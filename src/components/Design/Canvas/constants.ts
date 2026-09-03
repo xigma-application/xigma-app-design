@@ -68,3 +68,7 @@ export const ZOOM_MAX = 256;
 export const ZOOM_DELTA_THRESHOLD = 20;
 export const ZOOM_STEP_TRACKPAD = 0.032;
 export const ZOOM_STEP_WHEEL = 0.0768;
+export const ZOOM_STEP_PRESETS = [0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16, 32, 64, 128, 256];
+export const ZOOM_STEP_EPSILON = 0.001;
+export const ZOOM_PERCENTAGE_MENU_PRESETS = [0.5, 1, 2, 4, 8];
+export const ZOOM_FIT_PADDING_PX = 64;

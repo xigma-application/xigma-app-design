@@ -4,13 +4,21 @@ import { useTranslation } from 'react-i18next';
 // components
 import OutlinesMenu from './OutlinesMenu/OutlinesMenu';
 import PanelsMenu from './PanelsMenu/PanelsMenu';
+import ZoomToMenu from './ZoomToMenu/ZoomToMenu';
 import { MenuCompound } from 'shared';
 
 // hooks
 import { useViewMenuRulersClick } from './hooks/useViewMenuRulersClick';
+import { useViewMenuZoomInClick } from './hooks/useViewMenuZoomInClick';
+import { useViewMenuZoomOutClick } from './hooks/useViewMenuZoomOutClick';
+import { useViewMenuZoomTo100Click } from './hooks/useViewMenuZoomTo100Click';
+import { useViewMenuZoomToFitClick } from './hooks/useViewMenuZoomToFitClick';
+import { useViewMenuZoomToNextFrameClick } from './hooks/useViewMenuZoomToNextFrameClick';
+import { useViewMenuZoomToPreviousFrameClick } from './hooks/useViewMenuZoomToPreviousFrameClick';
+import { useViewMenuZoomToSelectionClick } from './hooks/useViewMenuZoomToSelectionClick';
 
 // store
-import { selectAreRulersVisible } from 'store/design/selectors';
+import { selectAreRulersVisible, selectSelectedIds, selectTopLevelFrameNodes, selectViewport } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // others
@@ -44,16 +52,28 @@ import {
   VIEW_MENU_ZOOM_TO_100_KEY,
   VIEW_MENU_ZOOM_TO_FIT_KEY,
   VIEW_MENU_ZOOM_TO_NEXT_FRAME_KEY,
+  VIEW_MENU_ZOOM_TO_PERCENTAGE_MENU_KEY,
   VIEW_MENU_ZOOM_TO_PREVIOUS_FRAME_KEY,
   VIEW_MENU_ZOOM_TO_SELECTION_KEY,
 } from './constants';
+import { ZOOM_MAX, ZOOM_MIN } from 'components/Design/Canvas/constants';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const ViewMenu: FC = () => {
   const { t } = useTranslation();
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
+  const viewport = useAppSelector(selectViewport);
+  const selectedIds = useAppSelector(selectSelectedIds);
+  const frameNodes = useAppSelector(selectTopLevelFrameNodes);
   const handleRulersClick = useViewMenuRulersClick();
+  const handleZoomInClick = useViewMenuZoomInClick();
+  const handleZoomOutClick = useViewMenuZoomOutClick();
+  const handleZoomTo100Click = useViewMenuZoomTo100Click();
+  const handleZoomToFitClick = useViewMenuZoomToFitClick();
+  const handleZoomToSelectionClick = useViewMenuZoomToSelectionClick();
+  const handleZoomToPreviousFrameClick = useViewMenuZoomToPreviousFrameClick();
+  const handleZoomToNextFrameClick = useViewMenuZoomToNextFrameClick();
 
   return (
     <>
@@ -87,16 +107,44 @@ const ViewMenu: FC = () => {
         <PanelsMenu />
       </MenuSub>
       <MenuSeparator />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_IN_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomIn.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_OUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomOut.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_TO_100_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomTo100.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_TO_FIT_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomToFit.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_TO_SELECTION_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomToSelection.join('')} />
+      <MenuItem
+        disabled={viewport.zoom >= ZOOM_MAX}
+        label={t(VIEW_MENU_ZOOM_IN_KEY)}
+        onClick={handleZoomInClick}
+        shortcut={KEYBOARD_SHORTCUTS.zoomIn.join('')}
+      />
+      <MenuItem
+        disabled={viewport.zoom <= ZOOM_MIN}
+        label={t(VIEW_MENU_ZOOM_OUT_KEY)}
+        onClick={handleZoomOutClick}
+        shortcut={KEYBOARD_SHORTCUTS.zoomOut.join('')}
+      />
+      <MenuItem label={t(VIEW_MENU_ZOOM_TO_100_KEY)} onClick={handleZoomTo100Click} shortcut={KEYBOARD_SHORTCUTS.zoomTo100.join('')} />
+      <MenuItem label={t(VIEW_MENU_ZOOM_TO_FIT_KEY)} onClick={handleZoomToFitClick} shortcut={KEYBOARD_SHORTCUTS.zoomToFit.join('')} />
+      <MenuItem
+        disabled={selectedIds.length === 0}
+        label={t(VIEW_MENU_ZOOM_TO_SELECTION_KEY)}
+        onClick={handleZoomToSelectionClick}
+        shortcut={KEYBOARD_SHORTCUTS.zoomToSelection.join('')}
+      />
+      <MenuSub label={t(VIEW_MENU_ZOOM_TO_PERCENTAGE_MENU_KEY)}>
+        <ZoomToMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(VIEW_MENU_PREVIOUS_PAGE_KEY)} shortcut={`${GLOBE}${KEYBOARD_SHORTCUTS.previousPage.join('')}`} />
       <MenuItem disabled label={t(VIEW_MENU_NEXT_PAGE_KEY)} shortcut={`${GLOBE}${KEYBOARD_SHORTCUTS.nextPage.join('')}`} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_TO_PREVIOUS_FRAME_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomToPreviousFrame.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_ZOOM_TO_NEXT_FRAME_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomToNextFrame.join('')} />
+      <MenuItem
+        disabled={frameNodes.length < 2}
+        label={t(VIEW_MENU_ZOOM_TO_PREVIOUS_FRAME_KEY)}
+        onClick={handleZoomToPreviousFrameClick}
+        shortcut={KEYBOARD_SHORTCUTS.zoomToPreviousFrame.join('')}
+      />
+      <MenuItem
+        disabled={frameNodes.length < 2}
+        label={t(VIEW_MENU_ZOOM_TO_NEXT_FRAME_KEY)}
+        onClick={handleZoomToNextFrameClick}
+        shortcut={KEYBOARD_SHORTCUTS.zoomToNextFrame.join('')}
+      />
       <MenuItem disabled label={t(VIEW_MENU_FIND_PREVIOUS_FRAME_KEY)} shortcut={KEYBOARD_SHORTCUTS.findPreviousFrame.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_FIND_NEXT_FRAME_KEY)} shortcut={KEYBOARD_SHORTCUTS.findNextFrame.join('')} />
     </>

@@ -12,6 +12,7 @@ describe('handleLockBrowserEvents', () => {
     KeyboardKeys.minus,
     KeyboardKeys.numpadAdd,
     KeyboardKeys.numpadSubtract,
+    KeyboardKeys.digit0,
     KeyboardKeys.a,
     KeyboardKeys.d,
     KeyboardKeys.f,

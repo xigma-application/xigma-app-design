@@ -1,32 +1,52 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import ViewMenu from './ViewMenu';
 
-// store
-import { selectAreRulersVisible } from 'store/design/selectors';
-import { store } from 'store';
-import { toggleRulers } from 'store/design/slice';
+// core
+import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/context';
 
-const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
-  render(
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
+// store
+import { addNode, deleteNode, setSelection, setViewport, toggleRulers } from 'store/design/slice';
+import { selectActivePage, selectAreRulersVisible, selectViewport } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
+const renderInMenu = (children: ReactNode): ReturnType<typeof render> => {
+  const canvas = document.createElement('canvas');
+  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 1000 } as DOMRect);
+  const refs = createCanvasRefs({ canvasRef: { current: canvas } });
+
+  return render(
     <Provider store={store}>
-      <DropdownMenuPrimitive.Root open>
-        <DropdownMenuPrimitive.Portal>
-          <DropdownMenuPrimitive.Content>{children}</DropdownMenuPrimitive.Content>
-        </DropdownMenuPrimitive.Portal>
-      </DropdownMenuPrimitive.Root>
+      <CanvasRefsContext.Provider value={refs}>
+        <DropdownMenuPrimitive.Root open>
+          <DropdownMenuPrimitive.Portal>
+            <DropdownMenuPrimitive.Content>{children}</DropdownMenuPrimitive.Content>
+          </DropdownMenuPrimitive.Portal>
+        </DropdownMenuPrimitive.Root>
+      </CanvasRefsContext.Provider>
     </Provider>,
   );
+};
 
 describe('ViewMenu', () => {
   beforeEach(() => {
     if (selectAreRulersVisible(store.getState())) {
       store.dispatch(toggleRulers());
     }
+
+    selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
+    store.dispatch(setSelection([]));
+    store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
   });
 
   it('should render every row with its label', () => {
@@ -58,6 +78,7 @@ describe('ViewMenu', () => {
       'Zoom to 100%',
       'Zoom to fit',
       'Zoom to selection',
+      'Zoom to...',
       'Previous page',
       'Next page',
       'Zoom to previous frame',
@@ -78,7 +99,7 @@ describe('ViewMenu', () => {
     expect(screen.getByText('🌐↓')).toBeInTheDocument();
   });
 
-  it('should keep the Outlines and Panels submenus and the Rulers row enabled while every other flat row stays disabled', () => {
+  it('should keep the Outlines, Panels and Zoom to... submenus, the Rulers row, and the always-available zoom rows enabled while every other flat row stays disabled', () => {
     // before
     renderInMenu(<ViewMenu />);
 
@@ -86,7 +107,12 @@ describe('ViewMenu', () => {
     expect(screen.getByText('Pixel grid').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
     expect(screen.getByText('Outlines').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Panels').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom to...').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Rulers').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom in').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom out').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom to 100%').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom to fit').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
   it('should toggle rulers visibility when the Rulers row is selected', () => {
@@ -99,5 +125,86 @@ describe('ViewMenu', () => {
 
     // result
     expect(selectAreRulersVisible(store.getState())).toBe(true);
+  });
+
+  it('should disable Zoom to selection when nothing is selected, and enable it once something is', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // result
+    expect(screen.getByText('Zoom to selection').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+
+    // action
+    act(() => {
+      store.dispatch(
+        addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      );
+      const { rootOrder } = selectActivePage(store.getState());
+      store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+    });
+
+    // result
+    expect(screen.getByText('Zoom to selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should disable the previous/next frame rows with fewer than two frames', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // result
+    expect(screen.getByText('Zoom to previous frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Zoom to next frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should step the zoom in when the Zoom in row is clicked', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Zoom in'));
+
+    // result
+    expect(selectViewport(store.getState()).zoom).toBe(1.5);
+  });
+
+  it('should step the zoom out when the Zoom out row is clicked', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Zoom out'));
+
+    // result
+    expect(selectViewport(store.getState()).zoom).toBe(0.75);
+  });
+
+  it('should reset the zoom to 100% when the Zoom to 100% row is clicked', () => {
+    // mock
+    store.dispatch(setViewport({ x: 50, y: 50, zoom: 4 }));
+
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Zoom to 100%'));
+
+    // result
+    expect(selectViewport(store.getState()).zoom).toBe(1);
+  });
+
+  it('should fit all content when the Zoom to fit row is clicked with nothing selected', () => {
+    // mock
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+    );
+
+    // before
+    renderInMenu(<ViewMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Zoom to fit'));
+
+    // result
+    expect(selectViewport(store.getState()).zoom).not.toBe(1);
   });
 });

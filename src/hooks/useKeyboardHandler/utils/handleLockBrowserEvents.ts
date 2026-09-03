@@ -8,6 +8,7 @@ const RESERVED_CTRL_KEYS: Set<string> = new Set([
   KeyboardKeys.minus,
   KeyboardKeys.numpadAdd,
   KeyboardKeys.numpadSubtract,
+  KeyboardKeys.digit0,
   KeyboardKeys.a,
   KeyboardKeys.d,
   KeyboardKeys.f,

@@ -26,6 +26,7 @@ export const VIEW_MENU_ZOOM_OUT_KEY = `${translationNameSpace}.zoomOut`;
 export const VIEW_MENU_ZOOM_TO_100_KEY = `${translationNameSpace}.zoomTo100`;
 export const VIEW_MENU_ZOOM_TO_FIT_KEY = `${translationNameSpace}.zoomToFit`;
 export const VIEW_MENU_ZOOM_TO_SELECTION_KEY = `${translationNameSpace}.zoomToSelection`;
+export const VIEW_MENU_ZOOM_TO_PERCENTAGE_MENU_KEY = `${translationNameSpace}.zoomToPercentageMenu`;
 export const VIEW_MENU_PREVIOUS_PAGE_KEY = `${translationNameSpace}.previousPage`;
 export const VIEW_MENU_NEXT_PAGE_KEY = `${translationNameSpace}.nextPage`;
 export const VIEW_MENU_ZOOM_TO_PREVIOUS_FRAME_KEY = `${translationNameSpace}.zoomToPreviousFrame`;

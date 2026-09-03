@@ -1,6 +1,6 @@
 # Tools — test case catalog
 
-Test cases for standalone canvas tools (Comment, Hand) that live in `e2e/design/tools/`.
+Test cases for standalone canvas tools (Comment, Hand, Zoom) that live in `e2e/design/tools/`.
 
 ## Hand tool (pan-only tool)
 
@@ -57,3 +57,25 @@ race, since it advances the timer deterministically between clicks).
 Scenario 6 is a pure CSS/inline-style sizing claim (`style.transform` stays `''` at any zoom) with no
 browser-timing stakes beyond what `CommentPin.spec.tsx`/`CommentDraftInput.spec.tsx` already assert
 precisely — no e2e needed per the standing rationale below.
+
+## Zoom
+
+The View menu's Zoom section (Zoom in/out, Zoom to 100%, Zoom to fit, Zoom to selection, percentage
+presets, Zoom to previous/next frame) and its matching global keyboard shortcuts both dispatch
+`setViewport` through shared `handleZoom*.ts` utils — see `design-store-architecture.md` §6. Zoom to
+fit is "smart": it fits the current selection when one exists, otherwise it fits every top-level
+node, and both fit-based paths account for the current left/right panel widths via
+`getVisibleCanvasRect`.
+
+| #   | Scenario                                                                                                                | Unit |        E2E        |
+| --- | ----------------------------------------------------------------------------------------------------------------------- | :--: | :---------------: |
+| 1   | Ctrl/Cmd+= steps the zoom in, actually changing the rendered content                                                    |  ✅  | ✅ `zoom.spec.ts` |
+| 2   | Zoom to fit (Shift+1) fits only the current selection when one exists, and fits every top-level node once it's cleared  |  ✅  | ✅ `zoom.spec.ts` |
+| 3   | Zoom in/out/100%/fit/selection, the percentage presets, and previous/next frame all compute the correct target viewport |  ✅  |         —         |
+| 4   | The fit rect accounts for the current left/right panel widths, and each treats a hidden/minimized panel as zero width   |  ✅  |         —         |
+
+Scenarios 3–4 are pure viewport-math claims (`getZoomToViewport`/`getFitViewport`/
+`getVisibleCanvasRect`/`getAdjacentFrameBounds`, all in `Canvas/utils/`) already asserted precisely
+in their own unit specs and in each `handleZoom*.spec.ts` — no browser-timing stakes beyond what
+scenarios 1–2 already prove end to end (a real keyboard shortcut actually reaching `setViewport`
+and repainting the canvas).

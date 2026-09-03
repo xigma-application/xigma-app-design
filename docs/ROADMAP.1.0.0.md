@@ -147,7 +147,10 @@ into the bundle.
       Vector Edit Mode), Select All, arrow-key nudge — every multi-element operation is a single
       Ctrl+Z step. Full write-up: `.claude/docs/design-tool-architecture.md` §6,
       `.claude/docs/vector-network.md` §65
-- [ ] zoom from keyboard shortcuts (Cmd +/−, Shift+0/1/2)
+- [x] zoom in/out, zoom to 100%/fit/selection, zoom percentage presets, and jump to the next/previous
+      frame — from the View menu and matching keyboard shortcuts (Cmd +/−/0, Shift+1/2, N/Shift+N).
+      Zoom to fit fits the current selection when there is one, otherwise everything, and always
+      avoids the open side panels
 
 ## Stage 11 — Undo / redo
 

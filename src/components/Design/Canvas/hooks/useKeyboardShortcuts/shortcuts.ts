@@ -68,4 +68,11 @@ export const shortcuts = {
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
   ungroup: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.g },
   useAsMask: { primaryKeys: [CONTROL_PRIMARY_KEY, MASK_MODIFIER_KEY], secondaryKey: KeyboardKeys.m },
+  zoomIn: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.plus },
+  zoomOut: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.minus },
+  zoomTo100: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.digit0 },
+  zoomToFit: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.digit1 },
+  zoomToNextFrame: { secondaryKey: KeyboardKeys.n },
+  zoomToPreviousFrame: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.n },
+  zoomToSelection: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.digit2 },
 } satisfies Partial<Record<ToolName, TShortcut>> & TStandardKeyboardShortcuts;

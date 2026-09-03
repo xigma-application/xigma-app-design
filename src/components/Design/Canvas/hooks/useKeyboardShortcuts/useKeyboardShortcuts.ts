@@ -36,6 +36,12 @@ import { handleSendToBack } from './utils/handleSendToBack';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
 import { handleUseSelectionAsMask } from './utils/handleUseSelectionAsMask';
+import { handleZoomIn } from './utils/handleZoomIn';
+import { handleZoomOut } from './utils/handleZoomOut';
+import { handleZoomTo100 } from './utils/handleZoomTo100';
+import { handleZoomToAdjacentFrame } from './utils/handleZoomToAdjacentFrame';
+import { handleZoomToFit } from './utils/handleZoomToFit';
+import { handleZoomToSelection } from './utils/handleZoomToSelection';
 import { nudgeMap } from './utils/nudgeMap';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
@@ -88,6 +94,13 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleSendToBack(dispatch), ...shortcuts.sendToBack },
       { action: (): any => handleCopySelection(refs), ...shortcuts.copy },
       { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
+      { action: (): any => handleZoomIn(dispatch, refs), ...shortcuts.zoomIn },
+      { action: (): any => handleZoomOut(dispatch, refs), ...shortcuts.zoomOut },
+      { action: (): any => handleZoomTo100(dispatch, refs), ...shortcuts.zoomTo100 },
+      { action: (): any => handleZoomToFit(dispatch, refs), ...shortcuts.zoomToFit },
+      { action: (): any => handleZoomToSelection(dispatch, refs), ...shortcuts.zoomToSelection },
+      { action: (): any => handleZoomToAdjacentFrame(dispatch, refs, 'next'), ...shortcuts.zoomToNextFrame },
+      { action: (): any => handleZoomToAdjacentFrame(dispatch, refs, 'previous'), ...shortcuts.zoomToPreviousFrame },
       ...nudgeMap(dispatch, refs),
     ],
     [dispatch, refs.vectorEdit.selectedVectorVertexIdsRef, refs.vectorEdit.selectedVectorHandlesRef],

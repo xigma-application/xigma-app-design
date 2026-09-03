@@ -4,10 +4,10 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'store';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
-import { TComment, TSceneNode, TViewport } from 'types/design/types';
+import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
 import { TSolidPaint } from 'types/design/paint/types';
 
@@ -85,6 +85,10 @@ export const selectPenActiveVertexId = (state: RootState): string | null => stat
 const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
+
+export const selectTopLevelFrameNodes = createSelector([selectOrderedNodes], (nodes): TFrameNode[] =>
+  nodes.filter((node): node is TFrameNode => node.type === NodeType.frame),
+);
 
 export const selectRenderOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) =>
   getRenderOrderedNodes(rootOrder, nodes),

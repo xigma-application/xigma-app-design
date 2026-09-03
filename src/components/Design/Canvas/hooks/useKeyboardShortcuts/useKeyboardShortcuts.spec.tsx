@@ -7,13 +7,13 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 // store
-import designReducer, { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import designReducer, { addNode, deleteNode, setActiveTool, setSelection, setVectorEditingNodeIds, setViewport } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, undo } from 'store/history/actions';
 import { createHistoryMiddleware } from 'store/history/historyMiddleware';
 import { createHistoryStack } from 'store/history/createHistoryStack';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { AppStore, store as realStore } from 'store';
-import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds, selectViewport } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -1049,5 +1049,124 @@ describe('useKeyboardShortcuts "Shift+W" behaviors', () => {
 
     // result
     expect(realStore.getState().design.activeTool).not.toBe(ToolName.variableWidth);
+  });
+});
+
+// handleZoom* all read the real store singleton (and the mounted canvas element) directly, same
+// reasoning as the blocks above
+describe('useKeyboardShortcuts zoom behaviors', () => {
+  let canvas: HTMLCanvasElement;
+
+  const addFrameNode = (x = 0): string => {
+    realStore.dispatch(
+      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x, y: 0 }),
+    );
+
+    const { rootOrder } = selectActivePage(realStore.getState());
+
+    return rootOrder[rootOrder.length - 1];
+  };
+
+  const renderZoomShortcuts = (): void => {
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs({ canvasRef: { current: canvas } })), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+  };
+
+  beforeEach(() => {
+    canvas = document.createElement('canvas');
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 1000 } as DOMRect);
+    selectActivePage(realStore.getState()).rootOrder.forEach((id) => realStore.dispatch(deleteNode(id)));
+    realStore.dispatch(setSelection([]));
+    realStore.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+  });
+
+  it('should step the zoom in on "Cmd+="', () => {
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'Equal', metaKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).toBe(1.5);
+  });
+
+  it('should step the zoom out on "Cmd+-"', () => {
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'Minus', metaKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).toBe(0.75);
+  });
+
+  it('should reset the zoom to 100% on "Cmd+0"', () => {
+    // mock
+    realStore.dispatch(setViewport({ x: 100, y: 100, zoom: 4 }));
+
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'Digit0', metaKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).toBe(1);
+  });
+
+  it('should zoom to fit all nodes on "Shift+1" when nothing is selected', () => {
+    // mock
+    addFrameNode(0);
+
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'Digit1', shiftKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).not.toBe(1);
+  });
+
+  it('should zoom to the selection on "Shift+2"', () => {
+    // mock
+    const idA = addFrameNode(0);
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'Digit2', shiftKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).not.toBe(1);
+  });
+
+  it('should zoom to the next frame on "N", wrapping and previous frame on "Shift+N"', () => {
+    // mock — viewport centered inside the first frame (x: 0-100)
+    addFrameNode(0);
+    addFrameNode(300);
+    realStore.dispatch(setViewport({ x: 450, y: 250, zoom: 1 }));
+
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyN' });
+
+    // result — fit onto the second frame (x: 300-400)
+    expect(selectViewport(realStore.getState()).x).not.toBe(450);
+
+    // action
+    realStore.dispatch(setViewport({ x: 450, y: 250, zoom: 1 }));
+    fireEvent.keyDown(window, { code: 'KeyN', shiftKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).x).not.toBe(450);
   });
 });

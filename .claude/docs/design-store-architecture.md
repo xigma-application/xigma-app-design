@@ -313,6 +313,32 @@ no ref/RAF batching, unlike drag state:
   per `canvas-rendering-pipeline.md` §4, so this dispatch drives both the JS-side selector consumers
   and (indirectly, via the next `drawScene` call) the shader uniforms).
 
+A third family of `setViewport` dispatchers is one-shot rather than continuous: the View menu's
+Zoom section (`LeftPanel/NavRail/LogoMenu/ViewMenu/ViewMenu.tsx`) and the matching global keyboard
+shortcuts (`Canvas/hooks/useKeyboardShortcuts/useKeyboardShortcuts.ts`, `shortcuts.ts`'s `zoomIn`/
+`zoomOut`/`zoomTo100`/`zoomToFit`/`zoomToSelection`/`zoomToNextFrame`/`zoomToPreviousFrame`) both
+funnel through the same `handleZoom*.ts` utils under `useKeyboardShortcuts/utils/` — one
+implementation shared by menu-click and shortcut, not two. Two pure-math primitives back every
+variant, both in `Canvas/utils/`:
+- `getZoomToViewport(viewport, targetZoom, anchor)` — generalizes `applyZoom.ts`'s
+  cursor-anchored zoom formula to an explicit target zoom instead of a wheel delta. Used by
+  zoom in/out (via `getSteppedZoomViewport`, which snaps to the next/previous value in
+  `ZOOM_STEP_PRESETS`), zoom-to-100%, and the percentage-preset menu (`ZoomToMenu`,
+  `handleZoomToPercentage.ts`) — anchored on the panel-aware visible-rect center in every case.
+- `getFitViewport(bounds, visibleRect, paddingPx)` — solves for the zoom/pan that fits a world
+  rect into a screen rect. Used by zoom-to-fit (`handleZoomToFit.ts` — fits the selection when one
+  exists, else all top-level nodes), zoom-to-selection, and zoom-to-previous/next-frame
+  (`handleZoomToAdjacentFrame.ts`, using `getAdjacentFrameBounds.ts` to pick the next/previous
+  top-level `NodeType.frame` node, ordered left-to-right, wrapping, anchored off whichever frame
+  currently contains — or is nearest to — the viewport center).
+
+Both primitives take a `visibleRect` from `getVisibleCanvasRect(canvasRect, leftPanelWidth,
+rightPanelWidth)` rather than the raw canvas element size — the canvas spans the full app width
+(`LeftPanel`/`RightPanel` are separate absolute overlays on top of it, not children that shrink
+it), so panel width must be subtracted explicitly. `refs.layout.leftPanelWidthRef`/
+`rightPanelWidthRef` already read `0` when a panel is hidden or minimized (`useReportPanelWidth`),
+so no separate minimized-state check is needed.
+
 ## 7. Test conventions for this layer
 
 A recurring (not universally enforced) `buildState(overrides: Partial<TDesignState> = {}) => TDesignState`

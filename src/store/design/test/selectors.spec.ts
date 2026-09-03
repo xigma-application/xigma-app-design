@@ -35,6 +35,7 @@ import {
   selectSelectedIds,
   selectSelectedLeafNodes,
   selectSelectedNodes,
+  selectTopLevelFrameNodes,
   selectVectorEditingNodeIds,
   selectViewport,
 } from '../selectors';
@@ -282,6 +283,31 @@ describe('design selectors', () => {
   it('should select the selected nodes', () => {
     // result
     expect(selectSelectedNodes(state)).toEqual([node]);
+  });
+
+  it('should select the top-level frame nodes', () => {
+    // result
+    expect(selectTopLevelFrameNodes(state)).toEqual([node]);
+  });
+
+  it('should filter out non-frame top-level nodes when selecting the top-level frame nodes', () => {
+    // mock
+    const rectangle: TRectangleNode = { ...node, id: 'rectangle-1', type: NodeType.rectangle };
+    const stateWithRectangle = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { ...state.design.pages['page-1'].nodes, [rectangle.id]: rectangle },
+            rootOrder: [node.id, rectangle.id],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    expect(selectTopLevelFrameNodes(stateWithRectangle)).toEqual([node]);
   });
 });
 
