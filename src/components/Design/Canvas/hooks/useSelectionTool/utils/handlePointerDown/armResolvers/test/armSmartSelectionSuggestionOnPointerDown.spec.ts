@@ -7,7 +7,7 @@ const applySmartSelectionSuggestionMock = vi.fn();
 vi.mock('../../../../../../utils/getSmartSelectionSuggestionIconAtPoint', () => ({
   getSmartSelectionSuggestionIconAtPoint: (...args: unknown[]): unknown => getSmartSelectionSuggestionIconAtPointMock(...args),
 }));
-vi.mock('../../applySmartSelectionSuggestion', () => ({
+vi.mock('../../applySmartSelectionSuggestion/applySmartSelectionSuggestion', () => ({
   applySmartSelectionSuggestion: (...args: unknown[]): void => applySmartSelectionSuggestionMock(...args),
 }));
 

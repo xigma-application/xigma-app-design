@@ -59,4 +59,22 @@ export type TSmartSelectionAppendSuggestion = {
   type: 'append';
 };
 
-export type TSmartSelectionSuggestion = TSmartSelectionAppendSuggestion | TSmartSelectionEqualizeSuggestion;
+export type TSmartSelectionGridEqualizeSuggestion = {
+  columnGapValues: number[];
+  layout: TSmartSelectionGridLayout;
+  rowGapValues: number[];
+  type: 'grid-equalize';
+};
+
+export type TSmartSelectionGridAppendSuggestion = {
+  layout: TSmartSelectionGridLayout;
+  outlierId: string;
+  target: { column: number; height: number; row: number; width: number; x: number; y: number };
+  type: 'grid-append';
+};
+
+export type TSmartSelectionSuggestion =
+  | TSmartSelectionAppendSuggestion
+  | TSmartSelectionEqualizeSuggestion
+  | TSmartSelectionGridAppendSuggestion
+  | TSmartSelectionGridEqualizeSuggestion;

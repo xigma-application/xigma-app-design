@@ -2,7 +2,7 @@
 import { TGridGeometry } from 'types/design/smartSelection/types';
 
 // utils
-import { getGridColumnGapValues } from '../getGridColumnGapValues';
+import { getGridColumnGapValues, getRawGridColumnGapValues } from '../getGridColumnGapValues';
 
 const geo = (columnX: number[]): TGridGeometry => ({
   columnWidth: columnX.map(() => 50),
@@ -22,5 +22,15 @@ describe('getGridColumnGapValues', () => {
 
   it('should reject non-uniform column gaps', () => {
     expect(getGridColumnGapValues(geo([0, 100, 400]), 4)).toBeNull();
+  });
+});
+
+describe('getRawGridColumnGapValues', () => {
+  it('should not gate on gap uniformity', () => {
+    expect(getRawGridColumnGapValues(geo([0, 100, 400]))).toEqual([50, 250]);
+  });
+
+  it('should still reject overlapping columns', () => {
+    expect(getRawGridColumnGapValues(geo([0, 40]))).toBeNull();
   });
 });

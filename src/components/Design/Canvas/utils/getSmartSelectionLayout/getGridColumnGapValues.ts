@@ -4,7 +4,7 @@ import { TGridGeometry } from 'types/design/smartSelection/types';
 // utils
 import { areGapsUniform } from './areGapsUniform';
 
-export const getGridColumnGapValues = (geometry: TGridGeometry, toleranceWorldUnits: number): number[] | null => {
+export const getRawGridColumnGapValues = (geometry: TGridGeometry): number[] | null => {
   const values: number[] = [];
 
   for (let columnIndex = 0; columnIndex < geometry.columnX.length - 1; columnIndex += 1) {
@@ -17,5 +17,11 @@ export const getGridColumnGapValues = (geometry: TGridGeometry, toleranceWorldUn
     values.push(gap);
   }
 
-  return areGapsUniform(values, toleranceWorldUnits) ? values : null;
+  return values;
+};
+
+export const getGridColumnGapValues = (geometry: TGridGeometry, toleranceWorldUnits: number): number[] | null => {
+  const values = getRawGridColumnGapValues(geometry);
+
+  return values && areGapsUniform(values, toleranceWorldUnits) ? values : null;
 };

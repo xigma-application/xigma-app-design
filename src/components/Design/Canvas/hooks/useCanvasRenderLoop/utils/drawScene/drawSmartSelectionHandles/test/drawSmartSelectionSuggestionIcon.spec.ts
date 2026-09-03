@@ -6,11 +6,15 @@ import { drawSmartSelectionSuggestionIcon } from '../drawSmartSelectionSuggestio
 
 const drawRectMock = vi.fn();
 const drawSmartSelectionSuggestionColumnGlyphMock = vi.fn();
+const drawSmartSelectionSuggestionGridGlyphMock = vi.fn();
 const drawSmartSelectionSuggestionRowGlyphMock = vi.fn();
 
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
 vi.mock('../drawSmartSelectionSuggestionColumnGlyph', () => ({
   drawSmartSelectionSuggestionColumnGlyph: (...args: unknown[]): void => drawSmartSelectionSuggestionColumnGlyphMock(...args),
+}));
+vi.mock('../drawSmartSelectionSuggestionGridGlyph', () => ({
+  drawSmartSelectionSuggestionGridGlyph: (...args: unknown[]): void => drawSmartSelectionSuggestionGridGlyphMock(...args),
 }));
 vi.mock('../drawSmartSelectionSuggestionRowGlyph', () => ({
   drawSmartSelectionSuggestionRowGlyph: (...args: unknown[]): void => drawSmartSelectionSuggestionRowGlyphMock(...args),
@@ -26,11 +30,12 @@ describe('drawSmartSelectionSuggestionIcon', () => {
   beforeEach(() => {
     drawRectMock.mockClear();
     drawSmartSelectionSuggestionColumnGlyphMock.mockClear();
+    drawSmartSelectionSuggestionGridGlyphMock.mockClear();
     drawSmartSelectionSuggestionRowGlyphMock.mockClear();
   });
 
   it('should draw the rounded-square background then the row glyph for a row suggestion', () => {
-    drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'x', 200, 200, IDENTITY_VIEWPORT);
+    drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'row', 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawRectMock).toHaveBeenCalledTimes(1);
     expect(drawRectMock.mock.calls[0][3]).toEqual({
@@ -40,12 +45,22 @@ describe('drawSmartSelectionSuggestionIcon', () => {
     });
     expect(drawSmartSelectionSuggestionRowGlyphMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSuggestionColumnGlyphMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionGridGlyphMock).not.toHaveBeenCalled();
   });
 
   it('should draw the column glyph for a column suggestion', () => {
-    drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'y', 200, 200, IDENTITY_VIEWPORT);
+    drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'column', 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawSmartSelectionSuggestionColumnGlyphMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSuggestionRowGlyphMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionGridGlyphMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the grid glyph for a grid suggestion', () => {
+    drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'grid', 200, 200, IDENTITY_VIEWPORT);
+
+    expect(drawSmartSelectionSuggestionGridGlyphMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionRowGlyphMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionColumnGlyphMock).not.toHaveBeenCalled();
   });
 });

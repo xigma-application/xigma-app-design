@@ -37,7 +37,7 @@ const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 
-const rect = (id: string, x: number): TSceneNode =>
+const rect = (id: string, x: number, y = 0): TSceneNode =>
   ({
     fill: '#000',
     height: 50,
@@ -48,7 +48,7 @@ const rect = (id: string, x: number): TSceneNode =>
     type: NodeType.rectangle,
     width: 50,
     x,
-    y: 0,
+    y,
   }) as TSceneNode;
 
 describe('drawSmartSelectionHandles', () => {
@@ -85,9 +85,22 @@ describe('drawSmartSelectionHandles', () => {
     );
 
     expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
-    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('x');
+    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('row');
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the grid-kind suggestion icon for a near-miss grid', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0, 0), rect('b', 100, 0), rect('c', 250, 0), rect('d', 0, 100), rect('e', 100, 100), rect('f', 250, 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('grid');
   });
 
   it('should not draw the suggestion icon while the pointer is outside the box', () => {

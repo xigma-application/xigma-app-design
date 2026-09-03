@@ -335,6 +335,128 @@ test('clicking the Smart Selection suggestion icon appends a spatial outlier to 
   expect(afterUndo[idD]).toMatchObject({ x: 1100, y: 600 });
 });
 
+test('clicking the Smart Selection suggestion icon equalizes a near-miss grid on both axes, and undoes in one step', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-suggestion-grid-equalize');
+  await expect(designPage.canvas).toBeVisible();
+
+  // 2x3 grid, column gaps 50 and 100 (mean 75), row gap already uniform (50)
+  await designPage.drawRectangle(700, 300, 750, 350); // A (row 0, col 0)
+  await designPage.drawRectangle(800, 300, 850, 350); // B (row 0, col 1) — gap 50 from A
+  await designPage.drawRectangle(950, 300, 1000, 350); // C (row 0, col 2) — gap 100 from B
+  await designPage.drawRectangle(700, 400, 750, 450); // D (row 1, col 0)
+  await designPage.drawRectangle(800, 400, 850, 450); // E (row 1, col 1)
+  await designPage.drawRectangle(950, 400, 1000, 450); // F (row 1, col 2) — selected on creation
+  await designPage.click(725, 325, { shift: true }); // + A
+  await designPage.click(825, 325, { shift: true }); // + B
+  await designPage.click(975, 325, { shift: true }); // + C
+  await designPage.click(725, 425, { shift: true }); // + D
+  await designPage.click(825, 425, { shift: true }); // + E
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const [idA, idB, idC, idD, idE, idF] = before.rootOrder;
+
+  // icon sits at the selection bbox's bottom-right (1000, 450) + an 8px margin, 24px square
+  await designPage.pointerDown(1020, 470);
+  await designPage.pointerUp();
+
+  const afterClick = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  // column 1 (b, e) shifts to the mean gap (75): x = 700+50+75 = 825; column 2 (c, f) is
+  // invariant (2-gap mean preserves the span); rows are untouched (already uniform)
+  expect(afterClick[idA]).toMatchObject({ x: 700, y: 300 });
+  expect(afterClick[idB]).toMatchObject({ x: 825, y: 300 });
+  expect(afterClick[idC]).toMatchObject({ x: 950, y: 300 });
+  expect(afterClick[idD]).toMatchObject({ x: 700, y: 400 });
+  expect(afterClick[idE]).toMatchObject({ x: 825, y: 400 });
+  expect(afterClick[idF]).toMatchObject({ x: 950, y: 400 });
+
+  await page.keyboard.press('Control+z');
+
+  const afterUndo = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  expect(afterUndo[idB]).toMatchObject({ x: 800, y: 300 });
+  expect(afterUndo[idE]).toMatchObject({ x: 800, y: 400 });
+});
+
+test('clicking the Smart Selection suggestion icon relocates and resizes a stray element into an empty grid cell, and undoes in one step', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-suggestion-grid-append');
+  await expect(designPage.canvas).toBeVisible();
+
+  // 2x3 grid (50px cells, 50px gaps) with (row 0, col 1) left empty, plus a stray rectangle
+  // of a different size that must be resized to fit the hole
+  await designPage.drawRectangle(700, 300, 750, 350); // A (row 0, col 0)
+  await designPage.drawRectangle(900, 300, 950, 350); // C (row 0, col 2)
+  await designPage.drawRectangle(700, 400, 750, 450); // D (row 1, col 0)
+  await designPage.drawRectangle(800, 400, 850, 450); // E (row 1, col 1)
+  await designPage.drawRectangle(900, 400, 950, 450); // F (row 1, col 2)
+  await designPage.drawRectangle(1100, 600, 1170, 660); // X — the stray outlier, 70x60, selected on creation
+  await designPage.click(725, 325, { shift: true }); // + A
+  await designPage.click(925, 325, { shift: true }); // + C
+  await designPage.click(725, 425, { shift: true }); // + D
+  await designPage.click(825, 425, { shift: true }); // + E
+  await designPage.click(925, 425, { shift: true }); // + F
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const [idA, , , , , idX] = before.rootOrder;
+  const originalX = before.nodes[idX] as { height: number; width: number; x: number; y: number };
+
+  // icon sits at the selection bbox's bottom-right (1170, 660) + an 8px margin, 24px square
+  await designPage.pointerDown(1190, 680);
+  await designPage.pointerUp();
+
+  const afterClick = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  // x relocates into the hole (row 0, col 1) and is resized to the cell's 50x50 dimensions
+  expect(afterClick[idX]).toMatchObject({ height: 50, width: 50, x: 800, y: 300 });
+  expect(afterClick[idA]).toMatchObject({ x: 700, y: 300 });
+
+  await page.keyboard.press('Control+z');
+
+  const afterUndo = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  expect(afterUndo[idX]).toMatchObject(originalX);
+});
+
 test('hovering a Smart Selection gap handle switches the cursor to move-x and back to default off it', async ({ page }) => {
   const designPage = new DesignPage(page);
 

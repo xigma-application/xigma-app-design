@@ -9,6 +9,24 @@ import { TSmartSelectionCascadeSetup } from './getSmartSelectionCascadeGroups';
 // utils
 import { getGeometryDeltaChanges } from './getGeometryDeltaChanges';
 
+export const computeSmartSelectionCascadeDeltas = (cascade: TSmartSelectionCascadeSetup, newGap: number): Record<string, number> => {
+  let previousEnd = cascade.anchorPosition + cascade.anchorSize;
+  const deltas: Record<string, number> = {};
+
+  cascade.cascadeGroups.forEach((group) => {
+    const newPosition = previousEnd + newGap;
+    const positionDelta = newPosition - group.originalPosition;
+
+    group.nodeIds.forEach((id) => {
+      deltas[id] = positionDelta;
+    });
+
+    previousEnd = newPosition + group.size;
+  });
+
+  return deltas;
+};
+
 export const applySmartSelectionGapCascade = (
   dispatch: AppDispatch,
   cascade: TSmartSelectionCascadeSetup,
@@ -16,18 +34,12 @@ export const applySmartSelectionGapCascade = (
   nodeOrigins: Record<string, TNodeOrigin>,
   newGap: number,
 ): void => {
-  let previousEnd = cascade.anchorPosition + cascade.anchorSize;
+  const deltas = computeSmartSelectionCascadeDeltas(cascade, newGap);
 
-  cascade.cascadeGroups.forEach((group) => {
-    const newPosition = previousEnd + newGap;
-    const positionDelta = newPosition - group.originalPosition;
+  Object.entries(deltas).forEach(([id, positionDelta]) => {
     const deltaX = axis === 'x' ? positionDelta : 0;
     const deltaY = axis === 'y' ? positionDelta : 0;
 
-    group.nodeIds.forEach((id) => {
-      dispatch(updateNode({ changes: getGeometryDeltaChanges(nodeOrigins[id], deltaX, deltaY), id }));
-    });
-
-    previousEnd = newPosition + group.size;
+    dispatch(updateNode({ changes: getGeometryDeltaChanges(nodeOrigins[id], deltaX, deltaY), id }));
   });
 };

@@ -44,4 +44,18 @@ describe('getSmartSelectionSuggestion', () => {
 
     expect(getSmartSelectionSuggestion(nodes, VIEWPORT)).toBeNull();
   });
+
+  it('should return a grid-equalize suggestion for a near-miss grid with uneven column gaps', () => {
+    const nodes = [rect('a', 0, 0), rect('b', 100, 0), rect('c', 250, 0), rect('d', 0, 100), rect('e', 100, 100), rect('f', 250, 100)];
+
+    expect(getSmartSelectionSuggestion(nodes, VIEWPORT)?.type).toBe('grid-equalize');
+  });
+
+  it('should return a grid-append suggestion for an otherwise-valid grid plus a spatial outlier', () => {
+    // a 2x3 grid with (row 0, column 1) empty, plus x, far enough away that it doesn't also
+    // read as a near-miss grid on its own (that's covered by getSmartSelectionGridEqualizeSuggestion)
+    const nodes = [rect('a', 0, 0), rect('c', 200, 0), rect('d', 0, 100), rect('e', 100, 100), rect('f', 200, 100), rect('x', 500, 500)];
+
+    expect(getSmartSelectionSuggestion(nodes, VIEWPORT)?.type).toBe('grid-append');
+  });
 });

@@ -2,7 +2,7 @@
 import { TArmContext } from '../types';
 
 // utils
-import { applySmartSelectionSuggestion } from '../applySmartSelectionSuggestion';
+import { applySmartSelectionSuggestion } from '../applySmartSelectionSuggestion/applySmartSelectionSuggestion';
 import { getSmartSelectionSuggestionIconAtPoint } from '../../../../../utils/getSmartSelectionSuggestionIconAtPoint';
 
 export const armSmartSelectionSuggestionOnPointerDown = ({ dispatch, point, selectedNodes, viewport }: TArmContext): true | undefined => {

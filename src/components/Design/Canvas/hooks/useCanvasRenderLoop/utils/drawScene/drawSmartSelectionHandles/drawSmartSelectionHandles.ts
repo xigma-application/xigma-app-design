@@ -49,12 +49,15 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
     const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport);
 
     if (suggestion) {
+      const kind =
+        suggestion.type === 'grid-equalize' || suggestion.type === 'grid-append' ? 'grid' : suggestion.axis === 'x' ? 'row' : 'column';
+
       drawSmartSelectionSuggestionIcon(
         gl,
         program,
         buffer,
         getSmartSelectionSuggestionIconRect(selectedNodes, viewport),
-        suggestion.axis,
+        kind,
         canvasWidth,
         canvasHeight,
         viewport,

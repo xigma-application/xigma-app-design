@@ -8,14 +8,21 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawSmartSelectionSuggestionColumnGlyph } from './drawSmartSelectionSuggestionColumnGlyph';
+import { drawSmartSelectionSuggestionGridGlyph } from './drawSmartSelectionSuggestionGridGlyph';
 import { drawSmartSelectionSuggestionRowGlyph } from './drawSmartSelectionSuggestionRowGlyph';
+
+const GLYPH_DRAWERS = {
+  column: drawSmartSelectionSuggestionColumnGlyph,
+  grid: drawSmartSelectionSuggestionGridGlyph,
+  row: drawSmartSelectionSuggestionRowGlyph,
+};
 
 export const drawSmartSelectionSuggestionIcon = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
   rect: TDraftRect,
-  axis: 'x' | 'y',
+  kind: 'column' | 'grid' | 'row',
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -31,9 +38,5 @@ export const drawSmartSelectionSuggestionIcon = (
     0,
   );
 
-  if (axis === 'x') {
-    drawSmartSelectionSuggestionRowGlyph(gl, program, buffer, rect, canvasWidth, canvasHeight, viewport);
-  } else {
-    drawSmartSelectionSuggestionColumnGlyph(gl, program, buffer, rect, canvasWidth, canvasHeight, viewport);
-  }
+  GLYPH_DRAWERS[kind](gl, program, buffer, rect, canvasWidth, canvasHeight, viewport);
 };
