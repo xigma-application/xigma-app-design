@@ -5,6 +5,7 @@ import {
   TCornerRadiusHandleHover,
   THoverRefs,
   TSmartSelectionGapHoverState,
+  TSmartSelectionSwapHoverState,
   TVectorCutSegmentHover,
   TVectorFaceHover,
   TVectorHandleHover,
@@ -23,6 +24,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredPolygonVertexCountHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredSmartSelectionGapRef = useRef<TSmartSelectionGapHoverState | null>(null);
+  const hoveredSmartSelectionSwapRef = useRef<TSmartSelectionSwapHoverState | null>(null);
   const hoveredStarCornerRadiusHandleRef = useRef<string | null>(null);
   const hoveredStarRatioHandleRef = useRef<string | null>(null);
   const hoveredStarVertexCountHandleRef = useRef<string | null>(null);
@@ -51,6 +53,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredPolygonVertexCountHandleRef,
       hoveredSegmentIdRef,
       hoveredSmartSelectionGapRef,
+      hoveredSmartSelectionSwapRef,
       hoveredStarCornerRadiusHandleRef,
       hoveredStarRatioHandleRef,
       hoveredStarVertexCountHandleRef,

@@ -202,6 +202,30 @@ describe('resolveSmartSelectionGapHover', () => {
     expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(false);
   });
 
+  it("should stash the hovered swap handle's centre on the shared ref while over a node centre", () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(refs.hover.hoveredSmartSelectionSwapRef.current).toEqual({ center: { x: 50, y: 50 } });
+  });
+
+  it('should clear the swap handle ref when the pointer is not over any node centre', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredSmartSelectionSwapRef.current = { center: { x: 50, y: 50 } };
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(refs.hover.hoveredSmartSelectionSwapRef.current).toBeNull();
+  });
+
   it('should never mark the selection box as hovered when nothing is selected', () => {
     // mock
     const refs = createCanvasRefs();

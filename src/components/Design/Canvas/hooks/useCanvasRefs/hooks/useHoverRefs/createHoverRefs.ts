@@ -11,6 +11,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredPolygonVertexCountHandleRef: { current: null },
   hoveredSegmentIdRef: { current: null },
   hoveredSmartSelectionGapRef: { current: null },
+  hoveredSmartSelectionSwapRef: { current: null },
   hoveredStarCornerRadiusHandleRef: { current: null },
   hoveredStarRatioHandleRef: { current: null },
   hoveredStarVertexCountHandleRef: { current: null },

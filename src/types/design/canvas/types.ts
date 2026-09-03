@@ -232,6 +232,7 @@ export type THoverRefs = {
   hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredSmartSelectionGapRef: RefObject<TSmartSelectionGapHoverState | null>;
+  hoveredSmartSelectionSwapRef: RefObject<TSmartSelectionSwapHoverState | null>;
   hoveredStarCornerRadiusHandleRef: RefObject<string | null>;
   hoveredStarRatioHandleRef: RefObject<string | null>;
   hoveredStarVertexCountHandleRef: RefObject<string | null>;
@@ -380,6 +381,10 @@ export type TSmartSelectionGapHoverState = {
   axis: 'x' | 'y';
   gapValue: number;
   point: TPoint;
+};
+
+export type TSmartSelectionSwapHoverState = {
+  center: TPoint;
 };
 
 export type TSmartSelectionRefs = {

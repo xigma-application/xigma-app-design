@@ -25,7 +25,17 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
       drawSmartSelectionGapHandles(gl, program, buffer, layout, canvasWidth, canvasHeight, viewport);
     }
 
-    drawSmartSelectionSwapHandles(gl, program, buffer, layout, isBoxActive, canvasWidth, canvasHeight, viewport);
+    drawSmartSelectionSwapHandles(
+      gl,
+      program,
+      buffer,
+      layout,
+      isBoxActive,
+      refs.hover.hoveredSmartSelectionSwapRef.current?.center ?? null,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
   }
 
   drawSmartSelectionGapHoverLabel(context, refs);

@@ -1,13 +1,11 @@
-// others
-import { SMART_SELECTION_SWAP_HANDLE_FILL, SMART_SELECTION_SWAP_HANDLE_RADIUS_PX } from 'constant/canvas';
-
 // types
+import { TPoint } from 'types/canvas';
 import { TSmartSelectionLayout } from 'types/design/smartSelection/types';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawSwapHandleDot } from './drawSwapHandleDot';
+import { drawSwapHandleRing } from './drawSwapHandleRing';
 
 const getSmartSelectionNodes = (layout: TSmartSelectionLayout): { bounds: { height: number; width: number; x: number; y: number } }[] =>
   layout.type === 'grid' ? layout.cells.flat() : layout.nodes;
@@ -18,29 +16,21 @@ export const drawSmartSelectionSwapHandles = (
   buffer: WebGLBuffer,
   layout: TSmartSelectionLayout,
   isBoxActive: boolean,
+  hoveredCenter: TPoint | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const radius = SMART_SELECTION_SWAP_HANDLE_RADIUS_PX / viewport.zoom;
-
   getSmartSelectionNodes(layout).forEach(({ bounds }) => {
     const centerX = bounds.x + bounds.width / 2;
     const centerY = bounds.y + bounds.height / 2;
 
-    if (!isBoxActive) {
-      drawSwapHandleDot(gl, program, buffer, centerX, centerY, canvasWidth, canvasHeight, viewport);
+    if (isBoxActive) {
+      const isHovered = hoveredCenter !== null && hoveredCenter.x === centerX && hoveredCenter.y === centerY;
+
+      drawSwapHandleRing(gl, program, buffer, centerX, centerY, isHovered, canvasWidth, canvasHeight, viewport);
     } else {
-      drawEllipse(
-        gl,
-        program,
-        buffer,
-        { fill: SMART_SELECTION_SWAP_HANDLE_FILL, height: radius * 2, width: radius * 2, x: centerX - radius, y: centerY - radius },
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        0,
-      );
+      drawSwapHandleDot(gl, program, buffer, centerX, centerY, canvasWidth, canvasHeight, viewport);
     }
   });
 };
