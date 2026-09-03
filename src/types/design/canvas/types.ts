@@ -387,8 +387,19 @@ export type TSmartSelectionSwapHoverState = {
   center: TPoint;
 };
 
+export type TSmartSelectionSwapDragState = {
+  dispatchThrottle: TThrottledDispatchState;
+  fromIndex: number;
+  hasMoved: boolean;
+  nodeOrigins: Record<string, TNodeOrigin>;
+  pointerStart: TPoint;
+  slots: { bounds: TDraftRect; id: string }[];
+  targetIndex: number;
+};
+
 export type TSmartSelectionRefs = {
   gapDragRef: RefObject<TSmartSelectionGapDragState | null>;
+  swapDragRef: RefObject<TSmartSelectionSwapDragState | null>;
 };
 
 export type TCanvasRefs = {

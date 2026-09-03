@@ -2,12 +2,12 @@
 import { createSmartSelectionRefs } from './createSmartSelectionRefs';
 
 describe('createSmartSelectionRefs behaviors', () => {
-  it('should default the gap drag ref to null', () => {
+  it('should default the drag refs to null', () => {
     // before
     const refs = createSmartSelectionRefs();
 
     // result
-    expect(refs).toEqual({ gapDragRef: { current: null } });
+    expect(refs).toEqual({ gapDragRef: { current: null }, swapDragRef: { current: null } });
   });
 
   it('should apply overrides on top of the defaults', () => {

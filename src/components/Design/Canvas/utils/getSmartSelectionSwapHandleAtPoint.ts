@@ -4,12 +4,16 @@ import { SMART_SELECTION_SWAP_HANDLE_HIT_RADIUS_PX } from 'constant/canvas';
 // types
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
+import { TSmartSelectionLayout } from 'types/design/smartSelection/types';
 
 // utils
 import { getSmartSelectionLayout } from './getSmartSelectionLayout/getSmartSelectionLayout';
+import { getSmartSelectionSwapSlots } from './getSmartSelectionSwapSlots';
 
 export type TSmartSelectionSwapHandleHit = {
   center: TPoint;
+  index: number;
+  layout: TSmartSelectionLayout;
 };
 
 export const getSmartSelectionSwapHandleAtPoint = (
@@ -21,13 +25,14 @@ export const getSmartSelectionSwapHandleAtPoint = (
   const tolerance = SMART_SELECTION_SWAP_HANDLE_HIT_RADIUS_PX / viewport.zoom;
 
   if (layout) {
-    const nodes = layout.type === 'grid' ? layout.cells.flat() : layout.nodes;
+    const slots = getSmartSelectionSwapSlots(layout);
 
-    for (const { bounds } of nodes) {
+    for (let index = 0; index < slots.length; index += 1) {
+      const { bounds } = slots[index];
       const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
       if (Math.hypot(point.x - center.x, point.y - center.y) <= tolerance) {
-        return { center };
+        return { center, index, layout };
       }
     }
   }

@@ -9,7 +9,7 @@ describe('useSmartSelectionRefs behaviors', () => {
     const { result } = renderHook(() => useSmartSelectionRefs());
 
     // result
-    expect(result.current).toEqual({ gapDragRef: { current: null } });
+    expect(result.current).toEqual({ gapDragRef: { current: null }, swapDragRef: { current: null } });
   });
 
   it('should keep returning the same refs object across re-renders', () => {

@@ -15,11 +15,11 @@ describe('getSmartSelectionSwapHandleAtPoint', () => {
     expect(getSmartSelectionSwapHandleAtPoint({ x: 25, y: 25 }, [rect('a', 0, 0)], VIEWPORT)).toBeNull();
   });
 
-  it("should hit a node's swap handle at that node's centre", () => {
+  it("should hit a node's swap handle at that node's centre and report its slot index", () => {
     const nodes = [rect('a', 0, 0), rect('b', 100, 0)];
 
-    expect(getSmartSelectionSwapHandleAtPoint({ x: 26, y: 24 }, nodes, VIEWPORT)).toEqual({ center: { x: 25, y: 25 } });
-    expect(getSmartSelectionSwapHandleAtPoint({ x: 125, y: 25 }, nodes, VIEWPORT)).toEqual({ center: { x: 125, y: 25 } });
+    expect(getSmartSelectionSwapHandleAtPoint({ x: 26, y: 24 }, nodes, VIEWPORT)).toMatchObject({ center: { x: 25, y: 25 }, index: 0 });
+    expect(getSmartSelectionSwapHandleAtPoint({ x: 125, y: 25 }, nodes, VIEWPORT)).toMatchObject({ center: { x: 125, y: 25 }, index: 1 });
   });
 
   it('should miss when the point is farther than the hit radius from every node centre', () => {
@@ -32,7 +32,7 @@ describe('getSmartSelectionSwapHandleAtPoint', () => {
     const nodes = [rect('a', 0, 0), rect('b', 100, 0)];
 
     // 3px away in world units — inside the 5px radius at zoom 1, outside it at zoom 4 (1.25px)
-    expect(getSmartSelectionSwapHandleAtPoint({ x: 28, y: 25 }, nodes, VIEWPORT)).toEqual({ center: { x: 25, y: 25 } });
+    expect(getSmartSelectionSwapHandleAtPoint({ x: 28, y: 25 }, nodes, VIEWPORT)).toMatchObject({ center: { x: 25, y: 25 } });
     expect(getSmartSelectionSwapHandleAtPoint({ x: 28, y: 25 }, nodes, { x: 0, y: 0, zoom: 4 })).toBeNull();
   });
 });

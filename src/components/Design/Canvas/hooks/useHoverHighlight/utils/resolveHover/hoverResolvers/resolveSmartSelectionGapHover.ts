@@ -19,7 +19,8 @@ export const resolveSmartSelectionGapHover = ({
 
   refs.hover.isSmartSelectionBoxHoveredRef.current =
     selectedNodes.length > 0 && isPointInsideBounds(point, getSelectionBounds(selectedNodes));
-  refs.hover.hoveredSmartSelectionSwapRef.current = getSmartSelectionSwapHandleAtPoint(point, selectedNodes, viewport);
+  const swapHit = getSmartSelectionSwapHandleAtPoint(point, selectedNodes, viewport);
+  refs.hover.hoveredSmartSelectionSwapRef.current = swapHit ? { center: swapHit.center } : null;
 
   if (hit) {
     refs.hover.hoveredSmartSelectionGapRef.current = { axis: hit.axis, gapValue: hit.gapValue, point };
