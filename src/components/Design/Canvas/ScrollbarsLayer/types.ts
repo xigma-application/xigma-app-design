@@ -14,3 +14,10 @@ export type TScrollbarDragRefs = {
   x: RefObject<boolean>;
   y: RefObject<boolean>;
 };
+
+export type TFrozenAxisRange = { rangeLength: number } | null;
+
+export type TFrozenRangeRefs = {
+  x: RefObject<TFrozenAxisRange>;
+  y: RefObject<TFrozenAxisRange>;
+};

@@ -678,20 +678,46 @@ need.
   panel-inset-aware, shared with Zoom to Fit/Selection) → content world bounds
   (`Canvas/utils/getSelectionBounds.ts` over all nodes, falling back to the visible rect itself in
   world space when the page is empty, so the thumb fills the track rather than dividing by zero) →
-  `utils/getScrollRange.ts` (unions content-in-screen-space with the visible rect, so the thumb
-  never runs off-track even panned away from all content, plus a fixed
-  `SCROLLBAR_RANGE_PADDING_PX` margin for a bit of Figma-style over-scroll room).
+  `utils/getScrollRange.ts`.
+- **The range is the union of content and the currently visible rect, padded.** `getScrollRange.ts`
+  unions `contentBoundsWorld` (transformed to screen space) with `visibleRect`, then pads the result
+  by `SCROLLBAR_RANGE_PADDING_PX` on every side — when the viewport is panned outside the content,
+  the union stretches to include it so the range (and thumb) reflect how far you've roamed, not just
+  the content's own extent (a range sized to content alone reports a thumb pinned at ~100% width
+  even when you're panned far from tiny/offscreen content, since `rangeLength` ends up smaller than
+  `visibleLength`). `SCROLLBAR_RANGE_PADDING_PX` is currently `0` — no Figma-style over-scroll room;
+  the boundary the thumb hard-stops at is exactly the content's own edge.
+- **The drag is cursor-anchored, not delta-accumulating.** On `pointerdown`, `useScrollbarDrag`
+  snapshots the live thumb `{ offset, size }` (from `getScrollbarThumb`) plus the current
+  `viewport.<axis>` and the `rangeLength / trackLength` ratio into a ref, once — this snapshot is
+  reused for the whole gesture, not re-derived from the (union-based, viewport-dependent) range on
+  every move, which is what made a v1 of this drag feed back into itself: as you dragged further
+  past the content edge the range kept growing, so the same mouse-px delta multiplied by a
+  progressively bigger ratio and the pan accelerated wildly. Each `pointermove` instead computes
+  `desiredOffset = clamp(anchorOffset + (clientPos - anchorClientPos), 0, trackLength - size)` — the
+  thumb tracks the cursor 1:1 in screen px, clamped to the track exactly like a native scrollbar —
+  and derives `viewport.<axis>` from that clamped offset, not the other way around. The hard stop at
+  either end falls out of the same `clamp()` for free.
+- **The render loop's thumb SIZE (not offset) is frozen for the duration of a drag**, via
+  `TFrozenAxisRange = { rangeLength: number } | null` (`ScrollbarsLayer/types.ts`) and a
+  `TFrozenRangeRefs` pair (one per axis) owned by `ScrollbarsLayer` and shared between both hooks.
+  `useScrollbarDrag` snapshots `rangeLength` into it on `pointerdown`, clears it on `pointerup`/
+  unmount; `useScrollbarsRenderLoop` substitutes it for the live `range.width`/`range.height` when
+  set, while `range.x`/`range.y` (the offset's anchor) always stay live. Without this, a drag that
+  crosses past the content boundary changes the union every frame (the visible rect no longer sits
+  inside content, so the union — and thus `rangeLength` — grows as you drag further out), which
+  visibly shrinks the thumb mid-gesture even though `useScrollbarDrag`'s own cursor-anchored math
+  doesn't jump. Freezing only the length keeps the thumb's width constant through a drag while its
+  offset keeps tracking the cursor live — freezing the offset too would freeze the thumb in place
+  until release instead of following the pointer.
 - `utils/getScrollbarThumb.ts` is the actual size/offset formula, axis-agnostic
   (`trackLength, visibleOffset, visibleLength, rangeOffset, rangeLength) => {offset, size}`) —
   called once per axis rather than duplicated top/left-style, since (unlike ruler tick painting)
   there's no per-axis canvas-paint difference to justify two functions.
 - `hooks/useScrollbarDrag.ts` (one hook, called twice with `axis: 'x' | 'y'`) attaches
   `pointerdown`/`pointermove`/`pointerup` straight to the thumb `<div>` itself (`setPointerCapture`,
-  same shape as `useHandTool`/`useCanvasDragPan`), re-deriving the same geometry fresh on every
-  move (the drag-delta-to-viewport-delta ratio genuinely changes as you pan, since the range is a
-  union that shifts) and dispatching `setViewport(applyPan(viewport, dx, 0 | 0, dy))` — reusing
-  `useCanvasPanZoom/utils/applyPan.ts` as-is; its sign convention already matched (dragging the
-  thumb right/down decreases `viewport.x`/`.y`, same as scrolling that direction).
+  same shape as `useHandTool`/`useCanvasDragPan`), dispatching `setViewport({ ...viewport, [axis]:
+  nextValue })` each move per the anchor formula above.
 - **Panel-aware on both axes, not just the along-axis one.** `getVisibleCanvasRect` already handles
   the horizontal bar's own length/offset correctly (its `x`/`width` bake in
   `leftPanelWidthRef`/`rightPanelWidthRef`). But the **vertical** bar's cross-axis position — how
@@ -717,7 +743,8 @@ need.
   `TLayoutRefs` in `types/design/canvas/types.ts`)
 - Scrollbars (§13): `Canvas/ScrollbarsLayer/{ScrollbarsLayer.tsx,scrollbars-layer.module.scss,types.ts}`,
   `.../hooks/{useScrollbarsRenderLoop,useScrollbarDrag}.ts`,
-  `.../utils/{getScrollGeometry,getScrollRange,getScrollbarThumb}.ts`, `Canvas/constants.ts`
+  `.../utils/{getScrollGeometry,getScrollRange,getScrollbarThumb}.ts`,
+  `Canvas/constants.ts`
   `SCROLLBAR_THICKNESS_PX`/`MIN_SCROLLBAR_THUMB_PX`/`SCROLLBAR_RANGE_PADDING_PX`
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
   `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`,

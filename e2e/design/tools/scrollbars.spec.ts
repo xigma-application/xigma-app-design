@@ -29,6 +29,50 @@ const dragThumb = async (page: Page, thumb: Locator, dx: number, dy: number): Pr
   await page.mouse.up();
 };
 
+test('the thumb keeps a constant size and hard-stops at the boundary when dragged past the end', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-scrollbar-hard-stop');
+  await expect(designPage.canvas).toBeVisible();
+
+  await setUpOverflow(designPage, page);
+
+  const thumb = page.locator('[class*="horizontal-thumb"]');
+
+  await expect(thumb).toBeVisible();
+
+  const start = await thumb.boundingBox();
+
+  if (!start) {
+    throw new Error('horizontal scrollbar thumb bounding box unavailable');
+  }
+
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+  await page.mouse.down();
+
+  // drag far past the right end of the track, sampling mid-gesture
+  await page.mouse.move(start.x + 2000, start.y + start.height / 2, { steps: 10 });
+  const midThumb = await thumb.boundingBox();
+  const midCanvas = await designPage.canvas.screenshot();
+
+  // keep dragging even further past — nothing should move any more
+  await page.mouse.move(start.x + 6000, start.y + start.height / 2, { steps: 10 });
+  const endThumb = await thumb.boundingBox();
+  const endCanvas = await designPage.canvas.screenshot();
+
+  await page.mouse.up();
+
+  if (!midThumb || !endThumb) {
+    throw new Error('horizontal scrollbar thumb bounding box unavailable mid-drag');
+  }
+
+  // constant size for the whole drag
+  expect(Math.abs(midThumb.width - start.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(endThumb.width - start.width)).toBeLessThanOrEqual(1);
+  // hard stop: once pinned, dragging further pans nothing
+  expect(endCanvas.equals(midCanvas)).toBe(true);
+});
+
 test('the scrollbars stay hidden while all content fits within the view', async ({ page }) => {
   const designPage = new DesignPage(page);
 

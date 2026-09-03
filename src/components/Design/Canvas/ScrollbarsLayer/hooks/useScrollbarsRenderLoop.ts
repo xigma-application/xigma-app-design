@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { TLayoutRefs } from 'types/design/canvas/types';
-import { TScrollbarDragRefs, TScrollbarElementRefs } from '../types';
+import { TFrozenRangeRefs, TScrollbarDragRefs, TScrollbarElementRefs } from '../types';
 
 // utils
 import { getScrollbarThumb } from '../utils/getScrollbarThumb';
@@ -19,6 +19,7 @@ const renderFrame = (
   layout: TLayoutRefs,
   elements: TScrollbarElementRefs,
   dragging: TScrollbarDragRefs,
+  frozenRange: TFrozenRangeRefs,
 ): void => {
   const { horizontalThumbRef, horizontalTrackRef, verticalThumbRef, verticalTrackRef } = elements;
   const horizontalTrack = horizontalTrackRef.current;
@@ -35,8 +36,10 @@ const renderFrame = (
       selectOrderedNodes(state),
       selectViewport(state),
     );
-    const horizontal = getScrollbarThumb(visibleRect.width, visibleRect.x, visibleRect.width, range.x, range.width);
-    const vertical = getScrollbarThumb(visibleRect.height, visibleRect.y, visibleRect.height, range.y, range.height);
+    const horizontalRangeLength = frozenRange.x.current?.rangeLength ?? range.width;
+    const verticalRangeLength = frozenRange.y.current?.rangeLength ?? range.height;
+    const horizontal = getScrollbarThumb(visibleRect.width, visibleRect.x, visibleRect.width, range.x, horizontalRangeLength);
+    const vertical = getScrollbarThumb(visibleRect.height, visibleRect.y, visibleRect.height, range.y, verticalRangeLength);
 
     horizontalTrack.style.display = overflow.x || dragging.x.current ? '' : 'none';
     horizontalTrack.style.left = px(visibleRect.x);
@@ -58,6 +61,7 @@ export const useScrollbarsRenderLoop = (
   layout: TLayoutRefs,
   elements: TScrollbarElementRefs,
   dragging: TScrollbarDragRefs,
+  frozenRange: TFrozenRangeRefs,
 ): void => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,7 +70,7 @@ export const useScrollbarsRenderLoop = (
       const frameIdRef = { current: 0 };
 
       const tick = (): void => {
-        renderFrame(canvas, layout, elements, dragging);
+        renderFrame(canvas, layout, elements, dragging, frozenRange);
         frameIdRef.current = requestAnimationFrame(tick);
       };
 
@@ -74,5 +78,5 @@ export const useScrollbarsRenderLoop = (
 
       return (): void => cancelAnimationFrame(frameIdRef.current);
     }
-  }, [canvasRef, dragging, elements, layout]);
+  }, [canvasRef, dragging, elements, frozenRange, layout]);
 };

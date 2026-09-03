@@ -18,8 +18,8 @@ describe('getScrollRange', () => {
     expect(range).toEqual({
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 800 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 
@@ -36,8 +36,8 @@ describe('getScrollRange', () => {
     expect(range).toEqual({
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 1100 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 
@@ -54,8 +54,8 @@ describe('getScrollRange', () => {
     expect(range).toEqual({
       height: 200 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 200 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 
@@ -72,8 +72,8 @@ describe('getScrollRange', () => {
     expect(range).toEqual({
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 800 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 });

@@ -7,6 +7,9 @@ import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hoo
 import { useScrollbarDrag } from './hooks/useScrollbarDrag';
 import { useScrollbarsRenderLoop } from './hooks/useScrollbarsRenderLoop';
 
+// types
+import { TFrozenAxisRange } from './types';
+
 // styles
 import styles from './scrollbars-layer.module.scss';
 
@@ -18,15 +21,18 @@ const ScrollbarsLayer: FC = () => {
   const verticalDraggingRef = useRef(false);
   const verticalThumbRef = useRef<HTMLDivElement | null>(null);
   const verticalTrackRef = useRef<HTMLDivElement | null>(null);
+  const horizontalFrozenRangeRef = useRef<TFrozenAxisRange>(null);
+  const verticalFrozenRangeRef = useRef<TFrozenAxisRange>(null);
 
   useScrollbarsRenderLoop(
     canvasRef,
     layout,
     { horizontalThumbRef, horizontalTrackRef, verticalThumbRef, verticalTrackRef },
     { x: horizontalDraggingRef, y: verticalDraggingRef },
+    { x: horizontalFrozenRangeRef, y: verticalFrozenRangeRef },
   );
-  useScrollbarDrag('x', canvasRef, layout, horizontalThumbRef, horizontalDraggingRef);
-  useScrollbarDrag('y', canvasRef, layout, verticalThumbRef, verticalDraggingRef);
+  useScrollbarDrag('x', canvasRef, layout, horizontalThumbRef, horizontalDraggingRef, horizontalFrozenRangeRef);
+  useScrollbarDrag('y', canvasRef, layout, verticalThumbRef, verticalDraggingRef, verticalFrozenRangeRef);
 
   return (
     <div className={styles.ScrollbarsLayer}>

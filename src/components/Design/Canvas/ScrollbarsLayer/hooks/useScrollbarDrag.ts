@@ -7,12 +7,22 @@ import { store, useAppDispatch } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
+import { TFrozenAxisRange, TScrollbarAxis } from '../types';
 import { TLayoutRefs } from 'types/design/canvas/types';
-import { TScrollbarAxis } from '../types';
 
 // utils
-import { applyPan } from '../../hooks/useCanvasPanZoom/utils/applyPan';
+import { clamp } from 'utils/math/clamp';
+import { getScrollbarThumb } from '../utils/getScrollbarThumb';
 import { getScrollGeometry } from '../utils/getScrollGeometry';
+
+type TDragAnchor = {
+  clientPos: number;
+  offset: number;
+  size: number;
+  trackLength: number;
+  viewportValue: number;
+  worldPerTrackPx: number;
+};
 
 export const useScrollbarDrag = (
   axis: TScrollbarAxis,
@@ -20,22 +30,13 @@ export const useScrollbarDrag = (
   layout: TLayoutRefs,
   thumbRef: RefObject<HTMLDivElement | null>,
   draggingRef: RefObject<boolean>,
+  frozenRangeRef: RefObject<TFrozenAxisRange>,
 ): void => {
   const dispatch = useAppDispatch();
-  const lastClientPosRef = useRef<number | null>(null);
+  const anchorRef = useRef<TDragAnchor | null>(null);
 
-  const handlePointerDown = (thumb: HTMLDivElement, event: PointerEvent): void => {
+  const handlePointerDown = (canvas: HTMLCanvasElement, thumb: HTMLDivElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
-      lastClientPosRef.current = axis === 'x' ? event.clientX : event.clientY;
-      draggingRef.current = true;
-      thumb.setPointerCapture(event.pointerId);
-      event.stopPropagation();
-    }
-  };
-
-  const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (lastClientPosRef.current !== null) {
-      const clientPos = axis === 'x' ? event.clientX : event.clientY;
       const state = store.getState();
       const viewport = selectViewport(state);
       const { range, visibleRect } = getScrollGeometry(
@@ -45,18 +46,44 @@ export const useScrollbarDrag = (
         selectOrderedNodes(state),
         viewport,
       );
-      const trackLength = axis === 'x' ? visibleRect.width : visibleRect.height;
+      const rangeStart = axis === 'x' ? range.x : range.y;
       const rangeLength = axis === 'x' ? range.width : range.height;
-      const deltaScreenPx = (clientPos - lastClientPosRef.current) * (rangeLength / trackLength);
+      const visibleStart = axis === 'x' ? visibleRect.x : visibleRect.y;
+      const trackLength = axis === 'x' ? visibleRect.width : visibleRect.height;
+      const thumb0 = getScrollbarThumb(trackLength, visibleStart, trackLength, rangeStart, rangeLength);
 
-      dispatch(setViewport(axis === 'x' ? applyPan(viewport, deltaScreenPx, 0) : applyPan(viewport, 0, deltaScreenPx)));
-      lastClientPosRef.current = clientPos;
+      anchorRef.current = {
+        clientPos: axis === 'x' ? event.clientX : event.clientY,
+        offset: thumb0.offset,
+        size: thumb0.size,
+        trackLength,
+        viewportValue: axis === 'x' ? viewport.x : viewport.y,
+        worldPerTrackPx: rangeLength / trackLength,
+      };
+      frozenRangeRef.current = { rangeLength };
+      draggingRef.current = true;
+      thumb.setPointerCapture(event.pointerId);
+      event.stopPropagation();
+    }
+  };
+
+  const handlePointerMove = (event: PointerEvent): void => {
+    const anchor = anchorRef.current;
+
+    if (anchor !== null) {
+      const clientPos = axis === 'x' ? event.clientX : event.clientY;
+      const desiredOffset = clamp(anchor.offset + (clientPos - anchor.clientPos), 0, anchor.trackLength - anchor.size);
+      const nextValue = anchor.viewportValue - (desiredOffset - anchor.offset) * anchor.worldPerTrackPx;
+      const viewport = selectViewport(store.getState());
+
+      dispatch(setViewport({ ...viewport, [axis]: nextValue }));
       event.stopPropagation();
     }
   };
 
   const handlePointerUp = (thumb: HTMLDivElement, event: PointerEvent): void => {
-    lastClientPosRef.current = null;
+    anchorRef.current = null;
+    frozenRangeRef.current = null;
     draggingRef.current = false;
     thumb.releasePointerCapture(event.pointerId);
   };
@@ -66,8 +93,8 @@ export const useScrollbarDrag = (
     const canvas = canvasRef.current;
 
     if (thumb && canvas) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(thumb, event);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
+      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, thumb, event);
+      const onPointerMove = (event: PointerEvent): void => handlePointerMove(event);
       const onPointerUp = (event: PointerEvent): void => handlePointerUp(thumb, event);
 
       thumb.addEventListener('pointerdown', onPointerDown);
@@ -78,9 +105,10 @@ export const useScrollbarDrag = (
         thumb.removeEventListener('pointerdown', onPointerDown);
         thumb.removeEventListener('pointermove', onPointerMove);
         thumb.removeEventListener('pointerup', onPointerUp);
-        lastClientPosRef.current = null;
+        anchorRef.current = null;
+        frozenRangeRef.current = null;
         draggingRef.current = false;
       };
     }
-  }, [axis, canvasRef, dispatch, draggingRef, layout, thumbRef]);
+  }, [axis, canvasRef, dispatch, draggingRef, frozenRangeRef, layout, thumbRef]);
 };

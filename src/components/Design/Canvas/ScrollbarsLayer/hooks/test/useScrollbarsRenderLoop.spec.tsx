@@ -12,7 +12,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TLayoutRefs } from 'types/design/canvas/types';
-import { TScrollbarDragRefs, TScrollbarElementRefs } from '../../types';
+import { TFrozenRangeRefs, TScrollbarDragRefs, TScrollbarElementRefs } from '../../types';
 
 // utils
 import { getScrollbarThumb } from '../../utils/getScrollbarThumb';
@@ -26,6 +26,8 @@ const createElements = (): TScrollbarElementRefs => ({
 });
 
 const createDragging = (x = false, y = false): TScrollbarDragRefs => ({ x: { current: x }, y: { current: y } });
+
+const createFrozenRange = (): TFrozenRangeRefs => ({ x: { current: null }, y: { current: null } });
 
 const createLayout = (leftPanelWidth = 0, rightPanelWidth = 0): TLayoutRefs => ({
   leftPanelWidthRef: { current: leftPanelWidth },
@@ -45,7 +47,8 @@ const renderLoop = (
   layout: TLayoutRefs,
   elements: TScrollbarElementRefs,
   dragging: TScrollbarDragRefs = createDragging(),
-): ReturnType<typeof renderHook> => renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements, dragging));
+  frozenRange: TFrozenRangeRefs = createFrozenRange(),
+): ReturnType<typeof renderHook> => renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements, dragging, frozenRange));
 
 describe('useScrollbarsRenderLoop', () => {
   let rafCallbacks: FrameRequestCallback[];
@@ -209,6 +212,43 @@ describe('useScrollbarsRenderLoop', () => {
     // result
     expect(() => renderLoop(canvasRef, createLayout(), createElements())).not.toThrow();
     expect(rafCallbacks).toHaveLength(0);
+  });
+
+  it('should use a frozen length for an axis instead of the live one, when the caller has set it, while its offset stays live', () => {
+    // mock — a node far past the right edge, so the live range length would put the thumb well
+    // under full width; freezing it at exactly the visible width pins the thumb full-width instead
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+    const frozenRange = createFrozenRange();
+    const nodeId = store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 5000,
+        y: 0,
+      }),
+    ).payload.id;
+
+    frozenRange.x.current = { rangeLength: 800 };
+
+    // before
+    renderLoop(canvasRef, createLayout(), elements, createDragging(true, false), frozenRange);
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result — a frozen length equal to the visible width makes size clamp to the full track, and its
+    // max-offset clamp (trackLength - size = 0) pins offset to 0 regardless of the live range start
+    expect(elements.horizontalThumbRef.current?.style.left).toBe('0px');
+    expect(elements.horizontalThumbRef.current?.style.width).toBe('800px');
+
+    // after — restore the shared store
+    store.dispatch(deleteNode(nodeId));
   });
 
   it('should skip a frame where a track or thumb element has not mounted yet', () => {

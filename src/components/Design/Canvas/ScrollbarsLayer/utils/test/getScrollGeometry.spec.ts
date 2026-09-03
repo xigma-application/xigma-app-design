@@ -41,8 +41,8 @@ describe('getScrollGeometry', () => {
     expect(range).toEqual({
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 800 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 
@@ -54,8 +54,8 @@ describe('getScrollGeometry', () => {
     expect(range).toEqual({
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 800 + SCROLLBAR_RANGE_PADDING_PX * 2,
-      x: -SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      x: 0 - SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
     expect(visibleRect).toEqual({ height: 600, width: 800, x: 0, y: 0 });
   });
@@ -70,7 +70,7 @@ describe('getScrollGeometry', () => {
       height: 600 + SCROLLBAR_RANGE_PADDING_PX * 2,
       width: 500 + SCROLLBAR_RANGE_PADDING_PX * 2,
       x: 200 - SCROLLBAR_RANGE_PADDING_PX,
-      y: -SCROLLBAR_RANGE_PADDING_PX,
+      y: 0 - SCROLLBAR_RANGE_PADDING_PX,
     });
   });
 
