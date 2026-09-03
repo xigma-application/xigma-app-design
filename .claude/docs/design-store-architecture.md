@@ -356,11 +356,21 @@ transitively via `LayersTree`/`Layers`/`useRenderRow`) now needs a `CanvasRefsPr
 
 `state.design.designHintLabelKey: string | null` holds an i18n key (or `null`). Any feature can
 dispatch `setDesignHintLabelKey('some.translation.key')` to show a plain-text hint floating above
-the toolbar; it self-clears after a fixed duration, no per-feature timer needed. Currently zoom is
-the only producer (`ZOOM_HINT_FIT_LABEL_KEY`/`ZOOM_HINT_SELECTION_LABEL_KEY`,
-`Toolbar/DesignHint/constants.ts`), but the state field and the rendering component are deliberately
-generic — a future feature reuses the same `setDesignHintLabelKey` dispatch rather than growing a
-parallel mechanism.
+the toolbar; it self-clears after a fixed duration, no per-feature timer needed. The state field and
+the rendering component are deliberately generic — each feature reuses the same
+`setDesignHintLabelKey` dispatch rather than growing a parallel mechanism, and owns its own i18n
+key(s) wherever makes sense for that feature (no shared "hint keys" file required). Two producers so
+far:
+- Zoom (`ZOOM_HINT_FIT_LABEL_KEY`/`ZOOM_HINT_SELECTION_LABEL_KEY`, `Toolbar/DesignHint/constants.ts`)
+  — `handleZoomToFit.ts`/`handleZoomToSelection.ts`.
+- Rulers visibility — `Canvas/hooks/useKeyboardShortcuts/utils/handleToggleRulers.ts` reads
+  `selectAreRulersVisible` *before* dispatching `toggleRulers()`, so it knows which direction the
+  toggle just went and picks `design.toolbar.rulersHint.shown`/`.hidden` accordingly (both defined
+  locally in that file, not in `Toolbar/DesignHint/constants.ts` — nothing requires every hint's
+  keys to live in one place). This one shared handler replaced four separate `dispatch(toggleRulers())`
+  call sites (View menu, the `Shift+R` keyboard shortcut, the Actions... panel item, and the ruler
+  right-click context menu's "Hide rulers"), so the hint now appears no matter which one triggered
+  the toggle — same "one implementation, many callers" shape as the zoom handlers.
 
 - `Toolbar/DesignHint/DesignHint.tsx` reads `selectDesignHintLabelKey`, renders nothing when `null`,
   otherwise renders `t(labelKey)` inside `shared/UI/Snackbar`.

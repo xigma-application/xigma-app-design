@@ -7,7 +7,7 @@ import { TKeysMap, useKeyboardHandler } from 'hooks';
 import { shortcuts } from './shortcuts';
 
 // store
-import { toggleActionsPanelOpen, toggleRulers, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { toggleActionsPanelOpen, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
@@ -33,6 +33,7 @@ import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
 import { handleSelectAll } from './utils/handleSelectAll';
 import { handleSendToBack } from './utils/handleSendToBack';
+import { handleToggleRulers } from './utils/handleToggleRulers';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
 import { handleUseSelectionAsMask } from './utils/handleUseSelectionAsMask';
@@ -78,7 +79,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
       { action: (): any => handleSelectAll(dispatch, refs), ...shortcuts.selectAll },
-      { action: (): any => dispatch(toggleRulers()), ...shortcuts.toggleRulers },
+      { action: (): any => handleToggleRulers(dispatch), ...shortcuts.toggleRulers },
       { action: (): any => dispatch(toggleUiHidden()), ...shortcuts.toggleUiHidden },
       { action: (): any => dispatch(toggleUiMinimized()), ...shortcuts.toggleUiMinimized },
       { action: (): any => dispatch(toggleActionsPanelOpen()), ...shortcuts.openActions },

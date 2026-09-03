@@ -364,6 +364,8 @@
   "design.toolbar.actionsPanel.tabPluginsWidgets": "Plugins & widgets",
   "design.toolbar.mediaHint.clickOrDragToPlace": "Click or drag to place",
   "design.toolbar.mediaHint.placeAll": "Place all",
+  "design.toolbar.rulersHint.hidden": "Rulers hidden",
+  "design.toolbar.rulersHint.shown": "Rulers shown",
   "design.toolbar.tool.arrow": "Arrow",
   "design.toolbar.tool.comment": "Comment",
   "design.toolbar.tool.default": "Move",

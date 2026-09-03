@@ -7,11 +7,13 @@ import RulerContextMenu from './RulerContextMenu';
 // hooks
 import { useGuideTool } from '../hooks/useGuideTool/useGuideTool';
 
+// others
+import { handleToggleRulers } from '../hooks/useKeyboardShortcuts/utils/handleToggleRulers';
+
 // pages
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // store
-import { toggleRulers } from 'store/design/slice';
 import { selectAllGuideLines } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -32,9 +34,7 @@ const GuideContextMenuPanel: FC = () => {
         axis={rulerMenu.axis}
         hasGuides={guideLines.some((guide) => guide.axis === rulerMenu.axis)}
         isOpen={isMenuOpen}
-        onHideRulers={(): void => {
-          dispatch(toggleRulers());
-        }}
+        onHideRulers={(): void => handleToggleRulers(dispatch)}
         onOpenChange={onMenuOpenChange}
         onRemoveAllGuides={removeAllGuides}
       />

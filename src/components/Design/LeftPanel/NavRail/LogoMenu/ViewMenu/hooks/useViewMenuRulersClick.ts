@@ -1,11 +1,13 @@
+// others
+import { handleToggleRulers } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/handleToggleRulers';
+
 // store
-import { toggleRulers } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 export const useViewMenuRulersClick = (): (() => void) => {
   const dispatch = useAppDispatch();
 
   return () => {
-    dispatch(toggleRulers());
+    handleToggleRulers(dispatch);
   };
 };

@@ -3,19 +3,16 @@ import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hoo
 
 // others
 import { handleSelectAll } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/handleSelectAll';
+import { handleToggleRulers } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/handleToggleRulers';
 import { handleUndo } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/handleUndo';
 
 // store
 import { AppDispatch, useAppDispatch } from 'store';
-import { toggleRulers, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 
 // types
 import { TActionsPanelAction } from '../types';
 import { TCanvasRefs } from 'types/design/canvas/types';
-
-const handleToggleRulers = (dispatch: AppDispatch): void => {
-  dispatch(toggleRulers());
-};
 
 const handleToggleUiHidden = (dispatch: AppDispatch): void => {
   dispatch(toggleUiHidden());

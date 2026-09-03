@@ -1,6 +1,6 @@
 # Tools — test case catalog
 
-Test cases for standalone canvas tools (Comment, Hand, Zoom) that live in `e2e/design/tools/`.
+Test cases for standalone canvas tools (Comment, Hand, Zoom, Rulers) that live in `e2e/design/tools/`.
 
 ## Hand tool (pan-only tool)
 
@@ -92,3 +92,19 @@ persistent (no `autoHideAfterMs`) since its dismissal is user-driven (a close bu
 `useSnackbarAutoHide.spec.ts`/`Snackbar.spec.tsx`/`DesignHint.spec.tsx` via fake timers; the e2e test
 only proves a real Zoom to fit keystroke reaches the hint end to end and that it's gone again after
 its real duration elapses.
+
+## Rulers visibility
+
+Toggling the rulers (View menu, `Shift+R`, the Actions... panel, or the ruler right-click context
+menu's "Hide rulers") now goes through one shared `handleToggleRulers.ts`, which also shows the same
+`DesignHint` snackbar as zoom — "Rulers shown"/"Rulers hidden" depending on which way the toggle just
+went, self-dismissing after 3s.
+
+| #   | Scenario                                                                                         | Unit |         E2E         |
+| --- | ------------------------------------------------------------------------------------------------ | :--: | :-----------------: |
+| 6   | Toggling rulers with Shift+R shows a matching "shown"/"hidden" hint that self-dismisses after 3s |  ✅  | ✅ `rulers.spec.ts` |
+
+`handleToggleRulers.spec.ts` covers both directions of the hint text precisely by reading
+`selectAreRulersVisible` before calling the handler; the e2e test only proves a real keystroke
+reaches the hint end to end in both directions and that it disappears on its own, the same division
+of labor as scenario 5 above.
