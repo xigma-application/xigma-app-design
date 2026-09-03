@@ -7,6 +7,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
+import { drawSwapHandleDot } from './drawSwapHandleDot';
 
 const getSmartSelectionNodes = (layout: TSmartSelectionLayout): { bounds: { height: number; width: number; x: number; y: number } }[] =>
   layout.type === 'grid' ? layout.cells.flat() : layout.nodes;
@@ -16,6 +17,7 @@ export const drawSmartSelectionSwapHandles = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   layout: TSmartSelectionLayout,
+  isBoxActive: boolean,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -26,15 +28,19 @@ export const drawSmartSelectionSwapHandles = (
     const centerX = bounds.x + bounds.width / 2;
     const centerY = bounds.y + bounds.height / 2;
 
-    drawEllipse(
-      gl,
-      program,
-      buffer,
-      { fill: SMART_SELECTION_SWAP_HANDLE_FILL, height: radius * 2, width: radius * 2, x: centerX - radius, y: centerY - radius },
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      0,
-    );
+    if (!isBoxActive) {
+      drawSwapHandleDot(gl, program, buffer, centerX, centerY, canvasWidth, canvasHeight, viewport);
+    } else {
+      drawEllipse(
+        gl,
+        program,
+        buffer,
+        { fill: SMART_SELECTION_SWAP_HANDLE_FILL, height: radius * 2, width: radius * 2, x: centerX - radius, y: centerY - radius },
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        0,
+      );
+    }
   });
 };

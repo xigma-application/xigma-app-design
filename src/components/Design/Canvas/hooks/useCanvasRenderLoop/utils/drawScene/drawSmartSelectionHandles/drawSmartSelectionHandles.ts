@@ -14,15 +14,18 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const layout = getSmartSelectionLayout(selectedNodes, viewport);
   const dragState = refs.smartSelection.gapDragRef.current;
-  const shouldShowHandles = Boolean(dragState) || refs.hover.isSmartSelectionBoxHoveredRef.current;
+  const isBoxActive = Boolean(dragState) || refs.hover.isSmartSelectionBoxHoveredRef.current;
 
-  if (layout && shouldShowHandles) {
+  if (layout) {
     if (dragState) {
       drawSmartSelectionGapFillPreview(gl, program, buffer, layout, dragState.axis, canvasWidth, canvasHeight, viewport);
     }
 
-    drawSmartSelectionGapHandles(gl, program, buffer, layout, canvasWidth, canvasHeight, viewport);
-    drawSmartSelectionSwapHandles(gl, program, buffer, layout, canvasWidth, canvasHeight, viewport);
+    if (isBoxActive) {
+      drawSmartSelectionGapHandles(gl, program, buffer, layout, canvasWidth, canvasHeight, viewport);
+    }
+
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, isBoxActive, canvasWidth, canvasHeight, viewport);
   }
 
   drawSmartSelectionGapHoverLabel(context, refs);

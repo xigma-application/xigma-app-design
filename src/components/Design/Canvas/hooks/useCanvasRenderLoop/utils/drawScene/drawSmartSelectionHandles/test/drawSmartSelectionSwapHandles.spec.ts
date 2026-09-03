@@ -8,8 +8,10 @@ import { TSmartSelectionNode } from 'types/design/smartSelection/types';
 import { drawSmartSelectionSwapHandles } from '../drawSmartSelectionSwapHandles';
 
 const drawEllipseMock = vi.fn();
+const drawSwapHandleDotMock = vi.fn();
 
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
+vi.mock('../drawSwapHandleDot', () => ({ drawSwapHandleDot: (...args: unknown[]): void => drawSwapHandleDotMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
@@ -20,12 +22,13 @@ const node = (id: string, x: number, y: number): TSmartSelectionNode => ({ bound
 describe('drawSmartSelectionSwapHandles', () => {
   beforeEach(() => {
     drawEllipseMock.mockClear();
+    drawSwapHandleDotMock.mockClear();
   });
 
-  it('should draw one dot per node, centred in its bounds, for a row layout', () => {
+  it('should draw one plain dot per node, centred in its bounds, for a row layout inside the active box', () => {
     const layout = { gaps: [], nodes: [node('a', 0, 0), node('b', 100, 0)], type: 'row' as const };
 
-    drawSmartSelectionSwapHandles(gl, program, buffer, layout, 200, 200, IDENTITY_VIEWPORT);
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawEllipseMock).toHaveBeenCalledTimes(2);
     expect(drawEllipseMock).toHaveBeenCalledWith(
@@ -46,7 +49,7 @@ describe('drawSmartSelectionSwapHandles', () => {
     );
   });
 
-  it('should draw one dot per cell for a grid layout', () => {
+  it('should draw one plain dot per cell for a grid layout inside the active box', () => {
     const layout = {
       cells: [[node('a', 0, 0), node('b', 100, 0)]],
       columnCount: 2,
@@ -56,18 +59,28 @@ describe('drawSmartSelectionSwapHandles', () => {
       type: 'grid' as const,
     };
 
-    drawSmartSelectionSwapHandles(gl, program, buffer, layout, 200, 200, IDENTITY_VIEWPORT);
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawEllipseMock).toHaveBeenCalledTimes(2);
   });
 
-  it('should shrink the handle screen-radius as zoom increases', () => {
+  it('should shrink the plain dot screen-radius as zoom increases', () => {
     const layout = { gaps: [], nodes: [node('a', 0, 0)], type: 'row' as const };
 
-    drawSmartSelectionSwapHandles(gl, program, buffer, layout, 200, 200, { x: 0, y: 0, zoom: 4 });
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, 200, 200, { x: 0, y: 0, zoom: 4 });
 
     const [[, , , ellipse]] = drawEllipseMock.mock.calls;
 
     expect(ellipse.width).toBeCloseTo((SMART_SELECTION_SWAP_HANDLE_RADIUS_PX * 2) / 4);
+  });
+
+  it('should draw the bordered dot per node instead of the plain dot while the box is not active', () => {
+    const layout = { gaps: [], nodes: [node('a', 0, 0), node('b', 100, 0)], type: 'row' as const };
+
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, false, 200, 200, IDENTITY_VIEWPORT);
+
+    expect(drawEllipseMock).not.toHaveBeenCalled();
+    expect(drawSwapHandleDotMock).toHaveBeenCalledTimes(2);
+    expect(drawSwapHandleDotMock).toHaveBeenCalledWith(gl, program, buffer, 20, 20, 200, 200, IDENTITY_VIEWPORT);
   });
 });
