@@ -155,3 +155,35 @@ test('pressing Enter with a mixed multi-selection (Rectangle + Ellipse) converts
   expect(state.nodes[ellipseId].type).toBe('vector');
   expect(state.vectorEditingNodeIds.slice().sort()).toEqual([rectangleId, ellipseId].sort());
 });
+
+test('pressing Enter with a mixed multi-selection (Rectangle + Text) also flattens the text into its own vector, alongside the converted shape', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-enter-mixed-shape-and-text');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1000, 400);
+  await designPage.drawTextBox(1100, 300, 1300, 400);
+  await designPage.typeText('Hi');
+  await page.keyboard.press('Escape'); // commits the text, stays selected
+
+  const [rectangleId, textId] = (await readDesignState(page)).rootOrder;
+
+  await designPage.click(950, 350); // select the rectangle
+  await designPage.click(1105, 308, { shift: true }); // add the text — on its rendered "Hi" glyphs, text hit-testing is glyph-precise not bbox
+
+  await page.keyboard.press('Enter');
+
+  // flattening text (real glyph-outline work, no mocked font atlas here) is genuinely slow — poll
+  // instead of reading state right after the keypress
+  await expect.poll(async () => (await readDesignState(page)).nodes[textId]?.type, { timeout: 15000 }).toBe('vector');
+
+  const state = await readDesignState(page);
+
+  expect(state.nodes[rectangleId].type).toBe('vector');
+  // each keeps its own, separate vector geometry — a multi-convert must never merge them into one
+  expect(state.nodes[rectangleId]).not.toBe(state.nodes[textId]);
+  expect(state.vectorEditingNodeIds.slice().sort()).toEqual([rectangleId, textId].sort());
+});

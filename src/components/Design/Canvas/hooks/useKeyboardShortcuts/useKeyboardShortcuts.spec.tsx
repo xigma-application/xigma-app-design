@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { fireEvent, renderHook } from '@testing-library/react';
+import { fireEvent, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // hooks
@@ -1023,7 +1023,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
     realStore.dispatch(setActiveTool(ToolName.default));
   });
 
-  it('should open every selected vector node for editing on "Enter" when two or more are selected', () => {
+  it('should open every selected vector node for editing on "Enter" when two or more are selected', async () => {
     // mock
     const vectorIdA = addVectorNode();
     const vectorIdB = addVectorNode();
@@ -1038,12 +1038,12 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
     // action
     fireEvent.keyDown(window, { code: 'Enter' });
 
-    // result
-    expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
+    // result — handleEnterVectorEdit also awaits any text-flatten targets before dispatching now
+    await waitFor(() => expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]));
     expect(realStore.getState().design.activeTool).toBe(ToolName.move);
   });
 
-  it('should open a single selected vector node for editing on "Enter"', () => {
+  it('should open a single selected vector node for editing on "Enter"', async () => {
     // mock
     const vectorIdA = addVectorNode();
 
@@ -1057,8 +1057,8 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
     // action
     fireEvent.keyDown(window, { code: 'Enter' });
 
-    // result
-    expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA]);
+    // result — handleEnterVectorEdit also awaits any text-flatten targets before dispatching now
+    await waitFor(() => expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA]));
     expect(realStore.getState().design.activeTool).toBe(ToolName.move);
   });
 

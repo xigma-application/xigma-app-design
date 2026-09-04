@@ -160,6 +160,21 @@ the text node with its flattened vector, any target whose `node.pathId` was set 
 bidirectional cascade (`cascadeDeletePathTextBinding.ts` already deletes a text's bound path when the
 text itself is deleted) rather than reimplementing it — `deleteNode` alone was enough.
 
+**Enter (multi-vector-edit entry) now flattens selected Text the same way Flatten does, not just
+convertible shapes.** `getTextFlattenTargets()` (`useKeyboardShortcuts/utils/`, async — resolves the
+real glyph outline per selected text node) was extracted out of `handleFlattenSelection.ts` so
+`handleEnterVectorEdit.ts` (§52 in `vector-network.md`) can call the exact same helper: a selected
+Text (or several) alongside convertible shapes/already-vector nodes all convert and open together in
+one `enterVectorEditMode` call, each staying its **own** independent `TVectorNode` — no merging, the
+same "one call per node" shape Flatten and the shape-conversion branch already had. `getTextFlattenTargets`
+has no parameters of its own (reads `selectSelectedNodes` internally, same as before extraction), so
+both call sites stay parameter-free at their own call boundary too. This made `handleEnterVectorEdit`
+itself `async` (it already was a pure `AppDispatch`-only function otherwise) — its one call site
+(`useKeyboardShortcuts.ts`'s Enter binding) was already typed `(): any =>`, so no wiring changed
+there, but assertions right after firing `Enter` in tests now need to wait a tick (`await` the
+function directly in unit tests, `await waitFor(...)`/`expect.poll(...)` in RTL/Playwright specs)
+instead of reading store state synchronously.
+
 ## 5. Outline as stroke — per-letter, then grouped (`getTextOutlineAsStrokeGlyphVectors.ts`)
 
 **Deliberately does not reuse Flatten's "fuse everything" shape.** Figma keeps every letter its own
@@ -284,10 +299,14 @@ boolean parameter entirely rather than always passing `false`.
 - Vector assembly: `buildVectorNodeFromLoops/**/test/`, `getVectorFillLoopPoints/chainIntoSteps/test/`.
 - Store wiring: `handleFlattenSelection.spec.ts` (real store dispatch, including the text-on-path
   path-delete case), `handleOutlineStroke/test/*.spec.ts` (shape replace, single-letter replace,
-  multi-letter group, text-on-path group + path delete).
+  multi-letter group, text-on-path group + path delete), `handleEnterVectorEdit.spec.ts` (Enter now
+  flattening Text alongside shape conversion, mixed multi-select, text-on-path path-delete, undo as
+  one step) and the "Enter" block in `useKeyboardShortcuts.spec.tsx`.
 - Precision: `rotateVectorNodeOrigin.spec.ts`, `bakeVectorNodeRotation.spec.ts`,
   `resizeVectorVertices.spec.ts`, `getRotatedNodeChanges.spec.ts`.
 - End-to-end: `e2e/design/transform/flatten.spec.ts` (all shapes, full-alphabet + Polish-diacritics
   text, text-on-path), `e2e/design/transform/outline-as-stroke.spec.ts` (shapes with a real stroke;
   text single-letter / multi-letter-grouped / text-on-path-grouped, all without ever setting a real
-  stroke — see §7).
+  stroke — see §7), `e2e/design/vector/enter-shape-to-vector.spec.ts` (a mixed Rectangle+Text
+  multi-select on Enter, `expect.poll` around the real, unmocked font-outline work per §7's
+  performance note).

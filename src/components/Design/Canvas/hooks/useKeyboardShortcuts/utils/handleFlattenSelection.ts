@@ -1,35 +1,15 @@
 // others
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // store
 import { deleteNode, replaceNode } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
-import { selectActivePage, selectSelectedNodes } from 'store/design/selectors';
+import { selectSelectedNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
-
-// types
-import { NodeType } from 'types/design/enums';
-import { TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { convertNodeToVector, isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
-import { getTextFlattenVector } from 'utils/canvas/text/fontOutline/getTextFlattenVector';
-
-type TTextFlattenTarget = { node: TTextNode; vector: TVectorNode };
-
-const getTextFlattenTargets = async (): Promise<TTextFlattenTarget[]> => {
-  const { nodes } = selectActivePage(store.getState());
-  const textNodes = selectSelectedNodes(store.getState()).filter((node): node is TTextNode => node.type === NodeType.text);
-  const targets = await Promise.all(
-    textNodes.map(async (node) => ({
-      node,
-      vector: await getTextFlattenVector(MSDF_ATLAS_JSON, node, node.pathId ? nodes[node.pathId] : undefined),
-    })),
-  );
-
-  return targets.filter((target): target is TTextFlattenTarget => target.vector !== null);
-};
+import { getTextFlattenTargets } from './getTextFlattenTargets';
 
 export const handleFlattenSelection = async (dispatch: AppDispatch): Promise<void> => {
   const shapeNodes = selectSelectedNodes(store.getState()).filter(isConvertibleToVectorNode);

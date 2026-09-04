@@ -3416,6 +3416,9 @@ always worked for one. `handleEnterVectorEdit` still filters the current selecti
 crashes or blocks), but the `>=2` gate is gone — `enterVectorEditMode`'s own `length > 0` guard is the
 only threshold now, matching Figma (Enter opens 1 or more selected vectors alike).
 
+**Update:** `handleEnterVectorEdit` also flattens any selected Text into its own vector now (async,
+same `getTextFlattenTargets` helper Flatten uses) — full write-up in `text-flatten-and-outline.md` §4.
+
 **`closeLoopOntoVertex.ts`'s `isAlreadyConnected` duplicate-segment guard was removed** — see §17's
 update note above for the full reasoning (it blocked a real case: closing a *second*, independent arc
 back onto an already-connected vertex pair, e.g. two arcs forming a lens/circle). Direction-independent
