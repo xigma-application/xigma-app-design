@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import LogoMenu from './LogoMenu/LogoMenu';
-import { Icon, Text } from 'shared';
+import { Icon, Label } from 'shared';
 
 // hooks
 import { useSelectNavItem } from './hooks/useSelectNavItem';
@@ -37,9 +37,9 @@ const NavRail: FC<TNavRailProps> = ({ activeNavItem, onSelectNavItem }) => {
                 <ToggleGroupPrimitive.Item aria-label={name} className={styles.NavRail__button} value={name}>
                   <Icon name={NAV_ITEM_ICON[name]} size={24} />
                 </ToggleGroupPrimitive.Item>
-                <Text className={styles.NavRail__label} fontSize={9}>
+                <Label className={styles.NavRail__label} fontSize={9}>
                   {t(NAV_ITEM_LABEL[name])}
-                </Text>
+                </Label>
               </div>
             </Fragment>
           );

@@ -2,7 +2,7 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // components
-import Text from 'shared/UI/Text/Text';
+import Label from 'shared/UI/Label/Label';
 
 // styles
 import styles from './section-column-labels.module.scss';
@@ -15,9 +15,9 @@ export type TSectionColumnLabelsProps = {
 export const SectionColumnLabels: FC<TSectionColumnLabelsProps> = ({ labels = [], width }) => (
   <div className={cx(styles.SectionColumnLabels)} style={{ width }}>
     {labels.map((label, index) => (
-      <Text className={styles.SectionColumnLabels__label} color="secondary" fontSize={9} key={index}>
+      <Label className={styles.SectionColumnLabels__label} color="secondary" fontSize={9} key={index}>
         {label}
-      </Text>
+      </Label>
     ))}
   </div>
 );

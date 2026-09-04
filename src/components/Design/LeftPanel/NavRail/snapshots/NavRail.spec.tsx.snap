@@ -107,7 +107,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           </svg>
         </button>
         <span
-          class="_Text_eea229 _NavRail__label_8eca33"
+          class="_Label_f37f38 _NavRail__label_8eca33"
           style="font-size: 9px;"
         >
           File
@@ -145,7 +145,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           </svg>
         </button>
         <span
-          class="_Text_eea229 _NavRail__label_8eca33"
+          class="_Label_f37f38 _NavRail__label_8eca33"
           style="font-size: 9px;"
         >
           Agents
@@ -183,7 +183,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           </svg>
         </button>
         <span
-          class="_Text_eea229 _NavRail__label_8eca33"
+          class="_Label_f37f38 _NavRail__label_8eca33"
           style="font-size: 9px;"
         >
           Assets
@@ -219,7 +219,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           </svg>
         </button>
         <span
-          class="_Text_eea229 _NavRail__label_8eca33"
+          class="_Label_f37f38 _NavRail__label_8eca33"
           style="font-size: 9px;"
         >
           Tools
@@ -258,7 +258,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           </svg>
         </button>
         <span
-          class="_Text_eea229 _NavRail__label_8eca33"
+          class="_Label_f37f38 _NavRail__label_8eca33"
           style="font-size: 9px;"
         >
           Variables

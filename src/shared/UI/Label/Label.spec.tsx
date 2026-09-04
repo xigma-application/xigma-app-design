@@ -2,14 +2,14 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
-import Text from './Text';
+import Label from './Label';
 
 // store
 import { toggleAdditionalLabels } from 'store/design/slice';
 import { selectAreAdditionalLabelsVisible } from 'store/design/selectors';
 import { store } from 'store';
 
-describe('Text', () => {
+describe('Label', () => {
   beforeEach(() => {
     if (!selectAreAdditionalLabelsVisible(store.getState())) {
       store.dispatch(toggleAdditionalLabels());
@@ -20,7 +20,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text>File</Text>
+        <Label>File</Label>
       </Provider>,
     );
 
@@ -35,7 +35,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text>File</Text>
+        <Label>File</Label>
       </Provider>,
     );
 
@@ -47,7 +47,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text fontSize={9}>File</Text>
+        <Label fontSize={9}>File</Label>
       </Provider>,
     );
 
@@ -59,7 +59,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text className="caller-class">File</Text>
+        <Label className="caller-class">File</Label>
       </Provider>,
     );
 
@@ -71,7 +71,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text>File</Text>
+        <Label>File</Label>
       </Provider>,
     );
 
@@ -83,7 +83,7 @@ describe('Text', () => {
     // before
     render(
       <Provider store={store}>
-        <Text color="secondary">File</Text>
+        <Label color="secondary">File</Label>
       </Provider>,
     );
 

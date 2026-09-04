@@ -11,7 +11,7 @@ exports[`SectionColumn snapshots > should render its labels and its children 1`]
       style="width: 100%;"
     >
       <span
-        class="_Text_eea229 _Text--secondary_eea229 _SectionColumnLabels__label_ed28d5"
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
         style="font-size: 9px;"
       >
         Alignment
