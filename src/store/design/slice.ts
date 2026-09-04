@@ -77,8 +77,6 @@ const initialPageId = nanoid();
 const initialState: TDesignState = {
   activePageId: initialPageId,
   activeTool: DEFAULT_TOOL,
-  areAdditionalLabelsVisible: true,
-  areRulersVisible: false,
   commentDraftPosition: null,
   designHintLabelKey: null,
   editingNodeId: null,
@@ -112,6 +110,12 @@ const initialState: TDesignState = {
     },
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 };
 
@@ -202,14 +206,20 @@ const designSlice = createSlice({
       state.isActionsPanelOpen = !state.isActionsPanelOpen;
     },
     toggleAdditionalLabels: (state) => {
-      state.areAdditionalLabelsVisible = !state.areAdditionalLabelsVisible;
+      state.preferences.areAdditionalLabelsVisible = !state.preferences.areAdditionalLabelsVisible;
     },
     toggleFrameClipContent: (state, action: PayloadAction<string>) => handleToggleFrameClipContent(state, action.payload),
+    toggleFrameOutlinesVisible: (state) => {
+      state.preferences.areFrameOutlinesVisible = !state.preferences.areFrameOutlinesVisible;
+    },
+    toggleMaskOutlinesVisible: (state) => {
+      state.preferences.areMaskOutlinesVisible = !state.preferences.areMaskOutlinesVisible;
+    },
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
     toggleRulers: (state) => {
-      state.areRulersVisible = !state.areRulersVisible;
+      state.preferences.areRulersVisible = !state.preferences.areRulersVisible;
     },
     toggleUiHidden: (state) => {
       state.isUiHidden = !state.isUiHidden;
@@ -270,6 +280,8 @@ export const {
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
   toggleFrameClipContent,
+  toggleFrameOutlinesVisible,
+  toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,

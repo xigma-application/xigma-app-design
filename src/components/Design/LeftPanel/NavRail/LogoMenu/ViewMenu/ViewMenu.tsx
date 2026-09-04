@@ -9,6 +9,8 @@ import { MenuCompound } from 'shared';
 
 // hooks
 import { useViewMenuAdditionalLabelsClick } from './hooks/useViewMenuAdditionalLabelsClick';
+import { useViewMenuFrameOutlinesClick } from './hooks/useViewMenuFrameOutlinesClick';
+import { useViewMenuMaskOutlinesClick } from './hooks/useViewMenuMaskOutlinesClick';
 import { useViewMenuRulersClick } from './hooks/useViewMenuRulersClick';
 import { useViewMenuZoomInClick } from './hooks/useViewMenuZoomInClick';
 import { useViewMenuZoomOutClick } from './hooks/useViewMenuZoomOutClick';
@@ -21,6 +23,8 @@ import { useViewMenuZoomToSelectionClick } from './hooks/useViewMenuZoomToSelect
 // store
 import {
   selectAreAdditionalLabelsVisible,
+  selectAreFrameOutlinesVisible,
+  selectAreMaskOutlinesVisible,
   selectAreRulersVisible,
   selectSelectedIds,
   selectTopLevelFrameNodes,
@@ -70,11 +74,15 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 const ViewMenu: FC = () => {
   const { t } = useTranslation();
   const areAdditionalLabelsVisible = useAppSelector(selectAreAdditionalLabelsVisible);
+  const areFrameOutlinesVisible = useAppSelector(selectAreFrameOutlinesVisible);
+  const areMaskOutlinesVisible = useAppSelector(selectAreMaskOutlinesVisible);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
   const viewport = useAppSelector(selectViewport);
   const selectedIds = useAppSelector(selectSelectedIds);
   const frameNodes = useAppSelector(selectTopLevelFrameNodes);
   const handleAdditionalLabelsClick = useViewMenuAdditionalLabelsClick();
+  const handleFrameOutlinesClick = useViewMenuFrameOutlinesClick();
+  const handleMaskOutlinesClick = useViewMenuMaskOutlinesClick();
   const handleRulersClick = useViewMenuRulersClick();
   const handleZoomInClick = useViewMenuZoomInClick();
   const handleZoomOutClick = useViewMenuZoomOutClick();
@@ -102,8 +110,8 @@ const ViewMenu: FC = () => {
         <OutlinesMenu />
       </MenuSub>
       <MenuItem disabled label={t(VIEW_MENU_PIXEL_PREVIEW_KEY)} shortcut={KEYBOARD_SHORTCUTS.pixelPreview.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_MASK_OUTLINES_KEY)} />
-      <MenuItem disabled label={t(VIEW_MENU_FRAME_OUTLINES_KEY)} />
+      <MenuItem label={t(VIEW_MENU_MASK_OUTLINES_KEY)} onClick={handleMaskOutlinesClick} selected={areMaskOutlinesVisible} />
+      <MenuItem label={t(VIEW_MENU_FRAME_OUTLINES_KEY)} onClick={handleFrameOutlinesClick} selected={areFrameOutlinesVisible} />
       <MenuItem disabled label={t(VIEW_MENU_MEMORY_USAGE_KEY)} />
       <MenuSeparator />
       <MenuItem label={t(VIEW_MENU_ADDITIONAL_LABELS_KEY)} onClick={handleAdditionalLabelsClick} selected={areAdditionalLabelsVisible} />

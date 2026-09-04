@@ -39,9 +39,11 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
+import { drawFrameOutlines } from './drawFrameOutlines';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
+import { drawMaskOutlines } from './drawMaskOutlines';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';
 import { drawPencilPreview } from './drawPencilPreview/drawPencilPreview';
 import { drawPenPreview } from './drawPenPreview/drawPenPreview';
@@ -136,6 +138,8 @@ export const drawScene = (
   drawSceneBackground(gl, imageContext, clientWidth, clientHeight, viewport);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
+  drawFrameOutlines(ctx, sceneNodes);
+  drawMaskOutlines(ctx, sceneNodes);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);

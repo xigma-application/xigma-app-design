@@ -31,9 +31,13 @@ export const selectActivePage = createSelector([selectActivePageId, selectPages]
 
 export const selectActiveTool = (state: RootState): ToolName => state.design.activeTool;
 
-export const selectAreAdditionalLabelsVisible = (state: RootState): boolean => state.design.areAdditionalLabelsVisible;
+export const selectAreAdditionalLabelsVisible = (state: RootState): boolean => state.design.preferences.areAdditionalLabelsVisible;
 
-export const selectAreRulersVisible = (state: RootState): boolean => state.design.areRulersVisible;
+export const selectAreFrameOutlinesVisible = (state: RootState): boolean => state.design.preferences.areFrameOutlinesVisible;
+
+export const selectAreMaskOutlinesVisible = (state: RootState): boolean => state.design.preferences.areMaskOutlinesVisible;
+
+export const selectAreRulersVisible = (state: RootState): boolean => state.design.preferences.areRulersVisible;
 
 export const selectCommentDraftPosition = (state: RootState): TPoint | null => state.design.commentDraftPosition;
 

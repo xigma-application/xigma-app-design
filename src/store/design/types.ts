@@ -27,11 +27,16 @@ export type TMaskConnectorLine = {
 
 export type TMaskConnectorInfo = TMaskConnectorLine[];
 
+export type TPreferences = {
+  areAdditionalLabelsVisible: boolean;
+  areFrameOutlinesVisible: boolean;
+  areMaskOutlinesVisible: boolean;
+  areRulersVisible: boolean;
+};
+
 export type TDesignState = {
   activePageId: string;
   activeTool: ToolName;
-  areAdditionalLabelsVisible: boolean;
-  areRulersVisible: boolean;
   commentDraftPosition: TPoint | null;
   designHintLabelKey: string | null;
   editingNodeId: string | null;
@@ -52,6 +57,7 @@ export type TDesignState = {
   lastTextTool: ToolName;
   pages: Record<string, TDesignPage>;
   penActiveVertexId: string | null;
+  preferences: TPreferences;
   vectorEditingNodeIds: string[];
 };
 
