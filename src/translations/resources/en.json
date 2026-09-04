@@ -392,6 +392,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.label": "Dimensions",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.lockAriaLabel": "Lock aspect ratio",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.lockTooltip": "Lock aspect ratio",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.unlockAriaLabel": "Unlock aspect ratio",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.unlockTooltip": "Unlock aspect ratio",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.freeForm": "Free form",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.grid": "Grid",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Horizontal",

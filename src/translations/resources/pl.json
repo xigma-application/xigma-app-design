@@ -404,6 +404,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.label": "Wymiary",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.lockAriaLabel": "Zablokuj proporcje",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.lockTooltip": "Zablokuj proporcje",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.unlockAriaLabel": "Odblokuj proporcje",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.unlockTooltip": "Odblokuj proporcje",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.freeForm": "Dowolna forma",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.grid": "Siatka",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Poziomy układ",

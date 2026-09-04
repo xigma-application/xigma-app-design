@@ -21,7 +21,15 @@ describe('ColumnDimensionsButtonIcons', () => {
     render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, vi.fn(), t)}</TooltipProvider>);
 
     // result
-    expect(screen.getByLabelText('Lock aspect ratio')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Unlock aspect ratio')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should use the "unlock" aria-label when locked is true', () => {
+    // before
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, vi.fn(), t)}</TooltipProvider>);
+
+    // result
+    expect(screen.getByLabelText('Unlock aspect ratio')).toBeInTheDocument();
   });
 
   it('should not mark the button as selected when locked is false', () => {

@@ -9,8 +9,12 @@ import { Icon, Tooltip } from 'shared';
 import { translationNameSpace } from './constants';
 
 export const ColumnDimensionsButtonIcons = (locked: boolean, onToggleLock: TFunc, t: TFunction): ReactNode[] => [
-  <Tooltip content={t(`${translationNameSpace}.lockTooltip`)} key="lock-aspect-ratio">
-    <Button ariaLabel={t(`${translationNameSpace}.lockAriaLabel`)} onClick={onToggleLock} selected={locked}>
+  <Tooltip content={t(`${translationNameSpace}.${locked ? 'unlockTooltip' : 'lockTooltip'}`)} key="lock-aspect-ratio">
+    <Button
+      ariaLabel={t(`${translationNameSpace}.${locked ? 'unlockAriaLabel' : 'lockAriaLabel'}`)}
+      onClick={onToggleLock}
+      selected={locked}
+    >
       <Icon name="AspectRatio" size={12} />
     </Button>
   </Tooltip>,
