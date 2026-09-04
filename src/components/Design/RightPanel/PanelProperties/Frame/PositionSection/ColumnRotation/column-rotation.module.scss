@@ -1,0 +1,6 @@
+.ColumnRotation {
+  &__shortcut {
+    color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
+    margin-left: 12px;
+  }
+}

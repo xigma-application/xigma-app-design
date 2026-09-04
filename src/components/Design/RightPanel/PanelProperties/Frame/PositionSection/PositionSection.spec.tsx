@@ -43,4 +43,12 @@ describe('PositionSection behaviors', () => {
     // result
     expect(screen.getAllByText('Position')).toHaveLength(2);
   });
+
+  it('should render the rotation row label', () => {
+    // before
+    renderPositionSection();
+
+    // result
+    expect(screen.getByText('Rotation')).toBeInTheDocument();
+  });
 });

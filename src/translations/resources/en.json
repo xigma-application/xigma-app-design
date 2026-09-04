@@ -391,6 +391,8 @@
   "design.rightPanel.panelProperties.frame.positionSection.columnPosition.label": "Position",
   "design.rightPanel.panelProperties.frame.positionSection.columnPosition.tooltipX": "X-position",
   "design.rightPanel.panelProperties.frame.positionSection.columnPosition.tooltipY": "Y-position",
+  "design.rightPanel.panelProperties.frame.positionSection.columnRotation.ariaLabel": "Rotation",
+  "design.rightPanel.panelProperties.frame.positionSection.columnRotation.label": "Rotation",
   "design.rightPanel.panelProperties.frame.positionSection.label": "Position",
   "design.rightPanel.panelProperties.frameTool.groups.archive": "Archive",
   "design.rightPanel.panelProperties.frameTool.groups.desktop": "Desktop",

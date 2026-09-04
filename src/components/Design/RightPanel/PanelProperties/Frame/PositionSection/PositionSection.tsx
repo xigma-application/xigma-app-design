@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import ColumnAlignment from './ColumnAlignment/ColumnAlignment';
 import ColumnPosition from './ColumnPosition/ColumnPosition';
+import ColumnRotation from './ColumnRotation/ColumnRotation';
 import { Section } from 'shared';
 
 // others
@@ -16,6 +17,7 @@ const PositionSection: FC = () => {
     <Section e2eValue="position" label={t(`${translationNameSpace}.label`)}>
       <ColumnAlignment />
       <ColumnPosition />
+      <ColumnRotation />
     </Section>
   );
 };
