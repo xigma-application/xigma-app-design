@@ -94,11 +94,48 @@ describe('SectionColumn behaviors', () => {
     expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).not.toBeNull();
   });
 
+  it('should render both buttonsIcon when exactly two are given', () => {
+    // before
+    render(
+      <Provider store={store}>
+        <SectionColumn buttonsIcon={[<button key="first">first</button>, <button key="second">second</button>]}>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('first')).toBeInTheDocument();
+    expect(screen.getByText('second')).toBeInTheDocument();
+  });
+
   it('should render an empty buttonsIcon wrapper when no buttonsIcon are given', () => {
     // before
     const { container } = renderSectionColumn(['Alignment']);
 
     // result
     expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).toBeEmptyDOMElement();
+  });
+
+  it('should render the input connector when withInputConnector is given', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn withInputConnector>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).not.toBeNull();
+  });
+
+  it('should not render the input connector by default', () => {
+    // before
+    const { container } = renderSectionColumn(['Alignment']);
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).toBeNull();
   });
 });

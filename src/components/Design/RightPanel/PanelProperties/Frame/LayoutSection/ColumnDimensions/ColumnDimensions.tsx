@@ -23,6 +23,7 @@ const ColumnDimensions: FC = () => {
       gridColumnType={GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin
+      withInputConnector={locked}
     >
       <ColumnDimensionsField
         ariaLabel={t(`${translationNameSpace}.ariaLabelWidth`)}

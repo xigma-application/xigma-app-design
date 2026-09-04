@@ -21,6 +21,7 @@ export type TSectionColumnProps = {
   gridColumnType?: GridColumnType;
   labels?: [string] | [string, string];
   withBottomMargin?: boolean;
+  withInputConnector?: boolean;
   withTopMargin?: boolean;
 };
 
@@ -30,6 +31,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
   gridColumnType,
   labels,
   withBottomMargin = false,
+  withInputConnector = false,
   withTopMargin = false,
 }) => {
   const buttonsWidthTotal = (size(buttonsIcon) || 1) * 24;
@@ -46,7 +48,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
       >
         <SectionColumnLabels labels={labels} width={width} />
         <div className={styles.SectionColumn__row}>
-          <SectionColumnContent gridColumnType={gridColumnType} width={width}>
+          <SectionColumnContent gridColumnType={gridColumnType} width={width} withInputConnector={withInputConnector}>
             {children}
           </SectionColumnContent>
           <SectionColumnButtonIcons buttonsIcon={buttonsIcon} />

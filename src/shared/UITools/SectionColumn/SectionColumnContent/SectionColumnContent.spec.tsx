@@ -69,4 +69,28 @@ describe('SectionColumnContent behaviors', () => {
     // result
     expect(container.querySelector('[class*="SectionColumnContent--one-by-two"]')).not.toBeNull();
   });
+
+  it('should render the input connector when withInputConnector is true', () => {
+    // before
+    const { container } = render(
+      <SectionColumnContent width="100%" withInputConnector>
+        <span>body</span>
+      </SectionColumnContent>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).not.toBeNull();
+  });
+
+  it('should not render the input connector by default', () => {
+    // before
+    const { container } = render(
+      <SectionColumnContent width="100%">
+        <span>body</span>
+      </SectionColumnContent>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).toBeNull();
+  });
 });

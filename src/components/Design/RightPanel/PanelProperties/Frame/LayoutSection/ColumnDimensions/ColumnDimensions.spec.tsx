@@ -146,4 +146,30 @@ describe('ColumnDimensions behaviors', () => {
     // result
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ lockedAspectRatio: true });
   });
+
+  it('should show the input connector between the width and height fields when locked', () => {
+    // mock
+    const frameId = addFrameNode(326, 187, true);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { container } = renderColumnDimensions();
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).not.toBeNull();
+  });
+
+  it('should not show the input connector when unlocked', () => {
+    // mock
+    const frameId = addFrameNode(326, 187, false);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { container } = renderColumnDimensions();
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).toBeNull();
+  });
 });
