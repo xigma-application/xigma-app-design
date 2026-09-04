@@ -99,6 +99,28 @@ test), and by `drawScene.ts` (filters `hidden` nodes out of `sceneNodes` before 
 node already selected via the panel itself (not clicked on canvas) can still be moved/resized/
 rotated; only *acquiring* a locked/hidden node via a canvas click or marquee is blocked.
 
+### 2b. Frame auto-layout properties
+
+`TFrameNode` (`types/design/types.ts`) carries three auto-layout fields, all optional:
+`layoutMode?: LayoutMode` (`freeForm | horizontal | vertical | grid`), `itemSpacing?: number`
+(a plain gap value — no `'auto' | 'fixed'` mode concept, unlike x-design's `TLayout.gap`), and
+`layoutAlignment?: AlignmentLayout` (9-way `topLeft…bottomRight` enum in `types/design/enums.ts`).
+
+Only `layoutMode` + `itemSpacing` actually affect anything today: `syncAutoLayoutChildren.ts` reads
+them (via `getAutoLayoutChildPositions.ts`) to stack a frame's children along the main axis whenever
+`layoutMode` is `horizontal`/`vertical`, and it re-runs automatically on every `updateNode` dispatch
+(`handleUpdateNode.ts` calls it for both the changed node and its parent — see §3). **`layoutAlignment`
+is UI-only and inert** — it's persisted (so it round-trips through undo/redo and survives reloads)
+but nothing in the auto-layout engine reads it yet; `getAutoLayoutChildPositions.ts` has no cross-axis
+logic. Both gaps (no Auto/Fixed mode, no cross-axis alignment) are intentional deferrals, not
+oversights — see the Right Panel's `LayoutSection/ColumnAlignmentLayout/` for the properties-panel UI
+that writes these fields (all three go through the existing generic `updateNode` action, no
+frame-specific reducer needed).
+
+`ColumnFlow` (`LayoutSection/ColumnFlow/`) is the only writer of `layoutMode` — it used to be a pure
+local-state stub with no Redux read/write at all; if you're touching it, confirm it's still reading
+`frameNode.layoutMode` and dispatching `updateNode`, not silently regressed back to local-only state.
+
 ## 3. Reducers — `store/design/slice.ts`
 
 Per the `xigma-store-slice-logic` convention (one-statement bodies stay inline, multi-statement

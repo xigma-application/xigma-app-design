@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import ColumnAlignmentLayout from './ColumnAlignmentLayout/ColumnAlignmentLayout';
 import ColumnClipContent from './ColumnClipContent/ColumnClipContent';
 import ColumnDimensions from './ColumnDimensions/ColumnDimensions';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
@@ -18,6 +19,7 @@ const LayoutSection: FC = () => {
     <UITools.Section component={<LayoutSectionButtons />} e2eValue="layout" label={t(`${translationNameSpace}.label`)}>
       <ColumnFlow />
       <ColumnDimensions />
+      <ColumnAlignmentLayout />
       <ColumnClipContent />
     </UITools.Section>
   );

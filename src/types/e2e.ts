@@ -1,6 +1,7 @@
 export enum E2EAttribute {
   accordion = 'accordion',
   accordionItem = 'accordion-item',
+  alignmentArea = 'alignment-area',
   buttonGroup = 'button-group',
   bypassGlobalShortcuts = 'bypass-global-shortcuts',
   checkbox = 'checkbox',

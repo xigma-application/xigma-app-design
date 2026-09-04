@@ -1,0 +1,298 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap row for a vertical frame 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: calc(100% - 32px);"
+    >
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Alignment
+      </span>
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Gap
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--one-by-two_e7fe0a"
+        style="width: calc(100% - 32px);"
+      >
+        <div
+          class="_AlignmentArea_ae5fc3"
+          data-test-alignment-area=""
+        >
+          <button
+            aria-label="Top left"
+            aria-pressed="true"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Top center"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--center_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Top right"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--end_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Left"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Center"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--center_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Right"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--end_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Bottom left"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Bottom center"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--center_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+          <button
+            aria-label="Bottom right"
+            aria-pressed="false"
+            class="_AlignmentOption_f79320"
+            data-state="closed"
+            type="button"
+          >
+            <div
+              class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical_f79320 _AlignmentOption__option-view--end_f79320"
+            >
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+              <div
+                class="_AlignmentOption__indicator_f79320"
+              />
+            </div>
+          </button>
+        </div>
+        <div
+          class="_TextField_bd2800"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="gap"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="10"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 9 9"
+                width="10"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M0.5 0C0.632608 0 0.759785 0.0526785 0.853553 0.146447C0.947321 0.240215 1 0.367392 1 0.5V0.75C1 0.888 1.112 1 1.25 1H7.75C7.8163 1 7.87989 0.973661 7.92678 0.926777C7.97366 0.879893 8 0.816304 8 0.75V0.5C8 0.367392 8.05268 0.240215 8.14645 0.146447C8.24021 0.0526785 8.36739 0 8.5 0C8.63261 0 8.75979 0.0526785 8.85355 0.146447C8.94732 0.240215 9 0.367392 9 0.5V0.75C9 1.44 8.44 2 7.75 2H1.25C0.56 2 0 1.44 0 0.75V0.5C0 0.367392 0.0526785 0.240215 0.146447 0.146447C0.240215 0.0526785 0.367392 0 0.5 0ZM1.25 8C1.1837 8 1.12011 8.02634 1.07322 8.07322C1.02634 8.12011 1 8.1837 1 8.25V8.5C1 8.63261 0.947321 8.75979 0.853553 8.85355C0.759785 8.94732 0.632608 9 0.5 9C0.367392 9 0.240215 8.94732 0.146447 8.85355C0.0526785 8.75979 0 8.63261 0 8.5V8.25C0 7.56 0.56 7 1.25 7H7.75C8.44 7 9 7.56 9 8.25V8.5C9 8.63261 8.94732 8.75979 8.85355 8.85355C8.75979 8.94732 8.63261 9 8.5 9C8.36739 9 8.24021 8.94732 8.14645 8.85355C8.05268 8.75979 8 8.63261 8 8.5V8.25C8 8.1837 7.97366 8.12011 7.92678 8.07322C7.87989 8.02634 7.8163 8 7.75 8H1.25ZM2.5 4C2.36739 4 2.24021 4.05268 2.14645 4.14645C2.05268 4.24021 2 4.36739 2 4.5C2 4.63261 2.05268 4.75979 2.14645 4.85355C2.24021 4.94732 2.36739 5 2.5 5H6.5C6.63261 5 6.75979 4.94732 6.85355 4.85355C6.94732 4.75979 7 4.63261 7 4.5C7 4.36739 6.94732 4.24021 6.85355 4.14645C6.75979 4.05268 6.63261 4 6.5 4H2.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <input
+              aria-label="Gap"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="gap"
+              type="number"
+              value="0"
+            />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        >
+          <button
+            aria-label="Properties"
+            aria-pressed="false"
+            class="_Button_b88d2e"
+            data-state="closed"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 12"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2.49851 12C2.63111 12 2.75829 11.9473 2.85206 11.8536C2.94583 11.7598 2.99851 11.6326 2.99851 11.5V9.95C3.56365 9.83524 4.07174 9.52864 4.43669 9.08213C4.80165 8.63562 5.00101 8.07668 5.00101 7.5C5.00101 6.92332 4.80165 6.36438 4.43669 5.91787C4.07174 5.47136 3.56365 5.16476 2.99851 5.05V0.5C2.99851 0.367392 2.94583 0.240215 2.85206 0.146447C2.75829 0.0526785 2.63111 0 2.49851 0C2.3659 0 2.23872 0.0526785 2.14495 0.146447C2.05118 0.240215 1.99851 0.367392 1.99851 0.5V5.05C1.43418 5.16574 0.927121 5.47275 0.562993 5.91914C0.198865 6.36553 0 6.92393 0 7.5C0 8.07607 0.198865 8.63447 0.562993 9.08086C0.927121 9.52725 1.43418 9.83426 1.99851 9.95V11.5C1.99851 11.6326 2.05118 11.7598 2.14495 11.8536C2.23872 11.9473 2.3659 12 2.49851 12ZM9.4985 12C9.63111 12 9.75829 11.9473 9.85206 11.8536C9.94583 11.7598 9.9985 11.6326 9.9985 11.5V6.95C10.5628 6.83426 11.0699 6.52725 11.434 6.08086C11.7981 5.63447 11.997 5.07607 11.997 4.5C11.997 3.92393 11.7981 3.36553 11.434 2.91914C11.0699 2.47275 10.5628 2.16574 9.9985 2.05V0.5C9.9985 0.367392 9.94583 0.240215 9.85206 0.146447C9.75829 0.0526785 9.63111 0 9.4985 0C9.3659 0 9.23872 0.0526785 9.14495 0.146447C9.05118 0.240215 8.9985 0.367392 8.9985 0.5V2.05C8.43336 2.16476 7.92527 2.47136 7.56032 2.91787C7.19537 3.36438 6.996 3.92332 6.996 4.5C6.996 5.07668 7.19537 5.63562 7.56032 6.08213C7.92527 6.52864 8.43336 6.83524 8.9985 6.95V11.5C8.9985 11.6326 9.05118 11.7598 9.14495 11.8536C9.23872 11.9473 9.3659 12 9.4985 12ZM9.4985 6C9.10068 6 8.71915 5.84196 8.43785 5.56066C8.15654 5.27936 7.99851 4.89782 7.99851 4.5C7.99851 4.10218 8.15654 3.72064 8.43785 3.43934C8.71915 3.15804 9.10068 3 9.4985 3C9.89633 3 10.2779 3.15804 10.5592 3.43934C10.8405 3.72064 10.9985 4.10218 10.9985 4.5C10.9985 4.89782 10.8405 5.27936 10.5592 5.56066C10.2779 5.84196 9.89633 6 9.4985 6ZM2.49851 9C2.10068 9 1.71915 8.84196 1.43784 8.56066C1.15654 8.27936 0.998505 7.89782 0.998505 7.5C0.998505 7.10218 1.15654 6.72064 1.43784 6.43934C1.71915 6.15804 2.10068 6 2.49851 6C2.89633 6 3.27786 6.15804 3.55917 6.43934C3.84047 6.72064 3.99851 7.10218 3.99851 7.5C3.99851 7.89782 3.84047 8.27936 3.55917 8.56066C3.27786 8.84196 2.89633 9 2.49851 9Z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

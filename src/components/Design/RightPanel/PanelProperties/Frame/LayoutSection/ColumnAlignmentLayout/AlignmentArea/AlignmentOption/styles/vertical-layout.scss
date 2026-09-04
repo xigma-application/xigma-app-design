@@ -1,0 +1,12 @@
+@mixin layout {
+  flex-direction: column;
+
+  .AlignmentOption__indicator {
+    height: 2px;
+    width: 7px;
+
+    &:not(:first-child):not(:last-child) {
+      width: 10px;
+    }
+  }
+}

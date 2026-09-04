@@ -1,0 +1,61 @@
+import cx from 'classnames';
+import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
+
+// components
+import { Tooltip } from 'shared';
+
+// others
+import { translationNameSpace } from '../../constants';
+
+// styles
+import styles from './alignment-option.module.scss';
+
+// types
+import { AlignmentLayout } from 'types/design/enums';
+
+// utils
+import { getOptionViewModifiers } from './utils/getOptionViewModifiers';
+
+export type TAlignmentOptionProps = {
+  alignment: AlignmentLayout;
+  isHorizontal: boolean;
+  isSelected: boolean;
+  onClick: TFunc<[AlignmentLayout]>;
+};
+
+export const AlignmentOption: FC<TAlignmentOptionProps> = ({ alignment, isHorizontal, isSelected, onClick }) => {
+  const { t } = useTranslation();
+  const label = t(`${translationNameSpace}.alignmentOption.${alignment}`);
+  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal);
+
+  return (
+    <Tooltip content={label}>
+      <button
+        aria-label={label}
+        aria-pressed={isSelected}
+        className={styles.AlignmentOption}
+        onClick={() => onClick(alignment)}
+        type="button"
+      >
+        <div
+          className={cx(
+            styles['AlignmentOption__option-view'],
+            optionViewModifiers.map((modifier) => styles[`AlignmentOption__option-view--${modifier}`]),
+          )}
+        >
+          {Array.from(Array(3), (_, index) => (
+            <div
+              className={cx(styles.AlignmentOption__indicator, {
+                [styles['AlignmentOption__indicator--selected']]: isSelected,
+              })}
+              key={index}
+            />
+          ))}
+        </div>
+      </button>
+    </Tooltip>
+  );
+};
+
+export default AlignmentOption;

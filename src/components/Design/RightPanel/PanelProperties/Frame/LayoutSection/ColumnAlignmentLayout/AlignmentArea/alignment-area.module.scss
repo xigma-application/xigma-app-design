@@ -1,0 +1,13 @@
+.AlignmentArea {
+  align-items: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-surface);
+  border-radius: 5px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  height: 56px;
+  justify-content: center;
+  width: 100%;
+}
