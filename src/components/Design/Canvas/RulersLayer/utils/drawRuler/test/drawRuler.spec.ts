@@ -16,8 +16,10 @@ const paintTopBandMock = vi.fn();
 const paintLeftBandMock = vi.fn();
 const paintTopBandEdgesMock = vi.fn();
 const paintLeftBandEdgesMock = vi.fn();
+const paintRulerCornerMock = vi.fn();
 
 vi.mock('../paintRulerBackground', () => ({ paintRulerBackground: (...args: unknown[]): void => paintRulerBackgroundMock(...args) }));
+vi.mock('../paintRulerCorner', () => ({ paintRulerCorner: (...args: unknown[]): void => paintRulerCornerMock(...args) }));
 vi.mock('../paintTopTicks', () => ({ paintTopTicks: (...args: unknown[]): void => paintTopTicksMock(...args) }));
 vi.mock('../paintLeftTicks', () => ({ paintLeftTicks: (...args: unknown[]): void => paintLeftTicksMock(...args) }));
 vi.mock('../paintHighlightedTopTick', () => ({
@@ -73,6 +75,7 @@ describe('drawRuler', () => {
     paintLeftBandMock.mockReset();
     paintTopBandEdgesMock.mockReset();
     paintLeftBandEdgesMock.mockReset();
+    paintRulerCornerMock.mockReset();
   });
 
   it('should paint the background and every tick, but skip bands and highlights when idle', () => {
@@ -90,6 +93,18 @@ describe('drawRuler', () => {
     expect(paintLeftBandMock).not.toHaveBeenCalled();
     expect(paintHighlightedTopTickMock).not.toHaveBeenCalled();
     expect(paintHighlightedLeftTickMock).not.toHaveBeenCalled();
+  });
+
+  it('should paint the corner divider at the given left inset, using the same tick stroke as the ticks', () => {
+    // mock
+    const ctx = createFakeContext();
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ leftInset: 300, tickStroke: 'var(--stroke)' }));
+
+    // result
+    expect(paintRulerCornerMock).toHaveBeenCalledWith(ctx, 300);
+    expect(ctx.strokeStyle).toBe('var(--stroke)');
   });
 
   it('should shift the background flush against LeftPanel’s edge, not the true screen edge', () => {

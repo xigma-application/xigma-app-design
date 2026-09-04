@@ -16,6 +16,7 @@ import { paintLeftBand } from './paintLeftBand';
 import { paintLeftBandEdges } from './paintLeftBandEdges';
 import { paintLeftTicks } from './paintLeftTicks';
 import { paintRulerBackground } from './paintRulerBackground';
+import { paintRulerCorner } from './paintRulerCorner';
 import { paintTopBand } from './paintTopBand';
 import { paintTopBandEdges } from './paintTopBandEdges';
 import { paintTopTicks } from './paintTopTicks';
@@ -77,6 +78,7 @@ export const drawRuler = (
   const leftGuideTick =
     highlightedGuide?.axis === 'y' ? getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.y, viewport.zoom, origin.y) : null;
 
+  paintRulerCorner(ctx, leftInset);
   paintTopTicks(
     ctx,
     getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x),
