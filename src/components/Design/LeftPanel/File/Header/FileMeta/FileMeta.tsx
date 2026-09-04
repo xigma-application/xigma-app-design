@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { noop } from 'lodash';
 
 // components
-import { Chip } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../../constants';
@@ -16,10 +16,10 @@ const FileMeta: FC = () => {
 
   return (
     <div className={styles.FileMeta}>
-      <Chip onClick={noop} variant="secondary">
+      <UITools.Chip onClick={noop} variant="secondary">
         {t(`${translationNameSpace}.drafts`)}
-      </Chip>
-      <Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</Chip>
+      </UITools.Chip>
+      <UITools.Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</UITools.Chip>
     </div>
   );
 };

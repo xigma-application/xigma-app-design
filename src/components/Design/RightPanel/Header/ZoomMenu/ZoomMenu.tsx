@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useAdditionalLabelsClick } from './hooks/useAdditionalLabelsClick';
@@ -41,7 +41,7 @@ import { useAppSelector } from 'store';
 // styles
 import styles from './zoom-menu.module.scss';
 
-const { PopoverItem, PopoverSeparator } = PopoverCompound;
+const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 const ZoomMenu: FC = () => {
   const { t } = useTranslation();

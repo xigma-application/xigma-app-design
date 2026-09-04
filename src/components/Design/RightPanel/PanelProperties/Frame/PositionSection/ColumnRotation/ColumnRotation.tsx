@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ColumnRotationField from './ColumnRotationField/ColumnRotationField';
-import { ButtonGroup, GridColumnType, SectionColumn } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnRotation } from './hooks/useColumnRotation';
@@ -16,7 +16,7 @@ const ColumnRotation: FC = () => {
   const { buttons, onBlur, onDragEnd, onDragStart, onScrub, rotation } = useColumnRotation();
 
   return (
-    <SectionColumn gridColumnType={GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
+    <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <ColumnRotationField
         ariaLabel={t(`${translationNameSpace}.ariaLabel`)}
         e2eValue="rotation"
@@ -26,8 +26,8 @@ const ColumnRotation: FC = () => {
         onScrub={onScrub}
         value={rotation}
       />
-      <ButtonGroup buttons={buttons} e2eValue="rotation-options" />
-    </SectionColumn>
+      <UITools.ButtonGroup buttons={buttons} e2eValue="rotation-options" />
+    </UITools.SectionColumn>
   );
 };
 

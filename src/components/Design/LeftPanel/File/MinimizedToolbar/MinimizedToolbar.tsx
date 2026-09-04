@@ -7,7 +7,7 @@ import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
 
 // components
 import MinimizeUiButton from '../Header/MinimizeUiButton/MinimizeUiButton';
-import { Chip, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // hooks
 import { useExpandUi } from './hooks/useExpandUi';
@@ -53,7 +53,7 @@ const MinimizedToolbar: FC<TMinimizedToolbarProps> = ({ name }) => {
           tabIndex={0}
         >
           <span className={styles.MinimizedToolbar__title}>{name}</span>
-          <Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</Chip>
+          <UITools.Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</UITools.Chip>
           <MinimizeUiButton className={styles.MinimizedToolbar__button} withTooltip={false} />
         </div>
       </Tooltip>

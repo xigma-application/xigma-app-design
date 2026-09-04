@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ColumnAlignment from './ColumnAlignment/ColumnAlignment';
 import ColumnPosition from './ColumnPosition/ColumnPosition';
 import ColumnRotation from './ColumnRotation/ColumnRotation';
-import { Section } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -14,11 +14,11 @@ const PositionSection: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <Section e2eValue="position" label={t(`${translationNameSpace}.label`)}>
+    <UITools.Section e2eValue="position" label={t(`${translationNameSpace}.label`)}>
       <ColumnAlignment />
       <ColumnPosition />
       <ColumnRotation />
-    </Section>
+    </UITools.Section>
   );
 };
 

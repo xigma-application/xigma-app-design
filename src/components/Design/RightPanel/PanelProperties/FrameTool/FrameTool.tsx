@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Accordion, Section } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useFramePresetAccordionItems } from './hooks/useFramePresetAccordionItems';
@@ -18,9 +18,9 @@ const FrameTool: FC = () => {
   const items = useFramePresetAccordionItems();
 
   return (
-    <Section e2eValue="frame-tool" label={t(`${translationNameSpace}.label`)} separator={false}>
-      <Accordion className={styles.FrameTool__accordion} e2eValue="frame-tool-presets" items={items} />
-    </Section>
+    <UITools.Section e2eValue="frame-tool" label={t(`${translationNameSpace}.label`)} separator={false}>
+      <UITools.Accordion className={styles.FrameTool__accordion} e2eValue="frame-tool-presets" items={items} />
+    </UITools.Section>
   );
 };
 

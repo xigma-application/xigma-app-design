@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Button, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { useSelectVectorEditTool } from './hooks/useSelectVectorEditTool';
@@ -32,12 +32,12 @@ const VectorEditToolButton: FC<TVectorEditToolButtonProps> = ({ isActive, tool }
         </>
       }
     >
-      <Button active={isActive} className={styles['VectorEditToolbar__tool-button']} onClick={handleClick}>
+      <UITools.Button active={isActive} className={styles['VectorEditToolbar__tool-button']} onClick={handleClick}>
         <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
         <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
           {t(tool.labelKey)}
         </span>
-      </Button>
+      </UITools.Button>
     </Tooltip>
   );
 };

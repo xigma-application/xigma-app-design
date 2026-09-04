@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ColumnFlowButtonIcons from './ColumnFlowButtonIcons';
-import { GridColumnType, SectionColumn, ToggleButtonGroup } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnFlow } from './hooks/useColumnFlow';
@@ -16,14 +16,14 @@ const ColumnFlow: FC = () => {
   const { onChange, onWrapChange, toggleButtons, value, wrap } = useColumnFlow();
 
   return (
-    <SectionColumn
+    <UITools.SectionColumn
       buttonsIcon={ColumnFlowButtonIcons(value, wrap, onWrapChange, t)}
-      gridColumnType={GridColumnType.single}
+      gridColumnType={UITools.GridColumnType.single}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin
     >
-      <ToggleButtonGroup e2eValue="flow" onChange={onChange} toggleButtons={toggleButtons} value={value} />
-    </SectionColumn>
+      <UITools.ToggleButtonGroup e2eValue="flow" onChange={onChange} toggleButtons={toggleButtons} value={value} />
+    </UITools.SectionColumn>
   );
 };
 

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import VectorEditMoreDropdown from './VectorEditMoreDropdown/VectorEditMoreDropdown';
 import VectorEditPaintTool from './VectorEditPaintTool/VectorEditPaintTool';
 import VectorEditToolButton from './VectorEditToolButton/VectorEditToolButton';
-import { Button, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { getIsVectorEditToolActive, useVectorEditToolbar } from './hooks/useVectorEditToolbar';
@@ -56,9 +56,9 @@ const VectorEditToolbar: FC = () => {
       <VectorEditMoreDropdown />
       <div className={styles.VectorEditToolbar__separator} />
       <Tooltip content={t('common.close')}>
-        <Button ariaLabel={t('common.close')} className={styles['VectorEditToolbar__tool-button']} onClick={handleClose}>
+        <UITools.Button ariaLabel={t('common.close')} className={styles['VectorEditToolbar__tool-button']} onClick={handleClose}>
           <Icon name="Close" size={ICON_SIZE} />
-        </Button>
+        </UITools.Button>
       </Tooltip>
     </div>
   );

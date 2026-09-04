@@ -102,7 +102,11 @@ describe('drawMaskOutlines', () => {
     const gl = createGlMock();
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [buildFrame('a', false), buildFrame('b', true), buildFrame('c', false)]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [
+      buildFrame('a', false),
+      buildFrame('b', true),
+      buildFrame('c', false),
+    ]);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);

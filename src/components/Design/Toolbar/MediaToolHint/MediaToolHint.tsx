@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Button, Icon, Snackbar } from 'shared';
+import { Icon, Snackbar, UITools } from 'shared';
 
 // hooks
 import { useMediaToolHintCloseClick } from './hooks/useMediaToolHintCloseClick';
@@ -35,13 +35,13 @@ const MediaToolHint: FC = () => {
   return (
     <Snackbar className={styles.MediaToolHint}>
       <span className={styles.MediaToolHint__label}>{t(`${translationNameSpace}.clickOrDragToPlace`)}</span>
-      <Button onClick={handlePlaceAllClick} variant="outline">
+      <UITools.Button onClick={handlePlaceAllClick} variant="outline">
         {t(`${translationNameSpace}.placeAll`)}
-      </Button>
+      </UITools.Button>
       <div className={styles.MediaToolHint__separator} />
-      <Button ariaLabel={t('common.close')} className={styles.MediaToolHint__close} onClick={handleCloseClick}>
+      <UITools.Button ariaLabel={t('common.close')} className={styles.MediaToolHint__close} onClick={handleCloseClick}>
         <Icon name="Close" size={24} />
-      </Button>
+      </UITools.Button>
     </Snackbar>
   );
 };

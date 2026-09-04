@@ -4,7 +4,7 @@ import { FC, FocusEvent } from 'react';
 import { ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
-import { TextField } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { POSITION_MAX, POSITION_MIN } from '../constants';
@@ -39,7 +39,7 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
   value,
 }) => (
   <Tooltip content={tooltip}>
-    <TextField
+    <UITools.TextField
       aria-label={ariaLabel}
       defaultValue={value}
       e2eValue={e2eValue}

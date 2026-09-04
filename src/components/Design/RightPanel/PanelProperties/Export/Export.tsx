@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Section } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -11,7 +11,7 @@ const Export: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <Section
+    <UITools.Section
       addAriaLabel={t(`${translationNameSpace}.addAriaLabel`)}
       addTooltip={t(`${translationNameSpace}.addTooltip`)}
       e2eValue="export"

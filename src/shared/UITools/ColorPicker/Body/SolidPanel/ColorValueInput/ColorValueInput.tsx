@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AlphaField from './AlphaField/AlphaField';
-import { Dropdown, FieldGroup } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { DEFAULT_FORMAT, FORMAT_LABEL_KEY, FORMAT_ORDER } from './constants';
@@ -29,11 +29,11 @@ export const ColorValueInput: FC<TColorValueInputProps> = ({ alpha, colorModel }
 
   return (
     <div className={styles.ColorValueInput}>
-      <Dropdown className={styles.ColorValueInput__formatTrigger} onSelect={setFormat} options={formatOptions} value={format} />
-      <FieldGroup>
+      <UITools.Dropdown className={styles.ColorValueInput__formatTrigger} onSelect={setFormat} options={formatOptions} value={format} />
+      <UITools.FieldGroup>
         {renderValueField(format, alpha, colorModel, rgb)}
         {format !== ColorFormat.css && <AlphaField alpha={alpha} onCommit={colorModel.setAlpha} />}
-      </FieldGroup>
+      </UITools.FieldGroup>
     </div>
   );
 };

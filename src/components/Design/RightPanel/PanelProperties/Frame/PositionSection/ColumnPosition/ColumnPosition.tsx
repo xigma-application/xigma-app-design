@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ColumnPositionField from './ColumnPositionField/ColumnPositionField';
-import { GridColumnType, SectionColumn } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnPosition } from './hooks/useColumnPosition';
@@ -16,7 +16,7 @@ const ColumnPosition: FC = () => {
   const { onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useColumnPosition();
 
   return (
-    <SectionColumn gridColumnType={GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
+    <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <ColumnPositionField
         ariaLabel={t(`${translationNameSpace}.ariaLabelX`)}
         e2eValue="x"
@@ -39,7 +39,7 @@ const ColumnPosition: FC = () => {
         tooltip={t(`${translationNameSpace}.tooltipY`)}
         value={y}
       />
-    </SectionColumn>
+    </UITools.SectionColumn>
   );
 };
 

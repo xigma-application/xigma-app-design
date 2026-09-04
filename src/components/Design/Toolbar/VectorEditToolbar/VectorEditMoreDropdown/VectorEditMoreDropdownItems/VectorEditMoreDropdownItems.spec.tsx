@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 
 // components
 import VectorEditMoreDropdownItems from './VectorEditMoreDropdownItems';
-import { Popover } from 'shared';
+import { UITools } from 'shared';
 
 // store
 import { store } from 'store';
@@ -15,9 +15,9 @@ import { ToolName } from 'types/design/enums';
 const renderVectorEditMoreDropdownItems = (lastMoreTool: ToolName | null): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <Popover trigger={<span>open</span>}>
+      <UITools.Popover trigger={<span>open</span>}>
         <VectorEditMoreDropdownItems lastMoreTool={lastMoreTool} />
-      </Popover>
+      </UITools.Popover>
     </Provider>,
   );
 

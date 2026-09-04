@@ -3,8 +3,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import ColorPicker from 'shared/UITools/ColorPicker/ColorPicker';
-import { Button, Color, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { usePaintColorPickerValue } from './hooks/usePaintColorPickerValue';
@@ -30,7 +29,7 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
 
   if (isActive) {
     return (
-      <ColorPicker
+      <UITools.ColorPicker
         moveable
         onChange={handleChange}
         onDragEnd={onDragEnd}
@@ -38,7 +37,7 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
         trigger={
           <>
             <div className={styles['VectorEditPaintTool__swatch-wrapper']}>
-              <Color alpha={value.alpha} className={styles.VectorEditPaintTool__swatch} color={value.hex} />
+              <UITools.Color alpha={value.alpha} className={styles.VectorEditPaintTool__swatch} color={value.hex} />
             </div>
             <span className={cx(toolbarStyles.VectorEditToolbar__label, toolbarStyles['VectorEditToolbar__label--active'])}>{label}</span>
           </>
@@ -59,10 +58,10 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
         </>
       }
     >
-      <Button active={false} className={toolbarStyles['VectorEditToolbar__tool-button']} onClick={handleSelect}>
+      <UITools.Button active={false} className={toolbarStyles['VectorEditToolbar__tool-button']} onClick={handleSelect}>
         <Icon color="neutral1" name={tool.icon} size={ICON_SIZE} />
         <span className={toolbarStyles.VectorEditToolbar__label}>{label}</span>
-      </Button>
+      </UITools.Button>
     </Tooltip>
   );
 };

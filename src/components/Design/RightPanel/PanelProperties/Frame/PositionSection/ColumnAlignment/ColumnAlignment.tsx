@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { ButtonGroup, GridColumnType, SectionColumn } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { HORIZONTAL_ALIGNMENT_OPTIONS, translationNameSpace, VERTICAL_ALIGNMENT_OPTIONS } from './constants';
@@ -20,10 +20,10 @@ const ColumnAlignment: FC = () => {
   const disabled = !frameNode?.parentId;
 
   return (
-    <SectionColumn gridColumnType={GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
-      <ButtonGroup buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, t)} e2eValue="horizontal-alignment" />
-      <ButtonGroup buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, t)} e2eValue="vertical-alignment" />
-    </SectionColumn>
+    <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
+      <UITools.ButtonGroup buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, t)} e2eValue="horizontal-alignment" />
+      <UITools.ButtonGroup buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, t)} e2eValue="vertical-alignment" />
+    </UITools.SectionColumn>
   );
 };
 

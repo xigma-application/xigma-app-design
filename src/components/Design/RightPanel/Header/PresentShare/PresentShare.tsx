@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import PresentOptionsMenu from './PresentOptionsMenu/PresentOptionsMenu';
-import { Button, ButtonMenu, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // others
 import { KEYBOARD_SHORTCUTS } from '../../../keys';
@@ -27,11 +27,11 @@ const PresentShare: FC = () => {
             </>
           }
         >
-          <Button ariaLabel={t(`${translationNameSpace}.present`)} className={styles.PresentShare__present}>
+          <UITools.Button ariaLabel={t(`${translationNameSpace}.present`)} className={styles.PresentShare__present}>
             <Icon name="Play" size={24} />
-          </Button>
+          </UITools.Button>
         </Tooltip>
-        <ButtonMenu
+        <UITools.ButtonMenu
           align="end"
           className={styles['PresentShare__present-options']}
           sideOffset={-2}
@@ -39,11 +39,11 @@ const PresentShare: FC = () => {
           triggerAriaLabel={t(`${translationNameSpace}.presentOptions`)}
         >
           <PresentOptionsMenu />
-        </ButtonMenu>
+        </UITools.ButtonMenu>
       </div>
-      <Button className={styles.PresentShare__share} size="medium">
+      <UITools.Button className={styles.PresentShare__share} size="medium">
         {t(`${translationNameSpace}.share`)}
-      </Button>
+      </UITools.Button>
     </div>
   );
 };

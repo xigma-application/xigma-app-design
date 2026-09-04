@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import VectorEditMoreDropdownItems from '../VectorEditMoreDropdownItems/VectorEditMoreDropdownItems';
-import { Button, ButtonMenu, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { useIsVectorEditMoreToolDisabled } from '../VectorEditMoreDropdownItem/hooks/useIsVectorEditMoreToolDisabled';
@@ -42,7 +42,7 @@ const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ tool
           </>
         }
       >
-        <Button
+        <UITools.Button
           active={isActive}
           ariaLabel={t(TOOL_LABEL[toolName])}
           className={styles['VectorEditToolbar__tool-button']}
@@ -50,16 +50,16 @@ const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ tool
           onClick={handleSelect}
         >
           <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={TOOL_ICON[toolName]} size={ICON_SIZE} />
-        </Button>
+        </UITools.Button>
       </Tooltip>
-      <ButtonMenu
+      <UITools.ButtonMenu
         className={styles['VectorEditToolbar__more-chevron']}
         side="top"
         trigger={<Icon name="ChevronDown" size={16} />}
         triggerAriaLabel={t(`${translationNameSpace}.more`)}
       >
         <VectorEditMoreDropdownItems lastMoreTool={toolName} />
-      </ButtonMenu>
+      </UITools.ButtonMenu>
     </div>
   );
 };

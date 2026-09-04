@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useIsVectorEditMoreToolDisabled } from './hooks/useIsVectorEditMoreToolDisabled';
@@ -12,7 +12,7 @@ import { useSelectVectorEditTool } from '../../VectorEditToolButton/hooks/useSel
 import { TOOL_ICON, TOOL_LABEL } from '../../../constants';
 import { TVectorEditMoreTool } from '../../constants';
 
-const { PopoverItem } = PopoverCompound;
+const { PopoverItem } = UITools.PopoverCompound;
 
 export type TVectorEditMoreDropdownItemProps = {
   selected: boolean;

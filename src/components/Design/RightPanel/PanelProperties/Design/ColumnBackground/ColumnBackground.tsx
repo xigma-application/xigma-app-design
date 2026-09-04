@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { ColorPickerInput } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnBackgroundColor } from './hooks/useColumnBackgroundColor';
@@ -16,7 +16,7 @@ const ColumnBackground: FC = () => {
     useColumnBackgroundColor();
 
   return (
-    <ColorPickerInput
+    <UITools.ColorPickerInput
       alpha={alpha}
       e2eValue="background"
       hex={hex}

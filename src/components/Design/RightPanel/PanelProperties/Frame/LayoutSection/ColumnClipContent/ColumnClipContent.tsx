@@ -2,8 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Checkbox from 'shared/UITools/Checkbox/Checkbox';
-import { SectionColumn } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnClipContent } from './hooks/useColumnClipContent';
@@ -16,9 +15,9 @@ const ColumnClipContent: FC = () => {
   const { clipContent, onChange } = useColumnClipContent();
 
   return (
-    <SectionColumn withBottomMargin withTopMargin>
-      <Checkbox e2eValue="clip-content" label={t(`${translationNameSpace}.label`)} onChange={onChange} value={clipContent} />
-    </SectionColumn>
+    <UITools.SectionColumn withBottomMargin withTopMargin>
+      <UITools.Checkbox e2eValue="clip-content" label={t(`${translationNameSpace}.label`)} onChange={onChange} value={clipContent} />
+    </UITools.SectionColumn>
   );
 };
 

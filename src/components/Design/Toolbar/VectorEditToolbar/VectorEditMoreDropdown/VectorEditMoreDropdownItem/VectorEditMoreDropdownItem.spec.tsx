@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 
 // components
 import VectorEditMoreDropdownItem from './VectorEditMoreDropdownItem';
-import { Popover } from 'shared';
+import { UITools } from 'shared';
 
 // store
 import { addNode, setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
@@ -18,9 +18,9 @@ import { TVectorEditMoreTool } from '../../constants';
 const renderVectorEditMoreDropdownItem = (selected: boolean, tool: TVectorEditMoreTool): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <Popover trigger={<span>open</span>}>
+      <UITools.Popover trigger={<span>open</span>}>
         <VectorEditMoreDropdownItem selected={selected} tool={tool} />
-      </Popover>
+      </UITools.Popover>
     </Provider>,
   );
 

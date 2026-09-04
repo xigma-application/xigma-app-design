@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useSelectPresentMode } from './hooks/useSelectPresentMode';
@@ -11,7 +11,7 @@ import { useSelectPresentMode } from './hooks/useSelectPresentMode';
 import { KEYBOARD_SHORTCUTS } from '../../../../keys';
 import { translationNameSpace } from './constants';
 
-const { PopoverItem } = PopoverCompound;
+const { PopoverItem } = UITools.PopoverCompound;
 
 const PresentOptionsMenu: FC = () => {
   const { t } = useTranslation();

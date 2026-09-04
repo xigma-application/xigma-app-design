@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import ColumnDimensionsButtonIcons from './ColumnDimensionsButtonIcons';
 import ColumnDimensionsField from './ColumnDimensionsField/ColumnDimensionsField';
-import { GridColumnType, SectionColumn } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useColumnDimensions } from './hooks/useColumnDimensions';
@@ -18,9 +18,9 @@ const ColumnDimensions: FC = () => {
     useColumnDimensions();
 
   return (
-    <SectionColumn
+    <UITools.SectionColumn
       buttonsIcon={ColumnDimensionsButtonIcons(locked, onToggleLock, t)}
-      gridColumnType={GridColumnType.twoInputs}
+      gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin
       withInputConnector={locked}
@@ -45,7 +45,7 @@ const ColumnDimensions: FC = () => {
         onScrub={onScrubHeight}
         value={height}
       />
-    </SectionColumn>
+    </UITools.SectionColumn>
   );
 };
 

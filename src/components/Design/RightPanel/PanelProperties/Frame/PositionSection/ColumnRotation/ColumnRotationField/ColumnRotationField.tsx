@@ -4,7 +4,7 @@ import { FC, FocusEvent } from 'react';
 import { Icon, ScrubbableInput } from '@xigma/components';
 
 // components
-import { TextField } from 'shared';
+import { UITools } from 'shared';
 
 // others
 import { ROTATION_MAX, ROTATION_MIN } from '../constants';
@@ -31,7 +31,7 @@ export const ColumnRotationField: FC<TColumnRotationFieldProps> = ({
   onScrub,
   value,
 }) => (
-  <TextField
+  <UITools.TextField
     aria-label={ariaLabel}
     defaultValue={`${value}°`}
     e2eValue={e2eValue}

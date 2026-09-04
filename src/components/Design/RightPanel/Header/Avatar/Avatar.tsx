@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import AccountMenu from './AccountMenu/AccountMenu';
 import AvatarBadge from './AvatarBadge/AvatarBadge';
-import { ButtonMenu, Icon, Tooltip } from 'shared';
+import { Icon, Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -16,7 +16,7 @@ const Avatar: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <ButtonMenu
+    <UITools.ButtonMenu
       align="center"
       className={styles.Avatar}
       trigger={
@@ -30,7 +30,7 @@ const Avatar: FC = () => {
       triggerAriaLabel={t(`${translationNameSpace}.ariaLabel`)}
     >
       <AccountMenu />
-    </ButtonMenu>
+    </UITools.ButtonMenu>
   );
 };
 

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Popover, PopoverCompound } from 'shared';
+import { Icon, UITools } from 'shared';
 
 // hooks
 import { useSelectGroupTool } from './hooks/useSelectGroupTool';
@@ -30,7 +30,7 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { getGroupDisplayedTool } from '../../utils/getGroupDisplayedTool';
 
-const { PopoverItem } = PopoverCompound;
+const { PopoverItem } = UITools.PopoverCompound;
 
 export type TToolDropdownProps = {
   tool: ToolName;
@@ -48,7 +48,11 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
   const selectedTool = getGroupDisplayedTool(tool, lastShapeTool, lastMouseTool, lastFrameTool, lastTextTool, lastPenTool);
 
   return (
-    <Popover trigger={<Icon name="ChevronDown" size={16} />} triggerAriaLabel={`${tool} options`} triggerClassName={styles.ToolDropdown}>
+    <UITools.Popover
+      trigger={<Icon name="ChevronDown" size={16} />}
+      triggerAriaLabel={`${tool} options`}
+      triggerClassName={styles.ToolDropdown}
+    >
       {(groupItems ?? [tool]).map((groupTool) => (
         <PopoverItem
           className={styles.ToolDropdown__item}
@@ -62,7 +66,7 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
           shortcutClassName={styles.ToolDropdown__shortcut}
         />
       ))}
-    </Popover>
+    </UITools.Popover>
   );
 };
 

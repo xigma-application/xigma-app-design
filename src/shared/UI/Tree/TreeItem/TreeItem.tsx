@@ -5,7 +5,7 @@ import { noop } from 'lodash';
 // components
 import TreeItemActions from './TreeItemActions';
 import TreeItemToggle from './TreeItemToggle/TreeItemToggle';
-import { EditableInput } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useRenameTreeItem } from './hooks/useRenameTreeItem';
@@ -70,7 +70,7 @@ export const TreeItem: FC<TTreeItemProps> = ({
         <span className={styles.TreeItem__icon} onDoubleClick={handleZoomToItem}>
           {renderIcon(node)}
         </span>
-        <EditableInput
+        <UITools.EditableInput
           autoEdit={isRenameRequested}
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
           editOnDoubleClick

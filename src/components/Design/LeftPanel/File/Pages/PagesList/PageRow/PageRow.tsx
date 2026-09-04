@@ -3,7 +3,7 @@ import { FC } from 'react';
 
 // components
 import PageRowMenu from './PageRowMenu';
-import { EditableInput } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { usePageRowRename } from './hooks/usePageRowRename';
@@ -37,7 +37,7 @@ const PageRow: FC<TPageRowProps> = ({ autoEdit, onAutoEditDismissed, page }) => 
 
   return (
     <div className={styles.PageRow} onClick={handleSelect} onContextMenu={onContextMenu}>
-      <EditableInput
+      <UITools.EditableInput
         autoEdit={autoEdit || isRenameRequested}
         className={cx(styles.PageRow__input, isOpen && !isSelected && styles['PageRow__input--menu-open'])}
         editOnDoubleClick

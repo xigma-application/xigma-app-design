@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AvatarBadge from '../AvatarBadge/AvatarBadge';
-import { Button, Icon } from 'shared';
+import { Icon, UITools } from 'shared';
 
 // others
 import { CURRENT_USER_NAME, translationNameSpace } from './constants';
@@ -21,10 +21,10 @@ const AccountMenu: FC = () => {
         <span className={styles['AccountMenu__user-name']}>{CURRENT_USER_NAME}</span>
       </div>
       <div className={styles.AccountMenu__actions}>
-        <Button className={styles.AccountMenu__spotlight}>{t(`${translationNameSpace}.spotlightMe`)}</Button>
-        <Button ariaLabel={t(`${translationNameSpace}.audioChat`)}>
+        <UITools.Button className={styles.AccountMenu__spotlight}>{t(`${translationNameSpace}.spotlightMe`)}</UITools.Button>
+        <UITools.Button ariaLabel={t(`${translationNameSpace}.audioChat`)}>
           <Icon name="Headphones" size={24} />
-        </Button>
+        </UITools.Button>
       </div>
     </div>
   );

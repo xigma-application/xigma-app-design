@@ -3,7 +3,7 @@ import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound, SearchInput, Tabs } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useActionsPanelItemClick } from './hooks/useActionsPanelItemClick';
@@ -22,7 +22,7 @@ import styles from './actions-panel.module.scss';
 // types
 import { TTab } from 'shared/UITools/Tabs/types';
 
-const { PopoverItem, PopoverSeparator } = PopoverCompound;
+const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 export const ActionsPanel: FC = () => {
   const { t } = useTranslation();
@@ -42,7 +42,7 @@ export const ActionsPanel: FC = () => {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content align="center" className={styles.ActionsPanel} side="top" sideOffset={10}>
-        <SearchInput
+        <UITools.SearchInput
           ariaLabel={t(`${translationNameSpace}.searchPlaceholder`)}
           autoFocus
           className={styles.ActionsPanel__search}
@@ -50,7 +50,7 @@ export const ActionsPanel: FC = () => {
           placeholder={t(`${translationNameSpace}.searchPlaceholder`)}
           value={query}
         />
-        <Tabs activeTab={activeTab} className={styles.ActionsPanel__tabs} setActiveTab={setActiveTab} tabs={TABS} />
+        <UITools.Tabs activeTab={activeTab} className={styles.ActionsPanel__tabs} setActiveTab={setActiveTab} tabs={TABS} />
         <div className={styles.ActionsPanel__list}>
           {sections.map(({ items, section }, index) => (
             <div key={section}>

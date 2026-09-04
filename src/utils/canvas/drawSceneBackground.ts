@@ -23,7 +23,16 @@ export const drawSceneBackground = (
   setAlphaWriteEnabled(gl, imageContext, true);
 
   if (paint.visible === false) {
-    drawCheckerboardBackground(gl, imageContext.checkerboardProgram, imageContext.gridBuffer, canvasWidth, canvasHeight, viewport, paint.color, 0);
+    drawCheckerboardBackground(
+      gl,
+      imageContext.checkerboardProgram,
+      imageContext.gridBuffer,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      paint.color,
+      0,
+    );
   } else if (paint.opacity < 100) {
     drawCheckerboardBackground(
       gl,

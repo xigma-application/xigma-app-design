@@ -83,7 +83,17 @@ export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneN
           );
           break;
         case NodeType.line:
-          drawLine(gl, program, buffer, node, MASK_OUTLINE_STROKE, MASK_OUTLINE_WIDTH_PX / viewport.zoom, canvasWidth, canvasHeight, viewport);
+          drawLine(
+            gl,
+            program,
+            buffer,
+            node,
+            MASK_OUTLINE_STROKE,
+            MASK_OUTLINE_WIDTH_PX / viewport.zoom,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+          );
           break;
         case NodeType.vector:
           drawVectorStroke(
@@ -99,7 +109,18 @@ export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneN
           );
           break;
         default:
-          drawThickOutline(gl, program, buffer, node, MASK_OUTLINE_STROKE, MASK_OUTLINE_WIDTH_PX, canvasWidth, canvasHeight, viewport, node.rotation);
+          drawThickOutline(
+            gl,
+            program,
+            buffer,
+            node,
+            MASK_OUTLINE_STROKE,
+            MASK_OUTLINE_WIDTH_PX,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+            node.rotation,
+          );
       }
     });
   }

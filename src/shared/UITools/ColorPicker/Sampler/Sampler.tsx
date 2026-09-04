@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { ButtonMenu, Icon } from 'shared';
+import { Icon, UITools } from 'shared';
 
 // hooks
 import { useToggleSampler } from './hooks/useToggleSampler';
@@ -19,7 +19,7 @@ export const Sampler: FC<TSamplerProps> = ({ onClose, onOpen }) => {
 
   return (
     <div className={styles.Sampler}>
-      <ButtonMenu
+      <UITools.ButtonMenu
         className={styles.Sampler__button}
         onOpenChange={handleOpenChange}
         trigger={(isOpen) => <Icon color={isOpen ? 'blue1' : 'neutral1'} name="Sample" size={14} />}

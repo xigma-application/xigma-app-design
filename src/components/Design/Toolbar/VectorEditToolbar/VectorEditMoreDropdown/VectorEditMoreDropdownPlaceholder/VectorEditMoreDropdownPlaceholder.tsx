@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import VectorEditMoreDropdownItems from '../VectorEditMoreDropdownItems/VectorEditMoreDropdownItems';
-import { ButtonMenu, Icon } from 'shared';
+import { Icon, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../../constants';
@@ -15,7 +15,7 @@ const VectorEditMoreDropdownPlaceholder: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <ButtonMenu
+    <UITools.ButtonMenu
       className={styles['VectorEditToolbar__more-button-menu']}
       side="top"
       trigger={
@@ -29,7 +29,7 @@ const VectorEditMoreDropdownPlaceholder: FC = () => {
       triggerAriaLabel={t(`${translationNameSpace}.more`)}
     >
       <VectorEditMoreDropdownItems lastMoreTool={null} />
-    </ButtonMenu>
+    </UITools.ButtonMenu>
   );
 };
 

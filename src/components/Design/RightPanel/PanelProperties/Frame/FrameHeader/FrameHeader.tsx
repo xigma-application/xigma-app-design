@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import FrameHeaderButtons from './FrameHeaderButtons';
 import FrameHeaderMenu from './FrameHeaderMenu';
-import { ButtonMenu, ComponentHeader, Icon } from 'shared';
+import { Icon, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -16,8 +16,8 @@ const FrameHeader: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <ComponentHeader buttons={<FrameHeaderButtons />} e2eValue="frame">
-      <ButtonMenu
+    <UITools.ComponentHeader buttons={<FrameHeaderButtons />} e2eValue="frame">
+      <UITools.ButtonMenu
         className={styles.FrameHeader__trigger}
         scrollable
         trigger={
@@ -29,8 +29,8 @@ const FrameHeader: FC = () => {
         triggerAriaLabel={t(`${translationNameSpace}.menuAriaLabel`)}
       >
         <FrameHeaderMenu />
-      </ButtonMenu>
-    </ComponentHeader>
+      </UITools.ButtonMenu>
+    </UITools.ComponentHeader>
   );
 };
 

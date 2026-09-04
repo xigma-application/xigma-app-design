@@ -2,7 +2,7 @@ import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useConvertSelectionToSection } from 'components/Design/Menu/hooks/useConvertSelectionToSection';
@@ -16,7 +16,7 @@ import { selectSelectedIds } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
-const { PopoverItem, PopoverSeparator } = PopoverCompound;
+const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 const PRESET_ITEM_MAX_WIDTH_PX = 174;
 

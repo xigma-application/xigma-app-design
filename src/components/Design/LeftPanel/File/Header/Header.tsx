@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import FileMeta from './FileMeta/FileMeta';
 import FileNameMenu from './FileNameMenu/FileNameMenu';
 import MinimizeUiButton from './MinimizeUiButton/MinimizeUiButton';
-import { EditableInput } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useFileNameMenu } from './hooks/useFileNameMenu';
@@ -28,7 +28,7 @@ const Header: FC<THeaderProps> = ({ name, onRenameFile }) => {
   return (
     <div className={styles.Header}>
       <div className={styles.Header__top}>
-        <EditableInput
+        <UITools.EditableInput
           action={<FileNameMenu onOpenChange={onOpenChange} onRename={onRename} open={isOpen} />}
           actionOpen={isOpen}
           ariaLabel={t(`${translationNameSpace}.renameAriaLabel`)}
