@@ -1,0 +1,39 @@
+.AccordionItem {
+  &__header {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--color-neutral-1);
+    column-gap: 6px;
+    cursor: pointer;
+    display: flex;
+    font-size: 12px;
+    height: 32px;
+    padding: 0;
+    width: 100%;
+  }
+
+  &__icon {
+    align-items: center;
+    display: inline-flex;
+    flex-shrink: 0;
+    justify-content: center;
+    transform: rotate(-90deg);
+    transition: transform 0.1s ease;
+
+    &--expanded {
+      transform: rotate(0deg);
+    }
+  }
+
+  &__label {
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__content {
+    padding-left: 12px;
+  }
+}

@@ -8,7 +8,7 @@ import { PopoverCompound } from 'shared';
 import { useConvertSelectionToSection } from 'components/Design/Menu/hooks/useConvertSelectionToSection';
 
 // others
-import { FRAME_PRESET_GROUPS } from './framePresetGroups';
+import { FRAME_PRESET_GROUPS } from '../../framePresetGroups';
 import { translationNameSpace } from './constants';
 
 // store
@@ -37,9 +37,9 @@ const FrameHeaderMenu: FC = () => {
       <PopoverItem label={t(`${translationNameSpace}.label`)} selected />
       <PopoverItem disabled label={t(`${translationNameSpace}.typeMenu.group`)} />
       {FRAME_PRESET_GROUPS.map((group) => (
-        <Fragment key={group[0].label}>
+        <Fragment key={group.labelKey}>
           <PopoverSeparator />
-          {group.map((preset) => (
+          {group.presets.map((preset) => (
             <PopoverItem
               key={preset.label}
               label={preset.label}

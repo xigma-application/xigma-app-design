@@ -21,6 +21,7 @@ export * from './UI/Text/Text';
 export * from './UI/Tree/Tree';
 export * from './UI/Tree/TreeItem/TreeItem';
 export * from './UI/Tree/TreeItem/types';
+export * from './UITools/Accordion/Accordion';
 export * from './UITools/Button/Button';
 export * from './UITools/ButtonMenu/ButtonMenu';
 export * from './UITools/Chip/Chip';

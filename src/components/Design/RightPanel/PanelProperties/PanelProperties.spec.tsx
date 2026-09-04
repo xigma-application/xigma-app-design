@@ -6,12 +6,12 @@ import PanelProperties from './PanelProperties';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 
 const renderPanelProperties = (): ReturnType<typeof render> =>
   render(
@@ -103,6 +103,38 @@ describe('PanelProperties behaviors', () => {
     expect(container).toBeEmptyDOMElement();
 
     // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should show the FrameTool panel while the frame tool is active, regardless of selection', () => {
+    // mock
+    store.dispatch(setActiveTool(ToolName.frame));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Frame')).toBeInTheDocument();
+    expect(screen.getByText('Phone')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setActiveTool(ToolName.default));
+  });
+
+  it('should show the FrameTool panel over the selected frame panel while the frame tool is active', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setActiveTool(ToolName.frame));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Phone')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
   });
 });

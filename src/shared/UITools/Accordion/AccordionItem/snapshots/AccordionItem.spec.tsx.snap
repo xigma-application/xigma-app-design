@@ -1,0 +1,92 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AccordionItem snapshots > should render its content expanded when defaultExpanded is true 1`] = `
+<DocumentFragment>
+  <div
+    class="_AccordionItem_f05791"
+    data-test-accordion-item=""
+  >
+    <button
+      aria-expanded="true"
+      class="_AccordionItem__header_f05791"
+      type="button"
+    >
+      <span
+        class="_AccordionItem__icon_f05791 _AccordionItem__icon--expanded_f05791"
+      >
+        <svg
+          class="Icon"
+          height="6"
+          style="color: var(--color-neutral-2);"
+          viewBox="0 0 6 6"
+          width="6"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m3 5 3-4H0z"
+            data-svg-property="fill"
+            fill="white"
+            fill-opacity="1"
+            fill-rule="nonzero"
+            stroke="none"
+          />
+        </svg>
+      </span>
+      <span
+        class="_AccordionItem__label_f05791"
+      >
+        Phone
+      </span>
+    </button>
+    <div
+      class="_AccordionItem__content_f05791"
+    >
+      <span>
+        body
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`AccordionItem snapshots > should render its header collapsed by default 1`] = `
+<DocumentFragment>
+  <div
+    class="_AccordionItem_f05791"
+    data-test-accordion-item=""
+  >
+    <button
+      aria-expanded="false"
+      class="_AccordionItem__header_f05791"
+      type="button"
+    >
+      <span
+        class="_AccordionItem__icon_f05791"
+      >
+        <svg
+          class="Icon"
+          height="6"
+          style="color: var(--color-neutral-2);"
+          viewBox="0 0 6 6"
+          width="6"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m3 5 3-4H0z"
+            data-svg-property="fill"
+            fill="white"
+            fill-opacity="1"
+            fill-rule="nonzero"
+            stroke="none"
+          />
+        </svg>
+      </span>
+      <span
+        class="_AccordionItem__label_f05791"
+      >
+        Phone
+      </span>
+    </button>
+  </div>
+</DocumentFragment>
+`;

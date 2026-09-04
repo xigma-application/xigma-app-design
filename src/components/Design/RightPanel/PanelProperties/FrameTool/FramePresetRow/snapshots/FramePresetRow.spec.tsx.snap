@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FramePresetRow snapshots > should render its label and its dimensions 1`] = `
+<DocumentFragment>
+  <button
+    class="_FramePresetRow_5fab8e"
+    type="button"
+  >
+    <span
+      class="_FramePresetRow__label_5fab8e"
+    >
+      iPhone 17
+    </span>
+    <span
+      class="_FramePresetRow__size_5fab8e"
+    >
+      402×874
+    </span>
+  </button>
+</DocumentFragment>
+`;

@@ -1,0 +1,1787 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FrameHeaderMenu snapshots > should render the type switcher and the size preset groups 1`] = `
+<DocumentFragment>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Section
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 1;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Frame
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de _PopoverItem--disabled_9483de"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Group
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 17
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        402×874
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 16 & 17 Pro
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        402×874
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 16
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        393×852
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 16 & 17 Pro Max
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        440×956
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 16 Plus
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        430×932
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone Air
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        420×912
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 14 & 15 Pro Max
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        430×932
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 14 & 15 Pro
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        393×852
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 13 & 14
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        390×844
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 14 Plus
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        428×926
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Android Compact
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        412×917
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Android Medium
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        700×840
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPad mini 8.3
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        744×1133
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Surface Pro 8
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1440×960
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPad Pro 11"
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        834×1194
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPad Pro 12.9"
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1024×1366
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Android Expanded
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1280×800
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        MacBook Air
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1280×832
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        MacBook Pro 14"
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1512×982
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        MacBook Pro 16"
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1728×1117
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Desktop
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1440×1024
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Wireframes
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1440×1024
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        TV
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1280×720
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Slide 16:9
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1920×1080
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Slide 4:3
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1024×768
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch Series 11 46mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        187×223
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch Ultra 49mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        208×248
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 41mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        176×215
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 45mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        198×242
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 44mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        184×224
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 40mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        162×197
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        A4
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        595×842
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        A5
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        420×595
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        A6
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        297×420
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Letter
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        612×792
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Tabloid
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        792×1224
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Twitter post
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1200×675
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Twitter header
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1500×500
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Facebook post
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1200×630
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Facebook cover
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        820×312
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Instagram post
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1080×1350
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Instagram story
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1080×1920
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Dribbble shot
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        400×300
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Dribbble shot HD
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        800×600
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        LinkedIn cover
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1584×396
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Plugin icon
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        128×128
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Profile banner
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1680×240
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Plugin / file cover
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1920×1080
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 13 mini
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        375×812
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone SE
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        320×568
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 13 Pro Max
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        428×926
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 13 / 13 Pro
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        390×844
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 11 Pro Max
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        414×896
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 11 Pro / X
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        375×812
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 8 Plus
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        414×736
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPhone 8
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        375×667
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Android Small
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        360×640
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Android Large
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        360×800
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Google Pixel 2
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        411×731
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Google Pixel 2 XL
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        411×823
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iPad mini 5
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        768×1024
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Surface Pro 4
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1368×912
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        MacBook
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1152×700
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        MacBook Pro
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1440×900
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Surface Book
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1500×1000
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 42mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        156×195
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apple Watch 38mm
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        136×170
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        iMac
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        1280×720
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    />
+    <div
+      class="_PopoverItem__row_9483de"
+      style="max-width: 174px;"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Macintosh 128k
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        512×342
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;
