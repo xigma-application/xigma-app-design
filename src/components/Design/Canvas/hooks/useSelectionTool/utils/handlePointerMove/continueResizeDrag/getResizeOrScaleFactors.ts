@@ -11,6 +11,6 @@ export const getResizeOrScaleFactors = (
   bounds: TDraftRect,
   point: TPoint,
   aspectRatio: number,
-  shiftKey: boolean,
+  isAspectLockRequested: boolean,
 ): TResizeFactors =>
-  isScaleTool ? getScaleFactors(handle, bounds, point, aspectRatio) : getResizeFactors(handle, bounds, point, aspectRatio, shiftKey);
+  isScaleTool || isAspectLockRequested ? getScaleFactors(handle, bounds, point, aspectRatio) : getResizeFactors(handle, bounds, point);

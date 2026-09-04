@@ -27,7 +27,8 @@ export const continueResizeDrag = (
     const { aspectRatio, bounds, candidateShapes, handle, nodeOrigins, rotatedGroupChildOrigins } = resizeDragState;
     const originEntries = Object.entries(nodeOrigins);
     const singleRotatableOrigin = getSingleRotatableOrigin(originEntries);
-    const frame = getResizeDragFrame(canvas, event, bounds, handle, aspectRatio, singleRotatableOrigin, candidateShapes);
+    const nodeId = originEntries.length === 1 ? originEntries[0][0] : undefined;
+    const frame = getResizeDragFrame(canvas, event, bounds, handle, aspectRatio, singleRotatableOrigin, candidateShapes, nodeId);
     const snapshots = canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
     canvasRefs.transform.alignmentGuideRef.current = frame.alignmentGuide;
 
@@ -43,10 +44,6 @@ export const continueResizeDrag = (
       applyRotatedGroupChildResize(groupId, singleRotatableOrigin, rotatedGroupChildOrigins, dispatch);
     }
 
-    canvasRefs.transform.aspectRatioLockGuideRef.current = getAspectRatioLockGuide(
-      frame.isAspectLocked,
-      singleRotatableOrigin,
-      originEntries.length === 1 ? originEntries[0][0] : undefined,
-    );
+    canvasRefs.transform.aspectRatioLockGuideRef.current = getAspectRatioLockGuide(frame.isAspectLocked, singleRotatableOrigin, nodeId);
   }
 };

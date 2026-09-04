@@ -25,4 +25,16 @@ describe('getResizeOrScaleFactors', () => {
       scaleY: 2,
     });
   });
+
+  it('should also use the scale factors when aspect lock is requested (Shift/lockedAspectRatio) without the scale tool, so an edge handle stays proportional', () => {
+    // mock — same drag/result as the scale-tool case above, but via the aspect-lock flag instead
+    const bounds = { height: 50, width: 100, x: 0, y: 0 };
+
+    // result
+    expect(getResizeOrScaleFactors(false, 'n', bounds, { x: 50, y: -50 }, 2, true)).toEqual({
+      anchors: { x: 50, y: 50 },
+      scaleX: 2,
+      scaleY: 2,
+    });
+  });
 });

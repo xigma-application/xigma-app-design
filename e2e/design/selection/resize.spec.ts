@@ -99,6 +99,66 @@ test('holding Shift while dragging a corner locks the aspect ratio, producing a 
   expect(lockedResize.equals(freeResize)).toBe(false);
 });
 
+test('holding Shift while dragging an edge handle also locks the aspect ratio, not just on corners', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-shift-lock-edge-free');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1000, 350); // 100x50, a 2:1 rectangle
+  await designPage.click(950, 325);
+
+  await designPage.pointerDown(1000, 325); // "e" edge handle
+  await designPage.pointerMove(1200, 325); // free drag only grows width, height stays 50
+  await designPage.pointerUp();
+  const freeResize = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-resize-shift-lock-edge-locked');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1000, 350);
+  await designPage.click(950, 325);
+
+  await page.keyboard.down('Shift');
+  await designPage.pointerDown(1000, 325);
+  await designPage.pointerMove(1200, 325); // identical drag, but height must now grow with it too
+  await designPage.pointerUp();
+  await page.keyboard.up('Shift');
+  const lockedResize = await designPage.canvas.screenshot();
+
+  expect(lockedResize.equals(freeResize)).toBe(false);
+});
+
+test('locking aspect ratio in the panel constrains an edge-handle drag too, without needing Shift', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-locked-aspect-ratio-edge-free');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(900, 300, 1000, 350); // 100x50, a 2:1 frame
+  await designPage.click(950, 325);
+
+  await designPage.pointerDown(1000, 325); // "e" edge handle
+  await designPage.pointerMove(1200, 325);
+  await designPage.pointerUp();
+  const freeResize = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-resize-locked-aspect-ratio-edge-locked');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(900, 300, 1000, 350);
+  await designPage.click(950, 325);
+
+  await page.getByLabel('Lock aspect ratio').click();
+
+  await designPage.pointerDown(1000, 325); // identical drag, no Shift held this time
+  await designPage.pointerMove(1200, 325);
+  await designPage.pointerUp();
+  const lockedResize = await designPage.canvas.screenshot();
+
+  expect(lockedResize.equals(freeResize)).toBe(false);
+});
+
 test('dragging a corner past the opposite anchor mirrors the node instead of sticking at the minimum size', async ({ page }) => {
   const designPage = new DesignPage(page);
 

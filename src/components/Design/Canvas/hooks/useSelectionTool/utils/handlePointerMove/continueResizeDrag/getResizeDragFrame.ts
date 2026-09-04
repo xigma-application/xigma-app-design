@@ -2,7 +2,7 @@
 import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectNodes, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -15,7 +15,6 @@ import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 // utils
 import { getPointAlignmentSnap } from 'components/Design/Canvas/utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
-import { getResizeAnchorPoint } from '../../../../../utils/getResizeAnchorPoint';
 import { getResizeAnchorSolver } from './getResizeAnchorSolver';
 import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
@@ -43,6 +42,7 @@ export const getResizeDragFrame = (
   aspectRatio: number,
   singleRotatableOrigin: TSingleRotatableOrigin,
   candidateShapes: TCandidateShape[],
+  nodeId: string | undefined,
 ): TResizeDragFrame => {
   const isScaleTool = selectActiveTool(store.getState()) === ToolName.scale;
   const viewport = selectViewport(store.getState());
@@ -54,9 +54,11 @@ export const getResizeDragFrame = (
   const affectsWidth = handle.includes('e') || handle.includes('w');
   const affectsHeight = handle.includes('n') || handle.includes('s');
   const snap = maskSnapToActiveAxes(rawSnap, queryPoint, affectsWidth, affectsHeight);
-  const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, snap.point, aspectRatio, event.shiftKey);
+  const node = nodeId ? selectNodes(store.getState())[nodeId] : undefined;
+  const isAspectLockRequested = event.shiftKey || Boolean(node && 'lockedAspectRatio' in node && node.lockedAspectRatio);
+  const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, snap.point, aspectRatio, isAspectLockRequested);
   const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
-  const isAspectLocked = isScaleTool || (getResizeAnchorPoint(handle, bounds) !== null && event.shiftKey);
+  const isAspectLocked = isScaleTool || isAspectLockRequested;
 
   return { alignmentGuide: snap.guide, anchors, isAspectLocked, rotatedAnchorSolver, scaleX, scaleY };
 };

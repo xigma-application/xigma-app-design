@@ -266,8 +266,8 @@ describe('continueResizeDrag', () => {
     });
   });
 
-  it('should ignore Shift on an edge handle, since aspect-lock only applies to corners', () => {
-    // mock
+  it('should also lock the aspect ratio on an edge handle while Shift is held, growing the cross axis symmetrically', () => {
+    // mock — same drag as the corner-lock case above, but dragged from the "e" edge handle instead
     const idA = addFrameNode(0, 0, 100, 50);
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef({
@@ -278,14 +278,83 @@ describe('continueResizeDrag', () => {
     });
 
     // before
-    continueResizeDrag(canvas, pointerEvent(150, 999, { shiftKey: true }), store.dispatch, resizeDragRef, createCanvasRefs());
+    continueResizeDrag(canvas, pointerEvent(150, 80, { shiftKey: true }), store.dispatch, resizeDragRef, createCanvasRefs());
 
-    // result — vertical axis untouched, exactly as a plain (unlocked) east-edge resize
+    // result — height derives from the locked ratio and grows around the original vertical center
+    // (y:25), rounded to the nearest pixel like every other resize
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
-      height: 50,
+      height: 75,
       width: 150,
       x: 0,
+      y: -12,
+    });
+  });
+
+  it('should lock the aspect ratio on a corner handle when the node has lockedAspectRatio, even without Shift', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 100, 50);
+    store.dispatch(updateNode({ changes: { lockedAspectRatio: true }, id: idA }));
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result — same locked result as the Shift-held case, driven by the node flag instead
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 80,
+      width: 160,
+      x: 0,
       y: 0,
+    });
+  });
+
+  it('should show the aspect-ratio lock guide while dragging a corner handle on a lockedAspectRatio node, even without Shift', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 100, 50);
+    store.dispatch(updateNode({ changes: { lockedAspectRatio: true }, id: idA }));
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.aspectRatioLockGuideRef.current).not.toBeNull();
+  });
+
+  it('should also lock the aspect ratio on an edge handle when the node has lockedAspectRatio, even without Shift', () => {
+    // mock — same drag as above, but the lock comes from the node flag instead of Shift
+    const idA = addFrameNode(0, 0, 100, 50);
+    store.dispatch(updateNode({ changes: { lockedAspectRatio: true }, id: idA }));
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result — same locked, centered result as the Shift-held edge case above
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 75,
+      width: 150,
+      x: 0,
+      y: -12,
     });
   });
 

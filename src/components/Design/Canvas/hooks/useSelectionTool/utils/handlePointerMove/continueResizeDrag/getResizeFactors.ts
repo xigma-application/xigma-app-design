@@ -2,9 +2,8 @@
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 
 // utils
-import { getResizeAnchorPoint } from '../../../../../utils/getResizeAnchorPoint';
+import { computeResizedRect } from '../../../../../utils/computeResizedRect';
 import { getResizeAxisAnchors } from '../../../../../utils/getResizeAxisAnchors';
-import { getResizeBounds } from './getResizeBounds';
 import { getSignedScale } from './getSignedScale';
 
 export type TResizeFactors = {
@@ -13,15 +12,8 @@ export type TResizeFactors = {
   scaleY: number;
 };
 
-export const getResizeFactors = (
-  handle: TResizeHandle,
-  bounds: TDraftRect,
-  point: TPoint,
-  aspectRatio: number,
-  shiftKey: boolean,
-): TResizeFactors => {
-  const cornerAnchor = getResizeAnchorPoint(handle, bounds);
-  const newBounds = getResizeBounds(handle, bounds, point, cornerAnchor, aspectRatio, shiftKey);
+export const getResizeFactors = (handle: TResizeHandle, bounds: TDraftRect, point: TPoint): TResizeFactors => {
+  const newBounds = computeResizedRect(handle, bounds, point);
   const anchors = getResizeAxisAnchors(handle, bounds);
 
   return {
