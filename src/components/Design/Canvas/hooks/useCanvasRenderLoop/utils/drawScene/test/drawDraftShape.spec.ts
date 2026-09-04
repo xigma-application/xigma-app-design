@@ -40,6 +40,10 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  dragSnapshotFaceBufferCache: new WeakMap(),
+  dragSnapshotProgram: {} as WebGLProgram,
+  dragSnapshotStrokeBufferCache: new WeakMap(),
+  dragSnapshotTrackedByNodeId: new Map(),
   ellipseArcLengthCache: new Map(),
   faceBufferCache: new WeakMap(),
   gridBuffer: {} as WebGLBuffer,

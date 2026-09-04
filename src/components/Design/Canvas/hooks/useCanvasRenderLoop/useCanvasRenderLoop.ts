@@ -9,6 +9,7 @@ import IMAGE_VERTEX_SHADER_SOURCE from 'constant/webgl/imageVertexShaderSource';
 import MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/maskCompositeFragmentShaderSource';
 import MASK_COMPOSITE_VERTEX_SHADER_SOURCE from 'constant/webgl/maskCompositeVertexShaderSource';
 import MSDF_FRAGMENT_SHADER_SOURCE from 'constant/webgl/msdfFragmentShaderSource';
+import VECTOR_DRAG_VERTEX_SHADER_SOURCE from 'constant/webgl/vectorDragVertexShaderSource';
 import VERTEX_SHADER_SOURCE from 'constant/webgl/vertexShaderSource';
 import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
@@ -33,6 +34,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const gridBuffer = gl && gl.createBuffer();
     const maskCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE);
     const maskCompositeBuffer = gl && gl.createBuffer();
+    const dragSnapshotProgram = gl && createProgram(gl, VECTOR_DRAG_VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 
     if (
       canvas &&
@@ -46,7 +48,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       gridProgram &&
       gridBuffer &&
       maskCompositeProgram &&
-      maskCompositeBuffer
+      maskCompositeBuffer &&
+      dragSnapshotProgram
     ) {
       const stopRenderLoop = setupRenderLoop(
         gl,
@@ -60,6 +63,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gridBuffer,
         maskCompositeProgram,
         maskCompositeBuffer,
+        dragSnapshotProgram,
         canvas,
         refs,
       );
@@ -76,6 +80,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteProgram(msdfProgram);
         gl.deleteProgram(gridProgram);
         gl.deleteProgram(maskCompositeProgram);
+        gl.deleteProgram(dragSnapshotProgram);
       };
     }
   }, [refs]);

@@ -789,6 +789,58 @@ gets the speedup. A whole-shape drag/rotate (every segment moves at once), a mul
 touched segments, or any topology change all correctly fall back to the exact original full recompute —
 same correctness, same (not worse) cost as before this slice, never a silently slower frame.
 
+## 9. Persistent GPU buffers for the whole-node rigid drag path — translate moved into the shader, not the CPU
+
+The GPU-buffer-caching item's other deliberate exclusion (§5.7's closing note): the three frozen-
+snapshot draws (drag/resize/rotate, §4) always passed `null` for `faceBufferCache`/`strokeBufferCache`,
+so every frame re-computed the transformed points on the CPU and re-uploaded the whole buffer via
+`bufferData` — correct, but wasteful for the **drag** case specifically, because a rigid drag's
+`facesByPaint`/`strokeVertices` (`captureVectorNodeDragSnapshot.ts`) are captured **once** at drag start
+and never change reference again; only `deltaX`/`deltaY` get mutated in place per frame
+(`updateDragSnapshotDeltas.ts`) — a profiling trace (2026-08-28, §5.7's stroke-buffer note) had already
+caught `translateFlatVertices`/`drawVectorNodeDragSnapshot.ts` at 106ms self / 10.3% of one frame on the
+3000-square stress scene, all of it CPU point-translation + re-upload that a rigid delta doesn't need.
+
+**Design**: a dedicated `vectorDragVertexShaderSource.ts` — the shared `vertexShaderSource.ts` plus one
+extra `uniform vec2 u_translate`, added to `a_position` before the existing zoom/viewport transform —
+compiled into its own `dragSnapshotProgram` (the app already has precedent for several coexisting
+programs: `imageProgram`, `msdfProgram`, `gridProgram`, `maskCompositeProgram`). Deliberately **not**
+a new param threaded through the shared `drawVectorFill`/`drawVectorFillPaints`/
+`drawVectorThickStrokeVertices` — those stay untouched, program-agnostic as before. Instead
+`drawVectorNodeDragSnapshot.ts` sets `u_translate` **once** per node per frame (`gl.useProgram` +
+`gl.uniform2f`) before calling the exact same (now-untranslated) draw functions with the drag-specific
+persistent buffer caches — the uniform value persists across every draw call on that program until
+next set, so one set covers every face + the stroke for that node. No CPU translation, no shader
+touched anywhere else in the app.
+
+**The one real new risk this design creates, and its fix**: `getOrCreateFaceBuffer`/
+`getOrCreateStrokeBuffer` create a real `WebGLBuffer` keyed by array reference the first time a face/
+stroke is drawn — fine for the *existing* persistent-node caches (`faceBufferCache`/`strokeBufferCache`),
+whose keys live as long as the node's own `segments`/`vertices` do. A drag snapshot's arrays are
+deliberately **ephemeral** (`captureVectorNodeDragSnapshot.ts` builds fresh ones every drag), so once a
+drag ends and its `Map` entry is removed, the `WeakMap` cache entry becomes unreachable — but the GPU
+buffer it points to is never freed just because its JS key gets garbage collected (same class of bug as
+§7's vertex-dot leak, worse here: unbounded across every drag ever done in the session, not just one
+continuous zoom). `cleanupStaleDragSnapshotBuffers.ts` fixes this the same way §7 did — explicit,
+provably-bounded eviction, not a hope that GC handles it: a `dragSnapshotTrackedByNodeId: Map<string,
+TVectorNodeDragSnapshot>` remembers, per node id, the snapshot object seen last frame; called once per
+frame from `drawScene.ts` (before any drawing), it walks that map and for every node id whose tracked
+snapshot is **not** (`!==`) the current one for that id (drag ended, or — defensively — replaced with a
+genuinely new snapshot object), looks up and `gl.deleteBuffer`s every face/stroke buffer that snapshot
+ever created, then drops the tracking entry; an ongoing drag's still-current snapshot is left untouched.
+Takes `(context: TDrawSceneContext, refs: TCanvasRefs)` — whole objects, matching every other
+`drawScene.ts`-level helper (`drawHoverOutline(ctx, ..., refs)` etc.), not individual cache/ref fields
+plucked out at the call site.
+
+**Scope**: drag only, not resize/rotate — resize is a non-uniform per-axis scale (plus an optional
+rotation-around-pivot for a rotated node) and rotate is a rotation matrix around a pivot; both are
+*linear* transforms too and could in principle move to the shader the same way, but that's meaningfully
+more shader math and its own risk to verify, deliberately left as a follow-up slice rather than scope-
+creeping this one. Verified against `e2e/design/selection/selection.spec.ts`'s vector-drag screenshot
+test (passes); a separate, unrelated pre-existing failure in the same file (a plain-click test, not
+drag) was confirmed via a clean-baseline `git stash` comparison to reproduce identically without this
+slice's changes.
+
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
@@ -869,6 +921,11 @@ same correctness, same (not worse) cost as before this slice, never a silently s
   `utils/canvas/vectorNetwork/eraseVectorNetwork/subtractCapsuleFromVectorNetwork/
   subtractCapsuleFromVectorNetwork.ts`,
   `utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings.ts`
+- Persistent GPU buffers for the drag path (§9): `constant/webgl/vectorDragVertexShaderSource.ts`,
+  `useCanvasRenderLoop/{useCanvasRenderLoop,types}.ts`, `useCanvasRenderLoop/utils/setupRenderLoop.ts`,
+  `useCanvasRenderLoop/utils/drawScene/{drawScene,drawLeafNode,drawVectorNodeOrTextPathGuide,
+  drawSceneVectorNode,cleanupStaleDragSnapshotBuffers}.ts`,
+  `utils/canvas/drawVectorNode/drawVectorNodeDragSnapshot.ts`
 
 ## Related
 

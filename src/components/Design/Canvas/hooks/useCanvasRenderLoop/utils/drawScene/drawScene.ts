@@ -25,6 +25,7 @@ import { TDrawSceneContext } from './types';
 import { TImageRenderContext } from '../../types';
 
 // utils
+import { cleanupStaleDragSnapshotBuffers } from './cleanupStaleDragSnapshotBuffers';
 import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
@@ -131,6 +132,7 @@ export const drawScene = (
     viewport,
   };
 
+  cleanupStaleDragSnapshotBuffers(ctx, refs);
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);

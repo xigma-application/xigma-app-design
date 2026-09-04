@@ -18,6 +18,7 @@ export const setupRenderLoop = (
   gridBuffer: WebGLBuffer,
   maskCompositeProgram: WebGLProgram,
   maskCompositeBuffer: WebGLBuffer,
+  dragSnapshotProgram: WebGLProgram,
   canvas: HTMLCanvasElement,
   refs: TCanvasRefs,
 ): (() => void) => {
@@ -27,6 +28,10 @@ export const setupRenderLoop = (
   const imageContext: TImageRenderContext = {
     buffer: imageBuffer,
     cache: new Map(),
+    dragSnapshotFaceBufferCache: new WeakMap(),
+    dragSnapshotProgram,
+    dragSnapshotStrokeBufferCache: new WeakMap(),
+    dragSnapshotTrackedByNodeId: new Map(),
     ellipseArcLengthCache: new Map(),
     faceBufferCache: new WeakMap(),
     gridBuffer,

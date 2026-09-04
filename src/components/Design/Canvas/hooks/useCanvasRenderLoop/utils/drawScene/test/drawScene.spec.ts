@@ -54,6 +54,10 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  dragSnapshotFaceBufferCache: new WeakMap(),
+  dragSnapshotProgram: {} as WebGLProgram,
+  dragSnapshotStrokeBufferCache: new WeakMap(),
+  dragSnapshotTrackedByNodeId: new Map(),
   ellipseArcLengthCache: new Map(),
   faceBufferCache: new WeakMap(),
   gridBuffer: {} as WebGLBuffer,

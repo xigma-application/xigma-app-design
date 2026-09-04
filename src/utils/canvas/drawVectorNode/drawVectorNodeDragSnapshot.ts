@@ -7,34 +7,32 @@ import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 import { drawVectorFillPaints } from './drawVectorFillPaints';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 
-const translatePoints = (points: TPoint[], deltaX: number, deltaY: number): TPoint[] =>
-  points.map((point) => ({ x: point.x + deltaX, y: point.y + deltaY }));
-
-const translateFlatVertices = (vertices: number[], deltaX: number, deltaY: number): number[] =>
-  vertices.map((value, index) => value + (index % 2 === 0 ? deltaX : deltaY));
-
 export const drawVectorNodeDragSnapshot = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
+  strokeBufferCache: WeakMap<number[], WebGLBuffer>,
   snapshot: TVectorNodeDragSnapshot,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const { deltaX, deltaY } = snapshot;
+  const translateLocation = gl.getUniformLocation(program, 'u_translate');
+
+  gl.useProgram(program);
+  gl.uniform2f(translateLocation, snapshot.deltaX, snapshot.deltaY);
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
-    const translatedFaces = points.map((face) => translatePoints(face, deltaX, deltaY));
-    drawVectorFillPaints(gl, program, buffer, null, null, translatedFaces, paint, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(gl, program, buffer, faceBufferCache, null, points, paint, canvasWidth, canvasHeight, viewport);
   });
 
   drawVectorThickStrokeVertices(
     gl,
     program,
     buffer,
-    null,
-    translateFlatVertices(snapshot.strokeVertices, deltaX, deltaY),
+    strokeBufferCache,
+    snapshot.strokeVertices,
     snapshot.strokeColor,
     canvasWidth,
     canvasHeight,

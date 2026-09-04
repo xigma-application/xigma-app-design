@@ -15,6 +15,9 @@ export const drawSceneVectorNode = (
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
   strokeBufferCache: WeakMap<number[], WebGLBuffer>,
+  dragSnapshotProgram: WebGLProgram,
+  dragSnapshotFaceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
+  dragSnapshotStrokeBufferCache: WeakMap<number[], WebGLBuffer>,
   node: TVectorNode,
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
@@ -29,7 +32,17 @@ export const drawSceneVectorNode = (
 
   switch (true) {
     case Boolean(dragSnapshot):
-      drawVectorNodeDragSnapshot(gl, program, buffer, dragSnapshot!, canvasWidth, canvasHeight, viewport);
+      drawVectorNodeDragSnapshot(
+        gl,
+        dragSnapshotProgram,
+        buffer,
+        dragSnapshotFaceBufferCache,
+        dragSnapshotStrokeBufferCache,
+        dragSnapshot!,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
       break;
     case Boolean(resizeSnapshot):
       drawVectorNodeResizeSnapshot(gl, program, buffer, resizeSnapshot!, canvasWidth, canvasHeight, viewport);

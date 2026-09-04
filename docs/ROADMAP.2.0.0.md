@@ -60,6 +60,12 @@ in §5.6/§5.7 as not yet started:
       to 2 entries per centers array with explicit `gl.deleteBuffer` on eviction — an earlier unbounded
       version genuinely leaked JS heap and GPU memory during a zoom/pan session, caught and fixed live
       the same day. Write-up in [[canvas-vector-performance]] §7.
+      **Fourth slice (2026-09-04)**: the whole-node rigid drag path (`drawVectorNodeDragSnapshot.ts`) —
+      persistent buffers uploaded once per drag, delta applied via a `u_translate` shader uniform on a
+      dedicated program instead of re-computing/re-uploading translated points every frame (a profiled
+      10.3%-of-frame hotspot). Explicit per-drag buffer cleanup on drag-end, same bounded-eviction
+      discipline as the third slice. Resize/rotate not yet done — same idea applies, left as a
+      follow-up. Write-up in [[canvas-vector-performance]] §9.
 
 The two items are independent of each other — do one, the other, both, or neither; there is no
 ordering dependency between them.

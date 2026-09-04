@@ -57,9 +57,28 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
 
     // before
-    drawSceneVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, null, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
+      node,
+      null,
+      null,
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorNodeMock).toHaveBeenCalledWith(
@@ -85,6 +104,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const dragSnapshots = new Map<string, TVectorNodeDragSnapshot>();
     const resizeSnapshots = new Map<string, TVectorNodeResizeSnapshot>();
     const rotateSnapshots = new Map<string, TVectorNodeRotateSnapshot>();
@@ -96,6 +118,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       dragSnapshots,
       resizeSnapshots,
@@ -129,6 +154,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
     const dragSnapshots = new Map([['node-1', snapshot]]);
 
@@ -139,6 +167,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       dragSnapshots,
       null,
@@ -149,7 +180,17 @@ describe('drawSceneVectorNode', () => {
     );
 
     // result
-    expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(
+      gl,
+      dragSnapshotProgram,
+      buffer,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
+      snapshot,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -162,6 +203,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -184,6 +228,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       null,
       resizeSnapshots,
@@ -207,6 +254,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 45,
       facesByPaint: [],
@@ -223,6 +273,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       null,
       null,
@@ -247,6 +300,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
@@ -271,6 +327,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       dragSnapshots,
       resizeSnapshots,
@@ -292,6 +351,9 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const dragSnapshotProgram = {} as WebGLProgram;
+    const dragSnapshotFaceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
+    const dragSnapshotStrokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -322,6 +384,9 @@ describe('drawSceneVectorNode', () => {
       buffer,
       faceBufferCache,
       strokeBufferCache,
+      dragSnapshotProgram,
+      dragSnapshotFaceBufferCache,
+      dragSnapshotStrokeBufferCache,
       node,
       null,
       resizeSnapshots,
