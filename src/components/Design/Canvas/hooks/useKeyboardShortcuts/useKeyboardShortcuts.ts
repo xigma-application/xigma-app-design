@@ -31,6 +31,7 @@ import { handleLeave } from './utils/handleLeave';
 import { handleOutlineStroke } from './utils/handleOutlineStroke/handleOutlineStroke';
 import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
+import { handleResizeToFit } from './utils/handleResizeToFit';
 import { handleSelectAll } from './utils/handleSelectAll';
 import { handleSendToBack } from './utils/handleSendToBack';
 import { handleToggleRulers } from './utils/handleToggleRulers';
@@ -91,6 +92,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleFlipSelection(dispatch, 'horizontal'), ...shortcuts.flipHorizontal },
       { action: (): any => handleFlipSelection(dispatch, 'vertical'), ...shortcuts.flipVertical },
       { action: (): any => handleOutlineStroke(dispatch), ...shortcuts.outlineStroke },
+      { action: (): any => handleResizeToFit(dispatch), ...shortcuts.resizeToFit },
       { action: (): any => handleBringToFront(dispatch), ...shortcuts.bringToFront },
       { action: (): any => handleSendToBack(dispatch), ...shortcuts.sendToBack },
       { action: (): any => handleCopySelection(refs), ...shortcuts.copy },

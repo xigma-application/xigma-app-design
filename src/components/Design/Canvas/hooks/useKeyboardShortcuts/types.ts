@@ -42,6 +42,7 @@ export type TStandardKeyboardShortcuts = {
   outlineStroke: TShortcut;
   paste: TShortcut;
   redo: TShortcut;
+  resizeToFit: TShortcut;
   selectAll: TShortcut;
   sendToBack: TShortcut;
   toggleRulers: TShortcut;

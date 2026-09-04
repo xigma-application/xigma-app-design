@@ -60,6 +60,7 @@ export const shortcuts = {
   outlineStroke: { primaryKeys: ['alt', 'control'], secondaryKey: KeyboardKeys.o },
   paste: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.v },
   redo: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.z },
+  resizeToFit: { primaryKeys: [CONTROL_PRIMARY_KEY, 'alt', 'shift'], secondaryKey: KeyboardKeys.r },
   selectAll: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.a },
   sendToBack: { secondaryKey: KeyboardKeys.bracketLeft },
   toggleRulers: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.r },

@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 // components
 import { MenuCompound } from 'shared';
 
+// hooks
+import { useResizeToFitSelection } from 'components/Design/Menu/hooks/useResizeToFitSelection';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import {
@@ -18,10 +21,20 @@ import {
   MORE_LAYOUT_OPTIONS_MENU_UNLOCK_ASPECT_RATIO_KEY,
 } from './constants';
 
+// store
+import { selectSelectedNodes } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
 const { MenuItem, MenuSeparator } = MenuCompound;
 
 const MoreLayoutOptionsMenu: FC = () => {
   const { t } = useTranslation();
+  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const onResizeToFit = useResizeToFitSelection();
+  const canResizeToFit = selectedNode?.type === NodeType.frame && selectedNode.childIds.length > 0;
 
   return (
     <>
@@ -32,8 +45,9 @@ const MoreLayoutOptionsMenu: FC = () => {
       <MenuItem disabled label={t(MORE_LAYOUT_OPTIONS_MENU_UNLOCK_ASPECT_RATIO_KEY)} withCheck={false} />
       <MenuSeparator />
       <MenuItem
-        disabled
+        disabled={!canResizeToFit}
         label={t(MORE_LAYOUT_OPTIONS_MENU_RESIZE_TO_FIT_KEY)}
+        onClick={onResizeToFit}
         shortcut={KEYBOARD_SHORTCUTS.resizeToFit.join('')}
         withCheck={false}
       />

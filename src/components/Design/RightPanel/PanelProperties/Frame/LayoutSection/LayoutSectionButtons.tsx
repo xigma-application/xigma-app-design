@@ -5,12 +5,16 @@ import { useTranslation } from 'react-i18next';
 import Button from 'shared/UITools/Button/Button';
 import { Icon, Tooltip } from 'shared';
 
+// hooks
+import { useResizeToFitSelection } from 'components/Design/Menu/hooks/useResizeToFitSelection';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from './constants';
 
 const LayoutSectionButtons = (): ReactNode[] => {
   const { t } = useTranslation();
+  const onResizeToFit = useResizeToFitSelection();
 
   return [
     <Tooltip
@@ -23,7 +27,7 @@ const LayoutSectionButtons = (): ReactNode[] => {
       }
       key="resize-to-fit"
     >
-      <Button ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)} onClick={() => {}} style={{ padding: 6 }}>
+      <Button ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)} onClick={onResizeToFit} style={{ padding: 6 }}>
         <Icon name="FitLayout" size={12} />
       </Button>
     </Tooltip>,
