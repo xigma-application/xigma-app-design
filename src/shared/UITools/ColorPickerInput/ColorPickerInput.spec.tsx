@@ -130,4 +130,22 @@ describe('ColorPickerInput behaviors', () => {
     // result
     expect(screen.getByLabelText('Toggle background visibility')).toBeInTheDocument();
   });
+
+  it('should report onDragStart/onDragEnd around a drag on the alpha scrubber', () => {
+    // mock
+    const onDragEnd = vi.fn();
+    const onDragStart = vi.fn();
+
+    // before
+    const { container } = renderColorPickerInput({ onDragEnd, onDragStart });
+    const scrubber = container.querySelector('[class*="ScrubbableInput"]') as HTMLDivElement;
+
+    // action
+    fireEvent.mouseDown(scrubber, { clientX: 0, clientY: 0 });
+    fireEvent.mouseUp(scrubber, { clientX: 0, clientY: 0 });
+
+    // result
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+    expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
 });

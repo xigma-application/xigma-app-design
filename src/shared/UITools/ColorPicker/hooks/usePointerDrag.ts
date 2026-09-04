@@ -8,6 +8,8 @@ export type TPointerDragPosition = { x: number; y: number };
 export type TUsePointerDragOptions = {
   axis?: 'both' | 'x';
   onChange: TFunc<[TPointerDragPosition]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
 };
 
 export type TUsePointerDragResult = {
@@ -29,7 +31,7 @@ const getPositionFromEvent = (
   return { x, y };
 };
 
-export const usePointerDrag = ({ axis = 'x', onChange }: TUsePointerDragOptions): TUsePointerDragResult => {
+export const usePointerDrag = ({ axis = 'x', onChange, onDragEnd, onDragStart }: TUsePointerDragOptions): TUsePointerDragResult => {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
@@ -37,6 +39,7 @@ export const usePointerDrag = ({ axis = 'x', onChange }: TUsePointerDragOptions)
 
     if (track) {
       event.currentTarget.setPointerCapture(event.pointerId);
+      onDragStart?.();
       onChange(getPositionFromEvent(event, track, axis));
     }
   };
@@ -51,6 +54,7 @@ export const usePointerDrag = ({ axis = 'x', onChange }: TUsePointerDragOptions)
 
   const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>): void => {
     event.currentTarget.releasePointerCapture(event.pointerId);
+    onDragEnd?.();
   };
 
   return { onPointerDown, onPointerMove, onPointerUp, trackRef };

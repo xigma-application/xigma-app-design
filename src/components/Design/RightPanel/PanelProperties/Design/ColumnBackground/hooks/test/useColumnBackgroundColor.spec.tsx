@@ -9,6 +9,7 @@ import { useColumnBackgroundColor } from '../useColumnBackgroundColor';
 import { DEFAULT_PAINT } from 'store/design/constants';
 import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { TSolidPaint } from 'types/design/paint/types';
@@ -100,5 +101,27 @@ describe('useColumnBackgroundColor', () => {
 
     // result
     expect(readPaint().visible).toBe(true);
+  });
+
+  it('should coalesce every opacity commit dispatched between onDragStart and onDragEnd into a single undo step', () => {
+    // before
+    const { result } = renderUseColumnBackgroundColor();
+
+    // action — simulates the alpha scrubber firing onChange repeatedly during one drag gesture
+    act(() => {
+      result.current.onDragStart();
+      result.current.onCommitAlpha(80);
+      result.current.onCommitAlpha(60);
+      result.current.onCommitAlpha(40);
+      result.current.onDragEnd();
+    });
+
+    expect(readPaint().opacity).toBe(40);
+
+    // action
+    store.dispatch(undo());
+
+    // result — one undo step restores the pre-drag opacity, not just the last drag-step
+    expect(readPaint().opacity).toBe(DEFAULT_PAINT.opacity);
   });
 });

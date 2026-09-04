@@ -16,12 +16,19 @@ import { THsv } from '../../../types';
 import { getHueColor } from '../../../utils/getHueColor';
 import { getThumbOffset } from '../../../utils/getThumbOffset';
 
-export type TSaturationMapProps = { hsv: THsv; onChange: TFunc<[Partial<THsv>]> };
+export type TSaturationMapProps = {
+  hsv: THsv;
+  onChange: TFunc<[Partial<THsv>]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
+};
 
-export const SaturationMap: FC<TSaturationMapProps> = ({ hsv, onChange }) => {
+export const SaturationMap: FC<TSaturationMapProps> = ({ hsv, onChange, onDragEnd, onDragStart }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     axis: 'both',
     onChange: ({ x, y }) => onChange({ s: x * 100, v: (1 - y) * 100 }),
+    onDragEnd,
+    onDragStart,
   });
 
   return (

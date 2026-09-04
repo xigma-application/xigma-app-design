@@ -17,18 +17,26 @@ export type TSolidPanelProps = {
   alpha: number;
   colorModel: TUseColorModelResult;
   onCloseSampler?: TFunc;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onOpenSampler?: TFunc;
 };
 
-export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onCloseSampler, onOpenSampler }) => (
+export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onCloseSampler, onDragEnd, onDragStart, onOpenSampler }) => (
   <div className={styles.SolidPanel}>
-    <SaturationMap hsv={colorModel.hsv} onChange={colorModel.setHsv} />
+    <SaturationMap hsv={colorModel.hsv} onChange={colorModel.setHsv} onDragEnd={onDragEnd} onDragStart={onDragStart} />
     <div className={styles.SolidPanel__controls}>
       <div className={styles.SolidPanel__switchers}>
         <Sampler onClose={onCloseSampler} onOpen={onOpenSampler} />
         <div className={styles.SolidPanel__inputs}>
-          <HueSlider hue={colorModel.hsv.h} onChange={colorModel.setHsv} />
-          <AlphaSlider alpha={alpha} color={colorModel.hex} onChange={colorModel.setAlpha} />
+          <HueSlider hue={colorModel.hsv.h} onChange={colorModel.setHsv} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+          <AlphaSlider
+            alpha={alpha}
+            color={colorModel.hex}
+            onChange={colorModel.setAlpha}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+          />
         </div>
       </div>
       <ColorValueInput alpha={alpha} colorModel={colorModel} />

@@ -1,4 +1,6 @@
 // store
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectBackgroundPaint } from 'store/design/selectors';
 import { setBackgroundPaint } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -13,6 +15,8 @@ export type TUseColumnBackgroundColorResult = {
   isVisible: boolean;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
+  onDragEnd: TFunc;
+  onDragStart: TFunc;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility: TFunc;
 };
@@ -31,6 +35,8 @@ export const useColumnBackgroundColor = (): TUseColumnBackgroundColorResult => {
     isVisible: paint.visible !== false,
     onCommitAlpha: (opacity) => apply({ opacity }),
     onCommitHex: (color) => apply({ color }),
+    onDragEnd: () => dispatch(endHistoryGesture()),
+    onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onPickerChange: ({ alpha, hex }) => apply({ color: hex, opacity: alpha }),
     onToggleVisibility: () => apply({ visible: paint.visible === false }),
   };

@@ -40,4 +40,23 @@ describe('usePaintColorPickerValue', () => {
     });
     expect(result.current.value).toStrictEqual({ alpha: 40, hex: '#ff0000' });
   });
+
+  it('should expose onDragStart/onDragEnd to bracket a drag gesture, without making the vector paint tool color undoable', () => {
+    // before
+    const { result } = renderUsePaintColorPickerValue();
+
+    // action
+    act(() => {
+      result.current.onDragStart();
+      result.current.onChange({ alpha: 40, hex: '#ff0000' });
+      result.current.onDragEnd();
+    });
+
+    // result — bracketing the gesture must not, by itself, turn setPaint into an undoable action
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#ff0000',
+      opacity: 40,
+      type: 'solid',
+    });
+  });
 });

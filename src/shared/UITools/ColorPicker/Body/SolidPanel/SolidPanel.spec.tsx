@@ -60,6 +60,43 @@ describe('SolidPanel behaviors', () => {
     expect(colorModel.setAlpha).toHaveBeenCalledWith(40);
   });
 
+  it('should forward onDragStart/onDragEnd to the alpha slider', () => {
+    // mock
+    const colorModel = {
+      hex: '#ff0000',
+      hsv: { h: 0, s: 100, v: 100 },
+      setAlpha: vi.fn(),
+      setHex: vi.fn(),
+      setHsv: vi.fn(),
+      setPreset: vi.fn(),
+    };
+    const onDragEnd = vi.fn();
+    const onDragStart = vi.fn();
+
+    // before
+    const { container } = render(
+      <TooltipProvider>
+        <SolidPanel alpha={0} colorModel={colorModel} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+      </TooltipProvider>,
+    );
+    const alphaTrack = container.querySelector('[class*="AlphaSlider"]') as HTMLDivElement;
+
+    vi.spyOn(alphaTrack, 'getBoundingClientRect').mockReturnValue({
+      height: 16,
+      left: 0,
+      top: 0,
+      width: 100,
+    } as DOMRect);
+
+    // action
+    alphaTrack.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 40, clientY: 0, pointerId: 1 }));
+    alphaTrack.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+
+    // result
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+    expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
+
   it('should call onOpenSampler when the sampler button is clicked', () => {
     // mock
     const colorModel = {

@@ -125,4 +125,64 @@ describe('usePointerDrag behaviors', () => {
     // result
     expect(event.currentTarget.releasePointerCapture).toHaveBeenCalledWith(1);
   });
+
+  it('should call onDragStart once on pointer down, before onChange', () => {
+    // mock
+    const onChange = vi.fn();
+    const onDragStart = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePointerDrag({ onChange, onDragStart }));
+    result.current.trackRef.current = createTrack();
+
+    // action
+    result.current.onPointerDown(createEvent(25, 90));
+
+    // result
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onDragStart on pointer down when the track ref is not yet attached', () => {
+    // mock
+    const onDragStart = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePointerDrag({ onChange: vi.fn(), onDragStart }));
+
+    // action
+    result.current.onPointerDown(createEvent(50, 50));
+
+    // result
+    expect(onDragStart).not.toHaveBeenCalled();
+  });
+
+  it('should not call onDragStart on pointer move', () => {
+    // mock
+    const onDragStart = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePointerDrag({ onChange: vi.fn(), onDragStart }));
+    result.current.trackRef.current = createTrack();
+
+    // action
+    result.current.onPointerMove(createEvent(60, 0, 1));
+
+    // result
+    expect(onDragStart).not.toHaveBeenCalled();
+  });
+
+  it('should call onDragEnd once on pointer up', () => {
+    // mock
+    const onDragEnd = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePointerDrag({ onChange: vi.fn(), onDragEnd }));
+    const event = createEvent(0, 0);
+
+    // action
+    result.current.onPointerUp(event);
+
+    // result
+    expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
 });

@@ -12,7 +12,8 @@ import { translationNameSpace } from '../constants';
 
 const ColumnBackground: FC = () => {
   const { t } = useTranslation();
-  const { alpha, hex, isVisible, onCommitAlpha, onCommitHex, onPickerChange, onToggleVisibility } = useColumnBackgroundColor();
+  const { alpha, hex, isVisible, onCommitAlpha, onCommitHex, onDragEnd, onDragStart, onPickerChange, onToggleVisibility } =
+    useColumnBackgroundColor();
 
   return (
     <ColorPickerInput
@@ -22,6 +23,8 @@ const ColumnBackground: FC = () => {
       isVisible={isVisible}
       onCommitAlpha={onCommitAlpha}
       onCommitHex={onCommitHex}
+      onDragEnd={onDragEnd}
+      onDragStart={onDragStart}
       onPickerChange={onPickerChange}
       onToggleVisibility={onToggleVisibility}
       toggleVisibilityAriaLabel={t(`${translationNameSpace}.background.toggleVisibilityAriaLabel`)}

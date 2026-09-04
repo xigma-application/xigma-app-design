@@ -29,6 +29,8 @@ export type TColorPickerInputProps = {
   isVisible?: boolean;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
   toggleVisibilityAriaLabel?: string;
@@ -44,6 +46,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   isVisible = true,
   onCommitAlpha,
   onCommitHex,
+  onDragEnd,
+  onDragStart,
   onPickerChange,
   onToggleVisibility,
   toggleVisibilityAriaLabel,
@@ -67,6 +71,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
               align="end"
               moveable
               onChange={onPickerChange}
+              onDragEnd={onDragEnd}
+              onDragStart={onDragStart}
               side="top"
               trigger={<Color alpha={alpha} color={hex} cursor="default" />}
               triggerAriaLabel={triggerAriaLabel}
@@ -80,7 +86,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           defaultValue={rounded}
           e2eValue={`${e2eValue}-alpha`}
           endAdornment={
-            <ScrubbableInput max={100} min={0} onChange={onCommitAlpha} value={rounded}>
+            <ScrubbableInput max={100} min={0} onChange={onCommitAlpha} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={rounded}>
               <span className={styles.ColorPickerInput__unit}>%</span>
             </ScrubbableInput>
           }

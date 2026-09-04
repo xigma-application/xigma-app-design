@@ -12,11 +12,19 @@ import styles from './alpha-slider.module.scss';
 // utils
 import { getThumbOffset } from '../../../utils/getThumbOffset';
 
-export type TAlphaSliderProps = { alpha: number; color: string; onChange: TFunc<[number]> };
+export type TAlphaSliderProps = {
+  alpha: number;
+  color: string;
+  onChange: TFunc<[number]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
+};
 
-export const AlphaSlider: FC<TAlphaSliderProps> = ({ alpha, color, onChange }) => {
+export const AlphaSlider: FC<TAlphaSliderProps> = ({ alpha, color, onChange, onDragEnd, onDragStart }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     onChange: ({ x }) => onChange(x * 100),
+    onDragEnd,
+    onDragStart,
   });
 
   return (

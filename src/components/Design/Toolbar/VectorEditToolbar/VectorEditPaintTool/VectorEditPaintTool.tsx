@@ -25,7 +25,7 @@ export type TVectorEditPaintToolProps = {
 const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) => {
   const { t } = useTranslation();
   const handleSelect = useSelectVectorEditTool(tool.toolName);
-  const { onChange: handleChange, value } = usePaintColorPickerValue();
+  const { onChange: handleChange, onDragEnd, onDragStart, value } = usePaintColorPickerValue();
   const label = t(tool.labelKey);
 
   if (isActive) {
@@ -33,6 +33,8 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
       <ColorPicker
         moveable
         onChange={handleChange}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
         trigger={
           <>
             <div className={styles['VectorEditPaintTool__swatch-wrapper']}>

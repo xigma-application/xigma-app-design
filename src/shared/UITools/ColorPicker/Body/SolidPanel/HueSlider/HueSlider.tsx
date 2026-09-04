@@ -15,11 +15,18 @@ import { THsv } from '../../../types';
 // utils
 import { getThumbOffset } from '../../../utils/getThumbOffset';
 
-export type THueSliderProps = { hue: THsv['h']; onChange: TFunc<[Partial<THsv>]> };
+export type THueSliderProps = {
+  hue: THsv['h'];
+  onChange: TFunc<[Partial<THsv>]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
+};
 
-export const HueSlider: FC<THueSliderProps> = ({ hue, onChange }) => {
+export const HueSlider: FC<THueSliderProps> = ({ hue, onChange, onDragEnd, onDragStart }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     onChange: ({ x }) => onChange({ h: x * 360 }),
+    onDragEnd,
+    onDragStart,
   });
 
   return (

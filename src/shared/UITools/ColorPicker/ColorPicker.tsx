@@ -29,6 +29,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   moveable = false,
   onChange,
+  onDragEnd,
+  onDragStart,
   onOpenChange,
   presets = DEFAULT_PRESETS,
   side,
@@ -60,7 +62,14 @@ export const ColorPicker: FC<TColorPickerProps> = ({
     >
       <div className={cx(styles.ColorPicker, className)}>
         <Header activeTab={activeTab} setActiveTab={handleSetActiveTab} />
-        <Body alpha={value.alpha} colorModel={colorModel} onCloseSampler={colorSampler.close} onOpenSampler={colorSampler.open} />
+        <Body
+          alpha={value.alpha}
+          colorModel={colorModel}
+          onCloseSampler={colorSampler.close}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          onOpenSampler={colorSampler.open}
+        />
         <Footer onSelectPreset={colorModel.setPreset} presets={presets} />
       </div>
       {colorSampler.isActive && <ColorSampler onClose={colorSampler.close} onPick={colorSampler.pick} />}

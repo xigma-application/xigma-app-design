@@ -13,6 +13,8 @@ export type TColorPickerProps = {
   className?: string;
   moveable?: boolean;
   onChange: TFunc<[TColorPickerValue]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onOpenChange?: TFunc<[boolean]>;
   presets?: TColorPickerValue[];
   side?: TPopoverProps['side'];

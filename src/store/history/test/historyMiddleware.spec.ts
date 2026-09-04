@@ -204,9 +204,7 @@ describe('historyMiddleware', () => {
     const idB = addFrameNode(50, 50);
 
     store.dispatch(setSelection([idA, idB]));
-    store.dispatch(createMaskGroup());
-
-    const groupId = store.getState().design.pages[store.getState().design.activePageId].rootOrder[0];
+    const { groupId } = store.dispatch(createMaskGroup()).payload;
     const maskChildId = selectSelectedIds(store.getState())[0];
 
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
@@ -341,24 +339,26 @@ describe('historyMiddleware', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].backgroundPaint).toEqual(DEFAULT_PAINT);
   });
 
-  it('should not create an undo step for the vector paint tool color, which is a tool setting rather than page content', () => {
-    // mock — a change unrelated to setPaint, so there is something to undo back to
+  it('should not create its own undo step for the vector paint tool color, which is a tool setting rather than page content', () => {
+    // mock — a real content change either side of the paint-tool color change, so a single undo has
+    // somewhere to land other than "undo the paint change" if setPaint wrongly consumed its own step
     const idA = addFrameNode(0, 0);
 
     store.dispatch(setPaint({ color: '#336699', opacity: 50, type: 'solid' }));
 
-    // before
-    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
-      color: '#336699',
-      opacity: 50,
-      type: 'solid',
-    });
+    const idB = addFrameNode(50, 50);
 
-    // action — undo should skip straight past the paint-tool color change, undoing the node add instead
+    // before
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeDefined();
+
+    // action — a single undo should remove only idB, skipping straight past the paint-tool color
+    // change in between (it never pushed a step of its own)
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeUndefined();
     expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
       color: '#336699',
       opacity: 50,
