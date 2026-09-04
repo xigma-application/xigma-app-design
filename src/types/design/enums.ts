@@ -4,6 +4,18 @@ export enum AlignmentHorizontal {
   right = 'right',
 }
 
+export enum AlignmentLayout {
+  bottomCenter = 'bottomCenter',
+  bottomLeft = 'bottomLeft',
+  bottomRight = 'bottomRight',
+  center = 'center',
+  left = 'left',
+  right = 'right',
+  topCenter = 'topCenter',
+  topLeft = 'topLeft',
+  topRight = 'topRight',
+}
+
 export enum AlignmentVertical {
   bottom = 'bottom',
   center = 'center',

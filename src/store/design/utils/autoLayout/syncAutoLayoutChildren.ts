@@ -1,6 +1,6 @@
 // types
 import { TDesignState } from '../../types';
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -21,7 +21,13 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
         .map((childId) => nodes[childId])
         .filter(Boolean)
         .filter(isBoxSceneNode);
-      const positions = getAutoLayoutChildPositions(frame.layoutMode, frame.itemSpacing ?? 0, { x: frame.x, y: frame.y }, children);
+      const positions = getAutoLayoutChildPositions(
+        frame.layoutMode,
+        frame.itemSpacing ?? 0,
+        frame.layoutAlignment ?? AlignmentLayout.topLeft,
+        frame,
+        children,
+      );
 
       children.forEach((child, index) => {
         child.x = positions[index].x;

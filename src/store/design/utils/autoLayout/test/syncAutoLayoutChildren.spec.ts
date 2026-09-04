@@ -1,5 +1,5 @@
 // types
-import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 
@@ -172,6 +172,39 @@ describe('syncAutoLayoutChildren', () => {
 
     // result
     expect(getActivePage(state).nodes.a).toMatchObject({ x: 5, y: 5 });
+  });
+
+  it('should centre children on the counter axis when layoutAlignment is set', () => {
+    // mock — a 20-tall child inside a 100-tall horizontal frame
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const layoutFrame = frame({
+      childIds: ['a'],
+      height: 100,
+      layoutAlignment: AlignmentLayout.left,
+      layoutMode: LayoutMode.horizontal,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — vertically centred: (100-20)/2 = 40
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 40 });
+  });
+
+  it('should default a missing layoutAlignment to topLeft', () => {
+    // mock
+    const a = rect({ id: 'a', width: 30 });
+    const layoutFrame = frame({ childIds: ['a'], layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 0 });
   });
 
   it('should skip a child id that no longer resolves to a node', () => {
