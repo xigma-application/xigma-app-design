@@ -168,8 +168,8 @@ The single largest structural gap versus Figma.
 - [x] group/ungroup (Cmd/Ctrl+G / Ctrl+Shift+G), click selects the group, Ctrl/⌘+click (+Shift to
       add/toggle) reaches straight into one specific child, rigid move/resize/rotate, delete/undo
       cascades. Full write-up: `.claude/docs/group-nodes.md`
-- [ ] real nesting in `TFrameNode`/section (`parentId` via drag onto a frame, not just visual
-      overlap) — only groups nest today, frames/sections still don't
+- [x] real nesting in frames/sections (dragging a shape onto one reparents it, not just visual
+      overlap)
 - [ ] double-click "enters" a group to select a child directly — Ctrl/⌘+click already covers the
       same outcome without it, so this is polish, not a gap
 - [x] moving/resizing a group moves/scales its children, including while the group is rotated
@@ -224,7 +224,7 @@ The single largest structural gap versus Figma.
 - [x] context menu (right-click) on nodes and the empty canvas (`NodeContextMenu`/`CanvasContextMenuPanel`,
       wired via `CanvasContextMenuPanel`) — most items still disabled placeholders pending their own
       features (see `components/Design/Menu/constants.ts`)
-- [ ] zoom control in the canvas corner (Zoom to fit/selection/100%)
+- [x] zoom control in the canvas corner (Zoom to fit/selection/100%)
 - [x] z-order from the UI — Bring to front/Send to back and Forward/Backward (single-step reorder)
 - [ ] right toolbar group (draw/scale/actions/dev mode)
 - [ ] size presets in the Frame tool
