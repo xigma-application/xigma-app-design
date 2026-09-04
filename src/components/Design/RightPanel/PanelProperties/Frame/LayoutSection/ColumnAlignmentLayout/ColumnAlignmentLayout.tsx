@@ -25,7 +25,7 @@ const ColumnAlignmentLayout: FC = () => {
         labels={[t(`${translationNameSpace}.label.alignment`), t(`${translationNameSpace}.label.gap`)]}
         withBottomMargin
       >
-        <AlignmentArea isHorizontal={isHorizontal} onClick={onChangeAlignment} value={alignment} />
+        <AlignmentArea isGapAutoHorizontal isGapAutoVertical isHorizontal={isHorizontal} onClick={onChangeAlignment} value={alignment} />
         <GapField isHorizontal={isHorizontal} onBlur={onBlurGap} onScrub={onScrubGap} value={gap} />
       </UITools.SectionColumn>
     );

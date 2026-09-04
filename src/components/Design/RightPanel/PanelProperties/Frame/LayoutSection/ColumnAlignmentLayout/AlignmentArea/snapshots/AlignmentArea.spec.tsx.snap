@@ -1,5 +1,403 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`AlignmentArea snapshots > should render a single indicator per option when gap is auto on a horizontal frame 1`] = `
+<DocumentFragment>
+  <div
+    class="_AlignmentArea_ae5fc3"
+    data-test-alignment-area=""
+  >
+    <button
+      aria-label="Top left"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Top center"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Top right"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Left"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--center_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Center"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--center_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Right"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--center_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom left"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--end_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom center"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--end_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom right"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--horizontal-auto_f79320 _AlignmentOption__option-view--end_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`AlignmentArea snapshots > should render a single indicator per option when gap is auto on a vertical frame 1`] = `
+<DocumentFragment>
+  <div
+    class="_AlignmentArea_ae5fc3"
+    data-test-alignment-area=""
+  >
+    <button
+      aria-label="Top left"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Top center"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--center_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Top right"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--end_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Left"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Center"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--center_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Right"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--end_f79320 _AlignmentOption__option-view--short_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom left"
+      aria-pressed="true"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320 _AlignmentOption__indicator--selected_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom center"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--center_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+    <button
+      aria-label="Bottom right"
+      aria-pressed="false"
+      class="_AlignmentOption_f79320"
+      data-state="closed"
+      type="button"
+    >
+      <div
+        class="_AlignmentOption__option-view_f79320 _AlignmentOption__option-view--vertical-auto_f79320 _AlignmentOption__option-view--end_f79320"
+      >
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+        <div
+          class="_AlignmentOption__indicator_f79320"
+        />
+      </div>
+    </button>
+  </div>
+</DocumentFragment>
+`;
+
 exports[`AlignmentArea snapshots > should render the 9 alignment options for a horizontal frame 1`] = `
 <DocumentFragment>
   <div

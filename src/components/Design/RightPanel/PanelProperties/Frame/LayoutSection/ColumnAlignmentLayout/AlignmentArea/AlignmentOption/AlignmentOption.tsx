@@ -19,15 +19,30 @@ import { getOptionViewModifiers } from './utils/getOptionViewModifiers';
 
 export type TAlignmentOptionProps = {
   alignment: AlignmentLayout;
+  isGapAutoHorizontal: boolean;
+  isGapAutoVertical: boolean;
+  isHighlighted: boolean;
   isHorizontal: boolean;
   isSelected: boolean;
   onClick: TFunc<[AlignmentLayout]>;
+  onMouseEnter: TFunc<[AlignmentLayout]>;
+  onMouseLeave: TFunc;
 };
 
-export const AlignmentOption: FC<TAlignmentOptionProps> = ({ alignment, isHorizontal, isSelected, onClick }) => {
+export const AlignmentOption: FC<TAlignmentOptionProps> = ({
+  alignment,
+  isGapAutoHorizontal,
+  isGapAutoVertical,
+  isHighlighted,
+  isHorizontal,
+  isSelected,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+}) => {
   const { t } = useTranslation();
   const label = t(`${translationNameSpace}.alignmentOption.${alignment}`);
-  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal);
+  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal, isGapAutoVertical, isGapAutoHorizontal);
 
   return (
     <Tooltip content={label}>
@@ -36,6 +51,8 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({ alignment, isHorizo
         aria-pressed={isSelected}
         className={styles.AlignmentOption}
         onClick={() => onClick(alignment)}
+        onMouseEnter={() => onMouseEnter(alignment)}
+        onMouseLeave={onMouseLeave}
         type="button"
       >
         <div
@@ -47,6 +64,7 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({ alignment, isHorizo
           {Array.from(Array(3), (_, index) => (
             <div
               className={cx(styles.AlignmentOption__indicator, {
+                [styles['AlignmentOption__indicator--highlighted']]: isHighlighted,
                 [styles['AlignmentOption__indicator--selected']]: isSelected,
               })}
               key={index}

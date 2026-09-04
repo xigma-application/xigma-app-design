@@ -1,4 +1,6 @@
+@use './styles/horizontal-auto' as horizontalAuto;
 @use './styles/horizontal-layout' as horizontal;
+@use './styles/vertical-auto' as verticalAuto;
 @use './styles/vertical-layout' as vertical;
 
 .AlignmentOption {
@@ -49,8 +51,24 @@
       @include vertical.layout;
     }
 
+    &--vertical-auto {
+      @include verticalAuto.layout;
+
+      &.AlignmentOption__option-view--short #{$self}__indicator:not(:first-child):not(:last-child) {
+        width: 7px;
+      }
+    }
+
     &--horizontal {
       @include horizontal.layout;
+    }
+
+    &--horizontal-auto {
+      @include horizontalAuto.layout;
+
+      &.AlignmentOption__option-view--short #{$self}__indicator:not(:first-child):not(:last-child) {
+        height: 7px;
+      }
     }
 
     &--center {

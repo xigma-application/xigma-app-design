@@ -1,0 +1,17 @@
+@mixin layout {
+  flex-direction: row;
+
+  .AlignmentOption__indicator {
+    display: none;
+
+    &:not(:first-child):not(:last-child) {
+      display: block;
+      height: 10px;
+      width: 2px;
+    }
+
+    &--highlighted {
+      opacity: 1;
+    }
+  }
+}
