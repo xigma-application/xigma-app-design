@@ -1,10 +1,10 @@
 // types
-import { NodeType, PathType, ToolName } from 'types/design/enums';
-import { TDesignPage, TDesignState } from '../../types';
+import { LayoutMode, NodeType, PathType, ToolName } from 'types/design/enums';
+import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TGroupNode, TPathNode, TRectangleNode, TTextNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
-import { getActivePage } from '../getActivePage';
+import { getActivePage } from '../../getActivePage';
 import { handleUpdateNode } from '../handleUpdateNode';
 
 const node: TFrameNode = {
@@ -360,6 +360,57 @@ describe('handleUpdateNode', () => {
     // result — the box itself moved, the child was left untouched (it gets its own updateNode in the same drag)
     expect(getActivePage(state).nodes['group-1']).toMatchObject({ height: 100, width: 100, x: 50, y: 20 });
     expect(getActivePage(state).nodes.child).toMatchObject({ height: 20, width: 20, x: 40, y: 40 });
+  });
+
+  it('should lay out its children when a frame’s layoutMode is switched to horizontal', () => {
+    // mock
+    const a: TRectangleNode = {
+      fill: '#fff',
+      height: 20,
+      id: 'a',
+      name: 'Rectangle',
+      parentId: 'frame-1',
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 30,
+      x: 999,
+      y: 999,
+    };
+    const b: TRectangleNode = { ...a, id: 'b', width: 50 };
+    const layoutFrame: TFrameNode = { ...node, childIds: ['a', 'b'], id: 'frame-1', itemSpacing: 10, x: 0, y: 0 };
+    const state = buildState({ a, b, 'frame-1': layoutFrame });
+
+    // before
+    handleUpdateNode(state, { changes: { layoutMode: LayoutMode.horizontal }, id: 'frame-1' });
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 0 });
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 40, y: 0 });
+  });
+
+  it('should reflow the siblings of an auto-layout frame after one child is resized', () => {
+    // mock
+    const a: TRectangleNode = {
+      fill: '#fff',
+      height: 20,
+      id: 'a',
+      name: 'Rectangle',
+      parentId: 'frame-1',
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 30,
+      x: 0,
+      y: 0,
+    };
+    const b: TRectangleNode = { ...a, id: 'b', width: 50, x: 30 };
+    const layoutFrame: TFrameNode = { ...node, childIds: ['a', 'b'], id: 'frame-1', layoutMode: LayoutMode.horizontal, x: 0, y: 0 };
+    const state = buildState({ a, b, 'frame-1': layoutFrame });
+
+    // before
+    handleUpdateNode(state, { changes: { width: 100 }, id: 'a' });
+
+    // result
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 100, y: 0 });
   });
 
   it('should resync the parent group bounds after moving a child node', () => {

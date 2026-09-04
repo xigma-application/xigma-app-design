@@ -1,5 +1,5 @@
 // types
-import { NodeType, PathType } from './enums';
+import { LayoutMode, NodeType, PathType } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
@@ -76,6 +76,8 @@ export type TFrameNode = TBaseNode & {
   clipContent: boolean;
   fill: string;
   guides?: TGuide[];
+  itemSpacing?: number;
+  layoutMode?: LayoutMode;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;

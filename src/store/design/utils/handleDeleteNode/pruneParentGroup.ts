@@ -6,6 +6,7 @@ import { TDesignState } from '../../types';
 import { getActivePage } from '../getActivePage';
 import { handleDeleteNode } from './handleDeleteNode';
 import { isContainerNode } from '../nodeHierarchy/isContainerNode';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const pruneParentGroup = (state: TDesignState, parentId: string | null, deletedChildId: string): void => {
@@ -18,6 +19,8 @@ export const pruneParentGroup = (state: TDesignState, parentId: string | null, d
       handleDeleteNode(state, parent.id);
     } else if (parent.type === NodeType.group) {
       syncGroupBounds(state, parent.id);
+    } else if (parent.type === NodeType.frame) {
+      syncAutoLayoutChildren(state, parent.id);
     }
   }
 };

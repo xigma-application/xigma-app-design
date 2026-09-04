@@ -10,6 +10,13 @@ export enum AlignmentVertical {
   top = 'top',
 }
 
+export enum LayoutMode {
+  freeForm = 'freeForm',
+  grid = 'grid',
+  horizontal = 'horizontal',
+  vertical = 'vertical',
+}
+
 export enum NodeType {
   ellipse = 'ellipse',
   frame = 'frame',

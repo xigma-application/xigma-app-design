@@ -1,7 +1,7 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -28,6 +28,20 @@ const group = (childIds: string[]): TGroupNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.group,
+  width: 10,
+  x: 0,
+  y: 0,
+});
+
+const section = (childIds: string[]): TSectionNode => ({
+  childIds,
+  fill: '#fff',
+  height: 10,
+  id: 'section-1',
+  name: 'Section',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.section,
   width: 10,
   x: 0,
   y: 0,
@@ -123,5 +137,47 @@ describe('pruneParentGroup', () => {
 
     // result
     expect(getActivePage(state).nodes['group-1']).toBeUndefined();
+  });
+
+  it('should close the gap between remaining siblings when a child is removed from an auto-layout frame', () => {
+    // mock
+    const a = rect('a', 'frame-1', 0);
+    const b = rect('b', 'frame-1', 10);
+    const layoutFrame: TFrameNode = {
+      childIds: ['a', 'b'],
+      clipContent: true,
+      fill: '#fff',
+      height: 10,
+      id: 'frame-1',
+      layoutMode: LayoutMode.horizontal,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    pruneParentGroup(state, 'frame-1', 'a');
+
+    // result
+    expect((getActivePage(state).nodes['frame-1'] as TFrameNode).childIds).toEqual(['b']);
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 0 });
+  });
+
+  it('should just drop the child id for a section parent, without any bounds/layout resync', () => {
+    // mock
+    const b = rect('b', 'section-1', 90);
+    const state = buildState({ nodes: { b, 'section-1': section(['a', 'b']) } });
+
+    // action
+    pruneParentGroup(state, 'section-1', 'a');
+
+    // result
+    const parent = getActivePage(state).nodes['section-1'] as TSectionNode;
+    expect(parent.childIds).toEqual(['b']);
   });
 });

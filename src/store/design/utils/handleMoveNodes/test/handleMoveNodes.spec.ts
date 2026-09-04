@@ -1,5 +1,5 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
@@ -305,6 +305,37 @@ describe('handleMoveNodes', () => {
     const page = getActivePage(state);
     expect(page.rootOrder).toEqual(['group-1', 'section-1']);
     expect(page.nodes['section-1'].parentId).toBeNull();
+  });
+
+  it('should lay out a node reparented into an auto-layout frame alongside its new sibling', () => {
+    // mock
+    const a = buildRect({ id: 'a', width: 30 });
+    const b = buildRect({ id: 'b', parentId: 'frame-1', width: 50 });
+    const layoutFrame = buildFrame({ childIds: ['b'], id: 'frame-1', layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame }, rootOrder: ['a', 'frame-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 0, targetParentId: 'frame-1' });
+
+    // result — inserted before 'b', so it takes the frame's own origin and pushes 'b' along
+    const page = getActivePage(state);
+    expect(page.nodes.a).toMatchObject({ x: 0, y: 0 });
+    expect(page.nodes.b).toMatchObject({ x: 30, y: 0 });
+  });
+
+  it('should close the gap in the source auto-layout frame after a child is moved out', () => {
+    // mock
+    const a = buildRect({ id: 'a', parentId: 'frame-1', width: 30 });
+    const b = buildRect({ id: 'b', parentId: 'frame-1', width: 50 });
+    const layoutFrame = buildFrame({ childIds: ['a', 'b'], id: 'frame-1', layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame }, rootOrder: ['frame-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 1, targetParentId: null });
+
+    // result
+    const page = getActivePage(state);
+    expect(page.nodes.b).toMatchObject({ x: 0, y: 0 });
   });
 
   it('should tolerate a moved id that no longer resolves to a node', () => {

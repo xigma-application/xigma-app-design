@@ -68,7 +68,7 @@ import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNode
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateGuide } from './utils/handleUpdateGuide';
-import { handleUpdateNode } from './utils/handleUpdateNode';
+import { handleUpdateNode } from './utils/handleUpdateNode/handleUpdateNode';
 import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 

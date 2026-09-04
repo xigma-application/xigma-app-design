@@ -9,6 +9,7 @@ import { insertNodesIntoContainer } from './insertNodesIntoContainer';
 import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 import { pruneEmptySourceGroup } from './pruneEmptySourceGroup';
 import { removeNodesFromContainer } from '../removeNodesFromContainer';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, targetParentId }: TMoveNodesPayload): void => {
@@ -33,5 +34,7 @@ export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, tar
     insertNodesIntoContainer(page, targetParentId, nodeIds, targetIndex);
     pruneEmptySourceGroup(state, sourceParentId, targetParentId);
     syncGroupBounds(state, targetParentId);
+    syncAutoLayoutChildren(state, sourceParentId);
+    syncAutoLayoutChildren(state, targetParentId);
   }
 };
