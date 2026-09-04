@@ -30,4 +30,29 @@ describe('useColumnFlow', () => {
     // result
     expect(result.current.value).toBe('grid');
   });
+
+  it('should default wrap to false', () => {
+    // before
+    const { result } = renderHook(() => useColumnFlow());
+
+    // result
+    expect(result.current.wrap).toBe(false);
+  });
+
+  it('should toggle wrap on change', () => {
+    // before
+    const { result } = renderHook(() => useColumnFlow());
+
+    // action
+    act(() => result.current.onWrapChange());
+
+    // result
+    expect(result.current.wrap).toBe(true);
+
+    // action
+    act(() => result.current.onWrapChange());
+
+    // result
+    expect(result.current.wrap).toBe(false);
+  });
 });

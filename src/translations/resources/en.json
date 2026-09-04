@@ -392,6 +392,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Horizontal",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.label": "Flow",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.vertical": "Vertical",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.wrapAriaLabel": "Wrap",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.wrapTooltip": "Wrap",
   "design.rightPanel.panelProperties.frame.layoutSection.label": "Layout",
   "design.rightPanel.panelProperties.frame.layoutSection.resizeToFitAriaLabel": "Resize to fit",
   "design.rightPanel.panelProperties.frame.layoutSection.resizeToFitTooltip": "Resize to fit",

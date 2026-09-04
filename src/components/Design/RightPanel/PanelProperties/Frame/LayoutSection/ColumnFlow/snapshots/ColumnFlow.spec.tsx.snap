@@ -8,7 +8,7 @@ exports[`ColumnFlow snapshots > should render the flow toggle buttons 1`] = `
   >
     <div
       class="_SectionColumnLabels_ed28d5"
-      style="width: 100%;"
+      style="width: calc(100% - 32px);"
     >
       <span
         class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
@@ -22,7 +22,7 @@ exports[`ColumnFlow snapshots > should render the flow toggle buttons 1`] = `
     >
       <div
         class="_SectionColumnContent_e7fe0a _SectionColumnContent--single_e7fe0a"
-        style="width: 100%;"
+        style="width: calc(100% - 32px);"
       >
         <div
           class="_ToggleButtonGroup_d11681"
@@ -123,6 +123,11 @@ exports[`ColumnFlow snapshots > should render the flow toggle buttons 1`] = `
             </svg>
           </button>
         </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        />
       </div>
     </div>
   </div>

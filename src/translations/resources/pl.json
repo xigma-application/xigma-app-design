@@ -404,6 +404,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Poziomy układ",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.label": "Przepływ",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.vertical": "Pionowy układ",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.wrapAriaLabel": "Zawijaj",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.wrapTooltip": "Zawijaj",
   "design.rightPanel.panelProperties.frame.layoutSection.label": "Układ",
   "design.rightPanel.panelProperties.frame.layoutSection.resizeToFitAriaLabel": "Dopasuj rozmiar",
   "design.rightPanel.panelProperties.frame.layoutSection.resizeToFitTooltip": "Dopasuj rozmiar",

@@ -1,5 +1,6 @@
 import cx from 'classnames';
 import { FC, ReactNode } from 'react';
+import { size } from 'lodash';
 
 // components
 import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
@@ -31,10 +32,9 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
   withBottomMargin = false,
   withTopMargin = false,
 }) => {
-  const buttonsCount = buttonsIcon?.length ?? 0;
-  const buttonsWidthTotal = (buttonsCount || 1) * 24;
-  const additionalGap = buttonsCount === 2 ? 2.5 : 0;
-  const width = buttonsCount > 0 ? `calc(100% - ${buttonsWidthTotal}px - ${additionalGap}px - 8px)` : '100%';
+  const buttonsWidthTotal = (size(buttonsIcon) || 1) * 24;
+  const additionalGap = size(buttonsIcon) === 2 ? 2.5 : 0;
+  const width = `calc(100% - ${buttonsWidthTotal}px - ${additionalGap}px - 8px)`;
 
   return (
     <E2EDataAttribute type={E2EAttribute.section} value="">
@@ -49,7 +49,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
           <SectionColumnContent gridColumnType={gridColumnType} width={width}>
             {children}
           </SectionColumnContent>
-          {buttonsIcon && <SectionColumnButtonIcons buttonsIcon={buttonsIcon} />}
+          <SectionColumnButtonIcons buttonsIcon={buttonsIcon} />
         </div>
       </div>
     </E2EDataAttribute>

@@ -21,7 +21,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
     >
       <div
         class="_SectionColumnLabels_ed28d5"
-        style="width: 100%;"
+        style="width: calc(100% - 32px);"
       >
         <span
           class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
@@ -35,7 +35,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
       >
         <div
           class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
-          style="width: 100%;"
+          style="width: calc(100% - 32px);"
         >
           <div
             class="_ButtonGroup_f86a5c"
@@ -238,6 +238,11 @@ exports[`PositionSection snapshots > should render the alignment and position ro
             </button>
           </div>
         </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -246,7 +251,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
     >
       <div
         class="_SectionColumnLabels_ed28d5"
-        style="width: 100%;"
+        style="width: calc(100% - 32px);"
       >
         <span
           class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
@@ -260,7 +265,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
       >
         <div
           class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
-          style="width: 100%;"
+          style="width: calc(100% - 32px);"
         >
           <div
             class="_TextField_bd2800"
@@ -317,6 +322,11 @@ exports[`PositionSection snapshots > should render the alignment and position ro
             </div>
           </div>
         </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -325,7 +335,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
     >
       <div
         class="_SectionColumnLabels_ed28d5"
-        style="width: 100%;"
+        style="width: calc(100% - 32px);"
       >
         <span
           class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
@@ -339,7 +349,7 @@ exports[`PositionSection snapshots > should render the alignment and position ro
       >
         <div
           class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
-          style="width: 100%;"
+          style="width: calc(100% - 32px);"
         >
           <div
             class="_TextField_bd2800"
@@ -459,6 +469,11 @@ exports[`PositionSection snapshots > should render the alignment and position ro
               </svg>
             </button>
           </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
         </div>
       </div>
     </div>

@@ -94,11 +94,11 @@ describe('SectionColumn behaviors', () => {
     expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).not.toBeNull();
   });
 
-  it('should not render the buttonsIcon wrapper when no buttonsIcon are given', () => {
+  it('should render an empty buttonsIcon wrapper when no buttonsIcon are given', () => {
     // before
     const { container } = renderSectionColumn(['Alignment']);
 
     // result
-    expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).toBeNull();
+    expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).toBeEmptyDOMElement();
   });
 });

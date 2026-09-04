@@ -8,7 +8,9 @@ export type TSectionColumnButtonIconsProps = {
 };
 
 export const SectionColumnButtonIcons: FC<TSectionColumnButtonIconsProps> = ({ buttonsIcon = [] }) => (
-  <div className={styles.SectionColumnButtonIcons}>{buttonsIcon.map((buttonIcon) => buttonIcon)}</div>
+  <div>
+    <div className={styles.SectionColumnButtonIcons}>{buttonsIcon.map((buttonIcon) => buttonIcon)}</div>
+  </div>
 );
 
 export default SectionColumnButtonIcons;

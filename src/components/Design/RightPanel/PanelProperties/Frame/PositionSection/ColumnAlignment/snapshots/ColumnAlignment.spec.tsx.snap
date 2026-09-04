@@ -8,7 +8,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
   >
     <div
       class="_SectionColumnLabels_ed28d5"
-      style="width: 100%;"
+      style="width: calc(100% - 32px);"
     >
       <span
         class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
@@ -22,7 +22,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
     >
       <div
         class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
-        style="width: 100%;"
+        style="width: calc(100% - 32px);"
       >
         <div
           class="_ButtonGroup_f86a5c"
@@ -224,6 +224,11 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
             </svg>
           </button>
         </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        />
       </div>
     </div>
   </div>

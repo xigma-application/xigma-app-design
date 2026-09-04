@@ -28,6 +28,6 @@ describe('SectionColumnButtonIcons behaviors', () => {
     const { container } = render(<SectionColumnButtonIcons />);
 
     // result
-    expect(container.querySelector('div')).toBeEmptyDOMElement();
+    expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).toBeEmptyDOMElement();
   });
 });

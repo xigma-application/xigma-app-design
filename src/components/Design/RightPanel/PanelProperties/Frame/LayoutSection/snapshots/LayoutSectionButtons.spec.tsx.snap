@@ -7,6 +7,7 @@ exports[`LayoutSectionButtons snapshots > should render the resize-to-fit and au
     aria-pressed="false"
     class="_Button_b88d2e"
     data-state="closed"
+    style="padding: 6px;"
     type="button"
   >
     <svg
@@ -32,6 +33,7 @@ exports[`LayoutSectionButtons snapshots > should render the resize-to-fit and au
     aria-pressed="false"
     class="_Button_b88d2e"
     data-state="closed"
+    style="padding: 6px;"
     type="button"
   >
     <svg
