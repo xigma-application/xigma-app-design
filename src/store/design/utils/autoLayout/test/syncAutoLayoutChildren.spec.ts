@@ -1,7 +1,7 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TFrameNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
+import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -205,6 +205,33 @@ describe('syncAutoLayoutChildren', () => {
 
     // result
     expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 0 });
+  });
+
+  it('should cascade the reposition delta onto a container child’s nested descendants, so they move along with it', () => {
+    // mock — a group sitting inside the auto-layout frame, with its own nested child
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const nested = rect({ height: 20, id: 'nested', parentId: 'b', width: 20, x: 5, y: 5 });
+    const group: TGroupNode = {
+      childIds: ['nested'],
+      height: 20,
+      id: 'b',
+      name: 'Group',
+      parentId: 'frame-1',
+      rotation: 0,
+      type: NodeType.group,
+      width: 20,
+      x: 0,
+      y: 0,
+    };
+    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b: group, 'frame-1': layoutFrame, nested } });
+
+    // action — the group's box moves from x=0 to x=40 (after the 30-wide rect plus a 10 gap), a +40/+0 delta
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the group itself, and its nested child, both shift by the same delta
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 40, y: 0 });
+    expect(getActivePage(state).nodes.nested).toMatchObject({ x: 45, y: 5 });
   });
 
   it('should treat a vector child as a box, shifting its vertices by the bounding-box delta', () => {

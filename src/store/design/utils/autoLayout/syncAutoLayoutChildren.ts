@@ -6,6 +6,7 @@ import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 import { getActivePage } from '../getActivePage';
 import { getAutoLayoutChildPositions } from './getAutoLayoutChildPositions';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
+import { getGroupSubtreeNodes } from '../nodeHierarchy/getGroupSubtreeNodes';
 import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
 
 export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | null): void => {
@@ -33,7 +34,9 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
         const deltaX = positions[index].x - bounds[index].x;
         const deltaY = positions[index].y - bounds[index].y;
 
-        Object.assign(child, getGeometryDeltaChanges(child, deltaX, deltaY));
+        getGroupSubtreeNodes(child, nodes).forEach((subtreeNode) => {
+          Object.assign(subtreeNode, getGeometryDeltaChanges(subtreeNode, deltaX, deltaY));
+        });
       });
     }
   }
