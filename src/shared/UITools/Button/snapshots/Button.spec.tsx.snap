@@ -60,3 +60,15 @@ exports[`Button snapshots > should render Button in its outline variant 1`] = `
   </button>
 </DocumentFragment>
 `;
+
+exports[`Button snapshots > should render Button in its selected state 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="true"
+    class="_Button_b88d2e _Button--selected_b88d2e"
+    type="button"
+  >
+    Click
+  </button>
+</DocumentFragment>
+`;
