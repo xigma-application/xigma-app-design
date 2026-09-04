@@ -787,6 +787,14 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
     expect(page.nodes[maskChildId].isMask).toBe(true);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true, metaKey: true });
+
+    // result
+    const pageAfterToggleOff = realStore.getState().design.pages[realStore.getState().design.activePageId];
+    expect(pageAfterToggleOff.nodes[maskChildId].isMask).toBe(false);
+    expect(selectSelectedIds(realStore.getState())).toEqual([maskChildId]);
   });
 
   it('should bring the selection to the front on "]" and send it to the back on "["', () => {

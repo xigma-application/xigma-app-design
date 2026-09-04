@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -54,6 +54,37 @@ describe('handleUseSelectionAsMask', () => {
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect(page.nodes[maskChildId].isMask).toBe(true);
+  });
+
+  it('should mask a single selected node', () => {
+    // mock
+    const idA = addFrameNode();
+
+    store.dispatch(setSelection([idA]));
+
+    // action
+    handleUseSelectionAsMask(store.dispatch);
+
+    // result
+    const page = selectActivePage(store.getState());
+    const [maskChildId] = selectSelectedIds(store.getState());
+    expect(page.nodes[maskChildId].isMask).toBe(true);
+  });
+
+  it('should remove the mask when the single selected node is already a mask', () => {
+    // mock
+    const idA = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { isMask: true }, id: idA }));
+    store.dispatch(setSelection([idA]));
+
+    // action
+    handleUseSelectionAsMask(store.dispatch);
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[idA].isMask).toBe(false);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
   it('should do nothing while in vector editing mode', () => {
