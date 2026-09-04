@@ -7,6 +7,7 @@ type TDesignSnapshot = {
   nodes: Record<
     string,
     {
+      childIds?: string[];
       endPoint?: string;
       defaultFill?: unknown;
       startPoint?: string;
@@ -15,6 +16,7 @@ type TDesignSnapshot = {
     }
   >;
   rootOrder: string[];
+  selectedIds: string[];
   vectorEditingNodeIds: string[];
 };
 
@@ -23,9 +25,9 @@ const readDesignState = (page: Page): Promise<TDesignSnapshot> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
-    const { nodes, rootOrder } = pages[activePageId];
+    const { nodes, rootOrder, selectedIds } = pages[activePageId];
 
-    return { nodes, rootOrder, vectorEditingNodeIds };
+    return { nodes, rootOrder, selectedIds, vectorEditingNodeIds };
   });
 
 const hasVertexNear = (vertices: Record<string, { x: number; y: number }> | undefined, x: number, y: number): boolean =>
@@ -186,4 +188,78 @@ test('pressing Enter with a mixed multi-selection (Rectangle + Text) also flatte
   // each keeps its own, separate vector geometry — a multi-convert must never merge them into one
   expect(state.nodes[rectangleId]).not.toBe(state.nodes[textId]);
   expect(state.vectorEditingNodeIds.slice().sort()).toEqual([rectangleId, textId].sort());
+});
+
+test('pressing Enter progressively drills through nested Frames — one level per press — before finally converting every leaf Rectangle', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-enter-drill-nested-frames');
+  await expect(designPage.canvas).toBeVisible();
+
+  // R1, F_outer, R2 at the top level; F_outer's only child is F_inner, which holds R3 and R4 —
+  // i.e. R, F[F[R,R]], R
+  await designPage.drawRectangle(700, 300, 740, 340); // R1
+  await designPage.click(1500, 700);
+  await designPage.drawFrame(800, 300, 900, 400); // F_outer
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(950, 300, 990, 340); // R2
+  await designPage.click(1500, 700);
+  await designPage.drawFrame(1050, 300, 1150, 400); // F_inner
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(1200, 300, 1240, 340); // R3
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(1260, 300, 1300, 340); // R4
+  await designPage.click(1500, 700);
+
+  const [rectangleId1, outerFrameId, rectangleId2, innerFrameId, rectangleId3, rectangleId4] = (await readDesignState(page)).rootOrder;
+
+  await page.evaluate(
+    async ([innerFrameId, outerFrameId, rectangleId3, rectangleId4]) => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(moveNodes({ nodeIds: [rectangleId3, rectangleId4], targetIndex: 0, targetParentId: innerFrameId }));
+      store.dispatch(moveNodes({ nodeIds: [innerFrameId], targetIndex: 0, targetParentId: outerFrameId }));
+    },
+    [innerFrameId, outerFrameId, rectangleId3, rectangleId4],
+  );
+
+  await designPage.click(720, 320); // select R1
+  // F_outer now has a child, making it a click-through root frame (isClickThroughFrame) — its own
+  // body no longer hit-tests to itself, so it must be selected via its name label instead
+  await designPage.click(815, 288, { shift: true }); // add F_outer, via its name label
+  await designPage.click(970, 320, { shift: true }); // add R2
+
+  expect((await readDesignState(page)).selectedIds).toEqual([rectangleId1, outerFrameId, rectangleId2]);
+
+  // 1st Enter: F_outer is the only container in the selection — it expands to its one child,
+  // F_inner; R1/R2 are untouched, and nothing converts yet
+  await page.keyboard.press('Enter');
+
+  let state = await readDesignState(page);
+
+  expect(state.selectedIds).toEqual([rectangleId1, innerFrameId, rectangleId2]);
+  expect(state.vectorEditingNodeIds).toEqual([]);
+
+  // 2nd Enter: F_inner is still a container — it expands to its two rectangles
+  await page.keyboard.press('Enter');
+
+  state = await readDesignState(page);
+
+  expect(state.selectedIds).toEqual([rectangleId1, rectangleId3, rectangleId4, rectangleId2]);
+  expect(state.vectorEditingNodeIds).toEqual([]);
+
+  // 3rd Enter: every selected node is now a plain rectangle — no containers left, so this press
+  // finally converts and opens all four for editing
+  await page.keyboard.press('Enter');
+
+  state = await readDesignState(page);
+
+  expect(state.nodes[rectangleId1].type).toBe('vector');
+  expect(state.nodes[rectangleId2].type).toBe('vector');
+  expect(state.nodes[rectangleId3].type).toBe('vector');
+  expect(state.nodes[rectangleId4].type).toBe('vector');
+  expect(state.vectorEditingNodeIds).toEqual([rectangleId1, rectangleId3, rectangleId4, rectangleId2]);
 });

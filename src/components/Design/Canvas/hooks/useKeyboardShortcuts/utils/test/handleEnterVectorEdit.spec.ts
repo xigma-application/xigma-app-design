@@ -38,7 +38,7 @@ const addVectorNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const addFrameNode = (): string => {
+const addFrameNode = (overrides: { childIds?: string[] } = {}): string => {
   store.dispatch(
     addNode({
       childIds: [],
@@ -52,7 +52,18 @@ const addFrameNode = (): string => {
       width: 10,
       x: 0,
       y: 0,
+      ...overrides,
     }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addGroupNode = (childIds: string[]): string => {
+  store.dispatch(
+    addNode({ childIds, height: 10, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -139,7 +150,7 @@ describe('handleEnterVectorEdit', () => {
     getTextFlattenVector.mockReset().mockResolvedValue(null);
   });
 
-  it('should do nothing when no vector or convertible nodes are selected', async () => {
+  it('should filter an empty Frame out of the selection on Enter, instead of converting anything', async () => {
     // mock
     const frameId = addFrameNode();
 
@@ -148,9 +159,60 @@ describe('handleEnterVectorEdit', () => {
     // before
     await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
-    // result
+    // result — a Frame with no children has nothing to drill into, so it's just dropped
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([]);
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should expand a selected Frame with children into its children on Enter, without converting/entering edit mode yet', async () => {
+    // mock
+    const rectangleIdA = addRectangleNode();
+    const rectangleIdB = addRectangleNode();
+    const frameId = addFrameNode({ childIds: [rectangleIdA, rectangleIdB] });
+
+    store.dispatch(setSelection([frameId]));
+
+    // action
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleIdA, rectangleIdB]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+    expect(selectActivePage(store.getState()).nodes[rectangleIdA].type).toBe(NodeType.rectangle);
+  });
+
+  it('should expand a selected Group with children into its children on Enter, exactly like a Frame', async () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    const groupId = addGroupNode([rectangleId]);
+
+    store.dispatch(setSelection([groupId]));
+
+    // action
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+  });
+
+  it('should undo a drill-into-Frame step, restoring the selection to the Frame itself', async () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    const frameId = addFrameNode({ childIds: [rectangleId] });
+
+    store.dispatch(setSelection([frameId]));
+
+    // action
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId]);
+
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([frameId]);
   });
 
   it('should exclude a vector node currently bound as a text-on-path guide, even when selected directly', async () => {
@@ -197,7 +259,7 @@ describe('handleEnterVectorEdit', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
-  it('should only include the vector nodes when the selection mixes vector and non-convertible nodes', async () => {
+  it('should first filter out an empty Frame mixed into the selection (one Enter), then open the remaining vectors on the next Enter', async () => {
     // mock
     const vectorIdA = addVectorNode();
     const vectorIdB = addVectorNode();
@@ -205,11 +267,56 @@ describe('handleEnterVectorEdit', () => {
 
     store.dispatch(setSelection([vectorIdA, frameId, vectorIdB]));
 
-    // before
+    // action — first Enter: the Frame is a container, so this press only filters it out
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([vectorIdA, vectorIdB]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+
+    // action — second Enter: no containers left, now it opens the vectors
     await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
+  });
+
+  it('should drill through nested Frames one Enter press per level, then convert only once every selected node is a leaf', async () => {
+    // mock — R, F[F[R,R]], R: two plain rectangles flanking a frame, that frame's only child is
+    // another frame, and that inner frame holds the last two rectangles
+    const rectangleId1 = addRectangleNode();
+    const rectangleId3 = addRectangleNode();
+    const rectangleId4 = addRectangleNode();
+    const innerFrameId = addFrameNode({ childIds: [rectangleId3, rectangleId4] });
+    const outerFrameId = addFrameNode({ childIds: [innerFrameId] });
+    const rectangleId2 = addRectangleNode();
+
+    store.dispatch(setSelection([rectangleId1, outerFrameId, rectangleId2]));
+
+    // action — 1st Enter: only the outer frame is a container; it expands to its one child (the
+    // inner frame), the two plain rectangles are left exactly where they are
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId1, innerFrameId, rectangleId2]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+
+    // action — 2nd Enter: the inner frame is still a container; it expands to its two rectangles
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId1, rectangleId3, rectangleId4, rectangleId2]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+
+    // action — 3rd Enter: every selected node is now a plain rectangle (no containers left), so
+    // this press finally converts and opens all four for editing
+    await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(nodes[rectangleId1].type).toBe(NodeType.vector);
+    expect(nodes[rectangleId2].type).toBe(NodeType.vector);
+    expect(nodes[rectangleId3].type).toBe(NodeType.vector);
+    expect(nodes[rectangleId4].type).toBe(NodeType.vector);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([rectangleId1, rectangleId3, rectangleId4, rectangleId2]);
   });
 
   it('should open every selected vector node when three or more are selected', async () => {

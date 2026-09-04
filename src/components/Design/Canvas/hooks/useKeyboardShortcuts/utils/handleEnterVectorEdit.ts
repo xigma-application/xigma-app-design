@@ -1,5 +1,6 @@
 // store
-import { deleteNode, replaceNode } from 'store/design/slice';
+import { deleteNode, replaceNode, setSelection } from 'store/design/slice';
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { selectActiveTool, selectSelectedIds, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
@@ -13,6 +14,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { convertNodeToVector, isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { enterVectorEditMode } from '../../../utils/enterVectorEditMode';
+import { expandSelectedContainers } from './expandSelectedContainers';
 import { getTextFlattenTargets } from './getTextFlattenTargets';
 import { isVectorBoundAsTextPath } from 'store/design/utils/isVectorBoundAsTextPath';
 
@@ -27,6 +29,13 @@ export const handleEnterVectorEdit = async (dispatch: AppDispatch, refs: TCanvas
   const selectedNodes = selectSelectedIds(state)
     .map((id) => state.design.pages[state.design.activePageId].nodes[id])
     .filter((node): node is TSceneNode => Boolean(node));
+
+  if (selectedNodes.some(isContainerNode)) {
+    dispatch(setSelection(expandSelectedContainers(selectedNodes)));
+
+    return;
+  }
+
   const nodesById = state.design.pages[state.design.activePageId].nodes;
   const alreadyVectorIds = selectedNodes
     .filter((node) => node.type === NodeType.vector && !isVectorBoundAsTextPath(nodesById, node.id))

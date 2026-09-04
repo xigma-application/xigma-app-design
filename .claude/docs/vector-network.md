@@ -3419,6 +3419,33 @@ only threshold now, matching Figma (Enter opens 1 or more selected vectors alike
 **Update:** `handleEnterVectorEdit` also flattens any selected Text into its own vector now (async,
 same `getTextFlattenTargets` helper Flatten uses) — full write-up in `text-flatten-and-outline.md` §4.
 
+**Update: Enter drills through a selected Frame/Group one level per press before converting
+anything, instead of silently dropping it from the conversion set.** Previously a Frame/Group mixed
+into the selection just got filtered out of `nodesToConvert`/`alreadyVectorIds` in the same press —
+so `[Rectangle, Frame, Rectangle]` converted the two rectangles immediately and the Frame's own
+contents were never reachable via Enter at all. Now, before any conversion logic runs,
+`handleEnterVectorEdit` checks `selectedNodes.some(isContainerNode)` (frame/group/section — the same
+predicate `nodeHierarchy/isContainerNode.ts` uses everywhere else); if true, that press is purely a
+**selection expansion**, not a conversion: `expandSelectedContainers.ts` (new, pure) maps every
+selected node to itself unless it's a container, in which case it's replaced in-place by its own
+`childIds` — an empty container contributes no ids at all, so it's simply dropped. The result is
+dispatched via a plain `setSelection(...)` (automatically its own undo step, `setSelection.type` was
+already in `UNDOABLE_ACTION_TYPES`) and the function returns — no `beginHistoryGesture`, no
+`enterVectorEditMode` call, nothing converts yet. Non-container nodes already in the selection (a
+plain rectangle sitting next to the frame, an already-open vector) ride along untouched at their same
+position. Repeated Enter presses walk down one tree level at a time — `R, F[F[R,R]], R` takes three
+presses (outer frame → inner frame → its two rectangles → now nothing but rectangles, so the third
+press finally converts all four) — until the selection contains zero containers, at which point Enter
+falls through to the pre-existing convert-and-open logic unchanged. Section behaves identically
+(`isContainerNode` already covered it); Group is included in the same predicate on request, even
+though it doesn't share Frame's `isClickThroughFrame` selection quirk. Unit: `expandSelectedContainers.spec.ts`
+(pure, every branch), `handleEnterVectorEdit.spec.ts` (empty Frame filtered / Frame with children
+expanded / Group parity / the full three-press nested-Frame walk / undo of a single drill step). E2e:
+`enter-shape-to-vector.spec.ts`'s nested-Frame drill test — real store `moveNodes` calls build the
+nesting (no drag choreography needed, since only the reparent matters here) — had to select the root
+outer frame via its **name label**, not a click on its body, once it had a child: a root frame with
+content is `isClickThroughFrame`, so its own interior no longer hit-tests to itself.
+
 **`closeLoopOntoVertex.ts`'s `isAlreadyConnected` duplicate-segment guard was removed** — see §17's
 update note above for the full reasoning (it blocked a real case: closing a *second*, independent arc
 back onto an already-connected vertex pair, e.g. two arcs forming a lens/circle). Direction-independent
