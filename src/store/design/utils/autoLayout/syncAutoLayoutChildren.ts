@@ -3,10 +3,8 @@ import { TDesignState } from '../../types';
 import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
-import { applyAutoLayoutHugSize } from './applyAutoLayoutHugSize';
+import { computeAutoLayoutPositions } from './computeAutoLayoutPositions';
 import { getActivePage } from '../getActivePage';
-import { getAutoLayoutChildPositions } from './getAutoLayoutChildPositions';
-import { getAutoLayoutContentBox } from './getAutoLayoutContentBox';
 import { getFramePadding } from './getFramePadding';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
 import { getGroupSubtreeNodes } from '../nodeHierarchy/getGroupSubtreeNodes';
@@ -26,18 +24,10 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       const bounds = children.map(getNodeAxisAlignedBounds);
       const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
       const itemSpacing = frame.itemSpacing ?? 0;
+      const counterAxisSpacing = frame.counterAxisSpacing ?? itemSpacing;
       const padding = getFramePadding(frame);
-
-      applyAutoLayoutHugSize(frame, frame.layoutMode, itemSpacing, padding, sizes);
-
-      const contentBox = getAutoLayoutContentBox(frame, padding);
-      const positions = getAutoLayoutChildPositions(
-        frame.layoutMode,
-        itemSpacing,
-        frame.layoutAlignment ?? AlignmentLayout.topLeft,
-        contentBox,
-        sizes,
-      );
+      const alignment = frame.layoutAlignment ?? AlignmentLayout.topLeft;
+      const positions = computeAutoLayoutPositions(frame, frame.layoutMode, itemSpacing, counterAxisSpacing, alignment, padding, sizes);
 
       children.forEach((child, index) => {
         const deltaX = positions[index].x - bounds[index].x;

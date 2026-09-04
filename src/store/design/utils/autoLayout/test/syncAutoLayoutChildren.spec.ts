@@ -172,6 +172,77 @@ describe('syncAutoLayoutChildren', () => {
     expect(getActivePage(state).nodes['frame-1']).toMatchObject({ height: 200, width: 500 });
   });
 
+  it('should wrap children onto a new line once they overflow the frame’s width', () => {
+    // mock — two 50-wide children can't both fit in a 50-wide frame
+    const a = rect({ height: 20, id: 'a', width: 50 });
+    const b = rect({ height: 20, id: 'b', width: 50 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b'],
+      counterAxisSpacing: 5,
+      height: 100,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      width: 50,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 0 });
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 0, y: 25 });
+  });
+
+  it('should hug the frame’s height to the wrapped block when wrap is on and the counter axis hugs', () => {
+    // mock
+    const a = rect({ height: 20, id: 'a', width: 50 });
+    const b = rect({ height: 30, id: 'b', width: 50 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b'],
+      counterAxisSizingMode: SizingMode.hug,
+      counterAxisSpacing: 5,
+      height: 999,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      width: 50,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — two lines (20+30) plus the 5px gap between them = 55
+    expect(getActivePage(state).nodes['frame-1']).toMatchObject({ height: 55, width: 50 });
+  });
+
+  it('should default a missing counterAxisSpacing to itemSpacing', () => {
+    // mock
+    const a = rect({ height: 20, id: 'a', width: 50 });
+    const b = rect({ height: 20, id: 'b', width: 50 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b'],
+      height: 100,
+      itemSpacing: 15,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      width: 50,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the second line is offset by the first line's 20px thickness plus the 15px itemSpacing fallback
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 0, y: 35 });
+  });
+
   it('should default a missing itemSpacing to zero', () => {
     // mock
     const a = rect({ id: 'a', width: 30 });

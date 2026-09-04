@@ -75,11 +75,13 @@ export type TFrameNode = TBaseNode & {
   childIds: string[];
   clipContent: boolean;
   counterAxisSizingMode?: SizingMode;
+  counterAxisSpacing?: number;
   fill: string;
   guides?: TGuide[];
   itemSpacing?: number;
   layoutAlignment?: AlignmentLayout;
   layoutMode?: LayoutMode;
+  layoutWrap?: boolean;
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
