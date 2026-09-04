@@ -45,6 +45,7 @@ const createCanvasRefs = (): TCanvasRefs =>
   ({
     transform: {
       alignmentGuideRef: { current: null },
+      autoLayoutDropTargetRef: { current: null },
       draggedNodeIdsRef: { current: null },
       dropTargetFrameIdRef: { current: null },
       equalSpacingGuidesRef: { current: null },

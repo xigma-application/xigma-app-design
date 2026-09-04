@@ -27,6 +27,7 @@ import { TImageRenderContext } from '../../types';
 // utils
 import { cleanupStaleDragSnapshotBuffers } from './cleanupStaleDragSnapshotBuffers';
 import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
+import { drawAutoLayoutDropIndicator } from './drawAutoLayoutDropIndicator';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
@@ -161,6 +162,7 @@ export const drawScene = (
   drawEditingPathTextHandle(ctx, editingTextBox, editingPathNode);
   drawVectorEditAlignmentGuide(ctx, refs);
   drawDropTargetFrameOutline(ctx, refs, nodesById);
+  drawAutoLayoutDropIndicator(ctx, refs);
   drawTransformAlignmentGuide(ctx, refs);
   drawAspectRatioLockGuide(ctx, refs);
   drawVectorLasso(ctx, refs);

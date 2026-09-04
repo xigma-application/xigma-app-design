@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -57,6 +57,30 @@ const addSectionNode = (x: number, y: number, size = 200): string => {
 const addGroupNode = (x: number, y: number, size = 200): string => {
   store.dispatch(
     addNode({ childIds: [], height: size, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: size, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addAutoLayoutFrameNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: size,
+      itemSpacing: 0,
+      layoutMode: LayoutMode.vertical,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -176,6 +200,54 @@ describe('commitDropIntoFrame', () => {
     // result
     const page = selectActivePage(store.getState());
     expect(page.nodes[rectId].parentId).toBeNull();
+  });
+
+  it('should insert the dragged selection at the computed auto-layout drop index, instead of appending it', () => {
+    // mock — an auto-layout frame with one existing child; the drop target ref says "insert at index 0"
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const existingId = addRectNode(0, 0);
+    store.dispatch(moveNodes({ nodeIds: [existingId], targetIndex: 0, targetParentId: frameId }));
+
+    const rectId = addRectNode(500, 500);
+    store.dispatch(setSelection([rectId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutDropTargetRef: { current: { frameId, index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — dropped before the existing child, not appended after it
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([rectId, existingId]);
+  });
+
+  it('should fall back to appending when the auto-layout drop target ref belongs to a different frame', () => {
+    // mock — stale ref pointing at some other frame id than the current drop target
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const existingId = addRectNode(0, 0);
+    store.dispatch(moveNodes({ nodeIds: [existingId], targetIndex: 0, targetParentId: frameId }));
+
+    const rectId = addRectNode(500, 500);
+    store.dispatch(setSelection([rectId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutDropTargetRef: { current: { frameId: 'stale-frame', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — appended after the existing child, per the ordinary fallback
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([existingId, rectId]);
   });
 
   it('should do nothing when the drop target is still the node’s current parent', () => {

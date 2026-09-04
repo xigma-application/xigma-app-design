@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
+import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
 import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -257,9 +258,12 @@ export type TVectorSnapshotsRefs = {
   rotatedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeRotateSnapshot> | null>;
 };
 
+export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: string };
+
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>;
+  autoLayoutDropTargetRef: RefObject<TAutoLayoutDropTargetHover | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;

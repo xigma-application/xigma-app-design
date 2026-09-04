@@ -4,13 +4,38 @@ import { selectActivePage, selectRenderOrderedNodes } from 'store/design/selecto
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { updateDragDropTarget } from '../updateDragDropTarget';
 
-const canvasRefs = (): TCanvasRefs => ({ transform: { dropTargetFrameIdRef: { current: 'stale' } } }) as unknown as TCanvasRefs;
+const canvasRefs = (): TCanvasRefs =>
+  ({
+    transform: { autoLayoutDropTargetRef: { current: null }, dropTargetFrameIdRef: { current: 'stale' } },
+  }) as unknown as TCanvasRefs;
+
+const addAutoLayoutFrame = (x: number, y: number, size: number, layoutMode: LayoutMode): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#fff',
+      height: size,
+      itemSpacing: 0,
+      layoutMode,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+};
 
 const addFrame = (x: number, y: number, size: number): string => {
   store.dispatch(
@@ -169,6 +194,78 @@ describe('updateDragDropTarget', () => {
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(groupId);
 
     spy.mockRestore();
+  });
+
+  it('should compute a drop indicator for an auto-layout frame instead of reparenting right away', () => {
+    const frameId = addAutoLayoutFrame(0, 0, 300, LayoutMode.vertical);
+    const rectId = addRect(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+
+    expect(refs.transform.dropTargetFrameIdRef.current).toBe(frameId);
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 0 });
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBeNull();
+
+    spy.mockRestore();
+  });
+
+  it('should account for an existing sibling’s bounds when computing the drop index in an auto-layout frame', () => {
+    const frameId = addAutoLayoutFrame(0, 0, 300, LayoutMode.vertical);
+    const existingId = addRect(0, 0);
+    store.dispatch(moveNodes({ nodeIds: [existingId], targetIndex: 0, targetParentId: frameId }));
+
+    const rectId = addRect(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    // the existing sibling is a 20-tall rect at y=0 (midpoint y=10); a cursor well past it lands after it
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 100 }, rendered, byId, refs);
+
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 1 });
+  });
+
+  it('should default a missing itemSpacing/layoutAlignment on the auto-layout frame', () => {
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#fff',
+        height: 300,
+        layoutMode: LayoutMode.vertical,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 300,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const frameId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    const rectId = addRect(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 0 });
+  });
+
+  it('should clear the drop indicator once the pointer leaves the auto-layout frame', () => {
+    addAutoLayoutFrame(0, 0, 100, LayoutMode.vertical);
+    const rectId = addRect(10, 10);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 50, y: 50 }, rendered, byId, refs);
+    expect(refs.transform.autoLayoutDropTargetRef.current).not.toBeNull();
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs);
+    expect(refs.transform.autoLayoutDropTargetRef.current).toBeNull();
   });
 
   it('should clear the ref and do nothing when nothing is selected', () => {

@@ -3,15 +3,16 @@ import { useRef } from 'react';
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TAspectRatioLockGuide } from 'types/canvas';
+import { TAutoLayoutDropTargetHover, TTransformRefs } from 'types/design/canvas/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
-import { TTransformRefs } from 'types/design/canvas/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 
 export const useTransformRefs = (): TTransformRefs => {
   const alignmentGuideRef = useRef<TAlignmentGuide | null>(null);
   const aspectRatioLockGuideRef = useRef<TAspectRatioLockGuide | null>(null);
+  const autoLayoutDropTargetRef = useRef<TAutoLayoutDropTargetHover | null>(null);
   const contactGuidesRef = useRef<TShapeContactGuide[] | null>(null);
   const distanceGuidesRef = useRef<TDistanceGuides | null>(null);
   const draggedNodeIdsRef = useRef<Set<string> | null>(null);
@@ -27,6 +28,7 @@ export const useTransformRefs = (): TTransformRefs => {
     transformRefsRef.current = {
       alignmentGuideRef,
       aspectRatioLockGuideRef,
+      autoLayoutDropTargetRef,
       contactGuidesRef,
       distanceGuidesRef,
       draggedNodeIdsRef,

@@ -34,6 +34,7 @@ export const disarmDrag = (
 
     canvasRefs.transform.draggedNodeIdsRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
+    canvasRefs.transform.autoLayoutDropTargetRef.current = null;
     canvasRefs.transform.dropTargetFrameIdRef.current = null;
     canvasRefs.transform.equalSpacingGuidesRef.current = null;
     canvasRefs.transform.matchedPairGuidesRef.current = null;

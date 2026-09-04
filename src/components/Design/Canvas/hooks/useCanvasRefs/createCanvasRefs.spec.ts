@@ -82,6 +82,7 @@ describe('createCanvasRefs behaviors', () => {
       transform: {
         alignmentGuideRef: { current: null },
         aspectRatioLockGuideRef: { current: null },
+        autoLayoutDropTargetRef: { current: null },
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },

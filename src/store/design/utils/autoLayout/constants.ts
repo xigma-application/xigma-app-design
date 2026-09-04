@@ -1,0 +1,1 @@
+export const INDICATOR_THICKNESS_PX = 2;

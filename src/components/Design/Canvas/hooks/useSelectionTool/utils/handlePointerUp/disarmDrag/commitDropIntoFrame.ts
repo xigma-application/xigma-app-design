@@ -21,7 +21,14 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
     const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
 
     if (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot)) {
-      const targetIndex = targetFrame && isContainerNode(targetFrame) ? targetFrame.childIds.length : page.rootOrder.length;
+      const autoLayoutDropTarget = canvasRefs.transform.autoLayoutDropTargetRef.current;
+      const targetIndex =
+        autoLayoutDropTarget && autoLayoutDropTarget.frameId === targetParentId
+          ? autoLayoutDropTarget.index
+          : targetFrame && isContainerNode(targetFrame)
+            ? targetFrame.childIds.length
+            : page.rootOrder.length;
+
       dispatch(moveNodes({ nodeIds, targetIndex, targetParentId }));
     }
   }
