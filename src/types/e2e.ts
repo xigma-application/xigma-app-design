@@ -1,6 +1,7 @@
 export enum E2EAttribute {
   accordion = 'accordion',
   accordionItem = 'accordion-item',
+  buttonGroup = 'button-group',
   bypassGlobalShortcuts = 'bypass-global-shortcuts',
   componentHeader = 'component-header',
   scrubbableInput = 'scrubbable-input',

@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionColumn snapshots > should render its labels and its children 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: 100%;"
+    >
+      <span
+        class="_Text_eea229 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 11px;"
+      >
+        Alignment
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--single_e7fe0a"
+        style="width: 100%;"
+      >
+        <span>
+          body
+        </span>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

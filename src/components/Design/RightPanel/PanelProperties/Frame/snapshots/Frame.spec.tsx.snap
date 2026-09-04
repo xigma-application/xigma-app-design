@@ -1,0 +1,373 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Frame snapshots > should render the FrameHeader 1`] = `
+<DocumentFragment>
+  <div
+    class="_ComponentHeader_163cd5"
+    data-test-component-header="frame"
+  >
+    <div
+      class="_ComponentHeader__label_163cd5"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="Element type"
+        class="_ButtonMenu_7516ba _FrameHeader__trigger_db2b05"
+        data-state="closed"
+        type="button"
+      >
+        <span
+          class="_FrameHeader__label_db2b05"
+        >
+          Frame
+          <svg
+            class="Icon"
+            data-fpl-icon-size="16"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 16 16"
+            width="16"
+          >
+            <path
+              d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </span>
+      </button>
+    </div>
+    <div
+      class="_ComponentHeader__buttons_163cd5"
+    >
+      <div
+        class="_FrameHeaderButtons_619d29"
+      >
+        <button
+          aria-label="Toggle ready for dev status"
+          aria-pressed="false"
+          class="_Button_b88d2e"
+          data-state="closed"
+          style="padding: 0px;"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              d="M13.631 6.018a.5.5 0 0 1 .35.614l-3 10.999a.5.5 0 0 1-.964-.263l3-11a.5.5 0 0 1 .614-.35M8.146 8.646a.5.5 0 0 1 .707.708L6.207 12l2.646 2.646a.5.5 0 0 1-.707.707l-3-3a.5.5 0 0 1 0-.707zm7 0a.5.5 0 0 1 .707 0l3 3a.5.5 0 0 1 0 .707l-3 3a.5.5 0 0 1-.707-.707L17.792 12l-2.646-2.646a.5.5 0 0 1 0-.708"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Create component"
+          aria-pressed="false"
+          class="_Button_b88d2e"
+          data-state="closed"
+          style="padding: 0px;"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M11.116 13.592a1.25 1.25 0 0 1 1.768 0l1.637 1.637a1.25 1.25 0 0 1 0 1.768l-1.637 1.638-.095.085a1.25 1.25 0 0 1-1.578 0l-.095-.085-1.638-1.64a1.25 1.25 0 0 1-.085-1.672l.085-.095zm1.06.707a.25.25 0 0 0-.353 0l-1.638 1.636a.25.25 0 0 0 0 .354l1.638 1.639a.25.25 0 0 0 .354 0l1.637-1.638a.25.25 0 0 0 0-.354zm3.053-4.82a1.25 1.25 0 0 1 1.767 0l1.639 1.637a1.25 1.25 0 0 1 0 1.768l-1.639 1.638-.095.086a1.25 1.25 0 0 1-1.578 0l-.095-.086-1.637-1.637a1.25 1.25 0 0 1-.086-1.673l.086-.095zm-8.226 0a1.25 1.25 0 0 1 1.767 0l1.64 1.638a1.25 1.25 0 0 1 0 1.768L8.77 14.52a1.25 1.25 0 0 1-1.672.086l-.095-.086-1.638-1.637a1.25 1.25 0 0 1-.086-1.673l.086-.095zm9.286.706a.25.25 0 0 0-.354 0l-1.637 1.64a.25.25 0 0 0 0 .353l1.637 1.637a.25.25 0 0 0 .354 0l1.639-1.638a.25.25 0 0 0 0-.354zm-8.226 0a.25.25 0 0 0-.353 0l-1.637 1.638a.25.25 0 0 0 0 .354l1.638 1.637a.25.25 0 0 0 .353 0l1.638-1.636a.25.25 0 0 0 0-.354zm3.053-4.819a1.25 1.25 0 0 1 1.768 0l1.637 1.638a1.25 1.25 0 0 1 0 1.767l-1.637 1.639-.095.085a1.25 1.25 0 0 1-1.578 0l-.095-.085-1.639-1.639a1.25 1.25 0 0 1-.085-1.673l.085-.094zm1.06.707a.25.25 0 0 0-.353 0l-1.639 1.638a.25.25 0 0 0 0 .353l1.64 1.639a.25.25 0 0 0 .353 0l1.637-1.639a.25.25 0 0 0 0-.353z"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Use as mask"
+          aria-pressed="false"
+          class="_Button_b88d2e"
+          data-state="closed"
+          style="padding: 0px;"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M18 12a6 6 0 0 1-8.5 5.456 6.001 6.001 0 0 0 0-10.912A6 6 0 0 1 18 12M6 12a5.99 5.99 0 0 1 2.401-4.801 5.003 5.003 0 0 1 0 9.602A5.99 5.99 0 0 1 6 12m2.2-5.88a7 7 0 1 0 7.6 11.76A7 7 0 0 0 8.2 6.12"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+            <path
+              clip-rule="evenodd"
+              d="M8.4 16.8a5.002 5.002 0 0 0 .001-9.602A5.99 5.99 0 0 0 6 12a5.99 5.99 0 0 0 2.4 4.8"
+              fill="var(--fpl-icon-color-3, var(--color-icon-tertiary))"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="_Section_5940d2"
+    data-test-section="position"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Position
+      </span>
+    </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: 100%;"
+      >
+        <span
+          class="_Text_eea229 _SectionColumnLabels__label_ed28d5"
+          style="font-size: 11px;"
+        >
+          Alignment
+        </span>
+      </div>
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+          style="width: 100%;"
+        >
+          <div
+            class="_ButtonGroup_f86a5c"
+            data-test-button-group="horizontal-alignment"
+          >
+            <button
+              aria-label="Align left"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 13 13"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M12.25 5C12.4489 5 12.6397 4.92098 12.7803 4.78033C12.921 4.63968 13 4.44891 13 4.25V3.75C13 3.55109 12.921 3.36032 12.7803 3.21967C12.6397 3.07902 12.4489 3 12.25 3H3.75C3.55109 3 3.36032 3.07902 3.21967 3.21967C3.07902 3.36032 3 3.55109 3 3.75V4.25C3 4.664 3.336 5 3.75 5H12.25ZM8.25 10C8.44891 10 8.63968 9.92098 8.78033 9.78033C8.92098 9.63968 9 9.44891 9 9.25V8.75C9 8.55109 8.92098 8.36032 8.78033 8.21967C8.63968 8.07902 8.44891 8 8.25 8H3.75C3.55109 8 3.36032 8.07902 3.21967 8.21967C3.07902 8.36032 3 8.55109 3 8.75V9.25C3 9.664 3.336 10 3.75 10H8.25Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M1 12.5C1 12.6326 0.947321 12.7598 0.853553 12.8536C0.759785 12.9473 0.632608 13 0.5 13C0.367392 13 0.240215 12.9473 0.146447 12.8536C0.0526785 12.7598 0 12.6326 0 12.5V0.5C0 0.367392 0.0526785 0.240215 0.146447 0.146447C0.240215 0.0526785 0.367392 0 0.5 0C0.632608 0 0.759785 0.0526785 0.853553 0.146447C0.947321 0.240215 1 0.367392 1 0.5V12.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align horizontal centers"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 11 13"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M10.25 5C10.4489 5 10.6397 4.92098 10.7803 4.78033C10.921 4.63968 11 4.44891 11 4.25V3.75C11 3.55109 10.921 3.36032 10.7803 3.21967C10.6397 3.07902 10.4489 3 10.25 3H0.75C0.551088 3 0.360322 3.07902 0.21967 3.21967C0.0790175 3.36032 0 3.55109 0 3.75V4.25C0 4.664 0.336 5 0.75 5H10.25ZM8.25 10C8.44891 10 8.63968 9.92098 8.78033 9.78033C8.92098 9.63968 9 9.44891 9 9.25V8.75C9 8.55109 8.92098 8.36032 8.78033 8.21967C8.63968 8.07902 8.44891 8 8.25 8H2.75C2.55109 8 2.36032 8.07902 2.21967 8.21967C2.07902 8.36032 2 8.55109 2 8.75V9.25C2 9.664 2.336 10 2.75 10H8.25Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M6 12.5C6 12.6326 5.94732 12.7598 5.85355 12.8536C5.75979 12.9473 5.63261 13 5.5 13C5.36739 13 5.24021 12.9473 5.14645 12.8536C5.05268 12.7598 5 12.6326 5 12.5V10H6V12.5ZM6 8V5H5V8H6ZM6 0.5V3H5V0.5C5 0.367392 5.05268 0.240215 5.14645 0.146447C5.24021 0.0526785 5.36739 0 5.5 0C5.63261 0 5.75979 0.0526785 5.85355 0.146447C5.94732 0.240215 6 0.367392 6 0.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align right"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 13 13"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M0.75 5C0.551088 5 0.360322 4.92098 0.21967 4.78033C0.0790175 4.63968 0 4.44891 0 4.25V3.75C0 3.55109 0.0790175 3.36032 0.21967 3.21967C0.360322 3.07902 0.551088 3 0.75 3H9.25C9.44891 3 9.63968 3.07902 9.78033 3.21967C9.92098 3.36032 10 3.55109 10 3.75V4.25C10 4.44891 9.92098 4.63968 9.78033 4.78033C9.63968 4.92098 9.44891 5 9.25 5H0.75ZM4.75 10C4.55109 10 4.36032 9.92098 4.21967 9.78033C4.07902 9.63968 4 9.44891 4 9.25V8.75C4 8.55109 4.07902 8.36032 4.21967 8.21967C4.36032 8.07902 4.55109 8 4.75 8H9.25C9.44891 8 9.63968 8.07902 9.78033 8.21967C9.92098 8.36032 10 8.55109 10 8.75V9.25C10 9.44891 9.92098 9.63968 9.78033 9.78033C9.63968 9.92098 9.44891 10 9.25 10H4.75Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M12 12.5C12 12.6326 12.0527 12.7598 12.1464 12.8536C12.2402 12.9473 12.3674 13 12.5 13C12.6326 13 12.7598 12.9473 12.8536 12.8536C12.9473 12.7598 13 12.6326 13 12.5V0.5C13 0.367392 12.9473 0.240215 12.8536 0.146447C12.7598 0.0526785 12.6326 0 12.5 0C12.3674 0 12.2402 0.0526785 12.1464 0.146447C12.0527 0.240215 12 0.367392 12 0.5V12.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+          <div
+            class="_ButtonGroup_f86a5c"
+            data-test-button-group="vertical-alignment"
+          >
+            <button
+              aria-label="Align top"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 13 13"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M5 12.25C5 12.4489 4.92098 12.6397 4.78033 12.7803C4.63968 12.921 4.44891 13 4.25 13H3.75C3.55109 13 3.36032 12.921 3.21967 12.7803C3.07902 12.6397 3 12.4489 3 12.25V3.75C3 3.55109 3.07902 3.36032 3.21967 3.21967C3.36032 3.07902 3.55109 3 3.75 3H4.25C4.44891 3 4.63968 3.07902 4.78033 3.21967C4.92098 3.36032 5 3.55109 5 3.75V12.25ZM10 8.25C10 8.44891 9.92098 8.63968 9.78033 8.78033C9.63968 8.92098 9.44891 9 9.25 9H8.75C8.55109 9 8.36032 8.92098 8.21967 8.78033C8.07902 8.63968 8 8.44891 8 8.25V3.75C8 3.55109 8.07902 3.36032 8.21967 3.21967C8.36032 3.07902 8.55109 3 8.75 3H9.25C9.44891 3 9.63968 3.07902 9.78033 3.21967C9.92098 3.36032 10 3.55109 10 3.75V8.25Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M12.5 1C12.6326 1 12.7598 0.947321 12.8536 0.853553C12.9473 0.759785 13 0.632608 13 0.5C13 0.367392 12.9473 0.240215 12.8536 0.146447C12.7598 0.0526785 12.6326 0 12.5 0H0.5C0.367392 0 0.240215 0.0526785 0.146447 0.146447C0.0526785 0.240215 0 0.367392 0 0.5C0 0.632608 0.0526785 0.759785 0.146447 0.853553C0.240215 0.947321 0.367392 1 0.5 1H12.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align vertical centers"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 13 11"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M5 0.75C5 0.551088 4.92098 0.360322 4.78033 0.21967C4.63968 0.0790175 4.44891 0 4.25 0H3.75C3.55109 0 3.36032 0.0790175 3.21967 0.21967C3.07902 0.360322 3 0.551088 3 0.75V10.25C3 10.664 3.336 11 3.75 11H4.25C4.44891 11 4.63968 10.921 4.78033 10.7803C4.92098 10.6397 5 10.4489 5 10.25V0.75ZM10 2.75C10 2.55109 9.92098 2.36032 9.78033 2.21967C9.63968 2.07902 9.44891 2 9.25 2H8.75C8.55109 2 8.36032 2.07902 8.21967 2.21967C8.07902 2.36032 8 2.55109 8 2.75V8.25C8 8.664 8.336 9 8.75 9H9.25C9.44891 9 9.63968 8.92098 9.78033 8.78033C9.92098 8.63968 10 8.44891 10 8.25V2.75Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  clip-rule="evenodd"
+                  d="M12.5 5C12.6326 5 12.7598 5.05268 12.8536 5.14645C12.9473 5.24021 13 5.36739 13 5.5C13 5.63261 12.9473 5.75979 12.8536 5.85355C12.7598 5.94732 12.6326 6 12.5 6H10V5H12.5ZM8 5H5V6H8V5ZM0.5 5H3V6H0.5C0.367392 6 0.240215 5.94732 0.146447 5.85355C0.0526785 5.75979 0 5.63261 0 5.5C0 5.36739 0.0526785 5.24021 0.146447 5.14645C0.240215 5.05268 0.367392 5 0.5 5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Align bottom"
+              aria-pressed="false"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              data-state="closed"
+              disabled=""
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 13 13"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M5 0.75C5 0.551088 4.92098 0.360322 4.78033 0.21967C4.63968 0.0790175 4.44891 0 4.25 0H3.75C3.55109 0 3.36032 0.0790175 3.21967 0.21967C3.07902 0.360322 3 0.551088 3 0.75V9.25C3 9.664 3.336 10 3.75 10H4.25C4.44891 10 4.63968 9.92098 4.78033 9.78033C4.92098 9.63968 5 9.44891 5 9.25V0.75ZM10 4.75C10 4.55109 9.92098 4.36032 9.78033 4.21967C9.63968 4.07902 9.44891 4 9.25 4H8.75C8.55109 4 8.36032 4.07902 8.21967 4.21967C8.07902 4.36032 8 4.55109 8 4.75V9.25C8 9.664 8.336 10 8.75 10H9.25C9.44891 10 9.63968 9.92098 9.78033 9.78033C9.92098 9.63968 10 9.44891 10 9.25V4.75Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+                <path
+                  d="M12.5 12C12.6326 12 12.7598 12.0527 12.8536 12.1464C12.9473 12.2402 13 12.3674 13 12.5C13 12.6326 12.9473 12.7598 12.8536 12.8536C12.7598 12.9473 12.6326 13 12.5 13H0.5C0.367392 13 0.240215 12.9473 0.146447 12.8536C0.0526785 12.7598 0 12.6326 0 12.5C0 12.3674 0.0526785 12.2402 0.146447 12.1464C0.240215 12.0527 0.367392 12 0.5 12H12.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

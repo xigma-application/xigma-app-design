@@ -1,0 +1,12 @@
+@forward '../section-column.module';
+@use '../section-column.module' as *;
+
+.SectionColumnLabels {
+  column-gap: $columnGap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  &__label {
+    margin-bottom: 5px;
+  }
+}

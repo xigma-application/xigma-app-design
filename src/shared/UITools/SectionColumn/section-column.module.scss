@@ -1,0 +1,17 @@
+$columnGap: 10px;
+$rowGap: 8px;
+
+.SectionColumn {
+  &--with-bottom-margin {
+    margin-bottom: 7.5px;
+  }
+
+  &--with-top-margin {
+    margin-top: 15px;
+  }
+
+  &__row {
+    column-gap: 8px;
+    display: flex;
+  }
+}

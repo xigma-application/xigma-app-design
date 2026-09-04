@@ -397,6 +397,8 @@
   "design.rightPanel.panelProperties.frame.frameHeader.menuAriaLabel": "Typ elementu",
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.group": "Grupa",
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Sekcja",
+  "design.rightPanel.panelProperties.frame.positionSection.columnAlignment.label": "Wyrównanie",
+  "design.rightPanel.panelProperties.frame.positionSection.label": "Pozycja",
   "design.rightPanel.panelProperties.frameTool.groups.archive": "Archiwum",
   "design.rightPanel.panelProperties.frameTool.groups.desktop": "Desktop",
   "design.rightPanel.panelProperties.frameTool.groups.figmaCommunity": "Społeczność Figma",

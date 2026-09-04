@@ -35,4 +35,12 @@ describe('Frame behaviors', () => {
     // result
     expect(screen.getByText('Frame')).toBeInTheDocument();
   });
+
+  it('should render the Position section', () => {
+    // before
+    renderFrame();
+
+    // result
+    expect(screen.getByText('Position')).toBeInTheDocument();
+  });
 });

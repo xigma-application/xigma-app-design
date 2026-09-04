@@ -385,6 +385,8 @@
   "design.rightPanel.panelProperties.frame.frameHeader.menuAriaLabel": "Element type",
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.group": "Group",
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Section",
+  "design.rightPanel.panelProperties.frame.positionSection.columnAlignment.label": "Alignment",
+  "design.rightPanel.panelProperties.frame.positionSection.label": "Position",
   "design.rightPanel.panelProperties.frameTool.groups.archive": "Archive",
   "design.rightPanel.panelProperties.frameTool.groups.desktop": "Desktop",
   "design.rightPanel.panelProperties.frameTool.groups.figmaCommunity": "Figma Community",

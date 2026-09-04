@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionColumnLabels snapshots > should render one label 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumnLabels_ed28d5"
+    style="width: 100%;"
+  >
+    <span
+      class="_Text_eea229 _SectionColumnLabels__label_ed28d5"
+      style="font-size: 11px;"
+    >
+      Alignment
+    </span>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`SectionColumnLabels snapshots > should render two labels 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumnLabels_ed28d5"
+    style="width: 100%;"
+  >
+    <span
+      class="_Text_eea229 _SectionColumnLabels__label_ed28d5"
+      style="font-size: 11px;"
+    >
+      X
+    </span>
+    <span
+      class="_Text_eea229 _SectionColumnLabels__label_ed28d5"
+      style="font-size: 11px;"
+    >
+      Y
+    </span>
+  </div>
+</DocumentFragment>
+`;

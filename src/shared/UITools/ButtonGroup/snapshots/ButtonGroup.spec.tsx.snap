@@ -1,0 +1,71 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ButtonGroup snapshots > should render one button per entry 1`] = `
+<DocumentFragment>
+  <div
+    class="_ButtonGroup_f86a5c"
+    data-test-button-group=""
+  >
+    <button
+      aria-label="Align left"
+      aria-pressed="false"
+      class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        fill="none"
+        height="12"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 13 13"
+        width="12"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          d="M12.25 5C12.4489 5 12.6397 4.92098 12.7803 4.78033C12.921 4.63968 13 4.44891 13 4.25V3.75C13 3.55109 12.921 3.36032 12.7803 3.21967C12.6397 3.07902 12.4489 3 12.25 3H3.75C3.55109 3 3.36032 3.07902 3.21967 3.21967C3.07902 3.36032 3 3.55109 3 3.75V4.25C3 4.664 3.336 5 3.75 5H12.25ZM8.25 10C8.44891 10 8.63968 9.92098 8.78033 9.78033C8.92098 9.63968 9 9.44891 9 9.25V8.75C9 8.55109 8.92098 8.36032 8.78033 8.21967C8.63968 8.07902 8.44891 8 8.25 8H3.75C3.55109 8 3.36032 8.07902 3.21967 8.21967C3.07902 8.36032 3 8.55109 3 8.75V9.25C3 9.664 3.336 10 3.75 10H8.25Z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+        <path
+          d="M1 12.5C1 12.6326 0.947321 12.7598 0.853553 12.8536C0.759785 12.9473 0.632608 13 0.5 13C0.367392 13 0.240215 12.9473 0.146447 12.8536C0.0526785 12.7598 0 12.6326 0 12.5V0.5C0 0.367392 0.0526785 0.240215 0.146447 0.146447C0.240215 0.0526785 0.367392 0 0.5 0C0.632608 0 0.759785 0.0526785 0.853553 0.146447C0.947321 0.240215 1 0.367392 1 0.5V12.5Z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Align center"
+      aria-pressed="false"
+      class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        fill="none"
+        height="12"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 11 13"
+        width="12"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          d="M10.25 5C10.4489 5 10.6397 4.92098 10.7803 4.78033C10.921 4.63968 11 4.44891 11 4.25V3.75C11 3.55109 10.921 3.36032 10.7803 3.21967C10.6397 3.07902 10.4489 3 10.25 3H0.75C0.551088 3 0.360322 3.07902 0.21967 3.21967C0.0790175 3.36032 0 3.55109 0 3.75V4.25C0 4.664 0.336 5 0.75 5H10.25ZM8.25 10C8.44891 10 8.63968 9.92098 8.78033 9.78033C8.92098 9.63968 9 9.44891 9 9.25V8.75C9 8.55109 8.92098 8.36032 8.78033 8.21967C8.63968 8.07902 8.44891 8 8.25 8H2.75C2.55109 8 2.36032 8.07902 2.21967 8.21967C2.07902 8.36032 2 8.55109 2 8.75V9.25C2 9.664 2.336 10 2.75 10H8.25Z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+        <path
+          clip-rule="evenodd"
+          d="M6 12.5C6 12.6326 5.94732 12.7598 5.85355 12.8536C5.75979 12.9473 5.63261 13 5.5 13C5.36739 13 5.24021 12.9473 5.14645 12.8536C5.05268 12.7598 5 12.6326 5 12.5V10H6V12.5ZM6 8V5H5V8H6ZM6 0.5V3H5V0.5C5 0.367392 5.05268 0.240215 5.14645 0.146447C5.24021 0.0526785 5.36739 0 5.5 0C5.63261 0 5.75979 0.0526785 5.85355 0.146447C5.94732 0.240215 6 0.367392 6 0.5Z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </button>
+  </div>
+</DocumentFragment>
+`;

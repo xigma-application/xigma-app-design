@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionColumnContent snapshots > should render its children in a single-column grid by default 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumnContent_e7fe0a _SectionColumnContent--single_e7fe0a"
+    style="width: 100%;"
+  >
+    <span>
+      body
+    </span>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`SectionColumnContent snapshots > should render its children in a two-input grid 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+    style="width: 100%;"
+  >
+    <span>
+      first
+    </span>
+    <span>
+      second
+    </span>
+  </div>
+</DocumentFragment>
+`;
