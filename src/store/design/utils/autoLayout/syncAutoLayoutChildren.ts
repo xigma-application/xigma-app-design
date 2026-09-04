@@ -5,7 +5,8 @@ import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 // utils
 import { getActivePage } from '../getActivePage';
 import { getAutoLayoutChildPositions } from './getAutoLayoutChildPositions';
-import { isBoxSceneNode } from './isBoxSceneNode';
+import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
+import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
 
 export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | null): void => {
   if (frameId) {
@@ -17,21 +18,22 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       frame.type === NodeType.frame &&
       (frame.layoutMode === LayoutMode.horizontal || frame.layoutMode === LayoutMode.vertical)
     ) {
-      const children = frame.childIds
-        .map((childId) => nodes[childId])
-        .filter(Boolean)
-        .filter(isBoxSceneNode);
+      const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
+      const bounds = children.map(getNodeAxisAlignedBounds);
+      const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
       const positions = getAutoLayoutChildPositions(
         frame.layoutMode,
         frame.itemSpacing ?? 0,
         frame.layoutAlignment ?? AlignmentLayout.topLeft,
         frame,
-        children,
+        sizes,
       );
 
       children.forEach((child, index) => {
-        child.x = positions[index].x;
-        child.y = positions[index].y;
+        const deltaX = positions[index].x - bounds[index].x;
+        const deltaY = positions[index].y - bounds[index].y;
+
+        Object.assign(child, getGeometryDeltaChanges(child, deltaX, deltaY));
       });
     }
   }

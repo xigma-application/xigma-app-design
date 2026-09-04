@@ -1,7 +1,7 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -205,6 +205,61 @@ describe('syncAutoLayoutChildren', () => {
 
     // result
     expect(getActivePage(state).nodes.a).toMatchObject({ x: 0, y: 0 });
+  });
+
+  it('should treat a vector child as a box, shifting its vertices by the bounding-box delta', () => {
+    // mock — a 40x10 vector sitting at the origin, next to a 30-wide rectangle
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const seg: TVectorSegment = { endId: 'p2', id: 's1', startId: 'p1', tangentEnd: null, tangentStart: null };
+    const vector: TVectorNode = {
+      defaultFill: [],
+      filledFaceKeys: [],
+      id: 'b',
+      name: 'Vector',
+      parentId: 'frame-1',
+      rotation: 0,
+      segments: { s1: seg },
+      strokeColor: '#000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { p1: { id: 'p1', x: 0, y: 0 }, p2: { id: 'p2', x: 40, y: 10 } },
+    };
+    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b: vector, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the vector's box moves to x=40 (after the 30-wide rect plus a 10 gap), so every vertex shifts by +40/+0
+    expect((getActivePage(state).nodes.b as TVectorNode).vertices).toEqual({
+      p1: { id: 'p1', x: 40, y: 0 },
+      p2: { id: 'p2', x: 80, y: 10 },
+    });
+  });
+
+  it('should treat a line child as a box, shifting its endpoints by the bounding-box delta', () => {
+    // mock — a 20-long horizontal line at the origin, next to a 30-wide rectangle
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const line: TLineNode = {
+      id: 'b',
+      name: 'Line',
+      parentId: 'frame-1',
+      stroke: '#000',
+      type: NodeType.line,
+      x1: 0,
+      x2: 20,
+      y1: 0,
+      y2: 0,
+    };
+    const layoutFrame = frame({ childIds: ['a', 'b'], layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b: line, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the line's box moves to x=30 (right after the rect, no gap), so both endpoints shift by +30
+    expect(getActivePage(state).nodes.b).toMatchObject({ x1: 30, x2: 50, y1: 0, y2: 0 });
   });
 
   it('should skip a child id that no longer resolves to a node', () => {
