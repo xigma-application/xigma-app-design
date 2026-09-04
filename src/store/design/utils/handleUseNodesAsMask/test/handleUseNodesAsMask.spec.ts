@@ -83,7 +83,7 @@ describe('handleUseNodesAsMask', () => {
     expect(group.childIds).toEqual(['a', 'b']);
     expect(page.nodes.b.isMask).toBe(true);
     expect(page.nodes.a.isMask).toBeUndefined();
-    expect(page.selectedIds).toEqual(['group-1']);
+    expect(page.selectedIds).toEqual(['b']);
   });
 
   it('should wrap a single selected node too', () => {
@@ -100,6 +100,7 @@ describe('handleUseNodesAsMask', () => {
     expect(group.name).toBe(DEFAULT_MASK_GROUP_NAME);
     expect(group.childIds).toEqual(['a']);
     expect(page.nodes.a.isMask).toBe(true);
+    expect(page.selectedIds).toEqual(['a']);
   });
 
   it('should no-op when nothing is selected', () => {

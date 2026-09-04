@@ -205,10 +205,8 @@ describe('historyMiddleware', () => {
     store.dispatch(setSelection([idA, idB]));
     store.dispatch(createMaskGroup());
 
-    const groupId = selectSelectedIds(store.getState())[0];
-    const maskChildIds = (store.getState().design.pages[store.getState().design.activePageId].nodes[groupId] as { childIds: string[] })
-      .childIds;
-    const maskChildId = maskChildIds[maskChildIds.length - 1];
+    const groupId = store.getState().design.pages[store.getState().design.activePageId].rootOrder[0];
+    const maskChildId = selectSelectedIds(store.getState())[0];
 
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
 

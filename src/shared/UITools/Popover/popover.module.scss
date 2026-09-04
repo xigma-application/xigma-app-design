@@ -12,6 +12,6 @@
 
   &--scrollable {
     display: flex;
-    max-height: min(var(--radix-popper-available-height), 400px);
+    max-height: var(--radix-popper-available-height);
   }
 }

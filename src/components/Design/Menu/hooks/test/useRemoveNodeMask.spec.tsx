@@ -36,8 +36,7 @@ describe('useRemoveNodeMask', () => {
     const [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([idA]));
     store.dispatch(createMaskGroup());
-    const groupId = selectActivePage(store.getState()).selectedIds[0];
-    const maskChildId = (selectActivePage(store.getState()).nodes[groupId] as { childIds: string[] }).childIds.at(-1)!;
+    const maskChildId = selectActivePage(store.getState()).selectedIds[0];
 
     // before
     const { result } = renderHook(() => useRemoveNodeMask(maskChildId), { wrapper });

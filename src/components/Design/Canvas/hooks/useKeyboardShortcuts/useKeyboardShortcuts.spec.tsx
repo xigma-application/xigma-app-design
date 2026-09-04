@@ -780,11 +780,13 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true, metaKey: true });
 
     // result
-    const [groupId] = selectSelectedIds(realStore.getState());
     const page = realStore.getState().design.pages[realStore.getState().design.activePageId];
+    const [groupId] = page.rootOrder;
+    const [maskChildId] = selectSelectedIds(realStore.getState());
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
-    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)!].isMask).toBe(true);
+    expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
+    expect(page.nodes[maskChildId].isMask).toBe(true);
   });
 
   it('should bring the selection to the front on "]" and send it to the back on "["', () => {

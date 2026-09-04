@@ -55,6 +55,7 @@ export const Popover: FC<TPopoverProps> = ({
         <PopoverPrimitive.Content
           align={align}
           className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
+          collisionPadding={scrollable ? 10 : undefined}
           onInteractOutside={onInteractOutside}
           onPointerDown={moveable ? onPointerDown : undefined}
           onPointerMove={moveable ? onPointerMove : undefined}

@@ -1,4 +1,5 @@
 @use '@xigma/scss/mixins/disabled';
+@use '@xigma/scss/mixins/svg-color';
 
 .Button {
   align-items: center;
@@ -26,6 +27,17 @@
 
   &--outline {
     border: 1px solid var(--color-neutral-3);
+  }
+
+  &--selected {
+    background-color: var(--color-bg-selected);
+    color: var(--color-icon-selected);
+
+    @include svg-color.svg-color(var(--color-icon-selected), true);
+
+    &:hover {
+      background-color: var(--color-bg-selected);
+    }
   }
 
   &--medium {

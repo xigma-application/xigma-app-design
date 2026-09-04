@@ -43,6 +43,14 @@ describe('Button snapshots', () => {
     // result
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('should render Button in its selected state', () => {
+    // before
+    const { asFragment } = render(<Button selected>Click</Button>);
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
 
 describe('Button behaviors', () => {
@@ -81,6 +89,14 @@ describe('Button behaviors', () => {
   it('should expose aria-pressed matching the active prop', () => {
     // before
     render(<Button active>Click</Button>);
+
+    // result
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should expose aria-pressed matching the selected prop', () => {
+    // before
+    render(<Button selected>Click</Button>);
 
     // result
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');

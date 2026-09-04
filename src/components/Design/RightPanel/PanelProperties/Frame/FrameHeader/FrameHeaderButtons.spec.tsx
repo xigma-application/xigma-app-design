@@ -6,7 +6,7 @@ import FrameHeaderButtons from './FrameHeaderButtons';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -92,6 +92,77 @@ describe('FrameHeaderButtons behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[frameId].isMask).toBe(true);
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should keep the masked frame selected so the panel does not disappear', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Use as mask'));
+
+    // result
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([frameId]);
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should render the mask button as active when the selected frame is already a mask', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { isMask: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // result
+    expect(screen.getByLabelText('Use as mask')).toHaveAttribute('aria-pressed', 'true');
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should hide the html tag button when the selected frame is already a mask', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { isMask: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // result
+    expect(screen.queryByLabelText('Toggle ready for dev status')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should remove the mask, without grouping, when the mask button is clicked while already masked', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { isMask: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Use as mask'));
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[frameId].isMask).toBe(false);
+    expect(page.selectedIds).toEqual([frameId]);
 
     // cleanup
     store.dispatch(setSelection([]));

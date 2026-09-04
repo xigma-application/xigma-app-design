@@ -64,7 +64,10 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           onBlur={onBlurHex}
           startAdornment={
             <ColorPicker
+              align="end"
+              moveable
               onChange={onPickerChange}
+              side="top"
               trigger={<Color alpha={alpha} color={hex} cursor="default" />}
               triggerAriaLabel={triggerAriaLabel}
               triggerClassName={styles.ColorPickerInput__trigger}

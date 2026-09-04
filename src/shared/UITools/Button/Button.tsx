@@ -15,16 +15,31 @@ export type TButtonProps = {
   className?: string;
   disabled?: boolean;
   onClick?: TFunc;
+  selected?: boolean;
   size?: TButtonSize;
   variant?: TButtonVariant;
 } & Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'className' | 'disabled' | 'onClick' | 'type'>;
 
 export const Button = forwardRef<HTMLButtonElement, TButtonProps>(
-  ({ active = false, ariaLabel, children, className = '', disabled = false, onClick, size = 'small', variant = 'solid', ...rest }, ref) => (
+  (
+    {
+      active = false,
+      ariaLabel,
+      children,
+      className = '',
+      disabled = false,
+      onClick,
+      selected = false,
+      size = 'small',
+      variant = 'solid',
+      ...rest
+    },
+    ref,
+  ) => (
     <button
       {...rest}
       aria-label={ariaLabel}
-      aria-pressed={active}
+      aria-pressed={active || selected}
       className={cx(
         styles.Button,
         {
@@ -32,6 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, TButtonProps>(
           [styles['Button--disabled']]: disabled,
           [styles['Button--medium']]: size === 'medium',
           [styles['Button--outline']]: variant === 'outline',
+          [styles['Button--selected']]: selected,
         },
         className,
       )}

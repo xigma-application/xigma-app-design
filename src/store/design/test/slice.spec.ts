@@ -273,12 +273,13 @@ describe('design slice', () => {
     // action
     const masked = slice(selected, createMaskGroup());
     const page = masked.pages[masked.activePageId];
-    const [groupId] = page.selectedIds;
+    const [groupId] = page.rootOrder;
+    const [maskChildId] = page.selectedIds;
 
     // result
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
-    const maskChildId = (page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)!;
+    expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
     expect(page.nodes[maskChildId].isMask).toBe(true);
 
     // action

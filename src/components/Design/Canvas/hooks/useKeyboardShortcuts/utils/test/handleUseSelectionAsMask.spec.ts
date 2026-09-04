@@ -1,6 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage, selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -48,11 +48,12 @@ describe('handleUseSelectionAsMask', () => {
     handleUseSelectionAsMask(store.dispatch);
 
     // result
-    const [selectedId] = selectSelectedIds(store.getState());
-    const group = selectSelectedNodes(store.getState())[0];
-    expect(group.type).toBe(NodeType.group);
-    expect(group.name).toBe('Mask group');
-    expect(selectedId).not.toBe(idA);
+    const page = selectActivePage(store.getState());
+    const [groupId] = page.rootOrder;
+    const [maskChildId] = selectSelectedIds(store.getState());
+    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].name).toBe('Mask group');
+    expect(page.nodes[maskChildId].isMask).toBe(true);
   });
 
   it('should do nothing while in vector editing mode', () => {
