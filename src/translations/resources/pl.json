@@ -399,6 +399,7 @@
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Sekcja",
   "design.rightPanel.panelProperties.frame.layoutSection.autoLayoutAriaLabel": "Użyj auto layoutu",
   "design.rightPanel.panelProperties.frame.layoutSection.autoLayoutTooltip": "Użyj auto layoutu",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Przycinaj zawartość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelHeight": "Wysokość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelWidth": "Szerokość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.label": "Wymiary",

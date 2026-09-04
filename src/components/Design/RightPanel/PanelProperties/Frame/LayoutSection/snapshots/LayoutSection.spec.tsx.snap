@@ -308,6 +308,47 @@ exports[`LayoutSection snapshots > should render the flow row 1`] = `
         </div>
       </div>
     </div>
+    <div
+      class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb _SectionColumn--with-top-margin_84b4eb"
+      data-test-section=""
+    >
+      <div
+        class="_SectionColumnLabels_ed28d5"
+        style="width: calc(100% - 32px);"
+      />
+      <div
+        class="_SectionColumn__row_84b4eb"
+      >
+        <div
+          class="_SectionColumnContent_e7fe0a _SectionColumnContent--single_e7fe0a"
+          style="width: calc(100% - 32px);"
+        >
+          <div
+            class="_Checkbox_923e68"
+            data-test-checkbox="clip-content"
+          >
+            <input
+              class="_Checkbox__input_923e68"
+              data-test-checkbox-input="clip-content"
+              type="checkbox"
+            />
+            <div
+              class="_Checkbox__input-wrapper_923e68"
+            />
+            <span
+              class="_Checkbox__label_923e68"
+            >
+              Clip content
+            </span>
+          </div>
+        </div>
+        <div>
+          <div
+            class="_SectionColumnButtonIcons_71f71e"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </DocumentFragment>
 `;

@@ -387,6 +387,7 @@
   "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Section",
   "design.rightPanel.panelProperties.frame.layoutSection.autoLayoutAriaLabel": "Use auto layout",
   "design.rightPanel.panelProperties.frame.layoutSection.autoLayoutTooltip": "Use auto layout",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Clip content",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelHeight": "Height",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelWidth": "Width",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.label": "Dimensions",

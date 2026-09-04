@@ -51,4 +51,12 @@ describe('LayoutSection behaviors', () => {
     // result
     expect(screen.getByText('Dimensions')).toBeInTheDocument();
   });
+
+  it('should render the clip content checkbox label', () => {
+    // before
+    renderLayoutSection();
+
+    // result
+    expect(screen.getByText('Clip content')).toBeInTheDocument();
+  });
 });
