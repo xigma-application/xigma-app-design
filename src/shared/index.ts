@@ -39,3 +39,4 @@ export * from './UITools/SectionColumn/SectionColumn';
 export * from './UITools/SectionColumn/enums';
 export * from './UITools/Tabs/Tabs';
 export * from './UITools/TextField/TextField';
+export * from './UITools/ToggleButtonGroup/ToggleButtonGroup';

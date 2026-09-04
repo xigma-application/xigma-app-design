@@ -8,4 +8,5 @@ export enum E2EAttribute {
   section = 'section',
   textField = 'text-field',
   textFieldInput = 'text-field-input',
+  toggleButtonGroup = 'toggle-button-group',
 }

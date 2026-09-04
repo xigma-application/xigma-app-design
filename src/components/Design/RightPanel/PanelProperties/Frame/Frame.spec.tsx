@@ -43,4 +43,13 @@ describe('Frame behaviors', () => {
     // result
     expect(screen.getAllByText('Position')).toHaveLength(2);
   });
+
+  it('should render the Layout section', () => {
+    // before
+    renderFrame();
+
+    // result
+    expect(screen.getByText('Layout')).toBeInTheDocument();
+    expect(screen.getByText('Flow')).toBeInTheDocument();
+  });
 });
