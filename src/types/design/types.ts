@@ -79,6 +79,10 @@ export type TFrameNode = TBaseNode & {
   itemSpacing?: number;
   layoutAlignment?: AlignmentLayout;
   layoutMode?: LayoutMode;
+  paddingBottom?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  paddingTop?: number;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;

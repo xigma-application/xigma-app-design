@@ -114,6 +114,26 @@ describe('syncAutoLayoutChildren', () => {
     expect(getActivePage(state).nodes.b).toMatchObject({ x: 100, y: 240 });
   });
 
+  it('should inset children from the frame’s edges by its padding', () => {
+    // mock
+    const a = rect({ id: 'a', width: 30 });
+    const layoutFrame = frame({
+      childIds: ['a'],
+      layoutMode: LayoutMode.horizontal,
+      paddingLeft: 8,
+      paddingTop: 4,
+      x: 100,
+      y: 200,
+    });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 108, y: 204 });
+  });
+
   it('should default a missing itemSpacing to zero', () => {
     // mock
     const a = rect({ id: 'a', width: 30 });

@@ -255,6 +255,35 @@ describe('updateDragDropTarget', () => {
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 0 });
   });
 
+  it('should inset the drop indicator by the auto-layout frame’s own padding', () => {
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#fff',
+        height: 300,
+        itemSpacing: 0,
+        layoutMode: LayoutMode.vertical,
+        name: 'Frame',
+        paddingLeft: 20,
+        paddingTop: 20,
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 300,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const rectId = addRect(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ indicator: { x: 20, y: 20 } });
+  });
+
   it('should clear the drop indicator once the pointer leaves the auto-layout frame', () => {
     addAutoLayoutFrame(0, 0, 100, LayoutMode.vertical);
     const rectId = addRect(10, 10);

@@ -5,6 +5,8 @@ import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 // utils
 import { getActivePage } from '../getActivePage';
 import { getAutoLayoutChildPositions } from './getAutoLayoutChildPositions';
+import { getAutoLayoutContentBox } from './getAutoLayoutContentBox';
+import { getFramePadding } from './getFramePadding';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
 import { getGroupSubtreeNodes } from '../nodeHierarchy/getGroupSubtreeNodes';
 import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
@@ -22,11 +24,12 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
       const bounds = children.map(getNodeAxisAlignedBounds);
       const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
+      const contentBox = getAutoLayoutContentBox(frame, getFramePadding(frame));
       const positions = getAutoLayoutChildPositions(
         frame.layoutMode,
         frame.itemSpacing ?? 0,
         frame.layoutAlignment ?? AlignmentLayout.topLeft,
-        frame,
+        contentBox,
         sizes,
       );
 

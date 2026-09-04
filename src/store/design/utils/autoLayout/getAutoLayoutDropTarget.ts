@@ -8,6 +8,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { clampToFrameEdge } from './clampToFrameEdge';
 import { getAutoLayoutChildPositions, TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
+import { getAutoLayoutContentBox, TAutoLayoutPadding } from './getAutoLayoutContentBox';
 import { getAutoLayoutDropInsertionIndex } from './getAutoLayoutDropInsertionIndex';
 
 export type TAutoLayoutDropIndicator = { height: number; width: number; x: number; y: number };
@@ -19,16 +20,18 @@ export const getAutoLayoutDropTarget = (
   itemSpacing: number,
   alignment: AlignmentLayout,
   frame: TDraftRect,
+  padding: TAutoLayoutPadding,
   children: TAutoLayoutChildSize[],
   draggedSize: { height: number; width: number },
   cursorPoint: TPoint,
 ): TAutoLayoutDropTarget => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
-  const positions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, frame, children);
+  const contentBox = getAutoLayoutContentBox(frame, padding);
+  const positions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, children);
   const cursorPrimary = isHorizontal ? cursorPoint.x : cursorPoint.y;
   const index = getAutoLayoutDropInsertionIndex(isHorizontal, cursorPrimary, positions, children);
   const simulatedChildren = [...children.slice(0, index), { ...draggedSize, id: '__dragged__' }, ...children.slice(index)];
-  const insertedPosition = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, frame, simulatedChildren)[index];
+  const insertedPosition = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, simulatedChildren)[index];
   const indicatorX = clampToFrameEdge(insertedPosition.x, frame.x);
   const indicatorY = clampToFrameEdge(insertedPosition.y, frame.y);
   const indicator = isHorizontal

@@ -1,5 +1,6 @@
 // store
 import { getAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
+import { getFramePadding } from 'store/design/utils/autoLayout/getFramePadding';
 import { getNodeAxisAlignedBounds } from 'store/design/utils/getNodeAxisAlignedBounds';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
@@ -65,6 +66,7 @@ export const updateDragDropTarget = (
           desiredParent.itemSpacing ?? 0,
           desiredParent.layoutAlignment ?? AlignmentLayout.topLeft,
           desiredParent,
+          getFramePadding(desiredParent),
           siblingSizes,
           getNodesBoundingBox(selectedNodes),
           point,

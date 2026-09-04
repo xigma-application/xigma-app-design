@@ -1,8 +1,11 @@
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
+import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 
 // utils
 import { getAutoLayoutDropTarget } from '../getAutoLayoutDropTarget';
+
+const NO_PADDING: TAutoLayoutPadding = { paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 };
 
 describe('getAutoLayoutDropTarget', () => {
   it('should land a 30-wide item at the start of an empty vertical frame, indicator spanning its width', () => {
@@ -12,6 +15,7 @@ describe('getAutoLayoutDropTarget', () => {
       10,
       AlignmentLayout.topLeft,
       { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
       [],
       { height: 20, width: 30 },
       { x: 50, y: 50 },
@@ -31,6 +35,7 @@ describe('getAutoLayoutDropTarget', () => {
       10,
       AlignmentLayout.topLeft,
       { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
       [{ height: 20, id: 'a', width: 20 }],
       { height: 20, width: 30 },
       { x: 0, y: 5 },
@@ -48,6 +53,7 @@ describe('getAutoLayoutDropTarget', () => {
       10,
       AlignmentLayout.topLeft,
       { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
       [{ height: 20, id: 'a', width: 20 }],
       { height: 20, width: 30 },
       { x: 0, y: 100 },
@@ -66,6 +72,7 @@ describe('getAutoLayoutDropTarget', () => {
       0,
       AlignmentLayout.topLeft,
       { height: 100, width: 200, x: 0, y: 0 },
+      NO_PADDING,
       [],
       { height: 40, width: 20 },
       { x: 10, y: 10 },
@@ -83,6 +90,7 @@ describe('getAutoLayoutDropTarget', () => {
       0,
       AlignmentLayout.topLeft,
       { height: 200, width: 200, x: 100, y: 300 },
+      NO_PADDING,
       [],
       { height: 20, width: 30 },
       { x: 150, y: 350 },
@@ -90,5 +98,39 @@ describe('getAutoLayoutDropTarget', () => {
 
     // result
     expect(dropTarget.indicator).toMatchObject({ x: 102, y: 302 });
+  });
+
+  it('should place the indicator at the real padding inset once padding reaches the minimum gap or more', () => {
+    // action — 5px padding on every side, well past the 2px minimum
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      { paddingBottom: 5, paddingLeft: 5, paddingRight: 5, paddingTop: 5 },
+      [],
+      { height: 20, width: 30 },
+      { x: 50, y: 50 },
+    );
+
+    // result — sits at the real padding inset, the minimum-gap clamp has nothing left to do
+    expect(dropTarget.indicator).toMatchObject({ x: 5, y: 5 });
+  });
+
+  it('should still enforce the minimum gap when padding falls short of it', () => {
+    // action — 1px padding, less than the 2px minimum
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      { paddingBottom: 1, paddingLeft: 1, paddingRight: 1, paddingTop: 1 },
+      [],
+      { height: 20, width: 30 },
+      { x: 50, y: 50 },
+    );
+
+    // result — the minimum-gap floor still wins over the smaller real padding
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 2 });
   });
 });
