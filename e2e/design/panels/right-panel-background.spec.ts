@@ -40,6 +40,43 @@ test('editing the hex field repaints the canvas background', async ({ page }) =>
   expect(after.equals(before)).toBe(false);
 });
 
+test('clicking the swatch opens the color picker popover and it stays open', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-right-panel-background-picker-open');
+  await expect(designPage.canvas).toBeVisible();
+
+  await page.getByLabel('Background color').click();
+
+  const panel = page.locator('[class*="ColorPicker_"]').first();
+
+  await expect(panel).toBeVisible();
+  await page.waitForTimeout(300);
+  await expect(panel).toBeVisible();
+});
+
+test('picking a preset color inside the open popover keeps it open and updates the hex field', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-right-panel-background-picker-pick');
+  await expect(designPage.canvas).toBeVisible();
+
+  await page.getByLabel('Background color').click();
+
+  const panel = page.locator('[class*="ColorPicker_"]').first();
+
+  await expect(panel).toBeVisible();
+
+  const preset = page.locator('[class*="Footer__colors"] > div').first();
+
+  await preset.click();
+
+  // picking a color mutates the store, which re-renders the hex/alpha fields with a new value —
+  // the popover must survive that re-render instead of being torn down along with it
+  await expect(panel).toBeVisible();
+  await expect(page.locator('[data-test-text-field-input="background-color"]')).not.toHaveValue('444444');
+});
+
 test('toggling the eye off then back on restores the original canvas background', async ({ page }) => {
   const designPage = new DesignPage(page);
 

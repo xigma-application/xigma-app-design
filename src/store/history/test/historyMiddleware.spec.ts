@@ -11,6 +11,7 @@ import {
   moveNodes,
   reorderPages,
   sendSelectionToBack,
+  setPaint,
   setSelection,
   toggleFrameClipContent,
   toggleNodeHidden,
@@ -20,6 +21,7 @@ import {
   updateGuide,
 } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
+import { DEFAULT_PAINT } from 'store/design/constants';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -319,6 +321,25 @@ describe('historyMiddleware', () => {
 
     // result
     expect(selectActivePage(store.getState()).guides).toEqual([]);
+  });
+
+  it('should treat a page background paint change as its own undo step', () => {
+    // mock
+    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setPaint({ color: '#336699', opacity: 50, type: 'solid' }));
+
+    // before
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#336699',
+      opacity: 50,
+      type: 'solid',
+    });
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual(DEFAULT_PAINT);
   });
 
   it('should treat removing every guide on an axis as its own undo step', () => {

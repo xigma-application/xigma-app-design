@@ -13,6 +13,7 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TextFieldVariant } from '../enums';
 
 export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'color'> & {
+  className?: string;
   e2eValue?: TE2EValue;
   endAdornment?: ReactNode;
   inputRef?: RefObject<HTMLInputElement | null>;
@@ -21,6 +22,8 @@ export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>,
 };
 
 export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
+  className = '',
+  defaultValue,
   disabled = false,
   e2eValue = '',
   endAdornment,
@@ -46,15 +49,20 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
 
   return (
     <div
-      className={cx(styles.TextFieldWrapper, styles[`TextFieldWrapper--${variant}`], {
-        [styles['TextFieldWrapper--disabled']]: disabled,
-      })}
+      className={cx(
+        styles.TextFieldWrapper,
+        styles[`TextFieldWrapper--${variant}`],
+        { [styles['TextFieldWrapper--disabled']]: disabled },
+        className,
+      )}
       {...getAttributes(E2EAttribute.textField, e2eValue)}
     >
       {startAdornment}
       <input
         className={styles.TextFieldWrapper__input}
+        defaultValue={defaultValue}
         disabled={disabled}
+        key={defaultValue as string | number}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         ref={inputRef}

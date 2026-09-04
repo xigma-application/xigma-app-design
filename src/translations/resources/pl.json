@@ -380,6 +380,7 @@
   "design.rightPanel.header.zoomMenu.inputAriaLabel": "Procent powiększenia",
   "design.rightPanel.header.zoomTrigger.ariaLabel": "Powiększenie",
   "design.rightPanel.header.zoomTrigger.tooltip": "Opcje powiększenia i widoku",
+  "design.rightPanel.panelProperties.design.background.colorTriggerAriaLabel": "Kolor tła",
   "design.rightPanel.panelProperties.design.background.toggleVisibilityAriaLabel": "Przełącz widoczność tła",
   "design.rightPanel.panelProperties.design.section.1.label": "Strona",
   "design.toolbar.actions": "Akcje",

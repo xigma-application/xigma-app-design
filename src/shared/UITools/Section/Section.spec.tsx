@@ -43,18 +43,6 @@ describe('Section behaviors', () => {
     expect(screen.getByText('body')).toBeInTheDocument();
   });
 
-  it('should drop the separator spacing class when separator is false', () => {
-    // before
-    const { container } = render(
-      <Section label="Page" separator={false}>
-        <span>body</span>
-      </Section>,
-    );
-
-    // result
-    expect(container.querySelector('[class*="Section__header--separator"]')).toBeNull();
-  });
-
   it('should not render the trailing component slot when no component is given', () => {
     // before
     const { container } = render(

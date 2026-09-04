@@ -20,3 +20,21 @@ describe('Color snapshots', () => {
     expect(asFragment()).toMatchSnapshot();
   });
 });
+
+describe('Color behaviors', () => {
+  it('should show the sampler cursor by default', () => {
+    // before
+    const { container } = render(<Color alpha={100} color="#ff0000" />);
+
+    // result
+    expect(container.querySelector('[class*="Color--cursor-default"]')).toBeNull();
+  });
+
+  it('should show the default cursor when cursor is set to "default"', () => {
+    // before
+    const { container } = render(<Color alpha={100} color="#ff0000" cursor="default" />);
+
+    // result
+    expect(container.querySelector('[class*="Color--cursor-default"]')).not.toBeNull();
+  });
+});

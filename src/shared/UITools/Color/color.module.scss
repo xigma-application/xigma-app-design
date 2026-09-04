@@ -10,6 +10,10 @@
   position: relative;
   width: 16px;
 
+  &--cursor-default {
+    cursor: default;
+  }
+
   &__picker {
     height: 100%;
     position: relative;

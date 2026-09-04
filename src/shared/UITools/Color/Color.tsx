@@ -8,13 +8,13 @@ import styles from './color.module.scss';
 import { hexToRgb } from 'utils/color/hexToRgb';
 import { rgbToCssString } from 'utils/color/rgbToCssString';
 
-export type TColorProps = { alpha: number; className?: string; color: string };
+export type TColorProps = { alpha: number; className?: string; color: string; cursor?: 'default' | 'sampler' };
 
-export const Color: FC<TColorProps> = ({ alpha, className = '', color }) => {
+export const Color: FC<TColorProps> = ({ alpha, className = '', color, cursor = 'sampler' }) => {
   const rgb = hexToRgb(color);
 
   return (
-    <div className={cx(styles.Color, className)}>
+    <div className={cx(styles.Color, { [styles['Color--cursor-default']]: cursor === 'default' }, className)}>
       <div className={styles.Color__picker} style={{ backgroundColor: rgbToCssString({ ...rgb, a: 100 }) }} />
       <div className={styles['Color__picker-alpha']} style={{ backgroundColor: rgbToCssString({ ...rgb, a: alpha }) }} />
       <div className={styles['Color__picker-texture']} />

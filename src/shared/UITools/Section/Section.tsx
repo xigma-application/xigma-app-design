@@ -16,14 +16,13 @@ export type TSectionProps = {
   component?: ReactElement;
   e2eValue?: TE2EValue;
   label?: string;
-  separator?: boolean;
 };
 
-export const Section: FC<TSectionProps> = ({ children, component, e2eValue = '', label, separator = true }) => (
+export const Section: FC<TSectionProps> = ({ children, component, e2eValue = '', label }) => (
   <E2EDataAttribute type={E2EAttribute.section} value={e2eValue}>
     <div className={styles.Section}>
       {label && (
-        <div className={cx(styles.Section__header, { [styles['Section__header--separator']]: separator })}>
+        <div className={cx(styles.Section__header)}>
           <span className={styles.Section__label}>{label}</span>
           {component && <div className={styles.Section__component}>{component}</div>}
         </div>

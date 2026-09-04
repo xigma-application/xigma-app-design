@@ -1,25 +1,29 @@
-.ColumnBackground {
+.ColorPickerInput {
   align-items: center;
   column-gap: 8px;
   display: flex;
+  height: 32px;
   width: 100%;
 
   &__fields {
-    align-items: center;
-    column-gap: 8px;
-    display: flex;
     flex: 1;
     min-width: 0;
   }
 
   &__alpha {
-    flex-shrink: 0;
-    width: 72px;
+    flex: 0 0 auto;
   }
 
   &__unit {
     color: var(--color-neutral-2);
     font-size: 11px;
+  }
+
+  &__trigger {
+    background: none;
+    border: none;
+    display: flex;
+    padding: 0;
   }
 
   &__toggle {
