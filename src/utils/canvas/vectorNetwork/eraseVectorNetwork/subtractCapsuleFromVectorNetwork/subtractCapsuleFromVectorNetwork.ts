@@ -16,7 +16,7 @@ import { planarizeVectorNetwork } from '../../planarizeVectorNetwork/planarizeVe
 export const subtractCapsuleFromVectorNetwork = (node: TVectorNode, path: TPoint[], radius: number): TErasedNetwork | null => {
   const capsule = buildCapsuleNetwork(path, radius);
   const capsuleSegmentIds = new Set(Object.keys(capsule.segments));
-  const planar = planarizeVectorNetwork({ ...node.segments, ...capsule.segments }, { ...node.vertices, ...capsule.vertices });
+  const planar = planarizeVectorNetwork(null, { ...node.segments, ...capsule.segments }, { ...node.vertices, ...capsule.vertices });
   const originalFillPolygons = getOriginalFillPolygons(node);
   const { droppedOriginalPiece, keptCapsulePiece, keptSegments } = filterKeptSegments(
     planar,

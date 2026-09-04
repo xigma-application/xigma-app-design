@@ -21,7 +21,7 @@ describe('planarizeVectorNetwork', () => {
     };
 
     // before
-    const result = planarizeVectorNetwork(segments, vertices);
+    const result = planarizeVectorNetwork(null, segments, vertices);
 
     // result
     expect(result.segments).toBe(segments);
@@ -42,7 +42,7 @@ describe('planarizeVectorNetwork', () => {
     };
 
     // before
-    const result = planarizeVectorNetwork(segments, vertices);
+    const result = planarizeVectorNetwork(null, segments, vertices);
 
     // result
     expect(Object.keys(result.segments).sort()).toEqual(['sA#0', 'sA#1', 'sB#0', 'sB#1']);

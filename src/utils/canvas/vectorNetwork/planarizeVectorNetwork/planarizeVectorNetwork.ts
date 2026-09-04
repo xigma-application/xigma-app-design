@@ -7,11 +7,12 @@ import { buildPlanarSegments } from './buildPlanarSegments';
 import { findAllNetworkCrossings } from './findAllNetworkCrossings/findAllNetworkCrossings';
 
 export const planarizeVectorNetwork = (
+  nodeId: string | null,
   segmentsRecord: Record<string, TVectorSegment>,
   vertices: Record<string, TVectorVertex>,
 ): TPlanarVectorNetwork => {
   const segments = Object.values(segmentsRecord);
-  const { crossingsBySegmentId, virtualVertices } = findAllNetworkCrossings(segments, vertices);
+  const { crossingsBySegmentId, virtualVertices } = findAllNetworkCrossings(nodeId, segments, vertices);
 
   if (crossingsBySegmentId.size === 0) {
     return { segments: segmentsRecord, vertices };

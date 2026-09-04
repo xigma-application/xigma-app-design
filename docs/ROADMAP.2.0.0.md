@@ -36,8 +36,12 @@ in §5.6/§5.7 as not yet started:
       **Third slice (2026-08-30)**: the first slice's skip extended to the planar clustering path
       (fill derivation + the has-crossings stroke case) — closes the gap that made it a no-op on the
       disjoint-shapes stress scene, confirmed live (0 further `computeClusters` calls across 40
-      drag frames). Crossing detection itself is still unincremental. Write-up in
-      [[canvas-vector-performance]] §5.10.
+      drag frames). Crossing detection itself is still unincremental.
+      **Fourth slice (2026-08-30), the actual "droższa" half**: incremental crossing detection for the
+      small-moved-set case (a single dragged vertex/curve handle, up to 8 touched segments) — always
+      falls back to the original full recompute for topology changes or larger moved sets, never a
+      silently slower frame (tuned from two real regressions found live, not assumed). Write-up in
+      [[canvas-vector-performance]] §8.
 - [ ] **GPU-buffer-level caching** — the renderer today re-uploads every node's geometry to the GPU
       (`bufferData`) every frame, whether or not it actually changed; the whole app shares only 4 GL
       buffers, rebound per-primitive (see [[canvas-rendering-pipeline]] §3/§8). Goal: persistent

@@ -714,6 +714,81 @@ subtree (`drawVectorEditHandlesLayer.ts` → `drawVectorEditHandlesForNode.ts` �
 the same way `faceBufferCache`/`strokeBufferCache` are, starting from `drawScene.ts`'s existing
 `imageContext`.
 
+## 8. Incremental crossing detection — the "droższa" (expensive) half of §5.6/§5.8, done for the single-dragged-segment case
+
+The remaining piece §5.10 explicitly left alone: `findAllNetworkCrossings.ts` re-scanning the **whole**
+node's segments against each other on every drag frame, even when only one vertex (2-8 touching
+segments) actually moved. Live profiling (2026-08-30, direct `performance.now()` instrumentation
+through 40 simulated drag frames on the 3000-square/12000-segment stress node) measured this at
+~13ms/frame for `planarizeVectorNetwork` alone — the single largest remaining per-frame cost after
+§5.9/§5.10, and the one those two explicitly deferred as "touches the core, high regression risk."
+
+**The exact invariant, one level more work than §5.8/§5.10's**: crossing detection genuinely depends on
+vertex *positions* (not just segment topology), so the pure id/startId/endId check that made §5.8/§5.10
+safe doesn't apply here on its own. What does still hold: `getCachedFlattenedSegment.ts`'s existing
+per-segment cache (§5.4's closing note) already tells you, for free, exactly *which* segments' rendered
+geometry changed since last time — it returns the *same* `TCachedFlattenedSegment` object when a
+segment's start/end vertex references (and tangents, and its own object identity) are unchanged, and a
+*new* one on any real change. So "which segments moved" needs no extra walk at all; it falls out of the
+same per-segment cache lookups `findAllNetworkCrossings.ts` already does to build `cachedById`.
+
+**The fix, split across 5 new files** (`planarizeVectorNetwork/findAllNetworkCrossings/`):
+- `detectMovedSegmentIds.ts` — one pass over the current segments (not two): bails immediately with
+  `null` ("go do a full recompute") the moment it finds a segment id absent from last time (topology
+  changed — added, removed, or swapped for a different id at the same count) or more than
+  `MAX_INCREMENTAL_MOVED_SEGMENTS` segments already moved, instead of always walking every segment
+  twice (once for an id-set check, once to collect moved ids) before the caller gets to decide. That
+  merge mattered in practice — see the benchmark note below.
+- `computeIncrementalNetworkCrossings.ts` — given the (small) set of moved segment ids: (1) discards
+  every crossing either moved segment was part of last time, off *both* sides of the pair — a moved
+  segment's own stale list doesn't tell its (possibly unmoved) partner the pairing is gone, so the
+  partner's list needs its own explicit filter; (2) re-scans each moved segment against every other
+  segment (bbox-overlap pre-check first, expensive `addCrossingsForPair` geometry only for the rare
+  actual overlap) to find its current crossings, deduped against double-processing when *two* moved
+  segments cross each other. An unmoved-vs-unmoved pair is never touched at all, by construction.
+- `addCrossingsForPair.ts` — the actual crossing-refinement-and-record logic (unchanged from the old
+  `findAllNetworkCrossings.ts` body), extracted so both the full-scan and incremental paths call the
+  exact same code instead of two copies that could drift.
+- `computeFullNetworkCrossings.ts` — the pre-existing spatial-hash broad phase (§5.4), extracted
+  verbatim; still the only path for `nodeId === null` callers and any topology change.
+- `findAllNetworkCrossings.ts` — the orchestrator: tracks `lastKnownByNodeId` (persistent, survives
+  node-reference churn, same accepted-unbounded shape as §5.8's `lastKnownByNodeId`), routes to reuse
+  (nothing moved) / incremental (small moved set) / full (topology changed, cap exceeded, or
+  `nodeId === null`) recompute.
+
+**`nodeId: string | null`, not always tracked**: `getPlanarVectorNetwork.ts` (the real per-frame render
+path) passes `node.id`. Three other call sites — `subtractCapsuleFromVectorNetwork.ts` (a synthetic
+node+erase-capsule merge), `doVectorNodesCross.ts` (two different nodes merged just to test overlap),
+`persistVectorNetworkCrossings.ts` (a one-off commit-time pass) — have no single stable node identity
+to key on, and pass `null`, which skips all history tracking and always takes the exact original
+full-recompute path. Zero behavior change for any of them.
+
+**The cap was tuned from real regressions found live, not picked upfront.** A naive first cut (cap of
+50, no early-bail) actually measured *slower* than the pre-existing full recompute in two ways found
+back to back:
+1. The O(movedSegments × totalSegments) rescan's per-candidate work computed a `[a,b].sort().join(':')`
+   dedup key *before* the cheap bbox-overlap check, paying string allocation for every one of the
+   (mostly non-overlapping) candidates — reordering the bbox check first fixed a single dragged
+   vertex from a *0.9x* "speedup" (i.e. a regression) to a real 1.6-1.9x.
+2. Even after that fix, a 10-vertex multi-drag (~20 touched segments) measured *0.8x* — a moved set
+   that's no longer tiny loses to the spatial hash's O(totalSegments) full rebuild, which does O(1)
+   amortized work per segment against O(movedSegments) work per segment here. `MAX_INCREMENTAL_MOVED_SEGMENTS`
+   was set to **8** from this — comfortably covers a single dragged vertex or curve handle (2-4 touching
+   segments), falls back cleanly otherwise. The fallback itself had its own tax problem — the two full
+   O(n) passes (id-set check, then movedIds collection) that used to run *before* falling through were
+   pure waste on top of the full recompute that follows — `detectMovedSegmentIds.ts`'s single-pass,
+   early-bail design (above) closed that, confirmed live: the 10-vertex case went from *0.8x* to *~1.1x*
+   (on par with, not slower than, doing nothing incremental at all) once the early bail was in place.
+3. All three findings came from a throwaway `__bench.spec.ts` (real `findAllNetworkCrossings` calls in
+   a loop, `performance.now()` deltas, run via `vitest run` — no browser needed since jsdom provides
+   `window`) — deleted before commit, not part of the shipped test suite; the ~1.6-1.9x single-drag
+   number is real but only as precise as one machine's one run, not a guaranteed ratio.
+
+**Scope**: only the single-dragged-vertex/curve-handle case (and small multi-selections up to the cap)
+gets the speedup. A whole-shape drag/rotate (every segment moves at once), a multi-select drag past 8
+touched segments, or any topology change all correctly fall back to the exact original full recompute —
+same correctness, same (not worse) cost as before this slice, never a silently slower frame.
+
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
@@ -785,6 +860,15 @@ the same way `faceBufferCache`/`strokeBufferCache` are, starting from `drawScene
   {drawVectorEditHandlesForNode/drawVectorEditHandlesForNode,
   drawVectorEditHandlesLayer/drawVectorEditHandlesLayer}.ts`, `useCanvasRenderLoop/types.ts`
   (`vertexDotBufferCache`), `useCanvasRenderLoop/utils/{setupRenderLoop,drawScene/drawScene}.ts`
+- Incremental crossing detection (§8): `utils/canvas/vectorNetwork/planarizeVectorNetwork/
+  findAllNetworkCrossings/{findAllNetworkCrossings,detectMovedSegmentIds,
+  computeIncrementalNetworkCrossings,computeFullNetworkCrossings,addCrossingsForPair}.ts`,
+  `utils/canvas/vectorNetwork/planarizeVectorNetwork/planarizeVectorNetwork.ts`,
+  `utils/canvas/vectorNetwork/getPlanarVectorNetwork.ts`,
+  `utils/canvas/vectorNetwork/mergeVectorNodes/doVectorNodesCross.ts`,
+  `utils/canvas/vectorNetwork/eraseVectorNetwork/subtractCapsuleFromVectorNetwork/
+  subtractCapsuleFromVectorNetwork.ts`,
+  `utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings.ts`
 
 ## Related
 

@@ -19,7 +19,7 @@ export const getPlanarVectorNetwork = (node: TVectorNode): TPlanarVectorNetwork 
     return cached;
   }
 
-  const planar = planarizeVectorNetwork(node.segments, node.vertices);
+  const planar = planarizeVectorNetwork(node.id, node.segments, node.vertices);
 
   byVertices.set(node.vertices, planar);
   cache.set(node.segments, byVertices);

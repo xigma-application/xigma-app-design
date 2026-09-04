@@ -17,10 +17,11 @@ export const doVectorNodesCross = (bakedNodeA: TVectorNode, bakedNodeB: TVectorN
 
   if (boundsOverlap) {
     const segmentIdsA = new Set(Object.keys(bakedNodeA.segments));
-    const { virtualVertices } = findAllNetworkCrossings([...Object.values(bakedNodeA.segments), ...Object.values(bakedNodeB.segments)], {
-      ...bakedNodeA.vertices,
-      ...bakedNodeB.vertices,
-    });
+    const { virtualVertices } = findAllNetworkCrossings(
+      null,
+      [...Object.values(bakedNodeA.segments), ...Object.values(bakedNodeB.segments)],
+      { ...bakedNodeA.vertices, ...bakedNodeB.vertices },
+    );
 
     return Object.keys(virtualVertices).some((vertexId) => {
       const [, firstSegmentId, secondSegmentId] = vertexId.split(':');

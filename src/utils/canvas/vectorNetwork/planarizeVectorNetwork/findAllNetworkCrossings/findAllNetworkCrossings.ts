@@ -1,44 +1,59 @@
 // types
-import { TNetworkCrossings } from './types';
-import { TSegmentCrossing } from '../types';
+import { TCachedFlattenedSegment, TNetworkCrossings } from './types';
 import { TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
-import { findOverlappingSegmentPairs } from './findOverlappingSegmentPairs';
-import { findSegmentCrossings } from '../findSegmentCrossings';
+import { computeFullNetworkCrossings } from './computeFullNetworkCrossings';
+import { computeIncrementalNetworkCrossings } from './computeIncrementalNetworkCrossings';
+import { detectMovedSegmentIds } from './detectMovedSegmentIds';
 import { getCachedFlattenedSegment } from './getCachedFlattenedSegment';
-import { refineCrossing } from '../refineCrossing';
 
-export const findAllNetworkCrossings = (segments: TVectorSegment[], vertices: Record<string, TVectorVertex>): TNetworkCrossings => {
+type TLastKnownCrossingsState = {
+  crossings: TNetworkCrossings;
+  entryBySegmentId: Map<string, TCachedFlattenedSegment>;
+  segmentIdsByVertexId: Map<string, [string, string]>;
+};
+
+const MAX_INCREMENTAL_MOVED_SEGMENTS = 8;
+const lastKnownByNodeId = new Map<string, TLastKnownCrossingsState>();
+
+export const findAllNetworkCrossings = (
+  nodeId: string | null,
+  segments: TVectorSegment[],
+  vertices: Record<string, TVectorVertex>,
+): TNetworkCrossings => {
   const cachedById = new Map(segments.map((segment) => [segment.id, getCachedFlattenedSegment(segment, vertices)]));
-  const boundingBoxes = segments.map((segment, index) => ({ ...cachedById.get(segment.id)!.bbox, index }));
-  const crossingsBySegmentId = new Map<string, TSegmentCrossing[]>();
-  const virtualVertices: Record<string, TVectorVertex> = {};
 
-  findOverlappingSegmentPairs(boundingBoxes).forEach(([i, j]) => {
-    const a = segments[i];
-    const b = segments[j];
-    const pointsA = cachedById.get(a.id)!.points;
-    const pointsB = cachedById.get(b.id)!.points;
+  if (nodeId === null) {
+    return computeFullNetworkCrossings(segments, vertices, cachedById).crossings;
+  }
 
-    findSegmentCrossings(pointsA, pointsB).forEach((coarseCrossing) => {
-      const crossing = refineCrossing(
-        a,
-        b,
-        vertices,
-        coarseCrossing.tA,
-        1 / (pointsA.length - 1),
-        coarseCrossing.tB,
-        1 / (pointsB.length - 1),
-      );
-      const [firstId, secondId] = [a.id, b.id].sort();
-      const vertexId = `x:${firstId}:${secondId}:${crossing.tA.toFixed(6)}`;
+  const lastKnown = lastKnownByNodeId.get(nodeId);
+  const movedIds = lastKnown && detectMovedSegmentIds(segments, cachedById, lastKnown.entryBySegmentId, MAX_INCREMENTAL_MOVED_SEGMENTS);
 
-      virtualVertices[vertexId] = { id: vertexId, x: crossing.point.x, y: crossing.point.y };
-      crossingsBySegmentId.set(a.id, [...(crossingsBySegmentId.get(a.id) ?? []), { t: crossing.tA, vertexId }]);
-      crossingsBySegmentId.set(b.id, [...(crossingsBySegmentId.get(b.id) ?? []), { t: crossing.tB, vertexId }]);
-    });
-  });
+  if (lastKnown && movedIds) {
+    if (movedIds.length === 0) {
+      return lastKnown.crossings;
+    }
 
-  return { crossingsBySegmentId, virtualVertices };
+    const segmentsById = new Map(segments.map((segment) => [segment.id, segment]));
+    const { crossings, segmentIdsByVertexId } = computeIncrementalNetworkCrossings(
+      vertices,
+      segmentsById,
+      cachedById,
+      movedIds,
+      lastKnown.crossings,
+      lastKnown.segmentIdsByVertexId,
+    );
+
+    lastKnownByNodeId.set(nodeId, { crossings, entryBySegmentId: cachedById, segmentIdsByVertexId });
+
+    return crossings;
+  }
+
+  const { crossings, segmentIdsByVertexId } = computeFullNetworkCrossings(segments, vertices, cachedById);
+
+  lastKnownByNodeId.set(nodeId, { crossings, entryBySegmentId: cachedById, segmentIdsByVertexId });
+
+  return crossings;
 };
