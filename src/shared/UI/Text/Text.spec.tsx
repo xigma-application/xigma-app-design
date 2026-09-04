@@ -66,4 +66,28 @@ describe('Text', () => {
     // result
     expect(screen.getByText('File')).toHaveClass('caller-class');
   });
+
+  it('should not apply the secondary color class by default', () => {
+    // before
+    render(
+      <Provider store={store}>
+        <Text>File</Text>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('File').className).not.toMatch(/--secondary/);
+  });
+
+  it('should apply the secondary color class when color is secondary', () => {
+    // before
+    render(
+      <Provider store={store}>
+        <Text color="secondary">File</Text>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('File').className).toMatch(/--secondary/);
+  });
 });

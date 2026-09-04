@@ -15,7 +15,7 @@ export type TSectionColumnLabelsProps = {
 export const SectionColumnLabels: FC<TSectionColumnLabelsProps> = ({ labels = [], width }) => (
   <div className={cx(styles.SectionColumnLabels)} style={{ width }}>
     {labels.map((label, index) => (
-      <Text className={styles.SectionColumnLabels__label} key={index}>
+      <Text className={styles.SectionColumnLabels__label} color="secondary" fontSize={9} key={index}>
         {label}
       </Text>
     ))}

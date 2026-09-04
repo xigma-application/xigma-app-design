@@ -2,4 +2,8 @@
 
 .Text {
   font-family: fonts.$fontFamily;
+
+  &--secondary {
+    color: var(--color-text-secondary);
+  }
 }

@@ -49,4 +49,12 @@ describe('SectionColumnLabels behaviors', () => {
     // result
     expect(container.querySelectorAll('span')).toHaveLength(0);
   });
+
+  it('should render each label in the secondary text color', () => {
+    // before
+    renderSectionColumnLabels(['Alignment']);
+
+    // result
+    expect(screen.getByText('Alignment').className).toMatch(/--secondary/);
+  });
 });
