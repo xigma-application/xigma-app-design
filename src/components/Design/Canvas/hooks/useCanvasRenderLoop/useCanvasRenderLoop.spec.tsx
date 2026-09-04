@@ -5,6 +5,11 @@ import { RefObject } from 'react';
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCanvasRenderLoop } from './useCanvasRenderLoop';
 
+// store
+import { DEFAULT_PAINT } from 'store/design/constants';
+import { setBackgroundPaint } from 'store/design/slice';
+import { store } from 'store';
+
 let rafCallback: FrameRequestCallback | undefined;
 
 const requestAnimationFrameMock = vi.fn((callback: FrameRequestCallback) => {
@@ -60,6 +65,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     rafCallback = undefined;
     vi.stubGlobal('requestAnimationFrame', requestAnimationFrameMock);
     vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrameMock);
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
   afterEach(() => {
@@ -138,7 +144,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     expect(cancelAnimationFrameMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should delete all six compiled programs on unmount', () => {
+  it('should delete all seven compiled programs on unmount', () => {
     // mock
     const { canvasRef, deleteProgram } = createGlCanvasRef();
 
@@ -149,6 +155,6 @@ describe('useCanvasRenderLoop behaviors', () => {
     unmount();
 
     // result
-    expect(deleteProgram).toHaveBeenCalledTimes(6);
+    expect(deleteProgram).toHaveBeenCalledTimes(7);
   });
 });

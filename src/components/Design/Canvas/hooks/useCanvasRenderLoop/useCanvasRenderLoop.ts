@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 // others
+import CHECKERBOARD_FRAGMENT_SHADER_SOURCE from 'constant/webgl/checkerboardFragmentShaderSource';
 import FRAGMENT_SHADER_SOURCE from 'constant/webgl/fragmentShaderSource';
 import GRID_FRAGMENT_SHADER_SOURCE from 'constant/webgl/gridFragmentShaderSource';
 import GRID_VERTEX_SHADER_SOURCE from 'constant/webgl/gridVertexShaderSource';
@@ -32,6 +33,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const msdfBuffer = gl && gl.createBuffer();
     const gridProgram = gl && createProgram(gl, GRID_VERTEX_SHADER_SOURCE, GRID_FRAGMENT_SHADER_SOURCE);
     const gridBuffer = gl && gl.createBuffer();
+    const checkerboardProgram = gl && createProgram(gl, GRID_VERTEX_SHADER_SOURCE, CHECKERBOARD_FRAGMENT_SHADER_SOURCE);
     const maskCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE);
     const maskCompositeBuffer = gl && gl.createBuffer();
     const dragSnapshotProgram = gl && createProgram(gl, VECTOR_DRAG_VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
@@ -47,6 +49,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       msdfBuffer &&
       gridProgram &&
       gridBuffer &&
+      checkerboardProgram &&
       maskCompositeProgram &&
       maskCompositeBuffer &&
       dragSnapshotProgram
@@ -61,6 +64,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         msdfBuffer,
         gridProgram,
         gridBuffer,
+        checkerboardProgram,
         maskCompositeProgram,
         maskCompositeBuffer,
         dragSnapshotProgram,
@@ -79,6 +83,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteProgram(imageProgram);
         gl.deleteProgram(msdfProgram);
         gl.deleteProgram(gridProgram);
+        gl.deleteProgram(checkerboardProgram);
         gl.deleteProgram(maskCompositeProgram);
         gl.deleteProgram(dragSnapshotProgram);
       };

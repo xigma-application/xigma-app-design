@@ -9,6 +9,7 @@ import { getNextPageName } from './getNextPageName';
 
 export const handleAddPage = (state: TDesignState, id: string): void => {
   const newPage: TDesignPage = {
+    backgroundPaint: DEFAULT_PAINT,
     comments: {},
     guides: [],
     id,

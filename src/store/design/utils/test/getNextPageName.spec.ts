@@ -5,6 +5,7 @@ import { TDesignPage } from '../../types';
 import { getNextPageName } from '../getNextPageName';
 
 const buildPage = (name: string): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id: name,

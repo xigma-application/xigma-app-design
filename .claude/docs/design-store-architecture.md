@@ -496,8 +496,14 @@ by `getNextPageName` (add) / `getDuplicatePageName` (duplicate). Separately, a `
 param (the app has no client-side router — every URL param is read directly off
 `window.location.search`, see [[app-shell]]) is read once on mount by
 `components/App/hooks/useSyncActivePageFromUrl.ts` → `setActivePage` if the id resolves (the one
-history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paint`/`comments` and
-`activeTool` are UI state, not document state. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
+history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`comments` and
+`activeTool` are UI state, not document state. `paint` (the Vector Paint tool's current color — set via
+`setPaint`, unrelated to the canvas background despite the generic name) is the same kind of tool
+setting and is likewise not in `UNDOABLE_ACTION_TYPES`. `backgroundPaint` (the Page background color/
+opacity/visibility shown in RightPanel when nothing is selected, set via `setBackgroundPaint`,
+[[canvas-rendering-pipeline]] §2) is document-ish enough that it *is* undoable — the two paints used to
+be the same field (`page.paint`, read/written by both the Page background picker and the Vector Paint
+tool), which cross-wired their pickers until the field was split in two. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
 newer half — `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }` — added so
 undo/redo also restores which vertex/segment/tangent-handle was selected inside Vector Edit Mode; see
 [[vector-network]] §8 for why that was a real gap (that state lives entirely in `TCanvasRefs`, outside

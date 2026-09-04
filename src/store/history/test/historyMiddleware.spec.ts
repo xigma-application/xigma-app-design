@@ -11,6 +11,7 @@ import {
   moveNodes,
   reorderPages,
   sendSelectionToBack,
+  setBackgroundPaint,
   setPaint,
   setSelection,
   toggleFrameClipContent,
@@ -323,11 +324,11 @@ describe('historyMiddleware', () => {
 
   it('should treat a page background paint change as its own undo step', () => {
     // mock
-    store.dispatch(setPaint(DEFAULT_PAINT));
-    store.dispatch(setPaint({ color: '#336699', opacity: 50, type: 'solid' }));
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
+    store.dispatch(setBackgroundPaint({ color: '#336699', opacity: 50, type: 'solid' }));
 
     // before
-    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+    expect(store.getState().design.pages[store.getState().design.activePageId].backgroundPaint).toEqual({
       color: '#336699',
       opacity: 50,
       type: 'solid',
@@ -337,7 +338,32 @@ describe('historyMiddleware', () => {
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual(DEFAULT_PAINT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].backgroundPaint).toEqual(DEFAULT_PAINT);
+  });
+
+  it('should not create an undo step for the vector paint tool color, which is a tool setting rather than page content', () => {
+    // mock — a change unrelated to setPaint, so there is something to undo back to
+    const idA = addFrameNode(0, 0);
+
+    store.dispatch(setPaint({ color: '#336699', opacity: 50, type: 'solid' }));
+
+    // before
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#336699',
+      opacity: 50,
+      type: 'solid',
+    });
+
+    // action — undo should skip straight past the paint-tool color change, undoing the node add instead
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#336699',
+      opacity: 50,
+      type: 'solid',
+    });
   });
 
   it('should treat removing every guide on an axis as its own undo step', () => {

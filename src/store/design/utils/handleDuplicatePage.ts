@@ -46,6 +46,7 @@ export const handleDuplicatePage = (state: TDesignState, payload: TDuplicatePage
     }, {});
 
     const duplicatedPage: TDesignPage = {
+      backgroundPaint: source.backgroundPaint,
       comments: structuredClone(source.comments),
       guides: structuredClone(source.guides),
       id: newPageId,

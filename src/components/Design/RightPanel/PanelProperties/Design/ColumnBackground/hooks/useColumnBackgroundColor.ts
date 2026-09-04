@@ -1,6 +1,6 @@
 // store
-import { selectPaint } from 'store/design/selectors';
-import { setPaint } from 'store/design/slice';
+import { selectBackgroundPaint } from 'store/design/selectors';
+import { setBackgroundPaint } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -18,11 +18,11 @@ export type TUseColumnBackgroundColorResult = {
 };
 
 export const useColumnBackgroundColor = (): TUseColumnBackgroundColorResult => {
-  const paint = useAppSelector(selectPaint);
+  const paint = useAppSelector(selectBackgroundPaint);
   const dispatch = useAppDispatch();
 
   const apply = (patch: Partial<TSolidPaint>): void => {
-    dispatch(setPaint({ ...paint, ...patch }));
+    dispatch(setBackgroundPaint({ ...paint, ...patch }));
   };
 
   return {

@@ -16,6 +16,7 @@ export const setupRenderLoop = (
   msdfBuffer: WebGLBuffer,
   gridProgram: WebGLProgram,
   gridBuffer: WebGLBuffer,
+  checkerboardProgram: WebGLProgram,
   maskCompositeProgram: WebGLProgram,
   maskCompositeBuffer: WebGLBuffer,
   dragSnapshotProgram: WebGLProgram,
@@ -28,6 +29,7 @@ export const setupRenderLoop = (
   const imageContext: TImageRenderContext = {
     buffer: imageBuffer,
     cache: new Map(),
+    checkerboardProgram,
     dragSnapshotFaceBufferCache: new WeakMap(),
     dragSnapshotProgram,
     dragSnapshotStrokeBufferCache: new WeakMap(),

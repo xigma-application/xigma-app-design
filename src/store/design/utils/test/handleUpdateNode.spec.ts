@@ -47,6 +47,7 @@ const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   lastTextTool: ToolName.text,
   pages: {
     'page-1': {
+      backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
       comments: {},
       guides: [],
       id: 'page-1',

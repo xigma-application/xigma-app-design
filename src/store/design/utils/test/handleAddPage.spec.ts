@@ -6,6 +6,7 @@ import { TDesignPage, TDesignState } from '../../types';
 import { handleAddPage } from '../handleAddPage';
 
 const buildPage = (name: string): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id: name,
@@ -55,6 +56,7 @@ describe('handleAddPage', () => {
 
     // result
     expect(state.pages['new-page']).toEqual({
+      backgroundPaint: { color: '#444444', opacity: 100, type: 'solid' },
       comments: {},
       guides: [],
       id: 'new-page',

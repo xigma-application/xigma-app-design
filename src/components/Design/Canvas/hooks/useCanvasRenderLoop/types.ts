@@ -10,6 +10,7 @@ import { TTextGeometry } from 'utils/canvas/text/getOrBuildTextGeometry';
 export type TImageRenderContext = {
   buffer: WebGLBuffer;
   cache: Map<string, WebGLTexture>;
+  checkerboardProgram: WebGLProgram;
   dragSnapshotFaceBufferCache: WeakMap<TPoint[], WebGLBuffer>;
   dragSnapshotProgram: WebGLProgram;
   dragSnapshotStrokeBufferCache: WeakMap<number[], WebGLBuffer>;

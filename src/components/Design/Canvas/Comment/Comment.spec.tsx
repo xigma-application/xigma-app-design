@@ -40,6 +40,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         lastTextTool: ToolName.text,
         pages: {
           'page-1': {
+            backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' as const },
             comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 100, y: 200 } },
             guides: [],
             id: 'page-1',

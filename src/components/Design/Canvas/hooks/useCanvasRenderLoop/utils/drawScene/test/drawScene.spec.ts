@@ -2,8 +2,8 @@
 import { CARET_BLINK_INTERVAL_MS, GRID_MIN_ZOOM } from 'constant/canvas';
 
 // store
-import { addNode, setSelection, setViewport, startTextEdit, stopTextEdit, toggleNodeHidden } from 'store/design/slice';
-import { DEFAULT_VIEWPORT } from 'store/design/constants';
+import { addNode, setBackgroundPaint, setSelection, setViewport, startTextEdit, stopTextEdit, toggleNodeHidden } from 'store/design/slice';
+import { DEFAULT_PAINT, DEFAULT_VIEWPORT } from 'store/design/constants';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -54,6 +54,7 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  checkerboardProgram: {} as WebGLProgram,
   dragSnapshotFaceBufferCache: new WeakMap(),
   dragSnapshotProgram: {} as WebGLProgram,
   dragSnapshotStrokeBufferCache: new WeakMap(),
@@ -75,6 +76,10 @@ const IMAGE_CONTEXT: TImageRenderContext = {
 };
 
 describe('drawScene', () => {
+  beforeEach(() => {
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
+  });
+
   it('should re-enable alpha writes for the background clear, then lock them for foreground drawing', () => {
     // mock
     const gl = createGlMock();

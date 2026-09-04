@@ -7,7 +7,7 @@ import { useColumnBackgroundColor } from '../useColumnBackgroundColor';
 
 // store
 import { DEFAULT_PAINT } from 'store/design/constants';
-import { setPaint } from 'store/design/slice';
+import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -18,11 +18,11 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 const renderUseColumnBackgroundColor = (): ReturnType<typeof renderHook<ReturnType<typeof useColumnBackgroundColor>, unknown>> =>
   renderHook(() => useColumnBackgroundColor(), { wrapper });
 
-const readPaint = (): TSolidPaint => store.getState().design.pages[store.getState().design.activePageId].paint;
+const readPaint = (): TSolidPaint => store.getState().design.pages[store.getState().design.activePageId].backgroundPaint;
 
 describe('useColumnBackgroundColor', () => {
   beforeEach(() => {
-    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
   it('should expose the current page paint as hex, alpha, and a visible flag', () => {
@@ -35,7 +35,7 @@ describe('useColumnBackgroundColor', () => {
 
   it('should report isVisible false when the paint is explicitly hidden', () => {
     // mock
-    store.dispatch(setPaint({ ...DEFAULT_PAINT, visible: false }));
+    store.dispatch(setBackgroundPaint({ ...DEFAULT_PAINT, visible: false }));
 
     // before
     const { result } = renderUseColumnBackgroundColor();
@@ -90,7 +90,7 @@ describe('useColumnBackgroundColor', () => {
 
   it('should re-show a hidden background on toggle', () => {
     // mock
-    store.dispatch(setPaint({ ...DEFAULT_PAINT, visible: false }));
+    store.dispatch(setBackgroundPaint({ ...DEFAULT_PAINT, visible: false }));
 
     // before
     const { result } = renderUseColumnBackgroundColor();

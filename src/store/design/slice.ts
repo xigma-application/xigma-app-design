@@ -99,6 +99,7 @@ const initialState: TDesignState = {
   lastTextTool: DEFAULT_TEXT_TOOL,
   pages: {
     [initialPageId]: {
+      backgroundPaint: DEFAULT_PAINT,
       comments: {},
       guides: [],
       id: initialPageId,
@@ -171,6 +172,9 @@ const designSlice = createSlice({
       state.activePageId = action.payload;
     },
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
+    setBackgroundPaint: (state, action: PayloadAction<TSolidPaint>) => {
+      getActivePage(state).backgroundPaint = action.payload;
+    },
     setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
       state.designHintLabelKey = action.payload;
     },
@@ -251,6 +255,7 @@ export const {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
+  setBackgroundPaint,
   setDesignHintLabelKey,
   setMediaToolArmed,
   setPaint,

@@ -6,6 +6,7 @@ import { TGuide, TGuideAxis } from 'types/design/guides/types';
 import { TSolidPaint } from 'types/design/paint/types';
 
 export type TDesignPage = {
+  backgroundPaint: TSolidPaint;
   comments: Record<string, TComment>;
   guides: TGuide[];
   id: string;

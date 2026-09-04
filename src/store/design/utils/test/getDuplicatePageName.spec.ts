@@ -9,6 +9,7 @@ const buildPages = (names: string[]): Record<string, TDesignPage> =>
     names.map((name) => [
       name,
       {
+        backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
         comments: {},
         guides: [],
         id: name,

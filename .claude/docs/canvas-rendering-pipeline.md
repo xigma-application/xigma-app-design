@@ -161,14 +161,34 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   path. A node with `hidden: true` (Layers panel, [[design-store-architecture]]) is filtered out of
   `sceneNodes` even earlier, straight off `selectOrderedNodes(state)`, before `getPreviewSceneNodes`
   ever sees it — it never reaches `drawSceneNodes` at all, not even a suppressed/invisible draw.
-  `drawSceneBackground.ts` masks the alpha channel back off after clearing
-  (`gl.colorMask(true,true,true,false)`) so the canvas's own backing-store alpha stays 1 post-clear
-  while per-shape draws still blend on `u_color.a`.
+  `drawSceneBackground.ts` re-enables alpha writes before clearing/drawing the background, then
+  locks them back off for the rest of the frame, via `setAlphaWriteEnabled.ts` — a small helper that
+  pairs `gl.colorMask(true,true,true,enabled)` with `imageContext.isAlphaWriteEnabled = enabled` in
+  one place, so the GPU state and the manually-tracked mirror of it can't drift apart (`bindTarget.ts`,
+  §11, uses the same helper for the mask render-target/main-framebuffer switch). This keeps the
+  canvas's own backing-store alpha at 1 post-clear while per-shape draws still blend on `u_color.a`.
+  The page background paint read here is `selectBackgroundPaint`/`page.backgroundPaint`
+  ([[design-store-architecture]]) — a separate field from `page.paint`, which belongs to the Vector
+  Paint tool (`VectorEditPaintTool`, [[vector-network]]) and is unrelated to the canvas background;
+  the two were briefly the same field and got their pickers cross-wired as a result, split apart into
+  `setPaint`/`setBackgroundPaint` (only the latter is in `UNDOABLE_ACTION_TYPES`). Whenever that paint
+  isn't both visible and fully opaque (`paint.visible === false`, or `paint.opacity < 100`),
+  `drawSceneBackground.ts` skips `drawBackground.ts`'s plain clear and instead calls
+  `drawCheckerboardBackground.ts`, which draws a transparency-indicator checkerboard (Figma/
+  Photoshop-style) as ordinary opaque GPU-rendered content over the full viewport — not real DOM/
+  canvas alpha transparency, which would require auditing every fill shader (plain-color, image, MSDF
+  text) for correct alpha output. The fragment shader mixes that checkerboard toward the paint's own
+  color by `u_paintMix` (`paint.opacity / 100`, or `0` when hidden regardless of the opacity value),
+  so dragging the opacity slider visibly fades between pure checkerboard and pure color instead of
+  (the earlier, broken approach) blending the color toward a fixed default gray that happened to equal
+  the default paint color itself — a no-op when the color was never changed from default. Shapes drawn
+  afterward remain fully opaque on top either way.
 
 ## 3. Shader programs
 
-Five GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts` (the 5th,
-`maskComposite`, was added for masks — see §11):
+Six GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts` (the 5th,
+`maskComposite`, was added for masks — see §11; the 6th, `checkerboard`, for the hidden/partially-
+transparent background indicator above):
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
@@ -177,6 +197,7 @@ Five GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createSh
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 | pixel grid | `gridVertexShaderSource.ts` (not world-space like the other three — see §10) | `gridFragmentShaderSource.ts` | — | `drawPixelGrid.ts` |
 | mask composite | `maskCompositeVertexShaderSource.ts` (passthrough clip-space quad + texcoords) | `maskCompositeFragmentShaderSource.ts` (`content.rgb, content.a * mask.a`) | — | `compositeMask.ts` (masks, §11) |
+| checkerboard | **same vertex source as pixel grid** (`gridVertexShaderSource.ts`, reused) | `checkerboardFragmentShaderSource.ts` (`u_viewportOffset`/`u_zoom` convert `v_screenPos` to world space before the `floor`/`mod` squares, so the pattern pans/zooms with the canvas like the pixel grid does, not fixed to the viewport; `CHECKERBOARD_COLOR_A`/`_B`/`_SQUARE_SIZE_PX` from `constant/canvas.ts`; final color is `mix(checkerColor, u_paintColor, u_paintMix)`) | — | `drawCheckerboardBackground.ts`, from `drawSceneBackground.ts` when the page background is hidden or below full opacity |
 
 Plain-color vertex shader (every program's transform math is identical, only the fragment stage
 differs per program):

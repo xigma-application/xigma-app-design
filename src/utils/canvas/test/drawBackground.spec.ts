@@ -1,6 +1,6 @@
 // store
 import { DEFAULT_PAINT } from 'store/design/constants';
-import { setPaint } from 'store/design/slice';
+import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
 
 // utils
@@ -12,40 +12,36 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 describe('drawBackground', () => {
   beforeEach(() => {
-    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
-  it('should clear the canvas to the page paint color at its opacity', () => {
+  it('should clear the canvas to the paint color, always at full alpha', () => {
     // mock
     const gl = createGlMock();
-    store.dispatch(setPaint({ color: '#336699', opacity: 50, type: 'solid' }));
+    const paint = { color: '#336699', opacity: 100, type: 'solid' } as const;
+
+    store.dispatch(setBackgroundPaint(paint));
 
     // before
     drawBackground(gl);
 
-    // result
-    const [r, g, b] = hexToRgbFloat('#336699');
+    // result — the WebGL canvas itself must never go anywhere but fully opaque: a lower alpha here
+    // clears the canvas element's own alpha channel, which (colorMask disables further alpha writes
+    // for the rest of the frame, see drawSceneBackground.ts) makes the whole canvas DOM-transparent
+    // for the entire frame, not just fade the background fill within the scene. Visibility and partial
+    // opacity are handled upstream by drawSceneBackground, which routes those cases to the checkerboard
+    // pattern instead of ever calling this function — drawBackground only ever runs at full opacity.
+    const [r, g, b] = hexToRgbFloat(paint.color);
 
-    expect(gl.clearColor).toHaveBeenCalledWith(r, g, b, 0.5);
+    expect(gl.clearColor).toHaveBeenCalledWith(r, g, b, 1);
     expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT);
   });
 
-  it('should clear to a fully transparent background when the page paint is hidden', () => {
+  it('should clear to the plain paint color at full opacity', () => {
     // mock
     const gl = createGlMock();
-    store.dispatch(setPaint({ color: '#336699', opacity: 100, type: 'solid', visible: false }));
 
-    // before
-    drawBackground(gl);
-
-    // result
-    expect(gl.clearColor).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), expect.any(Number), 0);
-  });
-
-  it('should treat an explicitly visible paint as opaque as its opacity', () => {
-    // mock
-    const gl = createGlMock();
-    store.dispatch(setPaint({ color: '#000000', opacity: 100, type: 'solid', visible: true }));
+    store.dispatch(setBackgroundPaint({ color: '#000000', opacity: 100, type: 'solid', visible: true }));
 
     // before
     drawBackground(gl);

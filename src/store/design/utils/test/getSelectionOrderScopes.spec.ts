@@ -13,6 +13,7 @@ const buildGroup = (id: string, childIds: string[]): TSceneNode =>
   ({ childIds, height: 10, id, name: id, parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }) as TSceneNode;
 
 const buildPage = (overrides: Partial<TDesignPage> = {}): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id: 'page-1',

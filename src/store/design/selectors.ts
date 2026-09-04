@@ -87,6 +87,8 @@ export const selectAllGuideLines = createSelector([selectPageGuides, selectFrame
 
 export const selectPaint = createSelector([selectActivePage], (page): TSolidPaint => page.paint);
 
+export const selectBackgroundPaint = createSelector([selectActivePage], (page): TSolidPaint => page.backgroundPaint);
+
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
 
 const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);

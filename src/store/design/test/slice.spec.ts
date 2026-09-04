@@ -24,6 +24,7 @@ import slice, {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
+  setBackgroundPaint,
   setPaint,
   setPenActiveVertexId,
   setSelection,
@@ -101,6 +102,7 @@ describe('design slice', () => {
       lastTextTool: ToolName.text,
       pages: {
         [activePageId]: {
+          backgroundPaint: DEFAULT_PAINT,
           comments: {},
           guides: [],
           id: activePageId,
@@ -534,6 +536,15 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[state.activePageId].paint).toEqual({ color: '#ff0000', opacity: 50, type: 'solid' });
+  });
+
+  it('should set the background paint independently of the vector paint tool paint', () => {
+    // before
+    const state = slice(undefined, setBackgroundPaint({ color: '#00ff00', opacity: 75, type: 'solid' }));
+
+    // result
+    expect(state.pages[state.activePageId].backgroundPaint).toEqual({ color: '#00ff00', opacity: 75, type: 'solid' });
+    expect(state.pages[state.activePageId].paint).toEqual(DEFAULT_PAINT);
   });
 
   it('should set the pen active vertex id', () => {

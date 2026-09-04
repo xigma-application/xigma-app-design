@@ -16,6 +16,7 @@ import { TDesignPage } from 'store/design/types';
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 const buildPage = (overrides: Partial<TDesignPage>): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id: 'page-1',

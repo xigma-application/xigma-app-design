@@ -1,3 +1,8 @@
+// store
+import { DEFAULT_PAINT } from 'store/design/constants';
+import { setBackgroundPaint } from 'store/design/slice';
+import { store } from 'store';
+
 // utils
 import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { setupRenderLoop } from '../setupRenderLoop';
@@ -29,6 +34,7 @@ describe('setupRenderLoop', () => {
     rafCallback = undefined;
     vi.stubGlobal('requestAnimationFrame', requestAnimationFrameMock);
     vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrameMock);
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
   afterEach(() => {
@@ -61,6 +67,7 @@ describe('setupRenderLoop', () => {
       msdfBuffer,
       gridProgram,
       gridBuffer,
+      {} as WebGLProgram,
       {} as WebGLProgram,
       {} as WebGLBuffer,
       {} as WebGLProgram,
@@ -97,6 +104,7 @@ describe('setupRenderLoop', () => {
       msdfBuffer,
       gridProgram,
       gridBuffer,
+      {} as WebGLProgram,
       {} as WebGLProgram,
       {} as WebGLBuffer,
       {} as WebGLProgram,

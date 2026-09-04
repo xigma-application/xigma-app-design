@@ -35,6 +35,7 @@ const buildGroup = (overrides: Partial<TGroupNode>): TGroupNode => ({
 });
 
 const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id,

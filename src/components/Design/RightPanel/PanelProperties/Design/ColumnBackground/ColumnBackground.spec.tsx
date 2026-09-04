@@ -7,7 +7,7 @@ import { TooltipProvider } from 'shared';
 
 // store
 import { DEFAULT_PAINT } from 'store/design/constants';
-import { setPaint } from 'store/design/slice';
+import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
 
 const renderColumnBackground = (): ReturnType<typeof render> =>
@@ -19,11 +19,11 @@ const renderColumnBackground = (): ReturnType<typeof render> =>
     </Provider>,
   );
 
-const readPaint = (): typeof DEFAULT_PAINT => store.getState().design.pages[store.getState().design.activePageId].paint;
+const readPaint = (): typeof DEFAULT_PAINT => store.getState().design.pages[store.getState().design.activePageId].backgroundPaint;
 
 describe('ColumnBackground snapshots', () => {
   beforeEach(() => {
-    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
   it('should render the colour field, alpha field, and visibility toggle', () => {
@@ -37,7 +37,7 @@ describe('ColumnBackground snapshots', () => {
 
 describe('ColumnBackground behaviors', () => {
   beforeEach(() => {
-    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
   });
 
   it('should seed the hex field from the current page paint', () => {
@@ -61,7 +61,7 @@ describe('ColumnBackground behaviors', () => {
 
   it('should show the closed-eye icon while the background is hidden', () => {
     // mock
-    store.dispatch(setPaint({ ...DEFAULT_PAINT, visible: false }));
+    store.dispatch(setBackgroundPaint({ ...DEFAULT_PAINT, visible: false }));
 
     // before
     const { container } = renderColumnBackground();

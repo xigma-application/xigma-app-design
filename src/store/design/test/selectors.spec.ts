@@ -6,6 +6,7 @@ import {
   selectAllGuideLines,
   selectAreAdditionalLabelsVisible,
   selectAreRulersVisible,
+  selectBackgroundPaint,
   selectCommentDraftPosition,
   selectComments,
   selectDescendantIdsOfSelected,
@@ -90,6 +91,7 @@ const state = {
     lastTextTool: ToolName.textOnPath,
     pages: {
       'page-1': {
+        backgroundPaint: { color: '#336699', opacity: 50, type: 'solid' },
         comments: { [comment.id]: comment },
         guides: [{ axis: 'x', id: 'page-guide', position: 50 }],
         id: 'page-1',
@@ -230,6 +232,11 @@ describe('design selectors', () => {
   it('should select the paint', () => {
     // result
     expect(selectPaint(state)).toEqual({ color: '#d9d9d9', opacity: 100, type: 'solid' });
+  });
+
+  it('should select the background paint, independent of the vector paint tool paint', () => {
+    // result
+    expect(selectBackgroundPaint(state)).toEqual({ color: '#336699', opacity: 50, type: 'solid' });
   });
 
   it('should select the pen active vertex id', () => {

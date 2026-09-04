@@ -43,6 +43,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         lastTextTool: ToolName.text,
         pages: {
           'page-1': {
+            backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' as const },
             comments: { [comment.id]: comment },
             guides: [],
             id: 'page-1',

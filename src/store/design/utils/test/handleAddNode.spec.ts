@@ -61,6 +61,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -111,6 +112,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -160,6 +162,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -210,6 +213,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -259,6 +263,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -311,6 +316,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',
@@ -374,6 +380,7 @@ describe('handleAddNode', () => {
       lastTextTool: ToolName.text,
       pages: {
         'page-1': {
+          backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           comments: {},
           guides: [],
           id: 'page-1',

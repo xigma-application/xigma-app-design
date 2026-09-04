@@ -52,6 +52,7 @@ const buildTextNode = (pathId: string | null = null): TTextNode => ({
 });
 
 const buildPage = (id: string, name: string): TDesignPage => ({
+  backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   comments: {},
   guides: [],
   id,
