@@ -3,6 +3,7 @@ import { FC, useRef } from 'react';
 // components
 import Header from './Header/Header';
 import MinimizedHeader from './MinimizedHeader/MinimizedHeader';
+import PanelProperties from './PanelProperties/PanelProperties';
 
 // core
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
@@ -44,6 +45,7 @@ const RightPanel: FC = () => {
     <div className={styles.RightPanel} ref={panelRef} style={{ width }}>
       <div className={styles['RightPanel__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorX }} />
       <Header />
+      <PanelProperties />
     </div>
   );
 };

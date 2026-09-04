@@ -1,0 +1,46 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnBackgroundColorField snapshots > should render the swatch trigger and the hex input 1`] = `
+<DocumentFragment>
+  <div
+    class="_TextField_bd2800"
+  >
+    <div
+      class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+      data-test-text-field="background-color"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="Background color"
+        class=""
+        data-state="closed"
+        type="button"
+      >
+        <div
+          class="_Color_a21594"
+        >
+          <div
+            class="_Color__picker_a21594"
+            style="background-color: rgb(68, 68, 68);"
+          />
+          <div
+            class="_Color__picker-alpha_a21594"
+            style="background-color: rgb(68, 68, 68);"
+          />
+          <div
+            class="_Color__picker-texture_a21594"
+          />
+        </div>
+      </button>
+      <input
+        class="_TextFieldWrapper__input_9a3a67"
+        data-test-bypass-global-shortcuts="true"
+        data-test-text-field-input="background-color"
+        maxlength="6"
+        value="444444"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

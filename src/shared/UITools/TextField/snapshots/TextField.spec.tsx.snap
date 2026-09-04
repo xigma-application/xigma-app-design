@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TextField snapshots > should render a labelled field wrapping its input 1`] = `
+<DocumentFragment>
+  <div
+    class="_TextField_bd2800 caller-class"
+  >
+    <span
+      class="_TextFieldLabel_93eccb"
+    >
+      Hex
+    </span>
+    <div
+      class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+      data-test-text-field="color"
+    >
+      <input
+        class="_TextFieldWrapper__input_9a3a67"
+        data-test-bypass-global-shortcuts="true"
+        data-test-text-field-input="color"
+        value="ffffff"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

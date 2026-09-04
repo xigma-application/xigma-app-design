@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TextFieldLabel snapshots > should render the label text 1`] = `
+<DocumentFragment>
+  <span
+    class="_TextFieldLabel_93eccb"
+  >
+    Hex
+  </span>
+</DocumentFragment>
+`;

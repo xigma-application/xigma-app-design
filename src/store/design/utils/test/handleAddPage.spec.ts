@@ -60,7 +60,7 @@ describe('handleAddPage', () => {
       id: 'new-page',
       name: 'Page 2',
       nodes: {},
-      paint: { color: '#D9D9D9', opacity: 100, type: 'solid' },
+      paint: { color: '#444444', opacity: 100, type: 'solid' },
       rootOrder: [],
       selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },

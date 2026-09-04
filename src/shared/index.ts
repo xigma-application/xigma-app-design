@@ -30,4 +30,6 @@ export * from './UITools/EditableInput/EditableInput';
 export * from './UITools/FieldGroup/FieldGroup';
 export * from './UITools/Popover/Popover';
 export * from './UITools/SearchInput/SearchInput';
+export * from './UITools/Section/Section';
 export * from './UITools/Tabs/Tabs';
+export * from './UITools/TextField/TextField';

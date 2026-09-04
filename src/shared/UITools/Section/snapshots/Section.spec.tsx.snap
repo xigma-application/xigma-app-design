@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Section snapshots > should render Section with a label, a trailing component, and its children 1`] = `
+<DocumentFragment>
+  <div
+    class="_Section_5940d2"
+    data-test-section="background"
+  >
+    <div
+      class="_Section__header_5940d2 _Section__header--separator_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Page
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          type="button"
+        >
+          ＋
+        </button>
+      </div>
+    </div>
+    <span>
+      body
+    </span>
+  </div>
+</DocumentFragment>
+`;

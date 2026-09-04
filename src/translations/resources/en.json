@@ -368,6 +368,8 @@
   "design.rightPanel.header.zoomMenu.inputAriaLabel": "Zoom percentage",
   "design.rightPanel.header.zoomTrigger.ariaLabel": "Zoom",
   "design.rightPanel.header.zoomTrigger.tooltip": "Zoom/view options",
+  "design.rightPanel.panelProperties.design.background.toggleVisibilityAriaLabel": "Toggle background visibility",
+  "design.rightPanel.panelProperties.design.section.1.label": "Page",
   "design.toolbar.actions": "Actions",
   "design.toolbar.actionsPanel.commonSettings": "Common settings",
   "design.toolbar.actionsPanel.recents": "Recents",
