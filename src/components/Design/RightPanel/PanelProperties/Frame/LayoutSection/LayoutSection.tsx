@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import ColumnDimensions from './ColumnDimensions/ColumnDimensions';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
 import LayoutSectionButtons from './LayoutSectionButtons';
 import { Section } from 'shared';
@@ -15,6 +16,7 @@ const LayoutSection: FC = () => {
   return (
     <Section component={<LayoutSectionButtons />} e2eValue="layout" label={t(`${translationNameSpace}.label`)}>
       <ColumnFlow />
+      <ColumnDimensions />
     </Section>
   );
 };

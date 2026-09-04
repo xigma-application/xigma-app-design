@@ -43,4 +43,12 @@ describe('LayoutSection behaviors', () => {
     // result
     expect(screen.getByText('Flow')).toBeInTheDocument();
   });
+
+  it('should render the dimensions row label', () => {
+    // before
+    renderLayoutSection();
+
+    // result
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
+  });
 });
