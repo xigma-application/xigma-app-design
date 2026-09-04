@@ -1,10 +1,10 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
 import { getRotatedAnchorSolver } from '../../getRotatedAnchorSolver';
@@ -25,6 +25,40 @@ const addFrameNode = (): string => {
       x: 0,
       y: 0,
     }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addAutoLayoutFrameNode = (): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 100,
+      itemSpacing: 10,
+      layoutMode: LayoutMode.horizontal,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectNode = (width: number, height: number): string => {
+  store.dispatch(
+    addNode({ fill: '#00ff00', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x: 0, y: 0 }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -157,5 +191,50 @@ describe('resizeBoxNode', () => {
       x: 50,
       y: -25,
     });
+  });
+
+  it('should reflow an auto-layout frame’s children live, in the same dispatch, when the frame itself is resized', () => {
+    // mock — a horizontal, right-packed auto-layout frame with two children
+    const frameId = addAutoLayoutFrameNode();
+    const idA = addRectNode(30, 20);
+    const idB = addRectNode(40, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [idA, idB], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(updateNode({ changes: { layoutAlignment: AlignmentLayout.topRight }, id: frameId }));
+
+    // before — the frame widens from 100 to 200, anchored at its own top-left corner
+    resizeBoxNode(
+      frameId,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      2,
+      1,
+      true,
+      null,
+    );
+
+    // result — right-packed content (30+10+40=80) re-anchors against the new, wider right edge
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[frameId]).toMatchObject({ width: 200 });
+    expect(page.nodes[idA]).toMatchObject({ x: 120 });
+    expect(page.nodes[idB]).toMatchObject({ x: 160 });
+  });
+
+  it('should reflow an auto-layout frame’s other children live, in the same dispatch, when one child is resized', () => {
+    // mock — a horizontal auto-layout frame with two children, left-packed (the default)
+    const frameId = addAutoLayoutFrameNode();
+    const idA = addRectNode(30, 20);
+    const idB = addRectNode(40, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [idA, idB], targetIndex: 0, targetParentId: frameId }));
+
+    // before — child a doubles in width (30 -> 60)
+    resizeBoxNode(idA, { flip: null, height: 20, rotation: 0, width: 30, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 2, 1, true, null);
+
+    // result — b is pushed along by a's new width, without being resized itself
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[idA]).toMatchObject({ width: 60 });
+    expect(page.nodes[idB]).toMatchObject({ width: 40, x: 70 });
   });
 });
