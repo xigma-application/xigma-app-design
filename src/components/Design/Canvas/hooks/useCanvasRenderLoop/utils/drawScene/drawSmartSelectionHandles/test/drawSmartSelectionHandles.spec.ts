@@ -5,6 +5,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawSmartSelectionHandles } from '../drawSmartSelectionHandles';
+import { getSmartSelectionSuggestion } from '../../../../../../utils/getSmartSelectionSuggestion';
 
 const drawSmartSelectionGapFillPreviewMock = vi.fn();
 const drawSmartSelectionGapHandlesMock = vi.fn();
@@ -31,6 +32,11 @@ vi.mock('../drawSmartSelectionSwapHandles', () => ({
 vi.mock('../drawSmartSelectionSwapShadow', () => ({
   drawSmartSelectionSwapShadow: (...args: unknown[]): void => drawSmartSelectionSwapShadowMock(...args),
 }));
+vi.mock('../../../../../../utils/getSmartSelectionSuggestion', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../../../utils/getSmartSelectionSuggestion')>();
+
+  return { getSmartSelectionSuggestion: vi.fn(actual.getSmartSelectionSuggestion) };
+});
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
@@ -88,6 +94,46 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('row');
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the column-kind suggestion icon for a near-miss vertical stack', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0, 0), rect('b', 0, 90), rect('c', 0, 230)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('column');
+  });
+
+  it('should draw the grid-kind suggestion icon for a grid-append suggestion', () => {
+    vi.mocked(getSmartSelectionSuggestion).mockReturnValueOnce({ axis: 'x', type: 'grid-append' } as never);
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 90), rect('c', 230)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('grid');
+  });
+
+  it('should draw no suggestion icon when the pointer is inside the box but there is no suggestion', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapHoverLabelMock).toHaveBeenCalledTimes(1);
   });
 
   it('should draw the grid-kind suggestion icon for a near-miss grid', () => {

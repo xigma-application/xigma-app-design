@@ -159,6 +159,19 @@ describe('resolveSmartSelectionGapHover', () => {
     });
   });
 
+  it('should return a hover result with the move-y cursor class over a column gap handle', () => {
+    // mock
+    const colA: TRectangleNode = { ...rectangle, id: 'col-a', x: 0, y: 0 };
+    const colB: TRectangleNode = { ...rectangle, id: 'col-b', x: 0, y: 150 };
+
+    // result
+    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 125 }, smartSelectionNodes: [colA, colB] }))).toEqual({
+      className: 'move-y',
+      cursor: '',
+      nodeId: null,
+    });
+  });
+
   it("should stash the hovered gap's axis, value and pointer position on the shared ref for the draw loop", () => {
     // mock
     const refs = createCanvasRefs();

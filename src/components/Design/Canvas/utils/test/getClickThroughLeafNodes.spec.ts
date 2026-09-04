@@ -53,6 +53,21 @@ const buildSection = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
     ...overrides,
   }) as TSceneNode;
 
+const buildGroup = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
+  ({
+    childIds: [],
+    height: 100,
+    id: 'group',
+    name: 'Group',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.group,
+    width: 100,
+    x: 0,
+    y: 0,
+    ...overrides,
+  }) as TSceneNode;
+
 describe('getClickThroughLeafNodes', () => {
   it('should keep a plain node with no container ancestor', () => {
     const rect = buildRect();
@@ -113,6 +128,37 @@ describe('getClickThroughLeafNodes', () => {
     const nodesById = { [frame.id]: frame, [rect.id]: rect, [section.id]: section };
 
     expect(getClickThroughLeafNodes([section, frame, rect], nodesById)).toEqual([section, rect]);
+  });
+
+  it('should walk past a group ancestor up to the enclosing click-through frame and keep the leaf', () => {
+    const frame = buildFrame({ childIds: ['group'] });
+    const group = buildGroup({ childIds: ['rect'], parentId: 'frame' });
+    const rect = buildRect({ parentId: 'group' });
+    const nodesById = { [frame.id]: frame, [group.id]: group, [rect.id]: rect };
+
+    expect(getClickThroughLeafNodes([frame, group, rect], nodesById)).toEqual([rect]);
+  });
+
+  it('should keep a leaf whose only ancestor is a top-level group with no container above it', () => {
+    const group = buildGroup({ childIds: ['rect'] });
+    const rect = buildRect({ parentId: 'group' });
+    const nodesById = { [group.id]: group, [rect.id]: rect };
+
+    expect(getClickThroughLeafNodes([group, rect], nodesById)).toEqual([rect]);
+  });
+
+  it('should keep an empty top-level group as a reachable leaf', () => {
+    const group = buildGroup({ childIds: [] });
+
+    expect(getClickThroughLeafNodes([group], { [group.id]: group })).toEqual([group]);
+  });
+
+  it('should exclude a non-empty group — its children are the real leaves', () => {
+    const group = buildGroup({ childIds: ['rect'] });
+    const rect = buildRect({ parentId: 'group' });
+    const nodesById = { [group.id]: group, [rect.id]: rect };
+
+    expect(getClickThroughLeafNodes([group], nodesById)).toEqual([]);
   });
 
   it('should still exclude a plain node behind an opaque (nested-in-frame) frame even inside a section', () => {

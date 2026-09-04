@@ -96,6 +96,37 @@ describe('drawSmartSelectionGapFillPreview', () => {
     );
   });
 
+  it('should skip the column-gap fill for any row where either side of the pair is an empty cell', () => {
+    const layout: TSmartSelectionGridLayout = {
+      cells: [
+        [null, node('b', 100, 0, 50, 50)],
+        [node('c', 0, 100, 50, 50), null],
+        [node('e', 0, 200, 50, 50), node('f', 100, 200, 50, 50)],
+      ],
+      columnCount: 2,
+      columnGaps: [{ index: 0, midpoint: { x: 75, y: 25 }, span: { x1: 75, x2: 75, y1: 0, y2: 250 }, value: 50 }],
+      geometry: { columnWidth: [50, 50], columnX: [0, 100], rowHeight: [50, 50, 50], rowY: [0, 100, 200] },
+      rowCount: 3,
+      rowGaps: [{ index: 0, midpoint: { x: 75, y: 75 }, span: { x1: 0, x2: 150, y1: 75, y2: 75 }, value: 50 }],
+      type: 'grid',
+    };
+
+    drawSmartSelectionGapFillPreview(gl, program, buffer, layout, 'x', 200, 200, IDENTITY_VIEWPORT);
+
+    // result — only the fully populated third row gets a fill; the two rows with a hole are skipped
+    expect(drawRectMock).toHaveBeenCalledTimes(1);
+    expect(drawRectMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      { fill: '#ff2fc2', fillAlpha: 0.3, height: 50, width: 50, x: 50, y: 200 },
+      200,
+      200,
+      IDENTITY_VIEWPORT,
+      0,
+    );
+  });
+
   it('should fill the row gap spanning the full width of the grid for a drag along the y axis', () => {
     const layout: TSmartSelectionGridLayout = {
       cells: [

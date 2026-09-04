@@ -90,6 +90,36 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
     expect(nodes()[idD]).toMatchObject({ x: 0, y: 100 });
   });
 
+  it('should skip empty grid slots that carry no node id', () => {
+    // mock — 3 filled cells and one hole (null slot) in a 2x2 grid
+    const idA = addRect(0, 0);
+    const idB = addRect(100, 0);
+    const idC = addRect(0, 100);
+    const dragState: TSmartSelectionSwapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: true,
+      nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 0, y: 100 } },
+      pointerStart: { x: 25, y: 25 },
+      slots: [
+        { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
+        { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
+        { bounds: { height: 50, width: 50, x: 0, y: 100 }, id: idC },
+        { bounds: { height: 50, width: 50, x: 100, y: 100 }, id: null },
+      ],
+      targetIndex: 2,
+    };
+
+    // action
+    dispatchSmartSelectionSwapUpdates(store.dispatch, dragState, 40, 45);
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
+    // result — the dragged cell tracks the pointer, the filled cells slide, the hole is ignored
+    expect(nodes()[idA]).toMatchObject({ x: 40, y: 45 });
+    expect(nodes()[idB]).toMatchObject({ x: 0, y: 0 });
+    expect(nodes()[idC]).toMatchObject({ x: 100, y: 0 });
+  });
+
   it('should only move the dragged block when the target index still equals the from index', () => {
     // mock
     const idA = addRect(0, 0);

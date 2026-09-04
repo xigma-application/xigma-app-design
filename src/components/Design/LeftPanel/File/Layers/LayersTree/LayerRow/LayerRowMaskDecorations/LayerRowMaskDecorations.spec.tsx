@@ -99,6 +99,17 @@ describe('LayerRowMaskDecorations', () => {
     expect(screen.getByText('Mask')).toBeInTheDocument();
   });
 
+  it('should render nothing for an unrecognized connector line role', () => {
+    // mock
+    const lines = [{ depthOffset: 0, role: 'unknown' }] as unknown as TMaskConnectorLine[];
+
+    // before
+    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('should render both an own-scope line and an inherited passthrough line at once, for a row that is masked content of an outer chain while also owning a nested mask scope', () => {
     // mock — same shape selectMaskConnectorRoleById produces for a masked-start row of an inner
     // mask group that itself sits inside an outer chain

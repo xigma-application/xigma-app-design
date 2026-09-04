@@ -1204,6 +1204,28 @@ describe('useKeyboardShortcuts zoom behaviors', () => {
     expect(selectViewport(realStore.getState()).zoom).toBe(0.75);
   });
 
+  it('should step the zoom in on "Cmd+NumpadAdd"', () => {
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'NumpadAdd', metaKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).toBe(1.5);
+  });
+
+  it('should step the zoom out on "Cmd+NumpadSubtract"', () => {
+    // before
+    renderZoomShortcuts();
+
+    // action
+    fireEvent.keyDown(window, { code: 'NumpadSubtract', metaKey: true });
+
+    // result
+    expect(selectViewport(realStore.getState()).zoom).toBe(0.75);
+  });
+
   it('should reset the zoom to 100% on "Cmd+0"', () => {
     // mock
     realStore.dispatch(setViewport({ x: 100, y: 100, zoom: 4 }));

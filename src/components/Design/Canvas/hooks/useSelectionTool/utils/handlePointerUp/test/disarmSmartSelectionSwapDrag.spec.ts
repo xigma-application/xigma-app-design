@@ -84,6 +84,31 @@ describe('disarmSmartSelectionSwapDrag', () => {
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
   });
 
+  it('should fall back to the dragged slot origin when the reorder produces no target for it', () => {
+    // mock — moved, but dropped back onto its own slot (from === target), so getReorderedSwapPositions
+    // yields no entry for the dragged id and the ?? fallback to the slot's own bounds kicks in
+    const idA = addRect(320, 40);
+    const canvas = createCanvas();
+    const dragState: TSmartSelectionSwapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: true,
+      nodeOrigins: { [idA]: { x: 0, y: 0 } },
+      pointerStart: { x: 25, y: 25 },
+      slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA }],
+      targetIndex: 0,
+    };
+    const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: dragState };
+
+    // before
+    disarmSmartSelectionSwapDrag(canvas, pointerEvent(4), store.dispatch, swapDragRef);
+
+    // result — zero net delta lands the block back on its slot origin, ref cleared, capture released
+    expect(nodes()[idA]).toMatchObject({ x: 0, y: 0 });
+    expect(swapDragRef.current).toBeNull();
+    expect(canvas.releasePointerCapture).toHaveBeenCalledWith(4);
+  });
+
   it('should not touch the nodes when the drag never moved', () => {
     // mock
     const idA = addRect(320, 40);

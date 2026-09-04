@@ -39,6 +39,12 @@ describe('getSmartSelectionGridEqualizeSuggestion', () => {
     expect(getSmartSelectionGridEqualizeSuggestion(nodes, 4, 4)).toBeNull();
   });
 
+  it('should return null when the cells form a grid shape but one cell is misaligned beyond tolerance', () => {
+    const nodes = [cell('a', 0, 0), cell('b', 100, 0), cell('c', 0, 100), cell('d', 100, 100, 80, 80)];
+
+    expect(getSmartSelectionGridEqualizeSuggestion(nodes, 4, 4)).toBeNull();
+  });
+
   it('should return null when a column overlaps (negative gap)', () => {
     const nodes = [cell('a', 0, 0), cell('b', 20, 0), cell('c', 0, 100), cell('d', 20, 100)];
 

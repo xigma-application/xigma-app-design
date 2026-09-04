@@ -84,6 +84,35 @@ describe('continueSmartSelectionGapDrag', () => {
     expect(dragState.badgeAnchor).toEqual({ x: 105, y: 25 });
   });
 
+  it('should grow a vertical gap by the pointer delta on the y axis', () => {
+    // mock
+    const idB = addRect(0, 100);
+    const canvas = createCanvas();
+    const dragState: TSmartSelectionGapDragState = {
+      anchorPosition: 0,
+      anchorSize: 50,
+      axis: 'y',
+      badgeAnchor: { x: 25, y: 75 },
+      cascadeGroups: [{ nodeIds: [idB], originalPosition: 100, size: 50 }],
+      currentGapValue: 50,
+      dispatchThrottle: { frameId: null, run: null },
+      gapIndex: 0,
+      hasMoved: false,
+      nodeOrigins: { [idB]: { x: 0, y: 100 } },
+      originalGapValue: 50,
+      pointerStart: { x: 25, y: 75 },
+    };
+    const gapDragRef: RefObject<TSmartSelectionGapDragState | null> = { current: dragState };
+
+    // before — pointer moved 30 down
+    continueSmartSelectionGapDrag(canvas, pointerEvent(25, 105), store.dispatch, gapDragRef);
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
+    // result — same doubling as the x-axis case; b moves to 0+50+110=160 on y
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 0, y: 160 });
+    expect(dragState.badgeAnchor).toEqual({ x: 25, y: 105 });
+  });
+
   it('should clamp the gap at 0 instead of going negative', () => {
     // mock
     const idB = addRect(100, 0);
