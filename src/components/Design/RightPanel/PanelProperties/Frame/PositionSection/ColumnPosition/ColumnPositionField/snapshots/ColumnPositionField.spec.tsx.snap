@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnPositionField snapshots > should render the field with its label and value 1`] = `
+<DocumentFragment>
+  <div
+    class="_TextField_bd2800"
+  >
+    <div
+      class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+      data-test-text-field="x"
+    >
+      <div
+        class="ScrubbableInput"
+      >
+        <span
+          class="_ColumnPositionField__label_bfd5c2"
+        >
+          X
+        </span>
+      </div>
+      <input
+        aria-label="X position"
+        class="_TextFieldWrapper__input_9a3a67"
+        data-state="closed"
+        data-test-bypass-global-shortcuts="true"
+        data-test-text-field-input="x"
+        type="number"
+        value="10"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

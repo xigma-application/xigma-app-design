@@ -41,6 +41,6 @@ describe('Frame behaviors', () => {
     renderFrame();
 
     // result
-    expect(screen.getByText('Position')).toBeInTheDocument();
+    expect(screen.getAllByText('Position')).toHaveLength(2);
   });
 });

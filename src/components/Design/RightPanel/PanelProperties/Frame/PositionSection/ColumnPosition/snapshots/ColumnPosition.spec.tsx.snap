@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnPosition snapshots > should render the X and Y fields 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: 100%;"
+    >
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Position
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+        style="width: 100%;"
+      >
+        <div
+          class="_TextField_bd2800"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="x"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <span
+                class="_ColumnPositionField__label_bfd5c2"
+              >
+                X
+              </span>
+            </div>
+            <input
+              aria-label="X position"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="x"
+              type="number"
+              value="-1010"
+            />
+          </div>
+        </div>
+        <div
+          class="_TextField_bd2800"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="y"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <span
+                class="_ColumnPositionField__label_bfd5c2"
+              >
+                Y
+              </span>
+            </div>
+            <input
+              aria-label="Y position"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="y"
+              type="number"
+              value="-810"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

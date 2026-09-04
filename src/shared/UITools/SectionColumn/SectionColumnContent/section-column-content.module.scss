@@ -5,6 +5,10 @@
   column-gap: $columnGap;
   display: grid;
 
+  & > * {
+    min-width: 0;
+  }
+
   &--single {
     grid-template-columns: 1fr;
   }

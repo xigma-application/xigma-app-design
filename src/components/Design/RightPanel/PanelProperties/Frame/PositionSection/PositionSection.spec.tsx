@@ -18,7 +18,7 @@ const renderPositionSection = (): ReturnType<typeof render> =>
   );
 
 describe('PositionSection snapshots', () => {
-  it('should render the Position section with the alignment row', () => {
+  it('should render the alignment and position rows', () => {
     // before
     const { asFragment } = renderPositionSection();
 
@@ -28,19 +28,19 @@ describe('PositionSection snapshots', () => {
 });
 
 describe('PositionSection behaviors', () => {
-  it('should render the section label', () => {
-    // before
-    renderPositionSection();
-
-    // result
-    expect(screen.getByText('Position')).toBeInTheDocument();
-  });
-
   it('should render the alignment row label', () => {
     // before
     renderPositionSection();
 
     // result
     expect(screen.getByText('Alignment')).toBeInTheDocument();
+  });
+
+  it('should render the section label and the position row label', () => {
+    // before
+    renderPositionSection();
+
+    // result
+    expect(screen.getAllByText('Position')).toHaveLength(2);
   });
 });

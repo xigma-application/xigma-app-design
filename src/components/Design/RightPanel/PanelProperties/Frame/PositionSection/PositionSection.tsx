@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ColumnAlignment from './ColumnAlignment/ColumnAlignment';
+import ColumnPosition from './ColumnPosition/ColumnPosition';
 import { Section } from 'shared';
 
 // others
@@ -14,6 +15,7 @@ const PositionSection: FC = () => {
   return (
     <Section e2eValue="position" label={t(`${translationNameSpace}.label`)}>
       <ColumnAlignment />
+      <ColumnPosition />
     </Section>
   );
 };
