@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ComponentHeader snapshots > should render ComponentHeader with children and trailing buttons 1`] = `
+<DocumentFragment>
+  <div
+    class="_ComponentHeader_163cd5"
+    data-test-component-header="frame"
+  >
+    <div
+      class="_ComponentHeader__label_163cd5"
+    >
+      Frame
+    </div>
+    <div
+      class="_ComponentHeader__buttons_163cd5"
+    >
+      <button
+        type="button"
+      >
+        ＋
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;

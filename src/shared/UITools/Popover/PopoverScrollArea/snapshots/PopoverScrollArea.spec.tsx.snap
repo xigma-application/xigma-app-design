@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PopoverScrollArea snapshots > should render its children inside a scrollable content area 1`] = `
+<DocumentFragment>
+  <div
+    class="_PopoverScrollArea_acebc2"
+  >
+    <div
+      class="_PopoverScrollArea__content_acebc2"
+    >
+      <span>
+        item
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;
