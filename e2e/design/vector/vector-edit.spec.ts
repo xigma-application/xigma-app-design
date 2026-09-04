@@ -480,12 +480,17 @@ test('selecting a different node while still editing one cleanly exits edit mode
   await designPage.goto('e2e-test-vector-edit-different-node-noQuirk');
   await expect(designPage.canvas).toBeVisible();
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its two layers-row icons can repaint on a slightly different
+  // frame between the two sequences — unrelated to the canvas edit handles this test checks
+  const canvasArea = await designPage.canvasSafeArea();
+
   await drawOpenTriangle(designPage); // node A, still being edited
   await designPage.selectVectorEditMoveTool();
   await designPage.drawFrame(1300, 300, 1400, 400); // node B, auto-selected on creation
   await designPage.click(1350, 350); // reaffirm B is the current selection
 
-  const viaSelectingB = await designPage.canvas.screenshot();
+  const viaSelectingB = await page.screenshot({ clip: canvasArea });
 
   await designPage.goto('e2e-test-vector-edit-different-node-reference');
   await expect(designPage.canvas).toBeVisible();
@@ -498,11 +503,13 @@ test('selecting a different node while still editing one cleanly exits edit mode
   await designPage.drawFrame(1300, 300, 1400, 400);
   await designPage.click(1350, 350);
 
-  const viaExplicitEscape = await designPage.canvas.screenshot();
+  const viaExplicitEscape = await page.screenshot({ clip: canvasArea });
 
   // identical whether A's edit mode was exited explicitly (Escape, Escape) or implicitly (by
-  // selecting B) — proves selecting B alone is enough to fully drop A's edit handles, no quirk
-  expect(viaSelectingB.equals(viaExplicitEscape)).toBe(true);
+  // selecting B) — proves selecting B alone is enough to fully drop A's edit handles, no quirk.
+  // Tolerant compare: two independent WebGL renders of the same scene can differ by a byte or two of
+  // sub-pixel AA noise without a single visually different pixel, which a strict Buffer.equals trips on
+  expect(countMismatchedPixels(viaSelectingB, viaExplicitEscape)).toBe(0);
 });
 
 test('a selected (not editing) vector node still resizes via the ordinary 8-direction handles', async ({ page }) => {

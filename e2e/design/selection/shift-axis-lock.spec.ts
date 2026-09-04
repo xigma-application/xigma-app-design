@@ -113,9 +113,11 @@ test('holding Shift mid-drag locks every member of a multi-selection to the same
   await designPage.click(925, 325);
   await designPage.click(1025, 325, { shift: true });
 
-  await designPage.pointerDown(925, 325);
+  // start the drag off A's dead centre so it clears the Smart Selection swap handle that the
+  // [A, B] multi-selection puts there
+  await designPage.pointerDown(910, 310);
   await page.keyboard.down('Shift');
-  await designPage.pointerMove(995, 415); // predominantly vertical
+  await designPage.pointerMove(980, 400); // predominantly vertical, same (70, 90) delta
   await designPage.pointerUp();
   await page.keyboard.up('Shift');
 

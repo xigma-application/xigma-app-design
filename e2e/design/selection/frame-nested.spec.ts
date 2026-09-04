@@ -187,6 +187,10 @@ test('a frame nested inside another frame never shows its name label, unlike a t
   await page.keyboard.type('Renamed');
   await page.keyboard.press('Enter');
 
+  // the layers-panel drag nests B without spring-loading the collapsed Section 1 open, so expand it
+  // to bring B's (now renamed) row back into the tree before asserting on it
+  await rows.filter({ hasText: 'Section 1' }).locator('[class*="TreeItem__toggleButton"]').click();
+
   await expect(rows.filter({ hasText: 'Renamed' })).toHaveCount(1);
 });
 

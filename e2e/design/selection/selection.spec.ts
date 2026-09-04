@@ -66,12 +66,13 @@ test('clicking an unselected frame inside a multi-selection does not replace the
 
   // rest the cursor on C first so the hover outline is already there for both captures below —
   // otherwise the hover highlight introduced by useHoverHighlight would itself make the two
-  // screenshots differ, unrelated to what this test is actually checking
-  await designPage.pointerMove(820, 120);
+  // screenshots differ, unrelated to what this test is actually checking. Aim left-of-centre in C so
+  // the point clears the Smart Selection gap handle that sits at the A..B gap midpoint (also x820).
+  await designPage.pointerMove(805, 120);
   const groupSelection = await designPage.canvas.screenshot();
 
   // pressing down on C must not flicker the outline away from the group while the button is held
-  await designPage.pointerDown(820, 120);
+  await designPage.pointerDown(805, 120);
   const heldOnUnselectedNode = await designPage.canvas.screenshot();
   expect(heldOnUnselectedNode.equals(groupSelection)).toBe(true);
 

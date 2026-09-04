@@ -3,6 +3,9 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
+// utils
+import { countMismatchedPixels } from '../../utils/compareScreenshots';
+
 test.describe.configure({ mode: 'serial' });
 
 test('the polygon vertex-count handle only renders once the triangle is both selected and hovered, not just selected', async ({ page }) => {
@@ -138,7 +141,9 @@ test('dragging the star vertex-count handle past the vertical axis through the c
   const viaHighIncrease = await resetViaPath('e2e-test-star-vertex-count-reset-a', { x: 1046, y: 305 });
   const viaLowIncrease = await resetViaPath('e2e-test-star-vertex-count-reset-b', { x: 1030, y: 360 });
 
-  expect(viaHighIncrease.equals(viaLowIncrease)).toBe(true);
+  // tolerant compare: two independent WebGL renders of the identical reset shape can differ by a byte
+  // or two of sub-pixel AA noise with zero visually different pixels, which a strict Buffer.equals trips on
+  expect(countMismatchedPixels(viaHighIncrease, viaLowIncrease)).toBe(0);
 });
 
 test('dragging the star ratio handle toward its anchor rounds out the points, changing the shape', async ({ page }) => {

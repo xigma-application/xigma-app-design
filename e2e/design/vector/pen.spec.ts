@@ -57,11 +57,16 @@ test('a drag shorter than the minimum drag distance is still treated as a plain 
   await designPage.goto('e2e-test-pen-sub-threshold-drag');
   await expect(designPage.canvas).toBeVisible();
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icon can repaint on a slightly different frame
+  // between the 1px-drag sequence and the plain-click sequence — unrelated to what this test checks
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.selectTool('pen');
   await designPage.click(700, 300);
   await designPage.dragVectorPoint(850, 300, 851, 300); // 1px drag, under MIN_DRAG_DISTANCE_PX (2)
   await designPage.pointerMove(1500, 900);
-  const subThreshold = await designPage.canvas.screenshot();
+  const subThreshold = await page.screenshot({ clip: canvasArea });
 
   await designPage.goto('e2e-test-pen-sub-threshold-reference');
   await expect(designPage.canvas).toBeVisible();
@@ -70,7 +75,7 @@ test('a drag shorter than the minimum drag distance is still treated as a plain 
   await designPage.click(700, 300);
   await designPage.click(850, 300); // plain click at the same spot
   await designPage.pointerMove(1500, 900);
-  const plainClick = await designPage.canvas.screenshot();
+  const plainClick = await page.screenshot({ clip: canvasArea });
 
   expect(subThreshold.equals(plainClick)).toBe(true);
 });
@@ -668,10 +673,15 @@ test('hovering within the angle-snap tolerance of horizontal pulls the rubber-ba
   await designPage.goto('e2e-test-pen-angle-snap-preview');
   await expect(designPage.canvas).toBeVisible();
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icon can repaint on a slightly different frame
+  // between the two hover sequences — unrelated to the rubber-band preview this test checks
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.selectTool('pen');
   await designPage.click(700, 300); // v1
   await designPage.pointerMove(850, 304); // a couple of px off horizontal — within the angle-snap tolerance
-  const nearHorizontal = await designPage.canvas.screenshot();
+  const nearHorizontal = await page.screenshot({ clip: canvasArea });
 
   await designPage.goto('e2e-test-pen-angle-snap-preview-reference');
   await expect(designPage.canvas).toBeVisible();
@@ -679,7 +689,7 @@ test('hovering within the angle-snap tolerance of horizontal pulls the rubber-ba
   await designPage.selectTool('pen');
   await designPage.click(700, 300);
   await designPage.pointerMove(850, 300); // exactly horizontal — the position the snap should pull onto
-  const exactHorizontal = await designPage.canvas.screenshot();
+  const exactHorizontal = await page.screenshot({ clip: canvasArea });
 
   // the near-horizontal hover snaps onto the same axis, rendering pixel-identical to hovering exactly on it
   expect(nearHorizontal.equals(exactHorizontal)).toBe(true);
@@ -717,11 +727,16 @@ test('clicking within the angle-snap tolerance commits the new vertex exactly on
   await designPage.goto('e2e-test-pen-angle-snap-commit');
   await expect(designPage.canvas).toBeVisible();
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icon can repaint on a slightly different frame
+  // between the two click sequences — unrelated to the committed vertex position this test checks
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.selectTool('pen');
   await designPage.click(700, 300); // v1
   await designPage.click(850, 304); // v2 — a couple of px off horizontal, within the angle-snap tolerance
   await designPage.pointerMove(1500, 900); // rest away
-  const snappedCommit = await designPage.canvas.screenshot();
+  const snappedCommit = await page.screenshot({ clip: canvasArea });
 
   await designPage.goto('e2e-test-pen-angle-snap-commit-reference');
   await expect(designPage.canvas).toBeVisible();
@@ -730,7 +745,7 @@ test('clicking within the angle-snap tolerance commits the new vertex exactly on
   await designPage.click(700, 300);
   await designPage.click(850, 300); // exactly horizontal — where the snap should have landed
   await designPage.pointerMove(1500, 900);
-  const exactCommit = await designPage.canvas.screenshot();
+  const exactCommit = await page.screenshot({ clip: canvasArea });
 
   expect(snappedCommit.equals(exactCommit)).toBe(true);
 });
@@ -902,11 +917,16 @@ test('placing a new vertex near a vertex on a completely separate shape snaps it
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icons can repaint on a slightly different frame
+  // between the two draw sequences — unrelated to the committed vertex position this test checks
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // shape B's v1
   await designPage.click(703, 600); // shape B's v2 — a couple of px off shape A's x=700 column
   await designPage.pointerMove(1500, 900); // rest away
-  const snapped = await designPage.canvas.screenshot();
+  const snapped = await page.screenshot({ clip: canvasArea });
 
   await designPage.goto('e2e-test-pen-alignment-guide-commit-reference');
   await expect(designPage.canvas).toBeVisible();
@@ -922,7 +942,7 @@ test('placing a new vertex near a vertex on a completely separate shape snaps it
   await designPage.click(900, 300);
   await designPage.click(700, 600); // exactly on shape A's column — where the guide should have snapped
   await designPage.pointerMove(1500, 900);
-  const exact = await designPage.canvas.screenshot();
+  const exact = await page.screenshot({ clip: canvasArea });
 
   expect(snapped.equals(exact)).toBe(true);
 });

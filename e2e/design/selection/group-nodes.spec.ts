@@ -24,9 +24,10 @@ test('dragging a group by clicking any of its children moves every child togethe
     return { group: page.nodes[groupId], groupId, nodeA: page.nodes[childIds[0]], nodeB: page.nodes[childIds[1]] };
   });
 
-  // drag from A's own area — a plain click there hits the whole group, so this moves both children
-  await designPage.pointerDown(720, 120);
-  await page.mouse.move(720 + 150, 120 + 60, { steps: 10 });
+  // drag from A's own area — a plain click there hits the whole group, so this moves both children;
+  // start off A's dead centre so the drag misses the Smart Selection swap handle sitting there
+  await designPage.pointerDown(708, 108);
+  await page.mouse.move(708 + 150, 108 + 60, { steps: 10 });
   await designPage.pointerUp();
 
   const after = await page.evaluate(
@@ -77,7 +78,8 @@ test('a plain click on a group child selects the whole group, and Ctrl+click on 
 
   await designPage.click(1500, 600); // deselect everything
 
-  await designPage.click(720, 120); // plain click on A's own area
+  // A's body, off its dead centre so the click clears the Smart Selection swap handle there
+  await designPage.click(708, 108); // plain click on A's own area
 
   const plainClickSelection = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -88,7 +90,7 @@ test('a plain click on a group child selects the whole group, and Ctrl+click on 
 
   expect(plainClickSelection).toEqual([before.groupId]);
 
-  await designPage.click(720, 120, { ctrl: true }); // Ctrl+click the same spot
+  await designPage.click(708, 108, { ctrl: true }); // Ctrl+click the same spot
 
   const ctrlClickSelection = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -123,7 +125,7 @@ test('Ctrl+Shift+click toggles a group child in and out of the selection, ignori
 
   await designPage.click(1500, 600); // deselect everything
 
-  await designPage.click(720, 120, { ctrl: true, shift: true }); // toggle A in
+  await designPage.click(708, 108, { ctrl: true, shift: true }); // toggle A in
 
   const afterFirstToggle = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -134,7 +136,7 @@ test('Ctrl+Shift+click toggles a group child in and out of the selection, ignori
 
   expect(afterFirstToggle).toEqual([idA]);
 
-  await designPage.click(920, 120, { ctrl: true, shift: true }); // toggle B in too, alongside A
+  await designPage.click(908, 108, { ctrl: true, shift: true }); // toggle B in too, alongside A
 
   const afterSecondToggle = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -145,7 +147,7 @@ test('Ctrl+Shift+click toggles a group child in and out of the selection, ignori
 
   expect(afterSecondToggle).toEqual([idA, idB]);
 
-  await designPage.click(720, 120, { ctrl: true, shift: true }); // toggle A back out
+  await designPage.click(708, 108, { ctrl: true, shift: true }); // toggle A back out
 
   const afterThirdToggle = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -455,7 +457,7 @@ test('deleting one individual child of a group shrinks it to the rest, and delet
   });
 
   // Ctrl+click B individually (bypassing the group) and delete just it
-  await designPage.click(920, 120, { ctrl: true });
+  await designPage.click(908, 108, { ctrl: true });
   await page.keyboard.press('Delete');
 
   const afterFirstDelete = await page.evaluate(
@@ -477,7 +479,7 @@ test('deleting one individual child of a group shrinks it to the rest, and delet
   expect(afterFirstDelete.group.width).toBeCloseTo(before.nodeA.width, 0);
 
   // now delete A too, the group's last remaining child
-  await designPage.click(720, 120, { ctrl: true });
+  await designPage.click(708, 108, { ctrl: true });
   await page.keyboard.press('Delete');
 
   const afterSecondDelete = await page.evaluate(
@@ -517,10 +519,11 @@ test('undoing an individual child’s rigid-body-breaking move restores the grou
     return { group: page.nodes[groupId], groupId, nodeB: page.nodes[childIds[1]] };
   });
 
-  // Ctrl+click B and drag it on its own, breaking the rigid body and growing the group's box
-  await designPage.click(920, 120, { ctrl: true });
-  await designPage.pointerDown(920, 120);
-  await page.mouse.move(1220, 120, { steps: 10 });
+  // Ctrl+click B and drag it on its own, breaking the rigid body and growing the group's box;
+  // aim off B's dead centre so the Ctrl+click and drag clear the Smart Selection swap handle there
+  await designPage.click(908, 108, { ctrl: true });
+  await designPage.pointerDown(908, 108);
+  await page.mouse.move(1208, 108, { steps: 10 });
   await designPage.pointerUp();
 
   const afterDrag = await page.evaluate(
@@ -652,14 +655,15 @@ test('once a group child and an unrelated node are both selected, starting the d
     return pages[activePageId].selectedIds[0];
   });
 
-  await designPage.click(920, 120, { ctrl: true }); // Ctrl+click B directly, bypassing the group
-  await designPage.click(920, 320, { shift: true }); // add C, selection = [B, C]
+  await designPage.click(908, 108, { ctrl: true }); // Ctrl+click B directly, bypassing the group
+  await designPage.click(908, 308, { shift: true }); // add C, selection = [B, C]
 
-  // B ∪ C's combined bounds span x900-940, y100-340 — (920, 220) sits in the empty gap between
-  // them but still inside that combined box; starting a drag there is only a rigid-multi-transform
-  // continuation (not a fresh hit-test) once the mixed-parent selection is recognized as one unit
-  await designPage.pointerDown(920, 220);
-  await page.mouse.move(920 + 100, 220, { steps: 10 });
+  // B ∪ C's combined bounds span x900-940, y100-340 — (908, 175) sits in the empty gap between
+  // them but still inside that combined box, and clear of the Smart Selection gap handle at the
+  // gap's exact midpoint; starting a drag there is only a rigid-multi-transform continuation (not a
+  // fresh hit-test) once the mixed-parent selection is recognized as one unit
+  await designPage.pointerDown(908, 175);
+  await page.mouse.move(908 + 100, 175, { steps: 10 });
   await designPage.pointerUp();
 
   const after = await page.evaluate(

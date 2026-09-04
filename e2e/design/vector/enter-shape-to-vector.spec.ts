@@ -8,7 +8,7 @@ type TDesignSnapshot = {
     string,
     {
       endPoint?: string;
-      fillColor?: string | null;
+      defaultFill?: unknown;
       startPoint?: string;
       type: string;
       vertices?: Record<string, { x: number; y: number }>;
@@ -124,7 +124,7 @@ test('pressing Enter on a selected Arrow converts it to a vector but drops its a
   const node = state.nodes[id];
 
   expect(node.type).toBe('vector');
-  expect(node.fillColor).toBeNull();
+  expect(node.defaultFill).toBeNull();
   expect(node).not.toHaveProperty('startPoint');
   expect(node).not.toHaveProperty('endPoint');
   expect(Object.keys(node.vertices ?? {})).toHaveLength(2);

@@ -7,8 +7,8 @@ import { DesignPage } from '../model/DesignPage';
 import { countMismatchedPixels } from '../../utils/compareScreenshots';
 
 type TStoredNode = {
+  defaultFill?: unknown;
   fill?: string | null;
-  fillColor?: string | null;
   height?: number;
   id: string;
   pathId?: string | null;
@@ -215,7 +215,7 @@ test('clicking a plain convertible shape with the Text on Path tool converts it 
   const text = Object.values(nodesAfter).find((node) => node.type === 'text');
 
   expect(converted.type).toBe('vector'); // converted in place, same id
-  expect(converted.fillColor).toBeNull(); // fill stripped so it doesn't sit as a filled block under the text
+  expect(converted.defaultFill).toBeNull(); // fill stripped so it does not sit as a filled block under the text
   expect(text?.pathId).toBe(rectangleId);
   expect(Object.keys(nodesAfter)).toHaveLength(2); // no separate node was created for the conversion
 });
@@ -462,6 +462,8 @@ test('copying and pasting a text-on-vector node (Ctrl+C / Ctrl+V) carries its ow
 
   await designPage.click(1000, 400);
   await page.keyboard.press('Control+c');
+  await designPage.click(1500, 700); // deselect — with a node still selected, Ctrl+V replaces it in
+  // place; the duplicate-with-rebound-guide behaviour under test only fires when nothing is selected
   await page.keyboard.press('Control+v');
 
   const nodes = await readNodes(page);
@@ -587,7 +589,7 @@ test('undoing a shape-to-vector text attach peels back the text commit first, th
   expect(Object.keys(afterFirstUndo)).toHaveLength(1); // the typed text node is gone
   const stillConverted = Object.values(afterFirstUndo)[0];
   expect(stillConverted.type).toBe('vector'); // the conversion itself is untouched by this undo
-  expect(stillConverted.fillColor).toBeNull();
+  expect(stillConverted.defaultFill).toBeNull();
 
   await page.keyboard.press('Control+z'); // undoes the attach gesture itself
 
