@@ -4,6 +4,7 @@ import { FC, ReactNode } from 'react';
 
 // components
 import PopoverItem from './PopoverItem/PopoverItem';
+import PopoverScrollArea from './PopoverScrollArea/PopoverScrollArea';
 import PopoverSeparator from './PopoverSeparator/PopoverSeparator';
 
 // hooks
@@ -20,6 +21,7 @@ export type TPopoverProps = {
   onInteractOutside?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
+  scrollable?: boolean;
   side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
   trigger: ReactNode;
@@ -35,6 +37,7 @@ export const Popover: FC<TPopoverProps> = ({
   onInteractOutside,
   onOpenChange,
   open,
+  scrollable = false,
   side = 'bottom',
   sideOffset = 8,
   trigger,
@@ -51,7 +54,7 @@ export const Popover: FC<TPopoverProps> = ({
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           align={align}
-          className={cx(styles.Popover, className)}
+          className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
           onInteractOutside={onInteractOutside}
           onPointerDown={moveable ? onPointerDown : undefined}
           onPointerMove={moveable ? onPointerMove : undefined}
@@ -60,7 +63,7 @@ export const Popover: FC<TPopoverProps> = ({
           sideOffset={sideOffset}
           style={moveable ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : undefined}
         >
-          {children}
+          {scrollable ? <PopoverScrollArea>{children}</PopoverScrollArea> : children}
         </PopoverPrimitive.Content>
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>

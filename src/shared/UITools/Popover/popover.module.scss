@@ -9,4 +9,9 @@
   color: var(--color-neutral-1);
   min-width: 150px;
   padding: 8px 4px;
+
+  &--scrollable {
+    display: flex;
+    max-height: min(var(--radix-popper-available-height), 400px);
+  }
 }

@@ -19,6 +19,7 @@ export type TPopoverItemProps = {
   icon?: TIconProps['name'];
   iconSize?: number;
   label: string;
+  maxWidth?: number;
   onClick?: () => void;
   selected?: boolean;
   shortcut?: string;
@@ -34,6 +35,7 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
   icon,
   iconSize = 14,
   label,
+  maxWidth,
   onClick,
   selected = false,
   shortcut,
@@ -58,11 +60,27 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
             {icon && <Icon name={icon} size={iconSize} />}
           </span>
         )}
-        <span className={styles.PopoverItem__label}>{label}</span>
-        {shortcut && <span className={cx(styles.PopoverItem__shortcut, shortcutClassName)}>{shortcut}</span>}
+        <div className={styles.PopoverItem__row} style={maxWidth ? { maxWidth } : undefined}>
+          <span className={styles.PopoverItem__label}>{label}</span>
+          {shortcut && <span className={cx(styles.PopoverItem__shortcut, shortcutClassName)}>{shortcut}</span>}
+        </div>
       </div>
     ),
-    [checkIconSize, checkVariant, className, disabled, icon, iconSize, label, onClick, selected, shortcut, shortcutClassName, withCheck],
+    [
+      checkIconSize,
+      checkVariant,
+      className,
+      disabled,
+      icon,
+      iconSize,
+      label,
+      maxWidth,
+      onClick,
+      selected,
+      shortcut,
+      shortcutClassName,
+      withCheck,
+    ],
   );
 
   return disabled ? content : <PopoverPrimitive.Close asChild>{content}</PopoverPrimitive.Close>;

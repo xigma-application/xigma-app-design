@@ -395,6 +395,8 @@
   "design.rightPanel.panelProperties.frame.frameHeader.maskAriaLabel": "Użyj jako maski",
   "design.rightPanel.panelProperties.frame.frameHeader.maskTooltip": "Użyj jako maski",
   "design.rightPanel.panelProperties.frame.frameHeader.menuAriaLabel": "Typ elementu",
+  "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.group": "Grupa",
+  "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Sekcja",
   "design.rightPanel.panelProperties.mcp.addAriaLabel": "Dodaj połączenie MCP",
   "design.rightPanel.panelProperties.mcp.addTooltip": "Skonfiguruj agentów dla Figma MCP",
   "design.rightPanel.panelProperties.mcp.noConnections": "Brak połączeń",

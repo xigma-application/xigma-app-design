@@ -1,0 +1,52 @@
+.PopoverScrollArea {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  outline: none;
+  position: relative;
+
+  &__content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__edge {
+    align-items: center;
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, var(--color-menu-panel));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    left: -4px;
+    position: absolute;
+    width: calc(100% + 8px);
+
+    &--top {
+      border-top-left-radius: var(--radius-medium);
+      border-top-right-radius: var(--radius-medium);
+      top: -8px;
+
+      .PopoverScrollArea__icon {
+        transform: rotate(180deg);
+      }
+    }
+
+    &--bottom {
+      border-bottom-left-radius: var(--radius-medium);
+      border-bottom-right-radius: var(--radius-medium);
+      bottom: -8px;
+    }
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 70%, var(--color-menu-panel));
+    }
+  }
+}

@@ -1,14 +1,20 @@
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import Frame from './Frame';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderFrame = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <Frame />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <Frame />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('Frame snapshots', () => {

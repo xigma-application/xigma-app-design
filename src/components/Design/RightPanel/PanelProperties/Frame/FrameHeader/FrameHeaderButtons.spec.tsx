@@ -1,15 +1,48 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import FrameHeaderButtons from './FrameHeaderButtons';
 import { TooltipProvider } from 'shared';
 
+// store
+import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
 const renderFrameHeaderButtons = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <FrameHeaderButtons />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <FrameHeaderButtons />
+      </TooltipProvider>
+    </Provider>,
   );
+
+const addFrameNode = (): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
 
 describe('FrameHeaderButtons snapshots', () => {
   it('should render the html tag, component, and mask buttons', () => {
@@ -46,15 +79,21 @@ describe('FrameHeaderButtons behaviors', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('should do nothing yet when the mask button is clicked', () => {
+  it('should turn the selected frame into a mask when the mask button is clicked', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
     // before
     renderFrameHeaderButtons();
-    const button = screen.getByLabelText('Use as mask');
 
     // action
-    fireEvent.click(button);
+    fireEvent.click(screen.getByLabelText('Use as mask'));
 
     // result
-    expect(button).toBeInTheDocument();
+    expect(selectActivePage(store.getState()).nodes[frameId].isMask).toBe(true);
+
+    // cleanup
+    store.dispatch(setSelection([]));
   });
 });

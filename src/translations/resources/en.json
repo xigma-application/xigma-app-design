@@ -383,6 +383,8 @@
   "design.rightPanel.panelProperties.frame.frameHeader.maskAriaLabel": "Use as mask",
   "design.rightPanel.panelProperties.frame.frameHeader.maskTooltip": "Use as mask",
   "design.rightPanel.panelProperties.frame.frameHeader.menuAriaLabel": "Element type",
+  "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.group": "Group",
+  "design.rightPanel.panelProperties.frame.frameHeader.typeMenu.section": "Section",
   "design.rightPanel.panelProperties.mcp.addAriaLabel": "Add MCP connection",
   "design.rightPanel.panelProperties.mcp.addTooltip": "Set up agents for Figma MCP",
   "design.rightPanel.panelProperties.mcp.noConnections": "No connections",

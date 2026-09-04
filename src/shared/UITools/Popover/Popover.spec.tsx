@@ -102,4 +102,22 @@ describe('Popover behaviors', () => {
     // result
     expect(content.style.transform).toBe('');
   });
+
+  it('should wrap its children in a PopoverScrollArea when scrollable', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(
+      <Popover scrollable trigger={<span>Open</span>}>
+        Popover content
+      </Popover>,
+    );
+    await user.click(screen.getByText('Open'));
+    const content = screen.getByRole('dialog');
+
+    // result
+    expect(content.className).toContain('Popover--scrollable');
+    expect(content.querySelector('[class*="PopoverScrollArea__content"]')).not.toBeNull();
+  });
 });

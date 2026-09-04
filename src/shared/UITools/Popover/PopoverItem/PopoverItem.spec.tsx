@@ -111,4 +111,32 @@ describe('PopoverItem behaviors', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
     expect(screen.getByText('Show rulers').previousElementSibling).not.toBeNull();
   });
+
+  it('should cap the label and shortcut row at maxWidth when given', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem label="iPhone 16 & 17 Pro Max" maxWidth={174} shortcut="440×956" />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    const row = screen.getByText('iPhone 16 & 17 Pro Max').parentElement as HTMLElement;
+
+    expect(row).toHaveStyle({ maxWidth: '174px' });
+  });
+
+  it('should not set a max width on the label and shortcut row by default', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem label="Frame" shortcut="F" />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    const row = screen.getByText('Frame').parentElement as HTMLElement;
+
+    expect(row.style.maxWidth).toBe('');
+  });
 });

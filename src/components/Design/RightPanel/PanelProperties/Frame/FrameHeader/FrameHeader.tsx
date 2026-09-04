@@ -19,6 +19,7 @@ const FrameHeader: FC = () => {
     <ComponentHeader buttons={<FrameHeaderButtons />} e2eValue="frame">
       <ButtonMenu
         className={styles.FrameHeader__trigger}
+        scrollable
         trigger={
           <span className={styles.FrameHeader__label}>
             {t(`${translationNameSpace}.label`)}

@@ -1,14 +1,20 @@
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import FrameHeader from './FrameHeader';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderFrameHeader = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <FrameHeader />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <FrameHeader />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('FrameHeader snapshots', () => {

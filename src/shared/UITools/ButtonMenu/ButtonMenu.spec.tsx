@@ -65,4 +65,19 @@ describe('ButtonMenu behaviors', () => {
     // result
     expect(screen.getByText('Open')).toBeInTheDocument();
   });
+
+  it('should wrap its content in a scrollable area when scrollable', () => {
+    // before
+    render(
+      <ButtonMenu scrollable trigger={<span>More</span>}>
+        <div>Item</div>
+      </ButtonMenu>,
+    );
+
+    // action
+    fireEvent.click(screen.getByText('More'));
+
+    // result
+    expect(screen.getByRole('dialog').querySelector('[class*="PopoverScrollArea__content"]')).not.toBeNull();
+  });
 });
