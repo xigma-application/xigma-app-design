@@ -409,6 +409,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.alignmentOption.topLeft": "Góra, lewo",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.alignmentOption.topRight": "Góra, prawo",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapAriaLabel": "Odstęp",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapTooltip.horizontal": "Poziomy odstęp między obiektami",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapTooltip.vertical": "Pionowy odstęp między obiektami",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.label.alignment": "Wyrównanie",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.label.gap": "Odstęp",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesAriaLabel": "Właściwości",

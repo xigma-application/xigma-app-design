@@ -33,6 +33,7 @@ exports[`GapField snapshots > should render the horizontal gap icon 1`] = `
       <input
         aria-label="Gap"
         class="_TextFieldWrapper__input_9a3a67"
+        data-state="closed"
         data-test-bypass-global-shortcuts="true"
         data-test-text-field-input="gap"
         type="number"
@@ -76,6 +77,7 @@ exports[`GapField snapshots > should render the vertical gap icon 1`] = `
       <input
         aria-label="Gap"
         class="_TextFieldWrapper__input_9a3a67"
+        data-state="closed"
         data-test-bypass-global-shortcuts="true"
         data-test-text-field-input="gap"
         type="number"

@@ -397,6 +397,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.alignmentOption.topLeft": "Top left",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.alignmentOption.topRight": "Top right",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapAriaLabel": "Gap",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapTooltip.horizontal": "Horizontal gap between objects",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.gapTooltip.vertical": "Vertical gap between objects",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.label.alignment": "Alignment",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.label.gap": "Gap",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesAriaLabel": "Properties",
