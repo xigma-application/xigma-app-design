@@ -575,13 +575,13 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: true });
 
     // result
-    expect(store.getState().design.areRulersVisible).toBe(true);
+    expect(store.getState().design.preferences.areRulersVisible).toBe(true);
 
     // action
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: true });
 
     // result
-    expect(store.getState().design.areRulersVisible).toBe(false);
+    expect(store.getState().design.preferences.areRulersVisible).toBe(false);
   });
 
   it('should toggle the Actions panel on "Cmd+K"', () => {
@@ -781,8 +781,8 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
 
     // result
     const page = realStore.getState().design.pages[realStore.getState().design.activePageId];
-    const [groupId] = page.rootOrder;
     const [maskChildId] = selectSelectedIds(realStore.getState());
+    const groupId = page.nodes[maskChildId].parentId as string;
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);

@@ -9,8 +9,12 @@ import { isFullyCutAwayEllipse } from '../isFullyCutAwayEllipse';
 const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  areAdditionalLabelsVisible: true,
-  areRulersVisible: false,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

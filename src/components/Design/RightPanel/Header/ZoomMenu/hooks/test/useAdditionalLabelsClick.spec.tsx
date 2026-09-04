@@ -13,13 +13,13 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 describe('useAdditionalLabelsClick', () => {
   it('should toggle the additional-labels visibility flag when called', () => {
     // before
-    const before = store.getState().design.areAdditionalLabelsVisible;
+    const before = store.getState().design.preferences.areAdditionalLabelsVisible;
     const { result } = renderHook(() => useAdditionalLabelsClick(), { wrapper });
 
     // action
     result.current();
 
     // result
-    expect(store.getState().design.areAdditionalLabelsVisible).toBe(!before);
+    expect(store.getState().design.preferences.areAdditionalLabelsVisible).toBe(!before);
   });
 });

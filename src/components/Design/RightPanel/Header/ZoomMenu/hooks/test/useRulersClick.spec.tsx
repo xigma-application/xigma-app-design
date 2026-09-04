@@ -13,13 +13,13 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 describe('useRulersClick', () => {
   it('should toggle the rulers visibility flag when called', () => {
     // before
-    const before = store.getState().design.areRulersVisible;
+    const before = store.getState().design.preferences.areRulersVisible;
     const { result } = renderHook(() => useRulersClick(), { wrapper });
 
     // action
     result.current();
 
     // result
-    expect(store.getState().design.areRulersVisible).toBe(!before);
+    expect(store.getState().design.preferences.areRulersVisible).toBe(!before);
   });
 });

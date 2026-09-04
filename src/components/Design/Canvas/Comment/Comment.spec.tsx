@@ -18,8 +18,12 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
       design: {
         activePageId: 'page-1',
         activeTool: ToolName.comment,
-        areAdditionalLabelsVisible: true,
-        areRulersVisible: false,
+        preferences: {
+          areAdditionalLabelsVisible: true,
+          areFrameOutlinesVisible: false,
+          areMaskOutlinesVisible: false,
+          areRulersVisible: false,
+        },
         commentDraftPosition: null,
         editingNodeId: null,
         editingSelectionChangedAt: 0,

@@ -5,6 +5,8 @@ import {
   selectActiveTool,
   selectAllGuideLines,
   selectAreAdditionalLabelsVisible,
+  selectAreFrameOutlinesVisible,
+  selectAreMaskOutlinesVisible,
   selectAreRulersVisible,
   selectBackgroundPaint,
   selectCommentDraftPosition,
@@ -69,8 +71,6 @@ const state = {
   design: {
     activePageId: 'page-1',
     activeTool: ToolName.frame,
-    areAdditionalLabelsVisible: false,
-    areRulersVisible: true,
     commentDraftPosition: { x: 1, y: 2 },
     editingNodeId: 'node-2',
     editingSelectionChangedAt: 42,
@@ -104,6 +104,12 @@ const state = {
       },
     },
     penActiveVertexId: 'vertex-1',
+    preferences: {
+      areAdditionalLabelsVisible: false,
+      areFrameOutlinesVisible: true,
+      areMaskOutlinesVisible: true,
+      areRulersVisible: true,
+    },
     vectorEditingNodeIds: [node.id],
   },
 } as any;
@@ -137,6 +143,16 @@ describe('design selectors', () => {
   it('should select the rulers visibility flag', () => {
     // result
     expect(selectAreRulersVisible(state)).toBe(true);
+  });
+
+  it('should select the frame outlines visibility flag', () => {
+    // result
+    expect(selectAreFrameOutlinesVisible(state)).toBe(true);
+  });
+
+  it('should select the mask outlines visibility flag', () => {
+    // result
+    expect(selectAreMaskOutlinesVisible(state)).toBe(true);
   });
 
   it('should select the comment draft position', () => {

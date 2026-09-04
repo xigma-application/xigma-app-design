@@ -24,8 +24,12 @@ const frame = (id: string): TFrameNode => ({
 const buildState = (nodes: Record<string, TSceneNode> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  areAdditionalLabelsVisible: true,
-  areRulersVisible: false,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

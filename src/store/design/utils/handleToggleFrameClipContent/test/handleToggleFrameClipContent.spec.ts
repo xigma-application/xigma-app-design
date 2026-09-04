@@ -10,8 +10,12 @@ import { handleToggleFrameClipContent } from '../handleToggleFrameClipContent';
 const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  areAdditionalLabelsVisible: true,
-  areRulersVisible: false,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   commentDraftPosition: null,
   designHintLabelKey: null,
   editingNodeId: null,

@@ -55,8 +55,12 @@ const textNode = (id: string, pathId: string | null): TTextNode => ({
 const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  areAdditionalLabelsVisible: true,
-  areRulersVisible: false,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

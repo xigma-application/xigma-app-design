@@ -21,8 +21,12 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
       design: {
         activePageId: 'page-1',
         activeTool: ToolName.comment,
-        areAdditionalLabelsVisible: true,
-        areRulersVisible: false,
+        preferences: {
+          areAdditionalLabelsVisible: true,
+          areFrameOutlinesVisible: false,
+          areMaskOutlinesVisible: false,
+          areRulersVisible: false,
+        },
         commentDraftPosition: null,
         editingNodeId: null,
         editingSelectionChangedAt: 0,

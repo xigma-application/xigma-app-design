@@ -36,6 +36,8 @@ import slice, {
   stopTextEdit,
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
+  toggleFrameOutlinesVisible,
+  toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
@@ -80,8 +82,6 @@ describe('design slice', () => {
     expect(state).toEqual({
       activePageId,
       activeTool: ToolName.default,
-      areAdditionalLabelsVisible: true,
-      areRulersVisible: false,
       commentDraftPosition: null,
       editingNodeId: null,
       editingSelectionChangedAt: 0,
@@ -115,6 +115,12 @@ describe('design slice', () => {
         },
       },
       penActiveVertexId: null,
+      preferences: {
+        areAdditionalLabelsVisible: true,
+        areFrameOutlinesVisible: false,
+        areMaskOutlinesVisible: false,
+        areRulersVisible: false,
+      },
       vectorEditingNodeIds: [],
     });
   });
@@ -665,13 +671,13 @@ describe('design slice', () => {
     const hidden = slice(undefined, toggleAdditionalLabels());
 
     // result
-    expect(hidden.areAdditionalLabelsVisible).toBe(false);
+    expect(hidden.preferences.areAdditionalLabelsVisible).toBe(false);
 
     // action
     const visibleAgain = slice(hidden, toggleAdditionalLabels());
 
     // result
-    expect(visibleAgain.areAdditionalLabelsVisible).toBe(true);
+    expect(visibleAgain.preferences.areAdditionalLabelsVisible).toBe(true);
   });
 
   it('should toggle the rulers visibility flag', () => {
@@ -679,13 +685,41 @@ describe('design slice', () => {
     const visible = slice(undefined, toggleRulers());
 
     // result
-    expect(visible.areRulersVisible).toBe(true);
+    expect(visible.preferences.areRulersVisible).toBe(true);
 
     // action
     const hiddenAgain = slice(visible, toggleRulers());
 
     // result
-    expect(hiddenAgain.areRulersVisible).toBe(false);
+    expect(hiddenAgain.preferences.areRulersVisible).toBe(false);
+  });
+
+  it('should toggle the frame outlines visibility flag', () => {
+    // action
+    const visible = slice(undefined, toggleFrameOutlinesVisible());
+
+    // result
+    expect(visible.preferences.areFrameOutlinesVisible).toBe(true);
+
+    // action
+    const hiddenAgain = slice(visible, toggleFrameOutlinesVisible());
+
+    // result
+    expect(hiddenAgain.preferences.areFrameOutlinesVisible).toBe(false);
+  });
+
+  it('should toggle the mask outlines visibility flag', () => {
+    // action
+    const visible = slice(undefined, toggleMaskOutlinesVisible());
+
+    // result
+    expect(visible.preferences.areMaskOutlinesVisible).toBe(true);
+
+    // action
+    const hiddenAgain = slice(visible, toggleMaskOutlinesVisible());
+
+    // result
+    expect(hiddenAgain.preferences.areMaskOutlinesVisible).toBe(false);
   });
 
   it('should update the live text edit content', () => {
