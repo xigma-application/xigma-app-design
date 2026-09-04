@@ -1,12 +1,12 @@
 // store
-import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, moveNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TGroupNode } from 'types/design/types';
+import { TFrameNode, TGroupNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
@@ -119,6 +119,67 @@ describe('handleDuplicateSelection', () => {
     });
 
     expect(page.nodes[originalGroupId]).toEqual(originalGroup);
+  });
+
+  it('should place the duplicate of a nested node as a sibling under the same parent, right after the original — not at the tree root', () => {
+    // mock
+    const parentFrameId = addFrameNode({ x: 0, y: 0 });
+    const childId = addFrameNode({ x: 2, y: 2 });
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentFrameId }));
+    store.dispatch(setSelection([childId]));
+
+    // action
+    handleDuplicateSelection(store.dispatch, createCanvasRefs());
+
+    // result
+    const page = selectActivePage(store.getState());
+    const [duplicateId] = selectSelectedIds(store.getState());
+
+    expect(duplicateId).not.toBe(childId);
+    expect(page.nodes[duplicateId].parentId).toBe(parentFrameId);
+    expect(page.rootOrder).not.toContain(duplicateId);
+    expect((page.nodes[parentFrameId] as TFrameNode).childIds).toEqual([childId, duplicateId]);
+  });
+
+  it('should undo the duplicate of a nested node — including its reparenting — in a single step', () => {
+    // mock
+    const parentFrameId = addFrameNode({ x: 0, y: 0 });
+    const childId = addFrameNode({ x: 2, y: 2 });
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentFrameId }));
+    store.dispatch(setSelection([childId]));
+
+    // action
+    handleDuplicateSelection(store.dispatch, createCanvasRefs());
+    store.dispatch(undo());
+
+    // result
+    const page = selectActivePage(store.getState());
+
+    expect((page.nodes[parentFrameId] as TFrameNode).childIds).toEqual([childId]);
+    expect(selectSelectedIds(store.getState())).toEqual([childId]);
+  });
+
+  it('should keep each nested sibling duplicate under the shared parent when several are duplicated at once', () => {
+    // mock
+    const parentFrameId = addFrameNode({ x: 0, y: 0 });
+    const firstChildId = addFrameNode({ x: 2, y: 2 });
+    const secondChildId = addFrameNode({ x: 4, y: 4 });
+
+    store.dispatch(moveNodes({ nodeIds: [firstChildId, secondChildId], targetIndex: 0, targetParentId: parentFrameId }));
+    store.dispatch(setSelection([firstChildId, secondChildId]));
+
+    // action
+    handleDuplicateSelection(store.dispatch, createCanvasRefs());
+
+    // result
+    const page = selectActivePage(store.getState());
+    const childIds = (page.nodes[parentFrameId] as TFrameNode).childIds;
+
+    expect(childIds).toHaveLength(4);
+    expect(page.rootOrder).not.toEqual(expect.arrayContaining(selectSelectedIds(store.getState())));
+    childIds.forEach((id) => expect(page.nodes[id].parentId).toBe(parentFrameId));
   });
 
   it('should be undoable as a single step even though it dispatches multiple nodes and a selection change', () => {

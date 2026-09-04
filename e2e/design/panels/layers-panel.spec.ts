@@ -203,3 +203,42 @@ test('double-clicking a layer row icon selects it and zooms the canvas to it', a
   const after = await designPage.canvas.screenshot();
   expect(before.equals(after)).toBe(false);
 });
+
+test('Ctrl+D on a nested layer keeps the duplicate nested under the same parent, not at the tree root', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-duplicate-nested');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A
+  await designPage.drawRectangle(760, 100, 800, 140); // B — adjacent, auto-selected
+  await designPage.click(720, 120, { shift: true }); // selection = [B, A]
+  await page.keyboard.press('Control+g'); // group = [A, B], collapsed
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click(); // expand the group
+  await expect(rows).toHaveCount(3); // group, child, child
+
+  await rows.nth(1).click(); // select the first child
+  await page.keyboard.press('Control+d');
+
+  await expect(rows).toHaveCount(4); // group + 3 children — the duplicate landed inside the group
+
+  // exactly one row sits at the tree root (the group); the duplicate is indented like its siblings
+  const rootDepthRows = await rows.evaluateAll(
+    (els) =>
+      els.filter((el) => {
+        const content = el.querySelector('[class*="TreeItem__content"]') as HTMLElement | null;
+        return content !== null && parseFloat(getComputedStyle(content).marginLeft || '0') === 0;
+      }).length,
+  );
+  expect(rootDepthRows).toBe(1);
+
+  const selectedMarginLeft = await layersTree
+    .locator('[aria-selected="true"] [class*="TreeItem__content"]')
+    .first()
+    .evaluate((el) => parseFloat(getComputedStyle(el as HTMLElement).marginLeft || '0'));
+  expect(selectedMarginLeft).toBeGreaterThan(0);
+});

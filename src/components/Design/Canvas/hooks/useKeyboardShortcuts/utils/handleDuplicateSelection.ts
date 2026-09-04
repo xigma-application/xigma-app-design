@@ -15,6 +15,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { cloneNodeSubtreeWithOffset } from './cloneNodeSubtreeWithOffset';
 import { collectSubtreeNodes } from './collectSubtreeNodes';
 import { duplicateVectorFragment } from './duplicateVectorFragment/duplicateVectorFragment';
+import { reparentDuplicatedRoots } from './reparentDuplicatedRoots';
 
 export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
@@ -32,6 +33,7 @@ export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRef
 
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
     dispatch(addNodes({ nodes: cloned.nodes, rootIds: cloned.rootIds }));
+    reparentDuplicatedRoots(dispatch, nodes, selectedIds, cloned.rootIds);
     dispatch(setSelection(cloned.rootIds));
     dispatch(endHistoryGesture());
   }

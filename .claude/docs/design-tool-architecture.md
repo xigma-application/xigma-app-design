@@ -164,6 +164,16 @@ delta switch, on `x`/`y` vs `x1..y2` vs `vertices`, now reused a third way for t
 One deliberate node-shape special-case: cloning a text-on-path node clears its `pathId` — leaving it
 attached would mean two text nodes both bound to (and repositioned by) the *same* original path.
 
+**Duplicating a nested node keeps the copy nested.** `cloneNodeSubtreeWithOffset`'s `remapClonedNode`
+only walks *down* (`collectSubtreeNodes` collects children, never the parent), so a subtree root whose
+original parent sits outside the clone set has its `parentId` remapped to `null` — and `addNodes` then
+pushes it straight into `page.rootOrder`. That threw a duplicated child out of its frame/group to the
+tree root. `handleDuplicateSelection` now follows `addNodes` with `reparentDuplicatedRoots.ts`: for
+each original selected id that had a container parent, one `moveNodes({ targetParentId,
+targetIndex: parent.childIds.indexOf(original) + 1 })` inside the same history gesture — so the copy
+lands right after its original, same parent, one undo step. Paste (`handlePasteSelection`) deliberately
+keeps root placement — paste is "into the current context", not "next to the source".
+
 **Plain Cmd/Ctrl+V replaces the current selection instead of offset-cloning when the two can be
 paired** — asked for directly, so `handlePasteSelection.ts` no longer always offset-clones. Before
 building the clone it now checks `canReplaceSelectionWithClipboard.ts` (shared with `pasteToReplace`'s
