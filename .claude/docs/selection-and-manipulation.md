@@ -1517,9 +1517,21 @@ from the eligible members only but applied to every dragged node's delta uniform
   either, per the request this shipped from).
 - Cleared in `disarmDrag.ts`, `onPointerLeave`, and the tool-teardown effect, mirroring §23's
   `contactGuidesRef` cleanup story.
+- **Visible where it runs along a frame edge.** Two things gang up on a guide that lands exactly on a
+  matched frame's own edge (dragging a child so its edge lines up with the parent frame's edge — a
+  common case now that children reparent on drag): the `drawDropTargetFrameOutline` blue outline is
+  drawn on that same edge, and a 1px line straddling the frame/background seam half-covers two device
+  columns at dpr 1. Fixes: `drawScene` now runs `drawTransformAlignmentGuide` **after**
+  `drawDropTargetFrameOutline` (guide on top of the drop outline, not under it), and `drawAlignmentGuide`
+  draws a wider semi-transparent white halo (`ALIGNMENT_GUIDE_HALO_*`) behind each axis line via a
+  local `drawGuideAxisLine` helper (white-on-white is invisible for interior/centre guides, pops the
+  red against the dark canvas at an edge). At dpr 1 the on-edge guide is still faint — the frame-edge
+  e2e below runs at `deviceScaleFactor: 2` (real retina Macs) for that reason.
 - e2e: `e2e/design/selection/shape-alignment-snap.spec.ts` — screenshot-equality against a control scene
   where the shape is placed directly at the expected snapped/unsnapped position (no drag), the same
-  technique §23's e2e already established for proving exact geometry without a state-reading hook.
+  technique §23's e2e already established for proving exact geometry without a state-reading hook. Plus
+  a `frame-edge alignment guide` describe block (dpr 2) diffing a strip on the frame's left edge with
+  vs. without the child snapped to it, guarding the draw-order/halo fix above.
 
 ## 25. Alignment-snap extended to resize
 

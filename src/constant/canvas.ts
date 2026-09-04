@@ -1,7 +1,11 @@
 // assets
 import defaultCursorUrl from 'assets/icons/cursors/default.png';
 
+export const ALIGNMENT_GUIDE_HALO_ALPHA = 0.5;
+export const ALIGNMENT_GUIDE_HALO_STROKE = '#ffffff';
+export const ALIGNMENT_GUIDE_HALO_WIDTH_PX = 3;
 export const ALIGNMENT_GUIDE_STROKE = '#cd4422';
+export const ALIGNMENT_GUIDE_STROKE_WIDTH_PX = 1;
 export const ALIGNMENT_SNAP_TOLERANCE_PX = 4;
 export const ARROWHEAD_LENGTH = 6;
 export const ARROWHEAD_STROKE_WIDTH = 1;

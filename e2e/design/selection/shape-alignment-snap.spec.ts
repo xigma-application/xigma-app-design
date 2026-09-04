@@ -66,3 +66,42 @@ test('dragging a shape well outside tolerance of another does not snap it', asyn
 
   expect(draggedShot.equals(controlShot)).toBe(true);
 });
+
+// runs at devicePixelRatio 2 (the real target: retina Macs) — a 1px guide sitting exactly on the
+// frame edge only resolves to solid pixels at dpr >= 2; at the suite-default dpr 1 it half-covers
+// two columns and the diff is below the pixel-equality threshold
+test.describe('frame-edge alignment guide', () => {
+  test.use({ deviceScaleFactor: 2 });
+
+  test('stays visible where a child dragged inside a frame lines up with the frame edge (guide draws over the drop-target outline)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-shape-alignment-snap-frame-edge');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 150, 1100, 650);
+    await designPage.click(1500, 900);
+    await designPage.drawRectangle(760, 200, 860, 300); // rect near the frame's top-left, inside it
+    await designPage.click(1500, 900);
+
+    // a clean vertical strip on the frame's left edge, below where the rect ends up
+    const edgeStrip = { height: 120, width: 16, x: 592, y: 420 };
+
+    // drag the rect left so its left edge snaps onto the frame's left edge (x=600) — guide expected
+    await designPage.pointerDown(810, 250);
+    await page.mouse.move(652, 250, { steps: 10 }); // left edge -> ~602, within snap tolerance of 600
+    await page.mouse.move(652, 250);
+    const withGuide = await page.screenshot({ clip: edgeStrip });
+
+    // drag it to a spot ~30px inside the frame edge — no axis lines up, no guide
+    await page.mouse.move(682, 250, { steps: 10 });
+    await page.mouse.move(682, 250);
+    const withoutGuide = await page.screenshot({ clip: edgeStrip });
+
+    await designPage.pointerUp();
+
+    expect(withGuide.equals(withoutGuide)).toBe(false);
+  });
+});

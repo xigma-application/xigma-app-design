@@ -32,30 +32,49 @@ describe('drawAlignmentGuide', () => {
     expect(drawLineMock).not.toHaveBeenCalled();
   });
 
-  it('should draw only a vertical line, from its own anchor to the matched vertical candidate, when only that axis matched', () => {
+  it('should draw a wide semi-transparent white halo behind the vertical guide so it stays visible where it runs along a shape edge', () => {
     // before
     call({ horizontal: null, vertical: { anchor: { x: 10, y: 10 }, match: { x: 10, y: 200 } } });
 
     // result
-    expect(drawLineMock).toHaveBeenCalledTimes(1);
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 10, y1: 10, y2: 200 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenNthCalledWith(
+      1,
+      {},
+      {},
+      {},
+      { x1: 10, x2: 10, y1: 10, y2: 200 },
+      '#ffffff',
+      3,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      0.5,
+    );
   });
 
-  it('should draw only a horizontal line, from its own anchor to the matched horizontal candidate, when only that axis matched', () => {
+  it('should draw the vertical guide core line, from its own anchor to the matched candidate, on top of its halo', () => {
     // before
-    call({ horizontal: { anchor: { x: 10, y: 10 }, match: { x: 300, y: 10 } }, vertical: null });
+    call({ horizontal: null, vertical: { anchor: { x: 10, y: 10 }, match: { x: 10, y: 200 } } });
 
     // result
-    expect(drawLineMock).toHaveBeenCalledTimes(1);
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 300, y1: 10, y2: 10 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    expect(drawLineMock).toHaveBeenNthCalledWith(
+      2,
+      {},
+      {},
+      {},
+      { x1: 10, x2: 10, y1: 10, y2: 200 },
+      '#cd4422',
+      1,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
-  it('should draw both lines independently, each from its own anchor, when both axes matched — even onto two different anchors (e.g. two different vertices dragged together in a group)', () => {
+  it('should draw the horizontal guide (halo then core) when only that axis matched', () => {
     // before
-    call({
-      horizontal: { anchor: { x: 10, y: 10 }, match: { x: 300, y: 10 } },
-      vertical: { anchor: { x: 50, y: 60 }, match: { x: 50, y: 200 } },
-    });
+    call({ horizontal: { anchor: { x: 10, y: 10 }, match: { x: 300, y: 10 } }, vertical: null });
 
     // result
     expect(drawLineMock).toHaveBeenCalledTimes(2);
@@ -64,12 +83,13 @@ describe('drawAlignmentGuide', () => {
       {},
       {},
       {},
-      { x1: 50, x2: 50, y1: 60, y2: 200 },
-      '#cd4422',
-      1,
+      { x1: 10, x2: 300, y1: 10, y2: 10 },
+      '#ffffff',
+      3,
       200,
       150,
       IDENTITY_VIEWPORT,
+      0.5,
     );
     expect(drawLineMock).toHaveBeenNthCalledWith(
       2,
@@ -85,7 +105,20 @@ describe('drawAlignmentGuide', () => {
     );
   });
 
-  it('should scale the stroke width down with zoom', () => {
+  it('should draw both axes independently, each from its own anchor, when both matched — even onto two different anchors (e.g. two vertices dragged together in a group)', () => {
+    // before
+    call({
+      horizontal: { anchor: { x: 10, y: 10 }, match: { x: 300, y: 10 } },
+      vertical: { anchor: { x: 50, y: 60 }, match: { x: 50, y: 200 } },
+    });
+
+    // result
+    expect(drawLineMock).toHaveBeenCalledTimes(4);
+    expect(drawLineMock.mock.calls[1][3]).toEqual({ x1: 50, x2: 50, y1: 60, y2: 200 });
+    expect(drawLineMock.mock.calls[3][3]).toEqual({ x1: 10, x2: 300, y1: 10, y2: 10 });
+  });
+
+  it('should scale both the halo and core stroke widths down with zoom', () => {
     // before
     drawAlignmentGuide(
       {} as WebGL2RenderingContext,
@@ -98,6 +131,7 @@ describe('drawAlignmentGuide', () => {
     );
 
     // result
-    expect(drawLineMock.mock.calls[0][5]).toBe(0.5);
+    expect(drawLineMock.mock.calls[0][5]).toBe(1.5);
+    expect(drawLineMock.mock.calls[1][5]).toBe(0.5);
   });
 });
