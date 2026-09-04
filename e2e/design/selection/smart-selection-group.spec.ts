@@ -3,7 +3,12 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
-const readActivePage = (page: DesignPage['page']) =>
+const readActivePage = (
+  page: DesignPage['page'],
+): Promise<{
+  children: { id: string; width: number; x: number; y: number }[];
+  group: { childIds: string[]; type: string; width: number; x: number };
+}> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { activePageId, pages } = store.getState().design;

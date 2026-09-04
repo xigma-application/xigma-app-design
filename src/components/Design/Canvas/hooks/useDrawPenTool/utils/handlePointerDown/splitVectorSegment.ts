@@ -45,7 +45,7 @@ export const splitVectorSegment = (
     },
   };
   const vertices = { ...node.vertices, [newVertexId]: { id: newVertexId, ...roundVectorPoint(split.point) } };
-  const { fillByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(node.filledFaceKeys, node.fillByKey, {
+  const { fillByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(node.filledFaceKeys, node.fillByKey ?? {}, {
     newSegmentId,
     newVertexId,
     originalEndId: segment.endId,

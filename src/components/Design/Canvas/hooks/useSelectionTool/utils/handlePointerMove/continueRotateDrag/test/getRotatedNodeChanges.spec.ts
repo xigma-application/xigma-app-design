@@ -36,7 +36,7 @@ describe('getRotatedNodeChanges', () => {
 
     // result — not rounded, so checked with a tolerance for floating-point noise from
     // Math.cos(90deg) not being an exact 0
-    expect(changes.rotation).toBe(0);
+    expect((changes as { rotation: number }).rotation).toBe(0);
     expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.x).toBeCloseTo(50);
     expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.y).toBeCloseTo(100);
   });

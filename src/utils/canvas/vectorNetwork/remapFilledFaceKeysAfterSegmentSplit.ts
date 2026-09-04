@@ -1,6 +1,5 @@
 // types
 import { TPaint } from 'types/design/paint/types';
-import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getVectorFillLoopKey } from './getVectorFillLoopKey';
@@ -42,7 +41,7 @@ export const remapFilledFaceKeysAfterSegmentSplit = (
   filledFaceKeys: string[],
   fillByKey: Record<string, TPaint[]>,
   split: TSegmentSplitInfo,
-): Pick<TVectorNode, 'filledFaceKeys' | 'fillByKey'> => {
+): { fillByKey: Record<string, TPaint[]>; filledFaceKeys: string[] } => {
   const nextFillByKey = { ...fillByKey };
 
   const nextFilledFaceKeys = filledFaceKeys.map((loopKey) => {

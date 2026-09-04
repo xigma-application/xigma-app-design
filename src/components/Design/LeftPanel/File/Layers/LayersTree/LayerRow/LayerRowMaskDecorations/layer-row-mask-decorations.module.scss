@@ -11,41 +11,41 @@
 
   &__line--start {
     background: var(--color-ramp-300);
-    top: -10px;
     height: 15px;
     left: 26.5px;
     pointer-events: none;
     position: absolute;
+    top: -10px;
     width: 1px;
   }
 
   &__line--continue {
     background: var(--color-ramp-300);
-    top: -10px;
     height: 15px;
     left: 26.5px;
     pointer-events: none;
     position: absolute;
+    top: -10px;
     width: 1px;
   }
 
   &__line--continue-child {
     background: var(--color-ramp-300);
-    top: -10px;
     height: 32px;
     left: 26.5px;
     pointer-events: none;
     position: absolute;
+    top: -10px;
     width: 1px;
   }
 
   &__lead {
     @include svg-color.svg-color(var(--color-ramp-300));
 
+    bottom: -2.5px;
     left: 27px;
     pointer-events: none;
     position: absolute;
-    bottom: -2.5px;
     transform: translateX(-50%) rotate(180deg);
   }
 }

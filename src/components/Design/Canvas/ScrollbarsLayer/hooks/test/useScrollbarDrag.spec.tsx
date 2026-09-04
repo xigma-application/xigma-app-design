@@ -96,7 +96,16 @@ const addOffscreenNode = (): void => {
 // mirrors what handlePointerDown anchors on (live geometry, converted to a thumb offset/size) plus
 // what handlePointerMove then derives from it, so these tests assert against the same formula the
 // hook itself uses
-const captureDragStart = (axis: TScrollbarAxis, leftPanelWidth: number, rightPanelWidth: number) => {
+const captureDragStart = (
+  axis: TScrollbarAxis,
+  leftPanelWidth: number,
+  rightPanelWidth: number,
+): {
+  thumb0: ReturnType<typeof getScrollbarThumb>;
+  trackLength: number;
+  viewportValue: number;
+  worldPerTrackPx: number;
+} => {
   const state = store.getState();
   const viewport = selectViewport(state);
   const geo = getScrollGeometry(CANVAS_RECT, leftPanelWidth, rightPanelWidth, selectOrderedNodes(state), viewport);

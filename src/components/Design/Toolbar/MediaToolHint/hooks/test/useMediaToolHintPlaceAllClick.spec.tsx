@@ -17,7 +17,7 @@ import { store } from 'store';
 // types
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 
-const createWrapper = (refs: ReturnType<typeof createCanvasRefs>) => {
+const createWrapper = (refs: ReturnType<typeof createCanvasRefs>): ((props: { children: ReactNode }) => ReactNode) => {
   const Wrapper = ({ children }: { children: ReactNode }): ReactNode => (
     <Provider store={store}>
       <CanvasRefsContext.Provider value={refs}>{children}</CanvasRefsContext.Provider>

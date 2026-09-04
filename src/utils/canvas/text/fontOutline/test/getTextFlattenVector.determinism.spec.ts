@@ -1,5 +1,6 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+/// <reference types="node" />
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -66,7 +67,7 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
   // stable, just far less likely to hit the ambiguous branch than a longer multi-glyph string).
   it('should resolve the exact same set of visible faces every time for the same full-alphabet input', async () => {
     const node = buildNode();
-    const summaries = [];
+    const summaries: ({ filledFaceKeyCount: number; resolvedFaceCount: number; totalPoints: number } | null)[] = [];
 
     for (let run = 0; run < 5; run += 1) {
       // sequential, not parallel — mirrors how the real "flatten selection" action calls this once per click
