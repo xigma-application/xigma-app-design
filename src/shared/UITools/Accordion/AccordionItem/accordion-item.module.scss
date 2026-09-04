@@ -7,10 +7,9 @@
     column-gap: 6px;
     cursor: pointer;
     display: flex;
-    font-size: 12px;
+    font-size: 11px;
     height: 32px;
-    padding: 0;
-    width: 100%;
+    padding-left: 8px;
   }
 
   &__icon {
@@ -31,9 +30,5 @@
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  &__content {
-    padding-left: 12px;
   }
 }

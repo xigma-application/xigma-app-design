@@ -28,6 +28,7 @@ export type TSectionProps<TItem = never> = {
   items?: TItem[];
   label?: ReactNode;
   onAdd?: TFunc;
+  separator?: boolean;
 };
 
 export const Section = <TItem,>({
@@ -39,12 +40,13 @@ export const Section = <TItem,>({
   items,
   label,
   onAdd,
+  separator = true,
 }: TSectionProps<TItem>): ReactElement => {
   const hasContent = isArray(items) && isRenderItem<TItem>(children) ? items.length > 0 : Boolean(children);
 
   return (
     <E2EDataAttribute type={E2EAttribute.section} value={e2eValue}>
-      <div className={cx(styles.Section, { [styles['Section--empty']]: !hasContent })}>
+      <div className={cx(styles.Section, { [styles['Section--empty']]: !hasContent, [styles['Section--noSeparator']]: !separator })}>
         {label && (
           <div className={cx(styles.Section__header)}>
             <span className={styles.Section__label}>{label}</span>

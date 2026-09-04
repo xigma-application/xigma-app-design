@@ -15,13 +15,13 @@ describe('useFramePresetAccordionItems', () => {
     expect(result.current).toHaveLength(FRAME_PRESET_GROUPS.length);
   });
 
-  it('should expand only the first group by default', () => {
+  it('should keep every group collapsed by default', () => {
     // before
     const { result } = renderHook(() => useFramePresetAccordionItems());
 
     // result
-    expect(result.current[0]?.defaultExpanded).toBe(true);
-    expect(result.current[1]?.defaultExpanded).toBeFalsy();
+    expect(result.current[0]?.defaultExpanded).toBe(false);
+    expect(result.current[1]?.defaultExpanded).toBe(false);
   });
 
   it('should translate the group label', () => {

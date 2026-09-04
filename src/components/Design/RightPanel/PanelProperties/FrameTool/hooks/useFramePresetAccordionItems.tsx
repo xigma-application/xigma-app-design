@@ -13,9 +13,9 @@ import { TAccordionItem } from 'shared/UITools/Accordion/types';
 export const useFramePresetAccordionItems = (): TAccordionItem[] => {
   const { t } = useTranslation();
 
-  return FRAME_PRESET_GROUPS.map((group, index) => ({
+  return FRAME_PRESET_GROUPS.map((group) => ({
     content: group.presets.map((preset) => <FramePresetRow key={preset.label} preset={preset} />),
-    defaultExpanded: index === 0,
+    defaultExpanded: false,
     label: t(`${translationNameSpace}.groups.${group.labelKey}`),
   }));
 };

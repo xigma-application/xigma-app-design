@@ -6,6 +6,10 @@
     padding-bottom: 0;
   }
 
+  &--noSeparator {
+    border-bottom: none;
+  }
+
   &__header {
     align-items: center;
     display: flex;

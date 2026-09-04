@@ -137,4 +137,28 @@ describe('Section behaviors', () => {
     // result
     expect(container.querySelector('[class*="Section__component"]')).not.toBeNull();
   });
+
+  it('should show the bottom border by default', () => {
+    // before
+    const { container } = renderSection(
+      <Section label="Page">
+        <span>body</span>
+      </Section>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--noSeparator"]')).toBeNull();
+  });
+
+  it('should hide the bottom border when separator is false', () => {
+    // before
+    const { container } = renderSection(
+      <Section label="Page" separator={false}>
+        <span>body</span>
+      </Section>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--noSeparator"]')).not.toBeNull();
+  });
 });

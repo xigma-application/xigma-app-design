@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 // components
 import FrameTool from './FrameTool';
@@ -46,29 +46,25 @@ describe('FrameTool behaviors', () => {
     expect(screen.getByText('Archive')).toBeInTheDocument();
   });
 
-  it('should expand the first group by default', () => {
+  it('should keep every group collapsed by default', () => {
     // before
     renderFrameTool();
     const phoneGroup = screen.getByText('Phone').closest('button') as HTMLElement;
-
-    // result
-    expect(phoneGroup).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText('iPhone 17')).toBeInTheDocument();
-  });
-
-  it('should keep every other group collapsed by default', () => {
-    // before
-    renderFrameTool();
     const tabletGroup = screen.getByText('Tablet').closest('button') as HTMLElement;
 
     // result
+    expect(phoneGroup).toHaveAttribute('aria-expanded', 'false');
     expect(tabletGroup).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('iPhone 17')).not.toBeInTheDocument();
     expect(screen.queryByText('iPad mini 8.3')).not.toBeInTheDocument();
   });
 
-  it('should render a preset with its dimensions', () => {
+  it('should render a preset with its dimensions once its group is expanded', () => {
     // before
     renderFrameTool();
+
+    // action
+    fireEvent.click(screen.getByText('Phone'));
     const row = screen.getByText('iPhone 17').closest('button') as HTMLElement;
 
     // result
