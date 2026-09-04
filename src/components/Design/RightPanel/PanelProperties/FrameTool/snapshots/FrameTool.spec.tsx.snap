@@ -3,7 +3,7 @@
 exports[`FrameTool snapshots > should render the Frame section with a preset accordion 1`] = `
 <DocumentFragment>
   <div
-    class="_Section_5940d2"
+    class="_Section_5940d2 _Section--noSeparator_5940d2"
     data-test-section="frame-tool"
   >
     <div
@@ -16,7 +16,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
       </span>
     </div>
     <div
-      class="_Accordion_e8254f"
+      class="_Accordion_e8254f _FrameTool__accordion_994dd9"
       data-test-accordion="frame-tool-presets"
     >
       <div

@@ -30,7 +30,7 @@ export const AccordionItem: FC<TAccordionItemProps> = ({ e2eValue = '', item }) 
       <div className={styles.AccordionItem}>
         <button aria-expanded={expanded} className={styles.AccordionItem__header} onClick={toggleExpanded} type="button">
           <span className={cx(styles.AccordionItem__icon, { [styles['AccordionItem__icon--expanded']]: expanded })}>
-            <Icon color="neutral2" name="Triangle" size={6} />
+            <Icon color="neutral1" name="Triangle" size={6} />
           </span>
           <span className={styles.AccordionItem__label}>{item.label}</span>
         </button>

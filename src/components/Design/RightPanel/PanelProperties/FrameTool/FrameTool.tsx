@@ -10,13 +10,16 @@ import { useFramePresetAccordionItems } from './hooks/useFramePresetAccordionIte
 // others
 import { translationNameSpace } from './constants';
 
+// styles
+import styles from './frame-tool.module.scss';
+
 const FrameTool: FC = () => {
   const { t } = useTranslation();
   const items = useFramePresetAccordionItems();
 
   return (
-    <Section e2eValue="frame-tool" label={t(`${translationNameSpace}.label`)}>
-      <Accordion e2eValue="frame-tool-presets" items={items} />
+    <Section e2eValue="frame-tool" label={t(`${translationNameSpace}.label`)} separator={false}>
+      <Accordion className={styles.FrameTool__accordion} e2eValue="frame-tool-presets" items={items} />
     </Section>
   );
 };
