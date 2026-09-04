@@ -1,10 +1,9 @@
 // utils
 import { drawVectorFill } from '../drawVectorFill';
 
-const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean] = [true, true, true, false]): WebGL2RenderingContext =>
+const createGlMock = (): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
-    COLOR_WRITEMASK: 3107,
     INVERT: 5386,
     KEEP: 7680,
     NOTEQUAL: 517,
@@ -23,7 +22,6 @@ const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean
     enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
-    getParameter: vi.fn(() => ambientColorWriteMask),
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),
@@ -44,7 +42,7 @@ describe('drawVectorFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, null, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -67,7 +65,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — stencil setup precedes the per-face fan pass, which precedes the composite pass
     expect(gl.clear).toHaveBeenCalledWith(gl.STENCIL_BUFFER_BIT);
@@ -78,8 +76,8 @@ describe('drawVectorFill', () => {
 
     expect(gl.drawArrays).toHaveBeenNthCalledWith(1, gl.TRIANGLE_FAN, 0, 3);
 
-    // alpha writes are restored to whatever the ambient (pre-call) state was — here the default
-    // mock ambient state has alpha writes off, matching drawing straight to the main canvas
+    // alpha writes are restored to whatever isAlphaWriteEnabled was passed in — here false, matching
+    // drawing straight to the main canvas
     expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, false);
     expect(gl.stencilFunc).toHaveBeenNthCalledWith(2, gl.NOTEQUAL, 0, 0xff);
     expect(gl.stencilOp).toHaveBeenNthCalledWith(2, gl.KEEP, gl.KEEP, gl.KEEP);
@@ -94,11 +92,11 @@ describe('drawVectorFill', () => {
     expect(disableOrder).toBeGreaterThan(secondDrawOrder);
   });
 
-  it('should restore alpha writes rather than force them off, when the ambient state (e.g. an offscreen mask render target) has them enabled', () => {
+  it('should restore alpha writes rather than force them off, when isAlphaWriteEnabled is true (e.g. an offscreen mask render target)', () => {
     // mock — bindTarget enables alpha writes while rendering into an offscreen mask target; the
     // fill's own stencil trick must hand that back afterward instead of hardcoding it off, or the
     // mask's alpha channel — the only thing the composite shader reads — never gets painted
-    const gl = createGlMock([true, true, true, true]);
+    const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const faces = [
@@ -110,7 +108,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, true);
 
     // result
     expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, true);
@@ -136,7 +134,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — one TRIANGLE_FAN per face (3 then 4 vertices), plus the final composite TRIANGLES pass
     expect(gl.drawArrays).toHaveBeenCalledTimes(3);
@@ -159,7 +157,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 1]);
@@ -179,7 +177,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.2);
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false, 0.2);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 0.2]);
@@ -200,7 +198,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.createBuffer).toHaveBeenCalledTimes(1);
@@ -222,8 +220,8 @@ describe('drawVectorFill', () => {
     ];
 
     // before — draw the same node twice, as consecutive render-loop frames would
-    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
-    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFill(gl, program, buffer, faceBufferCache, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — the face buffer is created and uploaded once; only the covering quad re-uploads every frame
     expect(gl.createBuffer).toHaveBeenCalledTimes(1);

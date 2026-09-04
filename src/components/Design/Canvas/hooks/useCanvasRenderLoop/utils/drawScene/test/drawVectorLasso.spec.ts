@@ -24,7 +24,7 @@ const call = (path: TPoint[] | null): void => {
       canvasHeight: 150,
       canvasWidth: 200,
       gl: {} as WebGL2RenderingContext,
-      imageContext: {} as never,
+      imageContext: { isAlphaWriteEnabled: false } as never,
       program: {} as WebGLProgram,
       viewport: IDENTITY_VIEWPORT,
     },
@@ -68,7 +68,7 @@ describe('drawVectorLasso', () => {
     call(path);
 
     // result — the fill wraps the raw path as a single face, same shape the dashed outline traces
-    expect(drawVectorFillMock).toHaveBeenCalledWith({}, {}, {}, null, null, [path], '#337ae1', 200, 150, IDENTITY_VIEWPORT, 0.2);
+    expect(drawVectorFillMock).toHaveBeenCalledWith({}, {}, {}, null, null, [path], '#337ae1', 200, 150, IDENTITY_VIEWPORT, false, 0.2);
     expect(drawDashedPolylineOutlineMock).toHaveBeenCalledWith({}, {}, {}, path, true, '#337ae1', 200, 150, IDENTITY_VIEWPORT, 6, 4.5);
   });
 });

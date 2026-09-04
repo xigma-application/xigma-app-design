@@ -17,12 +17,26 @@ export const drawVectorFillPaints = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   paints.forEach((paint) => {
     if (paint.visible !== false && paint.type === 'solid') {
       const alpha = paint.opacity / 100;
 
-      drawVectorFill(gl, program, buffer, faceBufferCache, nodeBounds, faces, paint.color, canvasWidth, canvasHeight, viewport, alpha);
+      drawVectorFill(
+        gl,
+        program,
+        buffer,
+        faceBufferCache,
+        nodeBounds,
+        faces,
+        paint.color,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        isAlphaWriteEnabled,
+        alpha,
+      );
     }
   });
 };

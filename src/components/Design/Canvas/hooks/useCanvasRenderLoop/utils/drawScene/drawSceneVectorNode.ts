@@ -25,6 +25,7 @@ export const drawSceneVectorNode = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   const dragSnapshot = draggedVectorNodeSnapshots?.get(node.id);
   const resizeSnapshot = resizedVectorNodeSnapshots?.get(node.id);
@@ -42,15 +43,27 @@ export const drawSceneVectorNode = (
         canvasWidth,
         canvasHeight,
         viewport,
+        isAlphaWriteEnabled,
       );
       break;
     case Boolean(resizeSnapshot):
-      drawVectorNodeResizeSnapshot(gl, program, buffer, resizeSnapshot!, canvasWidth, canvasHeight, viewport);
+      drawVectorNodeResizeSnapshot(gl, program, buffer, resizeSnapshot!, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
       break;
     case Boolean(rotateSnapshot):
-      drawVectorNodeRotateSnapshot(gl, program, buffer, rotateSnapshot!, canvasWidth, canvasHeight, viewport);
+      drawVectorNodeRotateSnapshot(gl, program, buffer, rotateSnapshot!, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
       break;
     default:
-      drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, canvasWidth, canvasHeight, viewport);
+      drawVectorNode(
+        gl,
+        program,
+        buffer,
+        faceBufferCache,
+        strokeBufferCache,
+        node,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        isAlphaWriteEnabled,
+      );
   }
 };

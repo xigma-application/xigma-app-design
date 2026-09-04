@@ -29,6 +29,7 @@ export const drawVectorNodeOrTextPathGuide = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
@@ -58,6 +59,7 @@ export const drawVectorNodeOrTextPathGuide = (
         canvasWidth,
         canvasHeight,
         viewport,
+        isAlphaWriteEnabled,
       );
     }
   }

@@ -57,7 +57,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     };
 
     // before
-    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
@@ -78,6 +78,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
@@ -92,6 +93,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });
@@ -113,7 +115,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     };
 
     // before
-    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result — x stays 10 (untouched, no anchor), y scales to 40 around anchor 0
     expect(drawVectorFillMock).toHaveBeenCalledWith(
@@ -127,6 +129,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });
@@ -160,7 +163,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     getThickVectorPathVerticesMock.mockReturnValue([1, 2, 3, 4]);
 
     // before
-    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(getThickVectorPathVerticesMock).toHaveBeenCalledWith(
@@ -208,7 +211,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     };
 
     // before
-    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledWith(
@@ -222,6 +225,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });

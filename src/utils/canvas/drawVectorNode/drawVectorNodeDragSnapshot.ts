@@ -17,6 +17,7 @@ export const drawVectorNodeDragSnapshot = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   const translateLocation = gl.getUniformLocation(program, 'u_translate');
 
@@ -24,7 +25,19 @@ export const drawVectorNodeDragSnapshot = (
   gl.uniform2f(translateLocation, snapshot.deltaX, snapshot.deltaY);
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
-    drawVectorFillPaints(gl, program, buffer, faceBufferCache, null, points, paint, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      null,
+      points,
+      paint,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      isAlphaWriteEnabled,
+    );
   });
 
   drawVectorThickStrokeVertices(

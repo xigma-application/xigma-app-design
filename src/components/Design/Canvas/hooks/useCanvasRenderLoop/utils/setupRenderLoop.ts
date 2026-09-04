@@ -36,6 +36,7 @@ export const setupRenderLoop = (
     faceBufferCache: new WeakMap(),
     gridBuffer,
     gridProgram,
+    isAlphaWriteEnabled: false,
     maskCompositeBuffer,
     maskCompositeProgram,
     msdfBuffer,

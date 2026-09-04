@@ -22,12 +22,25 @@ export const drawVectorNode = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
 
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
-    drawVectorFillPaints(gl, program, buffer, faceBufferCache, nodeBounds, polygons, paint, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      nodeBounds,
+      polygons,
+      paint,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      isAlphaWriteEnabled,
+    );
   });
 
   if (renderedNode.widthProfile) {

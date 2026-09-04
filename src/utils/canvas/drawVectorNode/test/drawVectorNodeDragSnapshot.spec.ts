@@ -44,7 +44,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#0d99ff', strokeVertices: [] };
 
     // before
-    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.getUniformLocation).toHaveBeenCalledWith(program, 'u_translate');
@@ -77,7 +77,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     };
 
     // before
-    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillPaintsMock).toHaveBeenCalledTimes(2);
@@ -93,6 +93,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
     );
     expect(drawVectorFillPaintsMock).toHaveBeenNthCalledWith(
       2,
@@ -106,6 +107,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
     );
   });
 
@@ -120,7 +122,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     const snapshot: TVectorNodeDragSnapshot = { deltaX: 3, deltaY: 4, facesByPaint: [], strokeColor: '#0d99ff', strokeVertices };
 
     // before
-    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeDragSnapshot(gl, program, buffer, faceBufferCache, strokeBufferCache, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillPaintsMock).not.toHaveBeenCalled();

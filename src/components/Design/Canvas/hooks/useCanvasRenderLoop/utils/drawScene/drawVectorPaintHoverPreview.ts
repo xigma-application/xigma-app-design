@@ -13,7 +13,7 @@ import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRendere
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorPaintHoverPreview = (context: TDrawSceneContext, nodes: Record<string, TSceneNode>, refs: TCanvasRefs): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const hoveredFace = refs.hover.hoveredVectorPaintFaceKeyRef.current;
   const node = hoveredFace ? getVectorEditingNode(nodes, hoveredFace.nodeId) : null;
 
@@ -23,8 +23,7 @@ export const drawVectorPaintHoverPreview = (context: TDrawSceneContext, nodes: R
 
     if (face) {
       const color = hoveredFace.isFilled ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
-
-      drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport);
+      drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport, imageContext.isAlphaWriteEnabled);
     }
   }
 };

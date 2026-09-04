@@ -18,6 +18,7 @@ export const drawVectorFill = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
   alpha = 1,
 ): void => {
   if (faces.length !== 0) {
@@ -33,8 +34,6 @@ export const drawVectorFill = (
     gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);
     gl.enableVertexAttribArray(positionLocation);
 
-    const [, , , alphaWriteEnabled] = gl.getParameter(gl.COLOR_WRITEMASK) as [boolean, boolean, boolean, boolean];
-
     gl.clear(gl.STENCIL_BUFFER_BIT);
     gl.enable(gl.STENCIL_TEST);
     gl.colorMask(false, false, false, false);
@@ -47,7 +46,7 @@ export const drawVectorFill = (
       gl.drawArrays(gl.TRIANGLE_FAN, 0, face.length);
     });
 
-    gl.colorMask(true, true, true, alphaWriteEnabled);
+    gl.colorMask(true, true, true, isAlphaWriteEnabled);
     gl.stencilFunc(gl.NOTEQUAL, 0, 0xff);
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 

@@ -1,10 +1,9 @@
 // utils
 import { drawVectorHatchFill } from '../drawVectorHatchFill';
 
-const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean] = [true, true, true, false]): WebGL2RenderingContext =>
+const createGlMock = (): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
-    COLOR_WRITEMASK: 3107,
     INVERT: 5386,
     KEEP: 7680,
     LINES: 1,
@@ -22,7 +21,6 @@ const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean
     enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
-    getParameter: vi.fn(() => ambientColorWriteMask),
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),
@@ -43,7 +41,7 @@ describe('drawVectorHatchFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorHatchFill(gl, program, buffer, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorHatchFill(gl, program, buffer, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -66,7 +64,7 @@ describe('drawVectorHatchFill', () => {
     ];
 
     // before
-    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — stencil setup precedes the per-face fan pass, which precedes the composite pass
     expect(gl.clear).toHaveBeenCalledWith(gl.STENCIL_BUFFER_BIT);
@@ -111,7 +109,7 @@ describe('drawVectorHatchFill', () => {
     ];
 
     // before
-    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — one TRIANGLE_FAN per face (3 then 4 vertices), plus the final composite LINES pass
     expect(gl.drawArrays).toHaveBeenCalledTimes(3);
@@ -134,15 +132,15 @@ describe('drawVectorHatchFill', () => {
     ];
 
     // before
-    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 1]);
   });
 
-  it('should restore alpha writes rather than force them off, when the ambient state has them enabled', () => {
+  it('should restore alpha writes rather than force them off, when isAlphaWriteEnabled is true', () => {
     // mock
-    const gl = createGlMock([true, true, true, true]);
+    const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const faces = [
@@ -154,7 +152,7 @@ describe('drawVectorHatchFill', () => {
     ];
 
     // before
-    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, true);
 
     // result
     expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, true);

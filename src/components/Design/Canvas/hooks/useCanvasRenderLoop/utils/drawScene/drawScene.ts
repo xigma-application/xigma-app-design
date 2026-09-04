@@ -133,7 +133,7 @@ export const drawScene = (
   };
 
   cleanupStaleDragSnapshotBuffers(ctx, refs);
-  drawSceneBackground(gl);
+  drawSceneBackground(gl, imageContext);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);

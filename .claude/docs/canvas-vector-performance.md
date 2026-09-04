@@ -841,6 +841,41 @@ test (passes); a separate, unrelated pre-existing failure in the same file (a pl
 drag) was confirmed via a clean-baseline `git stash` comparison to reproduce identically without this
 slice's changes.
 
+## 10. `gl.getParameter(gl.COLOR_WRITEMASK)` on every single fill draw — found live, right after §9
+
+A DevTools trace taken immediately after §9 landed (same 3000-square stress scene, whole-node drag)
+showed `getParameter` as the single largest self-time entry (14.5%) — bigger than everything §9 had
+just removed. `drawVectorFill.ts`/`drawVectorHatchFill.ts` called it once per draw purely to learn
+the *current* alpha-write state, so the trailing `gl.colorMask(true, true, true, …)` restore could put
+it back afterward rather than hardcoding it — `gl.getParameter` forces a GPU round-trip/sync, one of
+the more expensive things a WebGL call can do, and every fill draw was paying it.
+
+That state is not actually unknown: `gl.colorMask`'s alpha channel is set in exactly two places in the
+whole app — `drawSceneBackground.ts` (`false`, normal scene) and `bindTarget.ts` (`true` entering an
+offscreen mask target, `false` returning to the main framebuffer). Both now also write the same value
+to a new `TImageRenderContext.isAlphaWriteEnabled` boolean, read fresh (no caching across frames or
+mid-frame) at the exact point a fill call needs it — threaded down as a plain `isAlphaWriteEnabled:
+boolean` parameter through the same call chain as everything else here (`drawVectorFillPaints`,
+`drawVectorNode`/`drawVectorNode{Drag,Resize,Rotate}Snapshot`, every `drawScene.ts`-level hover/preview
+helper that calls `drawVectorHatchFill` directly). `drawVectorFill.ts`/`drawVectorHatchFill.ts`
+themselves are otherwise untouched — still program-agnostic, still don't know or care why the value is
+what it is.
+
+Mechanical but wide: ~20 call sites across the fill/hatch-fill chain needed the extra parameter, so this
+touched roughly as many files as §9 despite being a much smaller idea — straight-line threading, no new
+branches, coverage stayed at 100% with just two small additions: `bindTarget.spec.ts` gained two tests
+asserting `isAlphaWriteEnabled` tracks `true`/`false` correctly across the offscreen/main-framebuffer
+switch, `drawSceneBackground.spec.ts` gained one asserting the same reset on the normal-frame path.
+
+**Left deliberately unstaged**: `drawScene.ts` and `drawSceneBackground.ts`/its spec were mid-edit by a
+concurrent session (a background-paint-color feature landing on the same lines) at the moment this was
+verified — rather than fight a live conflict, this slice's contribution to those two files (the
+`imageContext` param, the `isAlphaWriteEnabled = false` reset) was left in place on disk, uncommitted,
+for that session to carry forward. Not required for correctness on its own: `bindTarget.ts`'s own
+`bindTarget(renderer, null)` call, unconditional at the end of every mask-aware `drawSceneNodes` pass,
+already resets `isAlphaWriteEnabled` to `false` before any normal-frame fill draw could read a stale
+`true`; `drawSceneBackground`'s reset is a redundant, belt-and-suspenders safety net once that lands.
+
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
@@ -926,6 +961,15 @@ slice's changes.
   `useCanvasRenderLoop/utils/drawScene/{drawScene,drawLeafNode,drawVectorNodeOrTextPathGuide,
   drawSceneVectorNode,cleanupStaleDragSnapshotBuffers}.ts`,
   `utils/canvas/drawVectorNode/drawVectorNodeDragSnapshot.ts`
+- `isAlphaWriteEnabled` threaded past `gl.getParameter` (§10): `useCanvasRenderLoop/types.ts`
+  (`TImageRenderContext.isAlphaWriteEnabled`), `useCanvasRenderLoop/utils/setupRenderLoop.ts`,
+  `useCanvasRenderLoop/utils/drawScene/drawSceneNodes/bindTarget.ts`, `utils/canvas/drawSceneBackground.ts`,
+  `utils/canvas/drawVectorNode/{drawVectorFill,drawVectorFillPaints,drawVectorHatchFill,drawVectorNode,
+  drawVectorNodeDragSnapshot,drawVectorNodeResizeSnapshot,drawVectorNodeRotateSnapshot}.ts`,
+  `useCanvasRenderLoop/utils/drawScene/{drawLeafNode,drawVectorNodeOrTextPathGuide,drawSceneVectorNode,
+  drawShapeBuilderNodeFacesHatch,drawVectorLasso,drawVectorFaceSelectHoverPreview,
+  drawVectorPaintHoverPreview,drawVectorPaintTouchedFacesPreview,drawVectorSelectedFillPreview,
+  drawVectorDraggedFillPreview,drawVectorShapeBuilderHoverPreview}.ts`
 
 ## Related
 

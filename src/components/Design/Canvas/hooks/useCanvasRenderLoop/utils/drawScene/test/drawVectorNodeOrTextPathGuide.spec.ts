@@ -101,6 +101,7 @@ const draw = (
     100,
     100,
     IDENTITY_VIEWPORT,
+    false,
     pathOutlineStyles,
     nodesById,
     editingPathId,

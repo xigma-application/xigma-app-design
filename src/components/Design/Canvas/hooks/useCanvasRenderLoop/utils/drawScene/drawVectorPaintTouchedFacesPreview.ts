@@ -17,7 +17,7 @@ export const drawVectorPaintTouchedFacesPreview = (
   nodes: Record<string, TSceneNode>,
   refs: TCanvasRefs,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const touchedFaces = refs.vectorPaint.vectorPaintTouchedFacesRef.current;
   const isRemoveMode = refs.vectorPaint.isVectorPaintRemoveRef.current;
 
@@ -46,6 +46,7 @@ export const drawVectorPaintTouchedFacesPreview = (
       canvasWidth,
       canvasHeight,
       viewport,
+      imageContext.isAlphaWriteEnabled,
     );
   }
 };

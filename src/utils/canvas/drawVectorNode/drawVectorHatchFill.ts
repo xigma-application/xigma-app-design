@@ -18,6 +18,7 @@ export const drawVectorHatchFill = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   if (faces.length !== 0) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -34,8 +35,6 @@ export const drawVectorHatchFill = (
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    const [, , , alphaWriteEnabled] = gl.getParameter(gl.COLOR_WRITEMASK) as [boolean, boolean, boolean, boolean];
-
     gl.clear(gl.STENCIL_BUFFER_BIT);
     gl.enable(gl.STENCIL_TEST);
     gl.colorMask(false, false, false, false);
@@ -47,7 +46,7 @@ export const drawVectorHatchFill = (
       gl.drawArrays(gl.TRIANGLE_FAN, 0, face.length);
     });
 
-    gl.colorMask(true, true, true, alphaWriteEnabled);
+    gl.colorMask(true, true, true, isAlphaWriteEnabled);
     gl.stencilFunc(gl.NOTEQUAL, 0, 0xff);
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 

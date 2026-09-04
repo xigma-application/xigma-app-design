@@ -53,7 +53,15 @@ describe('drawVectorDraggedFillPreview', () => {
   it('should draw nothing when nothing is currently being dragged', () => {
     // before
     drawVectorDraggedFillPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: null } } }),
     );
@@ -65,13 +73,21 @@ describe('drawVectorDraggedFillPreview', () => {
   it('should skip a node id that no longer resolves to any node, without calling drawVectorHatchFill for it', () => {
     // before
     drawVectorDraggedFillPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { missing: ['k1'] } } } }),
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT, false);
   });
 
   it('should hatch-fill every touched face across every dragged node in one call', () => {
@@ -84,7 +100,15 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [node.id]: ['k1', 'k2'] } } } }),
     );
@@ -99,6 +123,7 @@ describe('drawVectorDraggedFillPreview', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
     );
   });
 
@@ -122,13 +147,21 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       mixedNodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [frameNode.id]: ['k1'] } } } }),
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT, false);
   });
 
   it('should derive faces from whatever getRenderedVectorNode returns for the dragged node, not the raw node itself', () => {
@@ -142,7 +175,15 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       rotatedNodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [rotatedNode.id]: ['k1'] } } } }),
     );

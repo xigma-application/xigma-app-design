@@ -23,16 +23,13 @@ export const drawVectorShapeBuilderHoverPreview = (
   touchedFaces: TVectorShapeBuilderTouchedFaces,
   refs: TCanvasRefs,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const isSubtract = refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current;
   const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
   const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;
   const color = isSubtract ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
   const touchedNodeIds = Object.keys(touchedFaces).filter((nodeId) => touchedFaces[nodeId].size > 0);
 
-  // grouped over every OPEN node, not just the touched ones — a touched node's own boundary can be
-  // protected by an untouched neighbor it crosses (§62), so even a single touched node still needs to
-  // check every open node for a crossing partner, not just whichever ones the path itself already hit
   if (touchedNodeIds.length >= 1 && path && path.length > 0) {
     const openNodes = rootOrder
       .filter((nodeId) => vectorEditingNodeIds.includes(nodeId))
@@ -54,13 +51,26 @@ export const drawVectorShapeBuilderHoverPreview = (
             canvasWidth,
             canvasHeight,
             viewport,
+            imageContext.isAlphaWriteEnabled,
           );
         } else {
           const faces = isBoxMode
             ? getVectorFacesInRect(group.combinedNode, toDraftRect(path[0], path[path.length - 1]))
             : getVectorFacesOnPath(group.combinedNode, path);
 
-          faces.forEach((face) => drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport));
+          faces.forEach((face) =>
+            drawVectorHatchFill(
+              gl,
+              program,
+              buffer,
+              [face.points],
+              color,
+              canvasWidth,
+              canvasHeight,
+              viewport,
+              imageContext.isAlphaWriteEnabled,
+            ),
+          );
         }
       }
     });
@@ -76,6 +86,7 @@ export const drawVectorShapeBuilderHoverPreview = (
         canvasWidth,
         canvasHeight,
         viewport,
+        imageContext.isAlphaWriteEnabled,
       ),
     );
   }

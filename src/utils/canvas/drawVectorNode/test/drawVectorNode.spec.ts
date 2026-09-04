@@ -78,7 +78,7 @@ describe('drawVectorNode', () => {
     getVectorNodeThickStrokeVerticesMock.mockReturnValue(strokeVertices);
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 's1,s2,s3');
@@ -94,6 +94,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
     expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith(
@@ -136,7 +137,7 @@ describe('drawVectorNode', () => {
     getVectorFillLoopPointsMock.mockImplementation((_node: TVectorNode, key: string) => (key === 's1,s2,s3' ? loopAPoints : loopBPoints));
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result — each loop also gets its own color, derived from its own key, so two loops always differ
     const colorA = getVectorFillColorForLoopKey('s1,s2,s3');
@@ -156,6 +157,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
@@ -170,6 +172,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });
@@ -199,7 +202,7 @@ describe('drawVectorNode', () => {
     getVectorFillLoopPointsMock.mockReturnValue(null);
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 'stale-key');
@@ -230,7 +233,7 @@ describe('drawVectorNode', () => {
     };
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(getVectorFillLoopPointsMock).not.toHaveBeenCalled();
@@ -262,7 +265,7 @@ describe('drawVectorNode', () => {
     };
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
@@ -295,7 +298,7 @@ describe('drawVectorNode', () => {
     getRenderedVectorNodeMock.mockReturnValue(renderedNode);
 
     // before
-    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(node);

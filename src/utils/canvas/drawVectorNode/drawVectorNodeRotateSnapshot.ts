@@ -19,12 +19,13 @@ export const drawVectorNodeRotateSnapshot = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   const rotatedStrokeVertices: number[] = [];
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
     const rotatedFaces = points.map((face) => face.map((point) => rotateSnapshotPoint(point, snapshot)));
-    drawVectorFillPaints(gl, program, buffer, null, null, rotatedFaces, paint, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(gl, program, buffer, null, null, rotatedFaces, paint, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
   });
 
   for (let index = 0; index < snapshot.strokeVertices.length; index += 2) {

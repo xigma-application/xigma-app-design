@@ -35,10 +35,11 @@ export const drawVectorNodeResizeSnapshot = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   snapshot.facesByPaint.forEach(({ paint, points }) => {
     const scaledFaces = points.map((face) => face.map((point) => scalePoint(point, snapshot)));
-    drawVectorFillPaints(gl, program, buffer, null, null, scaledFaces, paint, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(gl, program, buffer, null, null, scaledFaces, paint, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
   });
 
   const scaledSegments = snapshot.flattenedSegments.map((segment) => ({

@@ -66,6 +66,10 @@ in §5.6/§5.7 as not yet started:
       10.3%-of-frame hotspot). Explicit per-drag buffer cleanup on drag-end, same bounded-eviction
       discipline as the third slice. Resize/rotate not yet done — same idea applies, left as a
       follow-up. Write-up in [[canvas-vector-performance]] §9.
+      **Fifth slice (2026-09-04), a live-profiling find right after the fourth**: `gl.getParameter`
+      (a GPU-sync stall) was called on every single fill draw just to learn the current alpha-write
+      state — replaced with a plain `isAlphaWriteEnabled` boolean threaded down from the two places
+      that actually set it. Write-up in [[canvas-vector-performance]] §10.
 
 The two items are independent of each other — do one, the other, both, or neither; there is no
 ordering dependency between them.

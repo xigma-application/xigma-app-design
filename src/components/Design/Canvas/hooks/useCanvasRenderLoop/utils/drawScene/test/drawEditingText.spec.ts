@@ -46,6 +46,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   faceBufferCache: new WeakMap(),
   gridBuffer: {} as WebGLBuffer,
   gridProgram: {} as WebGLProgram,
+  isAlphaWriteEnabled: false,
   maskCompositeBuffer: {} as WebGLBuffer,
   maskCompositeProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,

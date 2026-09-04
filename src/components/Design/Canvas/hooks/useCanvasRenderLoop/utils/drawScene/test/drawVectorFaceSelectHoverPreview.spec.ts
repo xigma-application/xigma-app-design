@@ -53,7 +53,15 @@ describe('drawVectorFaceSelectHoverPreview', () => {
   it('should draw nothing when nothing is hovered', () => {
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs(),
     );
@@ -65,7 +73,15 @@ describe('drawVectorFaceSelectHoverPreview', () => {
   it('should draw nothing when the hovered node id no longer resolves to any node', () => {
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: 'missing' } } } }),
     );
@@ -80,7 +96,15 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'stale-key', nodeId: node.id } } } }),
     );
@@ -95,13 +119,31 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: node.id } } } }),
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 0, y: 0 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should draw nothing when the hovered node id resolves to a non-vector node', () => {
@@ -124,7 +166,15 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       mixedNodes,
       createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: frameNode.id } } } }),
     );
@@ -144,7 +194,15 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
     // before
     drawVectorFaceSelectHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       rotatedNodes,
       createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: rotatedNode.id } } } }),
     );

@@ -10,14 +10,27 @@ import { drawDashedPolylineOutline } from 'utils/canvas/drawDashedPolylineOutlin
 import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
 
 export const drawVectorLasso = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const path = refs.lassoMarquee.vectorLassoPathRef.current;
 
   if (!path || path.length < 2) {
     return;
   }
 
-  drawVectorFill(gl, program, buffer, null, null, [path], DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, MARQUEE_FILL_ALPHA);
+  drawVectorFill(
+    gl,
+    program,
+    buffer,
+    null,
+    null,
+    [path],
+    DRAFT_FRAME_STROKE,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+    imageContext.isAlphaWriteEnabled,
+    MARQUEE_FILL_ALPHA,
+  );
   drawDashedPolylineOutline(
     gl,
     program,

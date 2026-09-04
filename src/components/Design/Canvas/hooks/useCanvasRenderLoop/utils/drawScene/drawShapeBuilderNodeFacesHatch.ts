@@ -16,11 +16,14 @@ export const drawShapeBuilderNodeFacesHatch = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isAlphaWriteEnabled: boolean,
 ): void => {
   if (node && faceKeys) {
     const bakedNode = getRenderedVectorNode(node);
     const faces = deriveVectorFaces(bakedNode).filter((face) => faceKeys.has(face.key));
 
-    faces.forEach((face) => drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport));
+    faces.forEach((face) =>
+      drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled),
+    );
   }
 };

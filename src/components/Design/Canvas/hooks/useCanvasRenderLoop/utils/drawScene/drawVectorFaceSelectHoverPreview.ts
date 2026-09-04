@@ -17,7 +17,7 @@ export const drawVectorFaceSelectHoverPreview = (
   nodes: Record<string, TSceneNode>,
   refs: TCanvasRefs,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const hoveredFace = refs.hover.hoveredVectorFaceSelectRef.current;
   const node = hoveredFace ? getVectorEditingNode(nodes, hoveredFace.nodeId) : null;
 
@@ -26,7 +26,17 @@ export const drawVectorFaceSelectHoverPreview = (
     const face = deriveVectorFaces(bakedNode).find((candidate) => candidate.key === hoveredFace.faceKey);
 
     if (face) {
-      drawVectorHatchFill(gl, program, buffer, [face.points], DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+      drawVectorHatchFill(
+        gl,
+        program,
+        buffer,
+        [face.points],
+        DRAFT_FRAME_STROKE,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        imageContext.isAlphaWriteEnabled,
+      );
     }
   }
 };

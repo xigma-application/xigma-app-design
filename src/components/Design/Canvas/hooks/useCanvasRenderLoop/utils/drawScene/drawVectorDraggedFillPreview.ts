@@ -13,7 +13,7 @@ import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRendere
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorDraggedFillPreview = (context: TDrawSceneContext, nodes: Record<string, TSceneNode>, refs: TCanvasRefs): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const draggedFillFaces = refs.vectorSnapshots.draggedVectorFillFacesRef.current;
 
   if (draggedFillFaces) {
@@ -32,6 +32,16 @@ export const drawVectorDraggedFillPreview = (context: TDrawSceneContext, nodes: 
       return [];
     });
 
-    drawVectorHatchFill(gl, program, buffer, faces, VECTOR_EDGE_HOVER_STROKE, canvasWidth, canvasHeight, viewport);
+    drawVectorHatchFill(
+      gl,
+      program,
+      buffer,
+      faces,
+      VECTOR_EDGE_HOVER_STROKE,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      imageContext.isAlphaWriteEnabled,
+    );
   }
 };

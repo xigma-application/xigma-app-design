@@ -117,6 +117,7 @@ export const drawLeafNode = (
         canvasWidth,
         canvasHeight,
         viewport,
+        imageContext.isAlphaWriteEnabled,
         pathOutlineStyles,
         nodesById,
         editingPathId,

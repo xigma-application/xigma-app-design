@@ -53,7 +53,15 @@ describe('drawVectorPaintHoverPreview', () => {
   it('should draw nothing when nothing is hovered', () => {
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs(),
     );
@@ -65,7 +73,15 @@ describe('drawVectorPaintHoverPreview', () => {
   it('should draw nothing when the hovered node id no longer resolves to any node', () => {
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: 'missing' } } } }),
     );
@@ -80,7 +96,15 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'stale-key', isFilled: true, nodeId: node.id } } } }),
     );
@@ -95,13 +119,31 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: node.id } } } }),
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 0, y: 0 }]],
+      '#cd4422',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should hatch-fill the hovered face with the add color when it is not yet filled', () => {
@@ -113,7 +155,15 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       unfilledNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k2', isFilled: false, nodeId: unfilledNode.id } } },
@@ -121,7 +171,17 @@ describe('drawVectorPaintHoverPreview', () => {
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 1, y: 1 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 1, y: 1 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should draw nothing when the hovered node id resolves to a non-vector node', () => {
@@ -144,7 +204,15 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       mixedNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: frameNode.id } } },
@@ -166,7 +234,15 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       rotatedNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: rotatedNode.id } } },

@@ -20,6 +20,7 @@ vi.mock('utils/canvas/drawVectorNode/drawVectorHatchFill', () => ({
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const IS_ALPHA_WRITE_ENABLED = false;
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
@@ -49,7 +50,18 @@ describe('drawShapeBuilderNodeFacesHatch', () => {
 
   it('should draw nothing when the node is null', () => {
     // before
-    drawShapeBuilderNodeFacesHatch(gl, program, buffer, null, new Set(['k1']), '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    drawShapeBuilderNodeFacesHatch(
+      gl,
+      program,
+      buffer,
+      null,
+      new Set(['k1']),
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -57,7 +69,7 @@ describe('drawShapeBuilderNodeFacesHatch', () => {
 
   it('should draw nothing when faceKeys is undefined', () => {
     // before
-    drawShapeBuilderNodeFacesHatch(gl, program, buffer, node, undefined, '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    drawShapeBuilderNodeFacesHatch(gl, program, buffer, node, undefined, '#337ae1', 200, 150, IDENTITY_VIEWPORT, IS_ALPHA_WRITE_ENABLED);
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -71,11 +83,32 @@ describe('drawShapeBuilderNodeFacesHatch', () => {
     ]);
 
     // before
-    drawShapeBuilderNodeFacesHatch(gl, program, buffer, node, new Set(['k1']), '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    drawShapeBuilderNodeFacesHatch(
+      gl,
+      program,
+      buffer,
+      node,
+      new Set(['k1']),
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 0, y: 0 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
   });
 
   it('should derive faces from whatever getRenderedVectorNode returns for the node, not the raw node itself', () => {
@@ -87,7 +120,18 @@ describe('drawShapeBuilderNodeFacesHatch', () => {
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
-    drawShapeBuilderNodeFacesHatch(gl, program, buffer, rotatedNode, new Set(['k1']), '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    drawShapeBuilderNodeFacesHatch(
+      gl,
+      program,
+      buffer,
+      rotatedNode,
+      new Set(['k1']),
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);

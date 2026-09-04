@@ -26,10 +26,23 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, null, null, faces, '#ff0000', 100, 100, IDENTITY_VIEWPORT, 1);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      '#ff0000',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+    );
   });
 
   it('should convert a partial paint opacity (0-100) into the 0-1 alpha drawVectorFill expects', () => {
@@ -37,7 +50,7 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#00ff00', opacity: 40, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenLastCalledWith(
@@ -51,6 +64,7 @@ describe('drawVectorFillPaints', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
       0.4,
     );
   });
@@ -61,7 +75,7 @@ describe('drawVectorFillPaints', () => {
     const top: TSolidPaint = { color: '#222222', opacity: 50, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [bottom, top], 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFillPaints(gl, program, buffer, null, null, faces, [bottom, top], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
@@ -74,7 +88,7 @@ describe('drawVectorFillPaints', () => {
     const hidden: TSolidPaint = { color: '#000000', opacity: 100, type: 'solid', visible: false };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [hidden], 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFillPaints(gl, program, buffer, null, null, faces, [hidden], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
@@ -92,7 +106,7 @@ describe('drawVectorFillPaints', () => {
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [gradient, image], 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFillPaints(gl, program, buffer, null, null, faces, [gradient, image], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();

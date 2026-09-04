@@ -18,7 +18,7 @@ export const drawVectorSelectedFillPreview = (
   vectorEditingNodeIds: string[],
   refs: TCanvasRefs,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
 
   if (selectedVertexIds.length > 0) {
@@ -34,7 +34,17 @@ export const drawVectorSelectedFillPreview = (
     });
 
     if (faces.length > 0) {
-      drawVectorHatchFill(gl, program, buffer, faces, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+      drawVectorHatchFill(
+        gl,
+        program,
+        buffer,
+        faces,
+        DRAFT_FRAME_STROKE,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        imageContext.isAlphaWriteEnabled,
+      );
     }
   }
 };

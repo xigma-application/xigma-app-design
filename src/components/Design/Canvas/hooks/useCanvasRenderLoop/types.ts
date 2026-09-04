@@ -18,6 +18,7 @@ export type TImageRenderContext = {
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>;
   gridBuffer: WebGLBuffer;
   gridProgram: WebGLProgram;
+  isAlphaWriteEnabled: boolean;
   maskCompositeBuffer: WebGLBuffer;
   maskCompositeProgram: WebGLProgram;
   msdfBuffer: WebGLBuffer;

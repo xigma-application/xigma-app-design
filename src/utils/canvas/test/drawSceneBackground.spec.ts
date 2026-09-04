@@ -1,3 +1,6 @@
+// types
+import { TImageRenderContext } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/types';
+
 // utils
 import { drawSceneBackground } from '../drawSceneBackground';
 
@@ -13,9 +16,10 @@ describe('drawSceneBackground', () => {
   it('should re-enable alpha writes for the background clear, then lock them for foreground drawing', () => {
     // mock
     const gl = createGlMock();
+    const imageContext = { isAlphaWriteEnabled: true } as TImageRenderContext;
 
     // before
-    drawSceneBackground(gl);
+    drawSceneBackground(gl, imageContext);
 
     // result
     expect((gl.colorMask as ReturnType<typeof vi.fn>).mock.calls).toEqual([
@@ -23,5 +27,17 @@ describe('drawSceneBackground', () => {
       [true, true, true, false],
     ]);
     expect(gl.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('should track that alpha writes are now disabled, for downstream fill draws to read', () => {
+    // mock
+    const gl = createGlMock();
+    const imageContext = { isAlphaWriteEnabled: true } as TImageRenderContext;
+
+    // before
+    drawSceneBackground(gl, imageContext);
+
+    // result
+    expect(imageContext.isAlphaWriteEnabled).toBe(false);
   });
 });

@@ -26,6 +26,7 @@ vi.mock('utils/canvas/drawVectorNode/drawVectorNodeRotateSnapshot', () => ({
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const IS_ALPHA_WRITE_ENABLED = false;
 
 const node: TVectorNode = {
   defaultFill: null,
@@ -78,6 +79,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
@@ -91,6 +93,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
@@ -128,6 +131,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
@@ -141,6 +145,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
@@ -177,6 +182,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
@@ -190,6 +196,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
@@ -238,10 +245,20 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
-    expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      snapshot,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -283,10 +300,20 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
-    expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      snapshot,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
+    );
     expect(drawVectorNodeMock).not.toHaveBeenCalled();
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
@@ -337,6 +364,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result
@@ -394,6 +422,7 @@ describe('drawSceneVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      IS_ALPHA_WRITE_ENABLED,
     );
 
     // result

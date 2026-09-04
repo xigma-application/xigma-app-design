@@ -78,7 +78,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing when nothing is touched', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       [node.id],
       [node.id],
@@ -93,7 +101,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing for a touched node id that no longer resolves to any node', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       [node.id],
       [node.id],
@@ -114,7 +130,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       [node.id],
       [node.id],
@@ -134,6 +158,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
     );
     expect(drawVectorHatchFillMock).toHaveBeenNthCalledWith(
       2,
@@ -145,6 +170,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
     );
   });
 
@@ -154,7 +180,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       [node.id],
       [node.id],
@@ -163,7 +197,17 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 0, y: 0 }]],
+      '#cd4422',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should skip a touched face key that no longer matches any current face', () => {
@@ -172,7 +216,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       nodes,
       [node.id],
       [node.id],
@@ -193,7 +245,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -218,7 +278,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -229,7 +297,17 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(getVectorFacesOnPathMock).toHaveBeenCalledWith(combinedNode, path);
     expect(getVectorFacesInRectMock).not.toHaveBeenCalled();
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 9, y: 9 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should re-hit-test a box rect (not the raw path) against the combined node when isBoxMode is true', () => {
@@ -247,7 +325,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -258,7 +344,17 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(getVectorFacesOnPathMock).not.toHaveBeenCalled();
     expect(getVectorFacesInRectMock).toHaveBeenCalledWith(combinedNode, { height: 10, width: 10, x: 0, y: 0 });
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 5, y: 5 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 5, y: 5 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should fall back to the plain per-node hatch for a group that turned out to be a singleton (touched nodes that don’t actually cross)', () => {
@@ -276,7 +372,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -302,7 +406,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -313,7 +425,17 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(groupCrossingVectorNodesMock).toHaveBeenCalledWith([node, otherNode]); // grouped over every open node, not just touched
     expect(getVectorFacesOnPathMock).toHaveBeenCalledWith(combinedNode, path);
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [[{ x: 9, y: 9 }]],
+      '#337ae1',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      false,
+    );
   });
 
   it('should skip a crossing group entirely when none of its members were actually touched, even while a different node elsewhere in the same gesture was', () => {
@@ -333,7 +455,15 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before — only node.id appears in touchedFaces
     drawVectorShapeBuilderHoverPreview(
-      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      {
+        buffer,
+        canvasHeight: 150,
+        canvasWidth: 200,
+        gl,
+        imageContext: { isAlphaWriteEnabled: false } as never,
+        program,
+        viewport: IDENTITY_VIEWPORT,
+      },
       threeNodes,
       [node.id, otherNode.id, thirdNode.id],
       [node.id, otherNode.id, thirdNode.id],

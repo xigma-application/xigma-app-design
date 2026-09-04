@@ -34,7 +34,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     };
 
     // before
-    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     const [[{ x, y }]] = drawVectorFillMock.mock.calls[0][5] as { x: number; y: number }[][];
@@ -52,6 +52,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });
@@ -67,7 +68,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     };
 
     // before
-    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledWith(
@@ -81,6 +82,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      false,
       1,
     );
   });
@@ -96,7 +98,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     };
 
     // before
-    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
