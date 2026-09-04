@@ -26,6 +26,7 @@ export * from './UITools/ButtonMenu/ButtonMenu';
 export * from './UITools/Chip/Chip';
 export * from './UITools/Color/Color';
 export * from './UITools/ColorPickerInput/ColorPickerInput';
+export * from './UITools/ComponentHeader/ComponentHeader';
 export * from './UITools/Dropdown/Dropdown';
 export * from './UITools/EditableInput/EditableInput';
 export * from './UITools/FieldGroup/FieldGroup';

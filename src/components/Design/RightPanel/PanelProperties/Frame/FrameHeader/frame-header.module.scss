@@ -1,0 +1,20 @@
+@use '@xigma/scss/mixins/svg-color';
+
+.FrameHeader {
+  &__trigger {
+    &.FrameHeader__trigger[data-state='open'] {
+      background-color: transparent;
+      color: var(--color-neutral-1);
+
+      @include svg-color.svg-color(var(--color-neutral-1));
+    }
+  }
+
+  &__label {
+    align-items: center;
+    column-gap: 4px;
+    display: flex;
+    font-size: 13px;
+    font-weight: 550;
+  }
+}
