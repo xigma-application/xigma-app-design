@@ -1,1 +1,2 @@
-export const INDICATOR_THICKNESS_PX = 2;
+export const INDICATOR_THICKNESS_PX = 3;
+export const INDICATOR_MIN_EDGE_GAP_PX = 2;
