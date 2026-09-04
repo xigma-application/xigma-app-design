@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ZoomMenu from '../ZoomMenu/ZoomMenu';
-import { ButtonMenu, Icon } from 'shared';
+import { ButtonMenu, Icon, Tooltip } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -25,9 +25,11 @@ const ZoomTrigger: FC = () => {
       align="end"
       className={styles.ZoomTrigger}
       trigger={
-        <span className={styles.ZoomTrigger__label}>
-          {zoomPercentage}%<Icon name="ChevronDown" size={16} />
-        </span>
+        <Tooltip content={t(`${translationNameSpace}.tooltip`)}>
+          <span className={styles.ZoomTrigger__label}>
+            {zoomPercentage}%<Icon name="ChevronDown" size={16} />
+          </span>
+        </Tooltip>
       }
       triggerAriaLabel={t(`${translationNameSpace}.ariaLabel`)}
     >

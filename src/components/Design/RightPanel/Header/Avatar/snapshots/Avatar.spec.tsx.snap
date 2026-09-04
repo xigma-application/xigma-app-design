@@ -11,25 +11,30 @@ exports[`Avatar snapshots > should render Avatar 1`] = `
     type="button"
   >
     <span
-      class="_AvatarBadge_0e47ca"
+      class="_Avatar__trigger_b0cebb"
+      data-state="closed"
     >
-      X
+      <span
+        class="_AvatarBadge_0e47ca"
+      >
+        X
+      </span>
+      <svg
+        class="Icon"
+        data-fpl-icon-size="16"
+        fill="none"
+        height="16"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="16"
+      >
+        <path
+          d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
     </span>
-    <svg
-      class="Icon"
-      data-fpl-icon-size="16"
-      fill="none"
-      height="16"
-      style="color: var(--color-neutral-1);"
-      viewBox="0 0 16 16"
-      width="16"
-    >
-      <path
-        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-        data-svg-property="fill"
-        fill="white"
-      />
-    </svg>
   </button>
 </DocumentFragment>
 `;

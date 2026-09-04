@@ -5,6 +5,11 @@
   padding: 0;
   width: 42px;
 
+  &__trigger {
+    align-items: center;
+    display: flex;
+  }
+
   &[data-state='open'] {
     background-color: var(--color-blue-1);
 
