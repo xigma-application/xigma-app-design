@@ -84,6 +84,7 @@ exports[`Design snapshots > should render the Page section with its background c
       <button
         aria-label="Toggle background visibility"
         class="_ColorPickerInput__toggle_2cba41"
+        data-state="closed"
         type="button"
       >
         <svg

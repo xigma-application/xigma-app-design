@@ -1,8 +1,8 @@
 import cx from 'classnames';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput } from '@xigma/components';
+import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
 import Color from '../Color/Color';
@@ -32,6 +32,7 @@ export type TColorPickerInputProps = {
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
   toggleVisibilityAriaLabel?: string;
+  toggleVisibilityTooltip?: ReactNode;
   triggerAriaLabel?: string;
 };
 
@@ -46,6 +47,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onPickerChange,
   onToggleVisibility,
   toggleVisibilityAriaLabel,
+  toggleVisibilityTooltip,
   triggerAriaLabel,
 }) => {
   const onBlurHex = useHexCommit(hex, onCommitHex);
@@ -86,14 +88,16 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
         />
       </FieldGroup>
       {onToggleVisibility && (
-        <button
-          aria-label={toggleVisibilityAriaLabel}
-          className={styles.ColorPickerInput__toggle}
-          onClick={onToggleVisibility}
-          type="button"
-        >
-          <Icon name={isVisible ? 'EyesOpened' : 'EyesClosed'} size={16} />
-        </button>
+        <Tooltip align="end" content={toggleVisibilityTooltip}>
+          <button
+            aria-label={toggleVisibilityAriaLabel}
+            className={styles.ColorPickerInput__toggle}
+            onClick={onToggleVisibility}
+            type="button"
+          >
+            <Icon name={isVisible ? 'EyesOpened' : 'EyesClosed'} size={16} />
+          </button>
+        </Tooltip>
       )}
     </div>
   );

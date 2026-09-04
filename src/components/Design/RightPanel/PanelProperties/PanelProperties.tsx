@@ -1,7 +1,10 @@
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 
 // components
 import Design from './Design/Design';
+import Export from './Export/Export';
+import Mcp from './Mcp/Mcp';
+import Styles from './Styles/Styles';
 
 // store
 import { selectSelectedIds } from 'store/design/selectors';
@@ -14,7 +17,14 @@ const PanelProperties: FC = () => {
     return null;
   }
 
-  return <Design />;
+  return (
+    <Fragment>
+      <Design />
+      <Styles />
+      <Export />
+      <Mcp />
+    </Fragment>
+  );
 };
 
 export default PanelProperties;

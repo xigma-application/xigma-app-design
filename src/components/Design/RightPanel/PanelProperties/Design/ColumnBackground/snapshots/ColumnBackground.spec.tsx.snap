@@ -71,6 +71,7 @@ exports[`ColumnBackground snapshots > should render the colour field, alpha fiel
     <button
       aria-label="Toggle background visibility"
       class="_ColorPickerInput__toggle_2cba41"
+      data-state="closed"
       type="button"
     >
       <svg

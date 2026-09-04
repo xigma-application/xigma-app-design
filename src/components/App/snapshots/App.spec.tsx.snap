@@ -809,6 +809,7 @@ exports[`App snapshots > should render App 1`] = `
             <button
               aria-label="Toggle background visibility"
               class="_ColorPickerInput__toggle_2cba41"
+              data-state="closed"
               type="button"
             >
               <svg
@@ -829,6 +830,143 @@ exports[`App snapshots > should render App 1`] = `
                 />
               </svg>
             </button>
+          </div>
+        </div>
+        <div
+          class="_Section_5940d2 _Section--empty_5940d2"
+          data-test-section="styles"
+        >
+          <div
+            class="_Section__header_5940d2"
+          >
+            <span
+              class="_Section__label_5940d2"
+            >
+              Styles
+            </span>
+            <div
+              class="_Section__component_5940d2"
+            >
+              <button
+                aria-label="Add style"
+                aria-pressed="false"
+                class="_Button_b88d2e"
+                data-state="closed"
+                style="padding: 0px;"
+                type="button"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-1);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="_Section_5940d2 _Section--empty_5940d2"
+          data-test-section="export"
+        >
+          <div
+            class="_Section__header_5940d2"
+          >
+            <span
+              class="_Section__label_5940d2"
+            >
+              Export
+            </span>
+            <div
+              class="_Section__component_5940d2"
+            >
+              <button
+                aria-label="Add export setting"
+                aria-pressed="false"
+                class="_Button_b88d2e"
+                data-state="closed"
+                style="padding: 0px;"
+                type="button"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-1);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="_Section_5940d2 _Section--empty_5940d2"
+          data-test-section="mcp"
+        >
+          <div
+            class="_Section__header_5940d2"
+          >
+            <span
+              class="_Section__label_5940d2"
+            >
+              MCP
+              <span
+                class="_Chip_a724d3 _Chip--outline_a724d3"
+              >
+                No connections
+              </span>
+            </span>
+            <div
+              class="_Section__component_5940d2"
+            >
+              <button
+                aria-label="Add MCP connection"
+                aria-pressed="false"
+                class="_Button_b88d2e"
+                data-state="closed"
+                style="padding: 0px;"
+                type="button"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-1);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

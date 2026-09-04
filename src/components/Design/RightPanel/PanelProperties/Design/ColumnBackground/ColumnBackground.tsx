@@ -25,6 +25,7 @@ const ColumnBackground: FC = () => {
       onPickerChange={onPickerChange}
       onToggleVisibility={onToggleVisibility}
       toggleVisibilityAriaLabel={t(`${translationNameSpace}.background.toggleVisibilityAriaLabel`)}
+      toggleVisibilityTooltip={t(`${translationNameSpace}.background.toggleVisibilityTooltip`)}
       triggerAriaLabel={t(`${translationNameSpace}.background.colorTriggerAriaLabel`)}
     />
   );

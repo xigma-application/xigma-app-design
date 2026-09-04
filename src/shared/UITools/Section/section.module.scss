@@ -2,6 +2,10 @@
   border-bottom: 1px solid var(--color-neutral-3);
   padding: 0 8px 12px 16px;
 
+  &--empty {
+    padding-bottom: 0;
+  }
+
   &__header {
     align-items: center;
     display: flex;
@@ -10,7 +14,10 @@
   }
 
   &__label {
+    align-items: center;
     color: var(--color-neutral-1);
+    column-gap: 6px;
+    display: flex;
     font-size: 11px;
     user-select: none;
   }

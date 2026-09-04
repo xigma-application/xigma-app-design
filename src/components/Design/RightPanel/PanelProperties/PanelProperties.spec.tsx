@@ -23,12 +23,15 @@ describe('PanelProperties behaviors', () => {
     store.dispatch(setSelection([]));
   });
 
-  it('should show the Design section while nothing is selected', () => {
+  it('should show the Design, Styles, Export, and MCP sections while nothing is selected', () => {
     // before
     renderPanelProperties();
 
     // result
     expect(screen.getByText('Page')).toBeInTheDocument();
+    expect(screen.getByText('Styles')).toBeInTheDocument();
+    expect(screen.getByText('Export')).toBeInTheDocument();
+    expect(screen.getByText('MCP')).toBeInTheDocument();
   });
 
   it('should render nothing while a node is selected', () => {

@@ -51,6 +51,14 @@ describe('Chip behaviors', () => {
     expect(screen.getByText('Free').tagName).toBe('SPAN');
   });
 
+  it('should apply the outline variant class', () => {
+    // before
+    const { container } = render(<Chip variant="outline">No connections</Chip>);
+
+    // result
+    expect(container.querySelector('[class*="Chip--outline"]')).not.toBeNull();
+  });
+
   it('should render as a clickable button and call onClick when it has an action', () => {
     // mock
     const onClick = vi.fn();

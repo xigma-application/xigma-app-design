@@ -4,7 +4,7 @@ import { FC, ReactNode } from 'react';
 // styles
 import styles from './chip.module.scss';
 
-export type TChipVariant = 'free' | 'secondary';
+export type TChipVariant = 'free' | 'outline' | 'secondary';
 
 export type TChipProps = {
   children: ReactNode;
