@@ -48,6 +48,11 @@ export enum PathType {
   ellipse = 'ellipse',
 }
 
+export enum SizingMode {
+  fixed = 'fixed',
+  hug = 'hug',
+}
+
 export enum ToolName {
   arrow = 'arrow',
   bend = 'bend',

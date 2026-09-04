@@ -3,6 +3,7 @@ import { TDesignState } from '../../types';
 import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
+import { applyAutoLayoutHugSize } from './applyAutoLayoutHugSize';
 import { getActivePage } from '../getActivePage';
 import { getAutoLayoutChildPositions } from './getAutoLayoutChildPositions';
 import { getAutoLayoutContentBox } from './getAutoLayoutContentBox';
@@ -24,10 +25,15 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
       const bounds = children.map(getNodeAxisAlignedBounds);
       const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
-      const contentBox = getAutoLayoutContentBox(frame, getFramePadding(frame));
+      const itemSpacing = frame.itemSpacing ?? 0;
+      const padding = getFramePadding(frame);
+
+      applyAutoLayoutHugSize(frame, frame.layoutMode, itemSpacing, padding, sizes);
+
+      const contentBox = getAutoLayoutContentBox(frame, padding);
       const positions = getAutoLayoutChildPositions(
         frame.layoutMode,
-        frame.itemSpacing ?? 0,
+        itemSpacing,
         frame.layoutAlignment ?? AlignmentLayout.topLeft,
         contentBox,
         sizes,

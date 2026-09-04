@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, LayoutMode, NodeType, ToolName } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, NodeType, SizingMode, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
@@ -132,6 +132,44 @@ describe('syncAutoLayoutChildren', () => {
 
     // result
     expect(getActivePage(state).nodes.a).toMatchObject({ x: 108, y: 204 });
+  });
+
+  it('should hug the frame’s width and height to its children, on the primary and counter axis', () => {
+    // mock — two children (30+50 wide, gap 10) inside a frame whose declared size is otherwise ignored
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const b = rect({ height: 60, id: 'b', width: 50 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b'],
+      counterAxisSizingMode: SizingMode.hug,
+      height: 999,
+      itemSpacing: 10,
+      layoutMode: LayoutMode.horizontal,
+      primaryAxisSizingMode: SizingMode.hug,
+      width: 999,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — width hugs the content length (30+10+50=90), height hugs the tallest child (60)
+    expect(getActivePage(state).nodes['frame-1']).toMatchObject({ height: 60, width: 90 });
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: 40, y: 0 });
+  });
+
+  it('should leave the frame’s size untouched when both sizing modes are fixed (or unset)', () => {
+    // mock
+    const a = rect({ height: 20, id: 'a', width: 30 });
+    const layoutFrame = frame({ childIds: ['a'], height: 200, layoutMode: LayoutMode.horizontal, width: 500, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result
+    expect(getActivePage(state).nodes['frame-1']).toMatchObject({ height: 200, width: 500 });
   });
 
   it('should default a missing itemSpacing to zero', () => {

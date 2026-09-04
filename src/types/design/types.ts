@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, LayoutMode, NodeType, PathType } from './enums';
+import { AlignmentLayout, LayoutMode, NodeType, PathType, SizingMode } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
@@ -74,6 +74,7 @@ export type TEllipseNode = TBaseNode & {
 export type TFrameNode = TBaseNode & {
   childIds: string[];
   clipContent: boolean;
+  counterAxisSizingMode?: SizingMode;
   fill: string;
   guides?: TGuide[];
   itemSpacing?: number;
@@ -83,6 +84,7 @@ export type TFrameNode = TBaseNode & {
   paddingLeft?: number;
   paddingRight?: number;
   paddingTop?: number;
+  primaryAxisSizingMode?: SizingMode;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;
