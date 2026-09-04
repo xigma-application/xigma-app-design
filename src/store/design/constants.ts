@@ -16,3 +16,18 @@ export const DEFAULT_PAGE_NAME = 'Page 1';
 export const DEFAULT_GROUP_NAME = 'Group';
 export const DEFAULT_MASK_GROUP_NAME = 'Mask group';
 export const MOCK_COMMENT_AUTHOR = 'Xigma';
+
+export const TOOL_DEFAULT_NODE_NAMES: ReadonlySet<string> = new Set([
+  'Frame',
+  'Section',
+  'Rectangle',
+  'Ellipse',
+  'Line',
+  'Arrow',
+  'Polygon',
+  'Star',
+  'Vector',
+  'Pencil',
+  'Text',
+  'Path',
+]);

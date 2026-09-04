@@ -140,9 +140,9 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       fill: config.fill,
       height: 30,
-      // frames auto-number off the page's existing frames (getNextFrameName) rather than keeping
-      // the tool's raw default name
-      name: config.type === NodeType.frame ? 'Frame 1' : config.name,
+      // every shape auto-numbers off the page's existing nodes of the same type/base name
+      // (getNextNodeName) rather than keeping the tool's raw default name
+      name: `${config.name} (1)`,
       type: config.type,
       width: 50,
       x: 10,

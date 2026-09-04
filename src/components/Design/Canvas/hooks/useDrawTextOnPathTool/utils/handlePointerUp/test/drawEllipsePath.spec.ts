@@ -22,7 +22,7 @@ describe('drawEllipsePath', () => {
     const { nodes, rootOrder } = selectActivePage(store.getState());
     const pathNodeId = rootOrder[rootOrder.length - 1];
 
-    expect(nodes[pathNodeId]).toMatchObject({ ...RECT, name: PATH_NAME, pathType: PathType.ellipse, type: NodeType.path });
+    expect(nodes[pathNodeId]).toMatchObject({ ...RECT, name: `${PATH_NAME} (1)`, pathType: PathType.ellipse, type: NodeType.path });
   });
 
   it('should select the new path and start text-editing bound to it, offset at the top of the ellipse', () => {

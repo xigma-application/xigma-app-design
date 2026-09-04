@@ -1,22 +1,19 @@
+// others
+import { TOOL_DEFAULT_NODE_NAMES } from '../constants';
+
 // types
-import { NodeType } from 'types/design/enums';
 import { TDesignState } from '../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from './getActivePage';
-import { getNextFrameName } from './getNextFrameName';
-import { getNextSectionName } from './getNextSectionName';
+import { getNextNodeName } from './getNextNodeName';
 
 export const handleAddNode = (state: TDesignState, node: TSceneNode): void => {
   const page = getActivePage(state);
 
-  if (node.type === NodeType.frame) {
-    node.name = getNextFrameName(page.nodes);
-  }
-
-  if (node.type === NodeType.section) {
-    node.name = getNextSectionName(page.nodes);
+  if (TOOL_DEFAULT_NODE_NAMES.has(node.name)) {
+    node.name = getNextNodeName(page.nodes, node.type, node.name);
   }
 
   page.nodes[node.id] = node;

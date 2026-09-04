@@ -36,7 +36,7 @@ describe('getEligibleVectorAtPoint', () => {
     addStraightVector(1000);
 
     // result
-    expect(getEligibleVectorAtPoint({ x: 1050, y: 0 }, IDENTITY_VIEWPORT)?.name).toBe('Vector');
+    expect(getEligibleVectorAtPoint({ x: 1050, y: 0 }, IDENTITY_VIEWPORT)?.name).toBe('Vector (1)');
   });
 
   it('should return null for a point away from any path', () => {
@@ -86,7 +86,7 @@ describe('getEligibleVectorAtPoint', () => {
     );
 
     // result
-    expect(getEligibleVectorAtPoint({ x: 5050, y: 50 }, IDENTITY_VIEWPORT)?.name).toBe('Rectangle');
+    expect(getEligibleVectorAtPoint({ x: 5050, y: 50 }, IDENTITY_VIEWPORT)?.name).toBe('Rectangle (1)');
   });
 
   it('should return null for a vector with no segments to form a chain', () => {

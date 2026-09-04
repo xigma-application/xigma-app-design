@@ -136,7 +136,7 @@ describe('useDrawPolygonTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       fill: CONFIG.fill,
       height: 30,
-      name: CONFIG.name,
+      name: `${CONFIG.name} (1)`,
       sides: CONFIG.sides,
       type: NodeType.polygon,
       width: 50,

@@ -309,7 +309,7 @@ describe('useDrawLineTool behaviors', () => {
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       endPoint: CONFIG.endPoint,
-      name: CONFIG.name,
+      name: `${CONFIG.name} (1)`,
       startPoint: CONFIG.startPoint,
       stroke: CONFIG.stroke,
       type: NodeType.line,

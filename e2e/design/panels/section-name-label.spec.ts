@@ -14,9 +14,9 @@ test('renaming a section via its canvas label updates the Layers panel row', asy
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawSection(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Section 1');
+  await expect(treeItemName(page)).toHaveText('Section (1)');
 
-  await designPage.doubleClick(715, 280); // the auto-numbered "Section 1" badge, just above the section
+  await designPage.doubleClick(715, 280); // the auto-numbered "Section (1)" badge, just above the section
   await page.keyboard.type('Header');
   await page.keyboard.press('Enter');
 
@@ -52,13 +52,13 @@ test('pressing Escape while editing the canvas label leaves the name unchanged',
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawSection(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Section 1');
+  await expect(treeItemName(page)).toHaveText('Section (1)');
 
   await designPage.doubleClick(715, 280);
   await page.keyboard.type('Discarded');
   await page.keyboard.press('Escape');
 
-  await expect(treeItemName(page)).toHaveText('Section 1');
+  await expect(treeItemName(page)).toHaveText('Section (1)');
 });
 
 test('the auto-numbered badge is already visible above a section while it is still being drawn', async ({ page }) => {
@@ -80,7 +80,7 @@ test('the auto-numbered badge is already visible above a section while it is sti
 
   await designPage.pointerUp();
 
-  // the "Section 1" badge must render as soon as the section is being dragged out, before the
+  // the "Section (1)" badge must render as soon as the section is being dragged out, before the
   // pointer is ever released
   expect(duringDrag.equals(before)).toBe(false);
 });
@@ -92,7 +92,7 @@ test('Ctrl+Z after a canvas-label rename reverts the name', async ({ page }) => 
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawSection(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Section 1');
+  await expect(treeItemName(page)).toHaveText('Section (1)');
 
   await designPage.doubleClick(715, 280);
   await page.keyboard.type('Header');
@@ -101,7 +101,7 @@ test('Ctrl+Z after a canvas-label rename reverts the name', async ({ page }) => 
 
   await page.keyboard.press('Control+z');
 
-  await expect(treeItemName(page)).toHaveText('Section 1');
+  await expect(treeItemName(page)).toHaveText('Section (1)');
 });
 
 test('clicking a section’s canvas label selects it, the same as clicking its body', async ({ page }) => {

@@ -14,9 +14,9 @@ test('renaming a frame via its canvas label updates the Layers panel row', async
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawFrame(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Frame 1');
+  await expect(treeItemName(page)).toHaveText('Frame (1)');
 
-  await designPage.doubleClick(715, 288); // the auto-numbered "Frame 1" label, just above the frame
+  await designPage.doubleClick(715, 288); // the auto-numbered "Frame (1)" label, just above the frame
   await page.keyboard.type('Header');
   await page.keyboard.press('Enter');
 
@@ -52,13 +52,13 @@ test('pressing Escape while editing the canvas label leaves the name unchanged',
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawFrame(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Frame 1');
+  await expect(treeItemName(page)).toHaveText('Frame (1)');
 
   await designPage.doubleClick(715, 288);
   await page.keyboard.type('Discarded');
   await page.keyboard.press('Escape');
 
-  await expect(treeItemName(page)).toHaveText('Frame 1');
+  await expect(treeItemName(page)).toHaveText('Frame (1)');
 });
 
 test('the auto-numbered label is already visible above a frame while it is still being drawn', async ({ page }) => {
@@ -80,7 +80,7 @@ test('the auto-numbered label is already visible above a frame while it is still
 
   await designPage.pointerUp();
 
-  // the "Frame 1" label must render as soon as the frame is being dragged out, before the pointer
+  // the "Frame (1)" label must render as soon as the frame is being dragged out, before the pointer
   // is ever released
   expect(duringDrag.equals(before)).toBe(false);
 });
@@ -92,7 +92,7 @@ test('Ctrl+Z after a canvas-label rename reverts the name', async ({ page }) => 
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawFrame(700, 300, 780, 380);
-  await expect(treeItemName(page)).toHaveText('Frame 1');
+  await expect(treeItemName(page)).toHaveText('Frame (1)');
 
   await designPage.doubleClick(715, 288);
   await page.keyboard.type('Header');
@@ -101,7 +101,7 @@ test('Ctrl+Z after a canvas-label rename reverts the name', async ({ page }) => 
 
   await page.keyboard.press('Control+z');
 
-  await expect(treeItemName(page)).toHaveText('Frame 1');
+  await expect(treeItemName(page)).toHaveText('Frame (1)');
 });
 
 test('clicking a frame’s canvas label selects it, the same as clicking its body', async ({ page }) => {

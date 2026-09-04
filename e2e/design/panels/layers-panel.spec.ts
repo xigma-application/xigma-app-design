@@ -242,3 +242,22 @@ test('Ctrl+D on a nested layer keeps the duplicate nested under the same parent,
     .evaluate((el) => parseFloat(getComputedStyle(el as HTMLElement).marginLeft || '0'));
   expect(selectedMarginLeft).toBeGreaterThan(0);
 });
+
+test('drawing several rectangles auto-numbers their Layers panel names instead of leaving them all identical', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-auto-number-rectangles');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140);
+  await designPage.drawRectangle(760, 100, 800, 140);
+  await designPage.drawRectangle(820, 100, 860, 140);
+
+  const rowNames = page.locator('[class*="TreeItem__name"]');
+
+  await expect(rowNames).toHaveCount(3);
+  // most-recently-drawn shape sits at the top row
+  await expect(rowNames.nth(0)).toHaveText('Rectangle (3)');
+  await expect(rowNames.nth(1)).toHaveText('Rectangle (2)');
+  await expect(rowNames.nth(2)).toHaveText('Rectangle (1)');
+});

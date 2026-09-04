@@ -137,7 +137,7 @@ describe('useDrawStarTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       fill: CONFIG.fill,
       height: 30,
-      name: CONFIG.name,
+      name: `${CONFIG.name} (1)`,
       points: CONFIG.points,
       ratio: CONFIG.ratio,
       type: NodeType.star,
