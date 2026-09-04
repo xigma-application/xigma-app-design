@@ -261,3 +261,50 @@ test('drawing several rectangles auto-numbers their Layers panel names instead o
   await expect(rowNames.nth(1)).toHaveText('Rectangle (2)');
   await expect(rowNames.nth(2)).toHaveText('Rectangle (1)');
 });
+
+test('Ctrl+click selecting a nested child directly on canvas auto-expands its parent Frame row in the Layers panel', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-auto-expand-on-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(700, 100, 900, 300);
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(750, 150, 800, 200);
+  await designPage.click(1500, 700);
+
+  const [, rectangleId] = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { moveNodes } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+    const frameId = Object.keys(nodes).find((id) => nodes[id].type === 'frame')!;
+    const rectangleId = rootOrder.find((id) => id !== frameId)!;
+
+    store.dispatch(moveNodes({ nodeIds: [rectangleId], targetIndex: 0, targetParentId: frameId }));
+
+    return [frameId, rectangleId];
+  });
+
+  await designPage.click(1500, 700); // deselect, tree starts collapsed
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await expect(rows).toHaveCount(1); // only the Frame row — the rectangle is collapsed inside it
+
+  await designPage.click(775, 175, { ctrl: true }); // reach the nested rectangle directly, bypassing the frame
+
+  await expect(rows).toHaveCount(2); // the Frame row auto-expanded to reveal its now-selected child
+  const selectedRow = layersTree.locator('[aria-selected="true"]');
+
+  await expect(selectedRow).toHaveCount(1);
+  await expect(selectedRow.locator('[class*="TreeItem__name"]')).toHaveText('Rectangle (1)');
+
+  const state = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    return store.getState().design.pages[store.getState().design.activePageId].selectedIds;
+  });
+
+  expect(state).toEqual([rectangleId]);
+});

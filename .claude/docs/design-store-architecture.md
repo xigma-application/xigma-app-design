@@ -353,6 +353,19 @@ layer's icon selects it and zooms to it in one gesture. Since this makes `TreeIt
 `useCanvasRefsContext()` consumer, every test that mounts a real `TreeItem` (directly, or
 transitively via `LayersTree`/`Layers`/`useRenderRow`) now needs a `CanvasRefsProvider` ancestor.
 
+**Selecting a nested node — from anywhere, not just the tree itself — auto-expands its ancestor rows
+in the Layers panel.** `Layers.tsx`'s `useExpandAncestorsOnSelect(expandedIds, onExpandedIdsChange)`
+watches `selectSelectedIds` and, on every change, walks each selected node's `parentId` chain
+(`getSelectionAncestorIds.ts`, pure, cycle-safe) and unions any missing ancestor ids into the existing
+`expandedIds` set from `useLayersExpansion`. A root-level selection is a no-op (empty ancestor set, no
+dispatch). The effect deliberately depends only on `[selectedIds]` — `nodes`/`expandedIds`/
+`onExpandedIdsChange` are read through a plain `useRef` kept current every render instead of being
+listed as dependencies, so dragging a node's geometry (which changes the `nodes` reference every
+pointermove) never re-triggers this walk; only an actual *selection* change does. Since a Ctrl+click
+straight into a deeply-nested child, or the Enter-drill-into-containers walk (`vector-network.md` §52),
+both go through the same `setSelection`, both benefit automatically — no separate wiring per
+selection-changing feature. e2e: `layers-panel.spec.ts`'s Ctrl+click-auto-expand test.
+
 ### `designHintLabelKey` — a generic momentary-hint mechanism (not zoom-specific)
 
 `state.design.designHintLabelKey: string | null` holds an i18n key (or `null`). Any feature can

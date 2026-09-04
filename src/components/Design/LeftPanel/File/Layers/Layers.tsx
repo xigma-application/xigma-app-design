@@ -7,6 +7,7 @@ import LayersTree from './LayersTree/LayersTree';
 
 // hooks
 import { useCollapseLayersShortcut } from './hooks/useCollapseLayersShortcut';
+import { useExpandAncestorsOnSelect } from './hooks/useExpandAncestorsOnSelect';
 import { useLayersExpansion } from './hooks/useLayersExpansion';
 import { useLayersHover } from './hooks/useLayersHover';
 import { useToggleLayersExpanded } from './hooks/useToggleLayersExpanded';
@@ -20,6 +21,7 @@ const Layers: FC = () => {
   const { isHovered, onMouseEnter, onMouseLeave } = useLayersHover();
 
   useCollapseLayersShortcut(isExpanded && hasExpanded && isHovered, collapseAll);
+  useExpandAncestorsOnSelect(expandedIds, onExpandedIdsChange);
 
   return (
     <div className={styles.Layers} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
