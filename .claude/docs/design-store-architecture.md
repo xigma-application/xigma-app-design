@@ -366,6 +366,21 @@ straight into a deeply-nested child, or the Enter-drill-into-containers walk (`v
 both go through the same `setSelection`, both benefit automatically — no separate wiring per
 selection-changing feature. e2e: `layers-panel.spec.ts`'s Ctrl+click-auto-expand test.
 
+**Update: the same hook also re-expands on a *live* reparent mid-drag, with zero changes to the drag
+hot path.** `updateDragDropTarget.ts` already dispatches `moveNodes` the moment a dragged node's
+target frame changes — well before `pointerup` — so a dragged node's own `parentId` is real and
+current throughout the drag, not just at drop. Rather than adding a new ephemeral Redux field mirrored
+off `dropTargetFrameIdRef` (the ref canvas rendering reads every frame), the hook just also subscribes
+to a new `selectSelectedParentIds` selector (`createSelector([selectSelectedNodes], (nodes) =>
+nodes.map((node) => node.parentId))`) with react-redux's `shallowEqual`, and adds it to the effect's
+dependency array. Since `shallowEqual` compares the *primitive* parentId values rather than the node
+objects themselves, react-redux keeps returning the same array reference across the 60/s position-only
+`nodes` churn of an ordinary drag — the selector body still recomputes every frame (cheap: a `.map()`
+over a typically tiny selected-nodes array), but nothing downstream re-renders or re-runs from that.
+Only an actual transition (a real `parentId` change, i.e. the rare `moveNodes` dispatch) produces a
+shallow-inequal array, which is what re-triggers the ancestor walk. e2e:
+`layers-panel.spec.ts`'s live-drag test — checks the Frame row mid-drag, before `pointerup`.
+
 ### `designHintLabelKey` — a generic momentary-hint mechanism (not zoom-specific)
 
 `state.design.designHintLabelKey: string | null` holds an i18n key (or `null`). Any feature can

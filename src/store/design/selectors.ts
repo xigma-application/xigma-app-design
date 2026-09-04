@@ -109,6 +109,10 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
   selectedIds.map((id) => nodes[id]),
 );
 
+export const selectSelectedParentIds = createSelector([selectSelectedNodes], (selectedNodes) =>
+  selectedNodes.filter(Boolean).map((node) => node.parentId),
+);
+
 export const selectSelectedLeafNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
   getTransformTargetNodes(selectedNodes.filter(Boolean), nodes),
 );

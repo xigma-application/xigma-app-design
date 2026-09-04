@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useExpandAncestorsOnSelect } from '../useExpandAncestorsOnSelect';
 
 // store
-import { addNode, moveNodes, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -144,5 +144,49 @@ describe('useExpandAncestorsOnSelect', () => {
 
     // result
     expect(onExpandedIdsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("should expand a node's new parent on a live reparent (e.g. dragging it into a Frame) even though the selection itself never changed", () => {
+    // mock — the rectangle is already selected, at the root, before it ever gets reparented; this
+    // matches updateDragDropTarget.ts dispatching moveNodes live, mid-drag, well before pointerup
+    const frameId = addFrame();
+    const rectangleId = addRectangle();
+
+    store.dispatch(setSelection([rectangleId]));
+
+    const onExpandedIdsChange = vi.fn();
+
+    renderHook(({ expandedIds }) => useExpandAncestorsOnSelect(expandedIds, onExpandedIdsChange), {
+      initialProps: { expandedIds: new Set<string>() },
+      wrapper,
+    });
+
+    expect(onExpandedIdsChange).not.toHaveBeenCalled();
+
+    // action — the live reparent, selection unchanged
+    act(() => store.dispatch(moveNodes({ nodeIds: [rectangleId], targetIndex: 0, targetParentId: frameId })));
+
+    // result
+    expect(onExpandedIdsChange).toHaveBeenCalledWith(new Set([frameId]));
+  });
+
+  it('should not fire on a plain position update of a selected node — only an actual parent change counts', () => {
+    // mock
+    const rectangleId = addRectangle();
+
+    store.dispatch(setSelection([rectangleId]));
+
+    const onExpandedIdsChange = vi.fn();
+
+    renderHook(({ expandedIds }) => useExpandAncestorsOnSelect(expandedIds, onExpandedIdsChange), {
+      initialProps: { expandedIds: new Set<string>() },
+      wrapper,
+    });
+
+    // action — dragging a node updates its x/y every pointermove; this must not re-trigger the walk
+    act(() => store.dispatch(updateNode({ changes: { x: 50, y: 50 }, id: rectangleId })));
+
+    // result
+    expect(onExpandedIdsChange).not.toHaveBeenCalled();
   });
 });

@@ -36,6 +36,7 @@ import {
   selectSelectedIds,
   selectSelectedLeafNodes,
   selectSelectedNodes,
+  selectSelectedParentIds,
   selectTopLevelFrameNodes,
   selectVectorEditingNodeIds,
   selectViewport,
@@ -294,6 +295,16 @@ describe('design selectors', () => {
   it('should select the selected nodes', () => {
     // result
     expect(selectSelectedNodes(state)).toEqual([node]);
+  });
+
+  it("should select the selected nodes' parent ids", () => {
+    // result
+    expect(selectSelectedParentIds(state)).toEqual([node.parentId]);
+  });
+
+  it('should return the same array reference for selectSelectedParentIds when called again on the same state', () => {
+    // result
+    expect(selectSelectedParentIds(state)).toBe(selectSelectedParentIds(state));
   });
 
   it('should select the top-level frame nodes', () => {

@@ -308,3 +308,39 @@ test('Ctrl+click selecting a nested child directly on canvas auto-expands its pa
 
   expect(state).toEqual([rectangleId]);
 });
+
+test('dragging a Rectangle live into a Frame auto-expands the Frame row in the Layers panel mid-drag', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-auto-expand-on-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(900, 300, 1100, 500);
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(700, 350, 750, 400); // outside the frame
+  await designPage.click(1500, 700); // deselect, tree starts collapsed
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await expect(rows).toHaveCount(2); // Frame + Rectangle, both still at the root, tree collapsed has nothing to expand yet — two siblings
+
+  await designPage.click(725, 375); // select the rectangle
+  await designPage.pointerDown(725, 375);
+  await designPage.pointerMove(1000, 400); // drag it well inside the frame — updateDragDropTarget reparents it live, before pointerup
+
+  // still mid-drag (no pointerUp yet) — the live reparent already happened, so the Frame row should
+  // already show the rectangle nested under it
+  await expect(rows).toHaveCount(2); // Frame + its now-nested Rectangle child (auto-expanded)
+  const childRow = layersTree.locator('[class*="TreeItem__name"]').filter({ hasText: 'Rectangle (1)' });
+
+  await expect(childRow).toBeVisible();
+  const childRowMarginLeft = await childRow
+    .locator('xpath=ancestor::*[contains(@class, "TreeItem__content")]')
+    .first()
+    .evaluate((el) => parseFloat(getComputedStyle(el as HTMLElement).marginLeft || '0'));
+
+  expect(childRowMarginLeft).toBeGreaterThan(0); // indented — a child of the Frame row, not a second root
+
+  await designPage.pointerUp();
+});
