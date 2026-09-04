@@ -112,6 +112,13 @@ describe('TreeItem', () => {
   it('should select the node and zoom the viewport to it when the icon is double-clicked', () => {
     // mock
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+    let now = 0;
+    const nowSpy = vi.spyOn(performance, 'now').mockImplementation(() => (now += 1000));
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(now);
+
+      return 0;
+    });
 
     // before
     renderTreeItem(false, node, { renderIcon: () => <span data-testid="row-icon">icon</span> });
@@ -122,6 +129,9 @@ describe('TreeItem', () => {
     // result
     expect(selectSelectedIds(store.getState())).toEqual([node.id]);
     expect(selectViewport(store.getState())).not.toEqual({ x: 0, y: 0, zoom: 1 });
+
+    nowSpy.mockRestore();
+    rafSpy.mockRestore();
   });
 
   it('should mark the row as selected when isSelected is true', () => {

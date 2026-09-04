@@ -542,6 +542,24 @@ exports[`App snapshots > should render App 1`] = `
           height="0"
           width="0"
         />
+        <div
+          class="_ScrollbarsLayer_765246"
+        >
+          <div
+            class="_ScrollbarsLayer__horizontal-track_765246"
+          >
+            <div
+              class="_ScrollbarsLayer__horizontal-thumb_765246"
+            />
+          </div>
+          <div
+            class="_ScrollbarsLayer__vertical-track_765246"
+          >
+            <div
+              class="_ScrollbarsLayer__vertical-thumb_765246"
+            />
+          </div>
+        </div>
       </div>
       <div
         class="_RightPanel_9eb0f1"
@@ -551,6 +569,158 @@ exports[`App snapshots > should render App 1`] = `
           class="_RightPanel__resize-handle_9eb0f1"
           style="cursor: w-resize;"
         />
+        <div
+          class="_Header_5f03c0"
+        >
+          <div
+            class="_Header__top_5f03c0"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Account menu"
+              class="_ButtonMenu_7516ba _Avatar_b0cebb"
+              data-state="closed"
+              type="button"
+            >
+              <span
+                class="_AvatarBadge_0e47ca"
+              >
+                X
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="16"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <div
+              class="_PresentShare_ba683c"
+            >
+              <div
+                class="_PresentShare__group_ba683c"
+              >
+                <button
+                  aria-label="Present"
+                  aria-pressed="false"
+                  class="_Button_b88d2e _PresentShare__present_ba683c"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="24L"
+                    fill="none"
+                    height="24"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 24 24"
+                    width="24"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M6 5.903C6 4.43 7.604 3.517 8.87 4.269l10.15 6.028c1.307.776 1.305 2.669-.003 3.442l-10.15 5.995c-1.228.724-2.768-.11-2.863-1.5L6 18.098zm1 12.195a.9.9 0 0 0 1.357.774l10.152-5.995a1 1 0 0 0 .002-1.72L8.359 5.129A.9.9 0 0 0 7 5.903z"
+                      data-svg-property="fill"
+                      fill="white"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Present options"
+                  class="_ButtonMenu_7516ba _PresentShare__present-options_ba683c"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="16"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="16"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <button
+                aria-pressed="false"
+                class="_Button_b88d2e _Button--medium_b88d2e _PresentShare__share_ba683c"
+                type="button"
+              >
+                Share
+              </button>
+            </div>
+          </div>
+          <div
+            class="_Header__navigation_5f03c0"
+          >
+            <div
+              class="_Tabs_3d6798"
+            >
+              <div
+                class="_Tabs__tab_3d6798 _Tabs__tab--active_3d6798"
+                data-no-drag="true"
+                data-state="closed"
+              >
+                Design
+              </div>
+              <div
+                class="_Tabs__tab_3d6798"
+                data-no-drag="true"
+                data-state="closed"
+              >
+                Prototype
+              </div>
+            </div>
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="Zoom"
+              class="_ButtonMenu_7516ba _ZoomTrigger_a89b11"
+              data-state="closed"
+              type="button"
+            >
+              <span
+                class="_ZoomTrigger__label_a89b11"
+              >
+                100%
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="16"
+                  fill="none"
+                  height="16"
+                  style="color: var(--color-neutral-1);"
+                  viewBox="0 0 16 16"
+                  width="16"
+                >
+                  <path
+                    d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                    data-svg-property="fill"
+                    fill="white"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
       <div
         class="_Toolbar_0b5712"

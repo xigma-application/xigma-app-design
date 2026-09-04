@@ -57,6 +57,15 @@ describe('useZoomToTreeItem', () => {
   });
 
   it('should select the node and zoom the viewport to it when called', () => {
+    // mock
+    let now = 0;
+    const nowSpy = vi.spyOn(performance, 'now').mockImplementation(() => (now += 1000));
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(now);
+
+      return 0;
+    });
+
     // before
     const { result } = renderHook(() => useZoomToTreeItem(nodeId), { wrapper });
 
@@ -66,5 +75,8 @@ describe('useZoomToTreeItem', () => {
     // result
     expect(selectSelectedIds(store.getState())).toEqual([nodeId]);
     expect(selectViewport(store.getState())).not.toEqual({ x: 0, y: 0, zoom: 1 });
+
+    nowSpy.mockRestore();
+    rafSpy.mockRestore();
   });
 });
