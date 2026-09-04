@@ -102,6 +102,29 @@ Dragging the canvas scrollbar could fling the view wildly off, or leave the thum
 partway to the edge instead of reaching it. Both fixed — dragging now pans smoothly and stops
 exactly at the content's edge, with the thumb staying a steady size the whole time.
 
+## Stage 17 — Right panel shell
+
+A docked, resizable panel on the right, matching the left panel's minimize/hide behavior. Its
+header holds the account menu, Present/Preview/Share, view tabs, and zoom controls, each with a
+real tooltip.
+
+## Stage 18 — Nothing-selected panel
+
+With nothing selected, the right panel shows the page's own background — a color swatch, hex and
+opacity editing, a checkerboard behind transparency — with full undo/redo, so a whole drag (in the
+picker or the opacity slider) becomes one undo step. Styles, Export, and MCP sections sit below it,
+matching Figma's layout, though their "+" buttons don't do anything yet.
+
+## Stage 19 — Frame properties panel
+
+Selecting a frame swaps the right panel into a dedicated view: position (X/Y), rotation with flip
+buttons, a Layout section (flow direction, width/height with a lock-aspect-ratio toggle that now
+also holds while dragging a resize handle on the canvas — not just typing into the fields — and
+shows the same diagonal guide line Shift-resizing does), a "Clip content" checkbox, and "Resize to
+fit" (its own button, an Object menu entry, and ⌥⇧⌘R) to snap the frame around its children.
+
+- [ ] the alignment row's buttons show and tooltip correctly but don't align anything yet
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

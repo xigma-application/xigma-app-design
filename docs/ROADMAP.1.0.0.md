@@ -170,7 +170,7 @@ The single largest structural gap versus Figma.
       cascades. Full write-up: `.claude/docs/group-nodes.md`
 - [x] real nesting in frames/sections (dragging a shape onto one reparents it, not just visual
       overlap)
-- [ ] double-click "enters" a group to select a child directly — Ctrl/⌘+click already covers the
+- [x] double-click "enters" a group to select a child directly — Ctrl/⌘+click already covers the
       same outcome without it, so this is polish, not a gap
 - [x] moving/resizing a group moves/scales its children, including while the group is rotated
 
@@ -227,7 +227,7 @@ The single largest structural gap versus Figma.
 - [x] zoom control in the canvas corner (Zoom to fit/selection/100%)
 - [x] z-order from the UI — Bring to front/Send to back and Forward/Backward (single-step reorder)
 - [ ] right toolbar group (draw/scale/actions/dev mode)
-- [ ] size presets in the Frame tool
+- [x] size presets in the Frame tool
 
 ---
 
