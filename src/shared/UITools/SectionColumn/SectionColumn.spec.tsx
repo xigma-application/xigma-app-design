@@ -78,4 +78,27 @@ describe('SectionColumn behaviors', () => {
     // result
     expect(container.querySelector('[class*="SectionColumn--with-top-margin"]')).not.toBeNull();
   });
+
+  it('should render the given buttonsIcon', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn buttonsIcon={[<button key="wrap">wrap</button>]}>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('wrap')).toBeInTheDocument();
+    expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).not.toBeNull();
+  });
+
+  it('should not render the buttonsIcon wrapper when no buttonsIcon are given', () => {
+    // before
+    const { container } = renderSectionColumn(['Alignment']);
+
+    // result
+    expect(container.querySelector('[class*="SectionColumnButtonIcons"]')).toBeNull();
+  });
 });

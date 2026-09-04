@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionColumnButtonIcons snapshots > should render the given buttonsIcon 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumnButtonIcons_71f71e"
+  >
+    <button>
+      wrap
+    </button>
+  </div>
+</DocumentFragment>
+`;
