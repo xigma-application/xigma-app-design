@@ -33,6 +33,14 @@ describe('remapFilledFaceKeysAfterSegmentSplit', () => {
     expect(remapFilledFaceKeysAfterSegmentSplit(filledFaceKeys, {}, split).filledFaceKeys).toEqual(filledFaceKeys);
   });
 
+  it('should pass a piece through unchanged when it does not match the segment[a|b] key pattern', () => {
+    // mock — a malformed piece with no [start|end] boundary section
+    const filledFaceKeys = ['malformed-piece-key'];
+
+    // result
+    expect(remapFilledFaceKeysAfterSegmentSplit(filledFaceKeys, {}, split).filledFaceKeys).toEqual(['malformed-piece-key']);
+  });
+
   it('should leave a loop key untouched when it references the split segment id but not its original full boundary', () => {
     // mock — e.g. the segment was already previously split, and this key already reflects the new topology
     const filledFaceKeys = ['s1[v:v1|v:vNew],s1b[v:v2|v:vNew],s2[v:v2|v:v3],s3[v:v1|v:v3]'];
