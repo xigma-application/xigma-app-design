@@ -1,14 +1,23 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 import FrameTool from './FrameTool';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderFrameTool = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <FrameTool />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <FrameTool />
+        </TooltipProvider>
+      </CanvasRefsProvider>
+    </Provider>,
   );
 
 describe('FrameTool snapshots', () => {
