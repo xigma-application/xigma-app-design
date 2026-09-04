@@ -22,6 +22,7 @@ import { drawStar } from 'utils/canvas/drawStar/drawStar';
 import { drawThickEllipseOutline } from 'utils/canvas/shapes/drawThickEllipseOutline';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide';
+import { getAutoLayoutDragOpacity } from './getAutoLayoutDragOpacity';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
@@ -38,6 +39,7 @@ export const drawLeafNode = (
   const draggedVectorNodeSnapshots = vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
   const resizedVectorNodeSnapshots = vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
   const rotatedVectorNodeSnapshots = vectorSnapshots.rotatedVectorNodeSnapshotsRef.current;
+  const dragOpacity = getAutoLayoutDragOpacity(refs, node.id);
 
   switch (node.type) {
     case NodeType.ellipse:
@@ -49,6 +51,7 @@ export const drawLeafNode = (
           ...node,
           arcEndAngle: node.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
           arcStartAngle: node.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
+          fillAlpha: dragOpacity,
         },
         canvasWidth,
         canvasHeight,
@@ -73,10 +76,32 @@ export const drawLeafNode = (
       }
       break;
     case NodeType.polygon:
-      drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);
+      drawPolygon(
+        gl,
+        program,
+        buffer,
+        { ...node, fillAlpha: dragOpacity },
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        node.flipX,
+        node.flipY,
+        node.rotation,
+      );
       break;
     case NodeType.star:
-      drawStar(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);
+      drawStar(
+        gl,
+        program,
+        buffer,
+        { ...node, fillAlpha: dragOpacity },
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        node.flipX,
+        node.flipY,
+        node.rotation,
+      );
       break;
     case NodeType.media:
       drawImage(
@@ -94,7 +119,18 @@ export const drawLeafNode = (
       );
       break;
     case NodeType.line:
-      drawLine(gl, program, buffer, node, node.stroke, node.strokeWidth ?? LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
+      drawLine(
+        gl,
+        program,
+        buffer,
+        node,
+        node.stroke,
+        node.strokeWidth ?? LINE_RENDER_STROKE_WIDTH,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        dragOpacity,
+      );
       drawLineEndpointArrowheads(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
       break;
     case NodeType.path:
@@ -142,7 +178,7 @@ export const drawLeafNode = (
       );
       break;
     default:
-      drawRect(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
+      drawRect(gl, program, buffer, { ...node, fillAlpha: dragOpacity }, canvasWidth, canvasHeight, viewport, node.rotation);
       if ('strokeColor' in node && node.strokeColor && node.strokeWidth) {
         drawThickOutline(gl, program, buffer, node, node.strokeColor, node.strokeWidth, canvasWidth, canvasHeight, viewport, node.rotation);
       }
