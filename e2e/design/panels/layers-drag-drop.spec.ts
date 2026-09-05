@@ -125,3 +125,68 @@ test('holding a drag over a collapsed group auto-expands it after the spring-loa
   await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggleButton"]').click();
   await expect(rows).toHaveCount(1);
 });
+
+test('dragging a Layers row onto a sibling row reorders them, using the auto-layout frame’s own forward (non-reversed) row order', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-autolayout-row-reorder');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(700, 100, 900, 400);
+  await page.locator('[data-test-toggle-button-group="flow"]').getByLabel('Vertical', { exact: true }).click();
+
+  // two rectangles dragged into the (empty) frame, settling top-to-bottom as childIds [rectA, rectB]
+  await designPage.drawRectangle(1000, 100, 1040, 140);
+  await page.mouse.move(1020, 120);
+  await page.mouse.down();
+  await page.mouse.move(750, 250, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+
+  await designPage.drawRectangle(1000, 200, 1040, 240);
+  await page.mouse.move(1020, 220);
+  await page.mouse.down();
+  await page.mouse.move(750, 250, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  // expand the frame row if the drag-in didn't already reveal its children
+  if ((await rows.count()) === 1) {
+    await rows.filter({ hasText: 'Frame' }).locator('[class*="TreeItem__toggleButton"]').click();
+  }
+
+  await expect(rows).toHaveCount(3);
+
+  // forward order: the frame's own children list top-to-bottom matching the visual layout, so
+  // rows[1] is the topmost child (rectA) and rows[2] the bottommost (rectB)
+  const before = await rows.allInnerTexts();
+
+  // drag the bottom child (rectB, row 2) onto the TOP edge of the top child's row (rectA, row 1),
+  // signalling "insert before rectA" rather than "insert after it" (which would land rectB right
+  // back in its own original slot — a no-op, not a genuine reorder). A real reproduction of the
+  // reported bug: this used to be a no-op for an auto-layout frame regardless of drop position,
+  // because the write-side index math still assumed every container's Layers rows were reversed
+  // relative to childIds
+  const fromRow = rows.nth(2);
+  const toRow = rows.nth(1);
+  const fromBox = await fromRow.boundingBox();
+  const toBox = await toRow.boundingBox();
+
+  if (!fromBox || !toBox) {
+    throw new Error('row bounding box unavailable');
+  }
+
+  await page.mouse.move(fromBox.x + fromBox.width / 2, fromBox.y + fromBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(toBox.x + toBox.width / 2, toBox.y + 2, { steps: 10 });
+  await page.mouse.up();
+
+  const after = await rows.allInnerTexts();
+
+  expect(after).toEqual([before[0], before[2], before[1]]);
+});

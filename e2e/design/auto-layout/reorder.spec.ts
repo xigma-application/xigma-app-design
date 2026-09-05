@@ -63,13 +63,15 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     // children are identical green squares, so a pixel diff would be a coin flip depending on which
     // slots happen to look different, where the exact row order is a precise, unambiguous check.
     //
-    // the Layers panel lists children in the reverse of the frame's own childIds order, and the
-    // dragged child (before[0], spatially at the bottom = last in childIds) moves to the very front
-    // of childIds — so the new panel order is exactly [before[1], before[2], before[0]]
+    // for an auto-layout frame, the Layers panel lists children in the same (forward) order as the
+    // frame's own childIds — matching the visual layout flow, unlike a plain frame/group which lists
+    // front-most (last in childIds) first. The dragged child (before[2], spatially at the bottom =
+    // last in childIds) moves to the very front of childIds — so the new panel order is exactly
+    // [before[2], before[0], before[1]]
     expect(after).toHaveLength(3);
     expect([...after].sort()).toEqual([...before].sort());
     expect(after).not.toEqual(before);
-    expect(after).toEqual([before[1], before[2], before[0]]);
+    expect(after).toEqual([before[2], before[0], before[1]]);
   });
 
   test('dragging the top child down swaps the instant it touches the next sibling’s own near edge, not its midpoint, and reverts at that same edge', async ({

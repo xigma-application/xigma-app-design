@@ -6,12 +6,12 @@ import { renderHook } from '@testing-library/react';
 import { useTreeSource } from '../useTreeSource';
 
 // store
-import { addNode, deleteNode, groupNodes, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, groupNodes, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, PathType } from 'types/design/enums';
+import { LayoutMode, NodeType, PathType } from 'types/design/enums';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -88,6 +88,111 @@ describe('useTreeSource', () => {
 
     // result — reversed relative to childIds, so the front-most child (idB) lists first
     expect(result.current.getChildren(groupNode)?.map((node) => node.id)).toEqual([idB, idA]);
+  });
+
+  it("should return a plain frame's children reversed relative to childIds, front-most (last in childIds) first", () => {
+    // mock — two rectangles moved into frame A, in order, so childIds ends up [rectA, rectB]
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 5,
+        name: 'Rectangle A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 5,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const rectA = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 5,
+        name: 'Rectangle B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 5,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const rectB = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    store.dispatch(moveNodes({ nodeIds: [rectA], targetIndex: 0, targetParentId: idA }));
+    store.dispatch(moveNodes({ nodeIds: [rectB], targetIndex: 1, targetParentId: idA }));
+
+    // before
+    const { result } = renderHook(() => useTreeSource(), { wrapper });
+    const frameNode = selectActivePage(store.getState()).nodes[idA];
+
+    // result — reversed relative to childIds, so the front-most child (rectB) lists first
+    expect(result.current.getChildren(frameNode)?.map((node) => node.id)).toEqual([rectB, rectA]);
+  });
+
+  it("should return an auto-layout frame's children in forward (layout) order, not reversed", () => {
+    // mock — an auto-layout frame with two rectangles, in the same order they were laid out
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        layoutMode: LayoutMode.vertical,
+        name: 'Auto-layout Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const autoLayoutFrameId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 5,
+        name: 'Rectangle A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 5,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const rectA = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 5,
+        name: 'Rectangle B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 5,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const rectB = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    store.dispatch(moveNodes({ nodeIds: [rectA], targetIndex: 0, targetParentId: autoLayoutFrameId }));
+    store.dispatch(moveNodes({ nodeIds: [rectB], targetIndex: 1, targetParentId: autoLayoutFrameId }));
+
+    // before
+    const { result } = renderHook(() => useTreeSource(), { wrapper });
+    const frameNode = selectActivePage(store.getState()).nodes[autoLayoutFrameId];
+
+    // result — forward order, matching the visual layout flow (rectA is topmost, listed first)
+    expect(result.current.getChildren(frameNode)?.map((node) => node.id)).toEqual([rectA, rectB]);
+
+    // cleanup
+    store.dispatch(deleteNode(autoLayoutFrameId));
   });
 
   it('should return undefined for a plain leaf node, since it has no expandable children', () => {

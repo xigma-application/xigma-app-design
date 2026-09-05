@@ -12,6 +12,9 @@ import { useRenderDropIndicator } from './hooks/useRenderDropIndicator';
 import { useRenderRow } from './hooks/useRenderRow';
 import { useTreeSource } from './hooks/useTreeSource';
 
+// utils
+import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
+
 // others
 import { LAYERS_TREE_ROW_HEIGHT } from '../constants';
 
@@ -37,6 +40,7 @@ const LayersTree: FC<TLayersTreeProps> = ({ expandedIds, onExpandedIdsChange }) 
       <Tree
         expandedIds={expandedIds}
         getChildren={getChildren}
+        isForwardOrderParent={(parentItem) => parentItem !== null && isAutoLayoutFrame(parentItem)}
         isRowHighlighted={isRowHighlighted}
         isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}

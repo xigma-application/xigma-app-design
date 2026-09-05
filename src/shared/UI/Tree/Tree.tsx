@@ -29,6 +29,7 @@ export type TTreeProps<T extends TTreeItem> = {
   className?: string;
   expandedIds?: Set<string>;
   getChildren: (item: T) => T[] | undefined;
+  isForwardOrderParent?: (parentItem: T | null) => boolean;
   isRowHighlighted?: (item: T) => boolean;
   isRowSelected?: (item: T) => boolean;
   onDeselectAll?: TFunc;
@@ -45,6 +46,7 @@ export const Tree = <T extends TTreeItem>({
   className = '',
   expandedIds: controlledExpandedIds,
   getChildren,
+  isForwardOrderParent,
   isRowHighlighted,
   isRowSelected,
   onDeselectAll,
@@ -62,14 +64,8 @@ export const Tree = <T extends TTreeItem>({
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
   const contentWidth = useScrollContentWidth(rowsRef, rows);
   const onSpringLoadExpand = useSpringLoadExpand(rows, onToggleExpand);
-  const { dropDepth, dropInsideIndex, handleRowMouseDown, insertionIndex } = useTreeRowDrag({
-    isRowSelected,
-    onReorder,
-    onSpringLoadExpand,
-    rowHeight,
-    rows,
-    rowsRef,
-  });
+  const dragOptions = { isForwardOrderParent, isRowSelected, onReorder, onSpringLoadExpand, rowHeight, rows, rowsRef };
+  const { dropDepth, dropInsideIndex, handleRowMouseDown, insertionIndex } = useTreeRowDrag(dragOptions);
   const isDragging = insertionIndex !== null;
   const handleRowsClick = useHandleRowsClick(onDeselectAll);
   const { highlightBackgroundSegments, selectionBackgroundSegments } = getTreeBackgroundSegments(

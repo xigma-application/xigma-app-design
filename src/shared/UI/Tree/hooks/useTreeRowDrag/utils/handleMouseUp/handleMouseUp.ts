@@ -35,12 +35,13 @@ const handleReorderDrop = <T extends TTreeItem>(
   insertionIndex: number,
   dropDepth: number,
   onReorder: TOnReorder<T> | undefined,
+  isForwardOrderParent: ((parentItem: T | null) => boolean) | undefined,
 ): void => {
   const canReorder = !getIsReorderNoOp(armed.indices, insertionIndex, dropDepth !== armed.depth);
 
   if (canReorder) {
     const toIndex = getReorderedInsertionIndex(armed.indices, insertionIndex);
-    const resolved = resolveTreeDrop(rows, armed.indices, toIndex, dropDepth);
+    const resolved = resolveTreeDrop(rows, armed.indices, toIndex, dropDepth, isForwardOrderParent);
 
     if (resolved) {
       onReorder?.(resolved.draggedItems, resolved.targetParentItem, resolved.targetIndex);
@@ -52,6 +53,7 @@ export const handleMouseUp = <T extends TTreeItem>(
   rows: TTreeRow<T>[],
   dragState: TTreeDragState,
   onReorder: TOnReorder<T> | undefined,
+  isForwardOrderParent?: (parentItem: T | null) => boolean,
 ): void => {
   const armed = dragState.armedRef.current;
 
@@ -62,7 +64,7 @@ export const handleMouseUp = <T extends TTreeItem>(
   if (armed && dragState.dropInsideIndex !== null) {
     handleDropInside(rows, armed, dragState.dropInsideIndex, onReorder);
   } else if (armed && dragState.insertionIndex !== null) {
-    handleReorderDrop(rows, armed, dragState.insertionIndex, dragState.dropDepth, onReorder);
+    handleReorderDrop(rows, armed, dragState.insertionIndex, dragState.dropDepth, onReorder, isForwardOrderParent);
   }
 
   clearSpringLoad(dragState.springLoadRef);

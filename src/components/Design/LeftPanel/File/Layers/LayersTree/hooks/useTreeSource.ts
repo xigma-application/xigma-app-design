@@ -10,6 +10,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
 import { isVectorBoundAsTextPath } from 'utils/canvas/vector/isVectorBoundAsTextPath';
 
 export type TUseTreeSourceResult = {
@@ -26,8 +27,9 @@ export const useTreeSource = (): TUseTreeSourceResult => {
   const getChildren = useCallback(
     (item: TSceneNode): TSceneNode[] | undefined => {
       if (isContainerNode(item)) {
-        return [...item.childIds]
-          .reverse()
+        const orderedChildIds = isAutoLayoutFrame(item) ? item.childIds : [...item.childIds].reverse();
+
+        return orderedChildIds
           .map((id) => nodes[id])
           .filter((node): node is TSceneNode => Boolean(node) && !isTextPathGuideNode(node, nodes));
       }

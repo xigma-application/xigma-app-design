@@ -11,6 +11,7 @@ import { handleMouseUp } from './utils/handleMouseUp/handleMouseUp';
 import { handleRowMouseDown } from './utils/handleRowMouseDown/handleRowMouseDown';
 
 export const useTreeRowDrag = <T extends TTreeItem>({
+  isForwardOrderParent,
   isRowSelected,
   onReorder,
   onSpringLoadExpand,
@@ -43,7 +44,7 @@ export const useTreeRowDrag = <T extends TTreeItem>({
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent): void => handleMouseMove(event, rows, rowHeight, rowsRef, dragState);
-    const onMouseUp = (): void => handleMouseUp(rows, dragState, onReorder);
+    const onMouseUp = (): void => handleMouseUp(rows, dragState, onReorder, isForwardOrderParent);
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
@@ -52,7 +53,7 @@ export const useTreeRowDrag = <T extends TTreeItem>({
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
-  }, [rows, dropDepth, dropInsideIndex, insertionIndex, isRowSelected, onReorder, rowHeight, rowsRef]);
+  }, [rows, dropDepth, dropInsideIndex, insertionIndex, isForwardOrderParent, isRowSelected, onReorder, rowHeight, rowsRef]);
 
   useEffect(() => (): void => clearSpringLoad(springLoadRef), []);
 

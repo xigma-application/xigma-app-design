@@ -89,3 +89,36 @@ no conflict. It dispatches `setSelection([id])` then calls the same `handleZoomT
 menu/Shift+2 shortcut already use (a plain reducer dispatch is synchronous, so the zoom sees the
 just-set selection). This makes `TreeItem` an unconditional `useCanvasRefsContext()` consumer, so
 every test mounting a real `TreeItem` needs a `CanvasRefsProvider` ancestor now.
+
+## Layers panel — drag-drop (reorder / nest)
+
+The generic `shared/UI/Tree` drag machinery (`useTreeRowDrag/`) powers row drag-and-drop for both
+the Layers panel and the Pages list. A drop either nests the dragged row inside the row it landed on
+(`handleDropInside`) or reorders it among siblings at the drop's resolved depth (`handleReorderDrop`
+→ `resolveTreeDrop.ts`).
+
+| #   | Scenario                                                                                                                                                                           | Unit |              E2E              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------: |
+| 345 | Dropping a layer onto the middle of a collapsed group nests it as the first child                                                                                                  |  —   | ✅ `layers-drag-drop.spec.ts` |
+| 346 | Dropping a layer onto the middle of an already-expanded group also nests it as the first child                                                                                     |  —   | ✅ `layers-drag-drop.spec.ts` |
+| 347 | Holding a drag over a collapsed group auto-expands it after the spring-load delay, and releasing right there still drops into the group                                            |  —   | ✅ `layers-drag-drop.spec.ts` |
+| 348 | Dragging a row onto a sibling reorders it using the target parent's own row order — forward (matching `childIds`) for an auto-layout frame, reversed (z-order) for everything else |  ✅  | ✅ `layers-drag-drop.spec.ts` |
+
+#348 is a real, reported regression, found right after `useTreeSource.ts` was fixed to list an
+auto-layout frame's children in forward order (matching the visual layout flow — see
+`.claude/docs/auto-layout.md`) instead of the reversed/z-order convention every other container
+uses. That read-side fix alone broke the _write_ side: `resolveTreeDrop.ts`'s
+`targetIndex = totalSiblingCount - uiOrderIndex` mirroring assumed the UI list was _always_ reversed
+relative to `childIds`, so dragging a row to reorder it within an auto-layout frame silently computed
+the wrong `childIds` index — often the row's own original slot, making the drag a no-op ("przerzucam
+w tree 2 na 1 i nic się nie zmienia"). Fixed by threading an optional
+`isForwardOrderParent?: (parentItem) => boolean` predicate through
+`Tree` → `useTreeRowDrag` → `handleMouseUp` → `resolveTreeDrop`, which skips the mirroring for a
+target parent that satisfies it (`LayersTree.tsx` passes `isAutoLayoutFrame`); every other consumer
+(Pages list) passes nothing and keeps the original reversed behavior unchanged. The unit suite
+(`resolveTreeDrop.spec.ts`) asserts the raw index math for both the forward and the still-mirrored
+case; the e2e version drags a _real_ row in a _real_ auto-layout frame and asserts the resulting
+Layers-panel order, since the whole point of the bug was that the write path only breaks once real
+DOM row positions and the real `useTreeSource` read order interact — a synthetic `resolveTreeDrop`
+call with hand-built rows can't by itself prove the two sides ever call it with matching
+expectations.

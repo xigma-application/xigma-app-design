@@ -21,6 +21,7 @@ export const resolveTreeDrop = <T extends TTreeItem>(
   fromIndices: number[],
   toIndex: number,
   toDepth: number,
+  isForwardOrderParent?: (parentItem: T | null) => boolean,
 ): TResolvedTreeDrop<T> | null => {
   const draggedRows = fromIndices.map((index) => rows[index]).filter((row): row is TTreeRow<T> => Boolean(row));
   const sourceParentId = draggedRows[0]?.parentItem?.id ?? null;
@@ -36,7 +37,7 @@ export const resolveTreeDrop = <T extends TTreeItem>(
       const isTargetSibling = (row: TTreeRow<T>): boolean => (row.parentItem?.id ?? null) === targetParentId;
       const totalSiblingCount = remainingRows.filter(isTargetSibling).length;
       const uiOrderIndex = remainingRows.slice(0, toIndex).filter(isTargetSibling).length;
-      const targetIndex = totalSiblingCount - uiOrderIndex;
+      const targetIndex = isForwardOrderParent?.(targetParentItem) ? uiOrderIndex : totalSiblingCount - uiOrderIndex;
 
       return { draggedItems: draggedRows.map((row) => row.item).reverse(), targetIndex, targetParentItem };
     }

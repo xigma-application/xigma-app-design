@@ -78,4 +78,28 @@ describe('resolveTreeDrop', () => {
     // action & result
     expect(resolveTreeDrop(rows, [5], 0, 0)).toBeNull();
   });
+
+  it('should use the raw ui-order index directly, without mirroring, when the target parent is forward-ordered (e.g. an auto-layout frame)', () => {
+    // mock — group has 3 existing children [x, y, z] in display order; 'a' is dragged in to land
+    // between x and y (ui-order position 1 among the group's siblings)
+    const group = { id: 'group' };
+    const rows = [buildRow('group'), buildRow('x', 1, group), buildRow('y', 1, group), buildRow('z', 1, group), buildRow('a')];
+
+    // action & result — forward order: ui-position 1 maps directly to childIds index 1, not
+    // mirrored to 3-1=2 (the reversed/z-order convention every other container uses)
+    const resolved = resolveTreeDrop(rows, [4], 2, 1, () => true);
+
+    expect(resolved).toEqual({ draggedItems: [{ id: 'a' }], targetIndex: 1, targetParentItem: group });
+  });
+
+  it('should still mirror the ui-order index when isForwardOrderParent is provided but returns false for this target', () => {
+    // mock — same setup as above
+    const group = { id: 'group' };
+    const rows = [buildRow('group'), buildRow('x', 1, group), buildRow('y', 1, group), buildRow('z', 1, group), buildRow('a')];
+
+    // action & result
+    const resolved = resolveTreeDrop(rows, [4], 2, 1, () => false);
+
+    expect(resolved?.targetIndex).toBe(2);
+  });
 });

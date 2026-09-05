@@ -28,6 +28,7 @@ export type TTreeDragState = {
 };
 
 export type TUseTreeRowDragOptions<T extends TTreeItem> = {
+  isForwardOrderParent?: (parentItem: T | null) => boolean;
   isRowSelected?: (item: T) => boolean;
   onReorder?: (draggedItems: T[], targetParentItem: T | null, targetIndex: number) => void;
   onSpringLoadExpand?: (itemId: string) => void;
