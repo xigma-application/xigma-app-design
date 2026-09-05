@@ -29,7 +29,7 @@ const ColumnAlignmentLayout: FC = () => {
           isGapAutoHorizontal={false}
           isGapAutoVertical={false}
           isHorizontal={isHorizontal}
-          isWrap
+          isWrap={false}
           onClick={onChangeAlignment}
           value={alignment}
         />

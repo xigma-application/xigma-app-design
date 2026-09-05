@@ -11,6 +11,7 @@ branch.
 
 ## Contents
 
+- [Auto-layout](./test-cases-auto-layout.md)
 - [Draw (shape/tool creation)](./test-cases-draw.md)
 - [Panels](./test-cases-panels.md)
 - [Selection & manipulation](./test-cases-selection.md)
