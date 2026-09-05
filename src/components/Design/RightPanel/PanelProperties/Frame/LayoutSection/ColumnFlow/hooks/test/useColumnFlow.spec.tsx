@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { useColumnFlow } from '../useColumnFlow';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -93,6 +93,26 @@ describe('useColumnFlow', () => {
     expect(readNode(frameId).layoutMode).toBe(LayoutMode.vertical);
   });
 
+  it('should reset wrap when the flow is changed to a different value', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { layoutMode: LayoutMode.horizontal, layoutWrap: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    expect(result.current.wrap).toBe(true);
+
+    // action
+    act(() => result.current.onChange('vertical'));
+
+    // result
+    expect(readNode(frameId).layoutWrap).toBe(false);
+    expect(result.current.wrap).toBe(false);
+  });
+
   it('should default wrap to false', () => {
     // before
     const { result } = renderUseColumnFlow();
@@ -101,7 +121,26 @@ describe('useColumnFlow', () => {
     expect(result.current.wrap).toBe(false);
   });
 
-  it('should toggle wrap on change', () => {
+  it('should read the selected frame’s existing wrap flag', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { layoutWrap: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // result
+    expect(result.current.wrap).toBe(true);
+  });
+
+  it('should dispatch the toggled wrap flag on the selected frame', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
     // before
     const { result } = renderUseColumnFlow();
 
@@ -109,12 +148,14 @@ describe('useColumnFlow', () => {
     act(() => result.current.onWrapChange());
 
     // result
+    expect(readNode(frameId).layoutWrap).toBe(true);
     expect(result.current.wrap).toBe(true);
 
     // action
     act(() => result.current.onWrapChange());
 
     // result
+    expect(readNode(frameId).layoutWrap).toBe(false);
     expect(result.current.wrap).toBe(false);
   });
 });

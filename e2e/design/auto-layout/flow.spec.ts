@@ -15,6 +15,11 @@ const setFlow = async (page: Page, direction: 'Horizontal' | 'Vertical'): Promis
   await flowGroup(page).getByLabel(direction, { exact: true }).click();
 };
 
+// the Wrap toggle only renders next to the Flow group while it's set to Horizontal
+const clickWrapToggle = async (page: Page): Promise<void> => {
+  await page.getByLabel('Wrap', { exact: true }).click();
+};
+
 // drags whatever is under (from) to (to), pausing before release so the auto-layout drop
 // indicator (computed live off the mousemove) has settled on its final insertion index — mirrors
 // frame-nested.spec.ts's own drop-settle wait for the same reason
@@ -216,5 +221,74 @@ test.describe('auto-layout — Flow (Horizontal / Vertical)', () => {
     const vertical = await page.screenshot({ clip: FRAME_AREA });
 
     expect(vertical.equals(horizontal)).toBe(false);
+  });
+
+  test('shrinking a comfortably-fitting Horizontal+Wrap frame to half its width pushes the trailing children onto a new row, still laid out left-to-right', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-wrap-resize');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2); // 500px wide
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    // four 100px-wide children with 100px of slack (400 < the 500px-wide frame) — not squeezed,
+    // all four comfortably fit on a single row before the resize below
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 700, y: 300 });
+    }
+
+    const before = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const frame = activePage.nodes[activePage.rootOrder[0]] as { childIds: string[] };
+
+      return { childIds: frame.childIds, nodes: activePage.nodes };
+    });
+
+    const [idA, idB, idC, idD] = before.childIds;
+    const rowY = (before.nodes[idA] as { y: number }).y;
+
+    // confirm the starting point really is a single, uncramped row before touching the resize
+    expect((before.nodes[idB] as { y: number }).y).toBe(rowY);
+    expect((before.nodes[idC] as { y: number }).y).toBe(rowY);
+    expect((before.nodes[idD] as { y: number }).y).toBe(rowY);
+
+    // grab the frame's own east (right-middle) resize handle and drag it to the frame's own
+    // horizontal midpoint, halving its width from 500px to 250px
+    await selectFrameRow(page);
+    const frameMidY = (FRAME.y1 + FRAME.y2) / 2;
+    const frameMidX = (FRAME.x1 + FRAME.x2) / 2;
+
+    await designPage.pointerDown(FRAME.x2, frameMidY);
+    await designPage.pointerMove(frameMidX, frameMidY);
+    await page.waitForTimeout(150);
+    await designPage.pointerUp();
+
+    const after = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].nodes;
+    });
+
+    const nodeA = after[idA] as { x: number; y: number };
+    const nodeB = after[idB] as { x: number; y: number };
+    const nodeC = after[idC] as { x: number; y: number };
+    const nodeD = after[idD] as { x: number; y: number };
+
+    // a and b (200px, still within the new 250px width) stay on the first row; c and d both wrap
+    // onto a second row, and within that row they still lie side by side, left-to-right
+    expect(nodeB.y).toBe(nodeA.y);
+    expect(nodeC.y).toBe(nodeD.y);
+    expect(nodeC.y).toBeGreaterThan(nodeA.y);
+    expect(nodeD.x).toBeGreaterThan(nodeC.x);
   });
 });

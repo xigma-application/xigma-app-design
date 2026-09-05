@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // others
@@ -24,15 +23,15 @@ export type TUseColumnFlowResult = {
 export const useColumnFlow = (): TUseColumnFlowResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [wrap, setWrap] = useState(false);
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const id = frameNode?.id ?? '';
   const value = frameNode?.layoutMode ?? LayoutMode.freeForm;
+  const wrap = frameNode?.layoutWrap ?? false;
 
   return {
-    onChange: (nextValue) => dispatch(updateNode({ changes: { layoutMode: nextValue as LayoutMode }, id })),
-    onWrapChange: () => setWrap((currentWrap) => !currentWrap),
+    onChange: (nextValue) => dispatch(updateNode({ changes: { layoutMode: nextValue as LayoutMode, layoutWrap: false }, id })),
+    onWrapChange: () => dispatch(updateNode({ changes: { layoutWrap: !wrap }, id })),
     toggleButtons: FLOW_OPTIONS.map(({ icon, labelKey, value: optionValue }) => ({
       ariaLabel: t(`${translationNameSpace}.${labelKey}`),
       icon,
