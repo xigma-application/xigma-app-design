@@ -5,8 +5,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 // components
 import ThemeMenu from './ThemeMenu';
 
-// others
-import { STORAGE_KEY } from 'hooks/useTheme/constants';
+// hooks
+import { STORAGE_KEY } from 'hooks';
 
 const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
   render(

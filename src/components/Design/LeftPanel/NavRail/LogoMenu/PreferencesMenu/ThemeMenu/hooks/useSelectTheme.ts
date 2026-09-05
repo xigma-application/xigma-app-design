@@ -1,8 +1,5 @@
 // hooks
-import { useTheme } from 'hooks';
-
-// types
-import { Theme } from 'types/theme';
+import { Theme, useTheme } from 'hooks';
 
 export type TUseSelectTheme = {
   selectTheme: (theme: Theme) => () => void;

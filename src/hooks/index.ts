@@ -6,5 +6,7 @@ export * from './useResizeHandler/types';
 export * from './useScrollThumb/types';
 export * from './useScrollThumb/useScrollThumb';
 export * from './useStopClickPropagation/useStopClickPropagation';
-export * from './useTheme/useTheme';
 export * from './useVirtualList/useVirtualList';
+
+// @xigma
+export * from '@xigma/hooks';

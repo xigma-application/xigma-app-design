@@ -57,17 +57,27 @@ reference in this repo's `constant/colors.ts`, and `@xigma/components`'s own `sr
 types `Icon`'s `color` prop). `@xigma/components` re-exports its `colors` map — a component could
 import that instead of the local `constant/colors.ts`, but HomePage still uses the local one.
 
-## `hooks/useTheme` — reading/switching the theme in React
+## `useTheme` — reading/switching the theme in React
 
 ```ts
+import { useTheme } from 'hooks'; // re-exports @xigma/hooks
+
 const { theme, setTheme, toggleTheme } = useTheme();
 ```
 
+Lives in the **`xigma-app-shared`** repo (`packages/hooks/src/useTheme`), pulled into
+`node_modules/@xigma/hooks` the same way as `@xigma/scss`. `src/hooks/index.ts` re-exports it
+(`export * from '@xigma/hooks';`) so call sites still just `import { useTheme } from 'hooks'` — no
+local copy exists anymore. `STORAGE_KEY` is exported from the same package for tests that need to
+seed `localStorage` directly (see `ThemeMenu.spec.tsx`, `useSelectTheme.spec.tsx`).
+
 Resolution order on first read: `localStorage['theme']` → `prefers-color-scheme` media query →
-`'dark'`. On every change it writes `document.documentElement.dataset.theme` (which is what the
-`[data-theme]` CSS rules above key off) and persists to `localStorage`. See
-[[xigma-module-structure]] for why `STORAGE_KEY` lives in a co-located `hooks/useTheme/constants.ts`
-rather than inline.
+`'dark'` (or just `'dark'` outright when there's no `window`, e.g. server-side rendering in a
+consumer like xigma-app-website — this app is a browser-only SPA so that branch never fires here).
+On every change it writes `document.documentElement.dataset.theme` (which is what the `[data-theme]`
+CSS rules above key off) and persists to `localStorage`.
+
+Editing the hook itself means editing the shared repo + `npm run xigma:pull`, same as `@xigma/scss`.
 
 ## Adding a new color-consuming component
 

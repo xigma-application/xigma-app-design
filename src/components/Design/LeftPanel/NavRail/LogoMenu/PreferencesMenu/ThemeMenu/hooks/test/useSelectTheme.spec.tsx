@@ -3,8 +3,8 @@ import { act, renderHook } from '@testing-library/react';
 // hooks
 import { useSelectTheme } from '../useSelectTheme';
 
-// others
-import { STORAGE_KEY } from 'hooks/useTheme/constants';
+// hooks
+import { STORAGE_KEY } from 'hooks';
 
 describe('useSelectTheme', () => {
   afterEach(() => {
