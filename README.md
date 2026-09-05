@@ -90,14 +90,17 @@ npm install
 npm run dev
 ```
 
-Vite starts on `http://localhost:5173`. There's no client-side router — the editor is the whole app,
+Vite starts on `http://localhost:7710` (the port comes from `@xigma/utils`' `getAppUrl`/`DEV_PORTS`
+config, `vite.config.ts`'s `server.port`). There's no client-side router — the editor is the whole app,
 served at the root; an optional `?project=<id>` query param is carried through for link-sharing (see
 `.claude/docs/app-shell.md`).
 
 ## Shared package (`@xigma/*`)
 
-The `@xigma/*` packages (`components` — the `Icon` component + SVG registry; `core`; `scss` — shared
-theme tokens; `utils`; `assets`) are **not** on npm — they live in the separate private repo
+The `@xigma/*` packages (`components` — the `Icon` component + SVG registry; `core`; `hooks` —
+shared React hooks like `useTheme`; `scss` — shared theme tokens; `utils` — cross-app helpers like
+`getAppUrl`/`DEV_PORTS` (used by `vite.config.ts` and `playwright.config.ts` for this app's port);
+`assets`) are **not** on npm — they live in the separate private repo
 [`xigma-application/xigma-app-shared`](https://github.com/xigma-application/xigma-app-shared) and
 are pulled into `node_modules/@xigma/*` locally by [`scripts/xigma-pull.cjs`](scripts/xigma-pull.cjs).
 

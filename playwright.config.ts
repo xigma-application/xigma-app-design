@@ -1,6 +1,11 @@
 /// <reference types="node" />
 import { defineConfig, devices } from '@playwright/test';
 
+// @xigma
+import { getAppUrl } from '@xigma/utils';
+
+const baseURL = getAppUrl('xigma-app-design', 'development');
+
 export default defineConfig({
   forbidOnly: !!process.env.CI,
   fullyParallel: true,
@@ -14,12 +19,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL,
     trace: 'on-first-retry',
   },
   webServer: {
     command: 'npm run dev',
     reuseExistingServer: !process.env.CI,
-    url: 'http://localhost:5173',
+    url: baseURL,
   },
 });

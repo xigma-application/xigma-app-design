@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import { defineConfig } from 'vite';
 
+// @xigma
+import { DEV_PORTS } from '@xigma/utils';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -20,6 +23,7 @@ export default defineConfig({
   },
   server: {
     hmr: process.env.STATIC_DEV ? false : undefined,
+    port: DEV_PORTS['xigma-app-design'],
     watch: {
       ignored: ['**/coverage/**'],
     },

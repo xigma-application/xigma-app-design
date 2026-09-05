@@ -10,7 +10,8 @@ Two separate ways to exercise the app in a real browser — pick based on what's
 ## 1. Automated regression suite (`npx playwright test`)
 
 - Config: `playwright.config.ts` (project root). `testDir: ./e2e`, project `chromium` only,
-  `webServer` auto-starts `npm run dev` on `localhost:5173` if not already running
+  `webServer` auto-starts `npm run dev` on `localhost:7710` (from `@xigma/utils`' `getAppUrl`) if
+  not already running
   (`reuseExistingServer: true`).
 - Spec files: `e2e/smoke.spec.ts`, `e2e/create-frame.spec.ts`.
 - Run: `npx playwright test` (headless, fast — this is what CI/regression checks should use).
@@ -27,7 +28,7 @@ opens a real on-screen Chromium window.
 Sequence:
 
 ```
-mcp__playwright__browser_navigate   -> http://localhost:5173/design/<any-id>
+mcp__playwright__browser_navigate   -> http://localhost:7710/design/<any-id>
 mcp__playwright__browser_snapshot   -> get element refs (canvas has no a11y role, won't appear;
                                         toolbar buttons do, e.g. radio "frame" [ref=eNN])
 mcp__playwright__browser_click      -> select the tool, target = ref from snapshot
