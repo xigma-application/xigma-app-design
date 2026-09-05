@@ -5,6 +5,7 @@ import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TVectorNode, TVector
 
 // utils
 import { getActivePage } from '../../getActivePage';
+import { getRotatedNodeBounds } from '../../getRotatedNodeBounds';
 import { syncAutoLayoutChildren } from '../syncAutoLayoutChildren';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
@@ -416,6 +417,27 @@ describe('syncAutoLayoutChildren', () => {
 
     // result — the line's box moves to x=30 (right after the rect, no gap), so both endpoints shift by +30
     expect(getActivePage(state).nodes.b).toMatchObject({ x1: 30, x2: 50, y1: 0, y2: 0 });
+  });
+
+  it('should position a rotated child by its rotated bounding box, not its raw un-rotated box', () => {
+    // mock — a 10x10 square rotated 45deg (rotated bbox side = 10*sqrt(2)) next to a 20-wide rect,
+    // in a horizontal frame with no gap
+    const square = rect({ height: 10, id: 'a', rotation: 45, width: 10, x: 999, y: 999 });
+    const b = rect({ id: 'b', width: 20, x: 999, y: 999 });
+    const layoutFrame = frame({ childIds: ['a', 'b'], layoutMode: LayoutMode.horizontal, x: 100, y: 200 });
+    const state = buildState({ nodes: { a: square, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the square's rotated bounding box (not its raw 10x10 local box) sits flush at the
+    // frame's own top-left; b starts right after the square's *rotated* footprint, not its raw one
+    const aBounds = getRotatedNodeBounds(getActivePage(state).nodes.a);
+    const expectedSide = 10 * Math.sqrt(2);
+
+    expect(aBounds.x).toBeCloseTo(100, 0);
+    expect(aBounds.y).toBeCloseTo(200, 0);
+    expect(getActivePage(state).nodes.b).toMatchObject({ x: Math.round(100 + expectedSide), y: 200 });
   });
 
   it('should skip a child id that no longer resolves to a node', () => {

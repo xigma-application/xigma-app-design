@@ -8,7 +8,7 @@ import { getActivePage } from '../getActivePage';
 import { getFramePadding } from './getFramePadding';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
 import { getGroupSubtreeNodes } from '../nodeHierarchy/getGroupSubtreeNodes';
-import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
+import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 
 export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | null): void => {
   if (frameId) {
@@ -21,7 +21,7 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       (frame.layoutMode === LayoutMode.horizontal || frame.layoutMode === LayoutMode.vertical)
     ) {
       const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
-      const bounds = children.map(getNodeAxisAlignedBounds);
+      const bounds = children.map(getRotatedNodeBounds);
       const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
       const itemSpacing = frame.itemSpacing ?? 0;
       const counterAxisSpacing = frame.counterAxisSpacing ?? itemSpacing;

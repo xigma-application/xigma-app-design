@@ -1,5 +1,5 @@
 // store
-import { getNodeAxisAlignedBounds } from 'store/design/utils/getNodeAxisAlignedBounds';
+import { getRotatedNodeBounds } from 'store/design/utils/getRotatedNodeBounds';
 
 // types
 import { TDraftRect } from 'types/canvas';
@@ -14,4 +14,4 @@ export const getAutoLayoutSiblingEntries = (
     .filter((id) => !movedNodeIds.includes(id))
     .map((id) => nodesById[id])
     .filter(Boolean)
-    .map((sibling) => ({ bounds: getNodeAxisAlignedBounds(sibling), sibling }));
+    .map((sibling) => ({ bounds: getRotatedNodeBounds(sibling), sibling }));

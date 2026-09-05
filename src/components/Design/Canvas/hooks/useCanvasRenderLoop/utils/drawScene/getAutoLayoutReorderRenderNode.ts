@@ -1,5 +1,5 @@
 // store
-import { getNodeAxisAlignedBounds } from 'store/design/utils/getNodeAxisAlignedBounds';
+import { getRotatedNodeBounds } from 'store/design/utils/getRotatedNodeBounds';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
@@ -12,7 +12,7 @@ export const getAutoLayoutReorderRenderNode = (refs: TCanvasRefs, node: TSceneNo
   const overridePosition = refs.transform.autoLayoutReorderPreviewRef.current?.positions[node.id];
 
   if (overridePosition) {
-    const bounds = getNodeAxisAlignedBounds(node);
+    const bounds = getRotatedNodeBounds(node);
     const deltaX = overridePosition.x - bounds.x;
     const deltaY = overridePosition.y - bounds.y;
 

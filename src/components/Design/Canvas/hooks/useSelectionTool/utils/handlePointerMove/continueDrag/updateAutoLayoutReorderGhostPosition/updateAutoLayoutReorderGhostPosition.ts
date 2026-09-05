@@ -1,5 +1,5 @@
 // store
-import { getNodeAxisAlignedBounds } from 'store/design/utils/getNodeAxisAlignedBounds';
+import { getRotatedNodeBounds } from 'store/design/utils/getRotatedNodeBounds';
 import { AppDispatch } from 'store';
 
 // types
@@ -24,7 +24,7 @@ export const updateAutoLayoutReorderGhostPosition = (
 
   if (isSingleNodeReorder && preview) {
     const [draggedNode] = selectedNodes;
-    const bounds = getNodeAxisAlignedBounds(draggedNode);
+    const bounds = getRotatedNodeBounds(draggedNode);
 
     canvasRefs.transform.autoLayoutReorderPreviewRef.current = {
       ...preview,

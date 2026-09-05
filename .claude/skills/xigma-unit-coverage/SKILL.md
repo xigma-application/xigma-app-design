@@ -36,7 +36,17 @@ everything else, including every hook/util/component you touch, is held to the s
    path," not a duplicate of an existing test.
 4. Re-run `npm run test:coverage` until clean, then run the plain `vitest run` suite once more (the
    coverage instrumentation can occasionally mask a timing issue) plus `tsc -b`/`eslint`.
-5. Always finish by running `npm run prettier:write` — every change, regardless of whether coverage
+5. **Verify 100% per file, not just on the global run.** For every production file you added or
+   edited, run a scoped check —
+   `npx vitest run --coverage --coverage.include='<path/to/file.ts>' <its own spec(s)>` — and confirm
+   that file alone reports 100% on all four metrics. Do this file-by-file, not once for the whole
+   batch of changed files together: a combined scoped run can read 100% while one file in the batch
+   is actually short and another file's tests are incidentally padding its numbers. The global
+   `npm run test:coverage` in steps 1-4 is necessary but not sufficient — it proves the *repo* is at
+   100%, not that *this specific file's own test(s)* are what's carrying it. If a file's tests live
+   in more than one spec (a dedicated spec plus an integration/hook-level spec that also exercises
+   it), include all of them in that file's scoped run rather than just the dedicated one.
+6. Always finish by running `npm run prettier:write` — every change, regardless of whether coverage
    was actually the thing that needed fixing. This is the last step, after tests/tsc are already
    green, not a substitute for them.
 
