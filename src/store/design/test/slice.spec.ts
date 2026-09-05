@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAGE_NAME, DEFAULT_PAINT } from '../constants';
+import { DEFAULT_PAGE_NAME, DEFAULT_PAINT, DEFAULT_VECTOR_PAINT } from '../constants';
 
 // store
 import slice, {
@@ -83,6 +83,7 @@ describe('design slice', () => {
       activePageId,
       activeTool: ToolName.default,
       commentDraftPosition: null,
+      designHintLabelKey: null,
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -91,7 +92,6 @@ describe('design slice', () => {
       editingTextContent: '',
       isActionsPanelOpen: false,
       isMediaToolArmed: false,
-      designHintLabelKey: null,
       isUiHidden: false,
       isUiMinimized: false,
       lastFrameTool: ToolName.frame,
@@ -108,7 +108,7 @@ describe('design slice', () => {
           id: activePageId,
           name: DEFAULT_PAGE_NAME,
           nodes: {},
-          paint: DEFAULT_PAINT,
+          paint: DEFAULT_VECTOR_PAINT,
           rootOrder: [],
           selectedIds: [],
           viewport: { x: 0, y: 0, zoom: 1 },
@@ -550,7 +550,7 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[state.activePageId].backgroundPaint).toEqual({ color: '#00ff00', opacity: 75, type: 'solid' });
-    expect(state.pages[state.activePageId].paint).toEqual(DEFAULT_PAINT);
+    expect(state.pages[state.activePageId].paint).toEqual(DEFAULT_VECTOR_PAINT);
   });
 
   it('should set the pen active vertex id', () => {

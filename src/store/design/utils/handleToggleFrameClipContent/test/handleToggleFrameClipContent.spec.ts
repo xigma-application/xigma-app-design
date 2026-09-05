@@ -10,12 +10,6 @@ import { handleToggleFrameClipContent } from '../handleToggleFrameClipContent';
 const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
   designHintLabelKey: null,
   editingNodeId: null,
@@ -49,6 +43,12 @@ const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
     },
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 });
 

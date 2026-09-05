@@ -164,7 +164,7 @@ describe('ActionsPanel', () => {
     renderActionsPanel();
 
     // result — the row's leading checkbox indicator renders its check icon
-    const row = screen.getByText('Show/Hide UI').closest('div');
+    const row = screen.getByText('Show/Hide UI').closest('div')?.parentElement;
     expect(row?.querySelector('svg')).toBeInTheDocument();
   });
 });

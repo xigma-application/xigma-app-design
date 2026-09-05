@@ -5,7 +5,7 @@ import { selectActiveTool, selectVectorEditingNodeIds } from 'store/design/selec
 import { AppDispatch, store } from 'store';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
@@ -31,14 +31,18 @@ export const handleEnterVectorEdit = async (dispatch: AppDispatch, refs: TCanvas
         const nodesById = state.design.pages[state.design.activePageId].nodes;
         const alreadyVectorIds = getAlreadyVectorNodeIds(selectedNodes, nodesById);
         const nodesToConvert = selectedNodes.filter(isConvertibleToVectorNode);
-        const textTargets = await getTextFlattenTargets();
+        const hasPathBoundText = selectedNodes.some((node) => node.type === NodeType.text && node.pathId);
 
-        convertSelectionToVectors(dispatch, refs, nodesToConvert, textTargets);
-        enterVectorEditMode(dispatch, [
-          ...alreadyVectorIds,
-          ...nodesToConvert.map((node) => node.id),
-          ...textTargets.map(({ node }) => node.id),
-        ]);
+        if (alreadyVectorIds.length > 0 || nodesToConvert.length > 0 || hasPathBoundText) {
+          const textTargets = await getTextFlattenTargets();
+
+          convertSelectionToVectors(dispatch, refs, nodesToConvert, textTargets);
+          enterVectorEditMode(dispatch, [
+            ...alreadyVectorIds,
+            ...nodesToConvert.map((node) => node.id),
+            ...textTargets.map(({ node }) => node.id),
+          ]);
+        }
       }
     }
   }

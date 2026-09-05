@@ -134,4 +134,56 @@ describe('PopoverScrollArea behaviors', () => {
     // cleanup
     vi.unstubAllGlobals();
   });
+
+  it('should auto-scroll the content up while the top edge button is hovered, and stop on mouse leave', () => {
+    // mock
+    let nextId = 0;
+    const scheduled = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      nextId += 1;
+      scheduled.set(nextId, cb);
+
+      return nextId;
+    });
+    vi.stubGlobal('cancelAnimationFrame', (id: number) => {
+      scheduled.delete(id);
+    });
+    const flush = (): void => {
+      const [id] = scheduled.keys();
+      const callback = id === undefined ? undefined : scheduled.get(id);
+
+      if (id !== undefined) {
+        scheduled.delete(id);
+      }
+      callback?.(0);
+    };
+
+    // before
+    const { container } = render(
+      <PopoverScrollArea>
+        <span>item</span>
+      </PopoverScrollArea>,
+    );
+    const content = getContent(container);
+    setContentMetrics(content, 100, 300, 200);
+    const topEdge = container.querySelector('[class*="PopoverScrollArea__edge--top"]') as HTMLElement;
+
+    // action
+    fireEvent.mouseEnter(topEdge);
+    flush();
+
+    // result
+    expect(content.scrollTop).toBeLessThan(200);
+
+    // action
+    fireEvent.mouseLeave(topEdge);
+    const scrollTopAfterLeave = content.scrollTop;
+    flush();
+
+    // result
+    expect(content.scrollTop).toBe(scrollTopAfterLeave);
+
+    // cleanup
+    vi.unstubAllGlobals();
+  });
 });

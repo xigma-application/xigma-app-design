@@ -34,7 +34,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +71,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +108,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -145,7 +145,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +182,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +219,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -256,7 +256,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -293,7 +293,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"
@@ -330,7 +330,7 @@ exports[`FrameTool snapshots > should render the Frame section with a preset acc
             <svg
               class="Icon"
               height="6"
-              style="color: var(--color-neutral-2);"
+              style="color: var(--color-neutral-1);"
               viewBox="0 0 6 6"
               width="6"
               xmlns="http://www.w3.org/2000/svg"

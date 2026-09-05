@@ -40,13 +40,8 @@ const frame = (overrides: Partial<TFrameNode>): TFrameNode => ({
 const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
+  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -55,7 +50,6 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
@@ -80,6 +74,12 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
     },
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 });
 

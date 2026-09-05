@@ -58,7 +58,7 @@ describe('PopoverItem behaviors', () => {
     );
 
     // result
-    expect(screen.getByText('Frame').previousElementSibling).toHaveStyle({ opacity: '1' });
+    expect(screen.getByText('Frame').parentElement?.previousElementSibling).toHaveStyle({ opacity: '1' });
   });
 
   it('should replace the check slot with a reserved icon slot when withCheck is false', () => {
@@ -70,7 +70,7 @@ describe('PopoverItem behaviors', () => {
     );
 
     // result — an empty icon slot takes the check span's place, so rows without an icon still align
-    const iconSlot = screen.getByText('Frame').previousElementSibling;
+    const iconSlot = screen.getByText('Frame').parentElement?.previousElementSibling;
     expect(iconSlot).not.toBeNull();
     expect(iconSlot?.querySelector('svg')).not.toBeInTheDocument();
   });
@@ -84,7 +84,7 @@ describe('PopoverItem behaviors', () => {
     );
 
     // result
-    expect(screen.getByText('Frame').previousElementSibling).toHaveStyle({ width: '20px' });
+    expect(screen.getByText('Frame').parentElement?.previousElementSibling).toHaveStyle({ width: '20px' });
   });
 
   it('should render the icon inside the icon slot when withCheck is false and an icon is given', () => {
@@ -109,7 +109,7 @@ describe('PopoverItem behaviors', () => {
 
     // result
     expect(container.querySelector('svg')).toBeInTheDocument();
-    expect(screen.getByText('Show rulers').previousElementSibling).not.toBeNull();
+    expect(screen.getByText('Show rulers').parentElement?.previousElementSibling).not.toBeNull();
   });
 
   it('should cap the label and shortcut row at maxWidth when given', () => {

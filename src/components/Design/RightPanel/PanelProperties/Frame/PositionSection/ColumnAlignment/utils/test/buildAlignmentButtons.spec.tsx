@@ -34,6 +34,14 @@ describe('buildAlignmentButtons', () => {
     expect(buttons.every((button) => button.disabled)).toBe(true);
   });
 
+  it('should do nothing when a button is clicked', () => {
+    // action
+    const [button] = buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, false, t);
+
+    // result
+    expect(() => button?.onClick()).not.toThrow();
+  });
+
   it('should render the translated label and the keyboard shortcut in the tooltip', () => {
     // action
     const [button] = buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, false, t);

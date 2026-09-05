@@ -51,13 +51,8 @@ const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPag
 const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> = {}): TDesignState => ({
   activePageId: 'source',
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
+  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -66,7 +61,6 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
@@ -80,6 +74,12 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
     target: buildPage('target', target),
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 });
 

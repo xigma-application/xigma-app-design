@@ -78,7 +78,10 @@ test('"Use as mask" wraps two selected rectangles in a "Mask group", marking the
   await page.keyboard.press(USE_AS_MASK_SHORTCUT);
 
   const after = await readDesignState(page);
-  const [groupId] = after.selectedIds;
+  // "Use as mask" selects the mask shape itself afterward (handleUseNodesAsMask.spec.ts's own
+  // documented behaviour), not the wrapping group — so the group is found via rootOrder instead,
+  // since grouping always collapses the selected members down to that one entry there
+  const [groupId] = after.rootOrder;
   const group = after.nodes[groupId];
 
   expect(group.name).toBe('Mask group');
@@ -164,7 +167,10 @@ test('filling a mask vector reveals its underlying content everywhere the fill n
   await page.keyboard.press(USE_AS_MASK_SHORTCUT);
 
   const grouped = await readDesignState(page);
-  const [groupId] = grouped.selectedIds;
+  // "Use as mask" selects the mask shape itself afterward, not the wrapping group — so the group is
+  // found via rootOrder instead, since grouping always collapses the selected members down to that
+  // one entry there
+  const [groupId] = grouped.rootOrder;
   const group = grouped.nodes[groupId];
   const maskId = group.childIds!.find((id) => grouped.nodes[id].isMask)!;
 
@@ -240,7 +246,10 @@ test('"Remove mask" restores full visibility while the group itself stays intact
   await page.keyboard.press(USE_AS_MASK_SHORTCUT);
 
   const grouped = await readDesignState(page);
-  const [groupId] = grouped.selectedIds;
+  // "Use as mask" selects the mask shape itself afterward, not the wrapping group — so the group is
+  // found via rootOrder instead, since grouping always collapses the selected members down to that
+  // one entry there
+  const [groupId] = grouped.rootOrder;
   const group = grouped.nodes[groupId];
   const maskId = group.childIds!.find((id) => grouped.nodes[id].isMask)!;
 
@@ -324,12 +333,16 @@ test('Control+Z undoes "Use as mask" as a single step, restoring the exact pre-m
 
   const grouped = await readDesignState(page);
   expect(grouped.selectedIds).toHaveLength(1);
+  // "Use as mask" selects the mask shape itself afterward, not the wrapping group — so the group is
+  // found via rootOrder instead, since grouping always collapses the selected members down to that
+  // one entry there
+  const [groupId] = grouped.rootOrder;
 
   await page.keyboard.press('Control+z');
 
   const after = await readDesignState(page);
 
-  expect(after.nodes[grouped.selectedIds[0]]).toBeUndefined(); // the "Mask group" node itself is gone
+  expect(after.nodes[groupId]).toBeUndefined(); // the "Mask group" node itself is gone
   expect(after.rootOrder).toEqual(before.rootOrder);
   expect(after.selectedIds).toEqual(before.selectedIds);
   expect(after.nodes).toEqual(before.nodes);

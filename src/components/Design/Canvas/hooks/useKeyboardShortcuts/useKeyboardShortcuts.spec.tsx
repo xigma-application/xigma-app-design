@@ -502,6 +502,17 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(() => fireEvent.keyDown(window, { altKey: true, code: 'KeyO', ctrlKey: true })).not.toThrow();
   });
 
+  it('should resize the selected frame to fit its children on "Cmd+Alt+Shift+R" without throwing when nothing is selected', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    expect(() => fireEvent.keyDown(window, { altKey: true, code: 'KeyR', metaKey: true, shiftKey: true })).not.toThrow();
+  });
+
   it('should flip the selection horizontally on "Shift+H" without throwing when nothing is selected', () => {
     // mock
     const store = createTestStore();

@@ -40,8 +40,8 @@ describe('ZoomMenu behaviors', () => {
   it('should mark the preset matching the current zoom as selected, and no other preset', () => {
     // before
     renderZoomMenu();
-    const selectedItem = screen.getByText('100%').closest('div')!;
-    const otherItem = screen.getByText('50%').closest('div')!;
+    const selectedItem = screen.getByText('100%').closest('div')!.parentElement!;
+    const otherItem = screen.getByText('50%').closest('div')!.parentElement!;
 
     // result — PopoverItem renders a Check icon with opacity 1 when selected, 0 otherwise
     expect(selectedItem.querySelector('span[style*="opacity: 1"]')).not.toBeNull();

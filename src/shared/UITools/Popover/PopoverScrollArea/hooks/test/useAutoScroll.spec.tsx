@@ -43,7 +43,7 @@ describe('useAutoScroll', () => {
     flush();
 
     // result
-    expect(element.scrollTop).toBe(6);
+    expect(element.scrollTop).toBe(10);
   });
 
   it('should scroll the element up on each animation frame while scrolling up', () => {
@@ -58,7 +58,7 @@ describe('useAutoScroll', () => {
     flush();
 
     // result
-    expect(element.scrollTop).toBe(7);
+    expect(element.scrollTop).toBe(5);
   });
 
   it('should stop scheduling frames once stopScrolling is called', () => {

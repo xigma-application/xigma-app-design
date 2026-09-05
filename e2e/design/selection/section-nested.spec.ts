@@ -44,7 +44,7 @@ const buildSectionWithRect = async (designPage: DesignPage, page: Page): Promise
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = rowsOf(page);
-  const sectionRow = rows.filter({ hasText: 'Section 1' });
+  const sectionRow = rows.filter({ hasText: 'Section (1)' });
 
   await dragRowOnto(rows.filter({ hasText: 'Rectangle' }), sectionRow);
   await sectionRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal the nested rectangle's row
@@ -58,7 +58,7 @@ test('a plain click always selects the section itself, even over its own content
   await buildSectionWithRect(designPage, page);
 
   const rows = rowsOf(page);
-  const sectionRow = rows.filter({ hasText: 'Section 1' });
+  const sectionRow = rows.filter({ hasText: 'Section (1)' });
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
   // clicking the section's own empty body selects the section
@@ -123,8 +123,8 @@ test('a frame nested directly inside a section stays click-through, just like a 
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = rowsOf(page);
-  const sectionRow = rows.filter({ hasText: 'Section 1' });
-  const frameRow = rows.filter({ hasText: 'Frame 1' });
+  const sectionRow = rows.filter({ hasText: 'Section (1)' });
+  const frameRow = rows.filter({ hasText: 'Frame (1)' });
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
   await dragRowOnto(rectRow, frameRow); // rectangle → frame
@@ -138,9 +138,8 @@ test('a frame nested directly inside a section stays click-through, just like a 
   await designPage.click(1050, 350);
   await page.keyboard.press('Delete');
 
-  // the section (now expanded) holds only the frame, which is itself now empty (its rectangle is
-  // gone) — so the frame row shows no expand toggle
-  await sectionRow.locator('[class*="TreeItem__toggleButton"]').click();
+  // the section (now expanded, since selecting the rectangle already revealed it) holds only the
+  // frame, which is itself now empty (its rectangle is gone) — so the frame row shows no expand toggle
   await expect(rows).toHaveCount(2);
   await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(0);
   await expect(frameRow.locator('[class*="TreeItem__toggleButton"]')).toHaveCount(0);
@@ -160,9 +159,9 @@ test('a section can never be dropped into a frame or into another section via th
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = rowsOf(page);
-  const frameRow = rows.filter({ hasText: 'Frame 1' });
-  const firstSectionRow = rows.filter({ hasText: 'Section 1' });
-  const secondSectionRow = rows.filter({ hasText: 'Section 2' });
+  const frameRow = rows.filter({ hasText: 'Frame (1)' });
+  const firstSectionRow = rows.filter({ hasText: 'Section (1)' });
+  const secondSectionRow = rows.filter({ hasText: 'Section (2)' });
 
   await expect(rows).toHaveCount(3);
 
@@ -198,10 +197,8 @@ test('dragging a shape on the canvas onto a section reparents it into the sectio
 
   const rows = rowsOf(page);
 
-  // the rectangle left the root — only the section remains there
-  await expect(rows).toHaveCount(1);
-
-  // expanding the section reveals the rectangle nested inside it
-  await rows.filter({ hasText: 'Section 1' }).locator('[class*="TreeItem__toggleButton"]').click();
+  // the rectangle left the root and now sits nested inside the section — still selected after the
+  // drop, so its new ancestor is already expanded to reveal it, no manual expand needed
+  await expect(rows).toHaveCount(2);
   await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(1);
 });

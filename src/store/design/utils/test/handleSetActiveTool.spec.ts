@@ -8,13 +8,8 @@ import { handleSetActiveTool } from '../handleSetActiveTool';
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
+  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -23,7 +18,6 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
@@ -47,6 +41,12 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
     },
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
   ...overrides,
 });

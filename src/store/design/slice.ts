@@ -10,6 +10,7 @@ import {
   DEFAULT_SHAPE_TOOL,
   DEFAULT_TEXT_TOOL,
   DEFAULT_TOOL,
+  DEFAULT_VECTOR_PAINT,
   DEFAULT_VIEWPORT,
 } from './constants';
 
@@ -103,7 +104,7 @@ const initialState: TDesignState = {
       id: initialPageId,
       name: DEFAULT_PAGE_NAME,
       nodes: {},
-      paint: DEFAULT_PAINT,
+      paint: DEFAULT_VECTOR_PAINT,
       rootOrder: [],
       selectedIds: [],
       viewport: DEFAULT_VIEWPORT,

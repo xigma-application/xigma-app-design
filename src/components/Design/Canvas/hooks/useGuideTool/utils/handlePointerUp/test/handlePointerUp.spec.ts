@@ -132,13 +132,13 @@ describe('handlePointerUp', () => {
     // mock
     const frameId = store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#fff',
         height: 400,
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        childIds: [],
-        clipContent: true,
         type: NodeType.frame,
         width: 400,
         x: 100,
@@ -164,13 +164,13 @@ describe('handlePointerUp', () => {
     // mock
     const frameId = store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#fff',
         height: 400,
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        childIds: [],
-        clipContent: true,
         type: NodeType.frame,
         width: 400,
         x: 100,
@@ -196,13 +196,13 @@ describe('handlePointerUp', () => {
     // mock
     const frameId = store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#fff',
         height: 400,
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        childIds: [],
-        clipContent: true,
         type: NodeType.frame,
         width: 400,
         x: 100,

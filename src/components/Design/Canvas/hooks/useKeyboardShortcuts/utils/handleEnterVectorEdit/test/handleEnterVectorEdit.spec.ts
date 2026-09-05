@@ -413,17 +413,17 @@ describe('handleEnterVectorEdit', () => {
     expect(store.getState().design.vectorEditingNodeIds).toEqual([textId]);
   });
 
-  it('should leave a selected Text node alone when it has no flattenable outline (e.g. empty content)', async () => {
+  it('should leave a plain (non-path-bound) Text node alone on Enter, without even attempting to flatten it, deferring to handleEnterTextEdit instead', async () => {
     // mock
     const textId = addTextNode();
 
     store.dispatch(setSelection([textId]));
-    getTextFlattenVector.mockResolvedValue(null);
 
     // action
     await handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
+    expect(getTextFlattenVector).not.toHaveBeenCalled();
     expect(selectActivePage(store.getState()).nodes[textId].type).toBe(NodeType.text);
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });

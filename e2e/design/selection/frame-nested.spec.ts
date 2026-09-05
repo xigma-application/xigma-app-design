@@ -59,9 +59,9 @@ const buildNestedFrames = async (designPage: DesignPage, page: Page): Promise<vo
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = page.locator('[class*="LayersTree"]').first().locator('[class*="Tree__row_"]');
-  const outerRow = rows.filter({ hasText: 'Frame 1' });
-  const middleRow = rows.filter({ hasText: 'Frame 2' });
-  const innerRow = rows.filter({ hasText: 'Frame 3' });
+  const outerRow = rows.filter({ hasText: 'Frame (1)' });
+  const middleRow = rows.filter({ hasText: 'Frame (2)' });
+  const innerRow = rows.filter({ hasText: 'Frame (3)' });
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
   await dragRowOnto(middleRow, outerRow);
@@ -80,9 +80,9 @@ test('a plain click reaches a frame nested any number of levels deep, but never 
   await buildNestedFrames(designPage, page);
 
   const rows = page.locator('[class*="LayersTree"]').first().locator('[class*="Tree__row_"]');
-  const outerRow = rows.filter({ hasText: 'Frame 1' });
-  const middleRow = rows.filter({ hasText: 'Frame 2' });
-  const innerRow = rows.filter({ hasText: 'Frame 3' });
+  const outerRow = rows.filter({ hasText: 'Frame (1)' });
+  const middleRow = rows.filter({ hasText: 'Frame (2)' });
+  const innerRow = rows.filter({ hasText: 'Frame (3)' });
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
   // clicking the middle frame's own body selects it directly — one hop from the click-through outer
@@ -170,8 +170,8 @@ test('a frame nested inside another frame never shows its name label, unlike a t
   const rows = page.locator('[class*="LayersTree"]').first().locator('[class*="Tree__row_"]');
 
   // creation order: Frame 1 = A (MIDDLE), Frame 2 = B (section child), Frame 3 = OUTER, Section 1
-  await dragRowOnto(rows.filter({ hasText: 'Frame 1' }), rows.filter({ hasText: 'Frame 3' })); // A into the outer frame
-  await dragRowOnto(rows.filter({ hasText: 'Frame 2' }), rows.filter({ hasText: 'Section 1' })); // B into the section
+  await dragRowOnto(rows.filter({ hasText: 'Frame (1)' }), rows.filter({ hasText: 'Frame (3)' })); // A into the outer frame
+  await dragRowOnto(rows.filter({ hasText: 'Frame (2)' }), rows.filter({ hasText: 'Section (1)' })); // B into the section
 
   await page.mouse.move(EMPTY_POINT.x, EMPTY_POINT.y);
   const labelAWhileNested = await page.screenshot({ clip: labelAreaA });
@@ -187,10 +187,8 @@ test('a frame nested inside another frame never shows its name label, unlike a t
   await page.keyboard.type('Renamed');
   await page.keyboard.press('Enter');
 
-  // the layers-panel drag nests B without spring-loading the collapsed Section 1 open, so expand it
-  // to bring B's (now renamed) row back into the tree before asserting on it
-  await rows.filter({ hasText: 'Section 1' }).locator('[class*="TreeItem__toggleButton"]').click();
-
+  // selecting/renaming B already reveals it in the tree by expanding its ancestor Section 1, so no
+  // extra expand click is needed here
   await expect(rows.filter({ hasText: 'Renamed' })).toHaveCount(1);
 });
 
@@ -219,7 +217,7 @@ test('marquee reaches a frame nested two levels deep without needing to fully en
   // the middle and inner frames (and the rectangle nested inside the inner one) are gone; the outer
   // frame — never fully enclosed — survives untouched
   await expect(rows).toHaveCount(1);
-  await expect(rows.filter({ hasText: 'Frame 1' })).toHaveCount(1);
+  await expect(rows.filter({ hasText: 'Frame (1)' })).toHaveCount(1);
 });
 
 test('a Ctrl-held drag starting on a nested frame draws a marquee instead of moving that frame', async ({ page }) => {

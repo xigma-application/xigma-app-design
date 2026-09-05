@@ -236,12 +236,19 @@ test('clicking inside an unfilled vector node, past its own contour, does not se
   ]);
   await designPage.selectTool('default'); // exit vector edit mode
   await designPage.click(1500, 700); // deselect — empty canvas
-  const baseline = await designPage.canvas.screenshot();
 
+  // asserting on selectedIds directly, rather than screenshot equality, sidesteps the Layers panel's
+  // own lazily-computed row icon glyph (its path fills in a render or two after the node is created),
+  // which otherwise makes two screenshots taken moments apart differ for reasons unrelated to this test
   await designPage.click(775, 275); // dead center of the unfilled square, well past its contour
-  const afterClick = await designPage.canvas.screenshot();
+  const selectedIds = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
 
-  expect(afterClick.equals(baseline)).toBe(true);
+    return pages[activePageId].selectedIds;
+  });
+
+  expect(selectedIds).toEqual([]);
 });
 
 test('a selected vector node can be dragged from anywhere in its bounding box, even past its own contour', async ({ page }) => {

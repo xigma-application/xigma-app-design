@@ -6,6 +6,7 @@ import { toggleMaskOutlinesVisible } from 'store/design/slice';
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
+import { TDrawSceneContext } from '../types';
 
 // utils
 import { drawMaskOutlines } from '../drawMaskOutlines';
@@ -28,7 +29,7 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
-const CONTEXT = (gl: WebGL2RenderingContext, program: WebGLProgram, buffer: WebGLBuffer) => ({
+const CONTEXT = (gl: WebGL2RenderingContext, program: WebGLProgram, buffer: WebGLBuffer): TDrawSceneContext => ({
   buffer,
   canvasHeight: 100,
   canvasWidth: 100,

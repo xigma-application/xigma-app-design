@@ -21,13 +21,8 @@ const buildPage = (name: string): TDesignPage => ({
 const buildState = (pageNames: string[], activePageId: string): TDesignState => ({
   activePageId,
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
+  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -36,7 +31,6 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
@@ -47,6 +41,12 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
   lastTextTool: ToolName.text,
   pages: Object.fromEntries(pageNames.map((name) => [name, buildPage(name)])),
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 });
 
@@ -66,7 +66,7 @@ describe('handleAddPage', () => {
       id: 'new-page',
       name: 'Page 2',
       nodes: {},
-      paint: { color: '#444444', opacity: 100, type: 'solid' },
+      paint: { color: '#D9D9D9', opacity: 100, type: 'solid' },
       rootOrder: [],
       selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },

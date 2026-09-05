@@ -42,16 +42,20 @@ exports[`PopoverItem snapshots > should render PopoverItem 1`] = `
         fill-rule="evenodd"
       />
     </svg>
-    <span
-      class="_PopoverItem__label_9483de"
+    <div
+      class="_PopoverItem__row_9483de"
     >
-      Frame
-    </span>
-    <span
-      class="_PopoverItem__shortcut_9483de"
-    >
-      F
-    </span>
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Frame
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        F
+      </span>
+    </div>
   </div>
 </DocumentFragment>
 `;
@@ -97,16 +101,20 @@ exports[`PopoverItem snapshots > should render a disabled PopoverItem 1`] = `
         fill-rule="evenodd"
       />
     </svg>
-    <span
-      class="_PopoverItem__label_9483de"
+    <div
+      class="_PopoverItem__row_9483de"
     >
-      Frame
-    </span>
-    <span
-      class="_PopoverItem__shortcut_9483de"
-    >
-      F
-    </span>
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Frame
+      </span>
+      <span
+        class="_PopoverItem__shortcut_9483de"
+      >
+        F
+      </span>
+    </div>
   </div>
 </DocumentFragment>
 `;

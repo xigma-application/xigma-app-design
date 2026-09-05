@@ -10,13 +10,8 @@ import { syncBoundNode } from '../syncBoundNode';
 const buildState = (nodes: Record<string, TPathNode | TRectangleNode | TTextNode | TVectorNode>): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
-  preferences: {
-    areAdditionalLabelsVisible: true,
-    areFrameOutlinesVisible: false,
-    areMaskOutlinesVisible: false,
-    areRulersVisible: false,
-  },
   commentDraftPosition: null,
+  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -25,7 +20,6 @@ const buildState = (nodes: Record<string, TPathNode | TRectangleNode | TTextNode
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
@@ -49,6 +43,12 @@ const buildState = (nodes: Record<string, TPathNode | TRectangleNode | TTextNode
     },
   },
   penActiveVertexId: null,
+  preferences: {
+    areAdditionalLabelsVisible: true,
+    areFrameOutlinesVisible: false,
+    areMaskOutlinesVisible: false,
+    areRulersVisible: false,
+  },
   vectorEditingNodeIds: [],
 });
 

@@ -21,7 +21,7 @@ exports[`Accordion snapshots > should render one item per entry 1`] = `
           <svg
             class="Icon"
             height="6"
-            style="color: var(--color-neutral-2);"
+            style="color: var(--color-neutral-1);"
             viewBox="0 0 6 6"
             width="6"
             xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@ exports[`Accordion snapshots > should render one item per entry 1`] = `
           <svg
             class="Icon"
             height="6"
-            style="color: var(--color-neutral-2);"
+            style="color: var(--color-neutral-1);"
             viewBox="0 0 6 6"
             width="6"
             xmlns="http://www.w3.org/2000/svg"

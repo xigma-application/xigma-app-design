@@ -145,6 +145,23 @@ describe('handleResizeToFit', () => {
     expect(frame.height).toBe(40);
   });
 
+  it('should shrink a rotated frame using its own local (unrotated) bounding box', () => {
+    // mock — a 90°-rotated frame around an unrotated 20x10 child at the origin
+    const childId = addRectangleNode({ height: 10, rotation: 0, width: 20, x: 0, y: 0 });
+    const frameId = addFrameNode({ childIds: [childId], height: 200, rotation: 90, width: 200, x: 0, y: 0 });
+    store.dispatch(setSelection([frameId]));
+
+    // action
+    handleResizeToFit(store.dispatch);
+
+    // result — bounds computed in the frame's own unrotated local space, then rotated back around its center
+    const frame = selectNodes(store.getState())[frameId] as TFrameNode;
+    expect(frame.width).toBeCloseTo(10, 5);
+    expect(frame.height).toBeCloseTo(20, 5);
+    expect(frame.x).toBeCloseTo(5, 5);
+    expect(frame.y).toBeCloseTo(-5, 5);
+  });
+
   it('should skip a childId that no longer resolves to a node', () => {
     // mock
     const childId = addRectangleNode({ height: 20, width: 20, x: 10, y: 10 });
