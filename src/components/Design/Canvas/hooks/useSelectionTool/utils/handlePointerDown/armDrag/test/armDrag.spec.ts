@@ -86,6 +86,7 @@ describe('armDrag', () => {
       candidateShapes: [],
       ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
+      grabbedNodeId: idA,
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 100, y: 100 } },
       pendingClickAction: null,

@@ -8,7 +8,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget';
+import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget/armAutoLayoutDropTarget';
 import { getDragDropTargetFrame } from './getDragDropTargetFrame';
 import { isAutoLayoutFrame } from './isAutoLayoutFrame';
 import { reparentToDropTarget } from './reparentToDropTarget';
@@ -21,6 +21,7 @@ export const resolveDragReparentTarget = (
   renderOrderedNodes: TSceneNode[],
   nodesById: Record<string, TSceneNode>,
   canvasRefs: TCanvasRefs,
+  grabbedNodeId: string | null,
 ): void => {
   const currentParent = selectedNodes[0].parentId ? nodesById[selectedNodes[0].parentId] : null;
   const currentParentId = currentParent?.id ?? null;
@@ -33,7 +34,17 @@ export const resolveDragReparentTarget = (
 
   switch (true) {
     case isAutoLayoutFrame(desiredParent) && desiredParentId !== null:
-      armAutoLayoutDropTarget(canvasRefs, desiredParent, desiredParentId, currentParentId, selectedNodes, movedNodeIds, nodesById, point);
+      armAutoLayoutDropTarget(
+        canvasRefs,
+        desiredParent,
+        desiredParentId,
+        currentParentId,
+        selectedNodes,
+        movedNodeIds,
+        nodesById,
+        point,
+        grabbedNodeId,
+      );
       break;
     case desiredParentId !== currentParentId && (desiredParentId !== null || canDragOutToRoot):
       reparentToDropTarget(dispatch, state, canvasRefs, movedNodeIds, desiredParentId);

@@ -18,6 +18,7 @@ export const updateDragDropTarget = (
   renderOrderedNodes: TSceneNode[],
   nodesById: Record<string, TSceneNode>,
   canvasRefs: TCanvasRefs,
+  grabbedNodeId: string | null,
 ): void => {
   canvasRefs.transform.dropTargetFrameIdRef.current = null;
   canvasRefs.transform.autoLayoutDropTargetRef.current = null;
@@ -25,7 +26,7 @@ export const updateDragDropTarget = (
   const canReparent = selectedNodes.length > 0 && !selectedNodes.some((node) => node.type === NodeType.section);
 
   if (canReparent) {
-    resolveDragReparentTarget(dispatch, state, selectedNodes, point, renderOrderedNodes, nodesById, canvasRefs);
+    resolveDragReparentTarget(dispatch, state, selectedNodes, point, renderOrderedNodes, nodesById, canvasRefs, grabbedNodeId);
   } else {
     canvasRefs.transform.autoLayoutReorderPreviewRef.current = null;
   }

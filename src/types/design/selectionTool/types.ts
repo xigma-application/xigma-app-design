@@ -28,6 +28,7 @@ export type TDragState = {
   candidateShapes: TCandidateShape[];
   ctrlMarqueeFallback: string[] | null;
   dispatchThrottle: TThrottledDispatchState;
+  grabbedNodeId?: string | null;
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;
   pendingClickAction: TPendingClickAction | null;

@@ -409,4 +409,59 @@ test.describe('auto-layout — reordering a child within its own frame, wrap ena
     // committed order (the real wrap engine, unchanged): block {3,4,5} moves to the front
     expect(after).toEqual([before[2], before[3], before[4], before[0], before[1], before[5]]);
   });
+
+  const buildSixChildGrid = async (designPage: DesignPage, page: Page): Promise<string[]> => {
+    // a 100-wide frame, no gaps, six 50x50 children: rows [1,2] / [3,4] / [5,6]
+    await designPage.drawFrame(600, 150, 700, 450);
+    await setFlowHorizontal(page);
+    await clickWrapToggle(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 6; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1450, 210);
+      await dragInto(page, { x: 1425, y: 185 }, { x: 690, y: 290 });
+    }
+
+    return rectangleRowNames(page);
+  };
+
+  test('anchors a dragged multi-node block by its FIRST member when that member is the one grabbed', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-block-grab-first');
+    await expect(designPage.canvas).toBeVisible();
+
+    const before = await buildSixChildGrid(designPage, page);
+
+    expect(before).toHaveLength(6);
+
+    // select {3,4} (row 2), grab element 3 (its own centre), drag onto element 5's cell (row 3)
+    await designPage.click(625, 225);
+    await designPage.click(675, 225, { shift: true });
+    await dragInto(page, { x: 625, y: 225 }, { x: 625, y: 275 });
+
+    // grabbed the first block member → the whole block lands after 5 and 6: [1,2,5,6,3,4]
+    expect(await rectangleRowNames(page)).toEqual([before[0], before[1], before[4], before[5], before[2], before[3]]);
+  });
+
+  test('offsets a dragged multi-node block by which member was grabbed — grabbing the last member lands it a slot earlier', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-block-grab-last');
+    await expect(designPage.canvas).toBeVisible();
+
+    const before = await buildSixChildGrid(designPage, page);
+
+    expect(before).toHaveLength(6);
+
+    // same selection {3,4} and same drop point, but grab element 4 (the second block member)
+    await designPage.click(625, 225);
+    await designPage.click(675, 225, { shift: true });
+    await dragInto(page, { x: 675, y: 225 }, { x: 625, y: 275 });
+
+    // grabbed the second member → block lands one slot earlier: [1,2,5,3,4,6]
+    expect(await rectangleRowNames(page)).toEqual([before[0], before[1], before[4], before[2], before[3], before[5]]);
+  });
 });

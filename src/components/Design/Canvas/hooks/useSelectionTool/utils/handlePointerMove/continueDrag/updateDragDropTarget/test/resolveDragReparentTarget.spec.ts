@@ -86,7 +86,7 @@ describe('resolveDragReparentTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs);
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs, null);
 
     // result
     const page = selectActivePage(store.getState());
@@ -106,7 +106,7 @@ describe('resolveDragReparentTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs);
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
 
     // result
     const page = selectActivePage(store.getState());
@@ -129,7 +129,7 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 120, y: 120 }, rendered, byId, canvasRefs);
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 120, y: 120 }, rendered, byId, canvasRefs, null);
 
     // result
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
@@ -152,7 +152,7 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs);
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
 
     // result
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
@@ -172,7 +172,7 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs);
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs, null);
 
     // result
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);

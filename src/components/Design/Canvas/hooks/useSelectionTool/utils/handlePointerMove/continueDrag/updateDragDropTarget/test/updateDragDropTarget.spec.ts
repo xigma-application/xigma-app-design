@@ -109,7 +109,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     const page = selectActivePage(store.getState());
     expect(refs.transform.dropTargetFrameIdRef.current).toBe(frameId);
@@ -126,7 +126,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs, null);
 
     const page = selectActivePage(store.getState());
     expect(refs.transform.dropTargetFrameIdRef.current).toBeNull();
@@ -144,7 +144,7 @@ describe('updateDragDropTarget', () => {
     const { rendered, byId } = nodesOf();
     const spy = vi.spyOn(store, 'dispatch');
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 120, y: 120 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 120, y: 120 }, rendered, byId, refs, null);
 
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
     expect(refs.transform.dropTargetFrameIdRef.current).toBe(frameId);
@@ -158,7 +158,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 10 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 10 }, rendered, byId, refs, null);
 
     const page = selectActivePage(store.getState());
     expect(refs.transform.dropTargetFrameIdRef.current).toBe(sectionId);
@@ -173,7 +173,7 @@ describe('updateDragDropTarget', () => {
     const { rendered, byId } = nodesOf();
     const spy = vi.spyOn(store, 'dispatch');
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[sectionId]], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[sectionId]], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.dropTargetFrameIdRef.current).toBeNull();
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
@@ -191,7 +191,7 @@ describe('updateDragDropTarget', () => {
     const { rendered, byId } = nodesOf();
     const spy = vi.spyOn(store, 'dispatch');
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs, null);
 
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(groupId);
@@ -206,7 +206,7 @@ describe('updateDragDropTarget', () => {
     const { rendered, byId } = nodesOf();
     const spy = vi.spyOn(store, 'dispatch');
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.dropTargetFrameIdRef.current).toBe(frameId);
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 0 });
@@ -226,7 +226,7 @@ describe('updateDragDropTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // the existing sibling is a 20-tall rect at y=0 (midpoint y=10); a cursor well past it lands after it
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 100 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 100 }, rendered, byId, refs, null);
 
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 1 });
   });
@@ -253,7 +253,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 0 });
   });
@@ -281,7 +281,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ indicator: { x: 20, y: 20 } });
   });
@@ -292,10 +292,10 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 50, y: 50 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 50, y: 50 }, rendered, byId, refs, null);
     expect(refs.transform.autoLayoutDropTargetRef.current).not.toBeNull();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs, null);
     expect(refs.transform.autoLayoutDropTargetRef.current).toBeNull();
   });
 
@@ -310,7 +310,7 @@ describe('updateDragDropTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // the dragged child (still at y=0, 20 tall) is dropped well past the sibling (at y=100) — index 1
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 10, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 10, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.autoLayoutDropTargetRef.current).toBeNull();
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 1, frameId });
@@ -336,7 +336,7 @@ describe('updateDragDropTarget', () => {
       positions: { [siblingId]: { x: 999, y: 999 } },
     };
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 10, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 10, y: 150 }, rendered, byId, refs, null);
 
     // untouched — a fresh trigger would have overwritten this with the real computed "from" position
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions[siblingId]).toEqual({ x: 999, y: 999 });
@@ -353,7 +353,7 @@ describe('updateDragDropTarget', () => {
 
     refs.transform.autoLayoutReorderPreviewRef.current = { activeIndex: 0, frameId: sourceFrameId, positions: {} };
 
-    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 550, y: 10 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[draggedId]], { x: 550, y: 10 }, rendered, byId, refs, null);
 
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: targetFrameId });
@@ -364,7 +364,7 @@ describe('updateDragDropTarget', () => {
     const refs = canvasRefs();
     const { rendered, byId } = nodesOf();
 
-    updateDragDropTarget(store.dispatch, store.getState(), [], { x: 150, y: 150 }, rendered, byId, refs);
+    updateDragDropTarget(store.dispatch, store.getState(), [], { x: 150, y: 150 }, rendered, byId, refs, null);
 
     expect(refs.transform.dropTargetFrameIdRef.current).toBeNull();
   });

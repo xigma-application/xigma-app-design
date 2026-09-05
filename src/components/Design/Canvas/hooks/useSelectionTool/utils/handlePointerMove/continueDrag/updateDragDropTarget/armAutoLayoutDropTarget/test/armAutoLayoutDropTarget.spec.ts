@@ -1,6 +1,6 @@
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TAutoLayoutFrame } from '../types';
+import { TAutoLayoutFrame } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -42,7 +42,7 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
 
     // result
     expect(refs.transform.autoLayoutReorderPreviewRef.current).not.toBeNull();
@@ -54,7 +54,7 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
@@ -67,7 +67,7 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, horizontalAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+    armAutoLayoutDropTarget(refs, horizontalAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
@@ -93,7 +93,7 @@ describe('armAutoLayoutDropTarget', () => {
     const nodesById = { a: siblingA, b: siblingB, c: siblingC };
 
     // action — cursor at 'c'’s own left edge, in row 2
-    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], nodesById, { x: 20, y: 150 });
+    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], nodesById, { x: 20, y: 150 }, null);
 
     // result — regression: the old flat (non-wrap-aware) index math compared the cursor only
     // against each sibling's own x threshold in childIds order; 'c' shares 'a'’s near-zero x (both
@@ -125,7 +125,7 @@ describe('armAutoLayoutDropTarget', () => {
     const nodesById = { a: siblingA, b: siblingB };
 
     // action — same parent on both sides, cursor at 'c'’s own left edge, still in row 2
-    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', 'frame-1', [draggedC], ['c'], nodesById, { x: 20, y: 150 });
+    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', 'frame-1', [draggedC], ['c'], nodesById, { x: 20, y: 150 }, null);
 
     // result — 'c' resolves back to index 2 (row 2), not row 1
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 2, frameId: 'frame-1' });
@@ -144,9 +144,91 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, huggedWrapFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+    armAutoLayoutDropTarget(refs, huggedWrapFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
+  });
+
+  describe('multi-node block reorder in a wrap frame', () => {
+    // six 100x100 children, two per row: [a,b] / [c,d] / [e,f]
+    const gridNode = (id: string, x: number, y: number): TSceneNode =>
+      ({ ...draggedRect, height: 100, id, width: 100, x, y }) as TSceneNode;
+    const gridNodes = {
+      a: gridNode('a', 0, 0),
+      b: gridNode('b', 100, 0),
+      c: gridNode('c', 0, 100),
+      d: gridNode('d', 100, 100),
+      e: gridNode('e', 0, 200),
+      f: gridNode('f', 100, 200),
+    };
+    const gridFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      childIds: ['a', 'b', 'c', 'd', 'e', 'f'],
+      height: 600,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      width: 200,
+    };
+
+    it('anchors the block by its first (childIds) member — grabbing it puts the whole block after row 3', () => {
+      const refs = createCanvasRefs();
+
+      // action — drag the {c,d} block, grabbed by 'c', cursor over 'e' (position 5)
+      armAutoLayoutDropTarget(
+        refs,
+        gridFrame,
+        'frame-1',
+        'frame-1',
+        [gridNodes.c, gridNodes.d],
+        ['c', 'd'],
+        gridNodes,
+        { x: 50, y: 250 },
+        'c',
+      );
+
+      // result — reading-order slot 4, grabbed index 0 → block inserted at index 4 of [a,b,e,f]
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 4, frameId: 'frame-1' });
+    });
+
+    it('offsets the insertion by which block member was grabbed — grabbing the second member lands the block one slot earlier', () => {
+      const refs = createCanvasRefs();
+
+      // action — same drag, but grabbed by 'd' (block-local index 1)
+      armAutoLayoutDropTarget(
+        refs,
+        gridFrame,
+        'frame-1',
+        'frame-1',
+        [gridNodes.c, gridNodes.d],
+        ['c', 'd'],
+        gridNodes,
+        { x: 50, y: 250 },
+        'd',
+      );
+
+      // result — slot 4 − 1 = 3
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 3, frameId: 'frame-1' });
+    });
+
+    it('treats an unknown / missing grabbed node as the block’s first member (offset 0)', () => {
+      const refs = createCanvasRefs();
+
+      // action — grabbedNodeId is null (e.g. drag started in the gap with nothing resolvable)
+      armAutoLayoutDropTarget(
+        refs,
+        gridFrame,
+        'frame-1',
+        'frame-1',
+        [gridNodes.c, gridNodes.d],
+        ['c', 'd'],
+        gridNodes,
+        { x: 50, y: 250 },
+        null,
+      );
+
+      // result — no offset, same as grabbing the first member
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 4, frameId: 'frame-1' });
+    });
   });
 });

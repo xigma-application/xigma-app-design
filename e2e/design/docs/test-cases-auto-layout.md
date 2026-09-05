@@ -37,6 +37,7 @@ gesture live, not just the Flow toggle in isolation.
 | 5   | Wrap: a dragged multi-row block previews as its own individual members, not one merged bounding box                                              |  ✅  | ✅ `reorder.spec.ts` |
 | 6   | Wrap: moving a child into another row keeps the reorder's whole-cell (edge-based) insert zone instead of a half-cell midpoint one                |  ✅  | ✅ `reorder.spec.ts` |
 | 7   | Wrap: a child dragged toward another row can be dropped straight back onto its own vacated slot                                                  |  ✅  | ✅ `reorder.spec.ts` |
+| 8   | Wrap: a dragged multi-node block lands by reading-order slot minus the grabbed member's offset within the block                                  |  ✅  | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -157,6 +158,30 @@ by feeding that recompute a `getAutoLayoutReorderOriginChildren` list — the re
 placeholder for the dragged item back at its origin index — then dropping the placeholder's own
 entry, so every real sibling keeps its pre-drag position for index resolution (the sibling ghost
 positions are still computed separately and do reflow).
+
+### Wrap reorder: a multi-node block landed one slot off, ignoring which member you grabbed
+
+Found live by the user (2026-09-06). Non-wrap multi-node block reorder works fine — one axis, so
+"which slot is the cursor over" maps straight to a splice index. Wrap has two axes: the old wrap
+path computed the block's insertion index _row-scoped_ (`realStart + rowDropTarget.index`) against a
+re-simulated collapsed layout, and never accounted for which member of the block the pointer went
+down on. Grabbing `{3,4}` by `3` vs by `4` gave the same result, one slot off from where the block
+should land.
+
+Agreed model (matches Figma): the block is a contiguous run ordered by `childIds`; it lands at
+`clamp(readingOrderSlot − grabbedIndexInBlock, 0, siblingCount)` in the reduced (block-removed)
+list, where `readingOrderSlot` is which grid slot the cursor is over **in the current, on-screen
+layout** (walk rows top-to-bottom, items across, an item passed once the cursor clears its far
+edge), and `grabbedIndexInBlock` is the grabbed member's position within the block. The commit
+already re-orders the moved ids by `childIds` and splices them contiguously, so only the index math
+had to change.
+
+Implemented for wrap + same-parent + `≥2` selected only (`armAutoLayoutMultiRowReorderPreview`):
+`getAutoLayoutReadingOrderSlot` does the 2D slot count from the children's real bounds; the grabbed
+member is captured at pointer-down as `dragState.grabbedNodeId` (`armDrag` — the hit node, or the
+nearest selected node when the pointer went down in the gap between block members) and threaded
+through `continueDrag → updateDragDropTarget → resolveDragReparentTarget → armAutoLayoutDropTarget`.
+Non-wrap, single-node wrap, and cross-parent drops are untouched.
 
 ### A real, pre-existing selection bug found while writing these tests
 

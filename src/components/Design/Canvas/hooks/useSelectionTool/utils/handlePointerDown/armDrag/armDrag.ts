@@ -11,11 +11,17 @@ import { TDragState, TPendingClickAction } from 'types/design/selectionTool/type
 
 // utils
 import { captureDraggedVectorNodeSnapshots } from './captureDraggedVectorNodeSnapshots';
-import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
+import { getCandidateShapes, type TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getDragNodeOrigins } from './getDragNodeOrigins';
 import { getGuideCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getGuideCandidateShapes';
+import { getNearestNodeId } from './getNearestNodeId';
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 import { getViewportWorldRect } from 'components/Design/Canvas/utils/getViewportWorldRect';
+
+const getArmDragGuideCandidateShapes = (canvasRefs: TCanvasRefs, state: ReturnType<typeof store.getState>): TCandidateShape[] => {
+  const canvas = canvasRefs.canvasRef.current;
+  return canvas ? getGuideCandidateShapes(selectAllGuideLines(state), getViewportWorldRect(canvas, selectViewport(state))) : [];
+};
 
 export const armDrag = (
   armIds: string[],
@@ -28,15 +34,14 @@ export const armDrag = (
   const { nodes } = selectActivePage(state);
   const armedNodes = armIds.map((id) => nodes[id]).filter(Boolean);
   const dragIds = getRigidTransformNodes(armedNodes, nodes).map((node) => node.id);
-  const canvas = canvasRefs.canvasRef.current;
-  const guideCandidateShapes = canvas
-    ? getGuideCandidateShapes(selectAllGuideLines(state), getViewportWorldRect(canvas, selectViewport(state)))
-    : [];
+  const guideCandidateShapes = getArmDragGuideCandidateShapes(canvasRefs, state);
+  const clickedNodeId = pendingClickAction?.kind === 'collapse' && armIds.includes(pendingClickAction.id) ? pendingClickAction.id : null;
 
   dragStateRef.current = {
     candidateShapes: getCandidateShapes(nodes, dragIds).concat(guideCandidateShapes),
     ctrlMarqueeFallback: null,
     dispatchThrottle: { frameId: null, run: null },
+    grabbedNodeId: clickedNodeId ?? getNearestNodeId(armIds, nodes, point),
     hasMoved: false,
     nodeOrigins: getDragNodeOrigins(dragIds, nodes),
     pendingClickAction,

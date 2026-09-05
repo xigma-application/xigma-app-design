@@ -68,7 +68,7 @@ export const continueDrag = (
     const renderOrderedNodes = selectRenderOrderedNodes(state);
 
     markDragAsMoved(dragState);
-    updateDragDropTarget(dispatch, state, selectedNodes, rawPoint, renderOrderedNodes, nodes, canvasRefs);
+    updateDragDropTarget(dispatch, state, selectedNodes, rawPoint, renderOrderedNodes, nodes, canvasRefs, dragState.grabbedNodeId ?? null);
     armDragSnapGuides(canvasRefs, isAutoLayoutDropTargetActive(canvasRefs), axisLock, guide, chainGapSnap.guides, matchedPairGuides);
     setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
     initDraggedNodeIds(canvasRefs, dragState);
