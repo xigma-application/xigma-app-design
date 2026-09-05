@@ -1,0 +1,15 @@
+@mixin layout {
+  flex-direction: column;
+  gap: 2px;
+
+  .AlignmentOption__wrap-row {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+
+    .AlignmentOption__indicator {
+      height: 4px;
+      width: 2px;
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import OptionIndicators from './OptionIndicators';
 import { Tooltip } from 'shared';
 
 // others
@@ -24,6 +25,7 @@ export type TAlignmentOptionProps = {
   isHighlighted: boolean;
   isHorizontal: boolean;
   isSelected: boolean;
+  isWrap: boolean;
   onClick: TFunc<[AlignmentLayout]>;
   onMouseEnter: TFunc<[AlignmentLayout]>;
   onMouseLeave: TFunc;
@@ -36,13 +38,15 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({
   isHighlighted,
   isHorizontal,
   isSelected,
+  isWrap,
   onClick,
   onMouseEnter,
   onMouseLeave,
 }) => {
   const { t } = useTranslation();
   const label = t(`${translationNameSpace}.alignmentOption.${alignment}`);
-  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal, isGapAutoVertical, isGapAutoHorizontal);
+  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal, isGapAutoVertical, isGapAutoHorizontal, isWrap);
+  const isWrapVariant = optionViewModifiers.includes('horizontal-wrap');
 
   return (
     <Tooltip content={label}>
@@ -61,15 +65,7 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({
             optionViewModifiers.map((modifier) => styles[`AlignmentOption__option-view--${modifier}`]),
           )}
         >
-          {Array.from(Array(3), (_, index) => (
-            <div
-              className={cx(styles.AlignmentOption__indicator, {
-                [styles['AlignmentOption__indicator--highlighted']]: isHighlighted,
-                [styles['AlignmentOption__indicator--selected']]: isSelected,
-              })}
-              key={index}
-            />
-          ))}
+          <OptionIndicators alignment={alignment} isHighlighted={isHighlighted} isSelected={isSelected} isWrap={isWrapVariant} />
         </div>
       </button>
     </Tooltip>

@@ -8,10 +8,14 @@ import { CrossAxisAlignment } from '../types';
 const MIDDLE_ROW_ALIGNMENTS = [AlignmentLayout.left, AlignmentLayout.center, AlignmentLayout.right];
 const MIDDLE_COLUMN_ALIGNMENTS = [AlignmentLayout.topCenter, AlignmentLayout.center, AlignmentLayout.bottomCenter];
 
-const getAxis = (isHorizontal: boolean, isGapAutoVertical: boolean, isGapAutoHorizontal: boolean): string => {
+const getAxis = (isHorizontal: boolean, isGapAutoVertical: boolean, isGapAutoHorizontal: boolean, isWrap: boolean): string => {
   if (isHorizontal) {
     if (isGapAutoHorizontal) {
       return 'horizontal-auto';
+    }
+
+    if (isWrap) {
+      return 'horizontal-wrap';
     }
 
     return 'horizontal';
@@ -52,8 +56,9 @@ export const getOptionViewModifiers = (
   isHorizontal: boolean,
   isGapAutoVertical: boolean,
   isGapAutoHorizontal: boolean,
+  isWrap: boolean,
 ): string[] => {
-  const axis = getAxis(isHorizontal, isGapAutoVertical, isGapAutoHorizontal);
+  const axis = getAxis(isHorizontal, isGapAutoVertical, isGapAutoHorizontal, isWrap);
   const crossAxis = isHorizontal ? HORIZONTAL_CROSS_AXIS_ALIGNMENT[alignment] : VERTICAL_CROSS_AXIS_ALIGNMENT[alignment];
   const crossAxisModifier = getCrossAxisModifier(crossAxis);
   const modifiers = crossAxisModifier ? [axis, crossAxisModifier] : [axis];

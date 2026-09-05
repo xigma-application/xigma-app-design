@@ -7,7 +7,7 @@ import { AlignmentLayout } from 'types/design/enums';
 describe('getOptionViewModifiers', () => {
   it('should return the vertical axis with no cross-axis modifier for the left column', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.left, false, false, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.left, false, false, false, false);
 
     // result
     expect(modifiers).toEqual(['vertical']);
@@ -15,7 +15,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should return the vertical axis with the center cross-axis modifier for the center column', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.center, false, false, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.center, false, false, false, false);
 
     // result
     expect(modifiers).toEqual(['vertical', 'center']);
@@ -23,7 +23,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should return the vertical axis with the end cross-axis modifier for the right column', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.right, false, false, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.right, false, false, false, false);
 
     // result
     expect(modifiers).toEqual(['vertical', 'end']);
@@ -31,7 +31,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should return the vertical-auto axis when isGapAutoVertical is true', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.topCenter, false, true, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topCenter, false, true, false, false);
 
     // result
     expect(modifiers).toEqual(['vertical-auto', 'center']);
@@ -39,7 +39,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should not switch to vertical-auto when only isGapAutoHorizontal is true', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.topCenter, false, false, true);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topCenter, false, false, true, false);
 
     // result
     expect(modifiers).toEqual(['vertical', 'center']);
@@ -47,19 +47,19 @@ describe('getOptionViewModifiers', () => {
 
   it('should add the short modifier for the middle row (left, center, right) in vertical-auto mode', () => {
     // result
-    expect(getOptionViewModifiers(AlignmentLayout.left, false, true, false)).toEqual(['vertical-auto', 'short']);
-    expect(getOptionViewModifiers(AlignmentLayout.center, false, true, false)).toEqual(['vertical-auto', 'center', 'short']);
-    expect(getOptionViewModifiers(AlignmentLayout.right, false, true, false)).toEqual(['vertical-auto', 'end', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.left, false, true, false, false)).toEqual(['vertical-auto', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.center, false, true, false, false)).toEqual(['vertical-auto', 'center', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.right, false, true, false, false)).toEqual(['vertical-auto', 'end', 'short']);
   });
 
   it('should not add the short modifier for the middle row outside vertical-auto mode', () => {
     // result
-    expect(getOptionViewModifiers(AlignmentLayout.center, false, false, false)).toEqual(['vertical', 'center']);
+    expect(getOptionViewModifiers(AlignmentLayout.center, false, false, false, false)).toEqual(['vertical', 'center']);
   });
 
-  it('should return the horizontal axis when not gap-auto', () => {
+  it('should return the horizontal axis when not gap-auto and not wrap', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, false, false);
 
     // result
     expect(modifiers).toEqual(['horizontal']);
@@ -67,7 +67,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should return the end cross-axis modifier for the bottom row when horizontal', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.bottomCenter, true, false, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.bottomCenter, true, false, false, false);
 
     // result
     expect(modifiers).toEqual(['horizontal', 'end']);
@@ -75,7 +75,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should return the horizontal-auto axis when isGapAutoHorizontal is true', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, true);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, true, false);
 
     // result
     expect(modifiers).toEqual(['horizontal-auto']);
@@ -83,7 +83,7 @@ describe('getOptionViewModifiers', () => {
 
   it('should not switch to horizontal-auto when only isGapAutoVertical is true', () => {
     // action
-    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, true, false);
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, true, false, false);
 
     // result
     expect(modifiers).toEqual(['horizontal']);
@@ -91,13 +91,45 @@ describe('getOptionViewModifiers', () => {
 
   it('should add the short modifier for the middle column (topCenter, center, bottomCenter) in horizontal-auto mode', () => {
     // result
-    expect(getOptionViewModifiers(AlignmentLayout.topCenter, true, false, true)).toEqual(['horizontal-auto', 'short']);
-    expect(getOptionViewModifiers(AlignmentLayout.center, true, false, true)).toEqual(['horizontal-auto', 'center', 'short']);
-    expect(getOptionViewModifiers(AlignmentLayout.bottomCenter, true, false, true)).toEqual(['horizontal-auto', 'end', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.topCenter, true, false, true, false)).toEqual(['horizontal-auto', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.center, true, false, true, false)).toEqual(['horizontal-auto', 'center', 'short']);
+    expect(getOptionViewModifiers(AlignmentLayout.bottomCenter, true, false, true, false)).toEqual(['horizontal-auto', 'end', 'short']);
   });
 
   it('should not add the short modifier for the middle column outside horizontal-auto mode', () => {
     // result
-    expect(getOptionViewModifiers(AlignmentLayout.center, true, false, false)).toEqual(['horizontal', 'center']);
+    expect(getOptionViewModifiers(AlignmentLayout.center, true, false, false, false)).toEqual(['horizontal', 'center']);
+  });
+
+  it('should return the horizontal-wrap axis when isWrap is true and gap is not auto', () => {
+    // action
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, false, true);
+
+    // result
+    expect(modifiers).toEqual(['horizontal-wrap']);
+  });
+
+  it('should prefer horizontal-auto over horizontal-wrap when both isGapAutoHorizontal and isWrap are true', () => {
+    // action
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, true, false, true, true);
+
+    // result
+    expect(modifiers).toEqual(['horizontal-auto']);
+  });
+
+  it('should not switch to horizontal-wrap on a vertical frame', () => {
+    // action
+    const modifiers = getOptionViewModifiers(AlignmentLayout.topLeft, false, false, false, true);
+
+    // result
+    expect(modifiers).toEqual(['vertical']);
+  });
+
+  it('should return the end cross-axis modifier for the bottom row in horizontal-wrap mode', () => {
+    // action
+    const modifiers = getOptionViewModifiers(AlignmentLayout.bottomCenter, true, false, false, true);
+
+    // result
+    expect(modifiers).toEqual(['horizontal-wrap', 'end']);
   });
 });

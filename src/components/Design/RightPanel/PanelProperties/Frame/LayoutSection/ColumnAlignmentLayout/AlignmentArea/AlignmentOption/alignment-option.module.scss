@@ -1,5 +1,6 @@
 @use './styles/horizontal-auto' as horizontalAuto;
 @use './styles/horizontal-layout' as horizontal;
+@use './styles/horizontal-wrap' as horizontalWrap;
 @use './styles/vertical-auto' as verticalAuto;
 @use './styles/vertical-layout' as vertical;
 
@@ -16,32 +17,6 @@
   padding: 0;
   position: relative;
   width: 100%;
-
-  &::before {
-    background-color: var(--color-neutral-2);
-    border-radius: 50%;
-    content: '';
-    height: 2.5px;
-    left: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 2.5px;
-  }
-
-  &:hover {
-    &::before {
-      opacity: 0;
-    }
-
-    #{$self}__indicator {
-      opacity: 1;
-    }
-  }
-
-  &[aria-pressed='true']::before {
-    opacity: 0;
-  }
 
   &__option-view {
     display: flex;
@@ -78,16 +53,25 @@
     &--end {
       align-items: flex-end;
     }
+
+    &--horizontal-wrap {
+      @include horizontalWrap.layout;
+
+      align-items: stretch;
+    }
   }
 
   &__indicator {
     background-color: var(--color-neutral-2);
     border-radius: 1px;
-    opacity: 0;
 
     &--selected {
       background-color: var(--color-blue-2);
-      opacity: 1;
+    }
+
+    &--highlighted {
+      background-color: var(--color-blue-2);
+      opacity: 0.5;
     }
   }
 }

@@ -26,6 +26,7 @@ export type TAlignmentAreaProps = {
   isGapAutoHorizontal?: boolean;
   isGapAutoVertical?: boolean;
   isHorizontal: boolean;
+  isWrap?: boolean;
   onClick: TFunc<[AlignmentLayout]>;
   value: AlignmentLayout;
 };
@@ -35,6 +36,7 @@ export const AlignmentArea: FC<TAlignmentAreaProps> = ({
   isGapAutoHorizontal = false,
   isGapAutoVertical = false,
   isHorizontal,
+  isWrap = false,
   onClick,
   value,
 }) => {
@@ -55,6 +57,7 @@ export const AlignmentArea: FC<TAlignmentAreaProps> = ({
             isHighlighted={isColumnHighlighted(alignment)}
             isHorizontal={isHorizontal}
             isSelected={isOptionSelected(alignment, value, isGapAutoVertical, isGapAutoHorizontal, isHorizontal)}
+            isWrap={isWrap}
             key={alignment}
             onClick={onClick}
             onMouseEnter={onMouseEnterOption}
