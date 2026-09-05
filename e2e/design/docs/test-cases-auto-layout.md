@@ -59,3 +59,22 @@ Worked around here by reselecting through the frame's own **Layers panel row** i
 unaffected. The underlying canvas-click bug is still open and worth its own investigation/fix; these
 tests don't attempt to root-cause or resolve it, only to route around it so Flow itself stays
 covered.
+
+## Rotated children
+
+| #   | Scenario                                                                                             | Unit |            E2E             |
+| --- | ---------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 1   | A child rotated to a non-90deg-multiple angle is packed by its rotated bounding box, not its raw one |  ✅  | ✅ `rotated-child.spec.ts` |
+
+Found from a real screenshot: a frame's rotated child visually overflowed the frame's own edge,
+because the real layout applier (`syncAutoLayoutChildren.ts`) measured and positioned every child by
+its raw, un-rotated `width`/`height`/`x`/`y` — correct for 0/90/180/270deg (where the rotated
+footprint is still a plain axis-aligned rectangle), but wrong for any other angle, where the true
+on-screen footprint is the rotated corners' axis-aligned bounding box (bigger, and offset from the
+raw box). Fixed via a new `getRotatedNodeBounds` store util, wired into every auto-layout
+size/position call site (the real applier, the drag-reorder sibling/ghost/render-preview code, and
+`getNodesBoundingBox`). The unit suite exhaustively covers the trig itself; this e2e test proves the
+full real pipeline (drag a child in, rotate it via `updateNode`, drag a second child in) actually
+clears the rotated footprint instead of overlapping it — rotation here is set directly via
+`updateNode` rather than the interactive rotate-handle drag, since that gesture is `rotate.spec.ts`'s
+own concern, not this one's.
