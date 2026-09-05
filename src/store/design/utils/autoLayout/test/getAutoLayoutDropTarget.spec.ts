@@ -133,4 +133,42 @@ describe('getAutoLayoutDropTarget', () => {
     // result — the minimum-gap floor still wins over the smaller real padding
     expect(dropTarget.indicator).toMatchObject({ x: 2, y: 2 });
   });
+
+  it('should report every real sibling’s own position, with a gap opened up for the dragged item', () => {
+    // action — two 20-tall siblings stacked with no gap; cursor lands the dragged item between them
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'b', width: 20 },
+      ],
+      { height: 20, width: 20 },
+      { x: 0, y: 25 },
+    );
+
+    // result — a is untouched at the top; b is pushed down by the dragged item's own 20px height
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.siblingPositions).toEqual({ a: { x: 0, y: 0 }, b: { x: 0, y: 40 } });
+  });
+
+  it('should never include the dragged placeholder itself in siblingPositions', () => {
+    // action
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [],
+      { height: 20, width: 30 },
+      { x: 50, y: 50 },
+    );
+
+    // result — no siblings at all, so the map is empty; specifically not `{ __dragged__: ... }`
+    expect(dropTarget.siblingPositions).toEqual({});
+  });
 });

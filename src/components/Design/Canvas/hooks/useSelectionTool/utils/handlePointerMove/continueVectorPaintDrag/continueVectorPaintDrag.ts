@@ -7,10 +7,10 @@ import { TCanvasRefs, TVectorDraggedFillFaces } from 'types/design/canvas/types'
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { paintNodeAlongPath } from './paintNodeAlongPath';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 // others
 import { MIN_DRAG_DISTANCE_PX } from '../../../../../constants';
@@ -28,9 +28,7 @@ export const continueVectorPaintDrag = (
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const nextPath = [...path, point];
-
     canvasRefs.vectorPaint.vectorPaintPathRef.current = nextPath;
-
     const [start] = nextPath;
     const hasDragged = nextPath.some(
       (pathPoint) => Math.hypot(pathPoint.x - start.x, pathPoint.y - start.y) >= MIN_DRAG_DISTANCE_PX / viewport.zoom,

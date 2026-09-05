@@ -61,7 +61,7 @@ describe('handleZoomToSelection', () => {
     const selectedId = addFrameNode(300);
     store.dispatch(setSelection([selectedId]));
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 100, x: 300, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action

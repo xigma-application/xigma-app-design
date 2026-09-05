@@ -2,13 +2,15 @@ import { useCallback, useMemo } from 'react';
 
 // store
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
-import { isVectorBoundAsTextPath } from 'store/design/utils/isVectorBoundAsTextPath';
 import { selectActivePage } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
+
+// utils
+import { isVectorBoundAsTextPath } from 'utils/canvas/vector/isVectorBoundAsTextPath';
 
 export type TUseTreeSourceResult = {
   getChildren: (item: TSceneNode) => TSceneNode[] | undefined;

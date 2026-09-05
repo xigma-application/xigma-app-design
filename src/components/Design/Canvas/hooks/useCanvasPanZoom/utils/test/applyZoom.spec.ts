@@ -3,7 +3,7 @@ import { ZOOM_MAX, ZOOM_MIN } from '../../../../constants';
 
 // utils
 import { applyZoom } from '../applyZoom';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 describe('applyZoom', () => {
   it('should increase zoom for a negative deltaY (scroll up / pinch out)', () => {

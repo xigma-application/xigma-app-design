@@ -5,7 +5,7 @@ import { TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from './getActivePage';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 
 export const syncPathTextNodesFromVector = (state: TDesignState, vectorNode: TVectorNode): void => {

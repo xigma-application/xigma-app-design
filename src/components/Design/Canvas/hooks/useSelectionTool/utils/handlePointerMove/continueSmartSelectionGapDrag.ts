@@ -12,8 +12,8 @@ import { TSmartSelectionGapDragState } from 'types/design/canvas/types';
 
 // utils
 import { dispatchSmartSelectionGapUpdates } from './dispatchSmartSelectionGapUpdates';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueSmartSelectionGapDrag = (
   canvas: HTMLCanvasElement,

@@ -8,7 +8,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { screenToWorld } from '../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const applyZoom = (viewport: TViewport, deltaY: number, cursor: TPoint): TViewport => {
   const step = Math.abs(deltaY) < ZOOM_DELTA_THRESHOLD ? ZOOM_STEP_TRACKPAD : ZOOM_STEP_WHEEL;

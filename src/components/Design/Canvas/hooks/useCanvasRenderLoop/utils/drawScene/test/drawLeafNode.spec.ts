@@ -28,7 +28,7 @@ const drawVectorNodeOrTextPathGuideMock = vi.fn();
 const getOrLoadTextureMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
 
-vi.mock('utils/canvas/drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
+vi.mock('../drawEllipseLeafNode/drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
 vi.mock('utils/canvas/drawEllipseArc', () => ({ drawEllipseArc: (...args: unknown[]): void => drawEllipseArcMock(...args) }));
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
 vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
@@ -47,7 +47,7 @@ vi.mock('utils/canvas/drawStar/drawStar', () => ({ drawStar: (...args: unknown[]
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
   drawThickOutline: (...args: unknown[]): void => drawThickOutlineMock(...args),
 }));
-vi.mock('../drawVectorNodeOrTextPathGuide', () => ({
+vi.mock('../drawVectorNodeOrTextPathGuide/drawVectorNodeOrTextPathGuide', () => ({
   drawVectorNodeOrTextPathGuide: (...args: unknown[]): void => drawVectorNodeOrTextPathGuideMock(...args),
 }));
 vi.mock('utils/canvas/getOrLoadTexture', () => ({ getOrLoadTexture: (...args: unknown[]): unknown => getOrLoadTextureMock(...args) }));
@@ -101,7 +101,9 @@ describe('drawLeafNode', () => {
     const node = rect({ strokeColor: '#000', strokeWidth: 2 });
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['r1']) },
       },
     });
@@ -112,6 +114,20 @@ describe('drawLeafNode', () => {
     // result — the fill is dimmed, but the stroke outline still draws at full opacity (not covered by this scope)
     expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.5 }, 200, 150, IDENTITY_VIEWPORT, 0);
     expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0);
+  });
+
+  it('should draw a rectangle at its live reorder-preview position instead of its real stored x/y', () => {
+    // mock
+    const node = rect({ x: 5, y: 15 });
+    const refs = createCanvasRefs({
+      transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { r1: { x: 40, y: 60 } } } } },
+    });
+
+    // action
+    drawLeafNode(context, node, new Map(), refs, {});
+
+    // result
+    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1, x: 40, y: 60 }, 200, 150, IDENTITY_VIEWPORT, 0);
   });
 
   it('should not dim a rectangle that is dragged but not currently over an auto-layout frame', () => {
@@ -131,7 +147,9 @@ describe('drawLeafNode', () => {
     const node = rect();
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['someone-else']) },
       },
     });
@@ -159,7 +177,9 @@ describe('drawLeafNode', () => {
     };
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['e1']) },
       },
     });
@@ -229,7 +249,9 @@ describe('drawLeafNode', () => {
     };
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['p1']) },
       },
     });
@@ -272,7 +294,9 @@ describe('drawLeafNode', () => {
     };
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['s1']) },
       },
     });
@@ -336,7 +360,9 @@ describe('drawLeafNode', () => {
     };
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['l1']) },
       },
     });
@@ -357,7 +383,7 @@ describe('drawLeafNode', () => {
       IDENTITY_VIEWPORT,
       0.5,
     );
-    expect(drawLineEndpointArrowheadsMock).toHaveBeenCalledWith(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineEndpointArrowheadsMock).toHaveBeenCalledWith(context, node);
   });
 
   it('should draw a path outline using its resolved style', () => {
@@ -380,7 +406,7 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, pathOutlineStyles, createCanvasRefs(), {});
 
     // result
-    expect(drawPathOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, { color: '#000' }, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawPathOutlineMock).toHaveBeenCalledWith(context, node, { color: '#000' });
   });
 
   it('should draw a vector node through the vector/text-path guide pipeline', () => {

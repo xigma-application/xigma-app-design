@@ -10,9 +10,9 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEdgeAtPointAcrossOpenNodes } from '../../../../utils/getVectorEdgeAtPointAcrossOpenNodes';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorCutHover = (
   canvas: HTMLCanvasElement,

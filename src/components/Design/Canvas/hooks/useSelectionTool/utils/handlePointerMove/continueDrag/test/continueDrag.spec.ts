@@ -6,7 +6,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
@@ -46,6 +46,7 @@ const createCanvasRefs = (): TCanvasRefs =>
     transform: {
       alignmentGuideRef: { current: null },
       autoLayoutDropTargetRef: { current: null },
+      autoLayoutReorderPreviewRef: { current: null },
       draggedNodeIdsRef: { current: null },
       dropTargetFrameIdRef: { current: null },
       equalSpacingGuidesRef: { current: null },
@@ -79,6 +80,30 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addRectNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
     addNode({ fill: '#00ff00', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addAutoLayoutFrameNode = (x: number, y: number, size = 300): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: size,
+      itemSpacing: 0,
+      layoutMode: LayoutMode.vertical,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -601,5 +626,59 @@ describe('continueDrag', () => {
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(frameId);
 
     dispatchSpy.mockRestore();
+  });
+
+  it('should hold a reordered child’s real position frozen and track the cursor through the reorder preview ref instead', () => {
+    // mock — a vertical auto-layout frame with two children; the first is dragged down past the second
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const draggedId = addRectNode(0, 0);
+    const siblingId = addRectNode(0, 100);
+
+    store.dispatch(moveNodes({ nodeIds: [draggedId, siblingId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([draggedId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [draggedId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — dragged 10px right, 150px down: still well inside the same frame, past the sibling
+    continueDrag(canvas, pointerEvent(10, 150), store.dispatch, dragStateRef, canvasRefs, setClassName, marqueeStartRef);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — the real node never moved (dispatch was suppressed)...
+    expect(selectActivePage(store.getState()).nodes[draggedId]).toMatchObject({ x: 0, y: 0 });
+
+    // ...while the preview ref tracks the cursor delta directly
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.positions[draggedId]).toEqual({ x: 10, y: 150 });
+  });
+
+  it('should dispatch the real position update normally once the reorder preview is no longer active', () => {
+    // mock — same setup, but no reorder preview armed (e.g. this tick landed outside the frame)
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const draggedId = addRectNode(0, 0);
+
+    store.dispatch(moveNodes({ nodeIds: [draggedId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([draggedId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [draggedId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — dragged out onto empty canvas, well clear of the frame
+    continueDrag(canvas, pointerEvent(900, 900), store.dispatch, dragStateRef, canvasRefs, setClassName, marqueeStartRef);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — the real node moved normally, since no reorder preview was armed for it
+    expect(selectActivePage(store.getState()).nodes[draggedId]).toMatchObject({ x: 900, y: 900 });
   });
 });

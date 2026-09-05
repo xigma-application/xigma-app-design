@@ -8,7 +8,7 @@ const useVectorWidthLabelEditorMock = vi.fn();
 vi.mock('components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext', () => ({
   useCanvasRefsContext: (): unknown => ({}),
 }));
-vi.mock('./hooks/useVectorWidthLabelEditor', () => ({
+vi.mock('./hooks/useVectorWidthLabelEditor/useVectorWidthLabelEditor', () => ({
   useVectorWidthLabelEditor: (): unknown => useVectorWidthLabelEditorMock(),
 }));
 

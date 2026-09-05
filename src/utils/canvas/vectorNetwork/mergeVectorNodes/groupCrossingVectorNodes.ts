@@ -3,7 +3,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { doVectorNodesCross } from './doVectorNodesCross';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { persistVectorNetworkCrossings } from '../planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export type TVectorNodeGroup = { combinedNode: TVectorNode; nodeIds: string[] };
@@ -47,8 +47,7 @@ const buildCombinedNode = (nodeIds: string[], bakedById: Map<string, TVectorNode
   };
 };
 
-export const groupCrossingVectorNodes = (nodes: TVectorNode[]): TVectorNodeGroup[] => {
-  const bakedById = new Map(nodes.map((node) => [node.id, getRenderedVectorNode(node)]));
+const buildCrossingAdjacency = (nodes: TVectorNode[], bakedById: Map<string, TVectorNode>): Map<string, Set<string>> => {
   const adjacency = new Map<string, Set<string>>(nodes.map((node) => [node.id, new Set<string>()]));
 
   for (let i = 0; i < nodes.length; i += 1) {
@@ -63,6 +62,14 @@ export const groupCrossingVectorNodes = (nodes: TVectorNode[]): TVectorNodeGroup
     }
   }
 
+  return adjacency;
+};
+
+const buildVectorNodeGroups = (
+  nodes: TVectorNode[],
+  adjacency: Map<string, Set<string>>,
+  bakedById: Map<string, TVectorNode>,
+): TVectorNodeGroup[] => {
   const visited = new Set<string>();
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const groups: TVectorNodeGroup[] = [];
@@ -76,4 +83,11 @@ export const groupCrossingVectorNodes = (nodes: TVectorNode[]): TVectorNodeGroup
   });
 
   return groups;
+};
+
+export const groupCrossingVectorNodes = (nodes: TVectorNode[]): TVectorNodeGroup[] => {
+  const bakedById = new Map(nodes.map((node) => [node.id, getRenderedVectorNode(node)]));
+  const adjacency = buildCrossingAdjacency(nodes, bakedById);
+
+  return buildVectorNodeGroups(nodes, adjacency, bakedById);
 };

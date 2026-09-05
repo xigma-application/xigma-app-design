@@ -11,9 +11,9 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { updatePenPreview } from './updatePenPreview';
 
 export const handlePointerMove = (

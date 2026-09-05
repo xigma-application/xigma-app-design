@@ -11,8 +11,8 @@ import { TPathOffsetDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getNearestPathOffsetAtPoint } from 'utils/canvas/shapes/getNearestPathOffsetAtPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continuePathOffsetDrag = (
   canvas: HTMLCanvasElement,

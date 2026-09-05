@@ -14,18 +14,14 @@ import { TFramePreset } from '../../../types';
 // utils
 import { getRectCenter } from 'components/Design/Canvas/utils/getRectCenter';
 import { getVisibleCanvasRect } from 'components/Design/Canvas/utils/getVisibleCanvasRect';
-import { screenToWorld } from 'components/Design/Canvas/utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { selectLastCreatedNode } from 'components/Design/Canvas/utils/selectLastCreatedNode';
 
 export const handleCreateFramePreset = (dispatch: AppDispatch, refs: TCanvasRefs, preset: TFramePreset): void => {
   const canvas = refs.canvasRef.current;
 
   if (canvas) {
-    const visibleRect = getVisibleCanvasRect(
-      canvas.getBoundingClientRect(),
-      refs.layout.leftPanelWidthRef.current,
-      refs.layout.rightPanelWidthRef.current,
-    );
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const worldCenter = screenToWorld(getRectCenter(visibleRect), selectViewport(store.getState()));
 
     dispatch(

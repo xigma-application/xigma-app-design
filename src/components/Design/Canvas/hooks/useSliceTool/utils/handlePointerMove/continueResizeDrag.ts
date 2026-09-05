@@ -10,11 +10,11 @@ import { TSliceResizeDragState } from '../../types';
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getResizedSliceBounds } from './getResizedSliceBounds';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { rotatePoint } from 'utils/math/rotatePoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueResizeDrag = (
   canvas: HTMLCanvasElement,

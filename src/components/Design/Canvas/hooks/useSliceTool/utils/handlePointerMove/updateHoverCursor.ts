@@ -11,13 +11,13 @@ import { store } from 'store';
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getSliceResizeHandleAtPoint } from '../getSliceResizeHandleAtPoint';
 import { getSliceRotateHandleAtPoint } from '../getSliceRotateHandleAtPoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const updateHoverCursor = (canvas: HTMLCanvasElement, event: PointerEvent, sliceRef: RefObject<TSliceDraft | null>): void => {
   const slice = sliceRef.current;

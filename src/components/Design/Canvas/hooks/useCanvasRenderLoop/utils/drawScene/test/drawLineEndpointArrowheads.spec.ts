@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TDrawContext } from '../types';
 
 // utils
 import { drawLineEndpointArrowheads } from '../drawLineEndpointArrowheads';
@@ -26,6 +27,15 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const BASE_LINE = { stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 } as const;
 
+const buildContext = (gl: WebGL2RenderingContext, program: WebGLProgram, buffer: WebGLBuffer): TDrawContext => ({
+  buffer,
+  canvasHeight: 100,
+  canvasWidth: 100,
+  gl,
+  program,
+  viewport: IDENTITY_VIEWPORT,
+});
+
 describe('drawLineEndpointArrowheads', () => {
   it('should draw nothing for a plain line with default endpoints', () => {
     // mock
@@ -34,7 +44,7 @@ describe('drawLineEndpointArrowheads', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawLineEndpointArrowheads(gl, program, buffer, BASE_LINE, 100, 100, IDENTITY_VIEWPORT);
+    drawLineEndpointArrowheads(buildContext(gl, program, buffer), BASE_LINE);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -47,7 +57,7 @@ describe('drawLineEndpointArrowheads', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawLineEndpointArrowheads(gl, program, buffer, { ...BASE_LINE, endPoint: 'arrow' }, 100, 100, IDENTITY_VIEWPORT);
+    drawLineEndpointArrowheads(buildContext(gl, program, buffer), { ...BASE_LINE, endPoint: 'arrow' });
 
     // result — 2 wing quads + 3 round-cap fills, per drawArrowhead
     expect(gl.drawArrays).toHaveBeenCalledTimes(5);
@@ -60,7 +70,7 @@ describe('drawLineEndpointArrowheads', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawLineEndpointArrowheads(gl, program, buffer, { ...BASE_LINE, endPoint: 'arrow', startPoint: 'arrow' }, 100, 100, IDENTITY_VIEWPORT);
+    drawLineEndpointArrowheads(buildContext(gl, program, buffer), { ...BASE_LINE, endPoint: 'arrow', startPoint: 'arrow' });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(10);
@@ -73,15 +83,15 @@ describe('drawLineEndpointArrowheads', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawLineEndpointArrowheads(
-      gl,
-      program,
-      buffer,
-      { endPoint: 'arrow', stroke: '#000000', type: NodeType.line, x1: 5, x2: 5, y1: 5, y2: 5 },
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-    );
+    drawLineEndpointArrowheads(buildContext(gl, program, buffer), {
+      endPoint: 'arrow',
+      stroke: '#000000',
+      type: NodeType.line,
+      x1: 5,
+      x2: 5,
+      y1: 5,
+      y2: 5,
+    });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

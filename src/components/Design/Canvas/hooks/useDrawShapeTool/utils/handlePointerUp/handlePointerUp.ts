@@ -5,7 +5,7 @@ import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 import { DEFAULT_SHAPE_SIZE } from '../../../../constants';
 
 // store
-import { addNode, setActiveTool } from 'store/design/slice';
+import { setActiveTool } from 'store/design/slice';
 import { endHistoryGesture } from 'store/history/actions';
 import { AppDispatch, AppStore } from 'store';
 
@@ -17,9 +17,10 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { dispatchShapeNode } from './dispatchShapeNode';
 import { getPointAlignmentSnap } from '../../../../utils/getPointAlignmentSnap';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { selectLastCreatedNode } from '../../../../utils/selectLastCreatedNode';
 import { toDraftRectWithDefault } from '../../../../utils/toDraftRectWithDefault';
 
@@ -41,14 +42,7 @@ export const handlePointerUp = (
     const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
     const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
-    if (type === NodeType.frame) {
-      dispatch(addNode({ ...rect, childIds: [], clipContent: true, fill, name, parentId: null, rotation: 0, type }));
-    } else if (type === NodeType.section) {
-      dispatch(addNode({ ...rect, childIds: [], fill, name, parentId: null, rotation: 0, type }));
-    } else {
-      dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, type }));
-    }
-
+    dispatchShapeNode(dispatch, rect, fill, name, type);
     selectLastCreatedNode(dispatch, appStore);
 
     startRef.current = null;

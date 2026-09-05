@@ -1,22 +1,22 @@
-import { RefObject } from 'react';
-
 // types
+import { TPencilDragRefs } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { getAxisLockedPoint, type TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const foldPendingAxisLock = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   viewport: TViewport,
   tail: TPoint[],
-  axisLockRef: RefObject<TAxisLock | null>,
-  shiftAnchorRef: RefObject<TPoint | null>,
+  pencilDragRefs: TPencilDragRefs,
 ): void => {
+  const { axisLockRef, shiftAnchorRef } = pencilDragRefs;
+
   if (axisLockRef.current && shiftAnchorRef.current) {
     const currentPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
 

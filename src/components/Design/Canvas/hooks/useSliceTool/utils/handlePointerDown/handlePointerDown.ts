@@ -16,12 +16,12 @@ import { armMoveDrag } from './armMoveDrag';
 import { armResizeDrag } from './armResizeDrag';
 import { armRotateDrag } from './armRotateDrag';
 import { discardSlice } from './discardSlice';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRotatedBoundingBox } from 'utils/canvas/getRotatedBoundingBox';
 import { getSliceResizeHandleAtPoint } from '../getSliceResizeHandleAtPoint';
 import { getSliceRotateHandleAtPoint } from '../getSliceRotateHandleAtPoint';
 import { isPointInRect } from '../../../../utils/isPointInRect';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,

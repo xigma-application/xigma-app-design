@@ -7,7 +7,9 @@ describe('getAutoLayoutDragOpacity', () => {
     // mock
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['a']) },
       },
     });
@@ -28,7 +30,9 @@ describe('getAutoLayoutDragOpacity', () => {
     // mock
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         draggedNodeIdsRef: { current: new Set(['a']) },
       },
     });
@@ -41,7 +45,9 @@ describe('getAutoLayoutDragOpacity', () => {
     // mock
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
       },
     });
 

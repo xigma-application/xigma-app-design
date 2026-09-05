@@ -2,12 +2,15 @@
 import { TImageRenderContext } from '../../types';
 import { TViewport } from 'types/design/types';
 
-export type TDrawSceneContext = {
+export type TDrawContext = {
   buffer: WebGLBuffer;
   canvasHeight: number;
   canvasWidth: number;
   gl: WebGL2RenderingContext;
-  imageContext: TImageRenderContext;
   program: WebGLProgram;
   viewport: TViewport;
+};
+
+export type TDrawSceneContext = TDrawContext & {
+  imageContext: TImageRenderContext;
 };

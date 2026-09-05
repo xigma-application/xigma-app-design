@@ -11,10 +11,10 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { getCollidedNodes } from '../../../../utils/getCollidedNodes';
 import { getMarqueeLeafNodes } from './getMarqueeLeafNodes';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isControlPressed } from 'utils/isControlPressed';
 import { pruneMarqueeDescendants } from './pruneMarqueeDescendants';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toDraftRect } from '../../../../utils/toDraftRect';
 
 export const continueMarqueeDrag = (

@@ -25,7 +25,9 @@ describe('drawAutoLayoutDropIndicator', () => {
     // mock
     const refs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 30, x: 10, y: 20 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'f1', index: 0, indicator: { height: 2, width: 30, x: 10, y: 20 }, siblingPositions: {} },
+        },
       },
     });
 

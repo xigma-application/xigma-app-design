@@ -12,9 +12,9 @@ import { TDraftEntity } from 'types/design/types';
 
 // utils
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { roundRect } from 'utils/math/roundRect';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,

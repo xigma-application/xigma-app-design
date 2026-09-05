@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 // others
 import { PENCIL_SIMPLIFY_TOLERANCE_PX } from '../../../../constants';
 
@@ -8,14 +6,13 @@ import { selectViewport } from 'store/design/selectors';
 import { AppStore } from 'store';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../types';
 
 // utils
-import { advancePencilTail } from './advancePencilTail';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { advancePencilTail } from './advancePencilTail/advancePencilTail';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { updateRawPreview } from './updateRawPreview';
 import { updateShiftLockedPreview } from './updateShiftLockedPreview';
 
@@ -24,15 +21,11 @@ export const handlePointerMove = (
   event: PointerEvent,
   appStore: AppStore,
   refs: TCanvasRefs,
-  committedPointsRef: RefObject<TPoint[] | null>,
-  tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TAxisLock | null>,
-  shiftAnchorRef: RefObject<TPoint | null>,
-  rawPointsRef: RefObject<TPoint[] | null>,
+  pencilDragRefs: TPencilDragRefs,
 ): void => {
-  const committed = committedPointsRef.current;
-  const tail = tailPointsRef.current;
-  const rawPoints = rawPointsRef.current;
+  const committed = pencilDragRefs.committedPointsRef.current;
+  const tail = pencilDragRefs.tailPointsRef.current;
+  const rawPoints = pencilDragRefs.rawPointsRef.current;
 
   if (committed && tail && rawPoints) {
     const viewport = selectViewport(appStore.getState());
@@ -42,20 +35,9 @@ export const handlePointerMove = (
     updateRawPreview(event, refs, rawPoints, currentPoint);
 
     if (event.shiftKey) {
-      updateShiftLockedPreview(refs, committed, tail, axisLockRef, shiftAnchorRef, currentPoint, viewport.zoom, tolerance);
+      updateShiftLockedPreview(refs, pencilDragRefs, committed, tail, currentPoint, viewport.zoom, tolerance);
     } else {
-      advancePencilTail(
-        refs,
-        committedPointsRef,
-        tailPointsRef,
-        axisLockRef,
-        shiftAnchorRef,
-        committed,
-        tail,
-        currentPoint,
-        viewport.zoom,
-        tolerance,
-      );
+      advancePencilTail(refs, pencilDragRefs, committed, tail, currentPoint, viewport.zoom, tolerance);
     }
   }
 };

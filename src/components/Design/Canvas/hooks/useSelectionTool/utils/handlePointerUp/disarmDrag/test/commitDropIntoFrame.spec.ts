@@ -213,7 +213,7 @@ describe('commitDropIntoFrame', () => {
 
     const canvasRefs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId, index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: { current: { frameId, index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} } },
         dropTargetFrameIdRef: { current: frameId },
       },
     });
@@ -237,7 +237,9 @@ describe('commitDropIntoFrame', () => {
 
     const canvasRefs = createCanvasRefs({
       transform: {
-        autoLayoutDropTargetRef: { current: { frameId: 'stale-frame', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 } } },
+        autoLayoutDropTargetRef: {
+          current: { frameId: 'stale-frame', index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} },
+        },
         dropTargetFrameIdRef: { current: frameId },
       },
     });
@@ -262,6 +264,53 @@ describe('commitDropIntoFrame', () => {
     commitDropIntoFrame(store.dispatch, dragState(true), createCanvasRefs({ transform: { dropTargetFrameIdRef: { current: frameId } } }));
 
     // result — still exactly one entry in childIds, not reordered/duplicated
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([rectId]);
+  });
+
+  it('should commit a same-parent auto-layout reorder using the preview’s active index', () => {
+    // mock — two children of an auto-layout frame; the second (dragged) is being reordered before the first
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const firstId = addRectNode(0, 0);
+    const draggedId = addRectNode(0, 100);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId, draggedId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([draggedId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId, positions: {} } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — moved to index 0, ahead of the first child
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([draggedId, firstId]);
+  });
+
+  it('should ignore a stale reorder preview left over from a different auto-layout frame', () => {
+    // mock — the preview ref still points at some other frame id, so it must not be trusted here
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const rectId = addRectNode(50, 50);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([rectId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'stale-frame', positions: {} } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action — dropped back over its own current parent; only a matching preview should trigger a commit
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — no reorder happened
     const page = selectActivePage(store.getState());
     expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([rectId]);
   });

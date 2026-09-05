@@ -23,7 +23,7 @@ import { handleCopySelection } from './utils/handleCopySelection';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
 import { handleEnterTextEdit } from './utils/handleEnterTextEdit';
-import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
+import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit/handleEnterVectorEdit';
 import { handleFlattenSelection } from './utils/handleFlattenSelection';
 import { handleFlipSelection } from './utils/handleFlipSelection';
 import { handleGroupSelection } from './utils/handleGroupSelection';

@@ -15,7 +15,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { applyDragPan } from './utils/applyDragPan';
-import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 
 export const useCanvasDragPan = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;

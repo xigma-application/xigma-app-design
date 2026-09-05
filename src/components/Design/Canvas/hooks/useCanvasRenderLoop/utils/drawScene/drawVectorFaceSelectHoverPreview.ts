@@ -9,7 +9,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorFaceSelectHoverPreview = (

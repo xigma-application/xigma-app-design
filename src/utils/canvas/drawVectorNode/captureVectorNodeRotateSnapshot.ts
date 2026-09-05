@@ -4,7 +4,7 @@ import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';

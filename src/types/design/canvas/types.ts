@@ -260,10 +260,13 @@ export type TVectorSnapshotsRefs = {
 
 export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: string };
 
+export type TAutoLayoutReorderPreview = { activeIndex: number; frameId: string; positions: Record<string, TPoint> };
+
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>;
   autoLayoutDropTargetRef: RefObject<TAutoLayoutDropTargetHover | null>;
+  autoLayoutReorderPreviewRef: RefObject<TAutoLayoutReorderPreview | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;

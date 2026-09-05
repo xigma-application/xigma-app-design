@@ -10,7 +10,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawVectorCutPointMarker } from './drawVectorCutPointMarker';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorCutHoverPreview = (context: TDrawSceneContext, nodes: Record<string, TSceneNode>, refs: TCanvasRefs): void => {

@@ -11,11 +11,11 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
 import { getCornerRadiusHandleSetbackMultiplier } from 'utils/canvas/cornerRadius/getCornerRadiusHandleSetbackMultiplier';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { getVertexAngles } from 'utils/math/getVertexAngles';
 import { normalizeVector } from 'utils/math/normalizeVector';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 type TShapeCornerRadiusDragState = {
   bounds: TDraftRect;

@@ -10,7 +10,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorChainFractionAtPosition } from 'utils/canvas/vectorNetwork/getVectorChainFractionAtPosition';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
@@ -19,7 +19,10 @@ import { getVectorCutHitAtPoint } from '../../../../utils/getVectorCutHitAtPoint
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorSegmentNormalAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentNormalAtT';
 import { getVectorSegmentPointAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentPointAtT';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
+
+const getWidthPointDelta = (isNewPoint: boolean, currentSignedDistance: number, armSignedDistance: number, sideSign: number): number =>
+  isNewPoint ? Math.abs(currentSignedDistance) - Math.abs(armSignedDistance) : (currentSignedDistance - armSignedDistance) * sideSign;
 
 export const continueVectorWidthPointDrag = (
   canvas: HTMLCanvasElement,
@@ -52,9 +55,7 @@ export const continueVectorWidthPointDrag = (
         const currentSignedDistance = (worldPoint.x - anchor.x) * normal.x + (worldPoint.y - anchor.y) * normal.y;
         const armSignedDistance = (drag.armWorldPoint.x - anchor.x) * normal.x + (drag.armWorldPoint.y - anchor.y) * normal.y;
         const sideSign = drag.target === 'right' ? -1 : 1;
-        const delta = drag.isNewPoint
-          ? Math.abs(currentSignedDistance) - Math.abs(armSignedDistance)
-          : (currentSignedDistance - armSignedDistance) * sideSign;
+        const delta = getWidthPointDelta(drag.isNewPoint, currentSignedDistance, armSignedDistance, sideSign);
         const distance = Math.max(0, drag.armMagnitude + delta);
 
         drag.point.leftOffset = distance;

@@ -4,7 +4,7 @@ import { TLineSegment } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { screenToWorld } from 'components/Design/Canvas/utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const getGuideSegment = (guide: TGuideLine, canvasWidth: number, canvasHeight: number, viewport: TViewport): TLineSegment => {
   if (guide.span) {

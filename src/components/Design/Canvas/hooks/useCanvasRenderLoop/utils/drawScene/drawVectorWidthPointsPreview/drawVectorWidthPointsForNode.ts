@@ -5,7 +5,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 // utils
 import { drawWidthPointHandles } from './drawWidthPointHandles';
 import { getPreviewWidthPoints } from './getPreviewWidthPoints';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { isVectorWidthHandleSelected } from './isVectorWidthHandleSelected';

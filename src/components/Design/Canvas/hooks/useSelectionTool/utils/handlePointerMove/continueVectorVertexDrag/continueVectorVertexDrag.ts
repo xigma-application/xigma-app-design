@@ -13,11 +13,11 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 // utils
 import { getAllVectorVertexPositions } from '../../../../../utils/getAllVectorVertexPositions';
 import { getGroupAlignmentGuide } from '../../../../../utils/getGroupAlignmentGuide';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { resolveVectorVertexMerge } from './resolveVectorVertexMerge';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { translateVectorVertices } from '../../../../../utils/translateVectorVertices';
 
 export const continueVectorVertexDrag = (

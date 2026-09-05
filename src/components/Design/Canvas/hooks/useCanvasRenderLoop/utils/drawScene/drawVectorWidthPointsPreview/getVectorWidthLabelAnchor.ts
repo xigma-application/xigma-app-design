@@ -4,7 +4,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorWidthLabelTarget } from './getVectorWidthLabelTargets';
 
 // utils
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from 'utils/canvas/vectorNetwork/getVectorChainPositionAtFraction';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';

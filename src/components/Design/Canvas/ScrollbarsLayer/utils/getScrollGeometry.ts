@@ -1,5 +1,6 @@
 // types
 import { TDraftRect } from 'types/canvas';
+import { TLayoutRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
@@ -28,14 +29,8 @@ const getContentBoundsWorld = (nodes: TSceneNode[], viewport: TViewport, visible
   };
 };
 
-export const getScrollGeometry = (
-  canvasRect: DOMRect,
-  leftPanelWidth: number,
-  rightPanelWidth: number,
-  nodes: TSceneNode[],
-  viewport: TViewport,
-): TScrollGeometry => {
-  const visibleRect = getVisibleCanvasRect(canvasRect, leftPanelWidth, rightPanelWidth);
+export const getScrollGeometry = (canvasRect: DOMRect, layout: TLayoutRefs, nodes: TSceneNode[], viewport: TViewport): TScrollGeometry => {
+  const visibleRect = getVisibleCanvasRect(canvasRect, layout);
   const contentBoundsWorld = getContentBoundsWorld(nodes, viewport, visibleRect);
   const range = getScrollRange(contentBoundsWorld, viewport, visibleRect);
   const contentScreen: TDraftRect = {

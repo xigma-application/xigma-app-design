@@ -11,10 +11,10 @@ import { TCornerRadiusDragState } from 'types/design/canvas/types';
 // utils
 import { getCornerRadiusFromPoint } from 'utils/canvas/cornerRadius/getCornerRadiusFromPoint';
 import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { resolveCornerFromDirection } from 'utils/canvas/cornerRadius/resolveCornerFromDirection';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueCornerRadiusDrag = (
   canvas: HTMLCanvasElement,

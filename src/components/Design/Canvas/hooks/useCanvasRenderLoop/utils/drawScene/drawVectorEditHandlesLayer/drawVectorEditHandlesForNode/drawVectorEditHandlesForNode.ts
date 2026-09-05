@@ -10,7 +10,7 @@ import { drawVectorEdgeInsertPreview } from '../drawVectorEdgeInsertPreview';
 import { drawVectorTangentHandles } from '../drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from '../drawVectorVertexDots/drawVectorVertexDots';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds/getOneHopVectorVertexIds';
-import { getRenderedVectorNode } from '../../../../../../utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 

@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getRenderedVectorNode } from '../getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { isPointInVectorRegions } from '../isPointInVectorRegions';
 import { isPointNearVectorPath } from '../isPointNearVectorPath';
 

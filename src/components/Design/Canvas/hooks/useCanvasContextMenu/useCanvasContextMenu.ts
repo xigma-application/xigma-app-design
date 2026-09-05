@@ -13,9 +13,9 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getSelectionHitAtPoint } from '../useSelectionTool/utils/handlePointerDown/getSelectionHitAtPoint/getSelectionHitAtPoint';
-import { screenToWorld } from '../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export type TUseCanvasContextMenuResult = TUseContextMenuResult & {
   hitNode: TSceneNode | null;

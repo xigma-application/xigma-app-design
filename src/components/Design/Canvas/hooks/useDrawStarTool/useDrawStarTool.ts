@@ -1,30 +1,19 @@
 import { useEffect, useRef } from 'react';
 
-// others
-import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
-import { DEFAULT_SHAPE_SIZE } from '../../constants';
-
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
-import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
-import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActiveTool, selectNodes, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { NodeType, ToolName } from 'types/design/enums';
-import { MouseButton } from 'types/enums';
+import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getCandidateShapes, type TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
-import { getPointAlignmentSnap } from '../../utils/getPointAlignmentSnap';
-import { getPointerPosition } from '../../utils/getPointerPosition';
-import { getShapeDraftRect } from '../../utils/getShapeDraftRect';
-import { screenToWorld } from '../../utils/screenToWorld';
-import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
-import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
+import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
+import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
+import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
+import { TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
 
 export type TStarToolConfig = {
   fill: string;
@@ -35,8 +24,7 @@ export type TStarToolConfig = {
 };
 
 export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, tool }: TStarToolConfig): void => {
-  const { canvasRef, draftRef } = refs;
-  const { alignmentGuideRef, aspectRatioLockGuideRef } = refs.transform;
+  const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
@@ -44,82 +32,32 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
   const startRef = useRef<TPoint | null>(null);
   const candidateShapesRef = useRef<TCandidateShape[]>([]);
 
-  const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (event.button === MouseButton.primary) {
-      dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-      dispatch(setSelection([]));
-      startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
-      candidateShapesRef.current = getCandidateShapes(selectNodes(appStore.getState()), []);
-      canvas.setPointerCapture(event.pointerId);
-    }
-  };
+  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef);
 
-  const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (startRef.current) {
-      const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = getShapeDraftRect(startRef.current, snap.point, event.shiftKey);
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerMove(canvas, event, refs, viewport, startRef, candidateShapesRef, fill, points, ratio);
 
-      draftRef.current = { ...rect, fill, points, ratio, type: NodeType.star };
-      alignmentGuideRef.current = snap.guide;
-      aspectRatioLockGuideRef.current = event.shiftKey ? { ...rect, rotation: 0 } : null;
-    }
-  };
-
-  const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (startRef.current) {
-      const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
-
-      dispatch(
-        addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, points, ratio, rotation: 0, type: NodeType.star }),
-      );
-      selectLastCreatedNode(dispatch, appStore);
-
-      startRef.current = null;
-      draftRef.current = null;
-      alignmentGuideRef.current = null;
-      aspectRatioLockGuideRef.current = null;
-      canvas.releasePointerCapture(event.pointerId);
-      dispatch(setActiveTool(ToolName.default));
-    }
-
-    dispatch(endHistoryGesture());
-  };
+  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef, fill, name, points, ratio);
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
     if (canvas && activeTool === tool) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
-      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event);
+      const onPointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event);
+      const onPointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event);
+      const onPointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event);
 
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('pointerdown', onPointerDownListener);
+      canvas.addEventListener('pointermove', onPointerMoveListener);
+      canvas.addEventListener('pointerup', onPointerUpListener);
 
       return (): void => {
-        canvas.removeEventListener('pointerdown', onPointerDown);
-        canvas.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('pointerdown', onPointerDownListener);
+        canvas.removeEventListener('pointermove', onPointerMoveListener);
+        canvas.removeEventListener('pointerup', onPointerUpListener);
       };
     }
-  }, [
-    activeTool,
-    alignmentGuideRef,
-    appStore,
-    aspectRatioLockGuideRef,
-    canvasRef,
-    dispatch,
-    draftRef,
-    fill,
-    name,
-    points,
-    ratio,
-    refs,
-    tool,
-    viewport,
-  ]);
+  }, [activeTool, appStore, canvasRef, dispatch, fill, name, points, ratio, refs, tool, viewport]);
 };

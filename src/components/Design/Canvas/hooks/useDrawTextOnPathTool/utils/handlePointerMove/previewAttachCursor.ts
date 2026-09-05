@@ -3,8 +3,8 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { getEligibleVectorAtPoint } from '../getEligibleVectorAtPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const previewAttachCursor = (
   canvas: HTMLCanvasElement,

@@ -13,13 +13,13 @@ import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
-import { getPointAlignmentSnap } from 'components/Design/Canvas/utils/getPointAlignmentSnap';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { getRawResizeSnap } from './getRawResizeSnap';
 import { getResizeAnchorSolver } from './getResizeAnchorSolver';
 import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
 import { maskSnapToActiveAxes } from './maskSnapToActiveAxes';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export type TResizeDragFrame = {
   alignmentGuide: TAlignmentGuide | null;
@@ -31,8 +31,6 @@ export type TResizeDragFrame = {
 };
 
 type TSingleRotatableOrigin = Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number }> | null;
-
-const isSnappableSingleOrigin = (origin: TSingleRotatableOrigin): boolean => !origin || (origin.rotation === 0 && 'width' in origin);
 
 export const getResizeDragFrame = (
   canvas: HTMLCanvasElement,
@@ -48,9 +46,7 @@ export const getResizeDragFrame = (
   const viewport = selectViewport(store.getState());
   const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
   const queryPoint = getResizeQueryPoint(rawPoint, bounds, singleRotatableOrigin);
-  const rawSnap = isSnappableSingleOrigin(singleRotatableOrigin)
-    ? getPointAlignmentSnap(queryPoint, candidateShapes, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom)
-    : { guide: null, point: queryPoint };
+  const rawSnap = getRawResizeSnap(queryPoint, candidateShapes, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom, singleRotatableOrigin);
   const affectsWidth = handle.includes('e') || handle.includes('w');
   const affectsHeight = handle.includes('n') || handle.includes('s');
   const snap = maskSnapToActiveAxes(rawSnap, queryPoint, affectsWidth, affectsHeight);

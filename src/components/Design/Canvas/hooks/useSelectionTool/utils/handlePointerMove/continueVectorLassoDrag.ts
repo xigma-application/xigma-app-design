@@ -7,10 +7,10 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorPointsInPolygon } from 'utils/canvas/vectorNetwork/getVectorPointsInPolygon';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueVectorLassoDrag = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs): void => {
   if (canvasRefs.lassoMarquee.vectorLassoPathRef.current) {

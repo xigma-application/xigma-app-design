@@ -13,11 +13,11 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { clearVectorSegmentHover } from './clearVectorSegmentHover';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEdgeAtPointAcrossOpenNodes } from '../../../../../utils/getVectorEdgeAtPointAcrossOpenNodes';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { resolveVectorSegmentHoverInNode } from './resolveVectorSegmentHoverInNode';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorSegmentHover = (
   canvas: HTMLCanvasElement,

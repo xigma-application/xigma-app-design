@@ -9,8 +9,8 @@ import { TSmartSelectionSwapDragState } from 'types/design/canvas/types';
 
 // utils
 import { dispatchSmartSelectionSwapUpdates } from './dispatchSmartSelectionSwapUpdates';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const getNearestSlotIndex = (slots: TSmartSelectionSwapDragState['slots'], pointX: number, pointY: number): number => {
   let nearestIndex = 0;

@@ -5,12 +5,15 @@ import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
+// hooks
+import { usePencilDragRefs } from './hooks/usePencilDragRefs/usePencilDragRefs';
+
 // utils
+import { handleKeyChange } from './utils/handleKeyChange/handleKeyChange';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
@@ -21,54 +24,25 @@ export const useDrawPencilTool = (refs: TCanvasRefs): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
-  const committedPointsRef = useRef<TPoint[] | null>(null);
-  const tailPointsRef = useRef<TPoint[] | null>(null);
-  const axisLockRef = useRef<TAxisLock | null>(null);
-  const shiftAnchorRef = useRef<TPoint | null>(null);
-  const rawPointsRef = useRef<TPoint[] | null>(null);
+  const pencilDragRefs = usePencilDragRefs();
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
-    handlePointerDown(
-      canvas,
-      event,
-      dispatch,
-      appStore,
-      refs,
-      committedPointsRef,
-      tailPointsRef,
-      axisLockRef,
-      shiftAnchorRef,
-      rawPointsRef,
-    );
+    handlePointerDown(canvas, event, dispatch, appStore, refs, pencilDragRefs);
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
-    handlePointerMove(canvas, event, appStore, refs, committedPointsRef, tailPointsRef, axisLockRef, shiftAnchorRef, rawPointsRef);
+    handlePointerMove(canvas, event, appStore, refs, pencilDragRefs);
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    handlePointerUp(canvas, event, dispatch, appStore, refs, committedPointsRef, tailPointsRef, axisLockRef, shiftAnchorRef, rawPointsRef);
+    handlePointerUp(canvas, event, dispatch, appStore, refs, pencilDragRefs);
   };
 
   const onModifierKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void => {
-    if ((event.key === 'Shift' || event.key === 'Control' || event.key === 'Meta') && lastPointerClientPositionRef.current) {
-      const { x, y } = lastPointerClientPositionRef.current;
-
-      onPointerMove(
-        canvas,
-        new PointerEvent('pointermove', {
-          clientX: x,
-          clientY: y,
-          ctrlKey: event.ctrlKey,
-          metaKey: event.metaKey,
-          pointerId: -1,
-          shiftKey: event.shiftKey,
-        }),
-      );
-    }
+    handleKeyChange(canvas, event, onPointerMove, lastPointerClientPositionRef.current);
   };
 
   useEffect(() => {
@@ -93,16 +67,16 @@ export const useDrawPencilTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', pointerUpListener);
         window.removeEventListener('keydown', modifierKeyDownListener);
         window.removeEventListener('keyup', modifierKeyUpListener);
-        committedPointsRef.current = null;
-        tailPointsRef.current = null;
-        axisLockRef.current = null;
-        shiftAnchorRef.current = null;
-        rawPointsRef.current = null;
+        pencilDragRefs.committedPointsRef.current = null;
+        pencilDragRefs.tailPointsRef.current = null;
+        pencilDragRefs.axisLockRef.current = null;
+        pencilDragRefs.shiftAnchorRef.current = null;
+        pencilDragRefs.rawPointsRef.current = null;
         lastPointerClientPositionRef.current = null;
         pencilPreviewPointsRef.current = null;
         refs.pencil.pencilRawPreviewPointsRef.current = null;
         refs.pencil.pencilShowRawPreviewRef.current = false;
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, pencilPreviewPointsRef, refs]);
+  }, [activeTool, appStore, canvasRef, dispatch, pencilDragRefs, pencilPreviewPointsRef, refs]);
 };

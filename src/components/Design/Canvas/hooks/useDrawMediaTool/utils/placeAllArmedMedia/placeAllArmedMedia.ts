@@ -11,11 +11,18 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
-import { getPlaceAllRects } from './getPlaceAllRects';
+import { getPlaceAllRects, TPlacedMedia } from './getPlaceAllRects';
 import { getRectCenter } from '../../../../utils/getRectCenter';
 import { getVisibleCanvasRect } from '../../../../utils/getVisibleCanvasRect';
 import { loadAllQueuedMedia } from './loadAllQueuedMedia';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
+
+const addPlacedMediaNodes = (dispatch: AppDispatch, appStore: AppStore, placedMedia: TPlacedMedia[], name: string): void => {
+  placedMedia.forEach(({ media, rect }) => {
+    dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: media.src, type: NodeType.media }));
+    appendLastCreatedNodeToSelection(dispatch, appStore);
+  });
+};
 
 export const placeAllArmedMedia = async (
   canvas: HTMLCanvasElement,
@@ -30,21 +37,12 @@ export const placeAllArmedMedia = async (
 
   if (armed || queue.length > 0) {
     const mediaList = await loadAllQueuedMedia(armed, queue);
-    const visibleRect = getVisibleCanvasRect(
-      canvas.getBoundingClientRect(),
-      refs.layout.leftPanelWidthRef.current,
-      refs.layout.rightPanelWidthRef.current,
-    );
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const worldCenter = screenToWorld(getRectCenter(visibleRect), selectViewport(appStore.getState()));
     const placedMedia = getPlaceAllRects(mediaList, worldCenter);
 
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-
-    placedMedia.forEach(({ media, rect }) => {
-      dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: media.src, type: NodeType.media }));
-      appendLastCreatedNodeToSelection(dispatch, appStore);
-    });
-
+    addPlacedMediaNodes(dispatch, appStore, placedMedia, name);
     dispatch(endHistoryGesture());
     dispatch(setActiveTool(ToolName.default));
   }

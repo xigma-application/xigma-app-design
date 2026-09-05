@@ -19,11 +19,15 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
     const targetFrame = dropTargetFrameId ? page.nodes[dropTargetFrameId] : null;
     const targetParentId = targetFrame && isContainerNode(targetFrame) ? targetFrame.id : null;
     const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
+    const reorderPreview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
+    const matchingReorderPreview =
+      targetParentId !== null && targetParentId === currentParentId && reorderPreview?.frameId === targetParentId ? reorderPreview : null;
 
-    if (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot)) {
+    if (matchingReorderPreview || (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot))) {
       const autoLayoutDropTarget = canvasRefs.transform.autoLayoutDropTargetRef.current;
-      const targetIndex =
-        autoLayoutDropTarget && autoLayoutDropTarget.frameId === targetParentId
+      const targetIndex = matchingReorderPreview
+        ? matchingReorderPreview.activeIndex
+        : autoLayoutDropTarget && autoLayoutDropTarget.frameId === targetParentId
           ? autoLayoutDropTarget.index
           : targetFrame && isContainerNode(targetFrame)
             ? targetFrame.childIds.length

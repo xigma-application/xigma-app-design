@@ -1,0 +1,162 @@
+// store
+import { addNode, deleteNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+import { TLayoutRefs } from 'types/design/canvas/types';
+import { TFrozenRangeRefs, TScrollbarDragRefs, TScrollbarElementRefs } from '../../../../types';
+
+// utils
+import { renderFrame } from '../renderFrame';
+
+const createElements = (): TScrollbarElementRefs => ({
+  horizontalThumbRef: { current: document.createElement('div') },
+  horizontalTrackRef: { current: document.createElement('div') },
+  verticalThumbRef: { current: document.createElement('div') },
+  verticalTrackRef: { current: document.createElement('div') },
+});
+
+const createDragging = (x = false, y = false): TScrollbarDragRefs => ({ x: { current: x }, y: { current: y } });
+
+const createFrozenRange = (): TFrozenRangeRefs => ({ x: { current: null }, y: { current: null } });
+
+const createLayout = (leftPanelWidth = 0, rightPanelWidth = 0): TLayoutRefs => ({
+  leftPanelWidthRef: { current: leftPanelWidth },
+  rightPanelWidthRef: { current: rightPanelWidth },
+});
+
+const createCanvas = (width: number, height: number): HTMLCanvasElement => {
+  const canvas = document.createElement('canvas');
+
+  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height, width } as DOMRect);
+
+  return canvas;
+};
+
+describe('renderFrame', () => {
+  it('should position both tracks and thumbs to match the visible rect and panel widths', () => {
+    // mock
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+
+    // before
+    renderFrame(canvas, createLayout(200, 100), elements, createDragging(), createFrozenRange());
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.left).toBe('200px');
+    expect(elements.horizontalTrackRef.current?.style.width).toBe('500px');
+    expect(elements.verticalTrackRef.current?.style.right).toBe('100px');
+    expect(elements.verticalTrackRef.current?.style.top).toBe('0px');
+    expect(elements.verticalTrackRef.current?.style.height).toBe('600px');
+  });
+
+  it('should hide both tracks while nothing overflows the visible area', () => {
+    // mock — empty page, viewport at origin: content fallback exactly fills the view
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+
+    // before
+    renderFrame(canvas, createLayout(), elements, createDragging(), createFrozenRange());
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('none');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('none');
+  });
+
+  it('should show each track again once its own axis overflows the visible area', () => {
+    // mock — a node far past both the right and bottom edges of an 800×600 view
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+    const nodeId = store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 5000,
+        y: 5000,
+      }),
+    ).payload.id;
+
+    // before
+    renderFrame(canvas, createLayout(), elements, createDragging(), createFrozenRange());
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('');
+
+    // after — restore the shared store
+    store.dispatch(deleteNode(nodeId));
+    expect(selectActivePage(store.getState()).rootOrder).toEqual([]);
+  });
+
+  it('should keep a track visible while its axis is being dragged, even with nothing overflowing', () => {
+    // mock — empty page (no overflow), but the horizontal drag is in progress
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+
+    // before
+    renderFrame(canvas, createLayout(), elements, createDragging(true, false), createFrozenRange());
+
+    // result — the grabbed bar stays put, the other one still hides
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('none');
+  });
+
+  it('should use a frozen length for an axis instead of the live one, when the caller has set it, while its offset stays live', () => {
+    // mock — a node far past the right edge, so the live range length would put the thumb well
+    // under full width; freezing it at exactly the visible width pins the thumb full-width instead
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+    const frozenRange = createFrozenRange();
+    const nodeId = store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 5000,
+        y: 0,
+      }),
+    ).payload.id;
+
+    frozenRange.x.current = { rangeLength: 800 };
+
+    // before
+    renderFrame(canvas, createLayout(), elements, createDragging(true, false), frozenRange);
+
+    // result — a frozen length equal to the visible width makes size clamp to the full track, and its
+    // max-offset clamp (trackLength - size = 0) pins offset to 0 regardless of the live range start
+    expect(elements.horizontalThumbRef.current?.style.left).toBe('0px');
+    expect(elements.horizontalThumbRef.current?.style.width).toBe('800px');
+
+    // after — restore the shared store
+    store.dispatch(deleteNode(nodeId));
+  });
+
+  it('should skip rendering entirely when a track or thumb element has not mounted yet', () => {
+    // mock
+    const canvas = createCanvas(800, 600);
+    const elements = createElements();
+
+    elements.horizontalThumbRef.current = null;
+
+    // before
+    expect(() => renderFrame(canvas, createLayout(), elements, createDragging(), createFrozenRange())).not.toThrow();
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.left).toBe('');
+  });
+});

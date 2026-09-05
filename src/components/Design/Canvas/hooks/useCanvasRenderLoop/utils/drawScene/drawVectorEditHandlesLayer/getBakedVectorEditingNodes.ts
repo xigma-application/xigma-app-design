@@ -2,7 +2,7 @@
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getRenderedVectorNode } from '../../../../../utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
 export const getBakedVectorEditingNodes = (

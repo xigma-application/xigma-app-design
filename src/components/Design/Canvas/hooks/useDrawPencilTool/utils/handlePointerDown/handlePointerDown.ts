@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 // store
 import { setSelection } from 'store/design/slice';
 import { beginHistoryGesture } from 'store/history/actions';
@@ -9,13 +7,12 @@ import { AppDispatch, AppStore } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,
@@ -23,11 +20,7 @@ export const handlePointerDown = (
   dispatch: AppDispatch,
   appStore: AppStore,
   refs: TCanvasRefs,
-  committedPointsRef: RefObject<TPoint[] | null>,
-  tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TAxisLock | null>,
-  shiftAnchorRef: RefObject<TPoint | null>,
-  rawPointsRef: RefObject<TPoint[] | null>,
+  pencilDragRefs: TPencilDragRefs,
 ): void => {
   if (event.button === MouseButton.primary) {
     const viewport = selectViewport(appStore.getState());
@@ -36,11 +29,11 @@ export const handlePointerDown = (
     dispatch(setSelection([]));
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
 
-    committedPointsRef.current = [point];
-    tailPointsRef.current = [point];
-    axisLockRef.current = null;
-    shiftAnchorRef.current = null;
-    rawPointsRef.current = [point];
+    pencilDragRefs.committedPointsRef.current = [point];
+    pencilDragRefs.tailPointsRef.current = [point];
+    pencilDragRefs.axisLockRef.current = null;
+    pencilDragRefs.shiftAnchorRef.current = null;
+    pencilDragRefs.rawPointsRef.current = [point];
     refs.pencil.pencilPreviewPointsRef.current = [point];
     refs.pencil.pencilRawPreviewPointsRef.current = null;
     refs.pencil.pencilShowRawPreviewRef.current = false;

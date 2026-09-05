@@ -16,8 +16,8 @@ import { TPoint } from 'types/canvas';
 // utils
 import { attachToVector } from './attachToVector';
 import { drawEllipsePath } from './drawEllipsePath';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toDraftRectWithDefault } from '../../../../utils/toDraftRectWithDefault';
 
 export const handlePointerUp = (

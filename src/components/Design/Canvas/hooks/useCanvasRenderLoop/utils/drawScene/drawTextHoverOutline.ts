@@ -9,8 +9,8 @@ import { TSceneNode, TTextNode, TViewport } from 'types/design/types';
 import { drawTextHoverUnderline } from './drawTextHoverUnderline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
-import { mirrorGuideVectorForText } from 'components/Design/Canvas/utils/mirrorGuideVectorForText';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
+import { mirrorGuideVectorForText } from 'utils/canvas/text/mirrorGuideVectorForText';
 
 export const drawTextHoverOutline = (
   gl: WebGL2RenderingContext,

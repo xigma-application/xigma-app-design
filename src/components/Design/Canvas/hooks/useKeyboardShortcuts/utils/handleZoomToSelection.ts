@@ -22,11 +22,7 @@ export const handleZoomToSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
   const selectedNodes = selectSelectedNodes(store.getState());
 
   if (canvas && selectedNodes.length > 0) {
-    const visibleRect = getVisibleCanvasRect(
-      canvas.getBoundingClientRect(),
-      refs.layout.leftPanelWidthRef.current,
-      refs.layout.rightPanelWidthRef.current,
-    );
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
 
     animateViewport(
       dispatch,

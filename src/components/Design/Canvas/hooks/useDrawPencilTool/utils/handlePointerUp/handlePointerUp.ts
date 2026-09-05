@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 // others
 import { PENCIL_SIMPLIFY_TOLERANCE_PX } from '../../../../constants';
 
@@ -9,9 +7,8 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../types';
 
 // utils
 import { commitPencilNodeIfLongEnough } from './commitPencilNodeIfLongEnough';
@@ -24,18 +21,15 @@ export const handlePointerUp = (
   dispatch: AppDispatch,
   appStore: AppStore,
   refs: TCanvasRefs,
-  committedPointsRef: RefObject<TPoint[] | null>,
-  tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TAxisLock | null>,
-  shiftAnchorRef: RefObject<TPoint | null>,
-  rawPointsRef: RefObject<TPoint[] | null>,
+  pencilDragRefs: TPencilDragRefs,
 ): void => {
+  const { axisLockRef, committedPointsRef, rawPointsRef, shiftAnchorRef, tailPointsRef } = pencilDragRefs;
   const committed = committedPointsRef.current;
   const tail = tailPointsRef.current;
 
   if (committed && tail) {
     const viewport = selectViewport(appStore.getState());
-    foldPendingAxisLock(canvas, event, viewport, tail, axisLockRef, shiftAnchorRef);
+    foldPendingAxisLock(canvas, event, viewport, tail, pencilDragRefs);
     const finalPoints = commitPencilTail(tail, committed, PENCIL_SIMPLIFY_TOLERANCE_PX / viewport.zoom);
 
     commitPencilNodeIfLongEnough(dispatch, appStore, finalPoints);

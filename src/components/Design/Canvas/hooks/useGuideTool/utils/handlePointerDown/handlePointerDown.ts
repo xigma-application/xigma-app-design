@@ -14,8 +14,8 @@ import { TRulerMenu, TSelectedGuide } from '../../types';
 // utils
 import { getGuideAtPoint } from '../getGuideAtPoint';
 import { getGutterAxis } from '../getGutterAxis';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,
@@ -47,22 +47,21 @@ export const handlePointerDown = (
       dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
       canvas.setPointerCapture(event.pointerId);
       event.stopImmediatePropagation();
-      return;
-    }
+    } else {
+      const hitGuide = getGuideAtPoint(pointer, selectAllGuideLines(state), viewport);
 
-    const hitGuide = getGuideAtPoint(pointer, selectAllGuideLines(state), viewport);
-
-    if (hitGuide) {
-      refs.guides.draggingGuideRef.current = {
-        axis: hitGuide.axis,
-        frameId: hitGuide.frameId,
-        hasMoved: false,
-        id: hitGuide.id,
-        position: hitGuide.worldPosition,
-      };
-      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-      canvas.setPointerCapture(event.pointerId);
-      event.stopImmediatePropagation();
+      if (hitGuide) {
+        refs.guides.draggingGuideRef.current = {
+          axis: hitGuide.axis,
+          frameId: hitGuide.frameId,
+          hasMoved: false,
+          id: hitGuide.id,
+          position: hitGuide.worldPosition,
+        };
+        dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+        canvas.setPointerCapture(event.pointerId);
+        event.stopImmediatePropagation();
+      }
     }
   }
 };

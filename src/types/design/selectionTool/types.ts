@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
+import { TAxisLock } from 'utils/math/axis/getAxisLockedPoint';
 import { TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 import { TVectorSegment } from 'types/design/types';

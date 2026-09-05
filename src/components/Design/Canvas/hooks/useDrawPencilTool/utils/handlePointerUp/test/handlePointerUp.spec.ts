@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 // store
 import { selectActivePage } from 'store/design/selectors';
 import { setSelection } from 'store/design/slice';
@@ -7,14 +5,22 @@ import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../../handlePointerDown/handlePointerDown';
 import { handlePointerUp } from '../handlePointerUp';
+
+export const createPencilDragRefs = (overrides: Partial<TPencilDragRefs> = {}): TPencilDragRefs => ({
+  axisLockRef: { current: null },
+  committedPointsRef: { current: null },
+  rawPointsRef: { current: null },
+  shiftAnchorRef: { current: null },
+  tailPointsRef: { current: null },
+  ...overrides,
+});
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -30,10 +36,6 @@ const pointerEvent = (options: Partial<PointerEventInit> = {}): PointerEvent => 
 const downEvent = (options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointerdown', { button: 0, clientX: 0, clientY: 0, pointerId: 1, ...options });
 
-const createPointsRef = (value: TPoint[] | null): RefObject<TPoint[] | null> => ({ current: value });
-const createAxisLockRef = (value: TAxisLock | null = null): RefObject<TAxisLock | null> => ({ current: value });
-const createShiftAnchorRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
-
 describe('handlePointerUp', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -45,18 +47,7 @@ describe('handlePointerUp', () => {
     const rootOrderBefore = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // before
-    handlePointerUp(
-      canvas,
-      pointerEvent(),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      createPointsRef(null),
-      createPointsRef(null),
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerUp(canvas, pointerEvent(), store.dispatch, store, createCanvasRefs(), createPencilDragRefs());
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderBefore);
@@ -67,28 +58,23 @@ describe('handlePointerUp', () => {
     // mock — the tail alone (10px) is under MIN_SHAPE_SIZE only if never merged with committed, but
     // combined with the committed prefix it clears the gate, proving the tail gets folded in first
     const canvas = createCanvas();
-    const committedPointsRef = createPointsRef([
-      { x: 0, y: 0 },
-      { x: 5, y: 0 },
-    ]);
-    const tailPointsRef = createPointsRef([
-      { x: 5, y: 0 },
-      { x: 15, y: 0 },
-    ]);
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: {
+        current: [
+          { x: 0, y: 0 },
+          { x: 5, y: 0 },
+        ],
+      },
+      tailPointsRef: {
+        current: [
+          { x: 5, y: 0 },
+          { x: 15, y: 0 },
+        ],
+      },
+    });
 
     // before
-    handlePointerUp(
-      canvas,
-      pointerEvent(),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      committedPointsRef,
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerUp(canvas, pointerEvent(), store.dispatch, store, createCanvasRefs(), pencilDragRefs);
 
     // result
     const { nodes, rootOrder } = selectActivePage(store.getState());
@@ -105,38 +91,20 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['stale-vertex'] } } });
 
-    handlePointerDown(
-      canvas,
-      downEvent(),
-      store.dispatch,
-      store,
-      refs,
-      createPointsRef(null),
-      createPointsRef(null),
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerDown(canvas, downEvent(), store.dispatch, store, refs, createPencilDragRefs());
 
-    const committedPointsRef = createPointsRef([{ x: 0, y: 0 }]);
-    const tailPointsRef = createPointsRef([
-      { x: 0, y: 0 },
-      { x: 10, y: 0 },
-    ]);
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      tailPointsRef: {
+        current: [
+          { x: 0, y: 0 },
+          { x: 10, y: 0 },
+        ],
+      },
+    });
 
     // before
-    handlePointerUp(
-      canvas,
-      pointerEvent(),
-      store.dispatch,
-      store,
-      refs,
-      committedPointsRef,
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerUp(canvas, pointerEvent(), store.dispatch, store, refs, pencilDragRefs);
 
     const rootOrderAfterCommit = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
@@ -153,21 +121,15 @@ describe('handlePointerUp', () => {
     // mock — regression check for the orchestrator's wiring: foldPendingAxisLock itself is unit
     // tested separately, this just proves handlePointerUp actually calls it before finalizing
     const canvas = createCanvas();
-    const tailPointsRef = createPointsRef([{ x: 0, y: 0 }]);
+    const pencilDragRefs = createPencilDragRefs({
+      axisLockRef: { current: 'x' },
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      shiftAnchorRef: { current: { x: 0, y: 0 } },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     // before — pointerup lands at (50, 30), well past MIN_SHAPE_SIZE once the locked point is folded in
-    handlePointerUp(
-      canvas,
-      pointerEvent({ clientX: 50, clientY: 30 }),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      createPointsRef([{ x: 0, y: 0 }]),
-      tailPointsRef,
-      createAxisLockRef('x'),
-      createShiftAnchorRef({ x: 0, y: 0 }),
-      createPointsRef(null),
-    );
+    handlePointerUp(canvas, pointerEvent({ clientX: 50, clientY: 30 }), store.dispatch, store, createCanvasRefs(), pencilDragRefs);
 
     // result
     const { nodes, rootOrder } = selectActivePage(store.getState());
@@ -181,36 +143,27 @@ describe('handlePointerUp', () => {
     // zero-length duplicate, keeping the path under MIN_SHAPE_SIZE and the node uncommitted
     const canvas = createCanvas();
     const refs = createCanvasRefs();
-    const committedPointsRef = createPointsRef([{ x: 0, y: 0 }]);
-    const tailPointsRef = createPointsRef([{ x: 0, y: 0 }]);
-    const axisLockRef = createAxisLockRef('x');
-    const shiftAnchorRef = createShiftAnchorRef({ x: 0, y: 0 });
-    const rawPointsRef = createPointsRef([{ x: 0, y: 0 }]);
+    const pencilDragRefs = createPencilDragRefs({
+      axisLockRef: { current: 'x' },
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      rawPointsRef: { current: [{ x: 0, y: 0 }] },
+      shiftAnchorRef: { current: { x: 0, y: 0 } },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     refs.pencil.pencilPreviewPointsRef.current = [{ x: 0, y: 0 }];
     refs.pencil.pencilRawPreviewPointsRef.current = [{ x: 0, y: 0 }];
     refs.pencil.pencilShowRawPreviewRef.current = true;
 
     // before — too short to commit a node, but cleanup must still happen
-    handlePointerUp(
-      canvas,
-      pointerEvent(),
-      store.dispatch,
-      store,
-      refs,
-      committedPointsRef,
-      tailPointsRef,
-      axisLockRef,
-      shiftAnchorRef,
-      rawPointsRef,
-    );
+    handlePointerUp(canvas, pointerEvent(), store.dispatch, store, refs, pencilDragRefs);
 
     // result
-    expect(committedPointsRef.current).toBeNull();
-    expect(tailPointsRef.current).toBeNull();
-    expect(axisLockRef.current).toBeNull();
-    expect(shiftAnchorRef.current).toBeNull();
-    expect(rawPointsRef.current).toBeNull();
+    expect(pencilDragRefs.committedPointsRef.current).toBeNull();
+    expect(pencilDragRefs.tailPointsRef.current).toBeNull();
+    expect(pencilDragRefs.axisLockRef.current).toBeNull();
+    expect(pencilDragRefs.shiftAnchorRef.current).toBeNull();
+    expect(pencilDragRefs.rawPointsRef.current).toBeNull();
     expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
     expect(refs.pencil.pencilRawPreviewPointsRef.current).toBeNull();
     expect(refs.pencil.pencilShowRawPreviewRef.current).toBe(false);

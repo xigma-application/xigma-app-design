@@ -10,10 +10,10 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isControlPressed } from 'utils/isControlPressed';
 import { resolveToolHover } from './resolveToolHover';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { setHoverState } from '../setHoverState';
 
 export const resolveHover = (

@@ -4,7 +4,7 @@ import { TVectorWidthPointHover } from 'types/design/canvas/types';
 
 // utils
 import { drawVectorCutPointMarker } from '../drawVectorCutPointMarker';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { getVectorSegmentPointAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentPointAtT';
 

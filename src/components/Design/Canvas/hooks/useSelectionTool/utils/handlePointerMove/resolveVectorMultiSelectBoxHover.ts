@@ -6,7 +6,7 @@ import { store } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
@@ -17,7 +17,7 @@ import { isInVectorMultiSelectRotateRing } from '../../../../utils/isInVectorMul
 import { isPointInRect } from '../../../../utils/isPointInRect';
 import { isVectorMultiSelectBoxEligible } from '../../../../utils/isVectorMultiSelectBoxEligible';
 import { rotatePoint } from 'utils/math/rotatePoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorMultiSelectBoxHover = (
   canvas: HTMLCanvasElement,
@@ -54,18 +54,22 @@ export const resolveVectorMultiSelectBoxHover = (
       const pivot = { x: box.bounds.x + box.bounds.width / 2, y: box.bounds.y + box.bounds.height / 2 };
       const localPoint = rotatePoint(point, pivot, -box.rotation);
 
-      if (resizeHandle) {
-        canvas.style.cursor = getRotatedCursorUrl('resize', getResizeCursorAngle(resizeHandle, box.rotation)) ?? '';
-        setClassName(null);
-      } else if (isInVectorMultiSelectRotateRing(point, box.bounds, viewport, box.rotation)) {
-        canvas.style.cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, box.bounds, box.rotation)) ?? '';
-        setClassName(null);
-      } else if (isPointInRect(localPoint, box.bounds)) {
-        canvas.style.cursor = '';
-        setClassName('move');
-      } else {
-        canvas.style.cursor = '';
-        setClassName(null);
+      switch (true) {
+        case resizeHandle !== null:
+          canvas.style.cursor = getRotatedCursorUrl('resize', getResizeCursorAngle(resizeHandle, box.rotation)) ?? '';
+          setClassName(null);
+          break;
+        case isInVectorMultiSelectRotateRing(point, box.bounds, viewport, box.rotation):
+          canvas.style.cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, box.bounds, box.rotation)) ?? '';
+          setClassName(null);
+          break;
+        case isPointInRect(localPoint, box.bounds):
+          canvas.style.cursor = '';
+          setClassName('move');
+          break;
+        default:
+          canvas.style.cursor = '';
+          setClassName(null);
       }
     }
   }

@@ -4,8 +4,8 @@ import { FC, useRef } from 'react';
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // hooks
-import { useScrollbarDrag } from './hooks/useScrollbarDrag';
-import { useScrollbarsRenderLoop } from './hooks/useScrollbarsRenderLoop';
+import { useScrollbarDrag } from './hooks/useScrollbarDrag/useScrollbarDrag';
+import { useScrollbarsRenderLoop } from './hooks/useScrollbarsRenderLoop/useScrollbarsRenderLoop';
 
 // types
 import { TFrozenAxisRange } from './types';

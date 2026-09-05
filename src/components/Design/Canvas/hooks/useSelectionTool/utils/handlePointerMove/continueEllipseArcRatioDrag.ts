@@ -16,10 +16,10 @@ import { TPoint } from 'types/canvas';
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
 import { getEllipseArcMajorArc } from 'utils/canvas/ellipseArc/getEllipseArcMajorArc';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { isAngleWithinArc } from 'utils/canvas/ellipseArc/isAngleWithinArc';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const normalizeAngle = (angle: number): number => ((angle % 360) + 360) % 360;
 

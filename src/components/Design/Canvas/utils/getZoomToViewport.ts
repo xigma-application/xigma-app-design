@@ -8,7 +8,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { screenToWorld } from './screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const getZoomToViewport = (viewport: TViewport, targetZoom: number, anchor: TPoint): TViewport => {
   const nextZoom = clamp(targetZoom, ZOOM_MIN, ZOOM_MAX);

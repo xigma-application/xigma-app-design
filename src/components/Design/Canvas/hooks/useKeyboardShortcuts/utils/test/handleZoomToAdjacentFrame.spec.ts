@@ -48,7 +48,7 @@ describe('handleZoomToAdjacentFrame', () => {
     addFrameNode(300);
     store.dispatch(setViewport({ x: 450, y: 250, zoom: 1 }));
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 100, x: 300, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action
@@ -64,7 +64,7 @@ describe('handleZoomToAdjacentFrame', () => {
     addFrameNode(300);
     store.dispatch(setViewport({ x: 450, y: 250, zoom: 1 }));
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 100, x: 300, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action

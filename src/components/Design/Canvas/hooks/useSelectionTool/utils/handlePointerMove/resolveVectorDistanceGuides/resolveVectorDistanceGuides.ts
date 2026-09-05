@@ -10,10 +10,10 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { getAnchor } from './getAnchor';
 import { getAnchorReferencePoint } from './getAnchorReferencePoint';
 import { getBakedEditingNodes } from './getBakedEditingNodes';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getTarget } from './getTarget';
 import { getVectorDistanceGuides } from '../../../../../utils/getVectorDistanceGuides/getVectorDistanceGuides';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorDistanceGuides = (
   canvas: HTMLCanvasElement,

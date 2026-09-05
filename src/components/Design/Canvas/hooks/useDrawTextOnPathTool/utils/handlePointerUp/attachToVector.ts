@@ -13,7 +13,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { convertNodeToVector, isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { createVectorTextPathSampler } from 'utils/canvas/text/pathSampler/createVectorTextPathSampler/createVectorTextPathSampler';
-import { getRenderedVectorNode } from '../../../../utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 
 export const attachToVector = (nodeId: string, point: TPoint, dispatch: AppDispatch): void => {

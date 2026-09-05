@@ -12,8 +12,8 @@ import { updateTextEditSelection } from 'store/design/slice';
 import { getCurvedHitAtEvent } from '../getCurvedHitAtEvent';
 import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { setEditableSelectionRange } from '../../../../TextEditOverlay/utils/setEditableSelectionRange';
 
 export const handlePointerDown = (
@@ -39,19 +39,18 @@ export const handlePointerDown = (
     isDraggingOffsetRef.current = true;
     anchorIndexRef.current = null;
     setClassName('pressing');
-    return;
-  }
-
-  const hit = isOnEditingSurface ? getCurvedHitAtEvent(canvas, event) : null;
-  const tolerance = PATH_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
-
-  if (overlay && hit && hit.distance <= tolerance) {
-    event.preventDefault();
-    overlay.focus();
-    setEditableSelectionRange(overlay, hit.index, hit.index);
-    dispatch(updateTextEditSelection({ end: hit.index, start: hit.index }));
-    anchorIndexRef.current = hit.index;
   } else {
-    anchorIndexRef.current = null;
+    const hit = isOnEditingSurface ? getCurvedHitAtEvent(canvas, event) : null;
+    const tolerance = PATH_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
+
+    if (overlay && hit && hit.distance <= tolerance) {
+      event.preventDefault();
+      overlay.focus();
+      setEditableSelectionRange(overlay, hit.index, hit.index);
+      dispatch(updateTextEditSelection({ end: hit.index, start: hit.index }));
+      anchorIndexRef.current = hit.index;
+    } else {
+      anchorIndexRef.current = null;
+    }
   }
 };

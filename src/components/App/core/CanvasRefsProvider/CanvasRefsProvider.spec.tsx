@@ -91,6 +91,7 @@ describe('CanvasRefsProvider behaviors', () => {
         alignmentGuideRef: { current: null },
         aspectRatioLockGuideRef: { current: null },
         autoLayoutDropTargetRef: { current: null },
+        autoLayoutReorderPreviewRef: { current: null },
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },

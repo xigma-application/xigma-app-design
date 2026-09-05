@@ -17,10 +17,10 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { bakeEditingNodeRotation } from './bakeEditingNodeRotation';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { resolvePenTargetNode } from '../resolvePenTargetNode';
 import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { startOrContinueVectorNetwork } from './startOrContinueVectorNetwork';
 
 export const handlePointerDown = (

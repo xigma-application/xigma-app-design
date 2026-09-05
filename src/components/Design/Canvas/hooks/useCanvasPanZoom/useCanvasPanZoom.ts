@@ -11,7 +11,7 @@ import { store, useAppDispatch } from 'store';
 // utils
 import { applyPan } from './utils/applyPan';
 import { applyZoom } from './utils/applyZoom';
-import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isControlPressed } from 'utils/isControlPressed';
 
 export const useCanvasPanZoom = (refs: TCanvasRefs): void => {

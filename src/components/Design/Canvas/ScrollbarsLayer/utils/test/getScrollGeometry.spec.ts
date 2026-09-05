@@ -3,6 +3,7 @@ import { SCROLLBAR_RANGE_PADDING_PX } from '../../../constants';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TLayoutRefs } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -10,6 +11,11 @@ import { getScrollGeometry } from '../getScrollGeometry';
 
 const canvasRect = { height: 600, width: 800 } as DOMRect;
 const viewport = { x: 0, y: 0, zoom: 1 };
+
+const layout = (leftPanelWidth: number, rightPanelWidth: number): TLayoutRefs => ({
+  leftPanelWidthRef: { current: leftPanelWidth },
+  rightPanelWidthRef: { current: rightPanelWidth },
+});
 
 const buildNode = (overrides: Partial<TSceneNode>): TSceneNode =>
   ({
@@ -34,7 +40,7 @@ describe('getScrollGeometry', () => {
     const nodes = [buildNode({ height: 100, width: 100, x: 0, y: 0 })];
 
     // before
-    const { range, visibleRect } = getScrollGeometry(canvasRect, 0, 0, nodes, viewport);
+    const { range, visibleRect } = getScrollGeometry(canvasRect, layout(0, 0), nodes, viewport);
 
     // result
     expect(visibleRect).toEqual({ height: 600, width: 800, x: 0, y: 0 });
@@ -48,7 +54,7 @@ describe('getScrollGeometry', () => {
 
   it('should fall back to the visible world rect when there are no nodes', () => {
     // before
-    const { range, visibleRect } = getScrollGeometry(canvasRect, 0, 0, [], viewport);
+    const { range, visibleRect } = getScrollGeometry(canvasRect, layout(0, 0), [], viewport);
 
     // result — content bounds default to exactly what's on screen, so the range is just the padded view
     expect(range).toEqual({
@@ -62,7 +68,7 @@ describe('getScrollGeometry', () => {
 
   it('should shrink the visible rect by the panel widths before computing the range', () => {
     // before
-    const { range, visibleRect } = getScrollGeometry(canvasRect, 200, 100, [], viewport);
+    const { range, visibleRect } = getScrollGeometry(canvasRect, layout(200, 100), [], viewport);
 
     // result
     expect(visibleRect).toEqual({ height: 600, width: 500, x: 200, y: 0 });
@@ -79,7 +85,7 @@ describe('getScrollGeometry', () => {
     const nodes = [buildNode({ height: 100, width: 100, x: 50, y: 50 })];
 
     // before
-    const { overflow } = getScrollGeometry(canvasRect, 0, 0, nodes, viewport);
+    const { overflow } = getScrollGeometry(canvasRect, layout(0, 0), nodes, viewport);
 
     // result
     expect(overflow).toEqual({ x: false, y: false });
@@ -87,7 +93,7 @@ describe('getScrollGeometry', () => {
 
   it('should report no overflow when there are no nodes (the fallback bounds equal the visible rect)', () => {
     // before
-    const { overflow } = getScrollGeometry(canvasRect, 0, 0, [], viewport);
+    const { overflow } = getScrollGeometry(canvasRect, layout(0, 0), [], viewport);
 
     // result
     expect(overflow).toEqual({ x: false, y: false });
@@ -98,7 +104,7 @@ describe('getScrollGeometry', () => {
     const nodes = [buildNode({ height: 100, width: 100, x: 800, y: 0 })];
 
     // before
-    const { overflow } = getScrollGeometry(canvasRect, 0, 0, nodes, viewport);
+    const { overflow } = getScrollGeometry(canvasRect, layout(0, 0), nodes, viewport);
 
     // result
     expect(overflow).toEqual({ x: true, y: false });
@@ -109,7 +115,7 @@ describe('getScrollGeometry', () => {
     const nodes = [buildNode({ height: 100, width: 100, x: 0, y: 0 })];
 
     // before
-    const { overflow } = getScrollGeometry(canvasRect, 0, 0, nodes, { x: 0, y: -20, zoom: 1 });
+    const { overflow } = getScrollGeometry(canvasRect, layout(0, 0), nodes, { x: 0, y: -20, zoom: 1 });
 
     // result
     expect(overflow).toEqual({ x: false, y: true });
@@ -120,7 +126,7 @@ describe('getScrollGeometry', () => {
     const nodes = [buildNode({ height: 10, width: 100, x: 0, y: 0 })];
 
     // before
-    const { overflow } = getScrollGeometry(canvasRect, 0, 0, nodes, { x: 0, y: 0, zoom: 10 });
+    const { overflow } = getScrollGeometry(canvasRect, layout(0, 0), nodes, { x: 0, y: 0, zoom: 10 });
 
     // result
     expect(overflow.x).toBe(true);

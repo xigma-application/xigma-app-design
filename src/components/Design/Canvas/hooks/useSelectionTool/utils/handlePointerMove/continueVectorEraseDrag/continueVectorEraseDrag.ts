@@ -9,10 +9,10 @@ import { TPoint } from 'types/canvas';
 import { TVectorEraseDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { getAxisLockedPoint } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { getDominantAxis } from 'components/Design/Canvas/utils/getDominantAxis';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
+import { getDominantAxis } from 'utils/math/axis/getDominantAxis';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueVectorEraseDrag = (
   canvas: HTMLCanvasElement,

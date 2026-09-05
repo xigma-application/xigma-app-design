@@ -12,14 +12,14 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { applyVectorMarqueeSelection } from './applyVectorMarqueeSelection';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { getVectorMarqueeHandleHitsForNode } from './getVectorMarqueeHandleHitsForNode';
 import { getVectorPointsInRect } from 'utils/canvas/vectorNetwork/getVectorPointsInRect';
 import { getVectorSegmentsInRect } from 'utils/canvas/vectorNetwork/getVectorSegmentsInRect';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 import { resolveVectorMarqueeMode } from '../resolveVectorMarqueeMode';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toDraftRect } from '../../../../../utils/toDraftRect';
 
 export const continueVectorMarqueeDrag = (

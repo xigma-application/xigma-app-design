@@ -14,9 +14,9 @@ import { TVectorCutDragState } from 'types/design/selectionTool/types';
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { findLineNetworkCrossings } from 'utils/canvas/vectorNetwork/cutVectorNetwork/findLineNetworkCrossings';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueVectorCutDrag = (
   canvas: HTMLCanvasElement,

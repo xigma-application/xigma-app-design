@@ -9,8 +9,8 @@ import { AppDispatch, store } from 'store';
 import { TEndpointDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueEndpointDrag = (
   canvas: HTMLCanvasElement,

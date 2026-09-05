@@ -14,16 +14,16 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { convertCtrlDragToMarquee } from './convertCtrlDragToMarquee';
-import { dispatchDraggedNodeUpdates } from './dispatchDraggedNodeUpdates';
-import { getAxisLockedPoint } from 'components/Design/Canvas/utils/getAxisLockedPoint';
+import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
 import { getChainGapDragSnap } from './getChainGapDragSnap';
-import { getDominantAxis } from 'components/Design/Canvas/utils/getDominantAxis';
-import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getDragAlignmentSnap';
+import { getDominantAxis } from 'utils/math/axis/getDominantAxis';
+import { getDragAlignmentSnap } from './getDragAlignmentSnap';
 import { getMatchedPairDragGuides } from './getMatchedPairDragGuides';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { initDraggedNodeIds } from './initDraggedNodeIds';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
-import { updateDragDropTarget } from './updateDragDropTarget';
+import { screenToWorld } from 'utils/transform/screenToWorld';
+import { updateAutoLayoutReorderGhostPosition } from './updateAutoLayoutReorderGhostPosition/updateAutoLayoutReorderGhostPosition';
+import { updateDragDropTarget } from './updateDragDropTarget/updateDragDropTarget';
 import { updateDragSnapshotDeltas } from './updateDragSnapshotDeltas';
 
 const AXIS_LOCK_CLASS_NAME = { x: 'move-x', y: 'move-y' } as const;
@@ -51,23 +51,16 @@ export const continueDrag = (
     const rawDeltaY = point.y - dragState.pointerStart.y;
     const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
     const nodes = selectNodes(state);
-    const { delta: alignmentDelta, guide } = getDragAlignmentSnap(
-      nodes,
-      dragState.nodeOrigins,
-      { x: rawDeltaX, y: rawDeltaY },
-      ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
-      dragState.candidateShapes,
-    );
+    const rawDelta = { x: rawDeltaX, y: rawDeltaY };
+    const toleranceWorldUnits = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
+    const { delta: alignmentDelta, guide } = getDragAlignmentSnap(nodes, dragState, rawDelta, toleranceWorldUnits);
     const chainGapSnap = getChainGapDragSnap(nodes, dragState, alignmentDelta, EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom);
     const deltaX = axisLock === 'y' ? 0 : alignmentDelta.x + chainGapSnap.delta.x;
     const deltaY = axisLock === 'x' ? 0 : alignmentDelta.y + chainGapSnap.delta.y;
-    const matchedPairGuides = getMatchedPairDragGuides(
-      nodes,
-      dragState,
-      { x: deltaX, y: deltaY },
-      GRID_CELL_SIZE_MATCH_TOLERANCE_PX / viewport.zoom,
-      ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
-    );
+    const delta = { x: deltaX, y: deltaY };
+    const sizeToleranceWorldUnits = GRID_CELL_SIZE_MATCH_TOLERANCE_PX / viewport.zoom;
+    const centreToleranceWorldUnits = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
+    const matchedPairGuides = getMatchedPairDragGuides(nodes, dragState, delta, sizeToleranceWorldUnits, centreToleranceWorldUnits);
     const selectedNodes = selectSelectedNodes(state);
     const renderOrderedNodes = selectRenderOrderedNodes(state);
 
@@ -80,6 +73,6 @@ export const continueDrag = (
     setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
     initDraggedNodeIds(canvasRefs, dragState);
     updateDragSnapshotDeltas(snapshots, deltaX, deltaY);
-    dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY);
+    updateAutoLayoutReorderGhostPosition(canvasRefs, selectedNodes, dispatch, dragState, snapshots, deltaX, deltaY);
   }
 };

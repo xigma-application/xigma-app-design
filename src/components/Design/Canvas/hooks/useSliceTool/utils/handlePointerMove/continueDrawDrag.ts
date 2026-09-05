@@ -9,8 +9,8 @@ import { TSliceDrawDragState } from '../../types';
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toDraftRect } from '../../../../utils/toDraftRect';
 
 export const continueDrawDrag = (

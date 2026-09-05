@@ -1,17 +1,23 @@
-import { RefObject } from 'react';
-
 // store
 import { setSelection } from 'store/design/slice';
 import { store } from 'store';
 import { selectSelectedIds } from 'store/design/selectors';
 
-// types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { TPoint } from 'types/canvas';
-
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
+
+// types
+import { TPencilDragRefs } from '../../../types';
+
+export const createPencilDragRefs = (overrides: Partial<TPencilDragRefs> = {}): TPencilDragRefs => ({
+  axisLockRef: { current: null },
+  committedPointsRef: { current: null },
+  rawPointsRef: { current: null },
+  shiftAnchorRef: { current: null },
+  tailPointsRef: { current: null },
+  ...overrides,
+});
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -25,10 +31,6 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointerdown', { button: 0, clientX: x, clientY: y, pointerId: 1, ...options });
 
-const createPointsRef = (): RefObject<TPoint[] | null> => ({ current: null });
-const createAxisLockRef = (): RefObject<TAxisLock | null> => ({ current: null });
-const createShiftAnchorRef = (): RefObject<TPoint | null> => ({ current: null });
-
 describe('handlePointerDown', () => {
   beforeEach(() => {
     store.dispatch(setSelection(['stale-selection']));
@@ -37,54 +39,29 @@ describe('handlePointerDown', () => {
   it('should ignore a non-primary button press entirely', () => {
     // mock
     const canvas = createCanvas();
-    const committedPointsRef = createPointsRef();
-    const tailPointsRef = createPointsRef();
+    const pencilDragRefs = createPencilDragRefs();
 
     // before
-    handlePointerDown(
-      canvas,
-      pointerEvent(10, 20, { button: 1 }),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      committedPointsRef,
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(),
-    );
+    handlePointerDown(canvas, pointerEvent(10, 20, { button: 1 }), store.dispatch, store, createCanvasRefs(), pencilDragRefs);
 
     // result
-    expect(committedPointsRef.current).toBeNull();
-    expect(tailPointsRef.current).toBeNull();
+    expect(pencilDragRefs.committedPointsRef.current).toBeNull();
+    expect(pencilDragRefs.tailPointsRef.current).toBeNull();
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
   });
 
   it('should seed both the committed prefix and the tail with the anchor point, and clear any prior selection', () => {
     // mock
     const canvas = createCanvas();
-    const committedPointsRef = createPointsRef();
-    const tailPointsRef = createPointsRef();
-    const rawPointsRef = createPointsRef();
+    const pencilDragRefs = createPencilDragRefs();
 
     // before
-    handlePointerDown(
-      canvas,
-      pointerEvent(10, 20),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      committedPointsRef,
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      rawPointsRef,
-    );
+    handlePointerDown(canvas, pointerEvent(10, 20), store.dispatch, store, createCanvasRefs(), pencilDragRefs);
 
     // result
-    expect(committedPointsRef.current).toEqual([{ x: 10, y: 20 }]);
-    expect(tailPointsRef.current).toEqual([{ x: 10, y: 20 }]);
-    expect(rawPointsRef.current).toEqual([{ x: 10, y: 20 }]);
+    expect(pencilDragRefs.committedPointsRef.current).toEqual([{ x: 10, y: 20 }]);
+    expect(pencilDragRefs.tailPointsRef.current).toEqual([{ x: 10, y: 20 }]);
+    expect(pencilDragRefs.rawPointsRef.current).toEqual([{ x: 10, y: 20 }]);
     expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
@@ -92,28 +69,16 @@ describe('handlePointerDown', () => {
   it('should reset any stale axis-lock state from a previous stroke', () => {
     // mock
     const canvas = createCanvas();
-    const axisLockRef = createAxisLockRef();
-    const shiftAnchorRef = createShiftAnchorRef();
-
-    axisLockRef.current = 'x';
-    shiftAnchorRef.current = { x: 1, y: 1 };
+    const pencilDragRefs = createPencilDragRefs({
+      axisLockRef: { current: 'x' },
+      shiftAnchorRef: { current: { x: 1, y: 1 } },
+    });
 
     // before
-    handlePointerDown(
-      canvas,
-      pointerEvent(10, 20),
-      store.dispatch,
-      store,
-      createCanvasRefs(),
-      createPointsRef(),
-      createPointsRef(),
-      axisLockRef,
-      shiftAnchorRef,
-      createPointsRef(),
-    );
+    handlePointerDown(canvas, pointerEvent(10, 20), store.dispatch, store, createCanvasRefs(), pencilDragRefs);
 
     // result
-    expect(axisLockRef.current).toBeNull();
-    expect(shiftAnchorRef.current).toBeNull();
+    expect(pencilDragRefs.axisLockRef.current).toBeNull();
+    expect(pencilDragRefs.shiftAnchorRef.current).toBeNull();
   });
 });

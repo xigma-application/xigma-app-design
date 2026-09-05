@@ -9,7 +9,7 @@ import { TRulerMenu, TSelectedGuide } from '../types';
 
 // utils
 import { getGuideAtPoint } from './getGuideAtPoint';
-import { getPointerPosition } from '../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRulerGutterSide } from './getRulerGutterSide';
 
 export const handleContextMenu = (
@@ -30,16 +30,15 @@ export const handleContextMenu = (
     setSelectedGuide(null);
     setRulerMenu({ axis: gutterSide === 'top' ? 'x' : 'y' });
     openMenuAt({ x: event.clientX, y: event.clientY });
-    return;
-  }
+  } else {
+    const hit = getGuideAtPoint(pointer, selectAllGuideLines(state), selectViewport(state));
 
-  const hit = getGuideAtPoint(pointer, selectAllGuideLines(state), selectViewport(state));
-
-  if (hit) {
-    event.preventDefault();
-    event.stopPropagation();
-    setRulerMenu(null);
-    setSelectedGuide({ frameId: hit.frameId, id: hit.id });
-    openMenuAt({ x: event.clientX, y: event.clientY });
+    if (hit) {
+      event.preventDefault();
+      event.stopPropagation();
+      setRulerMenu(null);
+      setSelectedGuide({ frameId: hit.frameId, id: hit.id });
+      openMenuAt({ x: event.clientX, y: event.clientY });
+    }
   }
 };

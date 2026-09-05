@@ -8,8 +8,8 @@ import { store } from 'store';
 
 // utils
 import { getCurvedCaretIndexAtPoint, TCurvedCaretHit } from 'utils/canvas/text/getCurvedCaretIndexAtPoint';
-import { getPointerPosition } from '../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const getCurvedHitAtEvent = (canvas: HTMLCanvasElement, event: MouseEvent): TCurvedCaretHit | null => {
   const state = store.getState();

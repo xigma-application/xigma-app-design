@@ -12,7 +12,7 @@ const flattenVectorSegmentsMock = vi.fn();
 const getThickVectorPathVerticesMock = vi.fn();
 const getVectorNodeBoundsMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+vi.mock('utils/canvas/render/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('../groupFilledFacesForRendering', () => ({

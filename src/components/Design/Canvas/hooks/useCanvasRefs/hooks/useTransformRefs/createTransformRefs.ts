@@ -5,6 +5,7 @@ export const createTransformRefs = (overrides: Partial<TTransformRefs> = {}): TT
   alignmentGuideRef: { current: null },
   aspectRatioLockGuideRef: { current: null },
   autoLayoutDropTargetRef: { current: null },
+  autoLayoutReorderPreviewRef: { current: null },
   contactGuidesRef: { current: null },
   distanceGuidesRef: { current: null },
   draggedNodeIdsRef: { current: null },

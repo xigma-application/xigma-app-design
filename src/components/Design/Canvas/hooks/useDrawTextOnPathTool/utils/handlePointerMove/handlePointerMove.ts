@@ -7,9 +7,9 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { continueAttachArm } from './continueAttachArm';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { previewAttachCursor } from './previewAttachCursor';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toDraftRect } from '../../../../utils/toDraftRect';
 
 export const handlePointerMove = (

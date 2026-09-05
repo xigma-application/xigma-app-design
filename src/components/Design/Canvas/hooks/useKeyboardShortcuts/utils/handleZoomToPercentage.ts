@@ -15,11 +15,7 @@ export const handleZoomToPercentage = (dispatch: AppDispatch, refs: TCanvasRefs,
   const canvas = refs.canvasRef.current;
 
   if (canvas) {
-    const visibleRect = getVisibleCanvasRect(
-      canvas.getBoundingClientRect(),
-      refs.layout.leftPanelWidthRef.current,
-      refs.layout.rightPanelWidthRef.current,
-    );
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const viewport = selectViewport(store.getState());
 
     dispatch(setViewport(getZoomToViewport(viewport, percent, getRectCenter(visibleRect))));

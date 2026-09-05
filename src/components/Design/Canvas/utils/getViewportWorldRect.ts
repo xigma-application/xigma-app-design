@@ -3,7 +3,7 @@ import { TDraftRect } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { screenToWorld } from './screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const getViewportWorldRect = (canvas: HTMLCanvasElement, viewport: TViewport): TDraftRect => {
   const topLeft = screenToWorld({ x: 0, y: 0 }, viewport);

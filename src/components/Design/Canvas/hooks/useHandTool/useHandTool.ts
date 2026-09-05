@@ -7,19 +7,19 @@ import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNa
 import { useIsSpaceHeld } from './hooks/useIsSpaceHeld';
 
 // store
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
-import { setTemporaryActiveTool, setViewport } from 'store/design/slice';
+import { selectActiveTool } from 'store/design/selectors';
+import { setTemporaryActiveTool } from 'store/design/slice';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { MouseButton } from 'types/enums';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { applyDragPan } from '../useCanvasDragPan/utils/applyDragPan';
-import { getPointerPosition } from '../../utils/getPointerPosition';
+import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
+import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
+import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useHandTool = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;
@@ -30,31 +30,12 @@ export const useHandTool = (refs: TCanvasRefs): void => {
   const lastPointRef = useRef<TPoint | null>(null);
   const toolBeforeSpaceRef = useRef<ToolName>(ToolName.default);
 
-  const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (event.button === MouseButton.primary) {
-      lastPointRef.current = getPointerPosition(canvas, event);
-      canvas.setPointerCapture(event.pointerId);
-      setClassName('pressing');
-    }
-  };
+  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerDown(canvas, event, lastPointRef, setClassName);
 
-  const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (lastPointRef.current) {
-      const point = getPointerPosition(canvas, event);
-      const viewport = selectViewport(store.getState());
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => handlePointerMove(canvas, event, dispatch, lastPointRef);
 
-      dispatch(setViewport(applyDragPan(viewport, point.x - lastPointRef.current.x, point.y - lastPointRef.current.y)));
-      lastPointRef.current = point;
-    }
-  };
-
-  const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (lastPointRef.current) {
-      lastPointRef.current = null;
-      canvas.releasePointerCapture(event.pointerId);
-      setClassName('hand');
-    }
-  };
+  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => handlePointerUp(canvas, event, lastPointRef, setClassName);
 
   useEffect(() => {
     if (isSpaceHeld) {
@@ -71,19 +52,19 @@ export const useHandTool = (refs: TCanvasRefs): void => {
     const canvas = canvasRef.current;
 
     if (canvas && activeTool === ToolName.hand) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
-      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event);
+      const onPointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event);
+      const onPointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event);
+      const onPointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event);
 
       setClassName('hand');
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('pointerdown', onPointerDownListener);
+      canvas.addEventListener('pointermove', onPointerMoveListener);
+      canvas.addEventListener('pointerup', onPointerUpListener);
 
       return (): void => {
-        canvas.removeEventListener('pointerdown', onPointerDown);
-        canvas.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('pointerdown', onPointerDownListener);
+        canvas.removeEventListener('pointermove', onPointerMoveListener);
+        canvas.removeEventListener('pointerup', onPointerUpListener);
         setClassName(null);
         lastPointRef.current = null;
       };

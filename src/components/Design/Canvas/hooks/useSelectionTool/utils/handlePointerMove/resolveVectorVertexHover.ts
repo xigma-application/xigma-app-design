@@ -11,9 +11,9 @@ import { store } from 'store';
 import { ToolName } from 'types/design/enums';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorVertexAtPointAcrossOpenNodes } from '../../../../utils/getVectorVertexAtPointAcrossOpenNodes';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorVertexHover = (
   canvas: HTMLCanvasElement,

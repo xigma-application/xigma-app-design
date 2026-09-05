@@ -7,9 +7,9 @@ import { selectEditingTextBox, selectEditingTextContent, selectViewport } from '
 import { store } from 'store';
 
 // utils
-import { getPointerPosition } from '../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getStraightCaretIndexAtPoint, TStraightCaretHit } from 'utils/canvas/text/getStraightCaretIndexAtPoint';
-import { screenToWorld } from '../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const getStraightHitAtEvent = (canvas: HTMLCanvasElement, event: MouseEvent): TStraightCaretHit | null => {
   const state = store.getState();

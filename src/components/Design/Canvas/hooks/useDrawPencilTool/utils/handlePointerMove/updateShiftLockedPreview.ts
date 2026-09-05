@@ -1,24 +1,23 @@
-import { RefObject } from 'react';
-
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TPencilDragRefs } from '../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getAxisLockedPoint, TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { getDominantAxis } from 'components/Design/Canvas/utils/getDominantAxis';
+import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
+import { getDominantAxis } from 'utils/math/axis/getDominantAxis';
 import { simplifyPencilPoints } from '../simplifyPencilPoints';
 
 export const updateShiftLockedPreview = (
   refs: TCanvasRefs,
+  pencilDragRefs: TPencilDragRefs,
   committed: TPoint[],
   tail: TPoint[],
-  axisLockRef: RefObject<TAxisLock | null>,
-  shiftAnchorRef: RefObject<TPoint | null>,
   currentPoint: TPoint,
   zoom: number,
   tolerance: number,
 ): void => {
+  const { axisLockRef, shiftAnchorRef } = pencilDragRefs;
   const anchor = shiftAnchorRef.current ?? tail[tail.length - 1];
   const axis = axisLockRef.current ?? getDominantAxis(anchor, currentPoint, zoom);
 

@@ -24,11 +24,7 @@ export const handleZoomToFit = (dispatch: AppDispatch, refs: TCanvasRefs): void 
     const fitNodes = selectOrderedNodes(store.getState());
 
     if (fitNodes.length > 0) {
-      const visibleRect = getVisibleCanvasRect(
-        canvas.getBoundingClientRect(),
-        refs.layout.leftPanelWidthRef.current,
-        refs.layout.rightPanelWidthRef.current,
-      );
+      const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
 
       animateViewport(
         dispatch,

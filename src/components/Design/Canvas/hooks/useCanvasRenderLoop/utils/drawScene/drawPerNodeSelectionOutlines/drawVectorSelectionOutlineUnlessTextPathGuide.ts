@@ -3,7 +3,7 @@ import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawVectorSelectionOutline } from './drawVectorSelectionOutline';
-import { isVectorBoundAsTextPath } from 'store/design/utils/isVectorBoundAsTextPath';
+import { isVectorBoundAsTextPath } from 'utils/canvas/vector/isVectorBoundAsTextPath';
 
 export const drawVectorSelectionOutlineUnlessTextPathGuide = (
   gl: WebGL2RenderingContext,

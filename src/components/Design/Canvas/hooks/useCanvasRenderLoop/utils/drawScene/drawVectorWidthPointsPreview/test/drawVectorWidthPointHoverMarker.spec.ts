@@ -9,7 +9,7 @@ const getRenderedVectorNodeMock = vi.fn();
 const getVectorSegmentPointAtTMock = vi.fn();
 const drawVectorCutPointMarkerMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+vi.mock('utils/canvas/render/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('utils/canvas/vectorNetwork/getVectorSegmentPointAtT', () => ({

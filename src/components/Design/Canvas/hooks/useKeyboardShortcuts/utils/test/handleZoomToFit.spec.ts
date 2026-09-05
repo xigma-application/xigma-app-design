@@ -60,7 +60,7 @@ describe('handleZoomToFit', () => {
     addFrameNode(0, 100);
     addFrameNode(300, 100);
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 400, x: 0, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action
@@ -77,7 +77,7 @@ describe('handleZoomToFit', () => {
     const selectedId = addFrameNode(300, 100);
     store.dispatch(setSelection([selectedId]));
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 400, x: 0, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action
@@ -94,7 +94,7 @@ describe('handleZoomToFit', () => {
       canvasRef: { current: canvas },
       layout: { leftPanelWidthRef: { current: 200 }, rightPanelWidthRef: { current: 100 } },
     });
-    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 200, 100);
+    const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), refs.layout);
     const expected = getFitViewport({ height: 100, width: 100, x: 0, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action

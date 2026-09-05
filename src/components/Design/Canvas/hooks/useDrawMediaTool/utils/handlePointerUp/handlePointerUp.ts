@@ -20,8 +20,8 @@ import { TDraftEntity } from 'types/design/types';
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
 import { armNextFile } from '../armNextFile';
 import { getMediaPlacementRect } from './utils/getMediaPlacementRect';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,

@@ -10,7 +10,7 @@ const getRenderedVectorNodeMock = vi.fn();
 const getVectorFullySelectedFacesMock = vi.fn();
 const drawVectorHatchFillMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+vi.mock('utils/canvas/render/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('utils/canvas/vectorNetwork/getVectorFullySelectedFaces', () => ({

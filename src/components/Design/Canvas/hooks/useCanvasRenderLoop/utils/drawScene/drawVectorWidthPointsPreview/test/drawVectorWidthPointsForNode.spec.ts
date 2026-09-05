@@ -9,7 +9,7 @@ import { drawVectorWidthPointsForNode } from '../drawVectorWidthPointsForNode';
 const getRenderedVectorNodeMock = vi.fn();
 const drawWidthPointHandlesMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+vi.mock('utils/canvas/render/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('../drawWidthPointHandles', () => ({

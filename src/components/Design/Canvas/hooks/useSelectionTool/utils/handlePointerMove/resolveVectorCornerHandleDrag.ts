@@ -12,10 +12,10 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 // utils
 import { commitVectorCornerHandleDrag } from '../../../../utils/commitVectorCornerHandleDrag';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { pickClosestAngleMatch } from 'utils/math/pickClosestAngleMatch';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolveVectorCornerHandleDrag = (
   canvas: HTMLCanvasElement,

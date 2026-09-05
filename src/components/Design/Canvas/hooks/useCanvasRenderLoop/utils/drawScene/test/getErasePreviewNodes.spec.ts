@@ -14,7 +14,7 @@ const getRenderedVectorNodeMock = vi.fn();
 vi.mock('utils/canvas/vectorNetwork/eraseVectorNetwork/subtractCapsuleFromVectorNetwork/subtractCapsuleFromVectorNetwork', () => ({
   subtractCapsuleFromVectorNetwork: (...args: unknown[]): unknown => subtractCapsuleFromVectorNetworkMock(...args),
 }));
-vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+vi.mock('utils/canvas/render/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 
@@ -36,6 +36,19 @@ const vectorNode: TVectorNode = {
 };
 
 const otherNode: TSceneNode = { ...vectorNode, id: 'v2' };
+
+const rectangleNode: TSceneNode = {
+  fill: '#ffffff',
+  height: 10,
+  id: 'r1',
+  name: 'Rectangle',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+};
 
 const createRefs = (strokePath: TPoint[] | null, diameterPx: number): TCanvasRefs =>
   ({
@@ -73,10 +86,18 @@ describe('getErasePreviewNodes', () => {
     ]);
   });
 
-  it('should leave a non-editing or non-vector node untouched', () => {
+  it('should leave a vector node untouched when it is not one of the editing nodes', () => {
     // result
     expect(getErasePreviewNodes([otherNode], ['v1'], ToolName.erase, createRefs([{ x: 0, y: 0 }], 10), IDENTITY_VIEWPORT)).toEqual([
       otherNode,
+    ]);
+    expect(subtractCapsuleFromVectorNetworkMock).not.toHaveBeenCalled();
+  });
+
+  it('should leave a non-vector node untouched even when its id is in the editing list', () => {
+    // result
+    expect(getErasePreviewNodes([rectangleNode], ['r1'], ToolName.erase, createRefs([{ x: 0, y: 0 }], 10), IDENTITY_VIEWPORT)).toEqual([
+      rectangleNode,
     ]);
     expect(subtractCapsuleFromVectorNetworkMock).not.toHaveBeenCalled();
   });

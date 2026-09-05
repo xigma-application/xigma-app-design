@@ -10,10 +10,10 @@ import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { getVertexCountFromLocalPoint } from 'utils/canvas/vertexCount/getVertexCountFromLocalPoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 type TVertexCountDragState = {
   bounds: TDraftRect;

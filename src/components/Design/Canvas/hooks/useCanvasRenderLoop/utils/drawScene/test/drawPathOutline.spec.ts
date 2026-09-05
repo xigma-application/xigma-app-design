@@ -1,5 +1,6 @@
 // types
 import { NodeType, PathType } from 'types/design/enums';
+import { TDrawContext } from '../types';
 import { TPathNode } from 'types/design/types';
 
 // utils
@@ -26,6 +27,15 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
+const buildContext = (gl: WebGL2RenderingContext, program: WebGLProgram, buffer: WebGLBuffer): TDrawContext => ({
+  buffer,
+  canvasHeight: 100,
+  canvasWidth: 100,
+  gl,
+  program,
+  viewport: IDENTITY_VIEWPORT,
+});
+
 const buildNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
   height: 10,
   id: 'a',
@@ -48,7 +58,7 @@ describe('drawPathOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPathOutline(gl, program, buffer, buildNode(), undefined, 100, 100, IDENTITY_VIEWPORT);
+    drawPathOutline(buildContext(gl, program, buffer), buildNode(), undefined);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -61,7 +71,7 @@ describe('drawPathOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPathOutline(gl, program, buffer, buildNode(), 'selected', 100, 100, IDENTITY_VIEWPORT);
+    drawPathOutline(buildContext(gl, program, buffer), buildNode(), 'selected');
 
     // result — a stroke-only ellipse draws a LINE_LOOP, not a thick triangulated ring
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -75,7 +85,7 @@ describe('drawPathOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPathOutline(gl, program, buffer, buildNode(), 'hover', 100, 100, IDENTITY_VIEWPORT);
+    drawPathOutline(buildContext(gl, program, buffer), buildNode(), 'hover');
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -89,7 +99,7 @@ describe('drawPathOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPathOutline(gl, program, buffer, buildNode(), 'editing', 100, 100, IDENTITY_VIEWPORT);
+    drawPathOutline(buildContext(gl, program, buffer), buildNode(), 'editing');
 
     // result — a dashed outline draws disconnected line segments, not a closed LINE_LOOP or a thick ring
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);

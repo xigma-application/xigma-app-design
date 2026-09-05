@@ -1,28 +1,30 @@
-import { RefObject } from 'react';
-
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../../types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { updateShiftLockedPreview } from '../updateShiftLockedPreview';
 
-const createAxisLockRef = (value: TAxisLock | null = null): RefObject<TAxisLock | null> => ({ current: value });
-const createShiftAnchorRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
+export const createPencilDragRefs = (overrides: Partial<TPencilDragRefs> = {}): TPencilDragRefs => ({
+  axisLockRef: { current: null },
+  committedPointsRef: { current: null },
+  rawPointsRef: { current: null },
+  shiftAnchorRef: { current: null },
+  tailPointsRef: { current: null },
+  ...overrides,
+});
 
 describe('updateShiftLockedPreview', () => {
   it('should preview the raw current point (unlocked) while the move stays under the axis-lock threshold', () => {
     // mock — 1px move in each direction stays under the 4px lock threshold, so no axis locks yet
     const refs = createCanvasRefs();
-    const axisLockRef = createAxisLockRef();
-    const shiftAnchorRef = createShiftAnchorRef();
+    const pencilDragRefs = createPencilDragRefs();
 
     // before
-    updateShiftLockedPreview(refs, [{ x: 0, y: 0 }], [{ x: 0, y: 0 }], axisLockRef, shiftAnchorRef, { x: 1, y: 1 }, 1, 4);
+    updateShiftLockedPreview(refs, pencilDragRefs, [{ x: 0, y: 0 }], [{ x: 0, y: 0 }], { x: 1, y: 1 }, 1, 4);
 
     // result
-    expect(axisLockRef.current).toBeNull();
+    expect(pencilDragRefs.axisLockRef.current).toBeNull();
     expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 1, y: 1 },
@@ -33,15 +35,14 @@ describe('updateShiftLockedPreview', () => {
     // mock — mostly-horizontal movement (dx=10, dy=3) locks the 'x' axis
     const refs = createCanvasRefs();
     const tail = [{ x: 0, y: 0 }];
-    const axisLockRef = createAxisLockRef();
-    const shiftAnchorRef = createShiftAnchorRef();
+    const pencilDragRefs = createPencilDragRefs();
 
     // before
-    updateShiftLockedPreview(refs, [{ x: 0, y: 0 }], tail, axisLockRef, shiftAnchorRef, { x: 10, y: 3 }, 1, 4);
+    updateShiftLockedPreview(refs, pencilDragRefs, [{ x: 0, y: 0 }], tail, { x: 10, y: 3 }, 1, 4);
 
     // result
-    expect(axisLockRef.current).toBe('x');
-    expect(shiftAnchorRef.current).toEqual({ x: 0, y: 0 });
+    expect(pencilDragRefs.axisLockRef.current).toBe('x');
+    expect(pencilDragRefs.shiftAnchorRef.current).toEqual({ x: 0, y: 0 });
     expect(tail).toEqual([{ x: 0, y: 0 }]);
     expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
@@ -53,14 +54,16 @@ describe('updateShiftLockedPreview', () => {
     // mock — axis already locked to 'x' from a prior move; a now-more-vertical move must still
     // constrain to the horizontal line through the anchor
     const refs = createCanvasRefs();
-    const axisLockRef = createAxisLockRef('x');
-    const shiftAnchorRef = createShiftAnchorRef({ x: 0, y: 0 });
+    const pencilDragRefs = createPencilDragRefs({
+      axisLockRef: { current: 'x' },
+      shiftAnchorRef: { current: { x: 0, y: 0 } },
+    });
 
     // before
-    updateShiftLockedPreview(refs, [{ x: 0, y: 0 }], [{ x: 0, y: 0 }], axisLockRef, shiftAnchorRef, { x: 12, y: 20 }, 1, 4);
+    updateShiftLockedPreview(refs, pencilDragRefs, [{ x: 0, y: 0 }], [{ x: 0, y: 0 }], { x: 12, y: 20 }, 1, 4);
 
     // result
-    expect(axisLockRef.current).toBe('x');
+    expect(pencilDragRefs.axisLockRef.current).toBe('x');
     expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 12, y: 0 },

@@ -12,10 +12,10 @@ import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const pinRotatedGroupBounds = (dispatch: AppDispatch, nodeOrigins: Record<string, TRotateNodeOrigin>): void => {
   const { nodes } = selectActivePage(store.getState());

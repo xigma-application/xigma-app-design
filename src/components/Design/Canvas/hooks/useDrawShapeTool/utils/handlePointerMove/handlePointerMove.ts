@@ -12,9 +12,9 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { getPointAlignmentSnap } from '../../../../utils/getPointAlignmentSnap';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getShapeDraftRect } from '../../../../utils/getShapeDraftRect';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,

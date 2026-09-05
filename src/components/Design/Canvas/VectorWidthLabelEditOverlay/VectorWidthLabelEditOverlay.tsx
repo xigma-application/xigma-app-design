@@ -4,7 +4,7 @@ import { FC } from 'react';
 import CanvasValueLabelInput from '../CanvasValueLabelInput/CanvasValueLabelInput';
 
 // hooks
-import { useVectorWidthLabelEditor } from './hooks/useVectorWidthLabelEditor';
+import { useVectorWidthLabelEditor } from './hooks/useVectorWidthLabelEditor/useVectorWidthLabelEditor';
 
 // others
 import { VALUE_LABEL_FONT_SIZE_PX } from 'constant/canvas';

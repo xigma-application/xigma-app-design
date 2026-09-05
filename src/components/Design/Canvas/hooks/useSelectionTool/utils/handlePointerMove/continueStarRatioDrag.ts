@@ -14,11 +14,11 @@ import { TStarRatioDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRatioFromLocalPoint } from 'utils/canvas/ratio/getRatioFromLocalPoint';
 import { getStarPoints } from 'utils/canvas/shapes/getStarPoints';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const continueStarRatioDrag = (
   canvas: HTMLCanvasElement,

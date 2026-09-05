@@ -28,9 +28,9 @@ import { continueVectorEraseDrag } from './continueVectorEraseDrag/continueVecto
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorLassoDrag } from './continueVectorLassoDrag';
 import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag/continueVectorMarqueeDrag';
-import { continueVectorMultiDrag } from './continueVectorMultiDrag';
-import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
-import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag';
+import { continueVectorMultiDrag } from './continueVectorMultiDrag/continueVectorMultiDrag';
+import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag/continueVectorMultiSelectResizeDrag';
+import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag/continueVectorMultiSelectRotateDrag';
 import { continueVectorPaintDrag } from './continueVectorPaintDrag/continueVectorPaintDrag';
 import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/continueVectorSegmentBendDrag';
 import { continueVectorShapeBuilderDrag } from './continueVectorShapeBuilderDrag';

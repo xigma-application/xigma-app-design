@@ -11,8 +11,8 @@ import { ToolName } from 'types/design/enums';
 import { MouseButton } from 'types/enums';
 
 // utils
-import { getPointerPosition } from '../../utils/getPointerPosition';
-import { screenToWorld } from '../../utils/screenToWorld';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const useCommentTool = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;
@@ -33,7 +33,6 @@ export const useCommentTool = (refs: TCanvasRefs): void => {
 
     if (canvas && activeTool === ToolName.comment) {
       const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
-
       canvas.addEventListener('pointerdown', onPointerDown);
 
       return (): void => canvas.removeEventListener('pointerdown', onPointerDown);

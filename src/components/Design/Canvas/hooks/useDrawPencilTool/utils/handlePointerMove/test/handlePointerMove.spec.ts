@@ -1,15 +1,21 @@
-import { RefObject } from 'react';
-
 // store
 import { store } from 'store';
 
 // types
-import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
-import { TPoint } from 'types/canvas';
+import { TPencilDragRefs } from '../../../types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerMove } from '../handlePointerMove';
+
+export const createPencilDragRefs = (overrides: Partial<TPencilDragRefs> = {}): TPencilDragRefs => ({
+  axisLockRef: { current: null },
+  committedPointsRef: { current: null },
+  rawPointsRef: { current: null },
+  shiftAnchorRef: { current: null },
+  tailPointsRef: { current: null },
+  ...overrides,
+});
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -22,10 +28,6 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1, ...options });
 
-const createPointsRef = (value: TPoint[] | null): RefObject<TPoint[] | null> => ({ current: value });
-const createAxisLockRef = (value: TAxisLock | null = null): RefObject<TAxisLock | null> => ({ current: value });
-const createShiftAnchorRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
-
 describe('handlePointerMove', () => {
   it('should do nothing when there is no stroke in progress', () => {
     // mock
@@ -33,17 +35,7 @@ describe('handlePointerMove', () => {
     const refs = createCanvasRefs();
 
     // before
-    handlePointerMove(
-      canvas,
-      pointerEvent(10, 10),
-      store,
-      refs,
-      createPointsRef(null),
-      createPointsRef(null),
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerMove(canvas, pointerEvent(10, 10), store, refs, createPencilDragRefs());
 
     // result
     expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
@@ -53,19 +45,13 @@ describe('handlePointerMove', () => {
     // mock — committed/tail are set, but rawPointsRef is null (e.g. a stale call after cleanup)
     const canvas = createCanvas();
     const refs = createCanvasRefs();
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     // before
-    handlePointerMove(
-      canvas,
-      pointerEvent(10, 10),
-      store,
-      refs,
-      createPointsRef([{ x: 0, y: 0 }]),
-      createPointsRef([{ x: 0, y: 0 }]),
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef(null),
-    );
+    handlePointerMove(canvas, pointerEvent(10, 10), store, refs, pencilDragRefs);
 
     // result
     expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
@@ -75,23 +61,17 @@ describe('handlePointerMove', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
-    const tailPointsRef = createPointsRef([{ x: 0, y: 0 }]);
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      rawPointsRef: { current: [{ x: 0, y: 0 }] },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     // before
-    handlePointerMove(
-      canvas,
-      pointerEvent(5, 0),
-      store,
-      refs,
-      createPointsRef([{ x: 0, y: 0 }]),
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef([{ x: 0, y: 0 }]),
-    );
+    handlePointerMove(canvas, pointerEvent(5, 0), store, refs, pencilDragRefs);
 
     // result — the real tail grows, proving advancePencilTail ran (updateShiftLockedPreview never touches it)
-    expect(tailPointsRef.current).toEqual([
+    expect(pencilDragRefs.tailPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 5, y: 0 },
     ]);
@@ -101,23 +81,17 @@ describe('handlePointerMove', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
-    const tailPointsRef = createPointsRef([{ x: 0, y: 0 }]);
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      rawPointsRef: { current: [{ x: 0, y: 0 }] },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     // before
-    handlePointerMove(
-      canvas,
-      pointerEvent(10, 3, { shiftKey: true }),
-      store,
-      refs,
-      createPointsRef([{ x: 0, y: 0 }]),
-      tailPointsRef,
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      createPointsRef([{ x: 0, y: 0 }]),
-    );
+    handlePointerMove(canvas, pointerEvent(10, 3, { shiftKey: true }), store, refs, pencilDragRefs);
 
     // result — axis-lock preview only, real tail unchanged (that's advancePencilTail's job)
-    expect(tailPointsRef.current).toEqual([{ x: 0, y: 0 }]);
+    expect(pencilDragRefs.tailPointsRef.current).toEqual([{ x: 0, y: 0 }]);
     expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
@@ -128,24 +102,18 @@ describe('handlePointerMove', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
-    const rawPointsRef = createPointsRef([{ x: 0, y: 0 }]);
+    const pencilDragRefs = createPencilDragRefs({
+      committedPointsRef: { current: [{ x: 0, y: 0 }] },
+      rawPointsRef: { current: [{ x: 0, y: 0 }] },
+      tailPointsRef: { current: [{ x: 0, y: 0 }] },
+    });
 
     // before
-    handlePointerMove(
-      canvas,
-      pointerEvent(5, 0, { ctrlKey: true }),
-      store,
-      refs,
-      createPointsRef([{ x: 0, y: 0 }]),
-      createPointsRef([{ x: 0, y: 0 }]),
-      createAxisLockRef(),
-      createShiftAnchorRef(),
-      rawPointsRef,
-    );
+    handlePointerMove(canvas, pointerEvent(5, 0, { ctrlKey: true }), store, refs, pencilDragRefs);
 
     // result
     expect(refs.pencil.pencilShowRawPreviewRef.current).toBe(true);
-    expect(rawPointsRef.current).toEqual([
+    expect(pencilDragRefs.rawPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 5, y: 0 },
     ]);

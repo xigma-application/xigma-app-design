@@ -14,12 +14,12 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getSegmentMidpoint } from 'utils/canvas/vectorNetwork/getSegmentMidpoint';
 import { getVectorCornerHandleAtPoint } from '../../../../../utils/getVectorCornerHandleAtPoint';
 import { getVectorEdgeAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
 import { getVectorSegmentMidpointAtPoint } from 'utils/canvas/vectorNetwork/getVectorSegmentMidpointAtPoint';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const getHoveredSegmentInsertPoint = (node: TVectorNode, segmentId: string | null): TPoint | null => {
   if (segmentId) {
@@ -53,22 +53,21 @@ export const resolveVectorSegmentHoverInNode = (
 
   if (event.altKey && event.buttons === 0) {
     hoveredVectorEdgeInsertPointRef.current = null;
-    return;
-  }
-
-  if (event.buttons === 0 && (event.ctrlKey || event.metaKey || selectActiveTool(state) === ToolName.bend)) {
-    hoveredVectorEdgeInsertPointRef.current = null;
-    const vertexHit = getVectorCornerHandleAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
-    const alternativeCursor = hit ? 'bend' : null;
-
-    setClassName(vertexHit ? 'segment' : alternativeCursor);
-  } else if (event.buttons === 0) {
-    hoveredVectorEdgeInsertPointRef.current = getHoveredSegmentInsertPoint(bakedNode, hit?.segmentId ?? null);
-
-    const midpointHit = getVectorSegmentMidpointAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
-
-    setClassName(midpointHit ? 'pen-extend' : null);
   } else {
-    hoveredVectorEdgeInsertPointRef.current = null;
+    if (event.buttons === 0 && (event.ctrlKey || event.metaKey || selectActiveTool(state) === ToolName.bend)) {
+      hoveredVectorEdgeInsertPointRef.current = null;
+      const vertexHit = getVectorCornerHandleAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
+      const alternativeCursor = hit ? 'bend' : null;
+
+      setClassName(vertexHit ? 'segment' : alternativeCursor);
+    } else if (event.buttons === 0) {
+      hoveredVectorEdgeInsertPointRef.current = getHoveredSegmentInsertPoint(bakedNode, hit?.segmentId ?? null);
+
+      const midpointHit = getVectorSegmentMidpointAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
+
+      setClassName(midpointHit ? 'pen-extend' : null);
+    } else {
+      hoveredVectorEdgeInsertPointRef.current = null;
+    }
   }
 };

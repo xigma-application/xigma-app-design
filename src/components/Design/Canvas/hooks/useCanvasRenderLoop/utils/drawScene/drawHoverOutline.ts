@@ -15,7 +15,7 @@ import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOut
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
-import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 
 export const drawHoverOutline = (
   context: TDrawSceneContext,

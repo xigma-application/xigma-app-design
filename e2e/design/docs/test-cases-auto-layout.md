@@ -26,6 +26,21 @@ shape directly over a frame's area does **not** auto-parent it (only a real drag
 drop-indicator path, or a Layers-panel reparent, does) — so this also exercises the drag-into-frame
 gesture live, not just the Flow toggle in isolation.
 
+## Reordering a child within its own frame
+
+| #   | Scenario                                                                                   | Unit |         E2E          |
+| --- | ------------------------------------------------------------------------------------------ | :--: | :------------------: |
+| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it |  —   | ✅ `reorder.spec.ts` |
+
+This is the one path here that a unit test genuinely can't stand in for: the real position math
+(`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
+already covered exhaustively at the unit level, but whether an actual pointer drag ends up
+committing the right index — real `mousedown`/`mousemove`/`mouseup` timing, not a synthetic
+`moveNodes` dispatch — is only provable in a real browser. Asserted via the Layers panel's exact
+row order (precise and unambiguous) rather than a canvas screenshot diff, since the three children
+are identical green squares and a pixel diff would tell you _something_ changed without saying
+what.
+
 ### A real, pre-existing selection bug found while writing these tests
 
 Reselecting the frame after giving it a child was originally attempted with a plain canvas click on

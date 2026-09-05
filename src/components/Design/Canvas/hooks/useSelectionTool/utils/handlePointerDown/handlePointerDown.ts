@@ -21,10 +21,10 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getSelectionHitAtPoint } from './getSelectionHitAtPoint/getSelectionHitAtPoint';
 import { isControlPressed } from 'utils/isControlPressed';
-import { screenToWorld } from '../../../../utils/screenToWorld';
+import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,
