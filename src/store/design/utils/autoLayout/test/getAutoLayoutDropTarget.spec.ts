@@ -17,6 +17,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 0, y: 0 },
       NO_PADDING,
       [],
+      [],
       { height: 20, width: 30 },
       { x: 50, y: 50 },
     );
@@ -37,6 +38,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 0, y: 0 },
       NO_PADDING,
       [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 0 }],
       { height: 20, width: 30 },
       { x: 0, y: 5 },
     );
@@ -55,6 +57,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 0, y: 0 },
       NO_PADDING,
       [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 0 }],
       { height: 20, width: 30 },
       { x: 0, y: 100 },
     );
@@ -74,6 +77,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 100, width: 200, x: 0, y: 0 },
       NO_PADDING,
       [],
+      [],
       { height: 40, width: 20 },
       { x: 10, y: 10 },
     );
@@ -92,6 +96,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 100, y: 300 },
       NO_PADDING,
       [],
+      [],
       { height: 20, width: 30 },
       { x: 150, y: 350 },
     );
@@ -109,6 +114,7 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 0, y: 0 },
       { paddingBottom: 5, paddingLeft: 5, paddingRight: 5, paddingTop: 5 },
       [],
+      [],
       { height: 20, width: 30 },
       { x: 50, y: 50 },
     );
@@ -125,6 +131,7 @@ describe('getAutoLayoutDropTarget', () => {
       AlignmentLayout.topLeft,
       { height: 200, width: 200, x: 0, y: 0 },
       { paddingBottom: 1, paddingLeft: 1, paddingRight: 1, paddingTop: 1 },
+      [],
       [],
       { height: 20, width: 30 },
       { x: 50, y: 50 },
@@ -146,6 +153,10 @@ describe('getAutoLayoutDropTarget', () => {
         { height: 20, id: 'a', width: 20 },
         { height: 20, id: 'b', width: 20 },
       ],
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 0, y: 20 },
+      ],
       { height: 20, width: 20 },
       { x: 0, y: 25 },
     );
@@ -164,11 +175,63 @@ describe('getAutoLayoutDropTarget', () => {
       { height: 200, width: 200, x: 0, y: 0 },
       NO_PADDING,
       [],
+      [],
       { height: 20, width: 30 },
       { x: 50, y: 50 },
     );
 
     // result — no siblings at all, so the map is empty; specifically not `{ __dragged__: ... }`
     expect(dropTarget.siblingPositions).toEqual({});
+  });
+
+  it('should keep the drop index at the dragged item’s old slot until the cursor crosses the next sibling’s own real midpoint', () => {
+    // action — dragging item 'b' (20 tall) out of a stack of three 20-tall items with no gap;
+    // remaining siblings 'a' and 'c' keep their real, undisturbed on-screen positions (b's old
+    // slot between them is still visually open, not yet compacted away)
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'c', width: 20 },
+      ],
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'c', x: 0, y: 40 },
+      ],
+      { height: 20, width: 20 },
+      { x: 0, y: 45 },
+    );
+
+    // result — c's real midpoint is y=50; a cursor at y=45 hasn't reached it yet, so the drop
+    // stays right after a (index 1), not after c
+    expect(dropTarget.index).toBe(1);
+  });
+
+  it('should advance the drop index past the next sibling once the cursor crosses its real midpoint', () => {
+    // action — same setup as above, cursor now past c's real midpoint (y=50)
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'c', width: 20 },
+      ],
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'c', x: 0, y: 40 },
+      ],
+      { height: 20, width: 20 },
+      { x: 0, y: 55 },
+    );
+
+    // result
+    expect(dropTarget.index).toBe(2);
   });
 });

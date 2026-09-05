@@ -49,14 +49,14 @@ export const getAutoLayoutDropTarget = (
   frame: TDraftRect,
   padding: TAutoLayoutPadding,
   children: TAutoLayoutChildSize[],
+  realPositions: TAutoLayoutChildPosition[],
   draggedSize: { height: number; width: number },
   cursorPoint: TPoint,
 ): TAutoLayoutDropTarget => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const contentBox = getAutoLayoutContentBox(frame, padding);
-  const positions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, children);
   const cursorPrimary = isHorizontal ? cursorPoint.x : cursorPoint.y;
-  const index = getAutoLayoutDropInsertionIndex(isHorizontal, cursorPrimary, positions, children);
+  const index = getAutoLayoutDropInsertionIndex(isHorizontal, cursorPrimary, realPositions, children);
   const simulatedChildren = [...children.slice(0, index), { ...draggedSize, id: '__dragged__' }, ...children.slice(index)];
   const simulatedPositions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, simulatedChildren);
   const insertedPosition = simulatedPositions[index];

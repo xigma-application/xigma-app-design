@@ -71,4 +71,47 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     expect(after).not.toEqual(before);
     expect(after).toEqual([before[1], before[2], before[0]]);
   });
+
+  test('dragging the top child down past a sibling only swaps once it crosses that sibling’s own midpoint, not the dragged child’s original one', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-down-threshold');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlow(page, 'Vertical');
+
+    // same three-child stack as above: 60px-tall boxes packed from the frame's top-left content-box
+    // origin (y=150), no gap — Rectangle 1 at y150-210, Rectangle 2 at y210-270, Rectangle 3 at
+    // y270-330. Rectangle 2's own midpoint sits at y=240; a stale threshold computed off the
+    // recompacted (gap-closed) sibling list instead would land at y=180 — exactly Rectangle 1's own
+    // midpoint — and swap far too early
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 440, 1460, 500);
+    await dragInto(page, { x: 1430, y: 470 }, { x: 630, y: 300 });
+
+    const before = await rectangleRowNames(page);
+
+    // dragging the top child to y=200 is past its own midpoint (180) but well short of Rectangle 2's
+    // real midpoint (240) — no swap should happen yet
+    await dragInto(page, { x: 630, y: 180 }, { x: 630, y: 200 });
+
+    const stillUnswapped = await rectangleRowNames(page);
+
+    expect(stillUnswapped).toEqual(before);
+
+    // now cross Rectangle 2's real midpoint (240) — the swap should fire
+    await dragInto(page, { x: 630, y: 200 }, { x: 630, y: 250 });
+
+    const afterSwap = await rectangleRowNames(page);
+
+    expect(afterSwap).not.toEqual(before);
+  });
 });

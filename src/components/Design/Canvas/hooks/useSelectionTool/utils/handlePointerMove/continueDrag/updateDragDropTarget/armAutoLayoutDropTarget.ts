@@ -27,6 +27,7 @@ export const armAutoLayoutDropTarget = (
 ): void => {
   const siblingEntries = getAutoLayoutSiblingEntries(desiredParent, movedNodeIds, nodesById);
   const siblingSizes = siblingEntries.map(({ bounds, sibling }) => ({ height: bounds.height, id: sibling.id, width: bounds.width }));
+  const realPositions = siblingEntries.map(({ bounds, sibling }) => ({ id: sibling.id, x: bounds.x, y: bounds.y }));
   const dropTarget = getAutoLayoutDropTarget(
     desiredParent.layoutMode,
     desiredParent.itemSpacing ?? 0,
@@ -34,6 +35,7 @@ export const armAutoLayoutDropTarget = (
     desiredParent,
     getFramePadding(desiredParent),
     siblingSizes,
+    realPositions,
     getNodesBoundingBox(selectedNodes),
     point,
   );
