@@ -45,6 +45,7 @@ const getAutoLayoutFrameDropTarget = (
         desiredParent,
         padding,
         siblingSizes,
+        originalIndex,
         draggedSize,
         point,
       )

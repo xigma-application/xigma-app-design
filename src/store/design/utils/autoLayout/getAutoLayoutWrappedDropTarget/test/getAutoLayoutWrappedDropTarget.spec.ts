@@ -19,7 +19,26 @@ const CHILDREN = [
 const NORMAL_SIZE = { height: 100, width: 100 };
 
 const dropTargetAt = (cursor: { x: number; y: number }, draggedSize = NORMAL_SIZE): ReturnType<typeof getAutoLayoutWrappedDropTarget> =>
-  getAutoLayoutWrappedDropTarget(LayoutMode.horizontal, 20, 20, AlignmentLayout.topLeft, FRAME, NO_PADDING, CHILDREN, draggedSize, cursor);
+  getAutoLayoutWrappedDropTarget(
+    LayoutMode.horizontal,
+    20,
+    20,
+    AlignmentLayout.topLeft,
+    FRAME,
+    NO_PADDING,
+    CHILDREN,
+    null,
+    draggedSize,
+    cursor,
+  );
+
+// same-parent reorder of '3' itself: '3' is excluded from the sibling list (it's the dragged node),
+// leaving only 1 and 2, which alone fit on a single row — originalIndex lets the row-detection step
+// reinsert '3'’s own placeholder at its pre-drag slot so its row still exists for cursor purposes
+const SIBLINGS_WITHOUT_3 = [
+  { height: 100, id: '1', width: 100 },
+  { height: 100, id: '2', width: 100 },
+];
 
 describe('getAutoLayoutWrappedDropTarget', () => {
   it('should insert between 1 and 2 when the cursor sits in their own row-1 gap', () => {
@@ -99,6 +118,7 @@ describe('getAutoLayoutWrappedDropTarget', () => {
       { height: 250, width: 400, x: 0, y: 0 },
       NO_PADDING,
       CHILDREN,
+      null,
       NORMAL_SIZE,
       { x: 50, y: 115 },
     );
@@ -106,5 +126,71 @@ describe('getAutoLayoutWrappedDropTarget', () => {
     // result
     expect(dropTarget.index).toBe(1);
     expect(dropTarget.indicator).toMatchObject({ x: 2, y: 110 });
+  });
+});
+
+describe('getAutoLayoutWrappedDropTarget — same-parent reorder (originalIndex reinstates the dragged item’s own row)', () => {
+  it('should leave 1 and 2 untouched when reordering 3 slightly within its own row, which nothing else shares', () => {
+    // action — '3' is excluded from the sibling list (it's the dragged node), so without
+    // originalIndex its own row would collapse and the cursor would misresolve into row 1
+    const dropTarget = getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      20,
+      20,
+      AlignmentLayout.topLeft,
+      FRAME,
+      NO_PADDING,
+      SIBLINGS_WITHOUT_3,
+      2,
+      NORMAL_SIZE,
+      { x: 20, y: 150 },
+    );
+
+    // result — 3 stays alone on row 2; 1 and 2 must not react at all
+    expect(dropTarget.index).toBe(2);
+    expect(dropTarget.siblingPositions).toMatchObject({ '1': { x: 0, y: 0 }, '2': { x: 120, y: 0 } });
+  });
+
+  it('should push 1 and 2 onto row 2 to make room in row 1, for an item the combined size of both', () => {
+    // action — matches Figma: even when the dragged item is as wide as 1 and 2 put together,
+    // dropping it at the very start of row 1 reflows 1 and 2 onto row 2, rather than letting them
+    // overflow row 1's real capacity
+    const dropTarget = getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      20,
+      20,
+      AlignmentLayout.topLeft,
+      FRAME,
+      NO_PADDING,
+      SIBLINGS_WITHOUT_3,
+      2,
+      { height: 100, width: 220 },
+      { x: 10, y: 50 },
+    );
+
+    // result — 3, then 1 and 2 pushed down to row 2
+    expect(dropTarget.index).toBe(0);
+    expect(dropTarget.siblingPositions).toMatchObject({ '1': { x: 0, y: 120 }, '2': { x: 120, y: 120 } });
+  });
+
+  it('should reset to a fresh (non-hysteretic) insertion when the dragged item is moved into a different row than its own', () => {
+    // action — '3'’s own original slot (index 2) falls outside row 1's range, so no row-local
+    // originalIndex hysteresis anchor applies; the drop is a plain fresh insertion into row 1
+    const dropTarget = getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      20,
+      20,
+      AlignmentLayout.topLeft,
+      FRAME,
+      NO_PADDING,
+      SIBLINGS_WITHOUT_3,
+      2,
+      NORMAL_SIZE,
+      { x: 118, y: 50 },
+    );
+
+    // result — 1, [dragged], 2 in row 1; 2 alone wraps onto row 2 since all three no longer fit
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.siblingPositions).toMatchObject({ '1': { x: 0, y: 0 }, '2': { x: 0, y: 120 } });
   });
 });

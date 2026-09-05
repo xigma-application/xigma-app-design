@@ -33,6 +33,7 @@ gesture live, not just the Flow toggle in isolation.
 | 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                       |  —   | ✅ `reorder.spec.ts` |
 | 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge      |  —   | ✅ `reorder.spec.ts` |
 | 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order) |  ✅  | ✅ `reorder.spec.ts` |
+| 4   | Wrap: nudging a child that sits alone on its own row doesn't perturb the siblings on a different row                                             |  ✅  | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -79,6 +80,28 @@ Reproduced and fixed live (2026-09-05) after the user found it by hand — no au
 any of the three until these were added afterward, one `e2e/design/auto-layout/reorder.spec.ts` case
 per distinct symptom (bugs 1+2 together, since they only manifest combined; bug 3 specifically via a
 reversed-click-order case) plus matching unit coverage on each of the four touched files.
+
+### Wrap reorder: a dragged child's own row used to vanish, not just its indicator
+
+Found live by the user (2026-09-05), right after the wrap-aware drop-indicator work above:
+same-parent reorder for a wrapped frame reused `getAutoLayoutWrappedDropTarget`, but that function
+never received `originalIndex` at all — it was silently dropped at the call site. For a cross-parent
+drop this doesn't matter (there is no original index), but for a same-parent reorder the dragged
+child is excluded from the sibling list passed in (it's the node being moved), so if that child was
+**alone on its own row**, removing it collapsed that row out of existence entirely. The cursor,
+still squarely over where that row used to be, then misresolved into a neighbouring row — dragging
+unrelated siblings there along with it even though they no longer fit.
+
+Fixed by threading `originalIndex` through to `getAutoLayoutWrappedDropTarget`, which reinserts a
+placeholder at that index _only_ for the row-detection step (`getAutoLayoutCursorRowRange`), so the
+dragged child's own row still exists for cursor purposes, then maps the detected row back to real
+(placeholder-free) sibling indices for the actual insertion-index math. The resulting sibling
+positions are now also computed by re-running the real wrap engine
+(`getAutoLayoutWrappedChildPositions`) over the full simulated array with the dragged item inserted
+at its resolved index — not just the affected row in isolation — so a child that can't coexist with
+its neighbours on one row correctly cascades the rest onto the next row(s) live, matching what
+committing the drop would produce anyway (mirrors Figma: dropping an item the combined size of two
+siblings pushes both of them onto the next row rather than overflowing the first).
 
 ### A real, pre-existing selection bug found while writing these tests
 

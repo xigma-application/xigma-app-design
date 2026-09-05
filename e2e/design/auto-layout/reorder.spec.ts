@@ -24,6 +24,22 @@ const dragInto = async (page: Page, from: { x: number; y: number }, to: { x: num
 const rectangleRowNames = (page: Page): Promise<string[]> =>
   page.locator('[class*="Tree__row_"]').filter({ hasText: 'Rectangle' }).allInnerTexts();
 
+const setFlowHorizontal = async (page: Page): Promise<void> => {
+  await flowGroup(page).getByLabel('Horizontal', { exact: true }).click();
+};
+
+const clickWrapToggle = async (page: Page): Promise<void> => {
+  await page.getByLabel('Wrap', { exact: true }).click();
+};
+
+const setHorizontalGap = async (page: Page, gap: number): Promise<void> => {
+  const gapInput = page.locator('[data-test-text-field-input="gap"]').first();
+
+  await gapInput.click();
+  await gapInput.fill(String(gap));
+  await gapInput.press('Enter');
+};
+
 test.describe('auto-layout — reordering a child within its own frame', () => {
   test('dragging a child to a new position among its own siblings reorders it, without ejecting it from the frame', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -202,5 +218,48 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     const afterRevert = await rectangleRowNames(page);
 
     expect(afterRevert).toEqual(before);
+  });
+});
+
+test.describe('auto-layout — reordering a child within its own frame, wrap enabled', () => {
+  test('leaves 1 and 2 untouched when reordering 3 slightly within its own row, which nothing else shares', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 250-wide frame fits exactly two 100-wide children per row (100 + 20 gap + 100 = 220 <= 250),
+    // so a third wraps onto its own row 2, flush left under the first
+    const wrapFrame = { x1: 600, x2: 850, y1: 150, y2: 500 };
+
+    await designPage.goto('e2e-test-auto-layout-reorder-within-wrapped-row');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(wrapFrame.x1, wrapFrame.y1, wrapFrame.x2, wrapFrame.y2);
+    await setFlowHorizontal(page);
+    await clickWrapToggle(page);
+    await setHorizontalGap(page, 20);
+
+    // three 100x100 children: 1 and 2 share row 1, 3 wraps alone onto row 2 flush left
+    await designPage.drawRectangle(1400, 160, 1500, 260);
+    await dragInto(page, { x: 1450, y: 210 }, { x: 650, y: 200 });
+
+    await designPage.drawRectangle(1400, 300, 1500, 400);
+    await dragInto(page, { x: 1450, y: 350 }, { x: 650, y: 200 });
+
+    await designPage.drawRectangle(1400, 440, 1500, 540);
+    await dragInto(page, { x: 1450, y: 490 }, { x: 650, y: 200 });
+
+    const before = await rectangleRowNames(page);
+
+    expect(before).toHaveLength(3);
+
+    // regression: '3' is excluded from the sibling list while it's being dragged (it's the moved
+    // node), so its own row-2 band used to collapse once removed, and the cursor (still squarely
+    // inside row 2) misresolved into row 1 — dragging 1 and 2 along with it to the very front even
+    // though they no longer fit alongside 3. Nudging 3 slightly left, still well inside its own row,
+    // must not perturb 1 or 2 at all
+    await dragInto(page, { x: 650, y: 320 }, { x: 620, y: 320 });
+
+    const after = await rectangleRowNames(page);
+
+    expect(after).toEqual(before);
   });
 });

@@ -1,0 +1,43 @@
+// types
+import { AlignmentLayout } from 'types/design/enums';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TDraftRect, TPoint } from 'types/canvas';
+
+// utils
+import { getAutoLayoutCursorRowRange } from './getAutoLayoutCursorRowRange';
+import { getAutoLayoutRowFrame } from './getAutoLayoutRowFrame';
+import { toRealCutIndex } from './toRealCutIndex';
+
+export type TAutoLayoutWrappedRowBounds = { realEnd: number; realStart: number; rowFrame: TDraftRect; rowOriginalIndex: number | null };
+
+export const getAutoLayoutWrappedRowBounds = (
+  isHorizontal: boolean,
+  itemSpacing: number,
+  counterAxisSpacing: number,
+  alignment: AlignmentLayout,
+  contentBox: TDraftRect,
+  children: TAutoLayoutChildSize[],
+  originalIndex: number | null,
+  draggedSize: { height: number; width: number },
+  cursorPoint: TPoint,
+): TAutoLayoutWrappedRowBounds => {
+  const rowDetectionChildren =
+    originalIndex === null
+      ? children
+      : [...children.slice(0, originalIndex), { ...draggedSize, id: '__dragged__' }, ...children.slice(originalIndex)];
+  const { bandEnd, bandStart, end, start } = getAutoLayoutCursorRowRange(
+    isHorizontal,
+    itemSpacing,
+    counterAxisSpacing,
+    alignment,
+    contentBox,
+    rowDetectionChildren,
+    cursorPoint,
+  );
+  const realStart = toRealCutIndex(start, originalIndex);
+  const realEnd = toRealCutIndex(end, originalIndex);
+  const rowOriginalIndex = originalIndex !== null && originalIndex >= start && originalIndex < end ? originalIndex - realStart : null;
+  const rowFrame = getAutoLayoutRowFrame(isHorizontal, contentBox, bandStart, bandEnd);
+
+  return { realEnd, realStart, rowFrame, rowOriginalIndex };
+};

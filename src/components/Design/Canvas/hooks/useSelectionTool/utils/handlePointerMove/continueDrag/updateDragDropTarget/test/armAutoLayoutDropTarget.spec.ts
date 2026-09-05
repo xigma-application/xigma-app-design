@@ -102,6 +102,35 @@ describe('armAutoLayoutDropTarget', () => {
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1', index: 2, indicator: { x: 2, y: 122 } });
   });
 
+  it('should not perturb 1 and 2 when reordering 3 slightly within its own (otherwise-empty) row', () => {
+    // mock — same wrapped shape as above, but this time 'c' is the node being dragged WITHIN its
+    // own parent ('c' is excluded from the sibling list because it's the moved node) — regression:
+    // without threading originalIndex through to the wrap computation, 'c'’s own row collapses once
+    // it's excluded, and the cursor (still visually over row 2) misresolves into row 1, dragging 'a'
+    // and 'b' along with it even though they no longer fit
+    const siblingA: TSceneNode = { ...draggedRect, height: 100, id: 'a', width: 100, x: 0, y: 0 } as TSceneNode;
+    const siblingB: TSceneNode = { ...draggedRect, height: 100, id: 'b', width: 100, x: 120, y: 0 } as TSceneNode;
+    const draggedC: TSceneNode = { ...draggedRect, height: 100, id: 'c', width: 100, x: 0, y: 120 } as TSceneNode;
+    const wrappedAutoLayoutFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      childIds: ['a', 'b', 'c'],
+      height: 400,
+      horizontalGap: 20,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      verticalGap: 20,
+      width: 250,
+    };
+    const refs = createCanvasRefs();
+    const nodesById = { a: siblingA, b: siblingB };
+
+    // action — same parent on both sides, cursor at 'c'’s own left edge, still in row 2
+    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', 'frame-1', [draggedC], ['c'], nodesById, { x: 20, y: 150 });
+
+    // result — 'c' resolves back to index 2 (row 2), not row 1
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 2, frameId: 'frame-1' });
+  });
+
   it('should fall back to the non-wrap drop target computation when wrap is enabled but the frame hugs its primary axis', () => {
     // mock — hug on the primary axis disables wrap, mirroring computeAutoLayoutPositions's own
     // wrapEnabled condition
