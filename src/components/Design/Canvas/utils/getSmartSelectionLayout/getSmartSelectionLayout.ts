@@ -12,8 +12,12 @@ import { getHorizontalLayout } from './getHorizontalLayout';
 import { getVerticalLayout } from './getVerticalLayout';
 import { isEligibleForSmartSelection } from './isEligibleForSmartSelection';
 
-export const getSmartSelectionLayout = (nodes: TSceneNode[], viewport: TViewport): TSmartSelectionLayout | null => {
-  if (isEligibleForSmartSelection(nodes)) {
+export const getSmartSelectionLayout = (
+  nodes: TSceneNode[],
+  viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
+): TSmartSelectionLayout | null => {
+  if (isEligibleForSmartSelection(nodes, nodesById)) {
     const bounds = getAxisAlignedNodeBounds(nodes);
     const alignmentTolerance = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
     const gapTolerance = EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom;

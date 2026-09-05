@@ -14,8 +14,12 @@ import { getSmartSelectionGridEqualizeSuggestion } from './getSmartSelectionGrid
 import { getSmartSelectionLayout } from './getSmartSelectionLayout/getSmartSelectionLayout';
 import { isEligibleForSmartSelection } from './getSmartSelectionLayout/isEligibleForSmartSelection';
 
-export const getSmartSelectionSuggestion = (nodes: TSceneNode[], viewport: TViewport): TSmartSelectionSuggestion | null => {
-  if (nodes.length >= 3 && isEligibleForSmartSelection(nodes) && getSmartSelectionLayout(nodes, viewport) === null) {
+export const getSmartSelectionSuggestion = (
+  nodes: TSceneNode[],
+  viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
+): TSmartSelectionSuggestion | null => {
+  if (nodes.length >= 3 && isEligibleForSmartSelection(nodes, nodesById) && getSmartSelectionLayout(nodes, viewport, nodesById) === null) {
     const bounds = getAxisAlignedNodeBounds(nodes);
     const alignmentTolerance = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
     const gapTolerance = EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom;

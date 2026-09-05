@@ -10,12 +10,17 @@ import { drawSmartSelectionSuggestion } from './drawSmartSelectionSuggestion';
 import { drawSmartSelectionSwapShadow } from './drawSmartSelectionSwapShadow';
 import { getSmartSelectionLayout } from '../../../../../utils/getSmartSelectionLayout/getSmartSelectionLayout';
 
-export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNodes: TSceneNode[], refs: TCanvasRefs): void => {
+export const drawSmartSelectionHandles = (
+  context: TDrawSceneContext,
+  selectedNodes: TSceneNode[],
+  refs: TCanvasRefs,
+  nodesById: Record<string, TSceneNode>,
+): void => {
   const isMoveDragActive = refs.transform.draggedNodeIdsRef.current !== null;
 
   if (!isMoveDragActive) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
-    const layout = getSmartSelectionLayout(selectedNodes, viewport);
+    const layout = getSmartSelectionLayout(selectedNodes, viewport, nodesById);
     const gapDragState = refs.smartSelection.gapDragRef.current;
     const swapDragState = refs.smartSelection.swapDragRef.current;
     const isBoxActive = Boolean(gapDragState) || refs.hover.isSmartSelectionBoxHoveredRef.current;
@@ -27,7 +32,7 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
     if (layout && !swapDragState) {
       drawSmartSelectionLayoutHandles(context, refs, layout, gapDragState, isBoxActive);
     } else if (!layout && isBoxActive) {
-      drawSmartSelectionSuggestion(context, selectedNodes);
+      drawSmartSelectionSuggestion(context, selectedNodes, nodesById);
     }
 
     drawSmartSelectionGapHoverLabel(context, refs);

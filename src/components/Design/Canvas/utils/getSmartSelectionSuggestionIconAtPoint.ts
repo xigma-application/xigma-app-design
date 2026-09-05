@@ -16,8 +16,9 @@ export const getSmartSelectionSuggestionIconAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
 ): TSmartSelectionSuggestionHit | null => {
-  const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport);
+  const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport, nodesById);
 
   if (suggestion) {
     const rect = getSmartSelectionSuggestionIconRect(selectedNodes, viewport);

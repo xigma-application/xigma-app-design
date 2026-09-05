@@ -20,8 +20,9 @@ export const getSmartSelectionSwapHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
 ): TSmartSelectionSwapHandleHit | null => {
-  const layout = getSmartSelectionLayout(selectedNodes, viewport);
+  const layout = getSmartSelectionLayout(selectedNodes, viewport, nodesById);
   const tolerance = SMART_SELECTION_SWAP_HANDLE_HIT_RADIUS_PX / viewport.zoom;
 
   if (layout) {

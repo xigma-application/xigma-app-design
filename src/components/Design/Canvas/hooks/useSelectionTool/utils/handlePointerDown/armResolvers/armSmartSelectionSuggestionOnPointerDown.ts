@@ -1,3 +1,7 @@
+// store
+import { selectNodes } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { TArmContext } from '../types';
 
@@ -11,7 +15,8 @@ export const armSmartSelectionSuggestionOnPointerDown = ({
   smartSelectionNodes,
   viewport,
 }: TArmContext): true | undefined => {
-  const hit = getSmartSelectionSuggestionIconAtPoint(point, smartSelectionNodes, viewport);
+  const nodesById = selectNodes(store.getState());
+  const hit = getSmartSelectionSuggestionIconAtPoint(point, smartSelectionNodes, viewport, nodesById);
 
   if (hit) {
     applySmartSelectionSuggestion(dispatch, hit.suggestion);

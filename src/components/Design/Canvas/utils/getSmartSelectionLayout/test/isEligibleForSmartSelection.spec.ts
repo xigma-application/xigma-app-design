@@ -1,6 +1,6 @@
 // types
-import { NodeType } from 'types/design/enums';
-import { TRectangleNode, TSceneNode } from 'types/design/types';
+import { LayoutMode, NodeType } from 'types/design/enums';
+import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { isEligibleForSmartSelection } from '../isEligibleForSmartSelection';
@@ -23,20 +23,50 @@ const rect = (overrides: Partial<Omit<TRectangleNode, 'type'>> = {}): TSceneNode
 const line = (): TSceneNode =>
   ({ id: 'l', name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 }) as TSceneNode;
 
+const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 100,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 100,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
 describe('isEligibleForSmartSelection', () => {
   it('should reject fewer than 2 nodes', () => {
-    expect(isEligibleForSmartSelection([rect()])).toBe(false);
+    expect(isEligibleForSmartSelection([rect()], {})).toBe(false);
   });
 
   it('should accept 2 or more axis-aligned nodes', () => {
-    expect(isEligibleForSmartSelection([rect({ id: 'a' }), rect({ id: 'b', rotation: 90 })])).toBe(true);
+    expect(isEligibleForSmartSelection([rect({ id: 'a' }), rect({ id: 'b', rotation: 90 })], {})).toBe(true);
   });
 
   it('should reject a node rotated by anything other than a multiple of 90', () => {
-    expect(isEligibleForSmartSelection([rect({ id: 'a' }), rect({ id: 'b', rotation: 45 })])).toBe(false);
+    expect(isEligibleForSmartSelection([rect({ id: 'a' }), rect({ id: 'b', rotation: 45 })], {})).toBe(false);
   });
 
   it('should reject a node that has no rotation field at all', () => {
-    expect(isEligibleForSmartSelection([rect({ id: 'a' }), line()])).toBe(false);
+    expect(isEligibleForSmartSelection([rect({ id: 'a' }), line()], {})).toBe(false);
+  });
+
+  it('should reject a selection whose parent is a horizontal/vertical/grid managed-layout frame', () => {
+    const nodesById = { 'frame-1': frame({ layoutMode: LayoutMode.grid }) };
+    const nodes = [rect({ id: 'a', parentId: 'frame-1' }), rect({ id: 'b', parentId: 'frame-1' })];
+
+    expect(isEligibleForSmartSelection(nodes, nodesById)).toBe(false);
+  });
+
+  it('should accept a selection whose parent is a plain (freeForm) frame', () => {
+    const nodesById = { 'frame-1': frame() };
+    const nodes = [rect({ id: 'a', parentId: 'frame-1' }), rect({ id: 'b', parentId: 'frame-1' })];
+
+    expect(isEligibleForSmartSelection(nodes, nodesById)).toBe(true);
   });
 });

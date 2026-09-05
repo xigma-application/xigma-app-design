@@ -1,3 +1,7 @@
+// store
+import { selectNodes } from 'store/design/selectors';
+import { store } from 'store';
+
 // utils
 import { armSmartSelectionSuggestionOnPointerDown } from '../armSmartSelectionSuggestionOnPointerDown';
 
@@ -46,5 +50,21 @@ describe('armSmartSelectionSuggestionOnPointerDown', () => {
     // result
     expect(result).toBeUndefined();
     expect(applySmartSelectionSuggestionMock).not.toHaveBeenCalled();
+  });
+
+  it('should look up the current nodes-by-id map and forward it to the hit test', () => {
+    // mock
+    getSmartSelectionSuggestionIconAtPointMock.mockReturnValue(null);
+
+    // before
+    armSmartSelectionSuggestionOnPointerDown({ dispatch, point, smartSelectionNodes, viewport } as never);
+
+    // result
+    expect(getSmartSelectionSuggestionIconAtPointMock).toHaveBeenCalledWith(
+      point,
+      smartSelectionNodes,
+      viewport,
+      selectNodes(store.getState()),
+    );
   });
 });

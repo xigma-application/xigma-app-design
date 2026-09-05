@@ -45,8 +45,9 @@ export const getSmartSelectionGapHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
 ): TSmartSelectionGapHit | null => {
-  const layout = getSmartSelectionLayout(selectedNodes, viewport);
+  const layout = getSmartSelectionLayout(selectedNodes, viewport, nodesById);
   const tolerance = SMART_SELECTION_GAP_HANDLE_HIT_RADIUS_PX / viewport.zoom;
 
   if (layout) {

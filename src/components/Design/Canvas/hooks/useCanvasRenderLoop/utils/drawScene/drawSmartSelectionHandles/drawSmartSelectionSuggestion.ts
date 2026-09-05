@@ -8,9 +8,13 @@ import { getSmartSelectionSuggestion } from '../../../../../utils/getSmartSelect
 import { getSmartSelectionSuggestionIconRect } from '../../../../../utils/getSmartSelectionSuggestionIconRect';
 import { getSmartSelectionSuggestionKind } from './getSmartSelectionSuggestionKind';
 
-export const drawSmartSelectionSuggestion = (context: TDrawSceneContext, selectedNodes: TSceneNode[]): void => {
+export const drawSmartSelectionSuggestion = (
+  context: TDrawSceneContext,
+  selectedNodes: TSceneNode[],
+  nodesById: Record<string, TSceneNode>,
+): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
-  const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport);
+  const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport, nodesById);
 
   if (suggestion) {
     drawSmartSelectionSuggestionIcon(

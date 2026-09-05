@@ -1,5 +1,5 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import {
   TEllipseNode,
   TFrameNode,
@@ -201,6 +201,38 @@ describe('resolveSmartSelectionGapHover', () => {
   it('should return undefined when the selection does not form a valid Smart Selection layout', () => {
     // result
     expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, smartSelectionNodes: [rowA] }))).toBeUndefined();
+  });
+
+  it('should return undefined for a selection inside a managed-layout (horizontal/vertical/grid) frame, even over what would otherwise be a gap handle', () => {
+    // mock
+    const managedLayoutFrame: TFrameNode = {
+      childIds: ['row-a', 'row-b'],
+      clipContent: true,
+      fill: '#fff',
+      height: 100,
+      id: 'managed-frame',
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 300,
+      x: 0,
+      y: 0,
+    };
+    const managedRowA: TRectangleNode = { ...rowA, parentId: 'managed-frame' };
+    const managedRowB: TRectangleNode = { ...rowB, parentId: 'managed-frame' };
+
+    // result
+    expect(
+      resolveSmartSelectionGapHover(
+        createContext({
+          nodesById: { 'managed-frame': managedLayoutFrame },
+          point: { x: 125, y: 50 },
+          smartSelectionNodes: [managedRowA, managedRowB],
+        }),
+      ),
+    ).toBeUndefined();
   });
 
   it('should mark the selection box as hovered while inside its bounds, even off any handle', () => {

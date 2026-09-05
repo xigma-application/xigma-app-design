@@ -1,7 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
+
+const flowGroup = (page: Page): Locator => page.locator('[data-test-toggle-button-group="flow"]');
+
+const setFlow = async (page: Page, direction: 'Grid' | 'Horizontal' | 'Vertical'): Promise<void> => {
+  await flowGroup(page).getByLabel(direction, { exact: true }).click();
+};
 
 test('dragging a Smart Selection gap handle grows the gap uniformly, keeps the first element fixed, and undoes in one step', async ({
   page,
@@ -485,5 +491,56 @@ test('hovering a Smart Selection gap handle switches the cursor to move-x and ba
   await expect(designPage.canvas).toHaveClass(/move-x/);
 
   await designPage.pointerMove(gapMidX, gapMidY + 200);
+  await expect(designPage.canvas).not.toHaveClass(/move-x/);
+});
+
+test('the Smart Selection gap guide never appears for children of a managed-layout (grid) frame, even where a gap handle would otherwise sit', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-managed-layout-suppressed');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 700);
+  await setFlow(page, 'Grid');
+
+  // two children, drawn off to the side and dragged in with a clean gap between them — drawing a
+  // shape never auto-parents it into a frame under it, so a real drag is required (same fixture
+  // pattern as auto-layout/flow.spec.ts); grid mode has no packing engine of its own, so each child
+  // keeps exactly the position it's dropped at, just like a plain frame's children would
+  await designPage.drawRectangle(1400, 300, 1450, 350); // A, 50x50
+  await page.mouse.move(1425, 325);
+  await page.mouse.down();
+  await page.mouse.move(675, 325, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+
+  await designPage.drawRectangle(1400, 300, 1450, 350); // B, 50x50 — selected on creation
+  await page.mouse.move(1425, 325);
+  await page.mouse.down();
+  await page.mouse.move(775, 325, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+
+  await designPage.click(675, 325, { shift: true }); // add A back to the selection alongside B
+
+  const { nodes, rootOrder } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const frameId = rootOrder[0];
+  const frame = nodes[frameId] as { childIds: string[] };
+  const [idA, idB] = frame.childIds;
+  const nodeA = nodes[idA] as { height: number; width: number; x: number; y: number };
+  const nodeB = nodes[idB] as { x: number };
+  const gapMidX = (nodeA.x + nodeA.width + nodeB.x) / 2;
+  const gapMidY = nodeA.y + nodeA.height / 2;
+
+  await designPage.pointerMove(gapMidX, gapMidY);
   await expect(designPage.canvas).not.toHaveClass(/move-x/);
 });

@@ -72,6 +72,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0)],
       createCanvasRefs(),
+      {},
     );
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
@@ -88,6 +89,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 90), rect('c', 230)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
@@ -103,6 +105,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0, 0), rect('b', 0, 90), rect('c', 0, 230)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
@@ -117,6 +120,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 90), rect('c', 230)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
@@ -130,6 +134,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
@@ -143,6 +148,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0, 0), rect('b', 100, 0), rect('c', 250, 0), rect('d', 0, 100), rect('e', 100, 100), rect('f', 250, 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
@@ -154,6 +160,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 90), rect('c', 230)],
       createCanvasRefs(),
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
@@ -166,6 +173,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
@@ -176,6 +184,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       createCanvasRefs(),
+      {},
     );
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
@@ -191,6 +200,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
@@ -225,6 +235,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionGapFillPreviewMock).toHaveBeenCalledTimes(1);
@@ -253,6 +264,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSwapShadowMock).toHaveBeenCalledTimes(1);
@@ -284,6 +296,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSwapShadowMock).toHaveBeenCalledTimes(1);
@@ -302,6 +315,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
@@ -332,6 +346,7 @@ describe('drawSmartSelectionHandles', () => {
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       refs,
+      {},
     );
 
     expect(drawSmartSelectionSwapShadowMock).not.toHaveBeenCalled();
