@@ -167,7 +167,65 @@ describe('useColumnAlignmentLayout', () => {
     expect(readNode(frameId).layoutAlignment).toBe(AlignmentLayout.center);
   });
 
-  it('should dispatch the new gap on scrub', () => {
+  it('should read the frame’s own horizontalGap and verticalGap directly, for a horizontal frame', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { horizontalGap: 10, verticalGap: 30 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.horizontalGap).toBe(10);
+    expect(result.current.verticalGap).toBe(30);
+  });
+
+  it('should read the frame’s own horizontalGap and verticalGap directly, for a vertical frame', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(updateNode({ changes: { horizontalGap: 10, verticalGap: 30 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.horizontalGap).toBe(10);
+    expect(result.current.verticalGap).toBe(30);
+  });
+
+  it('should default verticalGap to the horizontal frame’s own horizontalGap when unset', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { horizontalGap: 10 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.verticalGap).toBe(10);
+  });
+
+  it('should default a vertical frame’s unset horizontalGap to zero, with no fallback to verticalGap', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(updateNode({ changes: { verticalGap: 10 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.horizontalGap).toBe(0);
+  });
+
+  it('should dispatch horizontalGap when scrubbing the horizontal gap', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -177,13 +235,30 @@ describe('useColumnAlignmentLayout', () => {
     const { result } = renderUseColumnAlignmentLayout();
 
     // action
-    act(() => result.current.onScrubGap(24));
+    act(() => result.current.onScrubHorizontalGap(24));
 
     // result
-    expect(readNode(frameId).itemSpacing).toBe(24);
+    expect(readNode(frameId).horizontalGap).toBe(24);
   });
 
-  it('should commit a new gap on blur', () => {
+  it('should dispatch verticalGap when scrubbing the vertical gap', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // action
+    act(() => result.current.onScrubVerticalGap(24));
+
+    // result
+    expect(readNode(frameId).verticalGap).toBe(24);
+    expect(readNode(frameId).horizontalGap).toBeUndefined();
+  });
+
+  it('should commit a new horizontalGap on blur', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -194,13 +269,13 @@ describe('useColumnAlignmentLayout', () => {
     const input = Object.assign(document.createElement('input'), { value: '16' });
 
     // action
-    act(() => result.current.onBlurGap({ target: input } as unknown as Parameters<typeof result.current.onBlurGap>[0]));
+    act(() => result.current.onBlurHorizontalGap({ target: input } as unknown as Parameters<typeof result.current.onBlurHorizontalGap>[0]));
 
     // result
-    expect(readNode(frameId).itemSpacing).toBe(16);
+    expect(readNode(frameId).horizontalGap).toBe(16);
   });
 
-  it('should revert an invalid gap on blur', () => {
+  it('should revert an invalid horizontalGap on blur', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -211,10 +286,10 @@ describe('useColumnAlignmentLayout', () => {
     const input = Object.assign(document.createElement('input'), { value: '' });
 
     // action
-    act(() => result.current.onBlurGap({ target: input } as unknown as Parameters<typeof result.current.onBlurGap>[0]));
+    act(() => result.current.onBlurHorizontalGap({ target: input } as unknown as Parameters<typeof result.current.onBlurHorizontalGap>[0]));
 
     // result
     expect(input.value).toBe('0');
-    expect(readNode(frameId).itemSpacing).toBeUndefined();
+    expect(readNode(frameId).horizontalGap).toBeUndefined();
   });
 });

@@ -39,7 +39,7 @@ const addAutoLayoutFrameNode = (): string => {
       clipContent: true,
       fill: '#ff0000',
       height: 100,
-      itemSpacing: 10,
+      horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',
       parentId: null,

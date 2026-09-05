@@ -158,4 +158,24 @@ describe('useColumnFlow', () => {
     expect(readNode(frameId).layoutWrap).toBe(false);
     expect(result.current.wrap).toBe(false);
   });
+
+  it('should reset the vertical gap to zero when wrap is turned off', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { layoutWrap: true, verticalGap: 24 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    expect(readNode(frameId).verticalGap).toBe(24);
+
+    // action
+    act(() => result.current.onWrapChange());
+
+    // result
+    expect(readNode(frameId).layoutWrap).toBe(false);
+    expect(readNode(frameId).verticalGap).toBe(0);
+  });
 });

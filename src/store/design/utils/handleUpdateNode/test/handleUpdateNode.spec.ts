@@ -377,7 +377,7 @@ describe('handleUpdateNode', () => {
       y: 999,
     };
     const b: TRectangleNode = { ...a, id: 'b', width: 50 };
-    const layoutFrame: TFrameNode = { ...node, childIds: ['a', 'b'], id: 'frame-1', itemSpacing: 10, x: 0, y: 0 };
+    const layoutFrame: TFrameNode = { ...node, childIds: ['a', 'b'], horizontalGap: 10, id: 'frame-1', x: 0, y: 0 };
     const state = buildState({ a, b, 'frame-1': layoutFrame });
 
     // before

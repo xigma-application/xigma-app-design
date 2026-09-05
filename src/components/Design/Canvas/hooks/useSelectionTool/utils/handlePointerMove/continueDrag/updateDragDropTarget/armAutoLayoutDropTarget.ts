@@ -4,7 +4,7 @@ import { getFramePadding } from 'store/design/utils/autoLayout/getFramePadding';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 
 // types
-import { AlignmentLayout } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode } from 'types/design/enums';
 import { TAutoLayoutFrame } from './types';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
@@ -31,9 +31,10 @@ export const armAutoLayoutDropTarget = (
   const realPositions = siblingEntries.map(({ bounds, sibling }) => ({ id: sibling.id, x: bounds.x, y: bounds.y }));
   const isSameParentReorder = desiredParentId === currentParentId;
   const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
+  const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
   const dropTarget = getAutoLayoutDropTarget(
     desiredParent.layoutMode,
-    desiredParent.itemSpacing ?? 0,
+    (isHorizontal ? desiredParent.horizontalGap : desiredParent.verticalGap) ?? 0,
     desiredParent.layoutAlignment ?? AlignmentLayout.topLeft,
     desiredParent,
     getFramePadding(desiredParent),

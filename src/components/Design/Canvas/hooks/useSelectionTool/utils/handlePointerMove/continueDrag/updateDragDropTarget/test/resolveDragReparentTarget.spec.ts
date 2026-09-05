@@ -18,7 +18,6 @@ const addAutoLayoutFrame = (x: number, y: number, size: number): string => {
       clipContent: true,
       fill: '#fff',
       height: size,
-      itemSpacing: 0,
       layoutMode: LayoutMode.vertical,
       name: 'Frame',
       parentId: null,

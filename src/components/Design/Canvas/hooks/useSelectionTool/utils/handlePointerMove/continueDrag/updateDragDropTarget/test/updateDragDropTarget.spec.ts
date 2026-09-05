@@ -26,7 +26,6 @@ const addAutoLayoutFrame = (x: number, y: number, size: number, layoutMode: Layo
       clipContent: true,
       fill: '#fff',
       height: size,
-      itemSpacing: 0,
       layoutMode,
       name: 'Frame',
       parentId: null,
@@ -232,7 +231,7 @@ describe('updateDragDropTarget', () => {
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId, index: 1 });
   });
 
-  it('should default a missing itemSpacing/layoutAlignment on the auto-layout frame', () => {
+  it('should default a missing verticalGap/layoutAlignment on the auto-layout frame', () => {
     store.dispatch(
       addNode({
         childIds: [],
@@ -266,7 +265,6 @@ describe('updateDragDropTarget', () => {
         clipContent: true,
         fill: '#fff',
         height: 300,
-        itemSpacing: 0,
         layoutMode: LayoutMode.vertical,
         name: 'Frame',
         paddingLeft: 20,

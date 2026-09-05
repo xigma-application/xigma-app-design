@@ -112,7 +112,7 @@ describe('ColumnAlignmentLayout behaviors', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
-    store.dispatch(updateNode({ changes: { itemSpacing: 24 }, id: frameId }));
+    store.dispatch(updateNode({ changes: { horizontalGap: 24 }, id: frameId }));
     store.dispatch(setSelection([frameId]));
 
     // before

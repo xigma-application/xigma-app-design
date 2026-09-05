@@ -89,7 +89,7 @@ describe('syncAutoLayoutChildren', () => {
     // mock
     const a = rect({ id: 'a', width: 30, x: 999, y: 999 });
     const b = rect({ id: 'b', width: 50, x: 999, y: 999 });
-    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.horizontal, x: 100, y: 200 });
+    const layoutFrame = frame({ childIds: ['a', 'b'], horizontalGap: 10, layoutMode: LayoutMode.horizontal, x: 100, y: 200 });
     const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
 
     // action
@@ -104,7 +104,7 @@ describe('syncAutoLayoutChildren', () => {
     // mock
     const a = rect({ height: 30, id: 'a', x: 999, y: 999 });
     const b = rect({ height: 50, id: 'b', x: 999, y: 999 });
-    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.vertical, x: 100, y: 200 });
+    const layoutFrame = frame({ childIds: ['a', 'b'], layoutMode: LayoutMode.vertical, verticalGap: 10, x: 100, y: 200 });
     const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
 
     // action
@@ -143,7 +143,7 @@ describe('syncAutoLayoutChildren', () => {
       childIds: ['a', 'b'],
       counterAxisSizingMode: SizingMode.hug,
       height: 999,
-      itemSpacing: 10,
+      horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
       primaryAxisSizingMode: SizingMode.hug,
       width: 999,
@@ -179,10 +179,10 @@ describe('syncAutoLayoutChildren', () => {
     const b = rect({ height: 20, id: 'b', width: 50 });
     const layoutFrame = frame({
       childIds: ['a', 'b'],
-      counterAxisSpacing: 5,
       height: 100,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
+      verticalGap: 5,
       width: 50,
       x: 0,
       y: 0,
@@ -204,10 +204,10 @@ describe('syncAutoLayoutChildren', () => {
     const layoutFrame = frame({
       childIds: ['a', 'b'],
       counterAxisSizingMode: SizingMode.hug,
-      counterAxisSpacing: 5,
       height: 999,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
+      verticalGap: 5,
       width: 50,
       x: 0,
       y: 0,
@@ -221,14 +221,14 @@ describe('syncAutoLayoutChildren', () => {
     expect(getActivePage(state).nodes['frame-1']).toMatchObject({ height: 55, width: 50 });
   });
 
-  it('should default a missing counterAxisSpacing to itemSpacing', () => {
+  it('should default a missing verticalGap to horizontalGap', () => {
     // mock
     const a = rect({ height: 20, id: 'a', width: 50 });
     const b = rect({ height: 20, id: 'b', width: 50 });
     const layoutFrame = frame({
       childIds: ['a', 'b'],
       height: 100,
-      itemSpacing: 15,
+      horizontalGap: 15,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
       width: 50,
@@ -240,11 +240,11 @@ describe('syncAutoLayoutChildren', () => {
     // action
     syncAutoLayoutChildren(state, 'frame-1');
 
-    // result — the second line is offset by the first line's 20px thickness plus the 15px itemSpacing fallback
+    // result — the second line is offset by the first line's 20px thickness plus the 15px horizontalGap fallback
     expect(getActivePage(state).nodes.b).toMatchObject({ x: 0, y: 35 });
   });
 
-  it('should default a missing itemSpacing to zero', () => {
+  it('should default a missing horizontalGap to zero', () => {
     // mock
     const a = rect({ id: 'a', width: 30 });
     const b = rect({ id: 'b', width: 50 });
@@ -353,7 +353,7 @@ describe('syncAutoLayoutChildren', () => {
       x: 0,
       y: 0,
     };
-    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const layoutFrame = frame({ childIds: ['a', 'b'], horizontalGap: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
     const state = buildState({ nodes: { a, b: group, 'frame-1': layoutFrame, nested } });
 
     // action — the group's box moves from x=0 to x=40 (after the 30-wide rect plus a 10 gap), a +40/+0 delta
@@ -382,7 +382,7 @@ describe('syncAutoLayoutChildren', () => {
       vertexHandleModes: {},
       vertices: { p1: { id: 'p1', x: 0, y: 0 }, p2: { id: 'p2', x: 40, y: 10 } },
     };
-    const layoutFrame = frame({ childIds: ['a', 'b'], itemSpacing: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
+    const layoutFrame = frame({ childIds: ['a', 'b'], horizontalGap: 10, layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
     const state = buildState({ nodes: { a, b: vector, 'frame-1': layoutFrame } });
 
     // action

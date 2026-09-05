@@ -60,4 +60,16 @@ describe('armAutoLayoutDropTarget', () => {
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
   });
+
+  it('should use the frame’s own horizontalGap, not verticalGap, to space simulated siblings for a horizontal frame', () => {
+    // mock
+    const horizontalAutoLayoutFrame: TAutoLayoutFrame = { ...autoLayoutFrame, horizontalGap: 50, layoutMode: LayoutMode.horizontal };
+    const refs = createCanvasRefs();
+
+    // action
+    armAutoLayoutDropTarget(refs, horizontalAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+
+    // result
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
+  });
 });

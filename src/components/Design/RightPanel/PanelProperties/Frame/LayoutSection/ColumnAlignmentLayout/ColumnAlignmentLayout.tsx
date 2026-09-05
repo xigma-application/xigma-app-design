@@ -15,7 +15,19 @@ import { translationNameSpace } from './constants';
 
 const ColumnAlignmentLayout: FC = () => {
   const { t } = useTranslation();
-  const { alignment, gap, isHorizontal, isVisible, isWrap, onBlurGap, onChangeAlignment, onScrubGap } = useColumnAlignmentLayout();
+  const {
+    alignment,
+    horizontalGap,
+    isHorizontal,
+    isVisible,
+    isWrap,
+    onBlurHorizontalGap,
+    onBlurVerticalGap,
+    onChangeAlignment,
+    onScrubHorizontalGap,
+    onScrubVerticalGap,
+    verticalGap,
+  } = useColumnAlignmentLayout();
 
   if (isVisible) {
     return (
@@ -33,7 +45,10 @@ const ColumnAlignmentLayout: FC = () => {
           onClick={onChangeAlignment}
           value={alignment}
         />
-        <GapField isHorizontal={isHorizontal} onBlur={onBlurGap} onScrub={onScrubGap} value={gap} />
+        {isHorizontal && <GapField isHorizontal onBlur={onBlurHorizontalGap} onScrub={onScrubHorizontalGap} value={horizontalGap} />}
+        {(!isHorizontal || isWrap) && (
+          <GapField isHorizontal={false} onBlur={onBlurVerticalGap} onScrub={onScrubVerticalGap} value={verticalGap} />
+        )}
       </UITools.SectionColumn>
     );
   }

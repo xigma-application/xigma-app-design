@@ -23,8 +23,9 @@ export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | nu
       const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
       const bounds = children.map(getRotatedNodeBounds);
       const sizes = bounds.map((bound, index) => ({ height: bound.height, id: children[index].id, width: bound.width }));
-      const itemSpacing = frame.itemSpacing ?? 0;
-      const counterAxisSpacing = frame.counterAxisSpacing ?? itemSpacing;
+      const isHorizontal = frame.layoutMode === LayoutMode.horizontal;
+      const itemSpacing = (isHorizontal ? frame.horizontalGap : frame.verticalGap) ?? 0;
+      const counterAxisSpacing = (isHorizontal ? frame.verticalGap : frame.horizontalGap) ?? itemSpacing;
       const padding = getFramePadding(frame);
       const alignment = frame.layoutAlignment ?? AlignmentLayout.topLeft;
       const positions = computeAutoLayoutPositions(frame, frame.layoutMode, itemSpacing, counterAxisSpacing, alignment, padding, sizes);

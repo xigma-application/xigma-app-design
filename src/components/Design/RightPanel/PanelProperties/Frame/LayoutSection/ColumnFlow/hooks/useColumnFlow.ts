@@ -31,7 +31,7 @@ export const useColumnFlow = (): TUseColumnFlowResult => {
 
   return {
     onChange: (nextValue) => dispatch(updateNode({ changes: { layoutMode: nextValue as LayoutMode, layoutWrap: false }, id })),
-    onWrapChange: () => dispatch(updateNode({ changes: { layoutWrap: !wrap }, id })),
+    onWrapChange: () => dispatch(updateNode({ changes: wrap ? { layoutWrap: false, verticalGap: 0 } : { layoutWrap: true }, id })),
     toggleButtons: FLOW_OPTIONS.map(({ icon, labelKey, value: optionValue }) => ({
       ariaLabel: t(`${translationNameSpace}.${labelKey}`),
       icon,
