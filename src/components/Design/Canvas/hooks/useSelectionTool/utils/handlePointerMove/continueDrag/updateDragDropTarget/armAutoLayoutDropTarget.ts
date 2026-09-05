@@ -1,5 +1,5 @@
 // store
-import { getAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
+import { getAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { getFramePadding } from 'store/design/utils/autoLayout/getFramePadding';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 

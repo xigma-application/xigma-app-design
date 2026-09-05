@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
+import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TSceneNode } from 'types/design/types';
 
 // utils

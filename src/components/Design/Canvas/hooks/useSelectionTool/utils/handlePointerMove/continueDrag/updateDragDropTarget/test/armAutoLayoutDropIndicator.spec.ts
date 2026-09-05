@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
+import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 
 // utils
 import { armAutoLayoutDropIndicator } from '../armAutoLayoutDropIndicator';

@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget';
+import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';

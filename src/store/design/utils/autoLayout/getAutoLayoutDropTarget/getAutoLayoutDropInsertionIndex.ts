@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
 
 const getInsertionThreshold = (start: number, size: number, positionIndex: number, originalIndex: number | null): number => {
   switch (true) {

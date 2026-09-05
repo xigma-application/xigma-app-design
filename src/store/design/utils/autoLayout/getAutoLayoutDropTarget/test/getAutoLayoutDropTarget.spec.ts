@@ -1,6 +1,6 @@
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
+import { TAutoLayoutPadding } from '../../getAutoLayoutContentBox';
 
 // utils
 import { getAutoLayoutDropTarget } from '../getAutoLayoutDropTarget';
