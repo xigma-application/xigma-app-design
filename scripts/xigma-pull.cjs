@@ -8,7 +8,12 @@ const IGNORE = new Set(['node_modules', 'tsconfig.json', 'tsup.config.ts', 'src.
 
 const PROJECT_ROOT = process.cwd();
 const NODE_MODULES_XIGMA = path.resolve(PROJECT_ROOT, 'node_modules', '@xigma');
-const SHA_MARKER = path.join(NODE_MODULES_XIGMA, '.xigma-pull-sha');
+
+// Lives outside node_modules so `npm install` never prunes it (npm only reconciles node_modules).
+// Used to restore @xigma/* quickly after npm wipes it out, without re-cloning/re-building.
+const CACHE_DIR = path.resolve(PROJECT_ROOT, '.xigma-cache');
+const CACHE_PACKAGES_DIR = path.join(CACHE_DIR, 'packages');
+const CACHE_MARKER = path.join(CACHE_DIR, 'state.json');
 
 function run(cmd, opts = {}) {
   execSync(cmd, { stdio: 'inherit', ...opts });
@@ -77,16 +82,21 @@ function resolveRemoteSha(urls, branch) {
   return null;
 }
 
-function expectedPackagesPresent(names) {
-  return names.every((name) => fs.existsSync(path.join(NODE_MODULES_XIGMA, name, 'package.json')));
+function packagesPresentIn(baseDir, names) {
+  return names.length > 0 && names.every((name) => fs.existsSync(path.join(baseDir, name, 'package.json')));
 }
 
-function readShaMarker() {
+function readCacheState() {
   try {
-    return fs.readFileSync(SHA_MARKER, 'utf8').trim();
+    return JSON.parse(fs.readFileSync(CACHE_MARKER, 'utf8'));
   } catch {
     return null;
   }
+}
+
+function writeCacheState(sha, names) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true });
+  fs.writeFileSync(CACHE_MARKER, JSON.stringify({ sha, packages: names }, null, 2));
 }
 
 function discoverPackages(repoDir) {
@@ -98,12 +108,12 @@ function discoverPackages(repoDir) {
     .sort();
 }
 
-function copyPackages(repoDir, names, { hardFailOnMissing }) {
-  fs.mkdirSync(NODE_MODULES_XIGMA, { recursive: true });
+function copyPackages(srcPackagesDir, names, destDir, { hardFailOnMissing }) {
+  fs.mkdirSync(destDir, { recursive: true });
 
   for (const pkgName of names) {
-    const src = path.join(repoDir, 'packages', pkgName);
-    const dest = path.join(NODE_MODULES_XIGMA, pkgName);
+    const src = path.join(srcPackagesDir, pkgName);
+    const dest = path.join(destDir, pkgName);
 
     if (!fs.existsSync(src)) {
       if (hardFailOnMissing) {
@@ -117,8 +127,17 @@ function copyPackages(repoDir, names, { hardFailOnMissing }) {
     fs.rmSync(dest, { recursive: true, force: true });
     fs.mkdirSync(dest, { recursive: true });
     copyRecursive(src, dest);
-    console.log(`> Copied @xigma/${pkgName}`);
   }
+}
+
+// Fast path: restore node_modules/@xigma/* from our own cache (outside node_modules), no clone/build needed.
+// This is what heals the common case where `npm install` (any package, even one that fails to resolve)
+// pruned node_modules/@xigma/* as "extraneous" before this script's postinstall hook ever ran.
+function restoreFromCache(names) {
+  if (!packagesPresentIn(CACHE_PACKAGES_DIR, names)) return false;
+  copyPackages(CACHE_PACKAGES_DIR, names, NODE_MODULES_XIGMA, { hardFailOnMissing: false });
+  for (const name of names) console.log(`> Restored @xigma/${name} from local cache`);
+  return true;
 }
 
 function main() {
@@ -129,20 +148,29 @@ function main() {
 
   const config = readConfig();
   const urls = candidateUrls(config);
+  const cacheState = readCacheState();
 
-  // 1. resolve the remote branch SHA and check whether we already have that state
+  // 1. resolve the remote branch SHA
   const remote = resolveRemoteSha(urls, config.branch);
-  const knownNames = config.explicitPackages || [];
+  const upToDate = Boolean(remote && cacheState && cacheState.sha === remote.sha);
 
-  if (remote && readShaMarker() === remote.sha && (knownNames.length === 0 || expectedPackagesPresent(knownNames))) {
+  // 2. already up to date and node_modules/@xigma/* is intact — nothing to do
+  if (upToDate && packagesPresentIn(NODE_MODULES_XIGMA, cacheState.packages)) {
     console.log(`> @xigma/* packages are already at ${remote.sha.slice(0, 9)} — skipping.`);
     return;
   }
 
+  // 3. same version but node_modules/@xigma/* got wiped (e.g. npm pruned it during an install) —
+  //    restore instantly from the local cache instead of re-cloning/re-building.
+  if (upToDate && restoreFromCache(cacheState.packages)) {
+    console.log(`> @xigma/* packages restored at ${remote.sha.slice(0, 9)} (from cache).`);
+    return;
+  }
+
+  // 4. no usable cache for the current remote sha — full clone + build + copy
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'xigma-shared-'));
 
   try {
-    // 2. clone — try each URL in turn (SSH from the config, then HTTPS)
     const cloneUrls = remote ? [remote.url] : urls;
     let cloned = false;
     for (const url of cloneUrls) {
@@ -159,8 +187,12 @@ function main() {
     }
 
     if (!cloned) {
-      const names = config.explicitPackages || [];
-      if (names.length > 0 ? expectedPackagesPresent(names) : fs.existsSync(NODE_MODULES_XIGMA)) {
+      // offline / unreachable — fall back to whatever cache we have, even if stale
+      if (cacheState && restoreFromCache(cacheState.packages)) {
+        console.warn('! Failed to fetch xigma-app-shared — restored the last known @xigma/* packages from cache.');
+        return;
+      }
+      if (packagesPresentIn(NODE_MODULES_XIGMA, config.explicitPackages || cacheState?.packages || [])) {
         console.warn('! Failed to fetch xigma-app-shared — using the packages already present in node_modules.');
         return;
       }
@@ -170,18 +202,23 @@ function main() {
 
     const actualSha = tryGit(['-C', tmpDir, 'rev-parse', 'HEAD']) || (remote && remote.sha) || 'unknown';
 
-    // 3. install + build the workspace
+    // 5. install + build the workspace
     console.log('> Installing dependencies and building packages...');
     run('npm install --no-audit --no-fund', { cwd: tmpDir });
     run('npm run build --workspaces --if-present', { cwd: tmpDir });
 
-    // 4. package list: explicit from xigma.json or all from the repo
+    // 6. package list: explicit from xigma.json or all from the repo
     const names = config.explicitPackages || discoverPackages(tmpDir);
     console.log(`> Packages to copy: ${names.join(', ')}`);
 
-    copyPackages(tmpDir, names, { hardFailOnMissing: Boolean(config.explicitPackages) });
+    const repoPackagesDir = path.join(tmpDir, 'packages');
+    copyPackages(repoPackagesDir, names, NODE_MODULES_XIGMA, { hardFailOnMissing: Boolean(config.explicitPackages) });
 
-    fs.writeFileSync(SHA_MARKER, `${actualSha}\n`);
+    // refresh the cache too, so future npm installs can self-heal without network access
+    fs.rmSync(CACHE_PACKAGES_DIR, { recursive: true, force: true });
+    copyPackages(repoPackagesDir, names, CACHE_PACKAGES_DIR, { hardFailOnMissing: false });
+    writeCacheState(actualSha, names);
+
     console.log(`> Done (${actualSha.slice(0, 9)}).`);
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

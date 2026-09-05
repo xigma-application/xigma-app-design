@@ -4,8 +4,11 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/xigma-pull.cjs",
     "dev": "vite",
+    "predev:static": "node scripts/xigma-pull.cjs",
     "dev:static": "STATIC_DEV=1 vite",
+    "prebuild": "node scripts/xigma-pull.cjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",
