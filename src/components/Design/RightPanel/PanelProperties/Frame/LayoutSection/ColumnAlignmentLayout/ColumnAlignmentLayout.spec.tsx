@@ -122,6 +122,20 @@ describe('ColumnAlignmentLayout behaviors', () => {
     expect(screen.getByLabelText('Gap')).toHaveValue(24);
   });
 
+  it('should reflect the selected frame’s own wrap flag, instead of always rendering as non-wrapped', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { layoutWrap: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { container } = renderColumnAlignmentLayout();
+
+    // result
+    expect(container.querySelector('[class*="option-view--horizontal-wrap"]')).not.toBeNull();
+  });
+
   it('should commit a new alignment when an option is clicked', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);

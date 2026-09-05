@@ -15,7 +15,7 @@ import { translationNameSpace } from './constants';
 
 const ColumnAlignmentLayout: FC = () => {
   const { t } = useTranslation();
-  const { alignment, gap, isHorizontal, isVisible, onBlurGap, onChangeAlignment, onScrubGap } = useColumnAlignmentLayout();
+  const { alignment, gap, isHorizontal, isVisible, isWrap, onBlurGap, onChangeAlignment, onScrubGap } = useColumnAlignmentLayout();
 
   if (isVisible) {
     return (
@@ -29,7 +29,7 @@ const ColumnAlignmentLayout: FC = () => {
           isGapAutoHorizontal={false}
           isGapAutoVertical={false}
           isHorizontal={isHorizontal}
-          isWrap={false}
+          isWrap={isWrap}
           onClick={onChangeAlignment}
           value={alignment}
         />

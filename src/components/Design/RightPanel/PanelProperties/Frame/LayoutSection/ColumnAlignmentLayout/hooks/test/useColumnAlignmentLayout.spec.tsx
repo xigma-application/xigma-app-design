@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { useColumnAlignmentLayout } from '../useColumnAlignmentLayout';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -122,6 +122,33 @@ describe('useColumnAlignmentLayout', () => {
 
     // result
     expect(result.current.alignment).toBe(AlignmentLayout.topLeft);
+  });
+
+  it('should default wrap to false', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isWrap).toBe(false);
+  });
+
+  it('should read the selected frame’s existing wrap flag', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { layoutWrap: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isWrap).toBe(true);
   });
 
   it('should dispatch the new alignment on change', () => {

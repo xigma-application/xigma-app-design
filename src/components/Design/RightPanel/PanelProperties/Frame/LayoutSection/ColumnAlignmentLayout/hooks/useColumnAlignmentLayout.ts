@@ -16,6 +16,7 @@ export type TUseColumnAlignmentLayoutResult = {
   gap: number;
   isHorizontal: boolean;
   isVisible: boolean;
+  isWrap: boolean;
   onBlurGap: TFunc<[FocusEvent<HTMLInputElement>]>;
   onChangeAlignment: TFunc<[AlignmentLayout]>;
   onScrubGap: TFunc<[number]>;
@@ -39,6 +40,7 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     gap,
     isHorizontal: layoutMode === LayoutMode.horizontal,
     isVisible: layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical,
+    isWrap: Boolean(frameNode?.layoutWrap),
     onBlurGap: useDimensionsCommit(gap, commitGap),
     onChangeAlignment: (nextAlignment) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id })),
     onScrubGap: commitGap,
