@@ -15,9 +15,9 @@ export const getAutoLayoutWrappedSiblingPositions = (
   contentBox: TDraftRect,
   children: TAutoLayoutChildSize[],
   index: number,
-  draggedSize: { height: number; width: number },
+  draggedSizes: TAutoLayoutChildSize[],
 ): Record<string, TPoint> => {
-  const simulatedChildren = [...children.slice(0, index), { ...draggedSize, id: '__dragged__' }, ...children.slice(index)];
+  const simulatedChildren = [...children.slice(0, index), ...draggedSizes, ...children.slice(index)];
   const simulatedPositions = getAutoLayoutWrappedChildPositions(
     layoutMode,
     itemSpacing,

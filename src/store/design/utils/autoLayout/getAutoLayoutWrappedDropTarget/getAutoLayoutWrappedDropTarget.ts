@@ -21,6 +21,7 @@ export const getAutoLayoutWrappedDropTarget = (
   children: TAutoLayoutChildSize[],
   originalIndex: number | null,
   draggedSize: { height: number; width: number },
+  draggedSizes: TAutoLayoutChildSize[],
   cursorPoint: TPoint,
 ): TAutoLayoutDropTarget => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
@@ -59,7 +60,7 @@ export const getAutoLayoutWrappedDropTarget = (
     contentBox,
     children,
     index,
-    draggedSize,
+    draggedSizes,
   );
 
   return { index, indicator: rowDropTarget.indicator, siblingPositions };

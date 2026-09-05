@@ -18,6 +18,10 @@ const CHILDREN = [
 ];
 const NORMAL_SIZE = { height: 100, width: 100 };
 
+const asBlock = (draggedSize: { height: number; width: number }): { height: number; id: string; width: number }[] => [
+  { ...draggedSize, id: '__dragged__' },
+];
+
 const dropTargetAt = (cursor: { x: number; y: number }, draggedSize = NORMAL_SIZE): ReturnType<typeof getAutoLayoutWrappedDropTarget> =>
   getAutoLayoutWrappedDropTarget(
     LayoutMode.horizontal,
@@ -29,6 +33,7 @@ const dropTargetAt = (cursor: { x: number; y: number }, draggedSize = NORMAL_SIZ
     CHILDREN,
     null,
     draggedSize,
+    asBlock(draggedSize),
     cursor,
   );
 
@@ -120,6 +125,7 @@ describe('getAutoLayoutWrappedDropTarget', () => {
       CHILDREN,
       null,
       NORMAL_SIZE,
+      asBlock(NORMAL_SIZE),
       { x: 50, y: 115 },
     );
 
@@ -143,6 +149,7 @@ describe('getAutoLayoutWrappedDropTarget — same-parent reorder (originalIndex 
       SIBLINGS_WITHOUT_3,
       2,
       NORMAL_SIZE,
+      asBlock(NORMAL_SIZE),
       { x: 20, y: 150 },
     );
 
@@ -165,6 +172,7 @@ describe('getAutoLayoutWrappedDropTarget — same-parent reorder (originalIndex 
       SIBLINGS_WITHOUT_3,
       2,
       { height: 100, width: 220 },
+      asBlock({ height: 100, width: 220 }),
       { x: 10, y: 50 },
     );
 
@@ -186,11 +194,52 @@ describe('getAutoLayoutWrappedDropTarget — same-parent reorder (originalIndex 
       SIBLINGS_WITHOUT_3,
       2,
       NORMAL_SIZE,
+      asBlock(NORMAL_SIZE),
       { x: 118, y: 50 },
     );
 
     // result — 1, [dragged], 2 in row 1; 2 alone wraps onto row 2 since all three no longer fit
     expect(dropTarget.index).toBe(1);
     expect(dropTarget.siblingPositions).toMatchObject({ '1': { x: 0, y: 0 }, '2': { x: 0, y: 120 } });
+  });
+});
+
+describe('getAutoLayoutWrappedDropTarget — multi-node reorder distributes the block as its own members', () => {
+  // 6 × 50px children in a 100-wide frame, no gaps: rows [1,2] / [3,4] / [5,6]. Dragging the block
+  // {3,4,5} — which itself spans two rows in the current layout — to the very start of row 1.
+  const SMALL_FRAME = { height: 400, width: 100, x: 0, y: 0 };
+  const REAL_SIBLINGS = [
+    { height: 50, id: '1', width: 50 },
+    { height: 50, id: '2', width: 50 },
+    { height: 50, id: '6', width: 50 },
+  ];
+  const BLOCK_BBOX = { height: 100, width: 100 };
+  const BLOCK_MEMBERS = [
+    { height: 50, id: '__dragged__', width: 50 },
+    { height: 50, id: '__dragged__', width: 50 },
+    { height: 50, id: '__dragged__', width: 50 },
+  ];
+
+  it('reflows 1 → row 2, 2 → row 3, 6 stays — not 1 and 2 dumped together a row too far down', () => {
+    // action
+    const dropTarget = getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      SMALL_FRAME,
+      NO_PADDING,
+      REAL_SIBLINGS,
+      2,
+      BLOCK_BBOX,
+      BLOCK_MEMBERS,
+      { x: 10, y: 25 },
+    );
+
+    // result — rows become [block,block] / [block,1] / [2,6]: 1 slides to row 2, 2 to row 3, 6
+    // holds. Regression: one merged 100×100 placeholder took a whole double-height row of its own,
+    // shoving 1 AND 2 down together onto what reads as row 3.
+    expect(dropTarget.index).toBe(0);
+    expect(dropTarget.siblingPositions).toEqual({ 1: { x: 50, y: 50 }, 2: { x: 0, y: 100 }, 6: { x: 50, y: 100 } });
   });
 });

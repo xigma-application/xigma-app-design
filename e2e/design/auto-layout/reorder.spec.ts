@@ -40,6 +40,21 @@ const setHorizontalGap = async (page: Page, gap: number): Promise<void> => {
   await gapInput.press('Enter');
 };
 
+// samples a single pixel's RGB out of a tiny clipped screenshot — same PNG-decode technique the
+// indicator-position specs use
+const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
+  const { PNG } = await import('pngjs');
+  const screenshot = await page.screenshot({ clip: { height: 1, width: 1, x, y } });
+  const png = PNG.sync.read(screenshot);
+
+  return [png.data[0], png.data[1], png.data[2]];
+};
+
+// RECTANGLE_FILL is #D9D9D9 (neutral gray 217) — distinct from the frame's own white body and from
+// the blue drop indicator
+const isRectangleGray = ([r, g, b]: [number, number, number]): boolean =>
+  r > 195 && r < 235 && g > 195 && g < 235 && b > 195 && b < 235 && Math.max(r, g, b) - Math.min(r, g, b) < 15;
+
 test.describe('auto-layout — reordering a child within its own frame', () => {
   test('dragging a child to a new position among its own siblings reorders it, without ejecting it from the frame', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -261,5 +276,56 @@ test.describe('auto-layout — reordering a child within its own frame, wrap ena
     const after = await rectangleRowNames(page);
 
     expect(after).toEqual(before);
+  });
+
+  test('previews a multi-row block as its own members — 1 slides up a row, not 1 and 2 dumped a row too far down', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 100-wide frame, no gaps, six 50x50 children: rows [1,2] / [3,4] / [5,6]
+    const wrapFrame = { x1: 600, x2: 700, y1: 150, y2: 450 };
+
+    await designPage.goto('e2e-test-auto-layout-reorder-wrapped-block');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(wrapFrame.x1, wrapFrame.y1, wrapFrame.x2, wrapFrame.y2);
+    await setFlowHorizontal(page);
+    await clickWrapToggle(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 6; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1450, 210);
+      // dropped past the growing stack's midpoint every time, so they settle in drop order 1..6
+      await dragInto(page, { x: 1425, y: 185 }, { x: 690, y: 290 });
+    }
+
+    const before = await rectangleRowNames(page);
+
+    expect(before).toHaveLength(6);
+
+    // select the block {3,4,5} — it spans two rows in the current layout (3,4 on row 2; 5 on row 3)
+    await designPage.click(625, 225);
+    await designPage.click(675, 225, { shift: true });
+    await designPage.click(625, 275, { shift: true });
+
+    // start dragging the block toward the very front (slot 1), and hold — sampling the live
+    // reorder preview before releasing
+    await page.mouse.move(675, 225);
+    await page.mouse.down();
+    await page.mouse.move(610, 160, { steps: 10 });
+    await page.waitForTimeout(300);
+
+    // regression: the block used to be modelled as ONE merged 100x100 placeholder, which took a
+    // whole double-height row of its own and shoved BOTH 1 and 2 down together onto what reads as
+    // row 3 — leaving a gray sibling sitting in the row-3 band (frame-local y150-200). With the
+    // block modelled as its three real 50px members, nothing reaches that band: 1 only slides up
+    // into row 2, 2 into row 3's first slot, 6 holds.
+    expect(isRectangleGray(await readPixelColor(page, wrapFrame.x1 + 25, wrapFrame.y1 + 185))).toBe(false);
+
+    await page.mouse.up();
+
+    const after = await rectangleRowNames(page);
+
+    // committed order (the real wrap engine, unchanged): block {3,4,5} moves to the front
+    expect(after).toEqual([before[2], before[3], before[4], before[0], before[1], before[5]]);
   });
 });

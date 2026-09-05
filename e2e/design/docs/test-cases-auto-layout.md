@@ -34,6 +34,7 @@ gesture live, not just the Flow toggle in isolation.
 | 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge      |  —   | ✅ `reorder.spec.ts` |
 | 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order) |  ✅  | ✅ `reorder.spec.ts` |
 | 4   | Wrap: nudging a child that sits alone on its own row doesn't perturb the siblings on a different row                                             |  ✅  | ✅ `reorder.spec.ts` |
+| 5   | Wrap: a dragged multi-row block previews as its own individual members, not one merged bounding box                                              |  ✅  | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -102,6 +103,25 @@ at its resolved index — not just the affected row in isolation — so a child 
 its neighbours on one row correctly cascades the rest onto the next row(s) live, matching what
 committing the drop would produce anyway (mirrors Figma: dropping an item the combined size of two
 siblings pushes both of them onto the next row rather than overflowing the first).
+
+### Wrap reorder: a dragged multi-node block was modelled as one merged bounding box
+
+Found live by the user (2026-09-05), the last of the wrap-reorder issues. Dragging a multi-node
+selection whose members span more than one wrap-row in the current layout (e.g. the block `{3,4,5}`
+out of rows `[1,2] / [3,4] / [5,6]`) previewed wrongly: the siblings below the drop (`1` and `2`)
+slid down _together_ by a whole extra row instead of redistributing (`1` up into row 2, `2` into
+row 3, `6` holding) — even though releasing the drag committed exactly that redistribution.
+
+The live preview represented the whole selection as a single placeholder sized to
+`getNodesBoundingBox(selectedNodes)` — for `{3,4,5}` a 100×100 square (3 and 4 side by side, 5
+beneath). The wrap engine then treated that as one item occupying a full double-height row of its
+own, so everything after it dropped a row too far. Fixed by passing the dragged block's members as
+their own individually-sized entries (`getAutoLayoutOrderedDraggedSizes`, ordered by the parent's
+own `childIds`, each tagged `__dragged__` so it's still filtered out of the returned positions) and
+splicing all of them into the simulated array — so the wrap re-flow the preview runs is the same
+one the commit runs. The e2e case samples a single pixel in the row-3 band mid-drag (held, before
+release): gray there means a sibling was shoved down a row too far; empty means the block reflowed
+as its real members.
 
 ### A real, pre-existing selection bug found while writing these tests
 

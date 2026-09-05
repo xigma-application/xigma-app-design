@@ -19,6 +19,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { armAutoLayoutDropIndicator } from './armAutoLayoutDropIndicator';
 import { armAutoLayoutReorderPreview } from './armAutoLayoutReorderPreview';
+import { getAutoLayoutOrderedDraggedSizes } from './getAutoLayoutOrderedDraggedSizes';
 import { getAutoLayoutOriginalIndex } from './getAutoLayoutOriginalIndex';
 import { getAutoLayoutSiblingEntries } from './getAutoLayoutSiblingEntries';
 
@@ -32,6 +33,7 @@ const getAutoLayoutFrameDropTarget = (
   realPositions: TAutoLayoutChildPosition[],
   originalIndex: number | null,
   draggedSize: { height: number; width: number },
+  draggedSizes: TAutoLayoutChildSize[],
   point: TPoint,
 ): TAutoLayoutDropTarget => {
   const isWrapEnabled = Boolean(desiredParent.layoutWrap) && desiredParent.primaryAxisSizingMode !== SizingMode.hug;
@@ -47,6 +49,7 @@ const getAutoLayoutFrameDropTarget = (
         siblingSizes,
         originalIndex,
         draggedSize,
+        draggedSizes,
         point,
       )
     : getAutoLayoutDropTarget(
@@ -78,6 +81,8 @@ export const armAutoLayoutDropTarget = (
   const realPositions = siblingEntries.map(({ bounds, sibling }) => ({ id: sibling.id, x: bounds.x, y: bounds.y }));
   const isSameParentReorder = desiredParentId === currentParentId;
   const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
+  const orderedMovedIds = isSameParentReorder ? desiredParent.childIds.filter((id) => movedNodeIds.includes(id)) : movedNodeIds;
+  const draggedSizes = getAutoLayoutOrderedDraggedSizes(orderedMovedIds, selectedNodes);
   const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
   const itemSpacing = (isHorizontal ? desiredParent.horizontalGap : desiredParent.verticalGap) ?? 0;
   const counterAxisSpacing = (isHorizontal ? desiredParent.verticalGap : desiredParent.horizontalGap) ?? itemSpacing;
@@ -94,6 +99,7 @@ export const armAutoLayoutDropTarget = (
     realPositions,
     originalIndex,
     draggedSize,
+    draggedSizes,
     point,
   );
 

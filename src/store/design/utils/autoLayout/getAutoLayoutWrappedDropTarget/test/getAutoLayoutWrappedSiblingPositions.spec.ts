@@ -9,7 +9,7 @@ const CHILDREN = [
   { height: 100, id: '1', width: 100 },
   { height: 100, id: '2', width: 100 },
 ];
-const DRAGGED_SIZE = { height: 100, width: 100 };
+const DRAGGED_SIZES = [{ height: 100, id: '__dragged__', width: 100 }];
 
 describe('getAutoLayoutWrappedSiblingPositions', () => {
   it('should report every real sibling’s own simulated position, with room opened up for the dragged item', () => {
@@ -22,7 +22,7 @@ describe('getAutoLayoutWrappedSiblingPositions', () => {
       CONTENT_BOX,
       CHILDREN,
       0,
-      DRAGGED_SIZE,
+      DRAGGED_SIZES,
     );
 
     // result — '1' shares row 1 with the dragged item, pushed right by its 100px width + gap;
@@ -40,10 +40,37 @@ describe('getAutoLayoutWrappedSiblingPositions', () => {
       CONTENT_BOX,
       CHILDREN,
       2,
-      DRAGGED_SIZE,
+      DRAGGED_SIZES,
     );
 
     // result — specifically not `{ __dragged__: ... }`
     expect(Object.keys(siblingPositions)).toEqual(['1', '2']);
+  });
+
+  it('should model a multi-node dragged block as its own individually-sized members, not one merged bounding box', () => {
+    // action — a two-member dragged block (e.g. a 2-row-tall multi-select) must occupy exactly as
+    // much room as its two real members would, not one fat placeholder sized to their combined
+    // bounding box (which would misrepresent how many wrap-rows it actually displaces)
+    const twoMemberBlock = [
+      { height: 50, id: '__dragged__', width: 50 },
+      { height: 50, id: '__dragged__', width: 50 },
+    ];
+    const siblingPositions = getAutoLayoutWrappedSiblingPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 400, width: 100, x: 0, y: 0 },
+      [
+        { height: 50, id: '1', width: 50 },
+        { height: 50, id: '2', width: 50 },
+      ],
+      0,
+      twoMemberBlock,
+    );
+
+    // result — the two dragged members share row 1 together (50 + 50 = 100 <= 100); '1' and '2'
+    // then pack normally onto row 2, NOT pushed down an extra row by an oversized merged placeholder
+    expect(siblingPositions).toEqual({ 1: { x: 0, y: 50 }, 2: { x: 50, y: 50 } });
   });
 });
