@@ -126,6 +126,92 @@ describe('getAutoLayoutDropTarget', () => {
     expect(dropTarget.indicator).toMatchObject({ x: 2, y: 20 });
   });
 
+  it('should land halfway through the gap before the only child, not flush against the frame’s top edge, on a centre-aligned vertical frame', () => {
+    // action — a 200-tall frame, one 20-tall child real-positioned by centre alignment (y=90);
+    // cursor above it
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.center,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 90 }],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 50 },
+    );
+
+    // result — centred in the gap before 'a' (90 - 10/2 = 85); a centre-aligned frame has no near
+    // edge for the first position to hug (x is centre-aligned too, on the counter axis: (200-30)/2)
+    expect(dropTarget.index).toBe(0);
+    expect(dropTarget.indicator).toMatchObject({ x: 85, y: 85 });
+  });
+
+  it('should land halfway through the gap after the only child, not flush against the frame’s bottom edge, on a centre-aligned vertical frame', () => {
+    // action — same frame; cursor below the child
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.center,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 90 }],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 150 },
+    );
+
+    // result — centred in the gap after 'a' (90 + 20 + 10/2 = 115); no far edge to hug either
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.indicator).toMatchObject({ x: 85, y: 115 });
+  });
+
+  it('should land halfway through the gap before the only child on a bottom-aligned vertical frame — only the last position hugs an edge', () => {
+    // action — a 200-tall frame, bottom-left alignment, one 20-tall child real-positioned flush
+    // with the frame's bottom edge (y=180); cursor above it
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.bottomLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 180 }],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 100 },
+    );
+
+    // result — centred in the gap before 'a' (180 - 10/2 = 175), not stuck to the frame's top edge
+    expect(dropTarget.index).toBe(0);
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 175 });
+  });
+
+  it('should hug the frame’s own bottom edge when appending after the last child on a bottom-aligned vertical frame', () => {
+    // action — same frame; cursor below the child, past its own near-edge threshold
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.bottomLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 180 }],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 195 },
+    );
+
+    // result — the packed item's own top edge sits at y=180 (180 + its own 20 = the frame's
+    // bottom, 200), but the indicator is a thin 3px bar, not the item's own full height — it's
+    // anchored to that same far edge (200), offset inward by only its own thickness, landing at
+    // y=197, not flush with the item's own top (180)
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 197 });
+  });
+
   it('should build a vertical indicator bar (thickness on the horizontal axis) for a horizontal frame', () => {
     // action
     const dropTarget = getAutoLayoutDropTarget(

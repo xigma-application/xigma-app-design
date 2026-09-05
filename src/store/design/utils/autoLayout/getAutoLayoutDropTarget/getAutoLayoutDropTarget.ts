@@ -3,6 +3,7 @@ import { AlignmentLayout, LayoutMode } from 'types/design/enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
+import { getAlignmentComponents } from '../getAlignmentComponents';
 import { getAutoLayoutChildPositions, TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { getAutoLayoutDropIndicator, TAutoLayoutDropIndicator } from './getAutoLayoutDropIndicator';
@@ -34,12 +35,16 @@ export const getAutoLayoutDropTarget = (
   const index = getAutoLayoutDropInsertionIndex(isHorizontal, cursorPrimary, realPositions, children, originalIndex);
   const simulatedChildren = [...children.slice(0, index), { ...draggedSize, id: '__dragged__' }, ...children.slice(index)];
   const simulatedPositions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, simulatedChildren);
+  const { x: xAlign, y: yAlign } = getAlignmentComponents(alignment);
+  const primaryAlign = isHorizontal ? xAlign : yAlign;
   const insertedPosition = getAutoLayoutInsertedPosition(
     isHorizontal,
     itemSpacing,
+    primaryAlign,
     index,
     realPositions,
     children,
+    draggedSize,
     simulatedPositions[index],
   );
   const indicator = getAutoLayoutDropIndicator(isHorizontal, frame, draggedSize, insertedPosition);
