@@ -72,7 +72,7 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     expect(after).toEqual([before[1], before[2], before[0]]);
   });
 
-  test('dragging the top child down past a sibling only swaps once it crosses that sibling’s own midpoint, not the dragged child’s original one', async ({
+  test('dragging the top child down swaps the instant it touches the next sibling’s own near edge, not its midpoint, and reverts at that same edge', async ({
     page,
   }) => {
     const designPage = new DesignPage(page);
@@ -85,9 +85,8 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
 
     // same three-child stack as above: 60px-tall boxes packed from the frame's top-left content-box
     // origin (y=150), no gap — Rectangle 1 at y150-210, Rectangle 2 at y210-270, Rectangle 3 at
-    // y270-330. Rectangle 2's own midpoint sits at y=240; a stale threshold computed off the
-    // recompacted (gap-closed) sibling list instead would land at y=180 — exactly Rectangle 1's own
-    // midpoint — and swap far too early
+    // y270-330. Rectangle 2's own near edge sits at y=210; its midpoint (y=240) is a stale threshold
+    // this test rules out directly
     await designPage.drawRectangle(1400, 160, 1460, 220);
     await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
 
@@ -99,19 +98,27 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
 
     const before = await rectangleRowNames(page);
 
-    // dragging the top child to y=200 is past its own midpoint (180) but well short of Rectangle 2's
-    // real midpoint (240) — no swap should happen yet
-    await dragInto(page, { x: 630, y: 180 }, { x: 630, y: 200 });
+    // dragging the top child to y=202 hasn't yet touched Rectangle 2's near edge (y=210) — no swap
+    await dragInto(page, { x: 630, y: 180 }, { x: 630, y: 202 });
 
     const stillUnswapped = await rectangleRowNames(page);
 
     expect(stillUnswapped).toEqual(before);
 
-    // now cross Rectangle 2's real midpoint (240) — the swap should fire
-    await dragInto(page, { x: 630, y: 200 }, { x: 630, y: 250 });
+    // now touch y=220 — well past the near edge (210) but well short of the old midpoint (240) — the
+    // swap should already have fired
+    await dragInto(page, { x: 630, y: 180 }, { x: 630, y: 220 });
 
     const afterSwap = await rectangleRowNames(page);
 
     expect(afterSwap).not.toEqual(before);
+
+    // dragging back up past that same y=210 edge (the dragged child now sits at y210-270, grabbed
+    // from its own center) reverts to the original order — no extra dead zone beyond the one edge
+    await dragInto(page, { x: 630, y: 240 }, { x: 630, y: 202 });
+
+    const afterRevert = await rectangleRowNames(page);
+
+    expect(afterRevert).toEqual(before);
   });
 });

@@ -13,6 +13,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { armAutoLayoutDropIndicator } from './armAutoLayoutDropIndicator';
 import { armAutoLayoutReorderPreview } from './armAutoLayoutReorderPreview';
+import { getAutoLayoutOriginalIndex } from './getAutoLayoutOriginalIndex';
 import { getAutoLayoutSiblingEntries } from './getAutoLayoutSiblingEntries';
 
 export const armAutoLayoutDropTarget = (
@@ -28,6 +29,8 @@ export const armAutoLayoutDropTarget = (
   const siblingEntries = getAutoLayoutSiblingEntries(desiredParent, movedNodeIds, nodesById);
   const siblingSizes = siblingEntries.map(({ bounds, sibling }) => ({ height: bounds.height, id: sibling.id, width: bounds.width }));
   const realPositions = siblingEntries.map(({ bounds, sibling }) => ({ id: sibling.id, x: bounds.x, y: bounds.y }));
+  const isSameParentReorder = desiredParentId === currentParentId;
+  const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
   const dropTarget = getAutoLayoutDropTarget(
     desiredParent.layoutMode,
     desiredParent.itemSpacing ?? 0,
@@ -36,10 +39,10 @@ export const armAutoLayoutDropTarget = (
     getFramePadding(desiredParent),
     siblingSizes,
     realPositions,
+    originalIndex,
     getNodesBoundingBox(selectedNodes),
     point,
   );
-  const isSameParentReorder = desiredParentId === currentParentId;
 
   if (isSameParentReorder) {
     armAutoLayoutReorderPreview(canvasRefs, desiredParentId, dropTarget, siblingEntries);

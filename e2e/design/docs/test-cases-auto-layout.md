@@ -28,10 +28,10 @@ gesture live, not just the Flow toggle in isolation.
 
 ## Reordering a child within its own frame
 
-| #   | Scenario                                                                                                                             | Unit |         E2E          |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------ | :--: | :------------------: |
-| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                           |  —   | ✅ `reorder.spec.ts` |
-| 2   | Dragging a child past a sibling swaps only once the cursor crosses that sibling's own midpoint, not the dragged child's original one |  —   | ✅ `reorder.spec.ts` |
+| #   | Scenario                                                                                                                                    | Unit |         E2E          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
+| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                  |  —   | ✅ `reorder.spec.ts` |
+| 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge |  —   | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
