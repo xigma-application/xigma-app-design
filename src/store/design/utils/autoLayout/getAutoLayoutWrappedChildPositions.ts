@@ -37,9 +37,11 @@ export const getAutoLayoutWrappedChildPositions = (
 
     line.forEach((child) => {
       const size = isHorizontal ? child.width : child.height;
+      const counterChildSize = isHorizontal ? child.height : child.width;
+      const withinLineOffset = getAxisOffset(counterAlign, lineThicknesses[lineIndex], counterChildSize);
       const position = isHorizontal
-        ? { id: child.id, x: frame.x + primaryOffset, y: frame.y + counterOffset }
-        : { id: child.id, x: frame.x + counterOffset, y: frame.y + primaryOffset };
+        ? { id: child.id, x: frame.x + primaryOffset, y: frame.y + counterOffset + withinLineOffset }
+        : { id: child.id, x: frame.x + counterOffset + withinLineOffset, y: frame.y + primaryOffset };
 
       positions.push(position);
       primaryOffset += size + itemSpacing;

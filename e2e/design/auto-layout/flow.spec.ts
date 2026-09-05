@@ -291,4 +291,43 @@ test.describe('auto-layout — Flow (Horizontal / Vertical)', () => {
     expect(nodeC.y).toBeGreaterThan(nodeA.y);
     expect(nodeD.x).toBeGreaterThan(nodeC.x);
   });
+
+  test('with Horizontal + Wrap and Bottom-center alignment, a shorter child hangs from the bottom of its line instead of sticking to the top', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-wrap-bottom-alignment');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2); // 500x550
+    await setFlow(page, 'Horizontal');
+    await page.getByLabel('Bottom center', { exact: true }).click();
+    await clickWrapToggle(page);
+
+    // a tall child and a short child, both narrow enough (100+100=200, well under the 500px-wide
+    // frame) to land on the same wrapped line together
+    await designPage.drawRectangle(1400, 160, 1500, 310); // tall: 100x150
+    await dragInto(page, { x: 1450, y: 235 }, { x: 700, y: 300 });
+
+    await designPage.drawRectangle(1400, 400, 1500, 450); // short: 100x50
+    await dragInto(page, { x: 1450, y: 425 }, { x: 700, y: 300 });
+
+    const { nodes, rootOrder } = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+    });
+
+    const frame = nodes[rootOrder[0]] as { childIds: string[] };
+    const [tallId, shortId] = frame.childIds;
+    const tall = nodes[tallId] as { height: number; y: number };
+    const short = nodes[shortId] as { height: number; y: number };
+
+    // the shorter child's own bottom edge must land flush with the taller child's bottom edge —
+    // not flush with its top, which is what the code did before this fix
+    expect(short.y + short.height).toBe(tall.y + tall.height);
+  });
 });

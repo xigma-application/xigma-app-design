@@ -85,6 +85,49 @@ describe('getAutoLayoutWrappedChildPositions', () => {
     ]);
   });
 
+  it('should hang a shorter child from the bottom of its own line, not the line’s top, when counter alignment is "bottom"', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.bottomLeft,
+      { height: 60, width: 50, x: 0, y: 0 },
+      [
+        { height: 60, id: 'tall', width: 25 },
+        { height: 20, id: 'short', width: 25 },
+      ],
+    );
+
+    // both share a single 60-wide-max line (tall+short = 50 <= 50), so the line's own thickness is
+    // 60 (the tallest child); the shorter child must hang from the line's bottom edge (offset
+    // 60-20=40), not sit flush with its top (offset 0) the way it did before this fix
+    expect(positions).toEqual([
+      { id: 'tall', x: 0, y: 0 },
+      { id: 'short', x: 25, y: 40 },
+    ]);
+  });
+
+  it('should centre a shorter child within its own line’s thickness when counter alignment is "center"', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.center,
+      { height: 60, width: 50, x: 0, y: 0 },
+      [
+        { height: 60, id: 'tall', width: 25 },
+        { height: 20, id: 'short', width: 25 },
+      ],
+    );
+
+    // both share a single 60-tall line (the tallest child); the shorter child centres within that
+    // line's own thickness (offset (60-20)/2=20), not flush with its top (offset 0)
+    expect(positions).toEqual([
+      { id: 'tall', x: 0, y: 0 },
+      { id: 'short', x: 25, y: 20 },
+    ]);
+  });
+
   it('should wrap into columns (thickness on width) for a vertical frame', () => {
     const positions = getAutoLayoutWrappedChildPositions(
       LayoutMode.vertical,
