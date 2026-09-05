@@ -4,7 +4,7 @@ import { TDrawSceneContext } from '../types';
 import { TSmartSelectionLayout } from 'types/design/smartSelection/types';
 
 // utils
-import { drawSmartSelectionGapFillPreview } from './drawSmartSelectionGapFillPreview';
+import { drawSmartSelectionGapFillPreview } from './drawSmartSelectionGapFillPreview/drawSmartSelectionGapFillPreview';
 import { drawSmartSelectionGapHandles } from './drawSmartSelectionGapHandles';
 import { drawSmartSelectionSwapHandles } from './drawSmartSelectionSwapHandles';
 

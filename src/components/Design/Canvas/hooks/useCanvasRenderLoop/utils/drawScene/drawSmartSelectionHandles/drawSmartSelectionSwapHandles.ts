@@ -27,7 +27,6 @@ export const drawSmartSelectionSwapHandles = (
 
     if (isBoxActive) {
       const isHovered = hoveredCenter !== null && hoveredCenter.x === centerX && hoveredCenter.y === centerY;
-
       drawSwapHandleRing(gl, program, buffer, centerX, centerY, isHovered, canvasWidth, canvasHeight, viewport);
     } else {
       drawSwapHandleDot(gl, program, buffer, centerX, centerY, canvasWidth, canvasHeight, viewport);

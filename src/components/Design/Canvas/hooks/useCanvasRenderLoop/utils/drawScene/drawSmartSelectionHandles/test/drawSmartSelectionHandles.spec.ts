@@ -14,7 +14,7 @@ const drawSmartSelectionSuggestionIconMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
 const drawSmartSelectionSwapShadowMock = vi.fn();
 
-vi.mock('../drawSmartSelectionGapFillPreview', () => ({
+vi.mock('../drawSmartSelectionGapFillPreview/drawSmartSelectionGapFillPreview', () => ({
   drawSmartSelectionGapFillPreview: (...args: unknown[]): void => drawSmartSelectionGapFillPreviewMock(...args),
 }));
 vi.mock('../drawSmartSelectionGapHandles', () => ({
