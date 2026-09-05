@@ -12,9 +12,12 @@ import { TDragState } from 'types/design/selectionTool/types';
 export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState, canvasRefs: TCanvasRefs): void => {
   if (dragState.hasMoved) {
     const page = selectActivePage(store.getState());
-    const nodeIds = selectSelectedIds(store.getState());
-    const currentParentId = page.nodes[nodeIds[0]]?.parentId ?? null;
+    const selectedIds = selectSelectedIds(store.getState());
+    const currentParentId = page.nodes[selectedIds[0]]?.parentId ?? null;
     const currentParent = currentParentId ? page.nodes[currentParentId] : null;
+    const currentSiblingOrder = currentParent && isContainerNode(currentParent) ? currentParent.childIds : page.rootOrder;
+    const orderedFromCurrentParent = currentSiblingOrder.filter((id) => selectedIds.includes(id));
+    const nodeIds = [...orderedFromCurrentParent, ...selectedIds.filter((id) => !orderedFromCurrentParent.includes(id))];
     const dropTargetFrameId = canvasRefs.transform.dropTargetFrameIdRef.current;
     const targetFrame = dropTargetFrameId ? page.nodes[dropTargetFrameId] : null;
     const targetParentId = targetFrame && isContainerNode(targetFrame) ? targetFrame.id : null;

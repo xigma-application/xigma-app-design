@@ -28,10 +28,11 @@ gesture live, not just the Flow toggle in isolation.
 
 ## Reordering a child within its own frame
 
-| #   | Scenario                                                                                                                                    | Unit |         E2E          |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
-| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                  |  —   | ✅ `reorder.spec.ts` |
-| 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge |  —   | ✅ `reorder.spec.ts` |
+| #   | Scenario                                                                                                                                         | Unit |         E2E          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :------------------: |
+| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                       |  —   | ✅ `reorder.spec.ts` |
+| 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge      |  —   | ✅ `reorder.spec.ts` |
+| 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order) |  ✅  | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -41,6 +42,43 @@ committing the right index — real `mousedown`/`mousemove`/`mouseup` timing, no
 row order (precise and unambiguous) rather than a canvas screenshot diff, since the three children
 are identical green squares and a pixel diff would tell you _something_ changed without saying
 what.
+
+### Multi-node reorder was a genuinely missing mechanism, made of three separate bugs
+
+#3 above didn't exist before — dragging more than one selected child inside an auto-layout frame
+silently did nothing (or worse, swapped the two dragged nodes with each other). Three independent
+bugs stacked up:
+
+1. `updateAutoLayoutReorderGhostPosition.ts` only ever wrote a ghost position for the drag into the
+   preview ref when exactly one node was selected (`selectedNodes.length === 1`); for 2+ it fell
+   back to `dispatchDraggedNodeUpdates`, a plain positional dispatch that the auto-layout engine's
+   own resync immediately overwrote on every tick — the dragged block never visibly moved. Fixed by
+   writing a ghost position for every selected node, unconditionally.
+2. Even with (1) fixed, the pointerdown for a 2-node, same-size, adjacent selection never reached
+   the general drag/reorder resolver at all — `armSmartSelectionSwapOnPointerDown` (and the
+   `...Gap...` sibling) claim that exact shape (see `smart-guides.md`'s sibling doc,
+   `getSmartSelectionSwapHandleAtPoint`) earlier in `ARM_RESOLVERS`, arming their own
+   `swapDragRef`/`gapDragRef` instead of the ordinary `dragStateRef` `continueDrag.ts` reads. Fixed
+   by having both resolvers skip claiming the event (`isNodeAutoLayoutChild`, `utils/canvas/signals/`)
+   when the involved nodes are children of an auto-layout frame — Smart Selection swap/gap doesn't
+   understand auto-layout positioning at all, so deferring to the (already more general) auto-layout
+   reorder mechanism is strictly correct, not just a workaround. `drawSmartSelectionHandles.ts` also
+   now skips drawing its handles/shadow entirely while a plain move drag is active
+   (`draggedNodeIdsRef !== null` — move only, not resize/rotate, since those never populate that
+   ref), so the now-non-functional-here handles don't linger on screen mid-drag either.
+3. `commitDropIntoFrame.ts` built the `moveNodes` `nodeIds` array straight from `selectedIds` —
+   click/selection order, not the dragged nodes' own current spatial order. Selecting a
+   bottom-then-top pair (shift-click in that order) and dragging them together committed them in
+   that same (visually backwards) order, silently swapping the pair relative to each other even
+   though the user only meant to move them as a block. Fixed by deriving the commit order from the
+   nodes' own current parent's `childIds` (or `rootOrder`), falling back to selection order only for
+   ids that don't share that common parent (an already-dubious pre-existing edge case, left
+   unregressed rather than "fixed" further).
+
+Reproduced and fixed live (2026-09-05) after the user found it by hand — no automated test caught
+any of the three until these were added afterward, one `e2e/design/auto-layout/reorder.spec.ts` case
+per distinct symptom (bugs 1+2 together, since they only manifest combined; bug 3 specifically via a
+reversed-click-order case) plus matching unit coverage on each of the four touched files.
 
 ### A real, pre-existing selection bug found while writing these tests
 

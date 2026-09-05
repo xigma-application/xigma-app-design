@@ -132,15 +132,60 @@ special-casing needed in code — a 90° rotation's corner min/max naturally com
 width/height-swapped box), so there's a single code path for "any angle", not an
 if-0/90/180/270-else-other branch.
 
+## 5. Multi-node drag-reorder — three separate mechanisms had to agree
+
+Dragging a **multi-node selection** to reorder it within its own auto-layout frame is not one fix,
+it's three independent pieces that all have to cooperate — each has its own single-node-only or
+order-blind assumption that had to go:
+
+1. **Ghost tracking.** `updateAutoLayoutReorderGhostPosition.ts` writes a live cursor-tracked
+   position into `autoLayoutReorderPreviewRef.positions` for **every** currently-selected node
+   (`getDraggedNodeGhostPositions`), not just when exactly one is selected. Falling back to
+   `dispatchDraggedNodeUpdates` (a real store dispatch) while a reorder preview is active is wrong
+   for *any* node count — the auto-layout engine's own `syncAutoLayoutChildren` resync fights and
+   overwrites a real positional dispatch on every tick, so the node visually never moves.
+2. **Pointerdown priority.** `armSmartSelectionSwapOnPointerDown`/`armSmartSelectionGapOnPointerDown`
+   (`useSelectionTool/.../handlePointerDown/armResolvers/`) run **before** the general hit/drag
+   resolver in `ARM_RESOLVERS`, and claim a pointerdown on a 2-node, same-size, adjacent selection
+   for their own `swapDragRef`/`gapDragRef` — a completely separate mechanism from the ordinary
+   `dragStateRef` that `continueDrag.ts` (and therefore all of §2 above) reads. Smart Selection has
+   no concept of auto-layout at all, so it must not win that pointerdown for auto-layout children.
+   Both resolvers now check `isNodeAutoLayoutChild(node, nodesById)`
+   (`src/utils/canvas/signals/isNodeAutoLayoutChild.ts`) over `smartSelectionNodes` first and skip
+   hit-testing/arming entirely (`hit = isAutoLayoutSelection ? null : getSmartSelection...AtPoint(...)`)
+   when true, falling through to the real drag resolver. `drawSmartSelectionHandles.ts` also now
+   skips drawing anything while `refs.transform.draggedNodeIdsRef.current !== null` — that ref is
+   populated **only** by the plain move-drag path (`initDraggedNodeIds`, called from
+   `continueDrag.ts`), never by resize/rotate, so this hides the now-nonfunctional-here handles
+   during a move drag specifically without touching resize/rotate's own handle visuals.
+3. **Commit order.** `commitDropIntoFrame.ts` (pointer-up) used to build `moveNodes`'s `nodeIds`
+   straight from `selectSelectedIds` — i.e. click/selection order. For a multi-node **reorder**
+   (same parent before and after), that's the wrong order to preserve: it's the block's *current*
+   relative order in `childIds` that must survive the move, not whatever order the user happened to
+   click the members in. Selecting bottom-then-top (shift-click in that order) and dragging them as
+   a block used to silently swap them relative to each other on commit. Fixed by deriving `nodeIds`
+   from the shared current parent's `childIds` (or `page.rootOrder` if at the root), filtered down to
+   the selected ids, with any id that doesn't share that common parent appended afterward in its
+   original order (an already-pre-existing, still-unaddressed edge case for a heterogeneous-parent
+   selection — not made worse, not "fixed" further here).
+
+None of these three is optional — fixing only (1) still looks broken because of (2); fixing (1) and
+(2) still silently mis-orders the pair because of (3). All three needed their own targeted e2e
+reproduction (see History below) since none of them is visible from a single-node drag test.
+
 ## Tests
 
 - Unit: `src/store/design/utils/autoLayout/test/` (engine — padding, alignment, hug, wrap, the
   rotated-child regression in `syncAutoLayoutChildren.spec.ts`), `.../updateDragDropTarget/test/`
-  (drop-target/insertion-index/original-index), `src/store/design/utils/test/getRotatedNodeBounds.spec.ts`.
+  (drop-target/insertion-index/original-index), `src/store/design/utils/test/getRotatedNodeBounds.spec.ts`,
+  `updateAutoLayoutReorderGhostPosition.spec.ts`, `commitDropIntoFrame.spec.ts`,
+  `armSmartSelectionSwapOnPointerDown.spec.ts`/`...Gap...spec.ts`,
+  `drawSmartSelectionHandles.spec.ts`, `src/utils/canvas/signals/test/isNodeAutoLayoutChild.spec.ts`.
 - e2e: `e2e/design/auto-layout/flow.spec.ts` (Flow toggle, drag-into-frame, wrap sizing),
-  `reorder.spec.ts` (drag-reorder within a frame, the near-edge-not-midpoint threshold),
-  `rotated-child.spec.ts` (a child rotated via `updateNode` is packed by its rotated footprint).
-  Catalog with per-scenario detail: `e2e/design/docs/test-cases-auto-layout.md`.
+  `reorder.spec.ts` (single- and multi-node drag-reorder within a frame, the near-edge-not-midpoint
+  threshold, click-order-independent multi-node commit), `rotated-child.spec.ts` (a child rotated
+  via `updateNode` is packed by its rotated footprint). Catalog with per-scenario detail:
+  `e2e/design/docs/test-cases-auto-layout.md`.
 
 ## History (so it isn't repeated)
 
@@ -166,3 +211,11 @@ if-0/90/180/270-else-other branch.
    store-layer `getRotatedNodeBounds.ts` and wiring it into every one of those call sites (not just
    the real applier — the drag-reorder sibling/ghost/render-preview code shares the exact same bug
    class and was fixed in the same change).
+4. **2026-09-05, multi-node reorder didn't exist as a mechanism at all.** The user found this by
+   hand, in three layers: dragging two selected children did nothing visible (§5.1); once that was
+   fixed, it *still* did nothing for a same-size adjacent pair specifically, because Smart Selection
+   Swap was silently winning the pointerdown (§5.2); once that was also fixed, dragging a
+   bottom-then-top-clicked pair committed them in reversed relative order (§5.3). Each layer was
+   invisible until the one below it was fixed, which is why it took three rounds of "found it, fixed
+   it" — live debugging (temporary `console.log`s in the resolver chain, removed before commit)
+   traced each layer to its exact resolver/dispatch, rather than guessing from symptoms alone.

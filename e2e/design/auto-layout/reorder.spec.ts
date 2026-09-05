@@ -74,6 +74,86 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     expect(after).toEqual([before[2], before[0], before[1]]);
   });
 
+  test('dragging a multi-node selection reorders it together within the frame, preserving the block’s own relative order', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-multi-select');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlow(page, 'Vertical');
+
+    // same three-child stack as above: Rectangle 1 at y150-210, Rectangle 2 at y210-270,
+    // Rectangle 3 at y270-330
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 440, 1460, 500);
+    await dragInto(page, { x: 1430, y: 470 }, { x: 630, y: 300 });
+
+    const before = await rectangleRowNames(page);
+
+    // select the bottom two children together (Rectangle 2 and Rectangle 3)
+    await designPage.click(630, 240);
+    await designPage.click(630, 300, { shift: true });
+
+    // drag the pair, grabbed from within Rectangle 2, up past Rectangle 1 to the very top — before
+    // the fix, a multi-node drag inside an auto-layout frame fell back to a plain positional
+    // dispatch instead of tracking the reorder-preview ghost, so the drag visually fought the
+    // layout engine's own resync and never actually reordered
+    await dragInto(page, { x: 630, y: 240 }, { x: 630, y: 160 });
+
+    const after = await rectangleRowNames(page);
+
+    // the dragged pair moves to the front as one block, keeping their own relative order —
+    // Rectangle 2 above Rectangle 3, both now above Rectangle 1
+    expect(after).toEqual([before[1], before[2], before[0]]);
+  });
+
+  test('dragging a multi-node selection preserves the pair’s own current order even when they were clicked in the opposite (bottom-first) order', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-multi-select-click-order');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlow(page, 'Vertical');
+
+    // same three-child stack as above: Rectangle 1 at y150-210, Rectangle 2 at y210-270,
+    // Rectangle 3 at y270-330
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 440, 1460, 500);
+    await dragInto(page, { x: 1430, y: 470 }, { x: 630, y: 300 });
+
+    const before = await rectangleRowNames(page);
+
+    // select the bottom two children in bottom-first click order (Rectangle 3, then Rectangle 2)
+    // — the opposite of their visual/childIds order. Before the fix, the drag committed the
+    // dragged block using raw click/selection order, silently swapping Rectangle 2 and Rectangle 3
+    // relative to each other
+    await designPage.click(630, 300);
+    await designPage.click(630, 240, { shift: true });
+
+    await dragInto(page, { x: 630, y: 240 }, { x: 630, y: 160 });
+
+    const after = await rectangleRowNames(page);
+
+    // still Rectangle 2 above Rectangle 3, matching their pre-drag order, not click order
+    expect(after).toEqual([before[1], before[2], before[0]]);
+  });
+
   test('dragging the top child down swaps the instant it touches the next sibling’s own near edge, not its midpoint, and reverts at that same edge', async ({
     page,
   }) => {

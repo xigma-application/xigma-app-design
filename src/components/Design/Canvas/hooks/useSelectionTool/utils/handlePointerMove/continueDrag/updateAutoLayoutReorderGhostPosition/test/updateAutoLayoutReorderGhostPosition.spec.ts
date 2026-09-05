@@ -102,19 +102,24 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 105, y: 105 });
   });
 
-  it('should fall back to dispatching the drag delta when more than one node is selected', () => {
+  it('should write every dragged node’s cursor-tracked position into the preview ref, for a multi-node selection', () => {
     // mock
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'frame-1', positions: {} } } },
     });
-    const nodeA = rect({ id: 'a' });
-    const nodeB = rect({ id: 'b' });
+    const nodeA = rect({ id: 'a', x: 10, y: 20 });
+    const nodeB = rect({ id: 'b', x: 30, y: 40 });
     const state = dragState({ a: { x: 10, y: 20 }, b: { x: 30, y: 40 } });
 
     // action
     updateAutoLayoutReorderGhostPosition(refs, [nodeA, nodeB], store.dispatch, state, null, 5, 5);
+    flushThrottledDispatch(state.dispatchThrottle);
 
-    // result — the preview ref is untouched (still no ghost position written for either node)
-    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({});
+    // result — both dragged nodes get a ghost position, not just the first one
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      a: { x: 15, y: 25 },
+      b: { x: 35, y: 45 },
+    });
+    expect(state.dispatchThrottle.run).toBeNull();
   });
 });

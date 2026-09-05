@@ -5,10 +5,19 @@ import { AppDispatch } from 'store';
 // types
 import { TCanvasRefs, TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
+import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { dispatchDraggedNodeUpdates } from './dispatchDraggedNodeUpdates';
+
+const getDraggedNodeGhostPositions = (selectedNodes: TSceneNode[], deltaX: number, deltaY: number): Record<string, TPoint> =>
+  selectedNodes.reduce<Record<string, TPoint>>((positionsById, node) => {
+    const bounds = getRotatedNodeBounds(node);
+    positionsById[node.id] = { x: bounds.x + deltaX, y: bounds.y + deltaY };
+
+    return positionsById;
+  }, {});
 
 export const updateAutoLayoutReorderGhostPosition = (
   canvasRefs: TCanvasRefs,
@@ -20,15 +29,11 @@ export const updateAutoLayoutReorderGhostPosition = (
   deltaY: number,
 ): void => {
   const preview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
-  const isSingleNodeReorder = preview !== null && selectedNodes.length === 1;
 
-  if (isSingleNodeReorder && preview) {
-    const [draggedNode] = selectedNodes;
-    const bounds = getRotatedNodeBounds(draggedNode);
-
+  if (preview) {
     canvasRefs.transform.autoLayoutReorderPreviewRef.current = {
       ...preview,
-      positions: { ...preview.positions, [draggedNode.id]: { x: bounds.x + deltaX, y: bounds.y + deltaY } },
+      positions: { ...preview.positions, ...getDraggedNodeGhostPositions(selectedNodes, deltaX, deltaY) },
     };
   } else {
     dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY);

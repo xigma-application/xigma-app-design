@@ -292,6 +292,34 @@ describe('commitDropIntoFrame', () => {
     expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([draggedId, firstId]);
   });
 
+  it('should commit a multi-node reorder preserving the dragged block’s own current childIds order, not the click/selection order', () => {
+    // mock — three children of an auto-layout frame: first, then the pair being dragged (middle,
+    // last). Selected in the OPPOSITE order to their visual/childIds order (last clicked first) —
+    // committing raw click order would silently swap the pair's own relative order
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const firstId = addRectNode(0, 0);
+    const middleId = addRectNode(0, 20);
+    const lastId = addRectNode(0, 40);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId, middleId, lastId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([lastId, middleId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId, positions: {} } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action — reordering the [middle, last] pair to the very front
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — the pair keeps its own original relative order (middle above last), just moved as
+    // a block ahead of "first"
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([middleId, lastId, firstId]);
+  });
+
   it('should ignore a stale reorder preview left over from a different auto-layout frame', () => {
     // mock — the preview ref still points at some other frame id, so it must not be trusted here
     const frameId = addAutoLayoutFrameNode(0, 0);

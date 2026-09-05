@@ -292,6 +292,25 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
   });
 
+  it('should draw nothing at all while a plain move drag is in progress, even with an otherwise-valid layout and a hovered box', () => {
+    const refs = createCanvasRefs({
+      hover: { isSmartSelectionBoxHoveredRef: { current: true } },
+      transform: { draggedNodeIdsRef: { current: new Set(['a', 'b']) } },
+    });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSwapShadowMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapHoverLabelMock).not.toHaveBeenCalled();
+  });
+
   it('should not draw the swap shadow before the swap drag has moved', () => {
     const refs = createCanvasRefs({
       smartSelection: {
