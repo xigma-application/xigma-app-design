@@ -1,5 +1,5 @@
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TAutoLayoutFrame } from '../types';
 import { TSceneNode } from 'types/design/types';
 
@@ -68,6 +68,54 @@ describe('armAutoLayoutDropTarget', () => {
 
     // action
     armAutoLayoutDropTarget(refs, horizontalAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
+
+    // result
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
+  });
+
+  it('should route through the wrap-aware drop target computation for a horizontal frame with wrap enabled, hugging the left wall of the row the cursor is actually over', () => {
+    // mock — three 100x100 siblings: 'a' and 'b' share row 1 (250-wide content box, 100+20+100
+    // fits), 'c' wraps onto row 2 alone, flush under 'a' — the exact shape reported as broken
+    const siblingA: TSceneNode = { ...draggedRect, height: 100, id: 'a', width: 100, x: 0, y: 0 } as TSceneNode;
+    const siblingB: TSceneNode = { ...draggedRect, height: 100, id: 'b', width: 100, x: 120, y: 0 } as TSceneNode;
+    const siblingC: TSceneNode = { ...draggedRect, height: 100, id: 'c', width: 100, x: 0, y: 120 } as TSceneNode;
+    const wrappedAutoLayoutFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      childIds: ['a', 'b', 'c'],
+      height: 400,
+      horizontalGap: 20,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      verticalGap: 20,
+      width: 250,
+    };
+    const refs = createCanvasRefs();
+    const nodesById = { a: siblingA, b: siblingB, c: siblingC };
+
+    // action — cursor at 'c'’s own left edge, in row 2
+    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], nodesById, { x: 20, y: 150 });
+
+    // result — regression: the old flat (non-wrap-aware) index math compared the cursor only
+    // against each sibling's own x threshold in childIds order; 'c' shares 'a'’s near-zero x (both
+    // start their own row at x=0), so it resolved to index 0 and hugged the frame's own top-left
+    // edge — landing in row 1, not row 2 where the cursor actually was
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1', index: 2, indicator: { x: 2, y: 122 } });
+  });
+
+  it('should fall back to the non-wrap drop target computation when wrap is enabled but the frame hugs its primary axis', () => {
+    // mock — hug on the primary axis disables wrap, mirroring computeAutoLayoutPositions's own
+    // wrapEnabled condition
+    const huggedWrapFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      horizontalGap: 10,
+      layoutMode: LayoutMode.horizontal,
+      layoutWrap: true,
+      primaryAxisSizingMode: SizingMode.hug,
+    };
+    const refs = createCanvasRefs();
+
+    // action
+    armAutoLayoutDropTarget(refs, huggedWrapFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 });
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });

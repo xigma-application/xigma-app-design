@@ -98,6 +98,50 @@ unaffected. The underlying canvas-click bug is still open and worth its own inve
 tests don't attempt to root-cause or resolve it, only to route around it so Flow itself stays
 covered.
 
+## Drop indicator positioning
+
+| #   | Scenario                                                                                                                                       | Unit |                                                E2E                                                |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------------------------------------------------------------------: |
+| 1   | Indicator centres in the real gap between two siblings (or the frame's edge) instead of sitting flush against the next one, Top-left alignment |  ✅  |                            ✅ `horizontal-indicator-positions.spec.ts`                            |
+| 2   | Centre alignment never hugs a frame edge for the first/last position — always the gap's own midpoint, on both axes                             |  ✅  | ✅ `vertical-indicator-positions.spec.ts` / `horizontal-indicator-positions-center-right.spec.ts` |
+| 3   | Bottom/Right alignment hugs the correct far edge, anchored to the indicator's own thickness rather than the dragged item's full size           |  ✅  | ✅ `vertical-indicator-positions.spec.ts` / `horizontal-indicator-positions-center-right.spec.ts` |
+| 4   | Wrap: the indicator resolves against the real row/column the cursor is actually over, ignoring whether the dragged item would fit there        |  ✅  |                               ✅ `wrap-indicator-positions.spec.ts`                               |
+
+Found live by the user across several rounds of screenshots/manual dragging (2026-09-05), not from a
+pre-existing report. Four distinct, compounding issues in the same drop-indicator math:
+
+1. **Flush-against-the-next-sibling, not centred in the gap.** The indicator's position was taken
+   straight from a full simulated re-pack of the dragged item into the child array, which places its
+   leading edge exactly `itemSpacing` away from the previous sibling — i.e. flush against the next
+   real (unmoved) sibling's own edge, not centred in the gap. Fixed in `getAutoLayoutDropTarget` by
+   deriving the primary-axis coordinate directly from the real neighbour(s) (`previousEnd +
+itemSpacing / 2`, mirrored for "no previous"), independent of simulation.
+2. **Edge-hugging applied unconditionally regardless of alignment.** The "snap to the frame's own
+   edge" special case (for the very first/last child) fired for every alignment, when it should only
+   apply on the end of the primary axis that alignment actually anchors to — Centre alignment has no
+   fixed edge on _either_ end. Fixed via `getAutoLayoutPrimaryAnchoredPosition`, which only hugs an
+   edge when `primaryAlign` matches that end (`start` for the leading edge, `end` for the trailing
+   one); otherwise it's the same gap-midpoint formula as any middle insertion.
+3. **The Bottom/Right edge-hug itself was wrong by the dragged item's own size.** Even once (2)
+   correctly identified _when_ to hug the far edge, the position used was the packed item's own
+   near edge — which sits `draggedSize` away from the actual far edge, since the indicator is a thin
+   3px bar, not the full item. Fixed by anchoring to `simulatedPrimary + draggedPrimarySize -
+INDICATOR_THICKNESS_PX` instead.
+4. **Wrap wasn't wired into the drop-target math at all.** `armAutoLayoutDropTarget` always used the
+   plain single-line `getAutoLayoutDropTarget`, which compares the cursor against every sibling's
+   primary-axis position in flat `childIds` order — meaningless once a frame has wrapped, since a
+   second row's near-zero primary position can sort _before_ a first-row sibling. This produced
+   index/indicator mismatches and items snapping to the wrong row entirely. The fix went through two
+   designs: first a brute-force "simulate every insertion index, pick whichever ends up closest to
+   the cursor" search (correct for same-size items, but let a narrow item "escape" to a different,
+   nearer-fitting row the user was never actually hovering over); then a full pivot, prompted by the
+   user pointing out Figma doesn't reason about fit at all — `getAutoLayoutWrappedDropTarget` now
+   detects which real row/column the cursor is over (`getAutoLayoutCursorRowRange`, from the
+   **current**, pre-drag layout) and delegates straight to the already-correct single-line
+   `getAutoLayoutDropTarget`, scoped to just that row's own real members and its own band as a
+   mini-frame (`getAutoLayoutRowFrame`) — regardless of whether the dragged item would actually fit;
+   the real wrap engine re-flows the true geometry once the drop commits.
+
 ## Rotated children
 
 | #   | Scenario                                                                                             | Unit |            E2E             |

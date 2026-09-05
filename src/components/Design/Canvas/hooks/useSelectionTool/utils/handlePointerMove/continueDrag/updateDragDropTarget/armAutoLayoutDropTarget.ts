@@ -1,11 +1,17 @@
 // store
-import { getAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
+import {
+  getAutoLayoutDropTarget,
+  TAutoLayoutDropTarget,
+} from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
+import { getAutoLayoutWrappedDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutWrappedDropTarget/getAutoLayoutWrappedDropTarget';
 import { getFramePadding } from 'store/design/utils/autoLayout/getFramePadding';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 
 // types
-import { AlignmentLayout, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
 import { TAutoLayoutFrame } from './types';
+import { TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutContentBox';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
@@ -15,6 +21,46 @@ import { armAutoLayoutDropIndicator } from './armAutoLayoutDropIndicator';
 import { armAutoLayoutReorderPreview } from './armAutoLayoutReorderPreview';
 import { getAutoLayoutOriginalIndex } from './getAutoLayoutOriginalIndex';
 import { getAutoLayoutSiblingEntries } from './getAutoLayoutSiblingEntries';
+
+const getAutoLayoutFrameDropTarget = (
+  desiredParent: TAutoLayoutFrame,
+  itemSpacing: number,
+  counterAxisSpacing: number,
+  alignment: AlignmentLayout,
+  padding: TAutoLayoutPadding,
+  siblingSizes: TAutoLayoutChildSize[],
+  realPositions: TAutoLayoutChildPosition[],
+  originalIndex: number | null,
+  draggedSize: { height: number; width: number },
+  point: TPoint,
+): TAutoLayoutDropTarget => {
+  const isWrapEnabled = Boolean(desiredParent.layoutWrap) && desiredParent.primaryAxisSizingMode !== SizingMode.hug;
+
+  return isWrapEnabled
+    ? getAutoLayoutWrappedDropTarget(
+        desiredParent.layoutMode,
+        itemSpacing,
+        counterAxisSpacing,
+        alignment,
+        desiredParent,
+        padding,
+        siblingSizes,
+        draggedSize,
+        point,
+      )
+    : getAutoLayoutDropTarget(
+        desiredParent.layoutMode,
+        itemSpacing,
+        alignment,
+        desiredParent,
+        padding,
+        siblingSizes,
+        realPositions,
+        originalIndex,
+        draggedSize,
+        point,
+      );
+};
 
 export const armAutoLayoutDropTarget = (
   canvasRefs: TCanvasRefs,
@@ -32,16 +78,21 @@ export const armAutoLayoutDropTarget = (
   const isSameParentReorder = desiredParentId === currentParentId;
   const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
   const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
-  const dropTarget = getAutoLayoutDropTarget(
-    desiredParent.layoutMode,
-    (isHorizontal ? desiredParent.horizontalGap : desiredParent.verticalGap) ?? 0,
-    desiredParent.layoutAlignment ?? AlignmentLayout.topLeft,
+  const itemSpacing = (isHorizontal ? desiredParent.horizontalGap : desiredParent.verticalGap) ?? 0;
+  const counterAxisSpacing = (isHorizontal ? desiredParent.verticalGap : desiredParent.horizontalGap) ?? itemSpacing;
+  const alignment = desiredParent.layoutAlignment ?? AlignmentLayout.topLeft;
+  const padding = getFramePadding(desiredParent);
+  const draggedSize = getNodesBoundingBox(selectedNodes);
+  const dropTarget = getAutoLayoutFrameDropTarget(
     desiredParent,
-    getFramePadding(desiredParent),
+    itemSpacing,
+    counterAxisSpacing,
+    alignment,
+    padding,
     siblingSizes,
     realPositions,
     originalIndex,
-    getNodesBoundingBox(selectedNodes),
+    draggedSize,
     point,
   );
 
