@@ -21,7 +21,14 @@ const addRect = (x: number, y: number, width = 100, height = 100, overrides: Rec
   return rootOrder[rootOrder.length - 1];
 };
 
-const canvasRefs = (): TCanvasRefs => ({ transform: { contactGuidesRef: { current: null } } }) as unknown as TCanvasRefs;
+const canvasRefs = (): TCanvasRefs =>
+  ({
+    transform: {
+      autoLayoutDropTargetRef: { current: null },
+      autoLayoutReorderPreviewRef: { current: null },
+      contactGuidesRef: { current: null },
+    },
+  }) as unknown as TCanvasRefs;
 
 const selectionRefs = (overrides: Partial<TSelectionToolRefs> = {}): TSelectionToolRefs =>
   ({ dragStateRef: { current: null }, resizeDragRef: { current: null }, ...overrides }) as unknown as TSelectionToolRefs;
@@ -54,6 +61,27 @@ describe('resolveShapeContactGuides', () => {
       { x1: 100, x2: 100, y1: 0, y2: 100 },
       { x1: 100, x2: 100, y1: 20, y2: 80 },
     ]);
+  });
+
+  it('should clear the ref and skip computing contact guides while an auto-layout drop target is active', () => {
+    // mock — same flush-contact setup as above, which would otherwise populate a guide
+    const activeId = addRect(0, 0);
+
+    addRect(100, 20, 80, 60);
+
+    const refs = canvasRefs();
+
+    refs.transform.autoLayoutReorderPreviewRef.current = { activeIndex: 0, frameId: 'frame-1', positions: {} };
+
+    // action
+    resolveShapeContactGuides(
+      pointerEvent(),
+      refs,
+      selectionRefs({ dragStateRef: { current: { hasMoved: true, nodeOrigins: { [activeId]: {} } } } } as never),
+    );
+
+    // result
+    expect(refs.transform.contactGuidesRef.current).toBeNull();
   });
 
   it('should populate the ref while a single shape is being resized into contact', () => {

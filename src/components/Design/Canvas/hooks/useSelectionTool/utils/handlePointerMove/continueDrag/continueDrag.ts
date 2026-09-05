@@ -13,6 +13,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { armDragSnapGuides } from './armDragSnapGuides';
 import { convertCtrlDragToMarquee } from './convertCtrlDragToMarquee';
 import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
 import { getChainGapDragSnap } from './getChainGapDragSnap';
@@ -21,6 +22,8 @@ import { getDragAlignmentSnap } from './getDragAlignmentSnap';
 import { getMatchedPairDragGuides } from './getMatchedPairDragGuides';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { initDraggedNodeIds } from './initDraggedNodeIds';
+import { isAutoLayoutDropTargetActive } from 'utils/canvas/signals/isAutoLayoutDropTargetActive';
+import { markDragAsMoved } from './markDragAsMoved';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { updateAutoLayoutReorderGhostPosition } from './updateAutoLayoutReorderGhostPosition/updateAutoLayoutReorderGhostPosition';
 import { updateDragDropTarget } from './updateDragDropTarget/updateDragDropTarget';
@@ -64,12 +67,9 @@ export const continueDrag = (
     const selectedNodes = selectSelectedNodes(state);
     const renderOrderedNodes = selectRenderOrderedNodes(state);
 
-    dragState.hasMoved = true;
-    canvasRefs.transform.alignmentGuideRef.current = axisLock || matchedPairGuides ? null : guide;
-    canvasRefs.transform.equalSpacingGuidesRef.current = axisLock || matchedPairGuides ? null : chainGapSnap.guides;
-    canvasRefs.transform.matchedPairGuidesRef.current = axisLock ? null : matchedPairGuides;
-
+    markDragAsMoved(dragState);
     updateDragDropTarget(dispatch, state, selectedNodes, rawPoint, renderOrderedNodes, nodes, canvasRefs);
+    armDragSnapGuides(canvasRefs, isAutoLayoutDropTargetActive(canvasRefs), axisLock, guide, chainGapSnap.guides, matchedPairGuides);
     setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
     initDraggedNodeIds(canvasRefs, dragState);
     updateDragSnapshotDeltas(snapshots, deltaX, deltaY);
