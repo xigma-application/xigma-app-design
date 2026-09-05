@@ -42,6 +42,27 @@ const getAutoLayoutSiblingPositions = (simulatedPositions: TAutoLayoutChildPosit
     return positionsById;
   }, {});
 
+const getAutoLayoutInsertedPosition = (
+  isHorizontal: boolean,
+  itemSpacing: number,
+  index: number,
+  realPositions: TAutoLayoutChildPosition[],
+  children: TAutoLayoutChildSize[],
+  simulatedPosition: TPoint,
+): TPoint => {
+  if (index === 0) {
+    return simulatedPosition;
+  }
+
+  const previousPosition = realPositions[index - 1];
+  const previousSize = children[index - 1];
+  const previousPrimaryStart = isHorizontal ? previousPosition.x : previousPosition.y;
+  const previousPrimarySize = isHorizontal ? previousSize.width : previousSize.height;
+  const primary = previousPrimaryStart + previousPrimarySize + itemSpacing / 2;
+
+  return isHorizontal ? { x: primary, y: simulatedPosition.y } : { x: simulatedPosition.x, y: primary };
+};
+
 export const getAutoLayoutDropTarget = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
   itemSpacing: number,
@@ -60,7 +81,14 @@ export const getAutoLayoutDropTarget = (
   const index = getAutoLayoutDropInsertionIndex(isHorizontal, cursorPrimary, realPositions, children, originalIndex);
   const simulatedChildren = [...children.slice(0, index), { ...draggedSize, id: '__dragged__' }, ...children.slice(index)];
   const simulatedPositions = getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, simulatedChildren);
-  const insertedPosition = simulatedPositions[index];
+  const insertedPosition = getAutoLayoutInsertedPosition(
+    isHorizontal,
+    itemSpacing,
+    index,
+    realPositions,
+    children,
+    simulatedPositions[index],
+  );
   const indicator = getAutoLayoutDropIndicator(isHorizontal, frame, draggedSize, insertedPosition);
   const siblingPositions = getAutoLayoutSiblingPositions(simulatedPositions);
 

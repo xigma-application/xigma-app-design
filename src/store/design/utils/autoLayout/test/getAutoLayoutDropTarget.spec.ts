@@ -65,10 +65,65 @@ describe('getAutoLayoutDropTarget', () => {
       { x: 0, y: 100 },
     );
 
-    // result — lands right after the existing child, past its 20-tall box plus the 10 gap;
-    // far enough from the top edge that the minimum-gap clamp has no effect
+    // result — lands halfway through the 10px gap after the existing child (y=20 + 10/2), not
+    // flush against a phantom next sibling
     expect(dropTarget.index).toBe(1);
-    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 30 });
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 25 });
+  });
+
+  it('should centre the indicator in the gap between two existing children, not flush against the next one, on a vertical frame', () => {
+    // action — two 20-tall siblings with a 10px gap between them (a: y0-20, b: y30-50); cursor
+    // lands the dragged item between them
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      10,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'b', width: 20 },
+      ],
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 0, y: 30 },
+      ],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 25 },
+    );
+
+    // result — a's own trailing edge is y=20; the indicator sits at the gap's own midpoint
+    // (20 + 10/2 = 25), equidistant from both real neighbours regardless of the dragged item's size
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 25 });
+  });
+
+  it('should sit exactly at the touching boundary between two zero-gap siblings, not offset toward either one', () => {
+    // action — two 20-tall siblings stacked with no gap at all (a: y0-20, b: y20-40)
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.vertical,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 200, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'b', width: 20 },
+      ],
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 0, y: 20 },
+      ],
+      null,
+      { height: 20, width: 30 },
+      { x: 0, y: 20 },
+    );
+
+    // result — with a zero gap, half the gap is still zero: the indicator sits right at the
+    // shared boundary
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.indicator).toMatchObject({ x: 2, y: 20 });
   });
 
   it('should build a vertical indicator bar (thickness on the horizontal axis) for a horizontal frame', () => {
@@ -89,6 +144,27 @@ describe('getAutoLayoutDropTarget', () => {
     // result
     expect(dropTarget.index).toBe(0);
     expect(dropTarget.indicator).toEqual({ height: 40, width: 3, x: 2, y: 2 });
+  });
+
+  it('should centre the indicator in the gap after the last child on a horizontal frame too', () => {
+    // action — one 20-wide child at x=0 with a 10px gap; cursor well past its midpoint
+    const dropTarget = getAutoLayoutDropTarget(
+      LayoutMode.horizontal,
+      10,
+      AlignmentLayout.topLeft,
+      { height: 100, width: 200, x: 0, y: 0 },
+      NO_PADDING,
+      [{ height: 20, id: 'a', width: 20 }],
+      [{ id: 'a', x: 0, y: 0 }],
+      null,
+      { height: 40, width: 20 },
+      { x: 100, y: 10 },
+    );
+
+    // result — a's own trailing edge is x=20; the indicator sits halfway through the 10px gap
+    // (x=25), not flush against a phantom next sibling
+    expect(dropTarget.index).toBe(1);
+    expect(dropTarget.indicator).toMatchObject({ x: 25, y: 2 });
   });
 
   it('should clamp the indicator to a minimum gap relative to the frame’s own edge, not the canvas origin', () => {
