@@ -181,9 +181,31 @@ describe('getAutoLayoutWrappedDropTarget — same-parent reorder (originalIndex 
     expect(dropTarget.siblingPositions).toMatchObject({ '1': { x: 0, y: 120 }, '2': { x: 120, y: 120 } });
   });
 
-  it('should reset to a fresh (non-hysteretic) insertion when the dragged item is moved into a different row than its own', () => {
-    // action — '3'’s own original slot (index 2) falls outside row 1's range, so no row-local
-    // originalIndex hysteresis anchor applies; the drop is a plain fresh insertion into row 1
+  it('should keep an edge-based (whole-cell) insert zone when the dragged item is moved up from a later row', () => {
+    // action — '3' came from a later row (its own row 2), dragged up over row 1. The cursor sits at
+    // x=95: past item 1's midpoint (x=50) but still within item 1's own cell (0-100). A plain
+    // midpoint threshold would already read this as "after 1"; the reorder's far-edge threshold
+    // keeps the whole of item 1's cell as the "insert before 1" zone.
+    const dropTarget = getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      20,
+      20,
+      AlignmentLayout.topLeft,
+      FRAME,
+      NO_PADDING,
+      SIBLINGS_WITHOUT_3,
+      2,
+      NORMAL_SIZE,
+      asBlock(NORMAL_SIZE),
+      { x: 95, y: 50 },
+    );
+
+    // result — still inserting at the very start of row 1
+    expect(dropTarget.index).toBe(0);
+  });
+
+  it('should still advance the index once the cursor clears item 1’s far edge', () => {
+    // action — same setup, cursor now past item 1's cell entirely (x=118)
     const dropTarget = getAutoLayoutWrappedDropTarget(
       LayoutMode.horizontal,
       20,
@@ -241,5 +263,60 @@ describe('getAutoLayoutWrappedDropTarget — multi-node reorder distributes the 
     // shoving 1 AND 2 down together onto what reads as row 3.
     expect(dropTarget.index).toBe(0);
     expect(dropTarget.siblingPositions).toEqual({ 1: { x: 50, y: 50 }, 2: { x: 0, y: 100 }, 6: { x: 50, y: 100 } });
+  });
+});
+
+describe('getAutoLayoutWrappedDropTarget — a reordered child can be dropped straight back onto its own slot', () => {
+  // 6 × 100px children in a 200-wide frame, no gaps: rows [1,2] / [3,4] / [5,6]. Dragging '3' — its
+  // real-sibling list is [1,2,4,5,6], its origin index 2, its row band y100-200.
+  const GRID_FRAME = { height: 600, width: 200, x: 0, y: 0 };
+  const SIBLINGS_WITHOUT_3 = [
+    { height: 100, id: '1', width: 100 },
+    { height: 100, id: '2', width: 100 },
+    { height: 100, id: '4', width: 100 },
+    { height: 100, id: '5', width: 100 },
+    { height: 100, id: '6', width: 100 },
+  ];
+  const DRAGGED_3 = { height: 100, width: 100 };
+
+  const reorder3At = (cursor: { x: number; y: number }): ReturnType<typeof getAutoLayoutWrappedDropTarget> =>
+    getAutoLayoutWrappedDropTarget(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      GRID_FRAME,
+      NO_PADDING,
+      SIBLINGS_WITHOUT_3,
+      2,
+      DRAGGED_3,
+      asBlock(DRAGGED_3),
+      cursor,
+    );
+
+  it('resolves to the origin index while the cursor is still over its own vacated slot', () => {
+    // action — cursor over the left half of row 2, i.e. '3'’s own base slot
+    const dropTarget = reorder3At({ x: 50, y: 150 });
+
+    // result — index 2 puts '3' back exactly where it started; '4' does NOT slide left to fill the
+    // gap (regression: the row's positions were recomputed with '3' already gone, so '4' sat at
+    // x=0 and its near-edge threshold made the "before 4" slot unreachable)
+    expect(dropTarget.index).toBe(2);
+    expect(dropTarget.siblingPositions).toEqual({
+      1: { x: 0, y: 0 },
+      2: { x: 100, y: 0 },
+      4: { x: 100, y: 100 },
+      5: { x: 0, y: 200 },
+      6: { x: 100, y: 200 },
+    });
+  });
+
+  it('advances past 4 only once the cursor crosses into the right half of row 2', () => {
+    // action — cursor over the right half of row 2
+    const dropTarget = reorder3At({ x: 150, y: 150 });
+
+    // result — now '3' lands after '4'; '4' takes the row's first slot
+    expect(dropTarget.index).toBe(3);
+    expect(dropTarget.siblingPositions).toMatchObject({ 4: { x: 0, y: 100 } });
   });
 });

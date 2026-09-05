@@ -35,6 +35,8 @@ gesture live, not just the Flow toggle in isolation.
 | 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order) |  ✅  | ✅ `reorder.spec.ts` |
 | 4   | Wrap: nudging a child that sits alone on its own row doesn't perturb the siblings on a different row                                             |  ✅  | ✅ `reorder.spec.ts` |
 | 5   | Wrap: a dragged multi-row block previews as its own individual members, not one merged bounding box                                              |  ✅  | ✅ `reorder.spec.ts` |
+| 6   | Wrap: moving a child into another row keeps the reorder's whole-cell (edge-based) insert zone instead of a half-cell midpoint one                |  ✅  | ✅ `reorder.spec.ts` |
+| 7   | Wrap: a child dragged toward another row can be dropped straight back onto its own vacated slot                                                  |  ✅  | ✅ `reorder.spec.ts` |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -122,6 +124,39 @@ splicing all of them into the simulated array — so the wrap re-flow the previe
 one the commit runs. The e2e case samples a single pixel in the row-3 band mid-drag (held, before
 release): gray there means a sibling was shoved down a row too far; empty means the block reflowed
 as its real members.
+
+### Wrap reorder: crossing rows collapsed the insert zone to a half-cell
+
+Found live by the user (2026-09-05). Once a child was dragged into a row it didn't originate from,
+the "insert before this neighbour" zone shrank to the left _half_ of the neighbour's cell — cross
+its horizontal midpoint and the dragged child snapped back to its old position even though the
+cursor was still plainly over the neighbour.
+
+`getAutoLayoutWrappedRowBounds` was handing the row-scoped `getAutoLayoutDropTarget` a `null`
+`rowOriginalIndex` whenever the drag's origin fell outside the cursor's row, which drops
+`getAutoLayoutDropInsertionIndex` onto its midpoint threshold (`start + size / 2`). A same-parent
+reorder is supposed to use edge-based thresholds (the whole cell, no dead zone) — the same ones the
+non-wrap path already uses. Fixed by always passing `originalIndex - realStart`: it lands in
+`[0, row length]` for a same-row drag, goes negative when the child came from an earlier row (no
+member is "before" the origin → near-edge threshold, generous "insert after") and `>= row length`
+when it came from a later row (every member is "before" it → far-edge threshold, the neighbour's
+whole cell is the "insert before" zone). Only a genuine cross-parent drop keeps `null`/midpoints.
+
+### Wrap reorder: the vacated slot was gone the instant the drag started
+
+Found live by the user (2026-09-06). Reordering `3` out of rows `[1,2] / [3,4] / [5,6]`: the moment
+the drag began, `4` slid left into `3`'s slot and left a hole at its own — and there was no cursor
+position that put `3` back where it started; dropping over its own row committed `[1,2,4,3,5,6]`.
+
+The non-wrap reorder path never had this because the sibling positions it compares the cursor
+against come from the store, which still holds the pre-drag layout mid-drag — so `4` is still at its
+own x and `3`'s slot is still open. The wrap path instead **recomputes** positions with
+`getAutoLayoutWrappedChildPositions` over the real siblings (`3` already excluded), so `4` was
+placed at the row's left wall and its near-edge insert threshold made `3`'s slot unreachable. Fixed
+by feeding that recompute a `getAutoLayoutReorderOriginChildren` list — the real siblings plus a
+placeholder for the dragged item back at its origin index — then dropping the placeholder's own
+entry, so every real sibling keeps its pre-drag position for index resolution (the sibling ghost
+positions are still computed separately and do reflow).
 
 ### A real, pre-existing selection bug found while writing these tests
 

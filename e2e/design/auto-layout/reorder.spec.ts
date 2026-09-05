@@ -278,6 +278,87 @@ test.describe('auto-layout — reordering a child within its own frame, wrap ena
     expect(after).toEqual(before);
   });
 
+  test('lets a child be dragged toward another row and then dropped straight back onto its own slot', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 200-wide frame, no gaps, six 100x100 children: rows [1,2] / [3,4] / [5,6]
+    const wrapFrame = { x1: 600, x2: 800, y1: 150, y2: 520 };
+
+    await designPage.goto('e2e-test-auto-layout-reorder-wrapped-drop-back');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(wrapFrame.x1, wrapFrame.y1, wrapFrame.x2, wrapFrame.y2);
+    await setFlowHorizontal(page);
+    await clickWrapToggle(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 6; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1500, 260);
+      await dragInto(page, { x: 1450, y: 210 }, { x: 790, y: 500 });
+    }
+
+    const before = await rectangleRowNames(page);
+
+    expect(before).toHaveLength(6);
+
+    // grab '3' (row 2, first cell — screen centre ~(650, 300)), drag it up toward '1', then bring
+    // it back over the left half of its own row 2 and release. Regression: '4' slid left to fill
+    // the gap the instant the drag started, so its near edge sat at the row's left wall and the
+    // "before 4" slot ('3'’s own base) was unreachable — releasing here committed [1,2,4,3,5,6].
+    await page.mouse.move(650, 300);
+    await page.mouse.down();
+    await page.mouse.move(630, 190, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.move(640, 300, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+
+    const after = await rectangleRowNames(page);
+
+    expect(after).toEqual(before);
+  });
+
+  test('keeps "insert before" while the cursor is anywhere over the target cell when moving a child up from a later row', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    const wrapFrame = { x1: 600, x2: 850, y1: 150, y2: 500 };
+
+    await designPage.goto('e2e-test-auto-layout-reorder-wrapped-cell-zone');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(wrapFrame.x1, wrapFrame.y1, wrapFrame.x2, wrapFrame.y2);
+    await setFlowHorizontal(page);
+    await clickWrapToggle(page);
+    await setHorizontalGap(page, 20);
+
+    // three 100x100 children: 1 and 2 share row 1, 3 wraps alone onto row 2
+    await designPage.drawRectangle(1400, 160, 1500, 260);
+    await dragInto(page, { x: 1450, y: 210 }, { x: 650, y: 200 });
+
+    await designPage.drawRectangle(1400, 300, 1500, 400);
+    await dragInto(page, { x: 1450, y: 350 }, { x: 650, y: 200 });
+
+    await designPage.drawRectangle(1400, 440, 1500, 540);
+    await dragInto(page, { x: 1450, y: 490 }, { x: 650, y: 200 });
+
+    const before = await rectangleRowNames(page);
+
+    expect(before).toHaveLength(3);
+
+    // drag '3' up from its own row 2 and drop it with the cursor over the RIGHT half of item 1's
+    // own cell (x1+80: past item 1's midpoint at x1+50, but still inside its 0-100 cell). Regression:
+    // a plain midpoint threshold read this as "between 1 and 2" and committed [1,3,2]; the reorder's
+    // far-edge threshold treats the whole of item 1's cell as "insert before 1".
+    await dragInto(page, { x: wrapFrame.x1 + 50, y: wrapFrame.y1 + 170 }, { x: wrapFrame.x1 + 80, y: wrapFrame.y1 + 50 });
+
+    const after = await rectangleRowNames(page);
+
+    // '3' landed at the very front, not wedged between 1 and 2
+    expect(after).toEqual([before[2], before[0], before[1]]);
+  });
+
   test('previews a multi-row block as its own members — 1 slides up a row, not 1 and 2 dumped a row too far down', async ({ page }) => {
     const designPage = new DesignPage(page);
 
