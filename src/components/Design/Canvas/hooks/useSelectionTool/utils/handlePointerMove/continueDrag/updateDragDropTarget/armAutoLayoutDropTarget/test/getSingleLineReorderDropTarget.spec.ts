@@ -43,6 +43,7 @@ describe('getSingleLineReorderDropTarget', () => {
       baseDropTarget,
       frame,
       0,
+      0,
       AlignmentLayout.topLeft,
       NO_PADDING,
       siblingSizes,
@@ -63,6 +64,7 @@ describe('getSingleLineReorderDropTarget', () => {
     const result = getSingleLineReorderDropTarget(
       baseDropTarget,
       frame,
+      0,
       0,
       AlignmentLayout.topLeft,
       NO_PADDING,

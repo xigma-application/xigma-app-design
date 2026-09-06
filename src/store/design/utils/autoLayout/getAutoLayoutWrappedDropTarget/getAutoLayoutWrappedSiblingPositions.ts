@@ -1,22 +1,13 @@
 // types
-import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TAutoLayoutSiblingPositionsInput } from '../types';
+import { TPoint } from 'types/canvas';
 
 // utils
 import { getAutoLayoutSiblingPositions } from '../getAutoLayoutDropTarget/getAutoLayoutSiblingPositions';
 import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
 
-export const getAutoLayoutWrappedSiblingPositions = (
-  layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
-  itemSpacing: number,
-  counterAxisSpacing: number,
-  alignment: AlignmentLayout,
-  contentBox: TDraftRect,
-  children: TAutoLayoutChildSize[],
-  index: number,
-  draggedSizes: TAutoLayoutChildSize[],
-): Record<string, TPoint> => {
+export const getAutoLayoutWrappedSiblingPositions = (input: TAutoLayoutSiblingPositionsInput): Record<string, TPoint> => {
+  const { alignment, children, contentBox, counterAxisSpacing, draggedSizes, index, itemSpacing, layoutMode } = input;
   const simulatedChildren = [...children.slice(0, index), ...draggedSizes, ...children.slice(index)];
   const simulatedPositions = getAutoLayoutWrappedChildPositions(
     layoutMode,

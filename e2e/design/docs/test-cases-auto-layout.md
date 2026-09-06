@@ -357,11 +357,12 @@ raw node while only the fill ghost got the reorder position override. It now run
 
 ## Rotated children
 
-| #   | Scenario                                                                                                                                                    | Unit |            E2E             |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
-| 1   | A child rotated to a non-90deg-multiple angle is packed by its rotated bounding box, not its raw one                                                        |  ✅  | ✅ `rotated-child.spec.ts` |
-| 2   | Rotating the frame itself keeps its children anchored to (orbiting) the frame's own centre, instead of resetting them to the flat, un-rotated flow position |  ✅  | ✅ `rotated-frame.spec.ts` |
-| 3   | When every child rigidly inherits the frame's own rotation (the rotate-handle/panel behavior above), siblings stay evenly spaced instead of drifting apart  |  ✅  | ✅ `rotated-frame.spec.ts` |
+| #   | Scenario                                                                                                                                                                                                | Unit |            E2E             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 1   | A child rotated to a non-90deg-multiple angle is packed by its rotated bounding box, not its raw one                                                                                                    |  ✅  | ✅ `rotated-child.spec.ts` |
+| 2   | Rotating the frame itself keeps its children anchored to (orbiting) the frame's own centre, instead of resetting them to the flat, un-rotated flow position                                             |  ✅  | ✅ `rotated-frame.spec.ts` |
+| 3   | When every child rigidly inherits the frame's own rotation (the rotate-handle/panel behavior above), siblings stay evenly spaced instead of drifting apart                                              |  ✅  | ✅ `rotated-frame.spec.ts` |
+| 4   | Dragging/reordering a child, or dropping one in, inside an already-rotated auto-layout frame resolves the correct insertion index, ghost positions and drop indicator — not the flat, axis-aligned ones |  ✅  | ✅ `rotated-frame.spec.ts` |
 
 Found from a real screenshot: a frame's rotated child visually overflowed the frame's own edge,
 because the real layout applier (`syncAutoLayoutChildren.ts`) measured and positioned every child by
@@ -430,5 +431,43 @@ un-tilted child inside a 90deg-rotated **square** frame used to orbit to a posit
 the frame's own edge by 5px, because it kept packing by the child's raw (un-rotated) box instead of
 the same relative-rotation-aware one — the corrected math lands it flush in the adjacent corner instead.
 
-Still out of scope: dragging/reordering children inside an already-rotated auto-layout frame (the
-drop-indicator/reorder-ghost math built earlier this session) still assumes an axis-aligned frame.
+### Dragging inside a rotated frame — the whole drop-indicator/reorder-ghost engine assumed no rotation
+
+Found live right after, asked directly: "teraz trzeba wskaźniki dostosować oraz ten tryb ghost pod
+te kąty, bo też świrują" ("now the indicators and the ghost mode need adjusting for these angles too,
+they're also going haywire"). The entire drag/reorder engine built earlier this session
+(`armAutoLayoutDropTarget` and everything under it — insertion-index math, sibling reflow, the
+multi-node block ghost, wrap, the Ctrl "absolute" mode) compares the cursor and every sibling's
+bounds directly against the frame's own `x`/`y`/`width`/`height` — correct only when `frame.rotation`
+is 0, since all of that math implicitly assumes the frame's local axes and the world's axes are the
+same axes.
+
+Fixed by running the entire computation in the frame's own **local** (as-if-unrotated) space and
+converting only at the two boundaries:
+
+- **In:** the cursor point is un-rotated into local space (`getUnrotatedQueryPoint`, the same utility
+  hit-testing already used); every sibling's — and the dragged block's own — bounds are converted to
+  local bounds via `getAutoLayoutNodeLocalBounds` (relative-rotation size, from the earlier fix,
+  **plus** the position itself un-rotated back around the frame's centre, the inverse of
+  `getAutoLayoutRotatedSlotPosition`). Fed with these, every existing index/reflow/wrap/block
+  function runs completely unchanged, since from its own point of view nothing is rotated.
+- **Out:** the resulting sibling positions and dragged-block member slots are rotated back to world
+  (`getAutoLayoutRotatedPositions`, orbiting each slot's own centre around the frame's centre — the
+  same per-slot centre-based math as the sync fix, not a bare point rotation, which would silently
+  reintroduce the width/height-swap bug) before being written to the drop-target/reorder-preview
+  refs, since that's the space the ghost-render and delta-to-real-position code already expects.
+  The drop indicator's own rect is left in local coordinates and instead drawn with the frame's
+  rotation and centre as an explicit pivot (`drawRect`'s existing `rotationCenter` param) — simpler
+  than rotating its corners by hand. The live per-tick ghost-follow code (cursor tracking, block
+  member offsets) needed **no changes at all**: since every slot it reads is already rotated around
+  the same frame-centre pivot, the _differences_ between them behave as correctly-rotated vectors on
+  their own (rotating two points around a shared pivot and subtracting cancels the pivot out) — the
+  one exception was the chasm clamp box, which does an absolute min/max clamp, so `clampGhostToBox`
+  now un-rotates the ghost point into the box's own local space, clamps, and rotates the result back.
+
+Known, disclosed simplification: that clamp step still measures the _grabbed member's own_ width/
+height from its absolute (world) rotated bounding box, not relative to the frame — for a member that
+rigidly shares the frame's own tilt this is the same class of over/under-clamp as the pre-fix sizing
+bug, just scoped to the rare moment a multi-node block is dragged past the last slot (the "chasm")
+inside an already-rotated frame. Left as-is rather than threading a third rotation-relative value
+through the live per-tick path for a compound edge case this narrow.

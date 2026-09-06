@@ -61,16 +61,16 @@ export const getAutoLayoutWrappedDropTarget = (
     cursorPoint,
   );
   const index = realStart + rowDropTarget.index;
-  const siblingPositions = getAutoLayoutWrappedSiblingPositions(
-    layoutMode,
-    itemSpacing,
-    counterAxisSpacing,
+  const siblingPositions = getAutoLayoutWrappedSiblingPositions({
     alignment,
-    contentBox,
     children,
-    index,
+    contentBox,
+    counterAxisSpacing,
     draggedSizes,
-  );
+    index,
+    itemSpacing,
+    layoutMode,
+  });
 
   return { index, indicator: rowDropTarget.indicator, siblingPositions };
 };

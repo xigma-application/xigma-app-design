@@ -28,7 +28,7 @@ const dragInto = async (page: Page, from: { x: number; y: number }, to: { x: num
   await page.mouse.up();
 };
 
-type TNodeGeometry = { height: number; rotation: number; width: number; x: number; y: number };
+type TNodeGeometry = { height: number; id: string; rotation: number; width: number; x: number; y: number };
 
 const getFrameChildren = (page: Page): Promise<TNodeGeometry[]> =>
   page.evaluate(async () => {
@@ -151,5 +151,41 @@ test.describe('auto-layout — a rotated frame', () => {
     expect(Math.abs(distance(centreOf(after[0]), centreOf(after[1])) - 60)).toBeLessThan(5);
     expect(Math.abs(distance(centreOf(after[1]), centreOf(after[2])) - 60)).toBeLessThan(5);
     expect(after.every((child) => child.rotation === 45)).toBe(true);
+  });
+
+  test('reorders correctly with a real mouse drag once the frame (and its children) are rotated', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // the same 240x100 frame, two 60x60 children — after a rigid 90deg rotate they land at world
+    // (710,80) and (710,140) (see the first test above), i.e. centres (740,110) and (740,170)
+    await designPage.goto('e2e-test-auto-layout-rotated-frame-drag-reorder');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(ROW_FRAME.x1, ROW_FRAME.y1, ROW_FRAME.x2, ROW_FRAME.y2);
+    await setFlowHorizontal(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 2; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1460, 220);
+      await dragInto(page, { x: 1430, y: 190 }, { x: ROW_FRAME.x2 - 15, y: 200 });
+    }
+
+    await rotateFrameRigidly(page, 90);
+
+    const rotated = await getFrameChildren(page);
+
+    // regression: with the drop-target/reorder-ghost math built earlier this session assuming an
+    // axis-aligned frame, dragging inside an already-rotated one resolved the wrong insertion index
+    // (or an inflated one, per the previous test) — a real mouse drag through the indicator/ghost
+    // pipeline must still swap the two children correctly once un-rotated cursor math is used
+    await dragInto(page, { x: 740, y: 170 }, { x: 740, y: 90 });
+
+    const after = await getFrameChildren(page);
+
+    // the two children swapped places: the one that used to render second is now first — its
+    // position recomputes to the same first-slot geometry the other child had before ((710,80)),
+    // so identity (id), not position, is what actually proves the swap happened
+    expect(after[0]).toMatchObject({ height: 60, id: rotated[1].id, rotation: 90, width: 60, x: 710, y: 80 });
+    expect(after[1]).toMatchObject({ height: 60, id: rotated[0].id, rotation: 90, width: 60, x: 710, y: 140 });
   });
 });

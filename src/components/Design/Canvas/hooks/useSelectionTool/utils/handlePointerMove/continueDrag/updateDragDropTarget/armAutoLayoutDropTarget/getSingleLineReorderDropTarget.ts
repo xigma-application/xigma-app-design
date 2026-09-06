@@ -12,6 +12,7 @@ export const getSingleLineReorderDropTarget = (
   dropTarget: TAutoLayoutDropTarget,
   desiredParent: TAutoLayoutFrame,
   itemSpacing: number,
+  counterAxisSpacing: number,
   alignment: AlignmentLayout,
   padding: TAutoLayoutPadding,
   siblingSizes: TAutoLayoutChildSize[],
@@ -21,15 +22,16 @@ export const getSingleLineReorderDropTarget = (
   if (orderedMovedIds.length > 1) {
     return {
       ...dropTarget,
-      siblingPositions: getAutoLayoutSingleLineSiblingPositions(
-        desiredParent.layoutMode,
-        itemSpacing,
+      siblingPositions: getAutoLayoutSingleLineSiblingPositions({
         alignment,
-        getAutoLayoutContentBox(desiredParent, padding),
-        siblingSizes,
-        dropTarget.index,
+        children: siblingSizes,
+        contentBox: getAutoLayoutContentBox(desiredParent, padding),
+        counterAxisSpacing,
         draggedSizes,
-      ),
+        index: dropTarget.index,
+        itemSpacing,
+        layoutMode: desiredParent.layoutMode,
+      }),
     };
   }
 

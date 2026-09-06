@@ -7,8 +7,13 @@ export const getDraggedBlockPreviewMeta = (
   grabbedNodeId: string | null,
   memberSlots: TPoint[],
   clampBox: TDraftRect,
+  clampCenter: TPoint,
+  clampRotation: number,
   contiguous: boolean,
-): Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'> => {
+): Pick<
+  TAutoLayoutReorderPreview,
+  'draggedClampBox' | 'draggedClampCenter' | 'draggedClampRotation' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'
+> => {
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const draggedMemberSlots = orderedMovedIds.reduce<Record<string, TPoint>>((slots, id, memberIndex) => {
     slots[id] = memberSlots[memberIndex];
@@ -18,6 +23,8 @@ export const getDraggedBlockPreviewMeta = (
 
   return {
     draggedClampBox: clampBox,
+    draggedClampCenter: clampCenter,
+    draggedClampRotation: clampRotation,
     draggedContiguous: contiguous,
     draggedGrabbedId: orderedMovedIds[grabbedIndexInBlock],
     draggedMemberSlots,

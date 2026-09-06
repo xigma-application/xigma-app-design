@@ -1,6 +1,7 @@
 // store
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutContentBox';
 import { getAutoLayoutDraggedMemberSlots } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDraggedMemberSlots';
+import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoLayoutFrameCenter';
 
 // types
 import { AlignmentLayout } from 'types/design/enums';
@@ -21,7 +22,12 @@ export const getReorderDraggedBlock = (
   draggedSizes: TAutoLayoutChildSize[],
   orderedMovedIds: string[],
   grabbedNodeId: string | null,
-): Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'> | undefined => {
+):
+  | Pick<
+      TAutoLayoutReorderPreview,
+      'draggedClampBox' | 'draggedClampCenter' | 'draggedClampRotation' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'
+    >
+  | undefined => {
   if (orderedMovedIds.length > 1) {
     const contentBox = getAutoLayoutContentBox(desiredParent, padding);
     const memberSlots = getAutoLayoutDraggedMemberSlots(
@@ -34,7 +40,15 @@ export const getReorderDraggedBlock = (
       draggedSizes,
     );
 
-    return getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots, contentBox, false);
+    return getDraggedBlockPreviewMeta(
+      orderedMovedIds,
+      grabbedNodeId,
+      memberSlots,
+      contentBox,
+      getAutoLayoutFrameCenter(desiredParent),
+      desiredParent.rotation,
+      false,
+    );
   }
 
   return undefined;

@@ -1,11 +1,32 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutDropTargetContext } from '../types';
 import { TAutoLayoutFrame } from '../../types';
 
 // utils
 import { getAutoLayoutFrameDropTarget } from '../getAutoLayoutFrameDropTarget';
 
 const NO_PADDING = { paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 };
+
+const buildContext = (
+  siblingSizes: TAutoLayoutChildSize[],
+  draggedSizes: TAutoLayoutChildSize[],
+  realPositions: TAutoLayoutChildPosition[] = [],
+): TAutoLayoutDropTargetContext => ({
+  alignment: AlignmentLayout.topLeft,
+  counterAxisSpacing: 20,
+  draggedSizes,
+  isSameParentReorder: false,
+  isWrapEnabled: false,
+  itemSpacing: 20,
+  orderedMovedIds: [],
+  originalIndex: null,
+  padding: NO_PADDING,
+  realPositions,
+  siblingEntries: [],
+  siblingSizes,
+});
 
 const autoLayoutFrame: TAutoLayoutFrame = {
   childIds: [],
@@ -27,19 +48,7 @@ const autoLayoutFrame: TAutoLayoutFrame = {
 describe('getAutoLayoutFrameDropTarget', () => {
   it('should route through the flat (non-wrap) computation when the frame has no wrap enabled', () => {
     // action
-    const dropTarget = getAutoLayoutFrameDropTarget(
-      autoLayoutFrame,
-      20,
-      20,
-      AlignmentLayout.topLeft,
-      NO_PADDING,
-      [],
-      [],
-      null,
-      { height: 20, width: 20 },
-      [],
-      { x: 10, y: 10 },
-    );
+    const dropTarget = getAutoLayoutFrameDropTarget(autoLayoutFrame, buildContext([], []), { height: 20, width: 20 }, { x: 10, y: 10 });
 
     // result
     expect(dropTarget.index).toBe(0);
@@ -57,15 +66,8 @@ describe('getAutoLayoutFrameDropTarget', () => {
     // action — cursor over row 2
     const dropTarget = getAutoLayoutFrameDropTarget(
       wrappedFrame,
-      20,
-      20,
-      AlignmentLayout.topLeft,
-      NO_PADDING,
-      children,
-      [],
-      null,
+      buildContext(children, [{ height: 100, id: '__dragged__', width: 100 }]),
       { height: 100, width: 100 },
-      [{ height: 100, id: '__dragged__', width: 100 }],
       { x: 20, y: 150 },
     );
 
@@ -79,19 +81,7 @@ describe('getAutoLayoutFrameDropTarget', () => {
     const huggedWrapFrame: TAutoLayoutFrame = { ...autoLayoutFrame, layoutWrap: true, primaryAxisSizingMode: SizingMode.hug };
 
     // action
-    const dropTarget = getAutoLayoutFrameDropTarget(
-      huggedWrapFrame,
-      20,
-      20,
-      AlignmentLayout.topLeft,
-      NO_PADDING,
-      [],
-      [],
-      null,
-      { height: 20, width: 20 },
-      [],
-      { x: 10, y: 10 },
-    );
+    const dropTarget = getAutoLayoutFrameDropTarget(huggedWrapFrame, buildContext([], []), { height: 20, width: 20 }, { x: 10, y: 10 });
 
     // result
     expect(dropTarget.index).toBe(0);

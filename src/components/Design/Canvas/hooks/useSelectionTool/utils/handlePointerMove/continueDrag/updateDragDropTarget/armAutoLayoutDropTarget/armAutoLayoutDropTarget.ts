@@ -9,6 +9,7 @@ import { armAutoLayoutFloatingReorderPreview } from './armAutoLayoutFloatingReor
 import { armAutoLayoutMultiRowReorderPreview } from './armAutoLayoutMultiRowReorderPreview/armAutoLayoutMultiRowReorderPreview';
 import { armAutoLayoutSingleLineDropTarget } from './armAutoLayoutSingleLineDropTarget';
 import { getAutoLayoutDropTargetContext } from './getAutoLayoutDropTargetContext';
+import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
 
 export const armAutoLayoutDropTarget = (
   canvasRefs: TCanvasRefs,
@@ -33,10 +34,11 @@ export const armAutoLayoutDropTarget = (
   );
   const isMultiRowReorder = context.isSameParentReorder && context.isWrapEnabled && context.orderedMovedIds.length > 1;
   const isFloatingReorder = suppressSameParentReorder && desiredParentId === currentParentId;
+  const localPoint = getUnrotatedQueryPoint(point, desiredParent, desiredParent.rotation);
 
   switch (true) {
     case isFloatingReorder:
-      armAutoLayoutFloatingReorderPreview(canvasRefs, desiredParent, desiredParentId, selectedNodes, point, context);
+      armAutoLayoutFloatingReorderPreview(canvasRefs, desiredParent, desiredParentId, selectedNodes, localPoint, context);
       break;
     case isMultiRowReorder:
       armAutoLayoutMultiRowReorderPreview(
@@ -53,10 +55,10 @@ export const armAutoLayoutDropTarget = (
         context.draggedSizes,
         context.orderedMovedIds,
         grabbedNodeId,
-        point,
+        localPoint,
       );
       break;
     default:
-      armAutoLayoutSingleLineDropTarget(canvasRefs, desiredParent, desiredParentId, selectedNodes, grabbedNodeId, point, context);
+      armAutoLayoutSingleLineDropTarget(canvasRefs, desiredParent, desiredParentId, selectedNodes, grabbedNodeId, localPoint, context);
   }
 };

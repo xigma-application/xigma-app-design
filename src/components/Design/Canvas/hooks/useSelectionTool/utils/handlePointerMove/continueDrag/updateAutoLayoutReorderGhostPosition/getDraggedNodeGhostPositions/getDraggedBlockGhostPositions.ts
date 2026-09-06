@@ -48,6 +48,8 @@ export const getDraggedBlockGhostPositions = (
     preview.draggedClampBox,
     grabbedBounds.width,
     grabbedBounds.height,
+    preview.draggedClampRotation,
+    preview.draggedClampCenter,
   );
   const targetOffsets = getTargetOffsets(selectedNodes, preview, slots, grabbedNode.id, grabbedGhost);
   const { offsets, tween } = resolveDraggedBlockOffsets(previewRef, preview, grabbedGhost, targetOffsets, performance.now());

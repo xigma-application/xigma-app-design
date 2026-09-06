@@ -1,5 +1,6 @@
 // store
-import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
+import { getAutoLayoutDraggedBoundingBox } from 'store/design/utils/autoLayout/getAutoLayoutDraggedBoundingBox';
+import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoLayoutFrameCenter';
 
 // types
 import { TAutoLayoutDropTargetContext } from './types';
@@ -12,6 +13,8 @@ import { TSceneNode } from 'types/design/types';
 import { armAutoLayoutDropIndicator } from './armAutoLayoutDropIndicator';
 import { armAutoLayoutReorderPreview } from './armAutoLayoutReorderPreview';
 import { getAutoLayoutFrameDropTarget } from './getAutoLayoutFrameDropTarget';
+import { getAutoLayoutWorldDraggedBlock } from './getAutoLayoutWorldDraggedBlock';
+import { getAutoLayoutWorldDropTarget } from './getAutoLayoutWorldDropTarget';
 import { getReorderDraggedBlock } from './getReorderDraggedBlock';
 import { getSingleLineReorderDropTarget } from './getSingleLineReorderDropTarget';
 
@@ -24,26 +27,15 @@ export const armAutoLayoutSingleLineDropTarget = (
   point: TPoint,
   context: TAutoLayoutDropTargetContext,
 ): void => {
-  const draggedSize = getNodesBoundingBox(selectedNodes);
-  const dropTarget = getAutoLayoutFrameDropTarget(
-    desiredParent,
-    context.itemSpacing,
-    context.counterAxisSpacing,
-    context.alignment,
-    context.padding,
-    context.siblingSizes,
-    context.realPositions,
-    context.originalIndex,
-    draggedSize,
-    context.draggedSizes,
-    point,
-  );
+  const draggedSize = getAutoLayoutDraggedBoundingBox(selectedNodes, desiredParent);
+  const dropTarget = getAutoLayoutFrameDropTarget(desiredParent, context, draggedSize, point);
 
   if (context.isSameParentReorder) {
     const reorderDropTarget = getSingleLineReorderDropTarget(
       dropTarget,
       desiredParent,
       context.itemSpacing,
+      context.counterAxisSpacing,
       context.alignment,
       context.padding,
       context.siblingSizes,
@@ -61,8 +53,22 @@ export const armAutoLayoutSingleLineDropTarget = (
       context.orderedMovedIds,
       grabbedNodeId,
     );
+    const frameCenter = getAutoLayoutFrameCenter(desiredParent);
+    const worldReorderDropTarget = getAutoLayoutWorldDropTarget(
+      reorderDropTarget,
+      context.siblingSizes,
+      frameCenter,
+      desiredParent.rotation,
+    );
+    const worldDraggedBlock = getAutoLayoutWorldDraggedBlock(
+      draggedBlock,
+      context.orderedMovedIds,
+      context.draggedSizes,
+      frameCenter,
+      desiredParent.rotation,
+    );
 
-    armAutoLayoutReorderPreview(canvasRefs, desiredParentId, reorderDropTarget, context.siblingEntries, draggedBlock);
+    armAutoLayoutReorderPreview(canvasRefs, desiredParentId, worldReorderDropTarget, context.siblingEntries, worldDraggedBlock);
   } else {
     armAutoLayoutDropIndicator(canvasRefs, desiredParentId, dropTarget);
   }

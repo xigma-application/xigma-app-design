@@ -1,7 +1,8 @@
 // store
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutContentBox';
+import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoLayoutFrameCenter';
 import { getAutoLayoutReadingOrderSlot } from 'store/design/utils/autoLayout/getAutoLayoutReadingOrderSlot/getAutoLayoutReadingOrderSlot';
-import { getAutoLayoutWrappedDraggedMemberSlots } from 'store/design/utils/autoLayout/getAutoLayoutWrappedDropTarget/getAutoLayoutWrappedDraggedMemberSlots';
+import { getAutoLayoutRotatedPositions } from 'store/design/utils/autoLayout/getAutoLayoutRotatedPositions';
 import { getAutoLayoutWrappedSiblingPositions } from 'store/design/utils/autoLayout/getAutoLayoutWrappedDropTarget/getAutoLayoutWrappedSiblingPositions';
 
 // types
@@ -16,8 +17,10 @@ import { TSceneNode } from 'types/design/types';
 import { armAutoLayoutReorderPreview } from '../armAutoLayoutReorderPreview';
 import { clamp } from 'utils/math/clamp';
 import { getAutoLayoutChildBounds } from './getAutoLayoutChildBounds';
-import { getContiguousMemberSlots } from './getContiguousMemberSlots';
+import { getAutoLayoutSizesById } from '../getAutoLayoutSizesById';
+import { getAutoLayoutWorldDraggedBlock } from '../getAutoLayoutWorldDraggedBlock';
 import { getDraggedBlockPreviewMeta } from '../getDraggedBlockPreviewMeta';
+import { getMemberSlots } from './getMemberSlots';
 
 export const armAutoLayoutMultiRowReorderPreview = (
   canvasRefs: TCanvasRefs,
@@ -36,13 +39,25 @@ export const armAutoLayoutMultiRowReorderPreview = (
   point: TPoint,
 ): void => {
   const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
-  const childBounds = getAutoLayoutChildBounds(desiredParent.childIds, nodesById);
+  const childBounds = getAutoLayoutChildBounds(desiredParent.childIds, nodesById, desiredParent);
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const readingOrderSlot = getAutoLayoutReadingOrderSlot(isHorizontal, childBounds, point);
   const isChasm = readingOrderSlot - grabbedIndexInBlock > siblingSizes.length;
   const index = clamp(readingOrderSlot - grabbedIndexInBlock, 0, siblingSizes.length);
   const contentBox = getAutoLayoutContentBox(desiredParent, padding);
-  const siblingPositions = getAutoLayoutWrappedSiblingPositions(
+  const siblingPositions = getAutoLayoutWrappedSiblingPositions({
+    alignment,
+    children: siblingSizes,
+    contentBox,
+    counterAxisSpacing,
+    draggedSizes,
+    index,
+    itemSpacing,
+    layoutMode: desiredParent.layoutMode,
+  });
+  const memberSlots = getMemberSlots(
+    isChasm,
+    isHorizontal,
     desiredParent.layoutMode,
     itemSpacing,
     counterAxisSpacing,
@@ -52,24 +67,28 @@ export const armAutoLayoutMultiRowReorderPreview = (
     index,
     draggedSizes,
   );
-  const memberSlots = isChasm
-    ? getContiguousMemberSlots(isHorizontal, draggedSizes, itemSpacing)
-    : getAutoLayoutWrappedDraggedMemberSlots(
-        desiredParent.layoutMode,
-        itemSpacing,
-        counterAxisSpacing,
-        alignment,
-        contentBox,
-        siblingSizes,
-        index,
-        draggedSizes,
-      );
+  const frameCenter = getAutoLayoutFrameCenter(desiredParent);
+  const worldSiblingPositions = getAutoLayoutRotatedPositions(
+    siblingPositions,
+    getAutoLayoutSizesById(siblingSizes),
+    frameCenter,
+    desiredParent.rotation,
+  );
+  const draggedBlock = getDraggedBlockPreviewMeta(
+    orderedMovedIds,
+    grabbedNodeId,
+    memberSlots,
+    contentBox,
+    frameCenter,
+    desiredParent.rotation,
+    isChasm,
+  );
 
   armAutoLayoutReorderPreview(
     canvasRefs,
     desiredParentId,
-    { index, indicator: { height: 0, width: 0, x: 0, y: 0 }, siblingPositions },
+    { index, indicator: { height: 0, width: 0, x: 0, y: 0 }, siblingPositions: worldSiblingPositions },
     siblingEntries,
-    getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots, contentBox, isChasm),
+    getAutoLayoutWorldDraggedBlock(draggedBlock, orderedMovedIds, draggedSizes, frameCenter, desiredParent.rotation),
   );
 };

@@ -162,7 +162,7 @@ export const drawScene = (
   drawEditingPathTextHandle(ctx, editingTextBox, editingPathNode);
   drawVectorEditAlignmentGuide(ctx, refs);
   drawDropTargetFrameOutline(ctx, refs, nodesById);
-  drawAutoLayoutDropIndicator(ctx, refs);
+  drawAutoLayoutDropIndicator(ctx, refs, nodesById);
   drawTransformAlignmentGuide(ctx, refs);
   drawAspectRatioLockGuide(ctx, refs);
   drawVectorLasso(ctx, refs);

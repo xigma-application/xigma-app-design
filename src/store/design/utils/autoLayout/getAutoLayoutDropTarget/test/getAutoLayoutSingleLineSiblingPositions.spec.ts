@@ -18,15 +18,16 @@ const BLOCK = [
 describe('getAutoLayoutSingleLineSiblingPositions', () => {
   it('opens room for the block’s individual members, not one merged bounding box', () => {
     // action — block re-enters at the front; '2' and '3' should shift right by exactly two cells
-    const siblingPositions = getAutoLayoutSingleLineSiblingPositions(
-      LayoutMode.horizontal,
-      0,
-      AlignmentLayout.topLeft,
-      CONTENT_BOX,
-      SIBLINGS,
-      0,
-      BLOCK,
-    );
+    const siblingPositions = getAutoLayoutSingleLineSiblingPositions({
+      alignment: AlignmentLayout.topLeft,
+      children: SIBLINGS,
+      contentBox: CONTENT_BOX,
+      counterAxisSpacing: 0,
+      draggedSizes: BLOCK,
+      index: 0,
+      itemSpacing: 0,
+      layoutMode: LayoutMode.horizontal,
+    });
 
     // result — NOT pushed out past x 400 as a full-row-wide merged placeholder would
     expect(siblingPositions).toEqual({ 2: { x: 200, y: 0 }, 3: { x: 300, y: 0 } });
@@ -34,15 +35,16 @@ describe('getAutoLayoutSingleLineSiblingPositions', () => {
 
   it('never includes the dragged placeholder itself', () => {
     // action
-    const siblingPositions = getAutoLayoutSingleLineSiblingPositions(
-      LayoutMode.horizontal,
-      0,
-      AlignmentLayout.topLeft,
-      CONTENT_BOX,
-      SIBLINGS,
-      2,
-      BLOCK,
-    );
+    const siblingPositions = getAutoLayoutSingleLineSiblingPositions({
+      alignment: AlignmentLayout.topLeft,
+      children: SIBLINGS,
+      contentBox: CONTENT_BOX,
+      counterAxisSpacing: 0,
+      draggedSizes: BLOCK,
+      index: 2,
+      itemSpacing: 0,
+      layoutMode: LayoutMode.horizontal,
+    });
 
     // result
     expect(Object.keys(siblingPositions)).toEqual(['2', '3']);
@@ -50,15 +52,16 @@ describe('getAutoLayoutSingleLineSiblingPositions', () => {
 
   it('stacks the members along a vertical frame’s primary axis', () => {
     // action
-    const siblingPositions = getAutoLayoutSingleLineSiblingPositions(
-      LayoutMode.vertical,
-      0,
-      AlignmentLayout.topLeft,
-      { height: 600, width: 100, x: 0, y: 0 },
-      SIBLINGS,
-      0,
-      BLOCK,
-    );
+    const siblingPositions = getAutoLayoutSingleLineSiblingPositions({
+      alignment: AlignmentLayout.topLeft,
+      children: SIBLINGS,
+      contentBox: { height: 600, width: 100, x: 0, y: 0 },
+      counterAxisSpacing: 0,
+      draggedSizes: BLOCK,
+      index: 0,
+      itemSpacing: 0,
+      layoutMode: LayoutMode.vertical,
+    });
 
     // result
     expect(siblingPositions).toEqual({ 2: { x: 0, y: 200 }, 3: { x: 0, y: 300 } });
