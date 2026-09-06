@@ -440,6 +440,68 @@ describe('syncAutoLayoutChildren', () => {
     expect(getActivePage(state).nodes.b).toMatchObject({ x: Math.round(100 + expectedSide), y: 200 });
   });
 
+  it('should orbit a child’s flow slot around the frame’s own centre when the frame itself is rotated', () => {
+    // mock — a 100x100 (square) frame at the origin (centre at 50,50), rotated 90deg; a single
+    // 30x20 child would sit flush at the frame's own top-left (0,0) were the frame unrotated, and
+    // the child itself is NOT independently tilted (rotation: 0, unlike the frame)
+    const a = rect({ height: 20, id: 'a', width: 30, x: 999, y: 999 });
+    const layoutFrame = frame({ childIds: ['a'], height: 100, layoutMode: LayoutMode.horizontal, rotation: 90, width: 100, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — since the child stays axis-aligned in world space while the frame rotates around it,
+    // its footprint *as seen from inside the frame's own tilted axes* is the 30x20 box swapped to
+    // 20x30 (packed by getAutoLayoutChildLocalBounds, using rotation relative to the frame, exactly
+    // like an independently-rotated child is packed by its own rotated bounding box); flush top-left
+    // in that local space orbits the frame's centre (50,50) by 90deg to land flush in the top-RIGHT
+    // corner instead — still exactly inside the (square) frame's own edges, not overflowing past x=100
+    // the way a naive "keep using the raw 30x20 box" orbit would (that would land at x:75-105)
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 70, y: 0 });
+  });
+
+  it('should keep siblings evenly spaced — not pushed apart — when every child rigidly inherited the frame’s own rotation', () => {
+    // mock — found live by the user: rotating a frame via the interactive rotate-handle also rigidly
+    // rotates every descendant leaf by the same delta (continueRotateDrag), so each auto-layout child
+    // ends up with its OWN rotation equal to the frame's. Three 60x20 children, no gap, in a 200x100
+    // frame (centre 100,50), all now tilted 45deg to match the frame
+    const a = rect({ height: 20, id: 'a', rotation: 45, width: 60, x: 999, y: 999 });
+    const b = rect({ height: 20, id: 'b', rotation: 45, width: 60, x: 999, y: 999 });
+    const c = rect({ height: 20, id: 'c', rotation: 45, width: 60, x: 999, y: 999 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b', 'c'],
+      height: 100,
+      layoutMode: LayoutMode.horizontal,
+      rotation: 45,
+      width: 200,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, c, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — each child's rotation relative to the frame is 0 (45-45), so they pack by their real
+    // 60x20 footprint, not an inflated world-axis-aligned AABB of an already-45deg-tilted box; a
+    // rigid rotation preserves distances, so consecutive centres must stay exactly 60 apart, the
+    // same as the un-rotated row — before the fix, the absolute-rotation AABB (bigger than 60x20)
+    // inflated the flow spacing, so siblings drifted farther apart the further along the row they sat
+    const centreOf = (node: { height: number; width: number; x: number; y: number }): { x: number; y: number } => ({
+      x: node.x + node.width / 2,
+      y: node.y + node.height / 2,
+    });
+    const nodes = getActivePage(state).nodes;
+    const distance = (p: { x: number; y: number }, q: { x: number; y: number }): number => Math.hypot(p.x - q.x, p.y - q.y);
+    const centreA = centreOf(nodes.a as TRectangleNode);
+    const centreB = centreOf(nodes.b as TRectangleNode);
+    const centreC = centreOf(nodes.c as TRectangleNode);
+
+    expect(distance(centreA, centreB)).toBeCloseTo(60, 0);
+    expect(distance(centreB, centreC)).toBeCloseTo(60, 0);
+  });
+
   it('should skip a child id that no longer resolves to a node', () => {
     // mock
     const layoutFrame = frame({ childIds: ['gone'], layoutMode: LayoutMode.horizontal });

@@ -357,9 +357,11 @@ raw node while only the fill ghost got the reorder position override. It now run
 
 ## Rotated children
 
-| #   | Scenario                                                                                             | Unit |            E2E             |
-| --- | ---------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
-| 1   | A child rotated to a non-90deg-multiple angle is packed by its rotated bounding box, not its raw one |  ✅  | ✅ `rotated-child.spec.ts` |
+| #   | Scenario                                                                                                                                                    | Unit |            E2E             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 1   | A child rotated to a non-90deg-multiple angle is packed by its rotated bounding box, not its raw one                                                        |  ✅  | ✅ `rotated-child.spec.ts` |
+| 2   | Rotating the frame itself keeps its children anchored to (orbiting) the frame's own centre, instead of resetting them to the flat, un-rotated flow position |  ✅  | ✅ `rotated-frame.spec.ts` |
+| 3   | When every child rigidly inherits the frame's own rotation (the rotate-handle/panel behavior above), siblings stay evenly spaced instead of drifting apart  |  ✅  | ✅ `rotated-frame.spec.ts` |
 
 Found from a real screenshot: a frame's rotated child visually overflowed the frame's own edge,
 because the real layout applier (`syncAutoLayoutChildren.ts`) measured and positioned every child by
@@ -373,3 +375,60 @@ full real pipeline (drag a child in, rotate it via `updateNode`, drag a second c
 clears the rotated footprint instead of overlapping it — rotation here is set directly via
 `updateNode` rather than the interactive rotate-handle drag, since that gesture is `rotate.spec.ts`'s
 own concern, not this one's.
+
+### Rotating the frame reset its own children back to the flat flow position
+
+Found live by the user (2026-09-06), from a screenshot of a rotated auto-layout frame whose children
+had visibly drifted out of their original arrangement, worsening at exact 90deg multiples into what
+looked like a full reset to the frame's un-rotated top-left corner. Root cause:
+`syncAutoLayoutChildren` always packs children along the **world** x/y axes, using `frame.x`,
+`frame.y`, `frame.width`, `frame.height` directly — it never looks at `frame.rotation`. And
+`handleUpdateNode` re-runs that same sync on **every** `updateNode`, including one that only changes
+`rotation`. So the interactive rotate-handle's own rigid-rotation logic (`getRigidTransformNodes` +
+`continueRotateDrag`, which already correctly rotates the frame _and_ every descendant leaf around
+one shared pivot — this part was already right) would place a child at its correct, rotated position,
+only for the very next `syncAutoLayoutChildren` call — triggered as a side effect of that same
+dispatch, or any sibling's — to immediately overwrite it back to the flat, un-rotated flow slot.
+
+Fixed with a single, narrow change: `syncAutoLayoutChildren` now computes each child's flow slot
+exactly as before (this is a stable "as if the frame had no rotation" reference position, unaffected
+by `frame.rotation`), then orbits that slot's own centre around the frame's centre by
+`frame.rotation` (`getAutoLayoutRotatedSlotPosition`, using the same `rotatePoint` the rotate-handle
+itself uses) before translating the child's subtree into place. `rotatePoint` already short-circuits
+`degrees === 0`, so every existing (un-rotated) scenario is a byte-for-byte no-op — confirmed by the
+full pre-existing `syncAutoLayoutChildren` suite passing unchanged. The fix only touches _position_;
+each child's own `rotation` field is left alone, since the rotate-handle's existing rigid-rotate logic
+already sets that correctly (preserving a child's own independent tilt plus the frame's added delta).
+
+Follow-up, same day: the RightPanel's numeric rotation field (`useColumnRotation`) and its 90°/flip
+buttons (`buildRotationButtons`) dispatched a single plain `updateNode` on the frame alone, with no
+rigid-transform of descendants — a child would correctly re-anchor its _position_ (this sync fix),
+but wouldn't visually tilt itself to match, since only the interactive rotate-handle's own
+`getRigidTransformNodes` + per-descendant `updateNode` loop ever set `child.rotation`. Fixed by
+extracting that loop into a standalone, reusable `rotateNodesRigidly` (plus its two small
+dependencies, `getRotateNodeOrigins` and `pinRotatedGroupBounds`, pulled out of the drag code they
+used to live inside) and calling it from both the panel's scrub/blur commit and its 90° button — same
+rigid rotation, same pivot math, whichever way the rotation is set. The interactive drag path
+(`continueRotateDrag`) itself is untouched, just now importing the same extracted helpers instead of
+defining them locally. Unit-only — a real-store dispatch-orchestration function with no gesture/timing
+of its own; the interactive rotate-handle gesture already has its own e2e coverage in `rotate.spec.ts`.
+
+Follow-up, spotted live right after: with three children in a row, rotating the frame 45deg via the
+handle visibly pushed them apart — "coś je odpycha" ("something's pushing them away"), worse the
+further along the row. Root cause: `continueRotateDrag`'s rigid rotation gives every child its own
+`rotation` equal to the frame's (each spins in place to match, same as the frame), so by the time
+`syncAutoLayoutChildren` computes packing sizes via `getRotatedNodeBounds(child)`, it was reading each
+child's now-tilted **absolute** bounding box (bigger than its raw footprint) — inflating the flow
+spacing between siblings, and the error compounded further with each additional child. Fixed with
+`getAutoLayoutChildLocalBounds`: pack by the child's rotation **relative to the frame**
+(`child.rotation - frame.rotation`) instead of its absolute one — a child that rigidly inherited the
+frame's own tilt reads as untilted (0 relative) again, exactly like before the frame ever rotated; a
+genuinely independently-tilted child (scenario 1 above, frame at rotation 0) is unaffected, since
+subtracting 0 changes nothing. A same-day regression test in `syncAutoLayoutChildren.spec.ts` also
+caught, in passing, that the earlier position-anchoring fix itself had a latent edge case: an
+un-tilted child inside a 90deg-rotated **square** frame used to orbit to a position that overflowed
+the frame's own edge by 5px, because it kept packing by the child's raw (un-rotated) box instead of
+the same relative-rotation-aware one — the corrected math lands it flush in the adjacent corner instead.
+
+Still out of scope: dragging/reordering children inside an already-rotated auto-layout frame (the
+drop-indicator/reorder-ghost math built earlier this session) still assumes an axis-aligned frame.

@@ -1,6 +1,9 @@
 import { FocusEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// components
+import { rotateNodesRigidly } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerMove/continueRotateDrag/rotateNodesRigidly';
+
 // hooks
 import { useRotationCommit } from './useRotationCommit';
 
@@ -8,7 +11,6 @@ import { useRotationCommit } from './useRotationCommit';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -32,16 +34,23 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
   const { t } = useTranslation();
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const id = frameNode?.id ?? '';
   const rotation = frameNode?.rotation ?? 0;
 
   const commitRotation = (nextRotation: number): void => {
-    dispatch(updateNode({ changes: { rotation: nextRotation }, id }));
+    if (frameNode) {
+      rotateNodesRigidly(dispatch, frameNode, nextRotation);
+    }
+  };
+
+  const commitRotationOnBlur = (nextRotation: number): void => {
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    commitRotation(nextRotation);
+    dispatch(endHistoryGesture());
   };
 
   return {
-    buttons: buildRotationButtons(id, rotation, dispatch, t),
-    onBlur: useRotationCommit(rotation, commitRotation),
+    buttons: buildRotationButtons(frameNode, dispatch, t),
+    onBlur: useRotationCommit(rotation, commitRotationOnBlur),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onScrub: commitRotation,

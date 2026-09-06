@@ -48,6 +48,19 @@ describe('useColumnRotation', () => {
     store.dispatch(setSelection([]));
   });
 
+  it('should do nothing on scrub or blur when nothing is selected', () => {
+    // before — no selection at all
+    const { result } = renderUseColumnRotation();
+    const input = Object.assign(document.createElement('input'), { value: '90°' });
+
+    // action / result — no throw, and there's no frame to have moved
+    expect(() => {
+      act(() => result.current.onScrub(45));
+      act(() => result.current.onBlur({ target: input } as unknown as Parameters<typeof result.current.onBlur>[0]));
+    }).not.toThrow();
+    expect(result.current.rotation).toBe(0);
+  });
+
   it('should expose the selected frame rotation', () => {
     // mock
     const frameId = addFrameNode(20);
