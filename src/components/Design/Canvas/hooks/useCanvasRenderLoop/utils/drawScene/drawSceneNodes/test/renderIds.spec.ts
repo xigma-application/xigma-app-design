@@ -8,7 +8,7 @@ import { renderNode } from '../renderNode/renderNode';
 
 vi.mock('../renderNode/renderNode', () => ({ renderNode: vi.fn() }));
 
-const renderer = { id: 'renderer' } as unknown as TMaskRenderer;
+const renderer = { hoistedIds: new Set<string>(), id: 'renderer' } as unknown as TMaskRenderer;
 
 describe('renderIds', () => {
   beforeEach(() => {
@@ -29,5 +29,15 @@ describe('renderIds', () => {
     renderIds(renderer, [], null);
 
     expect(renderNode).not.toHaveBeenCalled();
+  });
+
+  it('should skip ids that have been hoisted out of the clipped scene tree', () => {
+    const withHoisted = { hoistedIds: new Set(['b']) } as unknown as TMaskRenderer;
+
+    renderIds(withHoisted, ['a', 'b', 'c'], null);
+
+    expect(renderNode).toHaveBeenCalledTimes(2);
+    expect(renderNode).toHaveBeenNthCalledWith(1, withHoisted, 'a', null);
+    expect(renderNode).toHaveBeenNthCalledWith(2, withHoisted, 'c', null);
   });
 });

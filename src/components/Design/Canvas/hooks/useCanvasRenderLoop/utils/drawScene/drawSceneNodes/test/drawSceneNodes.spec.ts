@@ -881,6 +881,48 @@ describe('drawSceneNodes', () => {
       expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, null);
     });
 
+    it('hoists a dragged child out of its clipping origin frame while a drop target on another frame is armed — drawn once, not dropped, not doubled', () => {
+      const child = buildNode({ id: 'child', parentId: 'frame', type: NodeType.rectangle });
+      const frame = buildNode({ childIds: ['child'], clipContent: true, id: 'frame' });
+      const scene = {
+        buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      };
+
+      const baselineGl = createGlMock();
+      drawSceneNodes(
+        { ...scene, gl: baselineGl, imageContext: withPool(createPoolStub()) },
+        [frame, child],
+        ['frame'],
+        new Map(),
+        createCanvasRefs(),
+        { child, frame },
+      );
+
+      const hoistedGl = createGlMock();
+      const refs = createCanvasRefs();
+      refs.transform.autoLayoutDropTargetRef.current = {
+        frameId: 'other-frame',
+        index: 0,
+        indicator: { height: 0, width: 0, x: 0, y: 0 },
+        siblingPositions: {},
+      };
+      refs.transform.draggedNodeIdsRef.current = new Set(['child']);
+      const pool = createPoolStub();
+      drawSceneNodes({ ...scene, gl: hoistedGl, imageContext: withPool(pool) }, [frame, child], ['frame'], new Map(), refs, {
+        child,
+        frame,
+      });
+
+      // the clip path still runs for the frame, and the child ends up drawn exactly as many times
+      // as it was without the hoist — just from the unclipped top pass instead of inside the mask
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      expect(hoistedGl.drawArrays).toHaveBeenCalledTimes((baselineGl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.length);
+    });
+
     it('should skip the offscreen path for a frame with Clip content off, even with children', () => {
       // mock
       const gl = createGlMock();

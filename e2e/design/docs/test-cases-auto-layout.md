@@ -277,6 +277,26 @@ INDICATOR_THICKNESS_PX` instead.
    mini-frame (`getAutoLayoutRowFrame`) — regardless of whether the dragged item would actually fit;
    the real wrap engine re-flows the true geometry once the drop commits.
 
+### The dragged ghost was clipped by the frame it was leaving
+
+| #   | Scenario                                                                                                                                             | Unit | E2E |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-: |
+| 1   | A node dragged out of a clipping frame toward another frame's auto-layout drop target renders unclipped (only the drop indicator was visible before) |  ✅  |  —  |
+
+Found live by the user (2026-09-06). Dragging a child out of a nested `clipContent` frame toward an
+_auto-layout_ frame's drop target: the child stays parented to (and clipped by) its origin frame
+until pointer-up (`armAutoLayoutDropIndicator` only shows the indicator; `commitDropIntoFrame` does
+the reparent on release), so the part already outside the origin frame was masked away, and what
+remained was at the standard 0.5 auto-layout-drag dim — "you only see the indicators". A plain
+(non-auto-layout) destination doesn't hit this because `reparentToDropTarget` reparents live during
+the drag.
+
+Fixed in the WebGL scene render (`drawSceneNodes`): while an auto-layout drop target is armed, the
+dragged node ids (`getHoistedDragIds`) are skipped everywhere in the clipped scene tree
+(`renderIds`) and painted once, unclipped, on top (`renderHoistedIds`). The 0.5 dim stays. Unit-only
+— the fix is a pure function of ref state, not a gesture/timing thing, and a pixel probe over a
+half-opacity ghost on a light frame body would be flaky.
+
 ## Rotated children
 
 | #   | Scenario                                                                                             | Unit |            E2E             |

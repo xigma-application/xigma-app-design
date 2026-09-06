@@ -1,6 +1,8 @@
 // utils
 import { bindTarget } from './bindTarget';
 import { drawLeafNode } from '../drawLeafNode';
+import { getHoistedDragIds } from './getHoistedDragIds';
+import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
 
 // types
@@ -26,16 +28,19 @@ export const drawSceneNodes = (
     sceneNodes.forEach(paintLeaf);
   } else {
     const { gl, imageContext } = context;
+    const sceneNodeById = new Map(sceneNodes.map((node) => [node.id, node]));
     const renderer: TMaskRenderer = {
       context,
       gl,
+      hoistedIds: getHoistedDragIds(refs, sceneNodeById),
       paintLeaf,
       pool: imageContext.renderTargetPool,
-      sceneNodeById: new Map(sceneNodes.map((node) => [node.id, node])),
+      sceneNodeById,
     };
 
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     renderIds(renderer, rootOrder, null);
+    renderHoistedIds(renderer);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     bindTarget(renderer, null);
   }

@@ -6,5 +6,9 @@ import { TMaskRenderer } from './types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
 export const renderIds = (renderer: TMaskRenderer, ids: string[], target: TRenderTarget | null): void => {
-  ids.forEach((id) => renderNode(renderer, id, target));
+  ids.forEach((id) => {
+    if (!renderer.hoistedIds.has(id)) {
+      renderNode(renderer, id, target);
+    }
+  });
 };
