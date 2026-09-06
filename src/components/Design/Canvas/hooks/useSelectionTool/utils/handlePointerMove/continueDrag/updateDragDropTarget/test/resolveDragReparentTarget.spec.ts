@@ -161,6 +161,49 @@ describe('resolveDragReparentTarget', () => {
     spy.mockRestore();
   });
 
+  it('should stay a reorder inside the auto-layout parent — not nest — when the pointer is over a sibling frame that lives in that parent', () => {
+    // mock — an auto-layout frame holding a plain sibling frame and the dragged rect
+    const parentId = addAutoLayoutFrame(0, 0, 300);
+    const siblingFrameId = addFrame(400, 400, 100);
+    const rectId = addRect(500, 500);
+
+    store.dispatch(moveNodes({ nodeIds: [siblingFrameId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 1, targetParentId: parentId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action — pointer is right over the sibling frame's body, still inside the auto-layout parent
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 40, y: 40 }, rendered, byId, canvasRefs, null);
+
+    // result — the target is the parent (reorder armed), the sibling frame is ignored, nothing reparents
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(parentId);
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).not.toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(parentId);
+
+    spy.mockRestore();
+  });
+
+  it('should fall back to normal drop-target resolution once the pointer leaves the auto-layout parent', () => {
+    // mock — same shape, but the pointer is now outside the parent frame entirely
+    const parentId = addAutoLayoutFrame(0, 0, 100);
+    const rectId = addRect(500, 500);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: parentId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+
+    // action — well outside the parent's bounds
+    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
+
+    // result — reorder mode is off; the node is ejected to the root
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBeNull();
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
+  });
+
   it('should delegate to the auto-layout drop target resolver instead of reparenting right away', () => {
     // mock
     const frameId = addAutoLayoutFrame(0, 0, 300);

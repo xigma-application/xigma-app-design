@@ -42,6 +42,7 @@ gesture live, not just the Flow toggle in isolation.
 | 10  | The internal arrangement of the block's ghost re-tweens (200 ms) when it changes mid-drag — e.g. a companion flips from the right of the cursor to its left near the last slot — while the grabbed member keeps tracking the cursor exactly                                                       |  ✅  |          —           |
 | 11  | Non-adjacent block (e.g. {1,4}): siblings make room for the block's individual members, not one merged bounding box spanning the members it straddles                                                                                                                                             |  ✅  | ✅ `reorder.spec.ts` |
 | 12  | Dragging the block's grabbed member past the last item into the "chasm" of a partial last row switches the ghost to a contiguous edge-to-edge run (companion right next to the grabbed member) clamped inside the frame, instead of a companion flying off toward its distant wrap-footprint slot |  ✅  |          —           |
+| 13  | While the pointer is inside the auto-layout parent, the drag stays a reorder — a sibling that is itself a frame is treated as a plain sibling, never a container to nest into; only leaving the parent's own bounds exits reorder mode into the basic drop-indicator flow                         |  ✅  |          —           |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -189,7 +190,7 @@ Non-wrap, single-node wrap, and cross-parent drops are untouched.
 
 ### The dragged block's ghost now shows the final layout — for every flow, not just wrap
 
-Found live by the user (2026-09-06). Two related gaps once the wrap block-reorder felt right:
+Found live by the user (2026-09-06). Several related gaps once the wrap block-reorder felt right:
 
 1. **The block's ghost kept its pre-drag geometry.** Selecting `{2,4}` (non-adjacent) and dragging
    showed `2` and `4` still a gap apart with `3` visually between them — not how they land. The
@@ -229,6 +230,17 @@ Found live by the user (2026-09-06). Two related gaps once the wrap block-reorde
    clamped to the frame's content box (`draggedClampBox` → `clampGhostToBox`) so it can't leave the
    frame. The commit index is (again) unchanged. Only wrap has a chasm; the non-wrap path always
    passes `contiguous: false`.
+
+4. **The diagonal swap could nest a member into a sibling frame.** During the footprint swap the
+   ghost members cross rows; if the pointer passed over a sibling that is itself a frame/container,
+   the drop-target resolver picked that sibling as a nesting target and the released block dropped
+   _inside_ it. Model (from the user): reorder mode has no "enter a frame" — a sibling frame is just
+   a sibling to move around; the only way out of reorder mode is to leave the auto-layout parent's
+   own bounds (then the basic drop-indicator flow takes over, and an outer frame instead of the
+   canvas is fine). `resolveDragReparentTarget` now short-circuits `desiredParentId` to the current
+   parent whenever the pointer is still inside an auto-layout `currentParent` (`isPointInsideFrame`),
+   so `getDragDropTargetFrame` never even gets to name a nested frame. Unit-only — pure function of
+   the pointer vs. the parent's bounds and type.
 
 ### A real, pre-existing selection bug found while writing these tests
 

@@ -11,6 +11,7 @@ import { TSceneNode } from 'types/design/types';
 import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget/armAutoLayoutDropTarget';
 import { getDragDropTargetFrame } from './getDragDropTargetFrame';
 import { isAutoLayoutFrame } from './isAutoLayoutFrame';
+import { isPointInsideFrame } from './isPointInsideFrame';
 import { reparentToDropTarget } from './reparentToDropTarget';
 
 export const resolveDragReparentTarget = (
@@ -26,7 +27,8 @@ export const resolveDragReparentTarget = (
   const currentParent = selectedNodes[0].parentId ? nodesById[selectedNodes[0].parentId] : null;
   const currentParentId = currentParent?.id ?? null;
   const movedNodeIds = selectedNodes.map((node) => node.id);
-  const desiredParentId = getDragDropTargetFrame(movedNodeIds, point, renderOrderedNodes, nodesById);
+  const isLockedToReorder = isAutoLayoutFrame(currentParent) && isPointInsideFrame(point, currentParent);
+  const desiredParentId = isLockedToReorder ? currentParentId : getDragDropTargetFrame(movedNodeIds, point, renderOrderedNodes, nodesById);
   const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
   const desiredParent = desiredParentId ? nodesById[desiredParentId] : null;
 
