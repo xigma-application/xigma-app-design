@@ -19,11 +19,12 @@ export const getAutoLayoutDropTargetContext = (
   selectedNodes: TSceneNode[],
   movedNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
+  suppressSameParentReorder: boolean,
 ): TAutoLayoutDropTargetContext => {
   const siblingEntries = getAutoLayoutSiblingEntries(desiredParent, movedNodeIds, nodesById);
   const siblingSizes = siblingEntries.map(({ bounds, sibling }) => ({ height: bounds.height, id: sibling.id, width: bounds.width }));
   const realPositions = siblingEntries.map(({ bounds, sibling }) => ({ id: sibling.id, x: bounds.x, y: bounds.y }));
-  const isSameParentReorder = desiredParentId === currentParentId;
+  const isSameParentReorder = desiredParentId === currentParentId && !suppressSameParentReorder;
   const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
   const orderedMovedIds = isSameParentReorder ? desiredParent.childIds.filter((id) => movedNodeIds.includes(id)) : movedNodeIds;
   const draggedSizes = getAutoLayoutOrderedDraggedSizes(orderedMovedIds, selectedNodes);

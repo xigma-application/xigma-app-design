@@ -33,6 +33,7 @@ export type TDragState = {
   nodeOrigins: Record<string, TNodeOrigin>;
   pendingClickAction: TPendingClickAction | null;
   pointerStart: TPoint;
+  reorderModeAbandoned?: boolean;
 };
 
 export type TEndpointDragState = {

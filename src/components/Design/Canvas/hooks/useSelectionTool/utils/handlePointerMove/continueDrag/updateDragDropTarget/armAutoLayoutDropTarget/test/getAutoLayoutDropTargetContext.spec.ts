@@ -48,6 +48,7 @@ describe('getAutoLayoutDropTargetContext', () => {
       [nodesById.c, nodesById.b],
       ['c', 'b'],
       nodesById,
+      false,
     );
 
     // result
@@ -58,7 +59,15 @@ describe('getAutoLayoutDropTargetContext', () => {
 
   it('treats a drop into another parent as a plain insert — no original index, moved ids left as given', () => {
     // action
-    const context = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', null, [nodesById.c, nodesById.b], ['c', 'b'], nodesById);
+    const context = getAutoLayoutDropTargetContext(
+      autoLayoutFrame,
+      'frame-1',
+      null,
+      [nodesById.c, nodesById.b],
+      ['c', 'b'],
+      nodesById,
+      false,
+    );
 
     // result
     expect(context.isSameParentReorder).toBe(false);
@@ -66,9 +75,26 @@ describe('getAutoLayoutDropTargetContext', () => {
     expect(context.orderedMovedIds).toEqual(['c', 'b']);
   });
 
+  it('treats even a same-parent drop as a plain insert when same-parent reorder is suppressed (modifier held / abandoned)', () => {
+    // action — desiredParentId === currentParentId, but the caller wants the basic drop-indicator flow
+    const context = getAutoLayoutDropTargetContext(
+      autoLayoutFrame,
+      'frame-1',
+      'frame-1',
+      [nodesById.c, nodesById.b],
+      ['c', 'b'],
+      nodesById,
+      true,
+    );
+
+    // result
+    expect(context.isSameParentReorder).toBe(false);
+    expect(context.originalIndex).toBeNull();
+  });
+
   it('spaces siblings with the frame’s own axis gap, falling back to 0 and to the item spacing on the counter axis', () => {
     // action
-    const noGaps = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', null, [nodesById.a], ['a'], nodesById);
+    const noGaps = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', null, [nodesById.a], ['a'], nodesById, false);
     const horizontalGap = getAutoLayoutDropTargetContext(
       { ...autoLayoutFrame, horizontalGap: 50, layoutMode: LayoutMode.horizontal },
       'frame-1',
@@ -76,6 +102,7 @@ describe('getAutoLayoutDropTargetContext', () => {
       [nodesById.a],
       ['a'],
       nodesById,
+      false,
     );
 
     // result
@@ -94,6 +121,7 @@ describe('getAutoLayoutDropTargetContext', () => {
       [nodesById.a],
       ['a'],
       nodesById,
+      false,
     );
     const huggedWrap = getAutoLayoutDropTargetContext(
       { ...autoLayoutFrame, layoutWrap: true, primaryAxisSizingMode: SizingMode.hug },
@@ -102,6 +130,7 @@ describe('getAutoLayoutDropTargetContext', () => {
       [nodesById.a],
       ['a'],
       nodesById,
+      false,
     );
 
     // result

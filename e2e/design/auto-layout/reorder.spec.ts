@@ -281,6 +281,59 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
     // committed order: the block {1,4} lands at the front, 2 and 3 follow — [1,4,2,3]
     expect(await rectangleRowNames(page)).toEqual([before[0], before[3], before[1], before[2]]);
   });
+
+  test('holding Ctrl mid-reorder switches to the basic drop indicator on the keypress alone, and releasing it switches back — no pointer movement', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-ctrl-toggle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlow(page, 'Vertical');
+
+    // the usual three-child vertical stack
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 440, 1460, 500);
+    await dragInto(page, { x: 1430, y: 470 }, { x: 630, y: 300 });
+
+    expect(await rectangleRowNames(page)).toHaveLength(3);
+
+    // start reordering the bottom child up toward the top and hold — the block ghost is live
+    await page.mouse.move(630, 295);
+    await page.mouse.down();
+    await page.mouse.move(630, 170, { steps: 10 });
+    await page.waitForTimeout(250);
+
+    const ghostShot = await designPage.canvas.screenshot();
+
+    // press Ctrl with NO further pointer movement — the mode must switch on the keydown alone
+    // (regression: it only switched on the next mousemove, so the grabbed child stayed glued to
+    // its ghost slot until the pointer was moved "firmly")
+    await page.keyboard.down('Control');
+    await page.waitForTimeout(250);
+
+    const ctrlShot = await designPage.canvas.screenshot();
+
+    expect(ctrlShot.equals(ghostShot)).toBe(false);
+
+    // release Ctrl, still without moving the pointer — the mode switches back off the basic
+    // floating preview on the keyup alone
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(250);
+
+    const releasedShot = await designPage.canvas.screenshot();
+
+    expect(releasedShot.equals(ctrlShot)).toBe(false);
+
+    await page.mouse.up();
+  });
 });
 
 test.describe('auto-layout — reordering a child within its own frame, wrap enabled', () => {

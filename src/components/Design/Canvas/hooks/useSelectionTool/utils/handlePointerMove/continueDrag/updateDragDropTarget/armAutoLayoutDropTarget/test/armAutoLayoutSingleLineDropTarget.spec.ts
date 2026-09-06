@@ -41,7 +41,7 @@ describe('armAutoLayoutSingleLineDropTarget', () => {
   it('arms the reorder preview when the drop stays inside the node’s current parent', () => {
     // mock
     const refs = createCanvasRefs();
-    const context = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {});
+    const context = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, false);
 
     // action
     armAutoLayoutSingleLineDropTarget(refs, autoLayoutFrame, 'frame-1', [draggedRect], null, { x: 10, y: 10 }, context);
@@ -54,7 +54,7 @@ describe('armAutoLayoutSingleLineDropTarget', () => {
   it('arms the drop indicator when dropping into a different parent', () => {
     // mock
     const refs = createCanvasRefs();
-    const context = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {});
+    const context = getAutoLayoutDropTargetContext(autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, false);
 
     // action
     armAutoLayoutSingleLineDropTarget(refs, autoLayoutFrame, 'frame-1', [draggedRect], null, { x: 10, y: 10 }, context);

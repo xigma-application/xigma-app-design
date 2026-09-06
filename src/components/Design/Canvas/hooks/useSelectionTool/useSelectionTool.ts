@@ -20,6 +20,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { adjustEraserDiameter } from './utils/adjustEraserDiameter';
 import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag';
 import { handleAltKeyChange } from './utils/handleAltKeyChange/handleAltKeyChange';
+import { handleModifierKeyChange } from './utils/handleModifierKeyChange/handleModifierKeyChange';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
@@ -83,6 +84,15 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     handleAltKeyChange(canvas, event, canvasRefs, selectRefs, activeTool, lastPointerClientPositionRef.current, onPointerMove);
   };
 
+  const onModifierKeyChange = (
+    canvas: HTMLCanvasElement,
+    event: KeyboardEvent,
+    canvasRefs: TCanvasRefs,
+    selectRefs: TSelectionToolRefs,
+  ): void => {
+    handleModifierKeyChange(canvas, event, canvasRefs, selectRefs, lastPointerClientPositionRef.current, onPointerMove);
+  };
+
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
@@ -109,6 +119,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       const shiftKeyUpListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event, refs, selectionRefs);
       const altKeyDownListener = (event: KeyboardEvent): void => onAltKeyChange(canvas, event, refs, selectionRefs);
       const altKeyUpListener = (event: KeyboardEvent): void => onAltKeyChange(canvas, event, refs, selectionRefs);
+      const modifierKeyDownListener = (event: KeyboardEvent): void => onModifierKeyChange(canvas, event, refs, selectionRefs);
+      const modifierKeyUpListener = (event: KeyboardEvent): void => onModifierKeyChange(canvas, event, refs, selectionRefs);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
@@ -119,6 +131,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       window.addEventListener('keyup', shiftKeyUpListener);
       window.addEventListener('keydown', altKeyDownListener);
       window.addEventListener('keyup', altKeyUpListener);
+      window.addEventListener('keydown', modifierKeyDownListener);
+      window.addEventListener('keyup', modifierKeyUpListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
@@ -130,6 +144,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         window.removeEventListener('keyup', shiftKeyUpListener);
         window.removeEventListener('keydown', altKeyDownListener);
         window.removeEventListener('keyup', altKeyUpListener);
+        window.removeEventListener('keydown', modifierKeyDownListener);
+        window.removeEventListener('keyup', modifierKeyUpListener);
         refs.vectorEdit.selectedVectorVertexIdsRef.current = [];
         refs.vectorEdit.selectedVectorHandlesRef.current = [];
         refs.vectorEdit.selectedVectorSegmentIdsRef.current = [];

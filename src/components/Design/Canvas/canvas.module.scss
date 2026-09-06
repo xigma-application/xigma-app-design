@@ -258,6 +258,13 @@
         row-resize;
     }
 
+    &--strict-mode {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/strict-mode.png') 8x) 4 4,
+        auto;
+    }
+
     &--trash {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */

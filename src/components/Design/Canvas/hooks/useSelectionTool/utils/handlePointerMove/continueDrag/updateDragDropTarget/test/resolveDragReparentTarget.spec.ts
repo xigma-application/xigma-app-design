@@ -9,6 +9,9 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+import { TDragState } from 'types/design/selectionTool/types';
+
+// utils
 import { resolveDragReparentTarget } from '../resolveDragReparentTarget';
 
 const addAutoLayoutFrame = (x: number, y: number, size: number): string => {
@@ -72,6 +75,7 @@ const nodesOf = (): { rendered: ReturnType<typeof selectRenderOrderedNodes>; byI
 });
 
 const refs = (): TCanvasRefs => createCanvasRefs();
+const dragState = (): TDragState => ({ hasMoved: true }) as unknown as TDragState;
 
 describe('resolveDragReparentTarget', () => {
   beforeEach(() => {
@@ -86,7 +90,18 @@ describe('resolveDragReparentTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 150, y: 150 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result
     const page = selectActivePage(store.getState());
@@ -106,7 +121,18 @@ describe('resolveDragReparentTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 900, y: 900 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result
     const page = selectActivePage(store.getState());
@@ -129,7 +155,18 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 120, y: 120 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 120, y: 120 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
@@ -152,7 +189,18 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 900, y: 900 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
@@ -175,7 +223,18 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action — pointer is right over the sibling frame's body, still inside the auto-layout parent
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 40, y: 40 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 40, y: 40 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result — the target is the parent (reorder armed), the sibling frame is ignored, nothing reparents
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(parentId);
@@ -197,11 +256,103 @@ describe('resolveDragReparentTarget', () => {
     const { rendered, byId } = nodesOf();
 
     // action — well outside the parent's bounds
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 900, y: 900 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result — reorder mode is off; the node is ejected to the root
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBeNull();
     expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
+  });
+
+  it('shows the basic drop indicator, not the reorder ghost, while the modifier is held inside the parent', () => {
+    // mock
+    const parentId = addAutoLayoutFrame(0, 0, 300);
+    const rectId = addRect(500, 500);
+    const otherRectId = addRect(600, 600);
+
+    store.dispatch(moveNodes({ nodeIds: [otherRectId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 1, targetParentId: parentId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+
+    // action — modifier held, pointer still inside the parent
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 150, y: 150 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      true,
+      dragState(),
+    );
+
+    // result — indicator armed for the parent; the floating preview carries no reorder-ghost slots
+    // (the block rides the cursor free, siblings just close the vacated gap)
+    expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: parentId });
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
+  });
+
+  it('abandons reorder mode for the rest of the drag once the modifier is held while leaving the parent', () => {
+    // mock
+    const parentId = addAutoLayoutFrame(0, 0, 100);
+    const rectId = addRect(10, 10);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: parentId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const state = dragState();
+
+    // action 1 — modifier held, pointer dragged out past the parent's bounds
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 900, y: 900 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      true,
+      state,
+    );
+
+    expect(state.reorderModeAbandoned).toBe(true);
+
+    // action 2 — modifier released, node still (or back) in the parent, pointer home
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: parentId }));
+    const back = nodesOf();
+
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [back.byId[rectId]],
+      { x: 50, y: 50 },
+      back.rendered,
+      back.byId,
+      canvasRefs,
+      null,
+      false,
+      state,
+    );
+
+    // result — sticky: still the basic floating mode (no reorder-ghost slots), not the reorder ghost
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
+    expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: parentId });
   });
 
   it('should delegate to the auto-layout drop target resolver instead of reparenting right away', () => {
@@ -215,7 +366,18 @@ describe('resolveDragReparentTarget', () => {
     const spy = vi.spyOn(store, 'dispatch');
 
     // action
-    resolveDragReparentTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 150, y: 150 }, rendered, byId, canvasRefs, null);
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 150, y: 150 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
 
     // result
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);

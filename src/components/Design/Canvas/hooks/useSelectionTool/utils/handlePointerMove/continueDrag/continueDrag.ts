@@ -19,6 +19,7 @@ import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
 import { getChainGapDragSnap } from './getChainGapDragSnap';
 import { getDominantAxis } from 'utils/math/axis/getDominantAxis';
 import { getDragAlignmentSnap } from './getDragAlignmentSnap';
+import { getDragCursorClassName } from './getDragCursorClassName';
 import { getMatchedPairDragGuides } from './getMatchedPairDragGuides';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { initDraggedNodeIds } from './initDraggedNodeIds';
@@ -28,8 +29,6 @@ import { screenToWorld } from 'utils/transform/screenToWorld';
 import { updateAutoLayoutReorderGhostPosition } from './updateAutoLayoutReorderGhostPosition/updateAutoLayoutReorderGhostPosition';
 import { updateDragDropTarget } from './updateDragDropTarget/updateDragDropTarget';
 import { updateDragSnapshotDeltas } from './updateDragSnapshotDeltas';
-
-const AXIS_LOCK_CLASS_NAME = { x: 'move-x', y: 'move-y' } as const;
 
 export const continueDrag = (
   canvas: HTMLCanvasElement,
@@ -47,6 +46,7 @@ export const continueDrag = (
   } else if (dragState) {
     const state = store.getState();
     const viewport = selectViewport(state);
+    const isReorderModifierHeld = event.ctrlKey || event.metaKey;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
     const axisLock = event.shiftKey ? getDominantAxis(dragState.pointerStart, rawPoint, viewport.zoom) : null;
     const point = axisLock ? getAxisLockedPoint(dragState.pointerStart, rawPoint, axisLock) : rawPoint;
@@ -68,9 +68,20 @@ export const continueDrag = (
     const renderOrderedNodes = selectRenderOrderedNodes(state);
 
     markDragAsMoved(dragState);
-    updateDragDropTarget(dispatch, state, selectedNodes, rawPoint, renderOrderedNodes, nodes, canvasRefs, dragState.grabbedNodeId ?? null);
+    updateDragDropTarget(
+      dispatch,
+      state,
+      selectedNodes,
+      rawPoint,
+      renderOrderedNodes,
+      nodes,
+      canvasRefs,
+      dragState.grabbedNodeId ?? null,
+      isReorderModifierHeld,
+      dragState,
+    );
     armDragSnapGuides(canvasRefs, isAutoLayoutDropTargetActive(canvasRefs), axisLock, guide, chainGapSnap.guides, matchedPairGuides);
-    setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
+    setClassName(getDragCursorClassName(canvasRefs, dragState, selectedNodes, isReorderModifierHeld, axisLock));
     initDraggedNodeIds(canvasRefs, dragState);
     updateDragSnapshotDeltas(snapshots, deltaX, deltaY);
     updateAutoLayoutReorderGhostPosition(canvasRefs, selectedNodes, dispatch, dragState, snapshots, deltaX, deltaY);

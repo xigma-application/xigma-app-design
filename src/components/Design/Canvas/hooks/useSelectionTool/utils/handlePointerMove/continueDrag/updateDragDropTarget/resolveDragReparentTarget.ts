@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
@@ -14,6 +15,21 @@ import { isAutoLayoutFrame } from './isAutoLayoutFrame';
 import { isPointInsideFrame } from './isPointInsideFrame';
 import { reparentToDropTarget } from './reparentToDropTarget';
 
+const applyDesiredDropTarget = (
+  canvasRefs: TCanvasRefs,
+  isReorderContext: boolean,
+  isModifierHeld: boolean,
+  desiredParentId: string | null,
+  currentParentId: string | null,
+  dragState: TDragState,
+): void => {
+  if (isReorderContext && isModifierHeld && desiredParentId !== currentParentId) {
+    dragState.reorderModeAbandoned = true;
+  }
+
+  canvasRefs.transform.dropTargetFrameIdRef.current = desiredParentId;
+};
+
 export const resolveDragReparentTarget = (
   dispatch: AppDispatch,
   state: RootState,
@@ -23,16 +39,20 @@ export const resolveDragReparentTarget = (
   nodesById: Record<string, TSceneNode>,
   canvasRefs: TCanvasRefs,
   grabbedNodeId: string | null,
+  isModifierHeld: boolean,
+  dragState: TDragState,
 ): void => {
   const currentParent = selectedNodes[0].parentId ? nodesById[selectedNodes[0].parentId] : null;
   const currentParentId = currentParent?.id ?? null;
   const movedNodeIds = selectedNodes.map((node) => node.id);
-  const isLockedToReorder = isAutoLayoutFrame(currentParent) && isPointInsideFrame(point, currentParent);
+  const isReorderContext = isAutoLayoutFrame(currentParent) && !dragState.reorderModeAbandoned;
+  const suppressReorder = isModifierHeld || Boolean(dragState.reorderModeAbandoned);
+  const isLockedToReorder = isAutoLayoutFrame(currentParent) && isPointInsideFrame(point, currentParent) && !suppressReorder;
   const desiredParentId = isLockedToReorder ? currentParentId : getDragDropTargetFrame(movedNodeIds, point, renderOrderedNodes, nodesById);
   const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
   const desiredParent = desiredParentId ? nodesById[desiredParentId] : null;
 
-  canvasRefs.transform.dropTargetFrameIdRef.current = desiredParentId;
+  applyDesiredDropTarget(canvasRefs, isReorderContext, isModifierHeld, desiredParentId, currentParentId, dragState);
 
   switch (true) {
     case isAutoLayoutFrame(desiredParent) && desiredParentId !== null:
@@ -46,6 +66,7 @@ export const resolveDragReparentTarget = (
         nodesById,
         point,
         grabbedNodeId,
+        suppressReorder,
       );
       break;
     case desiredParentId !== currentParentId && (desiredParentId !== null || canDragOutToRoot):

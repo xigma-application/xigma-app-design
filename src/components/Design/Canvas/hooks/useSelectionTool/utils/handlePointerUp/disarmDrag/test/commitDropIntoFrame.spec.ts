@@ -251,6 +251,29 @@ describe('commitDropIntoFrame', () => {
     expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([existingId, rectId]);
   });
 
+  it('reorders within the same auto-layout parent via the drop-indicator index when there is no reorder preview (modifier-held basic mode)', () => {
+    // mock — child already in an auto-layout frame; only the drop-indicator ref is set (no ghost preview)
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const firstId = addRectNode(0, 0);
+    const secondId = addRectNode(0, 0);
+    store.dispatch(moveNodes({ nodeIds: [firstId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(moveNodes({ nodeIds: [secondId], targetIndex: 1, targetParentId: frameId }));
+    store.dispatch(setSelection([secondId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        autoLayoutDropTargetRef: { current: { frameId, index: 0, indicator: { height: 2, width: 20, x: 0, y: 0 }, siblingPositions: {} } },
+        dropTargetFrameIdRef: { current: frameId },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — the second child moved to the front, per the indicator index
+    expect((selectActivePage(store.getState()).nodes[frameId] as { childIds: string[] }).childIds).toEqual([secondId, firstId]);
+  });
+
   it('should do nothing when the drop target is still the node’s current parent', () => {
     // mock
     const frameId = addFrameNode(0, 0);

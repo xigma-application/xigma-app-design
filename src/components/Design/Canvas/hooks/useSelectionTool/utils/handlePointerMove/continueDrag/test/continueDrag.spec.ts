@@ -656,6 +656,93 @@ describe('continueDrag', () => {
     expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.positions[draggedId]).toEqual({ x: 10, y: 150 });
   });
 
+  it('should show the strict-mode cursor while the modifier is held over the auto-layout parent during a reorder', () => {
+    // mock — a vertical auto-layout frame with two children; the first is being reordered
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const draggedId = addRectNode(0, 0);
+    const siblingId = addRectNode(0, 100);
+
+    store.dispatch(moveNodes({ nodeIds: [draggedId, siblingId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([draggedId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [draggedId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — Ctrl held, pointer still well inside the frame
+    continueDrag(canvas, pointerEvent(10, 150, { ctrlKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName, marqueeStartRef);
+
+    // result — the reorder ghost is suppressed for a basic floating preview: the drop indicator is
+    // armed for the parent, there are no reorder-ghost slots, the dragged node rides the cursor 1:1
+    // (real store position untouched), and the cursor switches
+    expect(canvasRefs.transform.autoLayoutDropTargetRef.current?.frameId).toBe(frameId);
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.positions[draggedId]).toEqual({ x: 10, y: 150 });
+    expect(selectActivePage(store.getState()).nodes[draggedId]).toMatchObject({ x: 0, y: 0 });
+    expect(setClassName).toHaveBeenLastCalledWith('strict-mode');
+  });
+
+  it('should not show the strict-mode cursor once reorder mode is abandoned, even with the modifier held', () => {
+    // mock — same setup, but the drag has already left the parent once with the modifier down
+    const frameId = addAutoLayoutFrameNode(0, 0);
+    const draggedId = addRectNode(0, 0);
+    const siblingId = addRectNode(0, 100);
+
+    store.dispatch(moveNodes({ nodeIds: [draggedId, siblingId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([draggedId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [draggedId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+      reorderModeAbandoned: true,
+    });
+
+    // before — Cmd held (the Mac modifier also counts), pointer inside the frame
+    continueDrag(canvas, pointerEvent(10, 150, { metaKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName, marqueeStartRef);
+
+    // result — no strict cursor
+    expect(setClassName).toHaveBeenLastCalledWith(null);
+  });
+
+  it('should not show the strict-mode cursor when the modifier is held but the drag is not over its auto-layout parent', () => {
+    // mock — a root-level node, no auto-layout parent in play
+    const draggedId = addRectNode(0, 0);
+
+    store.dispatch(setSelection([draggedId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [draggedId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — Ctrl held, dragged out onto empty canvas
+    continueDrag(
+      canvas,
+      pointerEvent(900, 900, { ctrlKey: true }),
+      store.dispatch,
+      dragStateRef,
+      canvasRefs,
+      setClassName,
+      marqueeStartRef,
+    );
+
+    // result — no drop target, so no strict cursor
+    expect(setClassName).toHaveBeenLastCalledWith(null);
+  });
+
   it('should dispatch the real position update normally once the reorder preview is no longer active', () => {
     // mock — same setup, but no reorder preview armed (e.g. this tick landed outside the frame)
     const frameId = addAutoLayoutFrameNode(0, 0);

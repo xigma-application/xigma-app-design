@@ -42,11 +42,24 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
+    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null, false);
 
     // result
     expect(refs.transform.autoLayoutReorderPreviewRef.current).not.toBeNull();
     expect(refs.transform.autoLayoutDropTargetRef.current).toBeNull();
+  });
+
+  it('should arm the basic floating preview (drop indicator + slot-less preview) when the same-parent reorder is suppressed', () => {
+    // mock — modifier held over the node's own parent
+    const refs = createCanvasRefs();
+
+    // action
+    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', 'frame-1', [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null, true);
+
+    // result — indicator armed, preview present but without any reorder-ghost slots
+    expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.frameId).toBe('frame-1');
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
   });
 
   it('should set the drop indicator, not the reorder preview, when dropping into a different parent', () => {
@@ -54,7 +67,7 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
+    armAutoLayoutDropTarget(refs, autoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null, false);
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
@@ -67,7 +80,18 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, horizontalAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
+    armAutoLayoutDropTarget(
+      refs,
+      horizontalAutoLayoutFrame,
+      'frame-1',
+      null,
+      [draggedRect],
+      ['dragged'],
+      {},
+      { x: 10, y: 10 },
+      null,
+      false,
+    );
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
@@ -93,7 +117,18 @@ describe('armAutoLayoutDropTarget', () => {
     const nodesById = { a: siblingA, b: siblingB, c: siblingC };
 
     // action — cursor at 'c'’s own left edge, in row 2
-    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', null, [draggedRect], ['dragged'], nodesById, { x: 20, y: 150 }, null);
+    armAutoLayoutDropTarget(
+      refs,
+      wrappedAutoLayoutFrame,
+      'frame-1',
+      null,
+      [draggedRect],
+      ['dragged'],
+      nodesById,
+      { x: 20, y: 150 },
+      null,
+      false,
+    );
 
     // result — regression: the old flat (non-wrap-aware) index math compared the cursor only
     // against each sibling's own x threshold in childIds order; 'c' shares 'a'’s near-zero x (both
@@ -125,7 +160,18 @@ describe('armAutoLayoutDropTarget', () => {
     const nodesById = { a: siblingA, b: siblingB };
 
     // action — same parent on both sides, cursor at 'c'’s own left edge, still in row 2
-    armAutoLayoutDropTarget(refs, wrappedAutoLayoutFrame, 'frame-1', 'frame-1', [draggedC], ['c'], nodesById, { x: 20, y: 150 }, null);
+    armAutoLayoutDropTarget(
+      refs,
+      wrappedAutoLayoutFrame,
+      'frame-1',
+      'frame-1',
+      [draggedC],
+      ['c'],
+      nodesById,
+      { x: 20, y: 150 },
+      null,
+      false,
+    );
 
     // result — 'c' resolves back to index 2 (row 2), not row 1
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 2, frameId: 'frame-1' });
@@ -144,7 +190,7 @@ describe('armAutoLayoutDropTarget', () => {
     const refs = createCanvasRefs();
 
     // action
-    armAutoLayoutDropTarget(refs, huggedWrapFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null);
+    armAutoLayoutDropTarget(refs, huggedWrapFrame, 'frame-1', null, [draggedRect], ['dragged'], {}, { x: 10, y: 10 }, null, false);
 
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: 'frame-1' });
@@ -185,6 +231,7 @@ describe('armAutoLayoutDropTarget', () => {
         gridNodes,
         { x: 50, y: 250 },
         'c',
+        false,
       );
 
       // result — reading-order slot 4, grabbed index 0 → block inserted at index 4 of [a,b,e,f]
@@ -205,6 +252,7 @@ describe('armAutoLayoutDropTarget', () => {
         gridNodes,
         { x: 50, y: 250 },
         'd',
+        false,
       );
 
       // result — slot 4 − 1 = 3
@@ -225,6 +273,7 @@ describe('armAutoLayoutDropTarget', () => {
         gridNodes,
         { x: 50, y: 250 },
         null,
+        false,
       );
 
       // result — no offset, same as grabbing the first member
@@ -248,7 +297,18 @@ describe('armAutoLayoutDropTarget', () => {
       const refs = createCanvasRefs();
 
       // action — drag the {b,c} block past the end, grabbed by 'b'
-      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b, rowNodes.c], ['b', 'c'], rowNodes, { x: 390, y: 50 }, 'b');
+      armAutoLayoutDropTarget(
+        refs,
+        rowFrame,
+        'frame-1',
+        'frame-1',
+        [rowNodes.b, rowNodes.c],
+        ['b', 'c'],
+        rowNodes,
+        { x: 390, y: 50 },
+        'b',
+        false,
+      );
 
       // result — block appended after [a, d]; 'b' and 'c' land contiguously at x 200 / 300
       expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
@@ -262,7 +322,18 @@ describe('armAutoLayoutDropTarget', () => {
       const refs = createCanvasRefs();
 
       // action — same drag, grabbed by 'c'
-      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b, rowNodes.c], ['b', 'c'], rowNodes, { x: 390, y: 50 }, 'c');
+      armAutoLayoutDropTarget(
+        refs,
+        rowFrame,
+        'frame-1',
+        'frame-1',
+        [rowNodes.b, rowNodes.c],
+        ['b', 'c'],
+        rowNodes,
+        { x: 390, y: 50 },
+        'c',
+        false,
+      );
 
       // result — same slots, only the grabbed id changes
       expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
@@ -276,7 +347,7 @@ describe('armAutoLayoutDropTarget', () => {
       const refs = createCanvasRefs();
 
       // action — only 'b' is dragged
-      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b], ['b'], rowNodes, { x: 390, y: 50 }, 'b');
+      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b], ['b'], rowNodes, { x: 390, y: 50 }, 'b', false);
 
       // result
       expect(refs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
@@ -287,7 +358,18 @@ describe('armAutoLayoutDropTarget', () => {
       const refs = createCanvasRefs();
 
       // action — {a,d} straddles 'b' and 'c'; drop at the front, grabbed by 'a'
-      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.a, rowNodes.d], ['a', 'd'], rowNodes, { x: 10, y: 50 }, 'a');
+      armAutoLayoutDropTarget(
+        refs,
+        rowFrame,
+        'frame-1',
+        'frame-1',
+        [rowNodes.a, rowNodes.d],
+        ['a', 'd'],
+        rowNodes,
+        { x: 10, y: 50 },
+        'a',
+        false,
+      );
 
       // result — the block reads as two 100px members at the front, not one merged {a..d} span
       // (the sibling reflow math itself is covered in getSingleLineReorderDropTarget.spec.ts)
