@@ -231,4 +231,70 @@ describe('armAutoLayoutDropTarget', () => {
       expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 4, frameId: 'frame-1' });
     });
   });
+
+  describe('multi-node block reorder in a plain (non-wrap) frame', () => {
+    // four 100x100 children in a row: [a, b, c, d]
+    const rowNode = (id: string, x: number): TSceneNode => ({ ...draggedRect, height: 100, id, width: 100, x, y: 0 }) as TSceneNode;
+    const rowNodes = { a: rowNode('a', 0), b: rowNode('b', 100), c: rowNode('c', 200), d: rowNode('d', 300) };
+    const rowFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      childIds: ['a', 'b', 'c', 'd'],
+      height: 300,
+      layoutMode: LayoutMode.horizontal,
+      width: 400,
+    };
+
+    it('records the block members’ contiguous final slots so the ghost can show the merged layout', () => {
+      const refs = createCanvasRefs();
+
+      // action — drag the {b,c} block past the end, grabbed by 'b'
+      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b, rowNodes.c], ['b', 'c'], rowNodes, { x: 390, y: 50 }, 'b');
+
+      // result — block appended after [a, d]; 'b' and 'c' land contiguously at x 200 / 300
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+        activeIndex: 2,
+        draggedGrabbedId: 'b',
+        draggedMemberSlots: { b: { x: 200, y: 0 }, c: { x: 300, y: 0 } },
+      });
+    });
+
+    it('marks which block member rides the cursor without shifting the slots', () => {
+      const refs = createCanvasRefs();
+
+      // action — same drag, grabbed by 'c'
+      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b, rowNodes.c], ['b', 'c'], rowNodes, { x: 390, y: 50 }, 'c');
+
+      // result — same slots, only the grabbed id changes
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+        activeIndex: 2,
+        draggedGrabbedId: 'c',
+        draggedMemberSlots: { b: { x: 200, y: 0 }, c: { x: 300, y: 0 } },
+      });
+    });
+
+    it('leaves a single-node reorder’s preview without any block metadata', () => {
+      const refs = createCanvasRefs();
+
+      // action — only 'b' is dragged
+      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.b], ['b'], rowNodes, { x: 390, y: 50 }, 'b');
+
+      // result
+      expect(refs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
+      expect(refs.transform.autoLayoutReorderPreviewRef.current?.draggedGrabbedId).toBeUndefined();
+    });
+
+    it('records the two contiguous member slots for a non-adjacent {a,d} block reordering to the front', () => {
+      const refs = createCanvasRefs();
+
+      // action — {a,d} straddles 'b' and 'c'; drop at the front, grabbed by 'a'
+      armAutoLayoutDropTarget(refs, rowFrame, 'frame-1', 'frame-1', [rowNodes.a, rowNodes.d], ['a', 'd'], rowNodes, { x: 10, y: 50 }, 'a');
+
+      // result — the block reads as two 100px members at the front, not one merged {a..d} span
+      // (the sibling reflow math itself is covered in getSingleLineReorderDropTarget.spec.ts)
+      expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+        activeIndex: 0,
+        draggedMemberSlots: { a: { x: 0, y: 0 }, d: { x: 100, y: 0 } },
+      });
+    });
+  });
 });

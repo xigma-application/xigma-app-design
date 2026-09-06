@@ -234,6 +234,53 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
 
     expect(afterRevert).toEqual(before);
   });
+
+  test('a non-adjacent {1,4} block reorders with its siblings making room for two members, not one merged span', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 240-wide frame, no gap, four 60x60 children in one horizontal row: cells at frame-local
+    // x 0 / 60 / 120 / 180
+    const rowFrame = { x1: 600, x2: 840, y1: 150, y2: 250 };
+
+    await designPage.goto('e2e-test-auto-layout-reorder-nonadjacent-block');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(rowFrame.x1, rowFrame.y1, rowFrame.x2, rowFrame.y2);
+    await setFlow(page, 'Horizontal');
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 4; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1460, 220);
+      // dropped near the frame's right wall each time, so they settle in draw order 1..4
+      await dragInto(page, { x: 1430, y: 190 }, { x: rowFrame.x2 - 15, y: 200 });
+    }
+
+    const before = await rectangleRowNames(page);
+
+    expect(before).toHaveLength(4);
+
+    // select {1,4} — non-adjacent, straddling 2 and 3
+    await designPage.click(rowFrame.x1 + 30, 180);
+    await designPage.click(rowFrame.x1 + 210, 180, { shift: true });
+
+    // grab element 1, nudge the block toward the front, and hold — sampling the live sibling reflow
+    await page.mouse.move(rowFrame.x1 + 30, 180);
+    await page.mouse.down();
+    await page.mouse.move(rowFrame.x1 + 12, 178, { steps: 10 });
+    await page.waitForTimeout(300);
+
+    // regression: the non-wrap reflow modelled {1,4} as ONE merged bounding box spanning all four
+    // cells, so 2 and 3 were shoved a full 240px right — clean out of the 240-wide frame, into
+    // phantom slots the ghost never showed. With the block modelled as its two real 60px members,
+    // 2 and 3 only slide up into the second and third slots and stay visible inside the frame.
+    expect(isRectangleGray(await readPixelColor(page, rowFrame.x1 + 150, 180))).toBe(true);
+    expect(isRectangleGray(await readPixelColor(page, rowFrame.x1 + 210, 180))).toBe(true);
+
+    await page.mouse.up();
+
+    // committed order: the block {1,4} lands at the front, 2 and 3 follow — [1,4,2,3]
+    expect(await rectangleRowNames(page)).toEqual([before[0], before[3], before[1], before[2]]);
+  });
 });
 
 test.describe('auto-layout — reordering a child within its own frame, wrap enabled', () => {

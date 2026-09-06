@@ -1,26 +1,22 @@
 // store
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutContentBox';
 import { getAutoLayoutReadingOrderSlot } from 'store/design/utils/autoLayout/getAutoLayoutReadingOrderSlot/getAutoLayoutReadingOrderSlot';
+import { getAutoLayoutWrappedDraggedMemberSlots } from 'store/design/utils/autoLayout/getAutoLayoutWrappedDropTarget/getAutoLayoutWrappedDraggedMemberSlots';
 import { getAutoLayoutWrappedSiblingPositions } from 'store/design/utils/autoLayout/getAutoLayoutWrappedDropTarget/getAutoLayoutWrappedSiblingPositions';
-import { getRotatedNodeBounds } from 'store/design/utils/getRotatedNodeBounds';
 
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
 import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
-import { TAutoLayoutFrame } from '../types';
+import { TAutoLayoutFrame } from '../../types';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { armAutoLayoutReorderPreview } from './armAutoLayoutReorderPreview';
+import { armAutoLayoutReorderPreview } from '../armAutoLayoutReorderPreview';
 import { clamp } from 'utils/math/clamp';
-
-const getAutoLayoutChildBounds = (childIds: string[], nodesById: Record<string, TSceneNode>): TDraftRect[] =>
-  childIds
-    .map((id) => nodesById[id])
-    .filter(Boolean)
-    .map((child) => getRotatedNodeBounds(child));
+import { getAutoLayoutChildBounds } from './getAutoLayoutChildBounds';
+import { getDraggedBlockPreviewMeta } from '../getDraggedBlockPreviewMeta';
 
 export const armAutoLayoutMultiRowReorderPreview = (
   canvasRefs: TCanvasRefs,
@@ -43,12 +39,23 @@ export const armAutoLayoutMultiRowReorderPreview = (
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const readingOrderSlot = getAutoLayoutReadingOrderSlot(isHorizontal, childBounds, point);
   const index = clamp(readingOrderSlot - grabbedIndexInBlock, 0, siblingSizes.length);
+  const contentBox = getAutoLayoutContentBox(desiredParent, padding);
   const siblingPositions = getAutoLayoutWrappedSiblingPositions(
     desiredParent.layoutMode,
     itemSpacing,
     counterAxisSpacing,
     alignment,
-    getAutoLayoutContentBox(desiredParent, padding),
+    contentBox,
+    siblingSizes,
+    index,
+    draggedSizes,
+  );
+  const memberSlots = getAutoLayoutWrappedDraggedMemberSlots(
+    desiredParent.layoutMode,
+    itemSpacing,
+    counterAxisSpacing,
+    alignment,
+    contentBox,
     siblingSizes,
     index,
     draggedSizes,
@@ -59,5 +66,6 @@ export const armAutoLayoutMultiRowReorderPreview = (
     desiredParentId,
     { index, indicator: { height: 0, width: 0, x: 0, y: 0 }, siblingPositions },
     siblingEntries,
+    getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots),
   );
 };

@@ -1,6 +1,6 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
-import { TAutoLayoutFrame } from '../../types';
+import { TAutoLayoutFrame } from '../../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -142,6 +142,64 @@ describe('armAutoLayoutMultiRowReorderPreview', () => {
 
     // result — no offset, same as grabbing the first member
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 4, frameId: 'frame-1' });
+  });
+
+  it('records each block member’s absolute final wrapped slot, keyed by node id', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // action — grabbed by 'c' (block-local index 0), cursor over 'e'; block lands on the new last row
+    armAutoLayoutMultiRowReorderPreview(
+      refs,
+      gridFrame,
+      'frame-1',
+      gridNodes,
+      siblingEntries,
+      siblingSizes,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      draggedSizes,
+      ['c', 'd'],
+      'c',
+      { x: 50, y: 250 },
+    );
+
+    // result — 'c' and 'd' share the third row
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+      draggedGrabbedId: 'c',
+      draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+    });
+  });
+
+  it('splits the recorded slots across two rows when the block straddles a wrap boundary', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // action — grabbed by 'd' (block-local index 1) → insertion index 3, block wraps [e,d] / [d,f]
+    armAutoLayoutMultiRowReorderPreview(
+      refs,
+      gridFrame,
+      'frame-1',
+      gridNodes,
+      siblingEntries,
+      siblingSizes,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      draggedSizes,
+      ['c', 'd'],
+      'd',
+      { x: 50, y: 250 },
+    );
+
+    // result — 'c' ends row 2, 'd' opens row 3
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+      draggedGrabbedId: 'd',
+      draggedMemberSlots: { c: { x: 100, y: 100 }, d: { x: 0, y: 200 } },
+    });
   });
 
   it('zeroes out the drop indicator, since a multi-row block reorder has no single insertion line to show', () => {

@@ -102,6 +102,149 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 105, y: 105 });
   });
 
+  it('places companions at their own footprint slot while the grabbed member tracks the cursor', () => {
+    // mock — block {c,d}; footprint slots are row-3 left/right; grabbed 'c' dragged onto its own slot
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedGrabbedId: 'c',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
+
+    // action — delta carries 'c' down onto row 3 left (its own footprint slot)
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 0, 100);
+
+    // result — 'c' rides the cursor, 'd' sits in its own footprint slot
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      c: { x: 0, y: 200 },
+      d: { x: 100, y: 200 },
+    });
+  });
+
+  it('keeps the whole block riding the cursor between slots, not pinned to the grid', () => {
+    // mock — same block {c,d}
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedGrabbedId: 'c',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
+
+    // action — 10px past 'c'’s own footprint slot, still nearest to it
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 10, 100);
+
+    // result — both members carry the same +10 the cursor moved; the pair is not snapped to the cell
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      c: { x: 10, y: 200 },
+      d: { x: 110, y: 200 },
+    });
+  });
+
+  it('swaps a companion into the grabbed member’s vacated slot when the cursor is over the companion’s slot', () => {
+    // mock — same block {c,d}; this time the grabbed 'c' is dragged onto 'd'’s footprint slot
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedGrabbedId: 'c',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
+
+    // action — delta carries 'c' onto row 3 right (which is 'd'’s footprint slot)
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 100, 100);
+
+    // result — 'c' rides the cursor onto the right cell; 'd' jumps left into 'c'’s vacated slot
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      c: { x: 100, y: 200 },
+      d: { x: 0, y: 200 },
+    });
+  });
+
+  it('falls back to cursor-tracking for a selected node with no recorded footprint slot', () => {
+    // mock — 'x' is selected but absent from draggedMemberSlots
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedGrabbedId: 'c',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const nodeX = rect({ id: 'x', x: 300, y: 300 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 }, x: { x: 300, y: 300 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD, nodeX], store.dispatch, state, null, 5, 5);
+
+    // result — 'x' just tracks the raw drag delta
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions.x).toEqual({ x: 305, y: 305 });
+  });
+
+  it('tracks the cursor for the whole block when the grabbed member is not among the selected nodes', () => {
+    // mock — draggedGrabbedId points at an id that is not in the selection
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedGrabbedId: 'gone',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 5, 5);
+
+    // result — no swap logic, every member just tracks the delta
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      c: { x: 5, y: 105 },
+      d: { x: 105, y: 105 },
+    });
+  });
+
   it('should write every dragged node’s cursor-tracked position into the preview ref, for a multi-node selection', () => {
     // mock
     const refs = createCanvasRefs({

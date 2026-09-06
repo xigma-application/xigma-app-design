@@ -260,7 +260,21 @@ export type TVectorSnapshotsRefs = {
 
 export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: string };
 
-export type TAutoLayoutReorderPreview = { activeIndex: number; frameId: string; positions: Record<string, TPoint> };
+export type TAutoLayoutDraggedOffsetTween = {
+  from: Record<string, TPoint>;
+  grabbedGhost: TPoint;
+  startTime: number;
+  target: Record<string, TPoint>;
+};
+
+export type TAutoLayoutReorderPreview = {
+  activeIndex: number;
+  draggedGrabbedId?: string;
+  draggedMemberSlots?: Record<string, TPoint>;
+  draggedOffsetTween?: TAutoLayoutDraggedOffsetTween;
+  frameId: string;
+  positions: Record<string, TPoint>;
+};
 
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;

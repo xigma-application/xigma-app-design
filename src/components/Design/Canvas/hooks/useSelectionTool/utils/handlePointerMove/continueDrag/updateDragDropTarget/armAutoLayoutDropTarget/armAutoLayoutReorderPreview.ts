@@ -1,6 +1,6 @@
 // types
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TAutoLayoutReorderPreview, TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
@@ -12,6 +12,7 @@ export const armAutoLayoutReorderPreview = (
   desiredParentId: string,
   dropTarget: TAutoLayoutDropTarget,
   siblingEntries: { bounds: TDraftRect; sibling: TSceneNode }[],
+  draggedBlock?: Pick<TAutoLayoutReorderPreview, 'draggedGrabbedId' | 'draggedMemberSlots'>,
 ): void => {
   const activePreview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
   const isAlreadyAnimatingThisIndex =
@@ -30,6 +31,7 @@ export const armAutoLayoutReorderPreview = (
       dropTarget.index,
       from,
       dropTarget.siblingPositions,
+      draggedBlock,
     );
   }
 };

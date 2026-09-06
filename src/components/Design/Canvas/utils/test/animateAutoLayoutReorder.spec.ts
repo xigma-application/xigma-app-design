@@ -107,6 +107,21 @@ describe('animateAutoLayoutReorder', () => {
     expect(previewRef.current?.positions.dragged).toEqual({ x: 5, y: 5 });
   });
 
+  it('should stamp the dragged-block metadata onto the ref and keep it across animation frames', () => {
+    // mock
+    const previewRef = { current: null as TAutoLayoutReorderPreview | null };
+    const draggedBlock = { draggedGrabbedId: 'c', draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } } };
+
+    // action
+    animateAutoLayoutReorder(previewRef, 'frame-1', 0, { a: { x: 0, y: 0 } }, { a: { x: 100, y: 0 } }, draggedBlock);
+    flush();
+    now += AUTO_LAYOUT_REORDER_ANIMATION_DURATION_MS;
+    flush();
+
+    // result — still present after the animation settles
+    expect(previewRef.current).toMatchObject(draggedBlock);
+  });
+
   it('should start a sibling with no prior recorded position directly at its own target, not lerp from nothing', () => {
     // mock — `to` has a sibling id that `from` never recorded (e.g. it only just joined the frame)
     const previewRef = { current: null as TAutoLayoutReorderPreview | null };

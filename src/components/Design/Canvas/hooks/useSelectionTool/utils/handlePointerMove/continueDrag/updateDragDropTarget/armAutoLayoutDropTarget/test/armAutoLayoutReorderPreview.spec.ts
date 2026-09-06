@@ -60,6 +60,19 @@ describe('armAutoLayoutReorderPreview', () => {
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions.s1).toEqual({ x: 30, y: 30 });
   });
 
+  it('should forward the dragged-block metadata onto the armed preview', () => {
+    // mock
+    const refs = createCanvasRefs();
+    const siblingEntries = [{ bounds: { height: 20, width: 20, x: 0, y: 0 }, sibling: sibling('s1', 0, 0) }];
+    const draggedBlock = { draggedGrabbedId: 'c', draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } } };
+
+    // action
+    armAutoLayoutReorderPreview(refs, 'frame-1', dropTarget(1), siblingEntries, draggedBlock);
+
+    // result
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject(draggedBlock);
+  });
+
   it('should not restart the animation when a preview is already animating this exact frame and index', () => {
     // mock
     const activePreview = { activeIndex: 1, frameId: 'frame-1', positions: { s1: { x: 999, y: 999 } } };
