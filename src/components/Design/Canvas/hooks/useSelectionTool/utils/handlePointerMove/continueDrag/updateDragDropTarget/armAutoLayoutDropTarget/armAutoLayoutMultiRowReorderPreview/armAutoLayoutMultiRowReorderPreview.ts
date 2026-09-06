@@ -16,6 +16,7 @@ import { TSceneNode } from 'types/design/types';
 import { armAutoLayoutReorderPreview } from '../armAutoLayoutReorderPreview';
 import { clamp } from 'utils/math/clamp';
 import { getAutoLayoutChildBounds } from './getAutoLayoutChildBounds';
+import { getContiguousMemberSlots } from './getContiguousMemberSlots';
 import { getDraggedBlockPreviewMeta } from '../getDraggedBlockPreviewMeta';
 
 export const armAutoLayoutMultiRowReorderPreview = (
@@ -38,6 +39,7 @@ export const armAutoLayoutMultiRowReorderPreview = (
   const childBounds = getAutoLayoutChildBounds(desiredParent.childIds, nodesById);
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const readingOrderSlot = getAutoLayoutReadingOrderSlot(isHorizontal, childBounds, point);
+  const isChasm = readingOrderSlot - grabbedIndexInBlock > siblingSizes.length;
   const index = clamp(readingOrderSlot - grabbedIndexInBlock, 0, siblingSizes.length);
   const contentBox = getAutoLayoutContentBox(desiredParent, padding);
   const siblingPositions = getAutoLayoutWrappedSiblingPositions(
@@ -50,22 +52,24 @@ export const armAutoLayoutMultiRowReorderPreview = (
     index,
     draggedSizes,
   );
-  const memberSlots = getAutoLayoutWrappedDraggedMemberSlots(
-    desiredParent.layoutMode,
-    itemSpacing,
-    counterAxisSpacing,
-    alignment,
-    contentBox,
-    siblingSizes,
-    index,
-    draggedSizes,
-  );
+  const memberSlots = isChasm
+    ? getContiguousMemberSlots(isHorizontal, draggedSizes, itemSpacing)
+    : getAutoLayoutWrappedDraggedMemberSlots(
+        desiredParent.layoutMode,
+        itemSpacing,
+        counterAxisSpacing,
+        alignment,
+        contentBox,
+        siblingSizes,
+        index,
+        draggedSizes,
+      );
 
   armAutoLayoutReorderPreview(
     canvasRefs,
     desiredParentId,
     { index, indicator: { height: 0, width: 0, x: 0, y: 0 }, siblingPositions },
     siblingEntries,
-    getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots),
+    getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots, contentBox, isChasm),
   );
 };

@@ -1,12 +1,14 @@
 // types
 import { TAutoLayoutReorderPreview } from 'types/design/canvas/types';
-import { TPoint } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 
 export const getDraggedBlockPreviewMeta = (
   orderedMovedIds: string[],
   grabbedNodeId: string | null,
   memberSlots: TPoint[],
-): Pick<TAutoLayoutReorderPreview, 'draggedGrabbedId' | 'draggedMemberSlots'> => {
+  clampBox: TDraftRect,
+  contiguous: boolean,
+): Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'> => {
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const draggedMemberSlots = orderedMovedIds.reduce<Record<string, TPoint>>((slots, id, memberIndex) => {
     slots[id] = memberSlots[memberIndex];
@@ -14,5 +16,10 @@ export const getDraggedBlockPreviewMeta = (
     return slots;
   }, {});
 
-  return { draggedGrabbedId: orderedMovedIds[grabbedIndexInBlock], draggedMemberSlots };
+  return {
+    draggedClampBox: clampBox,
+    draggedContiguous: contiguous,
+    draggedGrabbedId: orderedMovedIds[grabbedIndexInBlock],
+    draggedMemberSlots,
+  };
 };

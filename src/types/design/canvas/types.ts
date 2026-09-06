@@ -269,6 +269,8 @@ export type TAutoLayoutDraggedOffsetTween = {
 
 export type TAutoLayoutReorderPreview = {
   activeIndex: number;
+  draggedClampBox?: TDraftRect;
+  draggedContiguous?: boolean;
   draggedGrabbedId?: string;
   draggedMemberSlots?: Record<string, TPoint>;
   draggedOffsetTween?: TAutoLayoutDraggedOffsetTween;

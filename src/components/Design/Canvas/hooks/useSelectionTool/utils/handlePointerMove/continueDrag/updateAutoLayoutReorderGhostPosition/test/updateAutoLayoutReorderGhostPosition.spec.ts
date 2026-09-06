@@ -189,6 +189,36 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     });
   });
 
+  it('clamps the grabbed ghost to the frame content box so a companion flung into the chasm cannot leave the frame', () => {
+    // mock — footprint slots are near the frame's bottom; the frame's content box is 200x300
+    const refs = createCanvasRefs({
+      transform: {
+        autoLayoutReorderPreviewRef: {
+          current: {
+            activeIndex: 4,
+            draggedClampBox: { height: 300, width: 200, x: 0, y: 0 },
+            draggedGrabbedId: 'c',
+            draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+            frameId: 'frame-1',
+            positions: {},
+          },
+        },
+      },
+    });
+    const nodeC = rect({ id: 'c', x: 0, y: 100 });
+    const nodeD = rect({ id: 'd', x: 100, y: 100 });
+    const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
+
+    // action — a huge delta drags grabbed 'c' way past the last slot, into the dead space
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 500, 500);
+
+    // result — 'c' pins to the box's far corner (200-20 / 300-20), 'd' rides alongside it, both inside
+    expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
+      c: { x: 180, y: 280 },
+      d: { x: 80, y: 280 },
+    });
+  });
+
   it('falls back to cursor-tracking for a selected node with no recorded footprint slot', () => {
     // mock — 'x' is selected but absent from draggedMemberSlots
     const refs = createCanvasRefs({

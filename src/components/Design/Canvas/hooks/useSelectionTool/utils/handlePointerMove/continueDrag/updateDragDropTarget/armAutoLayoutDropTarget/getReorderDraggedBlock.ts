@@ -21,19 +21,20 @@ export const getReorderDraggedBlock = (
   draggedSizes: TAutoLayoutChildSize[],
   orderedMovedIds: string[],
   grabbedNodeId: string | null,
-): Pick<TAutoLayoutReorderPreview, 'draggedGrabbedId' | 'draggedMemberSlots'> | undefined => {
+): Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'> | undefined => {
   if (orderedMovedIds.length > 1) {
+    const contentBox = getAutoLayoutContentBox(desiredParent, padding);
     const memberSlots = getAutoLayoutDraggedMemberSlots(
       desiredParent.layoutMode,
       itemSpacing,
       alignment,
-      getAutoLayoutContentBox(desiredParent, padding),
+      contentBox,
       siblingSizes,
       dropTargetIndex,
       draggedSizes,
     );
 
-    return getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots);
+    return getDraggedBlockPreviewMeta(orderedMovedIds, grabbedNodeId, memberSlots, contentBox, false);
   }
 
   return undefined;

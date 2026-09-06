@@ -56,6 +56,22 @@ describe('getDraggedBlockGhostPositions', () => {
     expect(result.positions.x).toEqual({ x: 305, y: 305 });
   });
 
+  it('packs the block contiguously off the grabbed member, ignoring the swap, when the preview is marked contiguous', () => {
+    // mock — chasm mode: slots are relative contiguous positions, not absolute footprint slots
+    const view = {
+      ...preview(),
+      draggedContiguous: true,
+    } as TAutoLayoutReorderPreview;
+    const contiguousSlots: Record<string, TPoint> = { c: { x: 0, y: 0 }, d: { x: 120, y: 0 } };
+    const nodes = [node('c', 0, 100), node('d', 100, 100)];
+
+    // before — grabbed 'c' flung far to the right
+    const result = getDraggedBlockGhostPositions(previewRef(view), nodes, view, contiguousSlots, nodes[0], 400, 0);
+
+    // result — 'd' sits exactly one contiguous step (120) right of 'c', wherever 'c' is dragged
+    expect(result.positions).toEqual({ c: { x: 400, y: 100 }, d: { x: 520, y: 100 } });
+  });
+
   it('should return a tween describing the resolved target offsets', () => {
     // mock
     const view = preview();

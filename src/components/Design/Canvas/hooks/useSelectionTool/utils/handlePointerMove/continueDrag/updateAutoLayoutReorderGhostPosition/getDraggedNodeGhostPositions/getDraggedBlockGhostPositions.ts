@@ -11,10 +11,27 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { buildBlockMemberTargetOffsets } from './buildBlockMemberTargetOffsets';
+import { buildContiguousMemberOffsets } from './buildContiguousMemberOffsets';
 import { buildDraggedBlockPositions } from './buildDraggedBlockPositions';
+import { clampGhostToBox } from './clampGhostToBox';
 import { getNearestSlotOwnerId } from './getNearestSlotOwnerId';
 import { resolveDraggedBlockOffsets } from 'components/Design/Canvas/utils/animateDraggedBlockOffset';
 import { translateBy } from './translateBy';
+
+const getTargetOffsets = (
+  selectedNodes: TSceneNode[],
+  preview: TAutoLayoutReorderPreview,
+  slots: Record<string, TPoint>,
+  grabbedId: string,
+  grabbedGhost: TPoint,
+): Record<string, TPoint> => {
+  if (preview.draggedContiguous) {
+    return buildContiguousMemberOffsets(selectedNodes, slots, grabbedId);
+  }
+
+  const cursorSlotOwnerId = getNearestSlotOwnerId(slots, grabbedGhost);
+  return buildBlockMemberTargetOffsets(selectedNodes, slots, grabbedId, cursorSlotOwnerId, slots[cursorSlotOwnerId], slots[grabbedId]);
+};
 
 export const getDraggedBlockGhostPositions = (
   previewRef: RefObject<TAutoLayoutReorderPreview | null>,
@@ -25,18 +42,14 @@ export const getDraggedBlockGhostPositions = (
   deltaX: number,
   deltaY: number,
 ): TDraggedGhostResult => {
-  const grabbedGhost = translateBy(getRotatedNodeBounds(grabbedNode), deltaX, deltaY);
-  const cursorSlotOwnerId = getNearestSlotOwnerId(slots, grabbedGhost);
-  const cursorNearestSlot = slots[cursorSlotOwnerId];
-  const grabbedHomeSlot = slots[grabbedNode.id];
-  const targetOffsets = buildBlockMemberTargetOffsets(
-    selectedNodes,
-    slots,
-    grabbedNode.id,
-    cursorSlotOwnerId,
-    cursorNearestSlot,
-    grabbedHomeSlot,
+  const grabbedBounds = getRotatedNodeBounds(grabbedNode);
+  const grabbedGhost = clampGhostToBox(
+    translateBy(grabbedBounds, deltaX, deltaY),
+    preview.draggedClampBox,
+    grabbedBounds.width,
+    grabbedBounds.height,
   );
+  const targetOffsets = getTargetOffsets(selectedNodes, preview, slots, grabbedNode.id, grabbedGhost);
   const { offsets, tween } = resolveDraggedBlockOffsets(previewRef, preview, grabbedGhost, targetOffsets, performance.now());
   const positions = buildDraggedBlockPositions(selectedNodes, offsets, grabbedGhost, deltaX, deltaY);
 

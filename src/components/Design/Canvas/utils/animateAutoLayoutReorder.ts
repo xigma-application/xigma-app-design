@@ -46,7 +46,7 @@ export const animateAutoLayoutReorder = (
   activeIndex: number,
   from: Record<string, TPoint>,
   to: Record<string, TPoint>,
-  draggedBlock?: Pick<TAutoLayoutReorderPreview, 'draggedGrabbedId' | 'draggedMemberSlots'>,
+  draggedBlock?: Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'>,
 ): void => {
   previewRef.current = { activeIndex, frameId, positions: { ...previewRef.current?.positions, ...from }, ...draggedBlock };
 

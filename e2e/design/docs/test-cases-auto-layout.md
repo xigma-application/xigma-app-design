@@ -28,19 +28,20 @@ gesture live, not just the Flow toggle in isolation.
 
 ## Reordering a child within its own frame
 
-| #   | Scenario                                                                                                                                                                                                                                    | Unit |         E2E          |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
-| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                                                                                                                  |  —   | ✅ `reorder.spec.ts` |
-| 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge                                                                                                 |  —   | ✅ `reorder.spec.ts` |
-| 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order)                                                                                            |  ✅  | ✅ `reorder.spec.ts` |
-| 4   | Wrap: nudging a child that sits alone on its own row doesn't perturb the siblings on a different row                                                                                                                                        |  ✅  | ✅ `reorder.spec.ts` |
-| 5   | Wrap: a dragged multi-row block previews as its own individual members, not one merged bounding box                                                                                                                                         |  ✅  | ✅ `reorder.spec.ts` |
-| 6   | Wrap: moving a child into another row keeps the reorder's whole-cell (edge-based) insert zone instead of a half-cell midpoint one                                                                                                           |  ✅  | ✅ `reorder.spec.ts` |
-| 7   | Wrap: a child dragged toward another row can be dropped straight back onto its own vacated slot                                                                                                                                             |  ✅  | ✅ `reorder.spec.ts` |
-| 8   | Wrap: a dragged multi-node block lands by reading-order slot minus the grabbed member's offset within the block                                                                                                                             |  ✅  | ✅ `reorder.spec.ts` |
-| 9   | A dragged multi-node block's ghost shows its members merged into their final layout (contiguous, right gap/order) and rides the cursor as one unit — for plain horizontal / vertical, not only wrap                                         |  ✅  | ✅ `reorder.spec.ts` |
-| 10  | The internal arrangement of the block's ghost re-tweens (200 ms) when it changes mid-drag — e.g. a companion flips from the right of the cursor to its left near the last slot — while the grabbed member keeps tracking the cursor exactly |  ✅  |          —           |
-| 11  | Non-adjacent block (e.g. {1,4}): siblings make room for the block's individual members, not one merged bounding box spanning the members it straddles                                                                                       |  ✅  | ✅ `reorder.spec.ts` |
+| #   | Scenario                                                                                                                                                                                                                                                                                          | Unit |         E2E          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
+| 1   | Dragging a child to a new position among its own siblings reorders it, without ejecting it                                                                                                                                                                                                        |  —   | ✅ `reorder.spec.ts` |
+| 2   | Dragging a child swaps past a sibling the instant it touches that sibling's own near edge (not its midpoint), and reverts at that same edge                                                                                                                                                       |  —   | ✅ `reorder.spec.ts` |
+| 3   | Dragging a multi-node selection reorders the whole block together, preserving the block's own current relative order (not selection/click order)                                                                                                                                                  |  ✅  | ✅ `reorder.spec.ts` |
+| 4   | Wrap: nudging a child that sits alone on its own row doesn't perturb the siblings on a different row                                                                                                                                                                                              |  ✅  | ✅ `reorder.spec.ts` |
+| 5   | Wrap: a dragged multi-row block previews as its own individual members, not one merged bounding box                                                                                                                                                                                               |  ✅  | ✅ `reorder.spec.ts` |
+| 6   | Wrap: moving a child into another row keeps the reorder's whole-cell (edge-based) insert zone instead of a half-cell midpoint one                                                                                                                                                                 |  ✅  | ✅ `reorder.spec.ts` |
+| 7   | Wrap: a child dragged toward another row can be dropped straight back onto its own vacated slot                                                                                                                                                                                                   |  ✅  | ✅ `reorder.spec.ts` |
+| 8   | Wrap: a dragged multi-node block lands by reading-order slot minus the grabbed member's offset within the block                                                                                                                                                                                   |  ✅  | ✅ `reorder.spec.ts` |
+| 9   | A dragged multi-node block's ghost shows its members merged into their final layout (contiguous, right gap/order) and rides the cursor as one unit — for plain horizontal / vertical, not only wrap                                                                                               |  ✅  | ✅ `reorder.spec.ts` |
+| 10  | The internal arrangement of the block's ghost re-tweens (200 ms) when it changes mid-drag — e.g. a companion flips from the right of the cursor to its left near the last slot — while the grabbed member keeps tracking the cursor exactly                                                       |  ✅  |          —           |
+| 11  | Non-adjacent block (e.g. {1,4}): siblings make room for the block's individual members, not one merged bounding box spanning the members it straddles                                                                                                                                             |  ✅  | ✅ `reorder.spec.ts` |
+| 12  | Dragging the block's grabbed member past the last item into the "chasm" of a partial last row switches the ghost to a contiguous edge-to-edge run (companion right next to the grabbed member) clamped inside the frame, instead of a companion flying off toward its distant wrap-footprint slot |  ✅  |          —           |
 
 This is the one path here that a unit test genuinely can't stand in for: the real position math
 (`getAutoLayoutDropTarget`'s `siblingPositions`, the live tween in `animateAutoLayoutReorder`) is
@@ -214,6 +215,20 @@ Found live by the user (2026-09-06). Two related gaps once the wrap block-reorde
    individual `draggedSizes` spliced in, not one placeholder. Applied only for same-parent
    multi-node reorder (`getSingleLineReorderDropTarget`); single-node reorder and the cross-parent
    drop indicator keep the merged placeholder.
+
+3. **The grabbed member could be dragged into "the chasm".** With a partial last row
+   (`[1,2,3] / [4,5,6] / [7]`), grabbing `7` of `{6,7}` and dragging into the empty area where slots
+   8/9 would be: the footprint of the committed layout puts `6` in row 2 (col 3) and `7` in row 3
+   (col 1) — diagonally far apart — so `companion = grabbedGhost + (slot6 − slot7)` flew clean off
+   the frame. Model (from the user): _no real slot → the companion just sits next to the grabbed
+   member, even for a block of 10_. When the reading-order slot runs past the end
+   (`readingOrderSlot − grabbedIndexInBlock > siblingCount`), the ghost switches to **contiguous
+   mode** (`draggedContiguous` on the preview): member slots become a straight edge-to-edge run
+   (`getContiguousMemberSlots`), the swap/nearest-slot logic is skipped
+   (`buildContiguousMemberOffsets`), and the whole tight block rides the cursor — additionally
+   clamped to the frame's content box (`draggedClampBox` → `clampGhostToBox`) so it can't leave the
+   frame. The commit index is (again) unchanged. Only wrap has a chasm; the non-wrap path always
+   passes `contiguous: false`.
 
 ### A real, pre-existing selection bug found while writing these tests
 

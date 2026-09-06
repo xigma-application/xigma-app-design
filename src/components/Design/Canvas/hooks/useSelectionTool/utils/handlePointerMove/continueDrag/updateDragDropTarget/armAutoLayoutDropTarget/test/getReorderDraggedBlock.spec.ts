@@ -45,8 +45,10 @@ describe('getReorderDraggedBlock', () => {
     // action
     const block = getReorderDraggedBlock(rowFrame, 0, AlignmentLayout.topLeft, NO_PADDING, siblingSizes, 2, draggedSizes, ['b', 'c'], 'c');
 
-    // result
+    // result — non-wrap has no "chasm", so never contiguous
     expect(block).toEqual({
+      draggedClampBox: { height: 300, width: 400, x: 0, y: 0 },
+      draggedContiguous: false,
       draggedGrabbedId: 'c',
       draggedMemberSlots: { b: { x: 200, y: 0 }, c: { x: 300, y: 0 } },
     });

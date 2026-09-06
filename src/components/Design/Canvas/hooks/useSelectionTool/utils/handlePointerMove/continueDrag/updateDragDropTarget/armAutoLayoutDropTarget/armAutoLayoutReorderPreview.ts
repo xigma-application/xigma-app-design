@@ -12,7 +12,7 @@ export const armAutoLayoutReorderPreview = (
   desiredParentId: string,
   dropTarget: TAutoLayoutDropTarget,
   siblingEntries: { bounds: TDraftRect; sibling: TSceneNode }[],
-  draggedBlock?: Pick<TAutoLayoutReorderPreview, 'draggedGrabbedId' | 'draggedMemberSlots'>,
+  draggedBlock?: Pick<TAutoLayoutReorderPreview, 'draggedClampBox' | 'draggedContiguous' | 'draggedGrabbedId' | 'draggedMemberSlots'>,
 ): void => {
   const activePreview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
   const isAlreadyAnimatingThisIndex =
@@ -33,5 +33,11 @@ export const armAutoLayoutReorderPreview = (
       dropTarget.siblingPositions,
       draggedBlock,
     );
+  }
+
+  const preview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
+
+  if (preview && draggedBlock) {
+    canvasRefs.transform.autoLayoutReorderPreviewRef.current = { ...preview, ...draggedBlock };
   }
 };

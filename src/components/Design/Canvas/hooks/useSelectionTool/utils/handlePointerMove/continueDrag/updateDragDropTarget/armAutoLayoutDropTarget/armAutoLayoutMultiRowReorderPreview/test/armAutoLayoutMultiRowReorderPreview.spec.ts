@@ -227,4 +227,33 @@ describe('armAutoLayoutMultiRowReorderPreview', () => {
     // result
     expect(refs.transform.autoLayoutDropTargetRef.current).toBeNull();
   });
+
+  it('records contiguous member slots and flags the block contiguous when dragged into the chasm past the last item', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // action — grabbed 'c', cursor dragged well past the last child 'f' into the empty area
+    armAutoLayoutMultiRowReorderPreview(
+      refs,
+      gridFrame,
+      'frame-1',
+      gridNodes,
+      siblingEntries,
+      siblingSizes,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      draggedSizes,
+      ['c', 'd'],
+      'c',
+      { x: 260, y: 250 },
+    );
+
+    // result — no wrap footprint; 'c' and 'd' are just packed edge to edge
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({
+      draggedContiguous: true,
+      draggedMemberSlots: { c: { x: 0, y: 0 }, d: { x: 100, y: 0 } },
+    });
+  });
 });

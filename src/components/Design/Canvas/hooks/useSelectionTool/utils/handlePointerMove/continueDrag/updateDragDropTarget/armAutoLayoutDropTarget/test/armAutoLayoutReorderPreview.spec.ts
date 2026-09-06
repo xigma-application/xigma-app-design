@@ -85,4 +85,24 @@ describe('armAutoLayoutReorderPreview', () => {
     // result — untouched: a fresh trigger would have overwritten this with the freshly computed "from" position
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toBe(activePreview);
   });
+
+  it('refreshes the dragged-block metadata even when the index is unchanged (e.g. footprint → contiguous)', () => {
+    // mock — a preview is already animating index 1, with footprint block metadata
+    const activePreview = {
+      activeIndex: 1,
+      draggedContiguous: false,
+      draggedMemberSlots: { c: { x: 0, y: 200 }, d: { x: 100, y: 200 } },
+      frameId: 'frame-1',
+      positions: { s1: { x: 5, y: 5 } },
+    };
+    const refs = createCanvasRefs({ transform: { autoLayoutReorderPreviewRef: { current: activePreview } } });
+    const siblingEntries = [{ bounds: { height: 20, width: 20, x: 0, y: 0 }, sibling: sibling('s1', 0, 0) }];
+    const contiguous = { draggedContiguous: true, draggedGrabbedId: 'd', draggedMemberSlots: { c: { x: 0, y: 0 }, d: { x: 100, y: 0 } } };
+
+    // action — same index, but the block flipped into contiguous mode
+    armAutoLayoutReorderPreview(refs, 'frame-1', dropTarget(1), siblingEntries, contiguous);
+
+    // result — no animation restart, but the fresh block metadata is written; positions kept
+    expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ ...contiguous, positions: { s1: { x: 5, y: 5 } } });
+  });
 });
