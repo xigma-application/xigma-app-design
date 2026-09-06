@@ -8,26 +8,23 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawFrameOutlines } from '../drawFrameOutlines';
+import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 
-const createGlMock = (): WebGL2RenderingContext =>
-  ({
-    STATIC_DRAW: 35044,
-    TRIANGLES: 4,
-    bindBuffer: vi.fn(),
-    bufferData: vi.fn(),
-    drawArrays: vi.fn(),
-    enableVertexAttribArray: vi.fn(),
-    getAttribLocation: vi.fn(() => 0),
-    getUniformLocation: vi.fn(() => ({})),
-    uniform1f: vi.fn(),
-    uniform2f: vi.fn(),
-    uniform4fv: vi.fn(),
-    useProgram: vi.fn(),
-    vertexAttribPointer: vi.fn(),
-  }) as unknown as WebGL2RenderingContext;
+vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({ drawThickOutline: vi.fn() }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+
+const context = {
+  buffer: {} as WebGLBuffer,
+  canvasHeight: 100,
+  canvasWidth: 100,
+  gl: {} as WebGL2RenderingContext,
+  imageContext: {} as never,
+  program: {} as WebGLProgram,
+  viewport: IDENTITY_VIEWPORT,
+};
 
 const buildFrame = (id: string): TSceneNode => ({
   childIds: [],
@@ -59,75 +56,37 @@ const buildRectangle = (id: string): TSceneNode => ({
 
 describe('drawFrameOutlines', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+
     if (!selectAreFrameOutlinesVisible(store.getState())) {
       store.dispatch(toggleFrameOutlinesVisible());
     }
   });
 
   it('should draw nothing when the preference is off', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-
     store.dispatch(toggleFrameOutlinesVisible());
 
-    // before
-    drawFrameOutlines(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
-      [buildFrame('a')],
-    );
+    drawFrameOutlines(context, [buildFrame('a')], createCanvasRefs());
 
-    // result
-    expect(gl.drawArrays).not.toHaveBeenCalled();
-  });
-
-  it('should draw nothing when there are no frame nodes', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-
-    // before
-    drawFrameOutlines(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
-      [buildRectangle('a')],
-    );
-
-    // result
-    expect(gl.drawArrays).not.toHaveBeenCalled();
-  });
-
-  it('should draw a thick rectangular outline for a frame node', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-
-    // before
-    drawFrameOutlines(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
-      [buildFrame('a')],
-    );
-
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 24);
+    expect(drawThickOutline).not.toHaveBeenCalled();
   });
 
   it('should draw one outline per frame, skipping every other node type in the same list', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
+    drawFrameOutlines(context, [buildFrame('a'), buildRectangle('b'), buildFrame('c')], createCanvasRefs());
 
-    // before
-    drawFrameOutlines(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
-      [buildFrame('a'), buildRectangle('b'), buildFrame('c')],
-    );
+    expect(drawThickOutline).toHaveBeenCalledTimes(2);
+  });
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  it('should outline a frame at its live reorder-ghost position, not its frozen store position', () => {
+    // mock — a same-parent reorder preview has the frame's ghost riding the cursor at (50, 30)
+    const refs = createCanvasRefs();
+    refs.transform.autoLayoutReorderPreviewRef.current = { activeIndex: 0, frameId: 'parent', positions: { a: { x: 50, y: 30 } } };
+
+    // action — the frame's own store position is still (0, 0)
+    drawFrameOutlines(context, [buildFrame('a')], refs);
+
+    // result — the outline follows the ghost
+    expect(drawThickOutline).toHaveBeenCalledTimes(1);
+    expect((drawThickOutline as ReturnType<typeof vi.fn>).mock.calls[0][3]).toMatchObject({ x: 50, y: 30 });
   });
 });

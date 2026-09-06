@@ -923,6 +923,52 @@ describe('drawSceneNodes', () => {
       expect(hoistedGl.drawArrays).toHaveBeenCalledTimes((baselineGl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.length);
     });
 
+    it('hoists only the dragged subtree root — a dragged inner frame keeps rendering its own clipped children', () => {
+      const leaf = buildNode({ id: 'leaf', parentId: 'inner', type: NodeType.rectangle });
+      const inner = buildNode({ childIds: ['leaf'], clipContent: true, id: 'inner', parentId: 'origin' });
+      const origin = buildNode({ childIds: ['inner'], clipContent: true, id: 'origin' });
+      const scene = {
+        buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      };
+      const nodesById = { inner, leaf, origin };
+
+      const baselineGl = createGlMock();
+      drawSceneNodes(
+        { ...scene, gl: baselineGl, imageContext: withPool(createPoolStub()) },
+        [origin, inner, leaf],
+        ['origin'],
+        new Map(),
+        createCanvasRefs(),
+        nodesById,
+      );
+
+      const hoistedGl = createGlMock();
+      const refs = createCanvasRefs();
+      refs.transform.autoLayoutDropTargetRef.current = {
+        frameId: 'other-frame',
+        index: 0,
+        indicator: { height: 0, width: 0, x: 0, y: 0 },
+        siblingPositions: {},
+      };
+      // a frame drag arms the inner frame plus its descendants
+      refs.transform.draggedNodeIdsRef.current = new Set(['inner', 'leaf']);
+      drawSceneNodes(
+        { ...scene, gl: hoistedGl, imageContext: withPool(createPoolStub()) },
+        [origin, inner, leaf],
+        ['origin'],
+        new Map(),
+        refs,
+        nodesById,
+      );
+
+      // 'leaf' is NOT skipped inside the hoisted 'inner' frame's own clip pass — total draw calls hold
+      expect(hoistedGl.drawArrays).toHaveBeenCalledTimes((baselineGl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.length);
+    });
+
     it('should skip the offscreen path for a frame with Clip content off, even with children', () => {
       // mock
       const gl = createGlMock();

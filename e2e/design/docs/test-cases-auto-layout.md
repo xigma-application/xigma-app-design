@@ -292,10 +292,16 @@ remained was at the standard 0.5 auto-layout-drag dim — "you only see the indi
 the drag.
 
 Fixed in the WebGL scene render (`drawSceneNodes`): while an auto-layout drop target is armed, the
-dragged node ids (`getHoistedDragIds`) are skipped everywhere in the clipped scene tree
-(`renderIds`) and painted once, unclipped, on top (`renderHoistedIds`). The 0.5 dim stays. Unit-only
-— the fix is a pure function of ref state, not a gesture/timing thing, and a pixel probe over a
-half-opacity ghost on a light frame body would be flaky.
+roots of the dragged subtrees (`getHoistedDragIds` — the frame itself, not each of its descendants,
+so a dragged frame still renders its own clipped contents) are skipped everywhere in the clipped
+scene tree (`renderIds`) and painted once, unclipped, on top (`renderHoistedIds`). The 0.5 dim
+stays. Unit-only — the fix is a pure function of ref state, not a gesture/timing thing, and a pixel
+probe over a half-opacity ghost on a light frame body would be flaky.
+
+Follow-up (same day): the violet frame-outline overlay (`drawFrameOutlines`, the "Frame outlines"
+toggle) stayed at the frame's frozen store position during a same-parent reorder, since it drew the
+raw node while only the fill ghost got the reorder position override. It now runs the node through
+`getAutoLayoutReorderRenderNode` too, so the outline rides the ghost.
 
 ## Rotated children
 
