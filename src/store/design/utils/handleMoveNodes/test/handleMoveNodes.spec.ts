@@ -339,6 +339,47 @@ describe('handleMoveNodes', () => {
     expect(page.nodes.b).toMatchObject({ x: 0, y: 0 });
   });
 
+  it('should clear ignoreAutoLayout when a node is reparented into a different frame', () => {
+    // mock
+    const a = buildRect({ id: 'a', ignoreAutoLayout: true, parentId: 'frame-1' });
+    const source = buildFrame({ childIds: ['a'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const target = buildFrame({ childIds: [], id: 'frame-2', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ nodes: { a, 'frame-1': source, 'frame-2': target }, rootOrder: ['frame-1', 'frame-2'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 0, targetParentId: 'frame-2' });
+
+    // result
+    expect((getActivePage(state).nodes.a as TRectangleNode).ignoreAutoLayout).toBeUndefined();
+  });
+
+  it('should clear ignoreAutoLayout when a node is dragged back out to the root', () => {
+    // mock
+    const a = buildRect({ id: 'a', ignoreAutoLayout: true, parentId: 'frame-1' });
+    const source = buildFrame({ childIds: ['a'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ nodes: { a, 'frame-1': source }, rootOrder: ['frame-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 0, targetParentId: null });
+
+    // result
+    expect((getActivePage(state).nodes.a as TRectangleNode).ignoreAutoLayout).toBeUndefined();
+  });
+
+  it('should keep ignoreAutoLayout when a node is merely reordered within its own (unchanged) parent', () => {
+    // mock
+    const a = buildRect({ id: 'a', ignoreAutoLayout: true, parentId: 'frame-1' });
+    const b = buildRect({ id: 'b', parentId: 'frame-1' });
+    const frame = buildFrame({ childIds: ['a', 'b'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ nodes: { a, b, 'frame-1': frame }, rootOrder: ['frame-1'] });
+
+    // action — reorder 'a' to the end of the same frame's own children
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 1, targetParentId: 'frame-1' });
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ ignoreAutoLayout: true });
+  });
+
   it('should tolerate a moved id that no longer resolves to a node', () => {
     // mock
     const a = buildRect({ id: 'a' });

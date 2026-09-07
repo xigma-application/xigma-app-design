@@ -42,6 +42,27 @@ const readChild = (page: Page, childIndex: number): Promise<{ parentId: string |
     return { parentId: child.parentId, x: child.x, y: child.y };
   }, childIndex);
 
+const getChildId = (page: Page, childIndex: number): Promise<string> =>
+  page.evaluate(async (index) => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+    return frame.childIds[index];
+  }, childIndex);
+
+const readNodeById = (page: Page, id: string): Promise<{ ignoreAutoLayout?: boolean; parentId: string | null }> =>
+  page.evaluate(async (nodeId) => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const node = activePage.nodes[nodeId] as unknown as { ignoreAutoLayout?: boolean; parentId: string | null };
+
+    return { ignoreAutoLayout: node.ignoreAutoLayout, parentId: node.parentId };
+  }, id);
+
 test.describe('auto-layout — a child that ignores auto layout', () => {
   test('stays completely static while its flow siblings are dragged and reordered around it', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -109,5 +130,38 @@ test.describe('auto-layout — a child that ignores auto layout', () => {
     expect(after.parentId).toBe(before.parentId);
     expect(after.x - before.x).toBeCloseTo(40, 0);
     expect(after.y - before.y).toBeCloseTo(15, 0);
+  });
+
+  test('clears the flag once it is dragged out to a different parent', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-ignore-auto-layout-reparent');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlowVertical(page);
+
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    // flag the second (bottom) child to ignore auto layout
+    await setIgnoreAutoLayout(page, 1);
+
+    const childId = await getChildId(page, 1);
+    const before = await readNodeById(page, childId);
+
+    expect(before.ignoreAutoLayout).toBe(true);
+
+    // drag it well outside the frame's own bounds, out to the root
+    await dragInto(page, { x: 630, y: 240 }, { x: 1300, y: 750 });
+
+    const after = await readNodeById(page, childId);
+
+    // reparented to the root, and the flag is cleared — it's a normal node again in its new context
+    expect(after.parentId).toBeNull();
+    expect(after.ignoreAutoLayout).toBeUndefined();
   });
 });
