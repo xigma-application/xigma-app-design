@@ -1,0 +1,228 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing options 1`] = `
+<DocumentFragment>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 1;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <svg
+      class="Icon"
+      fill="none"
+      height="14"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 11 6"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M10.5 0C10.6326 0 10.7598 0.052678 10.8536 0.146446C10.9473 0.240214 11 0.367392 11 0.5V5.5C11 5.63261 10.9473 5.75979 10.8536 5.85355C10.7598 5.94732 10.6326 6 10.5 6C10.3674 6 10.2402 5.94732 10.1464 5.85355C10.0527 5.75979 10 5.63261 10 5.5V3.5H1V5.5C1 5.63261 0.947321 5.75979 0.853553 5.85355C0.759785 5.94732 0.632608 6 0.5 6C0.367392 6 0.240215 5.94732 0.146447 5.85355C0.0526785 5.75979 0 5.63261 0 5.5V0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0C0.632608 0 0.759785 0.052678 0.853553 0.146446C0.947321 0.240214 1 0.367392 1 0.5V2.5H10V0.5C10 0.367392 10.0527 0.240214 10.1464 0.146446C10.2402 0.052678 10.3674 0 10.5 0Z"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+    </svg>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Fixed width (77)
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <svg
+      class="Icon"
+      fill="none"
+      height="14"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 10 7"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M0.145917 0.145917C0.192363 0.0993537 0.247538 0.0624112 0.308283 0.0372047C0.369028 0.0119983 0.43415 -0.000976562 0.499917 -0.000976562C0.565684 -0.000976562 0.630806 0.0119983 0.691551 0.0372047C0.752296 0.0624112 0.807471 0.0993537 0.853917 0.145917L3.85392 3.14592C3.94765 3.23968 4.00031 3.36684 4.00031 3.49942C4.00031 3.632 3.94765 3.75915 3.85392 3.85292L0.853917 6.85292C0.807495 6.8994 0.752371 6.93629 0.691692 6.96148C0.631013 6.98666 0.565968 6.99965 0.50027 6.99969C0.434573 6.99974 0.36951 6.98685 0.308795 6.96175C0.248081 6.93665 0.192905 6.89984 0.146417 6.85342C0.0999292 6.807 0.0630398 6.75187 0.0378556 6.69119C0.0126714 6.63051 -0.000314537 6.56547 -0.000360966 6.49977C-0.000407394 6.43407 0.0124868 6.36901 0.0375853 6.3083C0.0626837 6.24758 0.0994947 6.1924 0.145917 6.14592L2.79292 3.49992L0.145917 0.853917C0.0993537 0.807471 0.0624107 0.752295 0.0372043 0.69155C0.0119978 0.630805 -0.000976562 0.565684 -0.000976562 0.499917C-0.000976562 0.43415 0.0119978 0.369029 0.0372043 0.308284C0.0624107 0.247539 0.0993537 0.192363 0.145917 0.145917ZM9.85392 0.145917C9.90048 0.192363 9.93742 0.247539 9.96263 0.308284C9.98784 0.369029 10.0008 0.43415 10.0008 0.499917C10.0008 0.565684 9.98784 0.630805 9.96263 0.69155C9.93742 0.752295 9.90048 0.807471 9.85392 0.853917L7.20692 3.49992L9.85392 6.14592C9.94767 6.2398 10.0003 6.36709 10.0002 6.49977C10.0001 6.63245 9.9473 6.75966 9.85342 6.85342C9.80693 6.89984 9.75175 6.93665 9.69104 6.96175C9.63032 6.98685 9.56526 6.99974 9.49956 6.99969C9.36688 6.9996 9.23967 6.9468 9.14592 6.85292L6.14592 3.85292C6.05218 3.75915 5.99952 3.632 5.99952 3.49942C5.99952 3.36684 6.05218 3.23968 6.14592 3.14592L9.14592 0.145917C9.19236 0.0993537 9.24754 0.0624112 9.30828 0.0372047C9.36903 0.0119983 9.43415 -0.000976562 9.49992 -0.000976562C9.56568 -0.000976562 9.63081 0.0119983 9.69155 0.0372047C9.7523 0.0624112 9.80747 0.0993537 9.85392 0.145917Z"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+    </svg>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Hug contents
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    >
+      <svg
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M7.5 2H8.5V14H7.5V2Z"
+          data-svg-property="fill"
+          fill="white"
+        />
+        <path
+          clip-rule="evenodd"
+          d="M2.854 5.146L5.707 8L2.854 10.854L2.146 10.146L3.793 8.5H0V7.5H3.793L2.146 5.854L2.854 5.146ZM12.207 8.5L13.854 10.146L13.146 10.854L10.293 8L13.146 5.146L13.854 5.854L12.207 7.5H16V8.5H12.207Z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Add min width…
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    >
+      <svg
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M1 2H2V14H1V2ZM14 2H15V14H14V2Z"
+          data-svg-property="fill"
+          fill="white"
+        />
+        <path
+          clip-rule="evenodd"
+          d="M4.20697 8.5L5.85397 10.146L5.14597 10.854L2.29297 8L5.14597 5.146L5.85397 5.854L4.20697 7.5H11.793L10.146 5.854L10.854 5.146L13.707 8L10.854 10.854L10.146 10.146L11.793 8.5H4.20697Z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Add max width…
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      class="_PopoverItem__iconSlot_9483de"
+      style="width: 14px;"
+    >
+      <svg
+        class="Icon"
+        data-fpl-icon-size="24"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="14"
+      >
+        <path
+          d="M11.117 5.586A2 2 0 0 1 13 5.649l4 2.31.113.07A2 2 0 0 1 18 9.69v4.62a2 2 0 0 1-.887 1.66l-.113.072-4 2.309a2 2 0 0 1-1.883.063L11 18.351l-4-2.309a2 2 0 0 1-1-1.732V9.69a2 2 0 0 1 1-1.73l4-2.31zm1.383.93a1 1 0 0 0-1 0l-4 2.308-.11.074A1 1 0 0 0 7 9.69v4.62l.009.132c.04.305.22.578.491.734l4 2.31c.27.155.597.175.88.058l.12-.059 4-2.31a1 1 0 0 0 .491-.733L17 14.31V9.69a1 1 0 0 0-.39-.792l-.11-.074zM12 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Apply variable…
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

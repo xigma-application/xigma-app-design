@@ -11,13 +11,15 @@ import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
 // utils
 import { getLockedDimensionsChanges } from '../utils/getLockedDimensionsChanges';
 
 export type TUseColumnDimensionsResult = {
   height: number;
+  heightSizingMode: SizingMode;
+  isAutoLayout: boolean;
   locked: boolean;
   onBlurHeight: TFunc<[FocusEvent<HTMLInputElement>]>;
   onBlurWidth: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -25,8 +27,11 @@ export type TUseColumnDimensionsResult = {
   onDragStart: TFunc;
   onScrubHeight: TFunc<[number]>;
   onScrubWidth: TFunc<[number]>;
+  onSelectHeightSizingMode: TFunc<[SizingMode]>;
+  onSelectWidthSizingMode: TFunc<[SizingMode]>;
   onToggleLock: TFunc;
   width: number;
+  widthSizingMode: SizingMode;
 };
 
 export const useColumnDimensions = (): TUseColumnDimensionsResult => {
@@ -37,6 +42,13 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const width = frameNode?.width ?? 0;
   const height = frameNode?.height ?? 0;
   const locked = frameNode?.lockedAspectRatio ?? false;
+  const layoutMode = frameNode?.layoutMode;
+  const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const isAutoLayout = layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical;
+  const primaryAxisSizingMode = frameNode?.primaryAxisSizingMode ?? SizingMode.fixed;
+  const counterAxisSizingMode = frameNode?.counterAxisSizingMode ?? SizingMode.fixed;
+  const widthSizingMode = isHorizontal ? primaryAxisSizingMode : counterAxisSizingMode;
+  const heightSizingMode = isHorizontal ? counterAxisSizingMode : primaryAxisSizingMode;
 
   const commitWidth = (nextWidth: number): void => {
     dispatch(updateNode({ changes: getLockedDimensionsChanges('width', nextWidth, width, height, locked), id }));
@@ -46,8 +58,18 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
     dispatch(updateNode({ changes: getLockedDimensionsChanges('height', nextHeight, width, height, locked), id }));
   };
 
+  const selectWidthSizingMode = (mode: SizingMode): void => {
+    dispatch(updateNode({ changes: { [isHorizontal ? 'primaryAxisSizingMode' : 'counterAxisSizingMode']: mode }, id }));
+  };
+
+  const selectHeightSizingMode = (mode: SizingMode): void => {
+    dispatch(updateNode({ changes: { [isHorizontal ? 'counterAxisSizingMode' : 'primaryAxisSizingMode']: mode }, id }));
+  };
+
   return {
     height,
+    heightSizingMode,
+    isAutoLayout,
     locked,
     onBlurHeight: useDimensionsCommit(height, commitHeight),
     onBlurWidth: useDimensionsCommit(width, commitWidth),
@@ -55,7 +77,10 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onScrubHeight: commitHeight,
     onScrubWidth: commitWidth,
+    onSelectHeightSizingMode: selectHeightSizingMode,
+    onSelectWidthSizingMode: selectWidthSizingMode,
     onToggleLock: () => dispatch(updateNode({ changes: { lockedAspectRatio: !locked }, id })),
     width,
+    widthSizingMode,
   };
 };

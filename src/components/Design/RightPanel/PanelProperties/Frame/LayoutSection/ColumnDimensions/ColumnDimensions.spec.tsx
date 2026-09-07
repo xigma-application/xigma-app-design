@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 
 const renderColumnDimensions = (): ReturnType<typeof render> =>
   render(
@@ -30,6 +30,29 @@ const addFrameNode = (width: number, height: number, lockedAspectRatio = false):
       fill: '#ff0000',
       height,
       lockedAspectRatio,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addAutoLayoutFrameNode = (width: number, height: number): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height,
+      layoutMode: LayoutMode.horizontal,
       name: 'Frame',
       parentId: null,
       rotation: 0,
@@ -171,5 +194,50 @@ describe('ColumnDimensions behaviors', () => {
 
     // result
     expect(container.querySelector('[class*="SectionColumnContent__input-connector"]')).toBeNull();
+  });
+
+  it('should not show the sizing-mode chevrons for a plain (non-auto-layout) frame', () => {
+    // mock
+    const frameId = addFrameNode(326, 187);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderColumnDimensions();
+
+    // result
+    expect(screen.queryByLabelText('Width sizing options')).toBeNull();
+    expect(screen.queryByLabelText('Height sizing options')).toBeNull();
+  });
+
+  it('should show both sizing-mode chevrons for an auto-layout frame', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(326, 187);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderColumnDimensions();
+
+    // result
+    expect(screen.getByLabelText('Width sizing options')).toBeInTheDocument();
+    expect(screen.getByLabelText('Height sizing options')).toBeInTheDocument();
+  });
+
+  it('should switch the width sizing mode to hug when the width menu’s Hug option is clicked', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(326, 187);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderColumnDimensions();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+    fireEvent.click(screen.getByText('Hug contents'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ primaryAxisSizingMode: 'hug' });
   });
 });
