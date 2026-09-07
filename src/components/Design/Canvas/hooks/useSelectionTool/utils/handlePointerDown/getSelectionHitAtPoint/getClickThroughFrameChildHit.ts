@@ -19,7 +19,7 @@ export const getClickThroughFrameChildHit = (
 ): TSceneNode | null => {
   const state = store.getState();
   const candidates = getClickThroughLeafNodes(selectRenderOrderedNodes(state), nodesById);
-  const hit = getNodeAtPoint(point, candidates, viewport);
+  const hit = getNodeAtPoint(point, candidates, viewport, { clipNodesById: nodesById });
 
   return hit && isAncestorNode(frame.id, hit, nodesById) && !selectVectorEditingNodeIds(state).includes(hit.id) ? hit : null;
 };

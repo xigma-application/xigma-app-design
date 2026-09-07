@@ -9,6 +9,7 @@ import { AppDispatch, store } from 'store';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
+import { dropClippedMarqueeNodes } from './dropClippedMarqueeNodes';
 import { getCollidedNodes } from '../../../../utils/getCollidedNodes';
 import { getMarqueeLeafNodes } from './getMarqueeLeafNodes';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
@@ -31,7 +32,10 @@ export const continueMarqueeDrag = (
     const nodesById = selectNodes(state);
     const isCtrlPressed = isControlPressed(event);
     const candidates = getMarqueeLeafNodes(state, nodesById, isCtrlPressed);
-    const collidedNodes = pruneMarqueeDescendants(getCollidedNodes(candidates, rect, isCtrlPressed, nodesById), nodesById);
+    const collidedNodes = pruneMarqueeDescendants(
+      dropClippedMarqueeNodes(getCollidedNodes(candidates, rect, isCtrlPressed, nodesById), rect, nodesById),
+      nodesById,
+    );
 
     marqueeRef.current = rect;
     dispatch(setSelection(collidedNodes.map(({ id }) => id)));

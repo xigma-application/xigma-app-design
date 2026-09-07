@@ -468,4 +468,38 @@ describe('getNodeAtPoint', () => {
     expect(getNodeAtPoint({ x: 8, y: 5 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
     expect(getNodeAtPoint({ x: 20, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
   });
+
+  describe('clip-content filtering', () => {
+    const clipFrame = buildNode({ clipContent: true, height: 100, id: 'frame', width: 100, x: 0, y: 0 });
+    // 40x40 child straddling the frame's right edge: x 80..120, so x > 100 is clipped away
+    const child = buildNode({ height: 40, id: 'child', parentId: 'frame', type: NodeType.ellipse, width: 40, x: 80, y: 20 });
+
+    it('should not hit a child on the part that a clipping frame ancestor has cut away', () => {
+      expect(getNodeAtPoint({ x: 112, y: 40 }, [clipFrame, child], IDENTITY_VIEWPORT)).toBeNull();
+    });
+
+    it('should still hit that child on the part that stays inside the clipping frame', () => {
+      expect(getNodeAtPoint({ x: 90, y: 40 }, [clipFrame, child], IDENTITY_VIEWPORT)?.id).toBe('child');
+    });
+
+    it('should hit the clipped-away part when ignoreClip is set', () => {
+      expect(getNodeAtPoint({ x: 112, y: 40 }, [clipFrame, child], IDENTITY_VIEWPORT, { ignoreClip: true })?.id).toBe('child');
+    });
+
+    it('should not filter when the ancestor frame does not clip its content', () => {
+      const openFrame = buildNode({ clipContent: false, height: 100, id: 'frame', width: 100, x: 0, y: 0 });
+
+      expect(getNodeAtPoint({ x: 112, y: 40 }, [openFrame, child], IDENTITY_VIEWPORT)?.id).toBe('child');
+    });
+
+    it('should honour a clipping frame anywhere up the ancestor chain', () => {
+      const outer = buildNode({ clipContent: true, height: 200, id: 'outer', width: 200, x: 0, y: 0 });
+      const inner = buildNode({ clipContent: true, height: 100, id: 'inner', parentId: 'outer', width: 100, x: 0, y: 0 });
+      const grandChild = buildNode({ height: 40, id: 'gc', parentId: 'inner', type: NodeType.ellipse, width: 40, x: 80, y: 20 });
+
+      // inside `outer` but past `inner`'s right edge — the grandchild must not be the hit there
+      // (the click lands on `outer`'s own body instead)
+      expect(getNodeAtPoint({ x: 112, y: 40 }, [outer, inner, grandChild], IDENTITY_VIEWPORT)?.id).toBe('outer');
+    });
+  });
 });

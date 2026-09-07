@@ -150,4 +150,38 @@ describe('continueMarqueeDrag', () => {
     expect(selectSelectedIds(store.getState())).toEqual([frameId]);
     expect(selectSelectedIds(store.getState())).not.toContain(childId);
   });
+
+  const buildFrameWithOverflowingChild = (): { childId: string } => {
+    const frameId = addFrameNode(0, 0, 400); // clips, 0..400
+    const childId = addRectNode(380, 180, 80); // 380..460 — overflows the right edge
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([]));
+
+    return { childId };
+  };
+
+  it('should not marquee-select a child through the part its clipping frame cuts away', () => {
+    // mock
+    buildFrameWithOverflowingChild();
+    const canvas = createCanvas();
+
+    // before — marquee sits entirely in the clipped-away band (x 420..500)
+    continueMarqueeDrag(canvas, pointerEvent(500, 260), store.dispatch, createMarqueeStartRef({ x: 420, y: 160 }), createMarqueeRef());
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it('should still marquee-select that child through the part that stays visible inside the frame', () => {
+    // mock
+    const { childId } = buildFrameWithOverflowingChild();
+    const canvas = createCanvas();
+
+    // before — marquee overlaps the child's still-visible sliver (x 350..390)
+    continueMarqueeDrag(canvas, pointerEvent(390, 260), store.dispatch, createMarqueeStartRef({ x: 350, y: 160 }), createMarqueeRef());
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([childId]);
+  });
 });

@@ -446,3 +446,27 @@ Every scenario here earns e2e coverage for the same reason the frame-nesting blo
 section-opacity rule, the Ctrl-reach bypass, the Layers-panel drag rejection, and the canvas
 drag-drop reparenting all have real pointer/timing/live-render stakes that a synthetic unit-level
 `PointerEvent` cannot faithfully reproduce.
+
+## Clipped children are not pickable where the frame cuts them away
+
+When a frame has `clipContent` on, the part of a child that spills outside the frame's rectangle is
+not just visually clipped — it stops being a hit target. A click there, or a marquee that only
+sweeps that clipped-away band, resolves to nothing; the same gestures over the child's still-visible
+part select it as normal. The one exception is a child that is **already** selected: it stays
+grabbable anywhere its geometry reaches, so a drag can start from the overhang. `getNodeAtPoint`
+grew an `isPointClippedFromNode` ancestor-walk (with a `clipNodesById` override for the leaf-only
+child-drill picks and an `ignoreClip` opt-out for the already-selected pick); `getSelectionHitAtPoint`
+post-filters its result the same way, and the marquee runs its collided set through
+`dropClippedMarqueeNodes`, which keeps a node only if the slice of it still visible through every
+clipping ancestor (`getClipVisibleRect`) overlaps the marquee. Lives in
+`e2e/design/selection/clip-selection.spec.ts`.
+
+| #   | Scenario                                                                                              | Unit |             E2E             |
+| --- | ----------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 360 | A click on a clipping frame child's clipped-away overhang selects nothing                             |  ✅  | ✅ `clip-selection.spec.ts` |
+| 361 | A click on that child's still-visible part selects it as normal                                       |  ✅  | ✅ `clip-selection.spec.ts` |
+| 362 | A marquee that only sweeps the clipped-away overhang selects nothing                                  |  ✅  | ✅ `clip-selection.spec.ts` |
+| 363 | A marquee that reaches the child's still-visible sliver selects it                                    |  ✅  | ✅ `clip-selection.spec.ts` |
+| 364 | Once the child is selected, it stays grabbable by its clipped-away overhang so a drag can start there |  ✅  | ✅ `clip-selection.spec.ts` |
+| 365 | The clip check walks the whole ancestor chain and only counts frames whose `clipContent` is on        |  ✅  |              —              |
+| 366 | A rotated clipping frame still clips to its own (rotation-aware) bounds                               |  ✅  |              —              |

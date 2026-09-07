@@ -1,5 +1,5 @@
 // store
-import { addNode, groupNodes, moveNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, moveNodes, setSelection, setVectorEditingNodeIds, toggleFrameClipContent } from 'store/design/slice';
 import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -349,6 +349,58 @@ describe('getSelectionHitAtPoint', () => {
       const hit = getSelectionHitAtPoint({ x: 21100, y: 21100 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
       expect(hit?.id).toBe(frameId);
+    });
+
+    describe('when a nested frame overflows an inner clipping frame', () => {
+      // outer 22000..22800 (clip off) → inner 22000..22400 (clips) → leaf frame 22360..22440,
+      // whose part at x > 22400 is clipped by `inner` but the click still lands inside `outer`
+      const buildNestedOverflow = (): { innerId: string; leafId: string; outerId: string } => {
+        const outerId = addFrameNode(22000, 22000, 800);
+        const innerId = addFrameNode(22000, 22000, 400);
+        const leafId = addFrameNode(22360, 22100, 80);
+
+        store.dispatch(moveNodes({ nodeIds: [innerId], targetIndex: 0, targetParentId: outerId }));
+        store.dispatch(moveNodes({ nodeIds: [leafId], targetIndex: 0, targetParentId: innerId }));
+        store.dispatch(toggleFrameClipContent(outerId)); // outer: clip off
+        store.dispatch(setSelection([]));
+
+        return { innerId, leafId, outerId };
+      };
+
+      it('should not pick the nested frame on the part the inner frame clips away', () => {
+        const { leafId } = buildNestedOverflow();
+
+        const hit = getSelectionHitAtPoint({ x: 22420, y: 22130 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+        expect(hit?.id).not.toBe(leafId);
+      });
+
+      it('should still pick the nested frame on the part that stays inside the inner frame', () => {
+        const { leafId } = buildNestedOverflow();
+
+        const hit = getSelectionHitAtPoint({ x: 22380, y: 22130 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+        expect(hit?.id).toBe(leafId);
+      });
+
+      it('should still grab the nested frame on its clipped-away part once it is already selected', () => {
+        const { leafId } = buildNestedOverflow();
+
+        store.dispatch(setSelection([leafId]));
+        const hit = getSelectionHitAtPoint({ x: 22420, y: 22130 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+        expect(hit?.id).toBe(leafId);
+      });
+
+      it('should pick the nested frame on its overflowing part once the inner frame stops clipping', () => {
+        const { innerId, leafId } = buildNestedOverflow();
+
+        store.dispatch(toggleFrameClipContent(innerId));
+        store.dispatch(setSelection([]));
+        const hit = getSelectionHitAtPoint({ x: 22420, y: 22130 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+        expect(hit?.id).toBe(leafId);
+      });
     });
   });
 

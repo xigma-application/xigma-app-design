@@ -1,5 +1,5 @@
 // store
-import { selectRenderOrderedNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { selectNodes, selectRenderOrderedNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -13,7 +13,7 @@ import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNod
 export const getGroupChildHitAtPoint = (point: TPoint, viewport: TViewport): TSceneNode | null => {
   const state = store.getState();
   const leafNodes = selectRenderOrderedNodes(state).filter((node) => !isContainerNode(node) || node.childIds.length === 0);
-  const hit = getNodeAtPoint(point, leafNodes, viewport);
+  const hit = getNodeAtPoint(point, leafNodes, viewport, { clipNodesById: selectNodes(state) });
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   return hit && hit.parentId && !vectorEditingNodeIds.includes(hit.id) ? hit : null;

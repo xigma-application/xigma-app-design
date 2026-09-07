@@ -18,34 +18,33 @@ export const resolvePlainNodeHover = ({
   selectedNodes,
   viewport,
 }: THoverResolverContext): THoverResult => {
-  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport);
-
+  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true });
   const frameLabelHit = Object.values(nodesById).find(
     (node) => node.type === NodeType.frame && isClickThroughFrame(node, nodesById) && isPointOnFrameNameLabel(point, node, viewport.zoom),
   );
 
-  if (frameLabelHit) {
-    return { className: null, cursor: '', nodeId: frameLabelHit.id };
-  }
+  if (!frameLabelHit) {
+    const hit = getNodeAtPoint(point, leafNodes, viewport, { clipNodesById: nodesById });
 
-  const hit = getNodeAtPoint(point, leafNodes, viewport);
+    if (hit) {
+      const ancestor = getTopLevelAncestor(hit, nodesById);
+      const plainNodeId =
+        (hit.type === NodeType.frame && ancestor.type === NodeType.section) ||
+        isControlPressed ||
+        isClickThroughFrame(ancestor, nodesById) ||
+        isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById)
+          ? hit.id
+          : ancestor.id;
 
-  if (hit) {
-    const ancestor = getTopLevelAncestor(hit, nodesById);
-    const plainNodeId =
-      (hit.type === NodeType.frame && ancestor.type === NodeType.section) ||
-      isControlPressed ||
-      isClickThroughFrame(ancestor, nodesById) ||
-      isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById)
-        ? hit.id
-        : ancestor.id;
+      if (selectedHit && (plainNodeId === selectedHit.id || isAncestorNode(plainNodeId, selectedHit, nodesById))) {
+        return { className: null, cursor: '', nodeId: selectedHit.id };
+      }
 
-    if (selectedHit && (plainNodeId === selectedHit.id || isAncestorNode(plainNodeId, selectedHit, nodesById))) {
-      return { className: null, cursor: '', nodeId: selectedHit.id };
+      return { className: null, cursor: '', nodeId: plainNodeId };
     }
 
-    return { className: null, cursor: '', nodeId: plainNodeId };
+    return { className: null, cursor: '', nodeId: selectedHit?.id ?? null };
   }
 
-  return { className: null, cursor: '', nodeId: selectedHit?.id ?? null };
+  return { className: null, cursor: '', nodeId: frameLabelHit.id };
 };
