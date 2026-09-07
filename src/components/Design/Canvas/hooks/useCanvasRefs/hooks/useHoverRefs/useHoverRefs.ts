@@ -2,6 +2,7 @@ import { useRef } from 'react';
 
 // types
 import {
+  TAutoLayoutGapHoverState,
   TCornerRadiusHandleHover,
   THoverRefs,
   TSmartSelectionGapHoverState,
@@ -16,6 +17,7 @@ import { TPoint } from 'types/canvas';
 
 export const useHoverRefs = (): THoverRefs => {
   const hoverRef = useRef<string | null>(null);
+  const hoveredAutoLayoutGapRef = useRef<TAutoLayoutGapHoverState | null>(null);
   const hoveredCornerRadiusHandleRef = useRef<TCornerRadiusHandleHover | null>(null);
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
@@ -39,12 +41,14 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoveredVectorWidthLabelRef = useRef<TVectorWidthPointHover | null>(null);
   const hoveredVectorWidthPointRef = useRef<TVectorWidthPointHover | null>(null);
+  const isAutoLayoutGapAreaHoveredRef = useRef(false);
   const isSmartSelectionBoxHoveredRef = useRef(false);
   const hoverRefsRef = useRef<THoverRefs | null>(null);
 
   if (hoverRefsRef.current === null) {
     hoverRefsRef.current = {
       hoverRef,
+      hoveredAutoLayoutGapRef,
       hoveredCornerRadiusHandleRef,
       hoveredEllipseArcHandleRef,
       hoveredEllipseArcRatioHandleRef,
@@ -68,6 +72,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredVectorVertexIdRef,
       hoveredVectorWidthLabelRef,
       hoveredVectorWidthPointRef,
+      isAutoLayoutGapAreaHoveredRef,
       isSmartSelectionBoxHoveredRef,
     };
   }

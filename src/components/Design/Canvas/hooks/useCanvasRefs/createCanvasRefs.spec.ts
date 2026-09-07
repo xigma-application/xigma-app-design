@@ -28,6 +28,7 @@ describe('createCanvasRefs behaviors', () => {
       guides: { draggingGuideRef: { current: null }, hoveredGuideRef: { current: null }, selectedGuideRef: { current: null } },
       hover: {
         hoverRef: { current: null },
+        hoveredAutoLayoutGapRef: { current: null },
         hoveredCornerRadiusHandleRef: { current: null },
         hoveredEllipseArcHandleRef: { current: null },
         hoveredEllipseArcRatioHandleRef: { current: null },
@@ -51,6 +52,7 @@ describe('createCanvasRefs behaviors', () => {
         hoveredVectorVertexIdRef: { current: null },
         hoveredVectorWidthLabelRef: { current: null },
         hoveredVectorWidthPointRef: { current: null },
+        isAutoLayoutGapAreaHoveredRef: { current: false },
         isSmartSelectionBoxHoveredRef: { current: false },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
@@ -83,6 +85,7 @@ describe('createCanvasRefs behaviors', () => {
         alignmentGuideRef: { current: null },
         aspectRatioLockGuideRef: { current: null },
         autoLayoutDropTargetRef: { current: null },
+        autoLayoutGapDragRef: { current: null },
         autoLayoutReorderPreviewRef: { current: null },
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },

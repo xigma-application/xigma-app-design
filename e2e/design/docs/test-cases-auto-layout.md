@@ -471,3 +471,45 @@ rigidly shares the frame's own tilt this is the same class of over/under-clamp a
 bug, just scoped to the rare moment a multi-node block is dragged past the last slot (the "chasm")
 inside an already-rotated frame. Left as-is rather than threading a third rotation-relative value
 through the live per-tick path for a compound edge case this narrow.
+
+## Gap handles
+
+| #   | Scenario                                                                                                                                                                                                                          | Unit |           E2E            |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 1   | Hovering a selected auto-layout frame's interior shows a small drag handle at every real gap between siblings, on both axes                                                                                                       |  ✅  |            —             |
+| 2   | Hovering one specific handle shows a floating px label and a pink 45deg hatch fill (the same technique vectors use for a paint fill preview) across every gap on that handle's axis, not just the one under the cursor            |  ✅  |            —             |
+| 3   | Dragging a handle swaps the hatch for a plain pink outline on those same gaps, and live-updates the frame's shared gap value (`horizontalGap`/`verticalGap`) for the whole frame at once                                          |  ✅  | ✅ `gap-handles.spec.ts` |
+| 4   | Wrap: a lone child on its own row/column shows no handle for the (nonexistent) gap to its missing neighbour, but the row/column-gap handle to the previous line still shows                                                       |  ✅  |            —             |
+| 5   | The cursor while hovering/dragging a handle is a dedicated rotated icon (`gap.png`), pointing along the handle's own drag axis and tilted by the frame's own rotation, the same mechanism the rotate handle's cursor already uses |  ✅  |            —             |
+
+Requested directly: "trzeba wskaźniki dostosować oraz ten tryb ghost pod te kąty" was the _previous_
+ask (the drop-indicator/reorder-ghost engine above); this one is a separate, new feature — draggable
+handles that let the user change an auto-layout frame's own `horizontalGap`/`verticalGap` straight on
+the canvas, styled after the existing ad-hoc "Smart Selection" gap-drag (an unrelated feature that
+lets any arbitrary multi-node selection's inferred spacing be dragged) but wired to the frame's real,
+persisted gap fields instead. The spec was locked turn-by-turn before writing any code, since an
+earlier misreading of one confirmation ("independent gap per pair" instead of "one shared value,
+matching the RightPanel's existing single gap field") would have meant a real data-model change; once
+corrected, the model stayed exactly what the frame already stores — a handle on any gap of a given
+axis always reads and writes the same one shared number for the whole frame.
+
+Geometry (`getAutoLayoutGapHandles`) reuses the same local↔world rotation strategy as the rotated-frame
+work above: every child's already-synced position is read via the existing `getAutoLayoutNodeLocalBounds`
+(no new packing math), grouped into flow "lines" by watching the primary-axis coordinate reset instead
+of re-deriving wrap breaks from padding/content-box, then adjacent siblings within a line become a
+main-axis handle and adjacent lines become a cross-axis (row/column-gap) handle. A lone item on its own
+line naturally produces zero within-line handles (nothing to pair it with) while still producing its
+line-to-line handle — no special-casing needed for the wrap edge case from scenario 4. Hit-testing and
+the interactive drag both convert the cursor into the frame's local space first (`getUnrotatedQueryPoint`,
+already used by the drop-target engine), so the whole feature works unmodified at any frame rotation.
+
+The hatch-fill visual reuses the vector paint tool's own `drawVectorHatchFill` (stencil-clipped diagonal
+lines) directly, rotating each gap's rect corners into world space first — the same technique the user
+pointed at explicitly ("Wektory mają to rozwiązanie jak to rysować gdy robimy paint"). The handle bars
+reuse the Smart Selection gap handle's exact visual constants (`SMART_SELECTION_GAP_HANDLE_*`) for a
+consistent look between the two systems, even though they are otherwise unrelated code paths. Unit-only
+for most of the above: the geometry, hit-testing, hover/cursor resolution and every draw layer (bars,
+hatch, outline, label) are pure functions or narrow WebGL call-verification, exhaustively covered without
+a browser. The one thing only a real browser proves is the actual pointerdown→pointermove→pointerup
+gesture correctly reading back into the store as a persisted `horizontalGap` change — that's
+`gap-handles.spec.ts`.

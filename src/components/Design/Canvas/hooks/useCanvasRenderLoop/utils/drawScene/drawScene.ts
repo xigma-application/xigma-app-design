@@ -28,6 +28,7 @@ import { TImageRenderContext } from '../../types';
 import { cleanupStaleDragSnapshotBuffers } from './cleanupStaleDragSnapshotBuffers';
 import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawAutoLayoutDropIndicator } from './drawAutoLayoutDropIndicator';
+import { drawAutoLayoutGapHandles } from './drawAutoLayoutGapHandles/drawAutoLayoutGapHandles';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
@@ -145,6 +146,7 @@ export const drawScene = (
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);
   drawSmartSelectionHandles(ctx, smartSelectionNodes, refs, nodesById);
+  drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

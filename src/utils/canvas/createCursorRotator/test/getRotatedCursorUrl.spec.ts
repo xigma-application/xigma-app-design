@@ -1,4 +1,5 @@
 // assets
+import gapCursorUrl from 'assets/icons/cursors/gap.png';
 import resizeCursorUrl from 'assets/icons/cursors/resize.png';
 import rotateCursorUrl from 'assets/icons/cursors/rotate.png';
 import scaleCursorUrl from 'assets/icons/cursors/scale.png';
@@ -17,6 +18,17 @@ vi.mock('../createCursorRotator', () => ({
 describe('getRotatedCursorUrl', () => {
   afterEach(() => {
     vi.resetModules();
+  });
+
+  it('should dispatch to the gap cursor asset', async () => {
+    // before
+    const { getRotatedCursorUrl } = await import('../getRotatedCursorUrl');
+
+    // action
+    const url = getRotatedCursorUrl('gap', 0);
+
+    // result
+    expect(url).toBe(`${gapCursorUrl}:0`);
   });
 
   it('should dispatch to the resize cursor asset', async () => {

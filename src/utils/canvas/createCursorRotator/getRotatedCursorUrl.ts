@@ -1,4 +1,5 @@
 // assets
+import gapCursorUrl from 'assets/icons/cursors/gap.png';
 import resizeCursorUrl from 'assets/icons/cursors/resize.png';
 import rotateCursorUrl from 'assets/icons/cursors/rotate.png';
 import scaleCursorUrl from 'assets/icons/cursors/scale.png';
@@ -10,6 +11,7 @@ import type { TCursorKind } from './types';
 import { createCursorRotator } from './createCursorRotator';
 
 const rotators = {
+  gap: createCursorRotator(gapCursorUrl),
   resize: createCursorRotator(resizeCursorUrl),
   rotate: createCursorRotator(rotateCursorUrl),
   scale: createCursorRotator(scaleCursorUrl),
@@ -17,6 +19,8 @@ const rotators = {
 
 export const getRotatedCursorUrl = (kind: TCursorKind, angle: number): string | null => {
   switch (kind) {
+    case 'gap':
+      return rotators.gap(angle);
     case 'resize':
       return rotators.resize(angle);
     case 'rotate':

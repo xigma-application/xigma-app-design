@@ -7,6 +7,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
+import { disarmAutoLayoutGapDrag } from './disarmAutoLayoutGapDrag';
 import { disarmCornerRadiusDrag } from './disarmCornerRadiusDrag';
 import { disarmDrag } from './disarmDrag/disarmDrag';
 import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
@@ -54,6 +55,7 @@ export const handlePointerUp = (
   disarmResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);
   disarmRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
   disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.cornerRadiusDragRef);
+  disarmAutoLayoutGapDrag(canvas, event, canvasRefs.transform.autoLayoutGapDragRef);
   disarmSmartSelectionGapDrag(canvas, event, canvasRefs.smartSelection.gapDragRef);
   disarmSmartSelectionSwapDrag(canvas, event, dispatch, canvasRefs.smartSelection.swapDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);

@@ -223,8 +223,15 @@ export type TVectorEditRefs = {
   vectorAlignmentGuideRef: RefObject<TAlignmentGuide | null>;
 };
 
+export type TAutoLayoutGapHoverState = {
+  axis: 'horizontal' | 'vertical';
+  frameId: string;
+  point: TPoint;
+};
+
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
+  hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
   hoveredCornerRadiusHandleRef: RefObject<TCornerRadiusHandleHover | null>;
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
@@ -248,6 +255,7 @@ export type THoverRefs = {
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoveredVectorWidthLabelRef: RefObject<TVectorWidthPointHover | null>;
   hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
+  isAutoLayoutGapAreaHoveredRef: RefObject<boolean>;
   isSmartSelectionBoxHoveredRef: RefObject<boolean>;
 };
 
@@ -280,10 +288,19 @@ export type TAutoLayoutReorderPreview = {
   positions: Record<string, TPoint>;
 };
 
+export type TAutoLayoutGapDragState = {
+  axis: 'horizontal' | 'vertical';
+  frameId: string;
+  originalGapValue: number;
+  point: TPoint;
+  pointerStart: TPoint;
+};
+
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>;
   autoLayoutDropTargetRef: RefObject<TAutoLayoutDropTargetHover | null>;
+  autoLayoutGapDragRef: RefObject<TAutoLayoutGapDragState | null>;
   autoLayoutReorderPreviewRef: RefObject<TAutoLayoutReorderPreview | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;

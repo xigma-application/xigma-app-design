@@ -1,1 +1,1 @@
-export type TCursorKind = 'rotate' | 'resize' | 'scale';
+export type TCursorKind = 'gap' | 'rotate' | 'resize' | 'scale';

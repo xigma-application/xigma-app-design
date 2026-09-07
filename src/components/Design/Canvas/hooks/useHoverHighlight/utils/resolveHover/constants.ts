@@ -1,3 +1,4 @@
+import { resolveAutoLayoutGapHover } from './hoverResolvers/resolveAutoLayoutGapHover';
 import { resolveCornerRadiusHover } from './hoverResolvers/resolveCornerRadiusHover';
 import { resolveEditingTextHover } from './hoverResolvers/resolveEditingTextHover';
 import { resolveEllipseArcHover } from './hoverResolvers/resolveEllipseArcHover';
@@ -15,6 +16,7 @@ import { resolveVectorMultiSelectRotateHover } from './hoverResolvers/resolveVec
 
 export const HOVER_RESOLVERS = [
   resolveSmartSelectionGapHover,
+  resolveAutoLayoutGapHover,
   resolveLineEndpointHover,
   resolvePathOffsetHover,
   resolveEditingTextHover,
