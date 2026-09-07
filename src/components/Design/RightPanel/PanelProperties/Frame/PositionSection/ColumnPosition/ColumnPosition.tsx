@@ -13,12 +13,13 @@ import { translationNameSpace } from './constants';
 
 const ColumnPosition: FC = () => {
   const { t } = useTranslation();
-  const { onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useColumnPosition();
+  const { disabled, onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useColumnPosition();
 
   return (
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <ColumnPositionField
         ariaLabel={t(`${translationNameSpace}.ariaLabelX`)}
+        disabled={disabled}
         e2eValue="x"
         label="X"
         onBlur={onBlurX}
@@ -30,6 +31,7 @@ const ColumnPosition: FC = () => {
       />
       <ColumnPositionField
         ariaLabel={t(`${translationNameSpace}.ariaLabelY`)}
+        disabled={disabled}
         e2eValue="y"
         label="Y"
         onBlur={onBlurY}

@@ -63,4 +63,12 @@ describe('ColumnPositionField behaviors', () => {
     // result
     expect(onBlur).toHaveBeenCalled();
   });
+
+  it('should disable the input when disabled is set', () => {
+    // before
+    renderColumnPositionField({ disabled: true });
+
+    // result
+    expect(screen.getByLabelText('X position')).toBeDisabled();
+  });
 });

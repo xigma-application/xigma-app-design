@@ -6,12 +6,12 @@ import ColumnPosition from './ColumnPosition';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 
 const renderColumnPosition = (): ReturnType<typeof render> =>
   render(
@@ -110,5 +110,24 @@ describe('ColumnPosition behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ x: 42 });
+  });
+
+  it('should disable both inputs when the selected frame sits in a managed-layout parent', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.vertical, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnPosition();
+
+    // result
+    expect(screen.getByLabelText('X position')).toBeDisabled();
+    expect(screen.getByLabelText('Y position')).toBeDisabled();
   });
 });

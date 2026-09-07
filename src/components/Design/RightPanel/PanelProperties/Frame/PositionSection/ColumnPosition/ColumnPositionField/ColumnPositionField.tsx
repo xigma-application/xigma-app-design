@@ -17,6 +17,7 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
 export type TColumnPositionFieldProps = {
   ariaLabel: string;
+  disabled?: boolean;
   e2eValue: TE2EValue;
   label: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -29,6 +30,7 @@ export type TColumnPositionFieldProps = {
 
 export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
   ariaLabel,
+  disabled = false,
   e2eValue,
   label,
   onBlur,
@@ -42,10 +44,12 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
     <UITools.TextField
       aria-label={ariaLabel}
       defaultValue={value}
+      disabled={disabled}
       e2eValue={e2eValue}
       onBlur={onBlur}
       startAdornment={
         <ScrubbableInput
+          disabled={disabled}
           max={POSITION_MAX}
           min={POSITION_MIN}
           onChange={onScrub}

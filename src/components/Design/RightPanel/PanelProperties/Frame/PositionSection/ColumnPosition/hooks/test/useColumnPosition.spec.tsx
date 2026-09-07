@@ -6,13 +6,13 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnPosition } from '../useColumnPosition';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -45,6 +45,10 @@ const readNode = (id: string): { x: number; y: number } => {
   const node = selectActivePage(store.getState()).nodes[id] as { x: number; y: number };
 
   return { x: node.x, y: node.y };
+};
+
+const nestFrame = (childId: string, parentId: string): void => {
+  store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
 };
 
 describe('useColumnPosition', () => {
@@ -112,6 +116,90 @@ describe('useColumnPosition', () => {
 
     // result
     expect(readNode(frameId).x).toBe(55);
+  });
+
+  it('should show the position relative to the parent origin for a nested frame', () => {
+    // mock
+    const parentId = addFrameNode(100, 50);
+
+    store.dispatch(updateNode({ changes: { height: 300, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(130, 90);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current).toMatchObject({ disabled: false, x: 30, y: 40 });
+  });
+
+  it('should commit a nested frame position back to absolute coordinates', () => {
+    // mock
+    const parentId = addFrameNode(100, 50);
+
+    store.dispatch(updateNode({ changes: { height: 300, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(130, 90);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // action — type 10 into the parent-local X field
+    act(() => result.current.onScrubX(10));
+
+    // result — absolute x is parent.x + 10
+    expect(readNode(childId).x).toBe(110);
+    expect(readNode(childId).y).toBe(90);
+  });
+
+  it('should express a nested frame position in the parent local space when the parent is rotated', () => {
+    // mock
+    const parentId = addFrameNode(100, 50);
+
+    store.dispatch(updateNode({ changes: { height: 200, rotation: 90, width: 300 }, id: parentId }));
+
+    const childId = addFrameNode(400, 400);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // action — round-trips through the rotation: setting the shown value back must not move the frame
+    const shownX = result.current.x;
+    const shownY = result.current.y;
+
+    act(() => result.current.onScrubX(shownX));
+    act(() => result.current.onScrubY(shownY));
+
+    // result
+    expect(readNode(childId).x).toBeCloseTo(400, 0);
+    expect(readNode(childId).y).toBeCloseTo(400, 0);
+  });
+
+  it('should disable the inputs when the parent runs a managed (auto) layout', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.horizontal, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current.disabled).toBe(true);
   });
 
   it('should coalesce every scrub between onDragStart and onDragEnd into a single undo step', () => {
