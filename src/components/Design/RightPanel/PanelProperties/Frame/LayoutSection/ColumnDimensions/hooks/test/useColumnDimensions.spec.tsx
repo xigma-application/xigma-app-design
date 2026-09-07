@@ -43,7 +43,12 @@ const addFrameNode = (width: number, height: number, lockedAspectRatio = false):
   return rootOrder[rootOrder.length - 1];
 };
 
-const addAutoLayoutFrameNode = (layoutMode: LayoutMode, primaryAxisSizingMode?: SizingMode, counterAxisSizingMode?: SizingMode): string => {
+const addAutoLayoutFrameNode = (
+  layoutMode: LayoutMode,
+  primaryAxisSizingMode?: SizingMode,
+  counterAxisSizingMode?: SizingMode,
+  lockedAspectRatio = false,
+): string => {
   store.dispatch(
     addNode({
       childIds: [],
@@ -52,6 +57,7 @@ const addAutoLayoutFrameNode = (layoutMode: LayoutMode, primaryAxisSizingMode?: 
       fill: '#ff0000',
       height: 50,
       layoutMode,
+      lockedAspectRatio,
       name: 'Frame',
       parentId: null,
       primaryAxisSizingMode,
@@ -202,6 +208,15 @@ describe('useColumnDimensions', () => {
     expect(readNode(frameId)).toMatchObject({ height: 50, width: 100 });
   });
 
+  it('should not throw when scrubbing width/height while nothing is selected', () => {
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action / result
+    expect(() => act(() => result.current.onScrubWidth(200))).not.toThrow();
+    expect(() => act(() => result.current.onScrubHeight(200))).not.toThrow();
+  });
+
   it('should not report auto-layout for a plain (freeForm/no layout) frame', () => {
     // mock
     const frameId = addFrameNode(100, 50);
@@ -309,5 +324,193 @@ describe('useColumnDimensions', () => {
 
     // result
     expect(readNode(frameId).primaryAxisSizingMode).toBe(SizingMode.hug);
+  });
+
+  it('should switch the width axis back to fixed when the width is resized while it was hugging', () => {
+    // mock — horizontal flow: width is the primary axis
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onScrubWidth(200));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+  });
+
+  it('should leave the width axis untouched when resizing while it was already fixed', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onScrubWidth(200));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+  });
+
+  it('should switch the height axis back to fixed when the height is resized while it was hugging', () => {
+    // mock — horizontal flow: height is the counter axis
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.hug);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onScrubHeight(120));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, height: 120 });
+  });
+
+  it('should switch the correct (counter) axis back to fixed when width is resized on a vertical-flow frame', () => {
+    // mock — vertical flow: width is the counter axis
+    const frameId = addAutoLayoutFrameNode(LayoutMode.vertical, SizingMode.fixed, SizingMode.hug);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onScrubWidth(200));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, width: 200 });
+  });
+
+  it('should reset both sizing-mode axes to fixed when the lock is turned on', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.hug);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onToggleLock());
+
+    // result
+    expect(readNode(frameId)).toMatchObject({
+      counterAxisSizingMode: SizingMode.fixed,
+      lockedAspectRatio: true,
+      primaryAxisSizingMode: SizingMode.fixed,
+    });
+  });
+
+  it('should not touch sizing modes when the lock is turned off', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.hug, true);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onToggleLock());
+
+    // result
+    expect(readNode(frameId)).toMatchObject({
+      counterAxisSizingMode: SizingMode.hug,
+      lockedAspectRatio: false,
+      primaryAxisSizingMode: SizingMode.hug,
+    });
+  });
+
+  it('should not touch sizing modes when turning the lock on for a non-auto-layout frame', () => {
+    // mock
+    const frameId = addFrameNode(100, 50);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onToggleLock());
+
+    // result
+    const node = readNode(frameId);
+
+    expect(node.lockedAspectRatio).toBe(true);
+    expect(node.primaryAxisSizingMode).toBeUndefined();
+    expect(node.counterAxisSizingMode).toBeUndefined();
+  });
+
+  it('should turn the lock off when the width axis is switched to hug', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.fixed, true);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, primaryAxisSizingMode: SizingMode.hug });
+  });
+
+  it('should turn the lock off when the height axis is switched to hug', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.fixed, true);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onSelectHeightSizingMode(SizingMode.hug));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.hug, lockedAspectRatio: false });
+  });
+
+  it('should leave the lock untouched when switching an axis to fixed', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.fixed, true);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onSelectWidthSizingMode(SizingMode.fixed));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: true, primaryAxisSizingMode: SizingMode.fixed });
+  });
+
+  it('should leave the lock untouched (already off) when switching an axis to hug', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action
+    act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, primaryAxisSizingMode: SizingMode.hug });
   });
 });

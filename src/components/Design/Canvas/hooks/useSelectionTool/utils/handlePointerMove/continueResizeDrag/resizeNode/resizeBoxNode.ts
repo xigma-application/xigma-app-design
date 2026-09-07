@@ -1,6 +1,8 @@
 // store
+import { selectNodes } from 'store/design/selectors';
+import { getAutoLayoutSizingModeResetChanges } from 'store/design/utils/autoLayout/getAutoLayoutSizingModeResetChanges';
 import { updateNode } from 'store/design/slice';
-import { AppDispatch } from 'store';
+import { AppDispatch, store } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
@@ -26,6 +28,8 @@ export const resizeBoxNode = (
   const width = Math.round(origin.width * axisScale.x);
   const { x, y } = getResizedPosition(origin, anchors, scaleX, scaleY, width, height, rotatedAnchorSolver);
   const changes = getResizeChanges(origin, scaleX, scaleY, isSingleBoxOrigin, height, width, x, y);
+  const node = selectNodes(store.getState())[id];
+  const sizingModeChanges = node ? getAutoLayoutSizingModeResetChanges(node, width !== origin.width, height !== origin.height) : {};
 
-  dispatch(updateNode({ changes, id }));
+  dispatch(updateNode({ changes: { ...changes, ...sizingModeChanges }, id }));
 };

@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
 // utils
 import { getRotatedAnchorSolver } from '../../getRotatedAnchorSolver';
@@ -32,17 +32,19 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const addAutoLayoutFrameNode = (): string => {
+const addAutoLayoutFrameNode = (counterAxisSizingMode?: SizingMode, primaryAxisSizingMode?: SizingMode): string => {
   store.dispatch(
     addNode({
       childIds: [],
       clipContent: true,
+      counterAxisSizingMode,
       fill: '#ff0000',
       height: 100,
       horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',
       parentId: null,
+      primaryAxisSizingMode,
       rotation: 0,
       type: NodeType.frame,
       width: 100,
@@ -236,5 +238,61 @@ describe('resizeBoxNode', () => {
     const page = selectActivePage(store.getState());
     expect(page.nodes[idA]).toMatchObject({ width: 60 });
     expect(page.nodes[idB]).toMatchObject({ width: 40, x: 70 });
+  });
+
+  it('should switch the width axis back to fixed when a hugging auto-layout frame is resized by dragging its width', () => {
+    // mock — horizontal flow: width is the primary axis
+    const frameId = addAutoLayoutFrameNode(undefined, SizingMode.hug);
+
+    // before
+    resizeBoxNode(
+      frameId,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      2,
+      1,
+      true,
+      null,
+    );
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+  });
+
+  it('should switch the height axis back to fixed when a hugging auto-layout frame is resized by dragging its height', () => {
+    // mock — horizontal flow: height is the counter axis
+    const frameId = addAutoLayoutFrameNode(SizingMode.hug);
+
+    // before
+    resizeBoxNode(
+      frameId,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      1,
+      1.5,
+      true,
+      null,
+    );
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, height: 150 });
+  });
+
+  it('should do nothing when the resized node can no longer be found in the store', () => {
+    // before — resizing an id that was never added should not throw
+    expect(() =>
+      resizeBoxNode(
+        'missing-id',
+        { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+        store.dispatch,
+        { x: 0, y: 0 },
+        2,
+        1,
+        true,
+        null,
+      ),
+    ).not.toThrow();
   });
 });

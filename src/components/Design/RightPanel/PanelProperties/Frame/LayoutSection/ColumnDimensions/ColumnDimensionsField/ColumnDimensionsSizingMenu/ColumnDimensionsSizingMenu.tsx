@@ -41,15 +41,13 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
       <PopoverItem
         icon={isWidth ? 'MinWidth' : 'MinHeight'}
         label={t(`${translationNameSpace}.${isWidth ? 'addMinWidth' : 'addMinHeight'}`)}
-        withCheck={false}
       />
       <PopoverItem
         icon={isWidth ? 'MaxWidth' : 'MaxHeight'}
         label={t(`${translationNameSpace}.${isWidth ? 'addMaxWidth' : 'addMaxHeight'}`)}
-        withCheck={false}
       />
       <PopoverSeparator />
-      <PopoverItem icon="Variables" label={t(`${translationNameSpace}.applyVariable`)} withCheck={false} />
+      <PopoverItem icon="Variables" label={t(`${translationNameSpace}.applyVariable`)} />
     </>
   );
 };
