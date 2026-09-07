@@ -88,6 +88,7 @@ describe('createCanvasRefs behaviors', () => {
         autoLayoutGapDragRef: { current: null },
         autoLayoutReorderPreviewRef: { current: null },
         contactGuidesRef: { current: null },
+        dimensionHintGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
         dropTargetFrameIdRef: { current: null },

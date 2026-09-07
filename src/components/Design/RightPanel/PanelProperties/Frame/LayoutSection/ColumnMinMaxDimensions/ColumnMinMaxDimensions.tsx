@@ -52,6 +52,7 @@ const ColumnMinMaxDimensions: FC = () => {
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMinWidth`)}
               e2eValue="min-width"
+              hintField="minWidth"
               icon="MinWidth"
               onBlur={onBlurMinWidth}
               onDragEnd={onDragEnd}
@@ -64,6 +65,7 @@ const ColumnMinMaxDimensions: FC = () => {
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMinHeight`)}
               e2eValue="min-height"
+              hintField="minHeight"
               icon="MinHeight"
               onBlur={onBlurMinHeight}
               onDragEnd={onDragEnd}
@@ -84,6 +86,7 @@ const ColumnMinMaxDimensions: FC = () => {
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMaxWidth`)}
               e2eValue="max-width"
+              hintField="maxWidth"
               icon="MaxWidth"
               onBlur={onBlurMaxWidth}
               onDragEnd={onDragEnd}
@@ -96,6 +99,7 @@ const ColumnMinMaxDimensions: FC = () => {
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMaxHeight`)}
               e2eValue="max-height"
+              hintField="maxHeight"
               icon="MaxHeight"
               onBlur={onBlurMaxHeight}
               onDragEnd={onDragEnd}

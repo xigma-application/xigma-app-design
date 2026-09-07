@@ -8,6 +8,7 @@ import { UITools } from 'shared';
 
 // hooks
 import { useColumnDimensions } from './hooks/useColumnDimensions';
+import { useDimensionFieldHover } from '../hooks/useDimensionFieldHover';
 
 // others
 import { translationNameSpace } from './constants';
@@ -51,6 +52,8 @@ const ColumnDimensions: FC = () => {
     width,
     widthSizingMode,
   } = useColumnDimensions();
+  const widthHint = useDimensionFieldHover('width');
+  const heightHint = useDimensionFieldHover('height');
   const showWidthDropdown = canHug || canFillWidth;
   const showHeightDropdown = canHug || canFillHeight;
 
@@ -78,6 +81,8 @@ const ColumnDimensions: FC = () => {
         onBlur={onBlurWidth}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
+        onHoverEnd={widthHint.onMouseLeave}
+        onHoverStart={widthHint.onMouseEnter}
         onRemoveBounds={onRemoveWidthBounds}
         onRevealMax={onRevealMaxWidth}
         onRevealMin={onRevealMinWidth}
@@ -102,6 +107,8 @@ const ColumnDimensions: FC = () => {
         onBlur={onBlurHeight}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
+        onHoverEnd={heightHint.onMouseLeave}
+        onHoverStart={heightHint.onMouseEnter}
         onRemoveBounds={onRemoveHeightBounds}
         onRevealMax={onRevealMaxHeight}
         onRevealMin={onRevealMinHeight}

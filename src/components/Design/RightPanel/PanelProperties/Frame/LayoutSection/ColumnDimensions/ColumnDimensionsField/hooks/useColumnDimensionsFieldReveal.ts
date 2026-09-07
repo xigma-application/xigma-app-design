@@ -1,5 +1,10 @@
 import { useState } from 'react';
 
+export type TUseColumnDimensionsFieldRevealParams = {
+  onHoverEnd?: TFunc;
+  onHoverStart?: TFunc;
+};
+
 export type TUseColumnDimensionsFieldRevealResult = {
   isRevealed: boolean;
   onMenuOpenChange: TFunc<[boolean]>;
@@ -7,14 +12,23 @@ export type TUseColumnDimensionsFieldRevealResult = {
   onMouseLeave: TFunc;
 };
 
-export const useColumnDimensionsFieldReveal = (): TUseColumnDimensionsFieldRevealResult => {
+export const useColumnDimensionsFieldReveal = ({
+  onHoverEnd,
+  onHoverStart,
+}: TUseColumnDimensionsFieldRevealParams = {}): TUseColumnDimensionsFieldRevealResult => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return {
     isRevealed: isHovered || isMenuOpen,
     onMenuOpenChange: setIsMenuOpen,
-    onMouseEnter: () => setIsHovered(true),
-    onMouseLeave: () => setIsHovered(false),
+    onMouseEnter: (): void => {
+      setIsHovered(true);
+      onHoverStart?.();
+    },
+    onMouseLeave: (): void => {
+      setIsHovered(false);
+      onHoverEnd?.();
+    },
   };
 };

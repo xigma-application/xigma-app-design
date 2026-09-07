@@ -141,4 +141,68 @@ test.describe('auto-layout — Min/Max sizing', () => {
     await page.getByText('Max width: 150', { exact: true }).click();
     await expect(page.locator('[data-test-text-field-input="max-width"]')).toHaveValue('150');
   });
+
+  test('hovering the width and min/max inputs paints canvas hint guides that clear when the pointer leaves', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-min-max-hints');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(OUTER.x1, OUTER.y1, OUTER.x2, OUTER.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await setFlowHorizontal(page);
+
+    // give the frame a Min W and a Max W with slack on both sides (width 300, min 120, max 520)
+    await page.getByLabel('Width sizing options').click();
+    await page.getByText('Add min width…', { exact: true }).click();
+    await page.locator('[data-test-text-field-input="min-width"]').fill('120');
+    await page.locator('[data-test-text-field-input="min-width"]').press('Enter');
+
+    await page.getByLabel('Width sizing options').click();
+    await page.getByText('Add max width…', { exact: true }).click();
+    await page.locator('[data-test-text-field-input="max-width"]').fill('520');
+    await page.locator('[data-test-text-field-input="max-width"]').press('Enter');
+
+    // the render loop is RAF-driven, so let a couple frames flush before each canvas grab
+    const settle = (): Promise<void> => page.waitForTimeout(150);
+    const readHoveredField = (): Promise<string | null> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+
+        return store.getState().design.hoveredDimensionField ?? null;
+      });
+
+    // pointer parked well away from every input — nothing hint-related on the canvas
+    await page.mouse.move(1200, 620);
+    await settle();
+    const baseline = await designPage.canvas.screenshot();
+
+    // hovering W publishes the field and draws the whole set (edge + min + max bracket)
+    await page.locator('[data-test-text-field-input="width"]').hover();
+    await settle();
+    expect(await readHoveredField()).toBe('width');
+    const widthHover = await designPage.canvas.screenshot();
+    expect(widthHover.equals(baseline)).toBe(false);
+
+    // leaving the input clears the hover and repaints the canvas without the guides
+    await page.mouse.move(1200, 620);
+    await settle();
+    expect(await readHoveredField()).toBeNull();
+    const afterLeave = await designPage.canvas.screenshot();
+    expect(afterLeave.equals(widthHover)).toBe(false);
+
+    // the Min W input alone draws a different picture than the Max W input alone
+    await page.locator('[data-test-text-field-input="min-width"]').hover();
+    await settle();
+    const minHover = await designPage.canvas.screenshot();
+    expect(minHover.equals(baseline)).toBe(false);
+
+    await page.mouse.move(1200, 620);
+    await settle();
+    await page.locator('[data-test-text-field-input="max-width"]').hover();
+    await settle();
+    const maxHover = await designPage.canvas.screenshot();
+    expect(maxHover.equals(baseline)).toBe(false);
+    expect(maxHover.equals(minHover)).toBe(false);
+  });
 });

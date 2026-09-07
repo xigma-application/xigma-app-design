@@ -30,6 +30,7 @@ import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawAutoLayoutDropIndicator } from './drawAutoLayoutDropIndicator';
 import { drawAutoLayoutGapHandles } from './drawAutoLayoutGapHandles/drawAutoLayoutGapHandles';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
+import { drawDimensionHintGuides } from './drawDimensionHintGuides/drawDimensionHintGuides';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
 import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';
@@ -184,6 +185,7 @@ export const drawScene = (
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
   drawShapeContactGuides(ctx, refs);
   drawDistanceGuides(ctx, refs);
+  drawDimensionHintGuides(ctx, refs);
   drawEqualSpacingGuides(ctx, refs);
   drawMatchedPairGuides(ctx, refs);
   drawGuides(ctx, guideLines, nodesById, refs, areRulersVisible);

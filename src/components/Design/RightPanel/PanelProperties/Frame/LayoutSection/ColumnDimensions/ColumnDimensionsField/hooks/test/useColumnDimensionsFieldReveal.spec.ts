@@ -29,6 +29,28 @@ describe('useColumnDimensionsFieldReveal', () => {
     expect(result.current.isRevealed).toBe(false);
   });
 
+  it('should forward the hover callbacks it was given on enter and leave', () => {
+    // mock
+    const onHoverStart = vi.fn();
+    const onHoverEnd = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useColumnDimensionsFieldReveal({ onHoverEnd, onHoverStart }));
+
+    // action
+    act(() => result.current.onMouseEnter());
+
+    // result
+    expect(onHoverStart).toHaveBeenCalledTimes(1);
+    expect(onHoverEnd).not.toHaveBeenCalled();
+
+    // action
+    act(() => result.current.onMouseLeave());
+
+    // result
+    expect(onHoverEnd).toHaveBeenCalledTimes(1);
+  });
+
   it('should stay revealed via the menu-open state, even after the mouse leaves', () => {
     // before
     const { result } = renderHook(() => useColumnDimensionsFieldReveal());

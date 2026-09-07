@@ -90,6 +90,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      hoveredDimensionField: null,
       isActionsPanelOpen: false,
       isMediaToolArmed: false,
       isUiHidden: false,

@@ -20,6 +20,7 @@ export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[
 
   if (selectionChanged) {
     state.revealedMinMax = { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false };
+    state.hoveredDimensionField = null;
   }
 
   page.selectedIds = normalizedIds;

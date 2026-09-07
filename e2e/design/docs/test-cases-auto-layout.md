@@ -566,6 +566,10 @@ live canvas resize-drag actually re-triggering the fill recompute end to end —
 | 12  | Once a bound has a value the dropdown entry shows it live (`Min width: 123`) instead of `Add min width…`; clicking that entry re-reveals the row populated with the stored value (an empty, valueless entry toggles its row on/off instead)                                                                      |  ✅  | ✅ `min-max-sizing.spec.ts` |
 | 13  | Revealing a Min/Max row moves keyboard focus straight into its input                                                                                                                                                                                                                                             |  ✅  | ✅ `min-max-sizing.spec.ts` |
 | 14  | Committing a Min/Max re-clamps the frame's own width/height on the spot — a Max of 150 on a 700-wide Fixed frame snaps it to 150 immediately, without waiting for any other recompute to touch it                                                                                                                |  ✅  | ✅ `min-max-sizing.spec.ts` |
+| 15  | Hovering the RightPanel's W (or H) field paints the whole hint set on the canvas: a coloured line on the frame's own edge, the Min line where set, and the Max bracket where set with slack; hovering Min W / Max W / Min H / Max H alone paints only that one guide                                             |  ✅  | ✅ `min-max-sizing.spec.ts` |
+| 16  | The Max bracket only draws while the current size is below the Max (there is slack to show); it is a red line at the Max with a red label, plus two blue arrow-tipped dashed connectors reaching out from the frame's far edge — and for height it extends **downward** from the bottom edge                     |  ✅  |              —              |
+| 17  | The hint guides are geometry-transformed into a rotated frame's own local space (`rotatePoint` about the frame centre, same convention as `getRotatedNodeBounds`), so every line, arrowhead and label offset follows the tilted edges rather than staying world-axis-aligned                                     |  ✅  |              —              |
+| 18  | The hover state is ephemeral `TDesignState.hoveredDimensionField` (one of six field ids or null); it clears on mouse-leave and on any real selection change, and the canvas repaints without the guides                                                                                                          |  ✅  | ✅ `min-max-sizing.spec.ts` |
 
 Min/Max live as four new optional `TBaseNode` fields (`minWidth`/`maxWidth`/`minHeight`/`maxHeight`),
 the same physical-axis-keyed convention as `widthSizingMode`/`heightSizingMode` — undefined means "no
@@ -590,7 +594,8 @@ whose entry now reads `Min width: 123` (live value) rather than `Add min width�
 exists. Revealing a row also drops keyboard focus straight into its input. A single shared **Remove**
 item — sitting in its own separator block below the Min/Max entries, `Close` icon, the same treatment
 `x-design`'s `ColumnMinMaxSize` remove uses — clears both bounds for that axis and un-reveals both
-rows at once. Committing a field to 0 (or below) is the same "remove this constraint" for that one
+rows at once (its `RemoveFit` icon had to be added to `@xigma/components`' shared icon set first).
+Committing a field to 0 (or below) is the same "remove this constraint" for that one
 bound: it clears the node field and un-reveals the row in one step, rather than flooring to the
 global dimensions minimum the way the plain Fixed width/height field does. Every Min/Max commit also
 re-clamps the frame's own width/height immediately (`clampAutoLayoutSize` against the resulting
@@ -599,8 +604,27 @@ frame that nothing else would recompute. The main Width/Height
 field's own leading "W"/"H" label swaps to the existing `WidthRestricted`/`HeightRestricted` icon
 (the same icons `x-design`'s analogous field uses for its "attached" state) the moment either bound
 is shown — real or still-empty — so the field visibly signals "this axis is constrained" independent
-of whether a number has been typed yet. Unit-only for the algorithm itself (the redistribution loop,
-the bounded-hug-grouping edge cases, the Fixed-commit and drag-resize clamps, the reveal/clear state
-machine) — exhaustively covered without a browser. What only a real browser proves: the RightPanel's
-toggle-then-edit flow actually reaching the store, and Wrap visibly re-flowing children onto a second
-line the instant Max makes it eligible — that's `min-max-sizing.spec.ts`.
+of whether a number has been typed yet.
+
+Hovering any of the six dimension fields (W, H, Min W, Max W, Min H, Max H) publishes its id into a
+new ephemeral `TDesignState.hoveredDimensionField`; `useDimensionHintGuides` (mounted in `Canvas`
+next to `useHoverHighlight`) turns that plus the single selected frame into a `TDimensionHintGuides`
+value on `transform.dimensionHintGuidesRef`, and `drawDimensionHintGuides` paints it every frame —
+its own render pass, separate from the Alt-hover distance guides so there is no shared-state
+regression risk. `getDimensionHintGuides` is the pure geometry: the W/H hover returns the frame's
+own edge line plus whichever of Min / Max apply, a single-field hover returns just that one guide,
+the Max bracket is suppressed once the size has caught up to the Max, and everything is finally run
+through `rotatePoint` about the frame centre so a rotated frame's guides follow its tilted edges.
+Lines carry a `'blue' | 'red'` tone and an optional `arrowAtEnd`. The frame's own edge line is blue;
+every Min guide and its label are red; the Max guide's own line and label are red too, and only its
+two arrow-tipped dashed connectors — the "reach" out to the Max — stay blue. The arrowhead is two
+short strokes back along the segment, so it orients itself correctly after rotation for free. Labels
+reuse `drawValueLabel` with a per-tone fill. The hover clears on mouse-leave and on
+any real selection change (`handleSetSelection`).
+
+Unit-only for the algorithm itself (the redistribution loop, the bounded-hug-grouping edge cases,
+the Fixed-commit and drag-resize clamps, the reveal/clear state machine, the hint-guide geometry
+including rotation) — exhaustively covered without a browser. What only a real browser proves: the
+RightPanel's toggle-then-edit flow actually reaching the store, Wrap visibly re-flowing children
+onto a second line the instant Max makes it eligible, and a panel hover actually repainting the
+WebGL canvas with the hint guides and clearing them on leave — that's `min-max-sizing.spec.ts`.

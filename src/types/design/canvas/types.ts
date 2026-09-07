@@ -5,6 +5,7 @@ import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmen
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
+import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
@@ -303,6 +304,7 @@ export type TTransformRefs = {
   autoLayoutGapDragRef: RefObject<TAutoLayoutGapDragState | null>;
   autoLayoutReorderPreviewRef: RefObject<TAutoLayoutReorderPreview | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
+  dimensionHintGuidesRef: RefObject<TDimensionHintGuides | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   dropTargetFrameIdRef: RefObject<string | null>;

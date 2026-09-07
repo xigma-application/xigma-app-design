@@ -37,6 +37,8 @@ export type TColumnDimensionsFieldProps = {
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onHoverEnd?: TFunc;
+  onHoverStart?: TFunc;
   onRemoveBounds?: TFunc;
   onRevealMax?: TFunc;
   onRevealMin?: TFunc;
@@ -62,6 +64,8 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   onBlur,
   onDragEnd,
   onDragStart,
+  onHoverEnd,
+  onHoverStart,
   onRemoveBounds,
   onRevealMax,
   onRevealMin,
@@ -70,7 +74,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   sizingMode,
   value,
 }) => {
-  const { isRevealed, onMenuOpenChange, onMouseEnter, onMouseLeave } = useColumnDimensionsFieldReveal();
+  const { isRevealed, onMenuOpenChange, onMouseEnter, onMouseLeave } = useColumnDimensionsFieldReveal({ onHoverEnd, onHoverStart });
   const minMaxIcon = getMinMaxIcon(axis === 'width', hasMin, hasMax);
 
   return (

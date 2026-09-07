@@ -5,7 +5,7 @@ import { RootState } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignPage, TRevealedMinMax } from './types';
+import { TDesignPage, TDimensionHintField, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
@@ -49,6 +49,8 @@ export const selectComments = createSelector([selectCommentsRecord], (comments) 
 export const selectDesignHintLabelKey = (state: RootState): string | null => state.design.designHintLabelKey;
 
 export const selectEditingNodeId = (state: RootState): string | null => state.design.editingNodeId;
+
+export const selectHoveredDimensionField = (state: RootState): TDimensionHintField | null => state.design.hoveredDimensionField ?? null;
 
 export const selectEditingSelectionChangedAt = (state: RootState): number => state.design.editingSelectionChangedAt;
 

@@ -22,6 +22,7 @@ import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRender
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
 import { useCommentTool } from './hooks/useCommentTool/useCommentTool';
 import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCaretEditing';
+import { useDimensionHintGuides } from './hooks/useDimensionHintGuides/useDimensionHintGuides';
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
 import { useDrawMediaTool } from './hooks/useDrawMediaTool/useDrawMediaTool';
@@ -90,6 +91,7 @@ const Canvas: FC = () => {
   useTextEditOnDoubleClick(refs);
   useVectorEditOnDoubleClick(refs);
   useHoverHighlight(refs);
+  useDimensionHintGuides(refs);
   useCurvedCaretEditing(refs);
   useStraightCaretEditing(refs);
   useDrawingCursor(refs);

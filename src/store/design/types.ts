@@ -41,6 +41,8 @@ export type TRevealedMinMax = {
   minWidth: boolean;
 };
 
+export type TDimensionHintField = 'height' | 'maxHeight' | 'maxWidth' | 'minHeight' | 'minWidth' | 'width';
+
 export type TDesignState = {
   activePageId: string;
   activeTool: ToolName;
@@ -52,6 +54,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  hoveredDimensionField?: TDimensionHintField | null;
   isActionsPanelOpen: boolean;
   isMediaToolArmed: boolean;
   isUiHidden: boolean;

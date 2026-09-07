@@ -22,6 +22,7 @@ import {
   TDeleteGuidePayload,
   TDesignSnapshot,
   TDesignState,
+  TDimensionHintField,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
   TReorderPayload,
@@ -87,6 +88,7 @@ const initialState: TDesignState = {
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  hoveredDimensionField: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isUiHidden: false,
@@ -185,6 +187,9 @@ const designSlice = createSlice({
     setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
       state.designHintLabelKey = action.payload;
     },
+    setHoveredDimensionField: (state, action: PayloadAction<TDimensionHintField | null>) => {
+      state.hoveredDimensionField = action.payload;
+    },
     setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
       state.isMediaToolArmed = action.payload;
     },
@@ -273,6 +278,7 @@ export const {
   setActiveTool,
   setBackgroundPaint,
   setDesignHintLabelKey,
+  setHoveredDimensionField,
   setMediaToolArmed,
   setMinMaxRevealed,
   setPaint,
