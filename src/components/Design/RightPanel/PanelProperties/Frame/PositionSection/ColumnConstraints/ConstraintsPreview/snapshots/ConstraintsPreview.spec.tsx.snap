@@ -1,0 +1,178 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ConstraintsPreview snapshots > should render a center preview with no active ticks 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstraintsPreview_f6b007"
+  >
+    <div
+      class="_ConstraintsPreview__box_f6b007"
+    >
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--top_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--top_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--bottom_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--bottom_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--left_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--left_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--right_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--right_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__node_f6b007"
+      >
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007 _ConstraintsPreview__node__cross--active_f6b007 _ConstraintsPreview__node__cross--locked_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--horizontal_f6b007 _ConstraintsPreview__node__cross__line--active_f6b007"
+          />
+        </div>
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007 _ConstraintsPreview__node__cross--active_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--vertical_f6b007 _ConstraintsPreview__node__cross__line--active_f6b007"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ConstraintsPreview snapshots > should render an explicit right/bottom preview 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstraintsPreview_f6b007"
+  >
+    <div
+      class="_ConstraintsPreview__box_f6b007"
+    >
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--top_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--top_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--bottom_f6b007 _ConstraintsPreview__tick--active_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--bottom_f6b007 _ConstraintsPreview__tick__line--active_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--left_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--left_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--right_f6b007 _ConstraintsPreview__tick--active_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--right_f6b007 _ConstraintsPreview__tick__line--active_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__node_f6b007"
+      >
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--horizontal_f6b007"
+          />
+        </div>
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007 _ConstraintsPreview__node__cross--locked_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--vertical_f6b007"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ConstraintsPreview snapshots > should render the default left/top preview 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstraintsPreview_f6b007"
+  >
+    <div
+      class="_ConstraintsPreview__box_f6b007"
+    >
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--top_f6b007 _ConstraintsPreview__tick--active_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--top_f6b007 _ConstraintsPreview__tick__line--active_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--bottom_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--bottom_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--left_f6b007 _ConstraintsPreview__tick--active_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--left_f6b007 _ConstraintsPreview__tick__line--active_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__tick_f6b007 _ConstraintsPreview__tick--right_f6b007"
+      >
+        <span
+          class="_ConstraintsPreview__tick__line_f6b007 _ConstraintsPreview__tick__line--right_f6b007"
+        />
+      </div>
+      <div
+        class="_ConstraintsPreview__node_f6b007"
+      >
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--horizontal_f6b007"
+          />
+        </div>
+        <div
+          class="_ConstraintsPreview__node__cross_f6b007 _ConstraintsPreview__node__cross--locked_f6b007"
+        >
+          <span
+            class="_ConstraintsPreview__node__cross__line_f6b007 _ConstraintsPreview__node__cross__line--vertical_f6b007"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

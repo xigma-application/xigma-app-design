@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { TIconProps } from '@xigma/components';
 
 export type TButtonGroup = {
+  active?: boolean;
   ariaLabel?: string;
   disabled?: boolean;
   name: TIconProps['name'];

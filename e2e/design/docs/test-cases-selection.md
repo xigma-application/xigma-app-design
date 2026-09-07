@@ -475,14 +475,15 @@ clipping ancestor (`getClipVisibleRect`) overlaps the marquee. Lives in
 
 Dragging a freeform frame's left or top edge (or a corner that includes them) moves the frame's own
 origin, so its children ride along by the same delta and stay put relative to that corner; dragging
-the right or bottom edge only grows the box and leaves the children where they are. The rule is
-rotation-aware — the child follows the world-space translation of the frame's unrotated-local
-top-left corner (`getFreeformFrameTopLeftDelta`), which is zero exactly when the anchored edge is
-the one being dragged. Auto-layout and grid frames are excluded (their engines already place
-children). `armPlainResizeDrag` snapshots the whole child subtree into
-`freeformFrameChildOrigins`; `continueResizeDrag` then translates each child via
-`applyFreeformFrameChildTranslation` after the frame's own box is written. Lives in
-`e2e/design/selection/frame-child-resize.spec.ts`.
+the right or bottom edge only grows the box and leaves the children where they are. This is the
+default (`left`/`top`) case of the general constraint reflow described below: the reducer
+chokepoint `handleUpdateNode` snapshots the frame's pre-mutation box, applies the change, then calls
+`syncConstrainedFrameChildren`, which recomputes every direct child's parent-local position from its
+`alignment` and the box delta and translates the child subtree to match — rotation-aware, via
+`getNodePositionInParent`/`getNodeAbsoluteFromParentPosition`. Because it lives in the reducer
+rather than the drag gesture, it runs for any `updateNode` that changes the frame's box, not just a
+canvas resize drag. Auto-layout and grid frames are excluded (their own engines already place
+children). Lives in `e2e/design/selection/frame-child-resize.spec.ts`.
 
 | #   | Scenario                                                                                          | Unit |               E2E               |
 | --- | ------------------------------------------------------------------------------------------------- | :--: | :-----------------------------: |
@@ -491,3 +492,26 @@ children). `armPlainResizeDrag` snapshots the whole child subtree into
 | 369 | A rotated frame carries its children along its own local axis, tracking the local top-left corner |  ✅  | ✅ `frame-child-resize.spec.ts` |
 | 370 | Auto-layout and grid frames capture no child origins, so their resize does not translate children |  ✅  |                —                |
 | 371 | Line and vector descendants translate every endpoint/vertex, not just a box `x`/`y`               |  ✅  |                —                |
+
+## Constraints anchor a freeform-frame child to its parent, live on resize
+
+A frame child can carry an `alignment: { horizontal?: left|center|right; vertical?: top|center|bottom }`.
+Setting an axis (via the RightPanel Alignment buttons, the expandable Constraints panel's
+dropdowns, or a direct `updateNode`) anchors the child to that edge/centre of the parent and keeps
+it there whenever the parent frame's box changes. The reflow runs in the reducer chokepoint
+`handleUpdateNode` → `syncConstrainedFrameChildren`, which — for every direct child of a **freeform**
+frame that has an alignment — recomputes the child's parent-local position with
+`getAlignedChildLocalPosition` (rotation-aware via `getNodePositionInParent` /
+`getNodeAbsoluteFromParentPosition`) and translates the child subtree to match. A free axis keeps
+its raw offset; auto-layout / grid parents are skipped (their own engine owns child positions). In
+the RightPanel, an aligned axis' Position input reads `auto` and is disabled. Lives in
+`e2e/design/selection/frame-child-constraints.spec.ts`.
+
+| #   | Scenario                                                                                     | Unit |                 E2E                  |
+| --- | -------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
+| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes            |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize      |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves             |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step) |  ✅  |                  —                   |
+| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space              |  ✅  |                  —                   |
+| 377 | An auto-layout parent ignores a child's alignment; a nested child subtree translates whole   |  ✅  |                  —                   |

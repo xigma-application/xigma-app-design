@@ -1,0 +1,21 @@
+.ColumnConstraints__grid {
+  column-gap: 8px;
+  display: grid;
+  grid-template-areas:
+    'horizontal container'
+    'vertical container';
+  grid-template-columns: 1fr 1fr;
+  row-gap: 8px;
+}
+
+.ColumnConstraints__horizontal {
+  grid-area: horizontal;
+}
+
+.ColumnConstraints__vertical {
+  grid-area: vertical;
+}
+
+.ColumnConstraints__container {
+  grid-area: container;
+}

@@ -24,9 +24,9 @@ export type TButtonGroupProps = {
 export const ButtonGroup: FC<TButtonGroupProps> = ({ buttons, e2eValue = '' }) => (
   <E2EDataAttribute type={E2EAttribute.buttonGroup} value={e2eValue}>
     <div className={styles.ButtonGroup}>
-      {buttons.map(({ ariaLabel, disabled = false, name, onClick, tooltip }) => (
+      {buttons.map(({ active = false, ariaLabel, disabled = false, name, onClick, tooltip }) => (
         <Tooltip content={tooltip} key={kebabCase(name)}>
-          <Button ariaLabel={ariaLabel} className={styles.ButtonGroup__button} disabled={disabled} onClick={onClick}>
+          <Button active={active} ariaLabel={ariaLabel} className={styles.ButtonGroup__button} disabled={disabled} onClick={onClick}>
             <Icon name={name} size={12} />
           </Button>
         </Tooltip>

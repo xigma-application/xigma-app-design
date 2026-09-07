@@ -8,15 +8,23 @@ import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import styles from '../column-alignment.module.scss';
 
 // types
+import { AlignmentHorizontal, AlignmentVertical } from 'types/design/enums';
 import { TAlignmentOption } from '../types';
 import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 
-export const buildAlignmentButtons = (options: TAlignmentOption[], disabled: boolean, t: TFunction): TButtonGroup[] =>
-  options.map(({ labelKey, name, shortcutKey }) => ({
+export const buildAlignmentButtons = <K extends AlignmentHorizontal | AlignmentVertical>(
+  options: TAlignmentOption[],
+  disabled: boolean,
+  selectedKey: K | undefined,
+  onSelect: TFunc<[K]>,
+  t: TFunction,
+): TButtonGroup[] =>
+  options.map(({ key, labelKey, name, shortcutKey }) => ({
+    active: key === selectedKey,
     ariaLabel: t(labelKey),
     disabled,
     name,
-    onClick: (): void => {},
+    onClick: (): void => onSelect(key as K),
     tooltip: (
       <Fragment>
         {t(labelKey)}

@@ -49,7 +49,6 @@ export type TResizeDragState = {
   aspectRatio: number;
   bounds: TDraftRect;
   candidateShapes: TCandidateShape[];
-  freeformFrameChildOrigins?: Record<string, TResizeNodeOrigin>;
   handle: TResizeHandle;
   nodeOrigins: Record<string, TResizeNodeOrigin>;
   rotatedGroupChildOrigins?: Record<string, TResizeNodeOrigin>;

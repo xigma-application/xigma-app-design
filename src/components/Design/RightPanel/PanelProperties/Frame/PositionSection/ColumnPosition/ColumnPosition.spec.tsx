@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'types/design/enums';
 
 const renderColumnPosition = (): ReturnType<typeof render> =>
   render(
@@ -129,5 +129,57 @@ describe('ColumnPosition behaviors', () => {
     // result
     expect(screen.getByLabelText('X position')).toBeDisabled();
     expect(screen.getByLabelText('Y position')).toBeDisabled();
+  });
+
+  const nestSelectedChild = (): string => {
+    const parentId = addFrameNode(0, 0);
+    const childId = addFrameNode(20, 20);
+
+    store.dispatch(updateNode({ changes: { height: 300, width: 400 }, id: parentId }));
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(setSelection([childId]));
+
+    return childId;
+  };
+
+  it('should not render the constraints toggle for a root frame with no parent', () => {
+    const frameId = addFrameNode(0, 0);
+
+    store.dispatch(setSelection([frameId]));
+    renderColumnPosition();
+
+    expect(screen.queryByLabelText('Constraints')).not.toBeInTheDocument();
+  });
+
+  it('should reveal the constraints panel when the toggle is clicked', () => {
+    nestSelectedChild();
+    renderColumnPosition();
+
+    expect(screen.queryByText('Constraints')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Constraints'));
+
+    expect(screen.getByText('Constraints')).toBeInTheDocument();
+  });
+
+  it('should keep showing the real coordinate but disable an axis input once a constraint is set on it', () => {
+    const childId = nestSelectedChild();
+
+    store.dispatch(
+      updateNode({
+        changes: { alignment: { horizontal: AlignmentHorizontal.center, vertical: AlignmentVertical.top } },
+        id: childId,
+      }),
+    );
+    renderColumnPosition();
+
+    const xInput = screen.getByLabelText('X position');
+    const yInput = screen.getByLabelText('Y position');
+
+    // setting the constraint alone never moves the child — still its original local position
+    expect(xInput).toHaveValue(20);
+    expect(xInput).toBeDisabled();
+    expect(yInput).toHaveValue(20);
+    expect(yInput).toBeDisabled();
   });
 });

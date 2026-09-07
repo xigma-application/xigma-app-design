@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
@@ -6,7 +6,7 @@ import ColumnAlignment from './ColumnAlignment';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -103,5 +103,54 @@ describe('ColumnAlignment behaviors', () => {
 
     // result
     expect(screen.getByLabelText('Align left')).not.toBeDisabled();
+  });
+
+  it('should write the alignment axis to the store when a button is clicked', () => {
+    // mock
+    const parentId = addFrameNode(null);
+    const childId = addFrameNode(parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnAlignment();
+    fireEvent.click(screen.getByLabelText('Align horizontal centers'));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[childId] as { alignment?: unknown }).alignment).toEqual({ horizontal: 'center' });
+  });
+
+  it('should mark the active alignment button as pressed and stay set on a repeated click', () => {
+    // mock
+    const parentId = addFrameNode(null);
+    const childId = addFrameNode(parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnAlignment();
+    fireEvent.click(screen.getByLabelText('Align right'));
+
+    // result
+    expect(screen.getByLabelText('Align right')).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByLabelText('Align right'));
+    expect((selectActivePage(store.getState()).nodes[childId] as { alignment?: unknown }).alignment).toEqual({ horizontal: 'right' });
+  });
+
+  it('should move the child to the anchor position when a button is clicked', () => {
+    // mock
+    const parentId = addFrameNode(null);
+
+    store.dispatch(updateNode({ changes: { height: 200, width: 200 }, id: parentId }));
+
+    const childId = addFrameNode(parentId);
+
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnAlignment();
+    fireEvent.click(screen.getByLabelText('Align right'));
+
+    // result — 200 (parent width) - 20 (child width)
+    expect((selectActivePage(store.getState()).nodes[childId] as { x: number }).x).toBe(180);
   });
 });

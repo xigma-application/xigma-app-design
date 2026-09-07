@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, LayoutMode, NodeType, PathType, SizingMode } from './enums';
+import { AlignmentHorizontal, AlignmentLayout, AlignmentVertical, LayoutMode, NodeType, PathType, SizingMode } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
@@ -43,7 +43,13 @@ export type TDraftText = TDraftRect & {
   type: NodeType.text;
 };
 
+export type TNodeAlignment = {
+  horizontal?: AlignmentHorizontal;
+  vertical?: AlignmentVertical;
+};
+
 export type TBaseNode = {
+  alignment?: TNodeAlignment;
   height: number;
   heightSizingMode?: SizingMode;
   hidden?: boolean;

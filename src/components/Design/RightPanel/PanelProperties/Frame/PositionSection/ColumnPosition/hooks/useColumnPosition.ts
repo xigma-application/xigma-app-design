@@ -18,7 +18,8 @@ import { getNodePositionInParent } from 'store/design/utils/getNodePositionInPar
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 
 export type TUseColumnPositionResult = {
-  disabled: boolean;
+  disabledX: boolean;
+  disabledY: boolean;
   onBlurX: TFunc<[FocusEvent<HTMLInputElement>]>;
   onBlurY: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
@@ -40,13 +41,14 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
   const local = frameNode && parent ? getNodePositionInParent(frameNode, parent) : undefined;
   const x = local ? Math.round(local.x) : (frameNode?.x ?? 0);
   const y = local ? Math.round(local.y) : (frameNode?.y ?? 0);
-  const disabled = parent !== undefined && isManagedLayoutFrame(parent);
+  const managed = parent !== undefined && isManagedLayoutFrame(parent);
 
   const commitX = (nextX: number): void => commitColumnPosition(dispatch, id, parent, nextX, y);
   const commitY = (nextY: number): void => commitColumnPosition(dispatch, id, parent, x, nextY);
 
   return {
-    disabled,
+    disabledX: managed || frameNode?.alignment?.horizontal !== undefined,
+    disabledY: managed || frameNode?.alignment?.vertical !== undefined,
     onBlurX: usePositionCommit(x, commitX),
     onBlurY: usePositionCommit(y, commitY),
     onDragEnd: () => dispatch(endHistoryGesture()),

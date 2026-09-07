@@ -12,7 +12,7 @@ import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentHorizontal, LayoutMode, NodeType } from 'types/design/enums';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -133,7 +133,7 @@ describe('useColumnPosition', () => {
     const { result } = renderUseColumnPosition();
 
     // result
-    expect(result.current).toMatchObject({ disabled: false, x: 30, y: 40 });
+    expect(result.current).toMatchObject({ disabledX: false, disabledY: false, x: 30, y: 40 });
   });
 
   it('should commit a nested frame position back to absolute coordinates', () => {
@@ -199,7 +199,29 @@ describe('useColumnPosition', () => {
     const { result } = renderUseColumnPosition();
 
     // result
-    expect(result.current.disabled).toBe(true);
+    expect(result.current.disabledX).toBe(true);
+    expect(result.current.disabledY).toBe(true);
+  });
+
+  it('should disable an axis with an alignment while still reporting its real coordinate', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    nestFrame(childId, parentId);
+    store.dispatch(updateNode({ changes: { alignment: { horizontal: AlignmentHorizontal.center } }, id: childId }));
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result — setting the constraint alone never moves the child; x is still its real local position
+    expect(result.current.disabledX).toBe(true);
+    expect(result.current.disabledY).toBe(false);
+    expect(result.current.x).toBe(20);
   });
 
   it('should coalesce every scrub between onDragStart and onDragEnd into a single undo step', () => {

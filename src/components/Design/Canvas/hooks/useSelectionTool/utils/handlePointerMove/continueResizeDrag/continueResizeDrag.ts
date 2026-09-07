@@ -8,7 +8,6 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { applyFreeformFrameChildTranslation } from './applyFreeformFrameChildTranslation';
 import { applyRotatedGroupChildResize } from './applyRotatedGroupChildResize';
 import { getAspectRatioLockGuide } from './getAspectRatioLockGuide';
 import { getResizeDragFrame } from './getResizeDragFrame';
@@ -25,8 +24,7 @@ export const continueResizeDrag = (
   const resizeDragState = resizeDragRef.current;
 
   if (resizeDragState) {
-    const { aspectRatio, bounds, candidateShapes, freeformFrameChildOrigins, handle, nodeOrigins, rotatedGroupChildOrigins } =
-      resizeDragState;
+    const { aspectRatio, bounds, candidateShapes, handle, nodeOrigins, rotatedGroupChildOrigins } = resizeDragState;
     const originEntries = Object.entries(nodeOrigins);
     const singleRotatableOrigin = getSingleRotatableOrigin(originEntries);
     const nodeId = originEntries.length === 1 ? originEntries[0][0] : undefined;
@@ -43,10 +41,6 @@ export const continueResizeDrag = (
     if (rotatedGroupChildOrigins && singleRotatableOrigin) {
       const [groupId] = originEntries[0];
       applyRotatedGroupChildResize(groupId, singleRotatableOrigin, rotatedGroupChildOrigins, dispatch);
-    }
-
-    if (freeformFrameChildOrigins && nodeId) {
-      applyFreeformFrameChildTranslation(nodeId, originEntries[0][1], freeformFrameChildOrigins, dispatch);
     }
 
     canvasRefs.transform.aspectRatioLockGuideRef.current = getAspectRatioLockGuide(frame.isAspectLocked, singleRotatableOrigin, nodeId);
