@@ -1,5 +1,5 @@
 // types
-import { AlignmentHorizontal, AlignmentLayout, AlignmentVertical, LayoutMode, NodeType, PathType, SizingMode } from './enums';
+import { AlignmentHorizontal, AlignmentLayout, AlignmentVertical, GapMode, LayoutMode, NodeType, PathType, SizingMode } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
@@ -89,6 +89,7 @@ export type TFrameNode = TBaseNode & {
   fill: string;
   guides?: TGuide[];
   horizontalGap?: number;
+  horizontalGapMode?: GapMode;
   layoutAlignment?: AlignmentLayout;
   layoutMode?: LayoutMode;
   layoutWrap?: boolean;
@@ -100,6 +101,7 @@ export type TFrameNode = TBaseNode & {
   strokeWidth?: number;
   type: NodeType.frame;
   verticalGap?: number;
+  verticalGapMode?: GapMode;
 };
 
 export type TGroupNode = TBaseNode & {

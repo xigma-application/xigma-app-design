@@ -38,6 +38,7 @@ describe('computeAutoLayoutSingleLinePositions', () => {
       AlignmentLayout.topLeft,
       NO_PADDING,
       sizes,
+      false,
     );
 
     expect(positions).toEqual([
@@ -53,7 +54,7 @@ describe('computeAutoLayoutSingleLinePositions', () => {
       { height: 50, id: 'b', width: 40 },
     ];
 
-    computeAutoLayoutSingleLinePositions(layoutFrame, LayoutMode.horizontal, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutSingleLinePositions(layoutFrame, LayoutMode.horizontal, 10, AlignmentLayout.topLeft, NO_PADDING, sizes, false);
 
     expect(layoutFrame).toMatchObject({ height: 50, width: 80 });
   });
@@ -72,6 +73,7 @@ describe('computeAutoLayoutSingleLinePositions', () => {
       AlignmentLayout.topLeft,
       NO_PADDING,
       sizes,
+      false,
     );
 
     expect(positions[1]).toMatchObject({ width: 240 });
@@ -91,11 +93,37 @@ describe('computeAutoLayoutSingleLinePositions', () => {
       AlignmentLayout.topLeft,
       NO_PADDING,
       sizes,
+      false,
     );
 
     expect(positions).toEqual([
       { height: 30, id: 'a', width: 20, x: 0, y: 0 },
       { height: 40, id: 'b', width: 20, x: 0, y: 40 },
+    ]);
+  });
+
+  it('should distribute the gap evenly across the content box when the primary axis gap is auto', () => {
+    const layoutFrame = frame({ width: 200 });
+    const sizes = [
+      { height: 20, id: 'a', width: 30 },
+      { height: 20, id: 'b', width: 40 },
+      { height: 20, id: 'c', width: 10 },
+    ];
+
+    const positions = computeAutoLayoutSingleLinePositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      10,
+      AlignmentLayout.center,
+      NO_PADDING,
+      sizes,
+      true,
+    );
+
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 30, x: 0, y: 40 },
+      { height: 20, id: 'b', width: 40, x: 90, y: 40 },
+      { height: 20, id: 'c', width: 10, x: 190, y: 40 },
     ]);
   });
 });

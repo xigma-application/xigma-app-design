@@ -22,6 +22,11 @@ export enum AlignmentVertical {
   top = 'top',
 }
 
+export enum GapMode {
+  auto = 'auto',
+  fixed = 'fixed',
+}
+
 export enum LayoutMode {
   freeForm = 'freeForm',
   grid = 'grid',

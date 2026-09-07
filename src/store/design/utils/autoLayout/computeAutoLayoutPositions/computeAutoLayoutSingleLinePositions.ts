@@ -16,6 +16,7 @@ export const computeAutoLayoutSingleLinePositions = (
   alignment: AlignmentLayout,
   padding: TAutoLayoutPadding,
   sizes: TAutoLayoutChildSize[],
+  isPrimaryGapAuto: boolean,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
@@ -29,5 +30,5 @@ export const computeAutoLayoutSingleLinePositions = (
   const fillableSizes = getFillableAutoLayoutSizes(sizes, widthMode, heightMode);
   const filledSizes = getAutoLayoutFillSizes(isHorizontal, itemSpacing, availablePrimary, availableCounter, fillableSizes);
 
-  return getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, filledSizes);
+  return getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, filledSizes, isPrimaryGapAuto);
 };

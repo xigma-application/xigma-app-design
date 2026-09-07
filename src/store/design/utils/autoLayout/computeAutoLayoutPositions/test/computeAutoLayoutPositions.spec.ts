@@ -31,7 +31,17 @@ describe('computeAutoLayoutPositions', () => {
       { height: 20, id: 'b', width: 40 },
     ];
 
-    const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    const positions = computeAutoLayoutPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      10,
+      10,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      false,
+      false,
+    );
 
     expect(positions).toEqual([
       { height: 20, id: 'a', width: 30, x: 0, y: 0 },
@@ -46,7 +56,17 @@ describe('computeAutoLayoutPositions', () => {
       { height: 20, id: 'b', width: 50 },
     ];
 
-    const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    const positions = computeAutoLayoutPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      0,
+      5,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      false,
+      false,
+    );
 
     expect(positions).toEqual([
       { height: 20, id: 'a', width: 50, x: 0, y: 0 },
@@ -61,7 +81,17 @@ describe('computeAutoLayoutPositions', () => {
       { height: 20, id: 'b', width: 40 },
     ];
 
-    const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    const positions = computeAutoLayoutPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      10,
+      10,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      false,
+      false,
+    );
 
     // hugged to a single line (30+10+40=80), not wrapped
     expect(layoutFrame.width).toBe(80);
@@ -78,7 +108,17 @@ describe('computeAutoLayoutPositions', () => {
       { height: 20, id: 'b', width: 40 },
     ];
 
-    const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    const positions = computeAutoLayoutPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      10,
+      10,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      false,
+      false,
+    );
 
     // 30+10+40=80 would exceed the 50 max, so b spills onto its own line instead of hugging to 80
     expect(layoutFrame.width).toBe(40);
@@ -95,7 +135,7 @@ describe('computeAutoLayoutPositions', () => {
       { height: 30, id: 'b', width: 50 },
     ];
 
-    computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     // two lines (20 + 30) plus one 5px gap between them = 55
     expect(layoutFrame.height).toBe(55);
@@ -108,7 +148,7 @@ describe('computeAutoLayoutPositions', () => {
       { height: 50, id: 'b', width: 30 },
     ];
 
-    computeAutoLayoutPositions(layoutFrame, LayoutMode.vertical, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutPositions(layoutFrame, LayoutMode.vertical, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     // two columns (20 + 30) plus one 5px gap between them = 55
     expect(layoutFrame.width).toBe(55);

@@ -19,6 +19,8 @@ export const computeAutoLayoutWrappedPositions = (
   alignment: AlignmentLayout,
   padding: TAutoLayoutPadding,
   sizes: TAutoLayoutChildSize[],
+  isPrimaryGapAuto: boolean,
+  isCounterGapAuto: boolean,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
@@ -48,5 +50,14 @@ export const computeAutoLayoutWrappedPositions = (
   const availableContentPrimary = isHorizontal ? contentBox.width : contentBox.height;
   const filledLines = getAutoLayoutFilledLines(isHorizontal, itemSpacing, availableContentPrimary, widthMode, heightMode, lines);
 
-  return getAutoLayoutWrappedChildPositions(layoutMode, itemSpacing, counterAxisSpacing, alignment, contentBox, filledLines);
+  return getAutoLayoutWrappedChildPositions(
+    layoutMode,
+    itemSpacing,
+    counterAxisSpacing,
+    alignment,
+    contentBox,
+    filledLines,
+    isPrimaryGapAuto,
+    isCounterGapAuto,
+  );
 };

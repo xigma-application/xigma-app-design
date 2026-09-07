@@ -263,7 +263,17 @@ exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap r
             />
             <span
               class="_TextFieldWrapper__endAdornment_9a3a67"
-            />
+            >
+              <button
+                aria-label="Toggle auto gap"
+                aria-pressed="false"
+                class="_Button_b88d2e"
+                data-state="closed"
+                type="button"
+              >
+                Auto
+              </button>
+            </span>
           </div>
         </div>
       </div>

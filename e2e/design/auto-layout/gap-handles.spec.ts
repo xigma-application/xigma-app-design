@@ -46,6 +46,21 @@ const getFrameGeometry = (page: Page): Promise<{ horizontalGap: number }> =>
     return activePage.nodes[frameId] as unknown as { horizontalGap: number };
   });
 
+const toggleAutoGap = async (page: Page): Promise<void> => {
+  await page.locator('[aria-label="Toggle auto gap"]').first().click();
+};
+
+const getChildrenX = (page: Page): Promise<number[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+    return frame.childIds.map((childId) => (activePage.nodes[childId] as unknown as { x: number }).x);
+  });
+
 test.describe('auto-layout — gap handles', () => {
   test('dragging the horizontal gap handle grows the shared gap and reflows the children', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -82,5 +97,42 @@ test.describe('auto-layout — gap handles', () => {
     const after = await getFrameGeometry(page);
 
     expect(after.horizontalGap).toBe(40);
+  });
+
+  test('switching gap to auto distributes children evenly, and live-redistributes them as the frame resizes', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 240x100 frame, no gap, two 60x60 children flush at world x 600 / 660
+    await designPage.goto('e2e-test-auto-layout-gap-handles-auto');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(ROW_FRAME.x1, ROW_FRAME.y1, ROW_FRAME.x2, ROW_FRAME.y2);
+    await setFlowHorizontal(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 2; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1460, 220);
+      await dragInto(page, { x: 1430, y: 190 }, { x: ROW_FRAME.x2 - 15, y: 200 });
+    }
+
+    await selectTheFrame(page);
+    await toggleAutoGap(page);
+
+    // 240-wide content box, two 60-wide children — the single gap becomes the full 120px leftover
+    const beforeResize = await getChildrenX(page);
+
+    expect(beforeResize).toEqual([600, 780]);
+
+    // drag the frame's right-edge handle 40px further right (240 -> 280 wide)
+    await page.mouse.move(840, 200);
+    await page.mouse.down();
+    await page.mouse.move(880, 200, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+
+    // 280-wide content box, same two 60-wide children — the gap grows to the new 160px leftover
+    const afterResize = await getChildrenX(page);
+
+    expect(afterResize).toEqual([600, 820]);
   });
 });

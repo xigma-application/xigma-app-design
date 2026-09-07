@@ -1,6 +1,6 @@
 // store
 import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoLayoutFrameCenter';
-import { getAutoLayoutGapHandles as getGapHandles } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles';
+import { getAutoLayoutGapHandles as getGapHandles } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles/getAutoLayoutGapHandles';
 import { getSelectedAutoLayoutFrame } from 'store/design/utils/autoLayout/getSelectedAutoLayoutFrame';
 
 // types

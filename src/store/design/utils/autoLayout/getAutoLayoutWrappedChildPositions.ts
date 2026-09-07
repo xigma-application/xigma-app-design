@@ -9,6 +9,7 @@ import { getAutoLayoutBlockCounterLength } from './getAutoLayoutBlockCounterLeng
 import { getAutoLayoutLineLength } from './getAutoLayoutLineLength';
 import { getAutoLayoutLineThickness } from './getAutoLayoutLineThickness';
 import { getAxisOffset } from './getAxisOffset';
+import { getDistributedGap } from './getDistributedGap';
 
 export const getAutoLayoutWrappedChildPositions = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
@@ -17,6 +18,8 @@ export const getAutoLayoutWrappedChildPositions = (
   alignment: AlignmentLayout,
   frame: TDraftRect,
   lines: TAutoLayoutChildSize[][],
+  isPrimaryGapAuto = false,
+  isCounterGapAuto = false,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const availablePrimary = isHorizontal ? frame.width : frame.height;
@@ -25,13 +28,17 @@ export const getAutoLayoutWrappedChildPositions = (
   const primaryAlign = isHorizontal ? xAlign : yAlign;
   const counterAlign = isHorizontal ? yAlign : xAlign;
   const lineThicknesses = lines.map((line) => getAutoLayoutLineThickness(isHorizontal, line));
-  const blockCounterLength = getAutoLayoutBlockCounterLength(counterAxisSpacing, lineThicknesses);
-  let counterOffset = getAxisOffset(counterAlign, availableCounter, blockCounterLength);
+  const totalLineThickness = lineThicknesses.reduce((total, thickness) => total + thickness, 0);
+  const effectiveCounterGap = isCounterGapAuto ? getDistributedGap(availableCounter, totalLineThickness, lines.length) : counterAxisSpacing;
+  const blockCounterLength = getAutoLayoutBlockCounterLength(effectiveCounterGap, lineThicknesses);
+  let counterOffset = isCounterGapAuto ? 0 : getAxisOffset(counterAlign, availableCounter, blockCounterLength);
   const positions: TAutoLayoutChildPosition[] = [];
 
   lines.forEach((line, lineIndex) => {
-    const lineLength = getAutoLayoutLineLength(isHorizontal, itemSpacing, line);
-    let primaryOffset = getAxisOffset(primaryAlign, availablePrimary, lineLength);
+    const linePrimarySize = line.reduce((total, child) => total + (isHorizontal ? child.width : child.height), 0);
+    const effectiveItemSpacing = isPrimaryGapAuto ? getDistributedGap(availablePrimary, linePrimarySize, line.length) : itemSpacing;
+    const lineLength = getAutoLayoutLineLength(isHorizontal, effectiveItemSpacing, line);
+    let primaryOffset = isPrimaryGapAuto ? 0 : getAxisOffset(primaryAlign, availablePrimary, lineLength);
 
     line.forEach((child) => {
       const size = isHorizontal ? child.width : child.height;
@@ -54,10 +61,10 @@ export const getAutoLayoutWrappedChildPositions = (
           };
 
       positions.push(position);
-      primaryOffset += size + itemSpacing;
+      primaryOffset += size + effectiveItemSpacing;
     });
 
-    counterOffset += lineThicknesses[lineIndex] + counterAxisSpacing;
+    counterOffset += lineThicknesses[lineIndex] + effectiveCounterGap;
   });
 
   return positions;

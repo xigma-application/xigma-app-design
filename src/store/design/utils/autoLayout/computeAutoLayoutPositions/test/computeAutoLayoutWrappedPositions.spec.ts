@@ -39,6 +39,8 @@ describe('computeAutoLayoutWrappedPositions', () => {
       AlignmentLayout.topLeft,
       NO_PADDING,
       sizes,
+      false,
+      false,
     );
 
     expect(positions).toEqual([
@@ -54,7 +56,7 @@ describe('computeAutoLayoutWrappedPositions', () => {
       { height: 30, id: 'b', width: 50 },
     ];
 
-    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     // two lines (20 + 30) plus one 5px gap between them = 55
     expect(layoutFrame.height).toBe(55);
@@ -67,7 +69,7 @@ describe('computeAutoLayoutWrappedPositions', () => {
       { height: 30, id: 'b', width: 50 },
     ];
 
-    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     expect(layoutFrame.height).toBe(200);
   });
@@ -79,7 +81,7 @@ describe('computeAutoLayoutWrappedPositions', () => {
       { height: 20, id: 'b', width: 40 },
     ];
 
-    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     // grouped against the 50 max (30+10+40=80 would overflow it), so b wraps to its own line;
     // the frame then hugs to the widest resulting line (40), not the raw max
@@ -90,7 +92,7 @@ describe('computeAutoLayoutWrappedPositions', () => {
     const layoutFrame = frame({ height: 100, maxWidth: 25, width: 999, widthSizingMode: SizingMode.hug });
     const sizes = [{ height: 20, id: 'a', width: 30 }];
 
-    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes, false, false);
 
     expect(layoutFrame.width).toBe(25);
   });
@@ -110,9 +112,65 @@ describe('computeAutoLayoutWrappedPositions', () => {
       AlignmentLayout.topLeft,
       NO_PADDING,
       sizes,
+      false,
+      false,
     );
 
     // 'a' alone fills the first 100-wide line; 'b' wraps to its own line and fills it entirely
     expect(positions[1]).toMatchObject({ width: 100 });
+  });
+
+  it('should distribute the primary-axis gap evenly within each wrapped line when the primary gap is auto', () => {
+    const layoutFrame = frame({ width: 100 });
+    const sizes = [
+      { height: 20, id: 'a', width: 20 },
+      { height: 20, id: 'b', width: 20 },
+      { height: 20, id: 'c', width: 20 },
+    ];
+
+    const positions = computeAutoLayoutWrappedPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      true,
+      false,
+    );
+
+    // one 100-wide line, 60px of children, 40px leftover split into 2 gaps of 20px each
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 20, x: 40, y: 0 },
+      { height: 20, id: 'c', width: 20, x: 80, y: 0 },
+    ]);
+  });
+
+  it('should distribute the counter-axis gap evenly between wrapped lines when the counter gap is auto', () => {
+    const layoutFrame = frame({ height: 100, width: 50 });
+    const sizes = [
+      { height: 20, id: 'a', width: 50 },
+      { height: 20, id: 'b', width: 50 },
+    ];
+
+    const positions = computeAutoLayoutWrappedPositions(
+      layoutFrame,
+      LayoutMode.horizontal,
+      0,
+      5,
+      AlignmentLayout.topLeft,
+      NO_PADDING,
+      sizes,
+      false,
+      true,
+    );
+
+    // two 20px-thick lines in a 100px-tall content box, 60px leftover into the single between-line gap
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 50, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 50, x: 0, y: 80 },
+    ]);
   });
 });

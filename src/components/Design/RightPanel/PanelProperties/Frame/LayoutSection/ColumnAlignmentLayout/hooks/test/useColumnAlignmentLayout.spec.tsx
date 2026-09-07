@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentLayout, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -291,5 +291,99 @@ describe('useColumnAlignmentLayout', () => {
     // result
     expect(input.value).toBe('0');
     expect(readNode(frameId).horizontalGap).toBeUndefined();
+  });
+
+  it('should default both gap modes to fixed (not auto)', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isHorizontalGapAuto).toBe(false);
+    expect(result.current.isVerticalGapAuto).toBe(false);
+  });
+
+  it('should toggle horizontalGapMode from fixed to auto and back', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { rerender, result } = renderUseColumnAlignmentLayout();
+
+    // action
+    act(() => result.current.onToggleHorizontalGapMode());
+    rerender();
+
+    // result
+    expect(readNode(frameId).horizontalGapMode).toBe(GapMode.auto);
+    expect(result.current.isHorizontalGapAuto).toBe(true);
+
+    // action
+    act(() => result.current.onToggleHorizontalGapMode());
+    rerender();
+
+    // result
+    expect(readNode(frameId).horizontalGapMode).toBeUndefined();
+  });
+
+  it('should toggle verticalGapMode from fixed to auto and back', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { rerender, result } = renderUseColumnAlignmentLayout();
+
+    // action
+    act(() => result.current.onToggleVerticalGapMode());
+    rerender();
+
+    // result
+    expect(readNode(frameId).verticalGapMode).toBe(GapMode.auto);
+    expect(result.current.isVerticalGapAuto).toBe(true);
+
+    // action
+    act(() => result.current.onToggleVerticalGapMode());
+    rerender();
+
+    // result
+    expect(readNode(frameId).verticalGapMode).toBeUndefined();
+  });
+
+  it('should disable the horizontal gap mode toggle when the width sizing mode hugs its content', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { widthSizingMode: SizingMode.hug }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isHorizontalGapModeDisabled).toBe(true);
+    expect(result.current.isVerticalGapModeDisabled).toBe(false);
+  });
+
+  it('should disable the vertical gap mode toggle when the height sizing mode hugs its content', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.hug }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isVerticalGapModeDisabled).toBe(true);
+    expect(result.current.isHorizontalGapModeDisabled).toBe(false);
   });
 });

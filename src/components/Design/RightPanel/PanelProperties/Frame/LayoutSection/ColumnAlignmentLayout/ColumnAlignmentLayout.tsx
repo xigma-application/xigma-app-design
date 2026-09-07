@@ -19,6 +19,10 @@ const ColumnAlignmentLayout: FC = () => {
     alignment,
     horizontalGap,
     isHorizontal,
+    isHorizontalGapAuto,
+    isHorizontalGapModeDisabled,
+    isVerticalGapAuto,
+    isVerticalGapModeDisabled,
     isVisible,
     isWrap,
     onBlurHorizontalGap,
@@ -26,6 +30,8 @@ const ColumnAlignmentLayout: FC = () => {
     onChangeAlignment,
     onScrubHorizontalGap,
     onScrubVerticalGap,
+    onToggleHorizontalGapMode,
+    onToggleVerticalGapMode,
     verticalGap,
   } = useColumnAlignmentLayout();
 
@@ -38,16 +44,34 @@ const ColumnAlignmentLayout: FC = () => {
         withBottomMargin
       >
         <AlignmentArea
-          isGapAutoHorizontal={false}
-          isGapAutoVertical={false}
+          isGapAutoHorizontal={isHorizontalGapAuto}
+          isGapAutoVertical={isVerticalGapAuto}
           isHorizontal={isHorizontal}
           isWrap={isWrap}
           onClick={onChangeAlignment}
           value={alignment}
         />
-        {isHorizontal && <GapField isHorizontal onBlur={onBlurHorizontalGap} onScrub={onScrubHorizontalGap} value={horizontalGap} />}
+        {isHorizontal && (
+          <GapField
+            isHorizontal
+            isModeAuto={isHorizontalGapAuto}
+            isModeToggleDisabled={isHorizontalGapModeDisabled}
+            onBlur={onBlurHorizontalGap}
+            onScrub={onScrubHorizontalGap}
+            onToggleMode={onToggleHorizontalGapMode}
+            value={horizontalGap}
+          />
+        )}
         {(!isHorizontal || isWrap) && (
-          <GapField isHorizontal={false} onBlur={onBlurVerticalGap} onScrub={onScrubVerticalGap} value={verticalGap} />
+          <GapField
+            isHorizontal={false}
+            isModeAuto={isVerticalGapAuto}
+            isModeToggleDisabled={isVerticalGapModeDisabled}
+            onBlur={onBlurVerticalGap}
+            onScrub={onScrubVerticalGap}
+            onToggleMode={onToggleVerticalGapMode}
+            value={verticalGap}
+          />
         )}
       </UITools.SectionColumn>
     );

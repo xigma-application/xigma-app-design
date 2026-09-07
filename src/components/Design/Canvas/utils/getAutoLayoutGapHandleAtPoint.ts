@@ -1,5 +1,5 @@
 // store
-import { getAutoLayoutGapHandles } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles';
+import { getAutoLayoutGapHandles } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles/getAutoLayoutGapHandles';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';

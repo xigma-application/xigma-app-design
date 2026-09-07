@@ -514,6 +514,45 @@ a browser. The one thing only a real browser proves is the actual pointerdown→
 gesture correctly reading back into the store as a persisted `horizontalGap` change — that's
 `gap-handles.spec.ts`.
 
+## Auto gap
+
+Each of `horizontalGap`/`verticalGap` can independently carry a `horizontalGapMode`/`verticalGapMode`
+of `'auto'` (default, unset, is `'fixed'` — the plain shared-number behaviour above). In `'auto'`
+mode the stored gap number is ignored for positioning: `getAutoLayoutChildPositions` /
+`getAutoLayoutWrappedChildPositions` instead distribute the axis's leftover space
+(`getDistributedGap`: `(availableSpace - childrenSize) / (itemCount - 1)`, clamped to 0) evenly
+between the children — first item flush to the content box's start edge, last item flush to its end
+edge, primary-axis alignment (start/center/end) moot since the block always saturates the full axis.
+Wrap's counter-axis (the gap between wrapped lines) has its own independent auto mode, computed the
+same way per the whole block against the counter axis. Because this lives in the same
+`getAutoLayoutSyncPositions` → `computeAutoLayoutPositions` pipeline every other auto-layout
+mutation already flows through, it applies to _any_ store change that touches the frame's box, not
+only a canvas resize drag — matching how the constraints/alignment reflow work
+(`syncConstrainedFrameChildren`) already behaves for freeform frames.
+
+On a `hug` sizing axis the math self-degrades to the plain fixed value with no special-casing needed:
+hug size is defined as `Σchildren + fixedGap * (n-1)`, so once hugged, `availableSpace - childrenSize`
+already equals exactly `fixedGap * (n-1)` — auto and fixed produce the identical position. The same
+holds when a `fill` child has already consumed the leftover primary space before the gap distribution
+runs. The RightPanel's `GapField` gets a small "Auto" toggle button (`UITools.Button`, active when the
+mode is auto) that disables the numeric input/scrub while active and is itself disabled when that
+axis's own frame sizing mode is `hug` (matching the math above — toggling would have no visible
+effect there). The dead `isGapAutoHorizontal`/`isGapAutoVertical` plumbing already built into
+`AlignmentArea`/`AlignmentOption` (collapsing the alignment picker's 3×3 grid into 3 cross-axis-only
+choices, since the primary-axis alignment component is moot once gap is auto) is now wired to these
+real values instead of a hardcoded `false`. On canvas, the draggable gap handles
+(`getAutoLayoutGapHandles`) are hidden for whichever axis is in auto mode — there is no longer a
+single shared number for a handle to drag.
+
+| #   | Scenario                                                                                                         | Unit |           E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 1   | A single-line frame's children distribute evenly across the content box, first/last flush to the edges           |  ✅  |            —             |
+| 2   | Each wrapped line distributes its own children independently; the counter (between-line) axis has its own toggle |  ✅  |            —             |
+| 3   | A `hug`-sized axis degrades to the identical fixed-gap layout, with no visible difference on toggle              |  ✅  |            —             |
+| 4   | Setting the mode alone (no resize) immediately re-flows the children, same as any other `updateNode`             |  ✅  |            —             |
+| 5   | The canvas gap-drag handles disappear for whichever axis is in auto mode                                         |  ✅  |            —             |
+| 6   | Toggling a frame to auto gap on the canvas, then live-resizing it, keeps the children evenly redistributed       |  ✅  | ✅ `gap-handles.spec.ts` |
+
 ## Fill sizing
 
 | #   | Scenario                                                                                                                                                                                                                                                                                       | Unit |           E2E            |

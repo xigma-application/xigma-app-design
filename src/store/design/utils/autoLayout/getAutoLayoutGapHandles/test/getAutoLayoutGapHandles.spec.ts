@@ -1,5 +1,5 @@
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { GapMode, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 
 // utils
@@ -92,5 +92,21 @@ describe('getAutoLayoutGapHandles', () => {
     // result
     expect(handles.vertical).toEqual([{ height: 20, width: 50, x: 0, y: 50 }]);
     expect(handles.horizontal).toEqual([{ height: 120, width: 20, x: 50, y: 0 }]);
+  });
+
+  it('should hide the horizontal handles when horizontalGapMode is auto — there is no single gap to drag', () => {
+    // action
+    const handles = getAutoLayoutGapHandles(frame(LayoutMode.horizontal, { horizontalGapMode: GapMode.auto }), [rect(0, 0), rect(70, 0)]);
+
+    // result
+    expect(handles).toEqual({ horizontal: [], vertical: [] });
+  });
+
+  it('should hide the vertical handles when verticalGapMode is auto — there is no single gap to drag', () => {
+    // action
+    const handles = getAutoLayoutGapHandles(frame(LayoutMode.vertical, { verticalGapMode: GapMode.auto }), [rect(0, 0), rect(0, 70)]);
+
+    // result
+    expect(handles).toEqual({ horizontal: [], vertical: [] });
   });
 });

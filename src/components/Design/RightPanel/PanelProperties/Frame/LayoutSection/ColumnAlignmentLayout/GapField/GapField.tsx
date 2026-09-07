@@ -13,12 +13,23 @@ import { translationNameSpace } from '../constants';
 
 export type TGapFieldProps = {
   isHorizontal: boolean;
+  isModeAuto: boolean;
+  isModeToggleDisabled?: boolean;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onScrub: TFunc<[number]>;
+  onToggleMode: TFunc;
   value: number;
 };
 
-export const GapField: FC<TGapFieldProps> = ({ isHorizontal, onBlur, onScrub, value }) => {
+export const GapField: FC<TGapFieldProps> = ({
+  isHorizontal,
+  isModeAuto,
+  isModeToggleDisabled = false,
+  onBlur,
+  onScrub,
+  onToggleMode,
+  value,
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -26,10 +37,23 @@ export const GapField: FC<TGapFieldProps> = ({ isHorizontal, onBlur, onScrub, va
       <UITools.TextField
         aria-label={t(`${translationNameSpace}.gapAriaLabel`)}
         defaultValue={value}
+        disabled={isModeAuto}
         e2eValue="gap"
+        endAdornment={
+          <Tooltip content={t(`${translationNameSpace}.gapModeToggleTooltip.${isModeAuto ? 'auto' : 'fixed'}`)}>
+            <UITools.Button
+              active={isModeAuto}
+              ariaLabel={t(`${translationNameSpace}.gapModeToggleAriaLabel`)}
+              disabled={isModeToggleDisabled}
+              onClick={onToggleMode}
+            >
+              {t(`${translationNameSpace}.gapModeToggleLabel`)}
+            </UITools.Button>
+          </Tooltip>
+        }
         onBlur={onBlur}
         startAdornment={
-          <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onScrub} value={value}>
+          <ScrubbableInput disabled={isModeAuto} max={GAP_MAX} min={GAP_MIN} onChange={onScrub} value={value}>
             <Icon name={isHorizontal ? 'GapColumns' : 'GapRows'} size={10} />
           </ScrubbableInput>
         }

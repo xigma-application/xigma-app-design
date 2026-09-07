@@ -9,12 +9,16 @@ import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentLayout, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
 export type TUseColumnAlignmentLayoutResult = {
   alignment: AlignmentLayout;
   horizontalGap: number;
   isHorizontal: boolean;
+  isHorizontalGapAuto: boolean;
+  isHorizontalGapModeDisabled: boolean;
+  isVerticalGapAuto: boolean;
+  isVerticalGapModeDisabled: boolean;
   isVisible: boolean;
   isWrap: boolean;
   onBlurHorizontalGap: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -22,6 +26,8 @@ export type TUseColumnAlignmentLayoutResult = {
   onChangeAlignment: TFunc<[AlignmentLayout]>;
   onScrubHorizontalGap: TFunc<[number]>;
   onScrubVerticalGap: TFunc<[number]>;
+  onToggleHorizontalGapMode: TFunc;
+  onToggleVerticalGapMode: TFunc;
   verticalGap: number;
 };
 
@@ -35,6 +41,8 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const alignment = frameNode?.layoutAlignment ?? AlignmentLayout.topLeft;
   const horizontalGap = frameNode?.horizontalGap ?? 0;
   const verticalGap = frameNode?.verticalGap ?? (isHorizontal ? horizontalGap : 0);
+  const isHorizontalGapAuto = frameNode?.horizontalGapMode === GapMode.auto;
+  const isVerticalGapAuto = frameNode?.verticalGapMode === GapMode.auto;
 
   const commitHorizontalGap = (nextGap: number): void => {
     dispatch(updateNode({ changes: { horizontalGap: nextGap }, id }));
@@ -48,6 +56,10 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     alignment,
     horizontalGap,
     isHorizontal,
+    isHorizontalGapAuto,
+    isHorizontalGapModeDisabled: (frameNode?.widthSizingMode ?? SizingMode.fixed) === SizingMode.hug,
+    isVerticalGapAuto,
+    isVerticalGapModeDisabled: (frameNode?.heightSizingMode ?? SizingMode.fixed) === SizingMode.hug,
     isVisible: layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical,
     isWrap: Boolean(frameNode?.layoutWrap),
     onBlurHorizontalGap: useDimensionsCommit(horizontalGap, commitHorizontalGap),
@@ -55,6 +67,9 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     onChangeAlignment: (nextAlignment) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id })),
     onScrubHorizontalGap: commitHorizontalGap,
     onScrubVerticalGap: commitVerticalGap,
+    onToggleHorizontalGapMode: () =>
+      dispatch(updateNode({ changes: { horizontalGapMode: isHorizontalGapAuto ? undefined : GapMode.auto }, id })),
+    onToggleVerticalGapMode: () => dispatch(updateNode({ changes: { verticalGapMode: isVerticalGapAuto ? undefined : GapMode.auto }, id })),
     verticalGap,
   };
 };

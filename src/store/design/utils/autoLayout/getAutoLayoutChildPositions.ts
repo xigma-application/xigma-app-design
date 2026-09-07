@@ -5,6 +5,7 @@ import { TDraftRect } from 'types/canvas';
 // utils
 import { getAlignmentComponents } from './getAlignmentComponents';
 import { getAxisOffset } from './getAxisOffset';
+import { getDistributedGap } from './getDistributedGap';
 
 export type TAutoLayoutChildSize = {
   height: number;
@@ -26,6 +27,7 @@ export const getAutoLayoutChildPositions = (
   alignment: AlignmentLayout,
   frame: TDraftRect,
   children: TAutoLayoutChildSize[],
+  isPrimaryGapAuto = false,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const { x: xAlign, y: yAlign } = getAlignmentComponents(alignment);
@@ -33,11 +35,10 @@ export const getAutoLayoutChildPositions = (
   const counterAlign = isHorizontal ? yAlign : xAlign;
   const primarySize = isHorizontal ? frame.width : frame.height;
   const counterSize = isHorizontal ? frame.height : frame.width;
-  const contentLength = children.reduce((total, child, index) => {
-    const size = isHorizontal ? child.width : child.height;
-    return total + size + (index > 0 ? itemSpacing : 0);
-  }, 0);
-  let offset = getAxisOffset(primaryAlign, primarySize, contentLength);
+  const childrenPrimarySize = children.reduce((total, child) => total + (isHorizontal ? child.width : child.height), 0);
+  const effectiveGap = isPrimaryGapAuto ? getDistributedGap(primarySize, childrenPrimarySize, children.length) : itemSpacing;
+  const contentLength = childrenPrimarySize + effectiveGap * Math.max(0, children.length - 1);
+  let offset = isPrimaryGapAuto ? 0 : getAxisOffset(primaryAlign, primarySize, contentLength);
 
   return children.map((child) => {
     const size = isHorizontal ? child.width : child.height;
@@ -47,7 +48,7 @@ export const getAutoLayoutChildPositions = (
       ? { height: child.height, id: child.id, width: child.width, x: frame.x + offset, y: frame.y + counterOffset }
       : { height: child.height, id: child.id, width: child.width, x: frame.x + counterOffset, y: frame.y + offset };
 
-    offset += size + itemSpacing;
+    offset += size + effectiveGap;
 
     return position;
   });

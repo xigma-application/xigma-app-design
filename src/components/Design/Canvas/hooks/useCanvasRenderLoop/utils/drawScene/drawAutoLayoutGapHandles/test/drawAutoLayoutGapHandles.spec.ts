@@ -17,7 +17,7 @@ const drawAutoLayoutGapOutlineMock = vi.fn();
 vi.mock('store/design/utils/autoLayout/getAutoLayoutFrameCenter', () => ({
   getAutoLayoutFrameCenter: (...args: unknown[]): unknown => getAutoLayoutFrameCenterMock(...args),
 }));
-vi.mock('store/design/utils/autoLayout/getAutoLayoutGapHandles', () => ({
+vi.mock('store/design/utils/autoLayout/getAutoLayoutGapHandles/getAutoLayoutGapHandles', () => ({
   getAutoLayoutGapHandles: (...args: unknown[]): unknown => getAutoLayoutGapHandlesMock(...args),
 }));
 vi.mock('../drawAutoLayoutGapHandleBars', () => ({
