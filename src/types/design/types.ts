@@ -51,6 +51,10 @@ export type TBaseNode = {
   isMask?: boolean;
   locked?: boolean;
   lockedAspectRatio?: boolean;
+  maxHeight?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  minWidth?: number;
   name: string;
   parentId: string | null;
   rotation: number;

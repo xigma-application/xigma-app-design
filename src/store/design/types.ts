@@ -34,6 +34,13 @@ export type TPreferences = {
   areRulersVisible: boolean;
 };
 
+export type TRevealedMinMax = {
+  maxHeight: boolean;
+  maxWidth: boolean;
+  minHeight: boolean;
+  minWidth: boolean;
+};
+
 export type TDesignState = {
   activePageId: string;
   activeTool: ToolName;
@@ -58,6 +65,7 @@ export type TDesignState = {
   pages: Record<string, TDesignPage>;
   penActiveVertexId: string | null;
   preferences: TPreferences;
+  revealedMinMax: TRevealedMinMax;
   vectorEditingNodeIds: string[];
 };
 

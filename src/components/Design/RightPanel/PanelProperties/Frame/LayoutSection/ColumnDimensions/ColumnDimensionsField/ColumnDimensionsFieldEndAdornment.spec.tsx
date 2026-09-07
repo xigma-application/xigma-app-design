@@ -12,9 +12,13 @@ const renderEndAdornment = (overrides: Partial<Parameters<typeof ColumnDimension
       axis="width"
       canFill
       canHug
+      hasMax={false}
+      hasMin={false}
       isRevealed={false}
       onMenuOpenChange={vi.fn()}
       onSelectSizingMode={vi.fn()}
+      onToggleMax={vi.fn()}
+      onToggleMin={vi.fn()}
       sizingMode={SizingMode.fixed}
       value={326}
       {...overrides}
@@ -129,5 +133,31 @@ describe('ColumnDimensionsFieldEndAdornment', () => {
 
     // result
     expect(screen.queryByText('Fill container')).toBeNull();
+  });
+
+  it('should call onToggleMin when the Add min width item is clicked', () => {
+    // mock
+    const onToggleMin = vi.fn();
+
+    // before
+    renderEndAdornment({ onToggleMin });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+    fireEvent.click(screen.getByText('Add min width…'));
+
+    // result
+    expect(onToggleMin).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show the "Remove min width…" label once hasMin is true', () => {
+    // before
+    renderEndAdornment({ hasMin: true });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+
+    // result
+    expect(screen.getByText('Remove min width…')).toBeInTheDocument();
   });
 });

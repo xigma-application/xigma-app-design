@@ -16,14 +16,31 @@ export type TColumnDimensionsSizingMenuProps = {
   axis: 'height' | 'width';
   canFill: boolean;
   canHug: boolean;
+  hasMax: boolean;
+  hasMin: boolean;
   mode: SizingMode;
   onSelect: TFunc<[SizingMode]>;
+  onToggleMax: TFunc;
+  onToggleMin: TFunc;
   value: number;
 };
 
-export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = ({ axis, canFill, canHug, mode, onSelect, value }) => {
+export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = ({
+  axis,
+  canFill,
+  canHug,
+  hasMax,
+  hasMin,
+  mode,
+  onSelect,
+  onToggleMax,
+  onToggleMin,
+  value,
+}) => {
   const { t } = useTranslation();
   const isWidth = axis === 'width';
+  const minLabelKey = hasMin ? (isWidth ? 'removeMinWidth' : 'removeMinHeight') : isWidth ? 'addMinWidth' : 'addMinHeight';
+  const maxLabelKey = hasMax ? (isWidth ? 'removeMaxWidth' : 'removeMaxHeight') : isWidth ? 'addMaxWidth' : 'addMaxHeight';
 
   return (
     <>
@@ -49,15 +66,23 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
           selected={mode === SizingMode.fill}
         />
       )}
-      <PopoverSeparator />
-      <PopoverItem
-        icon={isWidth ? 'MinWidth' : 'MinHeight'}
-        label={t(`${translationNameSpace}.${isWidth ? 'addMinWidth' : 'addMinHeight'}`)}
-      />
-      <PopoverItem
-        icon={isWidth ? 'MaxWidth' : 'MaxHeight'}
-        label={t(`${translationNameSpace}.${isWidth ? 'addMaxWidth' : 'addMaxHeight'}`)}
-      />
+      {canHug && (
+        <>
+          <PopoverSeparator />
+          <PopoverItem
+            icon={isWidth ? 'MinWidth' : 'MinHeight'}
+            label={t(`${translationNameSpace}.${minLabelKey}`)}
+            onClick={onToggleMin}
+            selected={hasMin}
+          />
+          <PopoverItem
+            icon={isWidth ? 'MaxWidth' : 'MaxHeight'}
+            label={t(`${translationNameSpace}.${maxLabelKey}`)}
+            onClick={onToggleMax}
+            selected={hasMax}
+          />
+        </>
+      )}
       <PopoverSeparator />
       <PopoverItem icon="Variables" label={t(`${translationNameSpace}.applyVariable`)} />
     </>

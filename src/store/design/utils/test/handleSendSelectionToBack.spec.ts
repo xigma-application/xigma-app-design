@@ -55,6 +55,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },
+  revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
 });
 

@@ -5,6 +5,7 @@ import { useCommitColumnDimensions } from './useCommitColumnDimensions';
 import { useDimensionsCommit } from './useDimensionsCommit';
 import { useSelectColumnSizingMode } from './useSelectColumnSizingMode';
 import { useToggleColumnLock } from './useToggleColumnLock';
+import { useToggleColumnMinMax } from './useToggleColumnMinMax';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -19,6 +20,10 @@ export type TUseColumnDimensionsResult = {
   canFillHeight: boolean;
   canFillWidth: boolean;
   canHug: boolean;
+  hasMaxHeight: boolean;
+  hasMaxWidth: boolean;
+  hasMinHeight: boolean;
+  hasMinWidth: boolean;
   height: number;
   heightSizingMode: SizingMode;
   locked: boolean;
@@ -31,6 +36,10 @@ export type TUseColumnDimensionsResult = {
   onSelectHeightSizingMode: TFunc<[SizingMode]>;
   onSelectWidthSizingMode: TFunc<[SizingMode]>;
   onToggleLock: TFunc;
+  onToggleMaxHeight: TFunc;
+  onToggleMaxWidth: TFunc;
+  onToggleMinHeight: TFunc;
+  onToggleMinWidth: TFunc;
   width: number;
   widthSizingMode: SizingMode;
 };
@@ -58,11 +67,17 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const { commitHeight, commitWidth } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
   const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(id, frameNode, nodes, locked);
   const toggleLock = useToggleColumnLock(id, locked, widthSizingMode, heightSizingMode);
+  const { hasMaxHeight, hasMaxWidth, hasMinHeight, hasMinWidth, toggleMaxHeight, toggleMaxWidth, toggleMinHeight, toggleMinWidth } =
+    useToggleColumnMinMax(id, frameNode);
 
   return {
     canFillHeight,
     canFillWidth,
     canHug,
+    hasMaxHeight,
+    hasMaxWidth,
+    hasMinHeight,
+    hasMinWidth,
     height,
     heightSizingMode,
     locked,
@@ -75,6 +90,10 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
     onSelectHeightSizingMode: selectHeightSizingMode,
     onSelectWidthSizingMode: selectWidthSizingMode,
     onToggleLock: toggleLock,
+    onToggleMaxHeight: toggleMaxHeight,
+    onToggleMaxWidth: toggleMaxWidth,
+    onToggleMinHeight: toggleMinHeight,
+    onToggleMinWidth: toggleMinWidth,
     width,
     widthSizingMode,
   };

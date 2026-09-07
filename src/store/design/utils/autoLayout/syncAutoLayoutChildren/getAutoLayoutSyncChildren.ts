@@ -23,6 +23,10 @@ export const getAutoLayoutSyncChildren = (frame: TFrameNode, nodes: Record<strin
       height: bound.height,
       heightSizingMode: isBoxSceneNode(child) ? child.heightSizingMode : undefined,
       id: child.id,
+      maxHeight: isBoxSceneNode(child) ? child.maxHeight : undefined,
+      maxWidth: isBoxSceneNode(child) ? child.maxWidth : undefined,
+      minHeight: isBoxSceneNode(child) ? child.minHeight : undefined,
+      minWidth: isBoxSceneNode(child) ? child.minWidth : undefined,
       width: bound.width,
       widthSizingMode: isBoxSceneNode(child) ? child.widthSizingMode : undefined,
     };

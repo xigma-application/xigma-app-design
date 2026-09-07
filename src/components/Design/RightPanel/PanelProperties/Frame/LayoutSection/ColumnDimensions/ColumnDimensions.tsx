@@ -18,6 +18,10 @@ const ColumnDimensions: FC = () => {
     canFillHeight,
     canFillWidth,
     canHug,
+    hasMaxHeight,
+    hasMaxWidth,
+    hasMinHeight,
+    hasMinWidth,
     height,
     heightSizingMode,
     locked,
@@ -30,6 +34,10 @@ const ColumnDimensions: FC = () => {
     onSelectHeightSizingMode,
     onSelectWidthSizingMode,
     onToggleLock,
+    onToggleMaxHeight,
+    onToggleMaxWidth,
+    onToggleMinHeight,
+    onToggleMinWidth,
     width,
     widthSizingMode,
   } = useColumnDimensions();
@@ -50,12 +58,16 @@ const ColumnDimensions: FC = () => {
         canFill={canFillWidth}
         canHug={canHug}
         e2eValue="width"
+        hasMax={hasMaxWidth}
+        hasMin={hasMinWidth}
         label="W"
         onBlur={onBlurWidth}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         onScrub={onScrubWidth}
         onSelectSizingMode={showWidthDropdown ? onSelectWidthSizingMode : undefined}
+        onToggleMax={onToggleMaxWidth}
+        onToggleMin={onToggleMinWidth}
         sizingMode={showWidthDropdown ? widthSizingMode : undefined}
         value={width}
       />
@@ -65,12 +77,16 @@ const ColumnDimensions: FC = () => {
         canFill={canFillHeight}
         canHug={canHug}
         e2eValue="height"
+        hasMax={hasMaxHeight}
+        hasMin={hasMinHeight}
         label="H"
         onBlur={onBlurHeight}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         onScrub={onScrubHeight}
         onSelectSizingMode={showHeightDropdown ? onSelectHeightSizingMode : undefined}
+        onToggleMax={onToggleMaxHeight}
+        onToggleMin={onToggleMinHeight}
         sizingMode={showHeightDropdown ? heightSizingMode : undefined}
         value={height}
       />

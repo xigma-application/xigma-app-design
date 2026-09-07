@@ -280,6 +280,32 @@ describe('resizeBoxNode', () => {
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ height: 150, heightSizingMode: SizingMode.fixed });
   });
 
+  it('should clamp the resized width down to the node’s own maxWidth', () => {
+    // mock
+    const idA = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { maxWidth: 120 }, id: idA }));
+
+    // before — scaleX2 would otherwise grow width to 200
+    resizeBoxNode(idA, { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 2, 1, true, null);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ width: 120 });
+  });
+
+  it('should clamp the resized height up to the node’s own minHeight', () => {
+    // mock
+    const idA = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { minHeight: 90 }, id: idA }));
+
+    // before — scaleY0.5 would otherwise shrink height to 25
+    resizeBoxNode(idA, { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 1, 0.5, true, null);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ height: 90 });
+  });
+
   it('should do nothing when the resized node can no longer be found in the store', () => {
     // before — resizing an id that was never added should not throw
     expect(() =>

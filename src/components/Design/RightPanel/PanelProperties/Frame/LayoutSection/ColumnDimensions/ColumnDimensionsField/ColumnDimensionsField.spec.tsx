@@ -169,4 +169,40 @@ describe('ColumnDimensionsField behaviors', () => {
     expect(screen.queryByText('Hug')).toBeNull();
     expect(screen.getByLabelText('Width sizing options')).toBeInTheDocument();
   });
+
+  it('should show the "W" text label when neither hasMin nor hasMax is set', () => {
+    // before
+    const { container } = renderColumnDimensionsField();
+
+    // result
+    expect(screen.getByText('W')).toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeNull();
+  });
+
+  it('should swap the "W" label for the WidthRestricted icon once hasMin is set', () => {
+    // before
+    const { container } = renderColumnDimensionsField({ hasMin: true });
+
+    // result
+    expect(screen.queryByText('W')).toBeNull();
+    expect(container.querySelector('svg')).not.toBeNull();
+  });
+
+  it('should swap the "W" label for the WidthRestricted icon once hasMax is set', () => {
+    // before
+    const { container } = renderColumnDimensionsField({ hasMax: true });
+
+    // result
+    expect(screen.queryByText('W')).toBeNull();
+    expect(container.querySelector('svg')).not.toBeNull();
+  });
+
+  it('should swap the "H" label for the HeightRestricted icon on a height-axis field once hasMax is set', () => {
+    // before
+    const { container } = renderColumnDimensionsField({ axis: 'height', hasMax: true, label: 'H' });
+
+    // result
+    expect(screen.queryByText('H')).toBeNull();
+    expect(container.querySelector('svg')).not.toBeNull();
+  });
 });

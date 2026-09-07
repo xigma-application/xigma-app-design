@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useCommitColumnDimensions } from '../useCommitColumnDimensions';
 
 // store
-import { addNode } from 'store/design/slice';
+import { addNode, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -85,6 +85,38 @@ describe('useCommitColumnDimensions', () => {
 
     // result
     expect(readNode(frameId)).toMatchObject({ width: 200, widthSizingMode: SizingMode.fixed });
+  });
+
+  it('should clamp a committed width down to the node’s own maxWidth', () => {
+    // mock
+    const frameId = addFrameNode(100, 50);
+
+    store.dispatch(updateNode({ changes: { maxWidth: 150 }, id: frameId }));
+
+    const frameNode = readNode(frameId);
+    const { result } = renderHook(() => useCommitColumnDimensions(frameId, frameNode, 100, 50, false), { wrapper });
+
+    // action
+    act(() => result.current.commitWidth(200));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ width: 150 });
+  });
+
+  it('should clamp a committed height up to the node’s own minHeight', () => {
+    // mock
+    const frameId = addFrameNode(100, 50);
+
+    store.dispatch(updateNode({ changes: { minHeight: 40 }, id: frameId }));
+
+    const frameNode = readNode(frameId);
+    const { result } = renderHook(() => useCommitColumnDimensions(frameId, frameNode, 100, 50, false), { wrapper });
+
+    // action
+    act(() => result.current.commitHeight(20));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ height: 40 });
   });
 
   it('should commit a new height without resetting any sizing mode when there is no selected node', () => {

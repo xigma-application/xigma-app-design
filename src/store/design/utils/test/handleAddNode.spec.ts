@@ -78,6 +78,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 
@@ -133,6 +134,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 
@@ -187,6 +189,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 
@@ -242,6 +245,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 
@@ -299,6 +303,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 
@@ -353,6 +358,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
     const media = {
@@ -421,6 +427,7 @@ describe('handleAddNode', () => {
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     };
 

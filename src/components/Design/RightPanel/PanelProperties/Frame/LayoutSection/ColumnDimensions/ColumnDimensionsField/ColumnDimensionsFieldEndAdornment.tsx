@@ -21,9 +21,13 @@ export type TColumnDimensionsFieldEndAdornmentProps = {
   axis: 'height' | 'width';
   canFill: boolean;
   canHug: boolean;
+  hasMax: boolean;
+  hasMin: boolean;
   isRevealed: boolean;
   onMenuOpenChange: TFunc<[boolean]>;
   onSelectSizingMode?: TFunc<[SizingMode]>;
+  onToggleMax: TFunc;
+  onToggleMin: TFunc;
   sizingMode?: SizingMode;
   value: number;
 };
@@ -32,9 +36,13 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
   axis,
   canFill,
   canHug,
+  hasMax,
+  hasMin,
   isRevealed,
   onMenuOpenChange,
   onSelectSizingMode,
+  onToggleMax,
+  onToggleMin,
   sizingMode,
   value,
 }) => {
@@ -59,8 +67,12 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
         axis={axis}
         canFill={canFill}
         canHug={canHug}
+        hasMax={hasMax}
+        hasMin={hasMin}
         mode={sizingMode}
         onSelect={onSelectSizingMode}
+        onToggleMax={onToggleMax}
+        onToggleMin={onToggleMin}
         value={value}
       />
     </UITools.ButtonMenu>

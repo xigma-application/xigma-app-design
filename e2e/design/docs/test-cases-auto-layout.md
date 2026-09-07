@@ -547,3 +547,48 @@ covered without a browser. What only a real browser proves:
 the RightPanel's sizing-mode dropdown actually dispatching `updateNode` for the selected child, and a
 live canvas resize-drag actually re-triggering the fill recompute end to end — that's
 `fill-sizing.spec.ts`.
+
+## Min/Max sizing
+
+| #   | Scenario                                                                                                                                                                                                                                                                              | Unit |             E2E             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 1   | A frame with an active (non-freeForm) layout can reveal an empty Min/Max width/height row via a toggle in the RightPanel's existing sizing dropdown, previously an inert placeholder — revealing writes nothing to the node until a real value is typed                               |  ✅  | ✅ `min-max-sizing.spec.ts` |
+| 2   | Min/Max is gated behind the same condition as Hug (the node itself must be an active-layout frame) — not offered for a freeForm frame or a non-frame Fill child                                                                                                                       |  ✅  |              —              |
+| 3   | A Hug-computed size is clamped to its own Min/Max, even though it would otherwise be smaller/larger from content alone                                                                                                                                                                |  ✅  | ✅ `min-max-sizing.spec.ts` |
+| 4   | A committed Fixed value, and a live canvas resize-drag, are both clamped to the node's own Min/Max the same way                                                                                                                                                                       |  ✅  |              —              |
+| 5   | On the primary axis, a Fill child's Max/Min is honored even when it diverges from the equal-split share; the leftover a Max-capped child gives back is redistributed among its still-unbounded Fill siblings, not wasted (mirrors CSS flexbox's "resolve flexible lengths" algorithm) |  ✅  |              —              |
+| 6   | On the counter axis, a Fill child's Min/Max clamps its stretch size independently — there's no shared pool on that axis to redistribute from                                                                                                                                          |  ✅  |              —              |
+| 7   | Once a Max is set on the primary axis, Wrap becomes available for a Hug frame (previously Hug and Wrap were mutually exclusive); lines are grouped against the Max as their budget, and the frame then re-hugs to the widest resulting line, not the raw Max                          |  ✅  | ✅ `min-max-sizing.spec.ts` |
+| 8   | Toggling a Min/Max entry off in the RightPanel clears that one bound back to unset; unlike Fixed/Hug/Fill, a real (committed) Min/Max survives a sizing-mode change or a manual resize — it's an independent, persistent constraint                                                   |  ✅  |              —              |
+| 9   | Committing a Min above the current Max (or a Max below the current Min) in the RightPanel pushes the other bound to match, keeping min ≤ max                                                                                                                                          |  ✅  |              —              |
+| 10  | Committing a Min/Max field to 0 (or a negative value) clears that bound entirely instead of flooring it to 1 — 0 isn't a meaningful lower/upper bound, so it's treated as "remove the constraint"                                                                                     |  ✅  |              —              |
+| 11  | A revealed-but-never-committed Min/Max row stays visible only while its node stays selected — it lives in ephemeral Redux state (`revealedMinMax`), not on the node, and disappears the moment the selection changes to a different node                                              |  ✅  |              —              |
+
+Min/Max live as four new optional `TBaseNode` fields (`minWidth`/`maxWidth`/`minHeight`/`maxHeight`),
+the same physical-axis-keyed convention as `widthSizingMode`/`heightSizingMode` — undefined means "no
+constraint". A single new `clampAutoLayoutSize` helper is the one clamp primitive reused everywhere a
+resolved size gets finalized: `applyAutoLayoutHugSize`, the new `applyAutoLayoutWrapPrimaryHugSize`
+(the bounded-Hug-plus-Wrap case), `getAutoLayoutFillSizes`'s counter-axis clamp, the RightPanel's
+Fixed-value commit, and the canvas drag-resize path. The primary-axis Fill case needed a real
+algorithm, not just a clamp — `resolveAutoLayoutFillPrimarySizes` runs a freeze-and-redistribute loop
+(same shape as CSS flexbox's own flexible-length resolution) so a Max-capped child's unused leftover
+flows to its still-growing siblings instead of being wasted, and a Min-forced child can pull leftover
+down to 0 for the rest rather than going negative. Enabling Wrap on a bounded Hug required teaching
+`computeAutoLayoutWrappedPositions` to group lines against the Max (not the current, not-yet-computed
+content box) and then hug the frame's own primary size to the widest resulting line via a new
+`getAutoLayoutWrapPrimaryHugSize`/`applyAutoLayoutWrapPrimaryHugSize` pair, mirroring the existing
+counter-axis hug pair exactly. The RightPanel toggle deliberately does **not** write a value on reveal
+— it flips one of four booleans in a new ephemeral `TDesignState.revealedMinMax` slice (reset to
+all-false by `handleSetSelection` whenever the selection actually changes), so an empty, uncommitted
+row behaves like a real Figma one: visible while you're looking at it, gone once you look away, and
+never a phantom `minWidth: 0` on the node. Committing a field to 0 (or below) is treated as "remove
+this constraint" — it clears the node field and un-reveals the row in one step, rather than flooring
+to the global dimensions minimum the way the plain Fixed width/height field does. The main Width/Height
+field's own leading "W"/"H" label swaps to the existing `WidthRestricted`/`HeightRestricted` icon
+(the same icons `x-design`'s analogous field uses for its "attached" state) the moment either bound
+is shown — real or still-empty — so the field visibly signals "this axis is constrained" independent
+of whether a number has been typed yet. Unit-only for the algorithm itself (the redistribution loop,
+the bounded-hug-grouping edge cases, the Fixed-commit and drag-resize clamps, the reveal/clear state
+machine) — exhaustively covered without a browser. What only a real browser proves: the RightPanel's
+toggle-then-edit flow actually reaching the store, and Wrap visibly re-flowing children onto a second
+line the instant Max makes it eligible — that's `min-max-sizing.spec.ts`.

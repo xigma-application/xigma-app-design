@@ -71,6 +71,23 @@ describe('computeAutoLayoutPositions', () => {
     ]);
   });
 
+  it('should switch to the wrapped engine when the primary axis hugs but a maxWidth bounds it', () => {
+    const layoutFrame = frame({ height: 100, layoutWrap: true, maxWidth: 50, widthSizingMode: SizingMode.hug });
+    const sizes = [
+      { height: 20, id: 'a', width: 30 },
+      { height: 20, id: 'b', width: 40 },
+    ];
+
+    const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+
+    // 30+10+40=80 would exceed the 50 max, so b spills onto its own line instead of hugging to 80
+    expect(layoutFrame.width).toBe(40);
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 30, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 40, x: 0, y: 30 },
+    ]);
+  });
+
   it('should hug the counter axis to the wrapped block, when wrap is on and the counter axis hugs', () => {
     const layoutFrame = frame({ height: 999, heightSizingMode: SizingMode.hug, layoutWrap: true, width: 50 });
     const sizes = [

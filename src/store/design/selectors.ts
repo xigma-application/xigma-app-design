@@ -5,7 +5,7 @@ import { RootState } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignPage } from './types';
+import { TDesignPage, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
@@ -95,6 +95,8 @@ export const selectPaint = createSelector([selectActivePage], (page): TSolidPain
 export const selectBackgroundPaint = createSelector([selectActivePage], (page): TSolidPaint => page.backgroundPaint);
 
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
+
+export const selectRevealedMinMax = (state: RootState): TRevealedMinMax => state.design.revealedMinMax;
 
 const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);
 

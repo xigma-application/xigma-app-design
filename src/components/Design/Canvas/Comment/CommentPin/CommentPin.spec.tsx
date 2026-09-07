@@ -60,6 +60,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
           areMaskOutlinesVisible: false,
           areRulersVisible: false,
         },
+        revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
         vectorEditingNodeIds: [],
       },
     },

@@ -10,6 +10,10 @@ export type TAutoLayoutChildSize = {
   height: number;
   heightSizingMode?: SizingMode;
   id: string;
+  maxHeight?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  minWidth?: number;
   width: number;
   widthSizingMode?: SizingMode;
 };

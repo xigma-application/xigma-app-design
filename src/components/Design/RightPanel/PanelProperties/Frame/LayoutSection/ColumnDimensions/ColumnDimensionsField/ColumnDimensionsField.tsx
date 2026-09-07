@@ -1,7 +1,8 @@
 import { FC, FocusEvent } from 'react';
+import { noop } from 'lodash';
 
 // @xigma
-import { ScrubbableInput } from '@xigma/components';
+import { Icon, ScrubbableInput } from '@xigma/components';
 
 // components
 import ColumnDimensionsFieldEndAdornment from './ColumnDimensionsFieldEndAdornment';
@@ -12,6 +13,7 @@ import { useColumnDimensionsFieldReveal } from './hooks/useColumnDimensionsField
 
 // others
 import { DIMENSIONS_MAX, DIMENSIONS_MIN } from '../constants';
+import { getMinMaxIcon } from './utils/getMinMaxIcon';
 
 // styles
 import styles from './column-dimensions-field.module.scss';
@@ -26,12 +28,16 @@ export type TColumnDimensionsFieldProps = {
   canFill?: boolean;
   canHug?: boolean;
   e2eValue: TE2EValue;
+  hasMax?: boolean;
+  hasMin?: boolean;
   label: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
   onScrub: TFunc<[number]>;
   onSelectSizingMode?: TFunc<[SizingMode]>;
+  onToggleMax?: TFunc;
+  onToggleMin?: TFunc;
   sizingMode?: SizingMode;
   value: number;
 };
@@ -42,16 +48,21 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   canFill = false,
   canHug = false,
   e2eValue,
+  hasMax = false,
+  hasMin = false,
   label,
   onBlur,
   onDragEnd,
   onDragStart,
   onScrub,
   onSelectSizingMode,
+  onToggleMax = noop,
+  onToggleMin = noop,
   sizingMode,
   value,
 }) => {
   const { isRevealed, onMenuOpenChange, onMouseEnter, onMouseLeave } = useColumnDimensionsFieldReveal();
+  const minMaxIcon = getMinMaxIcon(axis === 'width', hasMin, hasMax);
 
   return (
     <UITools.TextField
@@ -63,9 +74,13 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           axis={axis}
           canFill={canFill}
           canHug={canHug}
+          hasMax={hasMax}
+          hasMin={hasMin}
           isRevealed={isRevealed}
           onMenuOpenChange={onMenuOpenChange}
           onSelectSizingMode={onSelectSizingMode}
+          onToggleMax={onToggleMax}
+          onToggleMin={onToggleMin}
           sizingMode={sizingMode}
           value={value}
         />
@@ -82,7 +97,11 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           onMouseUp={onDragEnd}
           value={value}
         >
-          <span className={styles.ColumnDimensionsField__label}>{label}</span>
+          {minMaxIcon ? (
+            <Icon color="neutral2" name={minMaxIcon} size={12} />
+          ) : (
+            <span className={styles.ColumnDimensionsField__label}>{label}</span>
+          )}
         </ScrubbableInput>
       }
       type="number"

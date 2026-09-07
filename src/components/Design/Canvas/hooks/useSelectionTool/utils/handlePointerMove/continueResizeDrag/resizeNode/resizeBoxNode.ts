@@ -9,9 +9,11 @@ import { TPoint } from 'types/canvas';
 import { TResizeNodeOrigin, TVectorNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
+import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
 import { getResizeAxisScale } from './getResizeAxisScale';
 import { getResizeChanges } from './getResizeChanges';
 import { getResizedPosition } from './getResizedPosition';
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 
 export const resizeBoxNode = (
   id: string,
@@ -24,11 +26,13 @@ export const resizeBoxNode = (
   rotatedAnchorSolver: ((width: number, height: number) => TPoint) | null,
 ): void => {
   const axisScale = getResizeAxisScale(scaleX, scaleY, origin.rotation, isSingleBoxOrigin);
-  const height = Math.round(origin.height * axisScale.y);
-  const width = Math.round(origin.width * axisScale.x);
+  const node = selectNodes(store.getState())[id];
+  const rawHeight = Math.round(origin.height * axisScale.y);
+  const rawWidth = Math.round(origin.width * axisScale.x);
+  const height = node && isBoxSceneNode(node) ? clampAutoLayoutSize(rawHeight, node.minHeight, node.maxHeight) : rawHeight;
+  const width = node && isBoxSceneNode(node) ? clampAutoLayoutSize(rawWidth, node.minWidth, node.maxWidth) : rawWidth;
   const { x, y } = getResizedPosition(origin, anchors, scaleX, scaleY, width, height, rotatedAnchorSolver);
   const changes = getResizeChanges(origin, scaleX, scaleY, isSingleBoxOrigin, height, width, x, y);
-  const node = selectNodes(store.getState())[id];
   const sizingModeChanges = node ? getAutoLayoutSizingModeResetChanges(node, width !== origin.width, height !== origin.height) : {};
 
   dispatch(updateNode({ changes: { ...changes, ...sizingModeChanges }, id }));

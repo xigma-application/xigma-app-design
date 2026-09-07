@@ -68,4 +68,20 @@ describe('applyAutoLayoutHugSize', () => {
 
     expect(layoutFrame).toMatchObject({ height: 200, width: 500 });
   });
+
+  it('should clamp a hugged width down to maxWidth even though the natural content is wider', () => {
+    const layoutFrame = frame({ maxWidth: 50, widthSizingMode: SizingMode.hug });
+
+    applyAutoLayoutHugSize(layoutFrame, LayoutMode.horizontal, 10, NO_PADDING, sizes);
+
+    expect(layoutFrame.width).toBe(50);
+  });
+
+  it('should clamp a hugged width up to minWidth even though the natural content is narrower', () => {
+    const layoutFrame = frame({ minWidth: 500, widthSizingMode: SizingMode.hug });
+
+    applyAutoLayoutHugSize(layoutFrame, LayoutMode.horizontal, 10, NO_PADDING, sizes);
+
+    expect(layoutFrame.width).toBe(500);
+  });
 });

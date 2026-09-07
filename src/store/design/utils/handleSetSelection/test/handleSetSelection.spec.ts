@@ -49,6 +49,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },
+  revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
   ...overrides,
 });
@@ -406,6 +407,33 @@ describe('handleSetSelection', () => {
 
     // result
     expect(getActivePage(state).selectedIds).toEqual([vector.id, frame.id]);
+  });
+
+  it('should reset revealedMinMax when the selection actually changes', () => {
+    // mock
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id], {
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: true },
+    });
+
+    // before
+    handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.revealedMinMax).toEqual({ maxHeight: false, maxWidth: false, minHeight: false, minWidth: false });
+  });
+
+  it('should leave revealedMinMax untouched when the selection is unchanged', () => {
+    // mock
+    const state = buildState({ [frame.id]: frame }, [frame.id], {
+      revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: true },
+    });
+
+    // before
+    handleSetSelection(state, [frame.id]);
+
+    // result
+    expect(state.revealedMinMax).toEqual({ maxHeight: false, maxWidth: false, minHeight: false, minWidth: true });
   });
 
   it('should keep a freshly drawn ellipse guide selected while no text has bound to it yet', () => {

@@ -50,6 +50,18 @@ describe('getAutoLayoutSyncChildren', () => {
     expect(result.sizes).toEqual([{ height: 20, heightSizingMode: undefined, id: 'a', width: 30, widthSizingMode: undefined }]);
   });
 
+  it('should carry a child’s min/max width and height into its size entry', () => {
+    // mock
+    const a = rect({ id: 'a', maxHeight: 80, maxWidth: 90, minHeight: 10, minWidth: 20 });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0]).toMatchObject({ maxHeight: 80, maxWidth: 90, minHeight: 10, minWidth: 20 });
+  });
+
   it('should skip a child id that no longer resolves to a node', () => {
     // mock
     const layoutFrame = frame({ childIds: ['gone'] });

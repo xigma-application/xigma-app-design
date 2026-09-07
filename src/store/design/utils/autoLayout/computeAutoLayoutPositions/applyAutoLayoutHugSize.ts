@@ -5,6 +5,7 @@ import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
 
 // utils
+import { clampAutoLayoutSize } from '../clampAutoLayoutSize';
 import { getAutoLayoutHugSize } from './getAutoLayoutHugSize';
 
 export const applyAutoLayoutHugSize = (
@@ -21,11 +22,11 @@ export const applyAutoLayoutHugSize = (
     const hugSize = getAutoLayoutHugSize(layoutMode, itemSpacing, padding, sizes);
 
     if (widthMode === SizingMode.hug) {
-      frame.width = hugSize.width;
+      frame.width = clampAutoLayoutSize(hugSize.width, frame.minWidth, frame.maxWidth);
     }
 
     if (heightMode === SizingMode.hug) {
-      frame.height = hugSize.height;
+      frame.height = clampAutoLayoutSize(hugSize.height, frame.minHeight, frame.maxHeight);
     }
   }
 };

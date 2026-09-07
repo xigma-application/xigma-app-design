@@ -21,7 +21,9 @@ export const computeAutoLayoutPositions = (
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const primaryMode = isHorizontal ? widthMode : heightMode;
-  const wrapEnabled = Boolean(frame.layoutWrap) && primaryMode !== SizingMode.hug;
+  const primaryMax = isHorizontal ? frame.maxWidth : frame.maxHeight;
+  const hugWrapEligible = primaryMode !== SizingMode.hug || primaryMax !== undefined;
+  const wrapEnabled = Boolean(frame.layoutWrap) && hugWrapEligible;
 
   if (wrapEnabled) {
     return computeAutoLayoutWrappedPositions(frame, layoutMode, itemSpacing, counterAxisSpacing, alignment, padding, sizes);

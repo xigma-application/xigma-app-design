@@ -10,7 +10,19 @@ import { SizingMode } from 'types/design/enums';
 const renderMenu = (overrides: Partial<Parameters<typeof ColumnDimensionsSizingMenu>[0]> = {}): ReturnType<typeof render> =>
   render(
     <PopoverPrimitive.Root open>
-      <ColumnDimensionsSizingMenu axis="width" canFill canHug mode={SizingMode.fixed} onSelect={vi.fn()} value={77} {...overrides} />
+      <ColumnDimensionsSizingMenu
+        axis="width"
+        canFill
+        canHug
+        hasMax={false}
+        hasMin={false}
+        mode={SizingMode.fixed}
+        onSelect={vi.fn()}
+        onToggleMax={vi.fn()}
+        onToggleMin={vi.fn()}
+        value={77}
+        {...overrides}
+      />
     </PopoverPrimitive.Root>,
   );
 
@@ -159,5 +171,60 @@ describe('ColumnDimensionsSizingMenu behaviors', () => {
 
     // result
     expect(screen.queryByText('Fill container')).toBeNull();
+  });
+
+  it('should not render the min/max items when canHug is false', () => {
+    // before
+    renderMenu({ canHug: false });
+
+    // result
+    expect(screen.queryByText('Add min width…')).toBeNull();
+    expect(screen.queryByText('Add max width…')).toBeNull();
+  });
+
+  it('should call onToggleMin when the Add min width item is clicked', () => {
+    // mock
+    const onToggleMin = vi.fn();
+
+    // before
+    renderMenu({ onToggleMin });
+
+    // action
+    screen.getByText('Add min width…').click();
+
+    // result
+    expect(onToggleMin).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onToggleMax when the Add max width item is clicked', () => {
+    // mock
+    const onToggleMax = vi.fn();
+
+    // before
+    renderMenu({ onToggleMax });
+
+    // action
+    screen.getByText('Add max width…').click();
+
+    // result
+    expect(onToggleMax).toHaveBeenCalledTimes(1);
+  });
+
+  it('should switch the min/max labels to "Remove…" once hasMin/hasMax are true', () => {
+    // before
+    renderMenu({ hasMax: true, hasMin: true });
+
+    // result
+    expect(screen.getByText('Remove min width…')).toBeInTheDocument();
+    expect(screen.getByText('Remove max width…')).toBeInTheDocument();
+  });
+
+  it('should switch the min/max labels to "Remove…" for the height axis too', () => {
+    // before
+    renderMenu({ axis: 'height', hasMax: true, hasMin: true });
+
+    // result
+    expect(screen.getByText('Remove min height…')).toBeInTheDocument();
+    expect(screen.getByText('Remove max height…')).toBeInTheDocument();
   });
 });

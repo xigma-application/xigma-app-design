@@ -25,6 +25,7 @@ import {
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
   TReorderPayload,
+  TRevealedMinMax,
   TStartTextEditPayload,
   TTextEditSelection,
   TUpdateGuidePayload,
@@ -117,6 +118,7 @@ const initialState: TDesignState = {
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },
+  revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
 };
 
@@ -185,6 +187,9 @@ const designSlice = createSlice({
     },
     setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
       state.isMediaToolArmed = action.payload;
+    },
+    setMinMaxRevealed: (state, action: PayloadAction<{ bound: keyof TRevealedMinMax; value: boolean }>) => {
+      state.revealedMinMax[action.payload.bound] = action.payload.value;
     },
     setPaint: (state, action: PayloadAction<TSolidPaint>) => {
       getActivePage(state).paint = action.payload;
@@ -269,6 +274,7 @@ export const {
   setBackgroundPaint,
   setDesignHintLabelKey,
   setMediaToolArmed,
+  setMinMaxRevealed,
   setPaint,
   setPenActiveVertexId,
   setSelection,

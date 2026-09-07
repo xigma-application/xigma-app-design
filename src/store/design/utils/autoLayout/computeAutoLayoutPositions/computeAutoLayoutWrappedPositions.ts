@@ -5,6 +5,7 @@ import { TFrameNode } from 'types/design/types';
 
 // utils
 import { applyAutoLayoutWrapCounterHugSize } from './applyAutoLayoutWrapCounterHugSize';
+import { applyAutoLayoutWrapPrimaryHugSize } from './applyAutoLayoutWrapPrimaryHugSize';
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { getAutoLayoutFilledLines } from './getAutoLayoutFilledLines';
 import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
@@ -22,10 +23,22 @@ export const computeAutoLayoutWrappedPositions = (
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const primaryMode = isHorizontal ? widthMode : heightMode;
   const counterMode = isHorizontal ? heightMode : widthMode;
+  const primaryMax = isHorizontal ? frame.maxWidth : frame.maxHeight;
   const preContentBox = getAutoLayoutContentBox(frame, padding);
-  const availablePrimary = isHorizontal ? preContentBox.width : preContentBox.height;
+  const primaryPadding = isHorizontal ? padding.paddingLeft + padding.paddingRight : padding.paddingTop + padding.paddingBottom;
+  const availablePrimary =
+    primaryMode === SizingMode.hug && primaryMax !== undefined
+      ? primaryMax - primaryPadding
+      : isHorizontal
+        ? preContentBox.width
+        : preContentBox.height;
   const lines = groupAutoLayoutChildrenIntoLines(isHorizontal, itemSpacing, availablePrimary, sizes);
+
+  if (primaryMode === SizingMode.hug) {
+    applyAutoLayoutWrapPrimaryHugSize(frame, layoutMode, itemSpacing, padding, lines);
+  }
 
   if (counterMode === SizingMode.hug) {
     applyAutoLayoutWrapCounterHugSize(frame, layoutMode, counterAxisSpacing, padding, lines);

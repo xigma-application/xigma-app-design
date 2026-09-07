@@ -72,6 +72,29 @@ describe('computeAutoLayoutWrappedPositions', () => {
     expect(layoutFrame.height).toBe(200);
   });
 
+  it('should group lines against maxWidth and hug the primary axis to the widest resulting line', () => {
+    const layoutFrame = frame({ height: 100, maxWidth: 50, width: 999, widthSizingMode: SizingMode.hug });
+    const sizes = [
+      { height: 20, id: 'a', width: 30 },
+      { height: 20, id: 'b', width: 40 },
+    ];
+
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+
+    // grouped against the 50 max (30+10+40=80 would overflow it), so b wraps to its own line;
+    // the frame then hugs to the widest resulting line (40), not the raw max
+    expect(layoutFrame.width).toBe(40);
+  });
+
+  it('should clamp the primary-axis hug size down to maxWidth when even a single line still overflows it', () => {
+    const layoutFrame = frame({ height: 100, maxWidth: 25, width: 999, widthSizingMode: SizingMode.hug });
+    const sizes = [{ height: 20, id: 'a', width: 30 }];
+
+    computeAutoLayoutWrappedPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
+
+    expect(layoutFrame.width).toBe(25);
+  });
+
   it('should grow a filling child within its own wrapped line', () => {
     const layoutFrame = frame({ width: 100 });
     const sizes = [
