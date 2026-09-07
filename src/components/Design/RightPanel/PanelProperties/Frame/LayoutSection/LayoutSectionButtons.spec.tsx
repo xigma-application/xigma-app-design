@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const renderLayoutSectionButtons = (): ReturnType<typeof render> =>
@@ -117,15 +117,61 @@ describe('LayoutSectionButtons behaviors', () => {
     expect(frame.height).toBe(20);
   });
 
-  it('should do nothing yet when the auto-layout button is clicked', () => {
+  it('should switch the selected frame to horizontal when the auto-layout button is clicked', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
     // before
     renderLayoutSectionButtons();
-    const button = screen.getByLabelText('Use auto layout');
 
     // action
-    fireEvent.click(button);
+    fireEvent.click(screen.getByLabelText('Use auto layout'));
 
     // result
-    expect(button).toBeInTheDocument();
+    const frame = selectActivePage(store.getState()).nodes[frameId] as TFrameNode;
+    expect(frame.layoutMode).toBe(LayoutMode.horizontal);
+  });
+
+  it('should switch the selected frame back to freeForm when the auto-layout button is clicked again', () => {
+    // mock
+    const frameId = addFrameNode({ layoutMode: LayoutMode.horizontal });
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderLayoutSectionButtons();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Use auto layout'));
+
+    // result
+    const frame = selectActivePage(store.getState()).nodes[frameId] as TFrameNode;
+    expect(frame.layoutMode).toBe(LayoutMode.freeForm);
+  });
+
+  it('should hide the resize-to-fit button and mark auto layout as selected for a horizontal frame', () => {
+    // mock
+    const frameId = addFrameNode({ layoutMode: LayoutMode.horizontal });
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderLayoutSectionButtons();
+
+    // result
+    expect(screen.queryByLabelText('Resize to fit')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Use auto layout')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should show the resize-to-fit button and mark auto layout as unselected for a freeForm frame', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderLayoutSectionButtons();
+
+    // result
+    expect(screen.getByLabelText('Resize to fit')).toBeInTheDocument();
+    expect(screen.getByLabelText('Use auto layout')).toHaveAttribute('aria-pressed', 'false');
   });
 });
