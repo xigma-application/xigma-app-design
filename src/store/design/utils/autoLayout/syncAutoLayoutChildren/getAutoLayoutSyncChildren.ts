@@ -14,7 +14,9 @@ export type TAutoLayoutSyncChildren = {
 };
 
 export const getAutoLayoutSyncChildren = (frame: TFrameNode, nodes: Record<string, TSceneNode>): TAutoLayoutSyncChildren => {
-  const children = frame.childIds.map((childId) => nodes[childId]).filter(Boolean);
+  const children = frame.childIds
+    .map((childId) => nodes[childId])
+    .filter((child): child is TSceneNode => Boolean(child) && !(isBoxSceneNode(child) && child.ignoreAutoLayout));
   const bounds = children.map((child) => getAutoLayoutChildLocalBounds(child, frame.rotation));
   const sizes = bounds.map((bound, index) => {
     const child = children[index];

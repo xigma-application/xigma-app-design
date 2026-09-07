@@ -142,6 +142,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
       >
         Position
       </span>
+      <div
+        class="_Section__component_5940d2"
+      />
     </div>
     <div
       class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"

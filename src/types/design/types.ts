@@ -54,6 +54,7 @@ export type TBaseNode = {
   heightSizingMode?: SizingMode;
   hidden?: boolean;
   id: string;
+  ignoreAutoLayout?: boolean;
   isMask?: boolean;
   locked?: boolean;
   lockedAspectRatio?: boolean;

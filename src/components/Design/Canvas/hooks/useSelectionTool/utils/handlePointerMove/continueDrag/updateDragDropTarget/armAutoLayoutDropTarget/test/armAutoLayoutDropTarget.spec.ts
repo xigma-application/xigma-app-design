@@ -177,6 +177,42 @@ describe('armAutoLayoutDropTarget', () => {
     expect(refs.transform.autoLayoutReorderPreviewRef.current).toMatchObject({ activeIndex: 2, frameId: 'frame-1' });
   });
 
+  it('should never move a sibling that ignores auto layout while reordering its (flow) siblings', () => {
+    // mock — a horizontal frame with 4 children: 'abs' (ignoreAutoLayout, deliberately first in
+    // childIds), and flow siblings 'a', 'b', 'c'; the user drags 'a' and 'b' together, still inside
+    // the parent — regression: 'abs' used to be treated as a normal flow sibling and would shift
+    // alongside 'a'/'b'/'c' even though it must stay completely static
+    const absoluteSibling: TSceneNode = { ...draggedRect, id: 'abs', ignoreAutoLayout: true, width: 20, x: 0, y: 0 } as TSceneNode;
+    const siblingA: TSceneNode = { ...draggedRect, id: 'a', width: 20, x: 40, y: 0 } as TSceneNode;
+    const siblingB: TSceneNode = { ...draggedRect, id: 'b', width: 20, x: 60, y: 0 } as TSceneNode;
+    const siblingC: TSceneNode = { ...draggedRect, id: 'c', width: 20, x: 80, y: 0 } as TSceneNode;
+    const horizontalAutoLayoutFrame: TAutoLayoutFrame = {
+      ...autoLayoutFrame,
+      childIds: ['abs', 'a', 'b', 'c'],
+      layoutMode: LayoutMode.horizontal,
+    };
+    const refs = createCanvasRefs();
+    const nodesById = { a: siblingA, abs: absoluteSibling, b: siblingB, c: siblingC };
+
+    // action — drag the 'a'+'b' block, cursor still inside the parent
+    armAutoLayoutDropTarget(
+      refs,
+      horizontalAutoLayoutFrame,
+      'frame-1',
+      'frame-1',
+      [siblingA, siblingB],
+      ['a', 'b'],
+      nodesById,
+      { x: 10, y: 10 },
+      'a',
+      false,
+    );
+
+    // result — 'abs' never appears among the simulated sibling positions
+    expect(Object.keys(refs.transform.autoLayoutReorderPreviewRef.current?.positions ?? {})).not.toContain('abs');
+    expect(Object.keys(refs.transform.autoLayoutReorderPreviewRef.current?.positions ?? {}).sort()).toEqual(['c']);
+  });
+
   it('should fall back to the non-wrap drop target computation when wrap is enabled but the frame hugs its primary axis', () => {
     // mock — hug on the primary axis disables wrap, mirroring computeAutoLayoutPositions's own
     // wrapEnabled condition

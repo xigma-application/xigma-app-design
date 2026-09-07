@@ -74,4 +74,17 @@ describe('getAutoLayoutSiblingEntries', () => {
     // result
     expect(entries.map(({ sibling }) => sibling.id)).toEqual(['a']);
   });
+
+  it('should exclude a sibling that ignores auto layout — it must never react to a reorder of its siblings', () => {
+    // mock
+    const flowSibling = rect('flow', 0, 0);
+    const absoluteSibling = { ...rect('absolute', 40, 0), ignoreAutoLayout: true };
+    const nodesById = { absolute: absoluteSibling, flow: flowSibling };
+
+    // action
+    const entries = getAutoLayoutSiblingEntries(frame(['flow', 'absolute']), [], nodesById);
+
+    // result
+    expect(entries.map(({ sibling }) => sibling.id)).toEqual(['flow']);
+  });
 });

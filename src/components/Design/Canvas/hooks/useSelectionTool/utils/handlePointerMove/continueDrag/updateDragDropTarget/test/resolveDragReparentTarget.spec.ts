@@ -1,5 +1,5 @@
 // store
-import { addNode, deleteNode, moveNodes } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, updateNode } from 'store/design/slice';
 import { selectActivePage, selectRenderOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -353,6 +353,77 @@ describe('resolveDragReparentTarget', () => {
     // result — sticky: still the basic floating mode (no reorder-ghost slots), not the reorder ghost
     expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current?.draggedMemberSlots).toBeUndefined();
     expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toMatchObject({ frameId: parentId });
+  });
+
+  it('should not lock a node that ignores auto layout into the reorder ghost, even while its pointer stays inside the parent', () => {
+    // mock — an auto-layout frame holding a plain sibling and the dragged rect, which ignores auto layout
+    const parentId = addAutoLayoutFrame(0, 0, 300);
+    const siblingRectId = addRect(50, 50);
+    const rectId = addRect(500, 500);
+
+    store.dispatch(moveNodes({ nodeIds: [siblingRectId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 1, targetParentId: parentId }));
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: rectId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action — pointer stays inside the auto-layout parent, well away from the sibling
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 200, y: 200 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
+
+    // result — no reorder ghost armed, no reparent dispatched; the drag is left to a plain translate
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(parentId);
+
+    spy.mockRestore();
+  });
+
+  it('should not arm the auto-layout drop target for a node that ignores auto layout, even when dropped over a different auto-layout frame', () => {
+    // mock — the dragged rect (flagged ignoreAutoLayout) currently lives outside any frame; the pointer is over a
+    // second, unrelated auto-layout frame
+    const otherAutoLayoutFrameId = addAutoLayoutFrame(0, 0, 300);
+    const rectId = addRect(900, 900);
+
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: rectId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action — pointer is over the other auto-layout frame's body
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 150, y: 150 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
+
+    // result — reparents there via the plain drop-target path, not the reorder/drop-target-index machinery
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(otherAutoLayoutFrameId);
+    expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(true);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(otherAutoLayoutFrameId);
+
+    spy.mockRestore();
   });
 
   it('should delegate to the auto-layout drop target resolver instead of reparenting right away', () => {

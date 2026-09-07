@@ -14,6 +14,7 @@ import { TSceneNode } from 'types/design/types';
 import { getAutoLayoutOrderedDraggedSizes } from './getAutoLayoutOrderedDraggedSizes';
 import { getAutoLayoutOriginalIndex } from './getAutoLayoutOriginalIndex';
 import { getAutoLayoutSiblingEntries } from './getAutoLayoutSiblingEntries';
+import { isAutoLayoutFlowChild } from 'utils/canvas/signals/isAutoLayoutFlowChild';
 
 const getSiblingSizes = (
   siblingEntries: { bounds: TDraftRect; sibling: TSceneNode }[],
@@ -46,13 +47,14 @@ export const getAutoLayoutDropTargetContext = (
   nodesById: Record<string, TSceneNode>,
   suppressSameParentReorder: boolean,
 ): TAutoLayoutDropTargetContext => {
+  const flowChildIds = desiredParent.childIds.filter((id) => isAutoLayoutFlowChild(id, nodesById));
   const siblingEntries = getAutoLayoutSiblingEntries(desiredParent, movedNodeIds, nodesById);
   const localSiblingBounds = siblingEntries.map(({ sibling }) => getAutoLayoutNodeLocalBounds(sibling, desiredParent));
   const siblingSizes = getSiblingSizes(siblingEntries, localSiblingBounds);
   const realPositions = getSiblingRealPositions(siblingEntries, localSiblingBounds);
   const isSameParentReorder = desiredParentId === currentParentId && !suppressSameParentReorder;
-  const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(desiredParent.childIds, movedNodeIds) : null;
-  const orderedMovedIds = isSameParentReorder ? desiredParent.childIds.filter((id) => movedNodeIds.includes(id)) : movedNodeIds;
+  const originalIndex = isSameParentReorder ? getAutoLayoutOriginalIndex(flowChildIds, movedNodeIds) : null;
+  const orderedMovedIds = isSameParentReorder ? flowChildIds.filter((id) => movedNodeIds.includes(id)) : movedNodeIds;
   const draggedSizes = getAutoLayoutOrderedDraggedSizes(orderedMovedIds, selectedNodes, desiredParent.rotation);
   const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
   const itemSpacing = (isHorizontal ? desiredParent.horizontalGap : desiredParent.verticalGap) ?? 0;

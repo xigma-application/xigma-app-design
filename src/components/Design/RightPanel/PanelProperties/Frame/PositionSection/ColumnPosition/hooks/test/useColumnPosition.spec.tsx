@@ -201,6 +201,76 @@ describe('useColumnPosition', () => {
     // result
     expect(result.current.disabledX).toBe(true);
     expect(result.current.disabledY).toBe(true);
+    expect(result.current.showIgnoreAutoLayoutToggle).toBe(true);
+  });
+
+  it('should not show the ignore-auto-layout toggle for a freeform parent', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current.showIgnoreAutoLayoutToggle).toBe(false);
+  });
+
+  it('should re-enable the inputs for a child that ignores its managed-layout parent', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.horizontal, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    nestFrame(childId, parentId);
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childId }));
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current.disabledX).toBe(false);
+    expect(result.current.disabledY).toBe(false);
+    expect(result.current.ignoresAutoLayout).toBe(true);
+  });
+
+  it('should toggle ignoreAutoLayout on and off', () => {
+    // mock
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.horizontal, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    nestFrame(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { rerender, result } = renderUseColumnPosition();
+
+    // action
+    act(() => result.current.onToggleIgnoreAutoLayout());
+    rerender();
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[childId]).toMatchObject({ ignoreAutoLayout: true });
+    expect(result.current.ignoresAutoLayout).toBe(true);
+
+    // action
+    act(() => result.current.onToggleIgnoreAutoLayout());
+    rerender();
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[childId] as { ignoreAutoLayout?: boolean }).ignoreAutoLayout).toBeUndefined();
   });
 
   it('should disable an axis with an alignment while still reporting its real coordinate', () => {

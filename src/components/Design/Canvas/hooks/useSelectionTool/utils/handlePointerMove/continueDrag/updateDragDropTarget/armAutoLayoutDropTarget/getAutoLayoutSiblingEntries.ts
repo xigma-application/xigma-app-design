@@ -5,6 +5,9 @@ import { getRotatedNodeBounds } from 'store/design/utils/getRotatedNodeBounds';
 import { TDraftRect } from 'types/canvas';
 import { TFrameNode, TSceneNode } from 'types/design/types';
 
+// utils
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+
 export const getAutoLayoutSiblingEntries = (
   desiredParent: TFrameNode,
   movedNodeIds: string[],
@@ -13,5 +16,5 @@ export const getAutoLayoutSiblingEntries = (
   desiredParent.childIds
     .filter((id) => !movedNodeIds.includes(id))
     .map((id) => nodesById[id])
-    .filter(Boolean)
+    .filter((sibling) => Boolean(sibling) && !(isBoxSceneNode(sibling) && sibling.ignoreAutoLayout))
     .map((sibling) => ({ bounds: getRotatedNodeBounds(sibling), sibling }));

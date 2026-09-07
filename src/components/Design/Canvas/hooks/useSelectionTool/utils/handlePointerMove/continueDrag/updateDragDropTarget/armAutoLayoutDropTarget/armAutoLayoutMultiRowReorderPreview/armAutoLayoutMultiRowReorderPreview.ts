@@ -21,6 +21,7 @@ import { getAutoLayoutSizesById } from '../getAutoLayoutSizesById';
 import { getAutoLayoutWorldDraggedBlock } from '../getAutoLayoutWorldDraggedBlock';
 import { getDraggedBlockPreviewMeta } from '../getDraggedBlockPreviewMeta';
 import { getMemberSlots } from './getMemberSlots';
+import { isAutoLayoutFlowChild } from 'utils/canvas/signals/isAutoLayoutFlowChild';
 
 export const armAutoLayoutMultiRowReorderPreview = (
   canvasRefs: TCanvasRefs,
@@ -39,7 +40,8 @@ export const armAutoLayoutMultiRowReorderPreview = (
   point: TPoint,
 ): void => {
   const isHorizontal = desiredParent.layoutMode === LayoutMode.horizontal;
-  const childBounds = getAutoLayoutChildBounds(desiredParent.childIds, nodesById, desiredParent);
+  const flowChildIds = desiredParent.childIds.filter((id) => isAutoLayoutFlowChild(id, nodesById));
+  const childBounds = getAutoLayoutChildBounds(flowChildIds, nodesById, desiredParent);
   const grabbedIndexInBlock = Math.max(0, orderedMovedIds.indexOf(grabbedNodeId ?? ''));
   const readingOrderSlot = getAutoLayoutReadingOrderSlot(isHorizontal, childBounds, point);
   const isChasm = readingOrderSlot - grabbedIndexInBlock > siblingSizes.length;
