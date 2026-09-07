@@ -1,7 +1,7 @@
 // types
 import { LayoutMode, SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
-import { TAutoLayoutPadding } from './getAutoLayoutContentBox';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -14,13 +14,10 @@ export const applyAutoLayoutHugSize = (
   padding: TAutoLayoutPadding,
   sizes: TAutoLayoutChildSize[],
 ): void => {
-  const primaryMode = frame.primaryAxisSizingMode ?? SizingMode.fixed;
-  const counterMode = frame.counterAxisSizingMode ?? SizingMode.fixed;
+  const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
+  const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
 
-  if (primaryMode === SizingMode.hug || counterMode === SizingMode.hug) {
-    const isHorizontal = layoutMode === LayoutMode.horizontal;
-    const widthMode = isHorizontal ? primaryMode : counterMode;
-    const heightMode = isHorizontal ? counterMode : primaryMode;
+  if (widthMode === SizingMode.hug || heightMode === SizingMode.hug) {
     const hugSize = getAutoLayoutHugSize(layoutMode, itemSpacing, padding, sizes);
 
     if (widthMode === SizingMode.hug) {

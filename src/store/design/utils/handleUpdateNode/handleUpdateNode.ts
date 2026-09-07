@@ -5,7 +5,7 @@ import { TSceneNodeChanges } from 'types/design/types';
 // utils
 import { getActivePage } from '../getActivePage';
 import { invalidateVectorWidthProfile } from './invalidateVectorWidthProfile';
-import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncBoundNode } from './syncBoundNode';
 import { syncGroupBounds } from '../syncGroupBounds';
 

@@ -1,0 +1,31 @@
+// types
+import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
+import { TFrameNode } from 'types/design/types';
+
+// utils
+import { computeAutoLayoutSingleLinePositions } from './computeAutoLayoutSingleLinePositions';
+import { computeAutoLayoutWrappedPositions } from './computeAutoLayoutWrappedPositions';
+
+export const computeAutoLayoutPositions = (
+  frame: TFrameNode,
+  layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
+  itemSpacing: number,
+  counterAxisSpacing: number,
+  alignment: AlignmentLayout,
+  padding: TAutoLayoutPadding,
+  sizes: TAutoLayoutChildSize[],
+): TAutoLayoutChildPosition[] => {
+  const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
+  const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
+  const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const primaryMode = isHorizontal ? widthMode : heightMode;
+  const wrapEnabled = Boolean(frame.layoutWrap) && primaryMode !== SizingMode.hug;
+
+  if (wrapEnabled) {
+    return computeAutoLayoutWrappedPositions(frame, layoutMode, itemSpacing, counterAxisSpacing, alignment, padding, sizes);
+  }
+
+  return computeAutoLayoutSingleLinePositions(frame, layoutMode, itemSpacing, alignment, padding, sizes);
+};

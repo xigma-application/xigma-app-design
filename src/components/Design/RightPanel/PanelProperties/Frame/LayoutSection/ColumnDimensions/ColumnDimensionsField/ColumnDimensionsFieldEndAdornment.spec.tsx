@@ -10,6 +10,8 @@ const renderEndAdornment = (overrides: Partial<Parameters<typeof ColumnDimension
   render(
     <ColumnDimensionsFieldEndAdornment
       axis="width"
+      canFill
+      canHug
       isRevealed={false}
       onMenuOpenChange={vi.fn()}
       onSelectSizingMode={vi.fn()}
@@ -63,6 +65,24 @@ describe('ColumnDimensionsFieldEndAdornment', () => {
     expect(screen.getByLabelText('Width sizing options')).toBeInTheDocument();
   });
 
+  it('should render the literal "Fill" text while filling and not revealed', () => {
+    // before
+    renderEndAdornment({ isRevealed: false, sizingMode: SizingMode.fill });
+
+    // result
+    expect(screen.getByText('Fill')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Width sizing options')).toBeNull();
+  });
+
+  it('should render the chevron while filling and revealed', () => {
+    // before
+    renderEndAdornment({ isRevealed: true, sizingMode: SizingMode.fill });
+
+    // result
+    expect(screen.queryByText('Fill')).toBeNull();
+    expect(screen.getByLabelText('Width sizing options')).toBeInTheDocument();
+  });
+
   it('should use the height aria-label for the height axis', () => {
     // before
     renderEndAdornment({ axis: 'height' });
@@ -98,5 +118,16 @@ describe('ColumnDimensionsFieldEndAdornment', () => {
 
     // result
     expect(onSelectSizingMode).toHaveBeenCalledWith(SizingMode.hug);
+  });
+
+  it('should not offer the Fill option in the menu when canFill is false', () => {
+    // before
+    renderEndAdornment({ canFill: false });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+
+    // result
+    expect(screen.queryByText('Fill container')).toBeNull();
   });
 });

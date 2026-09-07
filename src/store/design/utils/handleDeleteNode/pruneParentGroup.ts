@@ -6,7 +6,7 @@ import { TDesignState } from '../../types';
 import { getActivePage } from '../getActivePage';
 import { handleDeleteNode } from './handleDeleteNode';
 import { isContainerNode } from '../nodeHierarchy/isContainerNode';
-import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const pruneParentGroup = (state: TDesignState, parentId: string | null, deletedChildId: string): void => {
@@ -15,12 +15,19 @@ export const pruneParentGroup = (state: TDesignState, parentId: string | null, d
   if (parent && isContainerNode(parent)) {
     parent.childIds = parent.childIds.filter((childId) => childId !== deletedChildId);
 
-    if (parent.type === NodeType.group && parent.childIds.length === 0) {
-      handleDeleteNode(state, parent.id);
-    } else if (parent.type === NodeType.group) {
-      syncGroupBounds(state, parent.id);
-    } else if (parent.type === NodeType.frame) {
-      syncAutoLayoutChildren(state, parent.id);
+    switch (parent.type) {
+      case NodeType.group:
+        if (parent.childIds.length === 0) {
+          handleDeleteNode(state, parent.id);
+        } else {
+          syncGroupBounds(state, parent.id);
+        }
+        break;
+      case NodeType.frame:
+        syncAutoLayoutChildren(state, parent.id);
+        break;
+      default:
+        break;
     }
   }
 };

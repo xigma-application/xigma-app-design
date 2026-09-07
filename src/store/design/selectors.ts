@@ -16,6 +16,7 @@ import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSe
 import { getAllGuideLines } from './utils/getAllGuideLines';
 import { getFrameGuideLines } from './utils/getFrameGuideLines';
 import { getRenderOrderedNodes } from './utils/getRenderOrderedNodes';
+import { getSelectedParentNode } from './utils/getSelectedParentNode';
 import { getSmartSelectionNodes } from './utils/nodeHierarchy/getSmartSelectionNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
 import { resolveMaskConnectorRoles } from './utils/maskConnector/resolveMaskConnectorRoles';
@@ -118,6 +119,8 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
 export const selectSelectedParentIds = createSelector([selectSelectedNodes], (selectedNodes) =>
   selectedNodes.filter(Boolean).map((node) => node.parentId),
 );
+
+export const selectSelectedParentNode = createSelector([selectSelectedNodes, selectNodes], getSelectedParentNode);
 
 export const selectSelectedLeafNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
   getTransformTargetNodes(selectedNodes.filter(Boolean), nodes),

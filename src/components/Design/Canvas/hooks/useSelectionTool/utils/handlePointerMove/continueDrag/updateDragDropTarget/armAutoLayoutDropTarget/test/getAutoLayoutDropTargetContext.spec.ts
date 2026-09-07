@@ -124,7 +124,7 @@ describe('getAutoLayoutDropTargetContext', () => {
       false,
     );
     const huggedWrap = getAutoLayoutDropTargetContext(
-      { ...autoLayoutFrame, layoutWrap: true, primaryAxisSizingMode: SizingMode.hug },
+      { ...autoLayoutFrame, heightSizingMode: SizingMode.hug, layoutWrap: true },
       'frame-1',
       null,
       [nodesById.a],

@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnDimensions } from '../useColumnDimensions';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
@@ -45,25 +45,25 @@ const addFrameNode = (width: number, height: number, lockedAspectRatio = false):
 
 const addAutoLayoutFrameNode = (
   layoutMode: LayoutMode,
-  primaryAxisSizingMode?: SizingMode,
-  counterAxisSizingMode?: SizingMode,
+  widthSizingMode?: SizingMode,
+  heightSizingMode?: SizingMode,
   lockedAspectRatio = false,
 ): string => {
   store.dispatch(
     addNode({
       childIds: [],
       clipContent: true,
-      counterAxisSizingMode,
       fill: '#ff0000',
       height: 50,
+      heightSizingMode,
       layoutMode,
       lockedAspectRatio,
       name: 'Frame',
       parentId: null,
-      primaryAxisSizingMode,
       rotation: 0,
       type: NodeType.frame,
       width: 100,
+      widthSizingMode,
       x: 0,
       y: 0,
     }),
@@ -75,6 +75,10 @@ const addAutoLayoutFrameNode = (
 };
 
 const readNode = (id: string): TFrameNode => selectActivePage(store.getState()).nodes[id] as TFrameNode;
+
+const moveIntoParent = (childId: string, parentId: string): void => {
+  store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+};
 
 describe('useColumnDimensions', () => {
   afterEach(() => {
@@ -217,7 +221,7 @@ describe('useColumnDimensions', () => {
     expect(() => act(() => result.current.onScrubHeight(200))).not.toThrow();
   });
 
-  it('should not report auto-layout for a plain (freeForm/no layout) frame', () => {
+  it('should not report canHug for a plain (freeForm/no layout) frame', () => {
     // mock
     const frameId = addFrameNode(100, 50);
 
@@ -227,13 +231,13 @@ describe('useColumnDimensions', () => {
     const { result } = renderUseColumnDimensions();
 
     // result
-    expect(result.current.isAutoLayout).toBe(false);
+    expect(result.current.canHug).toBe(false);
     expect(result.current.widthSizingMode).toBe(SizingMode.fixed);
     expect(result.current.heightSizingMode).toBe(SizingMode.fixed);
   });
 
-  it('should map primary/counter axis sizing modes to width/height for a horizontal-flow frame', () => {
-    // mock — horizontal flow: primary axis is width, counter axis is height
+  it('should read the width/height sizing modes directly off the node, for a horizontal-flow frame', () => {
+    // mock
     const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.fixed);
 
     store.dispatch(setSelection([frameId]));
@@ -242,14 +246,14 @@ describe('useColumnDimensions', () => {
     const { result } = renderUseColumnDimensions();
 
     // result
-    expect(result.current.isAutoLayout).toBe(true);
+    expect(result.current.canHug).toBe(true);
     expect(result.current.widthSizingMode).toBe(SizingMode.hug);
     expect(result.current.heightSizingMode).toBe(SizingMode.fixed);
   });
 
-  it('should map primary/counter axis sizing modes to width/height for a vertical-flow frame', () => {
-    // mock — vertical flow: primary axis is height, counter axis is width
-    const frameId = addAutoLayoutFrameNode(LayoutMode.vertical, SizingMode.hug, SizingMode.fixed);
+  it('should read the width/height sizing modes directly off the node, for a vertical-flow frame', () => {
+    // mock — layout direction no longer affects which physical axis a mode belongs to
+    const frameId = addAutoLayoutFrameNode(LayoutMode.vertical, SizingMode.fixed, SizingMode.hug);
 
     store.dispatch(setSelection([frameId]));
 
@@ -257,12 +261,12 @@ describe('useColumnDimensions', () => {
     const { result } = renderUseColumnDimensions();
 
     // result
-    expect(result.current.isAutoLayout).toBe(true);
+    expect(result.current.canHug).toBe(true);
     expect(result.current.widthSizingMode).toBe(SizingMode.fixed);
     expect(result.current.heightSizingMode).toBe(SizingMode.hug);
   });
 
-  it('should dispatch the width sizing mode onto the primary axis for a horizontal-flow frame', () => {
+  it('should dispatch the selected width sizing mode straight onto widthSizingMode', () => {
     // mock
     const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal);
 
@@ -275,42 +279,10 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
 
     // result
-    expect(readNode(frameId).primaryAxisSizingMode).toBe(SizingMode.hug);
+    expect(readNode(frameId).widthSizingMode).toBe(SizingMode.hug);
   });
 
-  it('should dispatch the width sizing mode onto the counter axis for a vertical-flow frame', () => {
-    // mock
-    const frameId = addAutoLayoutFrameNode(LayoutMode.vertical);
-
-    store.dispatch(setSelection([frameId]));
-
-    // before
-    const { result } = renderUseColumnDimensions();
-
-    // action
-    act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
-
-    // result
-    expect(readNode(frameId).counterAxisSizingMode).toBe(SizingMode.hug);
-  });
-
-  it('should dispatch the height sizing mode onto the counter axis for a horizontal-flow frame', () => {
-    // mock
-    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal);
-
-    store.dispatch(setSelection([frameId]));
-
-    // before
-    const { result } = renderUseColumnDimensions();
-
-    // action
-    act(() => result.current.onSelectHeightSizingMode(SizingMode.hug));
-
-    // result
-    expect(readNode(frameId).counterAxisSizingMode).toBe(SizingMode.hug);
-  });
-
-  it('should dispatch the height sizing mode onto the primary axis for a vertical-flow frame', () => {
+  it('should dispatch the selected height sizing mode straight onto heightSizingMode', () => {
     // mock
     const frameId = addAutoLayoutFrameNode(LayoutMode.vertical);
 
@@ -323,11 +295,11 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectHeightSizingMode(SizingMode.hug));
 
     // result
-    expect(readNode(frameId).primaryAxisSizingMode).toBe(SizingMode.hug);
+    expect(readNode(frameId).heightSizingMode).toBe(SizingMode.hug);
   });
 
   it('should switch the width axis back to fixed when the width is resized while it was hugging', () => {
-    // mock — horizontal flow: width is the primary axis
+    // mock
     const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug);
 
     store.dispatch(setSelection([frameId]));
@@ -339,7 +311,7 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onScrubWidth(200));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+    expect(readNode(frameId)).toMatchObject({ width: 200, widthSizingMode: SizingMode.fixed });
   });
 
   it('should leave the width axis untouched when resizing while it was already fixed', () => {
@@ -355,11 +327,11 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onScrubWidth(200));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+    expect(readNode(frameId)).toMatchObject({ width: 200, widthSizingMode: SizingMode.fixed });
   });
 
   it('should switch the height axis back to fixed when the height is resized while it was hugging', () => {
-    // mock — horizontal flow: height is the counter axis
+    // mock
     const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.hug);
 
     store.dispatch(setSelection([frameId]));
@@ -371,23 +343,7 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onScrubHeight(120));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, height: 120 });
-  });
-
-  it('should switch the correct (counter) axis back to fixed when width is resized on a vertical-flow frame', () => {
-    // mock — vertical flow: width is the counter axis
-    const frameId = addAutoLayoutFrameNode(LayoutMode.vertical, SizingMode.fixed, SizingMode.hug);
-
-    store.dispatch(setSelection([frameId]));
-
-    // before
-    const { result } = renderUseColumnDimensions();
-
-    // action
-    act(() => result.current.onScrubWidth(200));
-
-    // result
-    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, width: 200 });
+    expect(readNode(frameId)).toMatchObject({ height: 120, heightSizingMode: SizingMode.fixed });
   });
 
   it('should reset both sizing-mode axes to fixed when the lock is turned on', () => {
@@ -404,9 +360,9 @@ describe('useColumnDimensions', () => {
 
     // result
     expect(readNode(frameId)).toMatchObject({
-      counterAxisSizingMode: SizingMode.fixed,
+      heightSizingMode: SizingMode.fixed,
       lockedAspectRatio: true,
-      primaryAxisSizingMode: SizingMode.fixed,
+      widthSizingMode: SizingMode.fixed,
     });
   });
 
@@ -424,9 +380,9 @@ describe('useColumnDimensions', () => {
 
     // result
     expect(readNode(frameId)).toMatchObject({
-      counterAxisSizingMode: SizingMode.hug,
+      heightSizingMode: SizingMode.hug,
       lockedAspectRatio: false,
-      primaryAxisSizingMode: SizingMode.hug,
+      widthSizingMode: SizingMode.hug,
     });
   });
 
@@ -446,8 +402,8 @@ describe('useColumnDimensions', () => {
     const node = readNode(frameId);
 
     expect(node.lockedAspectRatio).toBe(true);
-    expect(node.primaryAxisSizingMode).toBeUndefined();
-    expect(node.counterAxisSizingMode).toBeUndefined();
+    expect(node.widthSizingMode).toBeUndefined();
+    expect(node.heightSizingMode).toBeUndefined();
   });
 
   it('should turn the lock off when the width axis is switched to hug', () => {
@@ -463,7 +419,7 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, primaryAxisSizingMode: SizingMode.hug });
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, widthSizingMode: SizingMode.hug });
   });
 
   it('should turn the lock off when the height axis is switched to hug', () => {
@@ -479,7 +435,7 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectHeightSizingMode(SizingMode.hug));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ counterAxisSizingMode: SizingMode.hug, lockedAspectRatio: false });
+    expect(readNode(frameId)).toMatchObject({ heightSizingMode: SizingMode.hug, lockedAspectRatio: false });
   });
 
   it('should leave the lock untouched when switching an axis to fixed', () => {
@@ -495,7 +451,7 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectWidthSizingMode(SizingMode.fixed));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: true, primaryAxisSizingMode: SizingMode.fixed });
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: true, widthSizingMode: SizingMode.fixed });
   });
 
   it('should leave the lock untouched (already off) when switching an axis to hug', () => {
@@ -511,6 +467,72 @@ describe('useColumnDimensions', () => {
     act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
 
     // result
-    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, primaryAxisSizingMode: SizingMode.hug });
+    expect(readNode(frameId)).toMatchObject({ lockedAspectRatio: false, widthSizingMode: SizingMode.hug });
+  });
+
+  it('should not offer Fill on either axis for a top-level frame with no parent', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // result
+    expect(result.current.canFillWidth).toBe(false);
+    expect(result.current.canFillHeight).toBe(false);
+  });
+
+  it('should offer Fill on both axes when the parent is an auto-layout frame not hugging either axis', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.fixed);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // result
+    expect(result.current.canFillWidth).toBe(true);
+    expect(result.current.canFillHeight).toBe(true);
+  });
+
+  it('should not offer Fill on an axis where the parent frame itself hugs that axis', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.fixed);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // result
+    expect(result.current.canFillWidth).toBe(false);
+    expect(result.current.canFillHeight).toBe(true);
+  });
+
+  it('should reset a direct child’s fill on the matching axis back to fixed when the parent switches that axis to hug', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.fixed, SizingMode.fixed);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(updateNode({ changes: { widthSizingMode: SizingMode.fill }, id: childId }));
+    store.dispatch(setSelection([parentId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action — the parent itself starts hugging its width, so the filling child has no budget left
+    act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
+
+    // result
+    expect(readNode(parentId).widthSizingMode).toBe(SizingMode.hug);
+    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fixed);
   });
 });

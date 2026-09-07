@@ -1,33 +1,28 @@
 // types
-import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
+import { SizingMode } from 'types/design/enums';
+import { TBaseNode, TSceneNode } from 'types/design/types';
 
-export type TAutoLayoutSizingModeResetChanges = Partial<Pick<TFrameNode, 'counterAxisSizingMode' | 'primaryAxisSizingMode'>>;
+// utils
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+
+export type TAutoLayoutSizingModeResetChanges = Partial<Pick<TBaseNode, 'heightSizingMode' | 'widthSizingMode'>>;
 
 export const getAutoLayoutSizingModeResetChanges = (
   node: TSceneNode,
   widthChanged: boolean,
   heightChanged: boolean,
 ): TAutoLayoutSizingModeResetChanges => {
-  const isAutoLayoutFrame =
-    node.type === NodeType.frame && (node.layoutMode === LayoutMode.horizontal || node.layoutMode === LayoutMode.vertical);
-
-  if (isAutoLayoutFrame) {
-    const isHorizontal = node.layoutMode === LayoutMode.horizontal;
-    const primaryAxisSizingMode = node.primaryAxisSizingMode ?? SizingMode.fixed;
-    const counterAxisSizingMode = node.counterAxisSizingMode ?? SizingMode.fixed;
-    const widthField = isHorizontal ? 'primaryAxisSizingMode' : 'counterAxisSizingMode';
-    const heightField = isHorizontal ? 'counterAxisSizingMode' : 'primaryAxisSizingMode';
-    const widthMode = isHorizontal ? primaryAxisSizingMode : counterAxisSizingMode;
-    const heightMode = isHorizontal ? counterAxisSizingMode : primaryAxisSizingMode;
+  if (isBoxSceneNode(node)) {
+    const widthMode = node.widthSizingMode ?? SizingMode.fixed;
+    const heightMode = node.heightSizingMode ?? SizingMode.fixed;
     const changes: TAutoLayoutSizingModeResetChanges = {};
 
-    if (widthChanged && widthMode === SizingMode.hug) {
-      changes[widthField] = SizingMode.fixed;
+    if (widthChanged && (widthMode === SizingMode.hug || widthMode === SizingMode.fill)) {
+      changes.widthSizingMode = SizingMode.fixed;
     }
 
-    if (heightChanged && heightMode === SizingMode.hug) {
-      changes[heightField] = SizingMode.fixed;
+    if (heightChanged && (heightMode === SizingMode.hug || heightMode === SizingMode.fill)) {
+      changes.heightSizingMode = SizingMode.fixed;
     }
 
     return changes;

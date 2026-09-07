@@ -32,22 +32,22 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const addAutoLayoutFrameNode = (counterAxisSizingMode?: SizingMode, primaryAxisSizingMode?: SizingMode): string => {
+const addAutoLayoutFrameNode = (heightSizingMode?: SizingMode, widthSizingMode?: SizingMode): string => {
   store.dispatch(
     addNode({
       childIds: [],
       clipContent: true,
-      counterAxisSizingMode,
       fill: '#ff0000',
       height: 100,
+      heightSizingMode,
       horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',
       parentId: null,
-      primaryAxisSizingMode,
       rotation: 0,
       type: NodeType.frame,
       width: 100,
+      widthSizingMode,
       x: 0,
       y: 0,
     }),
@@ -257,7 +257,7 @@ describe('resizeBoxNode', () => {
     );
 
     // result
-    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ primaryAxisSizingMode: SizingMode.fixed, width: 200 });
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ width: 200, widthSizingMode: SizingMode.fixed });
   });
 
   it('should switch the height axis back to fixed when a hugging auto-layout frame is resized by dragging its height', () => {
@@ -277,7 +277,7 @@ describe('resizeBoxNode', () => {
     );
 
     // result
-    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ counterAxisSizingMode: SizingMode.fixed, height: 150 });
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ height: 150, heightSizingMode: SizingMode.fixed });
   });
 
   it('should do nothing when the resized node can no longer be found in the store', () => {

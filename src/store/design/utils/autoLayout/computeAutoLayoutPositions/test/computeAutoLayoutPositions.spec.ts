@@ -34,8 +34,8 @@ describe('computeAutoLayoutPositions', () => {
     const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 10, 10, AlignmentLayout.topLeft, NO_PADDING, sizes);
 
     expect(positions).toEqual([
-      { id: 'a', x: 0, y: 0 },
-      { id: 'b', x: 40, y: 0 },
+      { height: 20, id: 'a', width: 30, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 40, x: 40, y: 0 },
     ]);
   });
 
@@ -49,13 +49,13 @@ describe('computeAutoLayoutPositions', () => {
     const positions = computeAutoLayoutPositions(layoutFrame, LayoutMode.horizontal, 0, 5, AlignmentLayout.topLeft, NO_PADDING, sizes);
 
     expect(positions).toEqual([
-      { id: 'a', x: 0, y: 0 },
-      { id: 'b', x: 0, y: 25 },
+      { height: 20, id: 'a', width: 50, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 50, x: 0, y: 25 },
     ]);
   });
 
   it('should ignore layoutWrap when the primary axis itself hugs — there is no fixed width to wrap against', () => {
-    const layoutFrame = frame({ height: 999, layoutWrap: true, primaryAxisSizingMode: SizingMode.hug, width: 999 });
+    const layoutFrame = frame({ height: 999, layoutWrap: true, width: 999, widthSizingMode: SizingMode.hug });
     const sizes = [
       { height: 20, id: 'a', width: 30 },
       { height: 20, id: 'b', width: 40 },
@@ -66,13 +66,13 @@ describe('computeAutoLayoutPositions', () => {
     // hugged to a single line (30+10+40=80), not wrapped
     expect(layoutFrame.width).toBe(80);
     expect(positions).toEqual([
-      { id: 'a', x: 0, y: 0 },
-      { id: 'b', x: 40, y: 0 },
+      { height: 20, id: 'a', width: 30, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 40, x: 40, y: 0 },
     ]);
   });
 
   it('should hug the counter axis to the wrapped block, when wrap is on and the counter axis hugs', () => {
-    const layoutFrame = frame({ counterAxisSizingMode: SizingMode.hug, height: 999, layoutWrap: true, width: 50 });
+    const layoutFrame = frame({ height: 999, heightSizingMode: SizingMode.hug, layoutWrap: true, width: 50 });
     const sizes = [
       { height: 20, id: 'a', width: 50 },
       { height: 30, id: 'b', width: 50 },
@@ -85,7 +85,7 @@ describe('computeAutoLayoutPositions', () => {
   });
 
   it('should hug the counter axis (width) to the wrapped block, for a vertical frame', () => {
-    const layoutFrame = frame({ counterAxisSizingMode: SizingMode.hug, height: 50, layoutWrap: true, width: 999 });
+    const layoutFrame = frame({ height: 50, layoutWrap: true, width: 999, widthSizingMode: SizingMode.hug });
     const sizes = [
       { height: 50, id: 'a', width: 20 },
       { height: 50, id: 'b', width: 30 },

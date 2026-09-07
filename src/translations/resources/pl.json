@@ -428,6 +428,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.applyVariable": "Zastosuj zmienną…",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.ariaLabelHeight": "Opcje wysokości",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.ariaLabelWidth": "Opcje szerokości",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.fillHeight": "Wypełnij kontener",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.fillWidth": "Wypełnij kontener",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.fixedHeight": "Stała wysokość ({{value}})",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.fixedWidth": "Stała szerokość ({{value}})",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.sizingMenu.hug": "Dopasuj do zawartości",

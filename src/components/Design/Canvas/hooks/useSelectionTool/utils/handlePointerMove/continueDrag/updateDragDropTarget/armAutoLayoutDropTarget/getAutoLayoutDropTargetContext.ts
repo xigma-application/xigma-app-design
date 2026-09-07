@@ -30,7 +30,9 @@ const getSiblingRealPositions = (
   localSiblingBounds: TDraftRect[],
 ): TAutoLayoutChildPosition[] =>
   localSiblingBounds.map((bounds, index) => ({
+    height: bounds.height,
     id: siblingEntries[index].sibling.id,
+    width: bounds.width,
     x: bounds.x,
     y: bounds.y,
   }));
@@ -57,7 +59,8 @@ export const getAutoLayoutDropTargetContext = (
   const counterAxisSpacing = (isHorizontal ? desiredParent.verticalGap : desiredParent.horizontalGap) ?? itemSpacing;
   const alignment = desiredParent.layoutAlignment ?? AlignmentLayout.topLeft;
   const padding = getFramePadding(desiredParent);
-  const isWrapEnabled = Boolean(desiredParent.layoutWrap) && desiredParent.primaryAxisSizingMode !== SizingMode.hug;
+  const primaryMode = isHorizontal ? desiredParent.widthSizingMode : desiredParent.heightSizingMode;
+  const isWrapEnabled = Boolean(desiredParent.layoutWrap) && primaryMode !== SizingMode.hug;
 
   return {
     alignment,

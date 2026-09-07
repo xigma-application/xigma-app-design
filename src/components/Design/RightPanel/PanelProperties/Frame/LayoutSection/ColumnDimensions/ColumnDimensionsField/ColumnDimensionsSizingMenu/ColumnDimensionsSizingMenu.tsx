@@ -14,12 +14,14 @@ const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 export type TColumnDimensionsSizingMenuProps = {
   axis: 'height' | 'width';
+  canFill: boolean;
+  canHug: boolean;
   mode: SizingMode;
   onSelect: TFunc<[SizingMode]>;
   value: number;
 };
 
-export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = ({ axis, mode, onSelect, value }) => {
+export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = ({ axis, canFill, canHug, mode, onSelect, value }) => {
   const { t } = useTranslation();
   const isWidth = axis === 'width';
 
@@ -31,12 +33,22 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
         onClick={() => onSelect(SizingMode.fixed)}
         selected={mode === SizingMode.fixed}
       />
-      <PopoverItem
-        icon={isWidth ? 'AutoWidth' : 'AutoHeight'}
-        label={t(`${translationNameSpace}.hug`)}
-        onClick={() => onSelect(SizingMode.hug)}
-        selected={mode === SizingMode.hug}
-      />
+      {canHug && (
+        <PopoverItem
+          icon={isWidth ? 'AutoWidth' : 'AutoHeight'}
+          label={t(`${translationNameSpace}.hug`)}
+          onClick={() => onSelect(SizingMode.hug)}
+          selected={mode === SizingMode.hug}
+        />
+      )}
+      {canFill && (
+        <PopoverItem
+          icon={isWidth ? 'WidthRestricted' : 'HeightRestricted'}
+          label={t(`${translationNameSpace}.${isWidth ? 'fillWidth' : 'fillHeight'}`)}
+          onClick={() => onSelect(SizingMode.fill)}
+          selected={mode === SizingMode.fill}
+        />
+      )}
       <PopoverSeparator />
       <PopoverItem
         icon={isWidth ? 'MinWidth' : 'MinHeight'}

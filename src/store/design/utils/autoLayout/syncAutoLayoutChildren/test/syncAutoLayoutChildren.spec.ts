@@ -1,11 +1,11 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType, SizingMode, ToolName } from 'types/design/enums';
-import { TDesignPage, TDesignState } from '../../../types';
+import { TDesignPage, TDesignState } from '../../../../types';
 import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
-import { getActivePage } from '../../getActivePage';
-import { getRotatedNodeBounds } from '../../getRotatedNodeBounds';
+import { getActivePage } from '../../../getActivePage';
+import { getRotatedNodeBounds } from '../../../getRotatedNodeBounds';
 import { syncAutoLayoutChildren } from '../syncAutoLayoutChildren';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
@@ -141,12 +141,12 @@ describe('syncAutoLayoutChildren', () => {
     const b = rect({ height: 60, id: 'b', width: 50 });
     const layoutFrame = frame({
       childIds: ['a', 'b'],
-      counterAxisSizingMode: SizingMode.hug,
       height: 999,
+      heightSizingMode: SizingMode.hug,
       horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
-      primaryAxisSizingMode: SizingMode.hug,
       width: 999,
+      widthSizingMode: SizingMode.hug,
       x: 0,
       y: 0,
     });
@@ -203,8 +203,8 @@ describe('syncAutoLayoutChildren', () => {
     const b = rect({ height: 30, id: 'b', width: 50 });
     const layoutFrame = frame({
       childIds: ['a', 'b'],
-      counterAxisSizingMode: SizingMode.hug,
       height: 999,
+      heightSizingMode: SizingMode.hug,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
       verticalGap: 5,
@@ -509,5 +509,131 @@ describe('syncAutoLayoutChildren', () => {
 
     // action / result
     expect(() => syncAutoLayoutChildren(state, 'frame-1')).not.toThrow();
+  });
+
+  it('should grow a single filling child to consume the leftover primary-axis space', () => {
+    // mock — a 300-wide frame, a fixed 50-wide sibling, a 10 gap, and one filling child
+    const a = rect({ height: 20, id: 'a', width: 50 });
+    const b = rect({ height: 20, id: 'b', width: 20, widthSizingMode: SizingMode.fill });
+    const layoutFrame = frame({ childIds: ['a', 'b'], horizontalGap: 10, layoutMode: LayoutMode.horizontal, width: 300, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, b, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — leftover = 300 - 50 - 10 = 240, all of it goes to b
+    expect(getActivePage(state).nodes.b).toMatchObject({ width: 240, x: 60, y: 0 });
+  });
+
+  it('should split the leftover primary-axis space evenly between several filling children', () => {
+    // mock — a 220-wide frame, no fixed sibling, two 10px gaps, three filling children
+    const a = rect({ height: 20, id: 'a', width: 10, widthSizingMode: SizingMode.fill });
+    const b = rect({ height: 20, id: 'b', width: 10, widthSizingMode: SizingMode.fill });
+    const c = rect({ height: 20, id: 'c', width: 10, widthSizingMode: SizingMode.fill });
+    const layoutFrame = frame({
+      childIds: ['a', 'b', 'c'],
+      horizontalGap: 10,
+      layoutMode: LayoutMode.horizontal,
+      width: 220,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, b, c, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — leftover = 220 - 20 (two gaps) = 200, split evenly = ~66.67 each
+    const nodes = getActivePage(state).nodes;
+
+    expect((nodes.a as TRectangleNode).width).toBeCloseTo(200 / 3, 1);
+    expect((nodes.b as TRectangleNode).width).toBeCloseTo(200 / 3, 1);
+    expect((nodes.c as TRectangleNode).width).toBeCloseTo(200 / 3, 1);
+  });
+
+  it('should stretch a counter-axis filling child to the frame’s content-box cross size', () => {
+    // mock — a 100-tall horizontal frame, one child filling the counter (height) axis
+    const a = rect({ height: 20, heightSizingMode: SizingMode.fill, id: 'a', width: 30 });
+    const layoutFrame = frame({ childIds: ['a'], height: 100, layoutMode: LayoutMode.horizontal, width: 200, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result
+    expect(getActivePage(state).nodes.a).toMatchObject({ height: 100, width: 30 });
+  });
+
+  it('should not grow a filling child on an axis where the parent frame itself is hugging that axis', () => {
+    // mock — the frame hugs its own width, so there is no leftover budget to hand to a filling child
+    const a = rect({ height: 20, id: 'a', width: 30, widthSizingMode: SizingMode.fill });
+    const layoutFrame = frame({ childIds: ['a'], layoutMode: LayoutMode.horizontal, widthSizingMode: SizingMode.hug, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — a stays at its own 30px width, and the frame hugs to exactly that
+    expect(getActivePage(state).nodes.a).toMatchObject({ width: 30 });
+    expect(getActivePage(state).nodes['frame-1']).toMatchObject({ width: 30 });
+  });
+
+  it('should skip fill-resizing a child that is independently rotated relative to the frame', () => {
+    // mock — a child tilted 45deg relative to an unrotated frame has no well-defined "grown" local box
+    const a = rect({ height: 20, id: 'a', rotation: 45, width: 30, widthSizingMode: SizingMode.fill });
+    const layoutFrame = frame({ childIds: ['a'], layoutMode: LayoutMode.horizontal, width: 300, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — width is left untouched, since the child's rotation differs from the frame's
+    expect(getActivePage(state).nodes.a).toMatchObject({ width: 30 });
+  });
+
+  it('should not recurse into a frame child that has no auto-layout of its own', () => {
+    // mock — the inner frame is a plain (freeForm) frame with two overlapping children; if a
+    // recursive auto-layout re-sync ran on it, it would pack and separate them
+    const inner = frame({ childIds: ['x', 'y'], height: 20, id: 'inner', parentId: 'frame-1', width: 20, x: 999, y: 999 });
+    const x = rect({ height: 10, id: 'x', parentId: 'inner', width: 10, x: 5, y: 5 });
+    const y = rect({ height: 10, id: 'y', parentId: 'inner', width: 10, x: 5, y: 5 });
+    const outer = frame({ childIds: ['inner'], layoutMode: LayoutMode.horizontal, width: 300, x: 0, y: 0 });
+    const state = buildState({ nodes: { 'frame-1': outer, inner, x, y } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — the inner frame moved into flow, carrying both children by the same translation,
+    // so they still sit exactly on top of each other rather than being packed apart
+    const nodes = getActivePage(state).nodes;
+
+    expect({ x: (nodes.x as TRectangleNode).x, y: (nodes.x as TRectangleNode).y }).toEqual({
+      x: (nodes.y as TRectangleNode).x,
+      y: (nodes.y as TRectangleNode).y,
+    });
+  });
+
+  it('should reflow a nested auto-layout frame’s own children after it gets resized by fill', () => {
+    // mock — an outer horizontal frame with a filling inner frame, which itself lays out a child
+    const inner = frame({
+      childIds: ['innerChild'],
+      height: 20,
+      id: 'inner',
+      layoutMode: LayoutMode.horizontal,
+      parentId: 'frame-1',
+      width: 20,
+      widthSizingMode: SizingMode.fill,
+    });
+    const innerChild = rect({ height: 20, id: 'innerChild', parentId: 'inner', width: 20, x: 999, y: 999 });
+    const outer = frame({ childIds: ['inner'], layoutMode: LayoutMode.horizontal, width: 300, x: 0, y: 0 });
+    const state = buildState({ nodes: { 'frame-1': outer, inner, innerChild } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — inner grows to fill the outer frame (300 wide), and its own child gets repositioned
+    // relative to inner's new (grown) box, proving the recursive re-sync actually ran
+    expect(getActivePage(state).nodes.inner).toMatchObject({ width: 300, x: 0, y: 0 });
+    expect(getActivePage(state).nodes.innerChild).toMatchObject({ x: 0, y: 0 });
   });
 });

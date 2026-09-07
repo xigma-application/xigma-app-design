@@ -23,6 +23,8 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 export type TColumnDimensionsFieldProps = {
   ariaLabel: string;
   axis: 'height' | 'width';
+  canFill?: boolean;
+  canHug?: boolean;
   e2eValue: TE2EValue;
   label: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -37,6 +39,8 @@ export type TColumnDimensionsFieldProps = {
 export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   ariaLabel,
   axis,
+  canFill = false,
+  canHug = false,
   e2eValue,
   label,
   onBlur,
@@ -57,6 +61,8 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
       endAdornment={
         <ColumnDimensionsFieldEndAdornment
           axis={axis}
+          canFill={canFill}
+          canHug={canHug}
           isRevealed={isRevealed}
           onMenuOpenChange={onMenuOpenChange}
           onSelectSizingMode={onSelectSizingMode}

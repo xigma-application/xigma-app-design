@@ -11,6 +11,7 @@ import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChild
 import { getAutoLayoutWrappedRowBounds } from './getAutoLayoutWrappedRowBounds';
 import { getAutoLayoutWrappedRowDropTarget } from './getAutoLayoutWrappedRowDropTarget';
 import { getAutoLayoutWrappedSiblingPositions } from './getAutoLayoutWrappedSiblingPositions';
+import { groupAutoLayoutChildrenIntoLines } from '../groupAutoLayoutChildrenIntoLines';
 
 export const getAutoLayoutWrappedDropTarget = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
@@ -27,14 +28,16 @@ export const getAutoLayoutWrappedDropTarget = (
 ): TAutoLayoutDropTarget => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const contentBox = getAutoLayoutContentBox(frame, padding);
+  const availablePrimary = isHorizontal ? contentBox.width : contentBox.height;
   const originChildren = getAutoLayoutReorderOriginChildren(children, originalIndex, draggedSize);
+  const originLines = groupAutoLayoutChildrenIntoLines(isHorizontal, itemSpacing, availablePrimary, originChildren);
   const realPositions = getAutoLayoutWrappedChildPositions(
     layoutMode,
     itemSpacing,
     counterAxisSpacing,
     alignment,
     contentBox,
-    originChildren,
+    originLines,
   ).filter((position) => position.id !== '__dragged__');
   const { realEnd, realStart, rowFrame, rowOriginalIndex } = getAutoLayoutWrappedRowBounds(
     isHorizontal,

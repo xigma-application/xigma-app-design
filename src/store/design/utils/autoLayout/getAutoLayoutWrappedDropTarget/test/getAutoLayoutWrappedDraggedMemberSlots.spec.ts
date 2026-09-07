@@ -58,6 +58,19 @@ describe('getAutoLayoutWrappedDraggedMemberSlots', () => {
     ]);
   });
 
+  it('measures the available primary space by height, not width, for a vertical frame', () => {
+    // action — a 200-tall content box means each column holds exactly 2x 100-tall items;
+    // the 4 siblings fill two full columns, so the block opens a third column
+    const columnBox = { height: 200, width: 600, x: 0, y: 0 };
+    const slots = getAutoLayoutWrappedDraggedMemberSlots(LayoutMode.vertical, 0, 0, AlignmentLayout.topLeft, columnBox, SIBLINGS, 4, BLOCK);
+
+    // result — third column starts at x=200 (two 100-wide columns before it), stacked by y
+    expect(slots).toEqual([
+      { x: 200, y: 0 },
+      { x: 200, y: 100 },
+    ]);
+  });
+
   it('returns nothing when the block is empty', () => {
     // action
     const slots = getAutoLayoutWrappedDraggedMemberSlots(

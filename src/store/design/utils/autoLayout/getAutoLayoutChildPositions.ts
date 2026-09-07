@@ -1,14 +1,20 @@
 // types
-import { AlignmentLayout, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
 import { getAlignmentComponents } from './getAlignmentComponents';
 import { getAxisOffset } from './getAxisOffset';
 
-export type TAutoLayoutChildSize = { height: number; id: string; width: number };
+export type TAutoLayoutChildSize = {
+  height: number;
+  heightSizingMode?: SizingMode;
+  id: string;
+  width: number;
+  widthSizingMode?: SizingMode;
+};
 
-export type TAutoLayoutChildPosition = { id: string; x: number; y: number };
+export type TAutoLayoutChildPosition = { height: number; id: string; width: number; x: number; y: number };
 
 export const getAutoLayoutChildPositions = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
@@ -34,8 +40,8 @@ export const getAutoLayoutChildPositions = (
     const counterChildSize = isHorizontal ? child.height : child.width;
     const counterOffset = getAxisOffset(counterAlign, counterSize, counterChildSize);
     const position = isHorizontal
-      ? { id: child.id, x: frame.x + offset, y: frame.y + counterOffset }
-      : { id: child.id, x: frame.x + counterOffset, y: frame.y + offset };
+      ? { height: child.height, id: child.id, width: child.width, x: frame.x + offset, y: frame.y + counterOffset }
+      : { height: child.height, id: child.id, width: child.width, x: frame.x + counterOffset, y: frame.y + offset };
 
     offset += size + itemSpacing;
 

@@ -15,9 +15,11 @@ import { translationNameSpace } from './constants';
 const ColumnDimensions: FC = () => {
   const { t } = useTranslation();
   const {
+    canFillHeight,
+    canFillWidth,
+    canHug,
     height,
     heightSizingMode,
-    isAutoLayout,
     locked,
     onBlurHeight,
     onBlurWidth,
@@ -31,6 +33,8 @@ const ColumnDimensions: FC = () => {
     width,
     widthSizingMode,
   } = useColumnDimensions();
+  const showWidthDropdown = canHug || canFillWidth;
+  const showHeightDropdown = canHug || canFillHeight;
 
   return (
     <UITools.SectionColumn
@@ -43,27 +47,31 @@ const ColumnDimensions: FC = () => {
       <ColumnDimensionsField
         ariaLabel={t(`${translationNameSpace}.ariaLabelWidth`)}
         axis="width"
+        canFill={canFillWidth}
+        canHug={canHug}
         e2eValue="width"
         label="W"
         onBlur={onBlurWidth}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         onScrub={onScrubWidth}
-        onSelectSizingMode={isAutoLayout ? onSelectWidthSizingMode : undefined}
-        sizingMode={isAutoLayout ? widthSizingMode : undefined}
+        onSelectSizingMode={showWidthDropdown ? onSelectWidthSizingMode : undefined}
+        sizingMode={showWidthDropdown ? widthSizingMode : undefined}
         value={width}
       />
       <ColumnDimensionsField
         ariaLabel={t(`${translationNameSpace}.ariaLabelHeight`)}
         axis="height"
+        canFill={canFillHeight}
+        canHug={canHug}
         e2eValue="height"
         label="H"
         onBlur={onBlurHeight}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         onScrub={onScrubHeight}
-        onSelectSizingMode={isAutoLayout ? onSelectHeightSizingMode : undefined}
-        sizingMode={isAutoLayout ? heightSizingMode : undefined}
+        onSelectSizingMode={showHeightDropdown ? onSelectHeightSizingMode : undefined}
+        sizingMode={showHeightDropdown ? heightSizingMode : undefined}
         value={height}
       />
     </UITools.SectionColumn>

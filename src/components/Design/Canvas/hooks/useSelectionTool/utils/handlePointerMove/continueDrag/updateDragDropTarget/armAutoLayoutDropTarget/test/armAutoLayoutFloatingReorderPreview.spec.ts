@@ -73,7 +73,7 @@ describe('armAutoLayoutFloatingReorderPreview', () => {
       ...autoLayoutFrame,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
-      primaryAxisSizingMode: SizingMode.fixed,
+      widthSizingMode: SizingMode.fixed,
     };
     const context = getAutoLayoutDropTargetContext(wrapFrame, 'frame-1', 'frame-1', [nodesById.dragged], ['dragged'], nodesById, true);
 

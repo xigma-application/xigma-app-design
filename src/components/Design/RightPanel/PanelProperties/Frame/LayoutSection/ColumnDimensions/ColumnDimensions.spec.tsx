@@ -238,6 +238,6 @@ describe('ColumnDimensions behaviors', () => {
     fireEvent.click(screen.getByText('Hug contents'));
 
     // result
-    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ primaryAxisSizingMode: 'hug' });
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ widthSizingMode: 'hug' });
   });
 });

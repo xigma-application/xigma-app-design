@@ -1,7 +1,7 @@
 // types
 import { LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
-import { TAutoLayoutPadding } from './getAutoLayoutContentBox';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 
 export const getAutoLayoutHugSize = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,

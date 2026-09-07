@@ -5,8 +5,8 @@ describe('getAutoLayoutSiblingPositions', () => {
   it('should map every real sibling to its own simulated position', () => {
     // action
     const positions = getAutoLayoutSiblingPositions([
-      { id: 'a', x: 0, y: 0 },
-      { id: 'b', x: 0, y: 40 },
+      { height: 0, id: 'a', width: 0, x: 0, y: 0 },
+      { height: 0, id: 'b', width: 0, x: 0, y: 40 },
     ]);
 
     // result
@@ -16,8 +16,8 @@ describe('getAutoLayoutSiblingPositions', () => {
   it('should never include the dragged placeholder itself', () => {
     // action
     const positions = getAutoLayoutSiblingPositions([
-      { id: 'a', x: 0, y: 0 },
-      { id: '__dragged__', x: 0, y: 20 },
+      { height: 0, id: 'a', width: 0, x: 0, y: 0 },
+      { height: 0, id: '__dragged__', width: 0, x: 0, y: 20 },
     ]);
 
     // result — specifically not `{ __dragged__: ... }`

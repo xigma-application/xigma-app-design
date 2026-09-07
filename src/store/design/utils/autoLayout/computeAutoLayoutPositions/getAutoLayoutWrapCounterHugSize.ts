@@ -1,11 +1,11 @@
 // types
 import { LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
-import { TAutoLayoutPadding } from './getAutoLayoutContentBox';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 
 // utils
-import { getAutoLayoutBlockCounterLength } from './getAutoLayoutBlockCounterLength';
-import { getAutoLayoutLineThickness } from './getAutoLayoutLineThickness';
+import { getAutoLayoutBlockCounterLength } from '../getAutoLayoutBlockCounterLength';
+import { getAutoLayoutLineThickness } from '../getAutoLayoutLineThickness';
 
 export const getAutoLayoutWrapCounterHugSize = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,

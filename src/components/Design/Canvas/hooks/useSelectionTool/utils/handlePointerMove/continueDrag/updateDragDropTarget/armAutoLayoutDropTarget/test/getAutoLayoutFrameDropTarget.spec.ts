@@ -78,7 +78,7 @@ describe('getAutoLayoutFrameDropTarget', () => {
   it('should fall back to the flat computation when wrap is enabled but the primary axis hugs its content', () => {
     // mock — hug on the primary axis disables wrap, mirroring computeAutoLayoutPositions's own
     // wrapEnabled condition
-    const huggedWrapFrame: TAutoLayoutFrame = { ...autoLayoutFrame, layoutWrap: true, primaryAxisSizingMode: SizingMode.hug };
+    const huggedWrapFrame: TAutoLayoutFrame = { ...autoLayoutFrame, layoutWrap: true, widthSizingMode: SizingMode.hug };
 
     // action
     const dropTarget = getAutoLayoutFrameDropTarget(huggedWrapFrame, buildContext([], []), { height: 20, width: 20 }, { x: 10, y: 10 });

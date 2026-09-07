@@ -45,6 +45,7 @@ export type TDraftText = TDraftRect & {
 
 export type TBaseNode = {
   height: number;
+  heightSizingMode?: SizingMode;
   hidden?: boolean;
   id: string;
   isMask?: boolean;
@@ -54,6 +55,7 @@ export type TBaseNode = {
   parentId: string | null;
   rotation: number;
   width: number;
+  widthSizingMode?: SizingMode;
   x: number;
   y: number;
 };
@@ -74,7 +76,6 @@ export type TEllipseNode = TBaseNode & {
 export type TFrameNode = TBaseNode & {
   childIds: string[];
   clipContent: boolean;
-  counterAxisSizingMode?: SizingMode;
   fill: string;
   guides?: TGuide[];
   horizontalGap?: number;
@@ -85,7 +86,6 @@ export type TFrameNode = TBaseNode & {
   paddingLeft?: number;
   paddingRight?: number;
   paddingTop?: number;
-  primaryAxisSizingMode?: SizingMode;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;

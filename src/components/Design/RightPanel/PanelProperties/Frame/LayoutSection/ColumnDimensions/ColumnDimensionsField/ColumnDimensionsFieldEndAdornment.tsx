@@ -19,6 +19,8 @@ import { SizingMode } from 'types/design/enums';
 
 export type TColumnDimensionsFieldEndAdornmentProps = {
   axis: 'height' | 'width';
+  canFill: boolean;
+  canHug: boolean;
   isRevealed: boolean;
   onMenuOpenChange: TFunc<[boolean]>;
   onSelectSizingMode?: TFunc<[SizingMode]>;
@@ -28,6 +30,8 @@ export type TColumnDimensionsFieldEndAdornmentProps = {
 
 export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdornmentProps> = ({
   axis,
+  canFill,
+  canHug,
   isRevealed,
   onMenuOpenChange,
   onSelectSizingMode,
@@ -40,8 +44,9 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
     return null;
   }
 
-  if (sizingMode === SizingMode.hug && !isRevealed) {
-    return <span className={styles.ColumnDimensionsField__hugLabel}>Hug</span>;
+  if (!isRevealed && (sizingMode === SizingMode.hug || sizingMode === SizingMode.fill)) {
+    const label = sizingMode === SizingMode.hug ? 'Hug' : 'Fill';
+    return <span className={styles.ColumnDimensionsField__hugLabel}>{label}</span>;
   }
 
   return (
@@ -50,7 +55,14 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
       trigger={<Icon name="ChevronDown" size={10} />}
       triggerAriaLabel={t(`${translationNameSpace}.${axis === 'width' ? 'ariaLabelWidth' : 'ariaLabelHeight'}`)}
     >
-      <ColumnDimensionsSizingMenu axis={axis} mode={sizingMode} onSelect={onSelectSizingMode} value={value} />
+      <ColumnDimensionsSizingMenu
+        axis={axis}
+        canFill={canFill}
+        canHug={canHug}
+        mode={sizingMode}
+        onSelect={onSelectSizingMode}
+        value={value}
+      />
     </UITools.ButtonMenu>
   );
 };

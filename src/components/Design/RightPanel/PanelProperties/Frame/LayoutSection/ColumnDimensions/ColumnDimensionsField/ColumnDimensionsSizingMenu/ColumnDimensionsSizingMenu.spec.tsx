@@ -10,7 +10,7 @@ import { SizingMode } from 'types/design/enums';
 const renderMenu = (overrides: Partial<Parameters<typeof ColumnDimensionsSizingMenu>[0]> = {}): ReturnType<typeof render> =>
   render(
     <PopoverPrimitive.Root open>
-      <ColumnDimensionsSizingMenu axis="width" mode={SizingMode.fixed} onSelect={vi.fn()} value={77} {...overrides} />
+      <ColumnDimensionsSizingMenu axis="width" canFill canHug mode={SizingMode.fixed} onSelect={vi.fn()} value={77} {...overrides} />
     </PopoverPrimitive.Root>,
   );
 
@@ -120,5 +120,44 @@ describe('ColumnDimensionsSizingMenu behaviors', () => {
     // result — PopoverItem renders a Check icon with opacity 1 when selected, 0 otherwise
     expect(hugRow.querySelector('span[style*="opacity: 1"]')).not.toBeNull();
     expect(fixedRow.querySelector('span[style*="opacity: 1"]')).toBeNull();
+  });
+
+  it('should render the Fill container option for the width axis and call onSelect with fill when clicked', () => {
+    // mock
+    const onSelect = vi.fn();
+
+    // before
+    renderMenu({ onSelect });
+
+    // action
+    screen.getByText('Fill container').click();
+
+    // result
+    expect(onSelect).toHaveBeenCalledWith(SizingMode.fill);
+  });
+
+  it('should mark the Fill option as selected when the mode is fill', () => {
+    // before
+    renderMenu({ mode: SizingMode.fill });
+    const fillRow = screen.getByText('Fill container').closest('div')!.parentElement!;
+
+    // result
+    expect(fillRow.querySelector('span[style*="opacity: 1"]')).not.toBeNull();
+  });
+
+  it('should not render the Hug option when canHug is false', () => {
+    // before
+    renderMenu({ canHug: false });
+
+    // result
+    expect(screen.queryByText('Hug contents')).toBeNull();
+  });
+
+  it('should not render the Fill option when canFill is false', () => {
+    // before
+    renderMenu({ canFill: false });
+
+    // result
+    expect(screen.queryByText('Fill container')).toBeNull();
   });
 });

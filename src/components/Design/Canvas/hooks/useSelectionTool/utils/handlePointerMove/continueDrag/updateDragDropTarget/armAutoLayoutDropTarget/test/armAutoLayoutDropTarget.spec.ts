@@ -185,7 +185,7 @@ describe('armAutoLayoutDropTarget', () => {
       horizontalGap: 10,
       layoutMode: LayoutMode.horizontal,
       layoutWrap: true,
-      primaryAxisSizingMode: SizingMode.hug,
+      widthSizingMode: SizingMode.hug,
     };
     const refs = createCanvasRefs();
 

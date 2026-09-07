@@ -1,26 +1,26 @@
 import { FocusEvent } from 'react';
 
 // hooks
+import { useCommitColumnDimensions } from './useCommitColumnDimensions';
 import { useDimensionsCommit } from './useDimensionsCommit';
+import { useSelectColumnSizingMode } from './useSelectColumnSizingMode';
+import { useToggleColumnLock } from './useToggleColumnLock';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
+import { selectNodes, selectSelectedNodes, selectSelectedParentNode } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
-// utils
-import { getAutoLayoutSizingModeResetChanges } from 'store/design/utils/autoLayout/getAutoLayoutSizingModeResetChanges';
-import { getLockedDimensionsChanges } from '../utils/getLockedDimensionsChanges';
-
 export type TUseColumnDimensionsResult = {
+  canFillHeight: boolean;
+  canFillWidth: boolean;
+  canHug: boolean;
   height: number;
   heightSizingMode: SizingMode;
-  isAutoLayout: boolean;
   locked: boolean;
   onBlurHeight: TFunc<[FocusEvent<HTMLInputElement>]>;
   onBlurWidth: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -37,64 +37,34 @@ export type TUseColumnDimensionsResult = {
 
 export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const dispatch = useAppDispatch();
+  const nodes = useAppSelector(selectNodes);
   const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const parentNode = useAppSelector(selectSelectedParentNode);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const id = frameNode?.id ?? '';
   const width = frameNode?.width ?? 0;
   const height = frameNode?.height ?? 0;
   const locked = frameNode?.lockedAspectRatio ?? false;
   const layoutMode = frameNode?.layoutMode;
-  const isHorizontal = layoutMode === LayoutMode.horizontal;
-  const isAutoLayout = layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical;
-  const primaryAxisSizingMode = frameNode?.primaryAxisSizingMode ?? SizingMode.fixed;
-  const counterAxisSizingMode = frameNode?.counterAxisSizingMode ?? SizingMode.fixed;
-  const widthSizingMode = isHorizontal ? primaryAxisSizingMode : counterAxisSizingMode;
-  const heightSizingMode = isHorizontal ? counterAxisSizingMode : primaryAxisSizingMode;
-
-  const commitWidth = (nextWidth: number): void => {
-    const dimensionChanges = getLockedDimensionsChanges('width', nextWidth, width, height, locked);
-    const sizingModeChanges = frameNode
-      ? getAutoLayoutSizingModeResetChanges(frameNode, dimensionChanges.width !== width, dimensionChanges.height !== height)
-      : {};
-
-    dispatch(updateNode({ changes: { ...dimensionChanges, ...sizingModeChanges }, id }));
-  };
-
-  const commitHeight = (nextHeight: number): void => {
-    const dimensionChanges = getLockedDimensionsChanges('height', nextHeight, width, height, locked);
-    const sizingModeChanges = frameNode
-      ? getAutoLayoutSizingModeResetChanges(frameNode, dimensionChanges.width !== width, dimensionChanges.height !== height)
-      : {};
-
-    dispatch(updateNode({ changes: { ...dimensionChanges, ...sizingModeChanges }, id }));
-  };
-
-  const selectWidthSizingMode = (mode: SizingMode): void => {
-    const field = isHorizontal ? 'primaryAxisSizingMode' : 'counterAxisSizingMode';
-    const lockChanges = mode !== SizingMode.fixed && locked ? { lockedAspectRatio: false } : {};
-
-    dispatch(updateNode({ changes: { [field]: mode, ...lockChanges }, id }));
-  };
-
-  const selectHeightSizingMode = (mode: SizingMode): void => {
-    const field = isHorizontal ? 'counterAxisSizingMode' : 'primaryAxisSizingMode';
-    const lockChanges = mode !== SizingMode.fixed && locked ? { lockedAspectRatio: false } : {};
-
-    dispatch(updateNode({ changes: { [field]: mode, ...lockChanges }, id }));
-  };
-
-  const toggleLock = (): void => {
-    const nextLocked = !locked;
-    const sizingModeChanges =
-      nextLocked && isAutoLayout ? { counterAxisSizingMode: SizingMode.fixed, primaryAxisSizingMode: SizingMode.fixed } : {};
-
-    dispatch(updateNode({ changes: { lockedAspectRatio: nextLocked, ...sizingModeChanges }, id }));
-  };
+  const canHug = layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical;
+  const parentFrame = parentNode?.type === NodeType.frame ? parentNode : undefined;
+  const parentIsAutoLayout = parentFrame?.layoutMode === LayoutMode.horizontal || parentFrame?.layoutMode === LayoutMode.vertical;
+  const parentWidthMode = parentFrame?.widthSizingMode ?? SizingMode.fixed;
+  const parentHeightMode = parentFrame?.heightSizingMode ?? SizingMode.fixed;
+  const canFillWidth = parentIsAutoLayout && parentWidthMode !== SizingMode.hug;
+  const canFillHeight = parentIsAutoLayout && parentHeightMode !== SizingMode.hug;
+  const widthSizingMode = frameNode?.widthSizingMode ?? SizingMode.fixed;
+  const heightSizingMode = frameNode?.heightSizingMode ?? SizingMode.fixed;
+  const { commitHeight, commitWidth } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
+  const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(id, frameNode, nodes, locked);
+  const toggleLock = useToggleColumnLock(id, locked, widthSizingMode, heightSizingMode);
 
   return {
+    canFillHeight,
+    canFillWidth,
+    canHug,
     height,
     heightSizingMode,
-    isAutoLayout,
     locked,
     onBlurHeight: useDimensionsCommit(height, commitHeight),
     onBlurWidth: useDimensionsCommit(width, commitWidth),

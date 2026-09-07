@@ -20,8 +20,8 @@ describe('getAutoLayoutChildPositions', () => {
 
     // result
     expect(positions).toEqual([
-      { id: 'a', x: 100, y: 200 },
-      { id: 'b', x: 140, y: 200 },
+      { height: 20, id: 'a', width: 30, x: 100, y: 200 },
+      { height: 20, id: 'b', width: 50, x: 140, y: 200 },
     ]);
   });
 
@@ -40,8 +40,8 @@ describe('getAutoLayoutChildPositions', () => {
 
     // result
     expect(positions).toEqual([
-      { id: 'a', x: 100, y: 200 },
-      { id: 'b', x: 100, y: 240 },
+      { height: 30, id: 'a', width: 20, x: 100, y: 200 },
+      { height: 50, id: 'b', width: 20, x: 100, y: 240 },
     ]);
   });
 
@@ -71,7 +71,7 @@ describe('getAutoLayoutChildPositions', () => {
     ]);
 
     // result — vertically centred (100-20)/2 = 40, horizontally still packed at start
-    expect(positions).toEqual([{ id: 'a', x: 0, y: 40 }]);
+    expect(positions).toEqual([{ height: 20, id: 'a', width: 30, x: 0, y: 40 }]);
   });
 
   it('should pack the whole row against the end of the primary axis when alignment is "right"', () => {
@@ -89,8 +89,8 @@ describe('getAutoLayoutChildPositions', () => {
 
     // result — row starts at 200-90=110
     expect(positions).toEqual([
-      { id: 'a', x: 110, y: 0 },
-      { id: 'b', x: 150, y: 0 },
+      { height: 20, id: 'a', width: 30, x: 110, y: 0 },
+      { height: 20, id: 'b', width: 50, x: 150, y: 0 },
     ]);
   });
 
@@ -105,6 +105,6 @@ describe('getAutoLayoutChildPositions', () => {
     );
 
     // result — primary (y) packed at the end: 100-20=80; counter (x) packed at the end: 100-30=70
-    expect(positions).toEqual([{ id: 'a', x: 70, y: 80 }]);
+    expect(positions).toEqual([{ height: 20, id: 'a', width: 30, x: 70, y: 80 }]);
   });
 });

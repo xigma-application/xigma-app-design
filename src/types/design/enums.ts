@@ -49,6 +49,7 @@ export enum PathType {
 }
 
 export enum SizingMode {
+  fill = 'fill',
   fixed = 'fixed',
   hug = 'hug',
 }

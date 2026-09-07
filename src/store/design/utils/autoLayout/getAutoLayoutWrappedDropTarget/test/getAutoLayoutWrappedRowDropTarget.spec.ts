@@ -11,9 +11,9 @@ const CHILDREN = [
   { height: 100, id: '3', width: 100 },
 ];
 const REAL_POSITIONS = [
-  { id: '1', x: 0, y: 0 },
-  { id: '2', x: 120, y: 0 },
-  { id: '3', x: 0, y: 120 },
+  { height: 100, id: '1', width: 100, x: 0, y: 0 },
+  { height: 100, id: '2', width: 100, x: 120, y: 0 },
+  { height: 100, id: '3', width: 100, x: 0, y: 120 },
 ];
 const DRAGGED_SIZE = { height: 100, width: 100 };
 

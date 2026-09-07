@@ -5,6 +5,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
+import { groupAutoLayoutChildrenIntoLines } from '../groupAutoLayoutChildrenIntoLines';
 
 export const getAutoLayoutWrappedDraggedMemberSlots = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
@@ -16,14 +17,17 @@ export const getAutoLayoutWrappedDraggedMemberSlots = (
   index: number,
   draggedSizes: TAutoLayoutChildSize[],
 ): TPoint[] => {
+  const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const availablePrimary = isHorizontal ? contentBox.width : contentBox.height;
   const simulatedChildren = [...children.slice(0, index), ...draggedSizes, ...children.slice(index)];
+  const simulatedLines = groupAutoLayoutChildrenIntoLines(isHorizontal, itemSpacing, availablePrimary, simulatedChildren);
   const simulatedPositions = getAutoLayoutWrappedChildPositions(
     layoutMode,
     itemSpacing,
     counterAxisSpacing,
     alignment,
     contentBox,
-    simulatedChildren,
+    simulatedLines,
   );
 
   return simulatedPositions.slice(index, index + draggedSizes.length).map((position) => ({ x: position.x, y: position.y }));
