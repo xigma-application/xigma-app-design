@@ -46,8 +46,9 @@ const getFrameGeometry = (page: Page): Promise<{ horizontalGap: number }> =>
     return activePage.nodes[frameId] as unknown as { horizontalGap: number };
   });
 
-const toggleAutoGap = async (page: Page): Promise<void> => {
-  await page.locator('[aria-label="Toggle auto gap"]').first().click();
+const selectAutoGap = async (page: Page): Promise<void> => {
+  await page.locator('[aria-label="Horizontal gap options"]').first().click();
+  await page.getByText('Auto', { exact: true }).click();
 };
 
 const getChildrenX = (page: Page): Promise<number[]> =>
@@ -116,7 +117,7 @@ test.describe('auto-layout — gap handles', () => {
     }
 
     await selectTheFrame(page);
-    await toggleAutoGap(page);
+    await selectAutoGap(page);
 
     // 240-wide content box, two 60-wide children — the single gap becomes the full 120px leftover
     const beforeResize = await getChildrenX(page);

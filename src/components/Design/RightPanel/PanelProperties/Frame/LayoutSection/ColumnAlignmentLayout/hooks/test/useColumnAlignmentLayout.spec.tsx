@@ -225,7 +225,7 @@ describe('useColumnAlignmentLayout', () => {
     expect(result.current.horizontalGap).toBe(0);
   });
 
-  it('should dispatch horizontalGap when scrubbing the horizontal gap', () => {
+  it('should dispatch horizontalGap when committing the horizontal gap', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -235,13 +235,13 @@ describe('useColumnAlignmentLayout', () => {
     const { result } = renderUseColumnAlignmentLayout();
 
     // action
-    act(() => result.current.onScrubHorizontalGap(24));
+    act(() => result.current.onCommitHorizontalGap(24));
 
     // result
     expect(readNode(frameId).horizontalGap).toBe(24);
   });
 
-  it('should dispatch verticalGap when scrubbing the vertical gap', () => {
+  it('should dispatch verticalGap when committing the vertical gap', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -251,46 +251,29 @@ describe('useColumnAlignmentLayout', () => {
     const { result } = renderUseColumnAlignmentLayout();
 
     // action
-    act(() => result.current.onScrubVerticalGap(24));
+    act(() => result.current.onCommitVerticalGap(24));
 
     // result
     expect(readNode(frameId).verticalGap).toBe(24);
     expect(readNode(frameId).horizontalGap).toBeUndefined();
   });
 
-  it('should commit a new horizontalGap on blur', () => {
+  it('should clear horizontalGapMode back to fixed when committing a typed value while auto', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
+    store.dispatch(updateNode({ changes: { horizontalGapMode: GapMode.auto }, id: frameId }));
     store.dispatch(setSelection([frameId]));
 
     // before
     const { result } = renderUseColumnAlignmentLayout();
-    const input = Object.assign(document.createElement('input'), { value: '16' });
 
     // action
-    act(() => result.current.onBlurHorizontalGap({ target: input } as unknown as Parameters<typeof result.current.onBlurHorizontalGap>[0]));
+    act(() => result.current.onCommitHorizontalGap(42));
 
     // result
-    expect(readNode(frameId).horizontalGap).toBe(16);
-  });
-
-  it('should revert an invalid horizontalGap on blur', () => {
-    // mock
-    const frameId = addFrameNode(LayoutMode.horizontal);
-
-    store.dispatch(setSelection([frameId]));
-
-    // before
-    const { result } = renderUseColumnAlignmentLayout();
-    const input = Object.assign(document.createElement('input'), { value: '' });
-
-    // action
-    act(() => result.current.onBlurHorizontalGap({ target: input } as unknown as Parameters<typeof result.current.onBlurHorizontalGap>[0]));
-
-    // result
-    expect(input.value).toBe('0');
-    expect(readNode(frameId).horizontalGap).toBeUndefined();
+    expect(readNode(frameId).horizontalGap).toBe(42);
+    expect(readNode(frameId).horizontalGapMode).toBeUndefined();
   });
 
   it('should default both gap modes to fixed (not auto)', () => {
@@ -303,11 +286,11 @@ describe('useColumnAlignmentLayout', () => {
     const { result } = renderUseColumnAlignmentLayout();
 
     // result
-    expect(result.current.isHorizontalGapAuto).toBe(false);
-    expect(result.current.isVerticalGapAuto).toBe(false);
+    expect(result.current.horizontalGapMode).toBe(GapMode.fixed);
+    expect(result.current.verticalGapMode).toBe(GapMode.fixed);
   });
 
-  it('should toggle horizontalGapMode from fixed to auto and back', () => {
+  it('should switch horizontalGapMode from fixed to auto and back', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);
 
@@ -317,22 +300,22 @@ describe('useColumnAlignmentLayout', () => {
     const { rerender, result } = renderUseColumnAlignmentLayout();
 
     // action
-    act(() => result.current.onToggleHorizontalGapMode());
+    act(() => result.current.onSelectHorizontalGapAuto());
     rerender();
 
     // result
     expect(readNode(frameId).horizontalGapMode).toBe(GapMode.auto);
-    expect(result.current.isHorizontalGapAuto).toBe(true);
+    expect(result.current.horizontalGapMode).toBe(GapMode.auto);
 
     // action
-    act(() => result.current.onToggleHorizontalGapMode());
+    act(() => result.current.onSelectHorizontalGapFixed());
     rerender();
 
     // result
     expect(readNode(frameId).horizontalGapMode).toBeUndefined();
   });
 
-  it('should toggle verticalGapMode from fixed to auto and back', () => {
+  it('should switch verticalGapMode from fixed to auto and back', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.vertical);
 
@@ -342,19 +325,49 @@ describe('useColumnAlignmentLayout', () => {
     const { rerender, result } = renderUseColumnAlignmentLayout();
 
     // action
-    act(() => result.current.onToggleVerticalGapMode());
+    act(() => result.current.onSelectVerticalGapAuto());
     rerender();
 
     // result
     expect(readNode(frameId).verticalGapMode).toBe(GapMode.auto);
-    expect(result.current.isVerticalGapAuto).toBe(true);
+    expect(result.current.verticalGapMode).toBe(GapMode.auto);
 
     // action
-    act(() => result.current.onToggleVerticalGapMode());
+    act(() => result.current.onSelectVerticalGapFixed());
     rerender();
 
     // result
     expect(readNode(frameId).verticalGapMode).toBeUndefined();
+  });
+
+  it('should show the live distributed value while auto, and commit that value on switching back to fixed', () => {
+    // mock — a 400-wide horizontal frame with two 40-wide children (flush at x=0 / x=360, no fixed gap)
+    const frameId = addFrameNode(LayoutMode.horizontal);
+    const childA = addFrameNode();
+    const childB = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { width: 400 }, id: frameId }));
+    store.dispatch(updateNode({ changes: { childIds: [childA, childB] }, id: frameId }));
+    store.dispatch(updateNode({ changes: { parentId: frameId, width: 40, x: 0 }, id: childA }));
+    store.dispatch(updateNode({ changes: { parentId: frameId, width: 40, x: 360 }, id: childB }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { rerender, result } = renderUseColumnAlignmentLayout();
+
+    // action
+    act(() => result.current.onSelectHorizontalGapAuto());
+    rerender();
+
+    // result — the field reads the real 320px gap between the two children, not the stale stored 0
+    expect(result.current.horizontalGap).toBe(320);
+
+    // action
+    act(() => result.current.onSelectHorizontalGapFixed());
+    rerender();
+
+    // result — switching back to fixed commits that live value, instead of reverting to the old one
+    expect(readNode(frameId).horizontalGap).toBe(320);
   });
 
   it('should disable the horizontal gap mode toggle when the width sizing mode hugs its content', () => {

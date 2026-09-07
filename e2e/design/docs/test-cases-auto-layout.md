@@ -534,15 +534,28 @@ On a `hug` sizing axis the math self-degrades to the plain fixed value with no s
 hug size is defined as `Σchildren + fixedGap * (n-1)`, so once hugged, `availableSpace - childrenSize`
 already equals exactly `fixedGap * (n-1)` — auto and fixed produce the identical position. The same
 holds when a `fill` child has already consumed the leftover primary space before the gap distribution
-runs. The RightPanel's `GapField` gets a small "Auto" toggle button (`UITools.Button`, active when the
-mode is auto) that disables the numeric input/scrub while active and is itself disabled when that
-axis's own frame sizing mode is `hug` (matching the math above — toggling would have no visible
-effect there). The dead `isGapAutoHorizontal`/`isGapAutoVertical` plumbing already built into
-`AlignmentArea`/`AlignmentOption` (collapsing the alignment picker's 3×3 grid into 3 cross-axis-only
-choices, since the primary-axis alignment component is moot once gap is auto) is now wired to these
-real values instead of a hardcoded `false`. On canvas, the draggable gap handles
-(`getAutoLayoutGapHandles`) are hidden for whichever axis is in auto mode — there is no longer a
-single shared number for a handle to drag.
+runs.
+
+The RightPanel's `GapField` end-adornment is a permanent chevron (`UITools.ButtonMenu`, mirroring
+`ColumnDimensionsField`'s own sizing-mode chevron) opening `ColumnGapModeMenu` — a `PopoverItem` list
+showing the live gap value (Fixed), an `Auto` option (hidden when that axis's own frame sizing mode
+is `hug`, since toggling it there would be a no-op per the math above), and a placeholder, currently
+inert, "Apply variable…" item. The Fixed option's displayed number is never the stale stored one:
+`getAutoLayoutEffectiveGaps` reads it straight off the already-synced sibling bounds (reusing the same
+`getAutoLayoutWithinLineGaps`/`getAutoLayoutBetweenLineGaps` geometry the gap handles use), so
+switching from auto back to fixed commits whatever the live distributed gap actually was. The numeric
+input itself is never disabled — while auto it holds the literal string `"Auto"` as its own `value`
+(the field's `type` swaps to `text` for this, back to `number` once fixed) rather than a placeholder,
+so a click selects it like any other text ready to be typed over. Overwriting it with a real number
+(or dragging the scrub icon, which always produces a real number) commits it and clears the mode back
+to fixed in the same dispatch, exactly as if the user had opened the menu and picked Fixed; blurring
+with anything that isn't a valid number (including leaving it untouched) reverts the display back to
+the literal `"Auto"` text and leaves the store alone. The dead
+`isGapAutoHorizontal`/`isGapAutoVertical` plumbing already built into `AlignmentArea`/`AlignmentOption`
+(collapsing the alignment picker's 3×3 grid into 3 cross-axis-only choices, since the primary-axis
+alignment component is moot once gap is auto) is now wired to these real values instead of a
+hardcoded `false`. On canvas, the draggable gap handles (`getAutoLayoutGapHandles`) are hidden for
+whichever axis is in auto mode — there is no longer a single shared number for a handle to drag.
 
 | #   | Scenario                                                                                                         | Unit |           E2E            |
 | --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
@@ -552,6 +565,11 @@ single shared number for a handle to drag.
 | 4   | Setting the mode alone (no resize) immediately re-flows the children, same as any other `updateNode`             |  ✅  |            —             |
 | 5   | The canvas gap-drag handles disappear for whichever axis is in auto mode                                         |  ✅  |            —             |
 | 6   | Toggling a frame to auto gap on the canvas, then live-resizing it, keeps the children evenly redistributed       |  ✅  | ✅ `gap-handles.spec.ts` |
+| 7   | Switching from auto back to fixed via the menu commits the live distributed value, not the stale stored one      |  ✅  |            —             |
+| 8   | Typing a value (or scrubbing) while auto commits it and clears the mode back to fixed in one dispatch            |  ✅  |            —             |
+| 9   | The Auto menu option is hidden when that axis's own frame sizing mode is `hug`                                   |  ✅  |            —             |
+| 10  | The auto-mode input holds the literal `"Auto"` text as its own value (`type="text"`), not a placeholder          |  ✅  |            —             |
+| 11  | Blurring with invalid/empty input while auto reverts the display to `"Auto"` and leaves the store untouched      |  ✅  |            —             |
 
 ## Fill sizing
 

@@ -13,26 +13,29 @@ import { useColumnAlignmentLayout } from './hooks/useColumnAlignmentLayout';
 // others
 import { translationNameSpace } from './constants';
 
+// types
+import { GapMode } from 'types/design/enums';
+
 const ColumnAlignmentLayout: FC = () => {
   const { t } = useTranslation();
   const {
     alignment,
     horizontalGap,
+    horizontalGapMode,
     isHorizontal,
-    isHorizontalGapAuto,
     isHorizontalGapModeDisabled,
-    isVerticalGapAuto,
     isVerticalGapModeDisabled,
     isVisible,
     isWrap,
-    onBlurHorizontalGap,
-    onBlurVerticalGap,
     onChangeAlignment,
-    onScrubHorizontalGap,
-    onScrubVerticalGap,
-    onToggleHorizontalGapMode,
-    onToggleVerticalGapMode,
+    onCommitHorizontalGap,
+    onCommitVerticalGap,
+    onSelectHorizontalGapAuto,
+    onSelectHorizontalGapFixed,
+    onSelectVerticalGapAuto,
+    onSelectVerticalGapFixed,
     verticalGap,
+    verticalGapMode,
   } = useColumnAlignmentLayout();
 
   if (isVisible) {
@@ -44,8 +47,8 @@ const ColumnAlignmentLayout: FC = () => {
         withBottomMargin
       >
         <AlignmentArea
-          isGapAutoHorizontal={isHorizontalGapAuto}
-          isGapAutoVertical={isVerticalGapAuto}
+          isGapAutoHorizontal={horizontalGapMode === GapMode.auto}
+          isGapAutoVertical={verticalGapMode === GapMode.auto}
           isHorizontal={isHorizontal}
           isWrap={isWrap}
           onClick={onChangeAlignment}
@@ -54,22 +57,22 @@ const ColumnAlignmentLayout: FC = () => {
         {isHorizontal && (
           <GapField
             isHorizontal
-            isModeAuto={isHorizontalGapAuto}
-            isModeToggleDisabled={isHorizontalGapModeDisabled}
-            onBlur={onBlurHorizontalGap}
-            onScrub={onScrubHorizontalGap}
-            onToggleMode={onToggleHorizontalGapMode}
+            mode={horizontalGapMode}
+            modeDisabled={isHorizontalGapModeDisabled}
+            onCommit={onCommitHorizontalGap}
+            onSelectAuto={onSelectHorizontalGapAuto}
+            onSelectFixed={onSelectHorizontalGapFixed}
             value={horizontalGap}
           />
         )}
         {(!isHorizontal || isWrap) && (
           <GapField
             isHorizontal={false}
-            isModeAuto={isVerticalGapAuto}
-            isModeToggleDisabled={isVerticalGapModeDisabled}
-            onBlur={onBlurVerticalGap}
-            onScrub={onScrubVerticalGap}
-            onToggleMode={onToggleVerticalGapMode}
+            mode={verticalGapMode}
+            modeDisabled={isVerticalGapModeDisabled}
+            onCommit={onCommitVerticalGap}
+            onSelectAuto={onSelectVerticalGapAuto}
+            onSelectFixed={onSelectVerticalGapFixed}
             value={verticalGap}
           />
         )}
