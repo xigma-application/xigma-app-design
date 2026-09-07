@@ -6,12 +6,12 @@ import { ReactNode } from 'react';
 import { useColumnFlow } from '../useColumnFlow';
 
 // store
-import { addNode, setSelection, updateNode } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -41,7 +41,34 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addAutoLayoutFrameNode = (layoutMode: LayoutMode): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 50,
+      layoutMode,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const readNode = (id: string): TFrameNode => selectActivePage(store.getState()).nodes[id] as TFrameNode;
+
+const moveIntoParent = (childId: string, parentId: string): void => {
+  store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+};
 
 describe('useColumnFlow', () => {
   afterEach(() => {
@@ -177,5 +204,68 @@ describe('useColumnFlow', () => {
     // result
     expect(readNode(frameId).layoutWrap).toBe(false);
     expect(readNode(frameId).verticalGap).toBe(0);
+  });
+
+  it('should reset a direct child’s fill on both axes back to fixed when the parent flow switches to freeForm', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fill, widthSizingMode: SizingMode.fill }, id: childId }));
+    store.dispatch(setSelection([parentId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action — the parent stops being an auto-layout frame, so it has no leftover space to hand out
+    act(() => result.current.onChange('freeForm'));
+
+    // result
+    expect(readNode(parentId).layoutMode).toBe(LayoutMode.freeForm);
+    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fixed);
+    expect(readNode(childId).heightSizingMode).toBe(SizingMode.fixed);
+  });
+
+  it('should reset a direct child’s fill on both axes back to fixed when the parent flow switches to grid', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.vertical);
+    const childId = addAutoLayoutFrameNode(LayoutMode.vertical);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fill, widthSizingMode: SizingMode.fill }, id: childId }));
+    store.dispatch(setSelection([parentId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action — grid isn't computed by the fill-aware auto-layout engine
+    act(() => result.current.onChange('grid'));
+
+    // result
+    expect(readNode(parentId).layoutMode).toBe(LayoutMode.grid);
+    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fixed);
+    expect(readNode(childId).heightSizingMode).toBe(SizingMode.fixed);
+  });
+
+  it('should leave a direct child’s fill untouched when flipping between horizontal and vertical', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fill, widthSizingMode: SizingMode.fill }, id: childId }));
+    store.dispatch(setSelection([parentId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action — both physical axes stay managed by the layout, just their primary/counter role swaps
+    act(() => result.current.onChange('vertical'));
+
+    // result
+    expect(readNode(parentId).layoutMode).toBe(LayoutMode.vertical);
+    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fill);
+    expect(readNode(childId).heightSizingMode).toBe(SizingMode.fill);
   });
 });

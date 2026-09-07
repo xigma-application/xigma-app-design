@@ -516,16 +516,17 @@ gesture correctly reading back into the store as a persisted `horizontalGap` cha
 
 ## Fill sizing
 
-| #   | Scenario                                                                                                                                                                                              | Unit |           E2E            |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
-| 1   | A child of an auto-layout frame can be set to "Fill container" on either axis, per axis, via a third option in the RightPanel's existing Fixed/Hug sizing dropdown                                    |  ✅  | ✅ `fill-sizing.spec.ts` |
-| 2   | On the primary axis, a filling child grows to consume exactly the frame's leftover space after every fixed sibling and gap                                                                            |  ✅  | ✅ `fill-sizing.spec.ts` |
-| 3   | Several filling children on the same axis split the leftover space evenly                                                                                                                             |  ✅  |            —             |
-| 4   | On the counter axis, a filling child stretches to the frame's full content-box cross size, independent of the primary-axis leftover calculation                                                       |  ✅  |            —             |
-| 5   | In `layoutWrap` mode, a filling child only shares the leftover space of its own wrapped line/row, not the whole frame                                                                                 |  ✅  |            —             |
-| 6   | Resizing the parent frame live-regrows every filling child to keep consuming the (now different) leftover space                                                                                       |  ✅  | ✅ `fill-sizing.spec.ts` |
-| 7   | Fill is not offered for an axis where the parent frame itself is hugging that axis (no budget to hand out); manually resizing a filling child resets it to Fixed, mirroring the existing Hug behavior |  ✅  |            —             |
-| 8   | Switching a frame's own axis to Hug resets any direct child that was filling that same axis back to Fixed, since a hugging parent has no leftover space to give                                       |  ✅  |            —             |
+| #   | Scenario                                                                                                                                                                                                                                                                                       | Unit |           E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 1   | A child of an auto-layout frame can be set to "Fill container" on either axis, per axis, via a third option in the RightPanel's existing Fixed/Hug sizing dropdown                                                                                                                             |  ✅  | ✅ `fill-sizing.spec.ts` |
+| 2   | On the primary axis, a filling child grows to consume exactly the frame's leftover space after every fixed sibling and gap                                                                                                                                                                     |  ✅  | ✅ `fill-sizing.spec.ts` |
+| 3   | Several filling children on the same axis split the leftover space evenly                                                                                                                                                                                                                      |  ✅  |            —             |
+| 4   | On the counter axis, a filling child stretches to the frame's full content-box cross size, independent of the primary-axis leftover calculation                                                                                                                                                |  ✅  |            —             |
+| 5   | In `layoutWrap` mode, a filling child only shares the leftover space of its own wrapped line/row, not the whole frame                                                                                                                                                                          |  ✅  |            —             |
+| 6   | Resizing the parent frame live-regrows every filling child to keep consuming the (now different) leftover space                                                                                                                                                                                |  ✅  | ✅ `fill-sizing.spec.ts` |
+| 7   | Fill is not offered for an axis where the parent frame itself is hugging that axis (no budget to hand out); manually resizing a filling child resets it to Fixed, mirroring the existing Hug behavior                                                                                          |  ✅  |            —             |
+| 8   | Switching a frame's own axis to Hug resets any direct child that was filling that same axis back to Fixed, since a hugging parent has no leftover space to give                                                                                                                                |  ✅  |            —             |
+| 9   | Switching a frame's flow to freeForm or grid resets every direct child's Fill on both axes back to Fixed, since neither mode is managed by the fill-aware auto-layout engine; flipping between Horizontal and Vertical leaves Fill untouched, since both physical axes stay managed either way |  ✅  |            —             |
 
 `primaryAxisSizingMode`/`counterAxisSizingMode` (self-hug only, frame-only) were renamed and relocated
 to `widthSizingMode`/`heightSizingMode` on `TBaseNode`, so every node type carries the same pair of
@@ -541,7 +542,8 @@ only ever wrote `x`/`y`), guarded to skip a child independently rotated relative
 well-defined "grown" local box in that case), and recurses into any auto-layout frame child whose own
 size just changed by fill, so a nested auto-layout frame reflows its own children after being grown.
 Unit-only for the algorithm itself (leftover-space math, per-line wrap independence, the Hug/Fill
-mutual-exclusion guard) — exhaustively covered without a browser. What only a real browser proves:
+mutual-exclusion guard, and the flow-switch-resets-Fill cascade in `useColumnFlow`) — exhaustively
+covered without a browser. What only a real browser proves:
 the RightPanel's sizing-mode dropdown actually dispatching `updateNode` for the selected child, and a
 live canvas resize-drag actually re-triggering the fill recompute end to end — that's
 `fill-sizing.spec.ts`.
