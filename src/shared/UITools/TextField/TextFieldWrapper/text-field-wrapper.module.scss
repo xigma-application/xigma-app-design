@@ -37,6 +37,17 @@
     font-size: 11px;
     min-width: 0;
     outline: none;
+    overflow: hidden;
     padding: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:focus ~ .TextFieldWrapper__endAdornment {
+      display: none;
+    }
+  }
+
+  &__endAdornment {
+    display: contents;
   }
 }

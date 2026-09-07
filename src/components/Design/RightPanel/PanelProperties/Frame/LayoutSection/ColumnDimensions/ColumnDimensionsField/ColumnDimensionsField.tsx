@@ -1,16 +1,17 @@
 import { FC, FocusEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // @xigma
-import { Icon, ScrubbableInput } from '@xigma/components';
+import { ScrubbableInput } from '@xigma/components';
 
 // components
-import ColumnDimensionsSizingMenu from './ColumnDimensionsSizingMenu/ColumnDimensionsSizingMenu';
+import ColumnDimensionsFieldEndAdornment from './ColumnDimensionsFieldEndAdornment';
 import { UITools } from 'shared';
+
+// hooks
+import { useColumnDimensionsFieldReveal } from './hooks/useColumnDimensionsFieldReveal';
 
 // others
 import { DIMENSIONS_MAX, DIMENSIONS_MIN } from '../constants';
-import { translationNameSpace } from './ColumnDimensionsSizingMenu/constants';
 
 // styles
 import styles from './column-dimensions-field.module.scss';
@@ -46,7 +47,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   sizingMode,
   value,
 }) => {
-  const { t } = useTranslation();
+  const { isRevealed, onMenuOpenChange, onMouseEnter, onMouseLeave } = useColumnDimensionsFieldReveal();
 
   return (
     <UITools.TextField
@@ -54,16 +55,18 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
       defaultValue={value}
       e2eValue={e2eValue}
       endAdornment={
-        sizingMode && onSelectSizingMode ? (
-          <UITools.ButtonMenu
-            trigger={<Icon name="ChevronDown" size={10} />}
-            triggerAriaLabel={t(`${translationNameSpace}.${axis === 'width' ? 'ariaLabelWidth' : 'ariaLabelHeight'}`)}
-          >
-            <ColumnDimensionsSizingMenu axis={axis} mode={sizingMode} onSelect={onSelectSizingMode} value={value} />
-          </UITools.ButtonMenu>
-        ) : undefined
+        <ColumnDimensionsFieldEndAdornment
+          axis={axis}
+          isRevealed={isRevealed}
+          onMenuOpenChange={onMenuOpenChange}
+          onSelectSizingMode={onSelectSizingMode}
+          sizingMode={sizingMode}
+          value={value}
+        />
       }
       onBlur={onBlur}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       startAdornment={
         <ScrubbableInput
           max={DIMENSIONS_MAX}

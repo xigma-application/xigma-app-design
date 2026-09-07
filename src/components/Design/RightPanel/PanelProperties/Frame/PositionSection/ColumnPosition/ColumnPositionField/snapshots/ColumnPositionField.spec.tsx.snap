@@ -27,6 +27,9 @@ exports[`ColumnPositionField snapshots > should render the field with its label 
         type="number"
         value="10"
       />
+      <span
+        class="_TextFieldWrapper__endAdornment_9a3a67"
+      />
     </div>
   </div>
 </DocumentFragment>

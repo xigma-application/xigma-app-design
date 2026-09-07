@@ -43,6 +43,9 @@ exports[`ColumnBackground snapshots > should render the colour field, alpha fiel
           maxlength="6"
           value="444444"
         />
+        <span
+          class="_TextFieldWrapper__endAdornment_9a3a67"
+        />
       </div>
       <div
         class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _ColorPickerInput__alpha_2cba41"
@@ -57,15 +60,19 @@ exports[`ColumnBackground snapshots > should render the colour field, alpha fiel
           type="number"
           value="100"
         />
-        <div
-          class="ScrubbableInput"
+        <span
+          class="_TextFieldWrapper__endAdornment_9a3a67"
         >
-          <span
-            class="_ColorPickerInput__unit_2cba41"
+          <div
+            class="ScrubbableInput"
           >
-            %
-          </span>
-        </div>
+            <span
+              class="_ColorPickerInput__unit_2cba41"
+            >
+              %
+            </span>
+          </div>
+        </span>
       </div>
     </div>
     <button

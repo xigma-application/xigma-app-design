@@ -292,6 +292,9 @@ exports[`PositionSection snapshots > should render the alignment and position ro
                 type="number"
                 value="0"
               />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
             </div>
           </div>
           <div
@@ -318,6 +321,9 @@ exports[`PositionSection snapshots > should render the alignment and position ro
                 data-test-text-field-input="y"
                 type="number"
                 value="0"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
               />
             </div>
           </div>
@@ -386,6 +392,9 @@ exports[`PositionSection snapshots > should render the alignment and position ro
                 data-test-text-field-input="rotation"
                 type="text"
                 value="0°"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
               />
             </div>
           </div>

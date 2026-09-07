@@ -60,6 +60,9 @@ exports[`ColumnRotation snapshots > should render the rotation field and the rot
               type="text"
               value="20°"
             />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
           </div>
         </div>
         <div

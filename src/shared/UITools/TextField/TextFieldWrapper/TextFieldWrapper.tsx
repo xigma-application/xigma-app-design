@@ -30,6 +30,8 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
   inputRef,
   onClick,
   onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
   startAdornment,
   variant = TextFieldVariant.filled,
   ...restProps
@@ -55,6 +57,8 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
         { [styles['TextFieldWrapper--disabled']]: disabled },
         className,
       )}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       {...getAttributes(E2EAttribute.textField, e2eValue)}
     >
       {startAdornment}
@@ -70,7 +74,7 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
         {...getAttributes(E2EAttribute.bypassGlobalShortcuts, 'true')}
         {...restProps}
       />
-      {endAdornment}
+      <span className={styles.TextFieldWrapper__endAdornment}>{endAdornment}</span>
     </div>
   );
 };

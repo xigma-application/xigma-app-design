@@ -20,6 +20,9 @@ exports[`TextField snapshots > should render a labelled field wrapping its input
         data-test-text-field-input="color"
         value="ffffff"
       />
+      <span
+        class="_TextFieldWrapper__endAdornment_9a3a67"
+      />
     </div>
   </div>
 </DocumentFragment>

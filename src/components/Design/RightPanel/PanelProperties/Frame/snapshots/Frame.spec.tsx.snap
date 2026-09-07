@@ -420,6 +420,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 type="number"
                 value="0"
               />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
             </div>
           </div>
           <div
@@ -446,6 +449,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 data-test-text-field-input="y"
                 type="number"
                 value="0"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
               />
             </div>
           </div>
@@ -514,6 +520,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 data-test-text-field-input="rotation"
                 type="text"
                 value="0°"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
               />
             </div>
           </div>
@@ -850,6 +859,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 type="number"
                 value="0"
               />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              />
             </div>
           </div>
           <div
@@ -875,6 +887,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 data-test-text-field-input="height"
                 type="number"
                 value="0"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
               />
             </div>
           </div>

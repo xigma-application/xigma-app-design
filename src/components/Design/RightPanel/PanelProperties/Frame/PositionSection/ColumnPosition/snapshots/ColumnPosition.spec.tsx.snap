@@ -49,6 +49,9 @@ exports[`ColumnPosition snapshots > should render the X and Y fields 1`] = `
               type="number"
               value="-1010"
             />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
           </div>
         </div>
         <div
@@ -75,6 +78,9 @@ exports[`ColumnPosition snapshots > should render the X and Y fields 1`] = `
               data-test-text-field-input="y"
               type="number"
               value="-810"
+            />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
             />
           </div>
         </div>

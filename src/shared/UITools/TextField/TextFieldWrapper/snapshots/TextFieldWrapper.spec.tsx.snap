@@ -15,8 +15,12 @@ exports[`TextFieldWrapper snapshots > should render the input with start and end
       data-test-text-field-input=""
       value="ffffff"
     />
-    <span>
-      %
+    <span
+      class="_TextFieldWrapper__endAdornment_9a3a67"
+    >
+      <span>
+        %
+      </span>
     </span>
   </div>
 </DocumentFragment>

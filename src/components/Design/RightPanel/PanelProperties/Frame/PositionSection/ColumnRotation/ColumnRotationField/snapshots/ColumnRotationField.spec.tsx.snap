@@ -38,6 +38,9 @@ exports[`ColumnRotationField snapshots > should render the field with its icon a
         type="text"
         value="0°"
       />
+      <span
+        class="_TextFieldWrapper__endAdornment_9a3a67"
+      />
     </div>
   </div>
 </DocumentFragment>
