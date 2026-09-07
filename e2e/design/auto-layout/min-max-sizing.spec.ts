@@ -128,6 +128,9 @@ test.describe('auto-layout — Min/Max sizing', () => {
     await maxWidthInput.press('Enter');
     expect((await readOuterFrame(page)).width).toBe(150);
 
+    // committing must let go of focus in one step — the row does not re-grab it on the value write
+    await expect(page.locator('[data-test-text-field-input="max-width"]')).not.toBeFocused();
+
     // leaving the frame and coming back hides the row even though the bound is still stored
     await designPage.drawRectangle(1400, 160, 1500, 210); // selects the new rectangle
     await selectLayersRow(page, 'Frame (1)');

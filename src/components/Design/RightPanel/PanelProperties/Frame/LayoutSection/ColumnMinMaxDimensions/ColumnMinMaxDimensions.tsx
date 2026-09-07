@@ -43,7 +43,11 @@ const ColumnMinMaxDimensions: FC = () => {
   return (
     <>
       {(hasMinWidth || hasMinHeight) && (
-        <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.minLabel`)]}>
+        <UITools.SectionColumn
+          gridColumnType={UITools.GridColumnType.twoInputs}
+          labels={[t(`${translationNameSpace}.minLabel`)]}
+          withBottomMargin
+        >
           {hasMinWidth && (
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMinWidth`)}
@@ -71,7 +75,11 @@ const ColumnMinMaxDimensions: FC = () => {
         </UITools.SectionColumn>
       )}
       {(hasMaxWidth || hasMaxHeight) && (
-        <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.maxLabel`)]}>
+        <UITools.SectionColumn
+          gridColumnType={UITools.GridColumnType.twoInputs}
+          labels={[t(`${translationNameSpace}.maxLabel`)]}
+          withBottomMargin
+        >
           {hasMaxWidth && (
             <ColumnMinMaxDimensionsField
               ariaLabel={t(`${translationNameSpace}.ariaLabelMaxWidth`)}

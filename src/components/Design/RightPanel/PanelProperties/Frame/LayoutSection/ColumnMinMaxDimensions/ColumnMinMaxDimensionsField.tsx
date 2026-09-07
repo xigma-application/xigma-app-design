@@ -1,4 +1,4 @@
-import { FC, FocusEvent } from 'react';
+import { FC, FocusEvent, useEffect, useRef } from 'react';
 
 // @xigma
 import { Icon, ScrubbableInput, TIconProps } from '@xigma/components';
@@ -32,20 +32,28 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
   onDragStart,
   onScrub,
   value,
-}) => (
-  <UITools.TextField
-    aria-label={ariaLabel}
-    autoFocus
-    defaultValue={value}
-    e2eValue={e2eValue}
-    onBlur={onBlur}
-    startAdornment={
-      <ScrubbableInput max={DIMENSIONS_MAX} min={0} onChange={onScrub} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value ?? 0}>
-        <Icon color="neutral2" name={icon} size={12} />
-      </ScrubbableInput>
-    }
-    type="number"
-  />
-);
+}) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  return (
+    <UITools.TextField
+      aria-label={ariaLabel}
+      defaultValue={value}
+      e2eValue={e2eValue}
+      inputRef={inputRef}
+      onBlur={onBlur}
+      startAdornment={
+        <ScrubbableInput max={DIMENSIONS_MAX} min={0} onChange={onScrub} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value ?? 0}>
+          <Icon color="neutral2" name={icon} size={12} />
+        </ScrubbableInput>
+      }
+      type="number"
+    />
+  );
+};
 
 export default ColumnMinMaxDimensionsField;
