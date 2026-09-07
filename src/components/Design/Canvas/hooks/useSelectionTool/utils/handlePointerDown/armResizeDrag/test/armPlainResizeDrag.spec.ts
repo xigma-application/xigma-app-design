@@ -6,7 +6,8 @@ import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // store
-import { addGuide } from 'store/design/slice';
+import { addGuide, addNode, moveNodes } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // utils
@@ -129,6 +130,66 @@ describe('armPlainResizeDrag', () => {
     expect(resizeDragRef.current?.candidateShapes).toContainEqual({
       bounds: { height: 0, width: 800, x: 0, y: 30 },
       points: expect.any(Array),
+    });
+  });
+
+  it('should capture child origins when the single selected node is a freeform frame with children', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ffffff',
+        height: 200,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 300,
+        x: 100,
+        y: 100,
+      }),
+    );
+
+    const frameId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 40,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 40,
+        x: 230,
+        y: 180,
+      }),
+    );
+
+    const childId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+
+    const frameNode = selectActivePage(store.getState()).nodes[frameId] as TFrameNode;
+
+    // before
+    armPlainResizeDrag(
+      canvas,
+      pointerEvent(),
+      resizeDragRef,
+      [frameNode],
+      'w',
+      { height: 200, width: 300, x: 100, y: 100 },
+      createCanvasRefs(),
+    );
+
+    // result
+    expect(resizeDragRef.current?.freeformFrameChildOrigins).toEqual({
+      [childId]: { flip: null, height: 40, rotation: 0, width: 40, x: 230, y: 180 },
     });
   });
 

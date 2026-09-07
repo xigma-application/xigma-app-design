@@ -13,6 +13,7 @@ import { store } from 'store';
 // utils
 import { captureResizedVectorNodeSnapshots } from '../captureResizedVectorNodeSnapshots';
 import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
+import { getFreeformFrameChildResizeOrigins } from './getFreeformFrameChildResizeOrigins';
 import { getGuideCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getGuideCandidateShapes';
 import { getResizeNodeOrigin } from './getResizeNodeOrigin';
 import { getTransformTargetNodes } from 'store/design/utils/nodeHierarchy/getTransformTargetNodes';
@@ -42,6 +43,7 @@ export const armPlainResizeDrag = (
     aspectRatio: bounds.width / bounds.height,
     bounds,
     candidateShapes: getCandidateShapes(nodes, Object.keys(nodeOrigins)).concat(guideCandidateShapes),
+    freeformFrameChildOrigins: getFreeformFrameChildResizeOrigins(selectedNodes, nodes),
     handle,
     nodeOrigins,
   };

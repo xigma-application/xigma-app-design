@@ -470,3 +470,24 @@ clipping ancestor (`getClipVisibleRect`) overlaps the marquee. Lives in
 | 364 | Once the child is selected, it stays grabbable by its clipped-away overhang so a drag can start there |  ✅  | ✅ `clip-selection.spec.ts` |
 | 365 | The clip check walks the whole ancestor chain and only counts frames whose `clipContent` is on        |  ✅  |              —              |
 | 366 | A rotated clipping frame still clips to its own (rotation-aware) bounds                               |  ✅  |              —              |
+
+## Resizing a freeform frame carries its children off the moving origin
+
+Dragging a freeform frame's left or top edge (or a corner that includes them) moves the frame's own
+origin, so its children ride along by the same delta and stay put relative to that corner; dragging
+the right or bottom edge only grows the box and leaves the children where they are. The rule is
+rotation-aware — the child follows the world-space translation of the frame's unrotated-local
+top-left corner (`getFreeformFrameTopLeftDelta`), which is zero exactly when the anchored edge is
+the one being dragged. Auto-layout and grid frames are excluded (their engines already place
+children). `armPlainResizeDrag` snapshots the whole child subtree into
+`freeformFrameChildOrigins`; `continueResizeDrag` then translates each child via
+`applyFreeformFrameChildTranslation` after the frame's own box is written. Lives in
+`e2e/design/selection/frame-child-resize.spec.ts`.
+
+| #   | Scenario                                                                                          | Unit |               E2E               |
+| --- | ------------------------------------------------------------------------------------------------- | :--: | :-----------------------------: |
+| 367 | Dragging the left edge shifts the children by the same delta as the frame origin                  |  ✅  | ✅ `frame-child-resize.spec.ts` |
+| 368 | Dragging the right edge grows the box only — children are untouched                               |  ✅  | ✅ `frame-child-resize.spec.ts` |
+| 369 | A rotated frame carries its children along its own local axis, tracking the local top-left corner |  ✅  | ✅ `frame-child-resize.spec.ts` |
+| 370 | Auto-layout and grid frames capture no child origins, so their resize does not translate children |  ✅  |                —                |
+| 371 | Line and vector descendants translate every endpoint/vertex, not just a box `x`/`y`               |  ✅  |                —                |
