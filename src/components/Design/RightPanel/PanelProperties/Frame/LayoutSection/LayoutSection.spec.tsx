@@ -145,4 +145,41 @@ describe('LayoutSection Min/Max reveal flow', () => {
     // result — the never-committed row is gone
     expect(screen.queryByLabelText('Min width')).toBeNull();
   });
+
+  it('should hide a committed Min width row on reselection and re-reveal it from the menu with its stored value', () => {
+    // mock
+    const frameId = addAutoLayoutFrameNode();
+    const otherFrameId = addAutoLayoutFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderLayoutSection();
+
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+    fireEvent.click(screen.getByText('Add min width…'));
+
+    const minWidthInput = screen.getByLabelText('Min width');
+
+    fireEvent.change(minWidthInput, { target: { value: '40' } });
+    fireEvent.blur(minWidthInput);
+
+    expect(selectActivePage(store.getState()).nodes[frameId]).toHaveProperty('minWidth', 40);
+
+    // action — leave the frame and come back
+    act(() => {
+      store.dispatch(setSelection([otherFrameId]));
+      store.dispatch(setSelection([frameId]));
+    });
+
+    // result — the row is hidden even though the bound is still stored
+    expect(screen.queryByLabelText('Min width')).toBeNull();
+
+    // action — the menu now offers the stored value; clicking it re-reveals the populated row
+    fireEvent.click(screen.getByLabelText('Width sizing options'));
+    fireEvent.click(screen.getByText('Min width: 40'));
+
+    // result
+    expect(screen.getByLabelText('Min width')).toHaveValue(40);
+  });
 });

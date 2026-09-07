@@ -10,6 +10,9 @@ import { setMinMaxRevealed, updateNode } from 'store/design/slice';
 // types
 import { NodeType } from 'types/design/enums';
 
+// utils
+import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
+
 export type TUseColumnMinMaxDimensionsResult = {
   hasMaxHeight: boolean;
   hasMaxWidth: boolean;
@@ -33,64 +36,87 @@ export const useColumnMinMaxDimensions = (): TUseColumnMinMaxDimensionsResult =>
   const revealed = useAppSelector(selectRevealedMinMax);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const id = frameNode?.id ?? '';
+  const width = frameNode?.width ?? 0;
+  const height = frameNode?.height ?? 0;
   const minWidth = frameNode?.minWidth;
   const maxWidth = frameNode?.maxWidth;
   const minHeight = frameNode?.minHeight;
   const maxHeight = frameNode?.maxHeight;
+  const isFrame = frameNode !== undefined;
 
-  const onCommitMinWidth = (value: number): void => {
-    if (value <= 0) {
-      dispatch(updateNode({ changes: { minWidth: undefined }, id }));
+  const onCommitMinWidth = (nextValue: number): void => {
+    if (nextValue <= 0) {
+      dispatch(updateNode({ changes: { minWidth: undefined, width: clampAutoLayoutSize(width, undefined, maxWidth) }, id }));
       dispatch(setMinMaxRevealed({ bound: 'minWidth', value: false }));
-      return;
+    } else {
+      const nextMaxWidth = maxWidth !== undefined && nextValue > maxWidth ? nextValue : maxWidth;
+      const maxWidthChanges = nextMaxWidth !== maxWidth ? { maxWidth: nextMaxWidth } : {};
+
+      dispatch(
+        updateNode({
+          changes: { minWidth: nextValue, width: clampAutoLayoutSize(width, nextValue, nextMaxWidth), ...maxWidthChanges },
+          id,
+        }),
+      );
     }
-
-    const maxWidthChanges = frameNode?.maxWidth !== undefined && value > frameNode.maxWidth ? { maxWidth: value } : {};
-
-    dispatch(updateNode({ changes: { minWidth: value, ...maxWidthChanges }, id }));
   };
 
-  const onCommitMaxWidth = (value: number): void => {
-    if (value <= 0) {
-      dispatch(updateNode({ changes: { maxWidth: undefined }, id }));
+  const onCommitMaxWidth = (nextValue: number): void => {
+    if (nextValue <= 0) {
+      dispatch(updateNode({ changes: { maxWidth: undefined, width: clampAutoLayoutSize(width, minWidth, undefined) }, id }));
       dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: false }));
-      return;
+    } else {
+      const nextMinWidth = minWidth !== undefined && nextValue < minWidth ? nextValue : minWidth;
+      const minWidthChanges = nextMinWidth !== minWidth ? { minWidth: nextMinWidth } : {};
+
+      dispatch(
+        updateNode({
+          changes: { maxWidth: nextValue, width: clampAutoLayoutSize(width, nextMinWidth, nextValue), ...minWidthChanges },
+          id,
+        }),
+      );
     }
-
-    const minWidthChanges = frameNode?.minWidth !== undefined && value < frameNode.minWidth ? { minWidth: value } : {};
-
-    dispatch(updateNode({ changes: { maxWidth: value, ...minWidthChanges }, id }));
   };
 
-  const onCommitMinHeight = (value: number): void => {
-    if (value <= 0) {
-      dispatch(updateNode({ changes: { minHeight: undefined }, id }));
+  const onCommitMinHeight = (nextValue: number): void => {
+    if (nextValue <= 0) {
+      dispatch(updateNode({ changes: { height: clampAutoLayoutSize(height, undefined, maxHeight), minHeight: undefined }, id }));
       dispatch(setMinMaxRevealed({ bound: 'minHeight', value: false }));
-      return;
+    } else {
+      const nextMaxHeight = maxHeight !== undefined && nextValue > maxHeight ? nextValue : maxHeight;
+      const maxHeightChanges = nextMaxHeight !== maxHeight ? { maxHeight: nextMaxHeight } : {};
+
+      dispatch(
+        updateNode({
+          changes: { height: clampAutoLayoutSize(height, nextValue, nextMaxHeight), minHeight: nextValue, ...maxHeightChanges },
+          id,
+        }),
+      );
     }
-
-    const maxHeightChanges = frameNode?.maxHeight !== undefined && value > frameNode.maxHeight ? { maxHeight: value } : {};
-
-    dispatch(updateNode({ changes: { minHeight: value, ...maxHeightChanges }, id }));
   };
 
-  const onCommitMaxHeight = (value: number): void => {
-    if (value <= 0) {
-      dispatch(updateNode({ changes: { maxHeight: undefined }, id }));
+  const onCommitMaxHeight = (nextValue: number): void => {
+    if (nextValue <= 0) {
+      dispatch(updateNode({ changes: { height: clampAutoLayoutSize(height, minHeight, undefined), maxHeight: undefined }, id }));
       dispatch(setMinMaxRevealed({ bound: 'maxHeight', value: false }));
-      return;
+    } else {
+      const nextMinHeight = minHeight !== undefined && nextValue < minHeight ? nextValue : minHeight;
+      const minHeightChanges = nextMinHeight !== minHeight ? { minHeight: nextMinHeight } : {};
+
+      dispatch(
+        updateNode({
+          changes: { height: clampAutoLayoutSize(height, nextMinHeight, nextValue), maxHeight: nextValue, ...minHeightChanges },
+          id,
+        }),
+      );
     }
-
-    const minHeightChanges = frameNode?.minHeight !== undefined && value < frameNode.minHeight ? { minHeight: value } : {};
-
-    dispatch(updateNode({ changes: { maxHeight: value, ...minHeightChanges }, id }));
   };
 
   return {
-    hasMaxHeight: maxHeight !== undefined || revealed.maxHeight,
-    hasMaxWidth: maxWidth !== undefined || revealed.maxWidth,
-    hasMinHeight: minHeight !== undefined || revealed.minHeight,
-    hasMinWidth: minWidth !== undefined || revealed.minWidth,
+    hasMaxHeight: isFrame && revealed.maxHeight,
+    hasMaxWidth: isFrame && revealed.maxWidth,
+    hasMinHeight: isFrame && revealed.minHeight,
+    hasMinWidth: isFrame && revealed.minWidth,
     maxHeight,
     maxWidth,
     minHeight,

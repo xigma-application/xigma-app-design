@@ -63,7 +63,7 @@ describe('useColumnMinMaxDimensions', () => {
     expect(result.current).toMatchObject({ hasMaxHeight: false, hasMaxWidth: false, hasMinHeight: false, hasMinWidth: false });
   });
 
-  it('should read the selected frame’s existing bounds', () => {
+  it('should read the selected frame’s existing bound values without revealing the rows', () => {
     // mock
     const frameId = addFrameNode();
 
@@ -73,17 +73,80 @@ describe('useColumnMinMaxDimensions', () => {
     // before
     const { result } = renderUseColumnMinMaxDimensions();
 
-    // result
+    // result — values are read, but the rows stay hidden until explicitly revealed
     expect(result.current).toMatchObject({
-      hasMaxHeight: true,
-      hasMaxWidth: true,
-      hasMinHeight: true,
-      hasMinWidth: true,
+      hasMaxHeight: false,
+      hasMaxWidth: false,
+      hasMinHeight: false,
+      hasMinWidth: false,
       maxHeight: 90,
       maxWidth: 80,
       minHeight: 30,
       minWidth: 20,
     });
+  });
+
+  it('should show a row only once its bound is revealed', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { minWidth: 20 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setMinMaxRevealed({ bound: 'minWidth', value: true }));
+
+    // before
+    const { result } = renderUseColumnMinMaxDimensions();
+
+    // result
+    expect(result.current).toMatchObject({ hasMinWidth: true, minWidth: 20 });
+  });
+
+  it('should shrink the frame width to a newly committed maxWidth', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnMinMaxDimensions();
+
+    // action
+    act(() => result.current.onCommitMaxWidth(60));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ maxWidth: 60, width: 60 });
+  });
+
+  it('should grow the frame width to a newly committed minWidth', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnMinMaxDimensions();
+
+    // action
+    act(() => result.current.onCommitMinWidth(150));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ minWidth: 150, width: 150 });
+  });
+
+  it('should shrink the frame height to a newly committed maxHeight', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnMinMaxDimensions();
+
+    // action
+    act(() => result.current.onCommitMaxHeight(30));
+
+    // result
+    expect(readNode(frameId)).toMatchObject({ height: 30, maxHeight: 30 });
   });
 
   it('should commit a new minWidth', () => {

@@ -12,55 +12,86 @@ import { TSceneNode } from 'types/design/types';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 
 export type TUseToggleColumnMinMaxResult = {
-  hasMaxHeight: boolean;
-  hasMaxWidth: boolean;
-  hasMinHeight: boolean;
-  hasMinWidth: boolean;
-  toggleMaxHeight: TFunc;
-  toggleMaxWidth: TFunc;
-  toggleMinHeight: TFunc;
-  toggleMinWidth: TFunc;
+  hasMaxHeightValue: boolean;
+  hasMaxWidthValue: boolean;
+  hasMinHeightValue: boolean;
+  hasMinWidthValue: boolean;
+  maxHeightShown: boolean;
+  maxHeightValue: number | undefined;
+  maxWidthShown: boolean;
+  maxWidthValue: number | undefined;
+  minHeightShown: boolean;
+  minHeightValue: number | undefined;
+  minWidthShown: boolean;
+  minWidthValue: number | undefined;
+  onRemoveHeightBounds: TFunc;
+  onRemoveWidthBounds: TFunc;
+  onRevealMaxHeight: TFunc;
+  onRevealMaxWidth: TFunc;
+  onRevealMinHeight: TFunc;
+  onRevealMinWidth: TFunc;
 };
 
 export const useToggleColumnMinMax = (id: string, node: TSceneNode | undefined): TUseToggleColumnMinMaxResult => {
   const dispatch = useAppDispatch();
   const revealed = useAppSelector(selectRevealedMinMax);
-  const hasMinWidth = Boolean(node && isBoxSceneNode(node) && node.minWidth !== undefined) || revealed.minWidth;
-  const hasMaxWidth = Boolean(node && isBoxSceneNode(node) && node.maxWidth !== undefined) || revealed.maxWidth;
-  const hasMinHeight = Boolean(node && isBoxSceneNode(node) && node.minHeight !== undefined) || revealed.minHeight;
-  const hasMaxHeight = Boolean(node && isBoxSceneNode(node) && node.maxHeight !== undefined) || revealed.maxHeight;
+  const boxNode = node && isBoxSceneNode(node) ? node : undefined;
+  const minWidthValue = boxNode?.minWidth;
+  const maxWidthValue = boxNode?.maxWidth;
+  const minHeightValue = boxNode?.minHeight;
+  const maxHeightValue = boxNode?.maxHeight;
 
-  const toggleMinWidth = (): void => {
-    if (hasMinWidth) {
-      dispatch(updateNode({ changes: { minWidth: undefined }, id }));
-    }
+  const minWidthShown = minWidthValue !== undefined || revealed.minWidth;
+  const maxWidthShown = maxWidthValue !== undefined || revealed.maxWidth;
+  const minHeightShown = minHeightValue !== undefined || revealed.minHeight;
+  const maxHeightShown = maxHeightValue !== undefined || revealed.maxHeight;
 
-    dispatch(setMinMaxRevealed({ bound: 'minWidth', value: !hasMinWidth }));
+  const onRevealMinWidth = (): void => {
+    dispatch(setMinMaxRevealed({ bound: 'minWidth', value: minWidthValue !== undefined || !revealed.minWidth }));
   };
 
-  const toggleMaxWidth = (): void => {
-    if (hasMaxWidth) {
-      dispatch(updateNode({ changes: { maxWidth: undefined }, id }));
-    }
-
-    dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: !hasMaxWidth }));
+  const onRevealMaxWidth = (): void => {
+    dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: maxWidthValue !== undefined || !revealed.maxWidth }));
   };
 
-  const toggleMinHeight = (): void => {
-    if (hasMinHeight) {
-      dispatch(updateNode({ changes: { minHeight: undefined }, id }));
-    }
-
-    dispatch(setMinMaxRevealed({ bound: 'minHeight', value: !hasMinHeight }));
+  const onRevealMinHeight = (): void => {
+    dispatch(setMinMaxRevealed({ bound: 'minHeight', value: minHeightValue !== undefined || !revealed.minHeight }));
   };
 
-  const toggleMaxHeight = (): void => {
-    if (hasMaxHeight) {
-      dispatch(updateNode({ changes: { maxHeight: undefined }, id }));
-    }
-
-    dispatch(setMinMaxRevealed({ bound: 'maxHeight', value: !hasMaxHeight }));
+  const onRevealMaxHeight = (): void => {
+    dispatch(setMinMaxRevealed({ bound: 'maxHeight', value: maxHeightValue !== undefined || !revealed.maxHeight }));
   };
 
-  return { hasMaxHeight, hasMaxWidth, hasMinHeight, hasMinWidth, toggleMaxHeight, toggleMaxWidth, toggleMinHeight, toggleMinWidth };
+  const onRemoveWidthBounds = (): void => {
+    dispatch(updateNode({ changes: { maxWidth: undefined, minWidth: undefined }, id }));
+    dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: false }));
+    dispatch(setMinMaxRevealed({ bound: 'minWidth', value: false }));
+  };
+
+  const onRemoveHeightBounds = (): void => {
+    dispatch(updateNode({ changes: { maxHeight: undefined, minHeight: undefined }, id }));
+    dispatch(setMinMaxRevealed({ bound: 'maxHeight', value: false }));
+    dispatch(setMinMaxRevealed({ bound: 'minHeight', value: false }));
+  };
+
+  return {
+    hasMaxHeightValue: maxHeightValue !== undefined,
+    hasMaxWidthValue: maxWidthValue !== undefined,
+    hasMinHeightValue: minHeightValue !== undefined,
+    hasMinWidthValue: minWidthValue !== undefined,
+    maxHeightShown,
+    maxHeightValue,
+    maxWidthShown,
+    maxWidthValue,
+    minHeightShown,
+    minHeightValue,
+    minWidthShown,
+    minWidthValue,
+    onRemoveHeightBounds,
+    onRemoveWidthBounds,
+    onRevealMaxHeight,
+    onRevealMaxWidth,
+    onRevealMinHeight,
+    onRevealMinWidth,
+  };
 };

@@ -1,10 +1,12 @@
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
+import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 // components
 import { UITools } from 'shared';
 
 // others
+import { getRemoveBoundsLabelKey } from './utils/getRemoveBoundsLabelKey';
 import { translationNameSpace } from './constants';
 
 // types
@@ -16,12 +18,15 @@ export type TColumnDimensionsSizingMenuProps = {
   axis: 'height' | 'width';
   canFill: boolean;
   canHug: boolean;
-  hasMax: boolean;
-  hasMin: boolean;
+  maxShown: boolean;
+  maxValue?: number;
+  minShown: boolean;
+  minValue?: number;
   mode: SizingMode;
+  onRemoveBounds?: TFunc;
+  onRevealMax?: TFunc;
+  onRevealMin?: TFunc;
   onSelect: TFunc<[SizingMode]>;
-  onToggleMax: TFunc;
-  onToggleMin: TFunc;
   value: number;
 };
 
@@ -29,18 +34,27 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
   axis,
   canFill,
   canHug,
-  hasMax,
-  hasMin,
+  maxShown,
+  maxValue,
+  minShown,
+  minValue,
   mode,
+  onRemoveBounds = noop,
+  onRevealMax = noop,
+  onRevealMin = noop,
   onSelect,
-  onToggleMax,
-  onToggleMin,
   value,
 }) => {
   const { t } = useTranslation();
   const isWidth = axis === 'width';
-  const minLabelKey = hasMin ? (isWidth ? 'removeMinWidth' : 'removeMinHeight') : isWidth ? 'addMinWidth' : 'addMinHeight';
-  const maxLabelKey = hasMax ? (isWidth ? 'removeMaxWidth' : 'removeMaxHeight') : isWidth ? 'addMaxWidth' : 'addMaxHeight';
+  const minLabel =
+    minValue !== undefined
+      ? t(`${translationNameSpace}.${isWidth ? 'minWidthValue' : 'minHeightValue'}`, { value: Math.round(minValue) })
+      : t(`${translationNameSpace}.${isWidth ? 'addMinWidth' : 'addMinHeight'}`);
+  const maxLabel =
+    maxValue !== undefined
+      ? t(`${translationNameSpace}.${isWidth ? 'maxWidthValue' : 'maxHeightValue'}`, { value: Math.round(maxValue) })
+      : t(`${translationNameSpace}.${isWidth ? 'addMaxWidth' : 'addMaxHeight'}`);
 
   return (
     <>
@@ -67,21 +81,21 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
         />
       )}
       {canHug && (
-        <>
+        <Fragment>
           <PopoverSeparator />
-          <PopoverItem
-            icon={isWidth ? 'MinWidth' : 'MinHeight'}
-            label={t(`${translationNameSpace}.${minLabelKey}`)}
-            onClick={onToggleMin}
-            selected={hasMin}
-          />
-          <PopoverItem
-            icon={isWidth ? 'MaxWidth' : 'MaxHeight'}
-            label={t(`${translationNameSpace}.${maxLabelKey}`)}
-            onClick={onToggleMax}
-            selected={hasMax}
-          />
-        </>
+          <PopoverItem icon={isWidth ? 'MinWidth' : 'MinHeight'} label={minLabel} onClick={onRevealMin} />
+          <PopoverItem icon={isWidth ? 'MaxWidth' : 'MaxHeight'} label={maxLabel} onClick={onRevealMax} />
+          {(minShown || maxShown) && (
+            <Fragment>
+              <PopoverSeparator />
+              <PopoverItem
+                icon="RemoveFit"
+                label={t(`${translationNameSpace}.${getRemoveBoundsLabelKey(isWidth, minShown, maxShown)}`)}
+                onClick={onRemoveBounds}
+              />
+            </Fragment>
+          )}
+        </Fragment>
       )}
       <PopoverSeparator />
       <PopoverItem icon="Variables" label={t(`${translationNameSpace}.applyVariable`)} />

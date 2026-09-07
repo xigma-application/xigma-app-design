@@ -5,13 +5,14 @@ import { Provider } from 'react-redux';
 import ColumnMinMaxDimensions from './ColumnMinMaxDimensions';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setMinMaxRevealed, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
+import { TRevealedMinMax } from 'store/design/types';
 
 const renderColumnMinMaxDimensions = (): ReturnType<typeof render> =>
   render(
@@ -43,66 +44,81 @@ const addFrameNode = (overrides: Partial<TFrameNode> = {}): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const reveal = (...bounds: (keyof TRevealedMinMax)[]): void => {
+  bounds.forEach((bound) => store.dispatch(setMinMaxRevealed({ bound, value: true })));
+};
+
 describe('ColumnMinMaxDimensions', () => {
+  beforeEach(() => {
+    (['maxHeight', 'maxWidth', 'minHeight', 'minWidth'] as const).forEach((bound) => {
+      store.dispatch(setMinMaxRevealed({ bound, value: false }));
+    });
+  });
+
   afterEach(() => {
     store.dispatch(setSelection([]));
   });
 
-  it('should render nothing when the selected frame has no bounds set', () => {
+  it('should render nothing when no bound row is revealed, even with values on the node', () => {
+    // mock
+    const frameId = addFrameNode({ maxWidth: 80, minWidth: 20 });
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { container } = renderColumnMinMaxDimensions();
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render nothing when nothing is selected even if a bound row was revealed', () => {
+    // mock
+    reveal('minWidth');
+
+    // before
+    const { container } = renderColumnMinMaxDimensions();
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render an empty Min width field when the row is revealed with no value on the node', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
+    reveal('minWidth');
 
     // before
-    const { container } = renderColumnMinMaxDimensions();
+    renderColumnMinMaxDimensions();
 
     // result
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByLabelText('Min width')).toHaveValue(null);
+    expect(screen.getByText('Min')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Min height')).toBeNull();
   });
 
-  it('should render nothing when nothing is selected', () => {
-    // before
-    const { container } = renderColumnMinMaxDimensions();
-
-    // result
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render only the width field within the Min row when only minWidth is set', () => {
+  it('should populate the revealed Min width field with the value stored on the node', () => {
     // mock
     const frameId = addFrameNode({ minWidth: 20 });
 
     store.dispatch(setSelection([frameId]));
+    reveal('minWidth');
 
     // before
     renderColumnMinMaxDimensions();
 
     // result
     expect(screen.getByLabelText('Min width')).toHaveValue(20);
-    expect(screen.queryByLabelText('Min height')).toBeNull();
-    expect(screen.getByText('Min')).toBeInTheDocument();
   });
 
-  it('should render only the height field within the Min row when only minHeight is set', () => {
-    // mock
-    const frameId = addFrameNode({ minHeight: 15 });
-
-    store.dispatch(setSelection([frameId]));
-
-    // before
-    renderColumnMinMaxDimensions();
-
-    // result
-    expect(screen.getByLabelText('Min height')).toHaveValue(15);
-    expect(screen.queryByLabelText('Min width')).toBeNull();
-  });
-
-  it('should render only the height field within the Max row when only maxHeight is set', () => {
+  it('should render only the revealed rows', () => {
     // mock
     const frameId = addFrameNode({ maxHeight: 95 });
 
     store.dispatch(setSelection([frameId]));
+    reveal('maxHeight');
 
     // before
     renderColumnMinMaxDimensions();
@@ -110,13 +126,15 @@ describe('ColumnMinMaxDimensions', () => {
     // result
     expect(screen.getByLabelText('Max height')).toHaveValue(95);
     expect(screen.queryByLabelText('Max width')).toBeNull();
+    expect(screen.queryByLabelText('Min width')).toBeNull();
   });
 
-  it('should render all four fields when every bound is set', () => {
+  it('should render all four fields when every bound is revealed', () => {
     // mock
     const frameId = addFrameNode({ maxHeight: 90, maxWidth: 80, minHeight: 30, minWidth: 20 });
 
     store.dispatch(setSelection([frameId]));
+    reveal('maxHeight', 'maxWidth', 'minHeight', 'minWidth');
 
     // before
     renderColumnMinMaxDimensions();
@@ -135,6 +153,7 @@ describe('ColumnMinMaxDimensions', () => {
     const frameId = addFrameNode({ minWidth: 20 });
 
     store.dispatch(setSelection([frameId]));
+    reveal('minWidth');
 
     // before
     renderColumnMinMaxDimensions();

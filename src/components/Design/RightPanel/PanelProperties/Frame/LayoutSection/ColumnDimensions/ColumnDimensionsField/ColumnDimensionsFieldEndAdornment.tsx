@@ -21,13 +21,16 @@ export type TColumnDimensionsFieldEndAdornmentProps = {
   axis: 'height' | 'width';
   canFill: boolean;
   canHug: boolean;
-  hasMax: boolean;
-  hasMin: boolean;
   isRevealed: boolean;
+  maxShown: boolean;
+  maxValue?: number;
+  minShown: boolean;
+  minValue?: number;
   onMenuOpenChange: TFunc<[boolean]>;
+  onRemoveBounds?: TFunc;
+  onRevealMax?: TFunc;
+  onRevealMin?: TFunc;
   onSelectSizingMode?: TFunc<[SizingMode]>;
-  onToggleMax: TFunc;
-  onToggleMin: TFunc;
   sizingMode?: SizingMode;
   value: number;
 };
@@ -36,13 +39,16 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
   axis,
   canFill,
   canHug,
-  hasMax,
-  hasMin,
   isRevealed,
+  maxShown,
+  maxValue,
+  minShown,
+  minValue,
   onMenuOpenChange,
+  onRemoveBounds,
+  onRevealMax,
+  onRevealMin,
   onSelectSizingMode,
-  onToggleMax,
-  onToggleMin,
   sizingMode,
   value,
 }) => {
@@ -67,12 +73,15 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
         axis={axis}
         canFill={canFill}
         canHug={canHug}
-        hasMax={hasMax}
-        hasMin={hasMin}
+        maxShown={maxShown}
+        maxValue={maxValue}
+        minShown={minShown}
+        minValue={minValue}
         mode={sizingMode}
+        onRemoveBounds={onRemoveBounds}
+        onRevealMax={onRevealMax}
+        onRevealMin={onRevealMin}
         onSelect={onSelectSizingMode}
-        onToggleMax={onToggleMax}
-        onToggleMin={onToggleMin}
         value={value}
       />
     </UITools.ButtonMenu>

@@ -18,26 +18,36 @@ const ColumnDimensions: FC = () => {
     canFillHeight,
     canFillWidth,
     canHug,
-    hasMaxHeight,
-    hasMaxWidth,
-    hasMinHeight,
-    hasMinWidth,
+    hasMaxHeightValue,
+    hasMaxWidthValue,
+    hasMinHeightValue,
+    hasMinWidthValue,
     height,
     heightSizingMode,
     locked,
+    maxHeightShown,
+    maxHeightValue,
+    maxWidthShown,
+    maxWidthValue,
+    minHeightShown,
+    minHeightValue,
+    minWidthShown,
+    minWidthValue,
     onBlurHeight,
     onBlurWidth,
     onDragEnd,
     onDragStart,
+    onRemoveHeightBounds,
+    onRemoveWidthBounds,
+    onRevealMaxHeight,
+    onRevealMaxWidth,
+    onRevealMinHeight,
+    onRevealMinWidth,
     onScrubHeight,
     onScrubWidth,
     onSelectHeightSizingMode,
     onSelectWidthSizingMode,
     onToggleLock,
-    onToggleMaxHeight,
-    onToggleMaxWidth,
-    onToggleMinHeight,
-    onToggleMinWidth,
     width,
     widthSizingMode,
   } = useColumnDimensions();
@@ -58,16 +68,21 @@ const ColumnDimensions: FC = () => {
         canFill={canFillWidth}
         canHug={canHug}
         e2eValue="width"
-        hasMax={hasMaxWidth}
-        hasMin={hasMinWidth}
+        hasMax={hasMaxWidthValue}
+        hasMin={hasMinWidthValue}
         label="W"
+        maxShown={maxWidthShown}
+        maxValue={maxWidthValue}
+        minShown={minWidthShown}
+        minValue={minWidthValue}
         onBlur={onBlurWidth}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
+        onRemoveBounds={onRemoveWidthBounds}
+        onRevealMax={onRevealMaxWidth}
+        onRevealMin={onRevealMinWidth}
         onScrub={onScrubWidth}
         onSelectSizingMode={showWidthDropdown ? onSelectWidthSizingMode : undefined}
-        onToggleMax={onToggleMaxWidth}
-        onToggleMin={onToggleMinWidth}
         sizingMode={showWidthDropdown ? widthSizingMode : undefined}
         value={width}
       />
@@ -77,16 +92,21 @@ const ColumnDimensions: FC = () => {
         canFill={canFillHeight}
         canHug={canHug}
         e2eValue="height"
-        hasMax={hasMaxHeight}
-        hasMin={hasMinHeight}
+        hasMax={hasMaxHeightValue}
+        hasMin={hasMinHeightValue}
         label="H"
+        maxShown={maxHeightShown}
+        maxValue={maxHeightValue}
+        minShown={minHeightShown}
+        minValue={minHeightValue}
         onBlur={onBlurHeight}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
+        onRemoveBounds={onRemoveHeightBounds}
+        onRevealMax={onRevealMaxHeight}
+        onRevealMin={onRevealMinHeight}
         onScrub={onScrubHeight}
         onSelectSizingMode={showHeightDropdown ? onSelectHeightSizingMode : undefined}
-        onToggleMax={onToggleMaxHeight}
-        onToggleMin={onToggleMinHeight}
         sizingMode={showHeightDropdown ? heightSizingMode : undefined}
         value={height}
       />

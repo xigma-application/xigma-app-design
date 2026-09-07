@@ -1,5 +1,4 @@
 import { FC, FocusEvent } from 'react';
-import { noop } from 'lodash';
 
 // @xigma
 import { Icon, ScrubbableInput } from '@xigma/components';
@@ -31,13 +30,18 @@ export type TColumnDimensionsFieldProps = {
   hasMax?: boolean;
   hasMin?: boolean;
   label: string;
+  maxShown?: boolean;
+  maxValue?: number;
+  minShown?: boolean;
+  minValue?: number;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onRemoveBounds?: TFunc;
+  onRevealMax?: TFunc;
+  onRevealMin?: TFunc;
   onScrub: TFunc<[number]>;
   onSelectSizingMode?: TFunc<[SizingMode]>;
-  onToggleMax?: TFunc;
-  onToggleMin?: TFunc;
   sizingMode?: SizingMode;
   value: number;
 };
@@ -51,13 +55,18 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   hasMax = false,
   hasMin = false,
   label,
+  maxShown = false,
+  maxValue,
+  minShown = false,
+  minValue,
   onBlur,
   onDragEnd,
   onDragStart,
+  onRemoveBounds,
+  onRevealMax,
+  onRevealMin,
   onScrub,
   onSelectSizingMode,
-  onToggleMax = noop,
-  onToggleMin = noop,
   sizingMode,
   value,
 }) => {
@@ -74,13 +83,16 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           axis={axis}
           canFill={canFill}
           canHug={canHug}
-          hasMax={hasMax}
-          hasMin={hasMin}
           isRevealed={isRevealed}
+          maxShown={maxShown}
+          maxValue={maxValue}
+          minShown={minShown}
+          minValue={minValue}
           onMenuOpenChange={onMenuOpenChange}
+          onRemoveBounds={onRemoveBounds}
+          onRevealMax={onRevealMax}
+          onRevealMin={onRevealMin}
           onSelectSizingMode={onSelectSizingMode}
-          onToggleMax={onToggleMax}
-          onToggleMin={onToggleMin}
           sizingMode={sizingMode}
           value={value}
         />

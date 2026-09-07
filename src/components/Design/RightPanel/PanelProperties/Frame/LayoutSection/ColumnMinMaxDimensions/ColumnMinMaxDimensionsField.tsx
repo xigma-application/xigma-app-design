@@ -35,6 +35,7 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
 }) => (
   <UITools.TextField
     aria-label={ariaLabel}
+    autoFocus
     defaultValue={value}
     e2eValue={e2eValue}
     onBlur={onBlur}

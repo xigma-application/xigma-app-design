@@ -55,164 +55,116 @@ describe('useToggleColumnMinMax', () => {
   it('should reveal an empty minWidth row without writing anything to the node', () => {
     // mock
     const frameId = addFrameNode();
-    const node = readNode(frameId);
-
-    // before
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
 
     // action
-    act(() => result.current.toggleMinWidth());
+    act(() => result.current.onRevealMinWidth());
 
     // result
     expect(readNode(frameId).minWidth).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.minWidth).toBe(true);
+    expect(readRevealed().minWidth).toBe(true);
+    expect(result.current.hasMinWidthValue).toBe(false);
   });
 
-  it('should hide the revealed-but-empty minWidth row on a second toggle, still writing nothing', () => {
+  it('should hide the revealed-but-empty minWidth row on a second reveal toggle', () => {
     // mock
     const frameId = addFrameNode();
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
 
-    // action — first click reveals it, second click hides it again
-    act(() => result.current.toggleMinWidth());
-    act(() => result.current.toggleMinWidth());
+    // action
+    act(() => result.current.onRevealMinWidth());
+    act(() => result.current.onRevealMinWidth());
 
     // result
     expect(readNode(frameId).minWidth).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.minWidth).toBe(false);
+    expect(readRevealed().minWidth).toBe(false);
   });
 
-  it('should clear a real minWidth value and un-reveal the row when toggled off', () => {
+  it('should keep the row revealed and never clear the value when revealing a bound that has a real value', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(updateNode({ changes: { minWidth: 40 }, id: frameId }));
 
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
 
-    // action
-    act(() => result.current.toggleMinWidth());
-
-    // result
-    expect(readNode(frameId).minWidth).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.minWidth).toBe(false);
-  });
-
-  it('should reveal an empty maxWidth row without writing anything to the node', () => {
-    // mock
-    const frameId = addFrameNode();
-    const node = readNode(frameId);
-
-    // before
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMaxWidth());
+    // action — reveal twice; the value must survive both
+    act(() => result.current.onRevealMinWidth());
+    act(() => result.current.onRevealMinWidth());
 
     // result
-    expect(readNode(frameId).maxWidth).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.maxWidth).toBe(true);
+    expect(readNode(frameId).minWidth).toBe(40);
+    expect(readRevealed().minWidth).toBe(true);
   });
 
-  it('should clear a real maxWidth value and un-reveal the row when toggled off', () => {
-    // mock
-    const frameId = addFrameNode();
-
-    store.dispatch(updateNode({ changes: { maxWidth: 150 }, id: frameId }));
-
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMaxWidth());
-
-    // result
-    expect(readNode(frameId).maxWidth).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.maxWidth).toBe(false);
-  });
-
-  it('should reveal an empty minHeight row without writing anything to the node', () => {
-    // mock
-    const frameId = addFrameNode();
-    const node = readNode(frameId);
-
-    // before
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMinHeight());
-
-    // result
-    expect(readNode(frameId).minHeight).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.minHeight).toBe(true);
-  });
-
-  it('should clear a real minHeight value and un-reveal the row when toggled off', () => {
-    // mock
-    const frameId = addFrameNode();
-
-    store.dispatch(updateNode({ changes: { minHeight: 10 }, id: frameId }));
-
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMinHeight());
-
-    // result
-    expect(readNode(frameId).minHeight).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.minHeight).toBe(false);
-  });
-
-  it('should reveal an empty maxHeight row without writing anything to the node', () => {
-    // mock
-    const frameId = addFrameNode();
-    const node = readNode(frameId);
-
-    // before
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMaxHeight());
-
-    // result
-    expect(readNode(frameId).maxHeight).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.maxHeight).toBe(true);
-  });
-
-  it('should clear a real maxHeight value and un-reveal the row when toggled off', () => {
+  it('should expose the real bound value and the shown flag', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(updateNode({ changes: { maxHeight: 90 }, id: frameId }));
 
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
-
-    // action
-    act(() => result.current.toggleMaxHeight());
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
 
     // result
-    expect(readNode(frameId).maxHeight).toBeUndefined();
-    expect(store.getState().design.revealedMinMax.maxHeight).toBe(false);
+    expect(result.current.maxHeightValue).toBe(90);
+    expect(result.current.hasMaxHeightValue).toBe(true);
+    expect(result.current.maxHeightShown).toBe(true);
+    expect(result.current.minHeightShown).toBe(false);
   });
 
-  it('should expose hasMinWidth as true once revealed, even with no real value on the node', () => {
+  it('should clear both width bounds and un-reveal both rows on remove', () => {
     // mock
     const frameId = addFrameNode();
-    const node = readNode(frameId);
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, node), { wrapper });
 
-    expect(result.current.hasMinWidth).toBe(false);
+    store.dispatch(updateNode({ changes: { maxWidth: 150, minWidth: 40 }, id: frameId }));
+    store.dispatch(setMinMaxRevealed({ bound: 'minWidth', value: true }));
+    store.dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: true }));
+
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
 
     // action
-    act(() => result.current.toggleMinWidth());
+    act(() => result.current.onRemoveWidthBounds());
 
     // result
-    expect(result.current.hasMinWidth).toBe(true);
-    expect(readRevealed().minWidth).toBe(true);
+    expect(readNode(frameId).minWidth).toBeUndefined();
+    expect(readNode(frameId).maxWidth).toBeUndefined();
+    expect(readRevealed().minWidth).toBe(false);
+    expect(readRevealed().maxWidth).toBe(false);
+  });
+
+  it('should clear both height bounds and un-reveal both rows on remove', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { maxHeight: 90, minHeight: 10 }, id: frameId }));
+
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+
+    // action
+    act(() => result.current.onRemoveHeightBounds());
+
+    // result
+    expect(readNode(frameId).minHeight).toBeUndefined();
+    expect(readNode(frameId).maxHeight).toBeUndefined();
+    expect(readRevealed().minHeight).toBe(false);
+    expect(readRevealed().maxHeight).toBe(false);
+  });
+
+  it('should reveal each empty bound row independently without writing to the node', () => {
+    // mock
+    const frameId = addFrameNode();
+    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+
+    // action
+    act(() => result.current.onRevealMaxWidth());
+    act(() => result.current.onRevealMinHeight());
+    act(() => result.current.onRevealMaxHeight());
+
+    // result
+    expect(readNode(frameId).maxWidth).toBeUndefined();
+    expect(readNode(frameId).minHeight).toBeUndefined();
+    expect(readNode(frameId).maxHeight).toBeUndefined();
+    expect(readRevealed()).toMatchObject({ maxHeight: true, maxWidth: true, minHeight: true });
   });
 
   it('should not throw when there is no node', () => {
@@ -220,6 +172,7 @@ describe('useToggleColumnMinMax', () => {
     const { result } = renderHook(() => useToggleColumnMinMax('missing-id', undefined), { wrapper });
 
     // action / result
-    expect(() => act(() => result.current.toggleMinWidth())).not.toThrow();
+    expect(() => act(() => result.current.onRevealMinWidth())).not.toThrow();
+    expect(() => act(() => result.current.onRemoveWidthBounds())).not.toThrow();
   });
 });

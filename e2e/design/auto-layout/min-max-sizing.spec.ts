@@ -98,4 +98,44 @@ test.describe('auto-layout — Min/Max sizing', () => {
     expect(secondChild.y).toBeGreaterThan(firstChild.y);
     expect(secondChild.x).toBe(firstChild.x);
   });
+
+  test('revealing a Max width row focuses its input, shrinks a Fixed frame at once, hides on reselection, and re-reveals from the menu', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-min-max-reveal');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a horizontal auto-layout frame, left on its default Fixed width of 300
+    await designPage.drawFrame(OUTER.x1, OUTER.y1, OUTER.x2, OUTER.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await setFlowHorizontal(page);
+
+    // reveal the Max width row from the width dropdown
+    await page.getByLabel('Width sizing options').click();
+    await page.getByText('Add max width…', { exact: true }).click();
+
+    const maxWidthInput = page.locator('[data-test-text-field-input="max-width"]');
+
+    // the freshly revealed input takes focus and starts genuinely empty
+    await expect(maxWidthInput).toBeFocused();
+    await expect(maxWidthInput).toHaveValue('');
+
+    // committing a Max below the current width reflows the frame immediately, even though its width
+    // mode is still Fixed
+    await maxWidthInput.fill('150');
+    await maxWidthInput.press('Enter');
+    expect((await readOuterFrame(page)).width).toBe(150);
+
+    // leaving the frame and coming back hides the row even though the bound is still stored
+    await designPage.drawRectangle(1400, 160, 1500, 210); // selects the new rectangle
+    await selectLayersRow(page, 'Frame (1)');
+    await expect(page.locator('[data-test-text-field-input="max-width"]')).toHaveCount(0);
+
+    // the dropdown now offers the stored value, and picking it brings the populated row back
+    await page.getByLabel('Width sizing options').click();
+    await page.getByText('Max width: 150', { exact: true }).click();
+    await expect(page.locator('[data-test-text-field-input="max-width"]')).toHaveValue('150');
+  });
 });
