@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -49,5 +49,13 @@ describe('getNodeTypeIconName', () => {
 
   it('should return the text-on-path icon for a text node bound to a path', () => {
     expect(getNodeTypeIconName({ ...textNode, pathId: 'vector-1' })).toBe('TextOnPathTool');
+  });
+
+  it('should return the layout-mode icon for a frame with auto layout', () => {
+    expect(getNodeTypeIconName({ ...frameNode, layoutMode: LayoutMode.horizontal })).toBe('LayoutHorizontal');
+  });
+
+  it('should prefer the mask icon over the layout-mode icon for a masked auto-layout frame', () => {
+    expect(getNodeTypeIconName({ ...frameNode, isMask: true, layoutMode: LayoutMode.horizontal })).toBe('MaskGroup');
   });
 });

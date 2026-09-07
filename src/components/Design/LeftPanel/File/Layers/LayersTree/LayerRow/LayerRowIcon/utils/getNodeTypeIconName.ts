@@ -2,16 +2,38 @@
 import { TIconProps } from '@xigma/components';
 
 // others
+import { getFrameLayoutIconName } from './getFrameLayoutIconName';
 import { NODE_TYPE_ICON } from '../constants';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
-export const getNodeTypeIconName = (node: TSceneNode): TIconProps['name'] => {
-  if (node.isMask) {
-    return 'MaskGroup';
+const getIconStatus = (node: TSceneNode, layoutIconName: TIconProps['name'] | undefined): 'default' | 'frameLayout' | 'mask' | 'textOnPath' => {
+  switch (true) {
+    case node.isMask:
+      return 'mask';
+    case Boolean(layoutIconName):
+      return 'frameLayout';
+    case node.type === NodeType.text && Boolean(node.pathId):
+      return 'textOnPath';
+    default:
+      return 'default';
   }
+};
 
-  return node.type === NodeType.text && node.pathId ? 'TextOnPathTool' : NODE_TYPE_ICON[node.type];
+export const getNodeTypeIconName = (node: TSceneNode): TIconProps['name'] => {
+  const layoutIconName = node.type === NodeType.frame ? getFrameLayoutIconName(node) : undefined;
+  const iconStatus = getIconStatus(node, layoutIconName);
+
+  switch (iconStatus) {
+    case 'mask':
+      return 'MaskGroup';
+    case 'frameLayout':
+      return layoutIconName as TIconProps['name'];
+    case 'textOnPath':
+      return 'TextOnPathTool';
+    default:
+      return NODE_TYPE_ICON[node.type];
+  }
 };
