@@ -1,9 +1,9 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TDesignState } from '../types';
 
 // utils
 import { getActivePage } from './getActivePage';
+import { getGroupBoundsChildIds } from './nodeHierarchy/getGroupBoundsChildIds';
 import { getNodesBoundingBox } from './getNodesBoundingBox';
 import { getRotatedGroupBounds } from './getRotatedGroupBounds';
 import { isGroupLikeNode } from './nodeHierarchy/isGroupLikeNode';
@@ -14,8 +14,9 @@ export const syncGroupBounds = (state: TDesignState, groupId: string | null): vo
     const group = nodes[groupId];
 
     if (group && isGroupLikeNode(group)) {
-      const boundsChildIds = group.type === NodeType.mask ? group.childIds.slice(-1) : group.childIds;
-      const children = boundsChildIds.map((childId) => nodes[childId]).filter(Boolean);
+      const children = getGroupBoundsChildIds(group)
+        .map((childId) => nodes[childId])
+        .filter(Boolean);
 
       if (children.length > 0) {
         const bounds = group.rotation === 0 ? getNodesBoundingBox(children) : getRotatedGroupBounds(children, group.rotation);

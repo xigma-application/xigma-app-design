@@ -8,6 +8,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 import { TGroupLikeNode } from 'types/design/types';
 
 // utils
+import { getGroupBoundsChildIds } from 'store/design/utils/nodeHierarchy/getGroupBoundsChildIds';
 import { getRotatedGroupBounds } from 'store/design/utils/getRotatedGroupBounds';
 import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 
@@ -27,7 +28,9 @@ export const resyncRotatedGroupBounds = (dispatch: AppDispatch, dragState: TDrag
 
   brokenGroupIds.forEach((groupId) => {
     const group = nodes[groupId] as TGroupLikeNode;
-    const children = group.childIds.map((childId) => nodes[childId]).filter(Boolean);
+    const children = getGroupBoundsChildIds(group)
+      .map((childId) => nodes[childId])
+      .filter(Boolean);
 
     if (children.length > 0) {
       dispatch(updateNode({ changes: getRotatedGroupBounds(children, group.rotation), id: groupId }));

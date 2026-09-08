@@ -1,14 +1,15 @@
 // store
-import { addNode, groupNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, createMaskGroup, groupNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
-import { TGroupNode } from 'types/design/types';
+import { TGroupNode, TMaskNode } from 'types/design/types';
 
 // utils
+import { getRotatedGroupBounds } from 'store/design/utils/getRotatedGroupBounds';
 import { resyncRotatedGroupBounds } from '../resyncRotatedGroupBounds';
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -22,6 +23,26 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
       parentId: null,
       rotation: 0,
       type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectangleNode = (x: number, y: number, size = 20): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
       width: size,
       x,
       y,
@@ -69,6 +90,30 @@ describe('resyncRotatedGroupBounds', () => {
     // result — the group's box changed to account for idA's new position
     const resynced = selectActivePage(store.getState()).nodes[groupId];
     expect(resynced).not.toMatchObject({ height: staleGroup.height, width: staleGroup.width, x: staleGroup.x, y: staleGroup.y });
+  });
+
+  it('should resync a rotated mask off the mask shape alone, not the union with the content dragged out from under it', () => {
+    // mock — [idA, idB] masked (idB last, the mask), rotated; idA (the masked content, not the mask
+    // itself) then dragged independently — the mask's box must still track only idB
+    const idA = addRectangleNode(0, 0, 20);
+    const idB = addRectangleNode(100, 0, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(createMaskGroup());
+    const maskId = selectActivePage(store.getState()).nodes[idA].parentId as string;
+
+    store.dispatch(updateNode({ changes: { rotation: 30 }, id: maskId }));
+
+    store.dispatch(updateNode({ changes: { x: 900 }, id: idA }));
+
+    // action — only idA (masked content) was part of this drag, not the mask container or idB
+    resyncRotatedGroupBounds(store.dispatch, dragState([idA]));
+
+    // result — the mask's box still matches idB alone; idA's runaway move never widens it
+    const resyncedMask = selectActivePage(store.getState()).nodes[maskId] as TMaskNode;
+    const bValue = selectActivePage(store.getState()).nodes[idB];
+    const expectedBounds = getRotatedGroupBounds([bValue], 30);
+    expect(resyncedMask).toMatchObject({ height: expectedBounds.height, width: expectedBounds.width });
   });
 
   it('should leave the group untouched when the group itself was part of the same drag (a whole-group rigid move)', () => {
