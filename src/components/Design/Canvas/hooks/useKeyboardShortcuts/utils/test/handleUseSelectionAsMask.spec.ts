@@ -132,6 +132,26 @@ describe('handleUseSelectionAsMask', () => {
     expect(selectSelectedIds(store.getState())).toEqual([maskChildId]);
   });
 
+  it('should ungroup the mask entirely when the mask container itself is the single selected node', () => {
+    // mock — build a mask container directly, matching what "wrap into a mask group" produces
+    const idA = addRectangleNode();
+    store.dispatch(setSelection([idA]));
+    handleUseSelectionAsMask(store.dispatch);
+    const [maskChildId] = selectSelectedIds(store.getState());
+    const maskId = selectActivePage(store.getState()).nodes[maskChildId].parentId as string;
+
+    store.dispatch(setSelection([maskId]));
+
+    // action — press the shortcut on the mask CONTAINER row, not its masked child
+    handleUseSelectionAsMask(store.dispatch);
+
+    // result — the container is gone entirely, not just flipped back to a plain group
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[maskId]).toBeUndefined();
+    expect(page.nodes[maskChildId].parentId).toBeNull();
+    expect(selectSelectedIds(store.getState())).toEqual([maskChildId]);
+  });
+
   it('should do nothing while in vector editing mode', () => {
     // mock
     const idA = addRectangleNode();
