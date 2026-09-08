@@ -1,8 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 
 // components
 import Tree from './Tree';
+
+// others
+import { TreeVisibleOrderContext } from './hooks/useTreeVisibleOrder/context';
 
 // types
 import { TTreeItem, TTreeRow } from './types';
@@ -15,6 +18,16 @@ type TItem = TTreeItem & { children?: TItem[] };
 const buildItem = (id: string, children?: TItem[]): TItem => ({ children, id });
 const getChildren = (item: TItem): TItem[] | undefined => item.children;
 const renderRow = (row: TTreeRow<TItem>): ReactNode => <span>Row {row.item.id}</span>;
+
+const RenderVisibleOrder = (row: TTreeRow<TItem>): ReactNode => {
+  const visibleOrderIds = useContext(TreeVisibleOrderContext);
+
+  return (
+    <span>
+      Row {row.item.id} — order: {visibleOrderIds.join(',')}
+    </span>
+  );
+};
 
 describe('Tree', () => {
   beforeEach(() => {
@@ -455,5 +468,44 @@ describe('Tree', () => {
       />,
     );
     expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
+  });
+
+  it('should provide every row a flat, top-to-bottom visible order via context, collapsed nodes excluded', () => {
+    // mock — root '0' has children '0-0' and '0-1'; only '0' starts expanded
+    const roots = [buildItem('0', [buildItem('0-0'), buildItem('0-1')]), buildItem('1')];
+
+    // before
+    render(
+      <Tree
+        expandedIds={new Set(['0'])}
+        getChildren={getChildren}
+        onExpandedIdsChange={vi.fn()}
+        renderRow={RenderVisibleOrder}
+        roots={roots}
+        rowHeight={32}
+      />,
+    );
+
+    // result — every visible row sees the same full order, in top-to-bottom visible sequence,
+    // with the collapsed root's own children never appearing since '1' has none expanded
+    const expectedOrder = '0,0-0,0-1,1';
+
+    expect(screen.getByText(`Row 0 — order: ${expectedOrder}`)).toBeInTheDocument();
+    expect(screen.getByText(`Row 0-0 — order: ${expectedOrder}`)).toBeInTheDocument();
+    expect(screen.getByText(`Row 0-1 — order: ${expectedOrder}`)).toBeInTheDocument();
+    expect(screen.getByText(`Row 1 — order: ${expectedOrder}`)).toBeInTheDocument();
+  });
+
+  it('should exclude a collapsed group’s children from the provided visible order', () => {
+    // mock — same shape, but '0' starts collapsed
+    const roots = [buildItem('0', [buildItem('0-0'), buildItem('0-1')]), buildItem('1')];
+
+    // before
+    render(<Tree expandedIds={new Set()} getChildren={getChildren} renderRow={RenderVisibleOrder} roots={roots} rowHeight={32} />);
+
+    // result — the collapsed children are entirely absent from the order, not just hidden
+    expect(screen.getByText('Row 0 — order: 0,1')).toBeInTheDocument();
+    expect(screen.getByText('Row 1 — order: 0,1')).toBeInTheDocument();
+    expect(screen.queryByText(/Row 0-0/)).not.toBeInTheDocument();
   });
 });

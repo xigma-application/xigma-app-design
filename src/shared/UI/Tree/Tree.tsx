@@ -15,6 +15,9 @@ import { useTreeExpansion } from './hooks/useTreeExpansion';
 import { useTreeRowDrag } from './hooks/useTreeRowDrag/useTreeRowDrag';
 import { useVirtualList } from 'hooks';
 
+// others
+import { TreeVisibleOrderContext } from './hooks/useTreeVisibleOrder/context';
+
 // styles
 import styles from './tree.module.scss';
 
@@ -61,6 +64,7 @@ export const Tree = <T extends TTreeItem>({
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
   const { expandedIds, onToggleExpand } = useTreeExpansion(controlledExpandedIds, onExpandedIdsChange, getChildren);
   const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
+  const visibleOrderIds = useMemo(() => rows.map((row) => row.item.id), [rows]);
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
   const contentWidth = useScrollContentWidth(rowsRef, rows);
   const onSpringLoadExpand = useSpringLoadExpand(rows, onToggleExpand);
@@ -76,34 +80,36 @@ export const Tree = <T extends TTreeItem>({
   );
 
   return (
-    <div className={cx(styles.Tree, className)}>
-      <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
-        <div
-          className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])}
-          style={{ height: totalSize, width: contentWidth }}
-        >
-          <TreeSelectionBackground segments={highlightBackgroundSegments} variant="highlight" />
-          <TreeSelectionBackground segments={selectionBackgroundSegments} />
-          <TreeRowList
-            items={items}
-            onRowMouseDown={onReorder ? handleRowMouseDown : undefined}
-            onToggleExpand={onToggleExpand}
-            renderRow={renderRow}
-            rows={rows}
-          />
-          <TreeDropOverlay
-            dropDepth={dropDepth}
-            dropInsideIndex={dropInsideIndex}
-            insertionIndex={insertionIndex}
-            isDefault={!renderDropIndicator}
-            renderDropIndicator={renderDropIndicator}
-            rowHeight={rowHeight}
-          />
+    <TreeVisibleOrderContext.Provider value={visibleOrderIds}>
+      <div className={cx(styles.Tree, className)}>
+        <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
+          <div
+            className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])}
+            style={{ height: totalSize, width: contentWidth }}
+          >
+            <TreeSelectionBackground segments={highlightBackgroundSegments} variant="highlight" />
+            <TreeSelectionBackground segments={selectionBackgroundSegments} />
+            <TreeRowList
+              items={items}
+              onRowMouseDown={onReorder ? handleRowMouseDown : undefined}
+              onToggleExpand={onToggleExpand}
+              renderRow={renderRow}
+              rows={rows}
+            />
+            <TreeDropOverlay
+              dropDepth={dropDepth}
+              dropInsideIndex={dropInsideIndex}
+              insertionIndex={insertionIndex}
+              isDefault={!renderDropIndicator}
+              renderDropIndicator={renderDropIndicator}
+              rowHeight={rowHeight}
+            />
+          </div>
         </div>
+        <ScrollThumb className={styles.Tree__scrollThumb} scrollRef={rowsRef} />
+        <ScrollThumb className={styles.Tree__scrollThumbHorizontal} orientation="horizontal" scrollRef={rowsRef} />
       </div>
-      <ScrollThumb className={styles.Tree__scrollThumb} scrollRef={rowsRef} />
-      <ScrollThumb className={styles.Tree__scrollThumbHorizontal} orientation="horizontal" scrollRef={rowsRef} />
-    </div>
+    </TreeVisibleOrderContext.Provider>
   );
 };
 

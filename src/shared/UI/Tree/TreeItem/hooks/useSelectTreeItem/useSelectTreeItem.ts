@@ -1,7 +1,10 @@
 import { MouseEvent } from 'react';
 
+// hooks
+import { useTreeVisibleOrder } from 'shared/UI/Tree/hooks/useTreeVisibleOrder/useTreeVisibleOrder';
+
 // store
-import { selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
+import { selectSelectedIds } from 'store/design/selectors';
 import { setSelection } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -12,14 +15,12 @@ import { getToggledSelectionIds } from './utils/getToggledSelectionIds';
 
 export const useSelectTreeItem = (id: string): TFunc<[MouseEvent]> => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectOrderedNodes);
+  const visibleOrderIds = useTreeVisibleOrder();
   const selectedIds = useAppSelector(selectSelectedIds);
 
   return (event: MouseEvent): void => {
     if (event.shiftKey) {
-      const orderedIds = nodes.map((node) => node.id);
-
-      dispatch(setSelection(getRangeSelectionIds(orderedIds, getSelectionAnchorId() ?? id, id)));
+      dispatch(setSelection(getRangeSelectionIds(visibleOrderIds, getSelectionAnchorId() ?? id, id)));
     } else if (event.ctrlKey || event.metaKey) {
       setSelectionAnchorId(id);
       dispatch(setSelection(getToggledSelectionIds(selectedIds, id)));

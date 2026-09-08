@@ -309,6 +309,77 @@ test('Ctrl+click selecting a nested child directly on canvas auto-expands its pa
   expect(state).toEqual([rectangleId]);
 });
 
+test('Shift-clicking between two nested rows range-selects them, and from a nested row up to a shallower one still spans everything between', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-nested-shift-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(700, 100, 900, 300); // Frame (1)
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(720, 120, 760, 160); // B — Rectangle (1)
+  await designPage.click(1500, 700);
+  await designPage.drawRectangle(780, 120, 820, 160); // C — Rectangle (2)
+  await designPage.click(1500, 700);
+  await designPage.drawFrame(700, 350, 900, 550); // Frame (2) — a second, shallower (top-level) sibling
+  await designPage.click(1500, 700);
+
+  // nest B and C under Frame (1) directly, matching how the Layers tree's own rootOrder never
+  // lists a container's children (the exact scenario the shift-select fix targets)
+  const { bId, cId, frame2Id, frameId } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { moveNodes } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const [frameId, bId, cId, frame2Id] = pages[activePageId].rootOrder;
+
+    store.dispatch(moveNodes({ nodeIds: [bId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(moveNodes({ nodeIds: [cId], targetIndex: 1, targetParentId: frameId }));
+
+    return { bId, cId, frame2Id, frameId };
+  });
+
+  await designPage.click(1500, 700); // deselect, tree starts collapsed
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await expect(rows).toHaveCount(2); // Frame (1) + Frame (2), B/C collapsed away
+
+  // expand "Frame (1)" (drawn first) to reveal its nested children
+  await rows
+    .filter({ hasText: /^Frame \(1\)$/ })
+    .locator('[class*="TreeItem__toggleButton"]')
+    .click();
+  await expect(rows).toHaveCount(4); // Frame (1), B, C, Frame (2)
+
+  const readSelectedIds = (): Promise<string[]> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].selectedIds;
+    });
+
+  // click nested row B, then shift-click nested row C — both nested under the same expanded parent
+  await rows.filter({ hasText: 'Rectangle (1)' }).click();
+  await rows.filter({ hasText: 'Rectangle (2)' }).click({ modifiers: ['Shift'] });
+
+  expect(new Set(await readSelectedIds())).toEqual(new Set([bId, cId]));
+
+  // now shift-click "Frame (2)" — a shallower, top-level row — from that same nested anchor (B,
+  // set by the very first plain click above). The visual range sweeps over B, C, their own parent
+  // Frame (1) (its row always sits between its nested children and any other top-level sibling),
+  // and Frame (2) — but since Frame (1) is now part of that selection too, the pre-existing
+  // dropDescendantsOfSelected normalization folds its own children back into it, so the final
+  // selection is just the two frames. Before the fix this shift-click selected only Frame (2)
+  // alone, silently dropping everything else the range should have covered.
+  await rows.filter({ hasText: /^Frame \(2\)$/ }).click({ modifiers: ['Shift'] });
+
+  expect(new Set(await readSelectedIds())).toEqual(new Set([frameId, frame2Id]));
+});
+
 test('dragging a Rectangle live into a Frame auto-expands the Frame row in the Layers panel mid-drag', async ({ page }) => {
   const designPage = new DesignPage(page);
 
