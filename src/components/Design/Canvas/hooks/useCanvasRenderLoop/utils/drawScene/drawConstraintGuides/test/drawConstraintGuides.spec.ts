@@ -2,16 +2,26 @@
 import { CONSTRAINT_GUIDE_STROKE } from 'constant/canvas';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { AlignmentHorizontal, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { drawConstraintGuides } from '../drawConstraintGuides';
 
 const drawDashedLineMock = vi.fn();
+const drawXMarkerMock = vi.fn();
+const drawVertexDotMock = vi.fn();
 
 vi.mock('utils/canvas/drawDashedLine', () => ({
   drawDashedLine: (...args: unknown[]): void => drawDashedLineMock(...args),
+}));
+
+vi.mock('utils/canvas/drawXMarker', () => ({
+  drawXMarker: (...args: unknown[]): void => drawXMarkerMock(...args),
+}));
+
+vi.mock('../../drawVectorEditHandlesLayer/drawVectorVertexDots/drawVertexDot', () => ({
+  drawVertexDot: (...args: unknown[]): void => drawVertexDotMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -58,6 +68,8 @@ const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
 describe('drawConstraintGuides', () => {
   beforeEach(() => {
     drawDashedLineMock.mockClear();
+    drawXMarkerMock.mockClear();
+    drawVertexDotMock.mockClear();
   });
 
   it('should draw one dashed line per axis for a single selected freeform-frame child', () => {
@@ -67,6 +79,24 @@ describe('drawConstraintGuides', () => {
 
     expect(drawDashedLineMock).toHaveBeenCalledTimes(2);
     expect(drawDashedLineMock.mock.calls[0][4]).toBe(CONSTRAINT_GUIDE_STROKE);
+  });
+
+  it('should draw the centre × marker and dot when a centre constraint is set on either axis', () => {
+    const child = rect({ alignment: { horizontal: AlignmentHorizontal.center } });
+
+    drawConstraintGuides(context, [child], { 'frame-1': frame(), r1: child });
+
+    expect(drawXMarkerMock).toHaveBeenCalledTimes(1);
+    expect(drawVertexDotMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not draw the centre × marker or dot for a non-centre constraint', () => {
+    const child = rect();
+
+    drawConstraintGuides(context, [child], { 'frame-1': frame(), r1: child });
+
+    expect(drawXMarkerMock).not.toHaveBeenCalled();
+    expect(drawVertexDotMock).not.toHaveBeenCalled();
   });
 
   it('should draw nothing when more than one node is selected', () => {

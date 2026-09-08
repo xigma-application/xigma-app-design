@@ -29,7 +29,7 @@ import { cleanupStaleDragSnapshotBuffers } from './cleanupStaleDragSnapshotBuffe
 import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawAutoLayoutDropIndicator } from './drawAutoLayoutDropIndicator';
 import { drawAutoLayoutGapHandles } from './drawAutoLayoutGapHandles/drawAutoLayoutGapHandles';
-import { drawConstraintGuides } from './drawConstraintGuides';
+import { drawConstraintGuides } from './drawConstraintGuides/drawConstraintGuides';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDimensionHintGuides } from './drawDimensionHintGuides/drawDimensionHintGuides';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
