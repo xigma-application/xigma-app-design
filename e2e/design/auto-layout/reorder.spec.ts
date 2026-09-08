@@ -334,6 +334,43 @@ test.describe('auto-layout — reordering a child within its own frame', () => {
 
     await page.mouse.up();
   });
+  test('a dragged Group member’s ghost visually follows the cursor mid-reorder, instead of staying glued to its original slot', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-reorder-group-ghost');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await setFlow(page, 'Vertical');
+
+    // rect A settles as the frame's first (top) member, occupying only the y150-210 band
+    await designPage.drawRectangle(1400, 160, 1460, 220);
+    await dragInto(page, { x: 1430, y: 190 }, { x: 630, y: 300 });
+
+    // rect B is wrapped in its own single-member Group (Ctrl+G still groups a lone selection), then
+    // dragged in as the second member, occupying only the y210-270 band
+    await designPage.drawRectangle(1400, 300, 1460, 360);
+    await page.keyboard.press('Control+g');
+    await dragInto(page, { x: 1430, y: 330 }, { x: 630, y: 300 });
+
+    // grab the Group member (row 2, centre ~y240) and drag it far down the frame, well past any
+    // band either of these two members could ever reflow into — the only way gray can appear down
+    // there is if the dragged Group's own content is following the cursor
+    await page.mouse.move(630, 240);
+    await page.mouse.down();
+    await page.mouse.move(630, 650, { steps: 10 });
+    await page.waitForTimeout(250);
+
+    // regression: the Group container's own reorder-preview entry existed but painted nothing (a
+    // group has no fill of its own); its child rectangle looked itself up by its OWN id, found no
+    // override, and kept rendering at its frozen store position — so the dragged content never
+    // visually followed the cursor at all, even though the drag itself was progressing
+    expect(isRectangleGray(await readPixelColor(page, 630, 650))).toBe(true);
+
+    await page.mouse.up();
+  });
 });
 
 test.describe('auto-layout — reordering a child within its own frame, wrap enabled', () => {

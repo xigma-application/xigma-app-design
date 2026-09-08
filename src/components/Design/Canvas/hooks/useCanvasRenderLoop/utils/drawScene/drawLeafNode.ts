@@ -26,7 +26,7 @@ export const drawLeafNode = (
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  const node = getAutoLayoutReorderRenderNode(refs, rawNode);
+  const node = getAutoLayoutReorderRenderNode(refs, rawNode, nodesById);
   const dragOpacity = getAutoLayoutDragOpacity(refs, node.id);
 
   switch (node.type) {

@@ -5,7 +5,7 @@ import { toggleFrameOutlinesVisible } from 'store/design/slice';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TSceneNode } from 'types/design/types';
+import { TGroupNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
@@ -66,13 +66,17 @@ describe('drawFrameOutlines', () => {
   it('should draw nothing when the preference is off', () => {
     store.dispatch(toggleFrameOutlinesVisible());
 
-    drawFrameOutlines(context, [buildFrame('a')], createCanvasRefs());
+    const frameA = buildFrame('a');
+    drawFrameOutlines(context, [frameA], createCanvasRefs(), { a: frameA });
 
     expect(drawThickOutline).not.toHaveBeenCalled();
   });
 
   it('should draw one outline per frame, skipping every other node type in the same list', () => {
-    drawFrameOutlines(context, [buildFrame('a'), buildRectangle('b'), buildFrame('c')], createCanvasRefs());
+    const frameA = buildFrame('a');
+    const rectB = buildRectangle('b');
+    const frameC = buildFrame('c');
+    drawFrameOutlines(context, [frameA, rectB, frameC], createCanvasRefs(), { a: frameA, b: rectB, c: frameC });
 
     expect(drawThickOutline).toHaveBeenCalledTimes(2);
   });
@@ -81,12 +85,28 @@ describe('drawFrameOutlines', () => {
     // mock — a same-parent reorder preview has the frame's ghost riding the cursor at (50, 30)
     const refs = createCanvasRefs();
     refs.transform.autoLayoutReorderPreviewRef.current = { activeIndex: 0, frameId: 'parent', positions: { a: { x: 50, y: 30 } } };
+    const frameA = buildFrame('a');
 
     // action — the frame's own store position is still (0, 0)
-    drawFrameOutlines(context, [buildFrame('a')], refs);
+    drawFrameOutlines(context, [frameA], refs, { a: frameA });
 
     // result — the outline follows the ghost
     expect(drawThickOutline).toHaveBeenCalledTimes(1);
     expect((drawThickOutline as ReturnType<typeof vi.fn>).mock.calls[0][3]).toMatchObject({ x: 50, y: 30 });
+  });
+
+  it('should outline a frame nested inside a dragged group at the group’s inherited ghost position', () => {
+    // mock — only the group's id has an override; the nested frame has none of its own
+    const refs = createCanvasRefs();
+    refs.transform.autoLayoutReorderPreviewRef.current = { activeIndex: 0, frameId: 'parent', positions: { g: { x: 80, y: 90 } } };
+    const frameA = { ...buildFrame('a'), parentId: 'g' };
+    const group: TGroupNode = { childIds: ['a'], height: 10, id: 'g', name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }; // prettier-ignore
+
+    // action
+    drawFrameOutlines(context, [frameA], refs, { a: frameA, g: group });
+
+    // result — the nested frame's outline inherits the group's ghost delta
+    expect(drawThickOutline).toHaveBeenCalledTimes(1);
+    expect((drawThickOutline as ReturnType<typeof vi.fn>).mock.calls[0][3]).toMatchObject({ x: 80, y: 90 });
   });
 });

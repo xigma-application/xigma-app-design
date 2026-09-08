@@ -15,13 +15,18 @@ import { TSceneNode } from 'types/design/types';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { getAutoLayoutReorderRenderNode } from './getAutoLayoutReorderRenderNode';
 
-export const drawFrameOutlines = (context: TDrawSceneContext, sceneNodes: TSceneNode[], refs: TCanvasRefs): void => {
+export const drawFrameOutlines = (
+  context: TDrawSceneContext,
+  sceneNodes: TSceneNode[],
+  refs: TCanvasRefs,
+  nodesById: Record<string, TSceneNode>,
+): void => {
   if (selectAreFrameOutlinesVisible(store.getState())) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
     sceneNodes.forEach((rawNode) => {
       if (rawNode.type === NodeType.frame) {
-        const node = getAutoLayoutReorderRenderNode(refs, rawNode);
+        const node = getAutoLayoutReorderRenderNode(refs, rawNode, nodesById);
 
         drawThickOutline(
           gl,
