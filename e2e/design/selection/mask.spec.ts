@@ -160,6 +160,97 @@ test('creating a Mask group from two children of a Frame keeps it inside frame.c
   expect(Object.values(afterDrag.nodes).filter((node) => node.type === 'mask')).toHaveLength(1);
 });
 
+test('masking two auto-layout members shrinks the container and reflows the frame; removing the mask grows it back and reflows again', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-mask-autolayout-reflow');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 700);
+  await page.locator('[data-test-toggle-button-group="flow"]').getByLabel('Horizontal', { exact: true }).click();
+
+  // A, B and C become three separate direct auto-layout members, left to right
+  await designPage.drawRectangle(1400, 200, 1450, 250);
+  await designPage.pointerDown(1420, 220);
+  await page.mouse.move(650, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  await designPage.drawRectangle(1400, 300, 1450, 350);
+  await designPage.pointerDown(1420, 320);
+  await page.mouse.move(700, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  await designPage.drawRectangle(1400, 400, 1450, 450);
+  await designPage.pointerDown(1420, 420);
+  await page.mouse.move(800, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as { childIds: string[] };
+    const [idA, idB, idC] = frame.childIds;
+    const a = activePage.nodes[idA] as { x: number; y: number };
+    const c = activePage.nodes[idC] as { x: number };
+
+    return { aCentre: { x: a.x + 25, y: a.y + 25 }, cX: c.x, frameId, idA, idB, idC };
+  });
+
+  // select A and B (both direct auto-layout members) and mask them — B, drawn second, becomes the
+  // mask shape; the container shrinks down to just B's own box
+  await designPage.click(before.aCentre.x, before.aCentre.y);
+  await designPage.click(before.aCentre.x + 50, before.aCentre.y, { shift: true });
+  await page.keyboard.press(USE_AS_MASK_SHORTCUT);
+
+  const afterMask = await page.evaluate(
+    async ({ frameId, idC }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const frame = activePage.nodes[frameId] as { childIds: string[] };
+      const [maskId] = frame.childIds;
+
+      return { c: activePage.nodes[idC] as { x: number }, mask: activePage.nodes[maskId] as { width: number }, maskId };
+    },
+    { frameId: before.frameId, idC: before.idC },
+  );
+
+  // the container shrank to a single member's own width (50, not the ~100 two-member span), and
+  // 'c' followed it back in
+  expect(afterMask.mask.width).toBeLessThan(70);
+  expect(afterMask.c.x).toBeLessThan(before.cX);
+
+  // action — remove the mask again
+  await page.evaluate(async (maskChildId) => {
+    const { store } = await import('/src/store/index.ts');
+    const { removeNodeMask } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(removeNodeMask(maskChildId));
+  }, before.idB);
+
+  const afterRemove = await page.evaluate(
+    async ({ idC, maskId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return { c: activePage.nodes[idC] as { x: number }, group: activePage.nodes[maskId] as { width: number } };
+    },
+    { idC: before.idC, maskId: afterMask.maskId },
+  );
+
+  // the container grew back to the union of both children, and 'c' was pushed back out again
+  expect(afterRemove.group.width).toBeGreaterThan(afterMask.mask.width);
+  expect(afterRemove.c.x).toBeGreaterThan(afterMask.c.x);
+});
+
 test('filling a mask vector reveals its underlying content everywhere the fill now covers, not just along the stroke — regression for the fill silently zeroing the mask target’s whole alpha channel', async ({
   page,
 }) => {

@@ -1,7 +1,7 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TMaskNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TMaskNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -95,6 +95,22 @@ const buildGroup = (overrides: Partial<TGroupNode> = {}): TGroupNode => ({
   ...overrides,
 });
 
+const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 10,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
 describe('handleRemoveNodeMask', () => {
   it('should convert the mask container back to a plain group when the current mask child is removed', () => {
     // mock — 'top' is the last child of the mask, i.e. the current mask shape; the container's own
@@ -114,6 +130,27 @@ describe('handleRemoveNodeMask', () => {
     expect(converted.childIds).toEqual(['bottom', 'top']);
     // back to plain-group semantics — the box widens to the union of both children again
     expect(converted).toMatchObject({ height: 10, width: 50, x: 0, y: 0 });
+  });
+
+  it('should reflow the auto-layout frame’s other children once removing the mask grows the container’s box', () => {
+    // mock — the mask container is a member of a horizontal auto-layout frame alongside sibling c;
+    // removing the mask grows the container from just 'top' (10 wide) back to the union of both
+    // children (50 wide), which must push 'c' further along the frame
+    const bottom = buildRectangle({ id: 'bottom', parentId: 'mask-1', x: 0 });
+    const top = buildRectangle({ id: 'top', parentId: 'mask-1', x: 40 });
+    const mask = buildMask({ childIds: ['bottom', 'top'], height: 10, parentId: 'frame-1', width: 10, x: 40, y: 0 });
+    const c = buildRectangle({ id: 'c', parentId: 'frame-1', x: 999 });
+    const frame = buildFrame({ childIds: ['mask-1', 'c'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ [bottom.id]: bottom, 'frame-1': frame, [mask.id]: mask, [top.id]: top, [c.id]: c });
+
+    // action
+    handleRemoveNodeMask(state, top.id);
+
+    // result — the converted group is pulled back to the frame's slot-0 layout position, widened to
+    // the union, and 'c' is forced past it at the new, correct offset
+    const page = getActivePage(state);
+    expect(page.nodes[mask.id]).toMatchObject({ width: 50, x: 0 });
+    expect(page.nodes.c).toMatchObject({ x: 50 });
   });
 
   it('should do nothing when the node is not the current (last) mask child', () => {

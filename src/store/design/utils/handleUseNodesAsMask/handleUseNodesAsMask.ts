@@ -9,6 +9,7 @@ import { TDesignState } from '../../types';
 import { getActivePage } from '../getActivePage';
 import { getMaskChildOrder } from './getMaskChildOrder';
 import { handleGroupNodes } from '../handleGroupNodes/handleGroupNodes';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const handleUseNodesAsMask = (state: TDesignState, groupId: string): void => {
@@ -23,5 +24,6 @@ export const handleUseNodesAsMask = (state: TDesignState, groupId: string): void
     page.nodes[groupId] = { ...group, childIds, name: DEFAULT_MASK_GROUP_NAME, type: NodeType.mask };
     page.selectedIds = [childIds[childIds.length - 1]];
     syncGroupBounds(state, groupId);
+    syncAutoLayoutChildren(state, group.parentId);
   }
 };

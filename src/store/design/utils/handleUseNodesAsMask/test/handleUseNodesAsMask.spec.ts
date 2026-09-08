@@ -2,7 +2,7 @@
 import { DEFAULT_MASK_GROUP_NAME } from '../../../constants';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TMaskNode, TRectangleNode } from 'types/design/types';
 
@@ -154,6 +154,27 @@ describe('handleUseNodesAsMask', () => {
     const page = getActivePage(state);
     const mask = page.nodes['group-1'] as TMaskNode;
     expect(mask.childIds).toEqual(['a', 'b']);
+  });
+
+  it('should reflow the auto-layout frame’s other children once masking shrinks the container’s box', () => {
+    // mock — a and b are direct children of a horizontal auto-layout frame, alongside sibling c;
+    // masking a+b shrinks the resulting container down to just b's own box (the mask shape), which
+    // must slide the frame's next member (c) back over to close the freed-up space
+    const a = buildRect({ height: 10, id: 'a', parentId: 'frame-1', width: 10, x: 0, y: 0 });
+    const b = buildRect({ height: 10, id: 'b', parentId: 'frame-1', width: 10, x: 10, y: 0 });
+    const c = buildRect({ height: 10, id: 'c', parentId: 'frame-1', width: 10, x: 20, y: 0 });
+    const frame = buildFrame({ childIds: ['a', 'b', 'c'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ nodes: { a, b, c, 'frame-1': frame }, rootOrder: ['frame-1'], selectedIds: ['a', 'b'] });
+
+    // action
+    handleUseNodesAsMask(state, 'group-1');
+
+    // result — the mask container shrank to b's own 10-wide box and was pulled back to the frame's
+    // slot-0 layout position, and 'c' followed it in, closing the gap the shrink opened up
+    const page = getActivePage(state);
+    const mask = page.nodes['group-1'] as TMaskNode;
+    expect(mask).toMatchObject({ width: 10, x: 0 });
+    expect(page.nodes.c).toMatchObject({ x: 10 });
   });
 
   it('should no-op when nothing is selected', () => {
