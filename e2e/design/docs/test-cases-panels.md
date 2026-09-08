@@ -103,6 +103,7 @@ the Layers panel and the Pages list. A drop either nests the dragged row inside 
 | 346 | Dropping a layer onto the middle of an already-expanded group also nests it as the first child                                                                                     |  —   | ✅ `layers-drag-drop.spec.ts` |
 | 347 | Holding a drag over a collapsed group auto-expands it after the spring-load delay, and releasing right there still drops into the group                                            |  —   | ✅ `layers-drag-drop.spec.ts` |
 | 348 | Dragging a row onto a sibling reorders it using the target parent's own row order — forward (matching `childIds`) for an auto-layout frame, reversed (z-order) for everything else |  ✅  | ✅ `layers-drag-drop.spec.ts` |
+| 349 | Dragging a Frame row into an existing Mask group, even dropped last, must not let the Frame become the active mask — it's pushed off the last slot instead                         |  ✅  | ✅ `layers-drag-drop.spec.ts` |
 
 #348 is a real, reported regression, found right after `useTreeSource.ts` was fixed to list an
 auto-layout frame's children in forward order (matching the visual layout flow — see

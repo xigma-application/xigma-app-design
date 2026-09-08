@@ -2,16 +2,15 @@
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { isLayoutContainerNode } from 'utils/canvas/signals/isLayoutContainerNode';
+import { containsLayoutContainerNode } from '../nodeHierarchy/containsLayoutContainerNode';
 
 export const getMaskChildOrder = (childIds: string[], nodes: Record<string, TSceneNode>): string[] => {
   const lastNode = nodes[childIds[childIds.length - 1]];
 
-  if (lastNode && isLayoutContainerNode(lastNode)) {
+  if (lastNode && containsLayoutContainerNode(lastNode, nodes)) {
     const reverseIndex = [...childIds].reverse().findIndex((id) => {
       const node = nodes[id];
-
-      return node && !isLayoutContainerNode(node);
+      return node && !containsLayoutContainerNode(node, nodes);
     });
 
     if (reverseIndex !== -1) {

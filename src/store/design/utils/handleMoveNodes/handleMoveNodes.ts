@@ -9,6 +9,7 @@ import { insertNodesIntoContainer } from './insertNodesIntoContainer';
 import { pruneEmptySourceGroup } from './pruneEmptySourceGroup';
 import { removeNodesFromContainer } from '../removeNodesFromContainer';
 import { reparentNodes } from './reparentNodes';
+import { resyncTargetMaskOrder } from './resyncTargetMaskOrder';
 import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
@@ -24,6 +25,7 @@ export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, tar
     removeNodesFromContainer(page, sourceParentId, nodeIds);
     reparentNodes(page, nodeIds, targetParentId, isReparenting);
     insertNodesIntoContainer(page, targetParentId, nodeIds, targetIndex);
+    resyncTargetMaskOrder(page, targetParentId);
     pruneEmptySourceGroup(state, sourceParentId, targetParentId);
     syncGroupBounds(state, targetParentId);
     syncAutoLayoutChildren(state, sourceParentId);

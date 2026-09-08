@@ -190,3 +190,49 @@ test('dragging a Layers row onto a sibling row reorders them, using the auto-lay
 
   expect(after).toEqual([before[0], before[2], before[1]]);
 });
+
+test('dragging a Frame row into an existing Mask group must not let it become the mask, even dropped last', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-frame-into-mask');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A — masked content
+  await designPage.drawRectangle(760, 100, 800, 140); // B — drawn second, becomes the mask
+  await designPage.click(720, 120, { shift: true }); // selection = [A, B]
+  await page.keyboard.press('Alt+Control+M'); // Use as mask
+  await designPage.drawFrame(820, 100, 900, 200); // loose Frame, at the root
+  await designPage.click(1500, 600); // deselect
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  // a freshly created group starts expanded — Frame, Mask group, and its 2 rectangle children
+  await expect(rows).toHaveCount(4);
+
+  const frameRow = rows.filter({ hasText: 'Frame' });
+
+  // sanity — before the drag, exactly one rectangle row carries the "Mask" badge
+  const maskedRectRow = rows.filter({ hasText: 'Rectangle' }).filter({ hasText: 'Mask' });
+  await expect(maskedRectRow).toHaveCount(1);
+
+  const frameBox = await frameRow.boundingBox();
+  const maskedBox = await maskedRectRow.boundingBox();
+
+  if (!frameBox || !maskedBox) {
+    throw new Error('row bounding box unavailable');
+  }
+
+  // drop the Frame onto the BOTTOM edge of the currently-masked row — "insert after it", i.e. into
+  // the last slot, exactly the position that would make the Frame the new active mask
+  await page.mouse.move(frameBox.x + frameBox.width / 2, frameBox.y + frameBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(maskedBox.x + maskedBox.width / 2, maskedBox.y + maskedBox.height - 2, { steps: 10 });
+  await page.mouse.up();
+
+  // the Frame landed inside the Mask group, but the badge stayed on the rectangle — the Frame never
+  // became the active mask
+  await expect(rows).toHaveCount(4);
+  await expect(rows.filter({ hasText: 'Frame' }).filter({ hasText: 'Mask' })).toHaveCount(0);
+  await expect(rows.filter({ hasText: 'Rectangle' }).filter({ hasText: 'Mask' })).toHaveCount(1);
+});

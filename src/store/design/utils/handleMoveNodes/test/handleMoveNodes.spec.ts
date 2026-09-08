@@ -1,7 +1,7 @@
 // types
 import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TMaskNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -45,6 +45,20 @@ const buildFrame = (overrides: Partial<TFrameNode>): TFrameNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.frame,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildMask = (overrides: Partial<TMaskNode>): TMaskNode => ({
+  childIds: [],
+  height: 10,
+  id: 'mask-1',
+  name: 'Mask group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.mask,
   width: 10,
   x: 0,
   y: 0,
@@ -378,6 +392,53 @@ describe('handleMoveNodes', () => {
 
     // result
     expect(getActivePage(state).nodes.a).toMatchObject({ ignoreAutoLayout: true });
+  });
+
+  it('should reorder a frame away from the mask position when dropped last into a mask container via the tree', () => {
+    // mock — a mask with an existing masked shape 'b'; dragging a frame in and dropping it last
+    // must not let the frame become the mask itself
+    const b = buildRect({ id: 'b', parentId: 'mask-1' });
+    const frame = buildFrame({ id: 'frame-1' });
+    const mask = buildMask({ childIds: ['b'], id: 'mask-1' });
+    const state = buildState({ nodes: { b, 'frame-1': frame, 'mask-1': mask }, rootOrder: ['frame-1', 'mask-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['frame-1'], targetIndex: 1, targetParentId: 'mask-1' });
+
+    // result — the frame lands, but 'b' stays last (still the mask)
+    const page = getActivePage(state);
+    expect((page.nodes['mask-1'] as TMaskNode).childIds).toEqual(['frame-1', 'b']);
+  });
+
+  it('should recursively reorder a group whose subtree contains a nested frame away from the mask position', () => {
+    // mock — 'g' isn't itself a frame, but wraps one two levels deep; it must not become the mask
+    const innerFrame = buildFrame({ id: 'inner-frame', parentId: 'g' });
+    const g = buildGroup({ childIds: ['inner-frame'], id: 'g' });
+    const b = buildRect({ id: 'b', parentId: 'mask-1' });
+    const mask = buildMask({ childIds: ['b'], id: 'mask-1' });
+    const state = buildState({ nodes: { b, g, 'inner-frame': innerFrame, 'mask-1': mask }, rootOrder: ['g', 'mask-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['g'], targetIndex: 1, targetParentId: 'mask-1' });
+
+    // result
+    const page = getActivePage(state);
+    expect((page.nodes['mask-1'] as TMaskNode).childIds).toEqual(['g', 'b']);
+  });
+
+  it('should let an ordinary node become the new mask when dropped last into a mask container', () => {
+    // mock — sanity check: the reorder guard only kicks in for a layout-container subtree
+    const b = buildRect({ id: 'b', parentId: 'mask-1' });
+    const c = buildRect({ id: 'c' });
+    const mask = buildMask({ childIds: ['b'], id: 'mask-1' });
+    const state = buildState({ nodes: { b, c, 'mask-1': mask }, rootOrder: ['c', 'mask-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['c'], targetIndex: 1, targetParentId: 'mask-1' });
+
+    // result — 'c' takes over as the mask, exactly as dropped
+    const page = getActivePage(state);
+    expect((page.nodes['mask-1'] as TMaskNode).childIds).toEqual(['b', 'c']);
   });
 
   it('should tolerate a moved id that no longer resolves to a node', () => {
