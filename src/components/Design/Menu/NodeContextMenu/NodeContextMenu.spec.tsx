@@ -553,6 +553,15 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Flip vertical')).not.toBeInTheDocument();
   });
 
+  it('should hide Flip horizontal/vertical for a frame node too', () => {
+    // before
+    renderNodeContextMenu({ node: buildFrameNode() });
+
+    // result
+    expect(screen.queryByText('Flip horizontal')).not.toBeInTheDocument();
+    expect(screen.queryByText('Flip vertical')).not.toBeInTheDocument();
+  });
+
   it('should show "Create separate layers" and hide "Send to Figma Make" for a text node attached to a path', () => {
     // before
     renderNodeContextMenu({ node: buildTextNode('path-1') });

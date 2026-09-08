@@ -6,7 +6,7 @@ import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TGroupNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { handleFlipSelection } from '../handleFlipSelection';
@@ -43,6 +43,51 @@ const addRectangleNode = (overrides: Partial<TRectangleNode> = {}): string => {
       parentId: null,
       rotation: 0,
       type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+      ...overrides,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addFrameNode = (overrides: Partial<TFrameNode> = {}): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+      ...overrides,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addSectionNode = (overrides: Partial<TSectionNode> = {}): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      fill: '#ff0000',
+      height: 20,
+      name: 'Section',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
       width: 20,
       x: 0,
       y: 0,
@@ -222,5 +267,47 @@ describe('handleFlipSelection', () => {
 
     // result
     expect(selectNodes(store.getState())).toEqual(before);
+  });
+
+  it('should do nothing at all when the selection is a single frame', () => {
+    // mock
+    const id = addFrameNode();
+    store.dispatch(setSelection([id]));
+    const before = selectNodes(store.getState());
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result — frame mirroring is unsupported; the node is left completely untouched
+    expect(selectNodes(store.getState())).toEqual(before);
+  });
+
+  it('should do nothing at all when the selection is a single section', () => {
+    // mock
+    const id = addSectionNode();
+    store.dispatch(setSelection([id]));
+    const before = selectNodes(store.getState());
+
+    // action
+    handleFlipSelection(store.dispatch, 'vertical');
+
+    // result
+    expect(selectNodes(store.getState())).toEqual(before);
+  });
+
+  it('should skip a frame but still flip the rest of a mixed selection', () => {
+    // mock
+    const frameId = addFrameNode({ x: 0, y: 0 });
+    const rectId = addRectangleNode({ x: 80, y: 0 });
+    store.dispatch(setSelection([frameId, rectId]));
+    const frameBefore = selectNodes(store.getState())[frameId];
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result — the frame is untouched, the rectangle mirrors around the shared bbox
+    const nodes = selectNodes(store.getState());
+    expect(nodes[frameId]).toEqual(frameBefore);
+    expect((nodes[rectId] as TRectangleNode).x).not.toBe(80);
   });
 });

@@ -172,14 +172,14 @@ const ObjectMenu: FC = () => {
       />
       <MenuSeparator />
       <MenuItem
-        disabled={!hasSelection}
+        disabled={!hasSelection || everySelectedIsFrame || everySelectedIsSection}
         label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)}
         onClick={onFlipHorizontal}
         shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')}
         withCheck={false}
       />
       <MenuItem
-        disabled={!hasSelection}
+        disabled={!hasSelection || everySelectedIsFrame || everySelectedIsSection}
         label={t(NODE_MENU_FLIP_VERTICAL_KEY)}
         onClick={onFlipVertical}
         shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')}

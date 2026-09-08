@@ -39,6 +39,7 @@ export const buildRotationButtons = (frame: TFrameNode | undefined, dispatch: Ap
   },
   {
     ariaLabel: t(NODE_MENU_FLIP_HORIZONTAL_KEY),
+    disabled: true,
     name: 'FlipHorizontal',
     onClick: (): void => {
       handleFlipSelection(dispatch, 'horizontal');
@@ -52,6 +53,7 @@ export const buildRotationButtons = (frame: TFrameNode | undefined, dispatch: Ap
   },
   {
     ariaLabel: t(NODE_MENU_FLIP_VERTICAL_KEY),
+    disabled: true,
     name: 'FlipVertical',
     onClick: (): void => {
       handleFlipSelection(dispatch, 'vertical');

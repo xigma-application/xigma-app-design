@@ -247,8 +247,8 @@ describe('ObjectMenu', () => {
   });
 
   it('should enable every wireable row once something is selected, and call its existing action when selected', () => {
-    // before
-    const nodeId = addFrameNode();
+    // before — a rectangle, not a frame: Flip stays enabled too (unlike the frame/section cases below)
+    const nodeId = addRectangleNode();
     store.dispatch(setSelection([nodeId]));
 
     renderInMenu(<ObjectMenu />);
@@ -256,7 +256,6 @@ describe('ObjectMenu', () => {
     const cases: [string, ReturnType<typeof vi.fn>][] = [
       ['Group selection', onGroupSelection],
       ['Ungroup selection', onUngroupSelection],
-      ['Convert to section', onConvertToSection],
       ['Use as mask', onUseAsMask],
       ['Bring to front', onBringToFront],
       ['Send to back', onSendToBack],
@@ -276,6 +275,42 @@ describe('ObjectMenu', () => {
       // result
       expect(handler).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('should keep Flip disabled when every selected node is a frame', () => {
+    // before
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Flip horizontal').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Flip vertical').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Flip disabled when every selected node is a section', () => {
+    // before
+    const sectionId = addSectionNode();
+    store.dispatch(setSelection([sectionId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Flip horizontal').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Flip vertical').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Flip enabled when the selection mixes a frame with a plain node', () => {
+    // before — handleFlipSelection itself skips the frame leaf, so the row stays clickable
+    const frameId = addFrameNode();
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([frameId, rectangleId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Flip horizontal').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
   it('should enable Convert to frame and call onConvertToFrame when every selected node is a section', () => {

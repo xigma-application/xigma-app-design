@@ -253,17 +253,19 @@ exports[`App snapshots > should render App 1`] = `
               >
                 <svg
                   class="Icon"
-                  data-fpl-icon-size="24"
-                  fill="none"
                   height="24"
                   style="color: var(--color-neutral-1);"
-                  viewBox="0 0 24 24"
+                  viewBox="0 0 12 12"
                   width="24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M11.117 5.586A2 2 0 0 1 13 5.649l4 2.31.113.07A2 2 0 0 1 18 9.69v4.62a2 2 0 0 1-.887 1.66l-.113.072-4 2.309a2 2 0 0 1-1.883.063L11 18.351l-4-2.309a2 2 0 0 1-1-1.732V9.69a2 2 0 0 1 1-1.73l4-2.31zm1.383.93a1 1 0 0 0-1 0l-4 2.308-.11.074A1 1 0 0 0 7 9.69v4.62l.009.132c.04.305.22.578.491.734l4 2.31c.27.155.597.175.88.058l.12-.059 4-2.31a1 1 0 0 0 .491-.733L17 14.31V9.69a1 1 0 0 0-.39-.792l-.11-.074zM12 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
+                    d="m2 3.693 4-2.31 4 2.31v4.619l-4 2.31-4-2.31zM6 .23l5 2.887V8.89l-5 2.887L1 8.89V3.116zM7 6c0 .553-.448 1-1 1-.552 0-1-.447-1-1 0-.552.448-1 1-1 .552 0 1 .448 1 1"
                     data-svg-property="fill"
                     fill="white"
+                    fill-opacity="1"
+                    fill-rule="evenodd"
+                    stroke="none"
                   />
                 </svg>
               </button>

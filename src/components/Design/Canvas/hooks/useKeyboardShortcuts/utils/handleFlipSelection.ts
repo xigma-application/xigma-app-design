@@ -14,6 +14,7 @@ import { NodeType } from 'types/design/enums';
 import { getGroupLeafNodes } from 'store/design/utils/nodeHierarchy/getGroupLeafNodes';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 import { getResizeNodeOrigin } from '../../useSelectionTool/utils/handlePointerDown/armResizeDrag/getResizeNodeOrigin';
+import { isFlipDisabledNodeType } from 'utils/canvas/signals/isFlipDisabledNodeType';
 import { resizeNode } from '../../useSelectionTool/utils/handlePointerMove/continueResizeDrag/resizeNode/resizeNode';
 
 export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 'vertical'): void => {
@@ -29,18 +30,20 @@ export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 
     const scaleX = axis === 'horizontal' ? -1 : 1;
     const scaleY = axis === 'vertical' ? -1 : 1;
     const isSingleBoxOrigin = selectedNodes.length === 1 && selectedNodes[0].type !== NodeType.group;
-    const leaves = selectedNodes.flatMap((node) => getGroupLeafNodes(node, nodes));
+    const leaves = selectedNodes.flatMap((node) => getGroupLeafNodes(node, nodes)).filter((leaf) => !isFlipDisabledNodeType(leaf));
 
-    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    leaves.forEach((leaf) => {
-      const origin = getResizeNodeOrigin(leaf);
+    if (leaves.length !== 0) {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      leaves.forEach((leaf) => {
+        const origin = getResizeNodeOrigin(leaf);
 
-      resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
+        resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
 
-      if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
-        dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
-      }
-    });
-    dispatch(endHistoryGesture());
+        if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
+          dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
+        }
+      });
+      dispatch(endHistoryGesture());
+    }
   }
 };

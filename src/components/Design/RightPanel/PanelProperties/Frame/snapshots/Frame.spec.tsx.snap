@@ -561,8 +561,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
             <button
               aria-label="Flip horizontal"
               aria-pressed="false"
-              class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
+              disabled=""
               type="button"
             >
               <svg
@@ -586,8 +587,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
             <button
               aria-label="Flip vertical"
               aria-pressed="false"
-              class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
+              disabled=""
               type="button"
             >
               <svg

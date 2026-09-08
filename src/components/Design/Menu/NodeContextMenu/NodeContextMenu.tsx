@@ -260,7 +260,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         shortcut={KEYBOARD_SHORTCUTS.lockUnlockLayer.join('')}
         withCheck={false}
       />
-      {!isSection && (
+      {!isSection && !isFrame && (
         <>
           <MenuSeparator />
           <MenuItem
