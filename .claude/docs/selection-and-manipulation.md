@@ -2002,6 +2002,45 @@ existing systems being explicitly named as the references made the split the mor
 of the request. See `e2e/design/docs/test-cases-auto-layout.md`'s "Padding handles" section for the
 full scenario table.
 
+**Click-to-edit value popup.** A plain click on a padding handle (pointerdown+pointerup with no
+intervening move — same `hasMoved` boolean other drag states already use, e.g.
+`TCornerRadiusDragState`, now also on `TAutoLayoutPaddingDragState`) opens a small floating HTML
+popup instead of doing nothing: `AutoLayoutPaddingEditOverlay` (mounted in `Canvas.tsx` alongside
+the other `*EditOverlay` components), showing the side's own icon
+(`Icon name="PaddingT/R/B/L"`, matching the RightPanel's `ColumnPadding` icons) plus a bare
+`<input>` pre-filled with the side's current value. Enter or blur commits (parsed via
+`parseInt(raw.replace(/[^\d]/g, ''))`, same stripping regex as the RightPanel's `sideField`, then
+clamped non-negative by `clampAutoLayoutPaddingValue`); Escape cancels. The popup's own
+`onPointerDown` calls `stopPropagation()` (mirroring `CanvasValueLabelInput`), so clicking into it
+never reaches the canvas's own pointerdown handling and can't trigger the empty-space deselect
+path.
+
+Unlike every other on-canvas edit overlay in this doc (Frame/Section name, vector width — all
+opened via a dedicated `dblclick` listener owned by a React hook, `useDoubleClickActivation`), this
+one's trigger lives inside the imperative `armAutoLayoutPaddingDrag`/`continueAutoLayoutPaddingDrag`/
+`disarmAutoLayoutPaddingDrag` resolver chain, which has no React state of its own to set. The
+bridge is a plain Redux dispatch from `disarmAutoLayoutPaddingDrag` (`startAutoLayoutPaddingEdit`,
+now taking `dispatch` like `disarmResizeDrag`/`disarmRotateDrag` already do) into a new transient
+`state.design.editingAutoLayoutPadding: TAutoLayoutPaddingEditState | null` field (`{ frameId;
+point; side }`, optional on `TDesignState` like `hoveredDimensionField` so the dozens of existing
+full-object `TDesignState` test fixtures across `store/design/utils/test/` didn't all need
+updating) — the same "imperative code dispatches, overlay component `useSelector`s it" pattern
+`TextEditOverlay`/`startTextEdit` already uses, chosen over local `useState` specifically because
+nothing here is a React hook. `stopAutoLayoutPaddingEdit({ frameId, side })` is guarded (only clears
+if both still match the live state) so a stale blur-commit from a just-superseded popup — e.g.
+clicking straight from one handle's open popup onto a different handle, which blurs the old input
+essentially concurrently with the new click's own `pointerup`-time dispatch — can't clobber the
+newly-opened one; ordering between the two dispatches doesn't matter, only identity does. Neither
+`startAutoLayoutPaddingEdit` nor `stopAutoLayoutPaddingEdit` is in `historyMiddleware`'s
+`UNDOABLE_ACTION_TYPES` (opening/closing the popup isn't itself undoable — same as `startTextEdit`/
+`stopTextEdit`); the eventual `updateNode` commit is, same as every other padding change.
+
+The WebGL-drawn parts stay reactive to this same state via the established one-way "React state →
+ref" mirror (`refs.transform.autoLayoutPaddingEditRef`, written by the overlay's own hook, read
+every render-loop frame): the guide line keeps drawing for the side being edited (same as an active
+drag), but `drawAutoLayoutPaddingLabel` suppresses its own value-badge text for that exact
+frame+side so the DOM popup's number doesn't double up with a second one drawn behind it.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

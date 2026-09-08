@@ -1,0 +1,1 @@
+export const AUTO_LAYOUT_PADDING_VALUE_MIN = 0;

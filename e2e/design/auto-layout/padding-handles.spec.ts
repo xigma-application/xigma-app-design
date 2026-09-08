@@ -32,6 +32,14 @@ const readFramePaddingLeft = (page: Page): Promise<number> =>
     return (activePage.nodes[activePage.rootOrder[0]] as { paddingLeft?: number }).paddingLeft ?? 0;
   });
 
+const readSelectedIds = (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].selectedIds;
+  });
+
 const buildHorizontalFrameWithChild = async (page: Page, testName: string): Promise<DesignPage> => {
   const designPage = new DesignPage(page);
 
@@ -112,5 +120,68 @@ test.describe('auto-layout — canvas padding handles', () => {
     const selectedAndHovered = await designPage.canvas.screenshot();
 
     expect(selectedAndHovered.equals(selectedOnly)).toBe(false);
+  });
+
+  test('clicking a padding handle without dragging opens a value popup that sets the padding on Enter', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-click-popup');
+    const selectedBefore = await readSelectedIds(page);
+
+    // a plain click (no intervening move) on the zero-padding left handle, instead of a drag
+    await designPage.pointerMove(610, 250);
+    await designPage.pointerDown(610, 250);
+    await designPage.pointerUp();
+
+    const input = page.locator('[data-test-auto-layout-padding-value-input]');
+
+    await expect(input).toBeVisible();
+    await expect(input).toHaveValue('0');
+
+    await input.fill('40');
+    await input.press('Enter');
+
+    await expect(input).toBeHidden();
+    expect(await readFramePaddingLeft(page)).toBe(40);
+    // committing the popup must not have cleared the frame's selection
+    expect(await readSelectedIds(page)).toEqual(selectedBefore);
+  });
+
+  test('pressing Escape in the padding value popup cancels without changing the padding', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-click-popup-escape');
+
+    await designPage.pointerMove(610, 250);
+    await designPage.pointerDown(610, 250);
+    await designPage.pointerUp();
+
+    const input = page.locator('[data-test-auto-layout-padding-value-input]');
+
+    await expect(input).toBeVisible();
+    await input.fill('40');
+    await input.press('Escape');
+
+    await expect(input).toBeHidden();
+    expect(await readFramePaddingLeft(page)).toBe(0);
+  });
+
+  test('clicking elsewhere on the canvas blurs the padding value popup and commits its value', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-click-popup-blur');
+    const selectedBefore = await readSelectedIds(page);
+
+    await designPage.pointerMove(610, 250);
+    await designPage.pointerDown(610, 250);
+    await designPage.pointerUp();
+
+    const input = page.locator('[data-test-auto-layout-padding-value-input]');
+
+    await expect(input).toBeVisible();
+    await input.fill('25');
+
+    // click elsewhere on the frame's own canvas area, away from the popup, to blur it
+    await designPage.pointerMove(750, 300);
+    await designPage.pointerDown(750, 300);
+    await designPage.pointerUp();
+
+    await expect(input).toBeHidden();
+    expect(await readFramePaddingLeft(page)).toBe(25);
+    expect(await readSelectedIds(page)).toEqual(selectedBefore);
   });
 });

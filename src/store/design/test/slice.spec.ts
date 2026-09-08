@@ -32,8 +32,10 @@ import slice, {
   setTemporaryActiveTool,
   setVectorEditingNodeIds,
   setViewport,
+  startAutoLayoutPaddingEdit,
   startCommentDraft,
   startTextEdit,
+  stopAutoLayoutPaddingEdit,
   stopTextEdit,
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
@@ -84,6 +86,7 @@ describe('design slice', () => {
       activeTool: ToolName.default,
       commentDraftPosition: null,
       designHintLabelKey: null,
+      editingAutoLayoutPadding: null,
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -609,6 +612,36 @@ describe('design slice', () => {
     // result
     expect(state.editingTextBox).toBeNull();
     expect(state.editingTextContent).toBe('');
+  });
+
+  it('should open the auto-layout padding value popup for a handle', () => {
+    // action
+    const state = slice(undefined, startAutoLayoutPaddingEdit({ frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' }));
+
+    // result
+    expect(state.editingAutoLayoutPadding).toEqual({ frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' });
+  });
+
+  it('should close the auto-layout padding value popup when the frame and side match', () => {
+    // before
+    const editing = slice(undefined, startAutoLayoutPaddingEdit({ frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' }));
+
+    // action
+    const state = slice(editing, stopAutoLayoutPaddingEdit({ frameId: 'frame-1', side: 'left' }));
+
+    // result
+    expect(state.editingAutoLayoutPadding).toBeNull();
+  });
+
+  it('should keep the auto-layout padding value popup open for an unrelated frame/side', () => {
+    // before
+    const editing = slice(undefined, startAutoLayoutPaddingEdit({ frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' }));
+
+    // action
+    const state = slice(editing, stopAutoLayoutPaddingEdit({ frameId: 'frame-1', side: 'top' }));
+
+    // result
+    expect(state.editingAutoLayoutPadding).toEqual({ frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' });
   });
 
   it('should set the Actions panel open flag', () => {

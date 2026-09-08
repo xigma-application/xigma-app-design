@@ -7,6 +7,7 @@ export const createTransformRefs = (overrides: Partial<TTransformRefs> = {}): TT
   autoLayoutDropTargetRef: { current: null },
   autoLayoutGapDragRef: { current: null },
   autoLayoutPaddingDragRef: { current: null },
+  autoLayoutPaddingEditRef: { current: null },
   autoLayoutReorderPreviewRef: { current: null },
   contactGuidesRef: { current: null },
   dimensionHintGuidesRef: { current: null },

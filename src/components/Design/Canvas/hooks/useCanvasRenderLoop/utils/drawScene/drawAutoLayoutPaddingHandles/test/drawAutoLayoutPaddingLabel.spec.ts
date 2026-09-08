@@ -55,6 +55,7 @@ describe('drawAutoLayoutPaddingLabel', () => {
 
     refs.transform.autoLayoutPaddingDragRef.current = {
       frameId: 'frame-1',
+      hasMoved: true,
       mode: 'delta',
       originalPaddingValue: 20,
       point: { x: 20, y: 100 },
@@ -130,6 +131,34 @@ describe('drawAutoLayoutPaddingLabel', () => {
       context.viewport,
       { fill: AUTO_LAYOUT_PADDING_HANDLE_FILL },
     );
+  });
+
+  it('should draw nothing while the hovered handle has its value popup open', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredAutoLayoutPaddingRef.current = { frameId: 'frame-1', point: { x: 150, y: 12 }, side: 'top' };
+    refs.transform.autoLayoutPaddingEditRef.current = { frameId: 'frame-1', point: { x: 150, y: 12 }, side: 'top' };
+
+    // before
+    drawAutoLayoutPaddingLabel(context, refs, { 'frame-1': frame });
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should keep drawing the hovered handle’s label when the value popup is open for a different side', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredAutoLayoutPaddingRef.current = { frameId: 'frame-1', point: { x: 150, y: 12 }, side: 'top' };
+    refs.transform.autoLayoutPaddingEditRef.current = { frameId: 'frame-1', point: { x: 20, y: 100 }, side: 'left' };
+
+    // before
+    drawAutoLayoutPaddingLabel(context, refs, { 'frame-1': frame });
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalled();
   });
 
   it('should draw nothing when neither a drag nor a hover is active', () => {

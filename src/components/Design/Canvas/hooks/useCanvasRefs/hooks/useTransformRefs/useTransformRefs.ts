@@ -10,6 +10,7 @@ import {
   TAutoLayoutReorderPreview,
   TTransformRefs,
 } from 'types/design/canvas/types';
+import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -22,6 +23,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const autoLayoutDropTargetRef = useRef<TAutoLayoutDropTargetHover | null>(null);
   const autoLayoutGapDragRef = useRef<TAutoLayoutGapDragState | null>(null);
   const autoLayoutPaddingDragRef = useRef<TAutoLayoutPaddingDragState | null>(null);
+  const autoLayoutPaddingEditRef = useRef<TAutoLayoutPaddingEditState | null>(null);
   const autoLayoutReorderPreviewRef = useRef<TAutoLayoutReorderPreview | null>(null);
   const contactGuidesRef = useRef<TShapeContactGuide[] | null>(null);
   const dimensionHintGuidesRef = useRef<TDimensionHintGuides | null>(null);
@@ -42,6 +44,7 @@ export const useTransformRefs = (): TTransformRefs => {
       autoLayoutDropTargetRef,
       autoLayoutGapDragRef,
       autoLayoutPaddingDragRef,
+      autoLayoutPaddingEditRef,
       autoLayoutReorderPreviewRef,
       contactGuidesRef,
       dimensionHintGuidesRef,

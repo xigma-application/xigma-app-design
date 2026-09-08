@@ -5,6 +5,7 @@ import { RootState } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TDesignPage, TDimensionHintField, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
@@ -47,6 +48,9 @@ const selectCommentsRecord = createSelector([selectActivePage], (page): Record<s
 export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
 
 export const selectDesignHintLabelKey = (state: RootState): string | null => state.design.designHintLabelKey;
+
+export const selectEditingAutoLayoutPadding = (state: RootState): TAutoLayoutPaddingEditState | null =>
+  state.design.editingAutoLayoutPadding ?? null;
 
 export const selectEditingNodeId = (state: RootState): string | null => state.design.editingNodeId;
 

@@ -37,6 +37,7 @@ export const continueAutoLayoutPaddingDrag = (
       const nextValue = getAutoLayoutPaddingDragValue(dragState, frame, localPoint);
       const cursorAngle = getAutoLayoutPaddingCursorAngle(dragState.side, frame.rotation, false);
 
+      dragState.hasMoved = true;
       dragState.point = point;
       canvas.style.cursor = getRotatedCursorUrl('gap', cursorAngle) ?? canvas.style.cursor;
       dispatch(updateNode({ changes: { [getAutoLayoutPaddingKey(dragState.side)]: nextValue }, id: frame.id }));

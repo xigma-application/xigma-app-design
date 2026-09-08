@@ -16,6 +16,7 @@ export const armAutoLayoutPaddingDrag = (
 ): void => {
   paddingDragRef.current = {
     frameId,
+    hasMoved: false,
     mode: originalPaddingValue === 0 ? 'absolute' : 'delta',
     originalPaddingValue,
     point,

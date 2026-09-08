@@ -1,5 +1,6 @@
 // types
 import { ToolName } from 'types/design/enums';
+import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
@@ -48,6 +49,7 @@ export type TDesignState = {
   activeTool: ToolName;
   commentDraftPosition: TPoint | null;
   designHintLabelKey: string | null;
+  editingAutoLayoutPadding?: TAutoLayoutPaddingEditState | null;
   editingNodeId: string | null;
   editingSelectionChangedAt: number;
   editingSelectionEnd: number;

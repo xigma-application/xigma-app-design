@@ -12,6 +12,7 @@ import {
   selectCommentDraftPosition,
   selectComments,
   selectDescendantIdsOfSelected,
+  selectEditingAutoLayoutPadding,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -168,6 +169,20 @@ describe('design selectors', () => {
   it('should return the same array reference for selectComments when called again on the same state', () => {
     // result
     expect(selectComments(state)).toBe(selectComments(state));
+  });
+
+  it('should default the editing auto-layout padding state to null', () => {
+    // result
+    expect(selectEditingAutoLayoutPadding(state)).toBeNull();
+  });
+
+  it('should select the editing auto-layout padding state', () => {
+    // mock
+    const editing = { frameId: 'frame-1', point: { x: 10, y: 20 }, side: 'left' as const };
+    const editingState = { ...state, design: { ...state.design, editingAutoLayoutPadding: editing } };
+
+    // result
+    expect(selectEditingAutoLayoutPadding(editingState)).toEqual(editing);
   });
 
   it('should select the editing node id', () => {

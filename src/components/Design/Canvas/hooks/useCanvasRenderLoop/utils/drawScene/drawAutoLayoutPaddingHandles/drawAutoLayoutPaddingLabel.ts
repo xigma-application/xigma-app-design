@@ -15,9 +15,11 @@ const LABEL_OFFSET_DIRECTION = { x: 1, y: -1 };
 
 export const drawAutoLayoutPaddingLabel = (context: TDrawSceneContext, refs: TCanvasRefs, nodesById: Record<string, TSceneNode>): void => {
   const active = refs.transform.autoLayoutPaddingDragRef.current ?? refs.hover.hoveredAutoLayoutPaddingRef.current;
+  const editState = refs.transform.autoLayoutPaddingEditRef.current;
   const frame = active ? nodesById[active.frameId] : null;
+  const isActiveBeingEdited = Boolean(editState && active && editState.frameId === active.frameId && editState.side === active.side);
 
-  if (active && frame && frame.type === NodeType.frame) {
+  if (active && frame && frame.type === NodeType.frame && !isActiveBeingEdited) {
     const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
     const value = frame[getAutoLayoutPaddingKey(active.side)] ?? 0;
 

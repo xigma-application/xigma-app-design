@@ -20,6 +20,7 @@ describe('armAutoLayoutPaddingDrag', () => {
     // result
     expect(paddingDragRef.current).toEqual({
       frameId: 'frame-1',
+      hasMoved: false,
       mode: 'absolute',
       originalPaddingValue: 0,
       point,
@@ -42,6 +43,7 @@ describe('armAutoLayoutPaddingDrag', () => {
     // result
     expect(paddingDragRef.current).toEqual({
       frameId: 'frame-1',
+      hasMoved: false,
       mode: 'delta',
       originalPaddingValue: 40,
       point,

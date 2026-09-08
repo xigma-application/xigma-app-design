@@ -57,7 +57,7 @@ export const handlePointerUp = (
   disarmRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
   disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.cornerRadiusDragRef);
   disarmAutoLayoutGapDrag(canvas, event, canvasRefs.transform.autoLayoutGapDragRef);
-  disarmAutoLayoutPaddingDrag(canvas, event, canvasRefs.transform.autoLayoutPaddingDragRef);
+  disarmAutoLayoutPaddingDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutPaddingDragRef);
   disarmSmartSelectionGapDrag(canvas, event, dispatch, canvasRefs.smartSelection.gapDragRef);
   disarmSmartSelectionSwapDrag(canvas, event, dispatch, canvasRefs.smartSelection.swapDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);

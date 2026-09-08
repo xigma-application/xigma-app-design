@@ -27,17 +27,20 @@ export const drawAutoLayoutPaddingHandles = (
   const dragState = refs.transform.autoLayoutPaddingDragRef.current;
   const hoverState = refs.hover.hoveredAutoLayoutPaddingRef.current;
   const rightPanelGuide = refs.hover.rightPanelPaddingGuideRef.current;
+  const editState = refs.transform.autoLayoutPaddingEditRef.current;
 
   if (frame) {
-    const handles = getAutoLayoutPaddingHandles(frame, context.viewport, dragState?.side ?? null);
+    const editingSide: TAutoLayoutPaddingSide | null = editState && editState.frameId === frame.id ? editState.side : null;
+    const handles = getAutoLayoutPaddingHandles(frame, context.viewport, dragState?.side ?? editingSide);
     const frameCenter = getAutoLayoutFrameCenter(frame);
 
-    if (refs.hover.isAutoLayoutPaddingAreaHoveredRef.current || dragState) {
+    if (refs.hover.isAutoLayoutPaddingAreaHoveredRef.current || dragState || editingSide) {
       SIDES.forEach((side) => {
         const handle = handles[side];
         const isDraggingThisSide = dragState?.side === side;
+        const isEditingThisSide = editingSide === side;
 
-        if (isDraggingThisSide) {
+        if (isDraggingThisSide || isEditingThisSide) {
           drawAutoLayoutPaddingGuideLine(context, frame, handle.band, side, frameCenter, frame.rotation);
         } else if (handle.value > 0 || hoverState?.side === side) {
           drawAutoLayoutPaddingHandleBar(context, handle.handleCenter, side, frameCenter, frame.rotation);

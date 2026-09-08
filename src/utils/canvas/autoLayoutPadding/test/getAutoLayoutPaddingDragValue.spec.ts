@@ -25,6 +25,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 const dragState = (overrides: Partial<TAutoLayoutPaddingDragState> = {}): TAutoLayoutPaddingDragState => ({
   frameId: 'frame-1',
+  hasMoved: false,
   mode: 'absolute',
   originalPaddingValue: 0,
   point: { x: 0, y: 100 },

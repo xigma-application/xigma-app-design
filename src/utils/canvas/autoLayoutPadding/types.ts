@@ -11,3 +11,9 @@ export type TAutoLayoutPaddingHandle = {
 };
 
 export type TAutoLayoutPaddingHandles = Record<TAutoLayoutPaddingSide, TAutoLayoutPaddingHandle>;
+
+export type TAutoLayoutPaddingEditState = {
+  frameId: string;
+  point: TPoint;
+  side: TAutoLayoutPaddingSide;
+};

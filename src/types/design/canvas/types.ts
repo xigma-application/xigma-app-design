@@ -5,7 +5,7 @@ import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmen
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
-import { TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
+import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -314,6 +314,7 @@ export type TAutoLayoutGapDragState = {
 
 export type TAutoLayoutPaddingDragState = {
   frameId: string;
+  hasMoved: boolean;
   mode: 'absolute' | 'delta';
   originalPaddingValue: number;
   point: TPoint;
@@ -327,6 +328,7 @@ export type TTransformRefs = {
   autoLayoutDropTargetRef: RefObject<TAutoLayoutDropTargetHover | null>;
   autoLayoutGapDragRef: RefObject<TAutoLayoutGapDragState | null>;
   autoLayoutPaddingDragRef: RefObject<TAutoLayoutPaddingDragState | null>;
+  autoLayoutPaddingEditRef: RefObject<TAutoLayoutPaddingEditState | null>;
   autoLayoutReorderPreviewRef: RefObject<TAutoLayoutReorderPreview | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   dimensionHintGuidesRef: RefObject<TDimensionHintGuides | null>;

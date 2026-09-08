@@ -2,6 +2,7 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // components
+import AutoLayoutPaddingEditOverlay from './AutoLayoutPaddingEditOverlay/AutoLayoutPaddingEditOverlay';
 import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
@@ -110,6 +111,7 @@ const Canvas: FC = () => {
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />
       <SectionNameLabelEditOverlay />
+      <AutoLayoutPaddingEditOverlay />
       <Comment />
     </CanvasContextMenuPanel>
   );

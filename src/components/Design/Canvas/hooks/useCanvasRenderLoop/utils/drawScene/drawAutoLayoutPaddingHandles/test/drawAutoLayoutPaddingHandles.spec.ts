@@ -138,6 +138,7 @@ describe('drawAutoLayoutPaddingHandles', () => {
 
     refs.transform.autoLayoutPaddingDragRef.current = {
       frameId: 'frame-1',
+      hasMoved: true,
       mode: 'delta',
       originalPaddingValue: 20,
       point: { x: 10, y: 100 },
@@ -160,6 +161,7 @@ describe('drawAutoLayoutPaddingHandles', () => {
 
     refs.transform.autoLayoutPaddingDragRef.current = {
       frameId: 'frame-1',
+      hasMoved: true,
       mode: 'absolute',
       originalPaddingValue: 0,
       point: { x: 270, y: 100 },
@@ -224,6 +226,7 @@ describe('drawAutoLayoutPaddingHandles', () => {
     refs.hover.rightPanelPaddingGuideRef.current = { frameId: 'frame-1', sides: ['right'] };
     refs.transform.autoLayoutPaddingDragRef.current = {
       frameId: 'frame-1',
+      hasMoved: true,
       mode: 'delta',
       originalPaddingValue: 20,
       point: { x: 10, y: 100 },
@@ -237,6 +240,35 @@ describe('drawAutoLayoutPaddingHandles', () => {
     // result — only the real drag's own guide line draws, not the stashed RightPanel one
     expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledTimes(1);
     expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.left.band, 'left', frameCenter, 0);
+  });
+
+  it('should draw only the guide line for a side whose value popup is open, and pass its side to the handles builder', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.transform.autoLayoutPaddingEditRef.current = { frameId: 'frame-1', point: { x: 10, y: 100 }, side: 'left' };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(getAutoLayoutPaddingHandlesMock).toHaveBeenCalledWith(frame, context.viewport, 'left');
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.left.band, 'left', frameCenter, 0);
+    expect(drawAutoLayoutPaddingHandleBarMock).not.toHaveBeenCalledWith(context, handles.left.handleCenter, 'left', frameCenter, 0);
+  });
+
+  it('should ignore a value popup open for a different frame', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.transform.autoLayoutPaddingEditRef.current = { frameId: 'frame-2', point: { x: 10, y: 100 }, side: 'left' };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(getAutoLayoutPaddingHandlesMock).toHaveBeenCalledWith(frame, context.viewport, null);
+    expect(drawAutoLayoutPaddingHandleBarMock).not.toHaveBeenCalled();
   });
 
   it('should always draw the label', () => {

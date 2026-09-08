@@ -70,6 +70,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId,
+      hasMoved: false,
       mode: 'absolute',
       originalPaddingValue: 0,
       point: { x: 0, y: 100 },
@@ -84,6 +85,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     // result
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ paddingLeft: 40 });
     expect(dragState.point).toEqual({ x: 40, y: 100 });
+    expect(dragState.hasMoved).toBe(true);
   });
 
   it('should grow the left padding by the pointer delta in delta mode', () => {
@@ -92,6 +94,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId,
+      hasMoved: false,
       mode: 'delta',
       originalPaddingValue: 10,
       point: { x: 10, y: 100 },
@@ -113,6 +116,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId,
+      hasMoved: false,
       mode: 'delta',
       originalPaddingValue: 10,
       point: { x: 10, y: 100 },
@@ -134,6 +138,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId,
+      hasMoved: false,
       mode: 'delta',
       originalPaddingValue: 10,
       point: { x: 150, y: 10 },
@@ -156,6 +161,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId,
+      hasMoved: false,
       mode: 'delta',
       originalPaddingValue: 10,
       point: { x: 150, y: 100 },
@@ -176,6 +182,7 @@ describe('continueAutoLayoutPaddingDrag', () => {
     const canvas = createCanvas();
     const dragState: TAutoLayoutPaddingDragState = {
       frameId: 'missing',
+      hasMoved: false,
       mode: 'absolute',
       originalPaddingValue: 0,
       point: { x: 0, y: 100 },

@@ -32,6 +32,7 @@ import {
   TUpdateGuidePayload,
 } from './types';
 import { ToolName } from 'types/design/enums';
+import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TPoint } from 'types/canvas';
 import { TSolidPaint } from 'types/design/paint/types';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -62,6 +63,7 @@ import { handleSetSelection } from './utils/handleSetSelection/handleSetSelectio
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
 import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
+import { handleStopAutoLayoutPaddingEdit } from './utils/handleStopAutoLayoutPaddingEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleToggleFrameClipContent } from './utils/handleToggleFrameClipContent/handleToggleFrameClipContent';
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
@@ -82,6 +84,7 @@ const initialState: TDesignState = {
   activeTool: DEFAULT_TOOL,
   commentDraftPosition: null,
   designHintLabelKey: null,
+  editingAutoLayoutPadding: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -209,10 +212,15 @@ const designSlice = createSlice({
     },
     setVectorEditingNodeIds: (state, action: PayloadAction<string[]>) => handleSetVectorEditingNodeIds(state, action.payload),
     setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
+    startAutoLayoutPaddingEdit: (state, action: PayloadAction<TAutoLayoutPaddingEditState>) => {
+      state.editingAutoLayoutPadding = action.payload;
+    },
     startCommentDraft: (state, action: PayloadAction<TPoint>) => {
       state.commentDraftPosition = action.payload;
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
+    stopAutoLayoutPaddingEdit: (state, action: PayloadAction<{ frameId: string; side: TAutoLayoutPaddingSide }>) =>
+      handleStopAutoLayoutPaddingEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
     toggleActionsPanelOpen: (state) => {
       state.isActionsPanelOpen = !state.isActionsPanelOpen;
@@ -288,8 +296,10 @@ export const {
   setTemporaryActiveTool,
   setVectorEditingNodeIds,
   setViewport,
+  startAutoLayoutPaddingEdit,
   startCommentDraft,
   startTextEdit,
+  stopAutoLayoutPaddingEdit,
   stopTextEdit,
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
