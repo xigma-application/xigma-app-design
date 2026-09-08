@@ -1,6 +1,6 @@
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
-import { TFrameNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TMaskNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getNodeTypeIconName } from '../getNodeTypeIconName';
@@ -57,5 +57,24 @@ describe('getNodeTypeIconName', () => {
 
   it('should prefer the mask icon over the layout-mode icon for a masked auto-layout frame', () => {
     expect(getNodeTypeIconName({ ...frameNode, layoutMode: LayoutMode.horizontal }, true)).toBe('MaskGroup');
+  });
+
+  it('should use the plain "Mask" container icon for a Mask node itself, distinct from "MaskGroup" used by its masked child', () => {
+    const maskContainer: TMaskNode = {
+      childIds: ['a', 'b'],
+      height: 10,
+      id: 'mask-1',
+      name: 'Mask group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.mask,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // isMask here answers "is this row itself the masked child of its parent" — false for the
+    // container row, since the container isn't masked by anything above it
+    expect(getNodeTypeIconName(maskContainer, false)).toBe('Mask');
   });
 });
