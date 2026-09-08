@@ -62,6 +62,8 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
     store.dispatch(moveNodes({ nodeIds: [lineId], targetIndex: 0, targetParentId: frameId }));
 
     expect(() => store.dispatch(updateNode({ changes: { width: 500 }, id: frameId }))).not.toThrow();
+    // updating the non-box node itself passes no previousBox, so the pass is a clean no-op
+    expect(() => store.dispatch(updateNode({ changes: { stroke: '#ffffff' }, id: lineId }))).not.toThrow();
   });
 
   it('should not move an unconstrained (default left/top) child when only the right edge moves', () => {
@@ -132,7 +134,7 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
     expect(localAfterResize.y).toBeCloseTo(localBeforeResize.y, 0);
   });
 
-  it('should not touch a child whose parent runs an auto layout', () => {
+  it('should not touch a plain flow child whose parent runs an auto layout', () => {
     const frameId = addFrame(100, 100, 400, 200, LayoutMode.horizontal);
     const childId = addChildRect(frameId, 130, 130);
 
@@ -140,6 +142,22 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
 
     // the auto-layout engine (not the constraint sync) owns this child's position
     expect(rect(childId).x).not.toBe(130);
+  });
+
+  it('should re-anchor an ignoreAutoLayout (absolute) child of an auto-layout frame, just like a freeform child', () => {
+    const frameId = addFrame(100, 100, 400, 200, LayoutMode.horizontal);
+    const childId = addChildRect(frameId, 350, 130);
+
+    // opt the child out of the flow, then right-anchor it
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childId }));
+    store.dispatch(updateNode({ changes: { alignment: { horizontal: AlignmentHorizontal.right } }, id: childId }));
+
+    const xBefore = rect(childId).x;
+
+    store.dispatch(updateNode({ changes: { width: 500 }, id: frameId })); // +100
+
+    // it rides the full width delta, keeping its gap to the right edge — no auto-layout involvement
+    expect(rect(childId).x).toBe(xBefore + 100);
   });
 
   it('should translate a nested child subtree as a whole', () => {

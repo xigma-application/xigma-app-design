@@ -503,15 +503,24 @@ it there whenever the parent frame's box changes. The reflow runs in the reducer
 frame that has an alignment — recomputes the child's parent-local position with
 `getAlignedChildLocalPosition` (rotation-aware via `getNodePositionInParent` /
 `getNodeAbsoluteFromParentPosition`) and translates the child subtree to match. A free axis keeps
-its raw offset; auto-layout / grid parents are skipped (their own engine owns child positions). In
-the RightPanel, an aligned axis' Position input reads `auto` and is disabled. Lives in
-`e2e/design/selection/frame-child-constraints.spec.ts`.
+its raw offset. Eligibility is a single shared predicate, `isConstraintEligibleFrameChild`: a
+direct child of a **freeform** frame, or an `ignoreAutoLayout` (absolute) child of a
+horizontal/vertical auto-layout frame — plain flow children and grid parents are skipped (their
+own engine owns child positions). In the RightPanel, an aligned axis' Position input reads `auto`
+and is disabled. When exactly one eligible child is selected, `drawConstraintGuides` draws dashed
+blue indicator lines on the canvas — one per axis, in the parent frame's local space (so child
+rotation is ignored, frame rotation is followed): an edge constraint runs from that edge of the
+child to the matching frame edge; a `center` constraint is a short line through the child's centre
+of length `w/2` / `h/2`. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
 
-| #   | Scenario                                                                                     | Unit |                 E2E                  |
-| --- | -------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
-| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes            |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize      |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves             |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step) |  ✅  |                  —                   |
-| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space              |  ✅  |                  —                   |
-| 377 | An auto-layout parent ignores a child's alignment; a nested child subtree translates whole   |  ✅  |                  —                   |
+| #   | Scenario                                                                                        | Unit |                 E2E                  |
+| --- | ----------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
+| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes               |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize         |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step)    |  ✅  |                  —                   |
+| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space                 |  ✅  |                  —                   |
+| 377 | An auto-layout parent ignores a plain flow child's alignment; a nested subtree translates whole |  ✅  |                  —                   |
+| 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child |  ✅  |                  —                   |
+| 379 | The canvas guide lines shift when the sole-selected child's constraint changes                  |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 380 | No guide lines are drawn while more than one node is selected                                   |  ✅  | ✅ `frame-child-constraints.spec.ts` |

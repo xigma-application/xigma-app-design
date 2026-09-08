@@ -95,6 +95,22 @@ const selectFrame = (page: Page): Promise<void> =>
     store.dispatch(setSelection([pages[activePageId].rootOrder[0]]));
   });
 
+const selectChild = (page: Page, alsoSecondRect = false): Promise<void> =>
+  page.evaluate(async (withSecond) => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const frame = activePage.nodes[activePage.rootOrder[0]] as unknown as { childIds: string[] };
+    const ids = [frame.childIds[0]];
+
+    if (withSecond) {
+      ids.push(activePage.rootOrder[activePage.rootOrder.length - 1]);
+    }
+
+    store.dispatch(setSelection(ids));
+  }, alsoSecondRect);
+
 const dropChildAt = async (designPage: DesignPage, page: Page, dropX: number, dropY: number): Promise<void> => {
   await designPage.drawRectangle(1400, 240, 1460, 300);
   await page.mouse.move(1430, 270);
@@ -181,5 +197,41 @@ test.describe('constraints reflow when the parent frame resizes', () => {
     const gapAfter = afterFrame.x + afterFrame.width - (afterChild.x + afterChild.width);
 
     expect(gapAfter).toBeCloseTo(gapBefore, 0);
+  });
+});
+
+test.describe('constraint guide lines on the canvas', () => {
+  test('the guide lines shift when the sole-selected child’s constraint changes', async ({ page }) => {
+    const designPage = await buildFrameWithChild(page);
+
+    await selectChild(page);
+    await page.waitForTimeout(100);
+    const leftTop = await designPage.canvas.screenshot();
+
+    await setConstraintOnly(page, { horizontal: 'right', vertical: 'bottom' });
+    await page.waitForTimeout(100);
+    const rightBottom = await designPage.canvas.screenshot();
+
+    // the lines re-anchored from the child's left/top edges to its right/bottom edges
+    expect(leftTop.equals(rightBottom)).toBe(false);
+  });
+
+  test('no guide lines are drawn while more than one node is selected', async ({ page }) => {
+    const designPage = await buildFrameWithChild(page);
+
+    await designPage.drawRectangle(1000, 500, 1060, 560); // a second, unrelated top-level node
+
+    await setConstraintOnly(page, { horizontal: 'right', vertical: 'bottom' });
+    await selectChild(page, true);
+    await page.waitForTimeout(100);
+    const withRightBottom = await designPage.canvas.screenshot();
+
+    await setConstraintOnly(page, { horizontal: 'left', vertical: 'top' });
+    await selectChild(page, true);
+    await page.waitForTimeout(100);
+    const withLeftTop = await designPage.canvas.screenshot();
+
+    // under a multi-selection the child's constraint has no visual effect at all — guides suppressed
+    expect(withRightBottom.equals(withLeftTop)).toBe(true);
   });
 });

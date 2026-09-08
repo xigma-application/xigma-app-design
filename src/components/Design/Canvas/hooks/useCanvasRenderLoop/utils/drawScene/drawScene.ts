@@ -29,6 +29,7 @@ import { cleanupStaleDragSnapshotBuffers } from './cleanupStaleDragSnapshotBuffe
 import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawAutoLayoutDropIndicator } from './drawAutoLayoutDropIndicator';
 import { drawAutoLayoutGapHandles } from './drawAutoLayoutGapHandles/drawAutoLayoutGapHandles';
+import { drawConstraintGuides } from './drawConstraintGuides';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDimensionHintGuides } from './drawDimensionHintGuides/drawDimensionHintGuides';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
@@ -145,6 +146,7 @@ export const drawScene = (
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
+  drawConstraintGuides(ctx, selectedNodes, nodesById);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);
   drawSmartSelectionHandles(ctx, smartSelectionNodes, refs, nodesById);
   drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);

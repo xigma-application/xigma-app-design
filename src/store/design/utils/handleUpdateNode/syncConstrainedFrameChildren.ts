@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDesignState } from '../../types';
 
 // utils
@@ -9,7 +10,7 @@ import { getGroupSubtreeNodes } from '../nodeHierarchy/getGroupSubtreeNodes';
 import { getNodeAbsoluteFromParentPosition } from '../getNodeAbsoluteFromParentPosition';
 import { getNodePositionInParent } from '../getNodePositionInParent';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
-import { isFreeformFrame } from 'utils/canvas/signals/isFreeformFrame';
+import { isConstraintEligibleFrameChild } from 'utils/canvas/signals/isConstraintEligibleFrameChild';
 
 export type TFrameBoxSnapshot = { height: number; rotation: number; width: number; x: number; y: number };
 
@@ -22,14 +23,14 @@ export const syncConstrainedFrameChildren = (
     const { nodes } = getActivePage(state);
     const frame = nodes[frameId];
 
-    if (frame && isFreeformFrame(frame)) {
+    if (frame && frame.type === NodeType.frame) {
       const widthDelta = frame.width - previousBox.width;
       const heightDelta = frame.height - previousBox.height;
 
       frame.childIds.forEach((childId) => {
         const child = nodes[childId];
 
-        if (child && isBoxSceneNode(child)) {
+        if (child && isBoxSceneNode(child) && isConstraintEligibleFrameChild(child, nodes)) {
           const oldLocal = getNodePositionInParent(child, previousBox);
           const targetLocal = {
             x: oldLocal.x + getAxisConstraintDelta(child.alignment?.horizontal, widthDelta),
