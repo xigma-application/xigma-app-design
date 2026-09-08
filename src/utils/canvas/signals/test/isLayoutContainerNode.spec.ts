@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { isFlipDisabledNodeType } from '../isFlipDisabledNodeType';
+import { isLayoutContainerNode } from '../isLayoutContainerNode';
 
 const buildNode = (type: NodeType): TSceneNode =>
   ({
@@ -19,20 +19,20 @@ const buildNode = (type: NodeType): TSceneNode =>
     y: 0,
   }) as unknown as TSceneNode;
 
-describe('isFlipDisabledNodeType', () => {
+describe('isLayoutContainerNode', () => {
   it('should be true for a frame', () => {
-    expect(isFlipDisabledNodeType(buildNode(NodeType.frame))).toBe(true);
+    expect(isLayoutContainerNode(buildNode(NodeType.frame))).toBe(true);
   });
 
   it('should be true for a section', () => {
-    expect(isFlipDisabledNodeType(buildNode(NodeType.section))).toBe(true);
+    expect(isLayoutContainerNode(buildNode(NodeType.section))).toBe(true);
   });
 
   it('should be false for a rectangle', () => {
-    expect(isFlipDisabledNodeType(buildNode(NodeType.rectangle))).toBe(false);
+    expect(isLayoutContainerNode(buildNode(NodeType.rectangle))).toBe(false);
   });
 
   it('should be false for a group', () => {
-    expect(isFlipDisabledNodeType(buildNode(NodeType.group))).toBe(false);
+    expect(isLayoutContainerNode(buildNode(NodeType.group))).toBe(false);
   });
 });

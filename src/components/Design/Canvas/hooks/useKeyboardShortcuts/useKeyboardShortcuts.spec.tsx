@@ -707,6 +707,26 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     return rootOrder[rootOrder.length - 1];
   };
 
+  const addRectangleNode = (x = 0, y = 0): string => {
+    realStore.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x,
+        y,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(realStore.getState());
+
+    return rootOrder[rootOrder.length - 1];
+  };
+
   beforeEach(() => {
     realStore.dispatch(setSelection([]));
   });
@@ -777,8 +797,8 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
 
   it('should wrap the selection into a mask group on "Ctrl+Cmd+M"', () => {
     // mock
-    const idA = addFrameNode();
-    const idB = addFrameNode(40, 40);
+    const idA = addRectangleNode();
+    const idB = addRectangleNode(40, 40);
 
     realStore.dispatch(setSelection([idA, idB]));
 

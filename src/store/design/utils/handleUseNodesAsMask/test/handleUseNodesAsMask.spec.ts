@@ -4,7 +4,7 @@ import { DEFAULT_MASK_GROUP_NAME } from '../../../constants';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -18,6 +18,22 @@ const buildRect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#ff0000',
+  height: 10,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,
@@ -106,6 +122,22 @@ describe('handleUseNodesAsMask', () => {
     expect(group.name).toBe(DEFAULT_MASK_GROUP_NAME);
     expect(group.childIds).toEqual(['a']);
     expect(page.nodes.a.isMask).toBe(true);
+    expect(page.selectedIds).toEqual(['a']);
+  });
+
+  it('should skip a trailing frame and mask the last non-container child instead', () => {
+    // mock — a frame is last in z-order, but frames can never become the mask
+    const a = buildRect({ id: 'a' });
+    const b = buildFrame({ id: 'b' });
+    const state = buildState({ nodes: { a, b }, rootOrder: ['a', 'b'], selectedIds: ['a', 'b'] });
+
+    // action
+    handleUseNodesAsMask(state, 'group-1');
+
+    // result
+    const page = getActivePage(state);
+    expect(page.nodes.a.isMask).toBe(true);
+    expect(page.nodes.b.isMask).toBeUndefined();
     expect(page.selectedIds).toEqual(['a']);
   });
 

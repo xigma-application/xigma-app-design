@@ -20,14 +20,12 @@ describe('useUseSelectionAsMask', () => {
     // mock
     store.dispatch(
       addNode({
-        childIds: [],
-        clipContent: true,
         fill: '#ff0000',
         height: 10,
         name: 'A',
         parentId: null,
         rotation: 0,
-        type: NodeType.frame,
+        type: NodeType.rectangle,
         width: 10,
         x: 0,
         y: 0,
@@ -35,14 +33,12 @@ describe('useUseSelectionAsMask', () => {
     );
     store.dispatch(
       addNode({
-        childIds: [],
-        clipContent: true,
         fill: '#ff0000',
         height: 10,
         name: 'B',
         parentId: null,
         rotation: 0,
-        type: NodeType.frame,
+        type: NodeType.rectangle,
         width: 10,
         x: 0,
         y: 0,
