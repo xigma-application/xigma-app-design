@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { getGroupableMembers } from '../getGroupableMembers';
@@ -13,6 +13,21 @@ const buildRect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
+  childIds: [],
+  fill: '#ff0000',
+  height: 10,
+  id: 'section-1',
+  name: 'Section',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.section,
   width: 10,
   x: 0,
   y: 0,
@@ -51,5 +66,22 @@ describe('getGroupableMembers', () => {
 
     // action & result
     expect(getGroupableMembers([b, a])).toEqual({ memberNodes: [b, a], parentId: 'other-parent' });
+  });
+
+  it('should return null when the selection is a single section — a section can never be wrapped', () => {
+    // mock
+    const section = buildSection();
+
+    // action & result
+    expect(getGroupableMembers([section])).toBeNull();
+  });
+
+  it('should return null when a section is part of a larger mixed selection', () => {
+    // mock
+    const rect = buildRect();
+    const section = buildSection();
+
+    // action & result
+    expect(getGroupableMembers([rect, section])).toBeNull();
   });
 });
