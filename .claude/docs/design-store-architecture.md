@@ -117,6 +117,14 @@ oversights — see the Right Panel's `LayoutSection/ColumnAlignmentLayout/` for 
 that writes these fields (all three go through the existing generic `updateNode` action, no
 frame-specific reducer needed).
 
+`LayoutSection/ColumnPadding/` writes `paddingTop/Right/Bottom/Left` the same way (generic
+`updateNode`, shown only for `horizontal`/`vertical` frames). Those four **are** consumed —
+`getFramePadding.ts` (`?? 0` per side) feeds `syncAutoLayoutChildren`'s content box. The column has
+a merged mode (2 inputs, `left`+`right` / `top`+`bottom`) and an individual mode (4 inputs), toggled
+by a local-state button, not persisted. A merged input accepts `"5, 2"` to set the two sides
+asymmetrically (`parsePaddingPair`) and its scrubber applies one delta to both sides
+(`useColumnPadding`'s `pairField.onScrub`), matching Figma.
+
 `ColumnFlow` (`LayoutSection/ColumnFlow/`) is the only writer of `layoutMode` — it used to be a pure
 local-state stub with no Redux read/write at all; if you're touching it, confirm it's still reading
 `frameNode.layoutMode` and dispatching `updateNode`, not silently regressed back to local-only state.

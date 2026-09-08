@@ -10,7 +10,7 @@ import { translationNameSpace } from './constants';
 
 export const ColumnAlignmentLayoutButtonIcons = (t: TFunction): ReactNode[] => [
   <Tooltip content={t(`${translationNameSpace}.propertiesTooltip`)} key="properties">
-    <Button ariaLabel={t(`${translationNameSpace}.propertiesAriaLabel`)} selected={false}>
+    <Button ariaLabel={t(`${translationNameSpace}.propertiesAriaLabel`)} selected={false} style={{ padding: 6 }}>
       <Icon name="Properties" size={12} />
     </Button>
   </Tooltip>,

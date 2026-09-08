@@ -7,6 +7,7 @@ import ColumnClipContent from './ColumnClipContent/ColumnClipContent';
 import ColumnDimensions from './ColumnDimensions/ColumnDimensions';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
 import ColumnMinMaxDimensions from './ColumnMinMaxDimensions/ColumnMinMaxDimensions';
+import ColumnPadding from './ColumnPadding/ColumnPadding';
 import LayoutSectionButtons from './LayoutSectionButtons';
 import { UITools } from 'shared';
 
@@ -22,6 +23,7 @@ const LayoutSection: FC = () => {
       <ColumnDimensions />
       <ColumnMinMaxDimensions />
       <ColumnAlignmentLayout />
+      <ColumnPadding />
       <ColumnClipContent />
     </UITools.Section>
   );

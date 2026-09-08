@@ -686,3 +686,26 @@ including rotation) — exhaustively covered without a browser. What only a real
 RightPanel's toggle-then-edit flow actually reaching the store, Wrap visibly re-flowing children
 onto a second line the instant Max makes it eligible, and a panel hover actually repainting the
 WebGL canvas with the hint guides and clearing them on leave — that's `min-max-sizing.spec.ts`.
+
+## Padding
+
+The RightPanel's `LayoutSection/ColumnPadding` (shown only for `horizontal`/`vertical` frames)
+writes `paddingTop/Right/Bottom/Left`, which `getFramePadding` already feeds into
+`syncAutoLayoutChildren`. Merged mode has two inputs (`left`+`right`, `top`+`bottom`): a single
+number sets both sides, `"5, 2"` sets them asymmetrically (`parsePaddingPair`), and the scrubber
+carries one delta onto both sides. An "Individual padding" button toggles to four side inputs
+(local component state, not persisted).
+
+| #   | Scenario                                                                                                      | Unit | E2E                  |
+| --- | ------------------------------------------------------------------------------------------------------------- | :--: | :------------------- |
+| 1   | Typing a merged horizontal padding pushes the frame's first child right by that amount, live                  |  ✅  | ✅ `padding.spec.ts` |
+| 2   | A `"10,50"` merged value sets `paddingLeft`/`paddingRight` asymmetrically and the field shows `"10, 50"` back |  ✅  | ✅ `padding.spec.ts` |
+| 3   | The Individual-padding toggle swaps the two merged inputs for four side inputs, each moving only its own side |  ✅  | ✅ `padding.spec.ts` |
+| 4   | `getPaddingPairValue` collapses equal sides to one number and splits unequal ones as `"a, b"`                 |  ✅  | —                    |
+| 5   | `parsePaddingPair` strips stray characters, mirrors a lone number to both sides, and falls back per side      |  ✅  | —                    |
+| 6   | Empty / non-numeric commit writes nothing; negative values clamp to 0                                         |  ✅  | —                    |
+
+Unit-only for the parsing/clamping and the merged↔individual field derivation
+(`useColumnPadding`, `pairField`, `sideField`, and the two `utils/`). What the browser adds:
+the panel input → `updateNode` → `syncAutoLayoutChildren` → child reflow round-trip — that's
+`padding.spec.ts`.
