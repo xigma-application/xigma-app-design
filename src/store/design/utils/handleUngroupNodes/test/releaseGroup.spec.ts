@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -15,6 +15,22 @@ const buildRect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildFrame = (overrides: Partial<TFrameNode>): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 10,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,
@@ -136,6 +152,28 @@ describe('releaseGroup', () => {
     expect(page.rootOrder).toEqual(['a', 'gone']);
     expect(page.nodes.a.parentId).toBeNull();
     expect(releasedIds).toEqual(['a', 'gone']);
+  });
+
+  it('should splice the children into the parent Frame’s childIds, not page.rootOrder, when the group was nested inside a Frame', () => {
+    // mock — regression: a bare isGroupLikeNode check treated a Frame parent as "no parent",
+    // writing the released children into page.rootOrder while leaving a dangling group id behind
+    // in frame.childIds (the group itself gets deleted by reparentAndRemoveGroup)
+    const a = buildRect({ id: 'a', parentId: 'group-1' });
+    const b = buildRect({ id: 'b', parentId: 'group-1' });
+    const group = buildGroup({ childIds: ['a', 'b'], parentId: 'frame-1' });
+    const frame = buildFrame({ childIds: ['group-1'], id: 'frame-1' });
+    const state = buildState({ nodes: { a, b, 'frame-1': frame, 'group-1': group }, rootOrder: ['frame-1'] });
+
+    // action
+    const releasedIds = releaseGroup(state, group);
+
+    // result
+    const page = getActivePage(state);
+    expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual(['a', 'b']);
+    expect(page.rootOrder).toEqual(['frame-1']);
+    expect(page.nodes.a.parentId).toBe('frame-1');
+    expect(page.nodes.b.parentId).toBe('frame-1');
+    expect(releasedIds).toEqual(['a', 'b']);
   });
 
   it('should resync the released parent group’s bounds to its remaining children', () => {

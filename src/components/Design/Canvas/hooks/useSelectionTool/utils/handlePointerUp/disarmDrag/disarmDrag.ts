@@ -12,6 +12,7 @@ import { applyPendingDragClickAction } from './applyPendingDragClickAction';
 import { commitDraggedVectorNodeSnapshots } from './commitDraggedVectorNodeSnapshots';
 import { commitDropIntoFrame } from './commitDropIntoFrame';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
+import { resyncGroupAutoLayoutAncestors } from '../resyncGroupAutoLayoutAncestors';
 import { resyncRotatedGroupBounds } from './resyncRotatedGroupBounds';
 
 export const disarmDrag = (
@@ -28,6 +29,7 @@ export const disarmDrag = (
     flushThrottledDispatch(dragState.dispatchThrottle);
     commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
     resyncRotatedGroupBounds(dispatch, dragState);
+    resyncGroupAutoLayoutAncestors(dispatch, Object.keys(dragState.nodeOrigins));
     commitDropIntoFrame(dispatch, dragState, canvasRefs);
     applyPendingDragClickAction(dispatch, dragState);
     setClassName(null);

@@ -5,7 +5,7 @@ import { TGroupLikeNode, TSceneNode } from 'types/design/types';
 // utils
 import { getActivePage } from '../getActivePage';
 import { getUngroupedOrder } from './getUngroupedOrder';
-import { isGroupLikeNode } from '../nodeHierarchy/isGroupLikeNode';
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 const reparentAndRemoveGroup = (page: TDesignPage, group: TGroupLikeNode): void => {
@@ -21,7 +21,7 @@ const reparentAndRemoveGroup = (page: TDesignPage, group: TGroupLikeNode): void 
 };
 
 const applyUngroupedOrder = (page: TDesignPage, parent: TSceneNode | null, nextOrder: string[]): void => {
-  if (parent && isGroupLikeNode(parent)) {
+  if (parent && isContainerNode(parent)) {
     parent.childIds = nextOrder;
   } else {
     page.rootOrder = nextOrder;
@@ -31,7 +31,7 @@ const applyUngroupedOrder = (page: TDesignPage, parent: TSceneNode | null, nextO
 export const releaseGroup = (state: TDesignState, group: TGroupLikeNode): string[] => {
   const page = getActivePage(state);
   const parent = group.parentId ? page.nodes[group.parentId] : null;
-  const containerOrder = parent && isGroupLikeNode(parent) ? parent.childIds : page.rootOrder;
+  const containerOrder = parent && isContainerNode(parent) ? parent.childIds : page.rootOrder;
   const nextOrder = getUngroupedOrder(containerOrder, group.id, group.childIds);
 
   reparentAndRemoveGroup(page, group);

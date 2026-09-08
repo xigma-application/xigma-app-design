@@ -143,7 +143,9 @@ describe('disarmSmartSelectionGapDrag', () => {
       dispatchThrottle: { frameId: null, run: (): void => {} },
       gapIndex: 0,
       hasMoved: true,
-      nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 60, y: 0 } },
+      // matches armSmartSelectionGapDrag's real shape — nodeOrigins only covers the moving
+      // cascade members (b), never the fixed anchor (a)
+      nodeOrigins: { [idB]: { x: 60, y: 0 } },
       originalGapValue: 40,
       pointerStart: { x: 0, y: 0 },
     };

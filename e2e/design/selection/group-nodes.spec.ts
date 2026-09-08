@@ -114,6 +114,118 @@ test('grouping two children of a Frame keeps the new group inside frame.childIds
   expect(Object.values(afterDrag.nodes).filter((node) => node.type === 'group')).toHaveLength(1);
 });
 
+test('ungrouping a Group whose own parent is a Frame releases its children into frame.childIds — not stranded into the page root order', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-ungroup-inside-frame-no-duplicate');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1000, 650);
+
+  await designPage.drawRectangle(1400, 200, 1460, 240);
+  await designPage.pointerDown(1430, 220);
+  await page.mouse.move(700, 250, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.drawRectangle(1400, 300, 1460, 340);
+  await designPage.pointerDown(1430, 320);
+  await page.mouse.move(700, 400, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.click(700, 250, { shift: true });
+  await page.keyboard.press('Control+g'); // group them inside the frame
+
+  const afterGroup = await readActivePage(page);
+  const frameId = afterGroup.rootOrder[0];
+
+  // action — ungroup right back
+  await page.keyboard.press('Control+Shift+g');
+
+  // result — regression: a bare isGroupLikeNode check treated the Frame parent as "no parent",
+  // stranding the released children in page.rootOrder while a dangling group id lingered in
+  // frame.childIds (the group node itself gets deleted)
+  const afterUngroup = await readActivePage(page);
+  const frame = afterUngroup.nodes[frameId] as { childIds: string[] };
+
+  expect(afterUngroup.rootOrder).toEqual([frameId]);
+  expect(frame.childIds).toHaveLength(2);
+  expect(frame.childIds.every((id) => Boolean(afterUngroup.nodes[id]))).toBe(true);
+});
+
+test('a plain drag that repositions a group’s child, growing the group’s own box, reflows the auto-layout frame it lives in once the drag ends', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-plain-drag-reflows-autolayout');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 700);
+  await page.locator('[data-test-toggle-button-group="flow"]').getByLabel('Horizontal', { exact: true }).click();
+
+  // A and B, drawn off to the side and grouped, become the frame's first auto-layout member
+  await designPage.drawRectangle(1400, 300, 1450, 380); // A
+  await designPage.drawRectangle(1460, 300, 1510, 380); // B — auto-selected, replacing A
+  await designPage.click(1408, 370, { shift: true }); // add A back (near its bottom), selection = [B, A]
+  await page.keyboard.press('Control+g'); // group = [A, B]
+
+  await designPage.pointerDown(1408, 370); // grab A's own area, off dead-centre to clear the swap handle
+  await page.mouse.move(650, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  // C, dragged in well past the group, becomes the second member
+  await designPage.drawRectangle(1400, 500, 1450, 550);
+  await designPage.pointerDown(1420, 525);
+  await page.mouse.move(950, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as { childIds: string[] };
+    const [groupId, cId] = frame.childIds;
+    const group = activePage.nodes[groupId] as { childIds: string[]; width: number };
+    const [, idB] = [...group.childIds].sort((x, y) => (activePage.nodes[x] as { x: number }).x - (activePage.nodes[y] as { x: number }).x);
+    const b = activePage.nodes[idB] as { height: number; width: number; x: number; y: number };
+    const c = activePage.nodes[cId] as { x: number };
+
+    return { b, cId, cX: c.x, groupId, groupWidth: group.width, idB };
+  });
+
+  // Ctrl+click B directly (bypassing the group) and drag it further out — a plain reposition, not
+  // the Smart Selection gap-handle gesture — widening the group's own box
+  const bCentre = { x: before.b.x + before.b.width / 2, y: before.b.y + before.b.height / 2 };
+  await designPage.click(bCentre.x, bCentre.y, { ctrl: true });
+  await designPage.pointerDown(bCentre.x, bCentre.y);
+  await page.mouse.move(bCentre.x + 60, bCentre.y, { steps: 10 });
+  await designPage.pointerUp();
+
+  const after = await page.evaluate(
+    async ({ cId, groupId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return {
+        c: activePage.nodes[cId] as { x: number },
+        group: activePage.nodes[groupId] as { width: number },
+      };
+    },
+    { cId: before.cId, groupId: before.groupId },
+  );
+
+  // the group widened to still enclose both children, and the frame reacted — 'C' slid over to
+  // keep sitting right after it, instead of staying frozen at its old position
+  expect(after.group.width).toBeGreaterThan(before.groupWidth);
+  expect(after.c.x).toBeGreaterThan(before.cX);
+});
+
 test('dragging a child inside a Group that itself sits in an auto-layout frame stays fully sealed off — no reorder ghost, no reparent', async ({
   page,
 }) => {
