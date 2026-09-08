@@ -63,7 +63,7 @@ test('the Smart Selection gap handle works on a selected group and resyncs the g
   expect(afterUndo.group.width).toBe(before.group.width);
 });
 
-test('widening a group’s gap with the Smart Selection handle reflows the auto-layout frame it lives in, sliding its next sibling over', async ({
+test('widening a group’s gap with the Smart Selection handle reflows the auto-layout frame it lives in — live, mid-drag — sliding its next sibling over', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -128,26 +128,29 @@ test('widening a group’s gap with the Smart Selection handle reflows the auto-
   await designPage.pointerMove(gapMidX, gapMidY);
   await designPage.pointerDown(gapMidX, gapMidY);
   await page.mouse.move(gapMidX + growBy, gapMidY, { steps: 5 });
-  await designPage.pointerUp();
+  await page.waitForTimeout(100);
 
-  const after = await page.evaluate(
+  // read while the gap handle is still held — the frame must have ALREADY reacted, mid-drag
+  const midDrag = await page.evaluate(
     async ({ cId, groupId }) => {
       const { store } = await import('/src/store/index.ts');
       const { activePageId, pages } = store.getState().design;
       const activePage = pages[activePageId];
 
       return {
-        c: activePage.nodes[cId] as { x: number },
-        group: activePage.nodes[groupId] as { width: number },
+        cX: (activePage.nodes[cId] as { x: number }).x,
+        groupWidth: (activePage.nodes[groupId] as { width: number }).width,
       };
     },
     { cId: before.cId, groupId: before.groupId },
   );
 
+  await designPage.pointerUp();
+
   // the group widened (its far child pushed by 2x the pointer's own move), and the frame reacted —
   // 'C' slid over to keep sitting right after the now-wider group, instead of staying frozen in place
-  expect(after.group.width).toBeGreaterThan(before.groupWidth);
-  expect(after.c.x).toBeGreaterThan(before.cX);
+  expect(midDrag.groupWidth).toBeGreaterThan(before.groupWidth);
+  expect(midDrag.cX).toBeGreaterThan(before.cX);
 });
 
 test('the Smart Selection swap handle reorders the children of a selected group', async ({ page }) => {

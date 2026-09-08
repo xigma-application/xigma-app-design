@@ -154,7 +154,7 @@ test('ungrouping a Group whose own parent is a Frame releases its children into 
   expect(frame.childIds.every((id) => Boolean(afterUngroup.nodes[id]))).toBe(true);
 });
 
-test('a plain drag that repositions a group’s child, growing the group’s own box, reflows the auto-layout frame it lives in once the drag ends', async ({
+test('a plain drag that repositions a group’s child, growing the group’s own box, reflows the auto-layout frame it lives in — live, mid-drag', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -199,31 +199,34 @@ test('a plain drag that repositions a group’s child, growing the group’s own
   });
 
   // Ctrl+click B directly (bypassing the group) and drag it further out — a plain reposition, not
-  // the Smart Selection gap-handle gesture — widening the group's own box
+  // the Smart Selection gap-handle gesture — widening the group's own box. DO NOT release yet
   const bCentre = { x: before.b.x + before.b.width / 2, y: before.b.y + before.b.height / 2 };
   await designPage.click(bCentre.x, bCentre.y, { ctrl: true });
   await designPage.pointerDown(bCentre.x, bCentre.y);
   await page.mouse.move(bCentre.x + 60, bCentre.y, { steps: 10 });
-  await designPage.pointerUp();
+  await page.waitForTimeout(100);
 
-  const after = await page.evaluate(
+  // read while the button is still held — the frame must have ALREADY reacted
+  const midDrag = await page.evaluate(
     async ({ cId, groupId }) => {
       const { store } = await import('/src/store/index.ts');
       const { activePageId, pages } = store.getState().design;
       const activePage = pages[activePageId];
 
       return {
-        c: activePage.nodes[cId] as { x: number },
-        group: activePage.nodes[groupId] as { width: number },
+        cX: (activePage.nodes[cId] as { x: number }).x,
+        groupWidth: (activePage.nodes[groupId] as { width: number }).width,
       };
     },
     { cId: before.cId, groupId: before.groupId },
   );
 
+  await designPage.pointerUp();
+
   // the group widened to still enclose both children, and the frame reacted — 'C' slid over to
   // keep sitting right after it, instead of staying frozen at its old position
-  expect(after.group.width).toBeGreaterThan(before.groupWidth);
-  expect(after.c.x).toBeGreaterThan(before.cX);
+  expect(midDrag.groupWidth).toBeGreaterThan(before.groupWidth);
+  expect(midDrag.cX).toBeGreaterThan(before.cX);
 });
 
 test('resizing a Group nested in an auto-layout frame reflows the frame LIVE, mid-drag, before the mouse is even released', async ({
