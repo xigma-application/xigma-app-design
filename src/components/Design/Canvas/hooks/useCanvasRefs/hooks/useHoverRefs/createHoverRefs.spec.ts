@@ -10,6 +10,7 @@ describe('createHoverRefs behaviors', () => {
     expect(refs).toEqual({
       hoverRef: { current: null },
       hoveredAutoLayoutGapRef: { current: null },
+      hoveredAutoLayoutPaddingRef: { current: null },
       hoveredCornerRadiusHandleRef: { current: null },
       hoveredEllipseArcHandleRef: { current: null },
       hoveredEllipseArcRatioHandleRef: { current: null },
@@ -34,6 +35,7 @@ describe('createHoverRefs behaviors', () => {
       hoveredVectorWidthLabelRef: { current: null },
       hoveredVectorWidthPointRef: { current: null },
       isAutoLayoutGapAreaHoveredRef: { current: false },
+      isAutoLayoutPaddingAreaHoveredRef: { current: false },
       isSmartSelectionBoxHoveredRef: { current: false },
     });
   });

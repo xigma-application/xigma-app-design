@@ -4,6 +4,7 @@ import { THoverRefs } from 'types/design/canvas/types';
 export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs => ({
   hoverRef: { current: null },
   hoveredAutoLayoutGapRef: { current: null },
+  hoveredAutoLayoutPaddingRef: { current: null },
   hoveredCornerRadiusHandleRef: { current: null },
   hoveredEllipseArcHandleRef: { current: null },
   hoveredEllipseArcRatioHandleRef: { current: null },
@@ -28,6 +29,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredVectorWidthLabelRef: { current: null },
   hoveredVectorWidthPointRef: { current: null },
   isAutoLayoutGapAreaHoveredRef: { current: false },
+  isAutoLayoutPaddingAreaHoveredRef: { current: false },
   isSmartSelectionBoxHoveredRef: { current: false },
   ...overrides,
 });

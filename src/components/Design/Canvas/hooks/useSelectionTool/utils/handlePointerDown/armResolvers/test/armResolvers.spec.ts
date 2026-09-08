@@ -9,7 +9,7 @@ import {
   setVectorEditingNodeIds,
   updateNode,
 } from 'store/design/slice';
-import { DEFAULT_PAINT, DEFAULT_PAINT_COLOR } from 'store/design/constants';
+import { DEFAULT_VECTOR_PAINT, DEFAULT_VECTOR_PAINT_COLOR } from 'store/design/constants';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -1079,7 +1079,7 @@ describe('armVectorLassoOnPointerDown', () => {
 describe('armVectorPaintOnPointerDown', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
-    store.dispatch(setPaint(DEFAULT_PAINT));
+    store.dispatch(setPaint(DEFAULT_VECTOR_PAINT));
   });
 
   it('should add the clicked face to filledFaceKeys and claim the pointerdown, when the face is not yet filled', () => {
@@ -1106,7 +1106,7 @@ describe('armVectorPaintOnPointerDown', () => {
 
     expect(action.payload.id).toBe(nodeId);
     expect(action.payload.changes).toEqual({
-      fillByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: DEFAULT_PAINT_COLOR, opacity: 100, type: 'solid' }] },
+      fillByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: DEFAULT_VECTOR_PAINT_COLOR, opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
     });
   });

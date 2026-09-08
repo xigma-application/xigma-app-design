@@ -3,7 +3,13 @@ import { useRef } from 'react';
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TAspectRatioLockGuide } from 'types/canvas';
-import { TAutoLayoutDropTargetHover, TAutoLayoutGapDragState, TAutoLayoutReorderPreview, TTransformRefs } from 'types/design/canvas/types';
+import {
+  TAutoLayoutDropTargetHover,
+  TAutoLayoutGapDragState,
+  TAutoLayoutPaddingDragState,
+  TAutoLayoutReorderPreview,
+  TTransformRefs,
+} from 'types/design/canvas/types';
 import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -15,6 +21,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const aspectRatioLockGuideRef = useRef<TAspectRatioLockGuide | null>(null);
   const autoLayoutDropTargetRef = useRef<TAutoLayoutDropTargetHover | null>(null);
   const autoLayoutGapDragRef = useRef<TAutoLayoutGapDragState | null>(null);
+  const autoLayoutPaddingDragRef = useRef<TAutoLayoutPaddingDragState | null>(null);
   const autoLayoutReorderPreviewRef = useRef<TAutoLayoutReorderPreview | null>(null);
   const contactGuidesRef = useRef<TShapeContactGuide[] | null>(null);
   const dimensionHintGuidesRef = useRef<TDimensionHintGuides | null>(null);
@@ -34,6 +41,7 @@ export const useTransformRefs = (): TTransformRefs => {
       aspectRatioLockGuideRef,
       autoLayoutDropTargetRef,
       autoLayoutGapDragRef,
+      autoLayoutPaddingDragRef,
       autoLayoutReorderPreviewRef,
       contactGuidesRef,
       dimensionHintGuidesRef,

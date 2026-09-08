@@ -709,3 +709,63 @@ Unit-only for the parsing/clamping and the merged↔individual field derivation
 (`useColumnPadding`, `pairField`, `sideField`, and the two `utils/`). What the browser adds:
 the panel input → `updateNode` → `syncAutoLayoutChildren` → child reflow round-trip — that's
 `padding.spec.ts`.
+
+## Padding handles
+
+A second, canvas-native way to set the same `paddingTop/Right/Bottom/Left` fields, styled after the
+existing gap handles above (same bar shape, same hit-testing/rotation strategy) but recoloured blue
+(`AUTO_LAYOUT_PADDING_HANDLE_FILL`, `#0d99ff`) instead of the gap system's pink, and with different
+value math per side.
+
+| #   | Scenario                                                                                                                                                                                   | Unit |                      E2E                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :--------------------------------------------: |
+| 1   | A padded side (>0) always shows its handle bar + 45deg hatch fill across the whole padding band while the selected frame is merely hovered — no need to hover that specific handle         |  ✅  |                       —                        |
+| 2   | A zero-padding side only shows its handle once the pointer is within reach of it, and shows no hatch (nothing to fill)                                                                     |  ✅  | ✅ `padding-handles.spec.ts` (visibility test) |
+| 3   | Dragging a zero-padding handle sets that side's padding to the pointer's live distance from the frame edge — absolute, like corner-radius, not delta                                       |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 4   | Dragging an already-padded handle grows/shrinks the value by the drag delta instead — the handle stays under the cursor, like the gap handles                                              |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 5   | Every side clamps at 0 instead of going negative, in either drag mode                                                                                                                      |  ✅  |                       —                        |
+| 6   | While dragging, the bar/hatch for that one side is replaced by a single solid blue guide line at the live padding boundary (plus the value label) — untouched sides keep showing normally  |  ✅  |                       —                        |
+| 7   | Handle geometry and hit-testing both run in the frame's local (un-rotated) space, so a rotated frame's handles/cursors follow its own rotated axes                                         |  ✅  |                       —                        |
+| 8   | A padded side's handle sits centred in the middle of the padding band (half the padding value in from the edge), not flush against the content boundary                                    |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 9   | A zero-padding handle sits just outside the frame's own edge visually, but is still grabbable well short of that 1px marker — its reach extends up to 30px in from the edge                |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 10  | The zero-padding grab cursor (`gap-base.png`) gets its own distinct angle per side (a 90deg clockwise step around the frame), not one shared per axis like the already-padded `gap` cursor |  ✅  |                       —                        |
+
+Requested directly, immediately after the RightPanel padding controls above: "Screen przedstawi
+sytuację kiedy padding jest zero i pojawia się możliwość ustawienia padding... To powinno mniej
+więcej działać jak z radius na rect... Jeśli padding jest ustawiony są dostępne handlery i nie
+trzeba w nich wjechać myszką... Zachowanie podobne jak ustawienie gap z tego modelu... Weź pod
+uwage obrót żeby handlery miały odpowiedni obrót... Handlery pojawiają się kiedy element jest
+zaznaczony i najeżdżamy myszką." The two drag math modes are picked once, at grab time, from
+whether that side's _current_ value is 0 (`armAutoLayoutPaddingDrag` sets
+`mode: originalPaddingValue === 0 ? 'absolute' : 'delta'`) — a zero-padding drag reads like a
+corner-radius drag (`getAutoLayoutPaddingDragValue`'s absolute branch: distance from the relevant
+frame edge, clamped to 0), while a positive-padding drag reads like a gap drag (original + signed
+delta along the drag axis, the sign flipped for the right/bottom sides since dragging _toward_ the
+frame's centre grows those). Once a drag starts it stays in that mode for the whole gesture, even
+if the value crosses back through 0 — mirroring corner-radius, not re-deciding per frame.
+
+Geometry (`getAutoLayoutPaddingHandles`, `src/utils/canvas/autoLayoutPadding/`) mirrors
+`getAutoLayoutGapHandles`'s local↔world rotation strategy, but per-side bands (`getAutoLayoutPaddingBand`,
+the inverse of `getAutoLayoutContentBox`'s inset) rather than per-gap rects. A padded handle centres
+itself in the middle of that band (`getAutoLayoutPaddingHandleInset` insets by `value / 2`); a
+0-padding handle instead sits `AUTO_LAYOUT_PADDING_ZERO_HANDLE_OUTSET_PX` (1 screen px) _outside_
+the frame's own edge (the same inset formula, given a negative offset). Since that 1px marker alone
+would be nearly unhittable, its hit-test (`isAutoLayoutPaddingHandleHit`) widens into a directional
+strip along the drag axis reaching `AUTO_LAYOUT_PADDING_ZERO_HANDLE_REACH_PX` (30 screen px) in from
+the edge — measured off the edge itself, not off the tiny marker — while keeping the ordinary
+circular tolerance on the perpendicular axis and for any already-padded side. That reach overlaps
+the frame's own plain resize-edge handle right at the pixel-exact edge midpoint; `armResizeOnPointerDown`
+still wins exactly there (it runs first in `ARM_RESOLVERS`), so the padding handle's own e2e grabs
+land a few pixels off that exact point rather than on it. The guide line shown mid-drag
+(`drawAutoLayoutPaddingGuideLine`) is a plain solid `drawLine`, unlike the dashed guides most other
+handle systems draw. The cursor reuses the existing `'gap'` cursor once a side already carries
+padding (same per-axis angle the gap handles use), but adds a new `'padding'` kind backed by the
+previously-unused `assets/icons/cursors/gap-base.png` asset for the zero-padding grab affordance —
+since that asset is directional rather than a symmetric double-arrow,
+`getAutoLayoutPaddingCursorAngle` gives each of the four sides its own angle (a 90deg clockwise step:
+top/right/bottom/left) instead of sharing one per axis, confirmed side-by-side live.
+Unit-only for the geometry, hit-testing, hover/cursor resolution and every draw layer (bars, hatch, guide line, label) — pure
+functions or narrow WebGL call-verification. `padding-handles.spec.ts` covers the one thing only a
+real browser proves: the actual pointerdown→pointermove→pointerup gesture correctly reading back
+into the store as a persisted `paddingLeft` change, in both math modes, plus the
+selected-and-hovered visibility gate.

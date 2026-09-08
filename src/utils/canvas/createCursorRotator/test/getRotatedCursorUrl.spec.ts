@@ -1,5 +1,6 @@
 // assets
 import gapCursorUrl from 'assets/icons/cursors/gap.png';
+import paddingCursorUrl from 'assets/icons/cursors/gap-base.png';
 import resizeCursorUrl from 'assets/icons/cursors/resize.png';
 import rotateCursorUrl from 'assets/icons/cursors/rotate.png';
 import scaleCursorUrl from 'assets/icons/cursors/scale.png';
@@ -29,6 +30,17 @@ describe('getRotatedCursorUrl', () => {
 
     // result
     expect(url).toBe(`${gapCursorUrl}:0`);
+  });
+
+  it('should dispatch to the padding cursor asset', async () => {
+    // before
+    const { getRotatedCursorUrl } = await import('../getRotatedCursorUrl');
+
+    // action
+    const url = getRotatedCursorUrl('padding', 15);
+
+    // result
+    expect(url).toBe(`${paddingCursorUrl}:15`);
   });
 
   it('should dispatch to the resize cursor asset', async () => {

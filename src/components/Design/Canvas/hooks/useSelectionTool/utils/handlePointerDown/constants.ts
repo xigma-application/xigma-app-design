@@ -1,4 +1,5 @@
 import { armAutoLayoutGapOnPointerDown } from './armResolvers/armAutoLayoutGapOnPointerDown';
+import { armAutoLayoutPaddingOnPointerDown } from './armResolvers/armAutoLayoutPaddingOnPointerDown';
 import { armBakeVectorRotationOnPointerDown } from './armResolvers/armBakeVectorRotationOnPointerDown';
 import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPointerDown';
 import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
@@ -71,6 +72,7 @@ export const ARM_RESOLVERS = [
   armStarCornerRadiusOnPointerDown,
   armRotateOnPointerDown,
   armAutoLayoutGapOnPointerDown,
+  armAutoLayoutPaddingOnPointerDown,
   armSmartSelectionSwapOnPointerDown,
   armSmartSelectionGapOnPointerDown,
   armSmartSelectionSuggestionOnPointerDown,

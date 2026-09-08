@@ -3,6 +3,7 @@ import { useRef } from 'react';
 // types
 import {
   TAutoLayoutGapHoverState,
+  TAutoLayoutPaddingHoverState,
   TCornerRadiusHandleHover,
   THoverRefs,
   TSmartSelectionGapHoverState,
@@ -18,6 +19,7 @@ import { TPoint } from 'types/canvas';
 export const useHoverRefs = (): THoverRefs => {
   const hoverRef = useRef<string | null>(null);
   const hoveredAutoLayoutGapRef = useRef<TAutoLayoutGapHoverState | null>(null);
+  const hoveredAutoLayoutPaddingRef = useRef<TAutoLayoutPaddingHoverState | null>(null);
   const hoveredCornerRadiusHandleRef = useRef<TCornerRadiusHandleHover | null>(null);
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
@@ -42,6 +44,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredVectorWidthLabelRef = useRef<TVectorWidthPointHover | null>(null);
   const hoveredVectorWidthPointRef = useRef<TVectorWidthPointHover | null>(null);
   const isAutoLayoutGapAreaHoveredRef = useRef(false);
+  const isAutoLayoutPaddingAreaHoveredRef = useRef(false);
   const isSmartSelectionBoxHoveredRef = useRef(false);
   const hoverRefsRef = useRef<THoverRefs | null>(null);
 
@@ -49,6 +52,7 @@ export const useHoverRefs = (): THoverRefs => {
     hoverRefsRef.current = {
       hoverRef,
       hoveredAutoLayoutGapRef,
+      hoveredAutoLayoutPaddingRef,
       hoveredCornerRadiusHandleRef,
       hoveredEllipseArcHandleRef,
       hoveredEllipseArcRatioHandleRef,
@@ -73,6 +77,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredVectorWidthLabelRef,
       hoveredVectorWidthPointRef,
       isAutoLayoutGapAreaHoveredRef,
+      isAutoLayoutPaddingAreaHoveredRef,
       isSmartSelectionBoxHoveredRef,
     };
   }

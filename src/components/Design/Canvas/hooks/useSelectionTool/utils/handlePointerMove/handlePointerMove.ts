@@ -7,6 +7,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { continueAutoLayoutGapDrag } from './continueAutoLayoutGapDrag';
+import { continueAutoLayoutPaddingDrag } from './continueAutoLayoutPaddingDrag';
 import { continueCornerRadiusDrag } from './continueCornerRadiusDrag';
 import { continueDrag } from './continueDrag/continueDrag';
 import { continueEllipseArcDrag } from './continueEllipseArcDrag';
@@ -60,6 +61,7 @@ export const handlePointerMove = (
   continueRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
   continueCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.cornerRadiusDragRef);
   continueAutoLayoutGapDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutGapDragRef);
+  continueAutoLayoutPaddingDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutPaddingDragRef);
   continueSmartSelectionGapDrag(canvas, event, dispatch, canvasRefs.smartSelection.gapDragRef);
   continueSmartSelectionSwapDrag(canvas, event, dispatch, canvasRefs.smartSelection.swapDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);

@@ -5,6 +5,7 @@ import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmen
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
+import { TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -230,9 +231,16 @@ export type TAutoLayoutGapHoverState = {
   point: TPoint;
 };
 
+export type TAutoLayoutPaddingHoverState = {
+  frameId: string;
+  point: TPoint;
+  side: TAutoLayoutPaddingSide;
+};
+
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
   hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
+  hoveredAutoLayoutPaddingRef: RefObject<TAutoLayoutPaddingHoverState | null>;
   hoveredCornerRadiusHandleRef: RefObject<TCornerRadiusHandleHover | null>;
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
@@ -257,6 +265,7 @@ export type THoverRefs = {
   hoveredVectorWidthLabelRef: RefObject<TVectorWidthPointHover | null>;
   hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
   isAutoLayoutGapAreaHoveredRef: RefObject<boolean>;
+  isAutoLayoutPaddingAreaHoveredRef: RefObject<boolean>;
   isSmartSelectionBoxHoveredRef: RefObject<boolean>;
 };
 
@@ -297,11 +306,21 @@ export type TAutoLayoutGapDragState = {
   pointerStart: TPoint;
 };
 
+export type TAutoLayoutPaddingDragState = {
+  frameId: string;
+  mode: 'absolute' | 'delta';
+  originalPaddingValue: number;
+  point: TPoint;
+  pointerStart: TPoint;
+  side: TAutoLayoutPaddingSide;
+};
+
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>;
   autoLayoutDropTargetRef: RefObject<TAutoLayoutDropTargetHover | null>;
   autoLayoutGapDragRef: RefObject<TAutoLayoutGapDragState | null>;
+  autoLayoutPaddingDragRef: RefObject<TAutoLayoutPaddingDragState | null>;
   autoLayoutReorderPreviewRef: RefObject<TAutoLayoutReorderPreview | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   dimensionHintGuidesRef: RefObject<TDimensionHintGuides | null>;

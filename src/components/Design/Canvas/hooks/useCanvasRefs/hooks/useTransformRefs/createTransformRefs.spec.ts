@@ -12,6 +12,7 @@ describe('createTransformRefs behaviors', () => {
       aspectRatioLockGuideRef: { current: null },
       autoLayoutDropTargetRef: { current: null },
       autoLayoutGapDragRef: { current: null },
+      autoLayoutPaddingDragRef: { current: null },
       autoLayoutReorderPreviewRef: { current: null },
       contactGuidesRef: { current: null },
       dimensionHintGuidesRef: { current: null },

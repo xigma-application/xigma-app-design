@@ -1900,6 +1900,89 @@ follows its children live and Ctrl+Z reverts it in the same step. Tests:
 `getSmartSelectionNodes.spec.ts`, `e2e/design/selection/smart-selection-group.spec.ts` (gap grow +
 box resync + undo, swap reorder + box unchanged).
 
+## 31. Auto-layout padding handles
+
+A second, canvas-native way to set an auto-layout frame's `paddingTop/Right/Bottom/Left` — the
+RightPanel's `LayoutSection/ColumnPadding` (see `auto-layout.md`) is the other. Lives in
+`src/utils/canvas/autoLayoutPadding/` (pure geometry), `Canvas/utils/getAutoLayoutPaddingHandleAtPoint.ts`
+(hit-test), `useSelectionTool/.../armAutoLayoutPaddingDrag.ts` + `armResolvers/armAutoLayoutPaddingOnPointerDown.ts`
++ `handlePointerMove/continueAutoLayoutPaddingDrag.ts` + `handlePointerUp/disarmAutoLayoutPaddingDrag.ts`
+(arm/continue/disarm, mirroring the auto-layout gap handles' resolver-chain wiring — one entry each
+in `ARM_RESOLVERS`/`HOVER_RESOLVERS`/`handlePointerMove`/`handlePointerUp`), and
+`drawScene/drawAutoLayoutPaddingHandles/` (render).
+
+**Geometry.** `getAutoLayoutPaddingHandles(frame, viewport, draggingSide)` returns one
+`{ band, handleCenter, side, value }` per side, in the frame's own local (un-rotated) space —
+`getAutoLayoutPaddingBand` is the literal inverse of `getAutoLayoutContentBox`'s inset (a thin rect
+from the frame edge in to the padding boundary). `handleCenter` sits in the **middle of that band**
+once `value > 0` (`getAutoLayoutPaddingHandleInset` insets by `value / 2`, not the full value — the
+handle is never flush against the content boundary); at `value === 0` it instead sits **just outside
+the frame's own edge** (`AUTO_LAYOUT_PADDING_ZERO_HANDLE_OUTSET_PX`, 1 screen px, passed to
+`getAutoLayoutPaddingHandleInset` as a *negative* inset — the same formula that centres a padded
+handle also places an unpadded one outside the band when the offset itself is negative). Both cases
+clamp to `getAutoLayoutPaddingMaxInset` (half the frame's own width/height on that axis) so a padded
+handle can't cross the frame's centre on a tiny frame. Draw/hit-test both rotate this local geometry
+to/from world via `frame.rotation` + `getAutoLayoutFrameCenter`, the same
+`rotatePoint`/`getUnrotatedQueryPoint` pair every other handle system in this doc uses.
+
+**Hit-test reach, wider than the visual dot for a zero-padding side.** The 1px-outside marker would
+be nearly impossible to hit precisely, so `isAutoLayoutPaddingHandleHit` treats a `value === 0` side
+as a *directional strip* rather than a circle around `handleCenter`: perpendicular to the drag axis
+it still uses the plain `AUTO_LAYOUT_PADDING_HANDLE_HIT_RADIUS_PX` tolerance, but along the drag axis
+it accepts anything from just past the marker (`-tolerance`) in to
+`AUTO_LAYOUT_PADDING_ZERO_HANDLE_REACH_PX` (30 screen px) toward the frame's centre — measured via
+`getAutoLayoutPaddingPrimaryDistanceFromEdge`, straight off the frame edge rather than off the tiny
+marker itself. A padded (`value > 0`) side keeps the plain circular tolerance around `handleCenter`,
+unaffected. Because this reach overlaps the frame's own edge, it can compete with the plain
+resize-edge handle exactly at the pixel-perfect edge midpoint (`armResizeOnPointerDown` still wins
+there, since it runs earlier in `ARM_RESOLVERS`) — grabbing anywhere a few pixels off that exact
+point resolves to the padding handle instead, which is the padding handles' own e2e test's actual
+grab points.
+
+**Two drag-value modes, picked once at grab time.** `armAutoLayoutPaddingDrag` reads the side's
+*current* value and freezes `mode: originalPaddingValue === 0 ? 'absolute' : 'delta'` into the drag
+state for the whole gesture (never re-decided mid-drag, even if the value crosses back through 0):
+
+- `'absolute'` (a zero-padding side) — `getAutoLayoutPaddingDragValue` reads the padding straight
+  off the pointer's live distance from that frame edge, clamped to 0. Same model as corner-radius:
+  no stored delta, recomputed fresh from the current pointer position every move.
+- `'delta'` (an already-padded side) — `originalPaddingValue + signedDelta` along the drag axis
+  (un-rotating both the current point and `pointerStart` first), sign flipped for the right/bottom
+  sides since moving *toward* the frame's centre grows those. Same model as the auto-layout gap
+  handles (§ auto-layout.md "Gap handles"): the handle stays glued under the cursor.
+
+**Visibility** (`drawAutoLayoutPaddingHandles`, gated on a single selected auto-layout frame +
+either `isAutoLayoutPaddingAreaHoveredRef` or an active drag, mirroring the gap handles' own
+area-hover ref): a side with `value > 0` always draws its bar + 45deg hatch fill
+(`drawVectorHatchFill`, reused from the vector paint tool exactly like the gap handles) while the
+frame is merely hovered anywhere — no need to be over that specific handle. A `value === 0` side
+only draws once `hoveredAutoLayoutPaddingRef` names it (anywhere within its wider zero-state reach,
+above) — there's nothing to hatch at zero width anyway. Whichever side is actively being dragged
+swaps its bar/hatch for a
+single solid blue guide line at the live padding boundary (`drawAutoLayoutPaddingGuideLine`, plain
+`drawLine` rather than the dashed guides most other systems in this doc use) plus the numeric value
+label — the *other*, non-dragged sides keep rendering normally throughout.
+
+**Cursor.** Reuses the existing rotated-cursor mechanism (`getRotatedCursorUrl`, §9) but adds a new
+`'padding'` kind wired to the previously-unused `assets/icons/cursors/gap-base.png` asset (only the
+0-padding grab affordance gets this distinct icon — a positive-value drag reuses the existing
+`'gap'` cursor, since it behaves like one, sharing the gap handles' own per-axis angle formula:
+`frame.rotation` for top/bottom, `frame.rotation + 90` for left/right — a symmetric double-arrow
+icon, so opposite sides sharing one angle is correct there). `gap-base.png` is a **directional**
+icon, not symmetric, so `getAutoLayoutPaddingCursorAngle` gives each of the four sides its own
+angle instead of one shared per axis: a 90deg step walking clockwise around the frame —
+`top: -90, right: 0, bottom: 90, left: 180` (plus `frame.rotation` on top of every one) — confirmed
+side-by-side live rather than assumed from the asset alone, after an initial per-axis version put
+top/bottom (and separately left/right) at the identical angle, which is wrong for a directional icon.
+
+Requested directly, immediately after the RightPanel padding controls: "To powinno mniej więcej
+działać jak z radius na rect... Zachowanie podobne jak ustawienie gap z tego modelu... graficznie
+handler taki sam tylko tutaj kolor niebieski". Locked as two independently-modelled interactions
+(radius-style for zero, gap-style for non-zero) rather than one unified formula, since the two
+existing systems being explicitly named as the references made the split the more literal reading
+of the request. See `e2e/design/docs/test-cases-auto-layout.md`'s "Padding handles" section for the
+full scenario table.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
