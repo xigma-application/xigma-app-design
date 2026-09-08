@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -12,22 +12,21 @@ import styles from './layer-row-mask-decorations.module.scss';
 
 // types
 import { TMaskConnectorLine } from 'store/design/selectors';
-import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getShiftedLeftStyle } from './utils/getShiftedLeftStyle';
 
 export type TLayerRowMaskDecorationsProps = {
+  isMask: boolean;
   maskConnectorLines?: TMaskConnectorLine[];
-  node: TSceneNode;
 };
 
-const LayerRowMaskDecorations: FC<TLayerRowMaskDecorationsProps> = ({ maskConnectorLines = [], node }) => {
+const LayerRowMaskDecorations: FC<TLayerRowMaskDecorationsProps> = ({ isMask, maskConnectorLines = [] }) => {
   const { t } = useTranslation();
 
   return (
-    <>
-      {node.isMask && <span className={styles.LayerRowMaskDecorations__badge}>{t(NODE_ROW_MASK_BADGE_KEY)}</span>}
+    <Fragment>
+      {isMask && <span className={styles.LayerRowMaskDecorations__badge}>{t(NODE_ROW_MASK_BADGE_KEY)}</span>}
       {maskConnectorLines.map((line) => {
         const key = `${line.role}-${line.depthOffset}`;
 
@@ -65,7 +64,7 @@ const LayerRowMaskDecorations: FC<TLayerRowMaskDecorationsProps> = ({ maskConnec
             return undefined;
         }
       })}
-    </>
+    </Fragment>
   );
 };
 

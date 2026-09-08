@@ -1,9 +1,11 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { isGroupLikeNode } from './isGroupLikeNode';
+
 export const getGroupLeafNodes = (group: TSceneNode, nodesById: Record<string, TSceneNode>): TSceneNode[] => {
-  if (group.type !== NodeType.group) {
+  if (!isGroupLikeNode(group)) {
     return [group];
   }
 

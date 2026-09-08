@@ -31,7 +31,6 @@ describe('convertSectionToFrame', () => {
       height: 100,
       hidden: undefined,
       id: 'section-1',
-      isMask: undefined,
       locked: undefined,
       name: 'Section',
       parentId: 'parent-1',
@@ -43,10 +42,10 @@ describe('convertSectionToFrame', () => {
     });
   });
 
-  it('should carry over hidden, locked and isMask when set', () => {
-    const section = buildSection({ hidden: true, isMask: true, locked: true });
+  it('should carry over hidden and locked when set', () => {
+    const section = buildSection({ hidden: true, locked: true });
 
-    expect(convertSectionToFrame(section)).toMatchObject({ hidden: true, isMask: true, locked: true });
+    expect(convertSectionToFrame(section)).toMatchObject({ hidden: true, locked: true });
   });
 
   it('should carry over the section’s children instead of discarding them', () => {

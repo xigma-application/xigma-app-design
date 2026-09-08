@@ -1,10 +1,10 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TDesignState } from '../../types';
 
 // utils
 import { getActivePage } from '../getActivePage';
 import { handleDeleteNode } from '../handleDeleteNode/handleDeleteNode';
+import { isGroupLikeNode } from '../nodeHierarchy/isGroupLikeNode';
 import { removeNodesFromContainer } from '../removeNodesFromContainer';
 import { syncGroupBounds } from '../syncGroupBounds';
 
@@ -14,13 +14,12 @@ export const stealMembersFromOldParents = (state: TDesignState, stolenMemberIds:
 
   oldParentIds.forEach((oldParentId) => {
     const idsFromThisParent = stolenMemberIds.filter((id) => (page.nodes[id]?.parentId ?? null) === oldParentId);
-
     removeNodesFromContainer(page, oldParentId, idsFromThisParent);
 
     if (oldParentId && oldParentId !== targetParentId) {
       const oldParent = page.nodes[oldParentId];
 
-      if (oldParent && oldParent.type === NodeType.group && oldParent.childIds.length === 0) {
+      if (oldParent && isGroupLikeNode(oldParent) && oldParent.childIds.length === 0) {
         handleDeleteNode(state, oldParentId);
       } else {
         syncGroupBounds(state, oldParentId);

@@ -55,11 +55,10 @@ describe('useUseSelectionAsMask', () => {
 
     // result
     const page = selectActivePage(store.getState());
-    const [groupId] = page.rootOrder;
     const [maskChildId] = page.selectedIds;
-    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    const groupId = page.nodes[maskChildId].parentId as string;
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
-    expect(page.nodes[maskChildId].isMask).toBe(true);
   });
 });

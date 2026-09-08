@@ -814,17 +814,16 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     const page = realStore.getState().design.pages[realStore.getState().design.activePageId];
     const [maskChildId] = selectSelectedIds(realStore.getState());
     const groupId = page.nodes[maskChildId].parentId as string;
-    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
-    expect(page.nodes[maskChildId].isMask).toBe(true);
 
     // action
     fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true, metaKey: true });
 
     // result
     const pageAfterToggleOff = realStore.getState().design.pages[realStore.getState().design.activePageId];
-    expect(pageAfterToggleOff.nodes[maskChildId].isMask).toBe(false);
+    expect(pageAfterToggleOff.nodes[groupId].type).toBe(NodeType.group);
     expect(selectSelectedIds(realStore.getState())).toEqual([maskChildId]);
   });
 

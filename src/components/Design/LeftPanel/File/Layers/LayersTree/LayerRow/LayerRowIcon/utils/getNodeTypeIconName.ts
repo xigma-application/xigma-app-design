@@ -9,9 +9,13 @@ import { NODE_TYPE_ICON } from '../constants';
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
-const getIconStatus = (node: TSceneNode, layoutIconName: TIconProps['name'] | undefined): 'default' | 'frameLayout' | 'mask' | 'textOnPath' => {
+const getIconStatus = (
+  node: TSceneNode,
+  isMask: boolean,
+  layoutIconName: TIconProps['name'] | undefined,
+): 'default' | 'frameLayout' | 'mask' | 'textOnPath' => {
   switch (true) {
-    case node.isMask:
+    case isMask:
       return 'mask';
     case Boolean(layoutIconName):
       return 'frameLayout';
@@ -22,9 +26,9 @@ const getIconStatus = (node: TSceneNode, layoutIconName: TIconProps['name'] | un
   }
 };
 
-export const getNodeTypeIconName = (node: TSceneNode): TIconProps['name'] => {
+export const getNodeTypeIconName = (node: TSceneNode, isMask: boolean): TIconProps['name'] => {
   const layoutIconName = node.type === NodeType.frame ? getFrameLayoutIconName(node) : undefined;
-  const iconStatus = getIconStatus(node, layoutIconName);
+  const iconStatus = getIconStatus(node, isMask, layoutIconName);
 
   switch (iconStatus) {
     case 'mask':

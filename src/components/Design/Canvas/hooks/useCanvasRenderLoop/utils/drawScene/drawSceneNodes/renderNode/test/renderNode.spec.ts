@@ -6,10 +6,12 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { renderFrameNode } from '../renderFrameNode';
 import { renderGroupNode } from '../renderGroupNode';
+import { renderMaskNode } from '../renderMaskNode';
 import { renderNode } from '../renderNode';
 import { renderSectionNode } from '../renderSectionNode';
 
 vi.mock('../renderGroupNode', () => ({ renderGroupNode: vi.fn() }));
+vi.mock('../renderMaskNode', () => ({ renderMaskNode: vi.fn() }));
 vi.mock('../renderFrameNode', () => ({ renderFrameNode: vi.fn() }));
 vi.mock('../renderSectionNode', () => ({ renderSectionNode: vi.fn() }));
 
@@ -39,6 +41,14 @@ describe('renderNode', () => {
     renderNode(renderer, 'group-1', null);
 
     expect(renderGroupNode).toHaveBeenCalledWith(renderer, renderer.sceneNodeById.get('group-1'), null);
+  });
+
+  it('should delegate a mask node to renderMaskNode', () => {
+    const renderer = buildRenderer({ 'mask-1': { id: 'mask-1', type: NodeType.mask } });
+
+    renderNode(renderer, 'mask-1', null);
+
+    expect(renderMaskNode).toHaveBeenCalledWith(renderer, renderer.sceneNodeById.get('mask-1'), null);
   });
 
   it('should delegate a frame node to renderFrameNode', () => {

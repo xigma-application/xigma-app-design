@@ -4,12 +4,12 @@ import { AppDispatch, store } from 'store';
 import { updateNode } from 'store/design/slice';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
-import { TGroupNode } from 'types/design/types';
+import { TGroupLikeNode } from 'types/design/types';
 
 // utils
 import { getRotatedGroupBounds } from 'store/design/utils/getRotatedGroupBounds';
+import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 
 export const resyncRotatedGroupBounds = (dispatch: AppDispatch, dragState: TDragState): void => {
   const { nodes } = selectActivePage(store.getState());
@@ -20,13 +20,13 @@ export const resyncRotatedGroupBounds = (dispatch: AppDispatch, dragState: TDrag
     const parentId = nodes[id]?.parentId;
     const parent = parentId ? nodes[parentId] : null;
 
-    if (parentId && !draggedIds.has(parentId) && parent?.type === NodeType.group && parent.rotation !== 0) {
+    if (parentId && !draggedIds.has(parentId) && parent && isGroupLikeNode(parent) && parent.rotation !== 0) {
       brokenGroupIds.add(parentId);
     }
   });
 
   brokenGroupIds.forEach((groupId) => {
-    const group = nodes[groupId] as TGroupNode;
+    const group = nodes[groupId] as TGroupLikeNode;
     const children = group.childIds.map((childId) => nodes[childId]).filter(Boolean);
 
     if (children.length > 0) {

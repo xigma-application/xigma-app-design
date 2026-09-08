@@ -39,6 +39,7 @@ export enum NodeType {
   frame = 'frame',
   group = 'group',
   line = 'line',
+  mask = 'mask',
   media = 'media',
   path = 'path',
   polygon = 'polygon',

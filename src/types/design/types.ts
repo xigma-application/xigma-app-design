@@ -55,7 +55,6 @@ export type TBaseNode = {
   hidden?: boolean;
   id: string;
   ignoreAutoLayout?: boolean;
-  isMask?: boolean;
   locked?: boolean;
   lockedAspectRatio?: boolean;
   maxHeight?: number;
@@ -109,6 +108,13 @@ export type TGroupNode = TBaseNode & {
   childIds: string[];
   type: NodeType.group;
 };
+
+export type TMaskNode = TBaseNode & {
+  childIds: string[];
+  type: NodeType.mask;
+};
+
+export type TGroupLikeNode = TGroupNode | TMaskNode;
 
 export type TMediaNode = TBaseNode & {
   flipX: boolean;
@@ -203,7 +209,6 @@ export type TVectorNode = {
   hidden?: boolean;
   holeParentByKey?: Record<string, string>;
   id: string;
-  isMask?: boolean;
   locked?: boolean;
   name: string;
   parentId: string | null;
@@ -223,7 +228,6 @@ export type TLineNode = {
   endPoint?: TLineEndpointStyle;
   hidden?: boolean;
   id: string;
-  isMask?: boolean;
   locked?: boolean;
   name: string;
   parentId: string | null;
@@ -242,7 +246,17 @@ export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
 export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
 export type TBoxSceneNode =
-  TEllipseNode | TFrameNode | TGroupNode | TMediaNode | TPathNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
+  | TEllipseNode
+  | TFrameNode
+  | TGroupNode
+  | TMaskNode
+  | TMediaNode
+  | TPathNode
+  | TPolygonNode
+  | TRectangleNode
+  | TSectionNode
+  | TStarNode
+  | TTextNode;
 
 export type TSceneNode = TBoxSceneNode | TLineNode | TVectorNode;
 
@@ -250,6 +264,7 @@ export type TNewSceneNode =
   | Omit<TEllipseNode, 'id'>
   | Omit<TFrameNode, 'id'>
   | Omit<TGroupNode, 'id'>
+  | Omit<TMaskNode, 'id'>
   | Omit<TMediaNode, 'id'>
   | Omit<TPathNode, 'id'>
   | Omit<TPolygonNode, 'id'>
@@ -264,6 +279,7 @@ export type TSceneNodeChanges =
   | Partial<TEllipseNode>
   | Partial<TFrameNode>
   | Partial<TGroupNode>
+  | Partial<TMaskNode>
   | Partial<TMediaNode>
   | Partial<TPathNode>
   | Partial<TPolygonNode>

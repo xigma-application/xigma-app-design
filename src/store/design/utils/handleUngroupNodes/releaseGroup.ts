@@ -1,19 +1,14 @@
 // types
-import { NodeType } from 'types/design/enums';
-import { TDesignState } from '../../types';
-import { TGroupNode } from 'types/design/types';
+import { TDesignPage, TDesignState } from '../../types';
+import { TGroupLikeNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
 import { getUngroupedOrder } from './getUngroupedOrder';
+import { isGroupLikeNode } from '../nodeHierarchy/isGroupLikeNode';
 import { syncGroupBounds } from '../syncGroupBounds';
 
-export const releaseGroup = (state: TDesignState, group: TGroupNode): string[] => {
-  const page = getActivePage(state);
-  const parent = group.parentId ? page.nodes[group.parentId] : null;
-  const containerOrder = parent && parent.type === NodeType.group ? parent.childIds : page.rootOrder;
-  const nextOrder = getUngroupedOrder(containerOrder, group.id, group.childIds);
-
+const reparentAndRemoveGroup = (page: TDesignPage, group: TGroupLikeNode): void => {
   group.childIds.forEach((id) => {
     const child = page.nodes[id];
 
@@ -23,13 +18,24 @@ export const releaseGroup = (state: TDesignState, group: TGroupNode): string[] =
   });
 
   delete page.nodes[group.id];
+};
 
-  if (parent && parent.type === NodeType.group) {
+const applyUngroupedOrder = (page: TDesignPage, parent: TSceneNode | null, nextOrder: string[]): void => {
+  if (parent && isGroupLikeNode(parent)) {
     parent.childIds = nextOrder;
   } else {
     page.rootOrder = nextOrder;
   }
+};
 
+export const releaseGroup = (state: TDesignState, group: TGroupLikeNode): string[] => {
+  const page = getActivePage(state);
+  const parent = group.parentId ? page.nodes[group.parentId] : null;
+  const containerOrder = parent && isGroupLikeNode(parent) ? parent.childIds : page.rootOrder;
+  const nextOrder = getUngroupedOrder(containerOrder, group.id, group.childIds);
+
+  reparentAndRemoveGroup(page, group);
+  applyUngroupedOrder(page, parent, nextOrder);
   syncGroupBounds(state, group.parentId);
 
   return group.childIds;

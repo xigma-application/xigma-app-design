@@ -11,7 +11,7 @@ const USE_AS_MASK_SHORTCUT = 'Alt+Control+M';
 const readDesignState = (
   page: Page,
 ): Promise<{
-  nodes: Record<string, { childIds?: string[]; isMask?: boolean; name: string; type: string }>;
+  nodes: Record<string, { childIds?: string[]; name: string; type: string }>;
   rootOrder: string[];
   selectedIds: string[];
 }> =>
@@ -85,15 +85,16 @@ test('"Use as mask" wraps two selected rectangles in a "Mask group", marking the
   const group = after.nodes[groupId];
 
   expect(group.name).toBe('Mask group');
+  expect(group.type).toBe('mask');
   expect(group.childIds).toHaveLength(2);
 
-  const maskChildId = group.childIds!.find((id) => after.nodes[id].isMask);
-  const maskedChildId = group.childIds!.find((id) => !after.nodes[id].isMask);
+  // the mask is purely positional — always the last child in childIds (bottom row in the Layers
+  // panel), no separate flag — B, drawn second, ends up there
+  const maskChildId = group.childIds![group.childIds!.length - 1];
+  const maskedChildId = group.childIds!.find((id) => id !== maskChildId);
 
   expect(maskChildId).toBeDefined();
   expect(maskedChildId).toBeDefined();
-  // the mask is the last child in childIds (bottom row in the Layers panel) — B, drawn second
-  expect(group.childIds!.indexOf(maskChildId!)).toBe(group.childIds!.length - 1);
 
   await designPage.click(1500, 700); // deselect
   await designPage.pointerMove(1500, 700); // neutral rest, no hover outline
@@ -172,8 +173,10 @@ test('filling a mask vector reveals its underlying content everywhere the fill n
   // one entry there
   const [groupId] = grouped.rootOrder;
   const group = grouped.nodes[groupId];
-  const maskId = group.childIds!.find((id) => grouped.nodes[id].isMask)!;
+  // the mask is purely positional — always the last child in childIds, no separate flag
+  const maskId = group.childIds![group.childIds!.length - 1];
 
+  expect(group.type).toBe('mask');
   expect(group.childIds).toHaveLength(2); // both the rectangle and the vector actually got grouped
   expect(grouped.nodes[maskId].type).toBe('vector');
 
@@ -251,19 +254,20 @@ test('"Remove mask" restores full visibility while the group itself stays intact
   // one entry there
   const [groupId] = grouped.rootOrder;
   const group = grouped.nodes[groupId];
-  const maskId = group.childIds!.find((id) => grouped.nodes[id].isMask)!;
+  // the mask is purely positional — always the last child in childIds, no separate flag
+  const maskId = group.childIds![group.childIds!.length - 1];
 
   await page.evaluate(async (id) => {
     const { store } = await import('/src/store/index.ts');
-    const { toggleNodeMask } = await import('/src/store/design/slice.ts');
+    const { removeNodeMask } = await import('/src/store/design/slice.ts');
 
-    store.dispatch(toggleNodeMask(id));
+    store.dispatch(removeNodeMask(id));
   }, maskId);
 
   const after = await readDesignState(page);
 
-  expect(after.nodes[maskId].isMask).toBe(false);
   expect(after.nodes[groupId]).toBeDefined(); // the group stays a group — "Remove mask" never ungroups
+  expect(after.nodes[groupId].type).toBe('group'); // converted back from "mask" to a plain group
   expect(after.nodes[groupId].childIds).toEqual(group.childIds);
 
   await designPage.click(1500, 700);

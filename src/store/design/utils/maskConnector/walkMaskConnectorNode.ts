@@ -19,8 +19,8 @@ export const walkMaskConnectorNode = (
   if (node) {
     passthrough.forEach((line) => addMaskConnectorLine(infoById, nodeId, line));
 
-    if (node.type === NodeType.group) {
-      const maskIndex = node.childIds.findIndex((childId) => nodes[childId]?.isMask);
+    if (node.type === NodeType.group || node.type === NodeType.mask) {
+      const maskIndex = node.type === NodeType.mask ? node.childIds.length - 1 : -1;
       const passthroughForChildren = getMaskConnectorPassthroughForChildren(passthrough);
 
       node.childIds.forEach((childId, index) => {

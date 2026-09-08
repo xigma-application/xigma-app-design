@@ -17,6 +17,7 @@ import slice, {
   groupNodes,
   moveNodes,
   moveNodesToPage,
+  removeNodeMask,
   renamePage,
   reorderPages,
   replaceDesignSnapshot,
@@ -40,7 +41,6 @@ import slice, {
   toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,
-  toggleNodeMask,
   toggleRulers,
   toggleUiHidden,
   toggleUiMinimized,
@@ -273,7 +273,7 @@ describe('design slice', () => {
     expect(ungrouped.pages[ungrouped.activePageId].nodes[groupId]).toBeUndefined();
   });
 
-  it('should wrap the selection in a mask group and toggle the mask flag off again', () => {
+  it('should wrap the selection in a mask group and convert it back to a plain group on removeNodeMask', () => {
     // before
     const withA = slice(undefined, addNode(frameNodePayload));
     const withB = slice(withA, addNode({ ...frameNodePayload, name: 'Frame 2' }));
@@ -287,21 +287,20 @@ describe('design slice', () => {
     const [maskChildId] = page.selectedIds;
 
     // result
-    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
     expect(page.nodes[groupId].name).toBe('Mask group');
     expect((page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)).toBe(maskChildId);
-    expect(page.nodes[maskChildId].isMask).toBe(true);
 
     // action
-    const unmasked = slice(masked, toggleNodeMask(maskChildId));
+    const unmasked = slice(masked, removeNodeMask(maskChildId));
 
     // result
-    expect(unmasked.pages[unmasked.activePageId].nodes[maskChildId].isMask).toBe(false);
+    expect(unmasked.pages[unmasked.activePageId].nodes[groupId].type).toBe(NodeType.group);
   });
 
-  it('should do nothing when toggling the mask state of a node that does not exist', () => {
+  it('should do nothing when removing the mask state of a node that does not exist', () => {
     // before
-    const state = slice(undefined, toggleNodeMask('missing'));
+    const state = slice(undefined, removeNodeMask('missing'));
 
     // result
     expect(state.pages[state.activePageId].nodes).toEqual({});

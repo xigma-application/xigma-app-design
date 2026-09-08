@@ -40,22 +40,22 @@ const textNode: TTextNode = {
 
 describe('getNodeTypeIconName', () => {
   it('should fall back to the shared NODE_TYPE_ICON entry for a non-text node', () => {
-    expect(getNodeTypeIconName(frameNode)).toBe('FrameTool');
+    expect(getNodeTypeIconName(frameNode, false)).toBe('FrameTool');
   });
 
   it('should return the plain text icon for a text node with no pathId', () => {
-    expect(getNodeTypeIconName(textNode)).toBe('TextTool');
+    expect(getNodeTypeIconName(textNode, false)).toBe('TextTool');
   });
 
   it('should return the text-on-path icon for a text node bound to a path', () => {
-    expect(getNodeTypeIconName({ ...textNode, pathId: 'vector-1' })).toBe('TextOnPathTool');
+    expect(getNodeTypeIconName({ ...textNode, pathId: 'vector-1' }, false)).toBe('TextOnPathTool');
   });
 
   it('should return the layout-mode icon for a frame with auto layout', () => {
-    expect(getNodeTypeIconName({ ...frameNode, layoutMode: LayoutMode.horizontal })).toBe('LayoutHorizontal');
+    expect(getNodeTypeIconName({ ...frameNode, layoutMode: LayoutMode.horizontal }, false)).toBe('LayoutHorizontal');
   });
 
   it('should prefer the mask icon over the layout-mode icon for a masked auto-layout frame', () => {
-    expect(getNodeTypeIconName({ ...frameNode, isMask: true, layoutMode: LayoutMode.horizontal })).toBe('MaskGroup');
+    expect(getNodeTypeIconName({ ...frameNode, layoutMode: LayoutMode.horizontal }, true)).toBe('MaskGroup');
   });
 });

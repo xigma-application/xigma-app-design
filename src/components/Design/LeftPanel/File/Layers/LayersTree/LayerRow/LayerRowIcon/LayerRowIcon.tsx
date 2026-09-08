@@ -16,11 +16,12 @@ import { getNodeOutlinePath } from './utils/getNodeOutlinePath';
 import { getNodeTypeIconName } from './utils/getNodeTypeIconName';
 
 export type TLayerRowIconProps = {
+  isMask: boolean;
   node: TSceneNode;
   size?: number;
 };
 
-const LayerRowIcon: FC<TLayerRowIconProps> = ({ node, size = 12 }) => {
+const LayerRowIcon: FC<TLayerRowIconProps> = ({ isMask, node, size = 12 }) => {
   const [outline, setOutline] = useState(() => getNodeOutlinePath(node));
   const previousNodeIdRef = useRef(node.id);
 
@@ -38,10 +39,10 @@ const LayerRowIcon: FC<TLayerRowIconProps> = ({ node, size = 12 }) => {
     setOutline(getNodeOutlinePath(node));
   }, [node]);
 
-  return outline && !node.isMask ? (
+  return outline && !isMask ? (
     <NodeShapeIcon outline={outline} size={size} />
   ) : (
-    <BaseNodeIcon name={getNodeTypeIconName(node)} size={size} />
+    <BaseNodeIcon name={getNodeTypeIconName(node, isMask)} size={size} />
   );
 };
 

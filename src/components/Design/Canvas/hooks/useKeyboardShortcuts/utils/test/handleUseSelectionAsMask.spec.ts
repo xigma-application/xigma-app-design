@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -92,9 +92,9 @@ describe('handleUseSelectionAsMask', () => {
     const page = selectActivePage(store.getState());
     const [groupId] = page.rootOrder;
     const [maskChildId] = selectSelectedIds(store.getState());
-    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
     expect(page.nodes[groupId].name).toBe('Mask group');
-    expect(page.nodes[maskChildId].isMask).toBe(true);
+    expect(maskChildId).toBe(idB);
   });
 
   it('should mask a single selected node', () => {
@@ -108,24 +108,28 @@ describe('handleUseSelectionAsMask', () => {
 
     // result
     const page = selectActivePage(store.getState());
-    const [maskChildId] = selectSelectedIds(store.getState());
-    expect(page.nodes[maskChildId].isMask).toBe(true);
+    const [groupId] = page.rootOrder;
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
-  it('should remove the mask when the single selected node is already a mask', () => {
-    // mock
+  it('should remove the mask when the single selected node is already the current mask', () => {
+    // mock — build a mask container directly, matching what "wrap into a mask group" produces
     const idA = addRectangleNode();
-
-    store.dispatch(updateNode({ changes: { isMask: true }, id: idA }));
     store.dispatch(setSelection([idA]));
+    handleUseSelectionAsMask(store.dispatch);
+    const [maskChildId] = selectSelectedIds(store.getState());
+    const maskId = selectActivePage(store.getState()).nodes[maskChildId].parentId as string;
 
-    // action
+    store.dispatch(setSelection([maskChildId]));
+
+    // action — press the shortcut again on the current mask child
     handleUseSelectionAsMask(store.dispatch);
 
     // result
     const page = selectActivePage(store.getState());
-    expect(page.nodes[idA].isMask).toBe(false);
-    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+    expect(page.nodes[maskId].type).toBe(NodeType.group);
+    expect(selectSelectedIds(store.getState())).toEqual([maskChildId]);
   });
 
   it('should do nothing while in vector editing mode', () => {
@@ -156,10 +160,10 @@ describe('handleUseSelectionAsMask', () => {
     // action
     handleUseSelectionAsMask(store.dispatch);
 
-    // result — frames stay frames, no group created, no isMask set
+    // result — frames stay frames, no group created
     const page = selectActivePage(store.getState());
-    expect(page.nodes[idA].isMask).toBeUndefined();
-    expect(page.nodes[idB].isMask).toBeUndefined();
+    expect(page.nodes[idA].type).toBe(NodeType.frame);
+    expect(page.nodes[idB].type).toBe(NodeType.frame);
     expect(page.rootOrder).toEqual(rootOrderBefore);
   });
 
@@ -175,7 +179,7 @@ describe('handleUseSelectionAsMask', () => {
 
     // result
     const page = selectActivePage(store.getState());
-    expect(page.nodes[idA].isMask).toBeUndefined();
+    expect(page.nodes[idA].type).toBe(NodeType.section);
     expect(page.rootOrder).toEqual(rootOrderBefore);
   });
 
@@ -192,6 +196,6 @@ describe('handleUseSelectionAsMask', () => {
     // result — the frame isn't excluded from the group itself, only from the all-container skip
     const page = selectActivePage(store.getState());
     const [groupId] = page.rootOrder;
-    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].type).toBe(NodeType.mask);
   });
 });

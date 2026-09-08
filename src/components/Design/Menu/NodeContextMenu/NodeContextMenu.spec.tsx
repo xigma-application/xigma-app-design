@@ -1,8 +1,14 @@
 import userEvent from '@testing-library/user-event';
+import { Provider } from 'react-redux';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
+
+// store
+import { addNode, moveNodes } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -66,33 +72,51 @@ const buildPage = (id: string, name: string): TDesignPage => ({
 
 const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): ReturnType<typeof render> =>
   render(
-    <NodeContextMenu
-      anchorRef={anchorRef}
-      isOpen
-      node={buildRectangleNode()}
-      onBringToFront={vi.fn()}
-      onConvertToFrame={vi.fn()}
-      onConvertToSection={vi.fn()}
-      onCopy={vi.fn()}
-      onFlatten={vi.fn()}
-      onFlipHorizontal={vi.fn()}
-      onFlipVertical={vi.fn()}
-      onGroupSelection={vi.fn()}
-      onMoveToPage={vi.fn()}
-      onOpenChange={vi.fn()}
-      onOutlineStroke={vi.fn()}
-      onPasteToReplace={vi.fn()}
-      onRemoveMask={vi.fn()}
-      onRename={vi.fn()}
-      onSendToBack={vi.fn()}
-      onToggleHidden={vi.fn()}
-      onToggleLocked={vi.fn()}
-      onUngroupSelection={vi.fn()}
-      onUseAsMask={vi.fn()}
-      otherPages={[]}
-      {...props}
-    />,
+    <Provider store={store}>
+      <NodeContextMenu
+        anchorRef={anchorRef}
+        isOpen
+        node={buildRectangleNode()}
+        onBringToFront={vi.fn()}
+        onConvertToFrame={vi.fn()}
+        onConvertToSection={vi.fn()}
+        onCopy={vi.fn()}
+        onFlatten={vi.fn()}
+        onFlipHorizontal={vi.fn()}
+        onFlipVertical={vi.fn()}
+        onGroupSelection={vi.fn()}
+        onMoveToPage={vi.fn()}
+        onOpenChange={vi.fn()}
+        onOutlineStroke={vi.fn()}
+        onPasteToReplace={vi.fn()}
+        onRemoveMask={vi.fn()}
+        onRename={vi.fn()}
+        onSendToBack={vi.fn()}
+        onToggleHidden={vi.fn()}
+        onToggleLocked={vi.fn()}
+        onUngroupSelection={vi.fn()}
+        onUseAsMask={vi.fn()}
+        otherPages={[]}
+        {...props}
+      />
+    </Provider>,
   );
+
+const buildMaskedRectangleNode = (): TRectangleNode => {
+  store.dispatch(
+    addNode({ childIds: [], height: 20, name: 'Mask group', parentId: null, rotation: 0, type: NodeType.mask, width: 20, x: 0, y: 0 }),
+  );
+  const maskId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
+
+  store.dispatch(
+    addNode({ fill: '#000000', height: 100, name: 'Node', parentId: null, rotation: 0, type: NodeType.rectangle, width: 100, x: 0, y: 0 }),
+  );
+  const nodeId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
+
+  store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex: 0, targetParentId: maskId }));
+
+  return selectActivePage(store.getState()).nodes[nodeId] as TRectangleNode;
+};
 
 describe('NodeContextMenu', () => {
   it('should show every menu item when open', () => {
@@ -148,7 +172,7 @@ describe('NodeContextMenu', () => {
     const onRemoveMask = vi.fn();
 
     // before
-    renderNodeContextMenu({ node: { ...buildRectangleNode(), isMask: true }, onRemoveMask });
+    renderNodeContextMenu({ node: buildMaskedRectangleNode(), onRemoveMask });
 
     // result
     expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();

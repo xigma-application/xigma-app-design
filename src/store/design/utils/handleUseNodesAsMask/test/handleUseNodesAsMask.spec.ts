@@ -4,7 +4,7 @@ import { DEFAULT_MASK_GROUP_NAME } from '../../../constants';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TMaskNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -88,7 +88,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
 });
 
 describe('handleUseNodesAsMask', () => {
-  it('should wrap the selection in a "Mask group" and flag its last child (bottom of the panel) as the mask', () => {
+  it('should wrap the selection in a "Mask group" node, whose last child is the mask', () => {
     // mock
     const a = buildRect({ id: 'a' });
     const b = buildRect({ id: 'b', x: 40 });
@@ -99,12 +99,10 @@ describe('handleUseNodesAsMask', () => {
 
     // result
     const page = getActivePage(state);
-    const group = page.nodes['group-1'] as TGroupNode;
-    expect(group.type).toBe(NodeType.group);
-    expect(group.name).toBe(DEFAULT_MASK_GROUP_NAME);
-    expect(group.childIds).toEqual(['a', 'b']);
-    expect(page.nodes.b.isMask).toBe(true);
-    expect(page.nodes.a.isMask).toBeUndefined();
+    const mask = page.nodes['group-1'] as TMaskNode;
+    expect(mask.type).toBe(NodeType.mask);
+    expect(mask.name).toBe(DEFAULT_MASK_GROUP_NAME);
+    expect(mask.childIds).toEqual(['a', 'b']);
     expect(page.selectedIds).toEqual(['b']);
   });
 
@@ -118,14 +116,14 @@ describe('handleUseNodesAsMask', () => {
 
     // result
     const page = getActivePage(state);
-    const group = page.nodes['group-1'] as TGroupNode;
-    expect(group.name).toBe(DEFAULT_MASK_GROUP_NAME);
-    expect(group.childIds).toEqual(['a']);
-    expect(page.nodes.a.isMask).toBe(true);
+    const mask = page.nodes['group-1'] as TMaskNode;
+    expect(mask.type).toBe(NodeType.mask);
+    expect(mask.name).toBe(DEFAULT_MASK_GROUP_NAME);
+    expect(mask.childIds).toEqual(['a']);
     expect(page.selectedIds).toEqual(['a']);
   });
 
-  it('should skip a trailing frame and mask the last non-container child instead', () => {
+  it('should reorder a trailing frame out of the mask position, since a frame can never be the mask', () => {
     // mock — a frame is last in z-order, but frames can never become the mask
     const a = buildRect({ id: 'a' });
     const b = buildFrame({ id: 'b' });
@@ -134,11 +132,26 @@ describe('handleUseNodesAsMask', () => {
     // action
     handleUseNodesAsMask(state, 'group-1');
 
+    // result — 'a' (the rectangle) ends up last, so it's the effective mask
+    const page = getActivePage(state);
+    const mask = page.nodes['group-1'] as TMaskNode;
+    expect(mask.childIds).toEqual(['b', 'a']);
+    expect(page.selectedIds).toEqual(['a']);
+  });
+
+  it('should leave the order untouched when every child is a layout container (no valid alternative)', () => {
+    // mock — both children are frames, so there is no non-container candidate to swap in as the mask
+    const a = buildFrame({ id: 'a' });
+    const b = buildFrame({ id: 'b', x: 40 });
+    const state = buildState({ nodes: { a, b }, rootOrder: ['a', 'b'], selectedIds: ['a', 'b'] });
+
+    // action
+    handleUseNodesAsMask(state, 'group-1');
+
     // result
     const page = getActivePage(state);
-    expect(page.nodes.a.isMask).toBe(true);
-    expect(page.nodes.b.isMask).toBeUndefined();
-    expect(page.selectedIds).toEqual(['a']);
+    const mask = page.nodes['group-1'] as TMaskNode;
+    expect(mask.childIds).toEqual(['a', 'b']);
   });
 
   it('should no-op when nothing is selected', () => {
@@ -152,6 +165,5 @@ describe('handleUseNodesAsMask', () => {
     // result
     const page = getActivePage(state);
     expect(page.nodes['group-1']).toBeUndefined();
-    expect(page.nodes.a.isMask).toBeUndefined();
   });
 });

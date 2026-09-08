@@ -24,7 +24,11 @@ export const drawSceneNodes = (
 ): void => {
   const paintLeaf = (node: TSceneNode): void => drawLeafNode(context, node, pathOutlineStyles, refs, nodesById, editingPathId);
 
-  if (!sceneNodes.some((node) => node.isMask || (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0))) {
+  if (
+    !sceneNodes.some(
+      (node) => node.type === NodeType.mask || (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0),
+    )
+  ) {
     sceneNodes.forEach(paintLeaf);
   } else {
     const { gl, imageContext } = context;

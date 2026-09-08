@@ -9,6 +9,7 @@ import {
   deleteGuide,
   groupNodes,
   moveNodes,
+  removeNodeMask,
   reorderPages,
   sendSelectionToBack,
   setBackgroundPaint,
@@ -17,7 +18,6 @@ import {
   toggleFrameClipContent,
   toggleNodeHidden,
   toggleNodeLocked,
-  toggleNodeMask,
   ungroupNodes,
   updateGuide,
 } from 'store/design/slice';
@@ -28,6 +28,9 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+
+// utils
+import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
@@ -198,7 +201,7 @@ describe('historyMiddleware', () => {
     expect(page.rootOrder).toContain(idB);
   });
 
-  it('should treat creating a mask group and removing the mask flag as their own undo steps', () => {
+  it('should treat creating a mask group and removing the mask as their own undo steps', () => {
     // mock
     const idA = addFrameNode(0, 0);
     const idB = addFrameNode(50, 50);
@@ -207,24 +210,24 @@ describe('historyMiddleware', () => {
     const { groupId } = store.dispatch(createMaskGroup()).payload;
     const maskChildId = selectSelectedIds(store.getState())[0];
 
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
+    expect(getIsMaskChild(selectActivePage(store.getState()).nodes[maskChildId], selectActivePage(store.getState()).nodes)).toBe(true);
 
-    store.dispatch(toggleNodeMask(maskChildId));
+    store.dispatch(removeNodeMask(maskChildId));
 
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[groupId].type).toBe(NodeType.group);
 
-    // action — undo the flag removal only
+    // action — undo the mask removal only
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId].type).toBe(NodeType.group);
+    expect(selectActivePage(store.getState()).nodes[groupId].type).toBe(NodeType.mask);
+    expect(getIsMaskChild(selectActivePage(store.getState()).nodes[maskChildId], selectActivePage(store.getState()).nodes)).toBe(true);
 
     // action — undo the mask-group creation too
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId]).toBeUndefined();
+    expect(selectActivePage(store.getState()).nodes[groupId]).toBeUndefined();
   });
 
   it('should undo toggling Clip content on a frame', () => {

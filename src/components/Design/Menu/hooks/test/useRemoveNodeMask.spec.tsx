@@ -13,6 +13,9 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 
+// utils
+import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
+
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 describe('useRemoveNodeMask', () => {
@@ -40,12 +43,14 @@ describe('useRemoveNodeMask', () => {
 
     // before
     const { result } = renderHook(() => useRemoveNodeMask(maskChildId), { wrapper });
-    expect(selectActivePage(store.getState()).nodes[maskChildId].isMask).toBe(true);
+    const pageBefore = selectActivePage(store.getState());
+    expect(getIsMaskChild(pageBefore.nodes[maskChildId], pageBefore.nodes)).toBe(true);
 
     // action
     result.current();
 
     // result
-    expect(selectActivePage(store.getState()).nodes[maskChildId].isMask).toBe(false);
+    const pageAfter = selectActivePage(store.getState());
+    expect(getIsMaskChild(pageAfter.nodes[maskChildId], pageAfter.nodes)).toBe(false);
   });
 });

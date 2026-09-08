@@ -8,7 +8,6 @@ export const convertFrameToSection = (node: TFrameNode): TSectionNode => ({
   height: node.height,
   hidden: node.hidden,
   id: node.id,
-  isMask: node.isMask,
   locked: node.locked,
   name: node.name,
   parentId: node.parentId,

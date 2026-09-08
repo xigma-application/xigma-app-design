@@ -47,7 +47,7 @@ import {
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TGroupNode, TMaskNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const node: TSceneNode = {
   childIds: [],
@@ -448,15 +448,16 @@ describe('design selectors — groups', () => {
     expect(selectRenderOrderedNodes(danglingState).map((sceneNode) => sceneNode.id)).toEqual(['group-1', 'a', 'loose']);
   });
 
-  it('should mark the last isMask child as "mask" and its one earlier sibling as "masked-start"', () => {
-    // mock
+  it('should mark the last (mask) child as "mask" and its one earlier sibling as "masked-start"', () => {
+    // mock — the last child of a mask container is always the mask, purely by position
+    const maskGroup: TMaskNode = { ...group, type: NodeType.mask };
     const maskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: childA, b: { ...childB, isMask: true }, 'group-1': group, loose },
+            nodes: { a: childA, b: childB, 'group-1': maskGroup, loose },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },
@@ -474,14 +475,14 @@ describe('design selectors — groups', () => {
   it('should mark the first of several masked siblings "masked-start" and the rest "masked-continue"', () => {
     // mock
     const c: TRectangleNode = { ...node, id: 'c', parentId: 'group-1', type: NodeType.rectangle };
-    const threeChildGroup: TGroupNode = { ...group, childIds: ['a', 'c', 'b'] };
+    const threeChildGroup: TMaskNode = { ...group, childIds: ['a', 'c', 'b'], type: NodeType.mask };
     const maskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: childA, b: { ...childB, isMask: true }, c, 'group-1': threeChildGroup, loose },
+            nodes: { a: childA, b: childB, c, 'group-1': threeChildGroup, loose },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },
@@ -502,13 +503,14 @@ describe('design selectors — groups', () => {
     const d: TRectangleNode = { ...node, id: 'd', parentId: 'c-group', type: NodeType.rectangle };
     const cGroup: TGroupNode = { ...group, childIds: ['d'], id: 'c-group', parentId: 'a' };
     const innerGroup: TGroupNode = { ...group, childIds: ['c', 'c-group'], id: 'a' };
+    const maskGroup: TMaskNode = { ...group, type: NodeType.mask };
     const maskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: innerGroup, b: { ...childB, isMask: true }, c, 'c-group': cGroup, d, 'group-1': group, loose },
+            nodes: { a: innerGroup, b: childB, c, 'c-group': cGroup, d, 'group-1': maskGroup, loose },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },
@@ -531,15 +533,16 @@ describe('design selectors — groups', () => {
     // nested mask scope (x masks y). "x" must show both: the outer passthrough (depthOffset 1,
     // continuing group-1's chain) AND its own inner scope role (depthOffset 0, masked-start)
     const x: TRectangleNode = { ...node, id: 'x', parentId: 'a', type: NodeType.rectangle };
-    const y: TRectangleNode = { ...node, id: 'y', isMask: true, parentId: 'a', type: NodeType.rectangle };
-    const innerMaskGroup: TGroupNode = { ...group, childIds: ['x', 'y'], id: 'a', parentId: 'group-1' };
+    const y: TRectangleNode = { ...node, id: 'y', parentId: 'a', type: NodeType.rectangle };
+    const innerMaskGroup: TMaskNode = { ...group, childIds: ['x', 'y'], id: 'a', parentId: 'group-1', type: NodeType.mask };
+    const maskGroup: TMaskNode = { ...group, type: NodeType.mask };
     const maskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: innerMaskGroup, b: { ...childB, isMask: true }, 'group-1': group, loose, x, y },
+            nodes: { a: innerMaskGroup, b: childB, 'group-1': maskGroup, loose, x, y },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },
@@ -563,14 +566,15 @@ describe('design selectors — groups', () => {
   it('should not propagate any role onto descendants of the mask node itself', () => {
     // mock — "b" is the mask and is also a group; its child "e" must stay unmarked
     const e: TRectangleNode = { ...node, id: 'e', parentId: 'b', type: NodeType.rectangle };
-    const maskGroupB: TGroupNode = { ...group, childIds: ['e'], id: 'b', isMask: true };
+    const groupB: TGroupNode = { ...group, childIds: ['e'], id: 'b' };
+    const maskGroup: TMaskNode = { ...group, type: NodeType.mask };
     const maskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: childA, b: maskGroupB, e, 'group-1': group, loose },
+            nodes: { a: childA, b: groupB, e, 'group-1': maskGroup, loose },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },
@@ -584,15 +588,16 @@ describe('design selectors — groups', () => {
     expect(roles.has('e')).toBe(false);
   });
 
-  it('should leave no roles when the mask has nothing above it (childIds[0])', () => {
+  it('should leave no roles when the mask container has only one child (nothing above it)', () => {
     // mock
+    const singleChildMaskGroup: TMaskNode = { ...group, childIds: ['a'], type: NodeType.mask };
     const topMaskState = {
       design: {
         ...state.design,
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { a: { ...childA, isMask: true }, b: childB, 'group-1': group, loose },
+            nodes: { a: childA, b: childB, 'group-1': singleChildMaskGroup, loose },
             rootOrder: ['group-1', 'loose'],
             selectedIds: [],
           },

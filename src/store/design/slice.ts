@@ -52,6 +52,7 @@ import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplic
 import { handleGroupNodes } from './utils/handleGroupNodes/handleGroupNodes';
 import { handleMoveNodes } from './utils/handleMoveNodes/handleMoveNodes';
 import { handleMoveNodesToPage } from './utils/handleMoveNodesToPage/handleMoveNodesToPage';
+import { handleRemoveNodeMask } from './utils/handleRemoveNodeMask/handleRemoveNodeMask';
 import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
@@ -65,7 +66,6 @@ import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleToggleFrameClipContent } from './utils/handleToggleFrameClipContent/handleToggleFrameClipContent';
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
 import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
-import { handleToggleNodeMask } from './utils/handleToggleNodeMask/handleToggleNodeMask';
 import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
 import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
@@ -167,6 +167,7 @@ const designSlice = createSlice({
     },
     moveNodes: (state, action: PayloadAction<TMoveNodesPayload>) => handleMoveNodes(state, action.payload),
     moveNodesToPage: (state, action: PayloadAction<TMoveNodesToPagePayload>) => handleMoveNodesToPage(state, action.payload),
+    removeNodeMask: (state, action: PayloadAction<string>) => handleRemoveNodeMask(state, action.payload),
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
@@ -228,7 +229,6 @@ const designSlice = createSlice({
     },
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
-    toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
     toggleRulers: (state) => {
       state.preferences.areRulersVisible = !state.preferences.areRulersVisible;
     },
@@ -268,6 +268,7 @@ export const {
   groupNodes,
   moveNodes,
   moveNodesToPage,
+  removeNodeMask,
   renamePage,
   reorderPages,
   replaceDesignSnapshot,
@@ -297,7 +298,6 @@ export const {
   toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,
-  toggleNodeMask,
   toggleRulers,
   toggleUiHidden,
   toggleUiMinimized,

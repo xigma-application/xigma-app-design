@@ -6,6 +6,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 // utils
 import { renderFrameNode } from './renderFrameNode';
 import { renderGroupNode } from './renderGroupNode';
+import { renderMaskNode } from './renderMaskNode';
 import { renderSectionNode } from './renderSectionNode';
 
 export const renderNode = (renderer: TMaskRenderer, id: string, target: TRenderTarget | null): void => {
@@ -15,6 +16,9 @@ export const renderNode = (renderer: TMaskRenderer, id: string, target: TRenderT
     switch (node.type) {
       case NodeType.group:
         renderGroupNode(renderer, node, target);
+        break;
+      case NodeType.mask:
+        renderMaskNode(renderer, node, target);
         break;
       case NodeType.frame:
         renderFrameNode(renderer, node, target);

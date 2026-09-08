@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TGroupNode, TMaskNode, TRectangleNode, TSceneNode } from 'types/design/types';
 import { TMaskConnectorLine } from 'store/design/types';
 
 // utils
@@ -33,6 +33,19 @@ const group = (id: string, childIds: string[]): TGroupNode => ({
   y: 0,
 });
 
+const mask = (id: string, childIds: string[]): TMaskNode => ({
+  childIds,
+  height: 10,
+  id,
+  name: 'Mask group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.mask,
+  width: 10,
+  x: 0,
+  y: 0,
+});
+
 describe('walkMaskConnectorNode', () => {
   it('should do nothing when the node id does not resolve (dangling reference)', () => {
     const infoById = new Map<string, TMaskConnectorLine[]>();
@@ -54,15 +67,28 @@ describe('walkMaskConnectorNode', () => {
     expect(infoById.size).toBe(0);
   });
 
-  it('should assign own scope roles to a group’s masked children', () => {
+  it('should never assign mask roles to a plain group’s children, even with several of them', () => {
     const nodes: Record<string, TSceneNode> = {
       a: rect('a', { parentId: 'group' }),
-      b: rect('b', { isMask: true, parentId: 'group' }),
+      b: rect('b', { parentId: 'group' }),
       group: group('group', ['a', 'b']),
     };
 
     const infoById = new Map<string, TMaskConnectorLine[]>();
     walkMaskConnectorNode(nodes, infoById, 'group', []);
+
+    expect(infoById.size).toBe(0);
+  });
+
+  it('should assign own scope roles to a mask container’s children — the last child is always the mask', () => {
+    const nodes: Record<string, TSceneNode> = {
+      a: rect('a', { parentId: 'mask-1' }),
+      b: rect('b', { parentId: 'mask-1' }),
+      'mask-1': mask('mask-1', ['a', 'b']),
+    };
+
+    const infoById = new Map<string, TMaskConnectorLine[]>();
+    walkMaskConnectorNode(nodes, infoById, 'mask-1', []);
 
     expect(infoById.get('a')).toEqual([{ depthOffset: 0, role: 'masked-start' }]);
     expect(infoById.get('b')).toEqual([{ depthOffset: 0, role: 'mask' }]);

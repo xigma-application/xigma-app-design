@@ -7,7 +7,7 @@ import { TDesignState } from '../../types';
 
 // utils
 import { getActivePage } from '../getActivePage';
-import { getMaskCandidateId } from './getMaskCandidateId';
+import { getMaskChildOrder } from './getMaskChildOrder';
 import { handleGroupNodes } from '../handleGroupNodes/handleGroupNodes';
 
 export const handleUseNodesAsMask = (state: TDesignState, groupId: string): void => {
@@ -17,10 +17,9 @@ export const handleUseNodesAsMask = (state: TDesignState, groupId: string): void
   const group = page.nodes[groupId];
 
   if (group?.type === NodeType.group) {
-    const maskedNodeId = getMaskCandidateId(group.childIds, page.nodes);
+    const childIds = getMaskChildOrder(group.childIds, page.nodes);
 
-    group.name = DEFAULT_MASK_GROUP_NAME;
-    page.nodes[maskedNodeId].isMask = true;
-    page.selectedIds = [maskedNodeId];
+    page.nodes[groupId] = { ...group, childIds, name: DEFAULT_MASK_GROUP_NAME, type: NodeType.mask };
+    page.selectedIds = [childIds[childIds.length - 1]];
   }
 };

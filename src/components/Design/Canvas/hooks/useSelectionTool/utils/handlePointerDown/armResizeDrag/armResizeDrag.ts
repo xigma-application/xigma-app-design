@@ -1,7 +1,6 @@
 import { RefObject } from 'react';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TResizeHandle } from 'types/canvas';
 import { TResizeDragState } from 'types/design/selectionTool/types';
@@ -10,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { armPlainResizeDrag } from './armPlainResizeDrag';
 import { armRotatedGroupResizeDrag } from './armRotatedGroupResizeDrag';
+import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 
 export const armResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -21,7 +21,7 @@ export const armResizeDrag = (
   canvasRefs: TCanvasRefs,
 ): void => {
   const [onlyNode] = selectedNodes;
-  const isRotatedGroup = selectedNodes.length === 1 && onlyNode.type === NodeType.group && onlyNode.rotation !== 0;
+  const isRotatedGroup = selectedNodes.length === 1 && isGroupLikeNode(onlyNode) && onlyNode.rotation !== 0;
 
   if (isRotatedGroup) {
     armRotatedGroupResizeDrag(canvas, event, resizeDragRef, onlyNode, handle, bounds);

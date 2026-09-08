@@ -17,6 +17,7 @@ export const NODE_TYPE_ICON: Record<NodeType, TIconProps['name']> = {
   [NodeType.frame]: 'FrameTool',
   [NodeType.group]: 'Group',
   [NodeType.line]: 'LineTool',
+  [NodeType.mask]: 'MaskGroup',
   [NodeType.media]: 'File',
   [NodeType.path]: 'PenTool',
   [NodeType.polygon]: 'PolygonTool',

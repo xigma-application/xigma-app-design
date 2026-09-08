@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TDraftRect, TResizeHandle } from 'types/canvas';
-import { TGroupNode } from 'types/design/types';
+import { TGroupLikeNode } from 'types/design/types';
 import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // store
@@ -20,7 +20,7 @@ export const armRotatedGroupResizeDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   resizeDragRef: RefObject<TResizeDragState | null>,
-  group: TGroupNode,
+  group: TGroupLikeNode,
   handle: TResizeHandle,
   bounds: TDraftRect,
 ): void => {

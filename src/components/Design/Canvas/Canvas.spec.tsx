@@ -12,7 +12,7 @@ import ClassNamesProvider from '../core/ClassNamesProvider/ClassNamesProvider';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setSelection, toggleUiHidden } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, toggleUiHidden } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -176,14 +176,28 @@ describe('Canvas context menu', () => {
     store.dispatch(toggleUiHidden());
   });
 
-  it('should toggle isMask off via Remove mask on a masked hit node', async () => {
+  it('should convert the mask container back to a group via Remove mask on a masked hit node', async () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
       addNode({
+        childIds: [],
+        height: 20,
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.mask,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const maskId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
+
+    store.dispatch(
+      addNode({
         fill: '#ff0000',
         height: 20,
-        isMask: true,
         name: 'Rectangle',
         parentId: null,
         rotation: 0,
@@ -194,6 +208,11 @@ describe('Canvas context menu', () => {
       }),
     );
     const nodeId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
+
+    store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex: 0, targetParentId: maskId }));
+    // the hit-test only drills past a container into its child once the current selection is
+    // already inside it (matching Figma's click-to-select-container, click-again-to-drill-in UX)
+    store.dispatch(setSelection([nodeId]));
 
     // before
     const { container } = renderCanvas();
@@ -207,6 +226,6 @@ describe('Canvas context menu', () => {
     await user.click(screen.getByText('Remove mask'));
 
     // result
-    expect(selectActivePage(store.getState()).nodes[nodeId].isMask).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[maskId].type).toBe(NodeType.group);
   });
 });

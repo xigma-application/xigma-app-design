@@ -42,7 +42,9 @@ import {
 } from '../constants';
 
 // store
+import { selectNodes } from 'store/design/selectors';
 import { TDesignPage } from 'store/design/types';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './node-context-menu.module.scss';
@@ -52,6 +54,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
 import { isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
@@ -110,6 +113,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
+  const nodes = useAppSelector(selectNodes);
+  const isMask = getIsMaskChild(node, nodes);
   const isFrame = node.type === NodeType.frame;
   const isGroup = node.type === NodeType.group;
   const isSection = node.type === NodeType.section;
@@ -210,7 +215,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && !node.isMask && (
+      {!isSection && !isFrame && !isMask && (
         <MenuItem
           label={t(NODE_MENU_USE_AS_MASK_KEY)}
           onClick={onUseAsMask}
@@ -218,7 +223,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && node.isMask && (
+      {!isSection && !isFrame && isMask && (
         <MenuItem
           label={t(NODE_MENU_REMOVE_MASK_KEY)}
           onClick={onRemoveMask}

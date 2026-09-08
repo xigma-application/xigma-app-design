@@ -142,7 +142,7 @@ export const drawScene = (
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
   drawFrameOutlines(ctx, sceneNodes, refs);
-  drawMaskOutlines(ctx, sceneNodes);
+  drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);

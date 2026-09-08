@@ -5,7 +5,7 @@ import { toggleMaskOutlinesVisible } from 'store/design/slice';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TSceneNode, TVectorNode } from 'types/design/types';
+import { TMaskNode, TSceneNode, TVectorNode } from 'types/design/types';
 import { TDrawSceneContext } from '../types';
 
 // utils
@@ -39,15 +39,27 @@ const CONTEXT = (gl: WebGL2RenderingContext, program: WebGLProgram, buffer: WebG
   viewport: IDENTITY_VIEWPORT,
 });
 
-const buildFrame = (id: string, isMask: boolean): TSceneNode => ({
+const buildMaskParent = (id: string, childIds: string[]): TMaskNode => ({
+  childIds,
+  height: 20,
+  id,
+  name: 'Mask group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.mask,
+  width: 10,
+  x: 0,
+  y: 0,
+});
+
+const buildFrame = (id: string, parentId: string | null): TSceneNode => ({
   childIds: [],
   clipContent: true,
   fill: '#ff0000',
   height: 20,
   id,
-  isMask,
   name: 'Frame',
-  parentId: null,
+  parentId,
   rotation: 0,
   type: NodeType.frame,
   width: 10,
@@ -65,11 +77,13 @@ describe('drawMaskOutlines', () => {
   it('should draw nothing when the preference is off', () => {
     // mock
     const gl = createGlMock();
+    const node = buildFrame('a', 'group');
+    const group = buildMaskParent('group', ['a']);
 
     store.dispatch(toggleMaskOutlinesVisible());
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [buildFrame('a', true)]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -78,9 +92,10 @@ describe('drawMaskOutlines', () => {
   it('should draw nothing when no node in the list is a mask', () => {
     // mock
     const gl = createGlMock();
+    const node = buildFrame('a', null);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [buildFrame('a', false)]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -89,9 +104,11 @@ describe('drawMaskOutlines', () => {
   it('should draw a thick rectangular outline for a masked box node (default case)', () => {
     // mock
     const gl = createGlMock();
+    const node = buildFrame('a', 'group');
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [buildFrame('a', true)]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -101,15 +118,15 @@ describe('drawMaskOutlines', () => {
   it('should draw only the masked node, skipping every unmasked node in the same list', () => {
     // mock
     const gl = createGlMock();
+    const a = buildFrame('a', 'group');
+    const b = buildFrame('b', 'group');
+    const c = buildFrame('c', null);
+    const group = buildMaskParent('group', ['a', 'b']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [
-      buildFrame('a', false),
-      buildFrame('b', true),
-      buildFrame('c', false),
-    ]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [a, b, c], { a, b, c, group });
 
-    // result
+    // result — 'b' is the last child of the mask container, so it's the only masked node
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
@@ -120,18 +137,18 @@ describe('drawMaskOutlines', () => {
       fill: '#ff0000',
       height: 20,
       id: 'a',
-      isMask: true,
       name: 'Ellipse',
-      parentId: null,
+      parentId: 'group',
       rotation: 0,
       type: NodeType.ellipse,
       width: 10,
       x: 0,
       y: 0,
     };
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -147,9 +164,8 @@ describe('drawMaskOutlines', () => {
       flipY: false,
       height: 20,
       id: 'a',
-      isMask: true,
       name: 'Polygon',
-      parentId: null,
+      parentId: 'group',
       rotation: 0,
       sides: 6,
       type: NodeType.polygon,
@@ -157,9 +173,10 @@ describe('drawMaskOutlines', () => {
       x: 0,
       y: 0,
     };
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -175,9 +192,8 @@ describe('drawMaskOutlines', () => {
       flipY: false,
       height: 20,
       id: 'a',
-      isMask: true,
       name: 'Star',
-      parentId: null,
+      parentId: 'group',
       points: 5,
       ratio: 0.382,
       rotation: 0,
@@ -186,9 +202,10 @@ describe('drawMaskOutlines', () => {
       x: 0,
       y: 0,
     };
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -200,9 +217,8 @@ describe('drawMaskOutlines', () => {
     const gl = createGlMock();
     const node: TSceneNode = {
       id: 'a',
-      isMask: true,
       name: 'Line',
-      parentId: null,
+      parentId: 'group',
       stroke: '#000000',
       type: NodeType.line,
       x1: 0,
@@ -210,9 +226,10 @@ describe('drawMaskOutlines', () => {
       y1: 0,
       y2: 10,
     };
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -226,9 +243,8 @@ describe('drawMaskOutlines', () => {
       defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
-      isMask: true,
       name: 'Vector',
-      parentId: null,
+      parentId: 'group',
       rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
       strokeColor: '#000000',
@@ -237,9 +253,10 @@ describe('drawMaskOutlines', () => {
       vertexHandleModes: {},
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 10 } },
     };
+    const group = buildMaskParent('group', ['a']);
 
     // before
-    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node]);
+    drawMaskOutlines(CONTEXT(gl, {} as WebGLProgram, {} as WebGLBuffer), [node], { a: node, group });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);

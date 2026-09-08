@@ -4,28 +4,12 @@ import { render, screen } from '@testing-library/react';
 import LayerRowMaskDecorations from './LayerRowMaskDecorations';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TMaskConnectorLine } from 'store/design/selectors';
-import { TRectangleNode } from 'types/design/types';
-
-const buildNode = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000000',
-  height: 10,
-  id: 'node-1',
-  name: 'Rectangle',
-  parentId: null,
-  rotation: 0,
-  type: NodeType.rectangle,
-  width: 10,
-  x: 0,
-  y: 0,
-  ...overrides,
-});
 
 describe('LayerRowMaskDecorations', () => {
   it('should render the "Mask" badge for a mask node', () => {
     // before
-    render(<LayerRowMaskDecorations node={buildNode({ isMask: true })} />);
+    render(<LayerRowMaskDecorations isMask />);
 
     // result
     expect(screen.getByText('Mask')).toBeInTheDocument();
@@ -33,7 +17,7 @@ describe('LayerRowMaskDecorations', () => {
 
   it('should render nothing for an ordinary node with no connector lines', () => {
     // before
-    const { container } = render(<LayerRowMaskDecorations node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} />);
 
     // result
     expect(container).toBeEmptyDOMElement();
@@ -44,7 +28,7 @@ describe('LayerRowMaskDecorations', () => {
     const lines: TMaskConnectorLine[] = [{ depthOffset: 0, role: 'masked-start' }];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} maskConnectorLines={lines} />);
     const line = container.querySelector<HTMLElement>('[class*="LayerRowMaskDecorations__line--start"]');
 
     // result
@@ -59,7 +43,7 @@ describe('LayerRowMaskDecorations', () => {
     const lines: TMaskConnectorLine[] = [{ depthOffset: 0, role: 'masked-continue' }];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} maskConnectorLines={lines} />);
 
     // result
     expect(
@@ -74,7 +58,7 @@ describe('LayerRowMaskDecorations', () => {
     const lines: TMaskConnectorLine[] = [{ depthOffset: 2, role: 'masked-continue' }];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} maskConnectorLines={lines} />);
     const line = container.querySelector<HTMLElement>('[class*="LayerRowMaskDecorations__line--continue-child"]');
 
     // result — jsdom folds the constant subtraction (26.5 - 2*21) down to a single length; the
@@ -90,7 +74,7 @@ describe('LayerRowMaskDecorations', () => {
     const lines: TMaskConnectorLine[] = [{ depthOffset: 0, role: 'mask' }];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode({ isMask: true })} />);
+    const { container } = render(<LayerRowMaskDecorations isMask maskConnectorLines={lines} />);
 
     // result
     expect(container.querySelector('[class*="LayerRowMaskDecorations__lead"]')).toBeInTheDocument();
@@ -104,7 +88,7 @@ describe('LayerRowMaskDecorations', () => {
     const lines = [{ depthOffset: 0, role: 'unknown' }] as unknown as TMaskConnectorLine[];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} maskConnectorLines={lines} />);
 
     // result
     expect(container).toBeEmptyDOMElement();
@@ -119,7 +103,7 @@ describe('LayerRowMaskDecorations', () => {
     ];
 
     // before
-    const { container } = render(<LayerRowMaskDecorations maskConnectorLines={lines} node={buildNode()} />);
+    const { container } = render(<LayerRowMaskDecorations isMask={false} maskConnectorLines={lines} />);
 
     // result — one own-column "start" line, plus one shifted "continue-child" passthrough line
     expect(container.querySelector('[class*="LayerRowMaskDecorations__line--start"]')).toBeInTheDocument();

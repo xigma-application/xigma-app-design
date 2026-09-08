@@ -31,7 +31,6 @@ describe('convertFrameToSection', () => {
       height: 100,
       hidden: undefined,
       id: 'frame-1',
-      isMask: undefined,
       locked: undefined,
       name: 'Frame',
       parentId: 'parent-1',
@@ -43,10 +42,10 @@ describe('convertFrameToSection', () => {
     });
   });
 
-  it('should carry over hidden, locked and isMask when set', () => {
-    const frame = buildFrame({ hidden: true, isMask: true, locked: true });
+  it('should carry over hidden and locked when set', () => {
+    const frame = buildFrame({ hidden: true, locked: true });
 
-    expect(convertFrameToSection(frame)).toMatchObject({ hidden: true, isMask: true, locked: true });
+    expect(convertFrameToSection(frame)).toMatchObject({ hidden: true, locked: true });
   });
 
   it('should drop the frame-only guides, strokeColor and strokeWidth fields', () => {

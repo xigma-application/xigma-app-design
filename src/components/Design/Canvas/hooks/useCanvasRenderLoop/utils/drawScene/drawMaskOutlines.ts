@@ -18,14 +18,15 @@ import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOut
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
 import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 
-export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneNode[]): void => {
+export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneNode[], nodesById: Record<string, TSceneNode>): void => {
   if (selectAreMaskOutlinesVisible(store.getState())) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
     sceneNodes.forEach((node) => {
-      if (!node.isMask) {
+      if (!getIsMaskChild(node, nodesById)) {
         return;
       }
 
