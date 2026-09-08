@@ -26,25 +26,34 @@ export const drawAutoLayoutPaddingHandles = (
   const frame = getSelectedAutoLayoutFrame(selectedNodes);
   const dragState = refs.transform.autoLayoutPaddingDragRef.current;
   const hoverState = refs.hover.hoveredAutoLayoutPaddingRef.current;
+  const rightPanelGuide = refs.hover.rightPanelPaddingGuideRef.current;
 
-  if (frame && (refs.hover.isAutoLayoutPaddingAreaHoveredRef.current || dragState)) {
+  if (frame) {
     const handles = getAutoLayoutPaddingHandles(frame, context.viewport, dragState?.side ?? null);
     const frameCenter = getAutoLayoutFrameCenter(frame);
 
-    SIDES.forEach((side) => {
-      const handle = handles[side];
-      const isDraggingThisSide = dragState?.side === side;
+    if (refs.hover.isAutoLayoutPaddingAreaHoveredRef.current || dragState) {
+      SIDES.forEach((side) => {
+        const handle = handles[side];
+        const isDraggingThisSide = dragState?.side === side;
 
-      if (isDraggingThisSide) {
-        drawAutoLayoutPaddingGuideLine(context, frame, handle.band, side, frameCenter, frame.rotation);
-      } else if (handle.value > 0 || hoverState?.side === side) {
-        drawAutoLayoutPaddingHandleBar(context, handle.handleCenter, side, frameCenter, frame.rotation);
+        if (isDraggingThisSide) {
+          drawAutoLayoutPaddingGuideLine(context, frame, handle.band, side, frameCenter, frame.rotation);
+        } else if (handle.value > 0 || hoverState?.side === side) {
+          drawAutoLayoutPaddingHandleBar(context, handle.handleCenter, side, frameCenter, frame.rotation);
 
-        if (handle.value > 0) {
-          drawAutoLayoutPaddingHatchFill(context, handle.band, frameCenter, frame.rotation);
+          if (handle.value > 0) {
+            drawAutoLayoutPaddingHatchFill(context, handle.band, frameCenter, frame.rotation);
+          }
         }
-      }
-    });
+      });
+    }
+
+    if (rightPanelGuide && rightPanelGuide.frameId === frame.id && !dragState) {
+      rightPanelGuide.sides.forEach((side) => {
+        drawAutoLayoutPaddingGuideLine(context, frame, handles[side].band, side, frameCenter, frame.rotation);
+      });
+    }
   }
 
   drawAutoLayoutPaddingLabel(context, refs, nodesById);

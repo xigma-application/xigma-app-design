@@ -2,6 +2,9 @@ import { Provider } from 'react-redux';
 import { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // hooks
 import { useColumnPadding } from './useColumnPadding';
 
@@ -15,7 +18,11 @@ import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { TPaddingField } from './types';
 
-const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
+const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+  <Provider store={store}>
+    <CanvasRefsProvider>{children}</CanvasRefsProvider>
+  </Provider>
+);
 
 const renderUseColumnPadding = (): ReturnType<typeof renderHook<ReturnType<typeof useColumnPadding>, unknown>> =>
   renderHook(() => useColumnPadding(), { wrapper });

@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import PanelProperties from './PanelProperties';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -16,9 +19,11 @@ import { NodeType, ToolName } from 'types/design/enums';
 const renderPanelProperties = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <PanelProperties />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <PanelProperties />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

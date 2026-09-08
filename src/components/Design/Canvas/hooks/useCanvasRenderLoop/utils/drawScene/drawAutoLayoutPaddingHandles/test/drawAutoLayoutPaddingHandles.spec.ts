@@ -175,6 +175,70 @@ describe('drawAutoLayoutPaddingHandles', () => {
     expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.right.band, 'right', frameCenter, 0);
   });
 
+  it('should draw a guide line for a RightPanel-hovered side, with no bar/hatch and no canvas hover needed', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.rightPanelPaddingGuideRef.current = { frameId: 'frame-1', sides: ['left'] };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.left.band, 'left', frameCenter, 0);
+    expect(drawAutoLayoutPaddingHandleBarMock).not.toHaveBeenCalled();
+    expect(drawAutoLayoutPaddingHatchFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a guide line for every side named by a merged RightPanel field', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.rightPanelPaddingGuideRef.current = { frameId: 'frame-1', sides: ['left', 'right'] };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.left.band, 'left', frameCenter, 0);
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.right.band, 'right', frameCenter, 0);
+  });
+
+  it('should not draw a RightPanel guide line for a different frame’s stashed hover', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.rightPanelPaddingGuideRef.current = { frameId: 'frame-2', sides: ['left'] };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(drawAutoLayoutPaddingGuideLineMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw a RightPanel guide line while a real canvas drag is active', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.rightPanelPaddingGuideRef.current = { frameId: 'frame-1', sides: ['right'] };
+    refs.transform.autoLayoutPaddingDragRef.current = {
+      frameId: 'frame-1',
+      mode: 'delta',
+      originalPaddingValue: 20,
+      point: { x: 10, y: 100 },
+      pointerStart: { x: 10, y: 100 },
+      side: 'left',
+    };
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result — only the real drag's own guide line draws, not the stashed RightPanel one
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledTimes(1);
+    expect(drawAutoLayoutPaddingGuideLineMock).toHaveBeenCalledWith(context, frame, handles.left.band, 'left', frameCenter, 0);
+  });
+
   it('should always draw the label', () => {
     // before
     drawAutoLayoutPaddingHandles(context, [frame], createCanvasRefs(), nodesById);

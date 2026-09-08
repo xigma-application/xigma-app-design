@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import ColumnPadding from './ColumnPadding';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -17,9 +20,11 @@ import { TFrameNode } from 'types/design/types';
 const renderColumnPadding = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <ColumnPadding />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <ColumnPadding />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

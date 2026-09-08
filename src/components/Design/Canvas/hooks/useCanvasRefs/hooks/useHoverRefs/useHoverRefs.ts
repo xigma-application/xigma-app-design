@@ -6,6 +6,7 @@ import {
   TAutoLayoutPaddingHoverState,
   TCornerRadiusHandleHover,
   THoverRefs,
+  TRightPanelPaddingGuideState,
   TSmartSelectionGapHoverState,
   TSmartSelectionSwapHoverState,
   TVectorCutSegmentHover,
@@ -46,6 +47,7 @@ export const useHoverRefs = (): THoverRefs => {
   const isAutoLayoutGapAreaHoveredRef = useRef(false);
   const isAutoLayoutPaddingAreaHoveredRef = useRef(false);
   const isSmartSelectionBoxHoveredRef = useRef(false);
+  const rightPanelPaddingGuideRef = useRef<TRightPanelPaddingGuideState | null>(null);
   const hoverRefsRef = useRef<THoverRefs | null>(null);
 
   if (hoverRefsRef.current === null) {
@@ -79,6 +81,7 @@ export const useHoverRefs = (): THoverRefs => {
       isAutoLayoutGapAreaHoveredRef,
       isAutoLayoutPaddingAreaHoveredRef,
       isSmartSelectionBoxHoveredRef,
+      rightPanelPaddingGuideRef,
     };
   }
 

@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import Frame from './Frame';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderFrame = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <Frame />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <Frame />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

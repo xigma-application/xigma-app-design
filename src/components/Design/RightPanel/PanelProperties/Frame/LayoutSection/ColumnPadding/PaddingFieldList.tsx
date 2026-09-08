@@ -26,6 +26,8 @@ const PaddingFieldList: FC<TPaddingFieldListProps> = ({ fields }) => {
           iconName={field.iconName}
           key={field.e2eValue}
           onCommit={field.onCommit}
+          onHoverEnd={field.onHoverEnd}
+          onHoverStart={field.onHoverStart}
           onScrub={field.onScrub}
           scrubValue={field.scrubValue}
           tooltip={t(`${translationNameSpace}.tooltip.${field.labelKey}`)}

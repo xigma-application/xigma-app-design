@@ -11,6 +11,8 @@ export type TPaddingField = {
   iconName: TIconProps['name'];
   labelKey: string;
   onCommit: (raw: string) => void;
+  onHoverEnd: () => void;
+  onHoverStart: () => void;
   onScrub: (next: number) => void;
   scrubValue: number;
   value: number | string;

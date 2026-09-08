@@ -14,32 +14,47 @@ export type TPaddingInputProps = {
   e2eValue: string;
   iconName: TIconProps['name'];
   onCommit: (raw: string) => void;
+  onHoverEnd: () => void;
+  onHoverStart: () => void;
   onScrub: (next: number) => void;
   scrubValue: number;
   tooltip: string;
   value: number | string;
 };
 
-const PaddingInput: FC<TPaddingInputProps> = ({ ariaLabel, e2eValue, iconName, onCommit, onScrub, scrubValue, tooltip, value }) => {
+const PaddingInput: FC<TPaddingInputProps> = ({
+  ariaLabel,
+  e2eValue,
+  iconName,
+  onCommit,
+  onHoverEnd,
+  onHoverStart,
+  onScrub,
+  scrubValue,
+  tooltip,
+  value,
+}) => {
   const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
     onCommit(event.target.value);
   };
 
   return (
-    <Tooltip content={tooltip}>
-      <UITools.TextField
-        aria-label={ariaLabel}
-        defaultValue={value}
-        e2eValue={e2eValue}
-        onBlur={handleBlur}
-        startAdornment={
-          <ScrubbableInput max={PADDING_MAX} min={PADDING_MIN} onChange={onScrub} value={scrubValue}>
-            <Icon name={iconName} size={24} />
-          </ScrubbableInput>
-        }
-        type="text"
-      />
-    </Tooltip>
+    <div onMouseEnter={onHoverStart} onMouseLeave={onHoverEnd}>
+      <Tooltip content={tooltip}>
+        <UITools.TextField
+          aria-label={ariaLabel}
+          defaultValue={value}
+          e2eValue={e2eValue}
+          onBlur={handleBlur}
+          startAdornment={
+            <ScrubbableInput max={PADDING_MAX} min={PADDING_MIN} onChange={onScrub} value={scrubValue}>
+              <Icon name={iconName} size={24} />
+            </ScrubbableInput>
+          }
+          type="text"
+        />
+      </Tooltip>
+    </div>
   );
 };
 

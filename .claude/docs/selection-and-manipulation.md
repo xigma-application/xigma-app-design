@@ -1974,6 +1974,25 @@ angle instead of one shared per axis: a 90deg step walking clockwise around the 
 `top: -90, right: 0, bottom: 90, left: 180` (plus `frame.rotation` on top of every one) — confirmed
 side-by-side live rather than assumed from the asset alone, after an initial per-axis version put
 top/bottom (and separately left/right) at the identical angle, which is wrong for a directional icon.
+The `'padding'`/`gap-base` icon is only the pre-grab hover affordance, though — once a zero-padding
+drag actually starts moving, `continueAutoLayoutPaddingDrag` switches the cursor to the plain
+`'gap'` icon for the rest of the gesture, same as an already-padded drag.
+
+**RightPanel-driven guide lines.** The RightPanel's own `ColumnPadding` fields (`LayoutSection/ColumnPadding/`,
+see `auto-layout.md`) can also trigger the canvas guide line, independent of any canvas mouse
+activity — hovering a merged field shows both of its sides, an individual field shows just its own.
+A dedicated ref, `refs.hover.rightPanelPaddingGuideRef: { frameId; sides: TAutoLayoutPaddingSide[] } | null`
+(kept separate from the canvas-hover/drag refs above, so the two input surfaces can't fight over the
+same state), is written by `PaddingInput`'s `onMouseEnter`/`onMouseLeave` — wired through
+`sideField`/`pairField` via a shared `buildPaddingHoverHandlers` — reached from a RightPanel
+component via `useCanvasRefsContext()`, the same context `RightPanel.tsx` already uses for
+`layout.rightPanelWidthRef`. `drawAutoLayoutPaddingHandles` reads it unconditionally (whenever a
+frame is selected, regardless of `isAutoLayoutPaddingAreaHoveredRef`/drag state) and draws a
+line-only guide (no bar, no hatch, no cursor) per named side, suppressed only while a real canvas
+drag is in progress. No render-loop wiring was needed for this at all — `drawScene`'s
+`requestAnimationFrame` loop already re-reads every ref fresh each frame regardless of which part
+of the app wrote it, so a plain DOM `onMouseEnter` handler shows up on the very next frame the same
+way a canvas-side hover always has.
 
 Requested directly, immediately after the RightPanel padding controls: "To powinno mniej więcej
 działać jak z radius na rect... Zachowanie podobne jak ustawienie gap z tego modelu... graficznie

@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import LayoutSection from './LayoutSection';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -16,9 +19,11 @@ import { LayoutMode, NodeType } from 'types/design/enums';
 const renderLayoutSection = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <LayoutSection />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <LayoutSection />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

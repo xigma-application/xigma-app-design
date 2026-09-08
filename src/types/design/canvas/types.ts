@@ -237,6 +237,11 @@ export type TAutoLayoutPaddingHoverState = {
   side: TAutoLayoutPaddingSide;
 };
 
+export type TRightPanelPaddingGuideState = {
+  frameId: string;
+  sides: TAutoLayoutPaddingSide[];
+};
+
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
   hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
@@ -267,6 +272,7 @@ export type THoverRefs = {
   isAutoLayoutGapAreaHoveredRef: RefObject<boolean>;
   isAutoLayoutPaddingAreaHoveredRef: RefObject<boolean>;
   isSmartSelectionBoxHoveredRef: RefObject<boolean>;
+  rightPanelPaddingGuideRef: RefObject<TRightPanelPaddingGuideState | null>;
 };
 
 export type TVectorSnapshotsRefs = {

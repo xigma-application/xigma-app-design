@@ -64,6 +64,7 @@ describe('CanvasRefsProvider behaviors', () => {
         isAutoLayoutGapAreaHoveredRef: { current: false },
         isAutoLayoutPaddingAreaHoveredRef: { current: false },
         isSmartSelectionBoxHoveredRef: { current: false },
+        rightPanelPaddingGuideRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
       layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },

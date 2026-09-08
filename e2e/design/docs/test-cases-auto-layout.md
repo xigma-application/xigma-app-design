@@ -717,18 +717,19 @@ existing gap handles above (same bar shape, same hit-testing/rotation strategy) 
 (`AUTO_LAYOUT_PADDING_HANDLE_FILL`, `#0d99ff`) instead of the gap system's pink, and with different
 value math per side.
 
-| #   | Scenario                                                                                                                                                                                   | Unit |                      E2E                       |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :--------------------------------------------: |
-| 1   | A padded side (>0) always shows its handle bar + 45deg hatch fill across the whole padding band while the selected frame is merely hovered — no need to hover that specific handle         |  ✅  |                       —                        |
-| 2   | A zero-padding side only shows its handle once the pointer is within reach of it, and shows no hatch (nothing to fill)                                                                     |  ✅  | ✅ `padding-handles.spec.ts` (visibility test) |
-| 3   | Dragging a zero-padding handle sets that side's padding to the pointer's live distance from the frame edge — absolute, like corner-radius, not delta                                       |  ✅  |          ✅ `padding-handles.spec.ts`          |
-| 4   | Dragging an already-padded handle grows/shrinks the value by the drag delta instead — the handle stays under the cursor, like the gap handles                                              |  ✅  |          ✅ `padding-handles.spec.ts`          |
-| 5   | Every side clamps at 0 instead of going negative, in either drag mode                                                                                                                      |  ✅  |                       —                        |
-| 6   | While dragging, the bar/hatch for that one side is replaced by a single solid blue guide line at the live padding boundary (plus the value label) — untouched sides keep showing normally  |  ✅  |                       —                        |
-| 7   | Handle geometry and hit-testing both run in the frame's local (un-rotated) space, so a rotated frame's handles/cursors follow its own rotated axes                                         |  ✅  |                       —                        |
-| 8   | A padded side's handle sits centred in the middle of the padding band (half the padding value in from the edge), not flush against the content boundary                                    |  ✅  |          ✅ `padding-handles.spec.ts`          |
-| 9   | A zero-padding handle sits just outside the frame's own edge visually, but is still grabbable well short of that 1px marker — its reach extends up to 30px in from the edge                |  ✅  |          ✅ `padding-handles.spec.ts`          |
-| 10  | The zero-padding grab cursor (`gap-base.png`) gets its own distinct angle per side (a 90deg clockwise step around the frame), not one shared per axis like the already-padded `gap` cursor |  ✅  |                       —                        |
+| #   | Scenario                                                                                                                                                                                    | Unit |                      E2E                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------------------------------: |
+| 1   | A padded side (>0) always shows its handle bar + 45deg hatch fill across the whole padding band while the selected frame is merely hovered — no need to hover that specific handle          |  ✅  |                       —                        |
+| 2   | A zero-padding side only shows its handle once the pointer is within reach of it, and shows no hatch (nothing to fill)                                                                      |  ✅  | ✅ `padding-handles.spec.ts` (visibility test) |
+| 3   | Dragging a zero-padding handle sets that side's padding to the pointer's live distance from the frame edge — absolute, like corner-radius, not delta                                        |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 4   | Dragging an already-padded handle grows/shrinks the value by the drag delta instead — the handle stays under the cursor, like the gap handles                                               |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 5   | Every side clamps at 0 instead of going negative, in either drag mode                                                                                                                       |  ✅  |                       —                        |
+| 6   | While dragging, the bar/hatch for that one side is replaced by a single solid blue guide line at the live padding boundary (plus the value label) — untouched sides keep showing normally   |  ✅  |                       —                        |
+| 7   | Handle geometry and hit-testing both run in the frame's local (un-rotated) space, so a rotated frame's handles/cursors follow its own rotated axes                                          |  ✅  |                       —                        |
+| 8   | A padded side's handle sits centred in the middle of the padding band (half the padding value in from the edge), not flush against the content boundary                                     |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 9   | A zero-padding handle sits just outside the frame's own edge visually, but is still grabbable well short of that 1px marker — its reach extends up to 30px in from the edge                 |  ✅  |          ✅ `padding-handles.spec.ts`          |
+| 10  | The zero-padding grab cursor (`gap-base.png`) gets its own distinct angle per side (a 90deg clockwise step around the frame), not one shared per axis like the already-padded `gap` cursor  |  ✅  |                       —                        |
+| 11  | Once a zero-padding drag actually starts moving, the cursor switches from `gap-base` to the plain `gap` icon — `gap-base` is only the pre-grab hover affordance, not the drag cursor itself |  ✅  |                       —                        |
 
 Requested directly, immediately after the RightPanel padding controls above: "Screen przedstawi
 sytuację kiedy padding jest zero i pojawia się możliwość ustawienia padding... To powinno mniej
@@ -769,3 +770,22 @@ functions or narrow WebGL call-verification. `padding-handles.spec.ts` covers th
 real browser proves: the actual pointerdown→pointermove→pointerup gesture correctly reading back
 into the store as a persisted `paddingLeft` change, in both math modes, plus the
 selected-and-hovered visibility gate.
+
+### Guide lines driven from the RightPanel, not just the canvas
+
+Hovering a `ColumnPadding` field in the RightPanel (`padding.spec.ts`'s "rightpanel-guide" tests)
+also draws the padding guide line(s) on the canvas, without needing any mouse activity on the
+canvas itself — hovering the merged horizontal/vertical field shows both of that axis's sides;
+hovering one individual side (with "Individual padding" toggled on) shows only that one. This
+reuses the exact same `drawAutoLayoutPaddingGuideLine` the canvas drag path draws, but line-only —
+no bar, no hatch, no cursor change — via a new, separate ref
+(`refs.hover.rightPanelPaddingGuideRef: { frameId, sides } | null`) so it can't be conflated with
+the canvas-pointer-driven hover/drag state that already exists. `PaddingInput`'s `onMouseEnter`/
+`onMouseLeave` (wired through `sideField`/`pairField` via a shared `buildPaddingHoverHandlers`)
+write/clear that ref through `useCanvasRefsContext()` — the same context+ref round-trip
+`RightPanel.tsx` already uses for `layout.rightPanelWidthRef`, just newly extended to a hover
+affordance. Because `drawScene`'s `requestAnimationFrame` loop re-reads every ref fresh each frame
+regardless of which side of the app wrote it, no render-loop plumbing changed — the canvas just
+picks the new ref up automatically. Updates live while scrubbing a field too, since the line's
+position is recomputed from the frame's _current_ padding value every frame, not snapshotted at
+hover-start.

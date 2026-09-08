@@ -37,6 +37,7 @@ describe('createHoverRefs behaviors', () => {
       isAutoLayoutGapAreaHoveredRef: { current: false },
       isAutoLayoutPaddingAreaHoveredRef: { current: false },
       isSmartSelectionBoxHoveredRef: { current: false },
+      rightPanelPaddingGuideRef: { current: null },
     });
   });
 

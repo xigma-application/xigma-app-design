@@ -1,5 +1,10 @@
+import { RefObject } from 'react';
+
 // store
 import { updateNode } from 'store/design/slice';
+
+// types
+import { TRightPanelPaddingGuideState } from 'types/design/canvas/types';
 
 // utils
 import { pairField } from '../pairField';
@@ -10,13 +15,27 @@ vi.mock('store/design/slice', async () => {
   return { ...actual, updateNode: vi.fn(actual.updateNode) };
 });
 
+const createPaddingGuideRef = (): RefObject<TRightPanelPaddingGuideState | null> => ({ current: null });
+
+const build = (firstValue: number, secondValue: number, paddingGuideRef = createPaddingGuideRef()): ReturnType<typeof pairField> =>
+  pairField(
+    vi.fn(),
+    'frame-1',
+    'horizontal',
+    'padding-horizontal',
+    'PaddingLR',
+    'paddingLeft',
+    firstValue,
+    'paddingRight',
+    secondValue,
+    paddingGuideRef,
+    ['left', 'right'],
+  );
+
 describe('pairField', () => {
   it('should build a field showing a single value when both sides match', () => {
-    // mock
-    const dispatch = vi.fn();
-
     // action
-    const field = pairField(dispatch, 'frame-1', 'horizontal', 'padding-horizontal', 'PaddingLR', 'paddingLeft', 10, 'paddingRight', 10);
+    const field = build(10, 10);
 
     // result
     expect(field).toMatchObject({
@@ -29,11 +48,8 @@ describe('pairField', () => {
   });
 
   it('should build a field showing both values when the sides differ', () => {
-    // mock
-    const dispatch = vi.fn();
-
     // action
-    const field = pairField(dispatch, 'frame-1', 'horizontal', 'padding-horizontal', 'PaddingLR', 'paddingLeft', 10, 'paddingRight', 20);
+    const field = build(10, 20);
 
     // result
     expect(field.value).toBe('10, 20');
@@ -41,8 +57,7 @@ describe('pairField', () => {
 
   it('should commit both clamped sides parsed from a single value on commit', () => {
     // mock
-    const dispatch = vi.fn();
-    const field = pairField(dispatch, 'frame-1', 'horizontal', 'padding-horizontal', 'PaddingLR', 'paddingLeft', 10, 'paddingRight', 20);
+    const field = build(10, 20);
 
     // action
     field.onCommit('12');
@@ -53,8 +68,7 @@ describe('pairField', () => {
 
   it('should commit both clamped sides parsed from a "first, second" value on commit', () => {
     // mock
-    const dispatch = vi.fn();
-    const field = pairField(dispatch, 'frame-1', 'horizontal', 'padding-horizontal', 'PaddingLR', 'paddingLeft', 10, 'paddingRight', 20);
+    const field = build(10, 20);
 
     // action
     field.onCommit('12, 24');
@@ -65,13 +79,38 @@ describe('pairField', () => {
 
   it('should carry the scrub delta from the first side onto the second side on scrub', () => {
     // mock
-    const dispatch = vi.fn();
-    const field = pairField(dispatch, 'frame-1', 'horizontal', 'padding-horizontal', 'PaddingLR', 'paddingLeft', 10, 'paddingRight', 20);
+    const field = build(10, 20);
 
     // action — first side moves from 10 to 15, a delta of +5
     field.onScrub(15);
 
     // result
     expect(updateNode).toHaveBeenCalledWith({ changes: { paddingLeft: 15, paddingRight: 25 }, id: 'frame-1' });
+  });
+
+  it('should stash the frame id and both sides in the padding guide ref on hover start', () => {
+    // mock
+    const paddingGuideRef = createPaddingGuideRef();
+    const field = build(10, 20, paddingGuideRef);
+
+    // action
+    field.onHoverStart();
+
+    // result
+    expect(paddingGuideRef.current).toEqual({ frameId: 'frame-1', sides: ['left', 'right'] });
+  });
+
+  it('should clear the padding guide ref on hover end', () => {
+    // mock
+    const paddingGuideRef = createPaddingGuideRef();
+    const field = build(10, 20, paddingGuideRef);
+
+    paddingGuideRef.current = { frameId: 'frame-1', sides: ['left', 'right'] };
+
+    // action
+    field.onHoverEnd();
+
+    // result
+    expect(paddingGuideRef.current).toBeNull();
   });
 });

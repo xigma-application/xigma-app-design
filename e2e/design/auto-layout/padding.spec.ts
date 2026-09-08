@@ -118,4 +118,44 @@ test.describe('auto-layout — Padding', () => {
     expect(after.paddingLeft ?? 0).toBe(0);
     await expect(page.locator('[data-test-text-field-input="padding-top"]')).toHaveValue('25');
   });
+
+  test('hovering the merged horizontal padding field draws guide lines on the canvas', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-auto-layout-padding-rightpanel-guide-merged');
+
+    const input = page.locator('[data-test-text-field-input="padding-horizontal"]');
+
+    await input.click();
+    await input.fill('40');
+    await input.press('Enter');
+
+    await page.mouse.move(50, 50);
+    const withoutHover = await designPage.canvas.screenshot();
+
+    await input.hover();
+    const withHover = await designPage.canvas.screenshot();
+
+    expect(withHover.equals(withoutHover)).toBe(false);
+  });
+
+  test('hovering one individual padding field draws a different guide than hovering the merged pair', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-auto-layout-padding-rightpanel-guide-individual');
+
+    const horizontalInput = page.locator('[data-test-text-field-input="padding-horizontal"]');
+
+    await horizontalInput.click();
+    await horizontalInput.fill('40');
+    await horizontalInput.press('Enter');
+
+    await page.getByLabel('Individual padding').click();
+
+    await page.mouse.move(50, 50);
+    await page.locator('[data-test-text-field-input="padding-left"]').hover();
+    const leftOnly = await designPage.canvas.screenshot();
+
+    await page.mouse.move(50, 50);
+    await page.locator('[data-test-text-field-input="padding-right"]').hover();
+    const rightOnly = await designPage.canvas.screenshot();
+
+    expect(leftOnly.equals(rightOnly)).toBe(false);
+  });
 });
