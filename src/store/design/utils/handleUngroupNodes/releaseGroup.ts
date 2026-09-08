@@ -6,6 +6,7 @@ import { TGroupLikeNode, TSceneNode } from 'types/design/types';
 import { getActivePage } from '../getActivePage';
 import { getUngroupedOrder } from './getUngroupedOrder';
 import { isContainerNode } from '../nodeHierarchy/isContainerNode';
+import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 const reparentAndRemoveGroup = (page: TDesignPage, group: TGroupLikeNode): void => {
@@ -37,6 +38,7 @@ export const releaseGroup = (state: TDesignState, group: TGroupLikeNode): string
   reparentAndRemoveGroup(page, group);
   applyUngroupedOrder(page, parent, nextOrder);
   syncGroupBounds(state, group.parentId);
+  syncAutoLayoutChildren(state, group.parentId);
 
   return group.childIds;
 };

@@ -1,5 +1,5 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
 import { TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
 
@@ -174,6 +174,28 @@ describe('releaseGroup', () => {
     expect(page.nodes.a.parentId).toBe('frame-1');
     expect(page.nodes.b.parentId).toBe('frame-1');
     expect(releasedIds).toEqual(['a', 'b']);
+  });
+
+  it('should reflow the auto-layout frame’s other children once ungrouping releases the group’s children directly into it', () => {
+    // mock — group-1 (holding a, b) is a member of a horizontal auto-layout frame, alongside
+    // sibling c, which starts out at a deliberately stale position (999) — only an actual layout
+    // pass over the frame's new direct children (a, b, c) can correct it back to 20
+    const a = buildRect({ height: 10, id: 'a', parentId: 'group-1', width: 10, x: 0, y: 0 });
+    const b = buildRect({ height: 10, id: 'b', parentId: 'group-1', width: 10, x: 10, y: 0 });
+    const c = buildRect({ height: 10, id: 'c', parentId: 'frame-1', width: 10, x: 999, y: 0 });
+    const group = buildGroup({ childIds: ['a', 'b'], height: 10, id: 'group-1', parentId: 'frame-1', width: 20, x: 0, y: 0 });
+    const frame = buildFrame({ childIds: ['group-1', 'c'], id: 'frame-1', layoutMode: LayoutMode.horizontal });
+    const state = buildState({ nodes: { a, b, c, 'frame-1': frame, 'group-1': group }, rootOrder: ['frame-1'] });
+
+    // action
+    releaseGroup(state, group);
+
+    // result — a and b took the group's old slot, and 'c' was pulled back to sit right after them
+    const page = getActivePage(state);
+    expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual(['a', 'b', 'c']);
+    expect(page.nodes.a).toMatchObject({ x: 0 });
+    expect(page.nodes.b).toMatchObject({ x: 10 });
+    expect(page.nodes.c).toMatchObject({ x: 20 });
   });
 
   it('should resync the released parent group’s bounds to its remaining children', () => {

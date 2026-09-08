@@ -7,21 +7,12 @@ import { updateNode } from 'store/design/slice';
 import { TGroupLikeNode } from 'types/design/types';
 
 // utils
-import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
+import { getGroupLikeParentIds } from 'store/design/utils/nodeHierarchy/getGroupLikeParentIds';
 
 export const resyncGroupAutoLayoutAncestors = (dispatch: AppDispatch, nodeOriginIds: string[]): void => {
   const { nodes } = selectActivePage(store.getState());
   const draggedIds = new Set(nodeOriginIds);
-  const groupLikeParentIds = new Set<string>();
-
-  draggedIds.forEach((id) => {
-    const parentId = nodes[id]?.parentId;
-    const parent = parentId ? nodes[parentId] : null;
-
-    if (parentId && !draggedIds.has(parentId) && parent && isGroupLikeNode(parent)) {
-      groupLikeParentIds.add(parentId);
-    }
-  });
+  const groupLikeParentIds = getGroupLikeParentIds(nodes, nodeOriginIds);
 
   groupLikeParentIds.forEach((groupId) => {
     const group = nodes[groupId] as TGroupLikeNode;

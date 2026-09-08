@@ -13,6 +13,7 @@ import { getAspectRatioLockGuide } from './getAspectRatioLockGuide';
 import { getResizeDragFrame } from './getResizeDragFrame';
 import { getSingleRotatableOrigin } from './getSingleRotatableOrigin';
 import { resizeOriginEntries } from './resizeOriginEntries';
+import { resyncResizedGroupAutoLayoutAncestors } from './resyncResizedGroupAutoLayoutAncestors';
 
 export const continueResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -37,6 +38,10 @@ export const continueResizeDrag = (
     }
 
     resizeOriginEntries(originEntries, dispatch, frame, Boolean(singleRotatableOrigin), snapshots);
+    resyncResizedGroupAutoLayoutAncestors(
+      dispatch,
+      originEntries.map(([id]) => id),
+    );
 
     if (rotatedGroupChildOrigins && singleRotatableOrigin) {
       const [groupId] = originEntries[0];

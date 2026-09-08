@@ -1,12 +1,12 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, groupNodes, setActiveTool, setSelection, updateNode } from 'store/design/slice';
+import { addNode, groupNodes, moveNodes, setActiveTool, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TFrameNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
@@ -70,6 +70,29 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: s
 const addMediaNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
   store.dispatch(
     addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation, src: 'a.png', type: NodeType.media, width, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addAutoLayoutFrameNode = (x: number, y: number, width: number, height: number): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height,
+      layoutMode: LayoutMode.horizontal,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -389,6 +412,47 @@ describe('continueResizeDrag', () => {
       y1: 40,
       y2: 160,
     });
+  });
+
+  it('should reflow the auto-layout frame’s other members LIVE, on this very pointermove, while resizing a group nested in it — not just once released', () => {
+    // mock — group-1 (holding a, b) is a member of a horizontal auto-layout frame, alongside
+    // sibling c. Group resize dispatches updateNode keyed by the group's LEAF children (a, b), same
+    // as any multi-node resize — the fix must reflow the frame from that same live dispatch, not
+    // wait for a separate disarm step
+    const idA = addFrameNode(0, 0, 20, 20);
+    const idB = addFrameNode(30, 0, 20, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectSelectedIds(store.getState());
+    const frameId = addAutoLayoutFrameNode(0, 0, 300, 100);
+    const idC = addFrameNode(0, 0, 20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [groupId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(moveNodes({ nodeIds: [idC], targetIndex: 1, targetParentId: frameId }));
+
+    const cBefore = selectActivePage(store.getState()).nodes[idC] as { x: number };
+
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2.5,
+      bounds: { height: 20, width: 50, x: 0, y: 0 },
+      handle: 'se',
+      nodeOrigins: {
+        [idA]: { flip: null, height: 20, rotation: 0, width: 20, x: 0, y: 0 },
+        [idB]: { flip: null, height: 20, rotation: 0, width: 20, x: 30, y: 0 },
+      },
+    });
+
+    // before — grow the group to double its width (50 -> 100), in a single pointermove, no disarm
+    continueResizeDrag(canvas, pointerEvent(100, 40), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result — 'c' already slid over to sit right after the now-wider group, live
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[groupId]).toMatchObject({ width: 100 });
+    expect(page.nodes[idC]).toMatchObject({ x: 100 });
+    expect((page.nodes[idC] as { x: number }).x).toBeGreaterThan(cBefore.x);
   });
 
   it('should snap a multi-node resize onto a nearby stationary shape, same as a single-node resize', () => {

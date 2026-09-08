@@ -226,6 +226,78 @@ test('a plain drag that repositions a group’s child, growing the group’s own
   expect(after.c.x).toBeGreaterThan(before.cX);
 });
 
+test('resizing a Group nested in an auto-layout frame reflows the frame LIVE, mid-drag, before the mouse is even released', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-resize-reflows-autolayout-live');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 700);
+  await page.locator('[data-test-toggle-button-group="flow"]').getByLabel('Horizontal', { exact: true }).click();
+
+  // A and B, grouped, become the frame's first auto-layout member
+  await designPage.drawRectangle(1400, 300, 1450, 380); // A
+  await designPage.drawRectangle(1460, 300, 1510, 380); // B — auto-selected, replacing A
+  await designPage.click(1408, 370, { shift: true }); // add A back, selection = [B, A]
+  await page.keyboard.press('Control+g'); // group = [A, B]
+
+  await designPage.pointerDown(1408, 370);
+  await page.mouse.move(650, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  // C, dragged in past the group, becomes the second member
+  await designPage.drawRectangle(1400, 500, 1450, 550);
+  await designPage.pointerDown(1420, 525);
+  await page.mouse.move(950, 300, { steps: 10 });
+  await page.waitForTimeout(150);
+  await designPage.pointerUp();
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as { childIds: string[] };
+    const [groupId, cId] = frame.childIds;
+    const group = activePage.nodes[groupId] as { height: number; width: number; x: number; y: number };
+    const c = activePage.nodes[cId] as { x: number };
+
+    return { cId, cX: c.x, groupId, se: { x: group.x + group.width, y: group.y + group.height } };
+  });
+
+  // select the group so its own resize handles render
+  await page.evaluate(async (groupId) => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(setSelection([groupId]));
+  }, before.groupId);
+
+  // grab the group's own bottom-right resize handle and drag it outward — but DO NOT release yet
+  await page.mouse.move(before.se.x, before.se.y);
+  await page.mouse.down();
+  await page.mouse.move(before.se.x + 80, before.se.y + 40, { steps: 10 });
+  await page.waitForTimeout(100);
+
+  // read while the button is still held — the frame must have ALREADY reflowed 'c' outward
+  const midDrag = await page.evaluate(
+    async ({ cId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return { cX: (pages[activePageId].nodes[cId] as { x: number }).x };
+    },
+    { cId: before.cId },
+  );
+
+  await page.mouse.up();
+
+  expect(midDrag.cX).toBeGreaterThan(before.cX);
+});
+
 test('dragging a child inside a Group that itself sits in an auto-layout frame stays fully sealed off — no reorder ghost, no reparent', async ({
   page,
 }) => {
