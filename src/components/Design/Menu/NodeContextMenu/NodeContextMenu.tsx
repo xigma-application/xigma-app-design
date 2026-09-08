@@ -44,7 +44,8 @@ import {
 // store
 import { selectNodes } from 'store/design/selectors';
 import { TDesignPage } from 'store/design/types';
-import { useAppSelector } from 'store';
+import { ungroupNodes } from 'store/design/slice';
+import { useAppDispatch, useAppSelector } from 'store';
 
 // styles
 import styles from './node-context-menu.module.scss';
@@ -111,10 +112,12 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   otherPages,
 }) => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
   const nodes = useAppSelector(selectNodes);
   const isMask = getIsMaskChild(node, nodes);
+  const isMaskContainer = node.type === NodeType.mask;
   const isFrame = node.type === NodeType.frame;
   const isGroup = node.type === NodeType.group;
   const isSection = node.type === NodeType.section;
@@ -123,6 +126,14 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
   const hasStrokeColor = node.type === NodeType.line ? Boolean(node.stroke) : 'strokeColor' in node && Boolean(node.strokeColor);
   const canOutlineStroke = node.type === NodeType.text ? true : hasStrokeWidth && hasStrokeColor;
+
+  const handleRemoveMask = (): void => {
+    if (isMaskContainer) {
+      dispatch(ungroupNodes([node.id]));
+    } else {
+      onRemoveMask();
+    }
+  };
 
   return (
     <Menu
@@ -215,7 +226,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && !isMask && (
+      {!isSection && !isFrame && !isMask && !isMaskContainer && (
         <MenuItem
           label={t(NODE_MENU_USE_AS_MASK_KEY)}
           onClick={onUseAsMask}
@@ -223,10 +234,10 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && isMask && (
+      {!isSection && !isFrame && (isMask || isMaskContainer) && (
         <MenuItem
           label={t(NODE_MENU_REMOVE_MASK_KEY)}
-          onClick={onRemoveMask}
+          onClick={handleRemoveMask}
           shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')}
           withCheck={false}
         />

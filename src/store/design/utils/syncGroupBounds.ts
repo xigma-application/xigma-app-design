@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDesignState } from '../types';
 
 // utils
@@ -13,7 +14,8 @@ export const syncGroupBounds = (state: TDesignState, groupId: string | null): vo
     const group = nodes[groupId];
 
     if (group && isGroupLikeNode(group)) {
-      const children = group.childIds.map((childId) => nodes[childId]).filter(Boolean);
+      const boundsChildIds = group.type === NodeType.mask ? group.childIds.slice(-1) : group.childIds;
+      const children = boundsChildIds.map((childId) => nodes[childId]).filter(Boolean);
 
       if (children.length > 0) {
         const bounds = group.rotation === 0 ? getNodesBoundingBox(children) : getRotatedGroupBounds(children, group.rotation);

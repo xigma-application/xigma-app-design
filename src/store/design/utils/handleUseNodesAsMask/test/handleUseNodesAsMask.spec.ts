@@ -104,6 +104,8 @@ describe('handleUseNodesAsMask', () => {
     expect(mask.name).toBe(DEFAULT_MASK_GROUP_NAME);
     expect(mask.childIds).toEqual(['a', 'b']);
     expect(page.selectedIds).toEqual(['b']);
+    // the container's own box must match the mask shape 'b' alone, not the union with 'a'
+    expect(mask).toMatchObject({ height: 10, width: 10, x: 40, y: 0 });
   });
 
   it('should wrap a single selected node too', () => {

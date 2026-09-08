@@ -97,10 +97,11 @@ const buildGroup = (overrides: Partial<TGroupNode> = {}): TGroupNode => ({
 
 describe('handleRemoveNodeMask', () => {
   it('should convert the mask container back to a plain group when the current mask child is removed', () => {
-    // mock — 'top' is the last child of the mask, i.e. the current mask shape
-    const bottom = buildRectangle({ id: 'bottom', parentId: 'mask-1' });
-    const top = buildRectangle({ id: 'top', parentId: 'mask-1' });
-    const mask = buildMask({ childIds: ['bottom', 'top'] });
+    // mock — 'top' is the last child of the mask, i.e. the current mask shape; the container's own
+    // box starts out matching just 'top' (mask semantics), well short of the union with 'bottom'
+    const bottom = buildRectangle({ id: 'bottom', parentId: 'mask-1', x: 0 });
+    const top = buildRectangle({ id: 'top', parentId: 'mask-1', x: 40 });
+    const mask = buildMask({ childIds: ['bottom', 'top'], height: 10, width: 10, x: 40, y: 0 });
     const state = buildState({ [bottom.id]: bottom, [mask.id]: mask, [top.id]: top });
 
     // action
@@ -111,6 +112,8 @@ describe('handleRemoveNodeMask', () => {
     const converted = page.nodes[mask.id] as TGroupNode;
     expect(converted.type).toBe(NodeType.group);
     expect(converted.childIds).toEqual(['bottom', 'top']);
+    // back to plain-group semantics — the box widens to the union of both children again
+    expect(converted).toMatchObject({ height: 10, width: 50, x: 0, y: 0 });
   });
 
   it('should do nothing when the node is not the current (last) mask child', () => {

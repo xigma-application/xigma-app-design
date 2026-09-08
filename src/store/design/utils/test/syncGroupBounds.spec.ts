@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TGroupNode, TMaskNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -29,6 +29,20 @@ const group = (overrides: Partial<TGroupNode>): TGroupNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.group,
+  width: 0,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const mask = (overrides: Partial<TMaskNode>): TMaskNode => ({
+  childIds: [],
+  height: 0,
+  id: 'mask-1',
+  name: 'Mask group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.mask,
   width: 0,
   x: 0,
   y: 0,
@@ -136,6 +150,20 @@ describe('syncGroupBounds', () => {
     const updated = getActivePage(state).nodes['group-1'];
     expect(updated).toMatchObject({ height: 20, width: 20 });
     expect(updated).not.toMatchObject({ height: 5, width: 5 });
+  });
+
+  it('should size a mask container off the mask shape alone (its last child), ignoring the masked content beneath it', () => {
+    // mock — content ('a') is much bigger than the mask shape ('b'), which sits last in childIds
+    const a = rect({ height: 100, id: 'a', parentId: 'mask-1', width: 100, x: 0, y: 0 });
+    const b = rect({ height: 10, id: 'b', parentId: 'mask-1', width: 10, x: 20, y: 20 });
+    const maskGroup = mask({ childIds: ['a', 'b'], id: 'mask-1' });
+    const state = buildState({ nodes: { a, b, 'mask-1': maskGroup } });
+
+    // action
+    syncGroupBounds(state, 'mask-1');
+
+    // result — matches 'b' (the mask), not the union of 'a' and 'b'
+    expect(getActivePage(state).nodes['mask-1']).toMatchObject({ height: 10, width: 10, x: 20, y: 20 });
   });
 
   it('should leave the box untouched when the group has no resolvable children', () => {

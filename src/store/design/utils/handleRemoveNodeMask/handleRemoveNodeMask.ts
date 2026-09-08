@@ -4,6 +4,7 @@ import { TDesignState } from '../../types';
 
 // utils
 import { getActivePage } from '../getActivePage';
+import { syncGroupBounds } from '../syncGroupBounds';
 
 export const handleRemoveNodeMask = (state: TDesignState, id: string): void => {
   const page = getActivePage(state);
@@ -13,6 +14,7 @@ export const handleRemoveNodeMask = (state: TDesignState, id: string): void => {
   if (parent && parent.type === NodeType.mask) {
     if (parent.childIds[parent.childIds.length - 1] === id) {
       page.nodes[parent.id] = { ...parent, type: NodeType.group };
+      syncGroupBounds(state, parent.id);
     }
   }
 };

@@ -13,7 +13,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
-import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TLineNode, TMaskNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
@@ -102,7 +102,7 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
     </Provider>,
   );
 
-const buildMaskedRectangleNode = (): TRectangleNode => {
+const buildMaskScene = (): { maskId: string; nodeId: string } => {
   store.dispatch(
     addNode({ childIds: [], height: 20, name: 'Mask group', parentId: null, rotation: 0, type: NodeType.mask, width: 20, x: 0, y: 0 }),
   );
@@ -115,7 +115,19 @@ const buildMaskedRectangleNode = (): TRectangleNode => {
 
   store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex: 0, targetParentId: maskId }));
 
+  return { maskId, nodeId };
+};
+
+const buildMaskedRectangleNode = (): TRectangleNode => {
+  const { nodeId } = buildMaskScene();
+
   return selectActivePage(store.getState()).nodes[nodeId] as TRectangleNode;
+};
+
+const buildMaskContainerNode = (): TMaskNode => {
+  const { maskId } = buildMaskScene();
+
+  return selectActivePage(store.getState()).nodes[maskId] as TMaskNode;
 };
 
 describe('NodeContextMenu', () => {
@@ -183,6 +195,29 @@ describe('NodeContextMenu', () => {
 
     // result
     expect(onRemoveMask).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show Remove mask for the mask container itself too, and ungroup it entirely on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const maskContainer = buildMaskContainerNode();
+    const childId = maskContainer.childIds[0];
+
+    // before
+    renderNodeContextMenu({ node: maskContainer });
+
+    // result
+    expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();
+    expect(screen.getByText('Remove mask').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Remove mask'));
+
+    // result — the container is gone entirely (not just flipped back to a plain group), and its
+    // child is released to whatever level the mask itself was at
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[maskContainer.id]).toBeUndefined();
+    expect(page.nodes[childId].parentId).toBeNull();
   });
 
   it('should not show Use as mask or Remove mask for a section', () => {
