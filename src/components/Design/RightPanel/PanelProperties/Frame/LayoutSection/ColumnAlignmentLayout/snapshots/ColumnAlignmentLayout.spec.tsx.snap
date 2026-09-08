@@ -301,6 +301,7 @@ exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap r
             aria-pressed="false"
             class="_Button_b88d2e"
             data-state="closed"
+            style="padding: 6px;"
             type="button"
           >
             <svg
