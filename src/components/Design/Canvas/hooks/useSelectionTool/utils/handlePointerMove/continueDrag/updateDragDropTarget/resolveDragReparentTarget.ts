@@ -13,6 +13,7 @@ import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget/armAutoLayout
 import { getDragDropTargetFrame } from './getDragDropTargetFrame';
 import { isAutoLayoutFrame } from './isAutoLayoutFrame';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 import { isPointInsideFrame } from './isPointInsideFrame';
 import { reparentToDropTarget } from './reparentToDropTarget';
 
@@ -52,7 +53,9 @@ export const resolveDragReparentTarget = (
   const suppressReorder = isModifierHeld || Boolean(dragState.reorderModeAbandoned);
   const isLockedToReorder =
     isAutoLayoutFrame(currentParent) && !isAbsoluteChild && isPointInsideFrame(point, currentParent) && !suppressReorder;
-  const desiredParentId = isLockedToReorder ? currentParentId : getDragDropTargetFrame(movedNodeIds, point, renderOrderedNodes, nodesById);
+  const isSealedGroupChild = currentParent !== null && isGroupLikeNode(currentParent);
+  const desiredParentId =
+    isLockedToReorder || isSealedGroupChild ? currentParentId : getDragDropTargetFrame(movedNodeIds, point, renderOrderedNodes, nodesById);
   const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
   const desiredParent = desiredParentId ? nodesById[desiredParentId] : null;
 

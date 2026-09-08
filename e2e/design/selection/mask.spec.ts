@@ -105,6 +105,61 @@ test('"Use as mask" wraps two selected rectangles in a "Mask group", marking the
   expect(isRed(await readPixelColor(page, 880, 480))).toBe(false);
 });
 
+test('creating a Mask group from two children of a Frame keeps it inside frame.childIds — not duplicated into the page root order once dragged', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-mask-inside-frame-no-duplicate');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1000, 650);
+
+  // draw both rects off to the side, then drag each into the frame — drawing directly over a frame
+  // does not auto-parent, only a drag-in does. A spans 650-750,250-350; B (dropped 40px over, on top
+  // of A once drawn second) spans 690-790,250-350 — a wide 690-750 overlap, and a wide exclusive zone
+  // for each (650-690 for A, 750-790 for B) to click unambiguously
+  await designPage.drawRectangle(1400, 200, 1500, 300);
+  await designPage.pointerDown(1450, 250);
+  await page.mouse.move(700, 300, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.drawRectangle(1400, 400, 1500, 500);
+  await designPage.pointerDown(1450, 450);
+  await page.mouse.move(740, 300, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.click(670, 300, { shift: true }); // add A back (its own exclusive zone), both selected
+  await page.keyboard.press(USE_AS_MASK_SHORTCUT); // mask them — the shared parent is the Frame, not root
+
+  const afterMask = await readDesignState(page);
+  const frameId = afterMask.rootOrder[0];
+  const frame = afterMask.nodes[frameId] as { childIds: string[] };
+
+  // regression: a bare isGroupLikeNode check treated the Frame parent as "no parent" and wrote the
+  // new mask container's id into page.rootOrder instead of frame.childIds
+  expect(afterMask.rootOrder).toEqual([frameId]);
+  expect(frame.childIds).toHaveLength(1);
+
+  const maskId = frame.childIds[0];
+  const mask = afterMask.nodes[maskId];
+  expect(mask.type).toBe('mask');
+  expect(mask.childIds).toHaveLength(2);
+
+  // drag the mask container around inside the frame — this used to surface the mismatch as a
+  // literal visible duplicate, once handleMoveNodes appended a second, stray entry into rootOrder
+  await designPage.click(1500, 700); // deselect
+  await designPage.pointerDown(720, 300); // inside the A/B overlap — the only visible mask pixels
+  await page.mouse.move(820, 450, { steps: 10 });
+  await designPage.pointerUp();
+
+  const afterDrag = await readDesignState(page);
+
+  expect(afterDrag.rootOrder).toEqual([frameId]);
+  expect((afterDrag.nodes[frameId] as { childIds: string[] }).childIds).toEqual([maskId]);
+  expect(Object.values(afterDrag.nodes).filter((node) => node.type === 'mask')).toHaveLength(1);
+});
+
 test('filling a mask vector reveals its underlying content everywhere the fill now covers, not just along the stroke — regression for the fill silently zeroing the mask target’s whole alpha channel', async ({
   page,
 }) => {

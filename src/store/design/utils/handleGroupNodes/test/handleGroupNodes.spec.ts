@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -15,6 +15,22 @@ const buildRect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 10,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,
@@ -279,6 +295,30 @@ describe('handleGroupNodes', () => {
     expect((page.nodes['group-2'] as TGroupNode).childIds).toEqual(['n2', 'n1']);
     expect(page.nodes['group-1']).toBeUndefined();
     expect(page.rootOrder).toEqual(['group-2']);
+  });
+
+  it('should nest the new group inside a Frame parent, not the page root order — regression for the duplicate-on-drag bug', () => {
+    // mock — a and b both live inside frame-1; grouping them must land the new group inside
+    // frame.childIds, not page.rootOrder, since that mismatch is what let a later drag insert the
+    // node into rootOrder a second time, producing a visible duplicate
+    const a = buildRect({ id: 'a', parentId: 'frame-1', x: 0, y: 0 });
+    const b = buildRect({ id: 'b', parentId: 'frame-1', x: 20, y: 0 });
+    const frame = buildFrame({ childIds: ['a', 'b'], id: 'frame-1' });
+    const state = buildState({
+      nodes: { a, b, 'frame-1': frame },
+      rootOrder: ['frame-1'],
+      selectedIds: ['a', 'b'],
+    });
+
+    // action
+    handleGroupNodes(state, 'group-1');
+
+    // result
+    const page = getActivePage(state);
+    expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual(['group-1']);
+    expect((page.nodes['group-1'] as TGroupNode).parentId).toBe('frame-1');
+    expect((page.nodes['group-1'] as TGroupNode).childIds).toEqual(['a', 'b']);
+    expect(page.rootOrder).toEqual(['frame-1']);
   });
 
   it('should no-op when the target parent would end up nested inside one of the nodes being grouped', () => {

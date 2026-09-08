@@ -8,7 +8,7 @@ import { getActivePage } from '../getActivePage';
 import { getGroupableMembers } from './getGroupableMembers';
 import { getIsDescendantOfMovedNodes } from '../handleMoveNodes/getIsDescendantOfMovedNodes';
 import { insertGroupNode } from './insertGroupNode';
-import { isGroupLikeNode } from '../nodeHierarchy/isGroupLikeNode';
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 import { stealMembersFromOldParents } from './stealMembersFromOldParents';
 import { syncGroupBounds } from '../syncGroupBounds';
 
@@ -25,7 +25,7 @@ export const handleGroupNodes = (state: TDesignState, groupId: string): void => 
     if (!isCycle) {
       const memberIdSet = new Set(memberIds);
       const initialParent = parentId ? page.nodes[parentId] : null;
-      const initialContainerOrder = initialParent && isGroupLikeNode(initialParent) ? initialParent.childIds : page.rootOrder;
+      const initialContainerOrder = initialParent && isContainerNode(initialParent) ? initialParent.childIds : page.rootOrder;
       const existingMemberIds = initialContainerOrder.filter((id) => memberIdSet.has(id));
       const stolenMemberIds = memberIds.filter((id) => !initialContainerOrder.includes(id));
       const orderedMemberIds = [...existingMemberIds, ...stolenMemberIds];

@@ -1,7 +1,16 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
+
+const readActivePage = (page: Page): Promise<{ nodes: Record<string, { childIds?: string[]; type: string }>; rootOrder: string[] }> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
 
 test('dragging a group by clicking any of its children moves every child together, as one rigid body', async ({ page }) => {
   const designPage = new DesignPage(page);
@@ -51,6 +60,125 @@ test('dragging a group by clicking any of its children moves every child togethe
   expect(after.group.y).toBeCloseTo(before.group.y + 60, 0);
   expect(after.group.width).toBeCloseTo(before.group.width, 0);
   expect(after.group.height).toBeCloseTo(before.group.height, 0);
+});
+
+test('grouping two children of a Frame keeps the new group inside frame.childIds — not duplicated into the page root order once dragged', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-inside-frame-no-duplicate');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1000, 650);
+
+  // draw both rects off to the side, then drag each into the frame — the established convention:
+  // drawing directly over a frame does not auto-parent, only a drag-in does
+  await designPage.drawRectangle(1400, 200, 1460, 240);
+  await designPage.pointerDown(1430, 220);
+  await page.mouse.move(700, 250, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.drawRectangle(1400, 300, 1460, 340);
+  await designPage.pointerDown(1430, 320);
+  await page.mouse.move(700, 400, { steps: 10 });
+  await designPage.pointerUp();
+
+  await designPage.click(700, 250, { shift: true }); // add the first rect back, both selected
+  await page.keyboard.press('Control+g'); // group them — the shared parent is the Frame, not root
+
+  const afterGroup = await readActivePage(page);
+  const frameId = afterGroup.rootOrder[0];
+  const frame = afterGroup.nodes[frameId] as { childIds: string[] };
+
+  // regression: a bare isGroupLikeNode check treated the Frame parent as "no parent" and wrote the
+  // new group's id into page.rootOrder instead of frame.childIds
+  expect(afterGroup.rootOrder).toEqual([frameId]);
+  expect(frame.childIds).toHaveLength(1);
+
+  const groupId = frame.childIds[0];
+  const group = afterGroup.nodes[groupId] as { childIds: string[]; type: string };
+  expect(group.type).toBe('group');
+  expect(group.childIds).toHaveLength(2);
+
+  // drag the group around inside the frame — this used to surface the mismatch as a literal visible
+  // duplicate, once handleMoveNodes appended a second, stray entry into page.rootOrder
+  await designPage.pointerDown(750, 300);
+  await page.mouse.move(850, 450, { steps: 10 });
+  await designPage.pointerUp();
+
+  const afterDrag = await readActivePage(page);
+
+  expect(afterDrag.rootOrder).toEqual([frameId]);
+  expect((afterDrag.nodes[frameId] as { childIds: string[] }).childIds).toEqual([groupId]);
+  expect(Object.values(afterDrag.nodes).filter((node) => node.type === 'group')).toHaveLength(1);
+});
+
+test('dragging a child inside a Group that itself sits in an auto-layout frame stays fully sealed off — no reorder ghost, no reparent', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-sealed-inside-autolayout-frame');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 700);
+  await page.locator('[data-test-toggle-button-group="flow"]').getByLabel('Vertical', { exact: true }).click();
+
+  // A becomes the frame's first auto-layout member
+  await designPage.drawRectangle(1400, 160, 1460, 220);
+  await designPage.pointerDown(1430, 190);
+  await page.mouse.move(630, 300, { steps: 10 });
+  await designPage.pointerUp();
+
+  // B is wrapped in its own single-member Group, then dragged in as the second member
+  await designPage.drawRectangle(1400, 300, 1460, 360);
+  await page.keyboard.press('Control+g');
+  await designPage.pointerDown(1430, 330);
+  await page.mouse.move(630, 300, { steps: 10 });
+  await designPage.pointerUp();
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as { childIds: string[] };
+    const [groupId] = frame.childIds.slice(-1);
+    const group = activePage.nodes[groupId] as { childIds: string[] };
+    const [childId] = group.childIds;
+    const child = activePage.nodes[childId] as { x: number; y: number };
+
+    return { child: { id: childId, x: child.x, y: child.y }, frameChildIds: frame.childIds, frameId, groupId };
+  });
+
+  // Ctrl+click B directly (bypassing the group) and drag it far down the frame — well past any
+  // band a real auto-layout reorder could ever slot it into
+  await designPage.click(before.child.x + 10, before.child.y + 10, { ctrl: true });
+  await designPage.pointerDown(before.child.x + 10, before.child.y + 10);
+  await page.mouse.move(before.child.x + 10, before.child.y + 250, { steps: 10 });
+  await designPage.pointerUp();
+
+  const after = await page.evaluate(
+    async ({ childId, frameId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return {
+        child: activePage.nodes[childId] as { parentId: string | null; x: number; y: number },
+        frame: activePage.nodes[frameId] as { childIds: string[] },
+      };
+    },
+    { childId: before.child.id, frameId: before.frameId },
+  );
+
+  // sealed: still a member of the same Group, the frame's own membership never changed, and the
+  // child moved substantially with the drag (allowing for alignment-guide snap) — a plain
+  // translate, not a reparent or a reorder that would have frozen it in place
+  expect(after.child.parentId).toBe(before.groupId);
+  expect(after.frame.childIds).toEqual(before.frameChildIds);
+  expect(after.child.y).toBeGreaterThan(before.child.y + 200);
 });
 
 test('a plain click on a group child selects the whole group, and Ctrl+click on the same spot bypasses it to select just that child', async ({

@@ -69,6 +69,14 @@ const addGroup = (x: number, y: number): string => {
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;
 };
 
+const addMask = (x: number, y: number): string => {
+  store.dispatch(
+    addNode({ childIds: [], height: 20, name: 'Mask group', parentId: null, rotation: 0, type: NodeType.mask, width: 20, x, y }),
+  );
+
+  return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+};
+
 const nodesOf = (): { rendered: ReturnType<typeof selectRenderOrderedNodes>; byId: ReturnType<typeof selectActivePage>['nodes'] } => ({
   byId: selectActivePage(store.getState()).nodes,
   rendered: selectRenderOrderedNodes(store.getState()),
@@ -205,6 +213,80 @@ describe('resolveDragReparentTarget', () => {
     // result
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(groupId);
+
+    spy.mockRestore();
+  });
+
+  it('should keep a Group child fully sealed off — no reorder ghost, no reparent — even when its Group sits inside an auto-layout frame', () => {
+    // mock — a Group nested inside an auto-layout frame; the dragged rect lives inside that Group.
+    // Hit-testing the pointer would normally find the auto-layout ancestor and arm its reorder ghost —
+    // that must never happen for a node whose immediate parent is a Group, it's a sealed environment
+    const autoLayoutFrameId = addAutoLayoutFrame(0, 0, 300);
+    const groupId = addGroup(10, 10);
+    const rectId = addRect(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [groupId], targetIndex: 0, targetParentId: autoLayoutFrameId }));
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: groupId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action — pointer still well inside the auto-layout frame's own bounds
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 40, y: 40 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
+
+    // result — sealed: no reorder ghost armed, no reparent dispatched, still a member of the Group
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(groupId);
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(groupId);
+
+    spy.mockRestore();
+  });
+
+  it('should keep a Mask child fully sealed off — no reorder ghost, no reparent — even when its Mask sits inside an auto-layout frame', () => {
+    // mock — same shape as the Group case, but the immediate parent is a Mask container
+    const autoLayoutFrameId = addAutoLayoutFrame(0, 0, 300);
+    const maskId = addMask(10, 10);
+    const rectId = addRect(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [maskId], targetIndex: 0, targetParentId: autoLayoutFrameId }));
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: maskId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 40, y: 40 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
+
+    // result
+    expect(canvasRefs.transform.autoLayoutReorderPreviewRef.current).toBeNull();
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(maskId);
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(maskId);
 
     spy.mockRestore();
   });
