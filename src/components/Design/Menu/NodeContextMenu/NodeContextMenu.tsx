@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, MenuCompound, TVirtualAnchor } from 'shared';
 
 // hooks
+import { useHandleRemoveMask } from '../hooks/useHandleRemoveMask';
 import { usePreventMenuRefocus, useStopClickPropagation } from 'hooks';
 
 // others
@@ -44,8 +45,7 @@ import {
 // store
 import { selectNodes } from 'store/design/selectors';
 import { TDesignPage } from 'store/design/types';
-import { ungroupNodes } from 'store/design/slice';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './node-context-menu.module.scss';
@@ -112,7 +112,6 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   otherPages,
 }) => {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
   const nodes = useAppSelector(selectNodes);
@@ -126,14 +125,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
   const hasStrokeColor = node.type === NodeType.line ? Boolean(node.stroke) : 'strokeColor' in node && Boolean(node.strokeColor);
   const canOutlineStroke = node.type === NodeType.text ? true : hasStrokeWidth && hasStrokeColor;
-
-  const handleRemoveMask = (): void => {
-    if (isMaskContainer) {
-      dispatch(ungroupNodes([node.id]));
-    } else {
-      onRemoveMask();
-    }
-  };
+  const handleRemoveMask = useHandleRemoveMask(node, onRemoveMask);
 
   return (
     <Menu
