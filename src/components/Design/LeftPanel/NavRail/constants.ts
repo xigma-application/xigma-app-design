@@ -32,3 +32,7 @@ export const NAV_ITEM_LABEL: Record<NavItemName, string> = {
   [NavItemName.tools]: `${translationNameSpace}.item.tools`,
   [NavItemName.variables]: `${translationNameSpace}.item.variables`,
 };
+
+export const NAV_ITEM_ICON_SIZE: Partial<Record<NavItemName, number>> = {
+  [NavItemName.variables]: 16,
+};

@@ -10,7 +10,7 @@ import { Icon, Label } from 'shared';
 import { useSelectNavItem } from './hooks/useSelectNavItem';
 
 // others
-import { NAV_ITEM_ICON, NAV_ITEM_LABEL, NAV_ITEM_ORDER } from './constants';
+import { NAV_ITEM_ICON, NAV_ITEM_ICON_SIZE, NAV_ITEM_LABEL, NAV_ITEM_ORDER } from './constants';
 
 // styles
 import styles from './nav-rail.module.scss';
@@ -35,7 +35,7 @@ const NavRail: FC<TNavRailProps> = ({ activeNavItem, onSelectNavItem }) => {
               {isLast && <div className={styles.NavRail__spacer} />}
               <div className={styles['NavRail__item-group']}>
                 <ToggleGroupPrimitive.Item aria-label={name} className={styles.NavRail__button} value={name}>
-                  <Icon name={NAV_ITEM_ICON[name]} size={24} />
+                  <Icon name={NAV_ITEM_ICON[name]} size={NAV_ITEM_ICON_SIZE[name] ?? 24} />
                 </ToggleGroupPrimitive.Item>
                 <Label className={styles.NavRail__label} fontSize={9}>
                   {t(NAV_ITEM_LABEL[name])}
