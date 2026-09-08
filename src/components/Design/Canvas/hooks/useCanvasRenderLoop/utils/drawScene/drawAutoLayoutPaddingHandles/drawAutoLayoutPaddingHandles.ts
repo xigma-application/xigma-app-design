@@ -26,6 +26,7 @@ export const drawAutoLayoutPaddingHandles = (
   const frame = getSelectedAutoLayoutFrame(selectedNodes);
   const dragState = refs.transform.autoLayoutPaddingDragRef.current;
   const hoverState = refs.hover.hoveredAutoLayoutPaddingRef.current;
+  const hoveredBandSides = refs.hover.hoveredAutoLayoutPaddingBandsRef.current ?? [];
   const rightPanelGuide = refs.hover.rightPanelPaddingGuideRef.current;
   const editState = refs.transform.autoLayoutPaddingEditRef.current;
 
@@ -45,7 +46,7 @@ export const drawAutoLayoutPaddingHandles = (
         } else if (handle.value > 0 || hoverState?.side === side) {
           drawAutoLayoutPaddingHandleBar(context, handle.handleCenter, side, frameCenter, frame.rotation);
 
-          if (handle.value > 0) {
+          if (handle.value > 0 && hoveredBandSides.includes(side)) {
             drawAutoLayoutPaddingHatchFill(context, handle.band, frameCenter, frame.rotation);
           }
         }

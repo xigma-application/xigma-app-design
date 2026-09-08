@@ -71,6 +71,31 @@ describe('resolveAutoLayoutPaddingHover', () => {
     expect(result).toMatchObject({ className: null, nodeId: null });
     expect(refs.hover.hoveredAutoLayoutPaddingRef.current).toEqual({ frameId: 'frame-1', point: { x: 10, y: 100 }, side: 'left' });
     expect(refs.hover.isAutoLayoutPaddingAreaHoveredRef.current).toBe(true);
+    expect(refs.hover.hoveredAutoLayoutPaddingBandsRef.current).toEqual(['left']);
+  });
+
+  it('should stash which padded band(s) actually contain the point, independent of the handle hit-test', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — dead centre of the frame: inside the frame, but off both the handle hit-test and any band
+    resolveAutoLayoutPaddingHover(createContext({ point: { x: 150, y: 100 }, refs, selectedNodes: [frame] }));
+
+    // result
+    expect(refs.hover.hoveredAutoLayoutPaddingBandsRef.current).toEqual([]);
+  });
+
+  it('should clear the padding-bands ref once nothing is selected', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredAutoLayoutPaddingBandsRef.current = ['left'];
+
+    // before
+    resolveAutoLayoutPaddingHover(createContext({ point: { x: 10, y: 100 }, refs, selectedNodes: [] }));
+
+    // result
+    expect(refs.hover.hoveredAutoLayoutPaddingBandsRef.current).toBeNull();
   });
 
   it('should resolve a top-side handle', () => {

@@ -1953,15 +1953,24 @@ state for the whole gesture (never re-decided mid-drag, even if the value crosse
 
 **Visibility** (`drawAutoLayoutPaddingHandles`, gated on a single selected auto-layout frame +
 either `isAutoLayoutPaddingAreaHoveredRef` or an active drag, mirroring the gap handles' own
-area-hover ref): a side with `value > 0` always draws its bar + 45deg hatch fill
-(`drawVectorHatchFill`, reused from the vector paint tool exactly like the gap handles) while the
-frame is merely hovered anywhere — no need to be over that specific handle. A `value === 0` side
-only draws once `hoveredAutoLayoutPaddingRef` names it (anywhere within its wider zero-state reach,
-above) — there's nothing to hatch at zero width anyway. Whichever side is actively being dragged
-swaps its bar/hatch for a
-single solid blue guide line at the live padding boundary (`drawAutoLayoutPaddingGuideLine`, plain
-`drawLine` rather than the dashed guides most other systems in this doc use) plus the numeric value
-label — the *other*, non-dragged sides keep rendering normally throughout.
+area-hover ref): a side with `value > 0` always draws its bar while the frame is merely hovered
+anywhere — no need to be over that specific handle — but its 45deg hatch fill
+(`drawVectorHatchFill`, reused from the vector paint tool exactly like the gap handles) only draws
+once the pointer has actually entered *that side's own padding band* (`getHoveredAutoLayoutPaddingBandSides`,
+a plain `isPointInRect` test per side against `getAutoLayoutPaddingBand`, stashed each hover pass
+into `refs.hover.hoveredAutoLayoutPaddingBandsRef: TAutoLayoutPaddingSide[] | null` — a *set* of
+sides rather than one, since a small frame's corner can put the pointer inside two adjacent bands
+at once). The bar's own broader "anywhere in the frame" visibility rule is unchanged — only the
+hatch fill gained the narrower band check, per explicit follow-up request ("dopiero jak faktycznie
+wjedziemy myszką na tą strefę padding... handler pozostaje tak jak dotychczas"). A `value === 0`
+side only draws its bar once `hoveredAutoLayoutPaddingRef` names it (anywhere within its wider
+zero-state reach, above) — there's nothing to hatch at zero width anyway, so it never enters the
+bands ref regardless (`getHoveredAutoLayoutPaddingBandSides` filters out any side whose padding
+isn't `> 0` before even testing the point). Whichever side is actively being dragged swaps its
+bar/hatch for a single solid blue guide line at the live padding boundary
+(`drawAutoLayoutPaddingGuideLine`, plain `drawLine` rather than the dashed guides most other
+systems in this doc use) plus the numeric value label — the *other*, non-dragged sides keep
+rendering normally throughout.
 
 **Cursor.** Reuses the existing rotated-cursor mechanism (`getRotatedCursorUrl`, §9) but adds a new
 `'padding'` kind wired to the previously-unused `assets/icons/cursors/gap-base.png` asset (only the

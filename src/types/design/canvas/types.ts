@@ -245,6 +245,7 @@ export type TRightPanelPaddingGuideState = {
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
   hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
+  hoveredAutoLayoutPaddingBandsRef: RefObject<TAutoLayoutPaddingSide[] | null>;
   hoveredAutoLayoutPaddingRef: RefObject<TAutoLayoutPaddingHoverState | null>;
   hoveredCornerRadiusHandleRef: RefObject<TCornerRadiusHandleHover | null>;
   hoveredEllipseArcHandleRef: RefObject<string | null>;

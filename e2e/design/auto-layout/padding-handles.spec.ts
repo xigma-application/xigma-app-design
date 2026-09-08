@@ -122,6 +122,30 @@ test.describe('auto-layout — canvas padding handles', () => {
     expect(selectedAndHovered.equals(selectedOnly)).toBe(false);
   });
 
+  test('the 45deg hatch fill only appears once the pointer actually enters that side’s own padding band', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-hatch-band-only');
+
+    // set the left padding directly, isolating hatch visibility from the handle-grab gesture itself
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const frameId = pages[activePageId].rootOrder[0];
+
+      store.dispatch(updateNode({ changes: { paddingLeft: 40 }, id: frameId }));
+    });
+
+    // inside the frame, but well clear of the left padding band (which spans x=600-640)
+    await designPage.pointerMove(750, 250);
+    const hoveredElsewhereInFrame = await designPage.canvas.screenshot();
+
+    // inside the left padding band itself
+    await designPage.pointerMove(620, 250);
+    const hoveredInsideTheBand = await designPage.canvas.screenshot();
+
+    expect(hoveredInsideTheBand.equals(hoveredElsewhereInFrame)).toBe(false);
+  });
+
   test('clicking a padding handle without dragging opens a value popup that sets the padding on Enter', async ({ page }) => {
     const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-click-popup');
     const selectedBefore = await readSelectedIds(page);

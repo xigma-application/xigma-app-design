@@ -12,6 +12,7 @@ describe('useHoverRefs behaviors', () => {
     expect(result.current).toEqual({
       hoverRef: { current: null },
       hoveredAutoLayoutGapRef: { current: null },
+      hoveredAutoLayoutPaddingBandsRef: { current: null },
       hoveredAutoLayoutPaddingRef: { current: null },
       hoveredCornerRadiusHandleRef: { current: null },
       hoveredEllipseArcHandleRef: { current: null },

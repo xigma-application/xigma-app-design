@@ -10,6 +10,7 @@ import { THoverResolverContext, THoverResult } from '../types';
 // utils
 import { getAutoLayoutPaddingCursorAngle } from 'utils/canvas/autoLayoutPadding/getAutoLayoutPaddingCursorAngle';
 import { getAutoLayoutPaddingHandleAtPoint } from '../../../../../utils/getAutoLayoutPaddingHandleAtPoint';
+import { getHoveredAutoLayoutPaddingBandSides } from '../../../../../utils/getHoveredAutoLayoutPaddingBandSides';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getUnrotatedQueryPoint } from '../../../../../utils/getUnrotatedQueryPoint';
 
@@ -23,6 +24,7 @@ export const resolveAutoLayoutPaddingHover = ({
 
   if (!frame) {
     refs.hover.isAutoLayoutPaddingAreaHoveredRef.current = false;
+    refs.hover.hoveredAutoLayoutPaddingBandsRef.current = null;
     refs.hover.hoveredAutoLayoutPaddingRef.current = null;
     return undefined;
   }
@@ -32,6 +34,7 @@ export const resolveAutoLayoutPaddingHover = ({
     localPoint.x >= frame.x && localPoint.x <= frame.x + frame.width && localPoint.y >= frame.y && localPoint.y <= frame.y + frame.height;
 
   refs.hover.isAutoLayoutPaddingAreaHoveredRef.current = isInsideFrame;
+  refs.hover.hoveredAutoLayoutPaddingBandsRef.current = getHoveredAutoLayoutPaddingBandSides(localPoint, frame);
 
   const tolerance = AUTO_LAYOUT_PADDING_HANDLE_HIT_RADIUS_PX / viewport.zoom;
   const hit = getAutoLayoutPaddingHandleAtPoint(localPoint, frame, viewport, tolerance);

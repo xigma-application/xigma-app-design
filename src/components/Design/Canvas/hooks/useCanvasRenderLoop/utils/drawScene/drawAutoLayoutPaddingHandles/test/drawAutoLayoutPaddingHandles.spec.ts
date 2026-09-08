@@ -89,11 +89,38 @@ describe('drawAutoLayoutPaddingHandles', () => {
     expect(drawAutoLayoutPaddingHandleBarMock).not.toHaveBeenCalled();
   });
 
-  it('should always show the bar and hatch for a padded side, without needing that specific handle hovered', () => {
+  it('should always show the bar for a padded side, without needing that specific handle hovered', () => {
     // mock
     const refs = createCanvasRefs();
 
     refs.hover.isAutoLayoutPaddingAreaHoveredRef.current = true;
+
+    // before
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(drawAutoLayoutPaddingHandleBarMock).toHaveBeenCalledWith(context, handles.left.handleCenter, 'left', frameCenter, 0);
+  });
+
+  it('should not show a padded side’s hatch fill just from the frame being hovered elsewhere', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.isAutoLayoutPaddingAreaHoveredRef.current = true;
+
+    // before — pointer is somewhere in the frame, but not inside the left band itself
+    drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);
+
+    // result
+    expect(drawAutoLayoutPaddingHatchFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should show a padded side’s hatch fill once the pointer actually enters that side’s own padding band', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.isAutoLayoutPaddingAreaHoveredRef.current = true;
+    refs.hover.hoveredAutoLayoutPaddingBandsRef.current = ['left'];
 
     // before
     drawAutoLayoutPaddingHandles(context, [frame], refs, nodesById);

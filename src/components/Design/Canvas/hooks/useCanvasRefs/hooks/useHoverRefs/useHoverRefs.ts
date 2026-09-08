@@ -15,11 +15,13 @@ import {
   TVectorPaintFaceHover,
   TVectorWidthPointHover,
 } from 'types/design/canvas/types';
+import { TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TPoint } from 'types/canvas';
 
 export const useHoverRefs = (): THoverRefs => {
   const hoverRef = useRef<string | null>(null);
   const hoveredAutoLayoutGapRef = useRef<TAutoLayoutGapHoverState | null>(null);
+  const hoveredAutoLayoutPaddingBandsRef = useRef<TAutoLayoutPaddingSide[] | null>(null);
   const hoveredAutoLayoutPaddingRef = useRef<TAutoLayoutPaddingHoverState | null>(null);
   const hoveredCornerRadiusHandleRef = useRef<TCornerRadiusHandleHover | null>(null);
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
@@ -54,6 +56,7 @@ export const useHoverRefs = (): THoverRefs => {
     hoverRefsRef.current = {
       hoverRef,
       hoveredAutoLayoutGapRef,
+      hoveredAutoLayoutPaddingBandsRef,
       hoveredAutoLayoutPaddingRef,
       hoveredCornerRadiusHandleRef,
       hoveredEllipseArcHandleRef,
