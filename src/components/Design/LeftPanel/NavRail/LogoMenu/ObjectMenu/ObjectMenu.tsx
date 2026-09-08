@@ -122,7 +122,7 @@ const ObjectMenu: FC = () => {
       />
       <MenuSeparator />
       <MenuItem
-        disabled={!hasSelection}
+        disabled={!hasSelection || everySelectedIsFrame || everySelectedIsSection}
         label={t(NODE_MENU_USE_AS_MASK_KEY)}
         onClick={onUseAsMask}
         shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')}

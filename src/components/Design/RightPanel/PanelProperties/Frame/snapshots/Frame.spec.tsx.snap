@@ -95,38 +95,6 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
             />
           </svg>
         </button>
-        <button
-          aria-label="Use as mask"
-          aria-pressed="false"
-          class="_Button_b88d2e"
-          data-state="closed"
-          style="padding: 0px;"
-          type="button"
-        >
-          <svg
-            class="Icon"
-            data-fpl-icon-size="24"
-            fill="none"
-            height="24"
-            style="color: var(--color-neutral-1);"
-            viewBox="0 0 24 24"
-            width="24"
-          >
-            <path
-              clip-rule="evenodd"
-              d="M18 12a6 6 0 0 1-8.5 5.456 6.001 6.001 0 0 0 0-10.912A6 6 0 0 1 18 12M6 12a5.99 5.99 0 0 1 2.401-4.801 5.003 5.003 0 0 1 0 9.602A5.99 5.99 0 0 1 6 12m2.2-5.88a7 7 0 1 0 7.6 11.76A7 7 0 0 0 8.2 6.12"
-              data-svg-property="fill"
-              fill="white"
-              fill-rule="evenodd"
-            />
-            <path
-              clip-rule="evenodd"
-              d="M8.4 16.8a5.002 5.002 0 0 0 .001-9.602A5.99 5.99 0 0 0 6 12a5.99 5.99 0 0 0 2.4 4.8"
-              fill="var(--fpl-icon-color-3, var(--color-icon-tertiary))"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   </div>

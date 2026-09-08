@@ -36,13 +36,13 @@ describe('FrameHeader behaviors', () => {
     expect(screen.getByText('Frame')).toBeInTheDocument();
   });
 
-  it('should render the html tag, component, and mask buttons', () => {
+  it('should render the html tag and component buttons', () => {
     // before
     renderFrameHeader();
 
     // result
     expect(screen.getByLabelText('Toggle ready for dev status')).toBeInTheDocument();
     expect(screen.getByLabelText('Create component')).toBeInTheDocument();
-    expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Use as mask')).not.toBeInTheDocument();
   });
 });

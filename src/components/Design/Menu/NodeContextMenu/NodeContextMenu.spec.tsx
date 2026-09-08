@@ -170,6 +170,15 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Remove mask')).not.toBeInTheDocument();
   });
 
+  it('should not show Use as mask or Remove mask for a frame', () => {
+    // before
+    renderNodeContextMenu({ node: buildFrameNode() });
+
+    // result
+    expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();
+    expect(screen.queryByText('Remove mask')).not.toBeInTheDocument();
+  });
+
   it('should not disable Copy, Paste to replace, Rename, Show/Hide, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {
     // before
     renderNodeContextMenu();

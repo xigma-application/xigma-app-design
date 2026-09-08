@@ -210,7 +210,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !node.isMask && (
+      {!isSection && !isFrame && !node.isMask && (
         <MenuItem
           label={t(NODE_MENU_USE_AS_MASK_KEY)}
           onClick={onUseAsMask}
@@ -218,7 +218,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && node.isMask && (
+      {!isSection && !isFrame && node.isMask && (
         <MenuItem
           label={t(NODE_MENU_REMOVE_MASK_KEY)}
           onClick={onRemoveMask}

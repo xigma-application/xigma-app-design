@@ -313,6 +313,40 @@ describe('ObjectMenu', () => {
     expect(screen.getByText('Flip horizontal').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
+  it('should keep Use as mask disabled when every selected node is a frame', () => {
+    // before
+    const frameId = addFrameNode();
+    store.dispatch(setSelection([frameId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Use as mask disabled when every selected node is a section', () => {
+    // before
+    const sectionId = addSectionNode();
+    store.dispatch(setSelection([sectionId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Use as mask enabled when the selection mixes a frame with a plain node', () => {
+    // before
+    const frameId = addFrameNode();
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([frameId, rectangleId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
   it('should enable Convert to frame and call onConvertToFrame when every selected node is a section', () => {
     // before
     const sectionId = addSectionNode();
