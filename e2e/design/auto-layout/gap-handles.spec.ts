@@ -100,6 +100,50 @@ test.describe('auto-layout — gap handles', () => {
     expect(after.horizontalGap).toBe(40);
   });
 
+  test('dragging the gap handle past 0 sets a negative gap, with no lower clamp', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 240x100 frame, no gap, two 60x60 children flush at world x 600 / 660
+    await designPage.goto('e2e-test-auto-layout-gap-handles-negative-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(ROW_FRAME.x1, ROW_FRAME.y1, ROW_FRAME.x2, ROW_FRAME.y2);
+    await setFlowHorizontal(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 2; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1460, 220);
+      await dragInto(page, { x: 1430, y: 190 }, { x: ROW_FRAME.x2 - 15, y: 200 });
+    }
+
+    await selectTheFrame(page);
+
+    // drag the handle 30px to the LEFT, past the zero-gap point it used to clamp at
+    await page.mouse.move(660, 180);
+    await page.mouse.down();
+    await page.mouse.move(630, 180, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+
+    const after = await getFrameGeometry(page);
+
+    expect(after.horizontalGap).toBe(-30);
+  });
+
+  test('typing a negative gap in the RightPanel field is accepted, with no lower clamp', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-gap-handles-negative-input');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(ROW_FRAME.x1, ROW_FRAME.y1, ROW_FRAME.x2, ROW_FRAME.y2);
+    await setFlowHorizontal(page);
+
+    await setHorizontalGap(page, -25);
+
+    expect((await getFrameGeometry(page)).horizontalGap).toBe(-25);
+  });
+
   test('switching gap to auto distributes children evenly, and live-redistributes them as the frame resizes', async ({ page }) => {
     const designPage = new DesignPage(page);
 

@@ -33,7 +33,7 @@ export const continueAutoLayoutGapDrag = (
       const localPoint = getUnrotatedQueryPoint(point, frame, frame.rotation);
       const localPointerStart = getUnrotatedQueryPoint(dragState.pointerStart, frame, frame.rotation);
       const delta = dragState.axis === 'horizontal' ? localPoint.x - localPointerStart.x : localPoint.y - localPointerStart.y;
-      const nextGapValue = Math.max(0, dragState.originalGapValue + delta);
+      const nextGapValue = dragState.originalGapValue + delta;
       const cursorAngle = dragState.axis === 'vertical' ? frame.rotation : frame.rotation + 90;
 
       dragState.point = point;

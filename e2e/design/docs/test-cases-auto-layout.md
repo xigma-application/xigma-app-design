@@ -482,6 +482,7 @@ through the live per-tick path for a compound edge case this narrow.
 | 3   | Dragging a handle swaps the hatch for a plain pink outline on those same gaps, and live-updates the frame's shared gap value (`horizontalGap`/`verticalGap`) for the whole frame at once                                          |  ✅  | ✅ `gap-handles.spec.ts` |
 | 4   | Wrap: a lone child on its own row/column shows no handle for the (nonexistent) gap to its missing neighbour, but the row/column-gap handle to the previous line still shows                                                       |  ✅  |            —             |
 | 5   | The cursor while hovering/dragging a handle is a dedicated rotated icon (`gap.png`), pointing along the handle's own drag axis and tilted by the frame's own rotation, the same mechanism the rotate handle's cursor already uses |  ✅  |            —             |
+| 6   | The gap value can go negative with no lower clamp — dragging a handle past 0, or typing a negative number in the RightPanel's gap field, both commit straight through and let children overlap                                    |  ✅  | ✅ `gap-handles.spec.ts` |
 
 Requested directly: "trzeba wskaźniki dostosować oraz ten tryb ghost pod te kąty" was the _previous_
 ask (the drop-indicator/reorder-ghost engine above); this one is a separate, new feature — draggable
@@ -514,6 +515,23 @@ hatch, outline, label) are pure functions or narrow WebGL call-verification, exh
 a browser. The one thing only a real browser proves is the actual pointerdown→pointermove→pointerup
 gesture correctly reading back into the store as a persisted `horizontalGap` change — that's
 `gap-handles.spec.ts`.
+
+**Negative gap, requested as a direct follow-up** ("musimy pozwolić na ujemne wartości... W right
+panel oraz na canvas na handlerach. Można schodzić ile się chce"): the drag handle's
+`continueAutoLayoutGapDrag.ts` used to clamp with `Math.max(0, ...)`; the RightPanel's
+`GapField/constants.ts` used to pass `GAP_MIN = 0` into its `ScrubbableInput` scrub-drag gesture.
+Both floors are gone now (`GAP_MIN` is `-Number.MAX_SAFE_INTEGER`, matching `GAP_MAX`'s existing
+symmetric ceiling) — nothing else needed to change: the RightPanel's text-input blur path
+(`useGapCommit.ts`) never clamped to begin with, `handleUpdateNode` doesn't clamp any field, and
+the reflow engine (`getAutoLayoutChildPositions.ts`/`getAutoLayoutWrappedChildPositions.ts`) already
+just accumulates `offset += size + gap` with no floor, so a negative value flows straight through
+and lets children overlap — no special-casing required. The separate "Auto gap" distribution
+algorithm (`getDistributedGap.ts`) keeps its own unrelated `Math.max(0, ...)`, since it computes
+_leftover space_ to spread, not a manually-typed number, and Auto mode ignores the stored gap field
+entirely while active (see "Auto gap" below) — allowing negative manual gap doesn't touch it. The
+Smart Selection gap-drag (`continueSmartSelectionGapDrag.ts`, a separate feature that repositions
+arbitrary selected nodes rather than writing a frame's `horizontalGap`/`verticalGap`) still clamps
+at 0 — out of scope, not mentioned in the request.
 
 ## Auto gap
 

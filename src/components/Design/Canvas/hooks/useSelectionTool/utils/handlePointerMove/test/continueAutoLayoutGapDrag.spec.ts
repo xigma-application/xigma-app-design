@@ -106,7 +106,7 @@ describe('continueAutoLayoutGapDrag', () => {
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ verticalGap: 40 });
   });
 
-  it('should clamp the gap at 0 instead of going negative', () => {
+  it('should allow the gap to go negative, with no lower clamp', () => {
     // mock
     const frameId = addFrame();
     const canvas = createCanvas();
@@ -123,7 +123,7 @@ describe('continueAutoLayoutGapDrag', () => {
     continueAutoLayoutGapDrag(canvas, pointerEvent(-100, 0), store.dispatch, gapDragRef);
 
     // result
-    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ horizontalGap: 0 });
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ horizontalGap: -120 });
   });
 
   it('should un-rotate the pointer delta before applying it, for a rotated frame', () => {

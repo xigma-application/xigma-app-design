@@ -45,6 +45,26 @@ describe('getAutoLayoutChildPositions', () => {
     ]);
   });
 
+  it('should let children overlap when the gap is negative, with no clamping to 0', () => {
+    // action
+    const positions = getAutoLayoutChildPositions(
+      LayoutMode.horizontal,
+      -10,
+      AlignmentLayout.topLeft,
+      { height: 100, width: 200, x: 100, y: 200 },
+      [
+        { height: 20, id: 'a', width: 30 },
+        { height: 20, id: 'b', width: 50 },
+      ],
+    );
+
+    // result — the second child starts 10px into the first one (100 + 30 - 10 = 120)
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 30, x: 100, y: 200 },
+      { height: 20, id: 'b', width: 50, x: 120, y: 200 },
+    ]);
+  });
+
   it('should return an empty array for a frame with no children', () => {
     // action
     const positions = getAutoLayoutChildPositions(
