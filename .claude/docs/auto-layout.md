@@ -173,6 +173,36 @@ None of these three is optional — fixing only (1) still looks broken because o
 (2) still silently mis-orders the pair because of (3). All three needed their own targeted e2e
 reproduction (see History below) since none of them is visible from a single-node drag test.
 
+## 6. Reflowing an auto-layout ancestor when a nested group's box changes
+
+`syncAutoLayoutChildren` measures a frame's **direct** children. When one of those children is a
+group/mask and something *inside* it changes shape (a leaf dragged, a Smart-Selection gap
+widened, the group resized, a mask added/removed, an ungroup), the group's own box is resynced by
+`syncGroupBounds` ([[group-nodes]] §4) — but the auto-layout frame two levels up is not
+re-triggered, so it keeps packing against the group's stale size until the next unrelated edit.
+
+`resyncGroupAutoLayoutAncestors(dispatch, nodeOriginIds)`
+(`useSelectionTool/utils/handlePointerUp/`) closes that gap. It walks
+`getGroupLikeParentIds(nodes, nodeOriginIds)` (`store/design/utils/nodeHierarchy/` — the
+group-like parents of the moved nodes that are **not themselves** in the moved set) and, per
+group, dispatches a no-op `updateNode({ changes: {}, id: groupId })` — which routes through
+`handleUpdateNode` → `syncGroupBounds` → `syncAutoLayoutChildren` for every ancestor, reflowing
+the frame with the group's fresh box.
+
+- **`isRigidGroupMove` guard.** Skip the dispatch when **every** child of the group is in the
+  moved set — that's the group moving as one rigid body (or a sealed lone-child drag, see
+  [[group-nodes]]), not an internal reshape, and reflowing it would fight the "sealed" isolation.
+- **Timing — must be inside the throttled callback.** During a live drag the resync is called
+  from `dispatchDraggedNodeUpdates.ts` / `dispatchSmartSelectionGapUpdates.ts` **after** the
+  rAF-throttled position dispatch lands, so `syncGroupBounds` sees the new child positions before
+  the ancestor reflow reads the group box. Called too early it reflows against the pre-move box.
+- **Call sites.** Live child-drag (`dispatchDraggedNodeUpdates`), Smart-Selection gap-drag
+  (`dispatchSmartSelectionGapUpdates` + `disarmSmartSelectionGapDrag`), plain drag disarm
+  (`disarmDrag`), and resize (`resyncResizedGroupAutoLayoutAncestors` from `continueResizeDrag` —
+  same idea, **no** rigid-move filter, since a resize is always a reshape). Mask create/remove
+  and full ungroup instead call `syncAutoLayoutChildren(state, group.parentId)` directly inside
+  their reducers (`handleUseNodesAsMask`, `handleRemoveNodeMask`, `handleUngroupNodes/releaseGroup`).
+
 ## Tests
 
 - Unit: `src/store/design/utils/autoLayout/test/` (engine — padding, alignment, hug, wrap, the

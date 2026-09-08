@@ -3,4 +3,6 @@ import { TPoint } from 'types/canvas';
 
 export type TConstraintGuideParent = { height: number; rotation: number; width: number; x: number; y: number };
 
+export type TChildLocalExtent = { centre: TPoint; halfX: number; halfY: number };
+
 export type TLocalSegment = { from: TPoint; to: TPoint };

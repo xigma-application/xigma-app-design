@@ -221,6 +221,27 @@ the recompute-every-frame *shape* of the fix was fine, the corner-fit *math* und
 (§4.2's "union-first" bug) was the actual bug, and it showed up on literally every frame since the
 group now resynced every frame. Rule out the math before reverting the "always recompute" shape again.
 
+### 4.4 A group/mask inside an auto-layout frame — sealed drag + ancestor reflow
+
+Two coupled behaviours when a group (or mask) is a child of an `layoutMode: horizontal | vertical`
+frame:
+
+- **Sealed child drag.** Ctrl+click-dragging a single leaf *inside* the group must not enter the
+  auto-layout ghost/reparent preview or get pulled into flow — the group is a closed environment.
+  `resolveDragReparentTarget.ts` treats `currentParent !== null && isGroupLikeNode(currentParent)`
+  as a sealed child and keeps `desiredParentId` on the group, so no drop-target arms.
+- **Ancestor reflow.** Once the leaf lands, the group's box changes and the frame two levels up
+  must repack — but only when it was an *internal reshape*, not the whole group moving rigidly.
+  Handled by `resyncGroupAutoLayoutAncestors` with its `isRigidGroupMove` guard; see
+  [[auto-layout]] §6 for the mechanism, the throttled-callback timing, and every call site
+  (live drag, Smart-Selection gap-drag, resize, mask create/remove, ungroup).
+
+Group/mask **create** and **ungroup** while inside a frame also call
+`syncAutoLayoutChildren(state, group.parentId)` in their reducers (`handleGroupNodes` /
+`handleUngroupNodes/releaseGroup`, `handleUseNodesAsMask`, `handleRemoveNodeMask`), and use
+`isContainerNode` (not `isGroupLikeNode`) when deciding parentage, so children never strand in
+`page.rootOrder` and the frame reflows to the new structure immediately.
+
 ## 5. Multi-select outline/resize/rotate for a *mixed* selection
 
 `Canvas/utils/isGroupSelection.ts` decides whether 2+ selected nodes get ONE combined

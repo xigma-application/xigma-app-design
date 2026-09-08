@@ -508,10 +508,13 @@ direct child of a **freeform** frame, or an `ignoreAutoLayout` (absolute) child 
 horizontal/vertical auto-layout frame — plain flow children and grid parents are skipped (their
 own engine owns child positions). In the RightPanel, an aligned axis' Position input reads `auto`
 and is disabled. When exactly one eligible child is selected, `drawConstraintGuides` draws dashed
-blue indicator lines on the canvas — one per axis, in the parent frame's local space (so child
-rotation is ignored, frame rotation is followed): an edge constraint runs from that edge of the
-child to the matching frame edge; a `center` constraint is a short line through the child's centre
-of length `w/2` / `h/2`. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
+blue indicator lines on the canvas — one per axis, running along the parent frame's own axes (the
+lines never tilt with the child; they do tilt with the frame). Each line is cast from the child's
+centre out along the frame axis and stops where it crosses the child's **current rotated** edge
+(`getChildLocalExtent`: `halfX = min((w/2)/|cos θ|, (h/2)/|sin θ|)` with `θ = child.rotation −
+frame.rotation`), then continues to the matching frame edge for an edge constraint, or spans half
+that extent each side of the centre for a `center` constraint. The centre `×` marker rotates with
+the frame. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
 
 | #   | Scenario                                                                                        | Unit |                 E2E                  |
 | --- | ----------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
@@ -524,3 +527,5 @@ of length `w/2` / `h/2`. Lives in `e2e/design/selection/frame-child-constraints.
 | 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child |  ✅  |                  —                   |
 | 379 | The canvas guide lines shift when the sole-selected child's constraint changes                  |  ✅  | ✅ `frame-child-constraints.spec.ts` |
 | 380 | No guide lines are drawn while more than one node is selected                                   |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 381 | The guide lines re-anchor to a rotated child's current extent, still axis-aligned to the frame  |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 382 | The guide lines and centre `×` marker follow a rotated parent frame                             |  ✅  | ✅ `frame-child-constraints.spec.ts` |

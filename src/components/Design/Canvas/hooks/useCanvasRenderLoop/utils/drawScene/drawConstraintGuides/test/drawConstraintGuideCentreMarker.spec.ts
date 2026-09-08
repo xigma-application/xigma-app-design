@@ -71,6 +71,14 @@ describe('drawConstraintGuideCentreMarker', () => {
     expect(drawVertexDotMock).toHaveBeenCalledTimes(1);
   });
 
+  it('should forward the parent frame rotation to the × marker', () => {
+    // before
+    drawConstraintGuideCentreMarker(context, node({ alignment: { horizontal: AlignmentHorizontal.center } }), { ...parent, rotation: 30 });
+
+    // result
+    expect(drawXMarkerMock.mock.calls[0].at(-1)).toBe(30);
+  });
+
   it('should draw nothing for a non-centre constraint', () => {
     // before
     drawConstraintGuideCentreMarker(context, node(), parent);

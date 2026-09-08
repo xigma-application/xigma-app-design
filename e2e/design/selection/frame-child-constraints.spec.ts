@@ -86,6 +86,20 @@ const alignChild = (page: Page, alignment: TAlignment): Promise<void> =>
     );
   }, alignment);
 
+const rotateNode = (page: Page, target: 'child' | 'frame', rotation: number): Promise<void> =>
+  page.evaluate(
+    async ({ deg, which }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const frame = activePage.nodes[activePage.rootOrder[0]] as unknown as { childIds: string[]; id: string };
+
+      store.dispatch(updateNode({ changes: { rotation: deg }, id: which === 'frame' ? frame.id : frame.childIds[0] }));
+    },
+    { deg: rotation, which: target },
+  );
+
 const selectFrame = (page: Page): Promise<void> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -214,6 +228,38 @@ test.describe('constraint guide lines on the canvas', () => {
 
     // the lines re-anchored from the child's left/top edges to its right/bottom edges
     expect(leftTop.equals(rightBottom)).toBe(false);
+  });
+
+  test('the guide lines re-anchor to a rotated child’s current extent', async ({ page }) => {
+    const designPage = await buildFrameWithChild(page);
+
+    await rotateNode(page, 'child', 30);
+    await selectChild(page);
+    await setConstraintOnly(page, { horizontal: 'left', vertical: 'top' });
+    await page.waitForTimeout(100);
+    const rotatedLeftTop = await designPage.canvas.screenshot();
+
+    // the child never moves on a constraint change, so only the guide lines can differ here
+    await setConstraintOnly(page, { horizontal: 'right', vertical: 'bottom' });
+    await page.waitForTimeout(100);
+    const rotatedRightBottom = await designPage.canvas.screenshot();
+
+    expect(rotatedLeftTop.equals(rotatedRightBottom)).toBe(false);
+  });
+
+  test('the guide lines and centre marker follow a rotated parent frame', async ({ page }) => {
+    const designPage = await buildFrameWithChild(page);
+
+    await selectChild(page);
+    await setConstraintOnly(page, { horizontal: 'center', vertical: 'center' });
+    await page.waitForTimeout(100);
+    const uprightFrame = await designPage.canvas.screenshot();
+
+    await rotateNode(page, 'frame', 20);
+    await page.waitForTimeout(100);
+    const rotatedFrame = await designPage.canvas.screenshot();
+
+    expect(uprightFrame.equals(rotatedFrame)).toBe(false);
   });
 
   test('no guide lines are drawn while more than one node is selected', async ({ page }) => {

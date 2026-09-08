@@ -71,10 +71,23 @@ describe('getConstraintGuideSegments', () => {
     expect(from.y).toBeCloseTo(to.y);
   });
 
-  it('should ignore the child’s own rotation entirely', () => {
-    const flat = getConstraintGuideSegments(child({ rotation: 0 }), parent, { horizontal: AlignmentHorizontal.center });
-    const spun = getConstraintGuideSegments(child({ rotation: 45 }), parent, { horizontal: AlignmentHorizontal.center });
+  it('should anchor the edge line to the child’s current rotated extent, not its un-rotated box', () => {
+    const flat = getConstraintGuideSegments(child({ rotation: 0 }), parent, { horizontal: AlignmentHorizontal.left });
+    const spun = getConstraintGuideSegments(child({ rotation: 30 }), parent, { horizontal: AlignmentHorizontal.left });
 
-    expect(spun).toEqual(flat);
+    // rotating the child widens its horizontal extent, so the near end sits further left
+    expect(spun[0].x1).toBeLessThan(flat[0].x1);
+    // the far end still lands on the frame's left edge
+    expect(spun[0].x2).toBeCloseTo(flat[0].x2);
+  });
+
+  it('should keep the line axis-aligned to the frame even when the child is rotated', () => {
+    const [horizontal, vertical] = getConstraintGuideSegments(child({ rotation: 30 }), parent, {
+      horizontal: AlignmentHorizontal.left,
+      vertical: AlignmentVertical.top,
+    });
+
+    expect(horizontal.y1).toBeCloseTo(horizontal.y2);
+    expect(vertical.x1).toBeCloseTo(vertical.x2);
   });
 });

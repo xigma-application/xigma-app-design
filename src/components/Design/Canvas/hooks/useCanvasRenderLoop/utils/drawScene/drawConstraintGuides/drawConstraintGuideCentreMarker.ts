@@ -18,7 +18,7 @@ export const drawConstraintGuideCentreMarker = (context: TDrawSceneContext, node
   if (hasCentreConstraint) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
     const strokeWidth = 1 / viewport.zoom;
-    const centre = getConstraintGuideCentre(node, parent);
+    const centre = getConstraintGuideCentre(node);
 
     drawXMarker(
       gl,
@@ -31,6 +31,7 @@ export const drawConstraintGuideCentreMarker = (context: TDrawSceneContext, node
       canvasWidth,
       canvasHeight,
       viewport,
+      parent.rotation,
     );
     drawVertexDot(
       gl,

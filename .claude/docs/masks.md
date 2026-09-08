@@ -39,6 +39,10 @@ bottom of its rows, clipping the rows above it — matches Figma.
 - Both `createMaskGroup.type` and `toggleNodeMask.type` are in `UNDOABLE_ACTION_TYPES`
   (`store/history/historyMiddleware.ts`) — single-dispatch, each its own undo step, like the
   lock/hide toggles.
+- When the mask group sits inside an auto-layout frame, `handleUseNodesAsMask` /
+  `handleRemoveNodeMask` also call `syncAutoLayoutChildren(state, group.parentId)` after
+  `syncGroupBounds`, so the frame repacks against the new group box without needing a nudge — see
+  [[auto-layout]] §6 and [[group-nodes]] §4.4.
 
 ## 3. Menu + shortcut
 
