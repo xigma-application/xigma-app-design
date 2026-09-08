@@ -62,6 +62,50 @@ test('dragging a group by clicking any of its children moves every child togethe
   expect(after.group.height).toBeCloseTo(before.group.height, 0);
 });
 
+test('arrow-key nudging a selected group moves every child, not just the group box', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-nudge');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A
+  await designPage.drawRectangle(900, 100, 940, 140); // B
+  await designPage.click(720, 120, { shift: true }); // selection = [B, A]
+  await page.keyboard.press('Control+g'); // group, auto-selected
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [groupId] = activePage.selectedIds;
+    const { childIds } = activePage.nodes[groupId];
+
+    return { childA: activePage.nodes[childIds[0]], childB: activePage.nodes[childIds[1]], group: activePage.nodes[groupId], groupId };
+  });
+
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowDown');
+
+  const after = await page.evaluate(
+    async ({ groupId, idA, idB }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return { group: activePage.nodes[groupId], nodeA: activePage.nodes[idA], nodeB: activePage.nodes[idB] };
+    },
+    { groupId: before.groupId, idA: before.childA.id, idB: before.childB.id },
+  );
+
+  expect(after.nodeA.x).toBe(before.childA.x + 2);
+  expect(after.nodeA.y).toBe(before.childA.y + 1);
+  expect(after.nodeB.x).toBe(before.childB.x + 2);
+  expect(after.nodeB.y).toBe(before.childB.y + 1);
+  expect(after.group.x).toBe(before.group.x + 2);
+  expect(after.group.width).toBe(before.group.width);
+});
+
 test('grouping two children of a Frame keeps the new group inside frame.childIds — not duplicated into the page root order once dragged', async ({
   page,
 }) => {

@@ -282,6 +282,12 @@ export const selectComments = createSelector([selectCommentsRecord], (comments) 
 field access — the memoization here is specifically for the "derive an array from a record" shape,
 not a blanket policy.
 
+**`selectOrderedNodes` is top-level only** — it maps `rootOrder`, so a frame/group/section child
+is not in it. Iterating it to act on "the current selection" silently drops any nested node
+(this bit arrow-key nudge: `handleNudgeSelection` filtered `selectOrderedNodes` by `selectedIds`
+and so never moved a frame child). To operate on the actual selection regardless of depth, map
+`selectSelectedIds` through `selectNodes` instead.
+
 ## 5. The ref-vs-Redux split for ephemeral interaction state
 
 `Canvas.tsx` (via `useCanvasRefs()`, `canvas-rendering-pipeline.md` §1) holds four `useRef`s read

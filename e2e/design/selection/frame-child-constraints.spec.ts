@@ -281,3 +281,21 @@ test.describe('constraint guide lines on the canvas', () => {
     expect(withRightBottom.equals(withLeftTop)).toBe(true);
   });
 });
+
+test.describe('keyboard nudge of a frame child', () => {
+  test('arrow keys move a sole-selected freeform-frame child', async ({ page }) => {
+    await buildFrameWithChild(page);
+
+    await selectChild(page);
+    const before = await readChild(page);
+
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowDown');
+
+    const after = await readChild(page);
+
+    expect(after.x).toBe(before.x + 2);
+    expect(after.y).toBe(before.y + 1);
+  });
+});

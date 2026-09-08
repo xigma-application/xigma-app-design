@@ -516,16 +516,18 @@ frame.rotation`), then continues to the matching frame edge for an edge constrai
 that extent each side of the centre for a `center` constraint. The centre `×` marker rotates with
 the frame. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
 
-| #   | Scenario                                                                                        | Unit |                 E2E                  |
-| --- | ----------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
-| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes               |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize         |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step)    |  ✅  |                  —                   |
-| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space                 |  ✅  |                  —                   |
-| 377 | An auto-layout parent ignores a plain flow child's alignment; a nested subtree translates whole |  ✅  |                  —                   |
-| 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child |  ✅  |                  —                   |
-| 379 | The canvas guide lines shift when the sole-selected child's constraint changes                  |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 380 | No guide lines are drawn while more than one node is selected                                   |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 381 | The guide lines re-anchor to a rotated child's current extent, still axis-aligned to the frame  |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 382 | The guide lines and centre `×` marker follow a rotated parent frame                             |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| #   | Scenario                                                                                                      | Unit |                 E2E                  |
+| --- | ------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
+| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes                             |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize                       |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves                              |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step)                  |  ✅  |                  —                   |
+| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space                               |  ✅  |                  —                   |
+| 377 | An auto-layout parent ignores a plain flow child's alignment; a nested subtree translates whole               |  ✅  |                  —                   |
+| 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child               |  ✅  |                  —                   |
+| 379 | The canvas guide lines shift when the sole-selected child's constraint changes                                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 380 | No guide lines are drawn while more than one node is selected                                                 |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 381 | The guide lines re-anchor to a rotated child's current extent, still axis-aligned to the frame                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 382 | The guide lines and centre `×` marker follow a rotated parent frame                                           |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 383 | Arrow-key nudge moves a freeform-frame / absolute child; a plain auto-layout flow child is left to the engine |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 384 | Arrow-key nudge of a selected group / mask group moves every child with it, not just the group box            |  ✅  |       ✅ `group-nodes.spec.ts`       |

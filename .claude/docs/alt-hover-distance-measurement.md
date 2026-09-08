@@ -42,6 +42,32 @@ measurement. `createNudgeKeyMap.ts` passes `event.altKey` through to `handleNudg
 defaults it to `false` for every other call site (arrow keys pressed without Alt, or any other caller
 that doesn't care about this feature).
 
+## Nudging frame children and groups — target resolution and subtree translation
+
+`handleNudgeSelection` originally resolved its targets by filtering `selectOrderedNodes` (which is
+`rootOrder`-only, see [[design-store-architecture]] §4) by `selectedIds`, then dispatched one
+`updateNode({ x, y })` per hit. Two bugs fell out of that:
+
+1. **Nested nodes were dropped entirely.** A selected frame / group / section child is not in
+   `rootOrder`, so arrow keys did nothing for it — while Delete, duplicate, etc. worked, because
+   those read `selectSelectedIds` directly. Fixed by mapping `selectSelectedIds` through
+   `selectNodes` and filtering with `isNudgeableNode` (same dir): a node is nudgeable unless it is
+   a **plain flow child of a managed-layout frame** (`isNodeManagedLayoutChild` and not
+   `ignoreAutoLayout`) — those are positioned by the layout engine and a nudge would just be
+   reverted by `syncAutoLayoutChildren` on the next `handleUpdateNode`. Freeform-frame child,
+   absolute (`ignoreAutoLayout`) child, and group/section children all nudge normally.
+2. **A group moved its own box but left its children behind.** `updateNode({ x, y })` on a
+   group/mask node moves only that node; `syncGroupBounds` then recomputes the box back from the
+   unmoved children on the next update. Fixed with `collectNudgeSubtreeNodes` (same dir): expand
+   every eligible target through `getGroupSubtreeNodes` (deduped) and dispatch the delta for
+   **each** subtree node — the same "translate the whole subtree by a fixed delta" pattern
+   `syncConstrainedFrameChildren` / `applyAutoLayoutSyncChildPosition` already use. Each delta is
+   read from the pre-nudge `selectNodes` snapshot, so ordering between the dispatches doesn't
+   matter.
+
+The `nodesToMove.length > 0` guard also means no empty history gesture is opened for an
+all-ineligible selection.
+
 ## What was tried and reverted first
 
 An earlier version implemented this via **mouse-drag** instead (`continueDrag.ts`/`armDrag.ts`
@@ -59,10 +85,13 @@ above, which sidesteps the whole problem: the cursor never has to move.
 ## Tests
 
 - Unit: `useKeyboardShortcuts/utils/test/updateNudgeDistanceGuide.spec.ts`,
-  `handleNudgeSelection.spec.ts`, `nudgeMap.spec.ts` (16 key-map entries: plain/Alt/Shift/Alt+Shift ×
-  4 directions).
+  `handleNudgeSelection.spec.ts` (incl. freeform / absolute / flow frame-child + group + mask-group
+  cases), `isNudgeableNode.spec.ts`, `collectNudgeSubtreeNodes.spec.ts`, `nudgeMap.spec.ts` (16
+  key-map entries: plain/Alt/Shift/Alt+Shift × 4 directions).
 - e2e: `e2e/design/selection/distance-guide.spec.ts` — "Alt+arrow-key nudging keeps the distance
-  measurement live...".
+  measurement live..."; `e2e/design/selection/frame-child-constraints.spec.ts` — "arrow keys move a
+  sole-selected freeform-frame child"; `e2e/design/selection/group-nodes.spec.ts` — "arrow-key
+  nudging a selected group moves every child".
 
 ## Vector Edit Mode extension: nudging selected vertices/tangent handles, and keeping *that*
 ## measurement live too

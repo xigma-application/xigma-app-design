@@ -71,13 +71,7 @@ export const handleNudgeVectorEdit = (dispatch: AppDispatch, refs: TCanvasRefs, 
       nudgeSelectedHandles(dispatch, refs, deltaX, deltaY);
     }
 
-    // the cached multi-select box (getVectorMultiSelectBox.ts) only recomputes when the set of
-    // selected ids changes, not their positions — a mouse drag keeps it in sync by translating it
-    // live (continueVectorMultiDrag.ts), but a keyboard nudge commits straight to the store with no
-    // such in-progress drag state, so the stale cached box has to be dropped here instead, forcing a
-    // fresh recompute against the just-nudged positions on the next render
     refs.vectorMultiSelect.vectorMultiSelectBoxRef.current = null;
-
     dispatch(endHistoryGesture());
     updateNudgeVectorDistanceGuide(store.getState(), refs, altKey);
   }
