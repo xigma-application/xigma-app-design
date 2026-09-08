@@ -483,6 +483,7 @@ through the live per-tick path for a compound edge case this narrow.
 | 4   | Wrap: a lone child on its own row/column shows no handle for the (nonexistent) gap to its missing neighbour, but the row/column-gap handle to the previous line still shows                                                       |  ✅  |            —             |
 | 5   | The cursor while hovering/dragging a handle is a dedicated rotated icon (`gap.png`), pointing along the handle's own drag axis and tilted by the frame's own rotation, the same mechanism the rotate handle's cursor already uses |  ✅  |            —             |
 | 6   | The gap value can go negative with no lower clamp — dragging a handle past 0, or typing a negative number in the RightPanel's gap field, both commit straight through and let children overlap                                    |  ✅  | ✅ `gap-handles.spec.ts` |
+| 7   | Dragging a handle always rounds the committed value to the nearest integer; holding Shift during the drag snaps it to the nearest multiple of 10 instead                                                                          |  ✅  | ✅ `gap-handles.spec.ts` |
 
 Requested directly: "trzeba wskaźniki dostosować oraz ten tryb ghost pod te kąty" was the _previous_
 ask (the drop-indicator/reorder-ghost engine above); this one is a separate, new feature — draggable
@@ -752,6 +753,7 @@ value math per side.
 | 13  | Enter (or blur, e.g. clicking elsewhere on the canvas) commits the typed value and closes the popup; committing never clears the frame's own selection                                                                                      |  ✅  |          ✅ `padding-handles.spec.ts`          |
 | 14  | Escape closes the popup without changing the padding value                                                                                                                                                                                  |  ✅  |          ✅ `padding-handles.spec.ts`          |
 | 15  | While the popup is open, the WebGL guide line for that side still draws (like an active drag), but the WebGL value-label text is suppressed so it doesn't double up with the popup's own number                                             |  ✅  |                       —                        |
+| 16  | Dragging a handle always rounds the committed value to the nearest integer; holding Shift during the drag snaps it to the nearest multiple of 10 instead                                                                                    |  ✅  |          ✅ `padding-handles.spec.ts`          |
 
 Requested directly, immediately after the RightPanel padding controls above: "Screen przedstawi
 sytuację kiedy padding jest zero i pojawia się możliwość ustawienia padding... To powinno mniej
@@ -792,6 +794,14 @@ functions or narrow WebGL call-verification. `padding-handles.spec.ts` covers th
 real browser proves: the actual pointerdown→pointermove→pointerup gesture correctly reading back
 into the store as a persisted `paddingLeft` change, in both math modes, plus the
 selected-and-hovered visibility gate.
+
+**Rounding and Shift-snap** (requested as a direct follow-up, alongside the same ask for the gap
+handles above): `continueAutoLayoutPaddingDrag.ts`/`continueAutoLayoutGapDrag.ts` both pass their
+raw computed value through the shared `getAutoLayoutHandleSnappedValue(value, event.shiftKey)` —
+plain `Math.round(...)` normally, or snapped to the nearest 10
+(`AUTO_LAYOUT_HANDLE_SHIFT_SNAP_STEP_PX`) while Shift is held — before dispatching. Applies to both
+handle families identically; the RightPanel's own numeric fields are untouched (they already
+round/parse their own way).
 
 ### Click (not drag) opens a value popup instead of doing nothing
 

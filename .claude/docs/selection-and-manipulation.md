@@ -1951,6 +1951,19 @@ state for the whole gesture (never re-decided mid-drag, even if the value crosse
   sides since moving *toward* the frame's centre grows those. Same model as the auto-layout gap
   handles (§ auto-layout.md "Gap handles"): the handle stays glued under the cursor.
 
+**Rounding, and Shift-snap-to-10.** Whatever `getAutoLayoutPaddingDragValue`/the gap drag's own
+`originalGapValue + delta` computes is raw (can be fractional, since it's a pixel delta divided by
+zoom) — `continueAutoLayoutPaddingDrag.ts`/`continueAutoLayoutGapDrag.ts` both then pass it through
+the shared `getAutoLayoutHandleSnappedValue(value, event.shiftKey)`
+(`src/utils/canvas/getAutoLayoutHandleSnappedValue.ts`) before dispatching: plain `Math.round(...)`
+normally, or snapped to the nearest `AUTO_LAYOUT_HANDLE_SHIFT_SNAP_STEP_PX` (10) while Shift is held
+(`Math.round(value / step) * step`, the same shape `continueSmartSelectionGapDrag.ts`'s own
+independent Shift-snap already used — this is the first time it's been factored into a shared
+function, since the smart-selection one is a separate, unrelated feature left as its own inline
+copy). Requested directly, as a follow-up once negative gap values landed: "musimy zaokrąglać
+wartości a dwa za pomocą shift przeskakujemy co 10" — applies uniformly to both the padding and gap
+canvas handles, not the RightPanel's own numeric fields (which already round/parse their own way).
+
 **Visibility** (`drawAutoLayoutPaddingHandles`, gated on a single selected auto-layout frame +
 either `isAutoLayoutPaddingAreaHoveredRef` or an active drag, mirroring the gap handles' own
 area-hover ref): a side with `value > 0` always draws its bar while the frame is merely hovered

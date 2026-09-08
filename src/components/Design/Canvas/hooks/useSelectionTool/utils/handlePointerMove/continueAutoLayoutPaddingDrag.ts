@@ -10,6 +10,7 @@ import { NodeType } from 'types/design/enums';
 import { TAutoLayoutPaddingDragState } from 'types/design/canvas/types';
 
 // utils
+import { getAutoLayoutHandleSnappedValue } from 'utils/canvas/getAutoLayoutHandleSnappedValue';
 import { getAutoLayoutPaddingCursorAngle } from 'utils/canvas/autoLayoutPadding/getAutoLayoutPaddingCursorAngle';
 import { getAutoLayoutPaddingDragValue } from 'utils/canvas/autoLayoutPadding/getAutoLayoutPaddingDragValue';
 import { getAutoLayoutPaddingKey } from 'utils/canvas/autoLayoutPadding/getAutoLayoutPaddingKey';
@@ -34,7 +35,8 @@ export const continueAutoLayoutPaddingDrag = (
     if (frame && frame.type === NodeType.frame) {
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
       const localPoint = getUnrotatedQueryPoint(point, frame, frame.rotation);
-      const nextValue = getAutoLayoutPaddingDragValue(dragState, frame, localPoint);
+      const rawValue = getAutoLayoutPaddingDragValue(dragState, frame, localPoint);
+      const nextValue = getAutoLayoutHandleSnappedValue(rawValue, event.shiftKey);
       const cursorAngle = getAutoLayoutPaddingCursorAngle(dragState.side, frame.rotation, false);
 
       dragState.hasMoved = true;

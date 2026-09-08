@@ -100,6 +100,38 @@ test.describe('auto-layout — gap handles', () => {
     expect(after.horizontalGap).toBe(40);
   });
 
+  test('holding Shift while dragging the gap handle snaps the value to the nearest multiple of 10', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    // a 240x100 frame, no gap, two 60x60 children flush at world x 600 / 660
+    await designPage.goto('e2e-test-auto-layout-gap-handles-shift-snap');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(ROW_FRAME.x1, ROW_FRAME.y1, ROW_FRAME.x2, ROW_FRAME.y2);
+    await setFlowHorizontal(page);
+    await setHorizontalGap(page, 0);
+
+    for (let index = 0; index < 2; index += 1) {
+      await designPage.drawRectangle(1400, 160, 1460, 220);
+      await dragInto(page, { x: 1430, y: 190 }, { x: ROW_FRAME.x2 - 15, y: 200 });
+    }
+
+    await selectTheFrame(page);
+
+    // drag the handle 44px to the right (a non-multiple-of-10 delta) with Shift held
+    await page.mouse.move(660, 180);
+    await page.mouse.down();
+    await page.keyboard.down('Shift');
+    await page.mouse.move(704, 180, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.keyboard.up('Shift');
+
+    const after = await getFrameGeometry(page);
+
+    expect(after.horizontalGap).toBe(40);
+  });
+
   test('dragging the gap handle past 0 sets a negative gap, with no lower clamp', async ({ page }) => {
     const designPage = new DesignPage(page);
 

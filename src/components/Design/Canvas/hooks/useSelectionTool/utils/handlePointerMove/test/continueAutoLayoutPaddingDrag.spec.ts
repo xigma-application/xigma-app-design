@@ -20,7 +20,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, shiftKey = false): PointerEvent =>
+  new PointerEvent('pointermove', { clientX: x, clientY: y, shiftKey });
 
 const addFrame = (overrides: { paddingLeft?: number; rotation?: number } = {}): string => {
   store.dispatch(
@@ -130,6 +131,50 @@ describe('continueAutoLayoutPaddingDrag', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ paddingLeft: 0 });
+  });
+
+  it('should round the padding value to the nearest integer', () => {
+    // mock
+    const frameId = addFrame();
+    const canvas = createCanvas();
+    const dragState: TAutoLayoutPaddingDragState = {
+      frameId,
+      hasMoved: false,
+      mode: 'absolute',
+      originalPaddingValue: 0,
+      point: { x: 0, y: 100 },
+      pointerStart: { x: 0, y: 100 },
+      side: 'left',
+    };
+    const paddingDragRef: RefObject<TAutoLayoutPaddingDragState | null> = { current: dragState };
+
+    // before
+    continueAutoLayoutPaddingDrag(canvas, pointerEvent(40.6, 100), store.dispatch, paddingDragRef);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ paddingLeft: 41 });
+  });
+
+  it('should snap the padding value to the nearest multiple of 10 while Shift is held', () => {
+    // mock
+    const frameId = addFrame();
+    const canvas = createCanvas();
+    const dragState: TAutoLayoutPaddingDragState = {
+      frameId,
+      hasMoved: false,
+      mode: 'absolute',
+      originalPaddingValue: 0,
+      point: { x: 0, y: 100 },
+      pointerStart: { x: 0, y: 100 },
+      side: 'left',
+    };
+    const paddingDragRef: RefObject<TAutoLayoutPaddingDragState | null> = { current: dragState };
+
+    // before
+    continueAutoLayoutPaddingDrag(canvas, pointerEvent(44, 100, true), store.dispatch, paddingDragRef);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ paddingLeft: 40 });
   });
 
   it('should grow the top padding by the downward pointer delta in delta mode', () => {

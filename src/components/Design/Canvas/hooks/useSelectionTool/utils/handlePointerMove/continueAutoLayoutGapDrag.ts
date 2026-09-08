@@ -10,6 +10,7 @@ import { NodeType } from 'types/design/enums';
 import { TAutoLayoutGapDragState } from 'types/design/canvas/types';
 
 // utils
+import { getAutoLayoutHandleSnappedValue } from 'utils/canvas/getAutoLayoutHandleSnappedValue';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
@@ -33,7 +34,8 @@ export const continueAutoLayoutGapDrag = (
       const localPoint = getUnrotatedQueryPoint(point, frame, frame.rotation);
       const localPointerStart = getUnrotatedQueryPoint(dragState.pointerStart, frame, frame.rotation);
       const delta = dragState.axis === 'horizontal' ? localPoint.x - localPointerStart.x : localPoint.y - localPointerStart.y;
-      const nextGapValue = dragState.originalGapValue + delta;
+      const rawGapValue = dragState.originalGapValue + delta;
+      const nextGapValue = getAutoLayoutHandleSnappedValue(rawGapValue, event.shiftKey);
       const cursorAngle = dragState.axis === 'vertical' ? frame.rotation : frame.rotation + 90;
 
       dragState.point = point;

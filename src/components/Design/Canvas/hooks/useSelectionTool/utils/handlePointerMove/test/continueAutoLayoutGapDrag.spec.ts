@@ -20,7 +20,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, shiftKey = false): PointerEvent =>
+  new PointerEvent('pointermove', { clientX: x, clientY: y, shiftKey });
 
 const addFrame = (rotation = 0): string => {
   store.dispatch(
@@ -84,6 +85,46 @@ describe('continueAutoLayoutGapDrag', () => {
     // result
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ horizontalGap: 50 });
     expect(dragState.point).toEqual({ x: 70, y: 0 });
+  });
+
+  it('should round the gap value to the nearest integer', () => {
+    // mock
+    const frameId = addFrame();
+    const canvas = createCanvas();
+    const dragState: TAutoLayoutGapDragState = {
+      axis: 'horizontal',
+      frameId,
+      originalGapValue: 30,
+      point: { x: 50, y: 0 },
+      pointerStart: { x: 50, y: 0 },
+    };
+    const gapDragRef: RefObject<TAutoLayoutGapDragState | null> = { current: dragState };
+
+    // before — pointer moved 20.6 to the right
+    continueAutoLayoutGapDrag(canvas, pointerEvent(70.6, 0), store.dispatch, gapDragRef);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ horizontalGap: 51 });
+  });
+
+  it('should snap the gap value to the nearest multiple of 10 while Shift is held', () => {
+    // mock
+    const frameId = addFrame();
+    const canvas = createCanvas();
+    const dragState: TAutoLayoutGapDragState = {
+      axis: 'horizontal',
+      frameId,
+      originalGapValue: 30,
+      point: { x: 50, y: 0 },
+      pointerStart: { x: 50, y: 0 },
+    };
+    const gapDragRef: RefObject<TAutoLayoutGapDragState | null> = { current: dragState };
+
+    // before — pointer moved 14 to the right (raw 44), should snap down to 40
+    continueAutoLayoutGapDrag(canvas, pointerEvent(64, 0, true), store.dispatch, gapDragRef);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ horizontalGap: 40 });
   });
 
   it('should grow the vertical gap by the pointer delta on the y axis', () => {

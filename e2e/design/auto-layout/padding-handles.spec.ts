@@ -74,6 +74,19 @@ test.describe('auto-layout — canvas padding handles', () => {
     expect(await readFramePaddingLeft(page)).toBe(40);
   });
 
+  test('holding Shift while dragging a padding handle snaps the value to the nearest multiple of 10', async ({ page }) => {
+    const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-shift-snap');
+
+    await designPage.pointerMove(625, 250);
+    await designPage.pointerDown(625, 250);
+    await page.keyboard.down('Shift');
+    await designPage.pointerMove(644, 250); // 44px in from the left edge (x=600) — not a multiple of 10
+    await designPage.pointerUp();
+    await page.keyboard.up('Shift');
+
+    expect(await readFramePaddingLeft(page)).toBe(40);
+  });
+
   test('a zero-padding handle can also be grabbed well short of its own visual dot, not just right on it', async ({ page }) => {
     const designPage = await buildHorizontalFrameWithChild(page, 'e2e-test-padding-handle-edge-reach');
 
