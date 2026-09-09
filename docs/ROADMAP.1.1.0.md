@@ -125,6 +125,46 @@ fit" (its own button, an Object menu entry, and ⌥⇧⌘R) to snap the frame ar
 
 - [ ] the alignment row's buttons show and tooltip correctly but don't align anything yet
 
+## Stage 20 — Auto layout: flow, alignment, wrap
+
+A frame can arrange its children for you. Pick a flow — horizontal or vertical — and the children line
+up in a row or column with a shared gap. A small 3×3 picker sets where that block sits inside the
+frame and how the children line up across the flow. Turn on Wrap and a horizontal row breaks onto a
+new line when it runs out of width, each line aligned on its own. Still works when the frame itself is
+rotated. Full write-up: `.claude/docs/auto-layout.md`.
+
+## Stage 21 — Auto layout: Hug / Fixed / Fill and Min/Max
+
+Each side of a frame — and of every child — can hug its contents, stay a fixed size, or fill the space
+its parent gives it. Several "fill" children share the leftover evenly. Optional Min and Max limits
+cap how far anything grows or shrinks, handing the slack back to the siblings that still have room.
+
+## Stage 22 — Auto layout: padding and gap
+
+Padding can be set per side, either in the panel or by dragging handles on the canvas, with a
+click-to-type value bubble and guide lines while you do it. The gap between children can be a fixed
+number — also draggable on the canvas, snapping to 10 with Shift, and allowed to go negative so
+children overlap — or switched to Auto, which spreads the leftover space out evenly instead.
+
+## Stage 23 — Auto layout: drag to reorder, drag to drop in
+
+Drag a child inside its frame and a blue marker shows where it will land; let go and it reorders in
+one step. Drag a shape in from outside and it drops into the marked spot instead of jumping around
+mid-drag. Handles wrapped rows, rotated frames, and dragging several selected children at once. A
+child can also be told to ignore auto layout and sit wherever you put it.
+
+## Stage 24 — Auto layout settings popover
+
+A gear button on the alignment row opens the less-common per-frame settings: canvas stacking order,
+aligning text children by their baseline, and how Auto gap spreads children (between / around /
+evenly). It also holds the Layout version switch — Figma split its auto layout into "legacy" and
+"updated" behaviour in 2026, and this matches that: under "updated" a frame never shrinks below its
+padding, an auto gap never overlaps children, a lone spaced child sits at the start, and a shape's
+stroke only affects layout when it's aligned to the inside.
+
+- [ ] stroke alignment (inside / center / outside) is applied by the engine and to rendering, but has
+      no panel control yet — it can only be set in code
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.
@@ -132,3 +172,5 @@ fit" (its own button, an Object menu entry, and ⌥⇧⌘R) to snap the frame ar
 [[text-flatten-and-outline]] — full pipeline behind Stage 12.
 
 [[masks]] — full pipeline behind Stage 13.
+
+[[auto-layout]] — full pipeline behind Stages 20-24.
