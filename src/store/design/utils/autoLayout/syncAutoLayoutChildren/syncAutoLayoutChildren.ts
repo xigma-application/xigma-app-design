@@ -7,24 +7,26 @@ import { applyAutoLayoutSyncChildPosition } from './applyAutoLayoutSyncChildPosi
 import { getActivePage } from '../../getActivePage';
 import { getAutoLayoutSyncChildren } from './getAutoLayoutSyncChildren';
 import { getAutoLayoutSyncPositions } from './getAutoLayoutSyncPositions';
+import { getGridLayoutSyncPositions } from './getGridLayoutSyncPositions';
 
 export const syncAutoLayoutChildren = (state: TDesignState, frameId: string | null): void => {
   if (frameId) {
     const { nodes } = getActivePage(state);
     const frame = nodes[frameId];
 
-    if (
-      frame &&
-      frame.type === NodeType.frame &&
-      (frame.layoutMode === LayoutMode.horizontal || frame.layoutMode === LayoutMode.vertical)
-    ) {
-      const { bounds, children, sizes } = getAutoLayoutSyncChildren(frame, nodes);
-      const positions = getAutoLayoutSyncPositions(frame, frame.layoutMode, sizes);
-      const frameCenter = { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 };
+    if (frame && frame.type === NodeType.frame) {
+      const { layoutMode } = frame;
 
-      children.forEach((child, index) => {
-        applyAutoLayoutSyncChildPosition(state, nodes, frame, frameCenter, child, bounds[index], positions[index]);
-      });
+      if (layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical || layoutMode === LayoutMode.grid) {
+        const { bounds, children, sizes } = getAutoLayoutSyncChildren(frame, nodes);
+        const positions =
+          layoutMode === LayoutMode.grid ? getGridLayoutSyncPositions(frame, sizes) : getAutoLayoutSyncPositions(frame, layoutMode, sizes);
+        const frameCenter = { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 };
+
+        children.forEach((child, index) => {
+          applyAutoLayoutSyncChildPosition(state, nodes, frame, frameCenter, child, bounds[index], positions[index]);
+        });
+      }
     }
   }
 };

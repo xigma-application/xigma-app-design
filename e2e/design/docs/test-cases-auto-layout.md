@@ -26,6 +26,27 @@ shape directly over a frame's area does **not** auto-parent it (only a real drag
 drop-indicator path, or a Layers-panel reparent, does) — so this also exercises the drag-into-frame
 gesture live, not just the Flow toggle in isolation.
 
+## Grid flow
+
+Phase 1 of grid auto-layout (`.claude/docs/auto-layout.md` §13) is the position engine only — no
+dedicated grid UI. The cell math (track sizing, placement order, gaps, padding, hug, spanning,
+per-cell alignment, rotation) is pinned exhaustively by the unit suite under
+`src/store/design/utils/autoLayout/computeGridLayoutPositions/`. The one wiring Phase 1 touches — the
+Flow toggle's "Grid" button dispatching `layoutMode: grid` + the seeded column count, the grid branch
+of `syncAutoLayoutChildren` running, the canvas repainting — is the only browser-worthy part, same
+rationale as the Flow section above.
+
+| #   | Scenario                                                                                                                             | Unit |        E2E        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------ | :--: | :---------------: |
+| 1   | The Flow toggle's Grid button lays the frame's children into a two-column grid (default column count 2), filling row 0 then row 1    |  ✅  | ✅ `grid.spec.ts` |
+| 2   | Switching a grid frame to Horizontal collapses it to a single row, and switching back to Grid restores the exact same cell positions |  ✅  | ✅ `grid.spec.ts` |
+| 3   | Track sizing (fixed / hug / fill fr split), row/column gaps, per-side padding, hug frame growing to the track sum                    |  ✅  |         —         |
+| 4   | Multi-cell spanning and explicit per-cell placement (manual anchors) when set in code                                                |  ✅  |         —         |
+| 5   | A rotated grid frame orbits its cells about the frame centre, same as the linear engine                                              |  ✅  |         —         |
+
+#3–#5 stay unit-only: there is no UI to drive them in a browser yet (Phase 1 is engine-only), and the
+geometry is asserted exactly by `computeGridLayoutPositions/test/` and `getGridLayoutSyncPositions.spec.ts`.
+
 ## Reordering a child within its own frame
 
 | #   | Scenario                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Unit |         E2E          |

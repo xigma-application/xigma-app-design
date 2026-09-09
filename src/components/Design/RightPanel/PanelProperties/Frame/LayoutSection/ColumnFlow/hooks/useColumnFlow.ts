@@ -34,9 +34,16 @@ export const useColumnFlow = (): TUseColumnFlowResult => {
   const wrap = frameNode?.layoutWrap ?? false;
 
   const onChange = (nextValue: string): void => {
-    dispatch(updateNode({ changes: { layoutMode: nextValue as LayoutMode, layoutWrap: false }, id }));
+    const isGrid = nextValue === LayoutMode.grid;
+    const seedGridColumns = isGrid && frameNode?.gridColumnCount === undefined;
+    const staysManaged = nextValue === LayoutMode.horizontal || nextValue === LayoutMode.vertical || isGrid;
 
-    const staysManaged = nextValue === LayoutMode.horizontal || nextValue === LayoutMode.vertical;
+    dispatch(
+      updateNode({
+        changes: { layoutMode: nextValue as LayoutMode, layoutWrap: false, ...(seedGridColumns ? { gridColumnCount: 2 } : {}) },
+        id,
+      }),
+    );
 
     if (!staysManaged && frameNode) {
       getChildrenFillResetChanges(frameNode, 'width', nodes).forEach((childId) => {

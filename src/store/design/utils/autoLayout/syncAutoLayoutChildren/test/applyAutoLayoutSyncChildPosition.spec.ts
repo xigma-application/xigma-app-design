@@ -192,6 +192,28 @@ describe('applyAutoLayoutSyncChildPosition', () => {
     expect(getActivePage(state).nodes.innerChild).toMatchObject({ x: 0, y: 0 });
   });
 
+  it('should recurse into a nested grid auto-layout frame child', () => {
+    // mock
+    const innerChild = rect({ id: 'innerChild', parentId: 'inner', x: 999, y: 999 });
+    const inner = frame({ childIds: ['innerChild'], gridColumnCount: 1, id: 'inner', layoutMode: LayoutMode.grid, x: 0, y: 0 });
+    const outer = frame({ childIds: ['inner'] });
+    const state = buildState({ nodes: { 'frame-1': outer, inner, innerChild } });
+
+    // before
+    applyAutoLayoutSyncChildPosition(
+      state,
+      getActivePage(state).nodes,
+      outer,
+      { x: 50, y: 50 },
+      inner,
+      { height: 20, width: 20, x: 0, y: 0 },
+      { height: 20, id: 'inner', width: 20, x: 0, y: 0 },
+    );
+
+    // result — the nested grid frame's own child got repositioned by the recursive sync
+    expect(getActivePage(state).nodes.innerChild).toMatchObject({ x: 0, y: 0 });
+  });
+
   it('should not recurse into a non-frame child', () => {
     // mock
     const a = rect({});

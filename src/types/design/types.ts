@@ -63,8 +63,16 @@ export type TNodeAlignment = {
   vertical?: AlignmentVertical;
 };
 
+export type TGridTrackSize = { mode: SizingMode; value?: number };
+
 export type TBaseNode = {
   alignment?: TNodeAlignment;
+  gridChildHorizontalAlign?: AlignmentHorizontal;
+  gridChildVerticalAlign?: AlignmentVertical;
+  gridColumnAnchorIndex?: number;
+  gridColumnSpan?: number;
+  gridRowAnchorIndex?: number;
+  gridRowSpan?: number;
   height: number;
   heightSizingMode?: SizingMode;
   hidden?: boolean;
@@ -106,6 +114,11 @@ export type TFrameNode = TBaseNode & {
   childIds: string[];
   clipContent: boolean;
   fill: string;
+  gridAutoPlacement?: boolean;
+  gridColumnCount?: number;
+  gridColumnSizes?: TGridTrackSize[];
+  gridRowCount?: number;
+  gridRowSizes?: TGridTrackSize[];
   guides?: TGuide[];
   horizontalGap?: number;
   horizontalGapMode?: GapMode;

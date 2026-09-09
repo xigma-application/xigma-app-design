@@ -227,7 +227,7 @@ describe('useColumnFlow', () => {
     expect(readNode(childId).heightSizingMode).toBe(SizingMode.fixed);
   });
 
-  it('should reset a direct child’s fill on both axes back to fixed when the parent flow switches to grid', () => {
+  it('should keep a direct child’s fill when the parent flow switches to grid, since the grid engine manages it', () => {
     // mock
     const parentId = addAutoLayoutFrameNode(LayoutMode.vertical);
     const childId = addAutoLayoutFrameNode(LayoutMode.vertical);
@@ -239,13 +239,46 @@ describe('useColumnFlow', () => {
     // before
     const { result } = renderUseColumnFlow();
 
-    // action — grid isn't computed by the fill-aware auto-layout engine
+    // action — a grid child that fills stretches to its cell, so the fill mode stays meaningful
     act(() => result.current.onChange('grid'));
 
     // result
     expect(readNode(parentId).layoutMode).toBe(LayoutMode.grid);
-    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fixed);
-    expect(readNode(childId).heightSizingMode).toBe(SizingMode.fixed);
+    expect(readNode(childId).widthSizingMode).toBe(SizingMode.fill);
+    expect(readNode(childId).heightSizingMode).toBe(SizingMode.fill);
+  });
+
+  it('should seed a default column count the first time a frame switches to grid', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action
+    act(() => result.current.onChange('grid'));
+
+    // result
+    expect(readNode(frameId).gridColumnCount).toBe(2);
+  });
+
+  it('should not overwrite an existing column count when switching back to grid', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 5 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action
+    act(() => result.current.onChange('grid'));
+
+    // result
+    expect(readNode(frameId).gridColumnCount).toBe(5);
   });
 
   it('should leave a direct child’s fill untouched when flipping between horizontal and vertical', () => {

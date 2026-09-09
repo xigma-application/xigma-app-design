@@ -24,6 +24,12 @@ export const getAutoLayoutSyncChildren = (frame: TFrameNode, nodes: Record<strin
 
     return {
       fontSize: child.type === NodeType.text ? child.fontSize : undefined,
+      gridChildHorizontalAlign: isBoxSceneNode(child) ? child.gridChildHorizontalAlign : undefined,
+      gridChildVerticalAlign: isBoxSceneNode(child) ? child.gridChildVerticalAlign : undefined,
+      gridColumnAnchorIndex: isBoxSceneNode(child) ? child.gridColumnAnchorIndex : undefined,
+      gridColumnSpan: isBoxSceneNode(child) ? child.gridColumnSpan : undefined,
+      gridRowAnchorIndex: isBoxSceneNode(child) ? child.gridRowAnchorIndex : undefined,
+      gridRowSpan: isBoxSceneNode(child) ? child.gridRowSpan : undefined,
       height: bound.height,
       heightSizingMode: isBoxSceneNode(child) ? child.heightSizingMode : undefined,
       id: child.id,

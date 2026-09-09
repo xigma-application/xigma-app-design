@@ -292,6 +292,57 @@ describe('syncAutoLayoutChildren', () => {
     expect(getActivePage(state).nodes.a).toMatchObject({ x: 5, y: 5 });
   });
 
+  it('should lay children into cells when the frame flows as a grid', () => {
+    // mock — four 20x20 children in a 200x200 frame with two 1fr columns and two 1fr rows
+    const a = rect({ id: 'a', x: 999, y: 999 });
+    const b = rect({ id: 'b', x: 999, y: 999 });
+    const c = rect({ id: 'c', x: 999, y: 999 });
+    const d = rect({ id: 'd', x: 999, y: 999 });
+    const layoutFrame = frame({
+      childIds: ['a', 'b', 'c', 'd'],
+      gridColumnCount: 2,
+      height: 200,
+      layoutMode: LayoutMode.grid,
+      width: 200,
+      x: 100,
+      y: 100,
+    });
+    const state = buildState({ nodes: { a, b, c, d, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — cells at the four 100x100 quadrant origins
+    const nodes = getActivePage(state).nodes;
+
+    expect(nodes.a).toMatchObject({ x: 100, y: 100 });
+    expect(nodes.b).toMatchObject({ x: 200, y: 100 });
+    expect(nodes.c).toMatchObject({ x: 100, y: 200 });
+    expect(nodes.d).toMatchObject({ x: 200, y: 200 });
+  });
+
+  it('should orbit grid cells around the frame’s centre when the grid frame itself is rotated', () => {
+    // mock — a single 20x20 child in a 100x100 grid frame rotated 180deg about its centre (50,50)
+    const a = rect({ id: 'a', x: 999, y: 999 });
+    const layoutFrame = frame({
+      childIds: ['a'],
+      gridColumnCount: 1,
+      height: 100,
+      layoutMode: LayoutMode.grid,
+      rotation: 180,
+      width: 100,
+      x: 0,
+      y: 0,
+    });
+    const state = buildState({ nodes: { a, 'frame-1': layoutFrame } });
+
+    // action
+    syncAutoLayoutChildren(state, 'frame-1');
+
+    // result — flush top-left of the single cell, orbited 180deg about (50,50), lands bottom-right
+    expect(getActivePage(state).nodes.a).toMatchObject({ x: 80, y: 80 });
+  });
+
   it('should no-op when the layout mode is freeForm', () => {
     // mock
     const a = rect({ id: 'a', x: 5, y: 5 });

@@ -165,6 +165,20 @@ stroke only affects layout when it's aligned to the inside.
 - [ ] stroke alignment (inside / center / outside) is applied by the engine and to rendering, but has
       no panel control yet — it can only be set in code
 
+## Stage 25 — Auto layout: grid flow
+
+A third arrangement next to horizontal and vertical: a frame can lay its children out on a grid of
+rows and columns. Pick the grid from the same Flow control; children fill it left to right, top to
+bottom, and each row or column can be a fixed size, hug its contents, or share the leftover space.
+Row and column gaps and padding work as they already do. Rotating the frame still works. Full
+write-up: `.claude/docs/auto-layout.md` §13.
+
+- [ ] first cut is the layout maths only — there is no panel yet for the column/row count, the
+      per-track sizes, or the grid gaps, and no on-canvas handles; a grid frame can be set up in
+      code but only the column count has a default when you click the button
+- [ ] later: placing a child in a specific cell, letting a child span several cells, dragging a
+      child from one cell to another, and reordering with the keyboard
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

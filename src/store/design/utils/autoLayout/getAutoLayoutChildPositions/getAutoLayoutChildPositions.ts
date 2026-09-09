@@ -1,5 +1,14 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode, StrokeAlign } from 'types/design/enums';
+import {
+  AlignmentHorizontal,
+  AlignmentLayout,
+  AlignmentVertical,
+  AutoSpacing,
+  LayoutMode,
+  LayoutVersion,
+  SizingMode,
+  StrokeAlign,
+} from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
@@ -10,6 +19,12 @@ import { getAutoLayoutPrimaryLayout } from './getAutoLayoutPrimaryLayout';
 
 export type TAutoLayoutChildSize = {
   fontSize?: number;
+  gridChildHorizontalAlign?: AlignmentHorizontal;
+  gridChildVerticalAlign?: AlignmentVertical;
+  gridColumnAnchorIndex?: number;
+  gridColumnSpan?: number;
+  gridRowAnchorIndex?: number;
+  gridRowSpan?: number;
   height: number;
   heightSizingMode?: SizingMode;
   id: string;

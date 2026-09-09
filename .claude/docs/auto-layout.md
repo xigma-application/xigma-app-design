@@ -384,6 +384,67 @@ groupId })` per group, routing through `handleUpdateNode` → `syncGroupBounds` 
   resize is always a reshape). Mask create/remove and full ungroup call `syncAutoLayoutChildren`
   directly in their reducers.
 
+## 13. Grid layout (`LayoutMode.grid`)
+
+Figma's third flow: children fall into a 2-D cell grid instead of a single row/column. **Phase 1
+shipped the position engine only — no dedicated grid UI.** The `ColumnFlow` toggle's existing
+(previously dead) "Grid" button now produces a real layout; everything else (track-size controls,
+canvas track handles, drag-into-cell, manual cell placement, spanning UI) is later phases.
+
+### Data model (`src/types/design/types.ts`)
+
+- **`TFrameNode`:** `gridColumnCount?` (min 1; `useColumnFlow` seeds `2` on first switch to grid),
+  `gridRowCount?` (absent → derived from the placed cells), `gridColumnSizes?` /
+  `gridRowSizes?: TGridTrackSize[]`, `gridAutoPlacement?` (absent → `true`). The two gaps **reuse
+  `horizontalGap` (columns) / `verticalGap` (rows)**; padding reuses `paddingTop/Right/Bottom/Left`;
+  frame `widthSizingMode` / `heightSizingMode` still mean hug/fixed/fill.
+- **`TGridTrackSize = { mode: SizingMode; value? }`** — `fixed` → `value` px, `fill` → `value` fr
+  weight (default 1), `hug` → `value` unused. Missing / short arrays default every track to `1fr`.
+- **`TBaseNode` (grid child):** `gridColumnAnchorIndex?` / `gridRowAnchorIndex?` (manual cell),
+  `gridColumnSpan?` / `gridRowSpan?` (default 1), `gridChildHorizontalAlign?: AlignmentHorizontal`
+  / `gridChildVerticalAlign?: AlignmentVertical` (per-cell alignment, default start). Deliberately
+  **not** the existing `alignment` field (that one is constraints/position). `getAutoLayoutSyncChildren`
+  copies these onto `TAutoLayoutChildSize` (box children only — line/vector default them).
+
+### Engine (`src/store/design/utils/autoLayout/computeGridLayoutPositions/`)
+
+`syncAutoLayoutChildren` widened its guard to `horizontal | vertical | grid`; for grid it calls
+`getGridLayoutSyncPositions(frame, sizes)` (sibling of `getAutoLayoutSyncPositions`) instead of the
+linear path — the shared `getAutoLayoutSyncChildren` → `applyAutoLayoutSyncChildPosition` loop and
+`frameCenter` are unchanged, so **rotation is free** (the applier already orbits each slot about the
+frame centre). `applyAutoLayoutSyncChildPosition` also recurses into a nested `grid` frame child.
+
+`computeGridLayoutPositions(input)` pipeline:
+
+1. `clampAutoLayoutFrameToPadding` (reused — diff #1, frame never narrower than its padding under
+   `updated`).
+2. `placeGridCells(sizes, columnCount, autoPlacement)` → `TGridCellPlacement[]`
+   (`{ id, columnStart, rowStart, columnSpan, rowSpan }`). Auto: sweep `childIds` order into the
+   next free region that fits (CSS-Grid sparse flow, span-aware). Manual (`autoPlacement === false`
+   + both anchors set): honour the anchor (clamped into range), leave holes.
+3. `derivedRowCount` = furthest occupied row; `rowCount = max(gridRowCount ?? derived, derived)`.
+4. `resolveGridTrackSizes(tracks, available, gap, isFrameAxisHug, contentMaxPerTrack)` per axis —
+   `fixed` → value, `hug` → max intrinsic size of the children spanning exactly that one track,
+   `fill` → weighted share of `max(available − reserved − gaps, 0)`. When that axis's frame sizing
+   is hug, `fill` collapses to the content max instead.
+5. If `widthSizingMode === hug`, `frame.width = padL + padR + Σ columnSizes + (n−1)·columnGap`
+   (clamped to min/max, mirrors `applyAutoLayoutHugSize`); same for height/rows.
+6. `getGridTrackOffsets` → running world-space offsets from the content box origin; per placement,
+   `getGridCellRect` (union of the spanned tracks — interior gaps are already baked into the
+   offsets) then `getGridChildPosition`: a `fill` child stretches to the cell (clamped to
+   min/max), otherwise it keeps its intrinsic size and offsets by
+   `getAxisOffset(gridChild*Align ?? start, cellSize, childSize)`.
+
+Returns `TAutoLayoutChildPosition[]` in `sizes` order — the exact shape the applier already
+consumes.
+
+### Not covered by Phase 1
+
+Track-size / count / gap RightPanel controls and canvas track pills, `gridAutoPlacement` toggle UI,
+empty-cell rendering, drag-a-child-into-a-cell drop target, span edge-handles, auto-placement
+obstruction reflow (push blockers / add tracks), arrow-key reorder, ⌘D-into-next-cell, track
+reorder/delete. The engine already honours spans and manual anchors when set in code.
+
 ## Tests
 
 - **Unit — engine:** `src/store/design/utils/autoLayout/test/` (flat helpers — `getFrameLayoutPadding`,
@@ -405,8 +466,11 @@ groupId })` per group, routing through `handleUpdateNode` → `syncGroupBounds` 
   `horizontal-indicator-positions(-center-right)`, `vertical-indicator-positions`, `reorder`,
   `rotated-child`, `rotated-frame`, `fill-sizing`, `min-max-sizing`, `padding`, `padding-handles`,
   `gap-handles`, `ignore-auto-layout`, `settings` (the popover round-trip: Layout version, Auto
-  spacing, Canvas stacking). Scenario catalog with per-row rationale:
-  `e2e/design/docs/test-cases-auto-layout.md`.
+  spacing, Canvas stacking), `grid` (the Flow toggle's Grid button → grid engine → canvas
+  round-trip). Scenario catalog with per-row rationale: `e2e/design/docs/test-cases-auto-layout.md`.
+- **Unit — grid (§13):** `computeGridLayoutPositions/test/` (`placeGridCells`,
+  `resolveGridTrackSizes`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
+  `computeGridLayoutPositions`) + `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`.
 
 ## History (so it isn't repeated)
 
@@ -431,3 +495,9 @@ groupId })` per group, routing through `handleUpdateNode` → `syncGroupBounds` 
    Inside stroke row hidden under `updated`); then #4 (`getAutoLayoutChildStrokeInset` +
    `getAutoLayoutFillSizes` content-area split). `strokeAlign` still has no RightPanel control — the
    engine and renderer read it, but it can only be set in code.
+6. **~2026-09 — grid flow, Phase 1 (§13).** `LayoutMode.grid` was a dead enum + dead Flow button
+   (picking it just reset child fill and laid out nothing). Phase 1 added the full data model and a
+   `computeGridLayoutPositions/` engine (placement, track sizing, gaps, padding, hug, spanning,
+   per-cell alignment, rotation) wired behind that same button — engine only, no dedicated grid UI.
+   The engine honours spans / manual anchors when set in code; the controls and canvas handles for
+   them are later phases.

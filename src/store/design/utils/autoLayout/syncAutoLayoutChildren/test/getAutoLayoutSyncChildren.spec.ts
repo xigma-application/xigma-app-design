@@ -1,5 +1,5 @@
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { AlignmentHorizontal, AlignmentVertical, NodeType, StrokeAlign } from 'types/design/enums';
 import { TFrameNode, TLineNode, TRectangleNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -146,6 +146,46 @@ describe('getAutoLayoutSyncChildren', () => {
 
     // result
     expect(result.sizes[0]).toMatchObject({ strokeAlign: StrokeAlign.inside, strokeWidth: 4 });
+  });
+
+  it('should carry a box child’s grid span, anchor and cell alignment into its size entry', () => {
+    // mock
+    const a = rect({
+      gridChildHorizontalAlign: AlignmentHorizontal.center,
+      gridChildVerticalAlign: AlignmentVertical.bottom,
+      gridColumnAnchorIndex: 1,
+      gridColumnSpan: 2,
+      gridRowAnchorIndex: 3,
+      gridRowSpan: 2,
+      id: 'a',
+    });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0]).toMatchObject({
+      gridChildHorizontalAlign: AlignmentHorizontal.center,
+      gridChildVerticalAlign: AlignmentVertical.bottom,
+      gridColumnAnchorIndex: 1,
+      gridColumnSpan: 2,
+      gridRowAnchorIndex: 3,
+      gridRowSpan: 2,
+    });
+  });
+
+  it('should leave the grid fields undefined for a non-box child, like a line', () => {
+    // mock
+    const a = line({ id: 'a' });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0].gridColumnSpan).toBeUndefined();
+    expect(result.sizes[0].gridChildHorizontalAlign).toBeUndefined();
   });
 
   it('should leave the stroke fields undefined for a non-box child, like a line', () => {
