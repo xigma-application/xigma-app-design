@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TSectionNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -77,6 +77,24 @@ describe('getCollidedNodes', () => {
 
     // result
     expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
+  });
+
+  it('should collide against the visual extent of an outside-aligned stroke', () => {
+    // mock — a 10x10 node whose geometry ends at x=10, but an 8px outside stroke reaches x=18
+    const node = buildNode({ height: 10, strokeAlign: StrokeAlign.outside, strokeColor: '#000000', strokeWidth: 8, width: 10, x: 0, y: 0 });
+    const area = { height: 4, width: 4, x: 12, y: 0 };
+
+    // result — the marquee only touches the stroke band, not the box, and still selects the node
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
+  });
+
+  it('should ignore an inside-aligned stroke when testing collision', () => {
+    // mock — same box, but the stroke sits inside, so the visual extent stays at the geometry
+    const node = buildNode({ height: 10, strokeAlign: StrokeAlign.inside, strokeColor: '#000000', strokeWidth: 8, width: 10, x: 0, y: 0 });
+    const area = { height: 4, width: 4, x: 12, y: 0 };
+
+    // result
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([]);
   });
 
   it('should never collide a hidden node', () => {

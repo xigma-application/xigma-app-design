@@ -1,8 +1,10 @@
 // types
+import { StrokeAlign } from 'types/design/enums';
 import { TGlyphAtlasJson } from 'types/msdf';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { getStrokeAlignInset } from '../getStrokeAlignInset/getStrokeAlignInset';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 
 export const drawMsdfGlyphs = (
@@ -19,6 +21,7 @@ export const drawMsdfGlyphs = (
   viewport: TViewport,
   strokeColor?: string,
   strokeWidth?: number,
+  strokeAlign?: StrokeAlign,
 ): void => {
   if (texture && vertices.length > 0) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -27,6 +30,7 @@ export const drawMsdfGlyphs = (
     const colorLocation = gl.getUniformLocation(program, 'u_color');
     const strokeColorLocation = gl.getUniformLocation(program, 'u_strokeColor');
     const strokeWidthLocation = gl.getUniformLocation(program, 'u_strokeWidth');
+    const strokeInsetLocation = gl.getUniformLocation(program, 'u_strokeInset');
     const screenPxRangeLocation = gl.getUniformLocation(program, 'u_screenPxRange');
     const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
     const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
@@ -35,6 +39,8 @@ export const drawMsdfGlyphs = (
     const screenPxRange = (atlas.distanceField.distanceRange * effectiveFontSize * viewport.zoom) / atlas.info.size;
     const hasStroke = Boolean(strokeColor && strokeWidth && strokeWidth > 0);
     const strokeWidthUniform = hasStroke ? ((strokeWidth as number) * viewport.zoom) / screenPxRange : 0;
+    const strokeInsetWorld = hasStroke && strokeAlign ? getStrokeAlignInset(strokeWidth as number, strokeAlign).inner : 0;
+    const strokeInsetUniform = (strokeInsetWorld * viewport.zoom) / screenPxRange;
 
     gl.useProgram(program);
     gl.activeTexture(gl.TEXTURE0);
@@ -44,6 +50,7 @@ export const drawMsdfGlyphs = (
     gl.uniform4fv(strokeColorLocation, hexToRgbaFloat(hasStroke ? (strokeColor as string) : color));
     gl.uniform1f(screenPxRangeLocation, screenPxRange);
     gl.uniform1f(strokeWidthLocation, strokeWidthUniform);
+    gl.uniform1f(strokeInsetLocation, strokeInsetUniform);
     gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
     gl.uniform1f(zoomLocation, viewport.zoom);
     gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);

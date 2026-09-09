@@ -1,3 +1,6 @@
+// types
+import { StrokeAlign } from 'types/design/enums';
+
 // utils
 import { drawThickOutline } from '../drawThickOutline';
 
@@ -102,6 +105,66 @@ describe('drawThickOutline', () => {
 
     expect(vertices[0]).toBeCloseTo(16);
     expect(vertices[1]).toBeCloseTo(4);
+  });
+
+  it('should sit the ring entirely outside the box for an outside-aligned stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — 2px stroke at zoom 1: outer edge at x = -2, inner edge back on the box at x = 0
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      StrokeAlign.outside,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const xValues = Array.from(firstCall[1] as Float32Array).filter((_, i) => i % 2 === 0);
+
+    expect(Math.min(...xValues)).toBeCloseTo(-2);
+    expect(Math.max(...xValues)).toBeCloseTo(12);
+    expect(xValues).toContain(0);
+  });
+
+  it('should sit the ring entirely inside the box for an inside-aligned stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — 2px stroke at zoom 1: outer edge on the box at x = 0, inner edge pulled in to x = 2
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      StrokeAlign.inside,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const xValues = Array.from(firstCall[1] as Float32Array).filter((_, i) => i % 2 === 0);
+
+    expect(Math.min(...xValues)).toBeCloseTo(0);
+    expect(Math.max(...xValues)).toBeCloseTo(10);
+    expect(xValues).toContain(2);
   });
 
   it('should trace the rounded boundary, not the sharp one, once cornerRadius is set', () => {

@@ -4,7 +4,20 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getRotatedNodeBounds } from './getRotatedNodeBounds';
+import { getStrokePadding } from './getNodeAtPoint/getStrokePadding';
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
+
+const getPaddedNodeBounds = (node: TSceneNode): TDraftRect => {
+  const rotatedBounds = getRotatedNodeBounds(node);
+  const strokePadding = getStrokePadding(node);
+
+  return {
+    height: rotatedBounds.height + strokePadding * 2,
+    width: rotatedBounds.width + strokePadding * 2,
+    x: rotatedBounds.x - strokePadding,
+    y: rotatedBounds.y - strokePadding,
+  };
+};
 
 export const getCollidedNodes = (
   nodes: TSceneNode[],
@@ -19,7 +32,7 @@ export const getCollidedNodes = (
 
   return nodes.filter((node) => {
     if (!node.hidden && !node.locked) {
-      const bounds = getRotatedNodeBounds(node);
+      const bounds = getPaddedNodeBounds(node);
       const nodeX2 = bounds.x + bounds.width;
       const nodeY2 = bounds.y + bounds.height;
       const mustEncloseFully = requireFullyInside || isClickThroughFrame(node, nodesById);

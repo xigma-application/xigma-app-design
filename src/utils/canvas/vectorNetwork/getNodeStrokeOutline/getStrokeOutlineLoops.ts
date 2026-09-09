@@ -9,16 +9,16 @@ import { getRectangleStrokeOutlineLoops } from './getRectangleStrokeOutlineLoops
 import { getVectorStrokeOutlineLoops } from './getVectorStrokeOutlineLoops';
 import { TStrokeOutlineLoops } from 'utils/canvas/vectorNetwork/getStrokeOutlinePolygons/getStrokeOutlinePolygons';
 
-export const getStrokeOutlineLoops = (node: TStrokeableNode, halfWidth: number): TStrokeOutlineLoops | null => {
+export const getStrokeOutlineLoops = (node: TStrokeableNode, outer: number, inner: number = outer): TStrokeOutlineLoops | null => {
   switch (node.type) {
     case NodeType.rectangle:
-      return getRectangleStrokeOutlineLoops(node, halfWidth);
+      return getRectangleStrokeOutlineLoops(node, outer, inner);
     case NodeType.ellipse:
-      return getEllipseStrokeOutlineLoops(node, halfWidth);
+      return getEllipseStrokeOutlineLoops(node, outer, inner);
     case NodeType.line:
-      return getLineStrokeOutlineLoops(node, halfWidth);
+      return getLineStrokeOutlineLoops(node, outer);
     case NodeType.vector:
-      return getVectorStrokeOutlineLoops(node, halfWidth);
+      return getVectorStrokeOutlineLoops(node, outer);
     // no default
   }
 };

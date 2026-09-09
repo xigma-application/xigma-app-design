@@ -1,12 +1,17 @@
 // types
+import { StrokeAlign } from 'types/design/enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { getRoundedRingVertices } from './getRoundedRingVertices';
 import { getSharpRingVertices } from './getSharpRingVertices';
+import { getStrokeAlignInset } from '../getStrokeAlignInset/getStrokeAlignInset';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotateFlatVertices } from './rotateFlatVertices';
+
+const getRawVertices = (rect: TDraftRect, cornerRadius: number, outer: number, inner: number): number[] =>
+  cornerRadius > 0 ? getRoundedRingVertices(rect, cornerRadius, outer, inner) : getSharpRingVertices(rect, outer, inner);
 
 export const drawThickOutline = (
   gl: WebGL2RenderingContext,
@@ -19,16 +24,16 @@ export const drawThickOutline = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  strokeAlign: StrokeAlign = StrokeAlign.center,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
   const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-  const halfWidth = strokeWidth / viewport.zoom / 2;
+  const { inner, outer } = getStrokeAlignInset(strokeWidth / viewport.zoom, strokeAlign);
   const cornerRadius = rect.cornerRadius ?? 0;
-
-  const rawVertices = cornerRadius > 0 ? getRoundedRingVertices(rect, halfWidth, cornerRadius) : getSharpRingVertices(rect, halfWidth);
+  const rawVertices = getRawVertices(rect, cornerRadius, outer, inner);
   const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const vertices = rotateFlatVertices(rawVertices, center, rotation);
 

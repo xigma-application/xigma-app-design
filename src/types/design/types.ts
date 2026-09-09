@@ -13,6 +13,7 @@ import {
   NodeType,
   PathType,
   SizingMode,
+  StrokeAlign,
 } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
@@ -92,6 +93,7 @@ export type TEllipseNode = TBaseNode & {
   fill: string;
   flipX?: boolean;
   flipY?: boolean;
+  strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.ellipse;
@@ -116,6 +118,7 @@ export type TFrameNode = TBaseNode & {
   paddingLeft?: number;
   paddingRight?: number;
   paddingTop?: number;
+  strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;
@@ -159,6 +162,7 @@ export type TPolygonNode = TBaseNode & {
 export type TRectangleNode = TBaseNode & {
   cornerRadius?: number;
   fill: string;
+  strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.rectangle;
@@ -190,6 +194,7 @@ export type TTextNode = TBaseNode & {
   pathFlip?: boolean;
   pathId?: string | null;
   pathStartOffset?: number;
+  strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.text;

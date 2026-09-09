@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
@@ -51,6 +51,32 @@ describe('getNodeStrokeOutline', () => {
     expect(result?.name).toBe('Rectangle outline');
     expect(result?.filledFaceKeys).toHaveLength(2);
     expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons).toHaveLength(2);
+  });
+
+  it('should push the outline fully outside the shape for an outside-aligned stroke', () => {
+    // mock — 20x20 rect at origin, stroke width 4; outside alignment puts the outer ring at x = -4
+    const node = buildRectangle({ strokeAlign: StrokeAlign.outside, strokeColor: '#123456', strokeWidth: 4 });
+
+    // action
+    const result = getNodeStrokeOutline(node);
+    const xs = Object.values(result?.vertices ?? {}).map((vertex) => vertex.x);
+
+    // result
+    expect(Math.min(...xs)).toBeCloseTo(-4);
+    expect(Math.max(...xs)).toBeCloseTo(24);
+  });
+
+  it('should keep the outline within the shape for an inside-aligned stroke', () => {
+    // mock — same rect; inside alignment keeps the outer ring on the 20x20 box edge
+    const node = buildRectangle({ strokeAlign: StrokeAlign.inside, strokeColor: '#123456', strokeWidth: 4 });
+
+    // action
+    const result = getNodeStrokeOutline(node);
+    const xs = Object.values(result?.vertices ?? {}).map((vertex) => vertex.x);
+
+    // result
+    expect(Math.min(...xs)).toBeCloseTo(0);
+    expect(Math.max(...xs)).toBeCloseTo(20);
   });
 
   it('should build a solid (hole-less) outline when the stroke is thick enough to fully cover the rectangle', () => {

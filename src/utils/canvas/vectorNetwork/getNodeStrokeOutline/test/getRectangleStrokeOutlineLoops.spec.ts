@@ -37,6 +37,17 @@ describe('getRectangleStrokeOutlineLoops', () => {
     expect(inner).toBeNull();
   });
 
+  it('should keep the outer loop on the shape edge when only an inner extent is given', () => {
+    // action — outer 0, inner 4 (an inside-aligned stroke): outer ring hugs the 20x20 box
+    const { inner, outer } = getRectangleStrokeOutlineLoops(buildRectangle(), 0, 4);
+    const outerXs = outer.map((point) => point.x);
+
+    // result
+    expect(Math.min(...outerXs)).toBeCloseTo(0);
+    expect(Math.max(...outerXs)).toBeCloseTo(20);
+    expect(inner).not.toBeNull();
+  });
+
   it('should clamp the corner radius to the shape before offsetting it by the half-width', () => {
     // action — cornerRadius 999 clamps to 10 (half the 20px side); outer radius = 10 + half-width
     const { outer } = getRectangleStrokeOutlineLoops(buildRectangle({ cornerRadius: 999 }), 2);

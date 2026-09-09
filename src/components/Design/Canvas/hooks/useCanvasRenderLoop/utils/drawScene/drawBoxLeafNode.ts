@@ -12,6 +12,18 @@ export const drawBoxLeafNode = (context: TDrawContext, node: TFrameNode | TRecta
   drawRect(gl, program, buffer, { ...node, fillAlpha: dragOpacity }, canvasWidth, canvasHeight, viewport, node.rotation);
 
   if ('strokeColor' in node && node.strokeColor && node.strokeWidth) {
-    drawThickOutline(gl, program, buffer, node, node.strokeColor, node.strokeWidth, canvasWidth, canvasHeight, viewport, node.rotation);
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      node,
+      node.strokeColor,
+      node.strokeWidth,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      node.rotation,
+      node.strokeAlign,
+    );
   }
 };

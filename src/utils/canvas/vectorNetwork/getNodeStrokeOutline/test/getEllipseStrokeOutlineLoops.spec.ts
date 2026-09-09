@@ -36,4 +36,17 @@ describe('getEllipseStrokeOutlineLoops', () => {
     // result
     expect(inner).toBeNull();
   });
+
+  it('should offset the outer and inner loops independently for an outside-aligned stroke', () => {
+    // action — outer 4, inner 0: outer ring expands to a 28x28 span, inner ring stays on the 20x20 path
+    const { inner, outer } = getEllipseStrokeOutlineLoops(buildEllipse(), 4, 0);
+    const outerXs = outer.map((point) => point.x);
+    const innerXs = (inner ?? []).map((point) => point.x);
+
+    // result
+    expect(Math.min(...outerXs)).toBeCloseTo(-4);
+    expect(Math.max(...outerXs)).toBeCloseTo(24);
+    expect(Math.min(...innerXs)).toBeCloseTo(0);
+    expect(Math.max(...innerXs)).toBeCloseTo(20);
+  });
 });

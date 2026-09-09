@@ -111,6 +111,13 @@ arms a marquee instead of immediately clearing the selection — see
 | 16  | Dragging a marquee live-updates the selection (and its rendered overlay) on every move, before release      |  ✅  | ✅ `selection.spec.ts` |
 | 17  | A frame the marquee only **touches** (partial overlap) gets selected in the default (no-modifier) mode      |  ✅  | ✅ `selection.spec.ts` |
 | 18  | The same partially-overlapped frame is **excluded** when Control/Cmd is held — full containment is required |  ✅  | ✅ `selection.spec.ts` |
+| 19  | The marquee collides against a node's **visual** stroke extent (outward `strokeWidth` for outside, half for center, nothing for inside), not just its geometry box |  ✅  | — |
+
+#19 stays unit-only: `getCollidedNodes.spec.ts` asserts the padded-bounds math exactly per
+`strokeAlign` (a marquee touching only the outside-stroke band selects; an inside stroke changes
+nothing), and there is no way yet to author a stroked node from the e2e `DesignPage` model — the
+stroke-section UI is a later phase, and `store.getState()` isn't reachable from e2e. Revisit once
+that panel exists.
 
 This is the one marquee scenario where e2e earns its keep the same way scenarios 14/15 do: the
 default-vs-Control distinction is a live `event.ctrlKey`/`metaKey` read inside a browser pointer

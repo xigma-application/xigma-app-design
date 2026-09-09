@@ -42,6 +42,7 @@ export const drawMsdfText = (
       viewport,
       node.strokeColor,
       node.strokeWidth,
+      node.strokeAlign,
     );
   }
 };

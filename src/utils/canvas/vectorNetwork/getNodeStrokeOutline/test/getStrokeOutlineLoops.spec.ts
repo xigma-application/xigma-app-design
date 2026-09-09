@@ -68,4 +68,13 @@ describe('getStrokeOutlineLoops', () => {
     // result
     expect(getStrokeOutlineLoops(VECTOR, 2)?.outer.length).toBeGreaterThan(0);
   });
+
+  it('should forward separate outer and inner extents to the rectangle helper', () => {
+    // action — outer 0, inner 3: the outer loop stays on the 20x20 box edge
+    const outerXs = getStrokeOutlineLoops(RECTANGLE, 0, 3)?.outer.map((point) => point.x) ?? [];
+
+    // result
+    expect(Math.min(...outerXs)).toBeCloseTo(0);
+    expect(Math.max(...outerXs)).toBeCloseTo(20);
+  });
 });

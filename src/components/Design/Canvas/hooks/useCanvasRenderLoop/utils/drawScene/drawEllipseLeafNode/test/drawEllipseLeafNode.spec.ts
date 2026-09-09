@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TDrawContext } from '../../types';
 import { TEllipseNode } from 'types/design/types';
 
@@ -84,15 +84,27 @@ describe('drawEllipseLeafNode', () => {
     );
   });
 
-  it('should draw the stroke outline when both strokeColor and strokeWidth are set', () => {
+  it('should draw the stroke outline, forwarding the stroke alignment, when both strokeColor and strokeWidth are set', () => {
     // mock
-    const node = ellipse({ strokeColor: '#000', strokeWidth: 2 });
+    const node = ellipse({ strokeAlign: StrokeAlign.outside, strokeColor: '#000', strokeWidth: 2 });
 
     // action
     drawEllipseLeafNode(context, node, 1);
 
     // result
-    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      node,
+      '#000',
+      2,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      0,
+      StrokeAlign.outside,
+    );
   });
 
   it('should skip the stroke outline when strokeWidth is missing, even with a strokeColor set', () => {

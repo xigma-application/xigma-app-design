@@ -86,6 +86,12 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeAlign {
+  center = 'center',
+  inside = 'inside',
+  outside = 'outside',
+}
+
 export enum ToolName {
   arrow = 'arrow',
   bend = 'bend',

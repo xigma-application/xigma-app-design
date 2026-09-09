@@ -1,4 +1,5 @@
 // types
+import { StrokeAlign } from 'types/design/enums';
 import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
@@ -130,6 +131,111 @@ describe('drawMsdfGlyphs', () => {
     // result — the stroke uniform mirrors the fill color, not the given stroke color
     expect(gl.uniform4fv).toHaveBeenNthCalledWith(2, expect.anything(), [1, 1, 1, 1]);
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 0);
+  });
+
+  it('should leave the stroke inset uniform at zero when no stroke alignment is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before — 3rd uniform1f call is u_strokeInset (after u_screenPxRange, u_strokeWidth)
+    drawMsdfGlyphs(gl, program, buffer, texture, ATLAS, vertices, '#ffffff', 20, 100, 100, IDENTITY_VIEWPORT, '#ff0000', 4);
+
+    // result
+    expect(gl.uniform1f).toHaveBeenNthCalledWith(3, expect.anything(), 0);
+  });
+
+  it('should push the fill boundary inward by half the stroke for a centered text stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before — screenPxRange 4, inset world = strokeWidth (4) / 2 = 2, uniform = 2 * zoom (1) / 4 = 0.5
+    drawMsdfGlyphs(
+      gl,
+      program,
+      buffer,
+      texture,
+      ATLAS,
+      vertices,
+      '#ffffff',
+      20,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      '#ff0000',
+      4,
+      StrokeAlign.center,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenNthCalledWith(3, expect.anything(), 0.5);
+  });
+
+  it('should push the fill boundary in by the whole stroke for an inside-aligned text stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before — inset world = strokeWidth (4), uniform = 4 * zoom (1) / screenPxRange (4) = 1
+    drawMsdfGlyphs(
+      gl,
+      program,
+      buffer,
+      texture,
+      ATLAS,
+      vertices,
+      '#ffffff',
+      20,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      '#ff0000',
+      4,
+      StrokeAlign.inside,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenNthCalledWith(3, expect.anything(), 1);
+  });
+
+  it('should keep the stroke inset uniform at zero for an outside-aligned text stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before
+    drawMsdfGlyphs(
+      gl,
+      program,
+      buffer,
+      texture,
+      ATLAS,
+      vertices,
+      '#ffffff',
+      20,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      '#ff0000',
+      4,
+      StrokeAlign.outside,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenNthCalledWith(3, expect.anything(), 0);
   });
 
   it('should compute screenPxRange from the atlas distance range, effective font size, and zoom', () => {

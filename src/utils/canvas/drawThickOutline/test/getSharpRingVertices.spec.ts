@@ -15,4 +15,15 @@ describe('getSharpRingVertices', () => {
     expect(yValues).toContain(1);
     expect(yValues).toContain(19);
   });
+
+  it('should offset the outer and inner edges independently when given separate extents', () => {
+    // mock — outer 3, inner 0: the ring spreads out to y=-3/23 and its inner edge stays on the rect (y=0/20)
+    const vertices = getSharpRingVertices({ height: 20, width: 10, x: 0, y: 0 }, 3, 0);
+    const yValues = vertices.filter((_, index) => index % 2 === 1);
+
+    expect(Math.min(...yValues)).toBe(-3);
+    expect(Math.max(...yValues)).toBe(23);
+    expect(yValues).toContain(0);
+    expect(yValues).toContain(20);
+  });
 });

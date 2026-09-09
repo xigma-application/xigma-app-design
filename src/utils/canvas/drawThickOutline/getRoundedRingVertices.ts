@@ -8,14 +8,26 @@ import { TDraftRect } from 'types/canvas';
 import { getRingVertices } from '../getRingVertices';
 import { getRoundedRectPoints } from '../shapes/getRoundedRectPoints';
 
-export const getRoundedRingVertices = (rect: TDraftRect, halfWidth: number, cornerRadius: number): number[] => {
+export const getRoundedRingVertices = (rect: TDraftRect, cornerRadius: number, outer: number, inner: number = outer): number[] => {
   const outerPoints = getRoundedRectPoints(
-    { cornerRadius, height: rect.height + halfWidth * 2, width: rect.width + halfWidth * 2, x: rect.x - halfWidth, y: rect.y - halfWidth },
+    {
+      cornerRadius: cornerRadius + outer,
+      height: rect.height + outer * 2,
+      width: rect.width + outer * 2,
+      x: rect.x - outer,
+      y: rect.y - outer,
+    },
     ROUNDED_RECT_CORNER_SEGMENTS,
   );
 
   const innerPoints = getRoundedRectPoints(
-    { cornerRadius, height: rect.height - halfWidth * 2, width: rect.width - halfWidth * 2, x: rect.x + halfWidth, y: rect.y + halfWidth },
+    {
+      cornerRadius: Math.max(cornerRadius - inner, 0),
+      height: rect.height - inner * 2,
+      width: rect.width - inner * 2,
+      x: rect.x + inner,
+      y: rect.y + inner,
+    },
     ROUNDED_RECT_CORNER_SEGMENTS,
   );
 

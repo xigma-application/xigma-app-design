@@ -5,6 +5,7 @@ uniform sampler2D u_texture;
 uniform vec4 u_color;
 uniform vec4 u_strokeColor;
 uniform float u_strokeWidth;
+uniform float u_strokeInset;
 uniform float u_screenPxRange;
 in vec2 v_texCoord;
 out vec4 outColor;
@@ -15,7 +16,7 @@ float median(float r, float g, float b) {
 
 void main() {
   vec3 msdf = texture(u_texture, v_texCoord).rgb;
-  float signedDist = median(msdf.r, msdf.g, msdf.b) - 0.5;
+  float signedDist = median(msdf.r, msdf.g, msdf.b) - 0.5 - u_strokeInset;
   float aa = max(fwidth(signedDist), 1e-4);
   float fillOpacity = clamp(signedDist / aa + 0.5, 0.0, 1.0);
   float strokeDist = signedDist + u_strokeWidth;

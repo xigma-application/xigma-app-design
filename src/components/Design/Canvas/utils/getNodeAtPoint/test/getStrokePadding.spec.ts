@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -24,6 +24,30 @@ describe('getStrokePadding', () => {
   it('should return half the stroke width when a node has a stroke color and a positive stroke width', () => {
     // mock
     const node = buildRectangle({ strokeColor: '#000000', strokeWidth: 8 });
+
+    // result
+    expect(getStrokePadding(node)).toBe(4);
+  });
+
+  it('should return the full stroke width outward for an outside-aligned stroke', () => {
+    // mock
+    const node = buildRectangle({ strokeAlign: StrokeAlign.outside, strokeColor: '#000000', strokeWidth: 8 });
+
+    // result
+    expect(getStrokePadding(node)).toBe(8);
+  });
+
+  it('should return 0 outward for an inside-aligned stroke', () => {
+    // mock
+    const node = buildRectangle({ strokeAlign: StrokeAlign.inside, strokeColor: '#000000', strokeWidth: 8 });
+
+    // result
+    expect(getStrokePadding(node)).toBe(0);
+  });
+
+  it('should return half the stroke width for an explicit centered stroke', () => {
+    // mock
+    const node = buildRectangle({ strokeAlign: StrokeAlign.center, strokeColor: '#000000', strokeWidth: 8 });
 
     // result
     expect(getStrokePadding(node)).toBe(4);

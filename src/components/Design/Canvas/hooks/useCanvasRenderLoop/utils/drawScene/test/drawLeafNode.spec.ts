@@ -113,7 +113,7 @@ describe('drawLeafNode', () => {
 
     // result — the fill is dimmed, but the stroke outline still draws at full opacity (not covered by this scope)
     expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.5 }, 200, 150, IDENTITY_VIEWPORT, 0);
-    expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined);
   });
 
   it('should draw a rectangle at its live reorder-preview position instead of its real stored x/y', () => {
@@ -227,7 +227,19 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#111', 3, 200, 150, IDENTITY_VIEWPORT, 15);
+    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      node,
+      '#111',
+      3,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      15,
+      undefined,
+    );
   });
 
   it('should draw a polygon with the threaded opacity', () => {

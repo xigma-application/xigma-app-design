@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TEllipseNode, TRectangleNode } from 'types/design/types';
 
 // utils
@@ -50,6 +50,22 @@ describe('getStrokeExpandedNode', () => {
 
     // result
     expect(getStrokeExpandedNode(node)).toMatchObject({ height: 18, width: 18, x: -4, y: -4 });
+  });
+
+  it('should grow the bounds by the full stroke width for an outside-aligned stroke', () => {
+    // mock
+    const node = buildRectangle({ strokeAlign: StrokeAlign.outside, strokeColor: '#000000', strokeWidth: 8 });
+
+    // result
+    expect(getStrokeExpandedNode(node)).toMatchObject({ height: 26, width: 26, x: -8, y: -8 });
+  });
+
+  it('should leave the bounds untouched for an inside-aligned stroke', () => {
+    // mock
+    const node = buildRectangle({ strokeAlign: StrokeAlign.inside, strokeColor: '#000000', strokeWidth: 8 });
+
+    // result
+    expect(getStrokeExpandedNode(node)).toBe(node);
   });
 
   it('should add the padding to an existing corner radius', () => {

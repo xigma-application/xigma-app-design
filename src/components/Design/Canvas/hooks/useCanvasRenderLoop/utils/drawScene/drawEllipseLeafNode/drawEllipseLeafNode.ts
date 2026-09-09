@@ -42,6 +42,7 @@ export const drawEllipseLeafNode = (context: TDrawContext, node: TEllipseNode, d
       canvasHeight,
       viewport,
       node.rotation,
+      node.strokeAlign,
     );
   }
 };

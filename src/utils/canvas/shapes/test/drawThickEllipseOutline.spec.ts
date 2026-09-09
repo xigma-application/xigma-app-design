@@ -1,6 +1,9 @@
 // others
 import { ELLIPSE_SEGMENTS } from 'constant/canvas';
 
+// types
+import { StrokeAlign } from 'types/design/enums';
+
 // utils
 import { drawThickEllipseOutline } from '../drawThickEllipseOutline';
 
@@ -61,6 +64,35 @@ describe('drawThickEllipseOutline', () => {
     expect(outerRightEdge).toBeCloseTo(11);
     // the inner ring stops short of the full radius (cx + rx = 10); a filled ellipse would reach all the way there
     expect(innerRightEdge).toBeCloseTo(9);
+  });
+
+  it('should grow only the outer ring for an outside-aligned stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — 2px stroke at zoom 1, rx 5: outer right edge at 12, inner right edge back on the path at 10
+    drawThickEllipseOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      StrokeAlign.outside,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[0]).toBeCloseTo(12);
+    expect(vertices[10]).toBeCloseTo(10);
   });
 
   it('should keep the border a constant size on screen regardless of zoom', () => {
