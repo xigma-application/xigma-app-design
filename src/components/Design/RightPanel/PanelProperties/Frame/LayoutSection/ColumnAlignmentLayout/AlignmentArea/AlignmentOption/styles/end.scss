@@ -1,0 +1,5 @@
+@mixin layout {
+  &--end {
+    align-items: flex-end;
+  }
+}

@@ -1,12 +1,14 @@
-@mixin layout {
-  flex-direction: row;
+@mixin layout($self) {
+  &--horizontal {
+    flex-direction: row;
 
-  .AlignmentOption__indicator {
-    height: 7px;
-    width: 2px;
+    #{$self}__indicator {
+      height: 7px;
+      width: 2px;
 
-    &:not(:first-child):not(:last-child) {
-      height: 10px;
+      &:not(:first-child):not(:last-child) {
+        height: 10px;
+      }
     }
   }
 }

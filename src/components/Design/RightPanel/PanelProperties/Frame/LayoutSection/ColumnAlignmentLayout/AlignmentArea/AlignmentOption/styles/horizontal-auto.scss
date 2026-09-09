@@ -1,13 +1,19 @@
-@mixin layout {
-  flex-direction: row;
+@mixin layout($self) {
+  &--horizontal-auto {
+    flex-direction: row;
 
-  .AlignmentOption__indicator {
-    display: none;
+    #{$self}__indicator {
+      display: none;
 
-    &:not(:first-child):not(:last-child) {
-      display: block;
-      height: 10px;
-      width: 2px;
+      &:not(:first-child):not(:last-child) {
+        display: block;
+        height: 10px;
+        width: 2px;
+      }
+    }
+
+    &.AlignmentOption__option-view--short #{$self}__indicator:not(:first-child):not(:last-child) {
+      height: 7px;
     }
   }
 }

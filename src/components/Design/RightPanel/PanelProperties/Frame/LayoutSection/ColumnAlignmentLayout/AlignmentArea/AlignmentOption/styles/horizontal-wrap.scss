@@ -1,15 +1,18 @@
-@mixin layout {
-  flex-direction: column;
-  gap: 2px;
-
-  .AlignmentOption__wrap-row {
-    display: flex;
-    flex-direction: row;
+@mixin layout($self) {
+  &--horizontal-wrap {
+    align-items: stretch;
+    flex-direction: column;
     gap: 2px;
 
-    .AlignmentOption__indicator {
-      height: 4px;
-      width: 2px;
+    #{$self}__wrap-row {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+
+      #{$self}__indicator {
+        height: 4px;
+        width: 2px;
+      }
     }
   }
 }

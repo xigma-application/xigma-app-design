@@ -1,3 +1,5 @@
+@use './styles/center' as center;
+@use './styles/end' as end;
 @use './styles/horizontal-auto' as horizontalAuto;
 @use './styles/horizontal-layout' as horizontal;
 @use './styles/horizontal-wrap' as horizontalWrap;
@@ -48,43 +50,13 @@
     display: flex;
     gap: 2px;
 
-    &--vertical {
-      @include vertical.layout;
-    }
-
-    &--vertical-auto {
-      @include verticalAuto.layout;
-
-      &.AlignmentOption__option-view--short #{$self}__indicator:not(:first-child):not(:last-child) {
-        width: 7px;
-      }
-    }
-
-    &--horizontal {
-      @include horizontal.layout;
-    }
-
-    &--horizontal-auto {
-      @include horizontalAuto.layout;
-
-      &.AlignmentOption__option-view--short #{$self}__indicator:not(:first-child):not(:last-child) {
-        height: 7px;
-      }
-    }
-
-    &--center {
-      align-items: center;
-    }
-
-    &--end {
-      align-items: flex-end;
-    }
-
-    &--horizontal-wrap {
-      @include horizontalWrap.layout;
-
-      align-items: stretch;
-    }
+    @include vertical.layout($self);
+    @include verticalAuto.layout($self);
+    @include horizontal.layout($self);
+    @include horizontalAuto.layout($self);
+    @include horizontalWrap.layout($self);
+    @include center.layout;
+    @include end.layout;
   }
 
   &__indicator {
