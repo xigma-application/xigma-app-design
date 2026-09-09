@@ -6,7 +6,7 @@ import { TFrameNode } from 'types/design/types';
 
 // utils
 import { computeAutoLayoutSingleLinePositions } from './computeAutoLayoutSingleLinePositions';
-import { computeAutoLayoutWrappedPositions } from './computeAutoLayoutWrappedPositions';
+import { computeAutoLayoutWrappedPositions } from './computeAutoLayoutWrappedPositions/computeAutoLayoutWrappedPositions';
 
 export const computeAutoLayoutPositions = (
   frame: TFrameNode,
