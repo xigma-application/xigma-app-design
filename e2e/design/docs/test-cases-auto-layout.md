@@ -604,7 +604,7 @@ whichever axis is in auto mode — there is no longer a single shared number for
 | 7   | Fill is not offered for an axis where the parent frame itself is hugging that axis (no budget to hand out); manually resizing a filling child resets it to Fixed, mirroring the existing Hug behavior                                                                                          |  ✅  |            —             |
 | 8   | Switching a frame's own axis to Hug resets any direct child that was filling that same axis back to Fixed, since a hugging parent has no leftover space to give                                                                                                                                |  ✅  |            —             |
 | 9   | Switching a frame's flow to freeForm or grid resets every direct child's Fill on both axes back to Fixed, since neither mode is managed by the fill-aware auto-layout engine; flipping between Horizontal and Vertical leaves Fill untouched, since both physical axes stay managed either way |  ✅  |            —             |
-| 10  | Under the updated Layout engine, fill children with different inside strokes split space so their **content areas** are equal (each box = its content share + its own inside-stroke width); under legacy they split total width evenly, ignoring child strokes                                    |  ✅  |            —             |
+| 10  | Under the updated Layout engine, fill children with different inside strokes split space so their **content areas** are equal (each box = its content share + its own inside-stroke width); under legacy they split total width evenly, ignoring child strokes                                 |  ✅  |            —             |
 
 #10 is unit-only, same rationale as #3–#5: `getAutoLayoutChildStrokeInset.spec.ts` and
 `getAutoLayoutFillSizes.spec.ts` pin the content-share math exactly per `layoutVersion`, and there is
@@ -844,3 +844,32 @@ regardless of which side of the app wrote it, no render-loop plumbing changed �
 picks the new ref up automatically. Updates live while scrubbing a field too, since the line's
 position is recomputed from the frame's _current_ padding value every frame, not snapshotted at
 hover-start.
+
+## Auto layout settings popover
+
+The "Properties" (gear) button on the Alignment row opens `PopoverAutoLayoutSettings`, a popover with
+one row per engine-level setting: Inside stroke (legacy only), Canvas stacking, Align text baseline,
+Auto spacing, Layout version. Every row is the same shape — a control → its own `commitXChange`
+util → `updateNode` → the `getAutoLayoutSyncPositions` pipeline reruns → the canvas repaints. The unit
+suite pins each `commitXChange`, each hook (persist + no-frame fallback) and the per-setting engine
+maths exhaustively; the only thing a browser adds is proof the real popover control dispatches and the
+engine reacts through the full round-trip. So `settings.spec.ts` covers that once per distinct
+_effect kind_ rather than once per row, reading the resulting child geometry back out of the store
+(same technique as `gap-handles.spec.ts`), except Canvas stacking whose effect is purely paint order
+and is read via a pixel sample.
+
+| #   | Scenario                                                                                                                                                                                             | Unit |          E2E          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------: |
+| 1   | Switching Layout version legacy↔updated in the popover reruns the engine end to end: a lone "between" child recentres under legacy, snaps to the start under updated, and the round-trip restores it |  ✅  | ✅ `settings.spec.ts` |
+| 2   | The Auto spacing control repositions a row of children differently for between / around / evenly, and round-trips back to the original between layout                                                |  ✅  | ✅ `settings.spec.ts` |
+| 3   | The Canvas stacking control flips which of two overlapping children (negative auto gap, legacy) paints on top, and round-trips                                                                       |  ✅  | ✅ `settings.spec.ts` |
+| 4   | Inside stroke (legacy only) — the frame stroke's contribution to child layout padding                                                                                                                |  ✅  |           —           |
+| 5   | Align text baseline — text children aligning by baseline vs by box                                                                                                                                   |  ✅  |           —           |
+
+#4 and #5 stay unit-only: #4's visible delta is a few px of child inset that needs a stroked frame and
+per-side measurement (`getFrameLayoutPadding.spec.ts` asserts it exactly per `layoutVersion`), and #5
+needs text children of differing font sizes for a small, font-metric-dependent shift
+(`getAutoLayoutBaselineExtent` / baseline-offset specs cover it) — neither is a browser-timing or
+paint-order concern a screenshot catches that the unit suite can't. #1–#3 earn e2e because they prove
+the popover→dispatch→engine→canvas wiring that no unit exercises; the three cover the two distinct
+observable effects (child _position_ via store readback, paint _order_ via pixel sample).
