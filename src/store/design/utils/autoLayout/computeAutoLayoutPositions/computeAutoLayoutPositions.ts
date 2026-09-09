@@ -1,12 +1,14 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode } from 'types/design/enums';
 import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
 
 // utils
+import { clampAutoLayoutFrameToPadding } from './clampAutoLayoutFrameToPadding';
 import { computeAutoLayoutSingleLinePositions } from './computeAutoLayoutSingleLinePositions';
 import { computeAutoLayoutWrappedPositions } from './computeAutoLayoutWrappedPositions/computeAutoLayoutWrappedPositions';
+import { isAutoLayoutWrapEnabled } from './isAutoLayoutWrapEnabled';
 
 export const computeAutoLayoutPositions = (
   frame: TFrameNode,
@@ -20,16 +22,15 @@ export const computeAutoLayoutPositions = (
   isCounterGapAuto: boolean,
   alignTextBaseline = false,
   autoSpacing = AutoSpacing.between,
+  layoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
-  const primaryMode = isHorizontal ? widthMode : heightMode;
-  const primaryMax = isHorizontal ? frame.maxWidth : frame.maxHeight;
-  const hugWrapEligible = primaryMode !== SizingMode.hug || primaryMax !== undefined;
-  const wrapEnabled = Boolean(frame.layoutWrap) && hugWrapEligible;
 
-  if (wrapEnabled) {
+  clampAutoLayoutFrameToPadding(frame, widthMode, heightMode, padding, layoutVersion);
+
+  if (isAutoLayoutWrapEnabled(frame, isHorizontal, widthMode, heightMode)) {
     return computeAutoLayoutWrappedPositions(
       frame,
       layoutMode,
@@ -42,6 +43,7 @@ export const computeAutoLayoutPositions = (
       isCounterGapAuto,
       alignTextBaseline,
       autoSpacing,
+      layoutVersion,
     );
   }
 
@@ -55,5 +57,6 @@ export const computeAutoLayoutPositions = (
     isPrimaryGapAuto,
     alignTextBaseline,
     autoSpacing,
+    layoutVersion,
   );
 };

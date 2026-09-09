@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
@@ -32,6 +32,7 @@ export const getAutoLayoutChildPositions = (
   isPrimaryGapAuto = false,
   alignTextBaseline = false,
   autoSpacing = AutoSpacing.between,
+  layoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const { x: xAlign, y: yAlign } = getAlignmentComponents(alignment);
@@ -48,6 +49,7 @@ export const getAutoLayoutChildPositions = (
     itemSpacing,
     autoSpacing,
     primaryAlign,
+    layoutVersion,
   );
   const { maxBaseline } = getAutoLayoutBaselineExtent(children);
   let offset = startOffset;

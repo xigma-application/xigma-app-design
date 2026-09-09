@@ -11,7 +11,16 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignTextBaseline, AutoSpacing, CanvasStacking, GapMode, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import {
+  AlignTextBaseline,
+  AutoSpacing,
+  CanvasStacking,
+  GapMode,
+  InsideStroke,
+  LayoutMode,
+  LayoutVersion,
+  NodeType,
+} from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -266,7 +275,30 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     // action
-    act(() => result.current.onSelectLayout('updated'));
+    act(() => result.current.onSelectLayout(LayoutVersion.legacy));
+
+    // result
+    expect(result.current.layoutValue).toBe('legacy');
+  });
+
+  it('should persist the selected layout version to the selected frame node', () => {
+    // before
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectLayout(LayoutVersion.legacy));
+
+    // result
+    expect(read(frameId).layoutVersion).toBe(LayoutVersion.legacy);
+  });
+
+  it('should fall back to the updated layout version when no frame is selected', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectLayout(LayoutVersion.legacy));
 
     // result
     expect(result.current.layoutValue).toBe('updated');
@@ -560,7 +592,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     act(() => result.current.onMouseEnterLayout());
 
     // action — hovering a candidate option while the row is also hovered
-    act(() => result.current.onHoverLayoutOption('legacy'));
+    act(() => result.current.onHoverLayoutOption(LayoutVersion.legacy));
 
     // result
     expect(result.current.layoutPreviewValue).toBe('legacy');
@@ -571,7 +603,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterLayout());
-    act(() => result.current.onHoverLayoutOption('legacy'));
+    act(() => result.current.onHoverLayoutOption(LayoutVersion.legacy));
 
     // action
     act(() => result.current.onHoverLayoutOption(null));

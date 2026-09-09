@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -23,6 +23,7 @@ export const computeAutoLayoutSingleLinePositions = (
   isPrimaryGapAuto: boolean,
   alignTextBaseline = false,
   autoSpacing = AutoSpacing.between,
+  layoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
@@ -45,5 +46,6 @@ export const computeAutoLayoutSingleLinePositions = (
     isPrimaryGapAuto,
     alignTextBaseline,
     autoSpacing,
+    layoutVersion,
   );
 };

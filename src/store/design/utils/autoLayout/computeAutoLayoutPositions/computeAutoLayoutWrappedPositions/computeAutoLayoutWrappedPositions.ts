@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion } from 'types/design/enums';
 import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutPadding } from '../../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
@@ -23,6 +23,7 @@ export const computeAutoLayoutWrappedPositions = (
   isCounterGapAuto: boolean,
   alignTextBaseline = false,
   autoSpacing = AutoSpacing.between,
+  layoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildPosition[] => {
   const { counterMode, heightMode, isHorizontal, primaryMax, primaryMode, widthMode } = getAutoLayoutWrapSizingModes(frame, layoutMode);
   const availablePrimary = getAutoLayoutWrapAvailablePrimarySpace(frame, isHorizontal, primaryMode, primaryMax, padding);
@@ -60,5 +61,6 @@ export const computeAutoLayoutWrappedPositions = (
     isCounterGapAuto,
     alignTextBaseline,
     autoSpacing,
+    layoutVersion,
   );
 };

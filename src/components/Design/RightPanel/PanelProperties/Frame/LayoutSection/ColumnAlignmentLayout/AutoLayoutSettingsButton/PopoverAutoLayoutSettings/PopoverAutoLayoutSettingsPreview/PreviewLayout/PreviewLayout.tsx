@@ -5,6 +5,7 @@ import { FC } from 'react';
 import styles from './preview-layout.module.scss';
 
 // types
+import { LayoutVersion } from 'types/design/enums';
 import { TLayoutVersion } from '../../types';
 
 export type TPreviewLayoutProps = {
@@ -12,7 +13,7 @@ export type TPreviewLayoutProps = {
 };
 
 export const PreviewLayout: FC<TPreviewLayoutProps> = ({ value }) => {
-  const legacy = value === 'legacy';
+  const legacy = value === LayoutVersion.legacy;
 
   return (
     <div className={cx(styles.PreviewLayout, { [styles['PreviewLayout--legacy']]: legacy })}>

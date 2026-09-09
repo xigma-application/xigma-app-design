@@ -1,5 +1,5 @@
 // types
-import { AutoSpacing } from 'types/design/enums';
+import { AutoSpacing, LayoutVersion } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutPrimarySpacing } from '../getAutoLayoutPrimarySpacing';
@@ -47,6 +47,25 @@ describe('getAutoLayoutPrimarySpacing', () => {
 
     it('should centre a single item, since its two half-edges combine into full edges of equal size', () => {
       expect(getAutoLayoutPrimarySpacing(200, 60, 1, AutoSpacing.around)).toEqual({ edgeOffset: 70, gap: 140 });
+    });
+  });
+
+  describe('legacy layout version', () => {
+    it('should let the between gap go negative when items overflow the available space', () => {
+      // 50 available, 80 total, 3 items -> raw leftover -30 across 2 gaps = -15
+      expect(getAutoLayoutPrimarySpacing(50, 80, 3, AutoSpacing.between, LayoutVersion.legacy)).toEqual({ edgeOffset: 0, gap: -15 });
+    });
+
+    it('should let the evenly units go negative on overflow', () => {
+      // raw leftover -30 / (3 + 1) = -7.5
+      expect(getAutoLayoutPrimarySpacing(50, 80, 3, AutoSpacing.evenly, LayoutVersion.legacy)).toEqual({
+        edgeOffset: -7.5,
+        gap: -7.5,
+      });
+    });
+
+    it('should still clamp under the updated layout version', () => {
+      expect(getAutoLayoutPrimarySpacing(50, 80, 3, AutoSpacing.between, LayoutVersion.updated)).toEqual({ edgeOffset: 0, gap: 0 });
     });
   });
 });

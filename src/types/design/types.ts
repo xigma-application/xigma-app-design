@@ -9,6 +9,7 @@ import {
   GapMode,
   InsideStroke,
   LayoutMode,
+  LayoutVersion,
   NodeType,
   PathType,
   SizingMode,
@@ -109,6 +110,7 @@ export type TFrameNode = TBaseNode & {
   insideStroke?: InsideStroke;
   layoutAlignment?: AlignmentLayout;
   layoutMode?: LayoutMode;
+  layoutVersion?: LayoutVersion;
   layoutWrap?: boolean;
   paddingBottom?: number;
   paddingLeft?: number;

@@ -55,6 +55,11 @@ export enum LayoutMode {
   vertical = 'vertical',
 }
 
+export enum LayoutVersion {
+  legacy = 'legacy',
+  updated = 'updated',
+}
+
 export enum NodeType {
   ellipse = 'ellipse',
   frame = 'frame',

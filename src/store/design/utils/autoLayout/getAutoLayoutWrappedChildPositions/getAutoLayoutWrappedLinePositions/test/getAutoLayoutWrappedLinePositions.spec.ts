@@ -3,7 +3,7 @@ import { AutoSpacing } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutWrappedLinePositions } from '../getAutoLayoutWrappedLinePositions';
-import { getTextBaselineOffset } from '../../getTextBaselineOffset';
+import { getTextBaselineOffset } from '../../../getTextBaselineOffset';
 
 const frame = { height: 100, width: 200, x: 100, y: 200 };
 const line = [

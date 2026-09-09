@@ -16,7 +16,16 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TAlignTextBaseline, TAutoSpacing, TCanvasStacking, TInsideStroke, TLayoutVersion } from '../types';
-import { AlignTextBaseline, AutoSpacing, CanvasStacking, GapMode, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import {
+  AlignTextBaseline,
+  AutoSpacing,
+  CanvasStacking,
+  GapMode,
+  InsideStroke,
+  LayoutMode,
+  LayoutVersion,
+  NodeType,
+} from 'types/design/enums';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
@@ -25,6 +34,7 @@ import { commitAlignTextBaselineChange } from './utils/commitAlignTextBaselineCh
 import { commitAutoSpacingChange } from './utils/commitAutoSpacingChange';
 import { commitCanvasStackingChange } from './utils/commitCanvasStackingChange';
 import { commitInsideStrokeChange } from './utils/commitInsideStrokeChange';
+import { commitLayoutVersionChange } from './utils/commitLayoutVersionChange';
 import { getAlignTextBaselineToggleButtons } from './utils/getAlignTextBaselineToggleButtons';
 
 export type TUsePopoverAutoLayoutSettingsResult = {
@@ -76,10 +86,10 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
   const canvasStacking = frameNode?.canvasStacking ?? CanvasStacking.lastOnTop;
   const alignTextBaseline = frameNode?.alignTextBaseline ?? AlignTextBaseline.off;
   const autoSpacing = frameNode?.autoSpacing ?? AutoSpacing.between;
+  const layoutVersion = frameNode?.layoutVersion ?? LayoutVersion.updated;
   const isHorizontal = frameNode?.layoutMode === LayoutMode.horizontal;
   const primaryGapMode = isHorizontal ? frameNode?.horizontalGapMode : frameNode?.verticalGapMode;
   const autoSpacingDisabled = primaryGapMode !== GapMode.auto;
-  const [layoutVersion, setLayoutVersion] = useState<TLayoutVersion>('updated');
   const [isPreviewingInsideStroke, setIsPreviewingInsideStroke] = useState(false);
   const [hoveredInsideStrokeOption, setHoveredInsideStrokeOption] = useState<TInsideStroke | null>(null);
   const [isPreviewingCanvasStacking, setIsPreviewingCanvasStacking] = useState(false);
@@ -131,6 +141,6 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
     onSelectAutoSpacing: (value: TAutoSpacing) => commitAutoSpacingChange(dispatch, frameNode, value),
     onSelectCanvasStacking: (value: TCanvasStacking) => commitCanvasStackingChange(dispatch, frameNode, value),
     onSelectInsideStroke: (value: TInsideStroke) => commitInsideStrokeChange(dispatch, frameNode, value),
-    onSelectLayout: (value: TLayoutVersion) => setLayoutVersion(value),
+    onSelectLayout: (value: TLayoutVersion) => commitLayoutVersionChange(dispatch, frameNode, value),
   };
 };

@@ -17,4 +17,12 @@ describe('getDistributedGap', () => {
   it('should return 0 for zero items', () => {
     expect(getDistributedGap(100, 0, 0)).toBe(0);
   });
+
+  it('should allow a negative gap when clamping to zero is disabled', () => {
+    expect(getDistributedGap(50, 80, 3, false)).toBe(-15);
+  });
+
+  it('should still clamp a single item to 0 even when clamping is disabled', () => {
+    expect(getDistributedGap(100, 40, 1, false)).toBe(0);
+  });
 });

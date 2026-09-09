@@ -1,5 +1,5 @@
 // types
-import { AutoSpacing } from 'types/design/enums';
+import { AutoSpacing, LayoutVersion } from 'types/design/enums';
 
 // utils
 import { getDistributedGap } from './getDistributedGap';
@@ -11,9 +11,12 @@ export const getAutoLayoutPrimarySpacing = (
   itemsTotalSize: number,
   itemCount: number,
   mode: AutoSpacing,
+  layoutVersion: LayoutVersion = LayoutVersion.updated,
 ): TAutoLayoutPrimarySpacing => {
   if (itemCount !== 0) {
-    const leftover = Math.max(0, availableSpace - itemsTotalSize);
+    const clampToZero = layoutVersion !== LayoutVersion.legacy;
+    const rawLeftover = availableSpace - itemsTotalSize;
+    const leftover = clampToZero ? Math.max(0, rawLeftover) : rawLeftover;
 
     switch (mode) {
       case AutoSpacing.around: {
@@ -25,7 +28,7 @@ export const getAutoLayoutPrimarySpacing = (
         return { edgeOffset: unit, gap: unit };
       }
       default:
-        return { edgeOffset: 0, gap: getDistributedGap(availableSpace, itemsTotalSize, itemCount) };
+        return { edgeOffset: 0, gap: getDistributedGap(availableSpace, itemsTotalSize, itemCount, clampToZero) };
     }
   }
 

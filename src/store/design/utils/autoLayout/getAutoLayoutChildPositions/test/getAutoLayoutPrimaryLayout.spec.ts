@@ -1,5 +1,5 @@
 // types
-import { AutoSpacing } from 'types/design/enums';
+import { AutoSpacing, LayoutVersion } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutPrimaryLayout } from '../getAutoLayoutPrimaryLayout';
@@ -31,5 +31,31 @@ describe('getAutoLayoutPrimaryLayout', () => {
 
     expect(layout.effectiveGap).toBeCloseTo(unit, 6);
     expect(layout.offset).toBeCloseTo(unit / 2, 6);
+  });
+
+  it('should centre a lone child in a "between" auto stack under the legacy layout version', () => {
+    const layout = getAutoLayoutPrimaryLayout(200, 60, 1, true, 10, AutoSpacing.between, 'start', LayoutVersion.legacy);
+
+    // content length = 60; offset = (200 - 60) / 2 = 70
+    expect(layout).toEqual({ effectiveGap: 0, offset: 70 });
+  });
+
+  it('should keep a lone child in a "between" auto stack start-aligned under the updated layout version', () => {
+    const layout = getAutoLayoutPrimaryLayout(200, 60, 1, true, 10, AutoSpacing.between, 'start', LayoutVersion.updated);
+
+    expect(layout).toEqual({ effectiveGap: 0, offset: 0 });
+  });
+
+  it('should not re-centre a lone child under legacy for the "around" or "evenly" modes', () => {
+    const around = getAutoLayoutPrimaryLayout(200, 60, 1, true, 0, AutoSpacing.around, 'start', LayoutVersion.legacy);
+
+    expect(around).toEqual({ effectiveGap: 140, offset: 70 });
+  });
+
+  it('should let the between auto gap go negative under the legacy layout version', () => {
+    const layout = getAutoLayoutPrimaryLayout(50, 80, 3, true, 0, AutoSpacing.between, 'start', LayoutVersion.legacy);
+
+    // raw leftover -30 across 2 gaps = -15
+    expect(layout.effectiveGap).toBe(-15);
   });
 });

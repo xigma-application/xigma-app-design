@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import i18n from 'i18next';
 
 // types
-import { AlignTextBaseline, AutoSpacing, CanvasStacking, InsideStroke } from 'types/design/enums';
+import { AlignTextBaseline, AutoSpacing, CanvasStacking, InsideStroke, LayoutVersion } from 'types/design/enums';
 
 // utils
 import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
@@ -46,7 +46,7 @@ describe('getPreviewContent', () => {
 
   it('should render the layout preview when a layout value is set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, layout: 'legacy' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, layout: LayoutVersion.legacy }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewLayout"]')).not.toBeNull();
@@ -61,7 +61,7 @@ describe('getPreviewContent', () => {
           autoSpacing: AutoSpacing.between,
           canvasStacking: CanvasStacking.lastOnTop,
           insideStroke: InsideStroke.included,
-          layout: 'legacy',
+          layout: LayoutVersion.legacy,
         },
         t,
       ),
@@ -99,7 +99,7 @@ describe('getPreviewContent', () => {
 
   it('should prioritize the auto spacing preview over the layout preview when both are set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: AutoSpacing.between, layout: 'legacy' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: AutoSpacing.between, layout: LayoutVersion.legacy }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewAutoSpacing"]')).not.toBeNull();

@@ -1,5 +1,5 @@
 // types
-import { AlignTextBaseline, AlignmentLayout, AutoSpacing, GapMode, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, AlignmentLayout, AutoSpacing, GapMode, LayoutMode, LayoutVersion, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -176,5 +176,103 @@ describe('getAutoLayoutSyncPositions', () => {
       { height: 20, id: 'a', width: 20, x: 0, y: 0 },
       { height: 20, id: 'b', width: 20, x: 30, y: 0 },
     ]);
+  });
+
+  describe('layout version', () => {
+    it('should overlap children with a negative auto gap under the legacy layout version', () => {
+      const layoutFrame = frame({
+        height: 20,
+        horizontalGapMode: GapMode.auto,
+        layoutVersion: LayoutVersion.legacy,
+        width: 50,
+      });
+      const sizes = [
+        { height: 20, id: 'a', width: 40 },
+        { height: 20, id: 'b', width: 40 },
+      ];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      // raw leftover 50 - 80 = -30 across the single gap
+      expect(positions).toEqual([
+        { height: 20, id: 'a', width: 40, x: 0, y: 0 },
+        { height: 20, id: 'b', width: 40, x: 10, y: 0 },
+      ]);
+    });
+
+    it('should collapse children to the start with a clamped auto gap under the updated layout version', () => {
+      const layoutFrame = frame({
+        height: 20,
+        horizontalGapMode: GapMode.auto,
+        layoutVersion: LayoutVersion.updated,
+        width: 50,
+      });
+      const sizes = [
+        { height: 20, id: 'a', width: 40 },
+        { height: 20, id: 'b', width: 40 },
+      ];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      expect(positions).toEqual([
+        { height: 20, id: 'a', width: 40, x: 0, y: 0 },
+        { height: 20, id: 'b', width: 40, x: 40, y: 0 },
+      ]);
+    });
+
+    it('should centre a lone child in a "between" auto stack under the legacy layout version', () => {
+      const layoutFrame = frame({
+        height: 20,
+        horizontalGapMode: GapMode.auto,
+        layoutVersion: LayoutVersion.legacy,
+        width: 200,
+      });
+      const sizes = [{ height: 20, id: 'a', width: 40 }];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      // (200 - 40) / 2 = 80
+      expect(positions).toEqual([{ height: 20, id: 'a', width: 40, x: 80, y: 0 }]);
+    });
+
+    it('should keep a lone child start-aligned in a "between" auto stack under the updated layout version', () => {
+      const layoutFrame = frame({
+        height: 20,
+        horizontalGapMode: GapMode.auto,
+        layoutVersion: LayoutVersion.updated,
+        width: 200,
+      });
+      const sizes = [{ height: 20, id: 'a', width: 40 }];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      expect(positions).toEqual([{ height: 20, id: 'a', width: 40, x: 0, y: 0 }]);
+    });
+
+    it('should widen a fixed frame narrower than its padding to the padding width under the updated layout version', () => {
+      const layoutFrame = frame({ height: 100, paddingLeft: 30, paddingRight: 30, width: 40 });
+      const sizes = [{ height: 20, id: 'a', width: 10 }];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      // frame widened 40 -> 60, child sits at the left padding edge
+      expect(layoutFrame.width).toBe(60);
+      expect(positions).toEqual([{ height: 20, id: 'a', width: 10, x: 30, y: 0 }]);
+    });
+
+    it('should leave a fixed frame narrower than its padding untouched under the legacy layout version', () => {
+      const layoutFrame = frame({
+        height: 100,
+        layoutVersion: LayoutVersion.legacy,
+        paddingLeft: 30,
+        paddingRight: 30,
+        width: 40,
+      });
+      const sizes = [{ height: 20, id: 'a', width: 10 }];
+
+      getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      expect(layoutFrame.width).toBe(40);
+    });
   });
 });

@@ -1,12 +1,12 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion } from 'types/design/enums';
 import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 
 // utils
 import { getAlignmentComponents } from '../getAlignmentComponents';
 import { getAutoLayoutWrappedCounterLayout } from './getAutoLayoutWrappedCounterLayout';
-import { getAutoLayoutWrappedLinePositions } from './getAutoLayoutWrappedLinePositions';
+import { getAutoLayoutWrappedLinePositions } from './getAutoLayoutWrappedLinePositions/getAutoLayoutWrappedLinePositions';
 
 export const getAutoLayoutWrappedChildPositions = (
   layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
@@ -19,6 +19,7 @@ export const getAutoLayoutWrappedChildPositions = (
   isCounterGapAuto = false,
   alignTextBaseline = false,
   autoSpacing = AutoSpacing.between,
+  layoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const availablePrimary = isHorizontal ? frame.width : frame.height;
@@ -56,6 +57,7 @@ export const getAutoLayoutWrappedChildPositions = (
       alignTextBaseline,
       lineThicknesses[lineIndex],
       counterOffset,
+      layoutVersion,
     );
 
     positions.push(...linePositions);
