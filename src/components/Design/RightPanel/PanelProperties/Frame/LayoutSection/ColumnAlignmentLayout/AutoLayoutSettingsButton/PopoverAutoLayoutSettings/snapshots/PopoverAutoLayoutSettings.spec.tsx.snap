@@ -1,0 +1,317 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] = `
+<DocumentFragment>
+  <div
+    class="_PopoverAutoLayoutSettings_12cf0b"
+  >
+    <div
+      class="_PopoverAutoLayoutSettingsHeader_51fba3"
+    >
+      <span
+        class="_PopoverAutoLayoutSettingsHeader__title_51fba3"
+      >
+        Auto layout settings
+      </span>
+      <button
+        aria-label="Close"
+        aria-pressed="false"
+        class="_Button_b88d2e _PopoverAutoLayoutSettingsHeader__close_51fba3"
+        data-state="closed"
+        style="padding: 0px;"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24L"
+          fill="none"
+          height="22"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="22"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M17.354 6.646a.5.5 0 0 1 0 .708L12.707 12l4.647 4.646a.5.5 0 0 1-.708.708L12 12.707l-4.646 4.647a.5.5 0 0 1-.708-.708L11.293 12 6.646 7.354a.5.5 0 0 1 .708-.707L12 11.293l4.646-4.647a.5.5 0 0 1 .708 0"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_PopoverAutoLayoutSettingsPreview_6ecfc6"
+    >
+      <span
+        class="_PopoverAutoLayoutSettingsPreview__label_6ecfc6"
+      >
+        Preview
+      </span>
+    </div>
+    <div
+      class="_PopoverAutoLayoutSettings__rows_12cf0b"
+    >
+      <div
+        class="_PopoverAutoLayoutSettingsRow_af31be"
+      >
+        <span
+          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+        >
+          Inside stroke
+        </span>
+        <div
+          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+            data-state="closed"
+            data-test-bypass-global-shortcuts="true"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Included
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        class="_PopoverAutoLayoutSettingsRow_af31be"
+      >
+        <span
+          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+        >
+          Canvas stacking
+        </span>
+        <div
+          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+            data-state="closed"
+            data-test-bypass-global-shortcuts="true"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Last on top
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        class="_PopoverAutoLayoutSettingsRow_af31be"
+      >
+        <span
+          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+        >
+          Align text baseline
+        </span>
+        <div
+          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+        >
+          <div
+            class="_ToggleButtonGroup_d11681 _PopoverAutoLayoutSettings__toggle_12cf0b"
+            data-test-toggle-button-group=""
+          >
+            <button
+              aria-label="Off"
+              aria-pressed="true"
+              class="_ToggleButtonGroup__button_d11681 _ToggleButtonGroup__button--selected_d11681"
+              data-state="closed"
+              type="button"
+            >
+              <svg
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 12 1"
+                width="12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="On"
+              aria-pressed="false"
+              class="_ToggleButtonGroup__button_d11681"
+              data-state="closed"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="Icon"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="_PopoverAutoLayoutSettingsRow_af31be _PopoverAutoLayoutSettingsRow--disabled_af31be"
+      >
+        <span
+          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+        >
+          Auto spacing
+        </span>
+        <div
+          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+        >
+          <span
+            data-state="closed"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Between
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+      </div>
+      <div
+        class="_PopoverAutoLayoutSettingsRow_af31be"
+      >
+        <span
+          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+        >
+          Layout
+        </span>
+        <div
+          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+        >
+          <div
+            class="_PopoverAutoLayoutSettings__layout-options_12cf0b"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              data-state="closed"
+              fill="none"
+              height="16"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="16"
+            >
+              <path
+                d="M8 2a6 6 0 1 1 0 12A6 6 0 0 1 8 2m0 1a5 5 0 1 0 0 10A5 5 0 0 0 8 3m0 4a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 8 7m0-2.25a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              type="button"
+            >
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Updated
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

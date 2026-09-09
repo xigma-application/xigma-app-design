@@ -1,0 +1,40 @@
+$circleCount: 3;
+
+.PreviewCanvasStacking {
+  align-items: center;
+  border: 1px dashed var(--color-neutral-2);
+  border-radius: 3px;
+  display: flex;
+  height: 63px;
+  justify-content: center;
+  width: 123px;
+
+  &--first-on-top {
+    .PreviewCanvasStacking__circle {
+      @for $i from 1 through $circleCount {
+        &:nth-child(#{$i}) {
+          z-index: $circleCount - $i + 1;
+        }
+      }
+    }
+  }
+
+  &__circle {
+    align-items: center;
+    background-color: var(--color-neutral-5);
+    border: 1.5px solid var(--color-neutral-1);
+    border-radius: 50%;
+    color: var(--color-neutral-1);
+    display: flex;
+    font-size: 18px;
+    font-weight: 400;
+    height: 41px;
+    justify-content: center;
+    position: relative;
+    width: 41px;
+
+    &:not(:first-child) {
+      margin-left: -10px;
+    }
+  }
+}

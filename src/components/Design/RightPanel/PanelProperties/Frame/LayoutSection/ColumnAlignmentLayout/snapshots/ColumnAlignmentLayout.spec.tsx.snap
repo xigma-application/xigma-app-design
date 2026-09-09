@@ -297,6 +297,8 @@ exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap r
           class="_SectionColumnButtonIcons_71f71e"
         >
           <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
             aria-label="Properties"
             aria-pressed="false"
             class="_Button_b88d2e"

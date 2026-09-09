@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 // components
 import Popover from './Popover';
+import { TooltipProvider } from 'shared';
 
 describe('Popover snapshots', () => {
   it('should render Popover', () => {
@@ -101,6 +102,48 @@ describe('Popover behaviors', () => {
 
     // result
     expect(content.style.transform).toBe('');
+  });
+
+  it('should render the trigger element itself, without an extra wrapping button, when asChild is set', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(
+      <Popover
+        asChild
+        trigger={
+          <button aria-label="Open" type="button">
+            Open
+          </button>
+        }
+      >
+        Popover content
+      </Popover>,
+    );
+
+    // result — the passed-in button IS the trigger, not a button wrapped around another button
+    expect(screen.getAllByRole('button', { name: 'Open' })).toHaveLength(1);
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+
+    // result
+    expect(screen.getByText('Popover content')).toBeInTheDocument();
+  });
+
+  it('should not render the trigger tooltip content until the trigger is hovered', () => {
+    // before
+    render(
+      <TooltipProvider>
+        <Popover trigger={<span>Open</span>} triggerTooltip="Trigger tooltip">
+          Popover content
+        </Popover>
+      </TooltipProvider>,
+    );
+
+    // result
+    expect(screen.queryByText('Trigger tooltip')).not.toBeInTheDocument();
   });
 
   it('should wrap its children in a PopoverScrollArea when scrollable', async () => {

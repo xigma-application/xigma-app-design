@@ -8,30 +8,47 @@ import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
 import { Icon } from 'shared';
 
 // hooks
+import { useDropdownHoverOption } from './hooks/useDropdownHoverOption';
 import { useDropdownState } from './hooks/useDropdownState';
 
 // styles
 import styles from './dropdown.module.scss';
 
 // types
-import { TDropdownOption } from './types';
+import { TDropdownOption, TDropdownVariant } from './types';
 import { E2EAttribute } from 'types/e2e';
 
 export type TDropdownProps<TValue extends string> = {
   className?: string;
+  disabled?: boolean;
+  onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
   value: TValue;
+  variant?: TDropdownVariant;
 };
 
-export const Dropdown = <TValue extends string>({ className = '', onSelect, options, value }: TDropdownProps<TValue>): ReactElement => {
+export const Dropdown = <TValue extends string>({
+  className = '',
+  disabled = false,
+  onHoverOption,
+  onSelect,
+  options,
+  value,
+  variant = 'filled',
+}: TDropdownProps<TValue>): ReactElement => {
   const selectedOption = options.find((option) => option.value === value);
   const { handleKeyDown, handleOpenChange, highlightedIndex, isOpen, setHighlightedIndex } = useDropdownState(options, value, onSelect);
+
+  useDropdownHoverOption(options, highlightedIndex, isOpen, onHoverOption);
 
   return (
     <PopoverPrimitive.Root onOpenChange={handleOpenChange} open={isOpen}>
       <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
-        <PopoverPrimitive.Trigger className={cx(styles.Dropdown, className)}>
+        <PopoverPrimitive.Trigger
+          className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
+          disabled={disabled}
+        >
           <span className={styles.Dropdown__label}>{selectedOption?.label}</span>
           <Icon name="ChevronDown" size={12} />
         </PopoverPrimitive.Trigger>

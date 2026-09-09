@@ -16,15 +16,24 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TToggleButton } from './types';
 
 export type TToggleButtonGroupProps = {
+  className?: string;
   e2eValue?: TE2EValue;
   onChange: TFunc<[string]>;
+  onHoverOption?: TFunc<[string | null]>;
   toggleButtons: TToggleButton[];
   value: string;
 };
 
-export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({ e2eValue = '', onChange, toggleButtons, value }) => (
+export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
+  className = '',
+  e2eValue = '',
+  onChange,
+  onHoverOption,
+  toggleButtons,
+  value,
+}) => (
   <E2EDataAttribute type={E2EAttribute.toggleButtonGroup} value={e2eValue}>
-    <div className={styles.ToggleButtonGroup}>
+    <div className={cx(styles.ToggleButtonGroup, className)}>
       {toggleButtons.map(({ ariaLabel, icon, tooltip, value: buttonValue }) => (
         <Tooltip content={tooltip} key={buttonValue}>
           <button
@@ -32,6 +41,8 @@ export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({ e2eValue = '', 
             aria-pressed={value === buttonValue}
             className={cx(styles.ToggleButtonGroup__button, { [styles['ToggleButtonGroup__button--selected']]: value === buttonValue })}
             onClick={() => onChange(buttonValue)}
+            onMouseEnter={() => onHoverOption?.(buttonValue)}
+            onMouseLeave={() => onHoverOption?.(null)}
             type="button"
           >
             <Icon name={icon} size={12} />

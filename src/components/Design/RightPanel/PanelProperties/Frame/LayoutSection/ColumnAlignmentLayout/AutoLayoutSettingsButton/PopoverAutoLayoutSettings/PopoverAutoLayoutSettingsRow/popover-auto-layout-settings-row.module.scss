@@ -1,0 +1,22 @@
+@use '@xigma/scss/mixins/disabled';
+
+.PopoverAutoLayoutSettingsRow {
+  align-items: center;
+  display: flex;
+  height: 32px;
+  justify-content: space-between;
+  padding: 0 16px;
+
+  &--disabled {
+    @include disabled.disabled;
+  }
+
+  &__label {
+    align-items: center;
+    color: var(--color-neutral-1);
+    display: flex;
+    font-size: 11px;
+    font-weight: 450;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,41 @@
+.PreviewLayout {
+  border: 1px dashed var(--color-neutral-2);
+  border-radius: 3px;
+  display: flex;
+  gap: 8px;
+  height: 63px;
+  padding: 8px;
+  transition: 100ms linear;
+  width: 188px;
+
+  &--legacy {
+    .PreviewLayout__box-left {
+      flex-grow: 1;
+    }
+  }
+
+  &__box-left,
+  &__box-right {
+    background-color: var(--color-neutral-3);
+    border-radius: 2px;
+    transition: 100ms linear;
+  }
+
+  &__box-left {
+    align-items: center;
+    display: flex;
+    flex-grow: 1.5;
+    justify-content: center;
+  }
+
+  &__box-left-inner {
+    background-color: var(--color-neutral-5);
+    height: calc(100% - 12px);
+    transition: 100ms linear;
+    width: calc(100% - 12px);
+  }
+
+  &__box-right {
+    flex-grow: 1;
+  }
+}

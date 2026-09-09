@@ -1,0 +1,57 @@
+.PreviewInsideStroke {
+  align-items: center;
+  column-gap: 10px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  transform-origin: center center;
+  transition: 100ms linear;
+
+  * {
+    transition: 100ms linear;
+  }
+
+  &--excluded {
+    transform: scale(1.2);
+  }
+
+  &__tile-left,
+  &__tile-right {
+    align-items: center;
+    background-color: var(--color-neutral-3);
+    border-radius: 3px;
+    display: flex;
+    height: 48px;
+    justify-content: center;
+  }
+
+  &__tile-left {
+    width: 48px;
+  }
+
+  &__tile-right {
+    width: 92px;
+  }
+
+  &__tile-content {
+    background-color: var(--color-neutral-5);
+    height: 36px;
+    width: calc(100% - 12px);
+  }
+
+  &__stroke {
+    border: 1px dashed var(--color-neutral-2);
+    border-radius: 3px;
+    height: 48px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+
+    &--excluded {
+      height: calc(48px - 12px);
+      width: calc(150px - 12px);
+    }
+  }
+}

@@ -41,7 +41,7 @@ const ColumnAlignmentLayout: FC = () => {
   if (isVisible) {
     return (
       <UITools.SectionColumn
-        buttonsIcon={ColumnAlignmentLayoutButtonIcons(t)}
+        buttonsIcon={ColumnAlignmentLayoutButtonIcons()}
         gridColumnType={UITools.GridColumnType.oneByTwo}
         labels={[t(`${translationNameSpace}.label.alignment`), t(`${translationNameSpace}.label.gap`)]}
         withBottomMargin

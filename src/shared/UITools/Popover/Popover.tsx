@@ -2,6 +2,9 @@ import cx from 'classnames';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { FC, ReactNode } from 'react';
 
+// @xigma
+import { Tooltip } from '@xigma/components';
+
 // components
 import PopoverItem from './PopoverItem/PopoverItem';
 import PopoverScrollArea from './PopoverScrollArea/PopoverScrollArea';
@@ -15,6 +18,7 @@ import styles from './popover.module.scss';
 
 export type TPopoverProps = {
   align?: 'center' | 'end' | 'start';
+  asChild?: boolean;
   children: ReactNode;
   className?: string;
   moveable?: boolean;
@@ -27,10 +31,12 @@ export type TPopoverProps = {
   trigger: ReactNode;
   triggerAriaLabel?: string;
   triggerClassName?: string;
+  triggerTooltip?: ReactNode;
 };
 
 export const Popover: FC<TPopoverProps> = ({
   align = 'start',
+  asChild = false,
   children,
   className = '',
   moveable = false,
@@ -43,14 +49,17 @@ export const Popover: FC<TPopoverProps> = ({
   trigger,
   triggerAriaLabel,
   triggerClassName,
+  triggerTooltip,
 }) => {
   const { handleOpenChange, offset, onPointerDown, onPointerMove, onPointerUp } = usePopoverDrag(moveable, onOpenChange);
 
   return (
     <PopoverPrimitive.Root onOpenChange={handleOpenChange} open={open}>
-      <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} className={triggerClassName}>
-        {trigger}
-      </PopoverPrimitive.Trigger>
+      <Tooltip content={triggerTooltip}>
+        <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} asChild={asChild} className={triggerClassName}>
+          {trigger}
+        </PopoverPrimitive.Trigger>
+      </Tooltip>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           align={align}

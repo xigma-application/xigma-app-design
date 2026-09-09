@@ -66,6 +66,64 @@ describe('ToggleButtonGroup behaviors', () => {
     expect(onChange).toHaveBeenCalledWith('vertical');
   });
 
+  it('should call onHoverOption with the button value on mouse enter and null on mouse leave', () => {
+    // mock
+    const onHoverOption = vi.fn();
+
+    // before
+    renderToggleButtonGroup({
+      onChange: vi.fn(),
+      onHoverOption,
+      toggleButtons: [
+        { ariaLabel: 'Free form', icon: 'FlowDefault', value: 'freeForm' },
+        { ariaLabel: 'Vertical', icon: 'FlowVertical', value: 'vertical' },
+      ],
+      value: 'freeForm',
+    });
+
+    // action
+    fireEvent.mouseEnter(screen.getByLabelText('Vertical'));
+
+    // result
+    expect(onHoverOption).toHaveBeenCalledWith('vertical');
+
+    // action
+    fireEvent.mouseLeave(screen.getByLabelText('Vertical'));
+
+    // result
+    expect(onHoverOption).toHaveBeenCalledWith(null);
+  });
+
+  it('should not throw when no onHoverOption callback is provided', () => {
+    // before
+    renderToggleButtonGroup({
+      onChange: vi.fn(),
+      toggleButtons: [{ ariaLabel: 'Free form', icon: 'FlowDefault', value: 'freeForm' }],
+      value: 'freeForm',
+    });
+
+    // action
+    const hover = (): void => {
+      fireEvent.mouseEnter(screen.getByLabelText('Free form'));
+    };
+
+    // result
+    expect(hover).not.toThrow();
+  });
+
+  it('should apply an additional className to the wrapper', () => {
+    // before
+    const { container } = renderToggleButtonGroup({
+      className: 'custom-width',
+      onChange: vi.fn(),
+      toggleButtons: [{ ariaLabel: 'Free form', icon: 'FlowDefault', value: 'freeForm' }],
+      value: 'freeForm',
+    });
+
+    // result
+    expect(container.querySelector('.custom-width')).not.toBeNull();
+  });
+
   it('should expose the e2e value on the toggle button group wrapper', () => {
     // before
     const { container } = renderToggleButtonGroup({
