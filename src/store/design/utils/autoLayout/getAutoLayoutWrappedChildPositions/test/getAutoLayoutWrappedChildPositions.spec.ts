@@ -1,9 +1,9 @@
 // types
-import { AlignmentLayout, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
-import { getTextBaselineOffset } from '../getTextBaselineOffset';
+import { getTextBaselineOffset } from '../../getTextBaselineOffset';
 
 describe('getAutoLayoutWrappedChildPositions', () => {
   it('should place a single line at the top-left, same as the unwrapped engine, when everything fits', () => {
@@ -179,6 +179,56 @@ describe('getAutoLayoutWrappedChildPositions', () => {
     );
 
     // counter gap = (100 - 20 - 20) / (2 - 1) = 60; the second line starts at 20 + 60 = 80
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 50, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 50, x: 0, y: 80 },
+    ]);
+  });
+
+  it('should apply the "evenly" auto spacing mode within a line, including edge offsets', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 20, width: 200, x: 0, y: 0 },
+      [
+        [
+          { height: 20, id: 'a', width: 20 },
+          { height: 20, id: 'b', width: 20 },
+          { height: 20, id: 'c', width: 20 },
+        ],
+      ],
+      true,
+      false,
+      false,
+      AutoSpacing.evenly,
+    );
+
+    // leftover 140 split into (3 items + 1) = 4 equal units of 35
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 35, y: 0 },
+      { height: 20, id: 'b', width: 20, x: 90, y: 0 },
+      { height: 20, id: 'c', width: 20, x: 145, y: 0 },
+    ]);
+  });
+
+  it('should ignore the auto spacing mode for the gap between lines, since it only governs the primary axis within a line', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 100, width: 50, x: 0, y: 0 },
+      [[{ height: 20, id: 'a', width: 50 }], [{ height: 20, id: 'b', width: 50 }]],
+      false,
+      true,
+      false,
+      AutoSpacing.evenly,
+    );
+
+    // same result as plain "between" counter gap distribution (60, not an evenly/around variant) —
+    // the counter (between-line) gap always stays "between" regardless of the autoSpacing mode
     expect(positions).toEqual([
       { height: 20, id: 'a', width: 50, x: 0, y: 0 },
       { height: 20, id: 'b', width: 50, x: 0, y: 80 },

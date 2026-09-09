@@ -1,6 +1,6 @@
 // types
 import { LayoutMode, SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutPadding } from '../../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
 
@@ -23,12 +23,19 @@ export const buildAutoLayoutWrapLines = (
 ): TAutoLayoutChildSize[][] => {
   const lines = groupAutoLayoutChildrenIntoLines(layoutMode === LayoutMode.horizontal, itemSpacing, availablePrimary, sizes);
 
-  if (primaryMode === SizingMode.hug) {
-    applyAutoLayoutWrapPrimaryHugSize(frame, layoutMode, itemSpacing, padding, lines);
+  switch (primaryMode) {
+    case SizingMode.hug:
+      applyAutoLayoutWrapPrimaryHugSize(frame, layoutMode, itemSpacing, padding, lines);
+      break;
+    default:
+      break;
   }
-
-  if (counterMode === SizingMode.hug) {
-    applyAutoLayoutWrapCounterHugSize(frame, layoutMode, counterAxisSpacing, padding, lines, alignTextBaseline);
+  switch (counterMode) {
+    case SizingMode.hug:
+      applyAutoLayoutWrapCounterHugSize(frame, layoutMode, counterAxisSpacing, padding, lines, alignTextBaseline);
+      break;
+    default:
+      break;
   }
 
   return lines;

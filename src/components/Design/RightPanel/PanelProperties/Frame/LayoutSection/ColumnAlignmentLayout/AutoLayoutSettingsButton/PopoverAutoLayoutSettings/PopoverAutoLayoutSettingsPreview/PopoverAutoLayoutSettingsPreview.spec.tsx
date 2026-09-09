@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import PopoverAutoLayoutSettingsPreview, { TPopoverAutoLayoutSettingsPreviewProps } from './PopoverAutoLayoutSettingsPreview';
 
 // types
-import { AlignTextBaseline, CanvasStacking, InsideStroke } from 'types/design/enums';
+import { AlignTextBaseline, AutoSpacing, CanvasStacking, InsideStroke } from 'types/design/enums';
 
 const NO_PREVIEW: TPopoverAutoLayoutSettingsPreviewProps = {
   alignTextBaseline: null,
@@ -52,7 +52,7 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
 
   it('should render the auto spacing preview visual instead of the placeholder when a value is passed', () => {
     // before
-    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} autoSpacing="between" />);
+    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} autoSpacing={AutoSpacing.between} />);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();

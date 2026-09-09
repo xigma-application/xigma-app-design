@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildPosition } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildPosition } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TPoint } from 'types/canvas';
 
 export const getAutoLayoutSiblingPositions = (simulatedPositions: TAutoLayoutChildPosition[]): Record<string, TPoint> =>

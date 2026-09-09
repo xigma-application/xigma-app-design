@@ -1,6 +1,6 @@
 // types
 import { SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 import { TFrameNode } from 'types/design/types';
 

@@ -1,13 +1,12 @@
 // types
-import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, SizingMode } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
-import { getAlignmentComponents } from './getAlignmentComponents';
-import { getAutoLayoutBaselineExtent } from './getAutoLayoutBaselineExtent';
-import { getAutoLayoutChildBaselineOffset } from './getAutoLayoutChildBaselineOffset';
-import { getAxisOffset } from './getAxisOffset';
-import { getDistributedGap } from './getDistributedGap';
+import { getAlignmentComponents } from '../getAlignmentComponents';
+import { getAutoLayoutBaselineExtent } from '../getAutoLayoutBaselineExtent';
+import { getAutoLayoutChildPosition } from './getAutoLayoutChildPosition';
+import { getAutoLayoutPrimaryLayout } from './getAutoLayoutPrimaryLayout';
 
 export type TAutoLayoutChildSize = {
   fontSize?: number;
@@ -32,6 +31,7 @@ export const getAutoLayoutChildPositions = (
   children: TAutoLayoutChildSize[],
   isPrimaryGapAuto = false,
   alignTextBaseline = false,
+  autoSpacing = AutoSpacing.between,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const { x: xAlign, y: yAlign } = getAlignmentComponents(alignment);
@@ -40,20 +40,30 @@ export const getAutoLayoutChildPositions = (
   const primarySize = isHorizontal ? frame.width : frame.height;
   const counterSize = isHorizontal ? frame.height : frame.width;
   const childrenPrimarySize = children.reduce((total, child) => total + (isHorizontal ? child.width : child.height), 0);
-  const effectiveGap = isPrimaryGapAuto ? getDistributedGap(primarySize, childrenPrimarySize, children.length) : itemSpacing;
-  const contentLength = childrenPrimarySize + effectiveGap * Math.max(0, children.length - 1);
-  let offset = isPrimaryGapAuto ? 0 : getAxisOffset(primaryAlign, primarySize, contentLength);
+  const { effectiveGap, offset: startOffset } = getAutoLayoutPrimaryLayout(
+    primarySize,
+    childrenPrimarySize,
+    children.length,
+    isPrimaryGapAuto,
+    itemSpacing,
+    autoSpacing,
+    primaryAlign,
+  );
   const { maxBaseline } = getAutoLayoutBaselineExtent(children);
+  let offset = startOffset;
 
   return children.map((child) => {
+    const position = getAutoLayoutChildPosition(
+      child,
+      isHorizontal,
+      frame,
+      offset,
+      counterAlign,
+      counterSize,
+      alignTextBaseline,
+      maxBaseline,
+    );
     const size = isHorizontal ? child.width : child.height;
-    const counterChildSize = isHorizontal ? child.height : child.width;
-    const counterOffset = alignTextBaseline
-      ? maxBaseline - getAutoLayoutChildBaselineOffset(child)
-      : getAxisOffset(counterAlign, counterSize, counterChildSize);
-    const position = isHorizontal
-      ? { height: child.height, id: child.id, width: child.width, x: frame.x + offset, y: frame.y + counterOffset }
-      : { height: child.height, id: child.id, width: child.width, x: frame.x + counterOffset, y: frame.y + offset };
 
     offset += size + effectiveGap;
 

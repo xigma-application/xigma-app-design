@@ -30,6 +30,7 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
     alignTextBaselinePreviewValue,
     alignTextBaselineToggleButtons,
     alignTextBaselineValue,
+    autoSpacingDisabled,
     autoSpacingOptions,
     autoSpacingPreviewValue,
     autoSpacingValue,
@@ -106,6 +107,7 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
         )}
         {!isGridLayout && (
           <PopoverAutoLayoutSettingsAutoSpacing
+            disabled={autoSpacingDisabled}
             onHoverOption={onHoverAutoSpacingOption}
             onMouseEnter={onMouseEnterAutoSpacing}
             onMouseLeave={onMouseLeaveAutoSpacing}

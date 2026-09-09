@@ -3,10 +3,13 @@ import { render } from '@testing-library/react';
 // components
 import PreviewAutoSpacing from './PreviewAutoSpacing';
 
+// types
+import { AutoSpacing } from 'types/design/enums';
+
 describe('PreviewAutoSpacing', () => {
   it('should render three spacing boxes, each in its own wrapper', () => {
     // before
-    const { container } = render(<PreviewAutoSpacing value="between" />);
+    const { container } = render(<PreviewAutoSpacing value={AutoSpacing.between} />);
 
     // action
     const wrappers = container.querySelectorAll('[class*="box-wrapper"]');
@@ -20,7 +23,7 @@ describe('PreviewAutoSpacing', () => {
 
   it('should not apply a modifier class for the between value', () => {
     // before
-    const { container } = render(<PreviewAutoSpacing value="between" />);
+    const { container } = render(<PreviewAutoSpacing value={AutoSpacing.between} />);
 
     // result
     expect(container.querySelector('[class*="--between"]')).toBeNull();
@@ -30,7 +33,7 @@ describe('PreviewAutoSpacing', () => {
 
   it('should apply the around modifier class for the around value', () => {
     // before
-    const { container } = render(<PreviewAutoSpacing value="around" />);
+    const { container } = render(<PreviewAutoSpacing value={AutoSpacing.around} />);
 
     // result
     expect(container.querySelector('[class*="--around"]')).not.toBeNull();
@@ -38,7 +41,7 @@ describe('PreviewAutoSpacing', () => {
 
   it('should apply the evenly modifier class for the evenly value', () => {
     // before
-    const { container } = render(<PreviewAutoSpacing value="evenly" />);
+    const { container } = render(<PreviewAutoSpacing value={AutoSpacing.evenly} />);
 
     // result
     expect(container.querySelector('[class*="--evenly"]')).not.toBeNull();

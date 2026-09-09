@@ -2,7 +2,7 @@
 import { INDICATOR_THICKNESS_PX } from './constants';
 
 // types
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAxisAlign } from './getAlignmentComponents';
 import { TPoint } from 'types/canvas';
 

@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 export const getAutoLayoutSizesById = (sizes: TAutoLayoutChildSize[]): Record<string, TAutoLayoutChildSize> =>
   sizes.reduce<Record<string, TAutoLayoutChildSize>>((byId, size) => {

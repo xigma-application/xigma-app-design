@@ -11,13 +11,14 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { GapMode, LayoutMode, NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 
 afterEach(() => {
   store.dispatch(setSelection([]));
 });
 
-const selectAFrame = (layoutMode: LayoutMode): void => {
+const selectAFrame = (layoutMode: LayoutMode, overrides: Partial<TFrameNode> = {}): void => {
   store.dispatch(
     addNode({
       childIds: [],
@@ -32,6 +33,7 @@ const selectAFrame = (layoutMode: LayoutMode): void => {
       width: 100,
       x: 0,
       y: 0,
+      ...overrides,
     }),
   );
 
@@ -248,6 +250,15 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
 
     // result
     expect(screen.queryByText('Only applicable for Auto gap')).not.toBeInTheDocument();
+  });
+
+  it('should enable the auto spacing dropdown when the frame’s primary gap mode is auto', () => {
+    // before
+    selectAFrame(LayoutMode.horizontal, { horizontalGapMode: GapMode.auto });
+    renderSettings();
+
+    // result
+    expect(screen.getByText('Between').closest('button')).not.toBeDisabled();
   });
 
   it('should show the layout preview visual while hovering the row, and restore the placeholder on leave', () => {

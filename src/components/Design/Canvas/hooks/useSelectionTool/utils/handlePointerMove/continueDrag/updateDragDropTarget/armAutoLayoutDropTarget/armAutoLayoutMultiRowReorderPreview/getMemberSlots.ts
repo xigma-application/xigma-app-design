@@ -3,7 +3,7 @@ import { getAutoLayoutWrappedDraggedMemberSlots } from 'store/design/utils/autoL
 
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils

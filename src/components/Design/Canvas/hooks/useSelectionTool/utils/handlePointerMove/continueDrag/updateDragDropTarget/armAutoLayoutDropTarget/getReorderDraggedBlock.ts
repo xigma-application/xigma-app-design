@@ -5,7 +5,7 @@ import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoL
 
 // types
 import { AlignmentLayout } from 'types/design/enums';
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutFrame } from '../types';
 import { TAutoLayoutReorderPreview } from 'types/design/canvas/types';
 

@@ -1,6 +1,6 @@
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { TDraftRect, TPoint } from 'types/canvas';
 

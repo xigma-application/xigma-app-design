@@ -1,5 +1,5 @@
 // types
-import { AlignTextBaseline, AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, AlignmentLayout, AutoSpacing, GapMode, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -125,5 +125,56 @@ describe('getAutoLayoutSyncPositions', () => {
 
     // falls back to the normal layoutAlignment math: counter (x) centred (100-50)/2=25, primary (y) centred (200-20)/2=90
     expect(positions).toEqual([{ height: 20, id: 'text', width: 50, x: 25, y: 90 }]);
+  });
+
+  it('should apply the "evenly" auto spacing mode on a horizontal frame’s primary gap, when the gap mode is auto', () => {
+    const layoutFrame = frame({ autoSpacing: AutoSpacing.evenly, height: 20, horizontalGapMode: GapMode.auto, width: 200 });
+    const sizes = [
+      { height: 20, id: 'a', width: 20 },
+      { height: 20, id: 'b', width: 20 },
+      { height: 20, id: 'c', width: 20 },
+    ];
+
+    const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+    // leftover 140 split into (3 items + 1) = 4 equal units of 35
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 35, y: 0 },
+      { height: 20, id: 'b', width: 20, x: 90, y: 0 },
+      { height: 20, id: 'c', width: 20, x: 145, y: 0 },
+    ]);
+  });
+
+  it('should also apply the auto spacing mode on a vertical frame’s primary gap, when that frame’s gap mode is auto', () => {
+    const layoutFrame = frame({ autoSpacing: AutoSpacing.evenly, height: 200, verticalGapMode: GapMode.auto, width: 20 });
+    const sizes = [
+      { height: 20, id: 'a', width: 20 },
+      { height: 20, id: 'b', width: 20 },
+      { height: 20, id: 'c', width: 20 },
+    ];
+
+    const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.vertical, sizes);
+
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 0, y: 35 },
+      { height: 20, id: 'b', width: 20, x: 0, y: 90 },
+      { height: 20, id: 'c', width: 20, x: 0, y: 145 },
+    ]);
+  });
+
+  it('should ignore the auto spacing mode when the gap mode is fixed, not auto', () => {
+    const layoutFrame = frame({ autoSpacing: AutoSpacing.evenly, height: 20, horizontalGap: 10, width: 200 });
+    const sizes = [
+      { height: 20, id: 'a', width: 20 },
+      { height: 20, id: 'b', width: 20 },
+    ];
+
+    const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+    // fixed 10px gap, packed at the start — the auto spacing mode has no effect since the gap mode isn't auto
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 20, x: 30, y: 0 },
+    ]);
   });
 });

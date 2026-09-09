@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 // utils
 import { getAutoLayoutChildBaselineOffset } from './getAutoLayoutChildBaselineOffset';

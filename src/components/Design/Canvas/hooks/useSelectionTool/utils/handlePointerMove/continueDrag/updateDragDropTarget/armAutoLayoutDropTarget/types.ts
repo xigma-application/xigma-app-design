@@ -3,7 +3,10 @@ import { TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutC
 
 // types
 import { AlignmentLayout } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import {
+  TAutoLayoutChildPosition,
+  TAutoLayoutChildSize,
+} from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 

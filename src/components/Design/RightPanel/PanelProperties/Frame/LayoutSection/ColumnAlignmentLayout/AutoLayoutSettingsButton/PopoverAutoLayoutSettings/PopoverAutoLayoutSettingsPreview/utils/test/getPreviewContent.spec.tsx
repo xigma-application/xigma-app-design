@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import i18n from 'i18next';
 
 // types
-import { AlignTextBaseline, CanvasStacking, InsideStroke } from 'types/design/enums';
+import { AlignTextBaseline, AutoSpacing, CanvasStacking, InsideStroke } from 'types/design/enums';
 
 // utils
 import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
@@ -38,7 +38,7 @@ describe('getPreviewContent', () => {
 
   it('should render the auto spacing preview when an auto spacing value is set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: 'between' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: AutoSpacing.between }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewAutoSpacing"]')).not.toBeNull();
@@ -58,7 +58,7 @@ describe('getPreviewContent', () => {
       getPreviewContent(
         {
           alignTextBaseline: AlignTextBaseline.on,
-          autoSpacing: 'between',
+          autoSpacing: AutoSpacing.between,
           canvasStacking: CanvasStacking.lastOnTop,
           insideStroke: InsideStroke.included,
           layout: 'legacy',
@@ -88,7 +88,9 @@ describe('getPreviewContent', () => {
 
   it('should prioritize the align text baseline preview over the auto spacing preview when both are set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: AlignTextBaseline.on, autoSpacing: 'between' }, t));
+    const { container } = render(
+      getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: AlignTextBaseline.on, autoSpacing: AutoSpacing.between }, t),
+    );
 
     // result
     expect(container.querySelector('[class*="PreviewAlignTextBaseline"]')).not.toBeNull();
@@ -97,7 +99,7 @@ describe('getPreviewContent', () => {
 
   it('should prioritize the auto spacing preview over the layout preview when both are set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: 'between', layout: 'legacy' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, autoSpacing: AutoSpacing.between, layout: 'legacy' }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewAutoSpacing"]')).not.toBeNull();

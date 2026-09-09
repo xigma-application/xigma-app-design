@@ -4,7 +4,10 @@ import { getFramePadding } from 'store/design/utils/autoLayout/getFramePadding';
 
 // types
 import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import {
+  TAutoLayoutChildPosition,
+  TAutoLayoutChildSize,
+} from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutDropTargetContext } from './types';
 import { TAutoLayoutFrame } from '../types';
 import { TDraftRect } from 'types/canvas';

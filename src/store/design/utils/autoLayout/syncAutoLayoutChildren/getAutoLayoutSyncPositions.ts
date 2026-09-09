@@ -1,6 +1,6 @@
 // types
-import { AlignTextBaseline, AlignmentLayout, GapMode, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { AlignTextBaseline, AlignmentLayout, AutoSpacing, GapMode, LayoutMode } from 'types/design/enums';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -20,6 +20,7 @@ export const getAutoLayoutSyncPositions = (
   const padding = getFrameLayoutPadding(frame);
   const alignment = frame.layoutAlignment ?? AlignmentLayout.topLeft;
   const alignTextBaseline = isHorizontal && frame.alignTextBaseline === AlignTextBaseline.on;
+  const autoSpacing = frame.autoSpacing ?? AutoSpacing.between;
 
   return computeAutoLayoutPositions(
     frame,
@@ -32,5 +33,6 @@ export const getAutoLayoutSyncPositions = (
     isPrimaryGapAuto,
     isCounterGapAuto,
     alignTextBaseline,
+    autoSpacing,
   );
 };

@@ -4,7 +4,11 @@ import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { getAlignmentComponents } from '../getAlignmentComponents';
-import { getAutoLayoutChildPositions, TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import {
+  getAutoLayoutChildPositions,
+  TAutoLayoutChildPosition,
+  TAutoLayoutChildSize,
+} from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { getAutoLayoutDropIndicator, TAutoLayoutDropIndicator } from './getAutoLayoutDropIndicator';
 import { getAutoLayoutDropInsertionIndex } from './getAutoLayoutDropInsertionIndex';

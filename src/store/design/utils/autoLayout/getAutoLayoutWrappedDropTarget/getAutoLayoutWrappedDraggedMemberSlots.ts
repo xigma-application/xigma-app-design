@@ -1,10 +1,10 @@
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
-import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
+import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions/getAutoLayoutWrappedChildPositions';
 import { groupAutoLayoutChildrenIntoLines } from '../groupAutoLayoutChildrenIntoLines';
 
 export const getAutoLayoutWrappedDraggedMemberSlots = (

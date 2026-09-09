@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAxisAlign } from '../getAlignmentComponents';
 import { TPoint } from 'types/canvas';
 

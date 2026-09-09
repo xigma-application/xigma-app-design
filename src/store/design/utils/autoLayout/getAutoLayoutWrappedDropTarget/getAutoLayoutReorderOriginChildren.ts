@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 export const getAutoLayoutReorderOriginChildren = (
   children: TAutoLayoutChildSize[],

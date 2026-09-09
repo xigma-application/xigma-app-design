@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { getAutoLayoutSiblingPositions } from '../getAutoLayoutDropTarget/getAutoLayoutSiblingPositions';
-import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
+import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions/getAutoLayoutWrappedChildPositions';
 import { groupAutoLayoutChildrenIntoLines } from '../groupAutoLayoutChildrenIntoLines';
 
 export const getAutoLayoutWrappedSiblingPositions = (input: TAutoLayoutSiblingPositionsInput): Record<string, TPoint> => {

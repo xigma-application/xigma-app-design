@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 import { TFrameNode, TSceneNode } from 'types/design/types';
 

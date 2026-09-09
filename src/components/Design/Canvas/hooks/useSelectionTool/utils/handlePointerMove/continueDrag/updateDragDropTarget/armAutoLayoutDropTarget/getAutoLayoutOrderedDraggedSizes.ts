@@ -2,7 +2,7 @@
 import { getAutoLayoutChildLocalBounds } from 'store/design/utils/autoLayout/getAutoLayoutChildLocalBounds';
 
 // types
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TSceneNode } from 'types/design/types';
 
 export const getAutoLayoutOrderedDraggedSizes = (

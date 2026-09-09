@@ -4,6 +4,7 @@ import {
   AlignmentHorizontal,
   AlignmentLayout,
   AlignmentVertical,
+  AutoSpacing,
   CanvasStacking,
   GapMode,
   InsideStroke,
@@ -97,6 +98,7 @@ export type TEllipseNode = TBaseNode & {
 
 export type TFrameNode = TBaseNode & {
   alignTextBaseline?: AlignTextBaseline;
+  autoSpacing?: AutoSpacing;
   canvasStacking?: CanvasStacking;
   childIds: string[];
   clipContent: boolean;

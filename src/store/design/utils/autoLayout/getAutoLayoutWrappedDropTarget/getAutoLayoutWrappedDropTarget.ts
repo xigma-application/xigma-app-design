@@ -1,13 +1,13 @@
 // types
 import { AlignmentLayout, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { type TAutoLayoutDropTarget } from '../getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 
 // utils
 import { getAutoLayoutContentBox, type TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { getAutoLayoutReorderOriginChildren } from './getAutoLayoutReorderOriginChildren';
-import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
+import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions/getAutoLayoutWrappedChildPositions';
 import { getAutoLayoutWrappedRowBounds } from './getAutoLayoutWrappedRowBounds';
 import { getAutoLayoutWrappedRowDropTarget } from './getAutoLayoutWrappedRowDropTarget';
 import { getAutoLayoutWrappedSiblingPositions } from './getAutoLayoutWrappedSiblingPositions';

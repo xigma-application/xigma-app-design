@@ -16,6 +16,7 @@ import { TAutoSpacing } from './types';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 
 export type TPopoverAutoLayoutSettingsAutoSpacingProps = {
+  disabled: boolean;
   onHoverOption: TFunc<[TAutoSpacing | null]>;
   onMouseEnter: TFunc;
   onMouseLeave: TFunc;
@@ -25,6 +26,7 @@ export type TPopoverAutoLayoutSettingsAutoSpacingProps = {
 };
 
 export const PopoverAutoLayoutSettingsAutoSpacing: FC<TPopoverAutoLayoutSettingsAutoSpacingProps> = ({
+  disabled,
   onHoverOption,
   onMouseEnter,
   onMouseLeave,
@@ -36,24 +38,36 @@ export const PopoverAutoLayoutSettingsAutoSpacing: FC<TPopoverAutoLayoutSettings
 
   return (
     <PopoverAutoLayoutSettingsRow
-      disabled
+      disabled={disabled}
       label={t(`${translationNameSpace}.autoSpacing.label`)}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <Tooltip content={t(`${translationNameSpace}.autoSpacing.disabledTooltip`)}>
-        <span>
-          <UITools.Dropdown
-            className={styles.PopoverAutoLayoutSettings__dropdown}
-            disabled
-            onHoverOption={onHoverOption}
-            onSelect={onSelect}
-            options={options}
-            value={value}
-            variant="outline"
-          />
-        </span>
-      </Tooltip>
+      {disabled ? (
+        <Tooltip content={t(`${translationNameSpace}.autoSpacing.disabledTooltip`)}>
+          <span>
+            <UITools.Dropdown
+              className={styles.PopoverAutoLayoutSettings__dropdown}
+              disabled={disabled}
+              onHoverOption={onHoverOption}
+              onSelect={onSelect}
+              options={options}
+              value={value}
+              variant="outline"
+            />
+          </span>
+        </Tooltip>
+      ) : (
+        <UITools.Dropdown
+          className={styles.PopoverAutoLayoutSettings__dropdown}
+          disabled={disabled}
+          onHoverOption={onHoverOption}
+          onSelect={onSelect}
+          options={options}
+          value={value}
+          variant="outline"
+        />
+      )}
     </PopoverAutoLayoutSettingsRow>
   );
 };

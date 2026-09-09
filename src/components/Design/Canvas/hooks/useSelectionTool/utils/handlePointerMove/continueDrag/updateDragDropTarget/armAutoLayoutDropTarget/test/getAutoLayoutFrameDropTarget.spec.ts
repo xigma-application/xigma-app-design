@@ -1,6 +1,9 @@
 // types
 import { AlignmentLayout, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import {
+  TAutoLayoutChildPosition,
+  TAutoLayoutChildSize,
+} from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutDropTargetContext } from '../types';
 import { TAutoLayoutFrame } from '../../types';
 

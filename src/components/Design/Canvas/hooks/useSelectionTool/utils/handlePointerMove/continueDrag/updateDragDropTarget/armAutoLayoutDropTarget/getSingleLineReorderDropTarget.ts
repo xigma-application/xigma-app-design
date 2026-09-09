@@ -4,7 +4,7 @@ import { getAutoLayoutSingleLineSiblingPositions } from 'store/design/utils/auto
 
 // types
 import { AlignmentLayout } from 'types/design/enums';
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
 import { TAutoLayoutFrame } from '../types';
 

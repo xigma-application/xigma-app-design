@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from './getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 export const getAutoLayoutLineLength = (isHorizontal: boolean, itemSpacing: number, line: TAutoLayoutChildSize[]): number =>
   line.reduce((total, child, index) => {

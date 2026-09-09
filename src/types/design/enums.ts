@@ -27,6 +27,12 @@ export enum AlignmentVertical {
   top = 'top',
 }
 
+export enum AutoSpacing {
+  around = 'around',
+  between = 'between',
+  evenly = 'evenly',
+}
+
 export enum CanvasStacking {
   firstOnTop = 'firstOnTop',
   lastOnTop = 'lastOnTop',

@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignTextBaseline, CanvasStacking, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, AutoSpacing, CanvasStacking, GapMode, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -21,7 +21,7 @@ const renderSettings = (
 ): ReturnType<typeof renderHook<ReturnType<typeof usePopoverAutoLayoutSettings>, unknown>> =>
   renderHook(() => usePopoverAutoLayoutSettings(onClose), { wrapper });
 
-const addFrame = (): string => {
+const addFrame = (overrides: Partial<TFrameNode> = {}): string => {
   store.dispatch(
     addNode({
       childIds: [],
@@ -36,6 +36,7 @@ const addFrame = (): string => {
       width: 100,
       x: 0,
       y: 0,
+      ...overrides,
     }),
   );
 
@@ -199,10 +200,65 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     // action
-    act(() => result.current.onSelectAutoSpacing('evenly'));
+    act(() => result.current.onSelectAutoSpacing(AutoSpacing.evenly));
 
     // result
     expect(result.current.autoSpacingValue).toBe('evenly');
+  });
+
+  it('should persist the selected auto spacing value to the selected frame node', () => {
+    // before
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectAutoSpacing(AutoSpacing.evenly));
+
+    // result
+    expect(read(frameId).autoSpacing).toBe(AutoSpacing.evenly);
+  });
+
+  it('should be disabled by default, since the frame’s primary gap mode is not auto', () => {
+    // before
+    const { result } = renderSettings();
+
+    // result
+    expect(result.current.autoSpacingDisabled).toBe(true);
+  });
+
+  it('should be enabled when the horizontal frame’s horizontal gap mode is auto', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const id = addFrame({ horizontalGapMode: GapMode.auto, layoutMode: LayoutMode.horizontal });
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderSettings();
+
+    // result
+    expect(result.current.autoSpacingDisabled).toBe(false);
+  });
+
+  it('should be enabled when the vertical frame’s vertical gap mode is auto', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const id = addFrame({ layoutMode: LayoutMode.vertical, verticalGapMode: GapMode.auto });
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderSettings();
+
+    // result
+    expect(result.current.autoSpacingDisabled).toBe(false);
+  });
+
+  it('should stay disabled for a vertical frame whose horizontal gap mode is auto, since that is the counter axis there', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const id = addFrame({ horizontalGapMode: GapMode.auto, layoutMode: LayoutMode.vertical });
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderSettings();
+
+    // result
+    expect(result.current.autoSpacingDisabled).toBe(true);
   });
 
   it('should update the layout value when selected', () => {
@@ -445,7 +501,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     act(() => result.current.onMouseEnterAutoSpacing());
 
     // action — hovering a candidate option while the row is also hovered
-    act(() => result.current.onHoverAutoSpacingOption('evenly'));
+    act(() => result.current.onHoverAutoSpacingOption(AutoSpacing.evenly));
 
     // result
     expect(result.current.autoSpacingPreviewValue).toBe('evenly');
@@ -456,7 +512,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAutoSpacing());
-    act(() => result.current.onHoverAutoSpacingOption('evenly'));
+    act(() => result.current.onHoverAutoSpacingOption(AutoSpacing.evenly));
 
     // action
     act(() => result.current.onHoverAutoSpacingOption(null));

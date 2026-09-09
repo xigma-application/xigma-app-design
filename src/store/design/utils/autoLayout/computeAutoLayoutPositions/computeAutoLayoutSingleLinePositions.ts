@@ -1,10 +1,14 @@
 // types
-import { AlignmentLayout, LayoutMode, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
 import { applyAutoLayoutHugSize } from './applyAutoLayoutHugSize';
-import { getAutoLayoutChildPositions, TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import {
+  getAutoLayoutChildPositions,
+  TAutoLayoutChildPosition,
+  TAutoLayoutChildSize,
+} from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { getAutoLayoutContentBox, TAutoLayoutPadding } from '../getAutoLayoutContentBox';
 import { getAutoLayoutFillSizes } from './getAutoLayoutFillSizes';
 import { getFillableAutoLayoutSizes } from './getFillableAutoLayoutSizes';
@@ -18,6 +22,7 @@ export const computeAutoLayoutSingleLinePositions = (
   sizes: TAutoLayoutChildSize[],
   isPrimaryGapAuto: boolean,
   alignTextBaseline = false,
+  autoSpacing = AutoSpacing.between,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
@@ -31,5 +36,14 @@ export const computeAutoLayoutSingleLinePositions = (
   const fillableSizes = getFillableAutoLayoutSizes(sizes, widthMode, heightMode);
   const filledSizes = getAutoLayoutFillSizes(isHorizontal, itemSpacing, availablePrimary, availableCounter, fillableSizes);
 
-  return getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, filledSizes, isPrimaryGapAuto, alignTextBaseline);
+  return getAutoLayoutChildPositions(
+    layoutMode,
+    itemSpacing,
+    alignment,
+    contentBox,
+    filledSizes,
+    isPrimaryGapAuto,
+    alignTextBaseline,
+    autoSpacing,
+  );
 };

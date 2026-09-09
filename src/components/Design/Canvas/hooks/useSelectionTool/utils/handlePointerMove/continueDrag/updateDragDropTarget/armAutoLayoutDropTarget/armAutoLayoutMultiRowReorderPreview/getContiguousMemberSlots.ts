@@ -1,5 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from 'store/design/utils/autoLayout/getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TPoint } from 'types/canvas';
 
 export const getContiguousMemberSlots = (isHorizontal: boolean, sizes: TAutoLayoutChildSize[], itemSpacing: number): TPoint[] => {

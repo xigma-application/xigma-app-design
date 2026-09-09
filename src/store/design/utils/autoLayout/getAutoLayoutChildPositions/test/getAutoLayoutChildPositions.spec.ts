@@ -1,9 +1,9 @@
 // types
-import { AlignmentLayout, LayoutMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutChildPositions } from '../getAutoLayoutChildPositions';
-import { getTextBaselineOffset } from '../getTextBaselineOffset';
+import { getTextBaselineOffset } from '../../getTextBaselineOffset';
 
 describe('getAutoLayoutChildPositions', () => {
   it('should stack children left to right from the frame origin, offsetting by width plus the gap', () => {
@@ -147,6 +147,59 @@ describe('getAutoLayoutChildPositions', () => {
     expect(positions).toEqual([
       { height: 20, id: 'a', width: 30, x: 0, y: 0 },
       { height: 20, id: 'b', width: 30, x: 170, y: 0 },
+    ]);
+  });
+
+  it('should split the leftover evenly across all gaps, including both edges, for the "evenly" auto spacing mode', () => {
+    // action — three 20-wide children in a 200-wide frame: leftover 140 split into 4 equal units of 35
+    const positions = getAutoLayoutChildPositions(
+      LayoutMode.horizontal,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 20, width: 200, x: 0, y: 0 },
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'b', width: 20 },
+        { height: 20, id: 'c', width: 20 },
+      ],
+      true,
+      false,
+      AutoSpacing.evenly,
+    );
+
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 20, x: 35, y: 0 },
+      { height: 20, id: 'b', width: 20, x: 90, y: 0 },
+      { height: 20, id: 'c', width: 20, x: 145, y: 0 },
+    ]);
+  });
+
+  it('should make the between-item gap twice the edge space for the "around" auto spacing mode', () => {
+    // action — three 20-wide children in a 200-wide frame: leftover 140, unit = 140/3
+    const positions = getAutoLayoutChildPositions(
+      LayoutMode.horizontal,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 20, width: 200, x: 0, y: 0 },
+      [
+        { height: 20, id: 'a', width: 20 },
+        { height: 20, id: 'b', width: 20 },
+        { height: 20, id: 'c', width: 20 },
+      ],
+      true,
+      false,
+      AutoSpacing.around,
+    );
+
+    const unit = 140 / 3;
+
+    expect(positions[0].x).toBeCloseTo(unit / 2, 6);
+    expect(positions[1].x).toBeCloseTo(unit / 2 + 20 + unit, 6);
+    expect(positions[2].x).toBeCloseTo(unit / 2 + 20 + unit + 20 + unit, 6);
+    expect(positions.map(({ height, id, width, y }) => ({ height, id, width, y }))).toEqual([
+      { height: 20, id: 'a', width: 20, y: 0 },
+      { height: 20, id: 'b', width: 20, y: 0 },
+      { height: 20, id: 'c', width: 20, y: 0 },
     ]);
   });
 

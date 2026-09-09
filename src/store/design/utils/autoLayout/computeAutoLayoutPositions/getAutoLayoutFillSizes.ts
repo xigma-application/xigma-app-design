@@ -1,6 +1,6 @@
 // types
 import { SizingMode } from 'types/design/enums';
-import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 // utils
 import { clampAutoLayoutSize } from '../clampAutoLayoutSize';

@@ -1,6 +1,6 @@
 // types
 import { AlignmentLayout, AutoSpacing, LayoutMode } from 'types/design/enums';
-import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions';
+import { TAutoLayoutChildPosition, TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TAutoLayoutPadding } from '../../getAutoLayoutContentBox';
 import { TFrameNode } from 'types/design/types';
 
@@ -9,7 +9,7 @@ import { buildAutoLayoutWrapLines } from './buildAutoLayoutWrapLines';
 import { getAutoLayoutWrapAvailablePrimarySpace } from './getAutoLayoutWrapAvailablePrimarySpace';
 import { getAutoLayoutWrapFilledLines } from './getAutoLayoutWrapFilledLines';
 import { getAutoLayoutWrapSizingModes } from './getAutoLayoutWrapSizingModes';
-import { getAutoLayoutWrappedChildPositions } from '../../getAutoLayoutWrappedChildPositions';
+import { getAutoLayoutWrappedChildPositions } from '../../getAutoLayoutWrappedChildPositions/getAutoLayoutWrappedChildPositions';
 
 export const computeAutoLayoutWrappedPositions = (
   frame: TFrameNode,

@@ -3,7 +3,7 @@ import { TAutoLayoutSiblingPositionsInput } from '../types';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getAutoLayoutChildPositions } from '../getAutoLayoutChildPositions';
+import { getAutoLayoutChildPositions } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { getAutoLayoutSiblingPositions } from './getAutoLayoutSiblingPositions';
 
 export const getAutoLayoutSingleLineSiblingPositions = (input: TAutoLayoutSiblingPositionsInput): Record<string, TPoint> => {
