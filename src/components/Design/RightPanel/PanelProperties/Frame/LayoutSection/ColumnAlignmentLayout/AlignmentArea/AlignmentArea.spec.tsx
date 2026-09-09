@@ -171,3 +171,103 @@ describe('AlignmentArea behaviors', () => {
     expect(screen.getByLabelText('Top left').querySelector('[class*="indicator--highlighted"]')).toBeNull();
   });
 });
+
+describe('AlignmentArea baseline mode', () => {
+  const renderBaseline = (
+    value = AlignmentLayout.topLeft,
+    isGapAutoHorizontal = false,
+    onClick = vi.fn(),
+    onRemoveBaselineAlignment = vi.fn(),
+  ): ReturnType<typeof render> =>
+    render(
+      <TooltipProvider>
+        <AlignmentArea
+          isBaselineAligned
+          isGapAutoHorizontal={isGapAutoHorizontal}
+          isHorizontal
+          onClick={onClick}
+          onRemoveBaselineAlignment={onRemoveBaselineAlignment}
+          value={value}
+        />
+      </TooltipProvider>,
+    );
+
+  it('should render the three main-axis options with only the selected one shown as an A glyph', () => {
+    // before
+    renderBaseline(AlignmentLayout.topLeft);
+
+    // result
+    expect(screen.queryByLabelText('Top left')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^(Left|Center|Right)$/ })).toHaveLength(3);
+    expect(screen.getAllByText('A')).toHaveLength(1);
+    expect(screen.getByLabelText('Left')).toHaveTextContent('A');
+  });
+
+  it('should mark the option matching the value main axis as pressed', () => {
+    // before
+    renderBaseline(AlignmentLayout.bottomRight);
+
+    // result
+    expect(screen.getByLabelText('Right')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Left')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('should show every option as a pressed A glyph when the primary gap is auto', () => {
+    // before
+    renderBaseline(AlignmentLayout.topLeft, true);
+
+    // result
+    expect(screen.getAllByText('A')).toHaveLength(3);
+    expect(screen.getByLabelText('Left')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Center')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Right')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should reveal the A glyph for a non-selected option on hover', () => {
+    // before
+    renderBaseline(AlignmentLayout.topLeft);
+
+    // result — only the selected option shows an A before hovering
+    expect(screen.getByLabelText('Center')).not.toHaveTextContent('A');
+
+    // action
+    fireEvent.mouseEnter(screen.getByLabelText('Center'));
+
+    // result
+    expect(screen.getByLabelText('Center')).toHaveTextContent('A');
+
+    // action
+    fireEvent.mouseLeave(screen.getByLabelText('Center'));
+
+    // result
+    expect(screen.getByLabelText('Center')).not.toHaveTextContent('A');
+  });
+
+  it('should dispatch the picked alignment on click', () => {
+    // mock
+    const onClick = vi.fn();
+
+    // before
+    renderBaseline(AlignmentLayout.topLeft, false, onClick);
+
+    // action
+    screen.getByLabelText('Center').click();
+
+    // result
+    expect(onClick).toHaveBeenCalledWith(AlignmentLayout.center);
+  });
+
+  it('should call onRemoveBaselineAlignment when the remove button is clicked', () => {
+    // mock
+    const onRemoveBaselineAlignment = vi.fn();
+
+    // before
+    renderBaseline(AlignmentLayout.topLeft, false, vi.fn(), onRemoveBaselineAlignment);
+
+    // action
+    screen.getByRole('button', { name: 'Remove baseline alignment' }).click();
+
+    // result
+    expect(onRemoveBaselineAlignment).toHaveBeenCalledTimes(1);
+  });
+});

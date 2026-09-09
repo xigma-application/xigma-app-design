@@ -440,6 +440,7 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.preview": "Podgląd",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesAriaLabel": "Właściwości",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesTooltip": "Właściwości",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.removeBaselineAlignment": "Usuń wyrównanie do linii bazowej",
   "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Przycinaj zawartość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelHeight": "Wysokość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelWidth": "Szerokość",

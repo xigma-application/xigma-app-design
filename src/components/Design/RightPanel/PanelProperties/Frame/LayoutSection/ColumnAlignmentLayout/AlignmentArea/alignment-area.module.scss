@@ -10,4 +10,38 @@
   height: 56px;
   justify-content: center;
   width: 100%;
+
+  &--baseline {
+    border-color: var(--color-selected);
+    grid-template-rows: 1fr 1fr;
+  }
+
+  &__remove-baseline {
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    border-radius: 0 0 4px 4px;
+    border-top: 1px solid var(--color-neutral-3);
+    cursor: pointer;
+    display: flex;
+    grid-column: 1 / -1;
+    height: 16px;
+    justify-content: center;
+    padding: 0;
+    width: 100%;
+
+    &:hover {
+      background-color: var(--color-neutral-3);
+    }
+  }
+
+  &__remove-baseline-icon {
+    align-items: center;
+    display: flex;
+    opacity: 0;
+  }
+
+  &__remove-baseline:hover &__remove-baseline-icon {
+    opacity: 1;
+  }
 }

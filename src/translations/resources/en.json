@@ -428,6 +428,7 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.preview": "Preview",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesAriaLabel": "Properties",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.propertiesTooltip": "Properties",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.removeBaselineAlignment": "Remove baseline alignment",
   "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Clip content",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelHeight": "Height",
   "design.rightPanel.panelProperties.frame.layoutSection.columnDimensions.ariaLabelWidth": "Width",

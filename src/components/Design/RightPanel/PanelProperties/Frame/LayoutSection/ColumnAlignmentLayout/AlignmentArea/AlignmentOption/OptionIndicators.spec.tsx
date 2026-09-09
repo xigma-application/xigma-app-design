@@ -61,4 +61,34 @@ describe('OptionIndicators', () => {
     expect(rows[0]).toHaveStyle({ justifyContent: 'flex-end' });
     expect(rows[1]).toHaveStyle({ justifyContent: 'flex-end' });
   });
+
+  it('should render nothing for an idle baseline option so the ::before dot shows through', () => {
+    // before
+    const { container } = render(
+      <OptionIndicators alignment={AlignmentLayout.center} isBaseline isHighlighted={false} isSelected={false} isWrap={false} />,
+    );
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render an A glyph for a selected baseline option', () => {
+    // before
+    const { container } = render(
+      <OptionIndicators alignment={AlignmentLayout.center} isBaseline isHighlighted={false} isSelected isWrap={false} />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="glyph--selected"]')).toHaveTextContent('A');
+  });
+
+  it('should render an A glyph for a highlighted baseline option', () => {
+    // before
+    const { container } = render(
+      <OptionIndicators alignment={AlignmentLayout.center} isBaseline isHighlighted isSelected={false} isWrap={false} />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="glyph--highlighted"]')).toHaveTextContent('A');
+  });
 });

@@ -22,6 +22,7 @@ const ColumnAlignmentLayout: FC = () => {
     alignment,
     horizontalGap,
     horizontalGapMode,
+    isBaselineAligned,
     isHorizontal,
     isHorizontalGapModeDisabled,
     isVerticalGapModeDisabled,
@@ -30,6 +31,7 @@ const ColumnAlignmentLayout: FC = () => {
     onChangeAlignment,
     onCommitHorizontalGap,
     onCommitVerticalGap,
+    onRemoveBaselineAlignment,
     onSelectHorizontalGapAuto,
     onSelectHorizontalGapFixed,
     onSelectVerticalGapAuto,
@@ -47,11 +49,13 @@ const ColumnAlignmentLayout: FC = () => {
         withBottomMargin
       >
         <AlignmentArea
+          isBaselineAligned={isBaselineAligned}
           isGapAutoHorizontal={horizontalGapMode === GapMode.auto}
           isGapAutoVertical={verticalGapMode === GapMode.auto}
           isHorizontal={isHorizontal}
           isWrap={isWrap}
           onClick={onChangeAlignment}
+          onRemoveBaselineAlignment={onRemoveBaselineAlignment}
           value={alignment}
         />
         {isHorizontal && (

@@ -4,7 +4,7 @@ import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { AlignmentLayout, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AlignTextBaseline, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -14,6 +14,7 @@ export type TUseColumnAlignmentLayoutResult = {
   alignment: AlignmentLayout;
   horizontalGap: number;
   horizontalGapMode: GapMode;
+  isBaselineAligned: boolean;
   isHorizontal: boolean;
   isHorizontalGapModeDisabled: boolean;
   isVerticalGapModeDisabled: boolean;
@@ -22,6 +23,7 @@ export type TUseColumnAlignmentLayoutResult = {
   onChangeAlignment: TFunc<[AlignmentLayout]>;
   onCommitHorizontalGap: TFunc<[number]>;
   onCommitVerticalGap: TFunc<[number]>;
+  onRemoveBaselineAlignment: TFunc;
   onSelectHorizontalGapAuto: TFunc;
   onSelectHorizontalGapFixed: TFunc;
   onSelectVerticalGapAuto: TFunc;
@@ -38,6 +40,7 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const id = frameNode?.id ?? '';
   const layoutMode = frameNode?.layoutMode;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const isBaselineAligned = isHorizontal && frameNode?.alignTextBaseline === AlignTextBaseline.on;
   const alignment = frameNode?.layoutAlignment ?? AlignmentLayout.topLeft;
   const horizontalGapMode = frameNode?.horizontalGapMode ?? GapMode.fixed;
   const verticalGapMode = frameNode?.verticalGapMode ?? GapMode.fixed;
@@ -60,6 +63,7 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     alignment,
     horizontalGap,
     horizontalGapMode,
+    isBaselineAligned,
     isHorizontal,
     isHorizontalGapModeDisabled: (frameNode?.widthSizingMode ?? SizingMode.fixed) === SizingMode.hug,
     isVerticalGapModeDisabled: (frameNode?.heightSizingMode ?? SizingMode.fixed) === SizingMode.hug,
@@ -68,6 +72,7 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     onChangeAlignment: (nextAlignment) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id })),
     onCommitHorizontalGap: commitHorizontalGap,
     onCommitVerticalGap: commitVerticalGap,
+    onRemoveBaselineAlignment: () => dispatch(updateNode({ changes: { alignTextBaseline: AlignTextBaseline.off }, id })),
     onSelectHorizontalGapAuto: () => dispatch(updateNode({ changes: { horizontalGapMode: GapMode.auto }, id })),
     onSelectHorizontalGapFixed: () =>
       dispatch(updateNode({ changes: { horizontalGap: Math.round(effectiveGaps.horizontal), horizontalGapMode: undefined }, id })),

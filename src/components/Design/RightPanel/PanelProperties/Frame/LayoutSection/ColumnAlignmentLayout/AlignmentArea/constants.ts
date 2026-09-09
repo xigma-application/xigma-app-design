@@ -12,3 +12,5 @@ export const ALIGNMENT_OPTIONS: AlignmentLayout[] = [
   AlignmentLayout.bottomCenter,
   AlignmentLayout.bottomRight,
 ];
+
+export const BASELINE_ALIGNMENT_OPTIONS: AlignmentLayout[] = [AlignmentLayout.left, AlignmentLayout.center, AlignmentLayout.right];

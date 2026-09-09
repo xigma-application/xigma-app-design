@@ -7,36 +7,37 @@ import styles from './alignment-option.module.scss';
 // types
 import { AlignmentLayout } from 'types/design/enums';
 
-const CENTER_COLUMN_ALIGNMENTS = [AlignmentLayout.topCenter, AlignmentLayout.center, AlignmentLayout.bottomCenter];
-const RIGHT_COLUMN_ALIGNMENTS = [AlignmentLayout.topRight, AlignmentLayout.right, AlignmentLayout.bottomRight];
+// utils
+import { getIndicatorClassName } from './utils/getIndicatorClassName';
+import { getWrapRowJustifyContent } from './utils/getWrapRowJustifyContent';
 
 export type TOptionIndicatorsProps = {
   alignment: AlignmentLayout;
+  isBaseline?: boolean;
   isHighlighted: boolean;
   isSelected: boolean;
   isWrap: boolean;
 };
 
-const getIndicatorClassName = (isHighlighted: boolean, isSelected: boolean): string =>
-  cx(styles.AlignmentOption__indicator, {
-    [styles['AlignmentOption__indicator--highlighted']]: isHighlighted,
-    [styles['AlignmentOption__indicator--selected']]: isSelected,
-  });
-
-const getWrapRowJustifyContent = (alignment: AlignmentLayout): CSSProperties['justifyContent'] => {
-  if (CENTER_COLUMN_ALIGNMENTS.includes(alignment)) {
-    return 'center';
-  }
-
-  if (RIGHT_COLUMN_ALIGNMENTS.includes(alignment)) {
-    return 'flex-end';
-  }
-
-  return 'flex-start';
-};
-
-export const OptionIndicators: FC<TOptionIndicatorsProps> = ({ alignment, isHighlighted, isSelected, isWrap }) => {
+export const OptionIndicators: FC<TOptionIndicatorsProps> = ({ alignment, isBaseline = false, isHighlighted, isSelected, isWrap }) => {
   const indicatorClassName = getIndicatorClassName(isHighlighted, isSelected);
+
+  if (isBaseline) {
+    if (!isSelected && !isHighlighted) {
+      return null;
+    }
+
+    return (
+      <span
+        className={cx(styles.AlignmentOption__glyph, {
+          [styles['AlignmentOption__glyph--highlighted']]: isHighlighted,
+          [styles['AlignmentOption__glyph--selected']]: isSelected,
+        })}
+      >
+        A
+      </span>
+    );
+  }
 
   if (isWrap) {
     const wrapRowStyle: CSSProperties = { justifyContent: getWrapRowJustifyContent(alignment) };

@@ -20,6 +20,7 @@ import { getOptionViewModifiers } from './utils/getOptionViewModifiers';
 
 export type TAlignmentOptionProps = {
   alignment: AlignmentLayout;
+  isBaseline?: boolean;
   isGapAutoHorizontal: boolean;
   isGapAutoVertical: boolean;
   isHighlighted: boolean;
@@ -33,6 +34,7 @@ export type TAlignmentOptionProps = {
 
 export const AlignmentOption: FC<TAlignmentOptionProps> = ({
   alignment,
+  isBaseline = false,
   isGapAutoHorizontal,
   isGapAutoVertical,
   isHighlighted,
@@ -45,7 +47,9 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({
 }) => {
   const { t } = useTranslation();
   const label = t(`${translationNameSpace}.alignmentOption.${alignment}`);
-  const optionViewModifiers = getOptionViewModifiers(alignment, isHorizontal, isGapAutoVertical, isGapAutoHorizontal, isWrap);
+  const optionViewModifiers = isBaseline
+    ? []
+    : getOptionViewModifiers(alignment, isHorizontal, isGapAutoVertical, isGapAutoHorizontal, isWrap);
   const isWrapVariant = optionViewModifiers.includes('horizontal-wrap');
 
   return (
@@ -53,7 +57,7 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({
       <button
         aria-label={label}
         aria-pressed={isSelected}
-        className={styles.AlignmentOption}
+        className={cx(styles.AlignmentOption, { [styles['AlignmentOption--baseline']]: isBaseline })}
         onClick={() => onClick(alignment)}
         onMouseEnter={() => onMouseEnter(alignment)}
         onMouseLeave={onMouseLeave}
@@ -65,7 +69,13 @@ export const AlignmentOption: FC<TAlignmentOptionProps> = ({
             optionViewModifiers.map((modifier) => styles[`AlignmentOption__option-view--${modifier}`]),
           )}
         >
-          <OptionIndicators alignment={alignment} isHighlighted={isHighlighted} isSelected={isSelected} isWrap={isWrapVariant} />
+          <OptionIndicators
+            alignment={alignment}
+            isBaseline={isBaseline}
+            isHighlighted={isHighlighted}
+            isSelected={isSelected}
+            isWrap={isWrapVariant}
+          />
         </div>
       </button>
     </Tooltip>

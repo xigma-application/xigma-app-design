@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignmentLayout, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AlignTextBaseline, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -165,6 +165,64 @@ describe('useColumnAlignmentLayout', () => {
 
     // result
     expect(readNode(frameId).layoutAlignment).toBe(AlignmentLayout.center);
+  });
+
+  it('should default isBaselineAligned to false', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isBaselineAligned).toBe(false);
+  });
+
+  it('should be baseline aligned when a horizontal frame has align text baseline on', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { alignTextBaseline: AlignTextBaseline.on }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isBaselineAligned).toBe(true);
+  });
+
+  it('should not be baseline aligned when a vertical frame has align text baseline on', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(updateNode({ changes: { alignTextBaseline: AlignTextBaseline.on }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // result
+    expect(result.current.isBaselineAligned).toBe(false);
+  });
+
+  it('should turn align text baseline off on remove baseline alignment', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { alignTextBaseline: AlignTextBaseline.on }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnAlignmentLayout();
+
+    // action
+    act(() => result.current.onRemoveBaselineAlignment());
+
+    // result
+    expect(readNode(frameId).alignTextBaseline).toBe(AlignTextBaseline.off);
   });
 
   it('should read the frame’s own horizontalGap and verticalGap directly, for a horizontal frame', () => {
