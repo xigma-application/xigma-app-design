@@ -40,7 +40,7 @@ export default defineConfig({
       },
     },
     environment: 'jsdom',
-    exclude: ['**/node_modules/**', 'e2e/**'],
+    exclude: ['**/node_modules/**', '.xigma-cache/**', 'e2e/**'],
     globals: true,
     resolveSnapshotPath: (testPath, snapExtension) =>
       path.join(path.dirname(testPath), 'snapshots', `${path.basename(testPath)}${snapExtension}`),
