@@ -16,7 +16,7 @@ import { usePopoverAutoLayoutSettings } from './hooks/usePopoverAutoLayoutSettin
 import styles from './popover-auto-layout-settings.module.scss';
 
 // types
-import { LayoutMode } from 'types/design/enums';
+import { LayoutMode, LayoutVersion } from 'types/design/enums';
 
 export type TPopoverAutoLayoutSettingsProps = {
   layoutMode?: LayoutMode;
@@ -65,6 +65,7 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
     onSelectInsideStroke,
     onSelectLayout,
   } = usePopoverAutoLayoutSettings(onClose);
+  const isLegacyLayout = layoutValue === LayoutVersion.legacy;
 
   return (
     <div className={styles.PopoverAutoLayoutSettings}>
@@ -77,14 +78,16 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
         layout={layoutPreviewValue}
       />
       <div className={styles.PopoverAutoLayoutSettings__rows}>
-        <PopoverAutoLayoutSettingsInsideStroke
-          onHoverOption={onHoverInsideStrokeOption}
-          onMouseEnter={onMouseEnterInsideStroke}
-          onMouseLeave={onMouseLeaveInsideStroke}
-          onSelect={onSelectInsideStroke}
-          options={insideStrokeOptions}
-          value={insideStrokeValue}
-        />
+        {isLegacyLayout && (
+          <PopoverAutoLayoutSettingsInsideStroke
+            onHoverOption={onHoverInsideStrokeOption}
+            onMouseEnter={onMouseEnterInsideStroke}
+            onMouseLeave={onMouseLeaveInsideStroke}
+            onSelect={onSelectInsideStroke}
+            options={insideStrokeOptions}
+            value={insideStrokeValue}
+          />
+        )}
         {!isGridLayout && (
           <PopoverAutoLayoutSettingsCanvasStacking
             onHoverOption={onHoverCanvasStackingOption}

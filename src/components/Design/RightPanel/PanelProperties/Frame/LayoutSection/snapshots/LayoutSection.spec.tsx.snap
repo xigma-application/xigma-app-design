@@ -290,6 +290,7 @@ exports[`LayoutSection snapshots > should render the flow row 1`] = `
               aria-pressed="false"
               class="_Button_b88d2e"
               data-state="closed"
+              style="padding: 6px;"
               type="button"
             >
               <svg

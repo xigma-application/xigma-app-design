@@ -876,6 +876,7 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
               aria-pressed="false"
               class="_Button_b88d2e"
               data-state="closed"
+              style="padding: 6px;"
               type="button"
             >
               <svg

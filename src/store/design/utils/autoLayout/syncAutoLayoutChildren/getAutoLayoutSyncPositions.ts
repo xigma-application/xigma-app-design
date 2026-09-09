@@ -17,11 +17,11 @@ export const getAutoLayoutSyncPositions = (
   const counterAxisSpacing = (isHorizontal ? frame.verticalGap : frame.horizontalGap) ?? itemSpacing;
   const isPrimaryGapAuto = (isHorizontal ? frame.horizontalGapMode : frame.verticalGapMode) === GapMode.auto;
   const isCounterGapAuto = (isHorizontal ? frame.verticalGapMode : frame.horizontalGapMode) === GapMode.auto;
-  const padding = getFrameLayoutPadding(frame);
   const alignment = frame.layoutAlignment ?? AlignmentLayout.topLeft;
   const alignTextBaseline = isHorizontal && frame.alignTextBaseline === AlignTextBaseline.on;
   const autoSpacing = frame.autoSpacing ?? AutoSpacing.between;
   const layoutVersion = frame.layoutVersion ?? LayoutVersion.updated;
+  const padding = getFrameLayoutPadding(frame, layoutVersion);
 
   return computeAutoLayoutPositions(
     frame,

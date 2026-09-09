@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { GapMode, LayoutMode, NodeType } from 'types/design/enums';
+import { GapMode, LayoutMode, LayoutVersion, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 afterEach(() => {
@@ -62,8 +62,9 @@ describe('PopoverAutoLayoutSettings snapshots', () => {
 });
 
 describe('PopoverAutoLayoutSettings behaviors', () => {
-  it('should render every row label', () => {
+  it('should render every row label, with the inside stroke row only under the legacy layout version', () => {
     // before
+    selectAFrame(LayoutMode.horizontal, { layoutVersion: LayoutVersion.legacy });
     renderSettings();
 
     // result
@@ -74,12 +75,21 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     expect(screen.getByText('Layout')).toBeInTheDocument();
   });
 
+  it('should hide the inside stroke row under the updated layout version, since the stroke alignment drives it automatically', () => {
+    // before — a fresh frame defaults to the updated engine
+    selectAFrame(LayoutMode.horizontal);
+    renderSettings();
+
+    // result
+    expect(screen.queryByText('Inside stroke')).not.toBeInTheDocument();
+    expect(screen.getByText('Layout')).toBeInTheDocument();
+  });
+
   it('should show the default dropdown values from the mockup', () => {
     // before
     renderSettings();
 
     // result
-    expect(screen.getByText('Included')).toBeInTheDocument();
     expect(screen.getByText('Last on top')).toBeInTheDocument();
     expect(screen.getByText('Between')).toBeInTheDocument();
     expect(screen.getByText('Updated')).toBeInTheDocument();
@@ -101,6 +111,7 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
 
   it('should show the inside stroke preview visual while hovering the row, and restore the placeholder on leave', () => {
     // before
+    selectAFrame(LayoutMode.horizontal, { layoutVersion: LayoutVersion.legacy });
     renderSettings();
 
     // result
@@ -121,6 +132,7 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
 
   it('should preview the hovered dropdown option, like x-design does, while the dropdown is open', () => {
     // before
+    selectAFrame(LayoutMode.horizontal, { layoutVersion: LayoutVersion.legacy });
     const { container } = renderSettings();
 
     // action — open the dropdown and hover the non-selected option
@@ -294,8 +306,9 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     expect(container.querySelector('[class*="PreviewLayout--legacy"]')).not.toBeNull();
   });
 
-  it('should only show the inside stroke and layout rows for a grid layout', () => {
+  it('should only show the inside stroke and layout rows for a legacy grid layout', () => {
     // before
+    selectAFrame(LayoutMode.grid, { layoutVersion: LayoutVersion.legacy });
     renderSettings(vi.fn(), LayoutMode.grid);
 
     // result
@@ -308,6 +321,7 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
 
   it('should hide the align text baseline row for a non-horizontal layout, since it only applies to horizontal auto layout', () => {
     // before
+    selectAFrame(LayoutMode.vertical, { layoutVersion: LayoutVersion.legacy });
     renderSettings(vi.fn(), LayoutMode.vertical);
 
     // result — every other row still shows for a vertical frame
