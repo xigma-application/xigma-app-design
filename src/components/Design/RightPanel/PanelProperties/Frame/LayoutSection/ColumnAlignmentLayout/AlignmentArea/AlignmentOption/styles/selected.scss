@@ -1,0 +1,6 @@
+@mixin layout {
+  &--selected {
+    background-color: var(--color-blue-2);
+    opacity: 1;
+  }
+}

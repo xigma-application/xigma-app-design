@@ -1,8 +1,10 @@
 @use './styles/center' as center;
 @use './styles/end' as end;
+@use './styles/highlighted' as highlighted;
 @use './styles/horizontal-auto' as horizontalAuto;
 @use './styles/horizontal-layout' as horizontal;
 @use './styles/horizontal-wrap' as horizontalWrap;
+@use './styles/selected' as selected;
 @use './styles/vertical-auto' as verticalAuto;
 @use './styles/vertical-layout' as vertical;
 
@@ -64,13 +66,7 @@
     border-radius: 1px;
     opacity: 0;
 
-    &--selected {
-      background-color: var(--color-blue-2);
-      opacity: 1;
-    }
-
-    &--highlighted {
-      opacity: 1;
-    }
+    @include selected.layout;
+    @include highlighted.layout;
   }
 }
