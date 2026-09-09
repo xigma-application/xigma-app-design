@@ -24,7 +24,7 @@ exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap r
       </span>
     </div>
     <div
-      class="_SectionColumn__row_84b4eb"
+      class="_SectionColumn__row_84b4eb _SectionColumn__row--top-aligned_84b4eb"
     >
       <div
         class="_SectionColumnContent_e7fe0a _SectionColumnContent--one-by-two_e7fe0a"

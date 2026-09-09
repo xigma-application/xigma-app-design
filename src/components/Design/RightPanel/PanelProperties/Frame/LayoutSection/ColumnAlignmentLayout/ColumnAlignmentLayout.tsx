@@ -47,6 +47,7 @@ const ColumnAlignmentLayout: FC = () => {
         gridColumnType={UITools.GridColumnType.oneByTwo}
         labels={[t(`${translationNameSpace}.label.alignment`), t(`${translationNameSpace}.label.gap`)]}
         withBottomMargin
+        withTopAlignedButtons
       >
         <AlignmentArea
           isBaselineAligned={isBaselineAligned}

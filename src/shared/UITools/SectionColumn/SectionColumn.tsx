@@ -22,6 +22,7 @@ export type TSectionColumnProps = {
   labels?: [string] | [string, string];
   withBottomMargin?: boolean;
   withInputConnector?: boolean;
+  withTopAlignedButtons?: boolean;
   withTopMargin?: boolean;
 };
 
@@ -32,6 +33,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
   labels,
   withBottomMargin = false,
   withInputConnector = false,
+  withTopAlignedButtons = false,
   withTopMargin = false,
 }) => {
   const buttonsWidthTotal = (size(buttonsIcon) || 1) * 24;
@@ -47,7 +49,11 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
         })}
       >
         <SectionColumnLabels labels={labels} width={width} />
-        <div className={styles.SectionColumn__row}>
+        <div
+          className={cx(styles.SectionColumn__row, {
+            [styles['SectionColumn__row--top-aligned']]: withTopAlignedButtons,
+          })}
+        >
           <SectionColumnContent gridColumnType={gridColumnType} width={width} withInputConnector={withInputConnector}>
             {children}
           </SectionColumnContent>

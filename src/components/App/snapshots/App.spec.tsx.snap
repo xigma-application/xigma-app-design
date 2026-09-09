@@ -253,10 +253,10 @@ exports[`App snapshots > should render App 1`] = `
               >
                 <svg
                   class="Icon"
-                  height="24"
+                  height="16"
                   style="color: var(--color-neutral-1);"
                   viewBox="0 0 12 12"
-                  width="24"
+                  width="16"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path

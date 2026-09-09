@@ -79,6 +79,34 @@ describe('SectionColumn behaviors', () => {
     expect(container.querySelector('[class*="SectionColumn--with-top-margin"]')).not.toBeNull();
   });
 
+  it('should not top-align the row by default', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumn__row--top-aligned"]')).toBeNull();
+  });
+
+  it('should apply the top-aligned row modifier class when withTopAlignedButtons is given', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn withTopAlignedButtons>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumn__row--top-aligned"]')).not.toBeNull();
+  });
+
   it('should render the given buttonsIcon', () => {
     // before
     const { container } = render(

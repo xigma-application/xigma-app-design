@@ -14,5 +14,9 @@ $rowGap: 8px;
     align-items: center;
     column-gap: 8px;
     display: flex;
+
+    &--top-aligned {
+      align-items: flex-start;
+    }
   }
 }
