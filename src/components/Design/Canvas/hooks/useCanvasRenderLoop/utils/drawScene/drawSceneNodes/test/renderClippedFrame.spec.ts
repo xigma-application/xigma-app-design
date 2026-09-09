@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { CanvasStacking, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { TMaskRenderer } from '../types';
 
@@ -76,5 +76,25 @@ describe('renderClippedFrame', () => {
     expect(compositeMask).toHaveBeenCalledWith(context, 'content-tex', 'mask-tex');
     expect(pool.release).toHaveBeenNthCalledWith(1, contentTarget);
     expect(pool.release).toHaveBeenNthCalledWith(2, maskTarget);
+  });
+
+  it('should paint the children in reverse order when the frame is set to first on top', () => {
+    const contentTarget = { texture: 'content-tex' };
+    const maskTarget = { texture: 'mask-tex' };
+    const pool = { acquire: vi.fn().mockReturnValueOnce(contentTarget).mockReturnValueOnce(maskTarget), release: vi.fn() };
+    const context = {
+      buffer: { id: 'buffer' },
+      canvasHeight: 100,
+      canvasWidth: 200,
+      gl: { id: 'gl' },
+      program: { id: 'program' },
+      viewport: { x: 0, y: 0, zoom: 1 },
+    };
+    const renderer = { context, pool } as unknown as TMaskRenderer;
+    const frame = buildFrame({ canvasStacking: CanvasStacking.firstOnTop });
+
+    renderClippedFrame(renderer, frame, { id: 'parent' } as never);
+
+    expect(renderIds).toHaveBeenCalledWith(renderer, ['child-b', 'child-a'], contentTarget);
   });
 });

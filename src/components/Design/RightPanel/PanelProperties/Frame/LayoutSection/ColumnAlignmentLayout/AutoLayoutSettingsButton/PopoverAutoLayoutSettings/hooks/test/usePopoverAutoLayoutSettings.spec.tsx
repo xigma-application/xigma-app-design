@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import { CanvasStacking, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -131,10 +131,33 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     // action
-    act(() => result.current.onSelectCanvasStacking('firstOnTop'));
+    act(() => result.current.onSelectCanvasStacking(CanvasStacking.firstOnTop));
 
     // result
     expect(result.current.canvasStackingValue).toBe('firstOnTop');
+  });
+
+  it('should persist the selected canvas stacking value to the selected frame node', () => {
+    // before
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectCanvasStacking(CanvasStacking.firstOnTop));
+
+    // result
+    expect(read(frameId).canvasStacking).toBe(CanvasStacking.firstOnTop);
+  });
+
+  it('should not throw and should fall back to the default canvas stacking value when no frame is selected', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectCanvasStacking(CanvasStacking.firstOnTop));
+
+    // result
+    expect(result.current.canvasStackingValue).toBe('lastOnTop');
   });
 
   it('should update the align text baseline value on change', () => {
@@ -281,7 +304,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     act(() => result.current.onMouseEnterCanvasStacking());
 
     // action — hovering a candidate option while the row is also hovered
-    act(() => result.current.onHoverCanvasStackingOption('firstOnTop'));
+    act(() => result.current.onHoverCanvasStackingOption(CanvasStacking.firstOnTop));
 
     // result
     expect(result.current.canvasStackingPreviewValue).toBe('firstOnTop');
@@ -292,7 +315,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterCanvasStacking());
-    act(() => result.current.onHoverCanvasStackingOption('firstOnTop'));
+    act(() => result.current.onHoverCanvasStackingOption(CanvasStacking.firstOnTop));
 
     // action
     act(() => result.current.onHoverCanvasStackingOption(null));

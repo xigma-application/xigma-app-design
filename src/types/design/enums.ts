@@ -22,6 +22,11 @@ export enum AlignmentVertical {
   top = 'top',
 }
 
+export enum CanvasStacking {
+  firstOnTop = 'firstOnTop',
+  lastOnTop = 'lastOnTop',
+}
+
 export enum GapMode {
   auto = 'auto',
   fixed = 'fixed',

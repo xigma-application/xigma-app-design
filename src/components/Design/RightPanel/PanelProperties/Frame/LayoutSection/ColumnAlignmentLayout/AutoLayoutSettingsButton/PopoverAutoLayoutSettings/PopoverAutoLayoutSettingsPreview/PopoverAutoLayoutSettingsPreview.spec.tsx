@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import PopoverAutoLayoutSettingsPreview, { TPopoverAutoLayoutSettingsPreviewProps } from './PopoverAutoLayoutSettingsPreview';
 
 // types
-import { InsideStroke } from 'types/design/enums';
+import { CanvasStacking, InsideStroke } from 'types/design/enums';
 
 const NO_PREVIEW: TPopoverAutoLayoutSettingsPreviewProps = {
   alignTextBaseline: null,
@@ -34,7 +34,7 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
 
   it('should render the canvas stacking preview visual instead of the placeholder when a value is passed', () => {
     // before
-    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking="lastOnTop" />);
+    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking={CanvasStacking.lastOnTop} />);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
   it('should prioritize the inside stroke preview over the canvas stacking preview when both are set', () => {
     // before
     const { container } = render(
-      <PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking="lastOnTop" insideStroke={InsideStroke.included} />,
+      <PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking={CanvasStacking.lastOnTop} insideStroke={InsideStroke.included} />,
     );
 
     // result

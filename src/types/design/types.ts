@@ -3,6 +3,7 @@ import {
   AlignmentHorizontal,
   AlignmentLayout,
   AlignmentVertical,
+  CanvasStacking,
   GapMode,
   InsideStroke,
   LayoutMode,
@@ -94,6 +95,7 @@ export type TEllipseNode = TBaseNode & {
 };
 
 export type TFrameNode = TBaseNode & {
+  canvasStacking?: CanvasStacking;
   childIds: string[];
   clipContent: boolean;
   fill: string;

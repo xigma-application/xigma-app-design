@@ -3,10 +3,13 @@ import { render, screen } from '@testing-library/react';
 // components
 import PreviewCanvasStacking from './PreviewCanvasStacking';
 
+// types
+import { CanvasStacking } from 'types/design/enums';
+
 describe('PreviewCanvasStacking', () => {
   it('should render one circle per stacked value', () => {
     // before
-    render(<PreviewCanvasStacking value="lastOnTop" />);
+    render(<PreviewCanvasStacking value={CanvasStacking.lastOnTop} />);
 
     // result
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -16,7 +19,7 @@ describe('PreviewCanvasStacking', () => {
 
   it('should not apply the first-on-top modifier for the lastOnTop value', () => {
     // before
-    const { container } = render(<PreviewCanvasStacking value="lastOnTop" />);
+    const { container } = render(<PreviewCanvasStacking value={CanvasStacking.lastOnTop} />);
 
     // result
     expect(container.querySelector('[class*="--first-on-top"]')).toBeNull();
@@ -24,7 +27,7 @@ describe('PreviewCanvasStacking', () => {
 
   it('should apply the first-on-top modifier for the firstOnTop value', () => {
     // before
-    const { container } = render(<PreviewCanvasStacking value="firstOnTop" />);
+    const { container } = render(<PreviewCanvasStacking value={CanvasStacking.firstOnTop} />);
 
     // result
     expect(container.querySelector('[class*="--first-on-top"]')).not.toBeNull();

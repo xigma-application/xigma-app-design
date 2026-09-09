@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { CanvasStacking, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { TMaskRenderer } from '../../types';
 
@@ -64,5 +64,14 @@ describe('renderFrameNode', () => {
 
     expect(renderIds).toHaveBeenCalledWith(renderer, [], null);
     expect(renderClippedFrame).not.toHaveBeenCalled();
+  });
+
+  it('should paint the children in reverse order when the frame is set to first on top', () => {
+    const renderer = buildRenderer();
+    const frame = buildFrame({ canvasStacking: CanvasStacking.firstOnTop, childIds: ['child-a', 'child-b'], clipContent: false });
+
+    renderFrameNode(renderer, frame, null);
+
+    expect(renderIds).toHaveBeenCalledWith(renderer, ['child-b', 'child-a'], null);
   });
 });

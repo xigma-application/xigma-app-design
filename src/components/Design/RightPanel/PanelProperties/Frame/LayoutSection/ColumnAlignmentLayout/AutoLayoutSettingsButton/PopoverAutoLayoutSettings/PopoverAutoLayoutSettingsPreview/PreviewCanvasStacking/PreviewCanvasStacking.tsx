@@ -6,6 +6,7 @@ import styles from './preview-canvas-stacking.module.scss';
 
 // types
 import { TCanvasStacking } from '../../types';
+import { CanvasStacking } from 'types/design/enums';
 
 export type TPreviewCanvasStackingProps = {
   value: TCanvasStacking;
@@ -14,7 +15,7 @@ export type TPreviewCanvasStackingProps = {
 const CIRCLE_VALUES = [1, 2, 3];
 
 export const PreviewCanvasStacking: FC<TPreviewCanvasStackingProps> = ({ value }) => {
-  const firstOnTop = value === 'firstOnTop';
+  const firstOnTop = value === CanvasStacking.firstOnTop;
 
   return (
     <div className={cx(styles.PreviewCanvasStacking, { [styles['PreviewCanvasStacking--first-on-top']]: firstOnTop })}>

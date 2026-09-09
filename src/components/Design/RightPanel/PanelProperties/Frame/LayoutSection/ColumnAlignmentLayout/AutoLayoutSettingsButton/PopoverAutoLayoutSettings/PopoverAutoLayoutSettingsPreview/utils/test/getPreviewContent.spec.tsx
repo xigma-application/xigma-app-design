@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import i18n from 'i18next';
 
 // types
-import { InsideStroke } from 'types/design/enums';
+import { CanvasStacking, InsideStroke } from 'types/design/enums';
 
 // utils
 import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
@@ -22,7 +22,7 @@ describe('getPreviewContent', () => {
 
   it('should render the canvas stacking preview when a canvas stacking value is set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, canvasStacking: 'lastOnTop' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, canvasStacking: CanvasStacking.lastOnTop }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewCanvasStacking"]')).not.toBeNull();
@@ -59,7 +59,7 @@ describe('getPreviewContent', () => {
         {
           alignTextBaseline: 'on',
           autoSpacing: 'between',
-          canvasStacking: 'lastOnTop',
+          canvasStacking: CanvasStacking.lastOnTop,
           insideStroke: InsideStroke.included,
           layout: 'legacy',
         },
@@ -77,7 +77,9 @@ describe('getPreviewContent', () => {
 
   it('should prioritize the canvas stacking preview over the align text baseline preview when both are set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: 'on', canvasStacking: 'lastOnTop' }, t));
+    const { container } = render(
+      getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: 'on', canvasStacking: CanvasStacking.lastOnTop }, t),
+    );
 
     // result
     expect(container.querySelector('[class*="PreviewCanvasStacking"]')).not.toBeNull();

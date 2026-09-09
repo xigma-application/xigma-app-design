@@ -2,6 +2,7 @@
 import { bindTarget } from './bindTarget';
 import { compositeMask } from '../compositeMask';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
+import { getFrameChildIdsInPaintOrder } from 'store/design/utils/getFrameChildIdsInPaintOrder';
 import { renderIds } from './renderIds';
 import { renderIntoTarget } from './renderIntoTarget';
 
@@ -16,7 +17,7 @@ export const renderClippedFrame = (renderer: TMaskRenderer, frame: TFrameNode, t
   const contentTarget = pool.acquire();
   const maskTarget = pool.acquire();
 
-  renderIntoTarget(renderer, contentTarget, () => renderIds(renderer, frame.childIds, contentTarget));
+  renderIntoTarget(renderer, contentTarget, () => renderIds(renderer, getFrameChildIdsInPaintOrder(frame), contentTarget));
   renderIntoTarget(renderer, maskTarget, () =>
     drawRect(gl, program, buffer, { ...frame, fill: '#ffffff', fillAlpha: 1 }, canvasWidth, canvasHeight, viewport, frame.rotation),
   );

@@ -4,6 +4,7 @@ import { TMaskRenderer } from '../types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
 // utils
+import { getFrameChildIdsInPaintOrder } from 'store/design/utils/getFrameChildIdsInPaintOrder';
 import { renderClippedFrame } from '../renderClippedFrame';
 import { renderIds } from '../renderIds';
 
@@ -13,6 +14,6 @@ export const renderFrameNode = (renderer: TMaskRenderer, node: TFrameNode, targe
   if (node.clipContent && node.childIds.length > 0) {
     renderClippedFrame(renderer, node, target);
   } else {
-    renderIds(renderer, node.childIds, target);
+    renderIds(renderer, getFrameChildIdsInPaintOrder(node), target);
   }
 };
