@@ -173,9 +173,11 @@ bottom, and each row or column can be a fixed size, hug its contents, or share t
 Row and column gaps and padding work as they already do. Rotating the frame still works. Full
 write-up: `.claude/docs/auto-layout.md` §13.
 
-- [ ] first cut is the layout maths only — there is no panel yet for the column/row count, the
-      per-track sizes, or the grid gaps, and no on-canvas handles; a grid frame can be set up in
-      code but only the column count has a default when you click the button
+- [x] the layout maths
+- [x] the right-panel Grid section — a preview tile that opens a popup with column and row number
+      fields and a click-to-pick size grid, plus the row and column gap fields
+- [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
+      the canvas — this is the last part
 - [ ] later: placing a child in a specific cell, letting a child span several cells, dragging a
       child from one cell to another, and reordering with the keyboard
 

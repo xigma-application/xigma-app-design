@@ -9,12 +9,15 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getAutoLayoutEffectiveGaps } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles/getAutoLayoutEffectiveGaps';
+import { useColumnGridArea, TUseColumnGridAreaResult } from './useColumnGridArea';
 
 export type TUseColumnAlignmentLayoutResult = {
   alignment: AlignmentLayout;
+  gridArea: TUseColumnGridAreaResult;
   horizontalGap: number;
   horizontalGapMode: GapMode;
   isBaselineAligned: boolean;
+  isGrid: boolean;
   isHorizontal: boolean;
   isHorizontalGapModeDisabled: boolean;
   isVerticalGapModeDisabled: boolean;
@@ -38,8 +41,10 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const id = frameNode?.id ?? '';
+  const gridArea = useColumnGridArea();
   const layoutMode = frameNode?.layoutMode;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
+  const isGrid = layoutMode === LayoutMode.grid;
   const isBaselineAligned = isHorizontal && frameNode?.alignTextBaseline === AlignTextBaseline.on;
   const alignment = frameNode?.layoutAlignment ?? AlignmentLayout.topLeft;
   const horizontalGapMode = frameNode?.horizontalGapMode ?? GapMode.fixed;
@@ -61,13 +66,15 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
 
   return {
     alignment,
+    gridArea,
     horizontalGap,
     horizontalGapMode,
     isBaselineAligned,
+    isGrid,
     isHorizontal,
-    isHorizontalGapModeDisabled: (frameNode?.widthSizingMode ?? SizingMode.fixed) === SizingMode.hug,
-    isVerticalGapModeDisabled: (frameNode?.heightSizingMode ?? SizingMode.fixed) === SizingMode.hug,
-    isVisible: layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical,
+    isHorizontalGapModeDisabled: isGrid || (frameNode?.widthSizingMode ?? SizingMode.fixed) === SizingMode.hug,
+    isVerticalGapModeDisabled: isGrid || (frameNode?.heightSizingMode ?? SizingMode.fixed) === SizingMode.hug,
+    isVisible: isGrid || layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical,
     isWrap: Boolean(frameNode?.layoutWrap),
     onChangeAlignment: (nextAlignment) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id })),
     onCommitHorizontalGap: commitHorizontalGap,

@@ -70,7 +70,7 @@ describe('useColumnAlignmentLayout', () => {
     expect(result.current.isVisible).toBe(false);
   });
 
-  it('should not be visible for a grid frame', () => {
+  it('should be visible and flagged as grid for a grid frame', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.grid);
 
@@ -80,7 +80,10 @@ describe('useColumnAlignmentLayout', () => {
     const { result } = renderUseColumnAlignmentLayout();
 
     // result
-    expect(result.current.isVisible).toBe(false);
+    expect(result.current.isVisible).toBe(true);
+    expect(result.current.isGrid).toBe(true);
+    expect(result.current.isHorizontalGapModeDisabled).toBe(true);
+    expect(result.current.isVerticalGapModeDisabled).toBe(true);
   });
 
   it('should be visible for a vertical frame', () => {

@@ -1,0 +1,15 @@
+.GridArea {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-surface);
+  border-radius: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: block;
+  height: 56px;
+  padding: 0;
+  width: 100%;
+}
+
+.GridAreaPanel {
+  padding: 12px;
+}

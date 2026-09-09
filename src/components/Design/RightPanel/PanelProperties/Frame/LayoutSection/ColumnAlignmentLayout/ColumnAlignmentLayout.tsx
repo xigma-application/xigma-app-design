@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import AlignmentArea from './AlignmentArea/AlignmentArea';
 import ColumnAlignmentLayoutButtonIcons from './ColumnAlignmentLayoutButtonIcons';
 import GapField from './GapField/GapField';
+import GridArea from './GridArea/GridArea';
 import { UITools } from 'shared';
 
 // hooks
@@ -20,9 +21,11 @@ const ColumnAlignmentLayout: FC = () => {
   const { t } = useTranslation();
   const {
     alignment,
+    gridArea,
     horizontalGap,
     horizontalGapMode,
     isBaselineAligned,
+    isGrid,
     isHorizontal,
     isHorizontalGapModeDisabled,
     isVerticalGapModeDisabled,
@@ -45,21 +48,31 @@ const ColumnAlignmentLayout: FC = () => {
       <UITools.SectionColumn
         buttonsIcon={ColumnAlignmentLayoutButtonIcons()}
         gridColumnType={UITools.GridColumnType.oneByTwo}
-        labels={[t(`${translationNameSpace}.label.alignment`), t(`${translationNameSpace}.label.gap`)]}
+        labels={[t(`${translationNameSpace}.label.${isGrid ? 'grid' : 'alignment'}`), t(`${translationNameSpace}.label.gap`)]}
         withBottomMargin
         withTopAlignedButtons
       >
-        <AlignmentArea
-          isBaselineAligned={isBaselineAligned}
-          isGapAutoHorizontal={horizontalGapMode === GapMode.auto}
-          isGapAutoVertical={verticalGapMode === GapMode.auto}
-          isHorizontal={isHorizontal}
-          isWrap={isWrap}
-          onClick={onChangeAlignment}
-          onRemoveBaselineAlignment={onRemoveBaselineAlignment}
-          value={alignment}
-        />
-        {isHorizontal && (
+        {isGrid ? (
+          <GridArea
+            columns={gridArea.columns}
+            onClickCell={gridArea.onClickCell}
+            onCommitColumns={gridArea.onCommitColumns}
+            onCommitRows={gridArea.onCommitRows}
+            rows={gridArea.rows}
+          />
+        ) : (
+          <AlignmentArea
+            isBaselineAligned={isBaselineAligned}
+            isGapAutoHorizontal={horizontalGapMode === GapMode.auto}
+            isGapAutoVertical={verticalGapMode === GapMode.auto}
+            isHorizontal={isHorizontal}
+            isWrap={isWrap}
+            onClick={onChangeAlignment}
+            onRemoveBaselineAlignment={onRemoveBaselineAlignment}
+            value={alignment}
+          />
+        )}
+        {(isGrid || isHorizontal) && (
           <GapField
             isHorizontal
             mode={horizontalGapMode}
@@ -70,7 +83,7 @@ const ColumnAlignmentLayout: FC = () => {
             value={horizontalGap}
           />
         )}
-        {(!isHorizontal || isWrap) && (
+        {(isGrid || !isHorizontal || isWrap) && (
           <GapField
             isHorizontal={false}
             mode={verticalGapMode}

@@ -3,12 +3,13 @@ import { test, expect, Locator, Page } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
-// Phase 1 of grid auto-layout ships the position engine only — no dedicated grid UI yet. The cell
-// math (track sizing, placement order, gaps, padding, hug, spanning, per-cell alignment) is pinned
-// exhaustively by the unit suite under src/store/design/utils/autoLayout/computeGridLayoutPositions/.
-// What only a real browser proves is the one wiring Phase 1 does touch: the RightPanel Flow toggle's
-// "Grid" button dispatching layoutMode: grid + the seeded column count, syncAutoLayoutChildren
-// running its grid branch, and the canvas repainting — the same round-trip rationale as flow.spec.ts.
+// Grid auto-layout: the cell math (track sizing, placement order, gaps, padding, hug, spanning,
+// per-cell alignment) is pinned exhaustively by the unit suite under
+// src/store/design/utils/autoLayout/computeGridLayoutPositions/, and the panel widget (preview tile,
+// count inputs, 12x8 pick matrix) by ColumnAlignmentLayout/GridArea/**. What only a real browser
+// proves is the wiring: the Flow toggle's "Grid" button and the GridArea popover controls
+// dispatching into the store, syncAutoLayoutChildren running its grid branch, and the canvas
+// repainting — the same round-trip rationale as flow.spec.ts.
 
 const FRAME = { x1: 600, x2: 1100, y1: 150, y2: 700 };
 
@@ -60,6 +61,10 @@ const readColumnCount = (page: Page): Promise<number | undefined> =>
 const unique = (values: number[]): number[] => [...new Set(values)];
 
 test.describe('auto-layout — Grid flow', () => {
+  // each test draws a frame plus several dragged-in children before it can assert — heavier than the
+  // 30s default, especially under parallel load
+  test.describe.configure({ timeout: 60_000 });
+
   test('the Grid flow button lays the frame’s children into a two-column grid, and round-trips through Horizontal', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -107,5 +112,43 @@ test.describe('auto-layout — Grid flow', () => {
     // ...and returning to Grid restores the exact same cell coordinates
     await setFlow(page, 'Grid');
     expect(await getChildren(page)).toEqual(grid);
+  });
+
+  test('the Grid panel widget drives the column count via its input and its pick matrix', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    for (const targetY of [250, 320, 390, 460]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(2);
+
+    // open the popover and type a new column count into its Columns field
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(3);
+
+    // the popover stays open — its 12x8 pick matrix sets both dimensions at once
+    await page.locator('[data-value="2.2"]').click();
+
+    await expect.poll(() => readColumnCount(page)).toBe(2);
+    // back to two columns; the row count still grows to fit all six children
+    expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(2);
   });
 });

@@ -438,12 +438,27 @@ frame centre). `applyAutoLayoutSyncChildPosition` also recurses into a nested `g
 Returns `TAutoLayoutChildPosition[]` in `sizes` order — the exact shape the applier already
 consumes.
 
-### Not covered by Phase 1
+### Panel — `LayoutSection/ColumnAlignmentLayout/GridArea/`
 
-Track-size / count / gap RightPanel controls and canvas track pills, `gridAutoPlacement` toggle UI,
+Ported faithfully from x-design's `shared/UITools/GridArea/` (structure + popup). When
+`layoutMode === grid`, `ColumnAlignmentLayout` swaps `AlignmentArea` for `<GridArea>` and shows
+**both** `GapField`s (column = `horizontalGap`, row = `verticalGap`; auto-gap mode disabled). The
+widget is a 56px preview tile (`GridAreaPreview`, a `repeat(n, 1fr)` grid capped at 10×10 with a
+`"C × R"` caption) that opens a `UITools.Popover` holding `GridInputs` (two `GridInputCells` —
+`TextField` + `ScrubbableInput` 1–100) and `CellsInput` (a 12×8 `data-value="col.row"` pick
+matrix). `useColumnGridArea` holds the in-flight strings, commits on blur via
+`clampGridCount` + `commitGridColumnCountChange` / `commitGridRowCountChange` (revert on
+empty / out-of-range), and `onClickCell` writes both counts at once. The Rows field shows the
+**effective** count (`getEffectiveGridRowCount` = `ceil(childCount / columns)`) when
+`gridRowCount` is unset; editing it writes `gridRowCount`. No per-track sizing UI (deferred).
+
+### Not covered yet
+
+Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
+`gridColumnSizes` / `gridRowSizes` — UI is the last phase), `gridAutoPlacement` toggle UI,
 empty-cell rendering, drag-a-child-into-a-cell drop target, span edge-handles, auto-placement
-obstruction reflow (push blockers / add tracks), arrow-key reorder, ⌘D-into-next-cell, track
-reorder/delete. The engine already honours spans and manual anchors when set in code.
+obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete. The engine already
+honours spans and manual anchors when set in code.
 
 ## Tests
 
@@ -468,9 +483,16 @@ reorder/delete. The engine already honours spans and manual anchors when set in 
   `gap-handles`, `ignore-auto-layout`, `settings` (the popover round-trip: Layout version, Auto
   spacing, Canvas stacking), `grid` (the Flow toggle's Grid button → grid engine → canvas
   round-trip). Scenario catalog with per-row rationale: `e2e/design/docs/test-cases-auto-layout.md`.
-- **Unit — grid (§13):** `computeGridLayoutPositions/test/` (`placeGridCells`,
-  `resolveGridTrackSizes`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
-  `computeGridLayoutPositions`) + `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`.
+- **Unit — grid (§13):** engine — `computeGridLayoutPositions/**/test/` (`placeGridCells/*`,
+  `resolveGridLayout/*`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
+  `resolveGridTrackSizes`, `computeGridLayoutPositions`) +
+  `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; panel —
+  `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
+  `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`) and
+  `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
+  `getEffectiveGridRowCount`, `commitGridColumnCountChange` / `commitGridRowCountChange`).
+- **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, and the
+  `GridArea` popover's Columns field + 12×8 pick matrix, driving the engine + canvas.
 
 ## History (so it isn't repeated)
 
@@ -501,3 +523,8 @@ reorder/delete. The engine already honours spans and manual anchors when set in 
    per-cell alignment, rotation) wired behind that same button — engine only, no dedicated grid UI.
    The engine honours spans / manual anchors when set in code; the controls and canvas handles for
    them are later phases.
+7. **~2026-09 — grid flow, Phase 2: the panel (§13).** Ported x-design's `GridArea` widget
+   (preview tile + popup with two count inputs and a 12×8 pick matrix) into `ColumnAlignmentLayout`
+   for grid mode, plus both gap fields. Deliberately no per-track sizing UI or canvas handles —
+   x-design has neither, and the engine's `1fr` default already matches `repeat(n, 1fr)`. Per-track
+   controls + on-canvas handles are the final phase.

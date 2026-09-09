@@ -1,0 +1,31 @@
+.CellsInput {
+  align-items: center;
+  box-sizing: border-box;
+  display: grid;
+  gap: 2px;
+  height: 130px;
+  justify-content: center;
+  margin-top: 11px;
+  padding: 2px;
+  position: relative;
+  width: 100%;
+
+  &__cell {
+    background-color: var(--color-neutral-3);
+    border: 1px solid var(--color-neutral-3);
+    border-radius: 2.5px;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+
+    &--active {
+      border-color: var(--color-blue-1);
+    }
+
+    &--selected {
+      background-color: var(--color-selected);
+      opacity: 0.6;
+    }
+  }
+}

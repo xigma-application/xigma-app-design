@@ -1,0 +1,11 @@
+.GridInputs {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  &__separator {
+    color: var(--color-neutral-1);
+    font-size: 10px;
+    margin: 0 5px;
+  }
+}

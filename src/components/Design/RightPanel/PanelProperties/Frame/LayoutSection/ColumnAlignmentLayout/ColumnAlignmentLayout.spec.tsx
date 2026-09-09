@@ -81,17 +81,20 @@ describe('ColumnAlignmentLayout behaviors', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should render nothing for a grid frame', () => {
+  it('should render the grid area widget and both gap fields for a grid frame', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.grid);
 
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2 }, id: frameId }));
     store.dispatch(setSelection([frameId]));
 
     // before
     const { container } = renderColumnAlignmentLayout();
 
     // result
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText('Grid')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Grid' })).toBeInTheDocument();
+    expect(container.querySelectorAll('[class*="GridAreaPreview__cell"]').length).toBeGreaterThan(0);
   });
 
   it('should render the alignment and gap labels for a horizontal frame', () => {
