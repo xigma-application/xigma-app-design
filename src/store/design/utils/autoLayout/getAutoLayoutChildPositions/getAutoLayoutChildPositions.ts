@@ -1,5 +1,5 @@
 // types
-import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode } from 'types/design/enums';
+import { AlignmentLayout, AutoSpacing, LayoutMode, LayoutVersion, SizingMode, StrokeAlign } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
@@ -17,6 +17,8 @@ export type TAutoLayoutChildSize = {
   maxWidth?: number;
   minHeight?: number;
   minWidth?: number;
+  strokeAlign?: StrokeAlign;
+  strokeWidth?: number;
   width: number;
   widthSizingMode?: SizingMode;
 };

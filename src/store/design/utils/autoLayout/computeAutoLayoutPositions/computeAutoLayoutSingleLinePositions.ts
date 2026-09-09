@@ -35,7 +35,7 @@ export const computeAutoLayoutSingleLinePositions = (
   const availablePrimary = isHorizontal ? contentBox.width : contentBox.height;
   const availableCounter = isHorizontal ? contentBox.height : contentBox.width;
   const fillableSizes = getFillableAutoLayoutSizes(sizes, widthMode, heightMode);
-  const filledSizes = getAutoLayoutFillSizes(isHorizontal, itemSpacing, availablePrimary, availableCounter, fillableSizes);
+  const filledSizes = getAutoLayoutFillSizes(isHorizontal, itemSpacing, availablePrimary, availableCounter, fillableSizes, layoutVersion);
 
   return getAutoLayoutChildPositions(
     layoutMode,

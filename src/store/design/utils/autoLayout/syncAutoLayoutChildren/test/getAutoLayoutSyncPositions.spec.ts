@@ -1,5 +1,15 @@
 // types
-import { AlignTextBaseline, AlignmentLayout, AutoSpacing, GapMode, LayoutMode, LayoutVersion, NodeType } from 'types/design/enums';
+import {
+  AlignTextBaseline,
+  AlignmentLayout,
+  AutoSpacing,
+  GapMode,
+  LayoutMode,
+  LayoutVersion,
+  NodeType,
+  SizingMode,
+  StrokeAlign,
+} from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -273,6 +283,37 @@ describe('getAutoLayoutSyncPositions', () => {
       getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
 
       expect(layoutFrame.width).toBe(40);
+    });
+
+    it('should give a fill child with an inside stroke a wider box to keep content areas equal under the updated layout version', () => {
+      const layoutFrame = frame({ height: 20, width: 100 });
+      const sizes = [
+        { height: 20, id: 'a', strokeAlign: StrokeAlign.inside, strokeWidth: 10, width: 0, widthSizingMode: SizingMode.fill },
+        { height: 20, id: 'b', width: 0, widthSizingMode: SizingMode.fill },
+      ];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      // 90 content split 45/45; a carries its 10px stroke -> box 55, b -> 45
+      expect(positions).toEqual([
+        { height: 20, id: 'a', width: 55, x: 0, y: 0 },
+        { height: 20, id: 'b', width: 45, x: 55, y: 0 },
+      ]);
+    });
+
+    it('should split fill children evenly, ignoring an inside stroke, under the legacy layout version', () => {
+      const layoutFrame = frame({ height: 20, layoutVersion: LayoutVersion.legacy, width: 100 });
+      const sizes = [
+        { height: 20, id: 'a', strokeAlign: StrokeAlign.inside, strokeWidth: 10, width: 0, widthSizingMode: SizingMode.fill },
+        { height: 20, id: 'b', width: 0, widthSizingMode: SizingMode.fill },
+      ];
+
+      const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+      expect(positions).toEqual([
+        { height: 20, id: 'a', width: 50, x: 0, y: 0 },
+        { height: 20, id: 'b', width: 50, x: 50, y: 0 },
+      ]);
     });
   });
 });

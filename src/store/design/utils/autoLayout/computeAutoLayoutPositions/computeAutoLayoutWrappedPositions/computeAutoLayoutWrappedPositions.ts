@@ -48,6 +48,7 @@ export const computeAutoLayoutWrappedPositions = (
     heightMode,
     lines,
     alignTextBaseline,
+    layoutVersion,
   );
 
   return getAutoLayoutWrappedChildPositions(

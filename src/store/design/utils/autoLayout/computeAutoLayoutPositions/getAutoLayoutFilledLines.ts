@@ -1,5 +1,5 @@
 // types
-import { SizingMode } from 'types/design/enums';
+import { LayoutVersion, SizingMode } from 'types/design/enums';
 import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 // utils
@@ -15,10 +15,11 @@ export const getAutoLayoutFilledLines = (
   heightMode: SizingMode,
   lines: TAutoLayoutChildSize[][],
   alignTextBaseline = false,
+  layoutVersion: LayoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildSize[][] =>
   lines.map((line) => {
     const fillableLine = getFillableAutoLayoutSizes(line, widthMode, heightMode);
     const lineThickness = getAutoLayoutLineThickness(isHorizontal, line, alignTextBaseline);
 
-    return getAutoLayoutFillSizes(isHorizontal, itemSpacing, availableContentPrimary, lineThickness, fillableLine);
+    return getAutoLayoutFillSizes(isHorizontal, itemSpacing, availableContentPrimary, lineThickness, fillableLine, layoutVersion);
   });

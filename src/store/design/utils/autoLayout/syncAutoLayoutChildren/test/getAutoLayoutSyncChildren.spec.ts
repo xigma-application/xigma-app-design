@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TFrameNode, TLineNode, TRectangleNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -134,6 +134,31 @@ describe('getAutoLayoutSyncChildren', () => {
     // result
     expect(result.sizes[0].fontSize).toBe(24);
     expect(result.sizes[1].fontSize).toBeUndefined();
+  });
+
+  it('should carry a box child’s stroke width and alignment into its size entry', () => {
+    // mock
+    const a = rect({ id: 'a', strokeAlign: StrokeAlign.inside, strokeColor: '#000', strokeWidth: 4 });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0]).toMatchObject({ strokeAlign: StrokeAlign.inside, strokeWidth: 4 });
+  });
+
+  it('should leave the stroke fields undefined for a non-box child, like a line', () => {
+    // mock
+    const a = line({ id: 'a', strokeWidth: 3 });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0].strokeAlign).toBeUndefined();
+    expect(result.sizes[0].strokeWidth).toBeUndefined();
   });
 
   it('should leave the sizing-mode and min/max fields undefined for a non-box child, like a line', () => {

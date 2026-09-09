@@ -1,10 +1,11 @@
 // types
-import { SizingMode } from 'types/design/enums';
+import { LayoutVersion, SizingMode } from 'types/design/enums';
 import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 
 // utils
 import { clampAutoLayoutSize } from '../clampAutoLayoutSize';
-import { resolveAutoLayoutFillPrimarySizes } from './resolveAutoLayoutFillPrimarySizes';
+import { getAutoLayoutChildStrokeInset } from './getAutoLayoutChildStrokeInset';
+import { resolveAutoLayoutFillPrimarySizes, TAutoLayoutFillPrimaryCandidate } from './resolveAutoLayoutFillPrimarySizes';
 
 const getFixedPrimarySize = (child: TAutoLayoutChildSize, isHorizontal: boolean): number => {
   const mode = isHorizontal ? child.widthSizingMode : child.heightSizingMode;
@@ -16,28 +17,48 @@ const getFixedPrimarySize = (child: TAutoLayoutChildSize, isHorizontal: boolean)
   return isHorizontal ? child.width : child.height;
 };
 
+const subtractInset = (bound: number | undefined, inset: number): number | undefined =>
+  bound === undefined ? undefined : Math.max(bound - inset, 0);
+
+const getAutoLayoutStrokeInsets = (fillChildren: TAutoLayoutChildSize[], layoutVersion: LayoutVersion): Record<string, number> =>
+  fillChildren.reduce<Record<string, number>>((strokeInsets, child) => {
+    strokeInsets[child.id] = getAutoLayoutChildStrokeInset(child, layoutVersion);
+    return strokeInsets;
+  }, {});
+
+const getAutoLayoutFillCandidates = (
+  fillChildren: TAutoLayoutChildSize[],
+  isHorizontal: boolean,
+  strokeInsets: Record<string, number>,
+): TAutoLayoutFillPrimaryCandidate[] =>
+  fillChildren.map((child) => ({
+    id: child.id,
+    max: subtractInset(isHorizontal ? child.maxWidth : child.maxHeight, strokeInsets[child.id]),
+    min: subtractInset(isHorizontal ? child.minWidth : child.minHeight, strokeInsets[child.id]),
+  }));
+
 export const getAutoLayoutFillSizes = (
   isHorizontal: boolean,
   itemSpacing: number,
   availablePrimary: number,
   availableCounter: number,
   children: TAutoLayoutChildSize[],
+  layoutVersion: LayoutVersion = LayoutVersion.updated,
 ): TAutoLayoutChildSize[] => {
   const totalGaps = children.length > 0 ? itemSpacing * (children.length - 1) : 0;
   const fixedPrimarySum = children.reduce((total, child) => total + getFixedPrimarySize(child, isHorizontal), 0);
   const fillChildren = children.filter((child) => (isHorizontal ? child.widthSizingMode : child.heightSizingMode) === SizingMode.fill);
-  const leftover = fillChildren.length > 0 ? Math.max(availablePrimary - totalGaps - fixedPrimarySum, 0) : 0;
-  const candidates = fillChildren.map((child) => ({
-    id: child.id,
-    max: isHorizontal ? child.maxWidth : child.maxHeight,
-    min: isHorizontal ? child.minWidth : child.minHeight,
-  }));
-  const resolvedPrimarySizes = resolveAutoLayoutFillPrimarySizes(leftover, candidates);
+  const strokeInsets = getAutoLayoutStrokeInsets(fillChildren, layoutVersion);
+  const totalStrokeInset = fillChildren.reduce((total, child) => total + strokeInsets[child.id], 0);
+  const leftover = fillChildren.length > 0 ? Math.max(availablePrimary - totalGaps - fixedPrimarySum - totalStrokeInset, 0) : 0;
+  const candidates = getAutoLayoutFillCandidates(fillChildren, isHorizontal, strokeInsets);
+  const resolvedContentSizes = resolveAutoLayoutFillPrimarySizes(leftover, candidates);
 
   return children.map((child) => {
     const primaryMode = isHorizontal ? child.widthSizingMode : child.heightSizingMode;
     const counterMode = isHorizontal ? child.heightSizingMode : child.widthSizingMode;
-    const primarySize = primaryMode === SizingMode.fill ? resolvedPrimarySizes[child.id] : isHorizontal ? child.width : child.height;
+    const primarySize =
+      primaryMode === SizingMode.fill ? resolvedContentSizes[child.id] + strokeInsets[child.id] : isHorizontal ? child.width : child.height;
     const rawCounterSize = counterMode === SizingMode.fill ? availableCounter : isHorizontal ? child.height : child.width;
     const counterMin = isHorizontal ? child.minHeight : child.minWidth;
     const counterMax = isHorizontal ? child.maxHeight : child.maxWidth;

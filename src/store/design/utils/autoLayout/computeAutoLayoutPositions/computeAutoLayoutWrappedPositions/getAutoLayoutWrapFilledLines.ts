@@ -1,5 +1,5 @@
 // types
-import { SizingMode } from 'types/design/enums';
+import { LayoutVersion, SizingMode } from 'types/design/enums';
 import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 import { TFrameNode } from 'types/design/types';
@@ -22,6 +22,7 @@ export const getAutoLayoutWrapFilledLines = (
   heightMode: SizingMode,
   lines: TAutoLayoutChildSize[][],
   alignTextBaseline = false,
+  layoutVersion: LayoutVersion = LayoutVersion.updated,
 ): TAutoLayoutWrapFilledLines => {
   const contentBox = getAutoLayoutContentBox(frame, padding);
   const availableContentPrimary = isHorizontal ? contentBox.width : contentBox.height;
@@ -33,6 +34,7 @@ export const getAutoLayoutWrapFilledLines = (
     heightMode,
     lines,
     alignTextBaseline,
+    layoutVersion,
   );
 
   return { contentBox, filledLines };

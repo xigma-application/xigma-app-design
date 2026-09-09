@@ -31,6 +31,8 @@ export const getAutoLayoutSyncChildren = (frame: TFrameNode, nodes: Record<strin
       maxWidth: isBoxSceneNode(child) ? child.maxWidth : undefined,
       minHeight: isBoxSceneNode(child) ? child.minHeight : undefined,
       minWidth: isBoxSceneNode(child) ? child.minWidth : undefined,
+      strokeAlign: isBoxSceneNode(child) && 'strokeAlign' in child ? child.strokeAlign : undefined,
+      strokeWidth: isBoxSceneNode(child) && 'strokeWidth' in child ? child.strokeWidth : undefined,
       width: bound.width,
       widthSizingMode: isBoxSceneNode(child) ? child.widthSizingMode : undefined,
     };
