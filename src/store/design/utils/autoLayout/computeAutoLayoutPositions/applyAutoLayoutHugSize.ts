@@ -14,12 +14,13 @@ export const applyAutoLayoutHugSize = (
   itemSpacing: number,
   padding: TAutoLayoutPadding,
   sizes: TAutoLayoutChildSize[],
+  alignTextBaseline = false,
 ): void => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
 
   if (widthMode === SizingMode.hug || heightMode === SizingMode.hug) {
-    const hugSize = getAutoLayoutHugSize(layoutMode, itemSpacing, padding, sizes);
+    const hugSize = getAutoLayoutHugSize(layoutMode, itemSpacing, padding, sizes, alignTextBaseline);
 
     if (widthMode === SizingMode.hug) {
       frame.width = clampAutoLayoutSize(hugSize.width, frame.minWidth, frame.maxWidth);

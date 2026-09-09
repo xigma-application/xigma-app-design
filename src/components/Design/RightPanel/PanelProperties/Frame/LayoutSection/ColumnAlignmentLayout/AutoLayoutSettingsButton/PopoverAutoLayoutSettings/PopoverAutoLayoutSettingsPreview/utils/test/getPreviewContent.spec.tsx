@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import i18n from 'i18next';
 
 // types
-import { CanvasStacking, InsideStroke } from 'types/design/enums';
+import { AlignTextBaseline, CanvasStacking, InsideStroke } from 'types/design/enums';
 
 // utils
 import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
@@ -30,7 +30,7 @@ describe('getPreviewContent', () => {
 
   it('should render the align text baseline preview when an align text baseline value is set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: 'on' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: AlignTextBaseline.on }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewAlignTextBaseline"]')).not.toBeNull();
@@ -57,7 +57,7 @@ describe('getPreviewContent', () => {
     const { container } = render(
       getPreviewContent(
         {
-          alignTextBaseline: 'on',
+          alignTextBaseline: AlignTextBaseline.on,
           autoSpacing: 'between',
           canvasStacking: CanvasStacking.lastOnTop,
           insideStroke: InsideStroke.included,
@@ -78,7 +78,7 @@ describe('getPreviewContent', () => {
   it('should prioritize the canvas stacking preview over the align text baseline preview when both are set', () => {
     // before
     const { container } = render(
-      getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: 'on', canvasStacking: CanvasStacking.lastOnTop }, t),
+      getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: AlignTextBaseline.on, canvasStacking: CanvasStacking.lastOnTop }, t),
     );
 
     // result
@@ -88,7 +88,7 @@ describe('getPreviewContent', () => {
 
   it('should prioritize the align text baseline preview over the auto spacing preview when both are set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: 'on', autoSpacing: 'between' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, alignTextBaseline: AlignTextBaseline.on, autoSpacing: 'between' }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewAlignTextBaseline"]')).not.toBeNull();

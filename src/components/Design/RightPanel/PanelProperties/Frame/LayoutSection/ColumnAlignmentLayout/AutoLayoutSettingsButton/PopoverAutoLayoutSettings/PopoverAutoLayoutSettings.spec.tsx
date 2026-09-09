@@ -6,17 +6,41 @@ import PopoverAutoLayoutSettings from './PopoverAutoLayoutSettings';
 import { TooltipProvider } from 'shared';
 
 // store
-import { setSelection } from 'store/design/slice';
+import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LayoutMode } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 
 afterEach(() => {
   store.dispatch(setSelection([]));
 });
 
-const renderSettings = (onClose: TFunc = vi.fn(), layoutMode?: LayoutMode): ReturnType<typeof render> =>
+const selectAFrame = (layoutMode: LayoutMode): void => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 100,
+      layoutMode,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+};
+
+const renderSettings = (onClose: TFunc = vi.fn(), layoutMode: LayoutMode = LayoutMode.horizontal): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <TooltipProvider>
@@ -168,6 +192,7 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
 
   it('should switch align text baseline to on when clicked', () => {
     // before
+    selectAFrame(LayoutMode.horizontal);
     renderSettings();
 
     // action
@@ -268,5 +293,17 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     expect(screen.queryByText('Canvas stacking')).not.toBeInTheDocument();
     expect(screen.queryByText('Align text baseline')).not.toBeInTheDocument();
     expect(screen.queryByText('Auto spacing')).not.toBeInTheDocument();
+  });
+
+  it('should hide the align text baseline row for a non-horizontal layout, since it only applies to horizontal auto layout', () => {
+    // before
+    renderSettings(vi.fn(), LayoutMode.vertical);
+
+    // result — every other row still shows for a vertical frame
+    expect(screen.getByText('Inside stroke')).toBeInTheDocument();
+    expect(screen.getByText('Canvas stacking')).toBeInTheDocument();
+    expect(screen.getByText('Auto spacing')).toBeInTheDocument();
+    expect(screen.getByText('Layout')).toBeInTheDocument();
+    expect(screen.queryByText('Align text baseline')).not.toBeInTheDocument();
   });
 });

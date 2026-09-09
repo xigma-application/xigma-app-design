@@ -17,12 +17,13 @@ export const computeAutoLayoutSingleLinePositions = (
   padding: TAutoLayoutPadding,
   sizes: TAutoLayoutChildSize[],
   isPrimaryGapAuto: boolean,
+  alignTextBaseline = false,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
   const isHorizontal = layoutMode === LayoutMode.horizontal;
 
-  applyAutoLayoutHugSize(frame, layoutMode, itemSpacing, padding, sizes);
+  applyAutoLayoutHugSize(frame, layoutMode, itemSpacing, padding, sizes, alignTextBaseline);
 
   const contentBox = getAutoLayoutContentBox(frame, padding);
   const availablePrimary = isHorizontal ? contentBox.width : contentBox.height;
@@ -30,5 +31,5 @@ export const computeAutoLayoutSingleLinePositions = (
   const fillableSizes = getFillableAutoLayoutSizes(sizes, widthMode, heightMode);
   const filledSizes = getAutoLayoutFillSizes(isHorizontal, itemSpacing, availablePrimary, availableCounter, fillableSizes);
 
-  return getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, filledSizes, isPrimaryGapAuto);
+  return getAutoLayoutChildPositions(layoutMode, itemSpacing, alignment, contentBox, filledSizes, isPrimaryGapAuto, alignTextBaseline);
 };

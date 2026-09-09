@@ -3,6 +3,7 @@ import { AlignmentLayout, LayoutMode } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutWrappedChildPositions } from '../getAutoLayoutWrappedChildPositions';
+import { getTextBaselineOffset } from '../getTextBaselineOffset';
 
 describe('getAutoLayoutWrappedChildPositions', () => {
   it('should place a single line at the top-left, same as the unwrapped engine, when everything fits', () => {
@@ -139,6 +140,75 @@ describe('getAutoLayoutWrappedChildPositions', () => {
     expect(positions).toEqual([
       { height: 60, id: 'a', width: 20, x: 0, y: 0 },
       { height: 60, id: 'b', width: 30, x: 25, y: 0 },
+    ]);
+  });
+
+  it('should distribute the gap evenly within a line when the primary gap mode is auto', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 20, width: 200, x: 0, y: 0 },
+      [
+        [
+          { height: 20, id: 'a', width: 30 },
+          { height: 20, id: 'b', width: 30 },
+        ],
+      ],
+      true,
+    );
+
+    // gap = (200 - 30 - 30) / (2 - 1) = 140
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 30, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 30, x: 170, y: 0 },
+    ]);
+  });
+
+  it('should distribute the gap evenly between lines when the counter gap mode is auto', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 100, width: 50, x: 0, y: 0 },
+      [[{ height: 20, id: 'a', width: 50 }], [{ height: 20, id: 'b', width: 50 }]],
+      false,
+      true,
+    );
+
+    // counter gap = (100 - 20 - 20) / (2 - 1) = 60; the second line starts at 20 + 60 = 80
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 50, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 50, x: 0, y: 80 },
+    ]);
+  });
+
+  it('should align a line’s children by text baseline, per line, instead of the normal within-line alignment', () => {
+    const positions = getAutoLayoutWrappedChildPositions(
+      LayoutMode.horizontal,
+      0,
+      0,
+      AlignmentLayout.topLeft,
+      { height: 100, width: 200, x: 0, y: 0 },
+      [
+        [
+          { fontSize: 16, height: 20, id: 'text', width: 50 },
+          { height: 30, id: 'icon', width: 24 },
+        ],
+      ],
+      false,
+      false,
+      true,
+    );
+
+    // both baselines land on the icon's own baseline (its bottom edge, the taller offset)
+    const textBaselineOffset = getTextBaselineOffset(16);
+
+    expect(positions).toEqual([
+      { height: 20, id: 'text', width: 50, x: 0, y: 30 - textBaselineOffset },
+      { height: 30, id: 'icon', width: 24, x: 50, y: 0 },
     ]);
   });
 });

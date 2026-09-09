@@ -4,10 +4,13 @@ import { TDraftRect } from 'types/canvas';
 
 // utils
 import { getAlignmentComponents } from './getAlignmentComponents';
+import { getAutoLayoutBaselineExtent } from './getAutoLayoutBaselineExtent';
+import { getAutoLayoutChildBaselineOffset } from './getAutoLayoutChildBaselineOffset';
 import { getAxisOffset } from './getAxisOffset';
 import { getDistributedGap } from './getDistributedGap';
 
 export type TAutoLayoutChildSize = {
+  fontSize?: number;
   height: number;
   heightSizingMode?: SizingMode;
   id: string;
@@ -28,6 +31,7 @@ export const getAutoLayoutChildPositions = (
   frame: TDraftRect,
   children: TAutoLayoutChildSize[],
   isPrimaryGapAuto = false,
+  alignTextBaseline = false,
 ): TAutoLayoutChildPosition[] => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const { x: xAlign, y: yAlign } = getAlignmentComponents(alignment);
@@ -39,11 +43,14 @@ export const getAutoLayoutChildPositions = (
   const effectiveGap = isPrimaryGapAuto ? getDistributedGap(primarySize, childrenPrimarySize, children.length) : itemSpacing;
   const contentLength = childrenPrimarySize + effectiveGap * Math.max(0, children.length - 1);
   let offset = isPrimaryGapAuto ? 0 : getAxisOffset(primaryAlign, primarySize, contentLength);
+  const { maxBaseline } = getAutoLayoutBaselineExtent(children);
 
   return children.map((child) => {
     const size = isHorizontal ? child.width : child.height;
     const counterChildSize = isHorizontal ? child.height : child.width;
-    const counterOffset = getAxisOffset(counterAlign, counterSize, counterChildSize);
+    const counterOffset = alignTextBaseline
+      ? maxBaseline - getAutoLayoutChildBaselineOffset(child)
+      : getAxisOffset(counterAlign, counterSize, counterChildSize);
     const position = isHorizontal
       ? { height: child.height, id: child.id, width: child.width, x: frame.x + offset, y: frame.y + counterOffset }
       : { height: child.height, id: child.id, width: child.width, x: frame.x + counterOffset, y: frame.y + offset };

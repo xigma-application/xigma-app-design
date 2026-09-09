@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TRectangleNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getAutoLayoutSyncChildren } from '../getAutoLayoutSyncChildren';
@@ -13,6 +13,38 @@ const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
   parentId: 'frame-1',
   rotation: 0,
   type: NodeType.rectangle,
+  width: 30,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const line = (overrides: Partial<TLineNode>): TLineNode => ({
+  id: 'a',
+  name: 'Line',
+  parentId: 'frame-1',
+  stroke: '#000',
+  type: NodeType.line,
+  x1: 0,
+  x2: 30,
+  y1: 0,
+  y2: 0,
+  ...overrides,
+});
+
+const text = (overrides: Partial<TTextNode>): TTextNode => ({
+  content: 'Hello',
+  fill: '#000',
+  flipX: false,
+  flipY: false,
+  fontFamily: 'Inter',
+  fontSize: 16,
+  height: 20,
+  id: 'a',
+  name: 'Text',
+  parentId: 'frame-1',
+  rotation: 0,
+  type: NodeType.text,
   width: 30,
   x: 0,
   y: 0,
@@ -88,5 +120,38 @@ describe('getAutoLayoutSyncChildren', () => {
 
     expect(result.bounds[0].width).toBeCloseTo(expectedSide, 5);
     expect(result.bounds[0].height).toBeCloseTo(expectedSide, 5);
+  });
+
+  it('should carry a text child’s fontSize into its size entry, and leave it undefined for non-text children', () => {
+    // mock
+    const a = text({ fontSize: 24, id: 'a' });
+    const b = rect({ id: 'b' });
+    const layoutFrame = frame({ childIds: ['a', 'b'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, b, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0].fontSize).toBe(24);
+    expect(result.sizes[1].fontSize).toBeUndefined();
+  });
+
+  it('should leave the sizing-mode and min/max fields undefined for a non-box child, like a line', () => {
+    // mock
+    const a = line({ id: 'a' });
+    const layoutFrame = frame({ childIds: ['a'] });
+
+    // before
+    const result = getAutoLayoutSyncChildren(layoutFrame, { a, 'frame-1': layoutFrame });
+
+    // result
+    expect(result.sizes[0]).toMatchObject({
+      heightSizingMode: undefined,
+      maxHeight: undefined,
+      maxWidth: undefined,
+      minHeight: undefined,
+      minWidth: undefined,
+      widthSizingMode: undefined,
+    });
   });
 });

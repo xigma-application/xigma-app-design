@@ -1,5 +1,6 @@
 // types
 import {
+  AlignTextBaseline,
   AlignmentHorizontal,
   AlignmentLayout,
   AlignmentVertical,
@@ -95,6 +96,7 @@ export type TEllipseNode = TBaseNode & {
 };
 
 export type TFrameNode = TBaseNode & {
+  alignTextBaseline?: AlignTextBaseline;
   canvasStacking?: CanvasStacking;
   childIds: string[];
   clipContent: boolean;

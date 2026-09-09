@@ -16,11 +16,12 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TAlignTextBaseline, TAutoSpacing, TCanvasStacking, TInsideStroke, TLayoutVersion } from '../types';
-import { CanvasStacking, InsideStroke, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, CanvasStacking, InsideStroke, NodeType } from 'types/design/enums';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
+import { commitAlignTextBaselineChange } from './utils/commitAlignTextBaselineChange';
 import { commitCanvasStackingChange } from './utils/commitCanvasStackingChange';
 import { commitInsideStrokeChange } from './utils/commitInsideStrokeChange';
 import { getAlignTextBaselineToggleButtons } from './utils/getAlignTextBaselineToggleButtons';
@@ -71,7 +72,7 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const insideStroke = frameNode?.insideStroke ?? InsideStroke.included;
   const canvasStacking = frameNode?.canvasStacking ?? CanvasStacking.lastOnTop;
-  const [alignTextBaseline, setAlignTextBaseline] = useState<TAlignTextBaseline>('off');
+  const alignTextBaseline = frameNode?.alignTextBaseline ?? AlignTextBaseline.off;
   const [autoSpacing, setAutoSpacing] = useState<TAutoSpacing>('between');
   const [layoutVersion, setLayoutVersion] = useState<TLayoutVersion>('updated');
   const [isPreviewingInsideStroke, setIsPreviewingInsideStroke] = useState(false);
@@ -105,7 +106,7 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
     layoutOptions: toOptions('layout', LAYOUT_VERSION_VALUES),
     layoutPreviewValue: hoveredLayoutOption ?? (isPreviewingLayout ? layoutVersion : null),
     layoutValue: layoutVersion,
-    onChangeAlignTextBaseline: (value: string) => setAlignTextBaseline(value as TAlignTextBaseline),
+    onChangeAlignTextBaseline: (value: string) => commitAlignTextBaselineChange(dispatch, frameNode, value as TAlignTextBaseline),
     onHoverAlignTextBaselineOption: (value: string | null) => setHoveredAlignTextBaselineOption(value as TAlignTextBaseline | null),
     onHoverAutoSpacingOption: (value: TAutoSpacing | null) => setHoveredAutoSpacingOption(value),
     onHoverCanvasStackingOption: (value: TCanvasStacking | null) => setHoveredCanvasStackingOption(value),

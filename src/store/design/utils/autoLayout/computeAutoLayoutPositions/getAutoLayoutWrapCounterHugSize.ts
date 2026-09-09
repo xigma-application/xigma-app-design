@@ -12,9 +12,10 @@ export const getAutoLayoutWrapCounterHugSize = (
   counterAxisSpacing: number,
   padding: TAutoLayoutPadding,
   lines: TAutoLayoutChildSize[][],
+  alignTextBaseline = false,
 ): number => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
-  const lineThicknesses = lines.map((line) => getAutoLayoutLineThickness(isHorizontal, line));
+  const lineThicknesses = lines.map((line) => getAutoLayoutLineThickness(isHorizontal, line, alignTextBaseline));
   const blockCounterLength = getAutoLayoutBlockCounterLength(counterAxisSpacing, lineThicknesses);
 
   return blockCounterLength + (isHorizontal ? padding.paddingTop + padding.paddingBottom : padding.paddingLeft + padding.paddingRight);

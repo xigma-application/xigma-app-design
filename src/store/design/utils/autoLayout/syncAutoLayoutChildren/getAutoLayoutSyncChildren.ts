@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions';
 import { TDraftRect } from 'types/canvas';
 import { TFrameNode, TSceneNode } from 'types/design/types';
@@ -22,6 +23,7 @@ export const getAutoLayoutSyncChildren = (frame: TFrameNode, nodes: Record<strin
     const child = children[index];
 
     return {
+      fontSize: child.type === NodeType.text ? child.fontSize : undefined,
       height: bound.height,
       heightSizingMode: isBoxSceneNode(child) ? child.heightSizingMode : undefined,
       id: child.id,

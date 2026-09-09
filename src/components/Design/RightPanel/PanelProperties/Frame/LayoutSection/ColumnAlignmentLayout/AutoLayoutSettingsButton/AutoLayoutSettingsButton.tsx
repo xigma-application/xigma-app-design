@@ -16,7 +16,7 @@ import styles from './auto-layout-settings-button.module.scss';
 
 export const AutoLayoutSettingsButton: FC = () => {
   const { t } = useTranslation();
-  const { onClose, onOpenChange, open } = useAutoLayoutSettingsButton();
+  const { layoutMode, onClose, onOpenChange, open } = useAutoLayoutSettingsButton();
 
   return (
     <UITools.Popover
@@ -34,7 +34,7 @@ export const AutoLayoutSettingsButton: FC = () => {
       }
       triggerTooltip={t(`${translationNameSpace}.propertiesTooltip`)}
     >
-      <PopoverAutoLayoutSettings onClose={onClose} />
+      <PopoverAutoLayoutSettings layoutMode={layoutMode} onClose={onClose} />
     </UITools.Popover>
   );
 };

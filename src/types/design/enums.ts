@@ -4,6 +4,11 @@ export enum AlignmentHorizontal {
   right = 'right',
 }
 
+export enum AlignTextBaseline {
+  off = 'off',
+  on = 'on',
+}
+
 export enum AlignmentLayout {
   bottomCenter = 'bottomCenter',
   bottomLeft = 'bottomLeft',

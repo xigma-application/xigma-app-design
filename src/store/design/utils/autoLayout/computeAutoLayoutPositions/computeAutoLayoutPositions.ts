@@ -18,6 +18,7 @@ export const computeAutoLayoutPositions = (
   sizes: TAutoLayoutChildSize[],
   isPrimaryGapAuto: boolean,
   isCounterGapAuto: boolean,
+  alignTextBaseline = false,
 ): TAutoLayoutChildPosition[] => {
   const widthMode = frame.widthSizingMode ?? SizingMode.fixed;
   const heightMode = frame.heightSizingMode ?? SizingMode.fixed;
@@ -38,8 +39,18 @@ export const computeAutoLayoutPositions = (
       sizes,
       isPrimaryGapAuto,
       isCounterGapAuto,
+      alignTextBaseline,
     );
   }
 
-  return computeAutoLayoutSingleLinePositions(frame, layoutMode, itemSpacing, alignment, padding, sizes, isPrimaryGapAuto);
+  return computeAutoLayoutSingleLinePositions(
+    frame,
+    layoutMode,
+    itemSpacing,
+    alignment,
+    padding,
+    sizes,
+    isPrimaryGapAuto,
+    alignTextBaseline,
+  );
 };

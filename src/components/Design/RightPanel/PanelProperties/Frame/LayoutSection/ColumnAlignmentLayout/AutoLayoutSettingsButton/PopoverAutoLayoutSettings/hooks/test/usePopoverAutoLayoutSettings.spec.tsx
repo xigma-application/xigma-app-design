@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { CanvasStacking, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, CanvasStacking, InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -169,6 +169,29 @@ describe('usePopoverAutoLayoutSettings', () => {
 
     // result
     expect(result.current.alignTextBaselineValue).toBe('on');
+  });
+
+  it('should persist the selected align text baseline value to the selected frame node', () => {
+    // before
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onChangeAlignTextBaseline('on'));
+
+    // result
+    expect(read(frameId).alignTextBaseline).toBe(AlignTextBaseline.on);
+  });
+
+  it('should not throw and should fall back to the default align text baseline value when no frame is selected', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onChangeAlignTextBaseline('on'));
+
+    // result
+    expect(result.current.alignTextBaselineValue).toBe('off');
   });
 
   it('should update the auto spacing value when selected', () => {

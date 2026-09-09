@@ -25,6 +25,7 @@ export type TPopoverAutoLayoutSettingsProps = {
 
 export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({ layoutMode, onClose }) => {
   const isGridLayout = layoutMode === LayoutMode.grid;
+  const isHorizontalLayout = layoutMode === LayoutMode.horizontal;
   const {
     alignTextBaselinePreviewValue,
     alignTextBaselineToggleButtons,
@@ -93,7 +94,7 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
             value={canvasStackingValue}
           />
         )}
-        {!isGridLayout && (
+        {isHorizontalLayout && (
           <PopoverAutoLayoutSettingsAlignTextBaseline
             onChange={onChangeAlignTextBaseline}
             onHoverOption={onHoverAlignTextBaselineOption}

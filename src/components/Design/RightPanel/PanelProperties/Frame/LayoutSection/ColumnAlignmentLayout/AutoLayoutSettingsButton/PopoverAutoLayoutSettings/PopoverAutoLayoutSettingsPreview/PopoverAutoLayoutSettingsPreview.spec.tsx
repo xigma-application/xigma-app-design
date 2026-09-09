@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import PopoverAutoLayoutSettingsPreview, { TPopoverAutoLayoutSettingsPreviewProps } from './PopoverAutoLayoutSettingsPreview';
 
 // types
-import { CanvasStacking, InsideStroke } from 'types/design/enums';
+import { AlignTextBaseline, CanvasStacking, InsideStroke } from 'types/design/enums';
 
 const NO_PREVIEW: TPopoverAutoLayoutSettingsPreviewProps = {
   alignTextBaseline: null,
@@ -43,7 +43,7 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
 
   it('should render the align text baseline preview visual instead of the placeholder when a value is passed', () => {
     // before
-    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} alignTextBaseline="on" />);
+    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} alignTextBaseline={AlignTextBaseline.on} />);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();

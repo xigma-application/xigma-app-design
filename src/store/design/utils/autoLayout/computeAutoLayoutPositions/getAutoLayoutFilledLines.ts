@@ -14,10 +14,11 @@ export const getAutoLayoutFilledLines = (
   widthMode: SizingMode,
   heightMode: SizingMode,
   lines: TAutoLayoutChildSize[][],
+  alignTextBaseline = false,
 ): TAutoLayoutChildSize[][] =>
   lines.map((line) => {
     const fillableLine = getFillableAutoLayoutSizes(line, widthMode, heightMode);
-    const lineThickness = getAutoLayoutLineThickness(isHorizontal, line);
+    const lineThickness = getAutoLayoutLineThickness(isHorizontal, line, alignTextBaseline);
 
     return getAutoLayoutFillSizes(isHorizontal, itemSpacing, availableContentPrimary, lineThickness, fillableLine);
   });

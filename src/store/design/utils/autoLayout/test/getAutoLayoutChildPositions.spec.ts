@@ -3,6 +3,7 @@ import { AlignmentLayout, LayoutMode } from 'types/design/enums';
 
 // utils
 import { getAutoLayoutChildPositions } from '../getAutoLayoutChildPositions';
+import { getTextBaselineOffset } from '../getTextBaselineOffset';
 
 describe('getAutoLayoutChildPositions', () => {
   it('should stack children left to right from the frame origin, offsetting by width plus the gap', () => {
@@ -126,5 +127,51 @@ describe('getAutoLayoutChildPositions', () => {
 
     // result — primary (y) packed at the end: 100-20=80; counter (x) packed at the end: 100-30=70
     expect(positions).toEqual([{ height: 20, id: 'a', width: 30, x: 70, y: 80 }]);
+  });
+
+  it('should distribute the gap evenly to fill the primary axis when the gap mode is auto', () => {
+    // action — two 30-wide children in a 200-wide frame: auto gap fills the remaining 140px between them
+    const positions = getAutoLayoutChildPositions(
+      LayoutMode.horizontal,
+      10,
+      AlignmentLayout.topLeft,
+      { height: 20, width: 200, x: 0, y: 0 },
+      [
+        { height: 20, id: 'a', width: 30 },
+        { height: 20, id: 'b', width: 30 },
+      ],
+      true,
+    );
+
+    // result — gap = (200 - 30 - 30) / (2 - 1) = 140
+    expect(positions).toEqual([
+      { height: 20, id: 'a', width: 30, x: 0, y: 0 },
+      { height: 20, id: 'b', width: 30, x: 170, y: 0 },
+    ]);
+  });
+
+  it('should align children by text baseline instead of the normal counter-axis alignment, when enabled', () => {
+    // action — a 16px text child (ascent-based baseline) next to a bottom-anchored icon; "left" alignment
+    // would normally centre the row vertically, but baseline mode overrides that entirely
+    const positions = getAutoLayoutChildPositions(
+      LayoutMode.horizontal,
+      0,
+      AlignmentLayout.left,
+      { height: 100, width: 200, x: 0, y: 0 },
+      [
+        { fontSize: 16, height: 20, id: 'text', width: 50 },
+        { height: 30, id: 'icon', width: 24 },
+      ],
+      false,
+      true,
+    );
+
+    // result — both baselines land on the icon's own baseline (its bottom edge, the taller offset)
+    const textBaselineOffset = getTextBaselineOffset(16);
+
+    expect(positions).toEqual([
+      { height: 20, id: 'text', width: 50, x: 0, y: 30 - textBaselineOffset },
+      { height: 30, id: 'icon', width: 24, x: 50, y: 0 },
+    ]);
   });
 });

@@ -1,9 +1,10 @@
 // types
-import { AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
+import { AlignTextBaseline, AlignmentLayout, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
 import { getAutoLayoutSyncPositions } from '../getAutoLayoutSyncPositions';
+import { getTextBaselineOffset } from '../../getTextBaselineOffset';
 
 const frame = (overrides: Partial<TFrameNode>): TFrameNode => ({
   childIds: [],
@@ -85,5 +86,44 @@ describe('getAutoLayoutSyncPositions', () => {
       { height: 30, id: 'a', width: 20, x: 0, y: 0 },
       { height: 40, id: 'b', width: 20, x: 0, y: 40 },
     ]);
+  });
+
+  it('should align by text baseline instead of layoutAlignment, on a horizontal frame, when enabled', () => {
+    const layoutFrame = frame({
+      alignTextBaseline: AlignTextBaseline.on,
+      height: 100,
+      layoutAlignment: AlignmentLayout.left,
+      width: 200,
+    });
+    const sizes = [
+      { fontSize: 16, height: 20, id: 'text', width: 50 },
+      { height: 30, id: 'icon', width: 24 },
+    ];
+
+    const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.horizontal, sizes);
+
+    // if layoutAlignment ("left") were still in effect, both would centre at (100-height)/2; instead
+    // both baselines land on the icon's own baseline (its bottom edge, the taller offset)
+    const textBaselineOffset = getTextBaselineOffset(16);
+
+    expect(positions).toEqual([
+      { height: 20, id: 'text', width: 50, x: 0, y: 30 - textBaselineOffset },
+      { height: 30, id: 'icon', width: 24, x: 50, y: 0 },
+    ]);
+  });
+
+  it('should ignore alignTextBaseline on a vertical frame, since baseline alignment is horizontal-only', () => {
+    const layoutFrame = frame({
+      alignTextBaseline: AlignTextBaseline.on,
+      height: 200,
+      layoutAlignment: AlignmentLayout.center,
+      width: 100,
+    });
+    const sizes = [{ fontSize: 16, height: 20, id: 'text', width: 50 }];
+
+    const positions = getAutoLayoutSyncPositions(layoutFrame, LayoutMode.vertical, sizes);
+
+    // falls back to the normal layoutAlignment math: counter (x) centred (100-50)/2=25, primary (y) centred (200-20)/2=90
+    expect(positions).toEqual([{ height: 20, id: 'text', width: 50, x: 25, y: 90 }]);
   });
 });

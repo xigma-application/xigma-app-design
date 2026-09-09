@@ -6,13 +6,14 @@ import styles from './preview-align-text-baseline.module.scss';
 
 // types
 import { TAlignTextBaseline } from '../../types';
+import { AlignTextBaseline } from 'types/design/enums';
 
 export type TPreviewAlignTextBaselineProps = {
   value: TAlignTextBaseline;
 };
 
 export const PreviewAlignTextBaseline: FC<TPreviewAlignTextBaselineProps> = ({ value }) => {
-  const on = value === 'on';
+  const on = value === AlignTextBaseline.on;
 
   return (
     <div className={cx(styles.PreviewAlignTextBaseline, { [styles['PreviewAlignTextBaseline--on']]: on })}>

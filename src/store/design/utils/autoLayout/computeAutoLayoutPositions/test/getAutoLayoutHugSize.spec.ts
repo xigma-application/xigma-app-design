@@ -41,4 +41,20 @@ describe('getAutoLayoutHugSize', () => {
 
     expect(size).toEqual({ height: 4, width: 4 });
   });
+
+  it('should hug to the baseline-aware extent, not the plain tallest child, when text baseline alignment is on', () => {
+    const size = getAutoLayoutHugSize(
+      LayoutMode.horizontal,
+      0,
+      NO_PADDING,
+      [
+        { fontSize: 16, height: 20, id: 'text', width: 50 },
+        { height: 30, id: 'icon', width: 24 },
+      ],
+      true,
+    );
+
+    // the text's descent past the shared baseline makes the hugged height taller than the tallest raw height (30)
+    expect(size.height).toBeGreaterThan(30);
+  });
 });

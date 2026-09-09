@@ -13,9 +13,10 @@ export const applyAutoLayoutWrapCounterHugSize = (
   counterAxisSpacing: number,
   padding: TAutoLayoutPadding,
   lines: TAutoLayoutChildSize[][],
+  alignTextBaseline = false,
 ): void => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
-  const huggedCounterSize = getAutoLayoutWrapCounterHugSize(layoutMode, counterAxisSpacing, padding, lines);
+  const huggedCounterSize = getAutoLayoutWrapCounterHugSize(layoutMode, counterAxisSpacing, padding, lines, alignTextBaseline);
 
   if (isHorizontal) {
     frame.height = huggedCounterSize;
