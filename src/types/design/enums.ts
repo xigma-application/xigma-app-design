@@ -27,6 +27,11 @@ export enum GapMode {
   fixed = 'fixed',
 }
 
+export enum InsideStroke {
+  excluded = 'excluded',
+  included = 'included',
+}
+
 export enum LayoutMode {
   freeForm = 'freeForm',
   grid = 'grid',

@@ -1,12 +1,66 @@
 import { act, renderHook } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { ReactNode } from 'react';
 
 // hooks
 import { usePopoverAutoLayoutSettings } from '../usePopoverAutoLayoutSettings';
 
+// store
+import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { InsideStroke, LayoutMode, NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
+
+const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
+
+const renderSettings = (
+  onClose: TFunc = vi.fn(),
+): ReturnType<typeof renderHook<ReturnType<typeof usePopoverAutoLayoutSettings>, unknown>> =>
+  renderHook(() => usePopoverAutoLayoutSettings(onClose), { wrapper });
+
+const addFrame = (): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 100,
+      layoutMode: LayoutMode.horizontal,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const read = (id: string): TFrameNode => selectActivePage(store.getState()).nodes[id] as TFrameNode;
+
 describe('usePopoverAutoLayoutSettings', () => {
+  let frameId = '';
+
+  beforeEach(() => {
+    frameId = addFrame();
+    store.dispatch(setSelection([frameId]));
+  });
+
+  afterEach(() => {
+    store.dispatch(setSelection([]));
+  });
+
   it('should default to the values shown in the mockup', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.insideStrokeValue).toBe('included');
@@ -18,7 +72,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should expose translated options for each dropdown field', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.insideStrokeOptions.map((option) => option.value)).toEqual(['included', 'excluded']);
@@ -29,7 +83,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should expose an off/on toggle button pair for align text baseline', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.alignTextBaselineToggleButtons.map((button) => [button.value, button.icon])).toEqual([
@@ -40,18 +94,41 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should update the inside stroke value when selected', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
-    act(() => result.current.onSelectInsideStroke('excluded'));
+    act(() => result.current.onSelectInsideStroke(InsideStroke.excluded));
 
     // result
     expect(result.current.insideStrokeValue).toBe('excluded');
   });
 
+  it('should persist the selected inside stroke value to the selected frame node', () => {
+    // before
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectInsideStroke(InsideStroke.excluded));
+
+    // result
+    expect(read(frameId).insideStroke).toBe(InsideStroke.excluded);
+  });
+
+  it('should not throw and should fall back to the default value when no frame is selected', () => {
+    // before
+    store.dispatch(setSelection([]));
+    const { result } = renderSettings();
+
+    // action
+    act(() => result.current.onSelectInsideStroke(InsideStroke.excluded));
+
+    // result
+    expect(result.current.insideStrokeValue).toBe('included');
+  });
+
   it('should update the canvas stacking value when selected', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onSelectCanvasStacking('firstOnTop'));
@@ -62,7 +139,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should update the align text baseline value on change', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onChangeAlignTextBaseline('on'));
@@ -73,7 +150,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should update the auto spacing value when selected', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onSelectAutoSpacing('evenly'));
@@ -84,7 +161,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should update the layout value when selected', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onSelectLayout('updated'));
@@ -95,7 +172,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should not preview inside stroke until it is hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.insideStrokePreviewValue).toBeNull();
@@ -103,7 +180,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview the current inside stroke value while hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onMouseEnterInsideStroke());
@@ -114,7 +191,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should clear the preview when the pointer leaves', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterInsideStroke());
 
@@ -127,12 +204,12 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should follow a selection made while still hovering', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterInsideStroke());
 
     // action
-    act(() => result.current.onSelectInsideStroke('excluded'));
+    act(() => result.current.onSelectInsideStroke(InsideStroke.excluded));
 
     // result
     expect(result.current.insideStrokePreviewValue).toBe('excluded');
@@ -140,12 +217,12 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview a hovered dropdown option, taking priority over the row-level hover preview', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterInsideStroke());
 
     // action — hovering a candidate option while the row is also hovered
-    act(() => result.current.onHoverInsideStrokeOption('excluded'));
+    act(() => result.current.onHoverInsideStrokeOption(InsideStroke.excluded));
 
     // result
     expect(result.current.insideStrokePreviewValue).toBe('excluded');
@@ -153,10 +230,10 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should fall back to the row-level hover preview once the option hover ends', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterInsideStroke());
-    act(() => result.current.onHoverInsideStrokeOption('excluded'));
+    act(() => result.current.onHoverInsideStrokeOption(InsideStroke.excluded));
 
     // action
     act(() => result.current.onHoverInsideStrokeOption(null));
@@ -167,7 +244,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should not preview canvas stacking until it is hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.canvasStackingPreviewValue).toBeNull();
@@ -175,7 +252,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview the current canvas stacking value while hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onMouseEnterCanvasStacking());
@@ -186,7 +263,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should clear the canvas stacking preview when the pointer leaves', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterCanvasStacking());
 
@@ -199,7 +276,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview a hovered canvas stacking dropdown option, taking priority over the row-level hover preview', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterCanvasStacking());
 
@@ -212,7 +289,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should fall back to the row-level canvas stacking hover preview once the option hover ends', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterCanvasStacking());
     act(() => result.current.onHoverCanvasStackingOption('firstOnTop'));
@@ -226,7 +303,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should not preview align text baseline until it is hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.alignTextBaselinePreviewValue).toBeNull();
@@ -234,7 +311,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview the current align text baseline value while hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onMouseEnterAlignTextBaseline());
@@ -245,7 +322,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should clear the align text baseline preview when the pointer leaves', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAlignTextBaseline());
 
@@ -258,7 +335,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview a hovered align text baseline toggle option, taking priority over the row-level hover preview', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAlignTextBaseline());
 
@@ -271,7 +348,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should fall back to the row-level align text baseline hover preview once the option hover ends', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAlignTextBaseline());
     act(() => result.current.onHoverAlignTextBaselineOption('on'));
@@ -285,7 +362,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should not preview auto spacing until it is hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.autoSpacingPreviewValue).toBeNull();
@@ -293,7 +370,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview the current auto spacing value while hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onMouseEnterAutoSpacing());
@@ -304,7 +381,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should clear the auto spacing preview when the pointer leaves', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAutoSpacing());
 
@@ -317,7 +394,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview a hovered auto spacing dropdown option, taking priority over the row-level hover preview', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAutoSpacing());
 
@@ -330,7 +407,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should fall back to the row-level auto spacing hover preview once the option hover ends', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterAutoSpacing());
     act(() => result.current.onHoverAutoSpacingOption('evenly'));
@@ -344,7 +421,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should not preview layout until it is hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // result
     expect(result.current.layoutPreviewValue).toBeNull();
@@ -352,7 +429,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview the current layout value while hovered', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     // action
     act(() => result.current.onMouseEnterLayout());
@@ -363,7 +440,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should clear the layout preview when the pointer leaves', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterLayout());
 
@@ -376,7 +453,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should preview a hovered layout dropdown option, taking priority over the row-level hover preview', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterLayout());
 
@@ -389,7 +466,7 @@ describe('usePopoverAutoLayoutSettings', () => {
 
   it('should fall back to the row-level layout hover preview once the option hover ends', () => {
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(vi.fn()));
+    const { result } = renderSettings();
 
     act(() => result.current.onMouseEnterLayout());
     act(() => result.current.onHoverLayoutOption('legacy'));
@@ -406,7 +483,7 @@ describe('usePopoverAutoLayoutSettings', () => {
     const onClose = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePopoverAutoLayoutSettings(onClose));
+    const { result } = renderSettings(onClose);
 
     // action
     act(() => result.current.handleClose());

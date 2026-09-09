@@ -10,12 +10,18 @@ import {
   translationNameSpace,
 } from '../constants';
 
+// store
+import { selectSelectedNodes } from 'store/design/selectors';
+import { useAppDispatch, useAppSelector } from 'store';
+
 // types
 import { TAlignTextBaseline, TAutoSpacing, TCanvasStacking, TInsideStroke, TLayoutVersion } from '../types';
+import { InsideStroke, NodeType } from 'types/design/enums';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
+import { commitInsideStrokeChange } from './utils/commitInsideStrokeChange';
 import { getAlignTextBaselineToggleButtons } from './utils/getAlignTextBaselineToggleButtons';
 
 export type TUsePopoverAutoLayoutSettingsResult = {
@@ -59,7 +65,10 @@ export type TUsePopoverAutoLayoutSettingsResult = {
 
 export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLayoutSettingsResult => {
   const { t } = useTranslation();
-  const [insideStroke, setInsideStroke] = useState<TInsideStroke>('included');
+  const dispatch = useAppDispatch();
+  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
+  const insideStroke = frameNode?.insideStroke ?? InsideStroke.included;
   const [canvasStacking, setCanvasStacking] = useState<TCanvasStacking>('lastOnTop');
   const [alignTextBaseline, setAlignTextBaseline] = useState<TAlignTextBaseline>('off');
   const [autoSpacing, setAutoSpacing] = useState<TAutoSpacing>('between');
@@ -113,7 +122,7 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
     onMouseLeaveLayout: () => setIsPreviewingLayout(false),
     onSelectAutoSpacing: (value: TAutoSpacing) => setAutoSpacing(value),
     onSelectCanvasStacking: (value: TCanvasStacking) => setCanvasStacking(value),
-    onSelectInsideStroke: (value: TInsideStroke) => setInsideStroke(value),
+    onSelectInsideStroke: (value: TInsideStroke) => commitInsideStrokeChange(dispatch, frameNode, value),
     onSelectLayout: (value: TLayoutVersion) => setLayoutVersion(value),
   };
 };

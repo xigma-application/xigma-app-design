@@ -1,17 +1,28 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import PopoverAutoLayoutSettings from './PopoverAutoLayoutSettings';
 import { TooltipProvider } from 'shared';
 
+// store
+import { setSelection } from 'store/design/slice';
+import { store } from 'store';
+
 // types
 import { LayoutMode } from 'types/design/enums';
 
+afterEach(() => {
+  store.dispatch(setSelection([]));
+});
+
 const renderSettings = (onClose: TFunc = vi.fn(), layoutMode?: LayoutMode): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <PopoverAutoLayoutSettings layoutMode={layoutMode} onClose={onClose} />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <PopoverAutoLayoutSettings layoutMode={layoutMode} onClose={onClose} />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('PopoverAutoLayoutSettings snapshots', () => {

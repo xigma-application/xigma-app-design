@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 // components
 import PopoverAutoLayoutSettingsPreview, { TPopoverAutoLayoutSettingsPreviewProps } from './PopoverAutoLayoutSettingsPreview';
 
+// types
+import { InsideStroke } from 'types/design/enums';
+
 const NO_PREVIEW: TPopoverAutoLayoutSettingsPreviewProps = {
   alignTextBaseline: null,
   autoSpacing: null,
@@ -22,7 +25,7 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
 
   it('should render the inside stroke preview visual instead of the placeholder when a value is passed', () => {
     // before
-    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} insideStroke="included" />);
+    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} insideStroke={InsideStroke.included} />);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();
@@ -67,7 +70,9 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
 
   it('should prioritize the inside stroke preview over the canvas stacking preview when both are set', () => {
     // before
-    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking="lastOnTop" insideStroke="included" />);
+    const { container } = render(
+      <PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} canvasStacking="lastOnTop" insideStroke={InsideStroke.included} />,
+    );
 
     // result
     expect(container.querySelector('[class*="PreviewInsideStroke"]')).not.toBeNull();

@@ -6,13 +6,14 @@ import styles from './preview-inside-stroke.module.scss';
 
 // types
 import { TInsideStroke } from '../../types';
+import { InsideStroke } from 'types/design/enums';
 
 export type TPreviewInsideStrokeProps = {
   value: TInsideStroke;
 };
 
 export const PreviewInsideStroke: FC<TPreviewInsideStrokeProps> = ({ value }) => {
-  const excluded = value === 'excluded';
+  const excluded = value === InsideStroke.excluded;
 
   return (
     <div className={cx(styles.PreviewInsideStroke, { [styles['PreviewInsideStroke--excluded']]: excluded })}>

@@ -1,6 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import i18n from 'i18next';
 
+// types
+import { InsideStroke } from 'types/design/enums';
+
 // utils
 import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
 
@@ -11,7 +14,7 @@ const NO_PREVIEW: TPreviewValues = { alignTextBaseline: null, autoSpacing: null,
 describe('getPreviewContent', () => {
   it('should render the inside stroke preview when an inside stroke value is set', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, insideStroke: 'included' }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, insideStroke: InsideStroke.included }, t));
 
     // result
     expect(container.querySelector('[class*="PreviewInsideStroke"]')).not.toBeNull();
@@ -53,7 +56,13 @@ describe('getPreviewContent', () => {
     // before
     const { container } = render(
       getPreviewContent(
-        { alignTextBaseline: 'on', autoSpacing: 'between', canvasStacking: 'lastOnTop', insideStroke: 'included', layout: 'legacy' },
+        {
+          alignTextBaseline: 'on',
+          autoSpacing: 'between',
+          canvasStacking: 'lastOnTop',
+          insideStroke: InsideStroke.included,
+          layout: 'legacy',
+        },
         t,
       ),
     );

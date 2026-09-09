@@ -5,7 +5,7 @@ import { TFrameNode } from 'types/design/types';
 
 // utils
 import { computeAutoLayoutPositions } from '../computeAutoLayoutPositions/computeAutoLayoutPositions';
-import { getFramePadding } from '../getFramePadding';
+import { getFrameLayoutPadding } from '../getFrameLayoutPadding';
 
 export const getAutoLayoutSyncPositions = (
   frame: TFrameNode,
@@ -17,7 +17,7 @@ export const getAutoLayoutSyncPositions = (
   const counterAxisSpacing = (isHorizontal ? frame.verticalGap : frame.horizontalGap) ?? itemSpacing;
   const isPrimaryGapAuto = (isHorizontal ? frame.horizontalGapMode : frame.verticalGapMode) === GapMode.auto;
   const isCounterGapAuto = (isHorizontal ? frame.verticalGapMode : frame.horizontalGapMode) === GapMode.auto;
-  const padding = getFramePadding(frame);
+  const padding = getFrameLayoutPadding(frame);
   const alignment = frame.layoutAlignment ?? AlignmentLayout.topLeft;
 
   return computeAutoLayoutPositions(

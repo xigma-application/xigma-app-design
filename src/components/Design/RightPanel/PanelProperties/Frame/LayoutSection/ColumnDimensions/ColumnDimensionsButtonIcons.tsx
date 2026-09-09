@@ -14,6 +14,7 @@ export const ColumnDimensionsButtonIcons = (locked: boolean, onToggleLock: TFunc
       ariaLabel={t(`${translationNameSpace}.${locked ? 'unlockAriaLabel' : 'lockAriaLabel'}`)}
       onClick={onToggleLock}
       selected={locked}
+      style={{ padding: 6 }}
     >
       <Icon name="AspectRatio" size={12} />
     </Button>

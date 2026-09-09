@@ -1,14 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import AutoLayoutSettingsButton from './AutoLayoutSettingsButton';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderButton = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <AutoLayoutSettingsButton />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <AutoLayoutSettingsButton />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('AutoLayoutSettingsButton snapshots', () => {
