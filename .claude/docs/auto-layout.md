@@ -460,9 +460,25 @@ it to the current effective count; when Auto the field shows the effective count
 `placeGridCells` so a manually-anchored / row-spanning child in a far row still counts, not just
 `ceil(childCount / columns)`) as the label "Auto". No per-track sizing UI (deferred).
 
-A child of a grid frame also shows a display-only **Column span / Row span** row
-(`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`) —
-fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
+A child of a grid frame also shows an editable **Column span / Row span** row
+(`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`).
+Each field is a `TextFieldWrapper` + `ScrubbableInput` adornment (`min={1}`, `max` from
+`getGridChildSpanBounds`). The `max` is **position-aware**, not just the track count: it runs
+`placeGridCells` over the frame's children to find this child's own cell, builds an occupancy set
+of *every other* child's placement (`getGridOccupancyExcludingNode`), then counts the contiguous
+free run from the child's cell outward — right for columns, down for rows — stopping at the first
+cell another child holds or at the grid's edge (`gridColumnCount`; `gridRowCount ??
+getDerivedGridRowCount` for rows). So a child at column 2 of a 4-column grid with a neighbour on
+column 3 gets `maxColumnSpan = 1`; growing a row span checks every cell across the child's *width*
+on each candidate row (History #16). The scrubber clamps to `[1, max]` itself, so a drag just
+stops there — no extra guard. **No `key` on `TextFieldWrapper`** (unlike `GridInputCells`): a key
+that changes per keystroke/scrub-step remounts the adornment mid-drag and the scrub dies after one
+step (History #16) — instead the pattern is `PaddingInput`'s: stable adornment, and a *typed*
+value out of range is reverted imperatively in `onBlur` (`event.target.value = currentSpan`) when
+`onCommitColumnSpan` / `onCommitRowSpan` returns `false`. `clampGridChildSpan(raw, max)` returns
+`null` for anything non-integer, `< 1`, or `> max`; a valid value only dispatches
+(`commitGridChildColumnSpanChange` / `…RowSpanChange` → `updateNode`) when it actually differs
+from the current span, so a min===max scrub doesn't spam the store.
 
 The **Padding** row (`ColumnPadding`) and a grid child's **Width/Height sizing dropdown**
 (`ColumnDimensions`, gated by `canFillWidth`/`canFillHeight`) both include `LayoutMode.grid` in
@@ -502,6 +518,15 @@ different: an impossible request should be rejected, not silently reinterpreted)
   `gridColumnAnchorIndex` / `gridRowAnchorIndex` dispatch (`commitGridRepackedAnchors`); a growing
   resize that doesn't dislodge anyone dispatches nothing. When the frame is still auto-placing,
   repacking is a no-op — the live engine already re-flows every render, there's nothing to persist.
+- **Reset every spanning child to 1×1** on an accepted resize (`resolution.spanReset` — the ids of
+  children with `gridColumnSpan > 1` or `gridRowSpan > 1`; `commitGridSpanReset` clears both
+  fields). A grid resize doesn't try to re-fit a 2×2 child into the new track grid — it's dropped
+  back to a plain single cell and re-flows like any other (user's call: "less complication than
+  resolving the grid against every child"). `resolveGridResize` also runs its capacity check and
+  repack off `resetInputs` (every child forced to 1×1), so `newColumnCount * capacityRowCount ≥
+  childIds.length` is an accurate cell count again — a 2×2 child used to count as one cell there
+  and mis-size the check. The reset happens for auto-placing frames too (span is a per-child
+  field independent of `gridAutoPlacement`).
 
 ### Canvas — cell slots
 
@@ -541,6 +566,15 @@ cursor:
   `hover.insertIndex = row * columnCount + column (+1 for the right side)`. No cells are
   highlighted; nothing is previewed being pushed (the shift only happens on drop, same "grid
   changes only on drop" rule as row growth).
+- **Hovered cell owned by a child that spans more than one cell** — a multi-cell child has no
+  interior insertion points, so the reading-order-indicator branch is skipped entirely and the
+  hover resolves to the **next free cell** (`getGridDropPlacements` from the hovered cell, which
+  scans forward past the whole span). `resolveGridDropHover` now builds a `cellOwner` map
+  (cell key → owning `TGridCellPlacement`) alongside the `occupied` set — `getGridOccupancyIndex`
+  — and `resolveOccupiedCellHover` checks `owner.columnSpan * owner.rowSpan > 1` before doing
+  anything else (History #16). A plain 1×1 occupied cell still gets the indicator/neighbour
+  behaviour above. The file is split into `resolveGridDropHover/` (`getHoveredGridCell`,
+  `getGridOccupancyIndex`, `resolveOccupiedCellHover`, `getGridDropPlacements`).
 
 `drawGridDropTarget` branches on `hover.indicator`: if set, it draws a single vertical bar
 (`getGridInsertIndicatorRect` — centred in the gap on that side of the cell, or clamped to the
@@ -664,9 +698,10 @@ same icons, same layout) was made grid-aware in place:
 
 Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
 `gridColumnSizes` / `gridRowSizes` — UI is the last phase), `gridAutoPlacement` toggle UI,
-occupied-vs-empty cell styling, span edge-handles, wiring the Column span / Row span fields,
-auto-placement obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete.
-The engine already honours spans and manual anchors when set in code.
+occupied-vs-empty cell styling, span edge-handles (canvas resize-to-span), auto-placement
+obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete. The Column span /
+Row span fields are wired (`ColumnGridChildSpan`); the engine already honours spans and manual
+anchors when set in code.
 
 ## Tests
 
@@ -697,7 +732,9 @@ The engine already honours spans and manual anchors when set in code.
   `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots + drop —
   `store/design/utils/autoLayout/test/{getSelectedGridFrame,getDerivedGridRowCount,getGridPlacementInputs}.spec.ts`,
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
-  `getGridDropCell`, `getGridDropPlacements`, `resolveGridDropHover`, `getGridInsertIndicatorRect`),
+  `getGridDropCell`, `getGridInsertIndicatorRect`) +
+  `gridSlots/resolveGridDropHover/test/*` (`getHoveredGridCell`, `getGridOccupancyIndex`,
+  `resolveOccupiedCellHover`, `getGridDropPlacements`, `resolveGridDropHover`),
   `gridSlots/getGridInsertPlacements/**/test/`,
   `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test,test/resolveDragReparentTarget}`,
   `disarmDrag/test/{applyGridDrop,applyGridInsert,resolveDropTargetIndex,commitDropIntoFrame}`,
@@ -707,8 +744,12 @@ The engine already honours spans and manual anchors when set in code.
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
   `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
   `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
-  `commitGridColumnCountChange` / `commitGridRowCountChange` / `commitGridRepackedAnchors`), and
-  `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`);
+  `commitGridColumnCountChange` / `commitGridRowCountChange` / `commitGridRepackedAnchors` /
+  `commitGridSpanReset`), and `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`,
+  `useColumnGridChildSpan`, `clampGridChildSpan`,
+  `commitGridChildColumnSpanChange` / `commitGridChildRowSpanChange`,
+  `getGridChildSpanBounds/**` — `getGridChildSpanBounds`, `growMaxSpan`, `isGridColumnClear`,
+  `isGridRowClear`, `getGridOccupancyExcludingNode`);
   `store/design/utils/autoLayout/test/getGridResizeRepack.spec.ts` (the reject/repack rules
   standalone); `PositionSection/ColumnAlignment/**` (`ColumnAlignment`, `useColumnAlignment` +
   its `hooks/utils/{commitAlignmentConstraint,moveNodeToAlignment,setGridChild{Horizontal,Vertical}Align}`
@@ -869,3 +910,30 @@ The engine already honours spans and manual anchors when set in code.
     powinien zwolnić też slot" — `getGridPlacementInputs`, the one shared input-builder behind every
     occupancy scan, never excluded `ignoreAutoLayout` children the way the layout engine's own
     `getAutoLayoutSyncChildren` already did). Both fixed at their respective single choke points.
+16. **2026-09-10 — grid flow, Phase 3i: wiring the Column span / Row span fields + spanning-child
+    fallout (§13 "Panel — a grid child's own cell alignment" sibling paragraph, and "Canvas — drag
+    a child into a cell").** The display-only span row (#8) became editable: `TextFieldWrapper` +
+    `ScrubbableInput` adornment, `min={1}`, `max` from `getGridChildSpanBounds` — the contiguous
+    free run of cells from the child's *own* position outward (right for columns, down for rows),
+    stopping at another child or the grid edge, so a child mid-grid with a neighbour ahead of it
+    can't be stretched over it (raised with a 4×1 and a 2×2 example — "trzeba sprawdzić czy
+    wszystkie pola pod nim mają puste miejsce"). A scrub just stops at that bound and a typed
+    out-of-range value is rejected (the scrubber clamps itself — no extra guard, per the user:
+    "tylko o jedno podnieść" once it was over-engineered). Three self-inflicted bugs on the way, all reported live: (a) both sibling
+    `<TextFieldWrapper>` fields were handed the **same React `key`** (`"1-0"` — `columnSpan` and
+    `revision` both `1`/`0`), so React duplicated/omitted children and bled the scrubber state
+    between them ("3 inputy?", "nie można z niego wyjśc"); (b) even with distinct keys, a `key`
+    that changes per keystroke/scrub-step remounts the adornment mid-drag, killing the scrub after
+    one step — fixed by dropping the outer `key` entirely and matching `PaddingInput`'s pattern
+    (stable adornment; a rejected typed value reverts imperatively in `onBlur` via
+    `event.target.value`); (c) `min === max` (grid affords a span of 1) fed a zero-range scrubber
+    — a valid value now only dispatches when it actually differs from the current span, so a
+    stuck-at-1 scrub is a no-op. Separately, wiring spans surfaced that **grid drop-hover was never
+    span-aware**: hovering *inside* a child that covers several cells offered a reading-order
+    insertion indicator at every interior track boundary. `resolveGridDropHover` now carries a
+    `cellOwner` map next to `occupied` and, when the hovered cell's owner spans more than one cell,
+    skips the indicator branch and resolves to the next free cell. And a grid *resize* now
+    **resets every spanning child to 1×1** (`resolveGridResize.spanReset` → `commitGridSpanReset`)
+    rather than trying to re-fit a 2×2 child into the new track grid — "less complication than
+    resolving the grid against every child"; it also means `resolveGridResize`'s capacity check
+    counts real cells again (a spanning child used to count as one).

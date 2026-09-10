@@ -60,12 +60,16 @@ repainting — same rationale as the Flow section above.
 | 20  | A grid child's Width/Height sizing dropdown offers Fill container (the dropdown didn't even render before, since a plain child is never itself huggable and Fill was gated to a linear parent only) — picking it stretches the child to its cell, same as a cell drop   |  —   | ✅ `grid.spec.ts` |
 | 21  | The shared "Alignment" widget (`PositionSection/ColumnAlignment`) moves a grid child within its own cell (`gridChildHorizontalAlign`/`gridChildVerticalAlign`) instead of setting the `alignment` constraint and moving it by x/y, the way it does for a non-grid child |  ✅  | ✅ `grid.spec.ts` |
 | 22  | Switching a grid child to Absolute position (`ignoreAutoLayout`) lets it drag freely on canvas instead of silently reverting on release, and frees its old cell for every other grid drag/drop occupancy calculation                                                    |  ✅  | ✅ `grid.spec.ts` |
+| 23  | The Column span field stretches a grid child across its cells (a Fill child spanning 2 columns takes the full frame width); a typed value past the grid's current column count is refused and the field snaps back                                                      |  ✅  | ✅ `grid.spec.ts` |
+| 24  | Changing the grid size (Columns/Rows/pick matrix) resets every spanning child back to 1×1 rather than re-fitting its span into the new track grid                                                                                                                       |  ✅  | ✅ `grid.spec.ts` |
+| 25  | Dragging a new element into the interior of a child that spans several cells drops it in the next free cell, not at an interior track boundary inside the span                                                                                                          |  ✅  | ✅ `grid.spec.ts` |
+| 26  | The span cap follows the child's own position — a child at column 2 of a 4-column grid with a neighbour on column 3 can only reach the free run between it and that blocker, not the whole grid width                                                                   |  ✅  | ✅ `grid.spec.ts` |
 
-#6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
+#6–#10 stay unit-only: there is no UI to drive per-track sizing / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
 `computeGridLayoutPositions/**/test/` and `getGridLayoutSyncPositions.spec.ts`. #12 is exercised
-exhaustively (both sides, both outcomes) by `resolveGridDropHover.spec.ts`; #11 adds the one
-browser-only proof that a real drop wires the ripple into the store. #13/#14 reuse the exact same
+exhaustively (both sides, both outcomes) by `resolveGridDropHover/test/resolveOccupiedCellHover.spec.ts`;
+#11 adds the one browser-only proof that a real drop wires the ripple into the store. #13/#14 reuse the exact same
 drop pipeline as #5/#11 (a same-parent drag just excludes its own old cells from the occupancy
 scan) — the e2e proof is the wiring, not new geometry. #15 has no unit equivalent: it is purely a
 "does the canvas actually repaint between two live cursor positions" question, the kind a
@@ -93,7 +97,19 @@ mode, never whether the node itself opted out via `ignoreAutoLayout`, so its liv
 was wrongly skipped and the drop had nothing to commit; and `getGridPlacementInputs` never
 excluded `ignoreAutoLayout` children from occupancy scans the way the layout engine's own
 children list already did, so a released child's old cell stayed "occupied" for every other
-grid drag/drop. Both fixed at their one shared choke point each.
+grid drag/drop. Both fixed at their one shared choke point each. #23 and #26 earn e2e because the whole
+`min`/`max`-clamped scrubber + revert-on-reject wiring lives in the DOM (`ScrubbableInput` +
+uncontrolled `<input>`), the same class of bug as #18 — the hook-level clamp is unit-covered
+(`clampGridChildSpan.spec.ts`, `useColumnGridChildSpan.spec.tsx`, `getGridChildSpanBounds/test/`)
+but "the field actually snaps back and the scrub actually stops at the edge" needs a browser. #26's
+math (the free run stops at a blocker, not the grid edge) is exhaustive in
+`getGridChildSpanBounds/test/`; the e2e is the one pass proving a real panel commit against a real
+placed neighbour is refused. #24's _decision_ (which children
+reset) is exhaustive in `getGridResizeRepack.spec.ts` / `useColumnGridArea.spec.tsx`; the e2e is
+the one pass proving a real panel commit clears the stored span. #25 is span-aware drop-hover
+resolution — exhaustive in `resolveGridDropHover/test/`; the e2e proves a real drag into a real
+multi-cell child's interior anchors the new element in the free column, not somewhere inside the
+span.
 
 ## Reordering a child within its own frame
 

@@ -7,7 +7,7 @@ import { placeGridCells } from './computeGridLayoutPositions/placeGridCells/plac
 
 export type TGridRepackedCell = { column: number; id: string; row: number };
 
-export type TGridResizeResolution = { ok: boolean; repacked: TGridRepackedCell[] };
+export type TGridResizeResolution = { ok: boolean; repacked: TGridRepackedCell[]; spanReset: string[] };
 
 export const resolveGridResize = (
   frame: TFrameNode,
@@ -18,15 +18,18 @@ export const resolveGridResize = (
   const childCount = frame.childIds.length;
 
   if (capacityRowCount === undefined || newColumnCount * capacityRowCount >= childCount) {
+    const inputs = getGridPlacementInputs(frame.childIds, nodesById);
+    const spanReset = inputs.filter((input) => (input.gridColumnSpan ?? 1) > 1 || (input.gridRowSpan ?? 1) > 1).map((input) => input.id);
+    const resetInputs = inputs.map((input) => ({ ...input, gridColumnSpan: undefined, gridRowSpan: undefined }));
+
     if (frame.gridAutoPlacement === false) {
       const oldColumnCount = Math.max(Math.round(frame.gridColumnCount ?? 1), 1);
-      const inputs = getGridPlacementInputs(frame.childIds, nodesById);
-      const oldPlacements = placeGridCells(inputs, oldColumnCount, false);
+      const oldPlacements = placeGridCells(resetInputs, oldColumnCount, false);
       const readingIndexOf = (columnStart: number, rowStart: number): number => rowStart * oldColumnCount + columnStart;
       const readingOrder = [...oldPlacements].sort(
         (a, b) => readingIndexOf(a.columnStart, a.rowStart) - readingIndexOf(b.columnStart, b.rowStart),
       );
-      const inputsById = new Map(inputs.map((input) => [input.id, input]));
+      const inputsById = new Map(resetInputs.map((input) => [input.id, input]));
       const orderedInputs = readingOrder.map((placement) => inputsById.get(placement.id)!);
       const newPlacements = placeGridCells(orderedInputs, newColumnCount, true);
       const oldById = new Map(oldPlacements.map((placement) => [placement.id, placement]));
@@ -39,11 +42,11 @@ export const resolveGridResize = (
         })
         .map((placement) => ({ column: placement.columnStart, id: placement.id, row: placement.rowStart }));
 
-      return { ok: true, repacked };
+      return { ok: true, repacked, spanReset };
     }
 
-    return { ok: true, repacked: [] };
+    return { ok: true, repacked: [], spanReset };
   }
 
-  return { ok: false, repacked: [] };
+  return { ok: false, repacked: [], spanReset: [] };
 };

@@ -245,6 +245,71 @@ describe('useColumnGridArea', () => {
     expect(page.nodes[secondId]).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 1 });
   });
 
+  it('should reset every spanning child back to 1x1 when the columns are committed', () => {
+    const frameId = addGridFrame();
+
+    addChild(frameId);
+    addChild(frameId);
+
+    const [firstId, secondId] = readFrame(frameId).childIds;
+
+    store.dispatch(updateNode({ changes: { gridColumnSpan: 2, gridRowSpan: 2 }, id: firstId }));
+    store.dispatch(updateNode({ changes: { gridColumnCount: 4 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitColumns('3'));
+
+    const page = selectActivePage(store.getState());
+
+    expect(readFrame(frameId).gridColumnCount).toBe(3);
+    expect(page.nodes[firstId]).toMatchObject({ gridColumnSpan: undefined, gridRowSpan: undefined });
+    expect((page.nodes[secondId] as { gridColumnSpan?: number }).gridColumnSpan).toBeUndefined();
+  });
+
+  it('should reset a spanning child back to 1x1 when a matrix cell is clicked', () => {
+    const frameId = addGridFrame();
+
+    addChild(frameId);
+
+    const [childId] = readFrame(frameId).childIds;
+
+    store.dispatch(updateNode({ changes: { gridColumnSpan: 3, gridRowSpan: 1 }, id: childId }));
+    store.dispatch(updateNode({ changes: { gridColumnCount: 3 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onClickCell({ columns: 2, rows: 2 }));
+
+    expect(selectActivePage(store.getState()).nodes[childId]).toMatchObject({
+      gridColumnSpan: undefined,
+      gridRowSpan: undefined,
+    });
+  });
+
+  it('should not touch child spans when the resize is rejected', () => {
+    const frameId = addGridFrame();
+
+    for (let i = 0; i < 4; i += 1) {
+      addChild(frameId);
+    }
+
+    const [firstId] = readFrame(frameId).childIds;
+
+    store.dispatch(updateNode({ changes: { gridColumnSpan: 2, gridRowSpan: 2 }, id: firstId }));
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 2 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitColumns('1'));
+
+    // 1 column x 2 fixed rows = 2 cells, short of the 4 children — rejected, spans untouched
+    expect(selectActivePage(store.getState()).nodes[firstId]).toMatchObject({ gridColumnSpan: 2, gridRowSpan: 2 });
+  });
+
   it('should report the rows as auto until an explicit count is set', () => {
     const frameId = addGridFrame();
 

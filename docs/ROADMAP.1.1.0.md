@@ -183,8 +183,8 @@ write-up: `.claude/docs/auto-layout.md` §13.
       rows if you drop past the end
 - [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
       the canvas — this is the last part
-- [ ] later: letting a child span several cells, dragging a child from one cell to another, and
-      reordering with the keyboard
+- [x] letting a child span several cells, from its Column span / Row span fields (see Stage 26)
+- [ ] later: reordering the cells with the keyboard
 
 ## Stage 26 — Rectangle properties panel
 
@@ -195,7 +195,9 @@ pulled into one place so the next shape type can reuse them.
 
 Anything sitting inside a grid also gets Column span / Row span fields under its size row.
 
-- [ ] the column-span / row-span fields are shown but don't change the layout yet
+- [x] the Column span / Row span fields stretch a child across cells — drag on the number or type
+      it, and it stops as soon as it runs into the edge of the grid or another element; changing
+      the grid's size drops any spanning child back to a single cell
 
 ## Related
 

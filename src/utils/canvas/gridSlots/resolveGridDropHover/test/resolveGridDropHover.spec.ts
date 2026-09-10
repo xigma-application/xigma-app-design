@@ -1,7 +1,7 @@
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TSceneNode } from 'types/design/types';
-import { TGridTrackLayout } from '../getGridTrackLayout';
+import { TGridTrackLayout } from '../../getGridTrackLayout';
 
 // utils
 import { resolveGridDropHover } from '../resolveGridDropHover';
@@ -37,11 +37,13 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   ...overrides,
 });
 
-const anchored = (id: string, column: number, row: number): TSceneNode =>
+const anchored = (id: string, column: number, row: number, columnSpan = 1, rowSpan = 1): TSceneNode =>
   ({
     fill: '#000',
     gridColumnAnchorIndex: column,
+    gridColumnSpan: columnSpan,
     gridRowAnchorIndex: row,
+    gridRowSpan: rowSpan,
     height: 10,
     id,
     name: id,
@@ -61,38 +63,12 @@ describe('resolveGridDropHover', () => {
   });
 
   it('should fall back to the origin when the track geometry is degenerate', () => {
-    expect(resolveGridDropHover(frame(), {}, [], { x: 50, y: 50 }, layout({ columnSize: 0 }))).toEqual({ cells: [{ column: 0, row: 0 }] });
-  });
-
-  it('should show a left indicator when the occupied cell is against the left wall', () => {
-    const nodes = byId([anchored('a', 0, 0)]);
-
-    expect(resolveGridDropHover(frame({ childIds: ['a'] }), nodes, [], { x: 20, y: 50 }, layout())).toEqual({
-      cells: [],
-      indicator: { column: 0, row: 0, side: 'left' },
-      insertIndex: 0,
-    });
-  });
-
-  it('should show a left indicator when the cell to the left is also occupied', () => {
-    const nodes = byId([anchored('a', 0, 0), anchored('b', 1, 0)]);
-
-    expect(resolveGridDropHover(frame({ childIds: ['a', 'b'] }), nodes, [], { x: 120, y: 50 }, layout())).toEqual({
-      cells: [],
-      indicator: { column: 1, row: 0, side: 'left' },
-      insertIndex: 1,
-    });
-  });
-
-  it('should highlight the free cell to the left instead of an indicator', () => {
-    const nodes = byId([anchored('b', 1, 0)]);
-
-    expect(resolveGridDropHover(frame({ childIds: ['b'] }), nodes, [], { x: 120, y: 50 }, layout())).toEqual({
+    expect(resolveGridDropHover(frame(), {}, [], { x: 50, y: 50 }, layout({ columnSize: 0 }))).toEqual({
       cells: [{ column: 0, row: 0 }],
     });
   });
 
-  it('should show a right indicator when the cell to the right is occupied', () => {
+  it('should delegate to the occupied-cell resolver, dropping a reading-order indicator on a plain cell', () => {
     const nodes = byId([anchored('a', 0, 0), anchored('b', 1, 0)]);
 
     expect(resolveGridDropHover(frame({ childIds: ['a', 'b'] }), nodes, [], { x: 80, y: 50 }, layout())).toEqual({
@@ -102,21 +78,12 @@ describe('resolveGridDropHover', () => {
     });
   });
 
-  it('should show a right indicator when the occupied cell is against the right wall', () => {
-    const nodes = byId([anchored('a', 0, 0), anchored('b', 1, 0)]);
+  it('should send a hover inside a multi-cell child to the next free cell, not an interior indicator', () => {
+    const nodes = byId([anchored('a', 0, 0, 2, 2)]);
+    const wide = layout({ columnCount: 3, rowCount: 2 });
 
-    expect(resolveGridDropHover(frame({ childIds: ['a', 'b'] }), nodes, [], { x: 180, y: 50 }, layout())).toEqual({
-      cells: [],
-      indicator: { column: 1, row: 0, side: 'right' },
-      insertIndex: 2,
-    });
-  });
-
-  it('should highlight the free cell to the right instead of an indicator', () => {
-    const nodes = byId([anchored('a', 0, 0)]);
-
-    expect(resolveGridDropHover(frame({ childIds: ['a'] }), nodes, [], { x: 80, y: 50 }, layout())).toEqual({
-      cells: [{ column: 1, row: 0 }],
+    expect(resolveGridDropHover(frame({ childIds: ['a'], gridColumnCount: 3 }), nodes, [], { x: 50, y: 50 }, wide)).toEqual({
+      cells: [{ column: 2, row: 0 }],
     });
   });
 

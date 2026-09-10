@@ -1,6 +1,6 @@
 // types
 import { TFrameNode, TSceneNode } from 'types/design/types';
-import { TGridDropCell } from './getGridDropCell';
+import { TGridDropCell } from '../getGridDropCell';
 
 // utils
 import { getGridPlacementInputs } from 'store/design/utils/autoLayout/getGridPlacementInputs';

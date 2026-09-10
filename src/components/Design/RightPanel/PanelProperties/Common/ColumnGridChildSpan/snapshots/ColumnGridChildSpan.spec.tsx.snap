@@ -34,21 +34,25 @@ exports[`ColumnGridChildSpan snapshots > should render the column and row span f
           class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _ColumnGridChildSpan__input_01a570"
           data-test-text-field="grid-column-span"
         >
-          <svg
-            class="Icon"
-            fill="none"
-            height="24"
-            style="color: var(--color-neutral-2);"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            class="ScrubbableInput"
           >
-            <path
-              d="M9.653 6.008A1.5 1.5 0 0 1 11 7.5V10a.5.5 0 0 1-1 0V7.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14a.5.5 0 0 1 1 0v2.5a1.5 1.5 0 0 1-1.347 1.492L9.5 18h-2A1.5 1.5 0 0 1 6 16.5v-9A1.5 1.5 0 0 1 7.5 6h2zm7 0A1.5 1.5 0 0 1 18 7.5v9a1.5 1.5 0 0 1-1.347 1.492L16.5 18h-2a1.5 1.5 0 0 1-1.5-1.5V16a.5.5 0 0 1 1 0v.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V8a.5.5 0 0 1-1 0v-.5A1.5 1.5 0 0 1 14.5 6h2zm-3.506 3.638a.5.5 0 0 1 .707 0l2 2a.5.5 0 0 1 0 .707l-2 2a.5.5 0 1 1-.707-.707l1.146-1.146H8.5a.5.5 0 0 1 0-1h5.793l-1.146-1.146a.5.5 0 0 1 0-.708"
-              data-svg-property="fill"
-              fill="white"
-            />
-          </svg>
+            <svg
+              class="Icon"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9.653 6.008A1.5 1.5 0 0 1 11 7.5V10a.5.5 0 0 1-1 0V7.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14a.5.5 0 0 1 1 0v2.5a1.5 1.5 0 0 1-1.347 1.492L9.5 18h-2A1.5 1.5 0 0 1 6 16.5v-9A1.5 1.5 0 0 1 7.5 6h2zm7 0A1.5 1.5 0 0 1 18 7.5v9a1.5 1.5 0 0 1-1.347 1.492L16.5 18h-2a1.5 1.5 0 0 1-1.5-1.5V16a.5.5 0 0 1 1 0v.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5V8a.5.5 0 0 1-1 0v-.5A1.5 1.5 0 0 1 14.5 6h2zm-3.506 3.638a.5.5 0 0 1 .707 0l2 2a.5.5 0 0 1 0 .707l-2 2a.5.5 0 1 1-.707-.707l1.146-1.146H8.5a.5.5 0 0 1 0-1h5.793l-1.146-1.146a.5.5 0 0 1 0-.708"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </div>
           <input
             aria-label="Column span"
             class="_TextFieldWrapper__input_9a3a67"
@@ -65,21 +69,25 @@ exports[`ColumnGridChildSpan snapshots > should render the column and row span f
           class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _ColumnGridChildSpan__input_01a570"
           data-test-text-field="grid-row-span"
         >
-          <svg
-            class="Icon"
-            fill="none"
-            height="24"
-            style="color: var(--color-neutral-2);"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            class="ScrubbableInput"
           >
-            <path
-              d="M17.992 9.653A1.5 1.5 0 0 1 16.5 11H14a.5.5 0 0 1 0-1h2.5a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5H10a.5.5 0 0 1 0 1H7.5a1.5 1.5 0 0 1-1.492-1.347L6 9.5v-2A1.5 1.5 0 0 1 7.5 6h9A1.5 1.5 0 0 1 18 7.5v2zm0 7A1.5 1.5 0 0 1 16.5 18h-9a1.5 1.5 0 0 1-1.492-1.347L6 16.5v-2A1.5 1.5 0 0 1 7.5 13H8a.5.5 0 0 1 0 1h-.5a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5H16a.5.5 0 0 1 0-1h.5a1.5 1.5 0 0 1 1.5 1.5v2zm-3.638-3.506a.5.5 0 0 1 0 .707l-2 2a.5.5 0 0 1-.707 0l-2-2a.5.5 0 1 1 .707-.707l1.146 1.146V8.5a.5.5 0 0 1 1 0v5.793l1.147-1.146a.5.5 0 0 1 .707 0"
-              data-svg-property="fill"
-              fill="white"
-            />
-          </svg>
+            <svg
+              class="Icon"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17.992 9.653A1.5 1.5 0 0 1 16.5 11H14a.5.5 0 0 1 0-1h2.5a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5H10a.5.5 0 0 1 0 1H7.5a1.5 1.5 0 0 1-1.492-1.347L6 9.5v-2A1.5 1.5 0 0 1 7.5 6h9A1.5 1.5 0 0 1 18 7.5v2zm0 7A1.5 1.5 0 0 1 16.5 18h-9a1.5 1.5 0 0 1-1.492-1.347L6 16.5v-2A1.5 1.5 0 0 1 7.5 13H8a.5.5 0 0 1 0 1h-.5a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5H16a.5.5 0 0 1 0-1h.5a1.5 1.5 0 0 1 1.5 1.5v2zm-3.638-3.506a.5.5 0 0 1 0 .707l-2 2a.5.5 0 0 1-.707 0l-2-2a.5.5 0 1 1 .707-.707l1.146 1.146V8.5a.5.5 0 0 1 1 0v5.793l1.147-1.146a.5.5 0 0 1 .707 0"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </div>
           <input
             aria-label="Row span"
             class="_TextFieldWrapper__input_9a3a67"

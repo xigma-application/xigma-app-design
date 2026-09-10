@@ -12,6 +12,7 @@ import { commitGridColumnCountChange } from './utils/commitGridColumnCountChange
 import { commitGridRepackedAnchors } from './utils/commitGridRepackedAnchors';
 import { commitGridRowCountChange } from './utils/commitGridRowCountChange';
 import { commitGridRowsAuto } from './utils/commitGridRowsAuto';
+import { commitGridSpanReset } from './utils/commitGridSpanReset';
 import { getDerivedGridRowCount } from 'store/design/utils/autoLayout/getDerivedGridRowCount';
 import { resolveGridResize } from 'store/design/utils/autoLayout/getGridResizeRepack';
 
@@ -44,6 +45,7 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
 
       if (resolution.ok) {
         commitGridColumnCountChange(dispatch, frameNode, next);
+        commitGridSpanReset(dispatch, resolution.spanReset);
         commitGridRepackedAnchors(dispatch, resolution.repacked);
       }
     }
@@ -57,6 +59,7 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
 
       if (resolution.ok) {
         commitGridRowCountChange(dispatch, frameNode, next);
+        commitGridSpanReset(dispatch, resolution.spanReset);
         commitGridRepackedAnchors(dispatch, resolution.repacked);
       }
     }
@@ -77,6 +80,7 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
       if (resolution.ok) {
         commitGridColumnCountChange(dispatch, frameNode, cell.columns);
         commitGridRowCountChange(dispatch, frameNode, cell.rows);
+        commitGridSpanReset(dispatch, resolution.spanReset);
         commitGridRepackedAnchors(dispatch, resolution.repacked);
       }
     }

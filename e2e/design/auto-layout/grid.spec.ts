@@ -771,4 +771,277 @@ test.describe('auto-layout — Grid flow', () => {
     expect(afterDrag.x).toBe(FRAME.x1 + 300 - 10);
     expect(afterDrag.y).toBe(FRAME.y1 + 300 - 10);
   });
+
+  test('the Column span field stretches a grid child across its cells, and refuses a span past the grid', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-child-span');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a lone child, added directly — auto-placed at cell (0,0) of the default 2-column grid
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    });
+
+    await page.mouse.click(FRAME.x1 + 10, FRAME.y1 + 10);
+
+    // make it fill its cell, so a wider span shows up as a wider box
+    await page.getByLabel('Width sizing options').click();
+    await page.getByText('Fill container', { exact: true }).click();
+
+    const columnSpanField = page.getByLabel('Column span', { exact: true });
+
+    // span 2 — the child stretches across both columns of the 500px-wide grid
+    await columnSpanField.fill('2');
+    await columnSpanField.press('Enter');
+
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const { store } = await import('/src/store/index.ts');
+          const { activePageId, pages } = store.getState().design;
+          const activePage = pages[activePageId];
+          const [frameId] = activePage.rootOrder;
+          const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+          const child = activePage.nodes[frame.childIds[0]] as unknown as { gridColumnSpan?: number; width: number };
+
+          return { span: child.gridColumnSpan, width: child.width };
+        }),
+      )
+      .toEqual({ span: 2, width: 500 });
+
+    // the grid only has 2 columns — typing 9 is refused and the field snaps back to 2
+    await columnSpanField.fill('9');
+    await columnSpanField.press('Enter');
+
+    await expect(page.getByLabel('Column span', { exact: true })).toHaveValue('2');
+    expect(
+      await page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const activePage = pages[activePageId];
+        const [frameId] = activePage.rootOrder;
+        const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+        return (activePage.nodes[frame.childIds[0]] as unknown as { gridColumnSpan?: number }).gridColumnSpan;
+      }),
+    ).toBe(2);
+  });
+
+  test('changing the grid size resets a spanning child back to a single cell', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-span-reset');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    });
+
+    await page.mouse.click(FRAME.x1 + 10, FRAME.y1 + 10);
+
+    const columnSpanField = page.getByLabel('Column span', { exact: true });
+
+    await columnSpanField.fill('2');
+    await columnSpanField.press('Enter');
+
+    const readSpan = (): Promise<number | undefined> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const activePage = pages[activePageId];
+        const [frameId] = activePage.rootOrder;
+        const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+        return (activePage.nodes[frame.childIds[0]] as unknown as { gridColumnSpan?: number }).gridColumnSpan;
+      });
+
+    await expect.poll(readSpan).toBe(2);
+
+    // grow the grid through the panel — the spanning child is reset to 1x1, not re-fitted
+    await selectFrameRow(page);
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await expect.poll(readSpan).toBeUndefined();
+  });
+
+  test('dragging a new element into a multi-cell child drops it in the next free cell, not inside the span', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-span-drop');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // 3-column grid, one child pinned to the 2x2 block at (0,0)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 3 }, id: frameId }));
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(
+        updateNode({
+          changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2, gridRowAnchorIndex: 0, gridRowSpan: 2 },
+          id: rectId,
+        }),
+      );
+    });
+
+    // a second rectangle out on the canvas, dragged deep into the span's interior (cell 0,0 area)
+    await designPage.drawRectangle(1400, 600, 1470, 660);
+
+    await page.mouse.move(1435, 630);
+    await page.mouse.down();
+    await page.mouse.move(FRAME.x1 + 60, FRAME.y1 + 60, { steps: 12 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    const dropped = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+      const last = activePage.nodes[frame.childIds[frame.childIds.length - 1]] as unknown as {
+        gridColumnAnchorIndex?: number;
+        gridRowAnchorIndex?: number;
+      };
+
+      return { childCount: frame.childIds.length, column: last.gridColumnAnchorIndex, row: last.gridRowAnchorIndex };
+    });
+
+    expect(dropped.childCount).toBe(2);
+    // it skipped the 2x2 block and landed on the free cell in column 2, not somewhere inside it
+    expect(dropped.column).toBe(2);
+    expect(dropped.row).toBe(0);
+  });
+
+  test('the Column span cap follows the child’s position — only the free cells ahead of it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-span-cap');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // 4-column grid: child "a" pinned across columns 0-1, child "b" at column 2 — only 2 cells left
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 4 }, id: frameId }));
+
+      const addRect = (): string => {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+
+        const state = store.getState().design;
+        const activePage = state.pages[state.activePageId];
+
+        return activePage.rootOrder[activePage.rootOrder.length - 1];
+      };
+
+      const aId = addRect();
+      const bId = addRect();
+
+      store.dispatch(moveNodes({ nodeIds: [aId, bId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2, gridRowAnchorIndex: 0 }, id: aId }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 2, gridRowAnchorIndex: 0 }, id: bId }));
+    });
+
+    // select "b" (sits at column 2 of the 500px-wide 4-column grid -> ~x + 250)
+    await page.mouse.click(FRAME.x1 + 258, FRAME.y1 + 10);
+
+    const columnSpanField = page.getByLabel('Column span', { exact: true });
+
+    await expect(columnSpanField).toBeVisible();
+
+    const readSpan = (): Promise<number | undefined> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const activePage = pages[activePageId];
+        const [frameId] = activePage.rootOrder;
+        const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+        const b = frame.childIds
+          .map((id) => activePage.nodes[id] as unknown as { gridColumnAnchorIndex?: number; gridColumnSpan?: number })
+          .find((node) => node.gridColumnAnchorIndex === 2);
+
+        return b?.gridColumnSpan;
+      });
+
+    // 3 would run off the end of what "b" can reach (columns 2-3) -> refused, field snaps back
+    await columnSpanField.fill('3');
+    await columnSpanField.press('Enter');
+    await expect(page.getByLabel('Column span', { exact: true })).toHaveValue('1');
+    expect(await readSpan()).not.toBe(3);
+
+    // 2 exactly fills the free run -> accepted
+    await columnSpanField.fill('2');
+    await columnSpanField.press('Enter');
+    await expect.poll(readSpan).toBe(2);
+  });
 });

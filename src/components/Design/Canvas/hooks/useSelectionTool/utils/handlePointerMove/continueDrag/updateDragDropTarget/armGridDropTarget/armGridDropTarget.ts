@@ -6,7 +6,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getGridTrackLayout } from 'utils/canvas/gridSlots/getGridTrackLayout';
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
-import { resolveGridDropHover } from 'utils/canvas/gridSlots/resolveGridDropHover';
+import { resolveGridDropHover } from 'utils/canvas/gridSlots/resolveGridDropHover/resolveGridDropHover';
 
 export const armGridDropTarget = (
   canvasRefs: TCanvasRefs,
