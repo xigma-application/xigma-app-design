@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import { kebabCase } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,12 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
   const { t } = useTranslation();
   const key = kebabCase(iconName);
   const label = t(`${translationNameSpace}.grid.${key}`);
+  const [revision, setRevision] = useState(0);
+
+  const handleCommit = (next: string): void => {
+    onCommit(next);
+    setRevision((current) => current + 1);
+  };
 
   return (
     <Tooltip content={label}>
@@ -31,12 +37,13 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
         defaultValue={value}
         e2eValue={key}
         endAdornment={endAdornment}
-        onBlur={(event) => onCommit(event.target.value)}
+        key={`${value}-${revision}`}
+        onBlur={(event) => handleCommit(event.target.value)}
         startAdornment={
           <ScrubbableInput
             max={GRID_COUNT_MAX}
             min={GRID_COUNT_MIN}
-            onChange={(next) => onCommit(next.toString())}
+            onChange={(next) => handleCommit(next.toString())}
             value={parseInt(value, 10) || GRID_COUNT_MIN}
           >
             <Icon name={iconName} size={12} />

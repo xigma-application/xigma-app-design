@@ -517,4 +517,51 @@ test.describe('auto-layout — Grid flow', () => {
       { column: 0, row: 1 },
     ]);
   });
+
+  test('a rejected column count leaves the input showing the real grid instead of the typed value', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-rejected-input');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // six children (fixture setup, not the gesture under test) fill the default 2-column grid to
+    // exactly 2x3, then rows are pinned Fixed — capacity is now exactly 6, with no slack
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      for (let index = 0; index < 6; index += 1) {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+
+        const state = store.getState().design;
+        const activePage = state.pages[state.activePageId];
+        const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+        store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+      }
+
+      store.dispatch(updateNode({ changes: { gridRowCount: 3 }, id: frameId }));
+    });
+
+    await selectFrameRow(page);
+    await page.locator('[data-test-grid-area]').click();
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    // 1 column x 3 fixed rows = 3 cells, short of the 6 children — the commit is rejected
+    await columnsField.fill('1');
+    await columnsField.blur();
+    await page.waitForTimeout(150);
+
+    expect(await readColumnCount(page)).toBe(2);
+    await expect(columnsField).toHaveValue('2');
+  });
 });

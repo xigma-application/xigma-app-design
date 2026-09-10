@@ -55,6 +55,7 @@ repainting — same rationale as the Flow section above.
 | 15  | A grid child being dragged visually rides the cursor like a ghost instead of snapping back to its cell (the live x/y dispatch is skipped so the grid engine's own resync has nothing to stomp)                                                                         |  —   | ✅ `grid.spec.ts` |
 | 16  | Shrinking the grid via the panel is rejected outright when the requested capacity can't hold every current child — no silent "grow to fit", the fields just revert                                                                                                     |  ✅  |         —         |
 | 17  | An accepted resize on an already-manually-placed grid re-packs every child's current reading order into the new column count instead of letting a naive per-axis anchor clamp collide two of them into the same cell                                                   |  ✅  | ✅ `grid.spec.ts` |
+| 18  | A rejected (or ignored) Columns/Rows commit leaves the input showing the real current grid value, not the invalid text the user typed — the field remounts to the store value on every commit attempt, accepted or not                                                 |  ✅  | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -66,11 +67,16 @@ scan) — the e2e proof is the wiring, not new geometry. #15 has no unit equival
 "does the canvas actually repaint between two live cursor positions" question, the kind a
 synthetic ref assertion can't distinguish from "frozen and re-rendering the same frame twice". #16
 is exercised exhaustively (every reject/accept branch) by `getGridResizeRepack.spec.ts` and
-`useColumnGridArea.spec.tsx`, so it stays unit-only — a real browser adds nothing a mocked
-`clampGridCount` input can't already prove. #17 gets the one browser-only pass: real drags anchor
-two children via the actual drop pipeline first, then a real panel commit has to repack them
-without a collision — proving the wiring between the drop pipeline and the resize pipeline, not
-just the repack algorithm itself (already exhaustive in `getGridResizeRepack.spec.ts`).
+`useColumnGridArea.spec.tsx`, so the _decision_ (reject vs. repack vs. accept) stays unit-only.
+"The fields just revert" turned out to be the one part that unit-only coverage couldn't actually
+prove — see #18. #17 gets the one browser-only pass: real drags anchor two children via the actual
+drop pipeline first, then a real panel commit has to repack them without a collision — proving the
+wiring between the drop pipeline and the resize pipeline, not just the repack algorithm itself
+(already exhaustive in `getGridResizeRepack.spec.ts`). #18 is a real bug found after #16/#17
+shipped: `GridInputCells`' `<input>` is uncontrolled and only remounts to its `value` prop when
+that prop actually changes, so a rejected/no-op commit left the user's invalid typed text on
+screen — invisible to the hook-level unit tests, which never render the actual DOM input. Fixed
+by remounting on every commit attempt via a bumped `revision` folded into the field's `key`.
 
 ## Reordering a child within its own frame
 

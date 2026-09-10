@@ -765,3 +765,12 @@ The engine already honours spans and manual anchors when set in code.
     the new column count via a fresh auto-flow pass, persisting an anchor only for whoever's cell
     actually moved. Auto-placing frames need no repair pass; the live engine already re-flows them
     every render.
+13. **2026-09-10 — grid flow, Phase 3f: stale Columns/Rows input after a rejected commit (§13
+    "Panel — resizing a grid that already has children").** A direct consequence of #12's capacity
+    guard: `GridInputCells`' text field is uncontrolled (`TextFieldWrapper` remounts the native
+    `<input>` only when its `defaultValue` prop actually changes), so when a commit is rejected or
+    ignored — the capacity guard, or an out-of-range/empty count — `value` never changes and the
+    field is left showing whatever invalid text the user typed instead of snapping back to the
+    real grid. Fixed with a local `revision` counter bumped on every commit attempt (accepted or
+    not), folded into the `key` handed to `UITools.TextField` so the field always remounts to the
+    current `value` prop after a blur or scrub, regardless of whether the store actually changed.
