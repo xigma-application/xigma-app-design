@@ -1,5 +1,9 @@
 import cx from 'classnames';
-import { FC, InputHTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
+import { FC, InputHTMLAttributes, ReactNode, RefObject } from 'react';
+
+// hooks
+import { useSelectInputOnClick } from './hooks/useSelectInputOnClick';
+import { useStopInputKeyPropagation } from './hooks/useStopInputKeyPropagation';
 
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
@@ -38,19 +42,8 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
   variant = TextFieldVariant.filled,
   ...restProps
 }) => {
-  const handleClick = (event: MouseEvent<HTMLInputElement>): void => {
-    event.currentTarget.select();
-    onClick?.(event);
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    if (event.key === 'Enter') {
-      event.stopPropagation();
-      event.currentTarget.blur();
-    }
-
-    onKeyDown?.(event);
-  };
+  const handleClick = useSelectInputOnClick(onClick);
+  const handleKeyDown = useStopInputKeyPropagation(onKeyDown);
 
   return (
     <div
