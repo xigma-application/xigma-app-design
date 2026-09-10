@@ -18,10 +18,10 @@ export const getGridInsertIndicatorRect = (
   const half = INDICATOR_THICKNESS_PX / 2;
   const contentLeft = frame.x + layout.padding.paddingLeft;
   const contentRight = frame.x + frame.width - layout.padding.paddingRight;
-  const rawX = indicator.side === 'left' ? slot.x - layout.columnGap / 2 - half : slot.x + layout.columnSize + layout.columnGap / 2 - half;
+  const rawX = indicator.side === 'left' ? slot.x - layout.columnGap / 2 - half : slot.x + slot.width + layout.columnGap / 2 - half;
 
   return {
-    height: layout.rowSize,
+    height: slot.height,
     width: INDICATOR_THICKNESS_PX,
     x: Math.min(Math.max(rawX, contentLeft - half), contentRight - half),
     y: slot.y,

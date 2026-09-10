@@ -20,17 +20,17 @@ export const resolveGridDropHover = (
   layout: TGridTrackLayout,
 ): TGridDropHover => {
   const count = Math.max(movedNodeIds.length, 1);
-  const columnStride = layout.columnSize + layout.columnGap;
-  const rowStride = layout.rowSize + layout.rowGap;
+  const sum = (values: number[]): number => values.reduce((total, value) => total + value, 0);
+  const hasTracks = sum(layout.columnSizes) > 0 && sum(layout.rowSizes) > 0;
   const context = { count, frame, movedNodeIds, nodesById };
 
   const resolve = (): TGridDropHover => {
-    if (columnStride > 0 && rowStride > 0) {
-      const cell = getHoveredGridCell(framePoint, layout, columnStride, rowStride);
+    if (hasTracks) {
+      const cell = getHoveredGridCell(framePoint, layout);
       const occupancy = getGridOccupancyIndex(context, layout.columnCount);
 
       if (occupancy.occupied.has(gridCellKey(cell.row, cell.column))) {
-        return resolveOccupiedCellHover(context, layout, framePoint, cell, columnStride, occupancy);
+        return resolveOccupiedCellHover(context, layout, framePoint, cell, occupancy);
       }
 
       return { cells: getGridDropPlacements(frame, nodesById, movedNodeIds, cell, count) };

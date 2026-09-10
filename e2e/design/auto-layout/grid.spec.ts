@@ -1739,4 +1739,35 @@ test.describe('auto-layout — Grid flow', () => {
     expect(noneSelected.equals(oneColumn)).toBe(false);
     expect(noneSelected.equals(twoColumns)).toBe(false);
   });
+
+  test('switching a column to Hug reflows the grid slot overlay on canvas', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-slot-reflow');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // one small element inside the grid so Hug has something to hug down to
+    await designPage.drawRectangle(1400, 300, 1440, 340);
+    await dragInto(page, { x: 1420, y: 320 }, { x: 800, y: 400 });
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+    const row0 = page.locator('[data-test-section="grid-columns"]').locator('[data-test-grid-track-row="0"]');
+    const safeArea = await designPage.canvasSafeArea();
+    const uniform = await page.screenshot({ clip: safeArea });
+
+    // switch column 0 to Hug via the mode dropdown — its slot should shrink to the child's width
+    await row0.getByText('Fill', { exact: true }).click();
+    await page.getByText('Hug contents').click();
+    await page.waitForTimeout(150);
+
+    const hugged = await page.screenshot({ clip: safeArea });
+    expect(hugged.equals(uniform)).toBe(false);
+  });
 });

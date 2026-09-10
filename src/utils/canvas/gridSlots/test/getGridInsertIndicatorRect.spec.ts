@@ -8,11 +8,11 @@ import { getGridInsertIndicatorRect } from '../getGridInsertIndicatorRect';
 const layout: TGridTrackLayout = {
   columnCount: 3,
   columnGap: 10,
-  columnSize: 40,
+  columnSizes: [40, 40, 40],
   padding: { paddingBottom: 8, paddingLeft: 8, paddingRight: 8, paddingTop: 6 },
   rowCount: 2,
   rowGap: 12,
-  rowSize: 30,
+  rowSizes: [30, 30],
 };
 
 const frame = { width: 156, x: 100, y: 200 } as TFrameNode;

@@ -666,14 +666,21 @@ different: an impossible request should be rejected, not silently reinterpreted)
 ### Canvas — cell slots
 
 `src/utils/canvas/gridSlots/` holds the shared geometry: `getGridTrackLayout(frame, nodesById)`
-→ `{ columnCount, columnGap, columnSize, padding, rowCount, rowGap, rowSize }` —
-`columnCount = gridColumnCount ?? 1`,
-`rowCount = max(gridRowCount ?? getDerivedGridRowCount, getDerivedGridRowCount)` (so an anchored
-child in a far row shows real rows), gaps
-`horizontalGap` / `verticalGap`, padding `getFrameLayoutPadding`, and **uniform `1fr` tracks**
-(`(content − gaps) / count`). `getGridSlotRect(layout, frame, column, row)` turns one cell into a
-world rect. This matches the engine while every track is `1fr`; per-track sizing (next) swaps the
-uniform split for `resolveGridLayout`'s resolved sizes.
+→ `{ columnCount, columnGap, columnSizes: number[], padding, rowCount, rowGap, rowSizes: number[] }`.
+It delegates to **`getGridResolvedTrackSizes`** (`store/design/utils/autoLayout/`) — the same
+`placeGridCells` → `resolveGridTrackSizes` pipeline the engine's `resolveGridLayout` runs (real
+`contentMax` per track from `getGridContentMaxPerTrack`), minus the child-position pass — so the
+overlay's per-track px **match the actual layout**: a Fixed track keeps its value, a Hug track
+collapses to its widest single-cell child, the Fill tracks share the rest (or collapse to content
+on a hug frame). `columnCount` / `rowCount` are just the resolved arrays' lengths (`rowCount` still
+grows for an anchored child in a far row, via the engine's `derivedRowCount`).
+`getGridSlotRect(layout, frame, column, row)` places a cell from the **cumulative** track offset
+(`getGridTrackOffset(sizes, gap, index)` = Σ preceding sizes + index·gap) and that track's own
+size; an index past the resolved tracks gets a zero size (the grid grows on drop).
+`getGridTrackIndexAt(sizes, gap, coord, allowOverflow)` is the inverse — which track a frame-local
+coordinate falls in (columns clamp to the last; rows extrapolate past the end using the last row's
+stride) — used by `getGridDropCell` / `getHoveredGridCell` in place of the old uniform-stride
+division.
 
 When a single `LayoutMode.grid` frame is **selected**, `drawGridSlots` (`getSelectedGridFrame`
 gate, in `drawScene` next to the padding/gap handles) strokes every cell faint blue

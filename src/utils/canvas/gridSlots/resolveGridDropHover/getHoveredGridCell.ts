@@ -4,14 +4,9 @@ import { TGridTrackLayout } from '../getGridTrackLayout';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { clamp } from 'utils/math/clamp';
+import { getGridTrackIndexAt } from '../getGridTrackIndexAt';
 
-export const getHoveredGridCell = (
-  framePoint: TPoint,
-  layout: TGridTrackLayout,
-  columnStride: number,
-  rowStride: number,
-): TGridDropCell => ({
-  column: clamp(Math.floor((framePoint.x - layout.padding.paddingLeft) / columnStride), 0, layout.columnCount - 1),
-  row: Math.max(Math.floor((framePoint.y - layout.padding.paddingTop) / rowStride), 0),
+export const getHoveredGridCell = (framePoint: TPoint, layout: TGridTrackLayout): TGridDropCell => ({
+  column: getGridTrackIndexAt(layout.columnSizes, layout.columnGap, framePoint.x - layout.padding.paddingLeft, false),
+  row: getGridTrackIndexAt(layout.rowSizes, layout.rowGap, framePoint.y - layout.padding.paddingTop, true),
 });

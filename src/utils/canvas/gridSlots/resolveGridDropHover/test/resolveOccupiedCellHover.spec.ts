@@ -9,16 +9,21 @@ import { TGridTrackLayout } from '../../getGridTrackLayout';
 import { getGridOccupancyIndex } from '../getGridOccupancyIndex';
 import { resolveOccupiedCellHover } from '../resolveOccupiedCellHover';
 
-const layout = (overrides: Partial<TGridTrackLayout> = {}): TGridTrackLayout => ({
-  columnCount: 2,
-  columnGap: 0,
-  columnSize: 100,
-  padding: { paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 },
-  rowCount: 2,
-  rowGap: 0,
-  rowSize: 100,
-  ...overrides,
-});
+const layout = (overrides: Partial<TGridTrackLayout> = {}): TGridTrackLayout => {
+  const columnCount = overrides.columnCount ?? 2;
+  const rowCount = overrides.rowCount ?? 2;
+
+  return {
+    columnCount,
+    columnGap: 0,
+    columnSizes: new Array<number>(columnCount).fill(100),
+    padding: { paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 },
+    rowCount,
+    rowGap: 0,
+    rowSizes: new Array<number>(rowCount).fill(100),
+    ...overrides,
+  };
+};
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
@@ -82,7 +87,7 @@ const run = (
   const { context, layout: trackLayout } = setup(childIds, nodes, frameOverrides);
   const occupancy = getGridOccupancyIndex(context, trackLayout.columnCount);
 
-  return resolveOccupiedCellHover(context, trackLayout, framePoint, cell, trackLayout.columnSize + trackLayout.columnGap, occupancy);
+  return resolveOccupiedCellHover(context, trackLayout, framePoint, cell, occupancy);
 };
 
 describe('resolveOccupiedCellHover', () => {
