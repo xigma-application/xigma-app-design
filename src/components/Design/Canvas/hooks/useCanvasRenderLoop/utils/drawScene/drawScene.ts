@@ -45,6 +45,7 @@ import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawFrameOutlines } from './drawFrameOutlines';
+import { drawGridDropTarget } from './drawGridDropTarget/drawGridDropTarget';
 import { drawGridSlots } from './drawGridSlots/drawGridSlots';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
@@ -172,6 +173,7 @@ export const drawScene = (
   drawVectorEditAlignmentGuide(ctx, refs);
   drawDropTargetFrameOutline(ctx, refs, nodesById);
   drawAutoLayoutDropIndicator(ctx, refs, nodesById);
+  drawGridDropTarget(ctx, refs, nodesById);
   drawTransformAlignmentGuide(ctx, refs);
   drawAspectRatioLockGuide(ctx, refs);
   drawVectorLasso(ctx, refs);

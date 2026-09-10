@@ -184,4 +184,56 @@ test.describe('auto-layout — Grid flow', () => {
 
     expect(withMoreColumns.equals(withGrid)).toBe(false);
   });
+
+  test('dragging an element over a grid cell highlights the target slot, and dropping nests it stretched to the cell', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-drop');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // one child already inside, then switch the frame to Grid
+    await designPage.drawRectangle(1400, 250, 1460, 310);
+    await dragInto(page, { x: 1430, y: 280 }, { x: 800, y: 400 });
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a second rectangle out on the canvas, to drag into the grid
+    await designPage.drawRectangle(1400, 600, 1470, 660);
+
+    const safeArea = await designPage.canvasSafeArea();
+    const beforeHover = await page.screenshot({ clip: safeArea });
+
+    await page.mouse.move(1435, 630);
+    await page.mouse.down();
+    await page.mouse.move(FRAME.x1 + 90, FRAME.y1 + 70, { steps: 12 });
+    await page.waitForTimeout(150);
+    const duringHover = await page.screenshot({ clip: safeArea });
+
+    // the hovered slot lights up and the dragged element drops to half opacity
+    expect(duringHover.equals(beforeHover)).toBe(false);
+
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    const dropped = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+      const last = activePage.nodes[frame.childIds[frame.childIds.length - 1]] as unknown as {
+        heightSizingMode?: string;
+        widthSizingMode?: string;
+      };
+
+      return { childCount: frame.childIds.length, heightSizingMode: last.heightSizingMode, widthSizingMode: last.widthSizingMode };
+    });
+
+    expect(dropped.childCount).toBe(2);
+    expect(dropped.widthSizingMode).toBe('fill');
+    expect(dropped.heightSizingMode).toBe('fill');
+  });
 });

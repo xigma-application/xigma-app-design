@@ -465,24 +465,43 @@ fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
 
 ### Canvas — cell slots
 
-When a single `LayoutMode.grid` frame is selected, `drawGridSlots` (in `drawScene`, next to the
-padding/gap handles) strokes one faint-blue (`GRID_SLOT_STROKE`) rectangle per cell.
-`getSelectedGridFrame` gates it; `getGridSlotRects(frame, nodesById)`
-(`src/utils/canvas/gridSlots/`) builds the frame-local rects: `columnCount = gridColumnCount ?? 1`,
+`src/utils/canvas/gridSlots/` holds the shared geometry: `getGridTrackLayout(frame, nodesById)`
+→ `{ columnCount, columnGap, columnSize, padding, rowCount, rowGap, rowSize }` —
+`columnCount = gridColumnCount ?? 1`,
 `rowCount = max(gridRowCount ?? ceil(childCount / columns), ceil(childCount / columns))`, gaps
 `horizontalGap` / `verticalGap`, padding `getFrameLayoutPadding`, and **uniform `1fr` tracks**
-(`(content − gaps) / count`). It matches the engine while every track is `1fr`; per-track sizing
-(next) swaps the uniform split for `resolveGridLayout`'s resolved sizes. Rotation is applied by
-`drawRect` about the frame centre, like the padding guides. Display only — no drag handles.
+(`(content − gaps) / count`). `getGridSlotRect(layout, frame, column, row)` turns one cell into a
+world rect. This matches the engine while every track is `1fr`; per-track sizing (next) swaps the
+uniform split for `resolveGridLayout`'s resolved sizes.
+
+When a single `LayoutMode.grid` frame is **selected**, `drawGridSlots` (`getSelectedGridFrame`
+gate, in `drawScene` next to the padding/gap handles) strokes every cell faint blue
+(`GRID_SLOT_STROKE`), rotation about the frame centre like the padding guides.
+
+### Canvas — drag a child into a cell
+
+While an element is dragged over a grid frame, `resolveDragReparentTarget` branches on
+`isGridFrame(desiredParent)` → `armGridDropTarget` writes
+`transform.gridDropTargetRef = { columnStart, frameId, rowStart }` (the **exact hovered cell**
+from `getGridDropCell` on the unrotated point; column clamped to the last one, row unbounded
+downward) plus `dropTargetFrameIdRef`. `drawGridDropTarget` outlines the whole grid, fills the
+`draggedCount` cells from that anchor in reading order (`GRID_SLOT_ACTIVE_FILL` at
+`GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style), and draws ghost rows past the current grid when
+the drop overruns it. `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is
+set. On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per
+node `updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` (reading-order from the
+anchor cell) and `widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size
+and fills the cell), and the frame flips to `gridAutoPlacement: false` so the anchors take. The
+grid grows rows to reach the dropped cell via the engine's `derivedRowCount` — no explicit
+`gridRowCount` write.
 
 ### Not covered yet
 
 Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
 `gridColumnSizes` / `gridRowSizes` — UI is the last phase), `gridAutoPlacement` toggle UI,
-occupied-vs-empty cell styling, drag-a-child-into-a-cell drop target, span edge-handles,
-wiring the Column span / Row span fields, auto-placement obstruction reflow, arrow-key reorder,
-⌘D-into-next-cell, track reorder/delete. The engine already honours spans and manual anchors when
-set in code.
+occupied-vs-empty cell styling, span edge-handles, wiring the Column span / Row span fields,
+auto-placement obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete.
+The engine already honours spans and manual anchors when set in code.
 
 ## Tests
 
@@ -510,18 +529,21 @@ set in code.
 - **Unit — grid (§13):** engine — `computeGridLayoutPositions/**/test/` (`placeGridCells/*`,
   `resolveGridLayout/*`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
   `resolveGridTrackSizes`, `computeGridLayoutPositions`) +
-  `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots —
+  `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots + drop —
   `store/design/utils/autoLayout/test/{getSelectedGridFrame,getEffectiveGridRowCount}.spec.ts`,
-  `src/utils/canvas/gridSlots/test/getGridSlotRects.spec.ts`,
-  `drawScene/test/drawGridSlots.spec.ts`; panel —
+  `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
+  `getGridDropCell`), `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
+  `disarmDrag/test/{applyGridDrop,resolveDropTargetIndex,commitDropIntoFrame}`,
+  `drawScene/test/{drawGridSlots,drawGridDropTarget,getAutoLayoutDragOpacity}.spec.ts`; panel —
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
   `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
   `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
   `commitGridColumnCountChange` / `commitGridRowCountChange`), and
   `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`).
 - **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
-  `GridArea` popover's Columns field + 12×8 pick matrix, and the on-canvas cell slots (appear on
-  select, reflow on column-count change), driving the engine + canvas.
+  `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
+  select, reflow on column-count change), and dragging an element into a cell (hover highlight +
+  dim, drop nests it filling the cell), driving the engine + canvas.
 
 ## History (so it isn't repeated)
 
@@ -557,9 +579,17 @@ set in code.
    for grid mode, plus both gap fields. Deliberately no per-track sizing UI or canvas handles —
    x-design has neither, and the engine's `1fr` default already matches `repeat(n, 1fr)`. Per-track
    controls + on-canvas handles are the final phase.
-8. **2026-09-10 — grid flow, Phase 3: canvas cell slots (§13 "Canvas").** Selecting a grid frame
-   now draws its cells as faint-blue outlines (`drawGridSlots` → `getGridSlotRects`, uniform `1fr`
-   geometry since nothing sets per-track sizes yet). Display only — no drag handles, no
-   occupied-vs-empty styling; those stay with the per-track phase. Also added a display-only
-   Column span / Row span row to the child panel, and moved `getEffectiveGridRowCount` out of the
-   RightPanel tree so the canvas helper can share it.
+8. **2026-09-10 — grid flow, Phase 3: canvas cell slots (§13 "Canvas — cell slots").** Selecting a
+   grid frame now draws its cells as faint-blue outlines (`drawGridSlots` → `getGridSlotRects`,
+   uniform `1fr` geometry since nothing sets per-track sizes yet). Display only. Also added a
+   display-only Column span / Row span row to the child panel, and moved `getEffectiveGridRowCount`
+   out of the RightPanel tree so the canvas helper can share it.
+9. **2026-09-10 — grid flow, Phase 3b: drag a child into a cell (§13 "Canvas — drag a child into a
+   cell").** First cut clamped the highlight to a reading-order insert index, so it always lit "the
+   first empty slot" instead of the cell under the cursor — reported by hand. Switched to exact
+   per-cell targeting: `getGridDropCell` returns the hovered `{ column, row }` (unbounded rows),
+   the drop pins the element there via `gridColumnAnchorIndex` / `gridRowAnchorIndex` +
+   `gridAutoPlacement: false`, and forces `widthSizingMode` / `heightSizingMode = fill` so the
+   element takes the cell's size, not its own. Grid grows rows to the dropped cell through the
+   engine's `derivedRowCount`. Multi-select fills forward from the anchor. Shares
+   `getGridTrackLayout` with the slot overlay.

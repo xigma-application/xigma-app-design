@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -57,6 +57,30 @@ const addSectionNode = (x: number, y: number, size = 200): string => {
 const addGroupNode = (x: number, y: number, size = 200): string => {
   store.dispatch(
     addNode({ childIds: [], height: size, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: size, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addGridFrameNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      gridColumnCount: 2,
+      height: size,
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -129,6 +153,39 @@ describe('commitDropIntoFrame', () => {
     expect(page.nodes[rectId].parentId).toBe(frameId);
     expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([rectId]);
     expect(page.rootOrder).not.toContain(rectId);
+  });
+
+  it('should drop the selection into the exact hovered grid cell, pin it there, and stretch it to fill', () => {
+    // mock — 2-column grid, one child already inside
+    const gridId = addGridFrameNode(0, 0);
+    const firstId = addRectNode(10, 10);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId], targetIndex: 0, targetParentId: gridId }));
+
+    const droppedId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([droppedId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: { current: { columnStart: 1, frameId: gridId, rowStart: 2 } },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[gridId] as { childIds: string[] }).childIds).toEqual([firstId, droppedId]);
+    expect(page.nodes[gridId]).toMatchObject({ gridAutoPlacement: false });
+    expect(page.nodes[droppedId]).toMatchObject({
+      gridColumnAnchorIndex: 1,
+      gridRowAnchorIndex: 2,
+      heightSizingMode: SizingMode.fill,
+      widthSizingMode: SizingMode.fill,
+    });
   });
 
   it('should pop the dragged selection back to the root when dropped over empty canvas', () => {

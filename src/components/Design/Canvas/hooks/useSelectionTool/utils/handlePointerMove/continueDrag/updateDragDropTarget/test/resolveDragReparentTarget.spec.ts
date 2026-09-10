@@ -35,6 +35,28 @@ const addAutoLayoutFrame = (x: number, y: number, size: number): string => {
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;
 };
 
+const addGridFrame = (x: number, y: number, size: number): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#fff',
+      gridColumnCount: 2,
+      height: size,
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+};
+
 const addFrame = (x: number, y: number, size: number): string => {
   store.dispatch(
     addNode({
@@ -504,6 +526,39 @@ describe('resolveDragReparentTarget', () => {
     expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toBeNull();
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(true);
     expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(otherAutoLayoutFrameId);
+
+    spy.mockRestore();
+  });
+
+  it('should arm the grid drop target instead of reparenting right away when the pointer is over a grid frame', () => {
+    // mock
+    const frameId = addGridFrame(0, 0, 300);
+    const rectId = addRect(500, 500);
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+
+    // spy
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 75, y: 75 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      false,
+      dragState(),
+    );
+
+    // result
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);
+    expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({ columnStart: 0, frameId, rowStart: 0 });
+    expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
 
     spy.mockRestore();
   });

@@ -25,6 +25,7 @@ export const updateDragDropTarget = (
 ): void => {
   canvasRefs.transform.dropTargetFrameIdRef.current = null;
   canvasRefs.transform.autoLayoutDropTargetRef.current = null;
+  canvasRefs.transform.gridDropTargetRef.current = null;
 
   const canReparent = selectedNodes.length > 0 && !selectedNodes.some((node) => node.type === NodeType.section);
 

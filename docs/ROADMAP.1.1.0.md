@@ -178,10 +178,13 @@ write-up: `.claude/docs/auto-layout.md` §13.
       fields and a click-to-pick size grid, plus the row and column gap fields
 - [x] selecting a grid frame outlines its cells on the canvas, and they reflow as the row/column
       count changes
+- [x] dragging an element onto the grid highlights the cell under the cursor (and the element goes
+      translucent); dropping snaps it into that cell at the cell's size, growing the grid with extra
+      rows if you drop past the end
 - [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
       the canvas — this is the last part
-- [ ] later: placing a child in a specific cell, letting a child span several cells, dragging a
-      child from one cell to another, and reordering with the keyboard
+- [ ] later: letting a child span several cells, dragging a child from one cell to another, and
+      reordering with the keyboard
 
 ## Stage 26 — Rectangle properties panel
 

@@ -1,3 +1,7 @@
+// others
+import { applyGridDrop } from './applyGridDrop';
+import { resolveDropTargetIndex } from './resolveDropTargetIndex';
+
 // store
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { isDropTargetContainer } from 'store/design/utils/nodeHierarchy/isDropTargetContainer';
@@ -6,6 +10,7 @@ import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
@@ -24,25 +29,32 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
     const canDragOutToRoot = currentParent !== null && isDropTargetContainer(currentParent);
     const reorderPreview = canvasRefs.transform.autoLayoutReorderPreviewRef.current;
     const autoLayoutDropTarget = canvasRefs.transform.autoLayoutDropTargetRef.current;
+    const gridDropTarget = canvasRefs.transform.gridDropTargetRef.current;
     const matchingReorderPreview =
       targetParentId !== null && targetParentId === currentParentId && reorderPreview?.frameId === targetParentId ? reorderPreview : null;
     const isSameParentIndicatorDrop =
       targetParentId !== null && targetParentId === currentParentId && autoLayoutDropTarget?.frameId === targetParentId;
+    const isGridDrop = targetParentId !== null && gridDropTarget?.frameId === targetParentId;
 
     if (
       matchingReorderPreview ||
       isSameParentIndicatorDrop ||
+      isGridDrop ||
       (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot))
     ) {
-      const targetIndex = matchingReorderPreview
-        ? matchingReorderPreview.activeIndex
-        : autoLayoutDropTarget && autoLayoutDropTarget.frameId === targetParentId
-          ? autoLayoutDropTarget.index
-          : targetFrame && isContainerNode(targetFrame)
-            ? targetFrame.childIds.length
-            : page.rootOrder.length;
+      const targetIndex = resolveDropTargetIndex({
+        autoLayoutDropTarget,
+        matchingReorderPreview,
+        page,
+        targetFrame,
+        targetParentId,
+      });
 
       dispatch(moveNodes({ nodeIds, targetIndex, targetParentId }));
+
+      if (isGridDrop && gridDropTarget && targetFrame && targetFrame.type === NodeType.frame) {
+        applyGridDrop(dispatch, targetFrame, gridDropTarget, nodeIds);
+      }
     }
   }
 };

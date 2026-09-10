@@ -19,6 +19,7 @@ const canvasRefs = (): TCanvasRefs =>
       autoLayoutDropTargetRef: { current: null },
       autoLayoutReorderPreviewRef: { current: null },
       dropTargetFrameIdRef: { current: 'stale' },
+      gridDropTargetRef: { current: null },
     },
   }) as unknown as TCanvasRefs;
 

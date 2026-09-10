@@ -285,6 +285,12 @@ export type TVectorSnapshotsRefs = {
 
 export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: string };
 
+export type TGridDropTargetHover = {
+  columnStart: number;
+  frameId: string;
+  rowStart: number;
+};
+
 export type TAutoLayoutDraggedOffsetTween = {
   from: Record<string, TPoint>;
   grabbedGhost: TPoint;
@@ -337,6 +343,7 @@ export type TTransformRefs = {
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   dropTargetFrameIdRef: RefObject<string | null>;
   equalSpacingGuidesRef: RefObject<TEqualSpacingGuides | null>;
+  gridDropTargetRef: RefObject<TGridDropTargetHover | null>;
   matchedPairGuidesRef: RefObject<TMatchedPairGuides | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;

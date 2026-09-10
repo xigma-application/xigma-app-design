@@ -18,6 +18,19 @@ describe('getAutoLayoutDragOpacity', () => {
     expect(getAutoLayoutDragOpacity(refs, 'a')).toBe(0.5);
   });
 
+  it('should return 0.5 when the node is dragged and a grid drop target is active', () => {
+    // mock
+    const refs = createCanvasRefs({
+      transform: {
+        draggedNodeIdsRef: { current: new Set(['a']) },
+        gridDropTargetRef: { current: { columnStart: 0, frameId: 'f1', rowStart: 0 } },
+      },
+    });
+
+    // result
+    expect(getAutoLayoutDragOpacity(refs, 'a')).toBe(0.5);
+  });
+
   it('should return 1 when no auto-layout drop target is active', () => {
     // mock
     const refs = createCanvasRefs({ transform: { draggedNodeIdsRef: { current: new Set(['a']) } } });

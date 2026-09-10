@@ -10,9 +10,11 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget/armAutoLayoutDropTarget';
+import { armGridDropTarget } from './armGridDropTarget/armGridDropTarget';
 import { getDragDropTargetFrame } from './getDragDropTargetFrame';
 import { isAutoLayoutFrame } from './isAutoLayoutFrame';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isGridFrame } from './isGridFrame';
 import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 import { isPointInsideFrame } from './isPointInsideFrame';
 import { reparentToDropTarget } from './reparentToDropTarget';
@@ -62,6 +64,9 @@ export const resolveDragReparentTarget = (
   applyDesiredDropTarget(canvasRefs, isReorderContext, isModifierHeld, desiredParentId, currentParentId, dragState);
 
   switch (true) {
+    case isGridFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild:
+      armGridDropTarget(canvasRefs, desiredParent, desiredParentId, nodesById, point);
+      break;
     case isAutoLayoutFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild:
       armAutoLayoutDropTarget(
         canvasRefs,

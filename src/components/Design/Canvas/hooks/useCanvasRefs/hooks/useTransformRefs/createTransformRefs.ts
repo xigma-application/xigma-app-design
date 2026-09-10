@@ -15,6 +15,7 @@ export const createTransformRefs = (overrides: Partial<TTransformRefs> = {}): TT
   draggedNodeIdsRef: { current: null },
   dropTargetFrameIdRef: { current: null },
   equalSpacingGuidesRef: { current: null },
+  gridDropTargetRef: { current: null },
   matchedPairGuidesRef: { current: null },
   resizedNodeIdsRef: { current: null },
   rotateDragRef: { current: null },
