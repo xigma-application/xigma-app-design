@@ -70,4 +70,32 @@ describe('DropdownOption behaviors', () => {
     // result
     expect(onMouseEnter).toHaveBeenCalledTimes(1);
   });
+
+  it('should render a leading icon when one is given', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <DropdownOption
+          highlighted={false}
+          icon="FixedWidth"
+          iconSize={16}
+          label="Hex"
+          onClick={vi.fn()}
+          onMouseEnter={vi.fn()}
+          selected={false}
+        />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="DropdownOption__icon"]')).not.toBeNull();
+  });
+
+  it('should render no leading icon slot when no icon is given', () => {
+    // before
+    const { container } = renderDropdownOption(vi.fn(), false);
+
+    // result
+    expect(container.querySelector('[class*="DropdownOption__icon"]')).toBeNull();
+  });
 });

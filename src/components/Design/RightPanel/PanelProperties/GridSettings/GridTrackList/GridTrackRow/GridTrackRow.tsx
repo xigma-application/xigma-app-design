@@ -18,6 +18,9 @@ import { useSelectTrackRow } from './hooks/useSelectTrackRow';
 
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
+import { getRemoveTrackTooltip } from './utils/getRemoveTrackTooltip';
+import { getSizingModeOptions } from './utils/getSizingModeOptions';
+import { getTrackModeOptions } from './utils/getTrackModeOptions';
 import { translationNameSpace } from '../../constants';
 
 // styles
@@ -61,18 +64,12 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const isHug = track.mode === SizingMode.hug;
-  const axisKey = axis === 'column' ? 'Column' : 'Row';
-  const isBulkRemove = isSelected && selectedCount > 1;
   const handleClick = useSelectTrackRow(onSelect);
   const handleBlur = useCommitTrackValueOnBlur(onChangeValue);
   const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
-  const removeTooltip = isBulkRemove
-    ? t(`${translationNameSpace}.remove${axisKey}sTooltip`, { count: selectedCount })
-    : t(`${translationNameSpace}.remove${axisKey}Tooltip`, { position: track.index + 1, total: trackCount });
-  const modeOptions = [SizingMode.fill, SizingMode.fixed, SizingMode.hug].map((mode) => ({
-    label: t(`${translationNameSpace}.mode.${mode}`),
-    value: mode,
-  }));
+  const removeTooltip = getRemoveTrackTooltip(t, axis, track, trackCount, isSelected, selectedCount);
+  const modeOptions = getSizingModeOptions(t);
+  const trackModeOptions = getTrackModeOptions(t, track, axis);
 
   return (
     <div
@@ -86,7 +83,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         bypassGlobalShortcuts={false}
         className={styles.GridTrackRow__mode}
         onSelect={onChangeMode}
-        options={modeOptions}
+        options={trackModeOptions}
         value={track.mode}
         variant="outline"
       />

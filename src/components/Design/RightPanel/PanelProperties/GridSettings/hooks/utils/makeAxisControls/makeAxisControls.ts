@@ -14,6 +14,7 @@ import { commitGridAxisModeChange } from './commitGridAxisModeChange';
 import { commitGridAxisReorder } from './commitGridAxisReorder';
 import { commitGridAxisValueChange } from './commitGridAxisValueChange';
 import { getGridTrackChildren } from 'store/design/utils/autoLayout/gridTracks/getGridTrackChildren';
+import { getGridTrackLayout } from 'utils/canvas/gridSlots/getGridTrackLayout';
 import { getGridTrackLinkedIndices } from 'store/design/utils/autoLayout/gridTracks/getGridTrackLinkedIndices';
 import { toViewModels } from './toViewModels';
 
@@ -31,5 +32,9 @@ export const makeAxisControls = (
   onReorder: (sourceIndices: number[], targetIndex: number): number[] | null =>
     commitGridAxisReorder(dispatch, frame, nodes, axis, currentTracks, sourceIndices, targetIndex),
   revision: frame,
-  tracks: toViewModels(currentTracks, getGridTrackLinkedIndices(getGridTrackChildren(frame, nodes, axis), currentTracks.length)),
+  tracks: toViewModels(
+    currentTracks,
+    getGridTrackLinkedIndices(getGridTrackChildren(frame, nodes, axis), currentTracks.length),
+    axis === 'column' ? getGridTrackLayout(frame, nodes).columnSize : getGridTrackLayout(frame, nodes).rowSize,
+  ),
 });

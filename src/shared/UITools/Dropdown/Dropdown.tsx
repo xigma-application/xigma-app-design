@@ -49,7 +49,7 @@ export const Dropdown = <TValue extends string>({
       className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
       disabled={disabled}
     >
-      <span className={styles.Dropdown__label}>{selectedOption?.label}</span>
+      <span className={styles.Dropdown__label}>{selectedOption?.triggerLabel ?? selectedOption?.label}</span>
       <Icon name="ChevronDown" size={12} />
     </PopoverPrimitive.Trigger>
   );

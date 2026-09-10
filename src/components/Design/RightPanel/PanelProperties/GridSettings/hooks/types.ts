@@ -5,6 +5,7 @@ export type TGridTrackViewModel = {
   index: number;
   linkedIndices: number[];
   mode: SizingMode;
+  resolvedSize: number;
   value: number;
 };
 

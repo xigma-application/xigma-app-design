@@ -14,6 +14,7 @@ const track = (overrides: Partial<TGridTrackViewModel> = {}): TGridTrackViewMode
   index: 0,
   linkedIndices: [0],
   mode: SizingMode.fill,
+  resolvedSize: 100,
   value: 1,
   ...overrides,
 });

@@ -65,9 +65,9 @@ describe('makeAxisControls', () => {
       );
 
       expect(controls.tracks).toEqual([
-        { index: 0, linkedIndices: [0], mode: SizingMode.fill, value: 1 },
-        { index: 1, linkedIndices: [1], mode: SizingMode.fixed, value: 80 },
-        { index: 2, linkedIndices: [2], mode: SizingMode.hug, value: 0 },
+        { index: 0, linkedIndices: [0], mode: SizingMode.fill, resolvedSize: expect.any(Number), value: 1 },
+        { index: 1, linkedIndices: [1], mode: SizingMode.fixed, resolvedSize: 80, value: 80 },
+        { index: 2, linkedIndices: [2], mode: SizingMode.hug, resolvedSize: expect.any(Number), value: 0 },
       ]);
     });
 

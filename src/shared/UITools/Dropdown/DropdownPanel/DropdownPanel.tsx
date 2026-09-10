@@ -36,6 +36,8 @@ export const DropdownPanel = <TValue extends string>({
       {options.map((option, index) => (
         <DropdownOption
           highlighted={index === highlightedIndex}
+          icon={option.icon}
+          iconSize={option.iconSize}
           key={option.value}
           label={option.label}
           onClick={handleSelect(option.value)}
