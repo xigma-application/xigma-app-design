@@ -547,6 +547,7 @@
   "design.rightPanel.panelProperties.gridSettings.closeAriaLabel": "Zamknij ustawienia siatki",
   "design.rightPanel.panelProperties.gridSettings.columns.label": "Kolumny",
   "design.rightPanel.panelProperties.gridSettings.deleteAriaLabel": "Usuń zaznaczone tory",
+  "design.rightPanel.panelProperties.gridSettings.fillWeightAriaLabel": "Predefiniowane wagi wypełnienia",
   "design.rightPanel.panelProperties.gridSettings.mode.fillContainer": "Wypełnij kontener ({{value}}fr)",
   "design.rightPanel.panelProperties.gridSettings.mode.fixedHeight": "Stała wysokość ({{value}})",
   "design.rightPanel.panelProperties.gridSettings.mode.fixedWidth": "Stała szerokość ({{value}})",

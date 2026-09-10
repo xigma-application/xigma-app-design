@@ -47,7 +47,7 @@ describe('GridTrackRow', () => {
 
     expect(screen.getByRole('button', { name: 'Reorder track' })).toHaveTextContent('1');
     expect(screen.getByText('Fill')).toBeInTheDocument();
-    expect(screen.getByLabelText('Track size value')).toHaveValue(1);
+    expect(screen.getByLabelText('Track size value')).toHaveValue('1fr');
   });
 
   it('should let global keyboard shortcuts (e.g. undo) through the value field and mode dropdown', () => {
@@ -75,6 +75,47 @@ describe('GridTrackRow', () => {
     renderRow();
 
     expect(screen.queryByLabelText('Track sizing mode')).not.toBeInTheDocument();
+  });
+
+  it('should render the fr value with a weight-preset chevron for a fill track', () => {
+    const onChangeValue = vi.fn();
+
+    renderRow({ onChangeValue, track: track({ mode: SizingMode.fill, value: 1 }) });
+
+    expect(screen.getByLabelText('Track size value')).toHaveValue('1fr');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fill weight presets' }));
+    fireEvent.click(screen.getByText('3fr'));
+
+    expect(onChangeValue).toHaveBeenCalledWith(3);
+  });
+
+  it('should keep a fill track on fill when an exact fr value is typed and committed', () => {
+    const onChangeMode = vi.fn();
+    const onChangeValue = vi.fn();
+
+    renderRow({ onChangeMode, onChangeValue, track: track({ mode: SizingMode.fill, value: 1 }) });
+    fireEvent.blur(screen.getByLabelText('Track size value'), { target: { value: '2fr' } });
+
+    expect(onChangeValue).toHaveBeenCalledWith(2);
+    expect(onChangeMode).not.toHaveBeenCalled();
+  });
+
+  it('should switch a fill track to fixed when the fr unit is removed on commit', () => {
+    const onChangeMode = vi.fn();
+    const onChangeValue = vi.fn();
+
+    renderRow({ onChangeMode, onChangeValue, track: track({ mode: SizingMode.fill, value: 1 }) });
+    fireEvent.blur(screen.getByLabelText('Track size value'), { target: { value: '300' } });
+
+    expect(onChangeMode).toHaveBeenCalledWith(SizingMode.fixed, 300);
+    expect(onChangeValue).not.toHaveBeenCalled();
+  });
+
+  it('should not render the fill weight-preset chevron for a non-fill track', () => {
+    renderRow({ track: track({ mode: SizingMode.fixed, value: 120 }) });
+
+    expect(screen.queryByRole('button', { name: 'Fill weight presets' })).not.toBeInTheDocument();
   });
 
   it('should seed the resolved size when switching to Fixed from the mode dropdown', () => {
@@ -118,7 +159,7 @@ describe('GridTrackRow', () => {
   it('should commit a numeric value on blur and ignore a blank one', () => {
     const onChangeValue = vi.fn();
 
-    renderRow({ onChangeValue });
+    renderRow({ onChangeValue, track: track({ mode: SizingMode.fixed, value: 1 }) });
     const input = screen.getByLabelText('Track size value');
 
     fireEvent.blur(input, { target: { value: '3.5' } });

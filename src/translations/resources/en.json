@@ -535,6 +535,7 @@
   "design.rightPanel.panelProperties.gridSettings.closeAriaLabel": "Close grid settings",
   "design.rightPanel.panelProperties.gridSettings.columns.label": "Columns",
   "design.rightPanel.panelProperties.gridSettings.deleteAriaLabel": "Delete selected tracks",
+  "design.rightPanel.panelProperties.gridSettings.fillWeightAriaLabel": "Fill weight presets",
   "design.rightPanel.panelProperties.gridSettings.mode.fillContainer": "Fill container ({{value}}fr)",
   "design.rightPanel.panelProperties.gridSettings.mode.fixedHeight": "Fixed height ({{value}})",
   "design.rightPanel.panelProperties.gridSettings.mode.fixedWidth": "Fixed width ({{value}})",

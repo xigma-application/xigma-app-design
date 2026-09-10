@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Icon, Tooltip } from '@xigma/components';
 
 // components
+import FillWeightMenu from './FillWeightMenu/FillWeightMenu';
 import GridTrackHandle from './GridTrackHandle';
 import { UITools } from 'shared';
 
@@ -13,14 +14,18 @@ import { UITools } from 'shared';
 import { TGridTrackSelectModifiers } from '../hooks/useGridTrackSelection';
 import { TGridTrackViewModel } from '../../hooks/types';
 import { useBeginTrackHandleDrag } from './hooks/useBeginTrackHandleDrag';
+import { useCommitFillTrackValue } from './hooks/useCommitFillTrackValue';
 import { useCommitHugTrackAsFixed } from './hooks/useCommitHugTrackAsFixed';
 import { useCommitTrackValueOnBlur } from './hooks/useCommitTrackValueOnBlur';
+import { useSelectTrackNumberPortion } from './hooks/useSelectTrackNumberPortion';
 import { useSelectTrackRow } from './hooks/useSelectTrackRow';
 
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
 import { getRemoveTrackTooltip } from './utils/getRemoveTrackTooltip';
 import { getTrackModeOptions } from './utils/getTrackModeOptions';
+import { getTrackValueFieldText } from './utils/getTrackValueFieldText';
+import { getValueBlurHandlerByMode } from './utils/getValueBlurHandlerByMode';
 import { roundTrackSize } from './utils/roundTrackSize';
 import { translationNameSpace } from '../../constants';
 
@@ -65,12 +70,16 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const isHug = track.mode === SizingMode.hug;
+  const isFill = track.mode === SizingMode.fill;
   const handleClick = useSelectTrackRow(onSelect);
   const handleBlur = useCommitTrackValueOnBlur(onChangeValue);
   const handleHugBlur = useCommitHugTrackAsFixed(onChangeMode);
+  const handleFillBlur = useCommitFillTrackValue(onChangeMode, onChangeValue);
   const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
+  const { inputRef, selectNumberPortion } = useSelectTrackNumberPortion();
   const removeTooltip = getRemoveTrackTooltip(t, axis, track, trackCount, isSelected, selectedCount);
   const trackModeOptions = getTrackModeOptions(t, track, axis);
+  const valueBlurHandlerByMode = getValueBlurHandlerByMode(handleFillBlur, handleBlur, handleHugBlur);
 
   const handleModeSelect = (mode: SizingMode): void => {
     onChangeMode(mode, mode === SizingMode.fixed ? roundTrackSize(track.resolvedSize) : undefined);
@@ -96,10 +105,14 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
         bypassGlobalShortcuts={false}
         className={cx(styles.GridTrackRow__value, { [styles['GridTrackRow__value--hug']]: isHug })}
-        defaultValue={isHug ? String(roundTrackSize(track.resolvedSize)) : String(track.value)}
+        defaultValue={getTrackValueFieldText(track)}
         e2eValue={`${E2EAttribute.gridTrackValue}-${track.index}`}
-        onBlur={isHug ? handleHugBlur : handleBlur}
-        type="number"
+        endAdornment={isFill ? <FillWeightMenu onSelect={onChangeValue} value={track.value} /> : undefined}
+        inputRef={inputRef}
+        onBlur={valueBlurHandlerByMode[track.mode]}
+        onClick={isFill ? selectNumberPortion : undefined}
+        onFocus={isFill ? selectNumberPortion : undefined}
+        type={isFill ? 'text' : 'number'}
       />
       <Tooltip align="end" content={removeTooltip}>
         <UITools.Button

@@ -25,3 +25,5 @@ export const TRACK_MODE_OPTIONS: Record<TGridTrackAxis, TTrackModeOption[]> = {
     { icon: 'FillVertical', iconSize: 24, labelKey: 'fillContainer', triggerLabel: 'Fill', value: SizingMode.fill },
   ],
 };
+
+export const FILL_WEIGHT_PRESETS: number[] = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5];

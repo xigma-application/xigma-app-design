@@ -73,6 +73,17 @@ const readColumnCount = (page: Page): Promise<number | undefined> =>
     return (activePage.nodes[frameId] as unknown as { gridColumnCount?: number }).gridColumnCount;
   });
 
+const readColumnTrack = (page: Page, index: number): Promise<{ mode?: string; value?: number } | undefined> =>
+  page.evaluate(async (trackIndex) => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const sizes = (activePage.nodes[frameId] as unknown as { gridColumnSizes?: { mode?: string; value?: number }[] }).gridColumnSizes;
+
+    return sizes?.[trackIndex];
+  }, index);
+
 const unique = (values: number[]): number[] => [...new Set(values)];
 
 type TGridState = { anchors: (number | undefined)[][]; childIds: string[]; gridAutoPlacement?: boolean };
@@ -1769,5 +1780,65 @@ test.describe('auto-layout — Grid flow', () => {
 
     const hugged = await page.screenshot({ clip: safeArea });
     expect(hugged.equals(uniform)).toBe(false);
+  });
+
+  test('the Fill value field re-weights the track as fr and drops to Fixed when the unit is removed', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-fill-value-field');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    await designPage.drawRectangle(1400, 300, 1440, 340);
+    await dragInto(page, { x: 1420, y: 320 }, { x: 800, y: 400 });
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    const row0 = columns.locator('[data-test-grid-track-row="0"]');
+    const value0 = row0.getByLabel('Track size value');
+    const safeArea = await designPage.canvasSafeArea();
+
+    // three 1fr columns split the width evenly
+    await page.waitForTimeout(150);
+    const equalThirds = await page.screenshot({ clip: safeArea });
+
+    // focusing the field selects just the digit (not the fr unit), so typing "3" over it
+    // yields "3fr" — the track stays on Fill, now weighted 3:1:1. Committing via blur (not
+    // Enter) so the keystroke doesn't also reach global canvas shortcuts.
+    await value0.click();
+    await value0.pressSequentially('3');
+    await value0.evaluate((el) => (el as HTMLInputElement).blur());
+    await expect.poll(() => readColumnTrack(page, 0)).toMatchObject({ mode: 'fill', value: 3 });
+    await page.waitForTimeout(150);
+    const weighted = await page.screenshot({ clip: safeArea });
+    expect(weighted.equals(equalThirds)).toBe(false);
+
+    // clearing the whole field down to a bare number (fr unit gone) drops the track to Fixed.
+    // Set via the DOM directly (not the keyboard) — Delete/Backspace are bound to the global
+    // "delete selected node" shortcut, which this field intentionally lets through.
+    await value0.evaluate((el) => {
+      const input = el as HTMLInputElement;
+      const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+
+      input.focus();
+      setValue?.call(input, '120');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.blur();
+    });
+    await expect.poll(() => readColumnTrack(page, 0)).toMatchObject({ mode: 'fixed', value: 120 });
+    await page.waitForTimeout(150);
+    const fixed = await page.screenshot({ clip: safeArea });
+    expect(fixed.equals(weighted)).toBe(false);
   });
 });
