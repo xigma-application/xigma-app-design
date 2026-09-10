@@ -144,4 +144,35 @@ describe('useColumnGridArea', () => {
 
     expect(readFrame(frameId)).toMatchObject({ gridColumnCount: 4, gridRowCount: 3 });
   });
+
+  it('should report the rows as auto until an explicit count is set', () => {
+    const frameId = addGridFrame();
+
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    expect(result.current.isRowsAuto).toBe(true);
+
+    act(() => result.current.onSetRowsFixed());
+
+    expect(result.current.isRowsAuto).toBe(false);
+    expect(readFrame(frameId).gridRowCount).toBe(result.current.rows.length ? Number(result.current.rows) : 1);
+  });
+
+  it('should clear the explicit row count when switched back to auto', () => {
+    const frameId = addGridFrame();
+
+    store.dispatch(updateNode({ changes: { gridRowCount: 4 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    expect(result.current.isRowsAuto).toBe(false);
+
+    act(() => result.current.onSetRowsAuto());
+
+    expect(result.current.isRowsAuto).toBe(true);
+    expect(readFrame(frameId).gridRowCount).toBeUndefined();
+  });
 });

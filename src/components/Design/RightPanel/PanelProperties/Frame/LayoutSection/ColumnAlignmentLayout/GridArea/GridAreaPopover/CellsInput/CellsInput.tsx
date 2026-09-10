@@ -50,12 +50,13 @@ export const CellsInput: FC<TCellsInputProps> = ({ close, columns, onClickCell, 
 
             return (
               <Tooltip content={`${targetColumn}x${targetRow}`} key={`${targetColumn}-${targetRow}`}>
-                <div
+                <button
                   className={cx(styles.CellsInput__cell, {
                     [styles['CellsInput__cell--active']]: targetColumn <= activeCell.columns && targetRow <= activeCell.rows,
                     [styles['CellsInput__cell--selected']]: targetColumn <= parsedColumns && targetRow <= parsedRows,
                   })}
                   data-value={`${targetColumn}${SEPARATOR}${targetRow}`}
+                  type="button"
                   {...getAttributes(E2EAttribute.gridCellInput, row * PICKER_COLUMNS + column)}
                 />
               </Tooltip>

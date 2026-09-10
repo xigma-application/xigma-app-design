@@ -10,13 +10,17 @@ import { TActiveCell } from '../GridArea/GridAreaPopover/CellsInput/types';
 import { clampGridCount } from './utils/clampGridCount';
 import { commitGridColumnCountChange } from './utils/commitGridColumnCountChange';
 import { commitGridRowCountChange } from './utils/commitGridRowCountChange';
+import { commitGridRowsAuto } from './utils/commitGridRowsAuto';
 import { getEffectiveGridRowCount } from './utils/getEffectiveGridRowCount';
 
 export type TUseColumnGridAreaResult = {
   columns: string;
+  isRowsAuto: boolean;
   onClickCell: TFunc<[TActiveCell]>;
   onCommitColumns: TFunc<[string]>;
   onCommitRows: TFunc<[string]>;
+  onSetRowsAuto: TFunc;
+  onSetRowsFixed: TFunc;
   rows: string;
 };
 
@@ -27,6 +31,7 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
   const childCount = frameNode?.childIds.filter((childId) => nodes[childId]).length ?? 0;
   const columnCount = Math.max(frameNode?.gridColumnCount ?? 1, 1);
+  const isRowsAuto = frameNode?.gridRowCount === undefined;
   const rowCount = frameNode?.gridRowCount ?? getEffectiveGridRowCount(childCount, columnCount);
 
   const onCommitColumns = (raw: string): void => {
@@ -45,6 +50,14 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
     }
   };
 
+  const onSetRowsAuto = (): void => {
+    commitGridRowsAuto(dispatch, frameNode);
+  };
+
+  const onSetRowsFixed = (): void => {
+    commitGridRowCountChange(dispatch, frameNode, rowCount);
+  };
+
   const onClickCell = (cell: TActiveCell): void => {
     commitGridColumnCountChange(dispatch, frameNode, cell.columns);
     commitGridRowCountChange(dispatch, frameNode, cell.rows);
@@ -52,9 +65,12 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
 
   return {
     columns: columnCount.toString(),
+    isRowsAuto,
     onClickCell,
     onCommitColumns,
     onCommitRows,
+    onSetRowsAuto,
+    onSetRowsFixed,
     rows: rowCount.toString(),
   };
 };

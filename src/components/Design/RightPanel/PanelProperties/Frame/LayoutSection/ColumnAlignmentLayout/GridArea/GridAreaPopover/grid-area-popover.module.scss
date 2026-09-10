@@ -1,4 +1,12 @@
 .GridAreaPopover {
   box-sizing: border-box;
-  width: 210px;
+  padding: 12px;
+  width: 100%;
+
+  &__settings-button {
+    height: 24px;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+  }
 }

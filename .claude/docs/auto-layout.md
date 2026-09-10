@@ -443,14 +443,20 @@ consumes.
 Ported faithfully from x-design's `shared/UITools/GridArea/` (structure + popup). When
 `layoutMode === grid`, `ColumnAlignmentLayout` swaps `AlignmentArea` for `<GridArea>` and shows
 **both** `GapField`s (column = `horizontalGap`, row = `verticalGap`; auto-gap mode disabled). The
-widget is a 56px preview tile (`GridAreaPreview`, a `repeat(n, 1fr)` grid capped at 10×10 with a
-`"C × R"` caption) that opens a `UITools.Popover` holding `GridInputs` (two `GridInputCells` —
-`TextField` + `ScrubbableInput` 1–100) and `CellsInput` (a 12×8 `data-value="col.row"` pick
-matrix). `useColumnGridArea` holds the in-flight strings, commits on blur via
-`clampGridCount` + `commitGridColumnCountChange` / `commitGridRowCountChange` (revert on
-empty / out-of-range), and `onClickCell` writes both counts at once. The Rows field shows the
-**effective** count (`getEffectiveGridRowCount` = `ceil(childCount / columns)`) when
-`gridRowCount` is unset; editing it writes `gridRowCount`. No per-track sizing UI (deferred).
+widget is a 210px-wide popover (`var(--color-neutral-4)` ground) opened from a 56px preview tile
+(`GridAreaPreview`, a `repeat(n, 1fr)` grid capped at 10×10 with a `"C × R"` caption). The popover
+holds `GridInputs` (two `GridInputCells` — `TextField` + `ScrubbableInput` 1–100, as shrinking
+flex items so they fit the 210px), `CellsInput` (a 12×8 `data-value="col.row"` pick matrix of
+`<button>`s, each `<Tooltip>`-wrapped so hover shows `"CxR"`), and an inert full-width **Open grid
+settings** outline button (placeholder — no handler yet). `useColumnGridArea` is the single hook
+(returned from `useColumnAlignmentLayout` as `gridArea` and passed whole into `<GridArea grid=…>`):
+columns/rows come straight from the store, commit on blur via `clampGridCount` +
+`commitGridColumnCountChange` / `commitGridRowCountChange` (no-op on empty / out-of-range),
+`onClickCell` writes both at once. The **Rows** field has a chevron menu (`GridRowsModeMenu` in a
+`UITools.ButtonMenu`) — **Auto** clears `gridRowCount` (`commitGridRowsAuto`), the fixed item pins
+it to the current effective count; when Auto the field shows the effective count
+(`getEffectiveGridRowCount` = `ceil(childCount / columns)`) as the label "Auto". No per-track
+sizing UI (deferred).
 
 ### Not covered yet
 

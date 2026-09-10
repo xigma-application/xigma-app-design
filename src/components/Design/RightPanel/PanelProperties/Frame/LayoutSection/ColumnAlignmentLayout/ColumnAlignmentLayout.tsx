@@ -53,13 +53,7 @@ const ColumnAlignmentLayout: FC = () => {
         withTopAlignedButtons
       >
         {isGrid ? (
-          <GridArea
-            columns={gridArea.columns}
-            onClickCell={gridArea.onClickCell}
-            onCommitColumns={gridArea.onCommitColumns}
-            onCommitRows={gridArea.onCommitRows}
-            rows={gridArea.rows}
-          />
+          <GridArea grid={gridArea} />
         ) : (
           <AlignmentArea
             isBaselineAligned={isBaselineAligned}

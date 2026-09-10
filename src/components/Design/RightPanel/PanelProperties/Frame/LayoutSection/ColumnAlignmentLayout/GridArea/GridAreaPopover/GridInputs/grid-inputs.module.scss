@@ -1,10 +1,15 @@
 .GridInputs {
   align-items: center;
   display: flex;
-  justify-content: space-between;
+
+  &__field {
+    flex: 1;
+    min-width: 0;
+  }
 
   &__separator {
     color: var(--color-neutral-1);
+    flex: 0 0 auto;
     font-size: 10px;
     margin: 0 5px;
   }

@@ -4,10 +4,25 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import GridArea from './GridArea';
 import { TooltipProvider } from 'shared';
 
-const renderGridArea = (props: Partial<Parameters<typeof GridArea>[0]> = {}): ReturnType<typeof render> =>
+// hooks
+import { TUseColumnGridAreaResult } from '../hooks/useColumnGridArea';
+
+const grid = (overrides: Partial<TUseColumnGridAreaResult> = {}): TUseColumnGridAreaResult => ({
+  columns: '2',
+  isRowsAuto: false,
+  onClickCell: vi.fn(),
+  onCommitColumns: vi.fn(),
+  onCommitRows: vi.fn(),
+  onSetRowsAuto: vi.fn(),
+  onSetRowsFixed: vi.fn(),
+  rows: '3',
+  ...overrides,
+});
+
+const renderGridArea = (gridOverrides: Partial<TUseColumnGridAreaResult> = {}): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <GridArea columns="2" onClickCell={vi.fn()} onCommitColumns={vi.fn()} onCommitRows={vi.fn()} rows="3" {...props} />
+      <GridArea grid={grid(gridOverrides)} />
     </TooltipProvider>,
   );
 

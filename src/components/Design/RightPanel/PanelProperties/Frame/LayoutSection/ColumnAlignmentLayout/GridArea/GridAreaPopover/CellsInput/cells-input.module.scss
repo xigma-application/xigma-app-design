@@ -5,18 +5,20 @@
   gap: 2px;
   height: 130px;
   justify-content: center;
-  margin-top: 11px;
+  margin-top: 8px;
   padding: 2px;
   position: relative;
   width: 100%;
 
   &__cell {
-    background-color: var(--color-neutral-3);
-    border: 1px solid var(--color-neutral-3);
+    appearance: none;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-surface);
     border-radius: 2.5px;
     box-sizing: border-box;
     cursor: pointer;
     height: 100%;
+    padding: 0;
     width: 100%;
 
     &--active {
@@ -24,8 +26,7 @@
     }
 
     &--selected {
-      background-color: var(--color-selected);
-      opacity: 0.6;
+      background-color: var(--color-icon-tertiary);
     }
   }
 }
