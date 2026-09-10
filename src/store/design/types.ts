@@ -3,6 +3,7 @@ import { ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
+import { TGridSectionHighlight } from 'types/design/canvas/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
 import { TSolidPaint } from 'types/design/paint/types';
 
@@ -56,6 +57,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  gridSectionHighlight?: TGridSectionHighlight | null;
   hoveredDimensionField?: TDimensionHintField | null;
   isActionsPanelOpen: boolean;
   isGridSettingsPanelOpen?: boolean;

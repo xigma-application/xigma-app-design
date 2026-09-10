@@ -25,6 +25,7 @@ export const drawThickOutline = (
   viewport: TViewport,
   rotation: number,
   strokeAlign: StrokeAlign = StrokeAlign.center,
+  rotationCenter?: TPoint,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -34,7 +35,7 @@ export const drawThickOutline = (
   const { inner, outer } = getStrokeAlignInset(strokeWidth / viewport.zoom, strokeAlign);
   const cornerRadius = rect.cornerRadius ?? 0;
   const rawVertices = getRawVertices(rect, cornerRadius, outer, inner);
-  const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const center: TPoint = rotationCenter ?? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const vertices = rotateFlatVertices(rawVertices, center, rotation);
 
   gl.useProgram(program);

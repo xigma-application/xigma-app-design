@@ -7,8 +7,8 @@ import GridSettings from './GridSettings';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
-import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
+import { addNode, setGridSectionHighlight, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
+import { selectActivePage, selectGridSectionHighlight, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -53,6 +53,7 @@ describe('GridSettings', () => {
   afterEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setGridSettingsPanelOpen(false));
+    store.dispatch(setGridSectionHighlight(null));
   });
 
   it('should render the header and one row per column and row track', () => {
@@ -82,6 +83,29 @@ describe('GridSettings', () => {
     fireEvent.focus(screen.getAllByRole('button', { name: 'Delete selected tracks' })[0]);
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove column 1 of 3');
+  });
+
+  it('should publish the pre-selected column’s cells as the canvas grid-section highlight', () => {
+    const frameId = selectGridFrame();
+
+    renderGridSettings();
+
+    expect(selectGridSectionHighlight(store.getState())).toEqual({
+      cells: [
+        { column: 0, row: 0 },
+        { column: 0, row: 1 },
+      ],
+      frameId,
+    });
+  });
+
+  it('should clear the grid-section highlight when the panel unmounts', () => {
+    selectGridFrame();
+
+    const { unmount } = renderGridSettings();
+    unmount();
+
+    expect(selectGridSectionHighlight(store.getState())).toBeNull();
   });
 
   it('should close the panel from the header', () => {

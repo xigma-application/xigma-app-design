@@ -77,6 +77,7 @@ repainting — same rationale as the Flow section above.
 | 37  | Selecting two tracks, reordering them together, then undoing brings **both** original tracks back selected at their restored positions (the panel's selection round-trips through undo/redo history, keyed on the frame reference), not just one                                          |  ✅  | ✅ `grid.spec.ts` |
 | 38  | The Columns/Rows `+` button carries an "Add column" / "Add row" tooltip, and a track's `−` button a position-aware one — "Remove column 1 of 2" for a lone track, switching to a count ("Remove 2 columns") once that track is part of a multi-selection the button would delete together |  ✅  | ✅ `grid.spec.ts` |
 | 39  | The Grid size popover opens with its top-left corner on the preview tile's own top-left corner (overlaying the panel downward), not flipped to one side — pinned by `side/align/sideOffset` plus `avoidCollisions={false}`                                                                |  —   | ✅ `grid.spec.ts` |
+| 40  | Selecting / extending / clearing a track selection in the Grid settings panel lights up (and unlights) that section's cells on the canvas — the panel feeds a standalone `gridSectionHighlight` store channel that `drawGridSectionHighlight` paints (slot-coloured fill + a 2× outline)  |  ✅  | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -154,7 +155,11 @@ between the single-track and multi-selection wording, is a real hover-timing + p
 the string selection itself is unit-covered (`GridTrackRow.spec.tsx`), but the browser proves it
 mounts and reads correctly against a live selection. #39 is unit-unprovable by nature — jsdom does no
 layout, so a Radix popover's resolved on-screen box only exists in a real browser; the e2e opens the
-popover and compares its `boundingBox()` top-left to the trigger tile's.
+popover and compares its `boundingBox()` top-left to the trigger tile's. #40's pieces are each
+unit-covered (`getGridSectionCells`, `getGridSectionHighlightRects`, `drawGridSectionHighlight`, the
+slice/selector, and the `GridSettings`/`GridTrackList` glue), but only a real WebGL canvas can show
+that a panel-side selection change actually repaints the overlay — the e2e drives the panel and
+asserts screenshot inequality across one / two / no selected columns.
 
 ## Reordering a child within its own frame
 

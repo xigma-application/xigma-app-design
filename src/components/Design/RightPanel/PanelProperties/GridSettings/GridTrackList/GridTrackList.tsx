@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 
 // components
 import GridTrackDropIndicator from './GridTrackDropIndicator';
@@ -14,7 +14,11 @@ import { useGridTrackList } from './hooks/useGridTrackList/useGridTrackList';
 import styles from './grid-track-list.module.scss';
 
 // types
+import { TGridCellPosition } from 'types/design/canvas/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
+
+// utils
+import { getGridSectionCells } from './utils/getGridSectionCells';
 
 export type TGridTrackListProps = {
   addAriaLabel: string;
@@ -22,9 +26,11 @@ export type TGridTrackListProps = {
   axis: TGridTrackAxis;
   controls: TGridAxisControls;
   coordinator: TGridTrackSelectionCoordinator;
+  crossAxisTrackCount: number;
   e2eValue: string;
   initialSelectedIndices?: number[];
   label: string;
+  onHighlightCellsChange: (cells: TGridCellPosition[]) => void;
 };
 
 export const GridTrackList: FC<TGridTrackListProps> = ({
@@ -33,11 +39,17 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
   axis,
   controls,
   coordinator,
+  crossAxisTrackCount,
   e2eValue,
   initialSelectedIndices,
   label,
+  onHighlightCellsChange,
 }) => {
   const list = useGridTrackList(controls, axis, coordinator, initialSelectedIndices);
+
+  useEffect(() => {
+    onHighlightCellsChange(getGridSectionCells(axis, list.selectedIndices, crossAxisTrackCount));
+  }, [axis, crossAxisTrackCount, list.selectedIndices, onHighlightCellsChange]);
 
   return (
     <UITools.Section addAriaLabel={addAriaLabel} addTooltip={addTooltip} e2eValue={e2eValue} label={label} onAdd={list.onAdd}>

@@ -26,6 +26,7 @@ import slice, {
   setActivePage,
   setActiveTool,
   setBackgroundPaint,
+  setGridSectionHighlight,
   setGridSettingsPanelOpen,
   setPaint,
   setPenActiveVertexId,
@@ -94,6 +95,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      gridSectionHighlight: null,
       hoveredDimensionField: null,
       isActionsPanelOpen: false,
       isGridSettingsPanelOpen: false,
@@ -672,6 +674,21 @@ describe('design slice', () => {
 
     // result
     expect(closed.isGridSettingsPanelOpen).toBe(false);
+  });
+
+  it('should set and clear the grid section highlight', () => {
+    // action
+    const highlight = { cells: [{ column: 1, row: 0 }], frameId: 'frame-1' };
+    const set = slice(undefined, setGridSectionHighlight(highlight));
+
+    // result
+    expect(set.gridSectionHighlight).toEqual(highlight);
+
+    // action
+    const cleared = slice(set, setGridSectionHighlight(null));
+
+    // result
+    expect(cleared.gridSectionHighlight).toBeNull();
   });
 
   it('should toggle the Actions panel open flag', () => {

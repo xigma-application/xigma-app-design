@@ -36,8 +36,10 @@ const renderList = (props: Partial<Parameters<typeof GridTrackList>[0]> = {}): R
         axis="column"
         controls={controls()}
         coordinator={permissiveCoordinator()}
+        crossAxisTrackCount={2}
         e2eValue="grid-columns"
         label="Columns"
+        onHighlightCellsChange={vi.fn()}
         {...props}
       />
     </TooltipProvider>,
@@ -56,6 +58,26 @@ describe('GridTrackList', () => {
     const selected = renderList({ initialSelectedIndices: [0] }).container.querySelector('[data-test-grid-track-row="0"]')?.className;
 
     expect(selected).not.toBe(plain);
+  });
+
+  it('should report the highlighted cells of its selected tracks up to the parent', () => {
+    const onHighlightCellsChange = vi.fn();
+
+    renderList({ crossAxisTrackCount: 3, initialSelectedIndices: [1], onHighlightCellsChange });
+
+    expect(onHighlightCellsChange).toHaveBeenLastCalledWith([
+      { column: 1, row: 0 },
+      { column: 1, row: 1 },
+      { column: 1, row: 2 },
+    ]);
+  });
+
+  it('should report an empty cell list when nothing on this axis is selected', () => {
+    const onHighlightCellsChange = vi.fn();
+
+    renderList({ onHighlightCellsChange });
+
+    expect(onHighlightCellsChange).toHaveBeenLastCalledWith([]);
   });
 
   it('should add a track from the section plus button', () => {

@@ -107,6 +107,36 @@ describe('drawThickOutline', () => {
     expect(vertices[1]).toBeCloseTo(4);
   });
 
+  it('should rotate around an explicit rotation center when one is passed', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — same rect + 90° as the own-center test, but pivoting about the origin instead
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      90,
+      StrokeAlign.center,
+      { x: 0, y: 0 },
+    );
+
+    // result — the first vertex (~ -1, -1 before rotation) lands elsewhere than the own-center run's (16, 4)
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[0]).toBeCloseTo(1);
+    expect(vertices[1]).toBeCloseTo(-1);
+  });
+
   it('should sit the ring entirely outside the box for an outside-aligned stroke', () => {
     // mock
     const gl = createGlMock();

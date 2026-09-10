@@ -9,6 +9,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectGridSectionHighlight,
   selectNodes,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
@@ -46,6 +47,7 @@ import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawFrameOutlines } from './drawFrameOutlines';
 import { drawGridDropTarget } from './drawGridDropTarget/drawGridDropTarget';
+import { drawGridSectionHighlight } from './drawGridSectionHighlight/drawGridSectionHighlight';
 import { drawGridSlots } from './drawGridSlots/drawGridSlots';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
@@ -119,6 +121,7 @@ export const drawScene = (
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const smartSelectionNodes = selectSmartSelectionNodes(state);
+  const gridSectionHighlight = selectGridSectionHighlight(state);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
   const valuesNodeByid = Object.values(nodesById);
@@ -155,6 +158,7 @@ export const drawScene = (
   drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
   drawGridSlots(ctx, selectedNodes, nodesById);
+  drawGridSectionHighlight(ctx, gridSectionHighlight, nodesById);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

@@ -293,6 +293,13 @@ export type TGridDropTargetHover = {
   previewCells?: { column: number; row: number }[];
 };
 
+export type TGridCellPosition = { column: number; row: number };
+
+export type TGridSectionHighlight = {
+  cells: TGridCellPosition[];
+  frameId: string;
+};
+
 export type TGridDragGhost = {
   nodeIds: string[];
   offset: TPoint;

@@ -679,6 +679,32 @@ When a single `LayoutMode.grid` frame is **selected**, `drawGridSlots` (`getSele
 gate, in `drawScene` next to the padding/gap handles) strokes every cell faint blue
 (`GRID_SLOT_STROKE`), rotation about the frame centre like the padding guides.
 
+### Canvas — section highlight (`gridSectionHighlight`)
+
+A **standalone** "light up these grid cells" facility, not wired into the Grid panel: any feature
+can point the canvas at a set of cells. `design` slice carries `gridSectionHighlight:
+{ cells: { column; row }[]; frameId } | null` (`setGridSectionHighlight` reducer,
+`selectGridSectionHighlight` selector, **not** undoable — outside the `getDesignSnapshot`
+`{ activePageId, pages }` shape). `drawScene` reads it and calls `drawGridSectionHighlight`
+(`isGridFrame` gate): `getGridSectionHighlightRects(frame, nodesById, cells)` drops cells outside
+the current `getGridTrackLayout` bounds, returns a `getGridSlotRect` per surviving cell plus one
+`outlineRect` = the bounding box of them all. Each cell is filled `GRID_SLOT_ACTIVE_FILL` @
+`GRID_SLOT_ACTIVE_FILL_ALPHA` (the same wash a slot/drop-target cell gets); the bounding box is
+stroked once with `drawThickOutline` at `GRID_SECTION_HIGHLIGHT_STROKE_WIDTH` (2, i.e. "2×" the
+1px slot line) in `GRID_SLOT_ACTIVE_STROKE`, rotation about the frame centre (`drawThickOutline`
+gained an optional trailing `rotationCenter` for this — otherwise it pivots about the rect's own
+centre). Disjoint cells get one enclosing outline (fine for the current caller — whole
+columns/rows are contiguous).
+
+The Grid settings panel is currently the only caller: each `GridTrackList` gets a
+`crossAxisTrackCount` (the *other* axis's track count) and an `onHighlightCellsChange` callback; a
+`useEffect` on its `selectedIndices` runs `getGridSectionCells(axis, selectedIndices,
+crossAxisCount)` (a selected column → a cell per row, a selected row → a cell per column, `[]`
+when nothing is selected) and reports up. `GridSettings` merges the column and row lists' cells
+and, in one effect, dispatches `setGridSectionHighlight({ cells, frameId })` (or `null` when
+empty); a cleanup effect clears it on unmount. One dispatcher, so no set/clear race between the
+two lists.
+
 ### Canvas — drag a child into a cell
 
 While an element is dragged over a grid frame, `resolveDragReparentTarget` branches on

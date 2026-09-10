@@ -20,6 +20,7 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectFrameGuides,
+  selectGridSectionHighlight,
   selectIsActionsPanelOpen,
   selectIsGridSettingsPanelOpen,
   selectIsUiHidden,
@@ -226,6 +227,17 @@ describe('design selectors', () => {
     expect(selectIsGridSettingsPanelOpen(state)).toBe(false);
     expect(selectIsGridSettingsPanelOpen({ ...state, design: { ...state.design, isGridSettingsPanelOpen: true } } as typeof state)).toBe(
       true,
+    );
+  });
+
+  it('should select the grid section highlight, defaulting to null when unset', () => {
+    // result
+    expect(selectGridSectionHighlight(state)).toBeNull();
+
+    const highlight = { cells: [{ column: 0, row: 1 }], frameId: 'frame-1' };
+
+    expect(selectGridSectionHighlight({ ...state, design: { ...state.design, gridSectionHighlight: highlight } } as typeof state)).toEqual(
+      highlight,
     );
   });
 

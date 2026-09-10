@@ -87,6 +87,15 @@ describe('useGridSettingsPanel', () => {
     });
 
     expect(selectIsGridSettingsPanelOpen(store.getState())).toBe(false);
+    expect(result.current.frameId).toBeNull();
+  });
+
+  it('should expose the selected grid frame id', () => {
+    const frameId = addGridFrame();
+
+    const { result } = render();
+
+    expect(result.current.frameId).toBe(frameId);
   });
 
   it('should build view models, defaulting the value to 1 for fill and 0 for non-fill without a value', () => {

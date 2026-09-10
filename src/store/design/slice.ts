@@ -33,6 +33,7 @@ import {
 } from './types';
 import { ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
+import { TGridSectionHighlight } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TSolidPaint } from 'types/design/paint/types';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -91,6 +92,7 @@ const initialState: TDesignState = {
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  gridSectionHighlight: null,
   hoveredDimensionField: null,
   isActionsPanelOpen: false,
   isGridSettingsPanelOpen: false,
@@ -192,6 +194,9 @@ const designSlice = createSlice({
     setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
       state.designHintLabelKey = action.payload;
     },
+    setGridSectionHighlight: (state, action: PayloadAction<TGridSectionHighlight | null>) => {
+      state.gridSectionHighlight = action.payload;
+    },
     setGridSettingsPanelOpen: (state, action: PayloadAction<boolean>) => {
       state.isGridSettingsPanelOpen = action.payload;
     },
@@ -291,6 +296,7 @@ export const {
   setActiveTool,
   setBackgroundPaint,
   setDesignHintLabelKey,
+  setGridSectionHighlight,
   setGridSettingsPanelOpen,
   setHoveredDimensionField,
   setMediaToolArmed,

@@ -14,6 +14,7 @@ import { makeAxisControls } from './utils/makeAxisControls/makeAxisControls';
 
 export type TUseGridSettingsPanelResult = {
   columns: TGridAxisControls;
+  frameId: string | null;
   onClose: TFunc;
   rows: TGridAxisControls;
 };
@@ -46,10 +47,11 @@ export const useGridSettingsPanel = (): TUseGridSettingsPanelResult => {
 
     return {
       columns: makeAxisControls(dispatch, frame, nodes, 'column', columnTracks),
+      frameId: frame.id,
       onClose,
       rows: makeAxisControls(dispatch, frame, nodes, 'row', rowTracks),
     };
   }
 
-  return { columns: NOOP_CONTROLS, onClose, rows: NOOP_CONTROLS };
+  return { columns: NOOP_CONTROLS, frameId: null, onClose, rows: NOOP_CONTROLS };
 };

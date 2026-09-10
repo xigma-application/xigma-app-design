@@ -1696,4 +1696,47 @@ test.describe('auto-layout — Grid flow', () => {
     await firstColumnMinus.hover();
     await expect(page.getByRole('tooltip')).toHaveText('Remove 2 columns');
   });
+
+  test('selecting tracks in the Grid panel highlights their cells on the canvas', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-section-highlight');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    const safeArea = await designPage.canvasSafeArea();
+
+    // column 0 is pre-selected on open — its cells are highlighted
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await page.waitForTimeout(150);
+    const oneColumn = await page.screenshot({ clip: safeArea });
+
+    // extend the panel selection to a second column — more cells light up on the canvas
+    await columns.locator('[data-test-grid-track-row="2"]').click({ modifiers: ['ControlOrMeta'] });
+    await page.waitForTimeout(150);
+    const twoColumns = await page.screenshot({ clip: safeArea });
+
+    expect(twoColumns.equals(oneColumn)).toBe(false);
+
+    // toggling both columns back off clears the highlight entirely
+    await columns.locator('[data-test-grid-track-row="0"]').click({ modifiers: ['ControlOrMeta'] });
+    await columns.locator('[data-test-grid-track-row="2"]').click({ modifiers: ['ControlOrMeta'] });
+    await page.waitForTimeout(150);
+    const noneSelected = await page.screenshot({ clip: safeArea });
+
+    expect(noneSelected.equals(oneColumn)).toBe(false);
+    expect(noneSelected.equals(twoColumns)).toBe(false);
+  });
 });
