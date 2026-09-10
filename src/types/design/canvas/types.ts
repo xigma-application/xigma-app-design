@@ -287,6 +287,7 @@ export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: stri
 
 export type TGridDropTargetHover = {
   columnStart: number;
+  count: number;
   frameId: string;
   rowStart: number;
 };

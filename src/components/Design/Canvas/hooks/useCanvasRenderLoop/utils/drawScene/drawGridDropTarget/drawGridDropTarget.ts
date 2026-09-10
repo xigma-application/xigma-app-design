@@ -23,9 +23,8 @@ export const drawGridDropTarget = (context: TDrawSceneContext, refs: TCanvasRefs
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
     const layout = getGridTrackLayout(frame, nodesById);
     const frameCenter = getAutoLayoutFrameCenter(frame);
-    const draggedCount = Math.max(refs.transform.draggedNodeIdsRef.current?.size ?? 1, 1);
     const firstActiveIndex = hover.rowStart * layout.columnCount + hover.columnStart;
-    const lastActiveIndex = firstActiveIndex + draggedCount - 1;
+    const lastActiveIndex = firstActiveIndex + Math.max(hover.count, 1) - 1;
     const totalRows = Math.max(layout.rowCount, Math.floor(lastActiveIndex / layout.columnCount) + 1);
 
     for (let row = 0; row < totalRows; row += 1) {

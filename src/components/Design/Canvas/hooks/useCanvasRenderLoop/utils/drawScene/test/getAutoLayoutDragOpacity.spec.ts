@@ -23,7 +23,7 @@ describe('getAutoLayoutDragOpacity', () => {
     const refs = createCanvasRefs({
       transform: {
         draggedNodeIdsRef: { current: new Set(['a']) },
-        gridDropTargetRef: { current: { columnStart: 0, frameId: 'f1', rowStart: 0 } },
+        gridDropTargetRef: { current: { columnStart: 0, count: 1, frameId: 'f1', rowStart: 0 } },
       },
     });
 

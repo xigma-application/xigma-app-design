@@ -12,6 +12,7 @@ export const armGridDropTarget = (
   canvasRefs: TCanvasRefs,
   frame: TFrameNode,
   frameId: string,
+  movedNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
   point: TPoint,
 ): void => {
@@ -20,5 +21,10 @@ export const armGridDropTarget = (
   const framePoint: TPoint = { x: unrotated.x - frame.x, y: unrotated.y - frame.y };
   const { column, row } = getGridDropCell(layout, framePoint);
 
-  canvasRefs.transform.gridDropTargetRef.current = { columnStart: column, frameId, rowStart: row };
+  canvasRefs.transform.gridDropTargetRef.current = {
+    columnStart: column,
+    count: Math.max(movedNodeIds.length, 1),
+    frameId,
+    rowStart: row,
+  };
 };

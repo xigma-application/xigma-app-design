@@ -482,12 +482,13 @@ gate, in `drawScene` next to the padding/gap handles) strokes every cell faint b
 
 While an element is dragged over a grid frame, `resolveDragReparentTarget` branches on
 `isGridFrame(desiredParent)` → `armGridDropTarget` writes
-`transform.gridDropTargetRef = { columnStart, frameId, rowStart }` (the **exact hovered cell**
-from `getGridDropCell` on the unrotated point; column clamped to the last one, row unbounded
-downward) plus `dropTargetFrameIdRef`. `drawGridDropTarget` outlines the whole grid, fills the
-`draggedCount` cells from that anchor in reading order (`GRID_SLOT_ACTIVE_FILL` at
-`GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style), and draws ghost rows past the current grid when
-the drop overruns it. `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is
+`transform.gridDropTargetRef = { columnStart, count, frameId, rowStart }` (the **exact hovered
+cell** from `getGridDropCell` on the unrotated point — column clamped to the last one, row
+unbounded downward — plus `count` = the number of **top-level** dragged nodes, not
+`draggedNodeIdsRef.size` which also counts a dragged frame's descendants) plus
+`dropTargetFrameIdRef`. `drawGridDropTarget` outlines the whole grid, fills the `count` cells from
+that anchor in reading order (`GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`,
+marquee-style), and draws ghost rows past the current grid when the drop overruns it. `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is
 set. On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per
 node `updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` (reading-order from the
 anchor cell) and `widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size
@@ -592,4 +593,6 @@ The engine already honours spans and manual anchors when set in code.
    `gridAutoPlacement: false`, and forces `widthSizingMode` / `heightSizingMode = fill` so the
    element takes the cell's size, not its own. Grid grows rows to the dropped cell through the
    engine's `derivedRowCount`. Multi-select fills forward from the anchor. Shares
-   `getGridTrackLayout` with the slot overlay.
+   `getGridTrackLayout` with the slot overlay. Follow-up (same day): the highlight counted
+   `draggedNodeIdsRef.size`, so dropping a frame **with children** lit one cell per descendant —
+   `gridDropTargetRef` now carries `count` = top-level dragged nodes only.

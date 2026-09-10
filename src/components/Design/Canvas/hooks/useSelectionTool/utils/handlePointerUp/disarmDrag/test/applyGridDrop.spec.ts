@@ -32,7 +32,7 @@ describe('applyGridDrop', () => {
     const dispatch = vi.fn();
 
     // action
-    applyGridDrop(dispatch, frame(), { columnStart: 0, frameId: 'grid-1', rowStart: 0 }, ['a']);
+    applyGridDrop(dispatch, frame(), { columnStart: 0, count: 1, frameId: 'grid-1', rowStart: 0 }, ['a']);
 
     // result
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { gridAutoPlacement: false }, id: 'grid-1' }));
@@ -43,7 +43,7 @@ describe('applyGridDrop', () => {
     const dispatch = vi.fn();
 
     // action
-    applyGridDrop(dispatch, frame(), { columnStart: 1, frameId: 'grid-1', rowStart: 3 }, ['a']);
+    applyGridDrop(dispatch, frame(), { columnStart: 1, count: 1, frameId: 'grid-1', rowStart: 3 }, ['a']);
 
     // result
     expect(dispatch).toHaveBeenCalledWith(
@@ -64,7 +64,7 @@ describe('applyGridDrop', () => {
     const dispatch = vi.fn();
 
     // action — single column: cell index 2 => column 0, row 2
-    applyGridDrop(dispatch, frame({ gridColumnCount: undefined }), { columnStart: 0, frameId: 'grid-1', rowStart: 2 }, ['a']);
+    applyGridDrop(dispatch, frame({ gridColumnCount: undefined }), { columnStart: 0, count: 1, frameId: 'grid-1', rowStart: 2 }, ['a']);
 
     // result
     expect(dispatch).toHaveBeenCalledWith(
@@ -80,7 +80,7 @@ describe('applyGridDrop', () => {
     const dispatch = vi.fn();
 
     // action — 2-column grid, starting at column 1 row 0
-    applyGridDrop(dispatch, frame(), { columnStart: 1, frameId: 'grid-1', rowStart: 0 }, ['a', 'b', 'c']);
+    applyGridDrop(dispatch, frame(), { columnStart: 1, count: 3, frameId: 'grid-1', rowStart: 0 }, ['a', 'b', 'c']);
 
     // result — cells (1,0), (0,1), (1,1)
     expect(dispatch).toHaveBeenCalledWith(
