@@ -5,7 +5,7 @@ import { TGridAxisControls } from '../../../hooks/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { TGridTrackSelectModifiers, useGridTrackSelection } from '../useGridTrackSelection';
 import { TGridTrackSelectionCoordinator } from '../../../hooks/useGridTrackSelectionCoordinator';
-import { useGridTrackReorderDrag } from '../useGridTrackReorderDrag';
+import { useGridTrackReorderDrag } from './hooks/useGridTrackReorderDrag/useGridTrackReorderDrag';
 
 // types
 import { SizingMode } from 'types/design/enums';
@@ -13,12 +13,12 @@ import { SizingMode } from 'types/design/enums';
 // utils
 import { commitGridTrackAdd } from './utils/commitGridTrackAdd';
 import { commitGridTrackDelete } from './utils/commitGridTrackDelete';
+import { commitGridTrackDragStart } from './utils/commitGridTrackDragStart';
 import { commitGridTrackModeChange } from './utils/commitGridTrackModeChange';
 import { commitGridTrackReorder } from './utils/commitGridTrackReorder';
 import { commitGridTrackSelect } from './utils/commitGridTrackSelect';
 import { commitGridTrackValueChange } from './utils/commitGridTrackValueChange';
-import { resolveGridTrackDragIndices } from './utils/resolveGridTrackDragIndices';
-import { syncExternalGridTrackSelection } from './utils/syncExternalGridTrackSelection';
+import { syncExternalGridTrackSelection } from './utils/syncExternalGridTrackSelection/syncExternalGridTrackSelection';
 import { syncSuppressedGridTrackSelection } from './utils/syncSuppressedGridTrackSelection';
 
 export type TUseGridTrackListResult = {
@@ -51,6 +51,7 @@ export const useGridTrackList = (
   const isSelfChangeRef = useRef(false);
   const initialSelectedIndicesRef = useRef(initialSelectedIndices);
   const previousRevisionRef = useRef(controls.revision);
+  const selectionByRevisionRef = useRef(new WeakMap<object, number[]>());
 
   useEffect(() => {
     syncSuppressedGridTrackSelection(isSuppressed, clearSelection);
@@ -64,42 +65,40 @@ export const useGridTrackList = (
       isSelfChangeRef,
       previousRevisionRef,
       initialSelectedIndicesRef,
+      selectionByRevisionRef,
+      selectedIndices,
       setSelection,
     );
-  }, [axis, controls.revision, coordinator, setSelection]);
+  }, [axis, controls.revision, coordinator, selectedIndices, setSelection]);
 
-  const onSelectRow = (index: number, modifiers: TGridTrackSelectModifiers): void =>
-    commitGridTrackSelect(coordinator, axis, selectRow, index, modifiers);
-
-  const onAdd = (): void => commitGridTrackAdd(controls, isSelfChangeRef);
-
-  const onChangeMode = (index: number, mode: SizingMode): void => commitGridTrackModeChange(controls, isSelfChangeRef, index, mode);
-
-  const onChangeValue = (index: number, value: number): void => commitGridTrackValueChange(controls, isSelfChangeRef, index, value);
-
-  const handleReorder = (sourceIndices: number[], insertionSlot: number): boolean =>
-    commitGridTrackReorder(controls, axis, coordinator, isSelfChangeRef, setSelection, sourceIndices, insertionSlot);
-
-  const { beginDrag, dragState, registerRow } = useGridTrackReorderDrag(trackCount, handleReorder);
-
-  const beginRowDrag = (index: number, event: ReactPointerEvent): void => {
-    const dragIndices = resolveGridTrackDragIndices(controls, axis, coordinator, setSelection, selectedIndices, index);
-
-    beginDrag(dragIndices, event);
-  };
-
-  const onDeleteRow = (index: number): void =>
-    commitGridTrackDelete(controls, axis, coordinator, isSelfChangeRef, clearSelection, selectedIndices, index);
+  const { beginDrag, dragState, registerRow } = useGridTrackReorderDrag(
+    trackCount,
+    (sourceIndices, insertionSlot, grabbedIndex, hasMoved) =>
+      commitGridTrackReorder(
+        controls,
+        axis,
+        coordinator,
+        isSelfChangeRef,
+        setSelection,
+        sourceIndices,
+        insertionSlot,
+        grabbedIndex,
+        hasMoved,
+      ),
+  );
 
   return {
-    beginDrag: beginRowDrag,
-    dropIndicatorIndex: dragState?.dropIndex ?? null,
+    beginDrag: (index: number, event: ReactPointerEvent): void =>
+      commitGridTrackDragStart(controls, axis, coordinator, setSelection, selectedIndices, beginDrag, index, event),
+    dropIndicatorIndex: dragState?.hasMoved ? dragState.dropIndex : null,
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
-    onAdd,
-    onChangeMode,
-    onChangeValue,
-    onDeleteRow,
-    onSelectRow,
+    onAdd: (): void => commitGridTrackAdd(controls, isSelfChangeRef),
+    onChangeMode: (index: number, mode: SizingMode): void => commitGridTrackModeChange(controls, isSelfChangeRef, index, mode),
+    onChangeValue: (index: number, value: number): void => commitGridTrackValueChange(controls, isSelfChangeRef, index, value),
+    onDeleteRow: (index: number): void =>
+      commitGridTrackDelete(controls, axis, coordinator, isSelfChangeRef, clearSelection, selectedIndices, index),
+    onSelectRow: (index: number, modifiers: TGridTrackSelectModifiers): void =>
+      commitGridTrackSelect(coordinator, axis, selectRow, index, modifiers),
     registerRow,
     selectedIndices,
   };

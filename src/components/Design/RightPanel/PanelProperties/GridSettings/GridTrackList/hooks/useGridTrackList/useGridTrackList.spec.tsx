@@ -74,10 +74,34 @@ describe('useGridTrackList', () => {
     act(() => result.current.onSelectRow(0, { meta: false, shift: false }));
     act(() => result.current.onSelectRow(1, { meta: true, shift: false }));
     act(() => result.current.beginDrag(1, pointerEvent()));
+    act(() => window.dispatchEvent(new PointerEvent('pointermove', { clientY: 100 })));
     act(() => window.dispatchEvent(new PointerEvent('pointerup')));
 
     expect(onReorder).toHaveBeenCalledWith([0, 1], 0);
     expect(result.current.selectedIndices).toEqual([1, 2]);
+  });
+
+  it('should collapse a multi-selection to just the grabbed row when released without moving', () => {
+    const onReorder = vi.fn(() => [1, 2]);
+    const { result } = renderHook(() => useGridTrackList(controls({ onReorder }), 'column', permissiveCoordinator()));
+
+    act(() => result.current.onSelectRow(0, { meta: false, shift: false }));
+    act(() => result.current.onSelectRow(1, { meta: true, shift: false }));
+    act(() => result.current.beginDrag(1, pointerEvent()));
+    act(() => window.dispatchEvent(new PointerEvent('pointerup')));
+
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(result.current.selectedIndices).toEqual([1]);
+  });
+
+  it('should keep the drop indicator hidden until the pointer actually moves', () => {
+    const { result } = renderHook(() => useGridTrackList(controls(), 'column', permissiveCoordinator()));
+
+    act(() => result.current.beginDrag(1, pointerEvent()));
+    expect(result.current.dropIndicatorIndex).toBeNull();
+
+    act(() => window.dispatchEvent(new PointerEvent('pointermove', { clientY: 100 })));
+    expect(result.current.dropIndicatorIndex).not.toBeNull();
   });
 
   it('should select an unselected row the moment it is grabbed, before the drag even resolves', () => {
@@ -103,6 +127,7 @@ describe('useGridTrackList', () => {
     // grabbing track 1 alone pulled its linked partner (track 0) along too
     expect(result.current.selectedIndices).toEqual([0, 1]);
 
+    act(() => window.dispatchEvent(new PointerEvent('pointermove', { clientY: 100 })));
     act(() => window.dispatchEvent(new PointerEvent('pointerup')));
 
     expect(onReorder).toHaveBeenCalledWith([0, 1], 0);
@@ -114,9 +139,10 @@ describe('useGridTrackList', () => {
 
     act(() => result.current.onSelectRow(0, { meta: false, shift: false }));
     act(() => result.current.beginDrag(2, pointerEvent()));
+    act(() => window.dispatchEvent(new PointerEvent('pointermove', { clientY: 100 })));
     act(() => window.dispatchEvent(new PointerEvent('pointerup')));
 
-    expect(onReorder).toHaveBeenCalledWith([2], 2);
+    expect(onReorder).toHaveBeenCalledWith([2], 0);
     // the drag already selected row 2; a rejected reorder does not undo that
     expect(result.current.selectedIndices).toEqual([2]);
   });
@@ -155,7 +181,7 @@ describe('useGridTrackList', () => {
     expect(result.current.selectedIndices).toEqual([0]);
   });
 
-  it('should clear a stale selection when the revision changes from outside the panel (e.g. an undo)', () => {
+  it('should clear a stale selection when the revision changes to one the panel never recorded (an external edit)', () => {
     const revisionA = {};
     const revisionB = {};
     const { result, rerender } = renderHook(({ trackControls }) => useGridTrackList(trackControls, 'column', permissiveCoordinator()), {
@@ -165,10 +191,35 @@ describe('useGridTrackList', () => {
     act(() => result.current.onSelectRow(1, { meta: false, shift: false }));
     expect(result.current.selectedIndices).toEqual([1]);
 
-    // an undo swaps in a different frame object without ever going through this hook's own actions
+    // a frame object this hook has never seen (an edit made somewhere else) — reset to the default
     rerender({ trackControls: controls({ revision: revisionB }) });
 
     expect(result.current.selectedIndices).toEqual([]);
+  });
+
+  it('should restore a revision’s own recorded selection when undo/redo brings that revision back', () => {
+    const revisionA = {};
+    const revisionB = {};
+    const { result, rerender } = renderHook(({ trackControls }) => useGridTrackList(trackControls, 'column', permissiveCoordinator()), {
+      initialProps: { trackControls: controls({ revision: revisionA }) },
+    });
+
+    act(() => result.current.onSelectRow(0, { meta: false, shift: false }));
+    act(() => result.current.onSelectRow(1, { meta: true, shift: false }));
+    expect(result.current.selectedIndices).toEqual([0, 1]);
+
+    // a panel-made edit rolls the revision forward without disturbing the selection
+    act(() => result.current.onChangeValue(0, 40));
+    rerender({ trackControls: controls({ revision: revisionB }) });
+    expect(result.current.selectedIndices).toEqual([0, 1]);
+
+    // an undo brings revisionA back — its recorded two-track selection is restored, not reset
+    rerender({ trackControls: controls({ revision: revisionA }) });
+    expect(result.current.selectedIndices).toEqual([0, 1]);
+
+    // and a redo forward to revisionB restores what was selected there too
+    rerender({ trackControls: controls({ revision: revisionB }) });
+    expect(result.current.selectedIndices).toEqual([0, 1]);
   });
 
   it('should still detect an external change when the track content happens to look identical (e.g. reordering two same-sized Fill columns)', () => {

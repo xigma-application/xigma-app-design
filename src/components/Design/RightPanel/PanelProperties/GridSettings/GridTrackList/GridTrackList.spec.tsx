@@ -100,19 +100,20 @@ describe('GridTrackList', () => {
     expect(onChangeMode).toHaveBeenCalledWith(0, 'hug');
   });
 
-  it('should show a drop indicator at the grabbed row and past the end while dragging', () => {
+  it('should keep the drop indicator hidden until the pointer actually moves, then show it past the end', () => {
     const { container } = renderList();
     const rowCount = (): number => container.querySelectorAll('[data-test-grid-track-row]').length;
     const before = container.querySelectorAll('div').length;
 
     fireEvent.pointerDown(screen.getAllByRole('button', { name: 'Reorder track' })[0]);
 
-    // indicator inserted at the grabbed row's position
-    expect(container.querySelectorAll('div').length).toBeGreaterThan(before);
+    // no indicator yet — grabbing the handle alone must not insert it
+    expect(container.querySelectorAll('div').length).toBe(before);
 
     fireEvent(window, new PointerEvent('pointermove', { clientY: 999 }));
 
-    // still two rows, now with a trailing indicator
+    // now that the pointer has actually moved, the indicator appears past the end
+    expect(container.querySelectorAll('div').length).toBeGreaterThan(before);
     expect(rowCount()).toBe(2);
 
     fireEvent(window, new PointerEvent('pointerup'));

@@ -64,10 +64,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
 
   return (
     <div
-      className={cx(styles.GridTrackRow, {
-        [styles['GridTrackRow--dragging']]: isDragging,
-        [styles['GridTrackRow--selected']]: isSelected,
-      })}
+      className={cx(styles.GridTrackRow, { [styles['GridTrackRow--selected']]: isSelected })}
       onClick={handleClick}
       ref={registerRow}
       {...getAttributes(E2EAttribute.gridTrackRow, String(track.index))}

@@ -15,7 +15,18 @@ export const commitGridTrackReorder = (
   setSelection: (indices: number[]) => void,
   sourceIndices: number[],
   insertionSlot: number,
+  grabbedIndex: number,
+  hasMoved: boolean,
 ): boolean => {
+  if (!hasMoved) {
+    const linkedIndices = controls.tracks[grabbedIndex]?.linkedIndices ?? [grabbedIndex];
+
+    coordinator.onSelectionChange(axis, true);
+    setSelection(linkedIndices);
+
+    return false;
+  }
+
   const newIndices = controls.onReorder(sourceIndices, insertionSlot);
 
   if (newIndices !== null) {

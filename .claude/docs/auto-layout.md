@@ -538,6 +538,10 @@ row gets `var(--color-blue-2)` borders on its mode dropdown and value field and
   for the drop slot, and a `GridTrackDropIndicator` renders there — `position: absolute` (2px
   `var(--color-neutral-1)` line, offset via `transform: translateY(index * 32px)`), *not* an
   in-flow flex sibling, so it never reflows the rows below it while it appears/disappears mid-drag.
+  The drag state carries `hasMoved` (false until the first `pointermove`); the indicator is gated
+  on it, so grabbing a handle and releasing without moving shows nothing, and a plain click on a
+  handle never flashes an indicator. Dragged rows are **not** dimmed — there is no
+  `--dragging` opacity rule, so the fields stay fully legible while a row is grabbed.
   On release `makeAxisControls.onReorder` runs `moveGridTrackBlock(tracks, start, count, slot)`
   (permutes the sizes array + returns `newIndexByOld`) then `getGridTrackReorderChildUpdates`
   remaps every anchored child's cells through that permutation — **rejected (`null`, nothing
@@ -571,20 +575,36 @@ row gets `var(--color-blue-2)` borders on its mode dropdown and value field and
   `setSelection(newIndices)` with `onReorder`'s returned new positions instead of clearing, so the
   moved track(s) stay visibly selected wherever they landed. A rejected reorder leaves the
   selection exactly as the grab already set it. Deleting still clears (nothing sensible to keep
-  selected).
-- **Undo/redo safety** — `useGridTrackList` keeps a `useRef` of `controls.revision` (the frame
-  node reference) and, in an effect, resets the selection back to `initialSelectedIndicesRef`
-  (`[0]` for Columns, `[]` for Rows — never to "nothing selected" for the axis that has a real
-  default) whenever that reference changes and an `isSelfChangeRef` flag (set synchronously by
-  this hook's own `onAdd`/`onChangeMode`/`onChangeValue`/`onDeleteRow`/successful-reorder actions,
-  right before they dispatch) says the change *wasn't* one of its own. Comparing `frame` identity
-  rather than the tracks' own derived content was a deliberate fix: an earlier version compared a
-  JSON signature of `{ mode, value, linkedIndices }`, which — for the common case of several
-  identical `Fill, 1fr` tracks — couldn't tell an undo apart from a no-op, since swapping two
-  indistinguishable tracks produces byte-identical derived content even though the underlying
-  frame node changed. Redux/Immer gives every node a fresh reference on any `updateNode` (history
-  middleware's `replaceDesignSnapshot` included), so reference identity is the reliable signal;
-  content never is.
+  selected). **A plain click on a handle that's part of a multi-selection**, released without any
+  `pointermove`, collapses the selection to just that one row (its own `linkedIndices` group) —
+  `commitGridTrackReorder` branches on `hasMoved`, and only an actual move goes through
+  `controls.onReorder`.
+- **Undo/redo carries the track selection** (`syncExternalGridTrackSelection`) — the panel's
+  selection is tied to undo/redo history without living in the Redux store. `useGridTrackList`
+  keeps a `WeakMap<frameRef, number[]>` (`selectionByRevisionRef`) and, in an effect keyed on
+  `controls.revision` *and* `selectedIndices`, records "the selection as it stands for this frame
+  reference" on every render where the reference is stable. When `controls.revision` (the frame
+  node reference) **changes**:
+  - if the new reference is one the map has seen → `setSelection` to its recorded value. This is
+    an undo/redo landing: Redux/Immer's `replaceDesignSnapshot` restores the *exact* historical
+    `pages` sub-tree (the history middleware snapshots the reference, never a clone; nothing
+    re-runs layout sync on replace), so the frame reference round-trips and its recorded selection
+    comes back with it. Undoing a 2-track reorder re-selects **both** original tracks at their
+    restored positions; undoing an add/delete restores whatever was selected before it.
+  - else if `isSelfChangeRef` is set (this hook's own `onAdd`/`onChangeMode`/`onChangeValue`/
+    `onDeleteRow`/successful-reorder flags it synchronously right before dispatching) → leave the
+    selection alone (the commit util already set the right one) and record it under the new
+    reference.
+  - else → a reference the panel never recorded (an edit made elsewhere while the panel is open,
+    or a state from before it opened) → reset to `initialSelectedIndicesRef` (`[0]` for Columns,
+    `[]` for Rows).
+
+  Comparing frame *identity* rather than the tracks' derived content was a deliberate earlier fix
+  (an old version diffed a JSON signature of `{ mode, value, linkedIndices }`, which can't tell an
+  undo of a swap of two identical `Fill, 1fr` tracks apart from a no-op); the `WeakMap` then turned
+  that same identity signal into a full history round-trip instead of a blunt reset. `WeakMap`
+  keying means entries GC themselves once a frame reference falls out of the history stack — no
+  manual bound.
 - **Global keyboard shortcuts (undo included) work from inside the panel's own fields** —
   `UITools.TextField`/`TextFieldWrapper` and `UITools.Dropdown` both unconditionally rendered
   `data-test-bypass-global-shortcuts="true"` on their input/trigger (the mechanism
@@ -1153,3 +1173,35 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     selected at a time"), Columns defaults to track 1 selected. `d`, `e` and the undo-signature fix
     each got a red→green e2e regression (`grid.spec.ts`) since they're real-browser timing/focus
     bugs a synthetic event can't reliably reproduce.
+20. **2026-09-10 — grid flow, Phase 5c: more Grid settings panel iteration.** Another fast pass
+    against the running panel: (a) **the panel silently reopened on a reselect** — after
+    deselecting a grid frame, `isGridSettingsPanelOpen` stayed set, so clicking the same frame
+    again jumped straight back into the panel instead of the normal frame properties.
+    `useCloseGridSettingsPanelOnReselect` (a `useLayoutEffect` in `PanelProperties`) now clears the
+    flag the moment a selection reappears after having been empty. (b) **shift/ctrl-clicking a
+    track's drag handle couldn't multi-select** — the handle's own `pointerdown` started a drag
+    unconditionally, swallowing the modifier; `useBeginTrackHandleDrag` now routes a modified
+    pointerdown to `onSelect` instead of the drag, and the handle `stopPropagation`s its own click
+    so it never double-fires the row's handler. (c) **the last column/row couldn't be deleted** —
+    the delete button was disabled at one track. It's now always enabled; deleting the final track
+    of an axis calls `commitGridLayoutExit` — switches the frame to `LayoutMode.freeForm`, clears
+    every `grid*` field on the frame and its children (plus the linear child-fill reset the manual
+    Flow switch does), and closes the panel back to the element properties. (d) **a plain click on
+    a member of a multi-selection didn't collapse it** — grabbing an already-selected row and
+    releasing without moving left the whole group selected; `useGridTrackReorderDrag` now tracks
+    `hasMoved`, and `commitGridTrackReorder` collapses to just the grabbed row's own linked group
+    when released unmoved (a real move still reorders / rejects as before). (e) **the drop
+    indicator and the row's drag dimming both showed at grab time, before any movement** — the
+    indicator is now gated on `dragState.hasMoved`, and the `.GridTrackRow--dragging { opacity }`
+    rule was removed outright (nothing should obscure the fields mid-drag). (f) **undo didn't
+    carry the panel's selection** — after selecting 2 tracks, reordering them, and undoing, only 1
+    stayed highlighted (History #19's blunt "external revision change → reset to the axis
+    default"). The user's call was full history integration: undo/redo restores the selection
+    exactly as it was at that point. `syncExternalGridTrackSelection` now keeps a
+    `WeakMap<frameRef, number[]>` — it records the live selection per frame reference, and on a
+    reference change *restores* the recorded selection if it's a reference the map has seen (an
+    undo/redo landing, since `replaceDesignSnapshot` round-trips the exact historical node
+    references), only falling back to the axis-default reset for a reference it never recorded
+    (§13 "Undo/redo carries the track selection"). This flipped e2e #31 — undoing an add now
+    brings back the pre-add selection instead of resetting. `a`–`f` each got a `grid.spec.ts`
+    regression.

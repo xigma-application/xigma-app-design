@@ -7,10 +7,6 @@
   padding-left: 16px;
   padding-right: 8px;
 
-  &--dragging {
-    opacity: 0.5;
-  }
-
   &--selected {
     background-color: var(--color-bg-selected);
   }

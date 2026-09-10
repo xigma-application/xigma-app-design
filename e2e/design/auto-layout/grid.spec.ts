@@ -1386,7 +1386,7 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readAnchors()).toEqual(afterFirst);
   });
 
-  test('undo/redo works from inside the track value field, and resets a now-stale track selection', async ({ page }) => {
+  test('undo/redo works from inside the track value field, and carries the panel’s track selection with it', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-auto-layout-grid-undo');
@@ -1419,10 +1419,58 @@ test.describe('auto-layout — Grid flow', () => {
     await page.keyboard.press('Control+z');
 
     await expect.poll(() => readColumnCount(page)).toBe(2);
-    // the undo came from outside this panel's own actions, so the selection resets to the axis
-    // default instead of leaving the stale highlight sitting on column 2's old index
+    // undo/redo carries the panel's selection: column 2 was selected before the add, so it comes
+    // back selected — not reset to the axis default, not left stale on a now-gone index
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).not.toHaveClass(/--selected/);
+  });
+
+  test('undoing a two-track reorder brings both tracks back selected, not just one', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-undo-reorder-selection');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    // 3 columns so a 2-track block has somewhere to move
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    // select columns 1 and 2
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await columns.locator('[data-test-grid-track-row="1"]').click({ modifiers: ['ControlOrMeta'] });
     await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
-    await expect(columns.locator('[data-test-grid-track-row="1"]')).not.toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+
+    // drag the pair past the last row to reorder them to the end
+    const handle = columns.locator('[data-test-grid-track-row="0"]').getByRole('button', { name: 'Reorder track' });
+    const target = columns.locator('[data-test-grid-track-row="2"]');
+    const from = await handle.boundingBox();
+    const to = await target.boundingBox();
+
+    await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to!.x + to!.width / 2, to!.y + to!.height, { steps: 8 });
+    await page.mouse.up();
+
+    // the moved pair stays selected at its new position
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="2"]')).toHaveClass(/--selected/);
+
+    // undo — both original tracks come back selected, at their restored positions (not just one)
+    await page.keyboard.press('Control+z');
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="2"]')).not.toHaveClass(/--selected/);
   });
 
   test('deselecting and reselecting a grid frame does not reopen the dedicated panel on its own', async ({ page }) => {
@@ -1509,5 +1557,76 @@ test.describe('auto-layout — Grid flow', () => {
     await expect(page.locator('[data-test-grid-settings-panel]')).toBeHidden();
     await expect(flowGroup(page)).toBeVisible();
     await expect(flowGroup(page).getByLabel('Free form', { exact: true })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('clicking a multi-selected track handle without moving collapses the selection to just that row', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-click-collapses-selection');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    // switching to Grid already seeds 2 columns; both selected via ctrl-click
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await columns.locator('[data-test-grid-track-row="1"]').click({ modifiers: ['ControlOrMeta'] });
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+
+    // grab row 1's handle (already part of the multi-selection) and release without moving
+    const handle = columns.locator('[data-test-grid-track-row="1"]').getByRole('button', { name: 'Reorder track' });
+    const box = await handle.boundingBox();
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.up();
+
+    // a plain click+release on a member of the group selects only that row
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).not.toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+  });
+
+  test('the drop indicator stays hidden and the grabbed row stays fully opaque until the pointer actually moves', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-drag-visuals');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+    const dropIndicator = page.locator('[class*="GridTrackDropIndicator"]');
+    const firstRow = columns.locator('[data-test-grid-track-row="0"]');
+    const handle = firstRow.getByRole('button', { name: 'Reorder track' });
+    const box = await handle.boundingBox();
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+
+    // grabbing the handle alone must not show the indicator or dim the row
+    await expect(dropIndicator).toBeHidden();
+    await expect(firstRow).toHaveCSS('opacity', '1');
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2 + 40, { steps: 5 });
+
+    // once the pointer actually moves, the indicator shows and the row is still not dimmed
+    await expect(dropIndicator).toBeVisible();
+    await expect(firstRow).toHaveCSS('opacity', '1');
+
+    await page.mouse.up();
   });
 });
