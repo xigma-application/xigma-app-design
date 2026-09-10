@@ -5,6 +5,7 @@ import {
   TAutoLayoutGapHoverState,
   TAutoLayoutPaddingHoverState,
   TCornerRadiusHandleHover,
+  TGridTrackAffordanceHover,
   THoverRefs,
   TRightPanelPaddingGuideState,
   TSmartSelectionGapHoverState,
@@ -27,6 +28,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRotateHandleRef = useRef<string | null>(null);
+  const hoveredGridTrackAffordanceRef = useRef<TGridTrackAffordanceHover | null>(null);
   const hoveredPolygonCornerRadiusHandleRef = useRef<string | null>(null);
   const hoveredPolygonVertexCountHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
@@ -62,6 +64,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredEllipseArcHandleRef,
       hoveredEllipseArcRatioHandleRef,
       hoveredEllipseArcRotateHandleRef,
+      hoveredGridTrackAffordanceRef,
       hoveredPolygonCornerRadiusHandleRef,
       hoveredPolygonVertexCountHandleRef,
       hoveredSegmentIdRef,

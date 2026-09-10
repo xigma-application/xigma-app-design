@@ -35,7 +35,7 @@ const rectangle: TRectangleNode = {
 };
 
 describe('getSelectedGridFrame', () => {
-  it('should return the frame when it is the sole selected node in grid layout mode', () => {
+  it('should return the frame when it is the sole selected node, in grid layout mode', () => {
     // result
     expect(getSelectedGridFrame([frame])).toBe(frame);
   });
@@ -57,9 +57,9 @@ describe('getSelectedGridFrame', () => {
 
   it('should return null when the selected frame is not in grid layout mode', () => {
     // mock
-    const horizontalFrame = { ...frame, layoutMode: LayoutMode.horizontal };
+    const autoLayoutFrame = { ...frame, layoutMode: LayoutMode.horizontal };
 
     // result
-    expect(getSelectedGridFrame([horizontalFrame])).toBeNull();
+    expect(getSelectedGridFrame([autoLayoutFrame])).toBeNull();
   });
 });

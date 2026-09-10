@@ -11,13 +11,14 @@ import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/u
 import { useHoverHighlight } from './useHoverHighlight';
 
 // store
-import { addNode, groupNodes, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, groupNodes, setActiveTool, setSelection, startTextEdit, stopTextEdit, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDistanceGuides } from '../../utils/getDistanceGuides/types';
+import { TGridTrackAffordanceHover } from 'types/design/canvas/types';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -183,14 +184,26 @@ const addEllipseNode = (x: number, y: number, size: number, arcStartAngle?: numb
 
 const renderHoverHighlight = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
-): { classNameRef: RefObject<string | null>; distanceGuidesRef: RefObject<TDistanceGuides | null>; hoverRef: RefObject<string | null> } => {
+): {
+  classNameRef: RefObject<string | null>;
+  distanceGuidesRef: RefObject<TDistanceGuides | null>;
+  gridTrackAffordanceRef: RefObject<TGridTrackAffordanceHover | null>;
+  hoverRef: RefObject<string | null>;
+} => {
   const hoverRef: RefObject<string | null> = { current: null };
   const classNameRef: RefObject<string | null> = { current: null };
   const distanceGuidesRef: RefObject<TDistanceGuides | null> = { current: null };
+  const gridTrackAffordanceRef: RefObject<TGridTrackAffordanceHover | null> = { current: null };
 
   renderHook(
     () => {
-      useHoverHighlight(createCanvasRefs({ canvasRef, hover: { hoverRef }, transform: { distanceGuidesRef } }));
+      useHoverHighlight(
+        createCanvasRefs({
+          canvasRef,
+          hover: { hoverRef, hoveredGridTrackAffordanceRef: gridTrackAffordanceRef },
+          transform: { distanceGuidesRef },
+        }),
+      );
       classNameRef.current = useClassNames().className;
     },
     {
@@ -202,7 +215,7 @@ const renderHoverHighlight = (
     },
   );
 
-  return { classNameRef, distanceGuidesRef, hoverRef };
+  return { classNameRef, distanceGuidesRef, gridTrackAffordanceRef, hoverRef };
 };
 
 describe('useHoverHighlight behaviors', () => {
@@ -342,6 +355,28 @@ describe('useHoverHighlight behaviors', () => {
 
     // result
     expect(hoverRef.current).toBeNull();
+  });
+
+  it('should clear the grid track affordance ref when the pointer leaves the canvas', () => {
+    // mock
+    const frameId = addFrameNode(500, 500, 200);
+
+    store.dispatch(updateNode({ changes: { layoutMode: LayoutMode.grid }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { gridTrackAffordanceRef } = renderHoverHighlight(canvasRef);
+
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 510, 510));
+    expect(gridTrackAffordanceRef.current).not.toBeNull();
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerleave', 510, 510));
+
+    // result
+    expect(gridTrackAffordanceRef.current).toBeNull();
   });
 
   it('should ignore pointer moves while a button is held (mid-drag elsewhere)', () => {

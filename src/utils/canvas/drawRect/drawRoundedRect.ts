@@ -29,6 +29,7 @@ export const drawRoundedRect = (
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const points = getRoundedRectPoints(rect, ROUNDED_RECT_CORNER_SEGMENTS).map((point) => rotatePoint(point, center, rotation));
+  const rectCenter = rotatePoint({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }, center, rotation);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
@@ -39,7 +40,7 @@ export const drawRoundedRect = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
   if (rect.fill) {
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(toFanVertices(center, points)), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(toFanVertices(rectCenter, points)), gl.STATIC_DRAW);
     gl.uniform4fv(colorLocation, hexToRgbaFloat(rect.fill, rect.fillAlpha));
     gl.drawArrays(gl.TRIANGLE_FAN, 0, points.length + 2);
   }

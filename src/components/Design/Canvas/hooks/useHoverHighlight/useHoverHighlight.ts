@@ -36,6 +36,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
     lastPointerClientPositionRef.current = null;
     refs.transform.distanceGuidesRef.current = null;
+    refs.hover.hoveredGridTrackAffordanceRef.current = null;
     refs.hover.hoveredSmartSelectionGapRef.current = null;
     refs.hover.hoveredSmartSelectionSwapRef.current = null;
     refs.hover.isSmartSelectionBoxHoveredRef.current = false;
@@ -67,6 +68,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         window.removeEventListener('keyup', onModifierKeyUp);
         lastPointerClientPositionRef.current = null;
         refs.transform.distanceGuidesRef.current = null;
+        refs.hover.hoveredGridTrackAffordanceRef.current = null;
         refs.hover.hoveredSmartSelectionGapRef.current = null;
         refs.hover.isSmartSelectionBoxHoveredRef.current = false;
         setHoverState(canvas, hoverRef, setClassName, null, '', null);

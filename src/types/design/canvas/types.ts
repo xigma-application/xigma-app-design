@@ -242,6 +242,12 @@ export type TRightPanelPaddingGuideState = {
   sides: TAutoLayoutPaddingSide[];
 };
 
+export type TGridTrackAffordanceHover = {
+  columnIndex: number;
+  frameId: string;
+  rowIndex: number;
+};
+
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
   hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
@@ -251,6 +257,7 @@ export type THoverRefs = {
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
+  hoveredGridTrackAffordanceRef: RefObject<TGridTrackAffordanceHover | null>;
   hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;
   hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;

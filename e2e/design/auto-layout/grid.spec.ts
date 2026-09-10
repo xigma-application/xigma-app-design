@@ -1840,4 +1840,29 @@ test.describe('auto-layout — Grid flow', () => {
     const fixed = await page.screenshot({ clip: safeArea });
     expect(fixed.equals(weighted)).toBe(false);
   });
+
+  test('hovering a selected grid frame shows a track-insert affordance pill', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-affordance');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const safeArea = await designPage.canvasSafeArea();
+
+    await page.mouse.move(FRAME.x1 - 40, (FRAME.y1 + FRAME.y2) / 2);
+    await page.waitForTimeout(150);
+    const hovered = await page.screenshot({ clip: safeArea });
+
+    await page.mouse.move(FRAME.x2 + 100, FRAME.y1);
+    await page.waitForTimeout(150);
+    const idle = await page.screenshot({ clip: safeArea });
+
+    expect(hovered.equals(idle)).toBe(false);
+  });
 });

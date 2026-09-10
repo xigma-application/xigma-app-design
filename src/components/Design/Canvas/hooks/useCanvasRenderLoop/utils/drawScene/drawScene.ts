@@ -49,6 +49,7 @@ import { drawFrameOutlines } from './drawFrameOutlines';
 import { drawGridDropTarget } from './drawGridDropTarget/drawGridDropTarget';
 import { drawGridSectionHighlight } from './drawGridSectionHighlight/drawGridSectionHighlight';
 import { drawGridSlots } from './drawGridSlots/drawGridSlots';
+import { drawGridTrackAffordance } from './drawGridTrackAffordance/drawGridTrackAffordance';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
@@ -159,6 +160,7 @@ export const drawScene = (
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
   drawGridSlots(ctx, selectedNodes, nodesById);
   drawGridSectionHighlight(ctx, gridSectionHighlight, nodesById);
+  drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
