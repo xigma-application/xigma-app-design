@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { dispatchDraggedNodeUpdates } from './dispatchDraggedNodeUpdates';
 import { getDraggedNodeGhostPositions } from './getDraggedNodeGhostPositions/getDraggedNodeGhostPositions';
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { isGridFrame } from '../updateDragDropTarget/isGridFrame';
 
 export const updateAutoLayoutReorderGhostPosition = (
@@ -23,14 +24,16 @@ export const updateAutoLayoutReorderGhostPosition = (
 ): void => {
   const previewRef = canvasRefs.transform.autoLayoutReorderPreviewRef;
   const preview = previewRef.current;
-  const originParentId = selectedNodes[0]?.parentId ?? null;
+  const grabbedNode = selectedNodes[0];
+  const originParentId = grabbedNode?.parentId ?? null;
   const originParent = originParentId ? (nodesById[originParentId] ?? null) : null;
+  const isAbsoluteChild = Boolean(grabbedNode) && isBoxSceneNode(grabbedNode) && Boolean(grabbedNode.ignoreAutoLayout);
 
   if (preview) {
     const { positions, tween } = getDraggedNodeGhostPositions(previewRef, selectedNodes, preview, deltaX, deltaY);
     previewRef.current = { ...preview, draggedOffsetTween: tween, positions: { ...preview.positions, ...positions } };
     canvasRefs.transform.gridDragGhostRef.current = null;
-  } else if (isGridFrame(originParent)) {
+  } else if (isGridFrame(originParent) && !isAbsoluteChild) {
     canvasRefs.transform.gridDragGhostRef.current = { nodeIds: selectedNodes.map((node) => node.id), offset: { x: deltaX, y: deltaY } };
   } else {
     canvasRefs.transform.gridDragGhostRef.current = null;

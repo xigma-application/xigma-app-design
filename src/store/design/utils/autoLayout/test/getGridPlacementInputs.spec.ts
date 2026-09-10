@@ -46,4 +46,10 @@ describe('getGridPlacementInputs', () => {
 
     expect(getGridPlacementInputs(['a', 'ghost', 'b', 'c'], nodes, new Set(['b'])).map((input) => input.id)).toEqual(['a', 'c']);
   });
+
+  it('should drop a child that opted out of the grid via ignoreAutoLayout, freeing its old cell for occupancy scans', () => {
+    const nodes = byId([rect('a'), rect('b', { ignoreAutoLayout: true } as Partial<TSceneNode>)]);
+
+    expect(getGridPlacementInputs(['a', 'b'], nodes).map((input) => input.id)).toEqual(['a']);
+  });
 });

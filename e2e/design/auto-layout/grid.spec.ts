@@ -655,4 +655,120 @@ test.describe('auto-layout — Grid flow', () => {
     expect(child.widthSizingMode).toBe('fill');
     expect(child.width).toBe(250);
   });
+
+  test('the shared Alignment widget moves a grid child within its own cell instead of setting a constraint', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-child-align');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a lone fixed-size child, added directly — auto-placed at (0,0) of the 2-column grid, so its
+    // single cell spans the full 250x550 (default fill tracks on both axes)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    });
+
+    await page.mouse.click(FRAME.x1 + 10, FRAME.y1 + 10);
+
+    // defaults to top-left of the cell being pressed, before any click
+    await expect(page.getByLabel('Align left')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByLabel('Align top')).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByLabel('Align right', { exact: true }).click();
+    await page.getByLabel('Align bottom', { exact: true }).click();
+
+    const child = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+      return activePage.nodes[frame.childIds[0]] as unknown as {
+        alignment?: unknown;
+        gridChildHorizontalAlign?: string;
+        gridChildVerticalAlign?: string;
+        x: number;
+        y: number;
+      };
+    });
+
+    expect(child.gridChildHorizontalAlign).toBe('right');
+    expect(child.gridChildVerticalAlign).toBe('bottom');
+    expect(child.alignment).toBeUndefined();
+    // node x/y are world coordinates; the cell is 250x550 (2 fill columns x 1 fill row), the
+    // child is a fixed 20x20, so it lands at the cell's bottom-right corner
+    expect(child.x).toBe(FRAME.x1 + 250 - 20);
+    expect(child.y).toBe(FRAME.y1 + 550 - 20);
+  });
+
+  test('switching a grid child to Absolute position lets it drag freely instead of snapping back to its old cell', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-child-absolute');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a lone fixed-size child, added directly — auto-placed at cell (0,0)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    });
+
+    await page.mouse.click(FRAME.x1 + 10, FRAME.y1 + 10);
+    await page.getByLabel('Ignore auto layout', { exact: true }).click();
+
+    // drag it well away from cell (0,0), fully inside the frame
+    await dragInto(page, { x: FRAME.x1 + 10, y: FRAME.y1 + 10 }, { x: FRAME.x1 + 300, y: FRAME.y1 + 300 });
+
+    const afterDrag = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+      return activePage.nodes[frame.childIds[0]] as unknown as { x: number; y: number };
+    });
+
+    // it actually moved to the drop point (grabbed at its own centre, 10px in from its corner) —
+    // not snapped back to its old cell position (the bug: the grid ghost mechanism, meant only for
+    // grid-managed children, doesn't skip live dispatch, so nothing ever commits its new position)
+    expect(afterDrag.x).toBe(FRAME.x1 + 300 - 10);
+    expect(afterDrag.y).toBe(FRAME.y1 + 300 - 10);
+  });
 });

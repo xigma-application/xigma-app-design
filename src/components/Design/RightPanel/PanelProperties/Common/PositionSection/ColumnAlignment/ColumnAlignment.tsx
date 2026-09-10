@@ -18,17 +18,20 @@ import { buildAlignmentButtons } from './utils/buildAlignmentButtons';
 
 const ColumnAlignment: FC = () => {
   const { t } = useTranslation();
-  const { disabled, horizontal, onSelectHorizontal, onSelectVertical, vertical } = useColumnAlignment();
+  const { disabled, gridHorizontal, gridVertical, horizontal, isGridChild, onSelectHorizontal, onSelectVertical, vertical } =
+    useColumnAlignment();
+  const displayHorizontal = isGridChild ? gridHorizontal : horizontal;
+  const displayVertical = isGridChild ? gridVertical : vertical;
 
   return (
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <UITools.ButtonGroup
-        buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, horizontal, onSelectHorizontal, t)}
+        buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, displayHorizontal, onSelectHorizontal, t)}
         className={styles.ColumnAlignment__buttons}
         e2eValue="horizontal-alignment"
       />
       <UITools.ButtonGroup
-        buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, vertical, onSelectVertical, t)}
+        buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, displayVertical, onSelectVertical, t)}
         className={styles.ColumnAlignment__buttons}
         e2eValue="vertical-alignment"
       />

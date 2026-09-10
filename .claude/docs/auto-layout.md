@@ -615,6 +615,51 @@ drag doesn't preview siblings shifting, only the dragged node(s) floating:
   parent is still a grid frame), so the node visually detaches and rides the cursor free of any
   cell — "pull it out of its slot, nothing else reshuffles."
 
+### Panel — a grid child's own cell alignment (the shared `ColumnAlignment` widget)
+
+A grid child aligns *within its own cell* via the data model's own `gridChildHorizontalAlign` /
+`gridChildVerticalAlign` (default top-left; §13 engine notes — `getGridChildPosition` already
+consumed these from day one, only the RightPanel control was missing). Rather than a second,
+duplicate widget, `PositionSection/ColumnAlignment` (the existing "Alignment" row — six buttons,
+same icons, same layout) was made grid-aware in place:
+
+- `useColumnAlignment`'s `isGridChild` (`parent.layoutMode === grid && !node.ignoreAutoLayout`)
+  branches `onSelectHorizontal` / `onSelectVertical` to `setGridChildHorizontalAlign` /
+  `setGridChildVerticalAlign` (write the grid fields only) instead of `moveNodeToAlignment` (write
+  `alignment` + x/y). The pre-existing `horizontal` / `vertical` / `setHorizontal` / `setVertical` /
+  `disabled` stay untouched in meaning — `ColumnPosition`'s constraints-icon affordance and
+  `ColumnConstraints` (the pin/scale panel) both also consume this hook and must keep working
+  exactly as before, grid or not. New `gridHorizontal` / `gridVertical` (defaulting to
+  left/top) are additive fields read only by `ColumnAlignment` itself, which picks
+  `isGridChild ? gridHorizontal : horizontal` for what button shows pressed.
+- The icons' two-tone fill (`data-svg-fill-one` / `data-svg-fill-two`, added straight to the
+  `align-*.svg` assets — `neutral-1` / `ramp-400` normally, `bg-selected` background +
+  `blue-2` on `fill-one` when the button is `aria-pressed`) lives in
+  `column-alignment.module.scss`, scoped under this file's own `.ColumnAlignment__buttons` class —
+  plain nested attribute selectors (`button:not(:disabled) { [data-svg-fill-one='fill'] {…} }`),
+  no `:global()` needed since a local class already anchors the chain (same pattern as
+  `ActionsPanel__item:hover { [data-svg-property='fill'] {…} }`).
+- **An absolute-position (`ignoreAutoLayout`) grid child "lets go" of both the panel behaviour and
+  the actual cell**, matching the user's own framing exactly: `isGridChild` excludes it, so
+  clicking an align button falls through to the ordinary edge-alignment/constrain path — the same
+  as a linear-layout child today. Two separate canvas-side gaps had to close for this to actually
+  hold, both pre-existing and undiscovered until this exact scenario surfaced:
+  - `updateAutoLayoutReorderGhostPosition`'s grid-ghost branch (previous section) only checked
+    `isGridFrame(originParent)` — an absolute child being dragged still hit it, so its live x/y
+    dispatch was skipped and nothing ever committed the new position: on release it silently
+    reverted to wherever it last was, looking exactly like "the alignment pulls it back into its
+    slot." Fixed by also requiring `!isAbsoluteChild` (`isBoxSceneNode(grabbedNode) &&
+    grabbedNode.ignoreAutoLayout`, the same check `resolveDragReparentTarget` already used) — an
+    absolute grid child now falls straight to the plain `dispatchDraggedNodeUpdates` path, dragging
+    freely like any other unmanaged node.
+  - `getGridPlacementInputs` (the one shared input-builder behind every grid occupancy scan —
+    drop-target hover, insert-index, drag-reorder) never excluded `ignoreAutoLayout` children at
+    all, unlike `getAutoLayoutSyncChildren` (the layout-engine's own children list, which already
+    did). So a child's old cell stayed "occupied" for every other drag/drop calculation even after
+    it opted out of the grid — going absolute didn't actually free its slot. Fixed by filtering
+    `ignoreAutoLayout` out there too, the single choke point every occupancy consumer already goes
+    through.
+
 ### Not covered yet
 
 Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
@@ -665,12 +710,17 @@ The engine already honours spans and manual anchors when set in code.
   `commitGridColumnCountChange` / `commitGridRowCountChange` / `commitGridRepackedAnchors`), and
   `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`);
   `store/design/utils/autoLayout/test/getGridResizeRepack.spec.ts` (the reject/repack rules
-  standalone).
+  standalone); `PositionSection/ColumnAlignment/**` (`ColumnAlignment`, `useColumnAlignment` +
+  its `hooks/utils/{commitAlignmentConstraint,moveNodeToAlignment,setGridChild{Horizontal,Vertical}Align}`
+  — the grid-branch cases specifically); `store/design/utils/autoLayout/test/getGridPlacementInputs.spec.ts`
+  (the `ignoreAutoLayout` exclusion).
 - **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
   `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
   select, reflow on column-count change), dragging an element into a cell (hover highlight + dim,
-  drop nests it filling the cell), and shrinking columns on an already-anchored grid repacking
-  instead of colliding, driving the engine + canvas.
+  drop nests it filling the cell), shrinking columns on an already-anchored grid repacking instead
+  of colliding, the shared Alignment widget moving a grid child within its own cell, and an
+  absolute-position grid child dragging freely instead of snapping back — driving the engine +
+  canvas.
 
 ## History (so it isn't repeated)
 
@@ -796,3 +846,26 @@ The engine already honours spans and manual anchors when set in code.
     `LayoutMode.grid`; the reorganiser folded the second fix into the shared `isManagedLayoutFrame`
     predicate (now `undefined`-safe) that `useColumnPosition` and `isNodeManagedLayoutChild` already
     used, dropping their redundant `!== undefined &&` guards.
+15. **2026-09-10 — grid flow, Phase 3h: a grid child's own cell alignment (§13 "Panel — a grid
+    child's own cell alignment").** First draft built a whole second widget (own folder, own hook,
+    own icon-option constants, own i18n keys) — flagged immediately ("Dlaczego duplikujesz ten
+    panel? To ten co już jest w position. Tylko trzeba go ograć logiką pod grid." / "Why are you
+    duplicating this panel? It's the one already in Position. You just need to wrap it with grid
+    logic."): reverted the new folder entirely and made the *existing* `PositionSection/
+    ColumnAlignment` grid-aware in place instead — same component, same hook, same icons, just a
+    branch. Two follow-up corrections while implementing, both about scope creep: the icon-fill
+    CSS used `:global()` unnecessarily (a local class already anchors the selector chain, matching
+    `ActionsPanel__item:hover { [data-svg-property='fill'] {…} }` — dropped it); and the fix had to
+    explicitly *not* fire for an absolute-position (`ignoreAutoLayout`) child ("Jak przełączam
+    element w pozycje absolutną. To powinine aligment go puścić, dwa aligment działac jak w layout
+    hor i vertical." — switching a child to absolute should release it from grid-cell alignment,
+    same as it already behaves for a linear-layout child). That last point surfaced two separate,
+    pre-existing, previously-undiscovered canvas bugs once actually tried by hand: dragging such a
+    child snapped it back on release ("Jak go przesuwam to puszczeniu aligment ciągnie go jakby był
+    w slot" — the grid-ghost mechanism in `updateAutoLayoutReorderGhostPosition` only checked the
+    *parent's* layout mode, never whether the dragged child itself opted out, so its live dispatch
+    was skipped and nothing ever committed the drop); and its old cell stayed marked occupied for
+    every other grid drag/drop calculation ("ten slot nadal jest zajęty… kiedy wchodzi absolute to
+    powinien zwolnić też slot" — `getGridPlacementInputs`, the one shared input-builder behind every
+    occupancy scan, never excluded `ignoreAutoLayout` children the way the layout engine's own
+    `getAutoLayoutSyncChildren` already did). Both fixed at their respective single choke points.

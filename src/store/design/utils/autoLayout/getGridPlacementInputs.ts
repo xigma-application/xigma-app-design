@@ -12,7 +12,7 @@ export const getGridPlacementInputs = (
 ): TGridPlacementInput[] =>
   childIds
     .map((id) => nodesById[id])
-    .filter((node): node is TSceneNode => Boolean(node) && !excludeIds.has(node.id))
+    .filter((node): node is TSceneNode => Boolean(node) && !excludeIds.has(node.id) && !(isBoxSceneNode(node) && node.ignoreAutoLayout))
     .map((node) => ({
       gridColumnAnchorIndex: isBoxSceneNode(node) ? node.gridColumnAnchorIndex : undefined,
       gridColumnSpan: isBoxSceneNode(node) ? node.gridColumnSpan : undefined,

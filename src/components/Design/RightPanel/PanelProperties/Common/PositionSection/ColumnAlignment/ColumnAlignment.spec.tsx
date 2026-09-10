@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 
 const renderColumnAlignment = (): ReturnType<typeof render> =>
   render(
@@ -22,13 +22,14 @@ const renderColumnAlignment = (): ReturnType<typeof render> =>
     </Provider>,
   );
 
-const addFrameNode = (parentId: string | null): string => {
+const addFrameNode = (parentId: string | null, layoutMode?: LayoutMode): string => {
   store.dispatch(
     addNode({
       childIds: [],
       clipContent: true,
       fill: '#ff0000',
       height: 20,
+      layoutMode,
       name: 'Frame',
       parentId,
       rotation: 0,
@@ -152,5 +153,38 @@ describe('ColumnAlignment behaviors', () => {
 
     // result — 200 (parent width) - 20 (child width)
     expect((selectActivePage(store.getState()).nodes[childId] as { x: number }).x).toBe(180);
+  });
+
+  it('should default a grid child to the top-left corner being pressed', () => {
+    // mock
+    const parentId = addFrameNode(null, LayoutMode.grid);
+    const childId = addFrameNode(parentId);
+
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnAlignment();
+
+    // result
+    expect(screen.getByLabelText('Align left')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Align top')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should write gridChildHorizontalAlign/gridChildVerticalAlign for a grid child, not alignment', () => {
+    // mock
+    const parentId = addFrameNode(null, LayoutMode.grid);
+    const childId = addFrameNode(parentId);
+
+    store.dispatch(setSelection([childId]));
+
+    // before
+    renderColumnAlignment();
+    fireEvent.click(screen.getByLabelText('Align right'));
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[childId] as { alignment?: unknown; gridChildHorizontalAlign?: unknown };
+
+    expect(node.gridChildHorizontalAlign).toBe('right');
+    expect(node.alignment).toBeUndefined();
   });
 });

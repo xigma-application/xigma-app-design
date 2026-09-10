@@ -6,12 +6,12 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnAlignment } from '../useColumnAlignment';
 
 // store
-import { addNode, moveNodes, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { AlignmentHorizontal, AlignmentVertical, NodeType } from 'types/design/enums';
+import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -19,13 +19,14 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 const renderUseColumnAlignment = (): ReturnType<typeof renderHook<ReturnType<typeof useColumnAlignment>, unknown>> =>
   renderHook(() => useColumnAlignment(), { wrapper });
 
-const addFrame = (parentId: string | null, width = 40, height = 40): string => {
+const addFrame = (parentId: string | null, width = 40, height = 40, layoutMode?: LayoutMode): string => {
   store.dispatch(
     addNode({
       childIds: [],
       clipContent: true,
       fill: '#ff0000',
       height,
+      layoutMode,
       name: 'Frame',
       parentId,
       rotation: 0,
@@ -140,5 +141,66 @@ describe('useColumnAlignment', () => {
     const { result } = renderUseColumnAlignment();
 
     expect(() => act(() => result.current.setHorizontal(AlignmentHorizontal.left))).not.toThrow();
+  });
+
+  // a grid parent + a plain child, so onSelectHorizontal/onSelectVertical route to the grid fields
+  const gridChild = (): { childId: string; parentId: string } => {
+    const parentId = addFrame(null, 400, 300, LayoutMode.grid);
+    const childId = addFrame(null, 40, 40);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(setSelection([childId]));
+
+    return { childId, parentId };
+  };
+
+  it('should report a grid child and default its grid align to the top-left corner', () => {
+    gridChild();
+
+    const { result } = renderUseColumnAlignment();
+
+    expect(result.current.isGridChild).toBe(true);
+    expect(result.current.gridHorizontal).toBe(AlignmentHorizontal.left);
+    expect(result.current.gridVertical).toBe(AlignmentVertical.top);
+  });
+
+  it('should not report a grid child for a non-grid parent', () => {
+    nested();
+
+    expect(renderUseColumnAlignment().result.current.isGridChild).toBe(false);
+  });
+
+  it('should write gridChildHorizontalAlign/gridChildVerticalAlign for a grid child instead of the alignment constraint', () => {
+    const { childId } = gridChild();
+    const { result } = renderUseColumnAlignment();
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+    act(() => result.current.onSelectVertical(AlignmentVertical.bottom));
+
+    const node = selectActivePage(store.getState()).nodes[childId] as TFrameNode;
+
+    expect(node.gridChildHorizontalAlign).toBe(AlignmentHorizontal.right);
+    expect(node.gridChildVerticalAlign).toBe(AlignmentVertical.bottom);
+    expect(alignmentOf(childId)).toBeUndefined();
+    // the grid engine itself repositions the child to the bottom-right of its single 400x300 cell
+    // (400 - 40 child width, 300 - 40 child height) — a live consequence of the grid resync, not
+    // something this hook writes directly
+    expect(positionOf(childId)).toEqual({ x: 360, y: 260 });
+  });
+
+  it('should expose the explicit grid align of a grid child', () => {
+    const { childId } = gridChild();
+
+    store.dispatch(
+      updateNode({
+        changes: { gridChildHorizontalAlign: AlignmentHorizontal.center, gridChildVerticalAlign: AlignmentVertical.center },
+        id: childId,
+      }),
+    );
+
+    const { result } = renderUseColumnAlignment();
+
+    expect(result.current.gridHorizontal).toBe(AlignmentHorizontal.center);
+    expect(result.current.gridVertical).toBe(AlignmentVertical.center);
   });
 });

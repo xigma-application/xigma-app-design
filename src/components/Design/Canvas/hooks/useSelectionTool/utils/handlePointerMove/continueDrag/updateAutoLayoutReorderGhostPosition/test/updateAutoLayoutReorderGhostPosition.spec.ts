@@ -123,6 +123,35 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     expect(state.dispatchThrottle.run).toBeNull();
   });
 
+  it('should dispatch the drag delta instead of arming the grid ghost for an absolute-position (ignoreAutoLayout) grid child', () => {
+    // mock — the parent IS a grid frame, but this specific child opted out via ignoreAutoLayout
+    const refs = createCanvasRefs();
+    const nodesById: Record<string, TSceneNode> = { 'frame-1': gridFrame() };
+    const id = addRect(100, 100);
+    const node = rect({ id, ignoreAutoLayout: true });
+    const state = dragState({ [id]: { x: 100, y: 100 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, nodesById);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result — no grid ghost armed, the live x/y dispatch runs like any other free child
+    expect(refs.transform.gridDragGhostRef.current).toBeNull();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 105, y: 105 });
+  });
+
+  it('should fall back to dispatching (a no-op) when there is no grabbed node at all', () => {
+    // mock — a defensive edge case: an empty selection mid-drag
+    const refs = createCanvasRefs();
+    const state = dragState({});
+
+    // action
+    expect(() => updateAutoLayoutReorderGhostPosition(refs, [], store.dispatch, state, null, 5, 5, {})).not.toThrow();
+
+    // result
+    expect(refs.transform.gridDragGhostRef.current).toBeNull();
+  });
+
   it('should clear a stale grid drag ghost when no reorder preview is active and the parent is not a grid frame', () => {
     // mock
     const refs = createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds: ['r1'], offset: { x: 1, y: 1 } } } } });

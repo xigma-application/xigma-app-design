@@ -1,21 +1,23 @@
 // store
 import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { AlignmentHorizontal, AlignmentVertical } from 'types/design/enums';
-import { TNodeAlignment } from 'types/design/types';
+import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
-import { getAlignedChildLocalPosition } from 'store/design/utils/getAlignedChildLocalPosition';
-import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
-import { getNodePositionInParent } from 'store/design/utils/getNodePositionInParent';
+import { commitAlignmentConstraint } from './utils/commitAlignmentConstraint';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { moveNodeToAlignment } from './utils/moveNodeToAlignment';
+import { setGridChildHorizontalAlign } from './utils/setGridChildHorizontalAlign';
+import { setGridChildVerticalAlign } from './utils/setGridChildVerticalAlign';
 
 export type TUseColumnAlignmentResult = {
   disabled: boolean;
+  gridHorizontal: AlignmentHorizontal;
+  gridVertical: AlignmentVertical;
   horizontal: AlignmentHorizontal | undefined;
+  isGridChild: boolean;
   onSelectHorizontal: TFunc<[AlignmentHorizontal]>;
   onSelectVertical: TFunc<[AlignmentVertical]>;
   setHorizontal: TFunc<[AlignmentHorizontal | undefined]>;
@@ -31,39 +33,22 @@ export const useColumnAlignment = (): TUseColumnAlignmentResult => {
   const alignment = node?.alignment;
   const parentNode = node?.parentId ? nodes[node.parentId] : undefined;
   const parent = parentNode && 'width' in parentNode ? parentNode : undefined;
-
-  const setConstraint = (next: TNodeAlignment): void => {
-    if (node) {
-      const cleaned = next.horizontal === undefined && next.vertical === undefined ? undefined : next;
-
-      dispatch(updateNode({ changes: { alignment: cleaned }, id: node.id }));
-    }
-  };
-
-  const moveToAlignment = (next: TNodeAlignment): void => {
-    if (node && parent) {
-      const currentLocal = getNodePositionInParent(node, parent);
-      const targetLocal = getAlignedChildLocalPosition(next, parent, node, currentLocal);
-      const targetAbsolute = getNodeAbsoluteFromParentPosition(targetLocal, parent);
-
-      dispatch(
-        updateNode({
-          changes: { alignment: next, x: Math.round(targetAbsolute.x), y: Math.round(targetAbsolute.y) },
-          id: node.id,
-        }),
-      );
-    } else {
-      setConstraint(next);
-    }
-  };
+  const isGridChild = parentNode?.type === NodeType.frame && parentNode.layoutMode === LayoutMode.grid && !node?.ignoreAutoLayout;
 
   return {
     disabled: !node?.parentId,
+    gridHorizontal: node?.gridChildHorizontalAlign ?? AlignmentHorizontal.left,
+    gridVertical: node?.gridChildVerticalAlign ?? AlignmentVertical.top,
     horizontal: alignment?.horizontal,
-    onSelectHorizontal: (value) => moveToAlignment({ horizontal: value, vertical: alignment?.vertical }),
-    onSelectVertical: (value) => moveToAlignment({ horizontal: alignment?.horizontal, vertical: value }),
-    setHorizontal: (value) => setConstraint({ horizontal: value, vertical: alignment?.vertical }),
-    setVertical: (value) => setConstraint({ horizontal: alignment?.horizontal, vertical: value }),
+    isGridChild,
+    onSelectHorizontal: isGridChild
+      ? (value): void => setGridChildHorizontalAlign(dispatch, node, value)
+      : (value): void => moveNodeToAlignment(dispatch, node, parent, { horizontal: value, vertical: alignment?.vertical }),
+    onSelectVertical: isGridChild
+      ? (value): void => setGridChildVerticalAlign(dispatch, node, value)
+      : (value): void => moveNodeToAlignment(dispatch, node, parent, { horizontal: alignment?.horizontal, vertical: value }),
+    setHorizontal: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: value, vertical: alignment?.vertical }),
+    setVertical: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: alignment?.horizontal, vertical: value }),
     vertical: alignment?.vertical,
   };
 };

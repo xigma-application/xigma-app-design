@@ -9,6 +9,18 @@
         fill: var(--color-ramp-400) !important;
       }
     }
+
+    button[aria-pressed='true'] {
+      background-color: var(--color-bg-selected) !important;
+
+      [data-svg-fill-one='fill'] {
+        fill: var(--color-blue-2) !important;
+      }
+
+      &:hover {
+        background-color: var(--color-bg-selected) !important;
+      }
+    }
   }
 
   &__shortcut {
