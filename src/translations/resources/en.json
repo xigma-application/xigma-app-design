@@ -397,6 +397,8 @@
   "design.rightPanel.panelProperties.common.columnDimensions.sizingMenu.removeMinWidth": "Remove min width",
   "design.rightPanel.panelProperties.common.columnDimensions.unlockAriaLabel": "Unlock aspect ratio",
   "design.rightPanel.panelProperties.common.columnDimensions.unlockTooltip": "Unlock aspect ratio",
+  "design.rightPanel.panelProperties.common.columnGridChildSpan.columnSpanLabel": "Column span",
+  "design.rightPanel.panelProperties.common.columnGridChildSpan.rowSpanLabel": "Row span",
   "design.rightPanel.panelProperties.common.layoutSection.label": "Layout",
   "design.rightPanel.panelProperties.common.panelHeader.componentAriaLabel": "Create component",
   "design.rightPanel.panelProperties.common.panelHeader.componentTooltip": "Create component",

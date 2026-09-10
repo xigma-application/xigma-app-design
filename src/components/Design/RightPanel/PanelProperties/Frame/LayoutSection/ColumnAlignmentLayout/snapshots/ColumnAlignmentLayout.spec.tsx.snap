@@ -238,7 +238,7 @@ exports[`ColumnAlignmentLayout snapshots > should render the alignment and gap r
                 class="Icon"
                 fill="none"
                 height="10"
-                style="color: var(--color-neutral-1);"
+                style="color: var(--color-neutral-2);"
                 viewBox="0 0 9 9"
                 width="10"
                 xmlns="http://www.w3.org/2000/svg"

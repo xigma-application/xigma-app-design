@@ -6,6 +6,7 @@ import ColumnAlignmentLayout from './ColumnAlignmentLayout/ColumnAlignmentLayout
 import ColumnClipContent from './ColumnClipContent/ColumnClipContent';
 import ColumnDimensions from '../../Common/ColumnDimensions/ColumnDimensions';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
+import ColumnGridChildSpan from '../../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import ColumnMinMaxDimensions from './ColumnMinMaxDimensions/ColumnMinMaxDimensions';
 import ColumnPadding from './ColumnPadding/ColumnPadding';
 import LayoutSectionButtons from './LayoutSectionButtons';
@@ -21,6 +22,7 @@ const LayoutSection: FC = () => {
     <UITools.Section component={<LayoutSectionButtons />} e2eValue="layout" label={t(`${translationNameSpace}.label`)}>
       <ColumnFlow />
       <ColumnDimensions />
+      <ColumnGridChildSpan />
       <ColumnMinMaxDimensions />
       <ColumnAlignmentLayout />
       <ColumnPadding />

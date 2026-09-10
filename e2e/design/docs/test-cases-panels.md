@@ -52,12 +52,14 @@ Selecting a single rectangle routes `PanelProperties.tsx` to `Rectangle/`, which
 `Common/PanelHeader`, `Common/PositionSection` and `Common/ColumnDimensions` (the same sections the
 Frame panel uses — their hooks gate on `isBoxSceneNode`, not `type === frame`). The header is the
 label plus the "Create component" button only, no element-type dropdown; the Layout section holds
-just the width/height row, none of the auto-layout rows.
+the width/height row plus, when the selection sits inside a grid frame, a Column span / Row span
+row (`Common/ColumnGridChildSpan`, display-only for now), none of the auto-layout rows.
 
-| #   | Scenario                                                                                      | Unit |             E2E              |
-| --- | --------------------------------------------------------------------------------------------- | :--: | :--------------------------: |
-| 1   | Selecting a rectangle shows the Rectangle panel with a Dimensions row and no auto-layout rows |  ✅  | ✅ `rectangle-panel.spec.ts` |
-| 2   | Editing the width field in the Rectangle panel resizes the shape on the canvas                |  —   | ✅ `rectangle-panel.spec.ts` |
+| #   | Scenario                                                                                              | Unit |                                                    E2E                                                    |
+| --- | ----------------------------------------------------------------------------------------------------- | :--: | :-------------------------------------------------------------------------------------------------------: |
+| 1   | Selecting a rectangle shows the Rectangle panel with a Dimensions row and no auto-layout rows         |  ✅  |                                       ✅ `rectangle-panel.spec.ts`                                        |
+| 2   | Editing the width field in the Rectangle panel resizes the shape on the canvas                        |  —   |                                       ✅ `rectangle-panel.spec.ts`                                        |
+| 3   | The Column span / Row span row shows only while the selection is a child of a `LayoutMode.grid` frame |  ✅  | — (pure conditional render, no canvas interaction; `useColumnGridChildSpan.spec.tsx` covers every branch) |
 
 ## Layers panel — lock/visibility
 

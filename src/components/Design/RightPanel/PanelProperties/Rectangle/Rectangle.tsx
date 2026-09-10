@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
+import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import PositionSection from '../Common/PositionSection/PositionSection';
 import RectangleHeader from './RectangleHeader/RectangleHeader';
 import { UITools } from 'shared';
@@ -19,6 +20,7 @@ const Rectangle: FC = () => {
       <PositionSection />
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <ColumnDimensions />
+        <ColumnGridChildSpan />
       </UITools.Section>
     </Fragment>
   );

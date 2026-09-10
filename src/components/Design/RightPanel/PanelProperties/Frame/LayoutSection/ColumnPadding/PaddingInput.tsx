@@ -4,10 +4,16 @@ import { FC, FocusEvent } from 'react';
 import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
-import { UITools, type TIconProps } from 'shared';
+import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFieldWrapper';
+
+// types
+import type { TIconProps } from 'shared';
 
 // others
 import { PADDING_MAX, PADDING_MIN } from './constants';
+
+// styles
+import styles from './padding-input.module.scss';
 
 export type TPaddingInputProps = {
   ariaLabel: string;
@@ -41,14 +47,15 @@ const PaddingInput: FC<TPaddingInputProps> = ({
   return (
     <div onMouseEnter={onHoverStart} onMouseLeave={onHoverEnd}>
       <Tooltip content={tooltip}>
-        <UITools.TextField
+        <TextFieldWrapper
           aria-label={ariaLabel}
+          className={styles.PaddingInput__input}
           defaultValue={value}
           e2eValue={e2eValue}
           onBlur={handleBlur}
           startAdornment={
             <ScrubbableInput max={PADDING_MAX} min={PADDING_MIN} onChange={onScrub} value={scrubValue}>
-              <Icon name={iconName} size={24} />
+              <Icon color="neutral2" name={iconName} size={24} />
             </ScrubbableInput>
           }
           type="text"

@@ -65,7 +65,7 @@ export const GapField: FC<TGapFieldProps> = ({
         onBlur={handleBlur}
         startAdornment={
           <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onCommit} value={value}>
-            <Icon name={isHorizontal ? 'GapColumns' : 'GapRows'} size={10} />
+            <Icon color="neutral2" name={isHorizontal ? 'GapColumns' : 'GapRows'} size={10} />
           </ScrubbableInput>
         }
         type={isAuto ? 'text' : 'number'}

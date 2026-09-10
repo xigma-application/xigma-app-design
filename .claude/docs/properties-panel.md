@@ -29,6 +29,10 @@ node's folder. Today:
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box
   node and keeps a `frameNode` narrowing only for the frame-specific pieces.
+- `Common/ColumnGridChildSpan/` — Column span / Row span fields, shown only when the selected
+  node's parent frame is `LayoutMode.grid` (`useColumnGridChildSpan`). Rendered after the W/H row
+  in both the Frame and Rectangle panels; self-hides otherwise. **Display only so far** — the
+  fields are uncontrolled and read `gridColumnSpan`/`gridRowSpan` (default 1) without committing.
 
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
@@ -37,14 +41,14 @@ i18n for the shared sections lives under `…panelProperties.common.*`.
 `Frame.tsx` = `FrameHeader` (its own `FrameHeaderMenu` with section/preset items +
 `FrameHeaderButtons` = HTML-tag toggle + the shared component button, all passed into
 `Common/PanelHeader`) → `Common/PositionSection` → `LayoutSection/` (flow, dimensions from
-`Common/`, min/max, alignment/gap/grid, padding, clip-content — the auto-layout-specific rows,
-frame-only).
+`Common/`, grid child span from `Common/`, min/max, alignment/gap/grid, padding, clip-content —
+the auto-layout-specific rows, frame-only).
 
 ## `Rectangle/`
 
 `Rectangle.tsx` = `RectangleHeader` (`Common/PanelHeader` with the label only + the shared
 component button, no dropdown) → `Common/PositionSection` → a bare `UITools.Section` labelled
-"Layout" holding just `Common/ColumnDimensions`. No auto-layout rows.
+"Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan`. No auto-layout rows.
 
 ## Adding a panel for another node type
 

@@ -188,6 +188,10 @@ name header with a "Create component" button, the same position and rotation con
 and a width/height row. The parts a frame and a rectangle share (header, position, dimensions) were
 pulled into one place so the next shape type can reuse them.
 
+Anything sitting inside a grid also gets Column span / Row span fields under its size row.
+
+- [ ] the column-span / row-span fields are shown but don't change the layout yet
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

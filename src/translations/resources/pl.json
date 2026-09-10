@@ -409,6 +409,8 @@
   "design.rightPanel.panelProperties.common.columnDimensions.sizingMenu.removeMinWidth": "Usuń min. szerokość",
   "design.rightPanel.panelProperties.common.columnDimensions.unlockAriaLabel": "Odblokuj proporcje",
   "design.rightPanel.panelProperties.common.columnDimensions.unlockTooltip": "Odblokuj proporcje",
+  "design.rightPanel.panelProperties.common.columnGridChildSpan.columnSpanLabel": "Rozpiętość kolumn",
+  "design.rightPanel.panelProperties.common.columnGridChildSpan.rowSpanLabel": "Rozpiętość wierszy",
   "design.rightPanel.panelProperties.common.layoutSection.label": "Układ",
   "design.rightPanel.panelProperties.common.panelHeader.componentAriaLabel": "Utwórz komponent",
   "design.rightPanel.panelProperties.common.panelHeader.componentTooltip": "Utwórz komponent",
