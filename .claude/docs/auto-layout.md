@@ -510,19 +510,38 @@ entry point today is the GridArea popover's **Open grid settings** button; the p
 `GridSettings` = header + a `<GridTrackList axis>` for **Columns** and one for **Rows**. Each
 `GridTrackList` is a `UITools.Section` (`onAdd` → the `+`) wrapping one `<GridTrackRow>` per
 track, a 4-column CSS grid row: `GridTrackHandle` (the 1-based number, swapped for the
-`RowGrabber` glyph on hover/drag via CSS) · `UITools.Dropdown variant="outline"` for the mode
-(`Fill`/`Fixed`/`Hug`) · a numeric `UITools.TextField` for the value (blank+disabled for `Hug`,
-`fr` weight for `Fill`, px for `Fixed`; its chevron `endAdornment` is a `ButtonMenu` re-listing
-the same three modes) · a **per-row** `−` delete button (own `UITools.Button`, `visibility:
-hidden` unless that row is hovered or selected — not a single section-level button). A selected
-row gets `var(--color-blue-2)` borders on its mode dropdown and value field and
-`var(--color-neutral-1)` handle digits (`GridTrackRow--selected` / `GridTrackHandle--selected`).
+`RowGrabber` glyph on hover/drag via CSS) · `UITools.Dropdown variant="outline"` for the mode ·
+a numeric `UITools.TextField` for the value · a **per-row** `−` delete button (own
+`UITools.Button`, `visibility: hidden` unless that row is hovered or selected — not a single
+section-level button). A selected row gets `var(--color-blue-2)` borders on its mode dropdown and
+value field and `var(--color-neutral-1)` handle digits (`GridTrackRow--selected` /
+`GridTrackHandle--selected`).
+
+- **Mode dropdown** — `getTrackModeOptions(t, track, axis)` builds three `UITools.Dropdown`
+  options from `TRACK_MODE_OPTIONS[axis]` (`GridTrackRow/constants.ts`, one entry per axis with an
+  icon + `iconSize` + a short English `triggerLabel`): axis-specific icon + a descriptive label
+  ("Fixed width / height (`roundTrackSize(track.resolvedSize)`)", "Hug contents", "Fill container
+  (`track.value`fr)"), ordered fixed / hug / fill. The **collapsed trigger** shows the short
+  `triggerLabel` ("Fixed" / "Hug" / "Fill"), never the full option text (`TDropdownOption` gained
+  an optional `triggerLabel`, plus per-option `icon` / `iconSize` rendered by `DropdownOption`
+  between the check mark and the label). Picking **Fixed** from the dropdown seeds the value with
+  the track's current `resolvedSize` (the number the option label showed), not the old fr weight —
+  `handleModeSelect` passes it as the third `onChangeMode(mode, value?)` arg, threaded through to
+  `commitGridAxisModeChange`.
+- **Value field** — `fr` weight for `Fill`, px for `Fixed`. For `Hug` it stays editable and shows
+  the track's **real resolved px** (`track.resolvedSize`, greyed `var(--color-neutral-2)`,
+  `var(--color-neutral-1)` on focus via `GridTrackRow__value--hug`); typing a number + Enter/blur
+  switches the track to `Fixed` at that value (`useCommitHugTrackAsFixed`). There is **no** chevron
+  `endAdornment` mode menu — the mode dropdown to its left is the only mode control.
 
 - **Data** — `useGridSettingsPanel` reads `gridColumnCount` / effective `gridRowCount` and
   `buildGridTrackList(count, frame.gridColumnSizes|gridRowSizes)` (pads with
-  `{ mode: fill, value: 1 }`), maps to `{ index, mode, value, linkedIndices }` view-models (see
-  "Spanning-child linking" below) via `makeAxisControls(dispatch, frame, nodes, axis, tracks)`,
-  one bundle per axis. Every mutation writes the **whole** normalised `gridColumnSizes` /
+  `{ mode: fill, value: 1 }`), maps to `{ index, mode, value, resolvedSize, linkedIndices }`
+  view-models (see "Spanning-child linking" below) via
+  `makeAxisControls(dispatch, frame, nodes, axis, tracks)`, one bundle per axis. `resolvedSize`
+  is the track's actual px from `getGridResolvedTrackSizes(frame, nodes)[axis]` (the real engine
+  resolution, not a uniform split) — feeds the "Fixed width (N)" / Hug-field display and the
+  Fixed-mode seed. Every mutation writes the **whole** normalised `gridColumnSizes` /
   `gridRowSizes` array (plus the count on add/delete) via `commitGridAxisTracks` — the engine's
   `resolveGridTrackSizes` already consumes those arrays, so the layout just reflows through
   `syncAutoLayoutChildren` on the next dispatch. `TGridAxisControls` also carries a `revision`

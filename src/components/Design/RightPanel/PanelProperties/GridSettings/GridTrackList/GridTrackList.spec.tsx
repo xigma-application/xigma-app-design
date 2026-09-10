@@ -21,8 +21,8 @@ const controls = (overrides: Partial<TGridAxisControls> = {}): TGridAxisControls
   onReorder: vi.fn(() => [0]),
   revision: {},
   tracks: [
-    { index: 0, mode: 'fill', value: 1 },
-    { index: 1, mode: 'fixed', value: 40 },
+    { index: 0, linkedIndices: [0], mode: 'fill', resolvedSize: 100, value: 1 },
+    { index: 1, linkedIndices: [1], mode: 'fixed', resolvedSize: 40, value: 40 },
   ] as TGridAxisControls['tracks'],
   ...overrides,
 });
@@ -128,7 +128,10 @@ describe('GridTrackList', () => {
     const onDelete = vi.fn();
 
     renderList({
-      controls: controls({ onDelete, tracks: [{ index: 0, mode: 'fill', value: 1 }] as TGridAxisControls['tracks'] }),
+      controls: controls({
+        onDelete,
+        tracks: [{ index: 0, linkedIndices: [0], mode: 'fill', resolvedSize: 100, value: 1 }] as TGridAxisControls['tracks'],
+      }),
     });
     fireEvent.click(screen.getByRole('button', { name: 'Delete selected tracks' }));
 
@@ -144,8 +147,8 @@ describe('GridTrackList', () => {
     fireEvent.blur(screen.getAllByLabelText('Track size value')[1], { target: { value: '64' } });
     expect(onChangeValue).toHaveBeenCalledWith(1, 64);
 
-    fireEvent.click(screen.getAllByLabelText('Track sizing mode')[0]);
-    fireEvent.click(screen.getByText('Hug'));
+    fireEvent.click(screen.getByText('Fill', { exact: true }));
+    fireEvent.click(screen.getByText('Hug contents'));
     expect(onChangeMode).toHaveBeenCalledWith(0, 'hug', undefined);
   });
 

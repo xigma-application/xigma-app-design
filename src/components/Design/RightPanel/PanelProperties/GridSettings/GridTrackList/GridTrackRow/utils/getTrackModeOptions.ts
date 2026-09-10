@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 
 // others
 import { TRACK_MODE_OPTIONS } from '../constants';
+import { roundTrackSize } from './roundTrackSize';
 import { translationNameSpace } from '../../../constants';
 
 // types
@@ -15,7 +16,7 @@ export const getTrackModeOptions = (t: TFunction, track: TGridTrackViewModel, ax
     icon,
     iconSize,
     label: t(`${translationNameSpace}.mode.${labelKey}`, {
-      value: value === SizingMode.fixed ? Math.round(track.resolvedSize * 100) / 100 : track.value,
+      value: value === SizingMode.fixed ? roundTrackSize(track.resolvedSize) : track.value,
     }),
     triggerLabel,
     value,

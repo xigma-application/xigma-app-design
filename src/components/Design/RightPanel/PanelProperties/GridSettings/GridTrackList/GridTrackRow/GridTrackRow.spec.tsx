@@ -57,7 +57,7 @@ describe('GridTrackRow', () => {
     expect(screen.getByText('Fill').closest('[data-test-bypass-global-shortcuts]')).toBeNull();
   });
 
-  it('should show the resolved size in a still-editable value field, with no chevron menu, for a hug track', () => {
+  it('should show the resolved size in a still-editable value field for a hug track', () => {
     const onChangeMode = vi.fn();
 
     renderRow({ onChangeMode, track: track({ mode: SizingMode.hug, resolvedSize: 276.5, value: 0 }) });
@@ -65,11 +65,36 @@ describe('GridTrackRow', () => {
 
     expect(input).not.toBeDisabled();
     expect(input).toHaveValue(276.5);
-    expect(screen.queryByLabelText('Track sizing mode')).not.toBeInTheDocument();
 
     // typing a value and committing switches the track to fixed at that value
     fireEvent.blur(input, { target: { value: '300' } });
     expect(onChangeMode).toHaveBeenCalledWith(SizingMode.fixed, 300);
+  });
+
+  it('should not render a mode chevron menu inside the value field', () => {
+    renderRow();
+
+    expect(screen.queryByLabelText('Track sizing mode')).not.toBeInTheDocument();
+  });
+
+  it('should seed the resolved size when switching to Fixed from the mode dropdown', () => {
+    const onChangeMode = vi.fn();
+
+    renderRow({ onChangeMode, track: track({ mode: SizingMode.fill, resolvedSize: 646.33, value: 1 }) });
+    fireEvent.click(screen.getByText('Fill', { exact: true }));
+    fireEvent.click(screen.getByText('Fixed width (646.33)'));
+
+    expect(onChangeMode).toHaveBeenCalledWith(SizingMode.fixed, 646.33);
+  });
+
+  it('should not pass a value when switching to a non-Fixed mode from the dropdown', () => {
+    const onChangeMode = vi.fn();
+
+    renderRow({ onChangeMode, track: track({ mode: SizingMode.fill, resolvedSize: 646.33, value: 1 }) });
+    fireEvent.click(screen.getByText('Fill', { exact: true }));
+    fireEvent.click(screen.getByText('Hug contents'));
+
+    expect(onChangeMode).toHaveBeenCalledWith(SizingMode.hug, undefined);
   });
 
   it('should not switch a hug track to fixed on a blank blur', () => {
@@ -101,16 +126,6 @@ describe('GridTrackRow', () => {
 
     fireEvent.blur(input, { target: { value: '' } });
     expect(onChangeValue).toHaveBeenCalledTimes(1);
-  });
-
-  it('should change the mode from the value field chevron menu', () => {
-    const onChangeMode = vi.fn();
-
-    renderRow({ onChangeMode });
-    fireEvent.click(screen.getByLabelText('Track sizing mode'));
-    fireEvent.click(screen.getByText('Hug'));
-
-    expect(onChangeMode).toHaveBeenCalledWith(SizingMode.hug);
   });
 
   it('should delete the row from its own minus button, and disable it when it is the last track', () => {

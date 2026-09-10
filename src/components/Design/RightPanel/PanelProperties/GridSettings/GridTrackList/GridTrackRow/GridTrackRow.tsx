@@ -20,8 +20,8 @@ import { useSelectTrackRow } from './hooks/useSelectTrackRow';
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
 import { getRemoveTrackTooltip } from './utils/getRemoveTrackTooltip';
-import { getSizingModeOptions } from './utils/getSizingModeOptions';
 import { getTrackModeOptions } from './utils/getTrackModeOptions';
+import { roundTrackSize } from './utils/roundTrackSize';
 import { translationNameSpace } from '../../constants';
 
 // styles
@@ -70,8 +70,11 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
   const handleHugBlur = useCommitHugTrackAsFixed(onChangeMode);
   const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
   const removeTooltip = getRemoveTrackTooltip(t, axis, track, trackCount, isSelected, selectedCount);
-  const modeOptions = getSizingModeOptions(t);
   const trackModeOptions = getTrackModeOptions(t, track, axis);
+
+  const handleModeSelect = (mode: SizingMode): void => {
+    onChangeMode(mode, mode === SizingMode.fixed ? roundTrackSize(track.resolvedSize) : undefined);
+  };
 
   return (
     <div
@@ -84,7 +87,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
       <UITools.Dropdown
         bypassGlobalShortcuts={false}
         className={styles.GridTrackRow__mode}
-        onSelect={onChangeMode}
+        onSelect={handleModeSelect}
         options={trackModeOptions}
         value={track.mode}
         variant="outline"
@@ -93,25 +96,8 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
         bypassGlobalShortcuts={false}
         className={cx(styles.GridTrackRow__value, { [styles['GridTrackRow__value--hug']]: isHug })}
-        defaultValue={isHug ? String(Math.round(track.resolvedSize * 100) / 100) : String(track.value)}
+        defaultValue={isHug ? String(roundTrackSize(track.resolvedSize)) : String(track.value)}
         e2eValue={`${E2EAttribute.gridTrackValue}-${track.index}`}
-        endAdornment={
-          isHug ? undefined : (
-            <UITools.ButtonMenu
-              trigger={<Icon name="ChevronDown" size={10} />}
-              triggerAriaLabel={t(`${translationNameSpace}.trackModeAriaLabel`)}
-            >
-              {modeOptions.map((option) => (
-                <UITools.PopoverCompound.PopoverItem
-                  key={option.value}
-                  label={option.label}
-                  onClick={() => onChangeMode(option.value)}
-                  selected={option.value === track.mode}
-                />
-              ))}
-            </UITools.ButtonMenu>
-          )
-        }
         onBlur={isHug ? handleHugBlur : handleBlur}
         type="number"
       />
