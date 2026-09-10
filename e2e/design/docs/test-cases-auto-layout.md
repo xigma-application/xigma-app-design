@@ -53,6 +53,8 @@ repainting — same rationale as the Flow section above.
 | 13  | Dragging two already-placed, scattered grid children together merges them into adjacent cells (same occupancy-scan mechanism as a fresh multi-drop, since it just excludes the moved nodes' own old cells)                                                             |  ✅  | ✅ `grid.spec.ts` |
 | 14  | Holding the modifier while dragging a grid child disables the whole grid drop mechanism — no highlight, no indicator, no anchor change, no sibling reshuffle on drop                                                                                                   |  ✅  | ✅ `grid.spec.ts` |
 | 15  | A grid child being dragged visually rides the cursor like a ghost instead of snapping back to its cell (the live x/y dispatch is skipped so the grid engine's own resync has nothing to stomp)                                                                         |  —   | ✅ `grid.spec.ts` |
+| 16  | Shrinking the grid via the panel is rejected outright when the requested capacity can't hold every current child — no silent "grow to fit", the fields just revert                                                                                                     |  ✅  |         —         |
+| 17  | An accepted resize on an already-manually-placed grid re-packs every child's current reading order into the new column count instead of letting a naive per-axis anchor clamp collide two of them into the same cell                                                   |  ✅  | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -62,7 +64,13 @@ browser-only proof that a real drop wires the ripple into the store. #13/#14 reu
 drop pipeline as #5/#11 (a same-parent drag just excludes its own old cells from the occupancy
 scan) — the e2e proof is the wiring, not new geometry. #15 has no unit equivalent: it is purely a
 "does the canvas actually repaint between two live cursor positions" question, the kind a
-synthetic ref assertion can't distinguish from "frozen and re-rendering the same frame twice".
+synthetic ref assertion can't distinguish from "frozen and re-rendering the same frame twice". #16
+is exercised exhaustively (every reject/accept branch) by `getGridResizeRepack.spec.ts` and
+`useColumnGridArea.spec.tsx`, so it stays unit-only — a real browser adds nothing a mocked
+`clampGridCount` input can't already prove. #17 gets the one browser-only pass: real drags anchor
+two children via the actual drop pipeline first, then a real panel commit has to repack them
+without a collision — proving the wiring between the drop pipeline and the resize pipeline, not
+just the repack algorithm itself (already exhaustive in `getGridResizeRepack.spec.ts`).
 
 ## Reordering a child within its own frame
 

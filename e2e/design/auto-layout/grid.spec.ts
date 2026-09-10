@@ -461,4 +461,60 @@ test.describe('auto-layout — Grid flow', () => {
 
     expect(atSecondOffset.equals(atFirstOffset)).toBe(false);
   });
+
+  test('shrinking the column count repacks a manually anchored child instead of leaving it overlapping another', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-resize-repack');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // drag two rectangles into specific cells of the 2-column grid — this anchors both explicitly
+    await designPage.drawRectangle(1400, 250, 1450, 290);
+    await dragInto(page, { x: 1425, y: 270 }, { x: FRAME.x1 + 60, y: FRAME.y1 + 60 }); // column 0
+
+    await designPage.drawRectangle(1400, 400, 1450, 440);
+    await dragInto(page, { x: 1425, y: 420 }, { x: FRAME.x1 + 320, y: FRAME.y1 + 60 }); // column 1
+
+    const readAnchors = (): Promise<{ column?: number; row?: number }[]> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const activePage = pages[activePageId];
+        const [frameId] = activePage.rootOrder;
+        const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+        return frame.childIds.map((id) => {
+          const node = activePage.nodes[id] as unknown as { gridColumnAnchorIndex?: number; gridRowAnchorIndex?: number };
+
+          return { column: node.gridColumnAnchorIndex, row: node.gridRowAnchorIndex };
+        });
+      });
+
+    expect(await readAnchors()).toEqual([
+      { column: 0, row: 0 },
+      { column: 1, row: 0 },
+    ]);
+
+    // shrink to a single column via the panel — re-select the frame, since the last drop left the
+    // dropped rectangle selected instead
+    await selectFrameRow(page);
+    await page.locator('[data-test-grid-area]').click();
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('1');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(1);
+    await page.keyboard.press('Escape');
+
+    // the first child keeps its cell; the second no longer fits at column 1 and drops into row 1 — not overlapping
+    await expect.poll(readAnchors).toEqual([
+      { column: 0, row: 0 },
+      { column: 0, row: 1 },
+    ]);
+  });
 });

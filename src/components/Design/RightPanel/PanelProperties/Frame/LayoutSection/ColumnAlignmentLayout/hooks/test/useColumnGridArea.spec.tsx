@@ -67,6 +67,12 @@ describe('useColumnGridArea', () => {
     expect(result.current.rows).toBe('1');
   });
 
+  it('should do nothing when a matrix cell is clicked with nothing selected', () => {
+    const { result } = renderUseColumnGridArea();
+
+    expect(() => act(() => result.current.onClickCell({ columns: 2, rows: 2 }))).not.toThrow();
+  });
+
   it('should read the frame’s column count and derive the effective row count from its children', () => {
     const frameId = addGridFrame();
 
@@ -143,6 +149,100 @@ describe('useColumnGridArea', () => {
     act(() => result.current.onClickCell({ columns: 4, rows: 3 }));
 
     expect(readFrame(frameId)).toMatchObject({ gridColumnCount: 4, gridRowCount: 3 });
+  });
+
+  it('should reject a column commit whose capacity is too small for the fixed row count and the current children', () => {
+    const frameId = addGridFrame();
+
+    for (let i = 0; i < 6; i += 1) {
+      addChild(frameId);
+    }
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 4 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitColumns('1'));
+
+    // 1 column x 4 fixed rows = 4 cells, short of the 6 children — rejected, nothing changes
+    expect(readFrame(frameId)).toMatchObject({ gridColumnCount: 2, gridRowCount: 4 });
+  });
+
+  it('should allow a column commit that would be too small for the fixed row count when rows are Auto', () => {
+    const frameId = addGridFrame();
+
+    for (let i = 0; i < 6; i += 1) {
+      addChild(frameId);
+    }
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitColumns('1'));
+
+    expect(readFrame(frameId).gridColumnCount).toBe(1);
+  });
+
+  it('should reject a row commit whose capacity is too small for the current children', () => {
+    const frameId = addGridFrame();
+
+    for (let i = 0; i < 6; i += 1) {
+      addChild(frameId);
+    }
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 4 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitRows('1'));
+
+    // 2 columns x 1 row = 2 cells, short of the 6 children — rejected
+    expect(readFrame(frameId)).toMatchObject({ gridColumnCount: 2, gridRowCount: 4 });
+  });
+
+  it('should reject a matrix-cell click whose capacity is too small for the current children', () => {
+    const frameId = addGridFrame();
+
+    for (let i = 0; i < 6; i += 1) {
+      addChild(frameId);
+    }
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 4 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onClickCell({ columns: 1, rows: 1 }));
+
+    expect(readFrame(frameId)).toMatchObject({ gridColumnCount: 2, gridRowCount: 4 });
+  });
+
+  it('should repack a manually anchored child that no longer fits when the columns shrink', () => {
+    const frameId = addGridFrame();
+
+    addChild(frameId);
+    addChild(frameId);
+
+    const [firstId, secondId] = readFrame(frameId).childIds;
+
+    store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 }, id: firstId }));
+    store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 1, gridRowAnchorIndex: 0 }, id: secondId }));
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 2 }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onCommitColumns('1'));
+
+    const page = selectActivePage(store.getState());
+
+    // the first child keeps its cell; the second no longer fits at column 1 and drops into row 1
+    expect(page.nodes[firstId]).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 });
+    expect(page.nodes[secondId]).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 1 });
   });
 
   it('should report the rows as auto until an explicit count is set', () => {

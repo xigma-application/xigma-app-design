@@ -464,6 +464,35 @@ A child of a grid frame also shows a display-only **Column span / Row span** row
 (`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`) —
 fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
 
+### Panel — resizing a grid that already has children (`resolveGridResize`)
+
+Every dimension commit that can shrink the grid (`onCommitColumns`, `onCommitRows`, `onClickCell`
+picking a matrix cell) routes through `store/design/utils/autoLayout/getGridResizeRepack.ts`'s
+`resolveGridResize(frame, nodesById, newColumnCount, capacityRowCount)` before dispatching
+anything — matching Figma, not the engine's own "always grows to fit" instinct (§ Canvas — drag a
+child into a cell already relies on that instinct for *drop*, but a *resize* the user typed in is
+different: an impossible request should be rejected, not silently reinterpreted):
+
+- **Reject outright** when `capacityRowCount !== undefined && newColumnCount * capacityRowCount <
+  childIds.length` — e.g. a 2×4 grid holding 6 children, requesting 1×1: 1 cell can't hold 6, so
+  the commit is dropped entirely (no dispatch at all, the fields snap back to the real value).
+  `capacityRowCount` is the *fixed* row count when rows aren't Auto, or `undefined` when they are
+  (Auto rows have no ceiling — `onCommitColumns` passes `isRowsAuto ? undefined : rowCount`;
+  `onCommitRows` and `onClickCell` always pass the row value being committed, since typing/clicking
+  a row count always pins it).
+- **Repack, not just clamp**, when the frame is in manual placement (`gridAutoPlacement === false`)
+  and the new size is *accepted*: a naive per-axis anchor clamp (`getAnchoredGridPlacement`'s own
+  `Math.min(Math.max(anchor, 0), columns - span)`) can silently collide two children into the same
+  cell — e.g. a 2×2 with A anchored (0,0) and B anchored (1,0), shrunk to 1 column: both anchors
+  clamp to column 0, landing on top of each other. `resolveGridResize` instead re-derives every
+  child's **current** reading-order position (`placeGridCells` at the *old* column count, sorted by
+  `row * oldColumns + column`), then re-packs that exact order into the *new* column count via a
+  fresh auto-flow pass (`placeGridCells(orderedInputs, newColumnCount, true)` — collision-free by
+  construction). Only children whose resolved cell actually changed get a new
+  `gridColumnAnchorIndex` / `gridRowAnchorIndex` dispatch (`commitGridRepackedAnchors`); a growing
+  resize that doesn't dislodge anyone dispatches nothing. When the frame is still auto-placing,
+  repacking is a no-op — the live engine already re-flows every render, there's nothing to persist.
+
 ### Canvas — cell slots
 
 `src/utils/canvas/gridSlots/` holds the shared geometry: `getGridTrackLayout(frame, nodesById)`
@@ -623,12 +652,15 @@ The engine already honours spans and manual anchors when set in code.
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
   `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
   `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
-  `commitGridColumnCountChange` / `commitGridRowCountChange`), and
-  `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`).
+  `commitGridColumnCountChange` / `commitGridRowCountChange` / `commitGridRepackedAnchors`), and
+  `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`);
+  `store/design/utils/autoLayout/test/getGridResizeRepack.spec.ts` (the reject/repack rules
+  standalone).
 - **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
   `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
-  select, reflow on column-count change), and dragging an element into a cell (hover highlight +
-  dim, drop nests it filling the cell), driving the engine + canvas.
+  select, reflow on column-count change), dragging an element into a cell (hover highlight + dim,
+  drop nests it filling the cell), and shrinking columns on an already-anchored grid repacking
+  instead of colliding, driving the engine + canvas.
 
 ## History (so it isn't repeated)
 
@@ -722,3 +754,14 @@ The engine already honours spans and manual anchors when set in code.
     selection's *origin* parent is a grid frame, in place of the dispatch) carries just a raw
     cursor offset, consumed at render time only by `getGridDragRenderNode` /
     `getOverriddenGridDragAncestor` — no store x/y is ever written until the real drop commit.
+12. **2026-09-10 — grid flow, Phase 3e: safe resizing (§ "Panel — resizing a grid that already has
+    children").** Locked from a single Figma example the user gave — a 2×4 grid holding 6
+    children, requested down to 1×1 — then a follow-up correction once a 2×2→1×2 case was raised:
+    the user pointed out that even an *accepted* resize (capacity is fine) can still leave an
+    anchored child's position invalid, and that has to be actively repaired, not just capacity
+    gated. `resolveGridResize` does both in one pass: reject when the requested capacity can't
+    hold every child (no dispatch, no silent "grow to fit" the way a *drop* is allowed to), else —
+    for a frame already in manual placement — re-pack every child's *current* reading order into
+    the new column count via a fresh auto-flow pass, persisting an anchor only for whoever's cell
+    actually moved. Auto-placing frames need no repair pass; the live engine already re-flows them
+    every render.

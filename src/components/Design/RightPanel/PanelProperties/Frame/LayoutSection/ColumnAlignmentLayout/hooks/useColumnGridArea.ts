@@ -9,9 +9,11 @@ import { TActiveCell } from '../GridArea/GridAreaPopover/CellsInput/types';
 // utils
 import { clampGridCount } from './utils/clampGridCount';
 import { commitGridColumnCountChange } from './utils/commitGridColumnCountChange';
+import { commitGridRepackedAnchors } from './utils/commitGridRepackedAnchors';
 import { commitGridRowCountChange } from './utils/commitGridRowCountChange';
 import { commitGridRowsAuto } from './utils/commitGridRowsAuto';
 import { getDerivedGridRowCount } from 'store/design/utils/autoLayout/getDerivedGridRowCount';
+import { resolveGridResize } from 'store/design/utils/autoLayout/getGridResizeRepack';
 
 export type TUseColumnGridAreaResult = {
   columns: string;
@@ -36,16 +38,27 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
   const onCommitColumns = (raw: string): void => {
     const next = clampGridCount(raw);
 
-    if (next !== null) {
-      commitGridColumnCountChange(dispatch, frameNode, next);
+    if (next !== null && frameNode) {
+      const capacityRowCount = isRowsAuto ? undefined : rowCount;
+      const resolution = resolveGridResize(frameNode, nodes, next, capacityRowCount);
+
+      if (resolution.ok) {
+        commitGridColumnCountChange(dispatch, frameNode, next);
+        commitGridRepackedAnchors(dispatch, resolution.repacked);
+      }
     }
   };
 
   const onCommitRows = (raw: string): void => {
     const next = clampGridCount(raw);
 
-    if (next !== null) {
-      commitGridRowCountChange(dispatch, frameNode, next);
+    if (next !== null && frameNode) {
+      const resolution = resolveGridResize(frameNode, nodes, columnCount, next);
+
+      if (resolution.ok) {
+        commitGridRowCountChange(dispatch, frameNode, next);
+        commitGridRepackedAnchors(dispatch, resolution.repacked);
+      }
     }
   };
 
@@ -58,8 +71,15 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
   };
 
   const onClickCell = (cell: TActiveCell): void => {
-    commitGridColumnCountChange(dispatch, frameNode, cell.columns);
-    commitGridRowCountChange(dispatch, frameNode, cell.rows);
+    if (frameNode) {
+      const resolution = resolveGridResize(frameNode, nodes, cell.columns, cell.rows);
+
+      if (resolution.ok) {
+        commitGridColumnCountChange(dispatch, frameNode, cell.columns);
+        commitGridRowCountChange(dispatch, frameNode, cell.rows);
+        commitGridRepackedAnchors(dispatch, resolution.repacked);
+      }
+    }
   };
 
   return {
