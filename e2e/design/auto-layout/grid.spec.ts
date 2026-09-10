@@ -1814,19 +1814,18 @@ test.describe('auto-layout — Grid flow', () => {
     const equalThirds = await page.screenshot({ clip: safeArea });
 
     // focusing the field selects just the digit (not the fr unit), so typing "3" over it
-    // yields "3fr" — the track stays on Fill, now weighted 3:1:1. Committing via blur (not
-    // Enter) so the keystroke doesn't also reach global canvas shortcuts.
+    // yields "3fr" — the track stays on Fill, now weighted 3:1:1
     await value0.click();
     await value0.pressSequentially('3');
-    await value0.evaluate((el) => (el as HTMLInputElement).blur());
+    await value0.press('Enter');
     await expect.poll(() => readColumnTrack(page, 0)).toMatchObject({ mode: 'fill', value: 3 });
     await page.waitForTimeout(150);
     const weighted = await page.screenshot({ clip: safeArea });
     expect(weighted.equals(equalThirds)).toBe(false);
 
     // clearing the whole field down to a bare number (fr unit gone) drops the track to Fixed.
-    // Set via the DOM directly (not the keyboard) — Delete/Backspace are bound to the global
-    // "delete selected node" shortcut, which this field intentionally lets through.
+    // Set via the DOM directly (not Delete/Backspace) — those are bound to the global "delete
+    // selected node" shortcut, which this field intentionally lets through.
     await value0.evaluate((el) => {
       const input = el as HTMLInputElement;
       const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
@@ -1834,8 +1833,8 @@ test.describe('auto-layout — Grid flow', () => {
       input.focus();
       setValue?.call(input, '120');
       input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.blur();
     });
+    await value0.press('Enter');
     await expect.poll(() => readColumnTrack(page, 0)).toMatchObject({ mode: 'fixed', value: 120 });
     await page.waitForTimeout(150);
     const fixed = await page.screenshot({ clip: safeArea });

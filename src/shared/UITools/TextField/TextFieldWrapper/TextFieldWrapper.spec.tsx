@@ -64,6 +64,40 @@ describe('TextFieldWrapper behaviors', () => {
     expect(onKeyDown).toHaveBeenCalled();
   });
 
+  it('should stop the Enter keydown from bubbling to global shortcut listeners', () => {
+    // mock
+    const onDocumentKeyDown = vi.fn();
+    document.addEventListener('keydown', onDocumentKeyDown);
+
+    // before
+    render(<TextFieldWrapper readOnly value="ffffff" />);
+    const input = screen.getByDisplayValue('ffffff');
+
+    // action
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    // result
+    expect(onDocumentKeyDown).not.toHaveBeenCalled();
+    document.removeEventListener('keydown', onDocumentKeyDown);
+  });
+
+  it('should let a non-Enter key keep bubbling to global shortcut listeners', () => {
+    // mock
+    const onDocumentKeyDown = vi.fn();
+    document.addEventListener('keydown', onDocumentKeyDown);
+
+    // before
+    render(<TextFieldWrapper readOnly value="ffffff" />);
+    const input = screen.getByDisplayValue('ffffff');
+
+    // action
+    fireEvent.keyDown(input, { key: 'a' });
+
+    // result
+    expect(onDocumentKeyDown).toHaveBeenCalled();
+    document.removeEventListener('keydown', onDocumentKeyDown);
+  });
+
   it('should not blur on a non-Enter key and needs no caller key handler', () => {
     // before
     render(<TextFieldWrapper readOnly value="ffffff" />);

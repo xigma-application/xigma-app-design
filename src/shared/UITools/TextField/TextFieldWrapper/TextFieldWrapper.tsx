@@ -45,6 +45,7 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === 'Enter') {
+      event.stopPropagation();
       event.currentTarget.blur();
     }
 
