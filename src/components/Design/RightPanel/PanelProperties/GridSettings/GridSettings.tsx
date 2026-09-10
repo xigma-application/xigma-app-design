@@ -31,6 +31,7 @@ const GridSettings: FC = () => {
       <GridSettingsHeader onClose={onClose} />
       <GridTrackList
         addAriaLabel={t(`${translationNameSpace}.addColumnAriaLabel`)}
+        addTooltip={t(`${translationNameSpace}.addColumnTooltip`)}
         axis="column"
         controls={columns}
         coordinator={coordinator}
@@ -40,6 +41,7 @@ const GridSettings: FC = () => {
       />
       <GridTrackList
         addAriaLabel={t(`${translationNameSpace}.addRowAriaLabel`)}
+        addTooltip={t(`${translationNameSpace}.addRowTooltip`)}
         axis="row"
         controls={rows}
         coordinator={coordinator}

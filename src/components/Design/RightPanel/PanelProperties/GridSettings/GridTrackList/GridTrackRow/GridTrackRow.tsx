@@ -3,7 +3,7 @@ import { FC, PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
-import { Icon } from '@xigma/components';
+import { Icon, Tooltip } from '@xigma/components';
 
 // components
 import GridTrackHandle from './GridTrackHandle';
@@ -26,8 +26,10 @@ import styles from './grid-track-row.module.scss';
 // types
 import { E2EAttribute } from 'types/e2e';
 import { SizingMode } from 'types/design/enums';
+import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 export type TGridTrackRowProps = {
+  axis: TGridTrackAxis;
   canDelete: boolean;
   isDragging: boolean;
   isSelected: boolean;
@@ -37,10 +39,13 @@ export type TGridTrackRowProps = {
   onSelect: TFunc<[TGridTrackSelectModifiers]>;
   onStartDrag: TFunc<[ReactPointerEvent]>;
   registerRow: (element: HTMLElement | null) => void;
+  selectedCount: number;
   track: TGridTrackViewModel;
+  trackCount: number;
 };
 
 export const GridTrackRow: FC<TGridTrackRowProps> = ({
+  axis,
   canDelete,
   isDragging,
   isSelected,
@@ -50,13 +55,20 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
   onSelect,
   onStartDrag,
   registerRow,
+  selectedCount,
   track,
+  trackCount,
 }) => {
   const { t } = useTranslation();
   const isHug = track.mode === SizingMode.hug;
+  const axisKey = axis === 'column' ? 'Column' : 'Row';
+  const isBulkRemove = isSelected && selectedCount > 1;
   const handleClick = useSelectTrackRow(onSelect);
   const handleBlur = useCommitTrackValueOnBlur(onChangeValue);
   const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
+  const removeTooltip = isBulkRemove
+    ? t(`${translationNameSpace}.remove${axisKey}sTooltip`, { count: selectedCount })
+    : t(`${translationNameSpace}.remove${axisKey}Tooltip`, { position: track.index + 1, total: trackCount });
   const modeOptions = [SizingMode.fill, SizingMode.fixed, SizingMode.hug].map((mode) => ({
     label: t(`${translationNameSpace}.mode.${mode}`),
     value: mode,
@@ -103,15 +115,17 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         onBlur={handleBlur}
         type="number"
       />
-      <UITools.Button
-        ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)}
-        className={styles.GridTrackRow__delete}
-        disabled={!canDelete}
-        onClick={onDelete}
-        style={{ padding: 2 }}
-      >
-        <Icon name="Minus" size={12} />
-      </UITools.Button>
+      <Tooltip align="end" content={removeTooltip}>
+        <UITools.Button
+          ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)}
+          className={styles.GridTrackRow__delete}
+          disabled={!canDelete}
+          onClick={onDelete}
+          style={{ padding: 2 }}
+        >
+          <Icon name="Minus" size={12} />
+        </UITools.Button>
+      </Tooltip>
     </div>
   );
 };

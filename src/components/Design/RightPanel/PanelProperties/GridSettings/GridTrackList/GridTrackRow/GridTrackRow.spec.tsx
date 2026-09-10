@@ -22,6 +22,7 @@ const renderRow = (props: Partial<Parameters<typeof GridTrackRow>[0]> = {}): Ret
   render(
     <TooltipProvider>
       <GridTrackRow
+        axis="column"
         canDelete
         isDragging={false}
         isSelected={false}
@@ -31,7 +32,9 @@ const renderRow = (props: Partial<Parameters<typeof GridTrackRow>[0]> = {}): Ret
         onSelect={vi.fn()}
         onStartDrag={vi.fn()}
         registerRow={vi.fn()}
+        selectedCount={1}
         track={track()}
+        trackCount={3}
         {...props}
       />
     </TooltipProvider>,
@@ -102,6 +105,7 @@ describe('GridTrackRow', () => {
     rerender(
       <TooltipProvider>
         <GridTrackRow
+          axis="column"
           canDelete={false}
           isDragging={false}
           isSelected={false}
@@ -111,12 +115,46 @@ describe('GridTrackRow', () => {
           onSelect={vi.fn()}
           onStartDrag={vi.fn()}
           registerRow={vi.fn()}
+          selectedCount={1}
           track={track()}
+          trackCount={3}
         />
       </TooltipProvider>,
     );
 
     expect(screen.getByRole('button', { name: 'Delete selected tracks' })).toBeDisabled();
+  });
+
+  it('should show a position-aware remove tooltip on the minus button for a column track', async () => {
+    renderRow({ axis: 'column', track: track({ index: 1 }), trackCount: 3 });
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Delete selected tracks' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove column 2 of 3');
+  });
+
+  it('should word the remove tooltip for a row track', async () => {
+    renderRow({ axis: 'row', track: track({ index: 0 }), trackCount: 2 });
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Delete selected tracks' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove row 1 of 2');
+  });
+
+  it('should switch the remove tooltip to a count when this row is part of a multi-selection', async () => {
+    renderRow({ axis: 'column', isSelected: true, selectedCount: 2, track: track({ index: 0 }), trackCount: 4 });
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Delete selected tracks' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove 2 columns');
+  });
+
+  it('should keep the single-track remove wording when the row itself is not in the multi-selection', async () => {
+    renderRow({ axis: 'column', isSelected: false, selectedCount: 2, track: track({ index: 2 }), trackCount: 4 });
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Delete selected tracks' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove column 3 of 4');
   });
 
   it('should reflect the selected and dragging states in its class list', () => {
@@ -126,6 +164,7 @@ describe('GridTrackRow', () => {
     rerender(
       <TooltipProvider>
         <GridTrackRow
+          axis="column"
           canDelete
           isDragging
           isSelected
@@ -135,7 +174,9 @@ describe('GridTrackRow', () => {
           onSelect={vi.fn()}
           onStartDrag={vi.fn()}
           registerRow={vi.fn()}
+          selectedCount={1}
           track={track()}
+          trackCount={3}
         />
       </TooltipProvider>,
     );

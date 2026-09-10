@@ -66,6 +66,24 @@ describe('GridSettings', () => {
     expect(screen.getAllByRole('button', { name: 'Reorder track' })).toHaveLength(5);
   });
 
+  it('should label each list’s plus button with its own add tooltip', async () => {
+    selectGridFrame();
+
+    renderGridSettings();
+    fireEvent.focus(screen.getByRole('button', { name: 'Add row' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Add row');
+  });
+
+  it('should give a column row’s minus button a position-aware remove tooltip', async () => {
+    selectGridFrame();
+
+    renderGridSettings();
+    fireEvent.focus(screen.getAllByRole('button', { name: 'Delete selected tracks' })[0]);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove column 1 of 3');
+  });
+
   it('should close the panel from the header', () => {
     selectGridFrame();
 

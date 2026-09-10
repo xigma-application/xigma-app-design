@@ -1629,4 +1629,44 @@ test.describe('auto-layout — Grid flow', () => {
 
     await page.mouse.up();
   });
+
+  test('the add and remove track buttons carry descriptive tooltips', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-tooltips');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+    const rows = page.locator('[data-test-section="grid-rows"]');
+
+    // the rows list's plus button announces its own axis, not the generic column copy
+    await rows.getByRole('button', { name: 'Add row' }).hover();
+    await expect(page.getByRole('tooltip')).toHaveText('Add row');
+
+    await page.mouse.move(FRAME.x1 - 120, FRAME.y1);
+    await expect(page.getByRole('tooltip')).toBeHidden();
+
+    // a column row's minus button names the exact track it removes and the current track count
+    const firstColumnMinus = columns.locator('[data-test-grid-track-row="0"]').getByRole('button', { name: 'Delete selected tracks' });
+
+    await firstColumnMinus.hover();
+    await expect(page.getByRole('tooltip')).toHaveText('Remove column 1 of 2');
+
+    await page.mouse.move(FRAME.x1 - 120, FRAME.y1);
+    await expect(page.getByRole('tooltip')).toBeHidden();
+
+    // select both columns — the same minus button now removes the whole selection, so it says so
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await columns.locator('[data-test-grid-track-row="1"]').click({ modifiers: ['ControlOrMeta'] });
+    await firstColumnMinus.hover();
+    await expect(page.getByRole('tooltip')).toHaveText('Remove 2 columns');
+  });
 });

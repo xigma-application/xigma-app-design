@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 
 // components
 import GridTrackDropIndicator from './GridTrackDropIndicator';
@@ -18,6 +18,7 @@ import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 export type TGridTrackListProps = {
   addAriaLabel: string;
+  addTooltip: ReactNode;
   axis: TGridTrackAxis;
   controls: TGridAxisControls;
   coordinator: TGridTrackSelectionCoordinator;
@@ -28,6 +29,7 @@ export type TGridTrackListProps = {
 
 export const GridTrackList: FC<TGridTrackListProps> = ({
   addAriaLabel,
+  addTooltip,
   axis,
   controls,
   coordinator,
@@ -38,11 +40,12 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
   const list = useGridTrackList(controls, axis, coordinator, initialSelectedIndices);
 
   return (
-    <UITools.Section addAriaLabel={addAriaLabel} e2eValue={e2eValue} label={label} onAdd={list.onAdd}>
+    <UITools.Section addAriaLabel={addAriaLabel} addTooltip={addTooltip} e2eValue={e2eValue} label={label} onAdd={list.onAdd}>
       <div className={styles.GridTrackList}>
         {list.dropIndicatorIndex !== null && <GridTrackDropIndicator index={list.dropIndicatorIndex} />}
         {controls.tracks.map((track) => (
           <GridTrackRow
+            axis={axis}
             canDelete
             isDragging={list.isRowDragging(track.index)}
             isSelected={list.selectedIndices.includes(track.index)}
@@ -53,7 +56,9 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
             onSelect={(modifiers) => list.onSelectRow(track.index, modifiers)}
             onStartDrag={(event) => list.beginDrag(track.index, event)}
             registerRow={list.registerRow(track.index)}
+            selectedCount={list.selectedIndices.length}
             track={track}
+            trackCount={controls.tracks.length}
           />
         ))}
       </div>

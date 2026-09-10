@@ -532,7 +532,13 @@ row gets `var(--color-blue-2)` borders on its mode dropdown and value field and
   anchor track just shifts the rest down); a single-cell child whose only track goes is released
   to auto-placement (`anchorIndex`/`span` → `undefined`). `getGridTrackChildren` returns `[]` for
   an auto-placement grid, so those fix-ups only run for manually-anchored (`gridAutoPlacement:
-  false`) frames.
+  false`) frames. The `+` button carries an axis-specific tooltip ("Add column" / "Add row", passed
+  down as `addTooltip` through `GridTrackList` into `UITools.Section`). Each row's `−` button gets a
+  tooltip from `GridTrackRow` built off `axis` + `trackCount` + (`isSelected`, `selectedCount`):
+  "Remove column 1 of 3" for a lone delete, but the count form ("Remove 2 columns", i18next
+  `_one`/`_few`/`_many`/`_other` plurals) when that row is itself in a multi-selection — matching
+  `commitGridTrackDelete`, which deletes the whole `selectedIndices` set only when the clicked row's
+  index is in it.
 - **Reorder** — drag the handle: `useGridTrackReorderDrag` opens a window `pointermove`/`pointerup`
   drag, `computeGridTrackDropIndex(rowRects, clientY)` counts the row midpoints above the pointer
   for the drop slot, and a `GridTrackDropIndicator` renders there — `position: absolute` (2px

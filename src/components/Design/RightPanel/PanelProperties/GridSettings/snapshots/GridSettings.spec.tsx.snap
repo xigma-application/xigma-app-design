@@ -64,6 +64,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Add column"
             aria-pressed="false"
             class="_Button_b88d2e"
+            data-state="closed"
             style="padding: 0px;"
             type="button"
           >
@@ -198,6 +199,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Delete selected tracks"
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            data-state="closed"
             style="padding: 2px;"
             type="button"
           >
@@ -328,6 +330,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Delete selected tracks"
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            data-state="closed"
             style="padding: 2px;"
             type="button"
           >
@@ -458,6 +461,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Delete selected tracks"
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            data-state="closed"
             style="padding: 2px;"
             type="button"
           >
@@ -501,6 +505,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Add row"
             aria-pressed="false"
             class="_Button_b88d2e"
+            data-state="closed"
             style="padding: 0px;"
             type="button"
           >
@@ -635,6 +640,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Delete selected tracks"
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            data-state="closed"
             style="padding: 2px;"
             type="button"
           >
@@ -765,6 +771,7 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-label="Delete selected tracks"
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            data-state="closed"
             style="padding: 2px;"
             type="button"
           >

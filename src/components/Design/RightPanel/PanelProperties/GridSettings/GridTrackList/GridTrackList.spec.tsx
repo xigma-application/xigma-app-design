@@ -32,6 +32,7 @@ const renderList = (props: Partial<Parameters<typeof GridTrackList>[0]> = {}): R
     <TooltipProvider>
       <GridTrackList
         addAriaLabel="Add column"
+        addTooltip="Add column"
         axis="column"
         controls={controls()}
         coordinator={permissiveCoordinator()}
@@ -64,6 +65,32 @@ describe('GridTrackList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add column' }));
 
     expect(onAdd).toHaveBeenCalled();
+  });
+
+  it('should surface the add tooltip from the section plus button', async () => {
+    renderList({ addTooltip: 'Add row' });
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Add column' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Add row');
+  });
+
+  it('should give each row a position-aware remove tooltip', async () => {
+    renderList();
+
+    fireEvent.focus(screen.getAllByRole('button', { name: 'Delete selected tracks' })[1]);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove column 2 of 2');
+  });
+
+  it('should turn the remove tooltip into a count once several rows are selected', async () => {
+    const { container } = renderList();
+
+    fireEvent.click(container.querySelector('[data-test-grid-track-row="0"]') as HTMLElement);
+    fireEvent.click(container.querySelector('[data-test-grid-track-row="1"]') as HTMLElement, { ctrlKey: true });
+    fireEvent.focus(screen.getAllByRole('button', { name: 'Delete selected tracks' })[0]);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Remove 2 columns');
   });
 
   it('should delete a track from that row’s own minus button', () => {
