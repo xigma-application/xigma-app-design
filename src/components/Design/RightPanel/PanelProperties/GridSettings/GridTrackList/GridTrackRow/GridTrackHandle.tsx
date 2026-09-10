@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, PointerEvent as ReactPointerEvent } from 'react';
+import { FC, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -20,6 +20,7 @@ export type TGridTrackHandleProps = {
 
 export const GridTrackHandle: FC<TGridTrackHandleProps> = ({ index, isDragging, isSelected, onPointerDown }) => {
   const { t } = useTranslation();
+  const stopClickPropagation = (event: ReactMouseEvent<HTMLButtonElement>): void => event.stopPropagation();
 
   return (
     <button
@@ -28,6 +29,7 @@ export const GridTrackHandle: FC<TGridTrackHandleProps> = ({ index, isDragging, 
         [styles['GridTrackHandle--dragging']]: isDragging,
         [styles['GridTrackHandle--selected']]: isSelected,
       })}
+      onClick={stopClickPropagation}
       onPointerDown={onPointerDown}
       type="button"
     >

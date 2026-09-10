@@ -75,10 +75,15 @@ describe('GridTrackList', () => {
     expect(onDelete).toHaveBeenCalledWith([1]);
   });
 
-  it('should disable every row’s minus button when only one track is left', () => {
-    renderList({ controls: controls({ tracks: [{ index: 0, mode: 'fill', value: 1 }] as TGridAxisControls['tracks'] }) });
+  it('should still allow deleting the last remaining track', () => {
+    const onDelete = vi.fn();
 
-    expect(screen.getByRole('button', { name: 'Delete selected tracks' })).toBeDisabled();
+    renderList({
+      controls: controls({ onDelete, tracks: [{ index: 0, mode: 'fill', value: 1 }] as TGridAxisControls['tracks'] }),
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete selected tracks' }));
+
+    expect(onDelete).toHaveBeenCalledWith([0]);
   });
 
   it('should forward a row’s mode and value changes with that row’s index', () => {

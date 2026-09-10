@@ -1424,4 +1424,90 @@ test.describe('auto-layout — Grid flow', () => {
     await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
     await expect(columns.locator('[data-test-grid-track-row="1"]')).not.toHaveClass(/--selected/);
   });
+
+  test('deselecting and reselecting a grid frame does not reopen the dedicated panel on its own', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-close-on-reselect');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    // deselect by clicking empty canvas, then reselect the same grid frame
+    await page.mouse.click(1500, 200);
+    await selectFrameRow(page);
+
+    // the normal frame properties show instead of the panel reopening on its own
+    await expect(page.locator('[data-test-grid-settings-panel]')).toBeHidden();
+    await expect(flowGroup(page)).toBeVisible();
+  });
+
+  test('shift/ctrl-clicking a track handle multi-selects instead of starting a drag', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-handle-multiselect');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    // switching to Grid already seeds 2 columns; add one more to have 3 rows to select across
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+
+    const lastHandle = columns.locator('[data-test-grid-track-row="2"]').getByRole('button', { name: 'Reorder track' });
+
+    await lastHandle.click({ modifiers: ['Shift'] });
+
+    // a shift-click on the handle extends the range selection instead of the handle's own drag
+    // swallowing the modifier and leaving only the row it was grabbed on selected
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="2"]')).toHaveClass(/--selected/);
+  });
+
+  test('deleting the last remaining column exits grid mode back to free-form layout', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-delete-last-column');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    // switching to Grid already seeds 2 columns; delete down to 1, then delete that last one too
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await columns.getByRole('button', { name: 'Delete selected tracks' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(1);
+
+    await columns.locator('[data-test-grid-track-row="0"]').click();
+    await columns.getByRole('button', { name: 'Delete selected tracks' }).click();
+
+    // the panel closes on its own and the frame falls back to the normal free-form properties
+    await expect(page.locator('[data-test-grid-settings-panel]')).toBeHidden();
+    await expect(flowGroup(page)).toBeVisible();
+    await expect(flowGroup(page).getByLabel('Free form', { exact: true })).toHaveAttribute('aria-pressed', 'true');
+  });
 });

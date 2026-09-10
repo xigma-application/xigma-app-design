@@ -21,6 +21,19 @@ describe('GridTrackHandle', () => {
     expect(onPointerDown).toHaveBeenCalled();
   });
 
+  it('should stop a click on the handle from bubbling to the row', () => {
+    const onRowClick = vi.fn();
+
+    render(
+      <div onClick={onRowClick}>
+        <GridTrackHandle index={0} isDragging={false} isSelected={false} onPointerDown={vi.fn()} />
+      </div>,
+    );
+    fireEvent.click(handle());
+
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
   it('should carry a distinct class while dragging and while selected', () => {
     const { rerender } = render(<GridTrackHandle index={0} isDragging={false} isSelected={false} onPointerDown={vi.fn()} />);
     const base = handle().className;

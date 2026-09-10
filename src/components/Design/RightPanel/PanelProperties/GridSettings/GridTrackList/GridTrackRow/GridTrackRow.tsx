@@ -12,6 +12,7 @@ import { UITools } from 'shared';
 // hooks
 import { TGridTrackSelectModifiers } from '../hooks/useGridTrackSelection';
 import { TGridTrackViewModel } from '../../hooks/types';
+import { useBeginTrackHandleDrag } from './hooks/useBeginTrackHandleDrag';
 import { useCommitTrackValueOnBlur } from './hooks/useCommitTrackValueOnBlur';
 import { useSelectTrackRow } from './hooks/useSelectTrackRow';
 
@@ -55,6 +56,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
   const isHug = track.mode === SizingMode.hug;
   const handleClick = useSelectTrackRow(onSelect);
   const handleBlur = useCommitTrackValueOnBlur(onChangeValue);
+  const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
   const modeOptions = [SizingMode.fill, SizingMode.fixed, SizingMode.hug].map((mode) => ({
     label: t(`${translationNameSpace}.mode.${mode}`),
     value: mode,
@@ -70,7 +72,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
       ref={registerRow}
       {...getAttributes(E2EAttribute.gridTrackRow, String(track.index))}
     >
-      <GridTrackHandle index={track.index} isDragging={isDragging} isSelected={isSelected} onPointerDown={onStartDrag} />
+      <GridTrackHandle index={track.index} isDragging={isDragging} isSelected={isSelected} onPointerDown={handlePointerDown} />
       <UITools.Dropdown
         bypassGlobalShortcuts={false}
         className={styles.GridTrackRow__mode}

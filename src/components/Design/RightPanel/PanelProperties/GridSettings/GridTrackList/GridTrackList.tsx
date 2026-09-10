@@ -36,7 +36,6 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
   label,
 }) => {
   const list = useGridTrackList(controls, axis, coordinator, initialSelectedIndices);
-  const canDelete = controls.tracks.length > 1;
 
   return (
     <UITools.Section addAriaLabel={addAriaLabel} e2eValue={e2eValue} label={label} onAdd={list.onAdd}>
@@ -44,7 +43,7 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
         {list.dropIndicatorIndex !== null && <GridTrackDropIndicator index={list.dropIndicatorIndex} />}
         {controls.tracks.map((track) => (
           <GridTrackRow
-            canDelete={canDelete}
+            canDelete
             isDragging={list.isRowDragging(track.index)}
             isSelected={list.selectedIndices.includes(track.index)}
             key={track.index}

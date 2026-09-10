@@ -10,7 +10,7 @@ import { TGridAxisControls } from './types';
 import { buildGridTrackList } from 'store/design/utils/autoLayout/gridTracks/buildGridTrackList';
 import { getDerivedGridRowCount } from 'store/design/utils/autoLayout/getDerivedGridRowCount';
 import { getSelectedGridFrame } from 'store/design/utils/autoLayout/getSelectedGridFrame';
-import { makeAxisControls } from './utils/makeAxisControls';
+import { makeAxisControls } from './utils/makeAxisControls/makeAxisControls';
 
 export type TUseGridSettingsPanelResult = {
   columns: TGridAxisControls;

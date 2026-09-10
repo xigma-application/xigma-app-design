@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
@@ -10,7 +10,7 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 
 // store
 import { addNode, setActiveTool, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -165,6 +165,33 @@ describe('PanelProperties behaviors', () => {
 
     // cleanup
     store.dispatch(setGridSettingsPanelOpen(false));
+    store.dispatch(setSelection([]));
+  });
+
+  it('should close the grid settings panel when a deselected grid frame is selected again', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 2, layoutMode: LayoutMode.grid }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setGridSettingsPanelOpen(true));
+
+    // before
+    renderPanelProperties();
+    expect(screen.getByRole('button', { name: 'Close grid settings' })).toBeInTheDocument();
+
+    // action: deselect, then select the same grid frame again (two distinct renders, like on the real canvas)
+    act(() => {
+      store.dispatch(setSelection([]));
+    });
+    act(() => {
+      store.dispatch(setSelection([frameId]));
+    });
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Close grid settings' })).not.toBeInTheDocument();
+    expect(selectIsGridSettingsPanelOpen(store.getState())).toBe(false);
+
+    // cleanup
     store.dispatch(setSelection([]));
   });
 

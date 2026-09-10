@@ -174,14 +174,17 @@ describe('useGridSettingsPanel', () => {
     expect(readNode(childId).gridColumnSpan).toBe(2);
   });
 
-  it('should not delete the last remaining track', () => {
+  it('should exit grid mode and close the panel when the last remaining track is deleted', () => {
     const frameId = addGridFrame({ gridColumnCount: 1 });
+    store.dispatch(setGridSettingsPanelOpen(true));
 
     const { result } = render();
 
     act(() => result.current.columns.onDelete([0]));
 
-    expect(readFrame(frameId).gridColumnCount).toBe(1);
+    expect(readFrame(frameId).layoutMode).toBe(LayoutMode.freeForm);
+    expect(readFrame(frameId).gridColumnCount).toBeUndefined();
+    expect(selectIsGridSettingsPanelOpen(store.getState())).toBe(false);
   });
 
   it('should reorder tracks and carry a manually anchored child along', () => {

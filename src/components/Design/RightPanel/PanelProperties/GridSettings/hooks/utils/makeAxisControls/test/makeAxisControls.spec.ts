@@ -1,5 +1,5 @@
 // store
-import { updateNode } from 'store/design/slice';
+import { setGridSettingsPanelOpen, updateNode } from 'store/design/slice';
 
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
@@ -11,7 +11,7 @@ import { makeAxisControls } from '../makeAxisControls';
 vi.mock('store/design/slice', async () => {
   const actual = await vi.importActual<typeof import('store/design/slice')>('store/design/slice');
 
-  return { ...actual, updateNode: vi.fn(actual.updateNode) };
+  return { ...actual, setGridSettingsPanelOpen: vi.fn(actual.setGridSettingsPanelOpen), updateNode: vi.fn(actual.updateNode) };
 });
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode =>
@@ -157,12 +157,51 @@ describe('makeAxisControls', () => {
       expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2 }, id: 'a' });
     });
 
-    it('should not delete the last remaining track', () => {
+    it('should exit grid mode when deleting the last remaining track', () => {
       const dispatch = vi.fn();
+      const gridFrame = frame({ childIds: ['a'], gridColumnCount: 1 });
+      const nodes = byId([rect('a', { widthSizingMode: SizingMode.fill })]);
 
-      makeAxisControls(dispatch, frame({ gridColumnCount: 1 }), {}, 'column', tracks({ mode: SizingMode.fixed, value: 10 })).onDelete([0]);
+      makeAxisControls(dispatch, gridFrame, nodes, 'column', tracks({ mode: SizingMode.fixed, value: 10 })).onDelete([0]);
 
-      expect(dispatch).not.toHaveBeenCalled();
+      expect(updateNode).toHaveBeenCalledWith({
+        changes: {
+          gridAutoPlacement: undefined,
+          gridColumnCount: undefined,
+          gridColumnSizes: undefined,
+          gridRowCount: undefined,
+          gridRowSizes: undefined,
+          layoutMode: LayoutMode.freeForm,
+          layoutWrap: false,
+        },
+        id: 'grid-1',
+      });
+      expect(updateNode).toHaveBeenCalledWith({
+        changes: {
+          gridChildHorizontalAlign: undefined,
+          gridChildVerticalAlign: undefined,
+          gridColumnAnchorIndex: undefined,
+          gridColumnSpan: undefined,
+          gridRowAnchorIndex: undefined,
+          gridRowSpan: undefined,
+        },
+        id: 'a',
+      });
+      expect(updateNode).toHaveBeenCalledWith({ changes: { widthSizingMode: SizingMode.fixed }, id: 'a' });
+      expect(setGridSettingsPanelOpen).toHaveBeenCalledWith(false);
+    });
+
+    it('should exit grid mode when deleting every remaining track at once', () => {
+      const dispatch = vi.fn();
+      const gridFrame = frame({ gridColumnCount: 2 });
+
+      const columnTracks = tracks({ mode: SizingMode.fixed, value: 10 }, { mode: SizingMode.fixed, value: 10 });
+
+      makeAxisControls(dispatch, gridFrame, {}, 'column', columnTracks).onDelete([0, 1]);
+
+      expect(updateNode).toHaveBeenCalledWith(
+        expect.objectContaining({ changes: expect.objectContaining({ layoutMode: LayoutMode.freeForm }) }),
+      );
     });
   });
 
