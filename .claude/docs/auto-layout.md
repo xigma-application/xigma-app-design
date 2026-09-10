@@ -483,20 +483,21 @@ gate, in `drawScene` next to the padding/gap handles) strokes every cell faint b
 ### Canvas — drag a child into a cell
 
 While an element is dragged over a grid frame, `resolveDragReparentTarget` branches on
-`isGridFrame(desiredParent)` → `armGridDropTarget` writes
-`transform.gridDropTargetRef = { columnStart, count, frameId, rowStart }` (the **exact hovered
-cell** from `getGridDropCell` on the unrotated point — column clamped to the last one, row
-unbounded downward — plus `count` = the number of **top-level** dragged nodes, not
-`draggedNodeIdsRef.size` which also counts a dragged frame's descendants) plus
-`dropTargetFrameIdRef`. `drawGridDropTarget` outlines the whole grid, fills the `count` cells from
-that anchor in reading order (`GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`,
-marquee-style), and draws ghost rows past the current grid when the drop overruns it. `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is
-set. On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per
-node `updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` (reading-order from the
-anchor cell) and `widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size
-and fills the cell), and the frame flips to `gridAutoPlacement: false` so the anchors take. The
-grid grows rows to reach the dropped cell via the engine's `derivedRowCount` — no explicit
-`gridRowCount` write.
+`isGridFrame(desiredParent)` → `armGridDropTarget` resolves the drop into concrete cells and
+writes `transform.gridDropTargetRef = { cells, frameId }` plus `dropTargetFrameIdRef`.
+`getGridDropCell` picks the hovered cell (unrotated point; column clamped, row unbounded down),
+then `getGridDropPlacements` walks reading order from there and collects one **free** cell per
+top-level dragged node: it runs `placeGridCells` over the frame's *other* children
+(`getGridPlacementInputs`, minus `movedNodeIds` for a same-parent drag) to build an occupancy
+set, so cells already holding an anchored child are skipped and the row count grows past the grid
+as needed. `drawGridDropTarget` outlines every cell up to the furthest resolved row (ghost rows
+included) and fills `hover.cells` (`GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`,
+marquee-style). `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is set.
+On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per node
+`updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and
+`widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size and fills the
+cell), and the frame flips to `gridAutoPlacement: false` so the anchors take. The grid grows rows
+to the dropped cells via the engine's `derivedRowCount` — no explicit `gridRowCount` write.
 
 ### Not covered yet
 
@@ -533,9 +534,10 @@ The engine already honours spans and manual anchors when set in code.
   `resolveGridLayout/*`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
   `resolveGridTrackSizes`, `computeGridLayoutPositions`) +
   `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots + drop —
-  `store/design/utils/autoLayout/test/{getSelectedGridFrame,getDerivedGridRowCount}.spec.ts`,
+  `store/design/utils/autoLayout/test/{getSelectedGridFrame,getDerivedGridRowCount,getGridPlacementInputs}.spec.ts`,
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
-  `getGridDropCell`), `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
+  `getGridDropCell`, `getGridDropPlacements`),
+  `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
   `disarmDrag/test/{applyGridDrop,resolveDropTargetIndex,commitDropIntoFrame}`,
   `drawScene/test/{drawGridSlots,drawGridDropTarget,getAutoLayoutDragOpacity}.spec.ts`; panel —
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
@@ -599,4 +601,9 @@ The engine already honours spans and manual anchors when set in code.
    engine's `derivedRowCount`. Multi-select fills forward from the anchor. Shares
    `getGridTrackLayout` with the slot overlay. Follow-up (same day): the highlight counted
    `draggedNodeIdsRef.size`, so dropping a frame **with children** lit one cell per descendant —
-   `gridDropTargetRef` now carries `count` = top-level dragged nodes only.
+   `gridDropTargetRef` briefly carried `count` = top-level dragged nodes only. Follow-up 2 (same
+   day): the reading-order fill was `firstIndex + i` — it stomped cells already holding an
+   anchored child (drop 3 into a 2×2 with the bottom row full → one landed on an occupied cell,
+   grid didn't grow). Now `getGridDropPlacements` builds an occupancy set from the other children
+   (`placeGridCells` + `occupyGridRegion`) and hands back the next *free* cells, so the ref is
+   `{ cells, frameId }` and `applyGridDrop` just reads `cells[i]`.

@@ -169,7 +169,7 @@ describe('commitDropIntoFrame', () => {
     const canvasRefs = createCanvasRefs({
       transform: {
         dropTargetFrameIdRef: { current: gridId },
-        gridDropTargetRef: { current: { columnStart: 1, count: 1, frameId: gridId, rowStart: 2 } },
+        gridDropTargetRef: { current: { cells: [{ column: 1, row: 2 }], frameId: gridId } },
       },
     });
 

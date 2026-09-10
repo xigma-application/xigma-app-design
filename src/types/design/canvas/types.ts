@@ -286,10 +286,8 @@ export type TVectorSnapshotsRefs = {
 export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: string };
 
 export type TGridDropTargetHover = {
-  columnStart: number;
-  count: number;
+  cells: { column: number; row: number }[];
   frameId: string;
-  rowStart: number;
 };
 
 export type TAutoLayoutDraggedOffsetTween = {

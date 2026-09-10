@@ -4,28 +4,26 @@ import { AppDispatch } from 'store';
 
 // types
 import { SizingMode } from 'types/design/enums';
-import { TFrameNode } from 'types/design/types';
-import { TGridDropTargetHover } from 'types/design/canvas/types';
+import { TGridDropCell } from 'utils/canvas/gridSlots/getGridDropCell';
 
-export const applyGridDrop = (dispatch: AppDispatch, frame: TFrameNode, gridDropTarget: TGridDropTargetHover, nodeIds: string[]): void => {
-  const columnCount = Math.max(Math.round(frame.gridColumnCount ?? 1), 1);
-  const firstIndex = gridDropTarget.rowStart * columnCount + gridDropTarget.columnStart;
+export const applyGridDrop = (dispatch: AppDispatch, frameId: string, cells: TGridDropCell[], nodeIds: string[]): void => {
+  dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
 
-  dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frame.id }));
+  nodeIds.forEach((id, index) => {
+    const cell = cells[index];
 
-  nodeIds.forEach((id, offset) => {
-    const cellIndex = firstIndex + offset;
-
-    dispatch(
-      updateNode({
-        changes: {
-          gridColumnAnchorIndex: cellIndex % columnCount,
-          gridRowAnchorIndex: Math.floor(cellIndex / columnCount),
-          heightSizingMode: SizingMode.fill,
-          widthSizingMode: SizingMode.fill,
-        },
-        id,
-      }),
-    );
+    if (cell) {
+      dispatch(
+        updateNode({
+          changes: {
+            gridColumnAnchorIndex: cell.column,
+            gridRowAnchorIndex: cell.row,
+            heightSizingMode: SizingMode.fill,
+            widthSizingMode: SizingMode.fill,
+          },
+          id,
+        }),
+      );
+    }
   });
 };

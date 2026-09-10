@@ -1,89 +1,109 @@
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { armGridDropTarget } from '../armGridDropTarget';
 
 const refs = (): TCanvasRefs => ({ transform: { gridDropTargetRef: { current: null } } }) as unknown as TCanvasRefs;
 
+const anchoredChild = (id: string, column: number, row: number): TSceneNode =>
+  ({
+    fill: '#000',
+    gridColumnAnchorIndex: column,
+    gridRowAnchorIndex: row,
+    height: 10,
+    id,
+    name: id,
+    parentId: 'grid-1',
+    rotation: 0,
+    type: NodeType.rectangle,
+    width: 10,
+    x: 0,
+    y: 0,
+  }) as TSceneNode;
+
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
   fill: '#fff',
-  gridColumnCount: 3,
-  gridRowCount: 3,
-  height: 300,
+  gridAutoPlacement: false,
+  gridColumnCount: 2,
+  gridRowCount: 2,
+  height: 200,
   id: 'grid-1',
   layoutMode: LayoutMode.grid,
   name: 'Frame',
   parentId: null,
   rotation: 0,
   type: NodeType.frame,
-  width: 300,
+  width: 200,
   x: 0,
   y: 0,
   ...overrides,
 });
 
 describe('armGridDropTarget', () => {
-  it('should write the hovered cell and the count of top-level dragged nodes', () => {
+  it('should resolve one cell per dragged node, starting at the hovered cell', () => {
     // mock
     const canvasRefs = refs();
 
-    // action — 100px cells; point at (250, 150) => column 2, row 1; two nodes moving
-    armGridDropTarget(canvasRefs, frame(), 'grid-1', ['a', 'b'], {}, { x: 250, y: 150 });
+    // action — 100px cells; point (50, 50) => column 0, row 0; two nodes
+    armGridDropTarget(canvasRefs, frame(), 'grid-1', ['x', 'y'], {}, { x: 50, y: 50 });
 
     // result
     expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({
-      columnStart: 2,
-      count: 2,
+      cells: [
+        { column: 0, row: 0 },
+        { column: 1, row: 0 },
+      ],
       frameId: 'grid-1',
-      rowStart: 1,
     });
   });
 
-  it('should let the row grow past the current grid when the pointer is below it', () => {
-    // mock
+  it('should skip cells already occupied by other children and grow rows to fit', () => {
+    // mock — bottom row (row 1) of a 2x2 grid is full
     const canvasRefs = refs();
+    const nodesById = { a: anchoredChild('a', 0, 1), b: anchoredChild('b', 1, 1) };
 
-    // action — pointer well below the 3-row grid
-    armGridDropTarget(canvasRefs, frame(), 'grid-1', ['a'], {}, { x: 50, y: 2050 });
+    // action — hover the top-left cell, drop three nodes
+    armGridDropTarget(canvasRefs, frame({ childIds: ['a', 'b'] }), 'grid-1', ['x', 'y', 'z'], nodesById, { x: 50, y: 50 });
 
-    // result
+    // result — (0,0), (0,1), then a new row (2,0) since row 1 is taken
     expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({
-      columnStart: 0,
-      count: 1,
+      cells: [
+        { column: 0, row: 0 },
+        { column: 1, row: 0 },
+        { column: 0, row: 2 },
+      ],
       frameId: 'grid-1',
-      rowStart: 20,
     });
+  });
+
+  it('should not count the dragged children themselves as occupancy on a same-parent drag', () => {
+    // mock — the two anchored children are the ones being dragged
+    const canvasRefs = refs();
+    const nodesById = { a: anchoredChild('a', 0, 1), b: anchoredChild('b', 1, 1) };
+
+    // action
+    armGridDropTarget(canvasRefs, frame({ childIds: ['a', 'b'] }), 'grid-1', ['a', 'b'], nodesById, { x: 50, y: 50 });
+
+    // result — nothing else occupies the grid, so they land at (0,0) and (0,1)
+    expect(canvasRefs.transform.gridDropTargetRef.current?.cells).toEqual([
+      { column: 0, row: 0 },
+      { column: 1, row: 0 },
+    ]);
   });
 
   it('should unrotate the query point about the frame centre for a rotated grid', () => {
     // mock
     const canvasRefs = refs();
 
-    // action — (250, 50) unrotates to the first cell; without unrotation it reads column 2
-    armGridDropTarget(canvasRefs, frame({ rotation: 90 }), 'grid-1', ['a'], {}, { x: 250, y: 50 });
+    // action — (150, 50) unrotates into the first cell for a 90°-rotated 200x200 frame
+    armGridDropTarget(canvasRefs, frame({ rotation: 90 }), 'grid-1', ['x'], {}, { x: 150, y: 50 });
 
     // result
-    expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({
-      columnStart: 0,
-      count: 1,
-      frameId: 'grid-1',
-      rowStart: 0,
-    });
-  });
-
-  it('should never write a count below one', () => {
-    // mock
-    const canvasRefs = refs();
-
-    // action
-    armGridDropTarget(canvasRefs, frame(), 'grid-1', [], {}, { x: 50, y: 50 });
-
-    // result
-    expect(canvasRefs.transform.gridDropTargetRef.current?.count).toBe(1);
+    expect(canvasRefs.transform.gridDropTargetRef.current?.cells).toEqual([{ column: 0, row: 0 }]);
   });
 });

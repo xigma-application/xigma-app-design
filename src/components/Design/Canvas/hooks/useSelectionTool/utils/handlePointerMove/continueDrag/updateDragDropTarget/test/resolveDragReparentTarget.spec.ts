@@ -556,7 +556,7 @@ describe('resolveDragReparentTarget', () => {
 
     // result
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);
-    expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({ columnStart: 0, count: 1, frameId, rowStart: 0 });
+    expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({ cells: [{ column: 0, row: 0 }], frameId });
     expect(canvasRefs.transform.autoLayoutDropTargetRef.current).toBeNull();
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
 

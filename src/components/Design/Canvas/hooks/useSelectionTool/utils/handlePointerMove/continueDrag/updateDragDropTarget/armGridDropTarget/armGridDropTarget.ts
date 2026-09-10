@@ -5,6 +5,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { getGridDropCell } from 'utils/canvas/gridSlots/getGridDropCell';
+import { getGridDropPlacements } from 'utils/canvas/gridSlots/getGridDropPlacements';
 import { getGridTrackLayout } from 'utils/canvas/gridSlots/getGridTrackLayout';
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
 
@@ -19,12 +20,8 @@ export const armGridDropTarget = (
   const layout = getGridTrackLayout(frame, nodesById);
   const unrotated = getUnrotatedQueryPoint(point, frame, frame.rotation);
   const framePoint: TPoint = { x: unrotated.x - frame.x, y: unrotated.y - frame.y };
-  const { column, row } = getGridDropCell(layout, framePoint);
+  const startCell = getGridDropCell(layout, framePoint);
+  const cells = getGridDropPlacements(frame, nodesById, movedNodeIds, startCell, Math.max(movedNodeIds.length, 1));
 
-  canvasRefs.transform.gridDropTargetRef.current = {
-    columnStart: column,
-    count: Math.max(movedNodeIds.length, 1),
-    frameId,
-    rowStart: row,
-  };
+  canvasRefs.transform.gridDropTargetRef.current = { cells, frameId };
 };

@@ -10,7 +10,6 @@ import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
@@ -52,8 +51,8 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
 
       dispatch(moveNodes({ nodeIds, targetIndex, targetParentId }));
 
-      if (isGridDrop && gridDropTarget && targetFrame && targetFrame.type === NodeType.frame) {
-        applyGridDrop(dispatch, targetFrame, gridDropTarget, nodeIds);
+      if (isGridDrop && gridDropTarget && targetParentId) {
+        applyGridDrop(dispatch, targetParentId, gridDropTarget.cells, nodeIds);
       }
     }
   }

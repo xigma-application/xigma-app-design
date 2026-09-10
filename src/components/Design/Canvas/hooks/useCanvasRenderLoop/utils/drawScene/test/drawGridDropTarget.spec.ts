@@ -64,52 +64,48 @@ const drawCalls = (gl: WebGL2RenderingContext, mode: number): number =>
   (gl.drawArrays as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter((args) => args[0] === mode).length;
 
 describe('drawGridDropTarget', () => {
-  it('should outline every cell and fill the one active drop cell', () => {
+  it('should outline every cell and fill each resolved drop cell', () => {
     // mock
     const gl = createGlMock();
 
     // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 1, frameId: 'grid-1', rowStart: 0 }), { 'grid-1': gridFrame() });
+    drawGridDropTarget(
+      context(gl),
+      refsWith({
+        cells: [
+          { column: 0, row: 0 },
+          { column: 1, row: 0 },
+        ],
+        frameId: 'grid-1',
+      }),
+      { 'grid-1': gridFrame() },
+    );
 
-    // result — 2 x 3 grid: 6 outlined, 1 filled
+    // result — 2 x 3 grid: 6 outlined, 2 filled
     expect(drawCalls(gl, gl.LINE_LOOP)).toBe(6);
-    expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
-  });
-
-  it('should fill one cell per top-level dragged node from the hovered anchor', () => {
-    // mock
-    const gl = createGlMock();
-
-    // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 2, frameId: 'grid-1', rowStart: 1 }), { 'grid-1': gridFrame() });
-
-    // result
     expect(drawCalls(gl, gl.TRIANGLES)).toBe(2);
   });
 
-  it('should not let a dragged frame’s children inflate the active cell count', () => {
-    // mock — a frame with three children is dragged; count is still 1
+  it('should grow the drawn grid by ghost rows to reach a resolved cell past the last row', () => {
+    // mock — 1 x 2 grid, but a resolved cell sits in row 3
     const gl = createGlMock();
 
     // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 1, frameId: 'grid-1', rowStart: 0 }), { 'grid-1': gridFrame() });
+    drawGridDropTarget(
+      context(gl),
+      refsWith({
+        cells: [
+          { column: 0, row: 1 },
+          { column: 0, row: 3 },
+        ],
+        frameId: 'grid-1',
+      }),
+      { 'grid-1': gridFrame({ gridColumnCount: 1, gridRowCount: 2 }) },
+    );
 
-    // result
-    expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
-  });
-
-  it('should grow the drawn grid by ghost rows when the drop runs past the last cell', () => {
-    // mock — 1 column, 2 rows (2 cells); dropping 3 nodes at row 1 needs rows up to index 3
-    const gl = createGlMock();
-
-    // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 3, frameId: 'grid-1', rowStart: 1 }), {
-      'grid-1': gridFrame({ gridColumnCount: 1, gridRowCount: 2 }),
-    });
-
-    // result — 4 rows drawn, 3 of them active
+    // result — 4 rows drawn, 2 filled
     expect(drawCalls(gl, gl.LINE_LOOP)).toBe(4);
-    expect(drawCalls(gl, gl.TRIANGLES)).toBe(3);
+    expect(drawCalls(gl, gl.TRIANGLES)).toBe(2);
   });
 
   it('should draw nothing when there is no grid drop target', () => {
@@ -128,7 +124,7 @@ describe('drawGridDropTarget', () => {
     const gl = createGlMock();
 
     // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 1, frameId: 'ghost', rowStart: 0 }), {});
+    drawGridDropTarget(context(gl), refsWith({ cells: [{ column: 0, row: 0 }], frameId: 'ghost' }), {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -151,7 +147,7 @@ describe('drawGridDropTarget', () => {
     };
 
     // before
-    drawGridDropTarget(context(gl), refsWith({ columnStart: 0, count: 1, frameId: 'grid-1', rowStart: 0 }), { 'grid-1': rectangle });
+    drawGridDropTarget(context(gl), refsWith({ cells: [{ column: 0, row: 0 }], frameId: 'grid-1' }), { 'grid-1': rectangle });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
