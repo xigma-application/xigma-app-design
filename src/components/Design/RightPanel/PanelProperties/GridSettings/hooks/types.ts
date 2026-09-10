@@ -11,8 +11,8 @@ export type TGridTrackViewModel = {
 
 export type TGridAxisControls = {
   onAdd: TFunc;
-  onChangeMode: (index: number, mode: SizingMode, value?: number) => void;
-  onChangeValue: TFunc<[number, number]>;
+  onChangeMode: (indices: number[], mode: SizingMode, value?: number) => void;
+  onChangeValue: (indices: number[], triggerIndex: number, value: number) => void;
   onDelete: TFunc<[number[]]>;
   onReorder: (sourceIndices: number[], targetIndex: number) => number[] | null;
   revision: unknown;

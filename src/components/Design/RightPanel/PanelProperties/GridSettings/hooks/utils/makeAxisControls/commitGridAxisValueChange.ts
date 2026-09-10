@@ -2,6 +2,7 @@
 import { AppDispatch } from 'store';
 
 // types
+import { SizingMode } from 'types/design/enums';
 import { TFrameNode, TGridTrackSize } from 'types/design/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
@@ -13,9 +14,12 @@ export const commitGridAxisValueChange = (
   frame: TFrameNode,
   axis: TGridTrackAxis,
   currentTracks: TGridTrackSize[],
-  index: number,
+  indices: number[],
+  triggerIndex: number,
   value: number,
 ): void => {
-  const next = currentTracks.map((track, trackIndex) => (trackIndex === index ? { ...track, value: Math.max(value, 0) } : track));
+  const mode = currentTracks[triggerIndex]?.mode ?? SizingMode.fixed;
+  const next = currentTracks.map((track, trackIndex) => (indices.includes(trackIndex) ? { mode, value: Math.max(value, 0) } : track));
+
   commitGridAxisTracks(dispatch, frame.id, axis, next);
 };

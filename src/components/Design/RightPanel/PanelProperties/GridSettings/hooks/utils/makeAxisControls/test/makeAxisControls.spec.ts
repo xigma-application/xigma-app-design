@@ -104,7 +104,7 @@ describe('makeAxisControls', () => {
     it('should seed a fill weight of 1 when switching to fill', () => {
       const dispatch = vi.fn();
 
-      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeMode(0, SizingMode.fill);
+      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeMode([0], SizingMode.fill);
 
       expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fill, value: 1 }] }, id: 'grid-1' });
     });
@@ -112,7 +112,7 @@ describe('makeAxisControls', () => {
     it('should preserve an existing value when switching between non-fill modes', () => {
       const dispatch = vi.fn();
 
-      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeMode(0, SizingMode.hug);
+      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeMode([0], SizingMode.hug);
 
       expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.hug, value: 40 }] }, id: 'grid-1' });
     });
@@ -120,7 +120,7 @@ describe('makeAxisControls', () => {
     it('should default to 0 when switching a track with no value to a non-fill mode', () => {
       const dispatch = vi.fn();
 
-      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fill })).onChangeMode(0, SizingMode.fixed);
+      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fill })).onChangeMode([0], SizingMode.fixed);
 
       expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 0 }] }, id: 'grid-1' });
     });
@@ -130,7 +130,7 @@ describe('makeAxisControls', () => {
     it('should clamp a negative value to zero', () => {
       const dispatch = vi.fn();
 
-      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeValue(0, -5);
+      makeAxisControls(dispatch, frame(), {}, 'column', tracks({ mode: SizingMode.fixed, value: 40 })).onChangeValue([0], 0, -5);
 
       expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 0 }] }, id: 'grid-1' });
     });

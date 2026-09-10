@@ -80,8 +80,8 @@ describe('useGridSettingsPanel', () => {
     expect(result.current.columns.onReorder([0], 1)).toBeNull();
     act(() => {
       result.current.columns.onAdd();
-      result.current.columns.onChangeMode(0, SizingMode.fixed);
-      result.current.columns.onChangeValue(0, 1);
+      result.current.columns.onChangeMode([0], SizingMode.fixed);
+      result.current.columns.onChangeValue([0], 0, 1);
       result.current.columns.onDelete([0]);
       result.current.onClose();
     });
@@ -154,10 +154,10 @@ describe('useGridSettingsPanel', () => {
 
     const { result } = render();
 
-    act(() => result.current.columns.onChangeMode(0, SizingMode.fixed));
+    act(() => result.current.columns.onChangeMode([0], SizingMode.fixed));
     expect(readFrame(frameId).gridColumnSizes?.[0]).toEqual({ mode: SizingMode.fixed, value: 1 });
 
-    act(() => result.current.rows.onChangeMode(0, SizingMode.fill));
+    act(() => result.current.rows.onChangeMode([0], SizingMode.fill));
     expect(readFrame(frameId).gridRowSizes?.[0]).toEqual({ mode: SizingMode.fill, value: 1 });
   });
 
@@ -166,7 +166,7 @@ describe('useGridSettingsPanel', () => {
 
     const { result } = render();
 
-    act(() => result.current.columns.onChangeValue(1, -5));
+    act(() => result.current.columns.onChangeValue([1], 1, -5));
 
     expect(readFrame(frameId).gridColumnSizes?.[1]).toEqual({ mode: SizingMode.fill, value: 0 });
   });

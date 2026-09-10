@@ -38,7 +38,7 @@ describe('commitGridAxisModeChange', () => {
     const dispatch = vi.fn();
     const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fixed, value: 40 }];
 
-    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, 0, SizingMode.fill);
+    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, [0], SizingMode.fill);
 
     expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fill, value: 1 }] }, id: 'grid-1' });
   });
@@ -50,7 +50,7 @@ describe('commitGridAxisModeChange', () => {
       { mode: SizingMode.fixed, value: 60 },
     ];
 
-    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, 0, SizingMode.hug);
+    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, [0], SizingMode.hug);
 
     expect(updateNode).toHaveBeenCalledWith({
       changes: {
@@ -67,7 +67,7 @@ describe('commitGridAxisModeChange', () => {
     const dispatch = vi.fn();
     const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fixed, value: 40 }];
 
-    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, 0, SizingMode.hug);
+    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, [0], SizingMode.hug);
 
     expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.hug, value: 40 }] }, id: 'grid-1' });
   });
@@ -76,8 +76,26 @@ describe('commitGridAxisModeChange', () => {
     const dispatch = vi.fn();
     const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fill }];
 
-    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, 0, SizingMode.fixed);
+    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, [0], SizingMode.fixed);
 
     expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 0 }] }, id: 'grid-1' });
+  });
+
+  it('should apply the same mode and value to every index given, for a multi-selection', () => {
+    const dispatch = vi.fn();
+    const currentTracks: TGridTrackSize[] = [
+      { mode: SizingMode.fill, value: 1 },
+      { mode: SizingMode.hug },
+      { mode: SizingMode.fixed, value: 90 },
+    ];
+
+    commitGridAxisModeChange(dispatch, frame(), 'column', currentTracks, [0, 2], SizingMode.fixed, 240);
+
+    expect(updateNode).toHaveBeenCalledWith({
+      changes: {
+        gridColumnSizes: [{ mode: SizingMode.fixed, value: 240 }, { mode: SizingMode.hug }, { mode: SizingMode.fixed, value: 240 }],
+      },
+      id: 'grid-1',
+    });
   });
 });

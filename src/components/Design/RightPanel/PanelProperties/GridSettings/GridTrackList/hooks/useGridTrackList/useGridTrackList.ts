@@ -94,8 +94,9 @@ export const useGridTrackList = (
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     onAdd: (): void => commitGridTrackAdd(controls, isSelfChangeRef),
     onChangeMode: (index: number, mode: SizingMode, value?: number): void =>
-      commitGridTrackModeChange(controls, isSelfChangeRef, index, mode, value),
-    onChangeValue: (index: number, value: number): void => commitGridTrackValueChange(controls, isSelfChangeRef, index, value),
+      commitGridTrackModeChange(controls, isSelfChangeRef, selectedIndices, index, mode, value),
+    onChangeValue: (index: number, value: number): void =>
+      commitGridTrackValueChange(controls, isSelfChangeRef, selectedIndices, index, value),
     onDeleteRow: (index: number): void =>
       commitGridTrackDelete(controls, axis, coordinator, isSelfChangeRef, clearSelection, selectedIndices, index),
     onSelectRow: (index: number, modifiers: TGridTrackSelectModifiers): void =>

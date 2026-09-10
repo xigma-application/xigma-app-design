@@ -156,6 +156,24 @@ describe('GridTrackRow', () => {
     expect(onSelect).toHaveBeenCalledWith({ meta: true, shift: false });
   });
 
+  it('should not change the row selection when clicking into the value field', () => {
+    const onSelect = vi.fn();
+
+    renderRow({ onSelect, track: track({ mode: SizingMode.fixed, value: 120 }) });
+    fireEvent.click(screen.getByLabelText('Track size value'));
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('should not change the row selection when opening the mode dropdown', () => {
+    const onSelect = vi.fn();
+
+    renderRow({ onSelect });
+    fireEvent.click(screen.getByText('Fill', { exact: true }));
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('should commit a numeric value on blur and ignore a blank one', () => {
     const onChangeValue = vi.fn();
 

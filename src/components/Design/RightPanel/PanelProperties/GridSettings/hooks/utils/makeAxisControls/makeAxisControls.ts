@@ -26,9 +26,10 @@ export const makeAxisControls = (
   currentTracks: TGridTrackSize[],
 ): TGridAxisControls => ({
   onAdd: (): void => commitGridAxisAdd(dispatch, frame, axis, currentTracks),
-  onChangeMode: (index: number, mode: SizingMode, value?: number): void =>
-    commitGridAxisModeChange(dispatch, frame, axis, currentTracks, index, mode, value),
-  onChangeValue: (index: number, value: number): void => commitGridAxisValueChange(dispatch, frame, axis, currentTracks, index, value),
+  onChangeMode: (indices: number[], mode: SizingMode, value?: number): void =>
+    commitGridAxisModeChange(dispatch, frame, axis, currentTracks, indices, mode, value),
+  onChangeValue: (indices: number[], triggerIndex: number, value: number): void =>
+    commitGridAxisValueChange(dispatch, frame, axis, currentTracks, indices, triggerIndex, value),
   onDelete: (indices: number[]): void => commitGridAxisDelete(dispatch, frame, nodes, axis, currentTracks, indices),
   onReorder: (sourceIndices: number[], targetIndex: number): number[] | null =>
     commitGridAxisReorder(dispatch, frame, nodes, axis, currentTracks, sourceIndices, targetIndex),

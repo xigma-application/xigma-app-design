@@ -16,9 +16,12 @@ import { TGridTrackViewModel } from '../../hooks/types';
 import { useBeginTrackHandleDrag } from './hooks/useBeginTrackHandleDrag';
 import { useCommitFillTrackValue } from './hooks/useCommitFillTrackValue';
 import { useCommitHugTrackAsFixed } from './hooks/useCommitHugTrackAsFixed';
+import { useCommitTrackMode } from './hooks/useCommitTrackMode';
 import { useCommitTrackValueOnBlur } from './hooks/useCommitTrackValueOnBlur';
+import { useHandleTrackValueClick } from './hooks/useHandleTrackValueClick';
 import { useSelectTrackNumberPortion } from './hooks/useSelectTrackNumberPortion';
 import { useSelectTrackRow } from './hooks/useSelectTrackRow';
+import { useStopRowSelectPropagation } from './hooks/useStopRowSelectPropagation';
 
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
@@ -26,7 +29,6 @@ import { getRemoveTrackTooltip } from './utils/getRemoveTrackTooltip';
 import { getTrackModeOptions } from './utils/getTrackModeOptions';
 import { getTrackValueFieldText } from './utils/getTrackValueFieldText';
 import { getValueBlurHandlerByMode } from './utils/getValueBlurHandlerByMode';
-import { roundTrackSize } from './utils/roundTrackSize';
 import { translationNameSpace } from '../../constants';
 
 // styles
@@ -80,10 +82,9 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
   const removeTooltip = getRemoveTrackTooltip(t, axis, track, trackCount, isSelected, selectedCount);
   const trackModeOptions = getTrackModeOptions(t, track, axis);
   const valueBlurHandlerByMode = getValueBlurHandlerByMode(handleFillBlur, handleBlur, handleHugBlur);
-
-  const handleModeSelect = (mode: SizingMode): void => {
-    onChangeMode(mode, mode === SizingMode.fixed ? roundTrackSize(track.resolvedSize) : undefined);
-  };
+  const handleModeSelect = useCommitTrackMode(onChangeMode, track.resolvedSize);
+  const stopRowSelectPropagation = useStopRowSelectPropagation();
+  const handleValueClick = useHandleTrackValueClick(isFill, selectNumberPortion);
 
   return (
     <div
@@ -93,14 +94,16 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
       {...getAttributes(E2EAttribute.gridTrackRow, String(track.index))}
     >
       <GridTrackHandle index={track.index} isDragging={isDragging} isSelected={isSelected} onPointerDown={handlePointerDown} />
-      <UITools.Dropdown
-        bypassGlobalShortcuts={false}
-        className={styles.GridTrackRow__mode}
-        onSelect={handleModeSelect}
-        options={trackModeOptions}
-        value={track.mode}
-        variant="outline"
-      />
+      <span onClick={stopRowSelectPropagation} style={{ display: 'contents' }}>
+        <UITools.Dropdown
+          bypassGlobalShortcuts={false}
+          className={styles.GridTrackRow__mode}
+          onSelect={handleModeSelect}
+          options={trackModeOptions}
+          value={track.mode}
+          variant="outline"
+        />
+      </span>
       <UITools.TextField
         aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
         bypassGlobalShortcuts={false}
@@ -110,7 +113,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         endAdornment={isFill ? <FillWeightMenu onSelect={onChangeValue} value={track.value} /> : undefined}
         inputRef={inputRef}
         onBlur={valueBlurHandlerByMode[track.mode]}
-        onClick={isFill ? selectNumberPortion : undefined}
+        onClick={handleValueClick}
         onFocus={isFill ? selectNumberPortion : undefined}
         type={isFill ? 'text' : 'number'}
       />

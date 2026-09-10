@@ -1865,4 +1865,40 @@ test.describe('auto-layout — Grid flow', () => {
 
     expect(hovered.equals(idle)).toBe(false);
   });
+
+  test('picking a mode from the dropdown applies the same mode and value to the whole multi-selection', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-multi-select-propagation');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    // select columns 0 and 2 — clicking into row 0's own dropdown below must not drop this
+    const row0 = columns.locator('[data-test-grid-track-row="0"]');
+
+    await row0.click();
+    await columns.locator('[data-test-grid-track-row="2"]').click({ modifiers: ['ControlOrMeta'] });
+
+    await row0.getByText('Fill', { exact: true }).click();
+    await page.getByText(/Fixed width/).click();
+
+    await expect.poll(() => readColumnTrack(page, 0)).toMatchObject({ mode: 'fixed' });
+    const triggerTrack = await readColumnTrack(page, 0);
+
+    expect(await readColumnTrack(page, 2)).toEqual(triggerTrack);
+    // the untouched, unselected column keeps its own default fill mode
+    expect(await readColumnTrack(page, 1)).toMatchObject({ mode: 'fill' });
+  });
 });

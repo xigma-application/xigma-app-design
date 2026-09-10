@@ -145,11 +145,11 @@ describe('GridTrackList', () => {
     renderList({ controls: controls({ onChangeMode, onChangeValue }) });
 
     fireEvent.blur(screen.getAllByLabelText('Track size value')[1], { target: { value: '64' } });
-    expect(onChangeValue).toHaveBeenCalledWith(1, 64);
+    expect(onChangeValue).toHaveBeenCalledWith([1], 1, 64);
 
     fireEvent.click(screen.getByText('Fill', { exact: true }));
     fireEvent.click(screen.getByText('Hug contents'));
-    expect(onChangeMode).toHaveBeenCalledWith(0, 'hug', undefined);
+    expect(onChangeMode).toHaveBeenCalledWith([0], 'hug', undefined);
   });
 
   it('should keep the drop indicator hidden until the pointer actually moves, then show it past the end', () => {

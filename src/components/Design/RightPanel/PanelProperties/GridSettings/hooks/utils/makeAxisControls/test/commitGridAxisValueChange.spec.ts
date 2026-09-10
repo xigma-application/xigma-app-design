@@ -38,7 +38,7 @@ describe('commitGridAxisValueChange', () => {
     const dispatch = vi.fn();
     const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fixed, value: 40 }];
 
-    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, 0, -5);
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0], 0, -5);
 
     expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 0 }] }, id: 'grid-1' });
   });
@@ -47,7 +47,7 @@ describe('commitGridAxisValueChange', () => {
     const dispatch = vi.fn();
     const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fixed, value: 40 }];
 
-    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, 0, 80);
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0], 0, 80);
 
     expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 80 }] }, id: 'grid-1' });
   });
@@ -59,13 +59,54 @@ describe('commitGridAxisValueChange', () => {
       { mode: SizingMode.fixed, value: 60 },
     ];
 
-    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, 0, 80);
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0], 0, 80);
 
     expect(updateNode).toHaveBeenCalledWith({
       changes: {
         gridColumnSizes: [
           { mode: SizingMode.fixed, value: 80 },
           { mode: SizingMode.fixed, value: 60 },
+        ],
+      },
+      id: 'grid-1',
+    });
+  });
+
+  it('should preserve the mode of the row that triggered the change', () => {
+    const dispatch = vi.fn();
+    const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fill, value: 2 }];
+
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0], 0, 3);
+
+    expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fill, value: 3 }] }, id: 'grid-1' });
+  });
+
+  it('should fall back to fixed when the trigger index is out of range', () => {
+    const dispatch = vi.fn();
+    const currentTracks: TGridTrackSize[] = [{ mode: SizingMode.fixed, value: 40 }];
+
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0], 99, 80);
+
+    expect(updateNode).toHaveBeenCalledWith({ changes: { gridColumnSizes: [{ mode: SizingMode.fixed, value: 80 }] }, id: 'grid-1' });
+  });
+
+  it("should apply the triggering row's own mode and the given value to every other index in a multi-selection", () => {
+    const dispatch = vi.fn();
+    const currentTracks: TGridTrackSize[] = [
+      { mode: SizingMode.fixed, value: 40 },
+      { mode: SizingMode.fill, value: 2 },
+      { mode: SizingMode.hug },
+    ];
+
+    // triggered from index 0 (fixed) -> every selected index becomes fixed at the committed value
+    commitGridAxisValueChange(dispatch, frame(), 'column', currentTracks, [0, 1, 2], 0, 200);
+
+    expect(updateNode).toHaveBeenCalledWith({
+      changes: {
+        gridColumnSizes: [
+          { mode: SizingMode.fixed, value: 200 },
+          { mode: SizingMode.fixed, value: 200 },
+          { mode: SizingMode.fixed, value: 200 },
         ],
       },
       id: 'grid-1',

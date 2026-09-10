@@ -160,8 +160,22 @@ describe('useGridTrackList', () => {
     act(() => result.current.onChangeValue(0, 40));
 
     expect(onAdd).toHaveBeenCalled();
-    expect(onChangeMode).toHaveBeenCalledWith(0, 'fixed', undefined);
-    expect(onChangeValue).toHaveBeenCalledWith(0, 40);
+    expect(onChangeMode).toHaveBeenCalledWith([0], 'fixed', undefined);
+    expect(onChangeValue).toHaveBeenCalledWith([0], 0, 40);
+  });
+
+  it('should apply a mode or value change to every selected row when the edited row is part of a multi-selection', () => {
+    const onChangeMode = vi.fn();
+    const onChangeValue = vi.fn();
+    const { result } = renderHook(() => useGridTrackList(controls({ onChangeMode, onChangeValue }), 'column', permissiveCoordinator()));
+
+    act(() => result.current.onSelectRow(0, { meta: false, shift: false }));
+    act(() => result.current.onSelectRow(2, { meta: true, shift: false }));
+    act(() => result.current.onChangeMode(2, 'hug' as never));
+    act(() => result.current.onChangeValue(0, 40));
+
+    expect(onChangeMode).toHaveBeenCalledWith([0, 2], 'hug', undefined);
+    expect(onChangeValue).toHaveBeenCalledWith([0, 2], 0, 40);
   });
 
   it('should not clear the selection when the panel’s own edit is what changed the revision', () => {
