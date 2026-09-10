@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { useColumnGridArea } from '../useColumnGridArea';
 
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, moveNodes, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -323,6 +323,21 @@ describe('useColumnGridArea', () => {
 
     expect(result.current.isRowsAuto).toBe(false);
     expect(readFrame(frameId).gridRowCount).toBe(result.current.rows.length ? Number(result.current.rows) : 1);
+  });
+
+  it('should force an explicit row count and open the settings panel', () => {
+    const frameId = addGridFrame();
+
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnGridArea();
+
+    act(() => result.current.onOpenSettings());
+
+    expect(readFrame(frameId).gridRowCount).toBe(1);
+    expect(store.getState().design.isGridSettingsPanelOpen).toBe(true);
+
+    store.dispatch(setGridSettingsPanelOpen(false));
   });
 
   it('should clear the explicit row count when switched back to auto', () => {

@@ -1,0 +1,18 @@
+.GridTrackList {
+  display: flex;
+  flex-direction: column;
+  margin-left: -16px;
+  position: relative;
+  width: calc(100% + 24px);
+}
+
+.GridTrackDropIndicator {
+  background-color: var(--color-neutral-1);
+  border-radius: 1px;
+  height: 2px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: -1px;
+  width: 100%;
+}

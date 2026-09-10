@@ -448,8 +448,11 @@ widget is a 210px-wide popover (`var(--color-neutral-4)` ground) opened from a 5
 (`GridAreaPreview`, a `repeat(n, 1fr)` grid capped at 10×10 with a `"C × R"` caption). The popover
 holds `GridInputs` (two `GridInputCells` — `TextField` + `ScrubbableInput` 1–100, as shrinking
 flex items so they fit the 210px), `CellsInput` (a 12×8 `data-value="col.row"` pick matrix of
-`<button>`s, each `<Tooltip>`-wrapped so hover shows `"CxR"`), and an inert full-width **Open grid
-settings** outline button (placeholder — no handler yet). `useColumnGridArea` is the single hook
+`<button>`s, each `<Tooltip>`-wrapped so hover shows `"CxR"`), and a full-width **Open grid
+settings** outline button — `onClick` runs `useColumnGridArea`'s `onOpenSettings`
+(`openGridSettingsPanel`: forces `gridRowCount` explicit if it was Auto, then dispatches
+`setGridSettingsPanelOpen(true)`) and closes the popover (§ "Panel — the dedicated Grid settings
+panel"). `useColumnGridArea` is the single hook
 (returned from `useColumnAlignmentLayout` as `gridArea` and passed whole into `<GridArea grid=…>`):
 columns/rows come straight from the store, commit on blur via `clampGridCount` +
 `commitGridColumnCountChange` / `commitGridRowCountChange` (no-op on empty / out-of-range),
@@ -489,6 +492,108 @@ already sets (§ Canvas — drag a child into a cell), just settable from the pa
 `isManagedLayoutFrame` predicate (`utils/canvas/signals/`) is the single source of truth for "is
 this frame's layout mode one of the three managed ones" — `useColumnPosition`,
 `isNodeManagedLayoutChild` and `useColumnDimensions`'s `parentIsAutoLayout` all go through it.
+
+### Panel — the dedicated Grid settings panel (`PanelProperties/GridSettings/`)
+
+A **separate right-panel view** that replaces the normal frame properties, the way `FrameTool`
+does for the Frame tool. `PanelProperties` renders `<GridSettings>` instead of `<Frame>` when a
+single grid frame is selected **and** `state.design.isGridSettingsPanelOpen` is set (new optional
+flag mirroring `isActionsPanelOpen`; `setGridSettingsPanelOpen` reducer +
+`selectIsGridSettingsPanelOpen` selector — `Boolean(...)` so an unset fixture reads `false`). Only
+entry point today is the GridArea popover's **Open grid settings** button; the panel's ✕
+(`GridSettingsHeader`) clears the flag.
+
+`GridSettings` = header + a `<GridTrackList axis>` for **Columns** and one for **Rows**. Each
+`GridTrackList` is a `UITools.Section` (`onAdd` → the `+`) wrapping one `<GridTrackRow>` per
+track, a 4-column CSS grid row: `GridTrackHandle` (the 1-based number, swapped for the
+`RowGrabber` glyph on hover/drag via CSS) · `UITools.Dropdown variant="outline"` for the mode
+(`Fill`/`Fixed`/`Hug`) · a numeric `UITools.TextField` for the value (blank+disabled for `Hug`,
+`fr` weight for `Fill`, px for `Fixed`; its chevron `endAdornment` is a `ButtonMenu` re-listing
+the same three modes) · a **per-row** `−` delete button (own `UITools.Button`, `visibility:
+hidden` unless that row is hovered or selected — not a single section-level button). A selected
+row gets `var(--color-blue-2)` borders on its mode dropdown and value field and
+`var(--color-neutral-1)` handle digits (`GridTrackRow--selected` / `GridTrackHandle--selected`).
+
+- **Data** — `useGridSettingsPanel` reads `gridColumnCount` / effective `gridRowCount` and
+  `buildGridTrackList(count, frame.gridColumnSizes|gridRowSizes)` (pads with
+  `{ mode: fill, value: 1 }`), maps to `{ index, mode, value, linkedIndices }` view-models (see
+  "Spanning-child linking" below) via `makeAxisControls(dispatch, frame, nodes, axis, tracks)`,
+  one bundle per axis. Every mutation writes the **whole** normalised `gridColumnSizes` /
+  `gridRowSizes` array (plus the count on add/delete) via `commitGridAxisTracks` — the engine's
+  `resolveGridTrackSizes` already consumes those arrays, so the layout just reflows through
+  `syncAutoLayoutChildren` on the next dispatch. `TGridAxisControls` also carries a `revision`
+  field — the raw `frame` node reference itself, opaque, compared only for identity (see
+  "Undo/redo safety" below).
+- **Add / delete** (`store/design/utils/autoLayout/gridTracks/`) — `+` appends a default fill
+  track and bumps the count. `−` runs `getGridTrackMultiDeleteResult(tracks, children, indices)`:
+  splices the sizes (highest index first), never below 1 track, and folds per-child anchor/span
+  fix-ups from `getGridTrackDeleteChildUpdates` — removed index `< anchor` → `anchor -= 1`;
+  removed index inside `[anchor, anchor+span)` → `span -= 1` (anchor unchanged, since deleting the
+  anchor track just shifts the rest down); a single-cell child whose only track goes is released
+  to auto-placement (`anchorIndex`/`span` → `undefined`). `getGridTrackChildren` returns `[]` for
+  an auto-placement grid, so those fix-ups only run for manually-anchored (`gridAutoPlacement:
+  false`) frames.
+- **Reorder** — drag the handle: `useGridTrackReorderDrag` opens a window `pointermove`/`pointerup`
+  drag, `computeGridTrackDropIndex(rowRects, clientY)` counts the row midpoints above the pointer
+  for the drop slot, and a `GridTrackDropIndicator` renders there — `position: absolute` (2px
+  `var(--color-neutral-1)` line, offset via `transform: translateY(index * 32px)`), *not* an
+  in-flow flex sibling, so it never reflows the rows below it while it appears/disappears mid-drag.
+  On release `makeAxisControls.onReorder` runs `moveGridTrackBlock(tracks, start, count, slot)`
+  (permutes the sizes array + returns `newIndexByOld`) then `getGridTrackReorderChildUpdates`
+  remaps every anchored child's cells through that permutation — **rejected (`null`, nothing
+  dispatched, the row snaps back)** if any child's `[anchor, anchor+span)` would stop being one
+  contiguous run, if the drag selection is non-contiguous, or if the move is an identity (drop
+  where it already is). On success it returns the block's own new positions (sorted), not just
+  `true` — see "Selection follows the drag" below.
+- **Spanning-child linking** — grabbing an unselected track that a spanning child covers no longer
+  drags just that one track (which could only ever be rejected or a no-op — moving one cell of a
+  2-cell span always either breaks it or leaves it in place). `getGridTrackLinkedIndices(children,
+  trackCount)` builds, per axis, a `number[][]` — one group per track index, `[index]` alone by
+  default, or every index a spanning child's `[anchor, anchor+span)` covers, shared by all of
+  them. `makeAxisControls` folds this into each view-model's `linkedIndices`. `beginRowDrag` (in
+  `useGridTrackList`) reads `controls.tracks[index].linkedIndices` and drags (and selects) the
+  *whole* group instead of the bare index whenever the grabbed row isn't already part of an
+  explicit multi-selection — an explicit Ctrl/Shift selection is never auto-extended, so a
+  deliberate partial selection can still exercise the rejection path.
+- **Ctrl/Shift multi-select** lives in `useGridTrackSelection` (`getGridTrackRangeIndices` /
+  `getGridTrackToggledIndices`); a contiguous selection drags as one block.
+- **Only one axis selected at a time** — `useGridTrackSelectionCoordinator` (one instance per
+  panel, shared by both `GridTrackList`s via props) tracks a single `activeAxis: 'column' | 'row'
+  | null`, defaulting to `'column'`. `isSuppressed(axis)` is true whenever a *different* axis owns
+  the selection; each `useGridTrackList` clears itself in an effect keyed on that. `onSelectRow`,
+  a successful reorder and the auto-extend-on-grab path all call `onSelectionChange(axis, true)`
+  to claim the axis synchronously (in the same handler as the state change, not a later effect —
+  computing `isSuppressed` from a stale `activeAxis` during the very render that claims it would
+  otherwise have the just-selected axis immediately suppress itself). Columns starts with column 1
+  pre-selected (`GridSettings` passes `initialSelectedIndices={[0]}` only to the Columns list),
+  matching the coordinator's own `'column'` default so nothing needs to reconcile at mount.
+- **Selection follows the drag, not "clears on drop"** — a successful reorder calls
+  `setSelection(newIndices)` with `onReorder`'s returned new positions instead of clearing, so the
+  moved track(s) stay visibly selected wherever they landed. A rejected reorder leaves the
+  selection exactly as the grab already set it. Deleting still clears (nothing sensible to keep
+  selected).
+- **Undo/redo safety** — `useGridTrackList` keeps a `useRef` of `controls.revision` (the frame
+  node reference) and, in an effect, resets the selection back to `initialSelectedIndicesRef`
+  (`[0]` for Columns, `[]` for Rows — never to "nothing selected" for the axis that has a real
+  default) whenever that reference changes and an `isSelfChangeRef` flag (set synchronously by
+  this hook's own `onAdd`/`onChangeMode`/`onChangeValue`/`onDeleteRow`/successful-reorder actions,
+  right before they dispatch) says the change *wasn't* one of its own. Comparing `frame` identity
+  rather than the tracks' own derived content was a deliberate fix: an earlier version compared a
+  JSON signature of `{ mode, value, linkedIndices }`, which — for the common case of several
+  identical `Fill, 1fr` tracks — couldn't tell an undo apart from a no-op, since swapping two
+  indistinguishable tracks produces byte-identical derived content even though the underlying
+  frame node changed. Redux/Immer gives every node a fresh reference on any `updateNode` (history
+  middleware's `replaceDesignSnapshot` included), so reference identity is the reliable signal;
+  content never is.
+- **Global keyboard shortcuts (undo included) work from inside the panel's own fields** —
+  `UITools.TextField`/`TextFieldWrapper` and `UITools.Dropdown` both unconditionally rendered
+  `data-test-bypass-global-shortcuts="true"` on their input/trigger (the mechanism
+  `useKeyboardHandler` checks via `target.closest(...)` before running *any* global shortcut,
+  Cmd+Z included, so with focus inside one of those elements the shortcut is swallowed before it
+  ever dispatches). Both now take an optional `bypassGlobalShortcuts` prop (default `true`,
+  preserving every other call site's existing behaviour) that `GridTrackRow` passes `false` for
+  its mode dropdown and value field specifically, so Cmd+Z reaches the app's `undo` thunk even
+  while the user is still focused on a field they were just editing.
 
 ### Panel — resizing a grid that already has children (`resolveGridResize`)
 
@@ -711,12 +816,12 @@ same icons, same layout) was made grid-aware in place:
 
 ### Not covered yet
 
-Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
-`gridColumnSizes` / `gridRowSizes` — UI is the last phase), `gridAutoPlacement` toggle UI,
-occupied-vs-empty cell styling, span edge-handles (canvas resize-to-span), auto-placement
-obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete. The Column span /
-Row span fields are wired (`ColumnGridChildSpan`); the engine already honours spans and manual
-anchors when set in code.
+On-canvas track pills / drag-a-track-edge-to-fixed-px (the panel now covers per-track
+Fixed/Hug/Fill sizing, add, delete and reorder — § "Panel — the dedicated Grid settings panel";
+the canvas overlay is still the last phase), `gridAutoPlacement` toggle UI, occupied-vs-empty
+cell styling, span edge-handles (canvas resize-to-span), auto-placement obstruction reflow,
+arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wired
+(`ColumnGridChildSpan`); the engine already honours spans and manual anchors when set in code.
 
 ## Tests
 
@@ -729,6 +834,18 @@ anchors when set in code.
   (`getAutoLayoutPrimaryLayout`), `getAutoLayoutWrappedChildPositions/**/test/`,
   `getAutoLayoutDropTarget/test/`, `getAutoLayoutWrappedDropTarget/test/`,
   `getAutoLayoutGapHandles/test/`, `getAutoLayoutReadingOrderSlot/test/`.
+- **Unit — grid tracks / panel:** `src/store/design/utils/autoLayout/gridTracks/test/`
+  (`buildGridTrackList`, `addGridTrack`, `deleteGridTrack`, `getGridTrackDeleteChildUpdates`,
+  `getGridTrackMultiDeleteResult`, `moveGridTrackBlock`, `getGridTrackReorderChildUpdates`,
+  `getGridTrackChildren`, `getGridTrackLinkedIndices`, `getGridAxisFieldNames`),
+  `PanelProperties/GridSettings/**` (`GridSettings`, `GridSettingsHeader`, `GridTrackList`,
+  `GridTrackRow` + `GridTrackHandle` + `GridTrackDropIndicator`, `useGridSettingsPanel`,
+  `useGridTrackSelectionCoordinator`,
+  `hooks/utils/{makeAxisControls,commitGridAxisTracks,commitGridDeleteChildUpdates,commitGridReorderChildUpdates}`,
+  `GridTrackList/hooks/{useGridTrackList,useGridTrackSelection,useGridTrackReorderDrag}`,
+  `GridTrackList/utils/{computeGridTrackDropIndex,getGridTrackRangeIndices,getGridTrackToggledIndices}`),
+  `.../ColumnAlignmentLayout/hooks/utils/test/{openGridSettingsPanel,commitGridColumnResize,commitGridRowResize,commitGridCellClick}.spec.ts`,
+  `shared/UITools/{Dropdown,TextField/TextFieldWrapper}` (`bypassGlobalShortcuts` opt-out).
 - **Unit — UI / preview:** `.../PopoverAutoLayoutSettings/**/*.spec.tsx` (+ `hooks/utils/test/commit*Change`),
   `.../ColumnMinMaxDimensions/`, `.../ColumnPadding/hooks/test/`,
   `.../updateDragDropTarget/armAutoLayoutDropTarget/test/`,
@@ -775,9 +892,11 @@ anchors when set in code.
   `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
   select, reflow on column-count change), dragging an element into a cell (hover highlight + dim,
   drop nests it filling the cell), shrinking columns on an already-anchored grid repacking instead
-  of colliding, the shared Alignment widget moving a grid child within its own cell, and an
-  absolute-position grid child dragging freely instead of snapping back — driving the engine +
-  canvas.
+  of colliding, the shared Alignment widget moving a grid child within its own cell, an
+  absolute-position grid child dragging freely instead of snapping back, and (§13's dedicated
+  panel) opening it / resizing / adding / deleting a track, dragging a track by its handle to
+  reorder (including the span-break rejection), and undo/redo from inside a panel field resetting
+  a stale track selection — driving the engine + canvas + panel together.
 
 ## History (so it isn't repeated)
 
@@ -976,3 +1095,61 @@ anchors when set in code.
     rootOrder)` — sibling order, selection-order remainder — and fed the same list to
     `armGridDropTarget` (via `resolveDragReparentTarget`) and to `commitDropIntoFrame`, so the two
     ends agree.
+18. **2026-09-10 — grid flow, Phase 5a: the dedicated Grid settings panel (§13 "Panel — the
+    dedicated Grid settings panel").** A separate right-panel view (like `FrameTool`), opened by
+    the GridArea popover's formerly-inert **Open grid settings** button, gated on a new
+    `isGridSettingsPanelOpen` design-state flag. Per-track Fill/Fixed/Hug + value editing, a `+`
+    to add a track, a `−` to delete the selected track(s), and drag-the-number-to-reorder with a
+    white drop line — all writing the whole `gridColumnSizes` / `gridRowSizes` array the engine
+    already resolves. Model locked with the user before coding (full-panel swap not a popover;
+    reorder that would break a child's span is rejected and the row snaps back; opening the panel
+    forces `gridRowCount` explicit; one commit). Delete clamps a covered child's span (or releases
+    a single-cell child to auto-placement); reorder remaps every manually-anchored child's anchor
+    index through the track permutation and bails if any child's `[anchor, anchor+span)` stops
+    being contiguous. Pure helpers under `store/design/utils/autoLayout/gridTracks/`; the
+    background reorganiser split the panel hooks/utils and generated their specs mid-build.
+19. **2026-09-10 — grid flow, Phase 5b: live design iteration on the Grid settings panel (§13
+    "Panel — the dedicated Grid settings panel").** A single fast back-and-forth session against
+    the running panel turned up several real bugs the unit suite alone hadn't caught, each fixed
+    at its root: (a) **opening the popover silently repacked the whole grid** — radix autofocuses
+    a popover's first focusable child on open, which landed on the Columns count field; clicking
+    **Open grid settings** (itself inside that popover) then blurred it, and the blur handler
+    always re-ran `resolveGridResize` even when the typed value matched the current count, which
+    unconditionally repacks manually-anchored children and resets spans. `commitGridColumnResize`
+    / `commitGridRowResize` now no-op when the committed value equals the current (derived) count.
+    (b) **`Icon`'s `className` prop silently discarded its own `"Icon"` class** — `Icon.tsx`
+    rendered `className="Icon"` then spread `...restProps` (which includes any caller `className`)
+    *after* it, so passing a `className` (needed here to lay out `RowGrabber` in the handle)
+    overwrote `"Icon"` outright and with it the `svg-color` recolor mixin scoped to that class,
+    leaving the icon stuck on its placeholder fill regardless of the `color` prop. Root-caused and
+    fixed in the sibling `xigma-app-shared` repo (`packages/components/src/Icon/Icon.tsx`,
+    `xigma-app-shared@6542778`): merge via `classnames` instead of a hard overwrite; hot-patched
+    the built `node_modules/@xigma/components` artifacts here too so the fix took effect without a
+    `xigma:pull` round-trip. (c) **the selection-follows-the-drag fix (History #18's reorder
+    clearing) didn't survive undo** — the first pass compared a content signature (`{ mode, value,
+    linkedIndices }` per track) to detect external changes; for the very common case of several
+    identical `Fill, 1fr` tracks, undoing a reorder that swapped two of them produced a
+    byte-identical signature, so the stale selection silently stuck at its old index. Replaced the
+    signature with the `frame` node's own object *reference* (a new `revision` field on
+    `TGridAxisControls`, threaded from `useGridSettingsPanel`/`makeAxisControls`) — Redux/Immer
+    always gives an updated node a fresh reference, content-independent, so this is the reliable
+    "did something external touch this axis" signal (§13 "Undo/redo safety"). (d) **grabbing one
+    track of a 2-track span could never actually move it** — dragging a lone track that belongs to
+    a spanning child always either breaks the span (rejected) or is a no-op, so the drag silently
+    did nothing; added `getGridTrackLinkedIndices` + auto-extending an unselected grab to the whole
+    group (§13 "Spanning-child linking"), with an explicit multi-selection still exempt so the
+    rejection path stays reachable. (e) **Cmd+Z did nothing while focus sat in the panel's own
+    value field or mode dropdown** — both `TextFieldWrapper` and `Dropdown` unconditionally mark
+    themselves as global-shortcut-bypass targets, which is `useKeyboardHandler`'s intended
+    behaviour for ordinary text editing but meant undo/redo were unreachable while still focused
+    on a field just edited in this structural-editing panel; gave both an opt-out
+    `bypassGlobalShortcuts` prop (default `true`, every other call site unaffected) that
+    `GridTrackRow` sets to `false` for its two fields. Also: the drop indicator was back to being
+    an in-flow flex sibling (History #18 already fixed this once; a subsequent tweak reintroduced
+    it) — re-fixed as `position: absolute`, offset by `transform: translateY(index * 32px)`, so it
+    never reflows the rows around it. Per-row `−` delete button (each row owns one, `visibility:
+    hidden` unless hovered/selected) replaced the original single section-level button. Only one
+    axis can hold a selection at a time (`useGridTrackSelectionCoordinator`, §13 "Only one axis
+    selected at a time"), Columns defaults to track 1 selected. `d`, `e` and the undo-signature fix
+    each got a red→green e2e regression (`grid.spec.ts`) since they're real-browser timing/focus
+    bugs a synthetic event can't reliably reproduce.

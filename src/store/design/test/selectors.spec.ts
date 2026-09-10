@@ -21,6 +21,7 @@ import {
   selectEditingTextContent,
   selectFrameGuides,
   selectIsActionsPanelOpen,
+  selectIsGridSettingsPanelOpen,
   selectIsUiHidden,
   selectIsUiMinimized,
   selectLastFrameTool,
@@ -218,6 +219,14 @@ describe('design selectors', () => {
   it('should select the Actions panel open flag', () => {
     // result
     expect(selectIsActionsPanelOpen(state)).toBe(true);
+  });
+
+  it('should select the Grid settings panel open flag, defaulting to false when unset', () => {
+    // result
+    expect(selectIsGridSettingsPanelOpen(state)).toBe(false);
+    expect(selectIsGridSettingsPanelOpen({ ...state, design: { ...state.design, isGridSettingsPanelOpen: true } } as typeof state)).toBe(
+      true,
+    );
   });
 
   it('should select the minimized UI flag', () => {

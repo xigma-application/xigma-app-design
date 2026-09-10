@@ -13,6 +13,7 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TextFieldVariant } from '../enums';
 
 export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'color'> & {
+  bypassGlobalShortcuts?: boolean;
   className?: string;
   e2eValue?: TE2EValue;
   endAdornment?: ReactNode;
@@ -22,6 +23,7 @@ export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>,
 };
 
 export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
+  bypassGlobalShortcuts = true,
   className = '',
   defaultValue,
   disabled = false,
@@ -71,7 +73,7 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
         onKeyDown={handleKeyDown}
         ref={inputRef}
         {...getAttributes(E2EAttribute.textFieldInput, e2eValue)}
-        {...getAttributes(E2EAttribute.bypassGlobalShortcuts, 'true')}
+        {...(bypassGlobalShortcuts ? getAttributes(E2EAttribute.bypassGlobalShortcuts, 'true') : {})}
         {...restProps}
       />
       <span className={styles.TextFieldWrapper__endAdornment}>{endAdornment}</span>

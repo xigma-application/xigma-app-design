@@ -93,6 +93,7 @@ const initialState: TDesignState = {
   editingTextContent: '',
   hoveredDimensionField: null,
   isActionsPanelOpen: false,
+  isGridSettingsPanelOpen: false,
   isMediaToolArmed: false,
   isUiHidden: false,
   isUiMinimized: false,
@@ -191,6 +192,9 @@ const designSlice = createSlice({
     setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
       state.designHintLabelKey = action.payload;
     },
+    setGridSettingsPanelOpen: (state, action: PayloadAction<boolean>) => {
+      state.isGridSettingsPanelOpen = action.payload;
+    },
     setHoveredDimensionField: (state, action: PayloadAction<TDimensionHintField | null>) => {
       state.hoveredDimensionField = action.payload;
     },
@@ -287,6 +291,7 @@ export const {
   setActiveTool,
   setBackgroundPaint,
   setDesignHintLabelKey,
+  setGridSettingsPanelOpen,
   setHoveredDimensionField,
   setMediaToolArmed,
   setMinMaxRevealed,

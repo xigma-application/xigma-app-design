@@ -183,8 +183,12 @@ write-up: `.claude/docs/auto-layout.md` §13.
       rows if you drop past the end. A child that spans several cells highlights its whole block of
       slots while it's dragged, skipping any that fall outside the grid or that another element
       already holds
-- [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
-      the canvas — this is the last part
+- [x] a dedicated Grid panel (opened from the Grid section, replaces the frame properties like the
+      frame-template list does): one row per column and per row, each set to a fixed size / hug /
+      share-the-space with a value; add a track, delete a track, and drag a track by its number to
+      reorder it — the cells and any placed children move with it, and a move that would tear a
+      spanning child apart snaps back
+- [ ] dragging those track sizes directly on the canvas — this is the last part
 - [x] letting a child span several cells, from its Column span / Row span fields (see Stage 26)
 - [ ] later: reordering the cells with the keyboard
 

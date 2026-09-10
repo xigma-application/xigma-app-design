@@ -58,6 +58,7 @@ export type TDesignState = {
   editingTextContent: string;
   hoveredDimensionField?: TDimensionHintField | null;
   isActionsPanelOpen: boolean;
+  isGridSettingsPanelOpen?: boolean;
   isMediaToolArmed: boolean;
   isUiHidden: boolean;
   isUiMinimized: boolean;

@@ -144,4 +144,24 @@ describe('Dropdown behaviors', () => {
     // result
     expect(onHoverOption).toHaveBeenCalledWith(null);
   });
+
+  it('should bypass global keyboard shortcuts on the trigger and the open panel by default', () => {
+    // before
+    render(<Dropdown onSelect={vi.fn()} options={options} value="hex" />);
+    fireEvent.click(screen.getByText('Hex'));
+
+    // result
+    expect(screen.getByRole('button')).toHaveAttribute('data-test-bypass-global-shortcuts', 'true');
+    expect(screen.getByText('RGB').closest('[data-test-bypass-global-shortcuts]')).not.toBeNull();
+  });
+
+  it('should not bypass global keyboard shortcuts when asked not to', () => {
+    // before
+    render(<Dropdown bypassGlobalShortcuts={false} onSelect={vi.fn()} options={options} value="hex" />);
+    fireEvent.click(screen.getByText('Hex'));
+
+    // result
+    expect(screen.getByRole('button')).not.toHaveAttribute('data-test-bypass-global-shortcuts');
+    expect(screen.getByText('RGB').closest('[data-test-bypass-global-shortcuts]')).toBeNull();
+  });
 });

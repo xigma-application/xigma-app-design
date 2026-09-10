@@ -19,6 +19,7 @@ import { TDropdownOption, TDropdownVariant } from './types';
 import { E2EAttribute } from 'types/e2e';
 
 export type TDropdownProps<TValue extends string> = {
+  bypassGlobalShortcuts?: boolean;
   className?: string;
   disabled?: boolean;
   onHoverOption?: TFunc<[TValue | null]>;
@@ -29,6 +30,7 @@ export type TDropdownProps<TValue extends string> = {
 };
 
 export const Dropdown = <TValue extends string>({
+  bypassGlobalShortcuts = true,
   className = '',
   disabled = false,
   onHoverOption,
@@ -42,35 +44,45 @@ export const Dropdown = <TValue extends string>({
 
   useDropdownHoverOption(options, highlightedIndex, isOpen, onHoverOption);
 
+  const trigger = (
+    <PopoverPrimitive.Trigger
+      className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
+      disabled={disabled}
+    >
+      <span className={styles.Dropdown__label}>{selectedOption?.label}</span>
+      <Icon name="ChevronDown" size={12} />
+    </PopoverPrimitive.Trigger>
+  );
+
+  const content = (
+    <PopoverPrimitive.Content align="center" className={styles.Dropdown__content} onKeyDown={handleKeyDown} side="bottom" sideOffset={4}>
+      <DropdownPanel
+        highlightedIndex={highlightedIndex}
+        onHighlight={setHighlightedIndex}
+        onSelect={onSelect}
+        options={options}
+        value={value}
+      />
+    </PopoverPrimitive.Content>
+  );
+
   return (
     <PopoverPrimitive.Root onOpenChange={handleOpenChange} open={isOpen}>
-      <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
-        <PopoverPrimitive.Trigger
-          className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
-          disabled={disabled}
-        >
-          <span className={styles.Dropdown__label}>{selectedOption?.label}</span>
-          <Icon name="ChevronDown" size={12} />
-        </PopoverPrimitive.Trigger>
-      </E2EDataAttribute>
-      <PopoverPrimitive.Portal>
+      {bypassGlobalShortcuts ? (
         <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
-          <PopoverPrimitive.Content
-            align="center"
-            className={styles.Dropdown__content}
-            onKeyDown={handleKeyDown}
-            side="bottom"
-            sideOffset={4}
-          >
-            <DropdownPanel
-              highlightedIndex={highlightedIndex}
-              onHighlight={setHighlightedIndex}
-              onSelect={onSelect}
-              options={options}
-              value={value}
-            />
-          </PopoverPrimitive.Content>
+          {trigger}
         </E2EDataAttribute>
+      ) : (
+        trigger
+      )}
+      <PopoverPrimitive.Portal>
+        {bypassGlobalShortcuts ? (
+          <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
+            {content}
+          </E2EDataAttribute>
+        ) : (
+          content
+        )}
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   );

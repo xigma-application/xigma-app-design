@@ -102,4 +102,20 @@ describe('TextFieldWrapper behaviors', () => {
     expect(container.querySelector('[data-test-text-field="color"]')).not.toBeNull();
     expect(container.querySelector('[data-test-text-field-input="color"]')).not.toBeNull();
   });
+
+  it('should bypass global keyboard shortcuts by default', () => {
+    // before
+    render(<TextFieldWrapper value="ffffff" />);
+
+    // result
+    expect(screen.getByDisplayValue('ffffff')).toHaveAttribute('data-test-bypass-global-shortcuts', 'true');
+  });
+
+  it('should not bypass global keyboard shortcuts when asked not to', () => {
+    // before
+    render(<TextFieldWrapper bypassGlobalShortcuts={false} value="ffffff" />);
+
+    // result
+    expect(screen.getByDisplayValue('ffffff')).not.toHaveAttribute('data-test-bypass-global-shortcuts');
+  });
 });

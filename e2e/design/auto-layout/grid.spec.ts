@@ -31,6 +31,21 @@ const selectFrameRow = async (page: Page): Promise<void> => {
   await page.locator('[class*="Tree__row_"]').filter({ hasText: 'Frame' }).first().click();
 };
 
+const openGridSettings = async (page: Page): Promise<void> => {
+  await page.locator('[data-test-grid-area]').click();
+  await page.getByRole('button', { name: 'Open grid settings' }).click();
+  await expect(page.locator('[data-test-grid-settings-panel]')).toBeVisible();
+};
+
+const readRowCount = (page: Page): Promise<number | undefined> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const [frameId] = pages[activePageId].rootOrder;
+
+    return (pages[activePageId].nodes[frameId] as unknown as { gridRowCount?: number }).gridRowCount;
+  });
+
 type TChildBox = { x: number; y: number };
 
 const getChildren = (page: Page): Promise<TChildBox[]> =>
@@ -1226,5 +1241,187 @@ test.describe('auto-layout — Grid flow', () => {
       small.column < big.column + big.columnSpan;
 
     expect(overlaps).toBe(false);
+  });
+
+  test('the Open grid settings button swaps in a dedicated panel whose track rows resize, add and delete columns', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-settings-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    for (const targetY of [250, 320, 390, 460]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    // the dedicated panel replaces the normal frame properties
+    await expect(flowGroup(page)).toBeHidden();
+    // forcing rows explicit means the panel shows a concrete row count
+    await expect.poll(() => readRowCount(page)).toBe(2);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+    const beforeResize = await getChildren(page);
+
+    // switch the first column track to a fixed width
+    await columns.locator('[data-test-grid-track-row="0"]').getByRole('button', { exact: true, name: 'Fill' }).click();
+    await page.getByText('Fixed', { exact: true }).click();
+
+    const firstValue = columns.getByLabel('Track size value').first();
+
+    await firstValue.fill('240');
+    await firstValue.blur();
+
+    await expect.poll(() => getChildren(page)).not.toEqual(beforeResize);
+
+    // add a column
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+
+    // select the last column track and delete it
+    await columns.locator('[data-test-grid-track-row="2"]').click();
+    await columns.getByRole('button', { name: 'Delete selected tracks' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(2);
+
+    // closing returns to the normal properties
+    await page.getByRole('button', { name: 'Close grid settings' }).click();
+    await expect(page.locator('[data-test-grid-settings-panel]')).toBeHidden();
+    await expect(flowGroup(page)).toBeVisible();
+  });
+
+  test('dragging a track by its handle reorders the grid columns and carries an anchored child, but a span-breaking move snaps back', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-reorder');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 3, gridRowCount: 1 }, id: frameId }));
+
+      const addRect = (): string => {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+        const state = store.getState().design;
+
+        return state.pages[state.activePageId].rootOrder.at(-1) as string;
+      };
+
+      const anchored = addRect();
+      const wide = addRect();
+
+      store.dispatch(moveNodes({ nodeIds: [anchored, wide], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 2, gridRowAnchorIndex: 0 }, id: anchored }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2, gridRowAnchorIndex: 0 }, id: wide }));
+    });
+
+    await selectFrameRow(page);
+    await openGridSettings(page);
+
+    const readAnchors = (): Promise<Record<string, number | undefined>> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const activePage = pages[activePageId];
+        const [frameId] = activePage.rootOrder;
+        const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+        const out: Record<string, number | undefined> = {};
+
+        frame.childIds.forEach((id) => {
+          out[(activePage.nodes[id] as unknown as { name: string }).name + id] = (
+            activePage.nodes[id] as unknown as { gridColumnAnchorIndex?: number }
+          ).gridColumnAnchorIndex;
+        });
+
+        return out;
+      });
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    const dragHandle = async (fromIndex: number, toRow: number): Promise<void> => {
+      const handle = columns.locator(`[data-test-grid-track-row="${fromIndex}"]`).getByRole('button', { name: 'Reorder track' });
+      const target = columns.locator(`[data-test-grid-track-row="${toRow}"]`);
+      const from = await handle.boundingBox();
+      const to = await target.boundingBox();
+
+      await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(to!.x + to!.width / 2, to!.y + 2, { steps: 10 });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+    };
+
+    // drag the 3rd column track to the front — the child anchored at column 2 rides to column 0
+    await dragHandle(2, 0);
+    await expect.poll(async () => Object.values(await readAnchors()).filter((value) => value === 0).length).toBeGreaterThanOrEqual(1);
+
+    const afterFirst = await readAnchors();
+
+    // grabbing an unselected track that belongs to a span auto-extends the drag to the whole
+    // span, so an explicit single-track selection is needed to actually attempt splitting it:
+    // the wide child now spans the last two columns; pulling only the middle one to the front
+    // would split its span in two, so the reorder is rejected and every anchor stays put
+    await columns.locator('[data-test-grid-track-row="1"]').click();
+    await dragHandle(1, 0);
+    expect(await readAnchors()).toEqual(afterFirst);
+  });
+
+  test('undo/redo works from inside the track value field, and resets a now-stale track selection', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-undo');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+
+    // select the second column track (not the default column 1)
+    await columns.locator('[data-test-grid-track-row="1"]').click();
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+
+    // add a third column — this is the panel's own change, the selection on column 2 must survive it
+    await columns.getByRole('button', { name: 'Add column' }).click();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).toHaveClass(/--selected/);
+
+    // undo from inside the value field itself — bypassGlobalShortcuts is off for this field, so
+    // the shortcut must still reach the app instead of being swallowed by the input
+    const firstValue = columns.getByLabel('Track size value').first();
+
+    await firstValue.click();
+    await page.keyboard.press('Control+z');
+
+    await expect.poll(() => readColumnCount(page)).toBe(2);
+    // the undo came from outside this panel's own actions, so the selection resets to the axis
+    // default instead of leaving the stale highlight sitting on column 2's old index
+    await expect(columns.locator('[data-test-grid-track-row="0"]')).toHaveClass(/--selected/);
+    await expect(columns.locator('[data-test-grid-track-row="1"]')).not.toHaveClass(/--selected/);
   });
 });

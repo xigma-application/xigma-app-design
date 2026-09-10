@@ -26,6 +26,7 @@ import slice, {
   setActivePage,
   setActiveTool,
   setBackgroundPaint,
+  setGridSettingsPanelOpen,
   setPaint,
   setPenActiveVertexId,
   setSelection,
@@ -95,6 +96,7 @@ describe('design slice', () => {
       editingTextContent: '',
       hoveredDimensionField: null,
       isActionsPanelOpen: false,
+      isGridSettingsPanelOpen: false,
       isMediaToolArmed: false,
       isUiHidden: false,
       isUiMinimized: false,
@@ -656,6 +658,20 @@ describe('design slice', () => {
 
     // result
     expect(closed.isActionsPanelOpen).toBe(false);
+  });
+
+  it('should set the Grid settings panel open flag', () => {
+    // action
+    const opened = slice(undefined, setGridSettingsPanelOpen(true));
+
+    // result
+    expect(opened.isGridSettingsPanelOpen).toBe(true);
+
+    // action
+    const closed = slice(opened, setGridSettingsPanelOpen(false));
+
+    // result
+    expect(closed.isGridSettingsPanelOpen).toBe(false);
   });
 
   it('should toggle the Actions panel open flag', () => {

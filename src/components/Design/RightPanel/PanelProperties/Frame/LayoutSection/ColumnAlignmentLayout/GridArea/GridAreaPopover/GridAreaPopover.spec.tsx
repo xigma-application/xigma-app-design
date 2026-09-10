@@ -13,6 +13,7 @@ const grid = (overrides: Partial<TUseColumnGridAreaResult> = {}): TUseColumnGrid
   onClickCell: vi.fn(),
   onCommitColumns: vi.fn(),
   onCommitRows: vi.fn(),
+  onOpenSettings: vi.fn(),
   onSetRowsAuto: vi.fn(),
   onSetRowsFixed: vi.fn(),
   rows: '2',

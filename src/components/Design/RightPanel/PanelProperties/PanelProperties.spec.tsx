@@ -9,12 +9,12 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { addNode, setActiveTool, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 
 const renderPanelProperties = (): ReturnType<typeof render> =>
   render(
@@ -143,6 +143,42 @@ describe('PanelProperties behaviors', () => {
 
     // result
     expect(container).toBeEmptyDOMElement();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should swap in the Grid settings panel while a grid frame is selected and the flag is on', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, gridRowCount: 2, layoutMode: LayoutMode.grid }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setGridSettingsPanelOpen(true));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Columns')).toBeInTheDocument();
+    expect(screen.getByText('Rows')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close grid settings' })).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setGridSettingsPanelOpen(false));
+    store.dispatch(setSelection([]));
+  });
+
+  it('should keep the normal frame panel for a grid frame while the flag is off', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(updateNode({ changes: { layoutMode: LayoutMode.grid }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Close grid settings' })).not.toBeInTheDocument();
 
     // cleanup
     store.dispatch(setSelection([]));

@@ -1,0 +1,794 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`GridSettings > should match the snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="_GridSettings_e9699a"
+    data-test-grid-settings-panel=""
+  >
+    <div
+      class="_ComponentHeader_163cd5"
+      data-test-component-header="grid-settings-header"
+    >
+      <div
+        class="_ComponentHeader__label_163cd5"
+      >
+        Grid
+      </div>
+      <div
+        class="_ComponentHeader__buttons_163cd5"
+      >
+        <button
+          aria-label="Close grid settings"
+          aria-pressed="false"
+          class="_Button_b88d2e"
+          style="padding: 0px;"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24L"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="16"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M17.354 6.646a.5.5 0 0 1 0 .708L12.707 12l4.647 4.646a.5.5 0 0 1-.708.708L12 12.707l-4.646 4.647a.5.5 0 0 1-.708-.708L11.293 12 6.646 7.354a.5.5 0 0 1 .708-.707L12 11.293l4.646-4.647a.5.5 0 0 1 .708 0"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_Section_5940d2"
+      data-test-section="grid-columns"
+    >
+      <div
+        class="_Section__header_5940d2"
+      >
+        <span
+          class="_Section__label_5940d2"
+        >
+          Columns
+        </span>
+        <div
+          class="_Section__component_5940d2"
+        >
+          <button
+            aria-label="Add column"
+            aria-pressed="false"
+            class="_Button_b88d2e"
+            style="padding: 0px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        class="_GridTrackList_23ffb1"
+      >
+        <div
+          class="_GridTrackRow_bdfaf0 _GridTrackRow--selected_bdfaf0"
+          data-test-grid-track-row="0"
+        >
+          <button
+            aria-label="Reorder track"
+            class="_GridTrackHandle_87f24b _GridTrackHandle--selected_87f24b"
+            type="button"
+          >
+            <span
+              class="_GridTrackHandle__number_87f24b"
+            >
+              1
+            </span>
+            <svg
+              class="Icon _GridTrackHandle__grabber_87f24b"
+              fill="none"
+              height="8"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 6 7"
+              width="8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M0 0H6V1H0V0ZM0 3H6V4H0V3ZM0 6H6V7H0V6Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Fill
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="grid-track-value-0"
+            >
+              <input
+                aria-label="Track size value"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-text-field-input="grid-track-value-0"
+                type="number"
+                value="1"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Track sizing mode"
+                  class="_ButtonMenu_7516ba"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="10"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="10"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Delete selected tracks"
+            aria-pressed="false"
+            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            style="padding: 2px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 1"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="_GridTrackRow_bdfaf0"
+          data-test-grid-track-row="1"
+        >
+          <button
+            aria-label="Reorder track"
+            class="_GridTrackHandle_87f24b"
+            type="button"
+          >
+            <span
+              class="_GridTrackHandle__number_87f24b"
+            >
+              2
+            </span>
+            <svg
+              class="Icon _GridTrackHandle__grabber_87f24b"
+              fill="none"
+              height="8"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 6 7"
+              width="8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M0 0H6V1H0V0ZM0 3H6V4H0V3ZM0 6H6V7H0V6Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Fill
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="grid-track-value-1"
+            >
+              <input
+                aria-label="Track size value"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-text-field-input="grid-track-value-1"
+                type="number"
+                value="1"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Track sizing mode"
+                  class="_ButtonMenu_7516ba"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="10"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="10"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Delete selected tracks"
+            aria-pressed="false"
+            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            style="padding: 2px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 1"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="_GridTrackRow_bdfaf0"
+          data-test-grid-track-row="2"
+        >
+          <button
+            aria-label="Reorder track"
+            class="_GridTrackHandle_87f24b"
+            type="button"
+          >
+            <span
+              class="_GridTrackHandle__number_87f24b"
+            >
+              3
+            </span>
+            <svg
+              class="Icon _GridTrackHandle__grabber_87f24b"
+              fill="none"
+              height="8"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 6 7"
+              width="8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M0 0H6V1H0V0ZM0 3H6V4H0V3ZM0 6H6V7H0V6Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Fill
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="grid-track-value-2"
+            >
+              <input
+                aria-label="Track size value"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-text-field-input="grid-track-value-2"
+                type="number"
+                value="1"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Track sizing mode"
+                  class="_ButtonMenu_7516ba"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="10"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="10"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Delete selected tracks"
+            aria-pressed="false"
+            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            style="padding: 2px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 1"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="_Section_5940d2"
+      data-test-section="grid-rows"
+    >
+      <div
+        class="_Section__header_5940d2"
+      >
+        <span
+          class="_Section__label_5940d2"
+        >
+          Rows
+        </span>
+        <div
+          class="_Section__component_5940d2"
+        >
+          <button
+            aria-label="Add row"
+            aria-pressed="false"
+            class="_Button_b88d2e"
+            style="padding: 0px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              data-fpl-icon-size="24"
+              fill="none"
+              height="24"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 24 24"
+              width="24"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        class="_GridTrackList_23ffb1"
+      >
+        <div
+          class="_GridTrackRow_bdfaf0"
+          data-test-grid-track-row="0"
+        >
+          <button
+            aria-label="Reorder track"
+            class="_GridTrackHandle_87f24b"
+            type="button"
+          >
+            <span
+              class="_GridTrackHandle__number_87f24b"
+            >
+              1
+            </span>
+            <svg
+              class="Icon _GridTrackHandle__grabber_87f24b"
+              fill="none"
+              height="8"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 6 7"
+              width="8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M0 0H6V1H0V0ZM0 3H6V4H0V3ZM0 6H6V7H0V6Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Fill
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="grid-track-value-0"
+            >
+              <input
+                aria-label="Track size value"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-text-field-input="grid-track-value-0"
+                type="number"
+                value="1"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Track sizing mode"
+                  class="_ButtonMenu_7516ba"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="10"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="10"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Delete selected tracks"
+            aria-pressed="false"
+            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            style="padding: 2px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 1"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="_GridTrackRow_bdfaf0"
+          data-test-grid-track-row="1"
+        >
+          <button
+            aria-label="Reorder track"
+            class="_GridTrackHandle_87f24b"
+            type="button"
+          >
+            <span
+              class="_GridTrackHandle__number_87f24b"
+            >
+              2
+            </span>
+            <svg
+              class="Icon _GridTrackHandle__grabber_87f24b"
+              fill="none"
+              height="8"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 6 7"
+              width="8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M0 0H6V1H0V0ZM0 3H6V4H0V3ZM0 6H6V7H0V6Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+            data-state="closed"
+            type="button"
+          >
+            <span
+              class="_Dropdown__label_cc217a"
+            >
+              Fill
+            </span>
+            <svg
+              class="Icon"
+              data-fpl-icon-size="16"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 16 16"
+              width="12"
+            >
+              <path
+                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                data-svg-property="fill"
+                fill="white"
+              />
+            </svg>
+          </button>
+          <div
+            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          >
+            <div
+              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+              data-test-text-field="grid-track-value-1"
+            >
+              <input
+                aria-label="Track size value"
+                class="_TextFieldWrapper__input_9a3a67"
+                data-test-text-field-input="grid-track-value-1"
+                type="number"
+                value="1"
+              />
+              <span
+                class="_TextFieldWrapper__endAdornment_9a3a67"
+              >
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="dialog"
+                  aria-label="Track sizing mode"
+                  class="_ButtonMenu_7516ba"
+                  data-state="closed"
+                  type="button"
+                >
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="10"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 16 16"
+                    width="10"
+                  >
+                    <path
+                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+          <button
+            aria-label="Delete selected tracks"
+            aria-pressed="false"
+            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            style="padding: 2px;"
+            type="button"
+          >
+            <svg
+              class="Icon"
+              fill="none"
+              height="12"
+              style="color: var(--color-neutral-1);"
+              viewBox="0 0 12 1"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 0.5C12 0.632608 11.9473 0.759786 11.8536 0.853554C11.7598 0.947322 11.6326 1 11.5 1H0.5C0.367392 1 0.240215 0.947322 0.146447 0.853554C0.0526785 0.759786 0 0.632608 0 0.5C0 0.367392 0.0526785 0.240214 0.146447 0.146446C0.240215 0.052678 0.367392 0 0.5 0H11.5C11.6326 0 11.7598 0.052678 11.8536 0.146446C11.9473 0.240214 12 0.367392 12 0.5Z"
+                data-svg-property="fill"
+                fill="white"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
