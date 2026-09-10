@@ -446,6 +446,10 @@ Ported faithfully from x-design's `shared/UITools/GridArea/` (structure + popup)
 **both** `GapField`s (column = `horizontalGap`, row = `verticalGap`; auto-gap mode disabled). The
 widget is a 210px-wide popover (`var(--color-neutral-4)` ground) opened from a 56px preview tile
 (`GridAreaPreview`, a `repeat(n, 1fr)` grid capped at 10×10 with a `"C × R"` caption). The popover
+opens **anchored to the tile's own top-left corner**, overlaying the panel downward from there
+(`side="bottom"`, `align="start"`, `sideOffset={-56}` = the tile height, and `avoidCollisions={false}`
+so Radix never flips or shifts it off that corner — the prop is a new opt-out on `UITools.Popover`,
+default `true`). The popover
 holds `GridInputs` (two `GridInputCells` — `TextField` + `ScrubbableInput` 1–100, as shrinking
 flex items so they fit the 210px), `CellsInput` (a 12×8 `data-value="col.row"` pick matrix of
 `<button>`s, each `<Tooltip>`-wrapped so hover shows `"CxR"`), and a full-width **Open grid

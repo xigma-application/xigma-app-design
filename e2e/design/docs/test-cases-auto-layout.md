@@ -76,6 +76,7 @@ repainting — same rationale as the Flow section above.
 | 36  | The drop indicator stays hidden, and the grabbed row(s) stay fully opaque, until the pointer actually moves while held — grabbing a handle alone no longer shows the indicator or dims the row before any drag has actually started                                                       |  ✅  | ✅ `grid.spec.ts` |
 | 37  | Selecting two tracks, reordering them together, then undoing brings **both** original tracks back selected at their restored positions (the panel's selection round-trips through undo/redo history, keyed on the frame reference), not just one                                          |  ✅  | ✅ `grid.spec.ts` |
 | 38  | The Columns/Rows `+` button carries an "Add column" / "Add row" tooltip, and a track's `−` button a position-aware one — "Remove column 1 of 2" for a lone track, switching to a count ("Remove 2 columns") once that track is part of a multi-selection the button would delete together |  ✅  | ✅ `grid.spec.ts` |
+| 39  | The Grid size popover opens with its top-left corner on the preview tile's own top-left corner (overlaying the panel downward), not flipped to one side — pinned by `side/align/sideOffset` plus `avoidCollisions={false}`                                                                |  —   | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -151,7 +152,9 @@ a mocked `TGridAxisControls`. #38 is a Radix tooltip on right-panel buttons: whe
 actually appears on hover after the provider's open-delay, and whether the `−` button's copy flips
 between the single-track and multi-selection wording, is a real hover-timing + portal-render check —
 the string selection itself is unit-covered (`GridTrackRow.spec.tsx`), but the browser proves it
-mounts and reads correctly against a live selection.
+mounts and reads correctly against a live selection. #39 is unit-unprovable by nature — jsdom does no
+layout, so a Radix popover's resolved on-screen box only exists in a real browser; the e2e opens the
+popover and compares its `boundingBox()` top-left to the trigger tile's.
 
 ## Reordering a child within its own frame
 

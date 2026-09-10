@@ -19,6 +19,8 @@ import styles from './grid-area.module.scss';
 // types
 import { E2EAttribute } from 'types/e2e';
 
+const TRIGGER_HEIGHT = 56;
+
 export type TGridAreaProps = {
   grid: TUseColumnGridAreaResult;
 };
@@ -32,10 +34,12 @@ export const GridArea: FC<TGridAreaProps> = ({ grid }) => {
     <UITools.Popover
       align="start"
       asChild
+      avoidCollisions={false}
       className={styles.GridAreaPanel}
       onOpenChange={setOpen}
       open={open}
-      side="left"
+      side="bottom"
+      sideOffset={-TRIGGER_HEIGHT}
       trigger={
         <button aria-label={label} className={styles.GridArea} type="button" {...getAttributes(E2EAttribute.gridArea, '')}>
           <GridAreaPreview columns={grid.columns} rows={grid.rows} />

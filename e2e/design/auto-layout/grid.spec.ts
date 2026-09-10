@@ -188,6 +188,33 @@ test.describe('auto-layout — Grid flow', () => {
     expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(2);
   });
 
+  test('the Grid size popover opens anchored to the top-left corner of its trigger tile', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-popover-anchor');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    const trigger = page.locator('[data-test-grid-area]');
+
+    await trigger.click();
+
+    const popover = page.locator('[class*="GridAreaPanel"]');
+
+    await expect(popover).toBeVisible();
+
+    const triggerBox = await trigger.boundingBox();
+    const popoverBox = await popover.boundingBox();
+
+    // the popover overlays the panel from the trigger's own top-left corner, not flipped off to one side
+    expect(Math.abs(popoverBox!.x - triggerBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(popoverBox!.y - triggerBox!.y)).toBeLessThanOrEqual(2);
+  });
+
   test('a selected grid frame draws its cell slots on the canvas, reflowing them when the column count changes', async ({ page }) => {
     const designPage = new DesignPage(page);
 

@@ -19,6 +19,7 @@ import styles from './popover.module.scss';
 export type TPopoverProps = {
   align?: 'center' | 'end' | 'start';
   asChild?: boolean;
+  avoidCollisions?: boolean;
   children: ReactNode;
   className?: string;
   moveable?: boolean;
@@ -37,6 +38,7 @@ export type TPopoverProps = {
 export const Popover: FC<TPopoverProps> = ({
   align = 'start',
   asChild = false,
+  avoidCollisions = true,
   children,
   className = '',
   moveable = false,
@@ -63,6 +65,7 @@ export const Popover: FC<TPopoverProps> = ({
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           align={align}
+          avoidCollisions={avoidCollisions}
           className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
           collisionPadding={scrollable ? 10 : undefined}
           onInteractOutside={onInteractOutside}
