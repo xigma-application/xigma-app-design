@@ -181,6 +181,13 @@ write-up: `.claude/docs/auto-layout.md` §13.
 - [ ] later: placing a child in a specific cell, letting a child span several cells, dragging a
       child from one cell to another, and reordering with the keyboard
 
+## Stage 26 — Rectangle properties panel
+
+Selecting a single rectangle now gives it its own right-panel view instead of a blank panel: the
+name header with a "Create component" button, the same position and rotation controls a frame has,
+and a width/height row. The parts a frame and a rectangle share (header, position, dimensions) were
+pulled into one place so the next shape type can reuse them.
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

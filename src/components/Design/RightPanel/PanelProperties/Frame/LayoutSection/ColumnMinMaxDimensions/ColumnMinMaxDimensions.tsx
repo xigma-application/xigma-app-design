@@ -7,7 +7,7 @@ import { UITools } from 'shared';
 
 // hooks
 import { useColumnMinMaxDimensions } from './hooks/useColumnMinMaxDimensions';
-import { useDimensionsCommit } from '../ColumnDimensions/hooks/useDimensionsCommit';
+import { useDimensionsCommit } from '../../../Common/ColumnDimensions/hooks/useDimensionsCommit';
 
 // others
 import { translationNameSpace } from './constants';

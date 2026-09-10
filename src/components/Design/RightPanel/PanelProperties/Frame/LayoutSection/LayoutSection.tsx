@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import ColumnAlignmentLayout from './ColumnAlignmentLayout/ColumnAlignmentLayout';
 import ColumnClipContent from './ColumnClipContent/ColumnClipContent';
-import ColumnDimensions from './ColumnDimensions/ColumnDimensions';
+import ColumnDimensions from '../../Common/ColumnDimensions/ColumnDimensions';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
 import ColumnMinMaxDimensions from './ColumnMinMaxDimensions/ColumnMinMaxDimensions';
 import ColumnPadding from './ColumnPadding/ColumnPadding';

@@ -3,7 +3,7 @@ import { FC, Fragment } from 'react';
 // components
 import FrameHeader from './FrameHeader/FrameHeader';
 import LayoutSection from './LayoutSection/LayoutSection';
-import PositionSection from './PositionSection/PositionSection';
+import PositionSection from '../Common/PositionSection/PositionSection';
 
 const Frame: FC = () => (
   <Fragment>

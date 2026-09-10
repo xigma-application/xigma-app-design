@@ -4,6 +4,7 @@ import { FC } from 'react';
 import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import NoSelection from './NoSelection/NoSelection';
+import Rectangle from './Rectangle/Rectangle';
 
 // store
 import { selectActiveTool, selectSelectedNodes } from 'store/design/selectors';
@@ -23,6 +24,8 @@ const PanelProperties: FC = () => {
       return <NoSelection />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.frame:
       return <Frame />;
+    case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.rectangle:
+      return <Rectangle />;
     default:
       return null;
   }

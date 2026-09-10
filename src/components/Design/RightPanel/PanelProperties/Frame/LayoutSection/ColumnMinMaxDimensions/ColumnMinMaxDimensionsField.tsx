@@ -7,10 +7,10 @@ import { Icon, ScrubbableInput, TIconProps } from '@xigma/components';
 import { UITools } from 'shared';
 
 // hooks
-import { useDimensionFieldHover } from '../hooks/useDimensionFieldHover';
+import { useDimensionFieldHover } from '../../../Common/ColumnDimensions/hooks/useDimensionFieldHover';
 
 // others
-import { DIMENSIONS_MAX } from '../ColumnDimensions/constants';
+import { DIMENSIONS_MAX } from '../../../Common/ColumnDimensions/constants';
 
 // types
 import { TDimensionHintField } from 'store/design/types';

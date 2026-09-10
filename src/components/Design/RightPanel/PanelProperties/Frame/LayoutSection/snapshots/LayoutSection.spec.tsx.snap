@@ -233,7 +233,7 @@ exports[`LayoutSection snapshots > should render the flow row 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnDimensionsField__label_bca1a8"
+                  class="_ColumnDimensionsField__label_85b29c"
                 >
                   W
                 </span>
@@ -262,7 +262,7 @@ exports[`LayoutSection snapshots > should render the flow row 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnDimensionsField__label_bca1a8"
+                  class="_ColumnDimensionsField__label_85b29c"
                 >
                   H
                 </span>

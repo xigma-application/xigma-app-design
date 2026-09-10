@@ -13,12 +13,12 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
         aria-expanded="false"
         aria-haspopup="dialog"
         aria-label="Element type"
-        class="_ButtonMenu_7516ba _FrameHeader__trigger_db2b05"
+        class="_ButtonMenu_7516ba _PanelHeader__trigger_8adac9"
         data-state="closed"
         type="button"
       >
         <span
-          class="_FrameHeader__label_db2b05"
+          class="_PanelHeader__label_8adac9"
         >
           Frame
           <svg
@@ -377,7 +377,7 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnPositionField__label_bfd5c2"
+                  class="_ColumnPositionField__label_f7c11b"
                 >
                   X
                 </span>
@@ -407,7 +407,7 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnPositionField__label_bfd5c2"
+                  class="_ColumnPositionField__label_f7c11b"
                 >
                   Y
                 </span>
@@ -819,7 +819,7 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnDimensionsField__label_bca1a8"
+                  class="_ColumnDimensionsField__label_85b29c"
                 >
                   W
                 </span>
@@ -848,7 +848,7 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
                 class="ScrubbableInput"
               >
                 <span
-                  class="_ColumnDimensionsField__label_bca1a8"
+                  class="_ColumnDimensionsField__label_85b29c"
                 >
                   H
                 </span>

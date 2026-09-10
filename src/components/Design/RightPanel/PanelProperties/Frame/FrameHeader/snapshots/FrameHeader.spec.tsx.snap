@@ -13,12 +13,12 @@ exports[`FrameHeader snapshots > should render the Frame label with its trailing
         aria-expanded="false"
         aria-haspopup="dialog"
         aria-label="Element type"
-        class="_ButtonMenu_7516ba _FrameHeader__trigger_db2b05"
+        class="_ButtonMenu_7516ba _PanelHeader__trigger_8adac9"
         data-state="closed"
         type="button"
       >
         <span
-          class="_FrameHeader__label_db2b05"
+          class="_PanelHeader__label_8adac9"
         >
           Frame
           <svg

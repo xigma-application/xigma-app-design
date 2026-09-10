@@ -4,7 +4,7 @@ import { selectNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TFrameNode } from 'types/design/types';
+import { TBoxSceneNode } from 'types/design/types';
 
 // utils
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
@@ -12,13 +12,13 @@ import { getRotateNodeOrigins } from '../../handlePointerDown/getRotateNodeOrigi
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
 import { pinRotatedGroupBounds } from './pinRotatedGroupBounds';
 
-export const rotateNodesRigidly = (dispatch: AppDispatch, frame: TFrameNode, nextRotation: number): void => {
-  const deltaDegrees = nextRotation - frame.rotation;
+export const rotateNodesRigidly = (dispatch: AppDispatch, node: TBoxSceneNode, nextRotation: number): void => {
+  const deltaDegrees = nextRotation - node.rotation;
 
   if (deltaDegrees !== 0) {
     const nodes = selectNodes(store.getState());
-    const pivot = { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 };
-    const targetNodes = getRigidTransformNodes([frame], nodes);
+    const pivot = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const targetNodes = getRigidTransformNodes([node], nodes);
     const nodeOrigins = getRotateNodeOrigins(targetNodes);
     const isSingleNodeRotate = targetNodes.length === 1;
 

@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ConstrainsView snapshots > should default to left/top when there is no alignment 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstrainsView_2460a4 _ConstrainsView__horizontal--left_2460a4 _ConstrainsView__vertical--top_2460a4"
+  >
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--bottom_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-horizontal_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-vertical_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--left_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--right_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--top_2460a4"
+    />
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ConstrainsView snapshots > should highlight the active horizontal and vertical anchors 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstrainsView_2460a4 _ConstrainsView__horizontal--right_2460a4 _ConstrainsView__vertical--bottom_2460a4"
+  >
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--bottom_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-horizontal_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-vertical_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--left_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--right_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--top_2460a4"
+    />
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ConstrainsView snapshots > should render the selected modifier 1`] = `
+<DocumentFragment>
+  <div
+    class="_ConstrainsView_2460a4 _ConstrainsView--selected_2460a4 _ConstrainsView__horizontal--left_2460a4 _ConstrainsView__vertical--top_2460a4"
+  >
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--bottom_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-horizontal_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--center-vertical_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--left_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--right_2460a4"
+    />
+    <div
+      class="_ConstrainsView__constrain_2460a4 _ConstrainsView__constrain--top_2460a4"
+    />
+  </div>
+</DocumentFragment>
+`;

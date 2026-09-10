@@ -156,9 +156,10 @@ node — but only when `child.rotation === frame.rotation` (no well-defined "gro
 otherwise); then translates the child's whole subtree by the position delta, and recurses
 `syncAutoLayoutChildren` if the child is itself an auto-layout frame.
 
-RightPanel controls: `LayoutSection/ColumnDimensions/` (W/H + the Fixed/Hug/Fill menu),
-`ColumnMinMaxDimensions/` (min/max fields; `useColumnMinMaxDimensions.ts` clamps on commit, `<= 0`
-clears the bound), `ColumnFlow/` (flow + wrap), `ColumnClipContent/`.
+RightPanel controls: `PanelProperties/Common/ColumnDimensions/` (W/H + the Fixed/Hug/Fill menu;
+shared with the Rectangle panel, so its hooks accept any box scene node, not only frames),
+`LayoutSection/ColumnMinMaxDimensions/` (min/max fields; `useColumnMinMaxDimensions.ts` clamps on
+commit, `<= 0` clears the bound), `ColumnFlow/` (flow + wrap), `ColumnClipContent/`.
 
 ## 4. Padding & gap
 

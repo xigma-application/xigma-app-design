@@ -49,6 +49,26 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addRectangleNode = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('PanelProperties behaviors', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -89,6 +109,23 @@ describe('PanelProperties behaviors', () => {
 
     // result
     expect(screen.getByText('Frame')).toBeInTheDocument();
+    expect(screen.queryByText('Page')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should show the Rectangle panel while a single rectangle is selected', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([rectangleId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Rectangle')).toBeInTheDocument();
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
     expect(screen.queryByText('Page')).not.toBeInTheDocument();
 
     // cleanup

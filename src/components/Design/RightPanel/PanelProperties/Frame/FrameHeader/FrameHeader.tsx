@@ -4,33 +4,22 @@ import { useTranslation } from 'react-i18next';
 // components
 import FrameHeaderButtons from './FrameHeaderButtons';
 import FrameHeaderMenu from './FrameHeaderMenu';
-import { Icon, UITools } from 'shared';
+import PanelHeader from '../../Common/PanelHeader/PanelHeader';
 
 // others
 import { translationNameSpace } from './constants';
-
-// styles
-import styles from './frame-header.module.scss';
 
 const FrameHeader: FC = () => {
   const { t } = useTranslation();
 
   return (
-    <UITools.ComponentHeader buttons={<FrameHeaderButtons />} e2eValue="frame">
-      <UITools.ButtonMenu
-        className={styles.FrameHeader__trigger}
-        scrollable
-        trigger={
-          <span className={styles.FrameHeader__label}>
-            {t(`${translationNameSpace}.label`)}
-            <Icon name="ChevronDown" size={16} />
-          </span>
-        }
-        triggerAriaLabel={t(`${translationNameSpace}.menuAriaLabel`)}
-      >
-        <FrameHeaderMenu />
-      </UITools.ButtonMenu>
-    </UITools.ComponentHeader>
+    <PanelHeader
+      buttons={<FrameHeaderButtons />}
+      e2eValue="frame"
+      label={t(`${translationNameSpace}.label`)}
+      menu={<FrameHeaderMenu />}
+      menuAriaLabel={t(`${translationNameSpace}.menuAriaLabel`)}
+    />
   );
 };
 

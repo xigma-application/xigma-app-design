@@ -46,6 +46,19 @@ logic either.
 | 7   | Clicking a section's canvas label selects it, landing on pixel-identical output to clicking its body                                                   |  ✅  |            ✅ `section-name-label.spec.ts`            |
 | 8   | Hovering a section's canvas label shows the same hover highlight as hovering its body                                                                  |  ✅  |            ✅ `section-name-label.spec.ts`            |
 
+## Rectangle properties panel
+
+Selecting a single rectangle routes `PanelProperties.tsx` to `Rectangle/`, which reuses the shared
+`Common/PanelHeader`, `Common/PositionSection` and `Common/ColumnDimensions` (the same sections the
+Frame panel uses — their hooks gate on `isBoxSceneNode`, not `type === frame`). The header is the
+label plus the "Create component" button only, no element-type dropdown; the Layout section holds
+just the width/height row, none of the auto-layout rows.
+
+| #   | Scenario                                                                                      | Unit |             E2E              |
+| --- | --------------------------------------------------------------------------------------------- | :--: | :--------------------------: |
+| 1   | Selecting a rectangle shows the Rectangle panel with a Dimensions row and no auto-layout rows |  ✅  | ✅ `rectangle-panel.spec.ts` |
+| 2   | Editing the width field in the Rectangle panel resizes the shape on the canvas                |  —   | ✅ `rectangle-panel.spec.ts` |
+
 ## Layers panel — lock/visibility
 
 The Layers panel (`LeftPanel/File/Layers`) lists the active page's nodes in root order (flat, no
