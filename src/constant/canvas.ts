@@ -83,6 +83,7 @@ export const FRAME_OUTLINE_WIDTH_PX = 1;
 export const GRID_CELL_SIZE_MATCH_TOLERANCE_PX = 0.5;
 export const GRID_COLOR = '#535353';
 export const GRID_MIN_ZOOM = 4;
+export const GRID_SLOT_STROKE = '#a9d0f5';
 export const GUIDE_HIT_TOLERANCE_PX = 4;
 export const GUIDE_IDLE_ALPHA = 0.5;
 export const GUIDE_SELECTED_STROKE = '#0d99ff';

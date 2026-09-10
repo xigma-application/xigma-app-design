@@ -151,4 +151,37 @@ test.describe('auto-layout — Grid flow', () => {
     // back to two columns; the row count still grows to fit all six children
     expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(2);
   });
+
+  test('a selected grid frame draws its cell slots on the canvas, reflowing them when the column count changes', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-slots');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2); // auto-selects the frame
+    await expect(flowGroup(page)).toBeVisible();
+
+    const safeArea = await designPage.canvasSafeArea();
+    const beforeGrid = await page.screenshot({ clip: safeArea });
+
+    await setFlow(page, 'Grid');
+    await page.waitForTimeout(150);
+    const withGrid = await page.screenshot({ clip: safeArea });
+
+    // the slot overlay is the only thing that changed — an empty frame has no children to lay out
+    expect(withGrid.equals(beforeGrid)).toBe(false);
+
+    await page.locator('[data-test-grid-area]').click();
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('6');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(6);
+
+    await page.keyboard.press('Escape'); // close the popover so it doesn't cover the canvas
+    await page.waitForTimeout(150);
+    const withMoreColumns = await page.screenshot({ clip: safeArea });
+
+    expect(withMoreColumns.equals(withGrid)).toBe(false);
+  });
 });

@@ -45,6 +45,7 @@ import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawFrameOutlines } from './drawFrameOutlines';
+import { drawGridSlots } from './drawGridSlots/drawGridSlots';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
@@ -152,6 +153,7 @@ export const drawScene = (
   drawSmartSelectionHandles(ctx, smartSelectionNodes, refs, nodesById);
   drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
+  drawGridSlots(ctx, selectedNodes, nodesById);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

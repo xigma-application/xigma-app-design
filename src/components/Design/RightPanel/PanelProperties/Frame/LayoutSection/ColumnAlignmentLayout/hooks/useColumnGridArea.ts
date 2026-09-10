@@ -11,7 +11,7 @@ import { clampGridCount } from './utils/clampGridCount';
 import { commitGridColumnCountChange } from './utils/commitGridColumnCountChange';
 import { commitGridRowCountChange } from './utils/commitGridRowCountChange';
 import { commitGridRowsAuto } from './utils/commitGridRowsAuto';
-import { getEffectiveGridRowCount } from './utils/getEffectiveGridRowCount';
+import { getEffectiveGridRowCount } from 'store/design/utils/autoLayout/getEffectiveGridRowCount';
 
 export type TUseColumnGridAreaResult = {
   columns: string;

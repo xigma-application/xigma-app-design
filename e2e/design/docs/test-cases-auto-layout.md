@@ -41,10 +41,11 @@ repainting — same rationale as the Flow section above.
 | 1   | The Flow toggle's Grid button lays the frame's children into a two-column grid (default column count 2), filling row 0 then row 1    |  ✅  | ✅ `grid.spec.ts` |
 | 2   | Switching a grid frame to Horizontal collapses it to a single row, and switching back to Grid restores the exact same cell positions |  ✅  | ✅ `grid.spec.ts` |
 | 3   | The Grid panel widget: typing a column count in the popover, and clicking a cell in the 12×8 pick matrix, both re-grid the children  |  ✅  | ✅ `grid.spec.ts` |
-| 4   | The rows field's Auto / fixed-count menu — clearing `gridRowCount` for Auto, pinning it to the effective count for fixed             |  ✅  |         —         |
-| 5   | Track sizing (fixed / hug / fill fr split), row/column gaps, per-side padding, hug frame growing to the track sum                    |  ✅  |         —         |
-| 6   | Multi-cell spanning and explicit per-cell placement (manual anchors) when set in code                                                |  ✅  |         —         |
-| 7   | A rotated grid frame orbits its cells about the frame centre, same as the linear engine                                              |  ✅  |         —         |
+| 4   | Selecting a grid frame outlines every cell on the canvas; the outlines reflow when the column count changes                          |  ✅  | ✅ `grid.spec.ts` |
+| 5   | The rows field's Auto / fixed-count menu — clearing `gridRowCount` for Auto, pinning it to the effective count for fixed             |  ✅  |         —         |
+| 6   | Track sizing (fixed / hug / fill fr split), row/column gaps, per-side padding, hug frame growing to the track sum                    |  ✅  |         —         |
+| 7   | Multi-cell spanning and explicit per-cell placement (manual anchors) when set in code                                                |  ✅  |         —         |
+| 8   | A rotated grid frame orbits its cells about the frame centre, same as the linear engine                                              |  ✅  |         —         |
 
 #4–#7 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by

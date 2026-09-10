@@ -456,16 +456,33 @@ columns/rows come straight from the store, commit on blur via `clampGridCount` +
 `onClickCell` writes both at once. The **Rows** field has a chevron menu (`GridRowsModeMenu` in a
 `UITools.ButtonMenu`) — **Auto** clears `gridRowCount` (`commitGridRowsAuto`), the fixed item pins
 it to the current effective count; when Auto the field shows the effective count
-(`getEffectiveGridRowCount` = `ceil(childCount / columns)`) as the label "Auto". No per-track
-sizing UI (deferred).
+(`getEffectiveGridRowCount` = `ceil(childCount / columns)`, now at
+`store/design/utils/autoLayout/`) as the label "Auto". No per-track sizing UI (deferred).
+
+A child of a grid frame also shows a display-only **Column span / Row span** row
+(`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`) —
+fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
+
+### Canvas — cell slots
+
+When a single `LayoutMode.grid` frame is selected, `drawGridSlots` (in `drawScene`, next to the
+padding/gap handles) strokes one faint-blue (`GRID_SLOT_STROKE`) rectangle per cell.
+`getSelectedGridFrame` gates it; `getGridSlotRects(frame, nodesById)`
+(`src/utils/canvas/gridSlots/`) builds the frame-local rects: `columnCount = gridColumnCount ?? 1`,
+`rowCount = max(gridRowCount ?? ceil(childCount / columns), ceil(childCount / columns))`, gaps
+`horizontalGap` / `verticalGap`, padding `getFrameLayoutPadding`, and **uniform `1fr` tracks**
+(`(content − gaps) / count`). It matches the engine while every track is `1fr`; per-track sizing
+(next) swaps the uniform split for `resolveGridLayout`'s resolved sizes. Rotation is applied by
+`drawRect` about the frame centre, like the padding guides. Display only — no drag handles.
 
 ### Not covered yet
 
 Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
 `gridColumnSizes` / `gridRowSizes` — UI is the last phase), `gridAutoPlacement` toggle UI,
-empty-cell rendering, drag-a-child-into-a-cell drop target, span edge-handles, auto-placement
-obstruction reflow, arrow-key reorder, ⌘D-into-next-cell, track reorder/delete. The engine already
-honours spans and manual anchors when set in code.
+occupied-vs-empty cell styling, drag-a-child-into-a-cell drop target, span edge-handles,
+wiring the Column span / Row span fields, auto-placement obstruction reflow, arrow-key reorder,
+⌘D-into-next-cell, track reorder/delete. The engine already honours spans and manual anchors when
+set in code.
 
 ## Tests
 
@@ -493,13 +510,18 @@ honours spans and manual anchors when set in code.
 - **Unit — grid (§13):** engine — `computeGridLayoutPositions/**/test/` (`placeGridCells/*`,
   `resolveGridLayout/*`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
   `resolveGridTrackSizes`, `computeGridLayoutPositions`) +
-  `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; panel —
+  `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots —
+  `store/design/utils/autoLayout/test/{getSelectedGridFrame,getEffectiveGridRowCount}.spec.ts`,
+  `src/utils/canvas/gridSlots/test/getGridSlotRects.spec.ts`,
+  `drawScene/test/drawGridSlots.spec.ts`; panel —
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
-  `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`) and
+  `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
   `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
-  `getEffectiveGridRowCount`, `commitGridColumnCountChange` / `commitGridRowCountChange`).
-- **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, and the
-  `GridArea` popover's Columns field + 12×8 pick matrix, driving the engine + canvas.
+  `commitGridColumnCountChange` / `commitGridRowCountChange`), and
+  `Common/ColumnGridChildSpan/**` (`ColumnGridChildSpan`, `useColumnGridChildSpan`).
+- **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
+  `GridArea` popover's Columns field + 12×8 pick matrix, and the on-canvas cell slots (appear on
+  select, reflow on column-count change), driving the engine + canvas.
 
 ## History (so it isn't repeated)
 
@@ -535,3 +557,9 @@ honours spans and manual anchors when set in code.
    for grid mode, plus both gap fields. Deliberately no per-track sizing UI or canvas handles —
    x-design has neither, and the engine's `1fr` default already matches `repeat(n, 1fr)`. Per-track
    controls + on-canvas handles are the final phase.
+8. **2026-09-10 — grid flow, Phase 3: canvas cell slots (§13 "Canvas").** Selecting a grid frame
+   now draws its cells as faint-blue outlines (`drawGridSlots` → `getGridSlotRects`, uniform `1fr`
+   geometry since nothing sets per-track sizes yet). Display only — no drag handles, no
+   occupied-vs-empty styling; those stay with the per-track phase. Also added a display-only
+   Column span / Row span row to the child panel, and moved `getEffectiveGridRowCount` out of the
+   RightPanel tree so the canvas helper can share it.

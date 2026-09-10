@@ -176,6 +176,8 @@ write-up: `.claude/docs/auto-layout.md` §13.
 - [x] the layout maths
 - [x] the right-panel Grid section — a preview tile that opens a popup with column and row number
       fields and a click-to-pick size grid, plus the row and column gap fields
+- [x] selecting a grid frame outlines its cells on the canvas, and they reflow as the row/column
+      count changes
 - [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
       the canvas — this is the last part
 - [ ] later: placing a child in a specific cell, letting a child span several cells, dragging a
