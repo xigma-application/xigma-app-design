@@ -33,7 +33,10 @@ export const useColumnPadding = (): TUseColumnPaddingResult => {
       sideField(dispatch, id, 'bottom', 'padding-bottom', 'PaddingB', 'paddingBottom', bottom, hover.rightPanelPaddingGuideRef, 'bottom'),
     ],
     isIndividual,
-    isVisible: frameNode?.layoutMode === LayoutMode.horizontal || frameNode?.layoutMode === LayoutMode.vertical,
+    isVisible:
+      frameNode?.layoutMode === LayoutMode.horizontal ||
+      frameNode?.layoutMode === LayoutMode.vertical ||
+      frameNode?.layoutMode === LayoutMode.grid,
     mergedFields: [
       pairField(
         dispatch,

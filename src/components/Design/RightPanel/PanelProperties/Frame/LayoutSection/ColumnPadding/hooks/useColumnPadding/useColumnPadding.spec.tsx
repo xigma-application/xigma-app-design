@@ -60,7 +60,7 @@ describe('useColumnPadding', () => {
     store.dispatch(setSelection([]));
   });
 
-  it('should be hidden for a freeform frame and visible for an auto-layout frame', () => {
+  it('should be hidden for a freeform frame and visible for an auto-layout or grid frame', () => {
     const freeformId = addFrame({ layoutMode: undefined });
 
     store.dispatch(setSelection([freeformId]));
@@ -69,6 +69,11 @@ describe('useColumnPadding', () => {
     const autoId = addFrame({ layoutMode: LayoutMode.vertical });
 
     store.dispatch(setSelection([autoId]));
+    expect(renderUseColumnPadding().result.current.isVisible).toBe(true);
+
+    const gridId = addFrame({ layoutMode: LayoutMode.grid });
+
+    store.dispatch(setSelection([gridId]));
     expect(renderUseColumnPadding().result.current.isVisible).toBe(true);
   });
 

@@ -464,6 +464,16 @@ A child of a grid frame also shows a display-only **Column span / Row span** row
 (`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`) —
 fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
 
+The **Padding** row (`ColumnPadding`) and a grid child's **Width/Height sizing dropdown**
+(`ColumnDimensions`, gated by `canFillWidth`/`canFillHeight`) both include `LayoutMode.grid` in
+their visibility gate, same as `horizontal`/`vertical` — Padding because the grid engine already
+reads `getFrameLayoutPadding` (§13 engine notes above), Fill because a grid child stretching to
+its cell is the same `widthSizingMode`/`heightSizingMode: fill` mechanism a drop into a cell
+already sets (§ Canvas — drag a child into a cell), just settable from the panel too. The shared
+`isManagedLayoutFrame` predicate (`utils/canvas/signals/`) is the single source of truth for "is
+this frame's layout mode one of the three managed ones" — `useColumnPosition`,
+`isNodeManagedLayoutChild` and `useColumnDimensions`'s `parentIsAutoLayout` all go through it.
+
 ### Panel — resizing a grid that already has children (`resolveGridResize`)
 
 Every dimension commit that can shrink the grid (`onCommitColumns`, `onCommitRows`, `onClickCell`
@@ -774,3 +784,15 @@ The engine already honours spans and manual anchors when set in code.
     real grid. Fixed with a local `revision` counter bumped on every commit attempt (accepted or
     not), folded into the `key` handed to `UITools.TextField` so the field always remounts to the
     current `value` prop after a blur or scrub, regardless of whether the store actually changed.
+14. **2026-09-10 — grid flow, Phase 3g: Padding and child Fill were both still linear-only.**
+    Neither gate had ever been widened for grid: `useColumnPadding`'s `isVisible` only checked
+    `horizontal`/`vertical`, so the whole Padding row stayed hidden for a grid frame even though
+    the grid engine already reads `getFrameLayoutPadding` (§13 engine notes above) — the row was
+    simply never surfaced. Separately, `useColumnDimensions`'s `parentIsAutoLayout` (which gates
+    `canFillWidth`/`canFillHeight`, and therefore whether the Width/Height sizing dropdown even
+    *renders* — `ColumnDimensions.tsx`'s `showWidthDropdown = canHug || canFillWidth`) also only
+    checked `horizontal`/`vertical`, so a grid child's sizing dropdown didn't show at all (not just
+    missing the Fill option) since a plain child is never itself huggable. Both widened to include
+    `LayoutMode.grid`; the reorganiser folded the second fix into the shared `isManagedLayoutFrame`
+    predicate (now `undefined`-safe) that `useColumnPosition` and `isNodeManagedLayoutChild` already
+    used, dropping their redundant `!== undefined &&` guards.

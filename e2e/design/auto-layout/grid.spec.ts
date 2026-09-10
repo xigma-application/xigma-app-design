@@ -564,4 +564,95 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readColumnCount(page)).toBe(2);
     await expect(columnsField).toHaveValue('2');
   });
+
+  test('the Padding row is available for a grid frame and shifts its children the same way as linear layout', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-padding');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    for (const targetY of [250, 320]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    const paddingInput = page.locator('[data-test-text-field-input="padding-horizontal"]');
+
+    await expect(paddingInput).toBeVisible();
+
+    const before = await getChildren(page);
+
+    await paddingInput.click();
+    await paddingInput.fill('40');
+    await paddingInput.press('Enter');
+
+    const after = await getChildren(page);
+
+    expect(after[0].x).toBe(before[0].x + 40);
+  });
+
+  test('a grid child offers Fill container in its Width sizing menu, and stretches to its cell once selected', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-child-fill');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a child added directly (not through the drop pipeline, which already sets Fill on its own)
+    // so it lands auto-placed at (0,0) with the ordinary default Fixed sizing
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+      );
+
+      const state = store.getState().design;
+      const activePage = state.pages[state.activePageId];
+      const rectId = activePage.rootOrder[activePage.rootOrder.length - 1];
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    });
+
+    // click the child directly on canvas — it's fixed-sized (20x20) auto-placed at the top-left
+    // of cell (0,0), i.e. the frame's own top-left corner (no padding/gap by default)
+    await page.mouse.click(FRAME.x1 + 10, FRAME.y1 + 10);
+
+    const widthMenuButton = page.getByLabel('Width sizing options');
+
+    await expect(widthMenuButton).toBeVisible();
+    await widthMenuButton.click();
+
+    const fillOption = page.getByText('Fill container', { exact: true });
+
+    await expect(fillOption).toBeVisible();
+    await fillOption.click();
+
+    const child = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+      return activePage.nodes[frame.childIds[0]] as unknown as { width: number; widthSizingMode?: string };
+    });
+
+    // the grid is 500px wide, 2 default columns, no gap/padding — a filling cell is 250px
+    expect(child.widthSizingMode).toBe('fill');
+    expect(child.width).toBe(250);
+  });
 });

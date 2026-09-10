@@ -56,6 +56,8 @@ repainting — same rationale as the Flow section above.
 | 16  | Shrinking the grid via the panel is rejected outright when the requested capacity can't hold every current child — no silent "grow to fit", the fields just revert                                                                                                     |  ✅  |         —         |
 | 17  | An accepted resize on an already-manually-placed grid re-packs every child's current reading order into the new column count instead of letting a naive per-axis anchor clamp collide two of them into the same cell                                                   |  ✅  | ✅ `grid.spec.ts` |
 | 18  | A rejected (or ignored) Columns/Rows commit leaves the input showing the real current grid value, not the invalid text the user typed — the field remounts to the store value on every commit attempt, accepted or not                                                 |  ✅  | ✅ `grid.spec.ts` |
+| 19  | The Padding row is shown (and functional) for a grid frame, exactly like a linear auto-layout frame — it was hidden entirely before                                                                                                                                    |  —   | ✅ `grid.spec.ts` |
+| 20  | A grid child's Width/Height sizing dropdown offers Fill container (the dropdown didn't even render before, since a plain child is never itself huggable and Fill was gated to a linear parent only) — picking it stretches the child to its cell, same as a cell drop  |  —   | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -76,6 +78,11 @@ wiring between the drop pipeline and the resize pipeline, not just the repack al
 shipped: `GridInputCells`' `<input>` is uncontrolled and only remounts to its `value` prop when
 that prop actually changes, so a rejected/no-op commit left the user's invalid typed text on
 screen — invisible to the hook-level unit tests, which never render the actual DOM input. Fixed
+by remounting on every commit attempt via a bumped `revision` folded into the field's `key`. #19
+and #20 are both plain visibility-gate bugs (`isVisible` / `showWidthDropdown` only checking
+`horizontal`/`vertical`) — the unit suite already pins every other branch of both hooks
+exhaustively, so only the one new `grid` branch needed a test; e2e is the one to actually prove
+the RightPanel _renders_ the control at all, which a hook-level assertion can't.
 by remounting on every commit attempt via a bumped `revision` folded into the field's `key`.
 
 ## Reordering a child within its own frame

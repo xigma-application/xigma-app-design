@@ -43,7 +43,7 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
   const local = node && parent ? getNodePositionInParent(node, parent) : undefined;
   const x = local ? Math.round(local.x) : (node?.x ?? 0);
   const y = local ? Math.round(local.y) : (node?.y ?? 0);
-  const managed = parent !== undefined && isManagedLayoutFrame(parent);
+  const managed = isManagedLayoutFrame(parent);
   const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
 
   const commitX = (nextX: number): void => commitColumnPosition(dispatch, id, parent, nextX, y);

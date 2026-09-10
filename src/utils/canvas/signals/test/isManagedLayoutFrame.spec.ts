@@ -22,6 +22,10 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 describe('isManagedLayoutFrame', () => {
+  it('should return false for an undefined node', () => {
+    expect(isManagedLayoutFrame(undefined)).toBe(false);
+  });
+
   it('should return true for a horizontal auto-layout frame', () => {
     expect(isManagedLayoutFrame(buildFrame({ layoutMode: LayoutMode.horizontal }))).toBe(true);
   });

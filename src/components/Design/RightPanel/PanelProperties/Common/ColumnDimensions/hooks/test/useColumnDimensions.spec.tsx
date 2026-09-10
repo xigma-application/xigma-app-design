@@ -500,6 +500,22 @@ describe('useColumnDimensions', () => {
     expect(result.current.canFillHeight).toBe(true);
   });
 
+  it('should offer Fill on both axes when the parent is a grid frame not hugging either axis', () => {
+    // mock
+    const parentId = addAutoLayoutFrameNode(LayoutMode.grid, SizingMode.fixed, SizingMode.fixed);
+    const childId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+    moveIntoParent(childId, parentId);
+    store.dispatch(setSelection([childId]));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // result
+    expect(result.current.canFillWidth).toBe(true);
+    expect(result.current.canFillHeight).toBe(true);
+  });
+
   it('should not offer Fill on an axis where the parent frame itself hugs that axis', () => {
     // mock
     const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal, SizingMode.hug, SizingMode.fixed);

@@ -18,6 +18,7 @@ import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
 // utils
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 
 export type TUseColumnDimensionsResult = {
   canFillHeight: boolean;
@@ -71,7 +72,7 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const layoutMode = frameNode?.layoutMode;
   const canHug = layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical;
   const parentFrame = parentNode?.type === NodeType.frame ? parentNode : undefined;
-  const parentIsAutoLayout = parentFrame?.layoutMode === LayoutMode.horizontal || parentFrame?.layoutMode === LayoutMode.vertical;
+  const parentIsAutoLayout = isManagedLayoutFrame(parentFrame);
   const parentWidthMode = parentFrame?.widthSizingMode ?? SizingMode.fixed;
   const parentHeightMode = parentFrame?.heightSizingMode ?? SizingMode.fixed;
   const canFillWidth = parentIsAutoLayout && parentWidthMode !== SizingMode.hug;
