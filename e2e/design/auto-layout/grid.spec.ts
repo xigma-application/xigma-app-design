@@ -236,4 +236,69 @@ test.describe('auto-layout — Grid flow', () => {
     expect(dropped.widthSizingMode).toBe('fill');
     expect(dropped.heightSizingMode).toBe('fill');
   });
+
+  test('dropping against the near edge of an occupied cell inserts there and pushes the trailing children forward', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-insert');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // two children dragged in, then switched to a two-column grid: they sit at (0,0) and (1,0)
+    for (const targetY of [250, 320]) {
+      await designPage.drawRectangle(1400, targetY, 1460, targetY + 40);
+      await dragInto(page, { x: 1430, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a third rectangle, dropped against the LEFT edge of the occupied second cell — its left
+    // neighbour is occupied too, so this is an insertion, not a plain cell drop
+    await designPage.drawRectangle(1400, 500, 1460, 540);
+
+    const cellOneLeftEdge = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 2;
+
+    await page.mouse.move(1430, 520);
+    await page.mouse.down();
+    await page.mouse.move(cellOneLeftEdge + 12, FRAME.y1 + 60, { steps: 12 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    const layout = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[]; gridAutoPlacement?: boolean };
+      const read = (id: string): { column?: number; row?: number; x: number; y: number } => {
+        const node = activePage.nodes[id] as unknown as {
+          gridColumnAnchorIndex?: number;
+          gridRowAnchorIndex?: number;
+          x: number;
+          y: number;
+        };
+
+        return { column: node.gridColumnAnchorIndex, row: node.gridRowAnchorIndex, x: Math.round(node.x), y: Math.round(node.y) };
+      };
+
+      return {
+        gridAutoPlacement: frame.gridAutoPlacement,
+        inserted: read(frame.childIds[2]),
+        pushed: read(frame.childIds[1]),
+      };
+    });
+
+    // the frame switched to manual placement; the dropped node took cell (1,0)
+    expect(layout.gridAutoPlacement).toBe(false);
+    expect(layout.inserted.column).toBe(1);
+    expect(layout.inserted.row).toBe(0);
+    // the child that used to sit there was pushed into the next row
+    expect(layout.pushed.column).toBe(0);
+    expect(layout.pushed.row).toBe(1);
+    expect(layout.pushed.y).toBeGreaterThan(layout.inserted.y);
+  });
 });

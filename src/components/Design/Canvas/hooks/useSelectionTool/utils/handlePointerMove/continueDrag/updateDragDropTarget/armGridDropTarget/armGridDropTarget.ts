@@ -4,10 +4,9 @@ import { TFrameNode, TSceneNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getGridDropCell } from 'utils/canvas/gridSlots/getGridDropCell';
-import { getGridDropPlacements } from 'utils/canvas/gridSlots/getGridDropPlacements';
 import { getGridTrackLayout } from 'utils/canvas/gridSlots/getGridTrackLayout';
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
+import { resolveGridDropHover } from 'utils/canvas/gridSlots/resolveGridDropHover';
 
 export const armGridDropTarget = (
   canvasRefs: TCanvasRefs,
@@ -20,8 +19,7 @@ export const armGridDropTarget = (
   const layout = getGridTrackLayout(frame, nodesById);
   const unrotated = getUnrotatedQueryPoint(point, frame, frame.rotation);
   const framePoint: TPoint = { x: unrotated.x - frame.x, y: unrotated.y - frame.y };
-  const startCell = getGridDropCell(layout, framePoint);
-  const cells = getGridDropPlacements(frame, nodesById, movedNodeIds, startCell, Math.max(movedNodeIds.length, 1));
+  const hover = resolveGridDropHover(frame, nodesById, movedNodeIds, framePoint, layout);
 
-  canvasRefs.transform.gridDropTargetRef.current = { cells, frameId };
+  canvasRefs.transform.gridDropTargetRef.current = { ...hover, frameId };
 };

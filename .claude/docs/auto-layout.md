@@ -483,22 +483,50 @@ gate, in `drawScene` next to the padding/gap handles) strokes every cell faint b
 ### Canvas — drag a child into a cell
 
 While an element is dragged over a grid frame, `resolveDragReparentTarget` branches on
-`isGridFrame(desiredParent)` → `armGridDropTarget` resolves the drop into concrete cells and
-writes `transform.gridDropTargetRef = { cells, frameId }` plus `dropTargetFrameIdRef`.
-`getGridDropCell` picks the hovered cell (unrotated point; column clamped, row unbounded down),
-then `getGridDropPlacements` walks reading order from there and collects one **free** cell per
-top-level dragged node: it runs `placeGridCells` over the frame's *other* children
-(`getGridPlacementInputs`, minus `movedNodeIds` for a same-parent drag) to build an occupancy
-set, so cells already holding an anchored child are skipped and a resolved cell can land past the
-current grid. `drawGridDropTarget` only draws the grid at its **current** `rowCount` — it fills
-the resolved cells that fall inside it and simply omits any that overflow (the grid grows on
+`isGridFrame(desiredParent)` → `armGridDropTarget` resolves the drop and writes
+`transform.gridDropTargetRef = { cells, frameId, indicator?, insertIndex? }` plus
+`dropTargetFrameIdRef`. The resolution (`resolveGridDropHover`) branches on what's under the
+cursor:
+
+- **Empty hovered cell** — `getGridDropPlacements` walks reading order from there and collects
+  one **free** cell per top-level dragged node: it runs `placeGridCells` over the frame's *other*
+  children (`getGridPlacementInputs`, minus `movedNodeIds` for a same-parent drag) to build an
+  occupancy set, so cells already holding an anchored child are skipped and a resolved cell can
+  land past the current grid. `hover.cells` is set, `hover.indicator` is absent.
+- **Occupied hovered cell, cursor on its free-neighbour side** — same-row neighbour (left when
+  the cursor is in the left half of the cell, right for the right half) is empty → highlight that
+  neighbour instead (`getGridDropPlacements` from the neighbour). Still a plain `cells` hover.
+- **Occupied hovered cell, cursor on its boxed-in side** — the same-row neighbour on that side is
+  either a wall (edge column) or itself occupied → arm an **insertion indicator** instead of a
+  cell: `hover.cells = []`, `hover.indicator = { column, row, side }`,
+  `hover.insertIndex = row * columnCount + column (+1 for the right side)`. No cells are
+  highlighted; nothing is previewed being pushed (the shift only happens on drop, same "grid
+  changes only on drop" rule as row growth).
+
+`drawGridDropTarget` branches on `hover.indicator`: if set, it draws a single vertical bar
+(`getGridInsertIndicatorRect` — centred in the gap on that side of the cell, or clamped to the
+frame's content edge for a wall) filled `FRAME_DROP_TARGET_STROKE`, the same colour/thickness as
+the linear auto-layout drop indicator. Otherwise it draws the grid at its **current** `rowCount`
+and fills the resolved cells that fall inside it, omitting any that overflow (the grid grows on
 drop, not on hover) — `GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style.
-`getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is set.
-On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per node
-`updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and
-`widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size and fills the
-cell), and the frame flips to `gridAutoPlacement: false` so the anchors take. The grid grows rows
-to the dropped cells via the engine's `derivedRowCount` — no explicit `gridRowCount` write.
+`getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` whenever the ref is set, indicator or
+not.
+
+On drop (`commitDropIntoFrame`):
+- **Cell hover** (`applyGridDrop`) — `moveNodes` appends the nodes, then per node `updateNode`
+  sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and `widthSizingMode` /
+  `heightSizingMode = fill` (the element ignores its own size and fills the cell), and the frame
+  flips to `gridAutoPlacement: false` so the anchors take. The grid grows rows to the dropped
+  cells via the engine's `derivedRowCount` — no explicit `gridRowCount` write.
+- **Indicator hover** (`applyGridInsert`, driven by `getGridInsertPlacements`) — reading-order
+  insert: `placeGridCells` resolves every *other* child's current reading index
+  (`row * columnCount + column`); the dragged nodes take `insertIndex .. insertIndex + N - 1`;
+  every existing child at or past `insertIndex` **ripples forward** to the nearest free reading
+  index at or after `insertIndex + N` (a child that already sat further out than the ripple stays
+  put — no gap is ever widened, only closed), growing a new row if it runs off the end. Every
+  moved child (dragged + rippled) gets an explicit anchor and the frame flips to
+  `gridAutoPlacement: false`; dragged nodes also get `widthSizingMode` / `heightSizingMode = fill`
+  like a plain cell drop. `childIds` order itself is untouched — the reorder is anchor-driven.
 
 ### Not covered yet
 
@@ -537,9 +565,10 @@ The engine already honours spans and manual anchors when set in code.
   `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots + drop —
   `store/design/utils/autoLayout/test/{getSelectedGridFrame,getDerivedGridRowCount,getGridPlacementInputs}.spec.ts`,
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
-  `getGridDropCell`, `getGridDropPlacements`),
+  `getGridDropCell`, `getGridDropPlacements`, `resolveGridDropHover`, `getGridInsertIndicatorRect`),
+  `gridSlots/getGridInsertPlacements/**/test/`,
   `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
-  `disarmDrag/test/{applyGridDrop,resolveDropTargetIndex,commitDropIntoFrame}`,
+  `disarmDrag/test/{applyGridDrop,applyGridInsert,resolveDropTargetIndex,commitDropIntoFrame}`,
   `drawScene/test/{drawGridSlots,drawGridDropTarget,getAutoLayoutDragOpacity}.spec.ts`; panel —
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
   `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
@@ -611,3 +640,18 @@ The engine already honours spans and manual anchors when set in code.
    drew ghost rows in the hover preview — but the spec was always "grow the grid only on drop", so
    `drawGridDropTarget` now caps at the current `rowCount` and omits any resolved cell that
    overflows (it's still placed, and the engine grows the grid, on drop).
+10. **2026-09-10 — grid flow, Phase 3c: reading-order insertion indicator (§13 "Canvas — drag a
+    child into a cell").** Cell-targeted drop (#9) had no way to insert *between* two occupied
+    cells — hovering one only ever retargeted that exact cell. Added a vertical insertion bar,
+    modelled on the linear auto-layout drop indicator but constrained to columns only (no
+    between-rows indicator): hovering the half of an occupied cell whose same-row neighbour is
+    free just highlights that neighbour (no indicator); hovering the half whose neighbour is a
+    wall or also occupied arms an indicator on that side instead. The model was locked with the
+    user turn-by-turn before coding, including a correction — the first pass only spelled out the
+    left-hovering case; the user pointed out the right side is the mirror, not "keep today's
+    behaviour". On drop, `applyGridInsert` / `getGridInsertPlacements` compute every other child's
+    reading-order index, place the dragged nodes at the insert index, and **ripple** every child
+    at or past it forward to the nearest free reading index (closing gaps rather than rigidly
+    shifting everyone by N; a child already further out than the ripple reaches stays put) —
+    anchoring every moved child and flipping `gridAutoPlacement: false`, same as a plain cell
+    drop. `childIds` order is untouched; the reorder is anchor-only.

@@ -48,10 +48,14 @@ repainting — same rationale as the Flow section above.
 | 8   | Track sizing (fixed / hug / fill fr split), row/column gaps, per-side padding, hug frame growing to the track sum                                                                                                                                                      |  ✅  |         —         |
 | 9   | Multi-cell spanning and explicit per-cell placement (manual anchors) when set in code                                                                                                                                                                                  |  ✅  |         —         |
 | 10  | A rotated grid frame orbits its cells about the frame centre, same as the linear engine                                                                                                                                                                                |  ✅  |         —         |
+| 11  | Hovering the boxed-in side (wall or another occupied cell) of an occupied cell arms a vertical insertion indicator instead of a cell highlight; dropping inserts there and ripples the trailing children forward, growing a row if needed                              |  ✅  | ✅ `grid.spec.ts` |
+| 12  | Hovering the free-neighbour side of an occupied cell highlights that neighbour cell instead of arming an indicator                                                                                                                                                     |  ✅  |         —         |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
-`computeGridLayoutPositions/**/test/` and `getGridLayoutSyncPositions.spec.ts`.
+`computeGridLayoutPositions/**/test/` and `getGridLayoutSyncPositions.spec.ts`. #12 is exercised
+exhaustively (both sides, both outcomes) by `resolveGridDropHover.spec.ts`; #11 adds the one
+browser-only proof that a real drop wires the ripple into the store.
 
 ## Reordering a child within its own frame
 

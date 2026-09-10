@@ -288,6 +288,8 @@ export type TAutoLayoutDropTargetHover = TAutoLayoutDropTarget & { frameId: stri
 export type TGridDropTargetHover = {
   cells: { column: number; row: number }[];
   frameId: string;
+  indicator?: { column: number; row: number; side: 'left' | 'right' };
+  insertIndex?: number;
 };
 
 export type TAutoLayoutDraggedOffsetTween = {

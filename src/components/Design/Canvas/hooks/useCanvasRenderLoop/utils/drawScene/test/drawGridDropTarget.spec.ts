@@ -108,6 +108,22 @@ describe('drawGridDropTarget', () => {
     expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
   });
 
+  it('should draw a single insertion bar and no cell outlines when an indicator is armed', () => {
+    // mock
+    const gl = createGlMock();
+
+    // before
+    drawGridDropTarget(
+      context(gl),
+      refsWith({ cells: [], frameId: 'grid-1', indicator: { column: 0, row: 0, side: 'left' }, insertIndex: 0 }),
+      { 'grid-1': gridFrame() },
+    );
+
+    // result — just the filled bar, no per-cell strokes
+    expect(drawCalls(gl, gl.LINE_LOOP)).toBe(0);
+    expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
+  });
+
   it('should draw nothing when there is no grid drop target', () => {
     // mock
     const gl = createGlMock();

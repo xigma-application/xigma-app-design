@@ -96,6 +96,23 @@ describe('armGridDropTarget', () => {
     ]);
   });
 
+  it('should arm an insertion indicator when hovering the near edge of an occupied, boxed-in cell', () => {
+    // mock — the single child fills the top-left cell, against the left wall
+    const canvasRefs = refs();
+    const nodesById = { a: anchoredChild('a', 0, 0) };
+
+    // action — hover the left slice of that cell
+    armGridDropTarget(canvasRefs, frame({ childIds: ['a'] }), 'grid-1', ['x'], nodesById, { x: 20, y: 50 });
+
+    // result — no cell highlight, a left indicator, and an insert index of 0
+    expect(canvasRefs.transform.gridDropTargetRef.current).toEqual({
+      cells: [],
+      frameId: 'grid-1',
+      indicator: { column: 0, row: 0, side: 'left' },
+      insertIndex: 0,
+    });
+  });
+
   it('should unrotate the query point about the frame centre for a rotated grid', () => {
     // mock
     const canvasRefs = refs();

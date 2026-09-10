@@ -1,5 +1,6 @@
 // others
 import { applyGridDrop } from './applyGridDrop';
+import { applyGridInsert } from './applyGridInsert';
 import { resolveDropTargetIndex } from './resolveDropTargetIndex';
 
 // store
@@ -10,6 +11,7 @@ import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
@@ -52,7 +54,11 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
       dispatch(moveNodes({ nodeIds, targetIndex, targetParentId }));
 
       if (isGridDrop && gridDropTarget && targetParentId) {
-        applyGridDrop(dispatch, targetParentId, gridDropTarget.cells, nodeIds);
+        if (gridDropTarget.insertIndex !== undefined && targetFrame?.type === NodeType.frame) {
+          applyGridInsert(dispatch, targetFrame, page.nodes, gridDropTarget.insertIndex, nodeIds);
+        } else {
+          applyGridDrop(dispatch, targetParentId, gridDropTarget.cells, nodeIds);
+        }
       }
     }
   }

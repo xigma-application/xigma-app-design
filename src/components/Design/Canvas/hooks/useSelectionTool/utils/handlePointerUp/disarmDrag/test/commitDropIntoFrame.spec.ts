@@ -188,6 +188,42 @@ describe('commitDropIntoFrame', () => {
     });
   });
 
+  it('should insert the selection at the indicator index and push the trailing grid children forward', () => {
+    // mock — 2-column grid holding two children in reading order
+    const gridId = addGridFrameNode(0, 0);
+    const aId = addRectNode(10, 10);
+    const bId = addRectNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [aId, bId], targetIndex: 0, targetParentId: gridId }));
+
+    const droppedId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([droppedId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: {
+          current: { cells: [], frameId: gridId, indicator: { column: 1, row: 0, side: 'left' }, insertIndex: 1 },
+        },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — dropped node takes reading index 1, "b" slides into the next row
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[gridId]).toMatchObject({ gridAutoPlacement: false });
+    expect(page.nodes[droppedId]).toMatchObject({
+      gridColumnAnchorIndex: 1,
+      gridRowAnchorIndex: 0,
+      heightSizingMode: SizingMode.fill,
+      widthSizingMode: SizingMode.fill,
+    });
+    expect(page.nodes[bId]).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 1 });
+  });
+
   it('should pop the dragged selection back to the root when dropped over empty canvas', () => {
     // mock — rect starts already nested inside a frame
     const frameId = addFrameNode(0, 0);
