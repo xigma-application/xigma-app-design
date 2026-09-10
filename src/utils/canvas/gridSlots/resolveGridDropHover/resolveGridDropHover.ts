@@ -10,6 +10,7 @@ import { getGridOccupancyIndex } from './getGridOccupancyIndex';
 import { getHoveredGridCell } from './getHoveredGridCell';
 import { gridCellKey } from 'store/design/utils/autoLayout/computeGridLayoutPositions/placeGridCells/gridCellKey';
 import { resolveOccupiedCellHover } from './resolveOccupiedCellHover';
+import { withGridSpanPreview } from './withGridSpanPreview';
 
 export const resolveGridDropHover = (
   frame: TFrameNode,
@@ -23,16 +24,20 @@ export const resolveGridDropHover = (
   const rowStride = layout.rowSize + layout.rowGap;
   const context = { count, frame, movedNodeIds, nodesById };
 
-  if (columnStride > 0 && rowStride > 0) {
-    const cell = getHoveredGridCell(framePoint, layout, columnStride, rowStride);
-    const occupancy = getGridOccupancyIndex(context, layout.columnCount);
+  const resolve = (): TGridDropHover => {
+    if (columnStride > 0 && rowStride > 0) {
+      const cell = getHoveredGridCell(framePoint, layout, columnStride, rowStride);
+      const occupancy = getGridOccupancyIndex(context, layout.columnCount);
 
-    if (occupancy.occupied.has(gridCellKey(cell.row, cell.column))) {
-      return resolveOccupiedCellHover(context, layout, framePoint, cell, columnStride, occupancy);
+      if (occupancy.occupied.has(gridCellKey(cell.row, cell.column))) {
+        return resolveOccupiedCellHover(context, layout, framePoint, cell, columnStride, occupancy);
+      }
+
+      return { cells: getGridDropPlacements(frame, nodesById, movedNodeIds, cell, count) };
     }
 
-    return { cells: getGridDropPlacements(frame, nodesById, movedNodeIds, cell, count) };
-  }
+    return { cells: getGridDropPlacements(frame, nodesById, movedNodeIds, { column: 0, row: 0 }, count) };
+  };
 
-  return { cells: getGridDropPlacements(frame, nodesById, movedNodeIds, { column: 0, row: 0 }, count) };
+  return withGridSpanPreview(resolve(), context, layout.columnCount);
 };

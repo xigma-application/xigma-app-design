@@ -556,7 +556,11 @@ cursor:
   one **free** cell per top-level dragged node: it runs `placeGridCells` over the frame's *other*
   children (`getGridPlacementInputs`, minus `movedNodeIds` for a same-parent drag) to build an
   occupancy set, so cells already holding an anchored child are skipped and a resolved cell can
-  land past the current grid. `hover.cells` is set, `hover.indicator` is absent.
+  land past the current grid. The scan is **span-aware**: for each dragged node it asks
+  `isGridRegionFree` for that node's whole `columnSpan × rowSpan` footprint (span clamped to the
+  column count so a too-wide child still resolves), so a spanning child's resolved anchor never
+  puts its body over an occupied cell or past the right wall — it drops into the next row instead
+  (History #17). `hover.cells` is set, `hover.indicator` is absent.
 - **Occupied hovered cell, cursor on its free-neighbour side** — same-row neighbour (left when
   the cursor is in the left half of the cell, right for the right half) is empty → highlight that
   neighbour instead (`getGridDropPlacements` from the neighbour). Still a plain `cells` hover.
@@ -574,14 +578,25 @@ cursor:
   — and `resolveOccupiedCellHover` checks `owner.columnSpan * owner.rowSpan > 1` before doing
   anything else (History #16). A plain 1×1 occupied cell still gets the indicator/neighbour
   behaviour above. The file is split into `resolveGridDropHover/` (`getHoveredGridCell`,
-  `getGridOccupancyIndex`, `resolveOccupiedCellHover`, `getGridDropPlacements`).
+  `getGridOccupancyIndex`, `resolveOccupiedCellHover`, `getGridDropPlacements`, `getSpanById`,
+  `withGridSpanPreview`, `getGridFootprintCells`).
+
+**Spanning-child footprint preview.** After any of the branches above, `withGridSpanPreview`
+runs once (History #17): when the dragged selection's resolved `cells` line up one-to-one with
+`movedNodeIds` and at least one dragged node spans more than a single cell, it expands each
+anchor into that node's `columnSpan × rowSpan` block (`getGridFootprintCells`, column start slid
+left to fit), unions the blocks (deduped), drops any cell another child occupies
+(`getGridOccupancyIndex`), and stashes the result as `hover.previewCells`. `hover.cells` stays
+the anchor list for `applyGridDrop`. Works for a multi-node drag too — every dragged member's
+footprint is drawn. Indicator hovers are left untouched.
 
 `drawGridDropTarget` branches on `hover.indicator`: if set, it draws a single vertical bar
 (`getGridInsertIndicatorRect` — centred in the gap on that side of the cell, or clamped to the
 frame's content edge for a wall) filled `FRAME_DROP_TARGET_STROKE`, the same colour/thickness as
 the linear auto-layout drop indicator. Otherwise it draws the grid at its **current** `rowCount`
-and fills the resolved cells that fall inside it, omitting any that overflow (the grid grows on
-drop, not on hover) — `GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style.
+and fills `hover.previewCells ?? hover.cells` — the ones that fall inside the grid, omitting any
+that overflow (the grid grows on drop, not on hover) — `GRID_SLOT_ACTIVE_FILL` at
+`GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style.
 `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` whenever the ref is set, indicator or
 not.
 
@@ -734,7 +749,8 @@ anchors when set in code.
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
   `getGridDropCell`, `getGridInsertIndicatorRect`) +
   `gridSlots/resolveGridDropHover/test/*` (`getHoveredGridCell`, `getGridOccupancyIndex`,
-  `resolveOccupiedCellHover`, `getGridDropPlacements`, `resolveGridDropHover`),
+  `resolveOccupiedCellHover`, `getGridDropPlacements`, `resolveGridDropHover`, `withGridSpanPreview`,
+  `getGridFootprintCells`),
   `gridSlots/getGridInsertPlacements/**/test/`,
   `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test,test/resolveDragReparentTarget}`,
   `disarmDrag/test/{applyGridDrop,applyGridInsert,resolveDropTargetIndex,commitDropIntoFrame}`,
@@ -937,3 +953,26 @@ anchors when set in code.
     rather than trying to re-fit a 2×2 child into the new track grid — "less complication than
     resolving the grid against every child"; it also means `resolveGridResize`'s capacity check
     counts real cells again (a spanning child used to count as one).
+17. **2026-09-10 — grid flow, Phase 3j: previewing a spanning child's slots while it's dragged
+    (§13 "Canvas — drag a child into a cell" → "Spanning-child footprint preview").** Dragging a
+    multi-cell child only ever lit its single anchor cell. Added `hover.previewCells`
+    (`withGridSpanPreview`): the union of each dragged node's `columnSpan × rowSpan` footprint,
+    drawn by `drawGridDropTarget` via `previewCells ?? cells` — cells past the grid edge are
+    already skipped by the draw loop ("the grid grows on drop, not on hover"). Three follow-up
+    corrections, all from hand-testing: (a) "na multiple to nie działa" — the first cut bailed
+    unless exactly one node was dragged; generalised to union every dragged member's footprint;
+    (b) "pozwala swoim rozmiarem nachodzić na inne elementy" — the footprint could be drawn over
+    an occupied cell; `withGridSpanPreview` now drops any footprint cell `getGridOccupancyIndex`
+    marks taken; (c) "dalej mogę nachodzić np. 2x1 na jeden slot który jest zajęty" — the preview
+    was clipped but the *drop* still overlapped, because `getGridDropPlacements` only ever scanned
+    for a free 1×1 anchor. Made that scan span-aware: it asks `isGridRegionFree` for the dragged
+    node's whole footprint (span clamped to the column count to stay terminating), so the resolved
+    anchor — and therefore both the preview and the committed drop — never overlaps another child
+    or runs off the right wall. A fourth: "1x1 wylądował w środku 3x1" on a multi-select drop —
+    `getGridDropPlacements` resolves `cells[i]` for `movedNodeIds[i]` (selection/click order),
+    but `commitDropIntoFrame`'s `applyGridDrop` reads `cells[i]` for `nodeIds[i]` built in
+    *sibling* order, so with a mixed selection the wide child could take the narrow child's anchor
+    and swallow it. Extracted the ordering into `getDropNodeOrder(selectedIds, currentParent,
+    rootOrder)` — sibling order, selection-order remainder — and fed the same list to
+    `armGridDropTarget` (via `resolveDragReparentTarget`) and to `commitDropIntoFrame`, so the two
+    ends agree.

@@ -1044,4 +1044,187 @@ test.describe('auto-layout — Grid flow', () => {
     await columnSpanField.press('Enter');
     await expect.poll(readSpan).toBe(2);
   });
+
+  test('dragging a multi-cell child previews its whole footprint of slots, not a single cell', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-span-footprint');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // a 3-column manual grid with a 2x2 child at (0,0) and a plain 1x1 child at (2,2)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 3, gridRowCount: 3 }, id: frameId }));
+
+      const addRect = (): string => {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+
+        const state = store.getState().design;
+        const activePage = state.pages[state.activePageId];
+
+        return activePage.rootOrder[activePage.rootOrder.length - 1];
+      };
+
+      const bigId = addRect();
+      const smallId = addRect();
+
+      store.dispatch(moveNodes({ nodeIds: [bigId, smallId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(
+        updateNode({ changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2, gridRowAnchorIndex: 0, gridRowSpan: 2 }, id: bigId }),
+      );
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 2, gridRowAnchorIndex: 2 }, id: smallId }));
+    });
+
+    const safeArea = await designPage.canvasSafeArea();
+    const hoverPoint = { x: FRAME.x1 + 170, y: FRAME.y1 + 60 };
+
+    // drag the small 1x1 child near the middle of the grid — 1 slot lights up
+    await designPage.click(FRAME.x1 + 420, FRAME.y1 + 480);
+    await page.mouse.move(FRAME.x1 + 420, FRAME.y1 + 480);
+    await page.mouse.down();
+    await page.mouse.move(hoverPoint.x, hoverPoint.y, { steps: 8 });
+    await page.waitForTimeout(150);
+    const smallHover = await page.screenshot({ clip: safeArea });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // drag the 2x2 child to the same spot — a 2x2 block of slots lights up instead
+    await designPage.click(FRAME.x1 + 40, FRAME.y1 + 40);
+    await page.mouse.move(FRAME.x1 + 40, FRAME.y1 + 40);
+    await page.mouse.down();
+    await page.mouse.move(hoverPoint.x, hoverPoint.y, { steps: 8 });
+    await page.waitForTimeout(150);
+    const bigHover = await page.screenshot({ clip: safeArea });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    expect(bigHover.equals(smallHover)).toBe(false);
+
+    // multi-select both children and drag together — the footprint preview still renders
+    await designPage.click(FRAME.x1 + 40, FRAME.y1 + 40);
+    await page.keyboard.down('Shift');
+    await designPage.click(FRAME.x1 + 420, FRAME.y1 + 480);
+    await page.keyboard.up('Shift');
+    await page.mouse.move(FRAME.x1 + 40, FRAME.y1 + 40);
+    await page.mouse.down();
+    await page.mouse.move(hoverPoint.x, hoverPoint.y, { steps: 8 });
+    await page.waitForTimeout(150);
+    const multiHover = await page.screenshot({ clip: safeArea });
+    await page.mouse.up();
+
+    expect(multiHover.equals(smallHover)).toBe(false);
+  });
+
+  test('dragging a wide child together with a small one does not drop the small one inside the wide one', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-multi-span-drop');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // 4-column, 2-row grid: "big" spans columns 0-2 of row 0, "small" sits at column 3 of row 0.
+    // "big" comes first in childIds so a select-small-then-big order mismatches the drop order.
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 4, gridRowCount: 2 }, id: frameId }));
+
+      const addRect = (): string => {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+
+        const state = store.getState().design;
+        const activePage = state.pages[state.activePageId];
+
+        return activePage.rootOrder[activePage.rootOrder.length - 1];
+      };
+
+      const bigId = addRect();
+      const smallId = addRect();
+
+      store.dispatch(moveNodes({ nodeIds: [bigId, smallId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(
+        updateNode({
+          changes: {
+            gridColumnAnchorIndex: 0,
+            gridColumnSpan: 3,
+            gridRowAnchorIndex: 0,
+            heightSizingMode: 'fill',
+            widthSizingMode: 'fill',
+          },
+          id: bigId,
+        }),
+      );
+      store.dispatch(
+        updateNode({
+          changes: { gridColumnAnchorIndex: 3, gridRowAnchorIndex: 0, heightSizingMode: 'fill', widthSizingMode: 'fill' },
+          id: smallId,
+        }),
+      );
+    });
+
+    const columnWidth = (FRAME.x2 - FRAME.x1) / 4;
+
+    // select "small" first (column 3), then "big" (columns 0-2)
+    await designPage.click(FRAME.x1 + columnWidth * 3 + columnWidth / 2, FRAME.y1 + 60);
+    await designPage.click(FRAME.x1 + columnWidth, FRAME.y1 + 60, { shift: true });
+
+    // drag the pair, grabbed from "big", down onto the empty second row
+    await dragInto(page, { x: FRAME.x1 + columnWidth, y: FRAME.y1 + 60 }, { x: FRAME.x1 + 40, y: FRAME.y1 + 340 });
+    await page.waitForTimeout(150);
+
+    const placed = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+      return frame.childIds.map((id) => {
+        const node = activePage.nodes[id] as unknown as {
+          gridColumnAnchorIndex?: number;
+          gridColumnSpan?: number;
+          gridRowAnchorIndex?: number;
+        };
+
+        return {
+          column: node.gridColumnAnchorIndex ?? 0,
+          columnSpan: node.gridColumnSpan ?? 1,
+          row: node.gridRowAnchorIndex ?? 0,
+        };
+      });
+    });
+
+    const big = placed.find((node) => node.columnSpan === 3);
+    const small = placed.find((node) => node.columnSpan === 1);
+
+    // the small child must not sit anywhere inside the wide child's 3-cell span
+    const overlaps =
+      big !== undefined &&
+      small !== undefined &&
+      small.row === big.row &&
+      small.column >= big.column &&
+      small.column < big.column + big.columnSpan;
+
+    expect(overlaps).toBe(false);
+  });
 });

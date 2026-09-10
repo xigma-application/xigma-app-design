@@ -1,5 +1,6 @@
 // store
 import { isDropTargetContainer } from 'store/design/utils/nodeHierarchy/isDropTargetContainer';
+import { selectActivePage } from 'store/design/selectors';
 import { AppDispatch, RootState } from 'store';
 
 // types
@@ -12,6 +13,7 @@ import { TSceneNode } from 'types/design/types';
 import { armAutoLayoutDropTarget } from './armAutoLayoutDropTarget/armAutoLayoutDropTarget';
 import { armGridDropTarget } from './armGridDropTarget/armGridDropTarget';
 import { getDragDropTargetFrame } from './getDragDropTargetFrame';
+import { getDropNodeOrder } from '../../../getDropNodeOrder';
 import { isAutoLayoutFrame } from './isAutoLayoutFrame';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { isGridFrame } from './isGridFrame';
@@ -65,7 +67,14 @@ export const resolveDragReparentTarget = (
 
   switch (true) {
     case isGridFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild && !isModifierHeld:
-      armGridDropTarget(canvasRefs, desiredParent, desiredParentId, movedNodeIds, nodesById, point);
+      armGridDropTarget(
+        canvasRefs,
+        desiredParent,
+        desiredParentId,
+        getDropNodeOrder(movedNodeIds, currentParent, selectActivePage(state).rootOrder),
+        nodesById,
+        point,
+      );
       break;
     case isAutoLayoutFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild:
       armAutoLayoutDropTarget(

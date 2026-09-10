@@ -96,4 +96,20 @@ describe('resolveGridDropHover', () => {
       insertIndex: 0,
     });
   });
+
+  it('should attach the full footprint as previewCells when a lone spanning child is the one being dragged', () => {
+    const nodes = byId([anchored('drag', 0, 0, 2, 2)]);
+    const wide = layout({ columnCount: 3, rowCount: 3 });
+    const gridFrame = frame({ childIds: ['drag'], gridColumnCount: 3, gridRowCount: 3 });
+
+    const hover = resolveGridDropHover(gridFrame, nodes, ['drag'], { x: 50, y: 50 }, wide);
+
+    expect(hover.cells).toEqual([{ column: 0, row: 0 }]);
+    expect(hover.previewCells).toEqual([
+      { column: 0, row: 0 },
+      { column: 1, row: 0 },
+      { column: 0, row: 1 },
+      { column: 1, row: 1 },
+    ]);
+  });
 });

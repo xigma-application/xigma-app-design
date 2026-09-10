@@ -1,6 +1,7 @@
 // others
 import { applyGridDrop } from './applyGridDrop';
 import { applyGridInsert } from './applyGridInsert';
+import { getDropNodeOrder } from '../../getDropNodeOrder';
 import { resolveDropTargetIndex } from './resolveDropTargetIndex';
 
 // store
@@ -21,9 +22,7 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
     const selectedIds = selectSelectedIds(store.getState());
     const currentParentId = page.nodes[selectedIds[0]]?.parentId ?? null;
     const currentParent = currentParentId ? page.nodes[currentParentId] : null;
-    const currentSiblingOrder = currentParent && isContainerNode(currentParent) ? currentParent.childIds : page.rootOrder;
-    const orderedFromCurrentParent = currentSiblingOrder.filter((id) => selectedIds.includes(id));
-    const nodeIds = [...orderedFromCurrentParent, ...selectedIds.filter((id) => !orderedFromCurrentParent.includes(id))];
+    const nodeIds = getDropNodeOrder(selectedIds, currentParent, page.rootOrder);
     const dropTargetFrameId = canvasRefs.transform.dropTargetFrameIdRef.current;
     const targetFrame = dropTargetFrameId ? page.nodes[dropTargetFrameId] : null;
     const targetParentId = targetFrame && isContainerNode(targetFrame) ? targetFrame.id : null;

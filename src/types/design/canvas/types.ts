@@ -290,6 +290,7 @@ export type TGridDropTargetHover = {
   frameId: string;
   indicator?: { column: number; row: number; side: 'left' | 'right' };
   insertIndex?: number;
+  previewCells?: { column: number; row: number }[];
 };
 
 export type TGridDragGhost = {

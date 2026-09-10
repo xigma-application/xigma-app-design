@@ -7,6 +7,7 @@ export type TGridDropHover = {
   cells: TGridDropCell[];
   indicator?: { column: number; row: number; side: 'left' | 'right' };
   insertIndex?: number;
+  previewCells?: TGridDropCell[];
 };
 
 export type TGridDropContext = {

@@ -180,7 +180,9 @@ write-up: `.claude/docs/auto-layout.md` §13.
       count changes
 - [x] dragging an element onto the grid highlights the cell under the cursor (and the element goes
       translucent); dropping snaps it into that cell at the cell's size, growing the grid with extra
-      rows if you drop past the end
+      rows if you drop past the end. A child that spans several cells highlights its whole block of
+      slots while it's dragged, skipping any that fall outside the grid or that another element
+      already holds
 - [ ] setting a row or column to a fixed size / hug / share-the-space, and dragging those sizes on
       the canvas — this is the last part
 - [x] letting a child span several cells, from its Column span / Row span fields (see Stage 26)

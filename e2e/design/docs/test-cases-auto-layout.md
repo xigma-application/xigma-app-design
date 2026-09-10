@@ -64,6 +64,8 @@ repainting — same rationale as the Flow section above.
 | 24  | Changing the grid size (Columns/Rows/pick matrix) resets every spanning child back to 1×1 rather than re-fitting its span into the new track grid                                                                                                                       |  ✅  | ✅ `grid.spec.ts` |
 | 25  | Dragging a new element into the interior of a child that spans several cells drops it in the next free cell, not at an interior track boundary inside the span                                                                                                          |  ✅  | ✅ `grid.spec.ts` |
 | 26  | The span cap follows the child's own position — a child at column 2 of a 4-column grid with a neighbour on column 3 can only reach the free run between it and that blocker, not the whole grid width                                                                   |  ✅  | ✅ `grid.spec.ts` |
+| 27  | Dragging a multi-cell child previews its whole footprint of slots (also for a multi-node selection); cells past the grid edge or already held by another element are left out, and the drop lands where the footprint actually fits                                     |  ✅  | ✅ `grid.spec.ts` |
+| 28  | Dragging a wide child together with a narrow one (selected in an order that differs from their sibling order) does not drop the narrow one inside the wide one's span                                                                                                   |  ✅  | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -104,7 +106,17 @@ uncontrolled `<input>`), the same class of bug as #18 — the hook-level clamp i
 but "the field actually snaps back and the scrub actually stops at the edge" needs a browser. #26's
 math (the free run stops at a blocker, not the grid edge) is exhaustive in
 `getGridChildSpanBounds/test/`; the e2e is the one pass proving a real panel commit against a real
-placed neighbour is refused. #24's _decision_ (which children
+placed neighbour is refused. #27 is a canvas render behaviour — the footprint geometry (union,
+dedupe, occupancy/edge clipping, span-aware anchor scan) is exhaustive in
+`resolveGridDropHover/test/{withGridSpanPreview,getGridFootprintCells,getGridDropPlacements}` and
+`drawGridDropTarget.spec.ts`, but "the WebGL layer actually paints the bigger highlight while a
+real drag is in flight" is only a browser check (screenshot inequality against the 1×1 drag, and
+against the same for a two-child selection). #28 is the drop-order bug: `getGridDropPlacements`
+resolves `cells[i]` for the drag's `movedNodeIds[i]`, while `applyGridDrop` reads `cells[i]` for
+`commitDropIntoFrame`'s `nodeIds[i]` — the two lists must be in the same order or a mixed
+selection swaps anchors. `getDropNodeOrder.spec.ts` pins the shared ordering helper; the e2e is
+the only place the two call sites are exercised end to end (select in one order, drop, read the
+committed anchors back). #24's _decision_ (which children
 reset) is exhaustive in `getGridResizeRepack.spec.ts` / `useColumnGridArea.spec.tsx`; the e2e is
 the one pass proving a real panel commit clears the stored span. #25 is span-aware drop-hover
 resolution — exhaustive in `resolveGridDropHover/test/`; the e2e proves a real drag into a real

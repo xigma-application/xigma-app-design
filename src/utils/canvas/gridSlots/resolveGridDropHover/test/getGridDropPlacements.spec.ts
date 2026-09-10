@@ -41,6 +41,9 @@ const anchored = (id: string, column: number, row: number): TSceneNode =>
     y: 0,
   }) as TSceneNode;
 
+const spanning = (id: string, columnSpan: number, rowSpan: number): TSceneNode =>
+  ({ ...anchored(id, 0, 0), gridColumnSpan: columnSpan, gridRowSpan: rowSpan }) as TSceneNode;
+
 const byId = (nodes: TSceneNode[]): Record<string, TSceneNode> => Object.fromEntries(nodes.map((node) => [node.id, node]));
 
 describe('getGridDropPlacements', () => {
@@ -95,5 +98,22 @@ describe('getGridDropPlacements', () => {
       { column: 0, row: 0 },
       { column: 0, row: 1 },
     ]);
+  });
+
+  it('should scan for a region the dragged child’s whole span fits, past an occupied cell', () => {
+    // 4x2 grid, "a" at (1,0); dragging a 2x1 "drag" hovered at column 0 can't sit at 0-1 (hits a)
+    const nodes = byId([anchored('a', 1, 0), spanning('drag', 2, 1)]);
+    const gridFrame = frame({ childIds: ['a', 'drag'], gridColumnCount: 4 });
+
+    expect(getGridDropPlacements(gridFrame, nodes, ['drag'], { column: 0, row: 0 }, 1)).toEqual([{ column: 2, row: 0 }]);
+  });
+
+  it('should keep a wall-blocking span in bounds instead of looping forever', () => {
+    // span wider than the space left of the hovered cell clamps to the column count and drops to
+    // the next reading-order row that can hold it (rather than never terminating)
+    const nodes = byId([spanning('drag', 9, 1)]);
+    const gridFrame = frame({ childIds: ['drag'], gridColumnCount: 3 });
+
+    expect(getGridDropPlacements(gridFrame, nodes, ['drag'], { column: 2, row: 0 }, 1)).toEqual([{ column: 0, row: 1 }]);
   });
 });

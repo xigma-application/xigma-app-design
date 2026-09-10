@@ -44,7 +44,7 @@ export const drawGridDropTarget = (context: TDrawSceneContext, refs: TCanvasRefs
         frameCenter,
       );
     } else {
-      const activeKeys = new Set(hover.cells.map((cell) => `${cell.row}:${cell.column}`));
+      const activeKeys = new Set((hover.previewCells ?? hover.cells).map((cell) => `${cell.row}:${cell.column}`));
 
       for (let row = 0; row < layout.rowCount; row += 1) {
         for (let column = 0; column < layout.columnCount; column += 1) {

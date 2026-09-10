@@ -108,6 +108,31 @@ describe('drawGridDropTarget', () => {
     expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
   });
 
+  it('should fill the spanning child’s whole footprint from previewCells, clipping the overflow', () => {
+    // mock — 2 x 3 grid; a 2x2 footprint anchored at row 2 spills one row past the grid
+    const gl = createGlMock();
+
+    // before
+    drawGridDropTarget(
+      context(gl),
+      refsWith({
+        cells: [{ column: 0, row: 2 }],
+        frameId: 'grid-1',
+        previewCells: [
+          { column: 0, row: 2 },
+          { column: 1, row: 2 },
+          { column: 0, row: 3 },
+          { column: 1, row: 3 },
+        ],
+      }),
+      { 'grid-1': gridFrame() },
+    );
+
+    // result — 2 x 3 grid still 6 outlined; only the 2 in-range footprint cells are filled
+    expect(drawCalls(gl, gl.LINE_LOOP)).toBe(6);
+    expect(drawCalls(gl, gl.TRIANGLES)).toBe(2);
+  });
+
   it('should draw a single insertion bar and no cell outlines when an indicator is armed', () => {
     // mock
     const gl = createGlMock();
