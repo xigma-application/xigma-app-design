@@ -40,6 +40,7 @@ export const disarmDrag = (
     canvasRefs.transform.autoLayoutReorderPreviewRef.current = null;
     canvasRefs.transform.dropTargetFrameIdRef.current = null;
     canvasRefs.transform.equalSpacingGuidesRef.current = null;
+    canvasRefs.transform.gridDragGhostRef.current = null;
     canvasRefs.transform.gridDropTargetRef.current = null;
     canvasRefs.transform.matchedPairGuidesRef.current = null;
     dragStateRef.current = null;

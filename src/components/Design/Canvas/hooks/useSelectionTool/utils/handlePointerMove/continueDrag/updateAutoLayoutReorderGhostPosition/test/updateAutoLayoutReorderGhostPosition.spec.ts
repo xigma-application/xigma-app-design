@@ -4,9 +4,9 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
-import { TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -30,6 +30,23 @@ const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
 const dragState = (nodeOrigins: TDragState['nodeOrigins']): TDragState =>
   ({ dispatchThrottle: { frameId: null, run: null }, nodeOrigins }) as unknown as TDragState;
 
+const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 200,
+  id: 'frame-1',
+  layoutMode: LayoutMode.grid,
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 200,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
 const addRect = (x: number, y: number): string => {
   store.dispatch(
     addNode({ fill: '#000', height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x, y }),
@@ -46,15 +63,18 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
   });
 
   it('should write the dragged node’s cursor-tracked position into the preview ref, without dispatching a node update', () => {
-    // mock
+    // mock — a stale grid ghost from an earlier frame of the same drag must not linger
     const refs = createCanvasRefs({
-      transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'frame-1', positions: {} } } },
+      transform: {
+        autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'frame-1', positions: {} } },
+        gridDragGhostRef: { current: { nodeIds: ['r1'], offset: { x: 1, y: 1 } } },
+      },
     });
     const node = rect();
     const state = dragState({ r1: { x: 10, y: 20 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, -3);
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, -3, {});
     flushThrottledDispatch(state.dispatchThrottle);
 
     // result
@@ -63,6 +83,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
       frameId: 'frame-1',
       positions: { r1: { x: 15, y: 17 } },
     });
+    expect(refs.transform.gridDragGhostRef.current).toBeNull();
     expect(state.dispatchThrottle.run).toBeNull();
   });
 
@@ -77,13 +98,44 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ r1: { x: 10, y: 20 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 0, 0);
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 0, 0, {});
 
     // result
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
       r1: { x: 10, y: 20 },
       sibling: { x: 1, y: 1 },
     });
+  });
+
+  it('should arm the grid drag ghost instead of dispatching, when the node’s parent is a grid frame', () => {
+    // mock
+    const refs = createCanvasRefs();
+    const nodesById: Record<string, TSceneNode> = { 'frame-1': gridFrame() };
+    const node = rect();
+    const state = dragState({ r1: { x: 10, y: 20 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, -3, nodesById);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result — the ghost ref carries the raw cursor delta, nothing dispatched to the store
+    expect(refs.transform.gridDragGhostRef.current).toEqual({ nodeIds: ['r1'], offset: { x: 5, y: -3 } });
+    expect(state.dispatchThrottle.run).toBeNull();
+  });
+
+  it('should clear a stale grid drag ghost when no reorder preview is active and the parent is not a grid frame', () => {
+    // mock
+    const refs = createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds: ['r1'], offset: { x: 1, y: 1 } } } } });
+    const id = addRect(100, 100);
+    const node = rect({ id });
+    const state = dragState({ [id]: { x: 100, y: 100 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, {});
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    expect(refs.transform.gridDragGhostRef.current).toBeNull();
   });
 
   it('should fall back to dispatching the drag delta when no reorder preview is active', () => {
@@ -94,7 +146,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ [id]: { x: 100, y: 100 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5);
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, {});
     flushThrottledDispatch(state.dispatchThrottle);
 
     // result
@@ -122,7 +174,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
 
     // action — delta carries 'c' down onto row 3 left (its own footprint slot)
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 0, 100);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 0, 100, {});
 
     // result — 'c' rides the cursor, 'd' sits in its own footprint slot
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
@@ -151,7 +203,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
 
     // action — 10px past 'c'’s own footprint slot, still nearest to it
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 10, 100);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 10, 100, {});
 
     // result — both members carry the same +10 the cursor moved; the pair is not snapped to the cell
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
@@ -180,7 +232,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
 
     // action — delta carries 'c' onto row 3 right (which is 'd'’s footprint slot)
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 100, 100);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 100, 100, {});
 
     // result — 'c' rides the cursor onto the right cell; 'd' jumps left into 'c'’s vacated slot
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
@@ -210,7 +262,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
 
     // action — a huge delta drags grabbed 'c' way past the last slot, into the dead space
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 500, 500);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 500, 500, {});
 
     // result — 'c' pins to the box's far corner (200-20 / 300-20), 'd' rides alongside it, both inside
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
@@ -240,7 +292,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 }, x: { x: 300, y: 300 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD, nodeX], store.dispatch, state, null, 5, 5);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD, nodeX], store.dispatch, state, null, 5, 5, {});
 
     // result — 'x' just tracks the raw drag delta
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions.x).toEqual({ x: 305, y: 305 });
@@ -266,7 +318,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ c: { x: 0, y: 100 }, d: { x: 100, y: 100 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 5, 5);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeC, nodeD], store.dispatch, state, null, 5, 5, {});
 
     // result — no swap logic, every member just tracks the delta
     expect(refs.transform.autoLayoutReorderPreviewRef.current?.positions).toEqual({
@@ -285,7 +337,7 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     const state = dragState({ a: { x: 10, y: 20 }, b: { x: 30, y: 40 } });
 
     // action
-    updateAutoLayoutReorderGhostPosition(refs, [nodeA, nodeB], store.dispatch, state, null, 5, 5);
+    updateAutoLayoutReorderGhostPosition(refs, [nodeA, nodeB], store.dispatch, state, null, 5, 5, {});
     flushThrottledDispatch(state.dispatchThrottle);
 
     // result — both dragged nodes get a ghost position, not just the first one

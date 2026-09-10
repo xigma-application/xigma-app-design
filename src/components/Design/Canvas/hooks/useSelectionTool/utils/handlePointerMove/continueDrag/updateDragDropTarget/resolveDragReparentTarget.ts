@@ -64,7 +64,7 @@ export const resolveDragReparentTarget = (
   applyDesiredDropTarget(canvasRefs, isReorderContext, isModifierHeld, desiredParentId, currentParentId, dragState);
 
   switch (true) {
-    case isGridFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild:
+    case isGridFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild && !isModifierHeld:
       armGridDropTarget(canvasRefs, desiredParent, desiredParentId, movedNodeIds, nodesById, point);
       break;
     case isAutoLayoutFrame(desiredParent) && desiredParentId !== null && !isAbsoluteChild:

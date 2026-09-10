@@ -14,6 +14,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { getAutoLayoutReorderRenderNode } from './getAutoLayoutReorderRenderNode';
+import { getGridDragRenderNode } from './getGridDragRenderNode';
 
 export const drawFrameOutlines = (
   context: TDrawSceneContext,
@@ -26,7 +27,7 @@ export const drawFrameOutlines = (
 
     sceneNodes.forEach((rawNode) => {
       if (rawNode.type === NodeType.frame) {
-        const node = getAutoLayoutReorderRenderNode(refs, rawNode, nodesById);
+        const node = getGridDragRenderNode(refs, getAutoLayoutReorderRenderNode(refs, rawNode, nodesById), nodesById);
 
         drawThickOutline(
           gl,

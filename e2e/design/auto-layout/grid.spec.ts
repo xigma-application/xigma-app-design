@@ -60,6 +60,27 @@ const readColumnCount = (page: Page): Promise<number | undefined> =>
 
 const unique = (values: number[]): number[] => [...new Set(values)];
 
+type TGridState = { anchors: (number | undefined)[][]; childIds: string[]; gridAutoPlacement?: boolean };
+
+const readGridState = (page: Page): Promise<TGridState> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const [frameId] = activePage.rootOrder;
+    const frame = activePage.nodes[frameId] as unknown as { childIds: string[]; gridAutoPlacement?: boolean };
+
+    return {
+      anchors: frame.childIds.map((id) => {
+        const node = activePage.nodes[id] as unknown as { gridColumnAnchorIndex?: number; gridRowAnchorIndex?: number };
+
+        return [node.gridColumnAnchorIndex, node.gridRowAnchorIndex];
+      }),
+      childIds: frame.childIds,
+      gridAutoPlacement: frame.gridAutoPlacement,
+    };
+  });
+
 test.describe('auto-layout — Grid flow', () => {
   // each test draws a frame plus several dragged-in children before it can assert — heavier than the
   // 30s default, especially under parallel load
@@ -300,5 +321,144 @@ test.describe('auto-layout — Grid flow', () => {
     expect(layout.pushed.column).toBe(0);
     expect(layout.pushed.row).toBe(1);
     expect(layout.pushed.y).toBeGreaterThan(layout.inserted.y);
+  });
+
+  test('dragging two already-placed, far-apart grid children together merges them into adjacent cells', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-reorder-merge');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // four children dragged in, then switched to a three-column grid: reading order fills
+    // (0,0) (1,0) (2,0) (0,1) — a full first row plus a single child alone in the second
+    for (const targetY of [250, 320, 390, 460]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    const columnWidth = (FRAME.x2 - FRAME.x1) / 3;
+    const rowHeight = (FRAME.y2 - FRAME.y1) / 2;
+    const cellPoint = (column: number, row: number): { x: number; y: number } => ({
+      x: FRAME.x1 + columnWidth * column + 20,
+      y: FRAME.y1 + rowHeight * row + 15,
+    });
+
+    const first = cellPoint(0, 0); // reading index 0
+    const third = cellPoint(2, 0); // reading index 2 — two columns away from the first, same row
+
+    // select the pair sitting at opposite ends of row 0
+    await designPage.click(first.x, first.y);
+    await designPage.click(third.x, third.y, { shift: true });
+
+    // drag the pair together, grabbed from the first, onto the mostly-empty second row
+    await dragInto(page, first, cellPoint(1, 1));
+    await page.waitForTimeout(150);
+
+    const { anchors, gridAutoPlacement } = await readGridState(page);
+    const draggedAnchors = anchors.filter((anchor) => anchor[0] !== undefined);
+
+    // manual placement kicked in; the dragged pair — two columns apart before the drag — landed
+    // on the same row in two ADJACENT columns, merged together instead of keeping their old gap
+    expect(gridAutoPlacement).toBe(false);
+    expect(draggedAnchors).toHaveLength(2);
+    expect(draggedAnchors[0]?.[1]).toBe(draggedAnchors[1]?.[1]);
+    expect(Math.abs((draggedAnchors[0]?.[0] ?? 0) - (draggedAnchors[1]?.[0] ?? 0))).toBe(1);
+  });
+
+  test('holding the modifier disables the grid drop mechanism entirely, leaving placement untouched', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-modifier-bypass');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // two children dragged in, then switched to a two-column grid: (0,0) and (1,0)
+    for (const targetY of [250, 320]) {
+      await designPage.drawRectangle(1400, targetY, 1460, targetY + 40);
+      await dragInto(page, { x: 1430, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    const before = await readGridState(page);
+
+    const columnWidth = (FRAME.x2 - FRAME.x1) / 2;
+    const firstCell = { x: FRAME.x1 + 20, y: FRAME.y1 + 15 };
+    const secondCell = { x: FRAME.x1 + columnWidth + 20, y: FRAME.y1 + 15 };
+
+    await designPage.click(firstCell.x, firstCell.y);
+
+    // grab the first child and drag it across the grid while holding the modifier the whole time
+    await page.mouse.move(firstCell.x, firstCell.y);
+    await page.mouse.down();
+    await page.keyboard.down('Control');
+    await page.mouse.move(secondCell.x, secondCell.y, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(150);
+
+    // no grid mode engaged at all — placement, order and auto-placement flag stay exactly as they were
+    expect(await readGridState(page)).toEqual(before);
+  });
+
+  test('a grid child being dragged rides the cursor like a ghost, instead of snapping back to its cell', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-drag-ghost');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // two children dragged in, then switched to a two-column grid: (0,0) and (1,0)
+    for (const targetY of [250, 320]) {
+      await designPage.drawRectangle(1400, targetY, 1460, targetY + 40);
+      await dragInto(page, { x: 1430, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    const firstCell = { x: FRAME.x1 + 20, y: FRAME.y1 + 15 };
+    const safeArea = await designPage.canvasSafeArea();
+
+    await designPage.click(firstCell.x, firstCell.y);
+
+    // grab the child and hold it in place — this is the frozen "snapped to its cell" position if
+    // the drag were merely re-syncing live x/y through the (grid-managed) layout engine
+    await page.mouse.move(firstCell.x, firstCell.y);
+    await page.mouse.down();
+    await page.mouse.move(firstCell.x + 15, firstCell.y + 15, { steps: 5 });
+    await page.waitForTimeout(150);
+    const atFirstOffset = await page.screenshot({ clip: safeArea });
+
+    // keep moving, well within the same cell (no new slot is highlighted) — a real ghost still
+    // rides the cursor here; a layout-resync-frozen node would render identically to the shot above
+    await page.mouse.move(firstCell.x + 60, firstCell.y + 45, { steps: 5 });
+    await page.waitForTimeout(150);
+    const atSecondOffset = await page.screenshot({ clip: safeArea });
+
+    await page.mouse.up();
+
+    expect(atSecondOffset.equals(atFirstOffset)).toBe(false);
   });
 });

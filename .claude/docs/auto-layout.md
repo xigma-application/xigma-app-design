@@ -528,6 +528,54 @@ On drop (`commitDropIntoFrame`):
   `gridAutoPlacement: false`; dragged nodes also get `widthSizingMode` / `heightSizingMode = fill`
   like a plain cell drop. `childIds` order itself is untouched — the reorder is anchor-driven.
 
+Everything above is agnostic to where the dragged node came from: dragging a *fresh* element in
+from outside the grid and dragging an *already-placed* grid child to a new cell go through the
+exact same `armGridDropTarget` → `drawGridDropTarget` → `commitDropIntoFrame` pipeline (the same
+occupancy scan naturally "merges" several scattered-but-selected grid children into adjacent free
+cells, since `count`/`draggedCount` is just the selection size and their own old cells are simply
+excluded from occupancy like any other moved node).
+
+### Canvas — the grid drag ghost (dragging an already-placed grid child)
+
+Reordering *inside* a grid has one problem the "fresh drop" case never hits: the dragged node is
+itself grid-managed. `dispatchDraggedNodeUpdates` (the generic per-frame drag translate every
+other node type uses) dispatches a live `updateNode` on x/y — but `handleUpdateNode` immediately
+re-runs `syncAutoLayoutChildren` on the parent, which for a grid frame resyncs *every* child from
+its anchor/auto-flow cell, stomping that live x/y right back. Net effect without a fix: the
+dragged node visually freezes at its cell instead of following the cursor.
+
+Fixed the same way the linear engine already solves this for its own reorder ghost
+(`autoLayoutReorderPreviewRef` + `getAutoLayoutReorderRenderNode`, §9) — but simpler, since a grid
+drag doesn't preview siblings shifting, only the dragged node(s) floating:
+
+- `updateAutoLayoutReorderGhostPosition` (the single umbrella that decides how a drag frame's
+  delta gets applied) now takes `nodesById` and checks `isGridFrame` on the dragged selection's
+  **origin** parent (`selectedNodes[0].parentId`, looked up before any drop takes effect — this is
+  stable for the whole drag since reparenting only happens on drop). Three outcomes: the existing
+  linear `preview` ref wins if armed; else if the origin parent is a grid frame, arm
+  `transform.gridDragGhostRef = { nodeIds, offset: { x: deltaX, y: deltaY } }` and skip the
+  dispatch entirely (so there is nothing for the grid resync to stomp); else the plain
+  `dispatchDraggedNodeUpdates` path (unmanaged nodes, or a fresh node not yet in a grid).
+- `getGridDragRenderNode` (wired into `drawLeafNode` and `drawFrameOutlines`, chained after the
+  linear `getAutoLayoutReorderRenderNode`) reads that ref at render time and returns the node
+  shifted by `offset` via `getGeometryDeltaChanges` — the store's x/y are never touched, so this is
+  purely a draw-time substitution. `getOverriddenGridDragAncestor` walks the parent chain (mirrors
+  `getOverriddenAncestorNode`) so a dragged frame's own nested children ride along too.
+- The ghost carries **no anchor/cell semantics of its own** — it is pure "let this node visually
+  detach and track the cursor 1:1, like the linear ghost." The *actual* target cell/indicator is
+  still `gridDropTargetRef`'s job (unchanged); on drop the real commit path
+  (`applyGridDrop`/`applyGridInsert`/plain reparent) sets the final position and the ghost ref is
+  cleared in `disarmDrag`.
+- **The modifier (Ctrl/Cmd) turns the whole grid mechanism off, not just the ghost.**
+  `resolveDragReparentTarget`'s grid case gained `&& !isModifierHeld` — holding the modifier while
+  dragging a grid child never arms `gridDropTargetRef` at all (no highlight, no indicator), so on
+  drop nothing anchors and no sibling is touched; the node behaves exactly like an ordinary
+  unmanaged drag (plain reparent if it lands outside its original grid, a no-op if it lands back
+  inside — `targetParentId === currentParentId` never satisfies `commitDropIntoFrame`'s drop
+  conditions when no ref is armed). The ghost still applies while the modifier is held (the origin
+  parent is still a grid frame), so the node visually detaches and rides the cursor free of any
+  cell — "pull it out of its slot, nothing else reshuffles."
+
 ### Not covered yet
 
 Per-track Fixed/Hug/Fill controls and on-canvas track pills (the engine already resolves
@@ -567,9 +615,11 @@ The engine already honours spans and manual anchors when set in code.
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
   `getGridDropCell`, `getGridDropPlacements`, `resolveGridDropHover`, `getGridInsertIndicatorRect`),
   `gridSlots/getGridInsertPlacements/**/test/`,
-  `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
+  `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test,test/resolveDragReparentTarget}`,
   `disarmDrag/test/{applyGridDrop,applyGridInsert,resolveDropTargetIndex,commitDropIntoFrame}`,
-  `drawScene/test/{drawGridSlots,drawGridDropTarget,getAutoLayoutDragOpacity}.spec.ts`; panel —
+  `drawScene/test/{drawGridSlots,drawGridDropTarget,getAutoLayoutDragOpacity,getGridDragRenderNode,getOverriddenGridDragAncestor}.spec.ts`,
+  `continueDrag/updateAutoLayoutReorderGhostPosition/test/updateAutoLayoutReorderGhostPosition.spec.ts`
+  (grid-ghost cases); panel —
   `ColumnAlignmentLayout/GridArea/**/*.spec.tsx` (`GridArea`, `GridAreaPreview`, `GridAreaPopover`,
   `GridInputs`, `GridInputCells`, `CellsInput`, `useCellsInput`),
   `ColumnAlignmentLayout/hooks/**` (`useColumnGridArea`, `clampGridCount`,
@@ -655,3 +705,20 @@ The engine already honours spans and manual anchors when set in code.
     shifting everyone by N; a child already further out than the ripple reaches stays put) —
     anchoring every moved child and flipping `gridAutoPlacement: false`, same as a plain cell
     drop. `childIds` order is untouched; the reorder is anchor-only.
+11. **2026-09-10 — grid flow, Phase 3d: reordering an already-placed child (§13 "Canvas — the grid
+    drag ghost").** The user specified this mode turn-by-turn, again locked before coding: (a) an
+    in-grid reorder drag uses the exact same slot/indicator UI as a fresh drop-in (it already did,
+    by construction — the occupancy scan just excludes `movedNodeIds` regardless of where they came
+    from) and several scattered selected children "merge" into adjacent free cells (also already
+    true — `count` is just the selection size); (b) holding the modifier disables the mechanism
+    entirely — `resolveDragReparentTarget`'s grid case gained `&& !isModifierHeld`, so no ref arms
+    and nothing anchors on drop; the user's own follow-up clarified the dragged node still visually
+    "pulls out of its slot" while every other child stays untouched, not literally frozen. That
+    follow-up surfaced a **separate, real bug**: a dragged grid child didn't visually move *at
+    all*, modifier or not — `dispatchDraggedNodeUpdates`'s live x/y dispatch was being immediately
+    stomped back to the cell position by the grid engine's own `syncAutoLayoutChildren` resync on
+    every frame. Fixed with a grid-specific analogue of the linear engine's own reorder ghost
+    (§9): `gridDragGhostRef` (armed by `updateAutoLayoutReorderGhostPosition` whenever the dragged
+    selection's *origin* parent is a grid frame, in place of the dispatch) carries just a raw
+    cursor offset, consumed at render time only by `getGridDragRenderNode` /
+    `getOverriddenGridDragAncestor` — no store x/y is ever written until the real drop commit.

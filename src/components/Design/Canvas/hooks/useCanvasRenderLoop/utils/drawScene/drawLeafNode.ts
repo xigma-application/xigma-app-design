@@ -17,6 +17,7 @@ import { drawTextLeafNode } from './drawTextLeafNode';
 import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide/drawVectorNodeOrTextPathGuide';
 import { getAutoLayoutDragOpacity } from './getAutoLayoutDragOpacity';
 import { getAutoLayoutReorderRenderNode } from './getAutoLayoutReorderRenderNode';
+import { getGridDragRenderNode } from './getGridDragRenderNode';
 
 export const drawLeafNode = (
   context: TDrawSceneContext,
@@ -26,7 +27,7 @@ export const drawLeafNode = (
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  const node = getAutoLayoutReorderRenderNode(refs, rawNode, nodesById);
+  const node = getGridDragRenderNode(refs, getAutoLayoutReorderRenderNode(refs, rawNode, nodesById), nodesById);
   const dragOpacity = getAutoLayoutDragOpacity(refs, node.id);
 
   switch (node.type) {

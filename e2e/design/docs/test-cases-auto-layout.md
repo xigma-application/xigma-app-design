@@ -50,12 +50,19 @@ repainting — same rationale as the Flow section above.
 | 10  | A rotated grid frame orbits its cells about the frame centre, same as the linear engine                                                                                                                                                                                |  ✅  |         —         |
 | 11  | Hovering the boxed-in side (wall or another occupied cell) of an occupied cell arms a vertical insertion indicator instead of a cell highlight; dropping inserts there and ripples the trailing children forward, growing a row if needed                              |  ✅  | ✅ `grid.spec.ts` |
 | 12  | Hovering the free-neighbour side of an occupied cell highlights that neighbour cell instead of arming an indicator                                                                                                                                                     |  ✅  |         —         |
+| 13  | Dragging two already-placed, scattered grid children together merges them into adjacent cells (same occupancy-scan mechanism as a fresh multi-drop, since it just excludes the moved nodes' own old cells)                                                             |  ✅  | ✅ `grid.spec.ts` |
+| 14  | Holding the modifier while dragging a grid child disables the whole grid drop mechanism — no highlight, no indicator, no anchor change, no sibling reshuffle on drop                                                                                                   |  ✅  | ✅ `grid.spec.ts` |
+| 15  | A grid child being dragged visually rides the cursor like a ghost instead of snapping back to its cell (the live x/y dispatch is skipped so the grid engine's own resync has nothing to stomp)                                                                         |  —   | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / spanning / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
 `computeGridLayoutPositions/**/test/` and `getGridLayoutSyncPositions.spec.ts`. #12 is exercised
 exhaustively (both sides, both outcomes) by `resolveGridDropHover.spec.ts`; #11 adds the one
-browser-only proof that a real drop wires the ripple into the store.
+browser-only proof that a real drop wires the ripple into the store. #13/#14 reuse the exact same
+drop pipeline as #5/#11 (a same-parent drag just excludes its own old cells from the occupancy
+scan) — the e2e proof is the wiring, not new geometry. #15 has no unit equivalent: it is purely a
+"does the canvas actually repaint between two live cursor positions" question, the kind a
+synthetic ref assertion can't distinguish from "frozen and re-rendering the same frame twice".
 
 ## Reordering a child within its own frame
 

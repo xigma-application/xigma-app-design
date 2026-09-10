@@ -23,6 +23,7 @@ describe('useTransformRefs behaviors', () => {
       draggedNodeIdsRef: { current: null },
       dropTargetFrameIdRef: { current: null },
       equalSpacingGuidesRef: { current: null },
+      gridDragGhostRef: { current: null },
       gridDropTargetRef: { current: null },
       matchedPairGuidesRef: { current: null },
       resizedNodeIdsRef: { current: null },

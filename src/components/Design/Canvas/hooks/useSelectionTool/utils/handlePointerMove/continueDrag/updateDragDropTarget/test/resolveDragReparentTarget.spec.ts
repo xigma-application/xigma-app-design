@@ -563,6 +563,71 @@ describe('resolveDragReparentTarget', () => {
     spy.mockRestore();
   });
 
+  it('should not arm the grid drop target while the modifier is held, and leave a same-parent child untouched', () => {
+    // mock — a child already anchored inside the grid; the pointer stays inside that same frame
+    const frameId = addGridFrame(0, 0, 300);
+    const rectId = addRect(10, 10);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 }, id: rectId }));
+
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    // action — modifier held
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 75, y: 75 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      true,
+      dragState(),
+    );
+
+    // result — no grid mode at all: no indicator/cell ref, nothing dispatched, the child's anchor is untouched
+    expect(canvasRefs.transform.gridDropTargetRef.current).toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId]).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 });
+
+    spy.mockRestore();
+  });
+
+  it('should plainly reparent into a grid frame while the modifier is held, without snapping to any cell', () => {
+    // mock — the dragged rect lives outside the grid entirely
+    const frameId = addGridFrame(0, 0, 300);
+    const rectId = addRect(900, 900);
+    const canvasRefs = refs();
+    const { rendered, byId } = nodesOf();
+
+    // action — modifier held, pointer over the grid frame
+    resolveDragReparentTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[rectId]],
+      { x: 75, y: 75 },
+      rendered,
+      byId,
+      canvasRefs,
+      null,
+      true,
+      dragState(),
+    );
+
+    // result — a plain reparent, no grid drop target ever armed, no anchor set
+    expect(canvasRefs.transform.gridDropTargetRef.current).toBeNull();
+
+    const page = selectActivePage(store.getState());
+
+    expect(page.nodes[rectId].parentId).toBe(frameId);
+    expect((page.nodes[rectId] as { gridColumnAnchorIndex?: number }).gridColumnAnchorIndex).toBeUndefined();
+    expect((page.nodes[rectId] as { gridRowAnchorIndex?: number }).gridRowAnchorIndex).toBeUndefined();
+  });
+
   it('should delegate to the auto-layout drop target resolver instead of reparenting right away', () => {
     // mock
     const frameId = addAutoLayoutFrame(0, 0, 300);

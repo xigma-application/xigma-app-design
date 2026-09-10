@@ -84,6 +84,6 @@ export const continueDrag = (
     setClassName(getDragCursorClassName(canvasRefs, dragState, selectedNodes, isReorderModifierHeld, axisLock));
     initDraggedNodeIds(canvasRefs, dragState);
     updateDragSnapshotDeltas(snapshots, deltaX, deltaY);
-    updateAutoLayoutReorderGhostPosition(canvasRefs, selectedNodes, dispatch, dragState, snapshots, deltaX, deltaY);
+    updateAutoLayoutReorderGhostPosition(canvasRefs, selectedNodes, dispatch, dragState, snapshots, deltaX, deltaY, nodes);
   }
 };

@@ -292,6 +292,11 @@ export type TGridDropTargetHover = {
   insertIndex?: number;
 };
 
+export type TGridDragGhost = {
+  nodeIds: string[];
+  offset: TPoint;
+};
+
 export type TAutoLayoutDraggedOffsetTween = {
   from: Record<string, TPoint>;
   grabbedGhost: TPoint;
@@ -344,6 +349,7 @@ export type TTransformRefs = {
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   dropTargetFrameIdRef: RefObject<string | null>;
   equalSpacingGuidesRef: RefObject<TEqualSpacingGuides | null>;
+  gridDragGhostRef: RefObject<TGridDragGhost | null>;
   gridDropTargetRef: RefObject<TGridDropTargetHover | null>;
   matchedPairGuidesRef: RefObject<TMatchedPairGuides | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
