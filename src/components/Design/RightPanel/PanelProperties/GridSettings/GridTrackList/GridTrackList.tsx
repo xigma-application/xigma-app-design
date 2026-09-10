@@ -62,7 +62,7 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
             isDragging={list.isRowDragging(track.index)}
             isSelected={list.selectedIndices.includes(track.index)}
             key={track.index}
-            onChangeMode={(mode) => list.onChangeMode(track.index, mode)}
+            onChangeMode={(mode, value) => list.onChangeMode(track.index, mode, value)}
             onChangeValue={(value) => list.onChangeValue(track.index, value)}
             onDelete={() => list.onDeleteRow(track.index)}
             onSelect={(modifiers) => list.onSelectRow(track.index, modifiers)}

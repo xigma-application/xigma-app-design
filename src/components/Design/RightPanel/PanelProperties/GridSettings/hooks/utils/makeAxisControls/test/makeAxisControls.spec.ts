@@ -56,18 +56,14 @@ const tracks = (...sizes: TGridTrackSize[]): TGridTrackSize[] => sizes;
 describe('makeAxisControls', () => {
   describe('tracks', () => {
     it('should default the view-model value to 1 for fill and 0 for non-fill without a value', () => {
-      const controls = makeAxisControls(
-        vi.fn(),
-        frame(),
-        {},
-        'column',
-        tracks({ mode: SizingMode.fill }, { mode: SizingMode.fixed, value: 80 }, { mode: SizingMode.hug }),
-      );
+      const columnSizes = tracks({ mode: SizingMode.fill }, { mode: SizingMode.fixed, value: 80 }, { mode: SizingMode.hug });
+      const controls = makeAxisControls(vi.fn(), frame({ gridColumnSizes: columnSizes }), {}, 'column', columnSizes);
 
+      // frame is 200 wide, 3 columns, no gaps/padding: fixed keeps 80, hug has no children (0), fill takes the rest
       expect(controls.tracks).toEqual([
-        { index: 0, linkedIndices: [0], mode: SizingMode.fill, resolvedSize: expect.any(Number), value: 1 },
+        { index: 0, linkedIndices: [0], mode: SizingMode.fill, resolvedSize: 120, value: 1 },
         { index: 1, linkedIndices: [1], mode: SizingMode.fixed, resolvedSize: 80, value: 80 },
-        { index: 2, linkedIndices: [2], mode: SizingMode.hug, resolvedSize: expect.any(Number), value: 0 },
+        { index: 2, linkedIndices: [2], mode: SizingMode.hug, resolvedSize: 0, value: 0 },
       ]);
     });
 

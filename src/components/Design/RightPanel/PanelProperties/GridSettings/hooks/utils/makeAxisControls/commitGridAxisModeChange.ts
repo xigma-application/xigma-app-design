@@ -16,9 +16,10 @@ export const commitGridAxisModeChange = (
   currentTracks: TGridTrackSize[],
   index: number,
   mode: SizingMode,
+  value?: number,
 ): void => {
   const next = currentTracks.map((track, trackIndex) =>
-    trackIndex === index ? { mode, value: mode === SizingMode.fill ? 1 : (track.value ?? 0) } : track,
+    trackIndex === index ? { mode, value: mode === SizingMode.fill ? 1 : (value ?? track.value ?? 0) } : track,
   );
 
   commitGridAxisTracks(dispatch, frame.id, axis, next);

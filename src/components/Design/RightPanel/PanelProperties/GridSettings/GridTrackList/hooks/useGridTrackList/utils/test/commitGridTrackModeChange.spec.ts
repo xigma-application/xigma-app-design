@@ -24,7 +24,7 @@ describe('commitGridTrackModeChange', () => {
 
     commitGridTrackModeChange(controls({ onChangeMode }), isSelfChangeRef, 1, 'fixed' as never);
 
-    expect(onChangeMode).toHaveBeenCalledWith(1, 'fixed');
+    expect(onChangeMode).toHaveBeenCalledWith(1, 'fixed', undefined);
     expect(isSelfChangeRef.current).toBe(true);
   });
 });

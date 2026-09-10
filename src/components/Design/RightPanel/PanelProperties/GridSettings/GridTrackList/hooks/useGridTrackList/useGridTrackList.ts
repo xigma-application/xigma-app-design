@@ -26,7 +26,7 @@ export type TUseGridTrackListResult = {
   dropIndicatorIndex: number | null;
   isRowDragging: (index: number) => boolean;
   onAdd: TFunc;
-  onChangeMode: TFunc<[number, SizingMode]>;
+  onChangeMode: (index: number, mode: SizingMode, value?: number) => void;
   onChangeValue: TFunc<[number, number]>;
   onDeleteRow: TFunc<[number]>;
   onSelectRow: TFunc<[number, TGridTrackSelectModifiers]>;
@@ -93,7 +93,8 @@ export const useGridTrackList = (
     dropIndicatorIndex: dragState?.hasMoved ? dragState.dropIndex : null,
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     onAdd: (): void => commitGridTrackAdd(controls, isSelfChangeRef),
-    onChangeMode: (index: number, mode: SizingMode): void => commitGridTrackModeChange(controls, isSelfChangeRef, index, mode),
+    onChangeMode: (index: number, mode: SizingMode, value?: number): void =>
+      commitGridTrackModeChange(controls, isSelfChangeRef, index, mode, value),
     onChangeValue: (index: number, value: number): void => commitGridTrackValueChange(controls, isSelfChangeRef, index, value),
     onDeleteRow: (index: number): void =>
       commitGridTrackDelete(controls, axis, coordinator, isSelfChangeRef, clearSelection, selectedIndices, index),

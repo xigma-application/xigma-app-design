@@ -146,7 +146,7 @@ describe('GridTrackList', () => {
 
     fireEvent.click(screen.getAllByLabelText('Track sizing mode')[0]);
     fireEvent.click(screen.getByText('Hug'));
-    expect(onChangeMode).toHaveBeenCalledWith(0, 'hug');
+    expect(onChangeMode).toHaveBeenCalledWith(0, 'hug', undefined);
   });
 
   it('should keep the drop indicator hidden until the pointer actually moves, then show it past the end', () => {

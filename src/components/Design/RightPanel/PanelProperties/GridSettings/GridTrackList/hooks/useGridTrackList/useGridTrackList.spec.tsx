@@ -160,7 +160,7 @@ describe('useGridTrackList', () => {
     act(() => result.current.onChangeValue(0, 40));
 
     expect(onAdd).toHaveBeenCalled();
-    expect(onChangeMode).toHaveBeenCalledWith(0, 'fixed');
+    expect(onChangeMode).toHaveBeenCalledWith(0, 'fixed', undefined);
     expect(onChangeValue).toHaveBeenCalledWith(0, 40);
   });
 

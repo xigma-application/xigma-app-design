@@ -11,7 +11,8 @@ export const commitGridTrackModeChange = (
   isSelfChangeRef: RefObject<boolean>,
   index: number,
   mode: SizingMode,
+  value?: number,
 ): void => {
   isSelfChangeRef.current = true;
-  controls.onChangeMode(index, mode);
+  controls.onChangeMode(index, mode, value);
 };

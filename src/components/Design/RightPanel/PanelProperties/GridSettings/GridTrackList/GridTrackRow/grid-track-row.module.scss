@@ -16,6 +16,16 @@
     border-color: var(--color-blue-2);
   }
 
+  &__value {
+    &--hug input {
+      color: var(--color-neutral-2);
+    }
+
+    &--hug:focus-within input {
+      color: var(--color-neutral-1);
+    }
+  }
+
   &__delete {
     align-items: center;
     display: flex;

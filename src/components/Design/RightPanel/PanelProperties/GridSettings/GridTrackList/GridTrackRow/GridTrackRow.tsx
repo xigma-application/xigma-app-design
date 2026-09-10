@@ -13,6 +13,7 @@ import { UITools } from 'shared';
 import { TGridTrackSelectModifiers } from '../hooks/useGridTrackSelection';
 import { TGridTrackViewModel } from '../../hooks/types';
 import { useBeginTrackHandleDrag } from './hooks/useBeginTrackHandleDrag';
+import { useCommitHugTrackAsFixed } from './hooks/useCommitHugTrackAsFixed';
 import { useCommitTrackValueOnBlur } from './hooks/useCommitTrackValueOnBlur';
 import { useSelectTrackRow } from './hooks/useSelectTrackRow';
 
@@ -36,7 +37,7 @@ export type TGridTrackRowProps = {
   canDelete: boolean;
   isDragging: boolean;
   isSelected: boolean;
-  onChangeMode: TFunc<[SizingMode]>;
+  onChangeMode: (mode: SizingMode, value?: number) => void;
   onChangeValue: TFunc<[number]>;
   onDelete: TFunc;
   onSelect: TFunc<[TGridTrackSelectModifiers]>;
@@ -66,6 +67,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
   const isHug = track.mode === SizingMode.hug;
   const handleClick = useSelectTrackRow(onSelect);
   const handleBlur = useCommitTrackValueOnBlur(onChangeValue);
+  const handleHugBlur = useCommitHugTrackAsFixed(onChangeMode);
   const handlePointerDown = useBeginTrackHandleDrag(onSelect, onStartDrag);
   const removeTooltip = getRemoveTrackTooltip(t, axis, track, trackCount, isSelected, selectedCount);
   const modeOptions = getSizingModeOptions(t);
@@ -90,26 +92,27 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
       <UITools.TextField
         aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
         bypassGlobalShortcuts={false}
-        className={styles.GridTrackRow__value}
-        defaultValue={isHug ? '' : String(track.value)}
-        disabled={isHug}
+        className={cx(styles.GridTrackRow__value, { [styles['GridTrackRow__value--hug']]: isHug })}
+        defaultValue={isHug ? String(Math.round(track.resolvedSize * 100) / 100) : String(track.value)}
         e2eValue={`${E2EAttribute.gridTrackValue}-${track.index}`}
         endAdornment={
-          <UITools.ButtonMenu
-            trigger={<Icon name="ChevronDown" size={10} />}
-            triggerAriaLabel={t(`${translationNameSpace}.trackModeAriaLabel`)}
-          >
-            {modeOptions.map((option) => (
-              <UITools.PopoverCompound.PopoverItem
-                key={option.value}
-                label={option.label}
-                onClick={() => onChangeMode(option.value)}
-                selected={option.value === track.mode}
-              />
-            ))}
-          </UITools.ButtonMenu>
+          isHug ? undefined : (
+            <UITools.ButtonMenu
+              trigger={<Icon name="ChevronDown" size={10} />}
+              triggerAriaLabel={t(`${translationNameSpace}.trackModeAriaLabel`)}
+            >
+              {modeOptions.map((option) => (
+                <UITools.PopoverCompound.PopoverItem
+                  key={option.value}
+                  label={option.label}
+                  onClick={() => onChangeMode(option.value)}
+                  selected={option.value === track.mode}
+                />
+              ))}
+            </UITools.ButtonMenu>
+          )
         }
-        onBlur={handleBlur}
+        onBlur={isHug ? handleHugBlur : handleBlur}
         type="number"
       />
       <Tooltip align="end" content={removeTooltip}>

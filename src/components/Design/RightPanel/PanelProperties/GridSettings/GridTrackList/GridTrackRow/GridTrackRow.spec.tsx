@@ -57,11 +57,28 @@ describe('GridTrackRow', () => {
     expect(screen.getByText('Fill').closest('[data-test-bypass-global-shortcuts]')).toBeNull();
   });
 
-  it('should disable and blank the value field for a hug track', () => {
-    renderRow({ track: track({ mode: SizingMode.hug, value: 0 }) });
+  it('should show the resolved size in a still-editable value field, with no chevron menu, for a hug track', () => {
+    const onChangeMode = vi.fn();
 
-    expect(screen.getByLabelText('Track size value')).toBeDisabled();
-    expect(screen.getByLabelText('Track size value')).toHaveValue(null);
+    renderRow({ onChangeMode, track: track({ mode: SizingMode.hug, resolvedSize: 276.5, value: 0 }) });
+    const input = screen.getByLabelText('Track size value');
+
+    expect(input).not.toBeDisabled();
+    expect(input).toHaveValue(276.5);
+    expect(screen.queryByLabelText('Track sizing mode')).not.toBeInTheDocument();
+
+    // typing a value and committing switches the track to fixed at that value
+    fireEvent.blur(input, { target: { value: '300' } });
+    expect(onChangeMode).toHaveBeenCalledWith(SizingMode.fixed, 300);
+  });
+
+  it('should not switch a hug track to fixed on a blank blur', () => {
+    const onChangeMode = vi.fn();
+
+    renderRow({ onChangeMode, track: track({ mode: SizingMode.hug, value: 0 }) });
+
+    fireEvent.blur(screen.getByLabelText('Track size value'), { target: { value: '' } });
+    expect(onChangeMode).not.toHaveBeenCalled();
   });
 
   it('should report the click modifiers when the row is clicked', () => {
