@@ -489,10 +489,11 @@ writes `transform.gridDropTargetRef = { cells, frameId }` plus `dropTargetFrameI
 then `getGridDropPlacements` walks reading order from there and collects one **free** cell per
 top-level dragged node: it runs `placeGridCells` over the frame's *other* children
 (`getGridPlacementInputs`, minus `movedNodeIds` for a same-parent drag) to build an occupancy
-set, so cells already holding an anchored child are skipped and the row count grows past the grid
-as needed. `drawGridDropTarget` outlines every cell up to the furthest resolved row (ghost rows
-included) and fills `hover.cells` (`GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`,
-marquee-style). `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is set.
+set, so cells already holding an anchored child are skipped and a resolved cell can land past the
+current grid. `drawGridDropTarget` only draws the grid at its **current** `rowCount` — it fills
+the resolved cells that fall inside it and simply omits any that overflow (the grid grows on
+drop, not on hover) — `GRID_SLOT_ACTIVE_FILL` at `GRID_SLOT_ACTIVE_FILL_ALPHA`, marquee-style.
+`getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` while the ref is set.
 On drop (`commitDropIntoFrame` → `applyGridDrop`): `moveNodes` appends the nodes, then per node
 `updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and
 `widthSizingMode` / `heightSizingMode = fill` (the element ignores its own size and fills the
@@ -606,4 +607,7 @@ The engine already honours spans and manual anchors when set in code.
    anchored child (drop 3 into a 2×2 with the bottom row full → one landed on an occupied cell,
    grid didn't grow). Now `getGridDropPlacements` builds an occupancy set from the other children
    (`placeGridCells` + `occupyGridRegion`) and hands back the next *free* cells, so the ref is
-   `{ cells, frameId }` and `applyGridDrop` just reads `cells[i]`.
+   `{ cells, frameId }` and `applyGridDrop` just reads `cells[i]`. Follow-up 3 (same day): that
+   drew ghost rows in the hover preview — but the spec was always "grow the grid only on drop", so
+   `drawGridDropTarget` now caps at the current `rowCount` and omits any resolved cell that
+   overflows (it's still placed, and the engine grows the grid, on drop).

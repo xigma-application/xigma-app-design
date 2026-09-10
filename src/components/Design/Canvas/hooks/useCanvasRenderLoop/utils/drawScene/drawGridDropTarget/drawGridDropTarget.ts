@@ -24,10 +24,8 @@ export const drawGridDropTarget = (context: TDrawSceneContext, refs: TCanvasRefs
     const layout = getGridTrackLayout(frame, nodesById);
     const frameCenter = getAutoLayoutFrameCenter(frame);
     const activeKeys = new Set(hover.cells.map((cell) => `${cell.row}:${cell.column}`));
-    const furthestActiveRow = hover.cells.reduce((max, cell) => Math.max(max, cell.row), -1);
-    const totalRows = Math.max(layout.rowCount, furthestActiveRow + 1);
 
-    for (let row = 0; row < totalRows; row += 1) {
+    for (let row = 0; row < layout.rowCount; row += 1) {
       for (let column = 0; column < layout.columnCount; column += 1) {
         const isActive = activeKeys.has(`${row}:${column}`);
         const rect = getGridSlotRect(layout, frame, column, row);

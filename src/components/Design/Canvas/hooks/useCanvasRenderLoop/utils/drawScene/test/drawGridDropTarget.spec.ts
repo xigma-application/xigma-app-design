@@ -86,8 +86,8 @@ describe('drawGridDropTarget', () => {
     expect(drawCalls(gl, gl.TRIANGLES)).toBe(2);
   });
 
-  it('should grow the drawn grid by ghost rows to reach a resolved cell past the last row', () => {
-    // mock — 1 x 2 grid, but a resolved cell sits in row 3
+  it('should not draw ghost rows for cells that overflow the grid — the grid only grows on drop', () => {
+    // mock — 1 x 2 grid; one resolved cell is in range (row 1), one overflows (row 3)
     const gl = createGlMock();
 
     // before
@@ -103,9 +103,9 @@ describe('drawGridDropTarget', () => {
       { 'grid-1': gridFrame({ gridColumnCount: 1, gridRowCount: 2 }) },
     );
 
-    // result — 4 rows drawn, 2 filled
-    expect(drawCalls(gl, gl.LINE_LOOP)).toBe(4);
-    expect(drawCalls(gl, gl.TRIANGLES)).toBe(2);
+    // result — only the 2 real rows, and only the in-range cell is filled
+    expect(drawCalls(gl, gl.LINE_LOOP)).toBe(2);
+    expect(drawCalls(gl, gl.TRIANGLES)).toBe(1);
   });
 
   it('should draw nothing when there is no grid drop target', () => {
