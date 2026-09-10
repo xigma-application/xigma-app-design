@@ -11,7 +11,7 @@ import { clampGridCount } from './utils/clampGridCount';
 import { commitGridColumnCountChange } from './utils/commitGridColumnCountChange';
 import { commitGridRowCountChange } from './utils/commitGridRowCountChange';
 import { commitGridRowsAuto } from './utils/commitGridRowsAuto';
-import { getEffectiveGridRowCount } from 'store/design/utils/autoLayout/getEffectiveGridRowCount';
+import { getDerivedGridRowCount } from 'store/design/utils/autoLayout/getDerivedGridRowCount';
 
 export type TUseColumnGridAreaResult = {
   columns: string;
@@ -29,10 +29,9 @@ export const useColumnGridArea = (): TUseColumnGridAreaResult => {
   const nodes = useAppSelector(selectNodes);
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const childCount = frameNode?.childIds.filter((childId) => nodes[childId]).length ?? 0;
   const columnCount = Math.max(frameNode?.gridColumnCount ?? 1, 1);
   const isRowsAuto = frameNode?.gridRowCount === undefined;
-  const rowCount = frameNode?.gridRowCount ?? getEffectiveGridRowCount(childCount, columnCount);
+  const rowCount = frameNode ? (frameNode.gridRowCount ?? getDerivedGridRowCount(frameNode, nodes)) : 1;
 
   const onCommitColumns = (raw: string): void => {
     const next = clampGridCount(raw);

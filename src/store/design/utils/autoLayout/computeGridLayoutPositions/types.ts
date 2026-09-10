@@ -1,3 +1,6 @@
+// types
+import { TAutoLayoutChildSize } from '../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
+
 export type TGridCellPlacement = {
   columnSpan: number;
   columnStart: number;
@@ -5,3 +8,8 @@ export type TGridCellPlacement = {
   rowSpan: number;
   rowStart: number;
 };
+
+export type TGridPlacementInput = Pick<
+  TAutoLayoutChildSize,
+  'gridColumnAnchorIndex' | 'gridColumnSpan' | 'gridRowAnchorIndex' | 'gridRowSpan' | 'id'
+>;

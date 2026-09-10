@@ -456,8 +456,9 @@ columns/rows come straight from the store, commit on blur via `clampGridCount` +
 `onClickCell` writes both at once. The **Rows** field has a chevron menu (`GridRowsModeMenu` in a
 `UITools.ButtonMenu`) — **Auto** clears `gridRowCount` (`commitGridRowsAuto`), the fixed item pins
 it to the current effective count; when Auto the field shows the effective count
-(`getEffectiveGridRowCount` = `ceil(childCount / columns)`, now at
-`store/design/utils/autoLayout/`) as the label "Auto". No per-track sizing UI (deferred).
+(`getDerivedGridRowCount(frame, nodes)` = the engine's own `derivedRowCount` — runs
+`placeGridCells` so a manually-anchored / row-spanning child in a far row still counts, not just
+`ceil(childCount / columns)`) as the label "Auto". No per-track sizing UI (deferred).
 
 A child of a grid frame also shows a display-only **Column span / Row span** row
 (`Common/ColumnGridChildSpan`, `useColumnGridChildSpan` gates on `parent.layoutMode === grid`) —
@@ -468,7 +469,8 @@ fields read `gridColumnSpan` / `gridRowSpan` (default 1), no commit path yet.
 `src/utils/canvas/gridSlots/` holds the shared geometry: `getGridTrackLayout(frame, nodesById)`
 → `{ columnCount, columnGap, columnSize, padding, rowCount, rowGap, rowSize }` —
 `columnCount = gridColumnCount ?? 1`,
-`rowCount = max(gridRowCount ?? ceil(childCount / columns), ceil(childCount / columns))`, gaps
+`rowCount = max(gridRowCount ?? getDerivedGridRowCount, getDerivedGridRowCount)` (so an anchored
+child in a far row shows real rows), gaps
 `horizontalGap` / `verticalGap`, padding `getFrameLayoutPadding`, and **uniform `1fr` tracks**
 (`(content − gaps) / count`). `getGridSlotRect(layout, frame, column, row)` turns one cell into a
 world rect. This matches the engine while every track is `1fr`; per-track sizing (next) swaps the
@@ -531,7 +533,7 @@ The engine already honours spans and manual anchors when set in code.
   `resolveGridLayout/*`, `getGridTrackOffsets`, `getGridCellRect`, `getGridChildPosition`,
   `resolveGridTrackSizes`, `computeGridLayoutPositions`) +
   `syncAutoLayoutChildren/test/getGridLayoutSyncPositions.spec.ts`; canvas slots + drop —
-  `store/design/utils/autoLayout/test/{getSelectedGridFrame,getEffectiveGridRowCount}.spec.ts`,
+  `store/design/utils/autoLayout/test/{getSelectedGridFrame,getDerivedGridRowCount}.spec.ts`,
   `src/utils/canvas/gridSlots/test/*` (`getGridTrackLayout`, `getGridSlotRect(s)`,
   `getGridDropCell`), `updateDragDropTarget/{test/isGridFrame,armGridDropTarget/test}`,
   `disarmDrag/test/{applyGridDrop,resolveDropTargetIndex,commitDropIntoFrame}`,
@@ -583,8 +585,10 @@ The engine already honours spans and manual anchors when set in code.
 8. **2026-09-10 — grid flow, Phase 3: canvas cell slots (§13 "Canvas — cell slots").** Selecting a
    grid frame now draws its cells as faint-blue outlines (`drawGridSlots` → `getGridSlotRects`,
    uniform `1fr` geometry since nothing sets per-track sizes yet). Display only. Also added a
-   display-only Column span / Row span row to the child panel, and moved `getEffectiveGridRowCount`
-   out of the RightPanel tree so the canvas helper can share it.
+   display-only Column span / Row span row to the child panel. Follow-up (2026-09-10): the "Auto"
+   row count and the slot overlay used `ceil(childCount / columns)`, which ignored a child pinned
+   to a far row — replaced by `getDerivedGridRowCount` (runs `placeGridCells`, matching the
+   engine's own `derivedRowCount`); `placeGridCells` now takes a narrow `TGridPlacementInput`.
 9. **2026-09-10 — grid flow, Phase 3b: drag a child into a cell (§13 "Canvas — drag a child into a
    cell").** First cut clamped the highlight to a reading-order insert index, so it always lit "the
    first empty slot" instead of the cell under the cursor — reported by hand. Switched to exact

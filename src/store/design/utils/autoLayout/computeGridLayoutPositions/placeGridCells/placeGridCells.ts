@@ -1,6 +1,5 @@
 // types
-import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
-import { TGridCellPlacement } from '../types';
+import { TGridCellPlacement, TGridPlacementInput } from '../types';
 
 // utils
 import { clampSpan } from './clampSpan';
@@ -8,7 +7,7 @@ import { getAnchoredGridPlacement } from './getAnchoredGridPlacement';
 import { getAutoFlowGridPlacement } from './getAutoFlowGridPlacement';
 import { occupyGridRegion } from './occupyGridRegion';
 
-export const placeGridCells = (children: TAutoLayoutChildSize[], columnCount: number, autoPlacement: boolean): TGridCellPlacement[] => {
+export const placeGridCells = (children: TGridPlacementInput[], columnCount: number, autoPlacement: boolean): TGridCellPlacement[] => {
   const columns = Math.max(Math.round(columnCount), 1);
   const occupied = new Set<string>();
   const cursor = { column: 0, row: 0 };

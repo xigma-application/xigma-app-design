@@ -4,7 +4,7 @@ import { TAutoLayoutPadding } from 'store/design/utils/autoLayout/getAutoLayoutC
 import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
-import { getEffectiveGridRowCount } from 'store/design/utils/autoLayout/getEffectiveGridRowCount';
+import { getDerivedGridRowCount } from 'store/design/utils/autoLayout/getDerivedGridRowCount';
 import { getFrameLayoutPadding } from 'store/design/utils/autoLayout/getFrameLayoutPadding';
 
 export type TGridTrackLayout = {
@@ -19,8 +19,7 @@ export type TGridTrackLayout = {
 
 export const getGridTrackLayout = (frame: TFrameNode, nodesById: Record<string, TSceneNode>): TGridTrackLayout => {
   const columnCount = Math.max(Math.round(frame.gridColumnCount ?? 1), 1);
-  const childCount = frame.childIds.filter((id) => nodesById[id]).length;
-  const derivedRowCount = getEffectiveGridRowCount(childCount, columnCount);
+  const derivedRowCount = getDerivedGridRowCount(frame, nodesById);
   const rowCount = Math.max(Math.round(frame.gridRowCount ?? derivedRowCount), derivedRowCount);
   const columnGap = frame.horizontalGap ?? 0;
   const rowGap = frame.verticalGap ?? 0;

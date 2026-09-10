@@ -1,9 +1,8 @@
 // types
-import { TAutoLayoutChildSize } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
-import { TGridCellPlacement } from '../types';
+import { TGridCellPlacement, TGridPlacementInput } from '../types';
 
 export const getAnchoredGridPlacement = (
-  child: TAutoLayoutChildSize,
+  child: TGridPlacementInput,
   columns: number,
   columnSpan: number,
   rowSpan: number,
