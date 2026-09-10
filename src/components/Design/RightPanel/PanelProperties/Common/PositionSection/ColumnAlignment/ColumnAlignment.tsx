@@ -10,6 +10,9 @@ import { useColumnAlignment } from './hooks/useColumnAlignment';
 // others
 import { HORIZONTAL_ALIGNMENT_OPTIONS, translationNameSpace, VERTICAL_ALIGNMENT_OPTIONS } from './constants';
 
+// styles
+import styles from './column-alignment.module.scss';
+
 // utils
 import { buildAlignmentButtons } from './utils/buildAlignmentButtons';
 
@@ -21,10 +24,12 @@ const ColumnAlignment: FC = () => {
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <UITools.ButtonGroup
         buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, horizontal, onSelectHorizontal, t)}
+        className={styles.ColumnAlignment__buttons}
         e2eValue="horizontal-alignment"
       />
       <UITools.ButtonGroup
         buttons={buildAlignmentButtons(VERTICAL_ALIGNMENT_OPTIONS, disabled, vertical, onSelectVertical, t)}
+        className={styles.ColumnAlignment__buttons}
         e2eValue="vertical-alignment"
       />
     </UITools.SectionColumn>

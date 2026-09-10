@@ -1,4 +1,16 @@
 .ColumnAlignment {
+  &__buttons {
+    button:not(:disabled) {
+      [data-svg-fill-one='fill'] {
+        fill: var(--color-neutral-1) !important;
+      }
+
+      [data-svg-fill-two='fill'] {
+        fill: var(--color-ramp-400) !important;
+      }
+    }
+  }
+
   &__shortcut {
     color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
     margin-left: 12px;

@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 import { kebabCase } from 'lodash';
 
@@ -18,12 +19,13 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
 export type TButtonGroupProps = {
   buttons: TButtonGroup[];
+  className?: string;
   e2eValue?: TE2EValue;
 };
 
-export const ButtonGroup: FC<TButtonGroupProps> = ({ buttons, e2eValue = '' }) => (
+export const ButtonGroup: FC<TButtonGroupProps> = ({ buttons, className = '', e2eValue = '' }) => (
   <E2EDataAttribute type={E2EAttribute.buttonGroup} value={e2eValue}>
-    <div className={styles.ButtonGroup}>
+    <div className={cx(styles.ButtonGroup, className)}>
       {buttons.map(({ active = false, ariaLabel, disabled = false, name, onClick, tooltip }) => (
         <Tooltip content={tooltip} key={kebabCase(name)}>
           <Button active={active} ariaLabel={ariaLabel} className={styles.ButtonGroup__button} disabled={disabled} onClick={onClick}>
