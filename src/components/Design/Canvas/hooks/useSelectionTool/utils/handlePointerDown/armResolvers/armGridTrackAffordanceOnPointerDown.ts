@@ -17,7 +17,6 @@ export const armGridTrackAffordanceOnPointerDown = ({ canvas, canvasRefs, dispat
   if (hover?.hoveredPillAxis) {
     const axis = hover.hoveredPillAxis;
     const index = axis === 'column' ? hover.columnIndex : hover.rowIndex;
-
     const hasSelectModifier = event.metaKey || event.ctrlKey || event.shiftKey;
 
     if (hover.hoveredHandlePart === 'grip' && !hasSelectModifier) {
