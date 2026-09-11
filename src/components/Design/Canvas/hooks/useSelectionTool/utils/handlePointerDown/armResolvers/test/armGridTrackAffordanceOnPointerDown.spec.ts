@@ -197,8 +197,10 @@ describe('armGridTrackAffordanceOnPointerDown', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('should not toggle a Cmd/Ctrl-held grip click into a select — dragging still wins on the grip band', () => {
+  it('should toggle a Cmd/Ctrl-held grip click into a select instead of dragging, matching the panel’s own handle behaviour', () => {
     // mock
+    store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0] }));
+
     const dispatch = vi.fn();
     const canvasRefs = {
       hover: {
@@ -213,9 +215,52 @@ describe('armGridTrackAffordanceOnPointerDown', () => {
     armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: { ...plainEvent, metaKey: true }, point } as never);
 
     // result
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 2] }));
+    expect(dispatch).toHaveBeenCalledWith(setPanelGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 2] }));
+    expect(armGridTrackAffordanceDragMock).not.toHaveBeenCalled();
+  });
+
+  it('should toggle a Shift-held grip click into a range-select instead of dragging', () => {
+    // mock
+    store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0] }));
+
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 2, frameId: 'frame-1', hoveredHandlePart: 'grip', hoveredPillAxis: 'column', rowIndex: 0 },
+        },
+      },
+      transform: { gridTrackAffordanceDragRef: { current: null } },
+    };
+
+    // before
+    armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: { ...plainEvent, shiftKey: true }, point } as never);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 1, 2] }));
+    expect(armGridTrackAffordanceDragMock).not.toHaveBeenCalled();
+  });
+
+  it('should still arm a plain (unmodified) grip click as a drag', () => {
+    // mock
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 2, frameId: 'frame-1', hoveredHandlePart: 'grip', hoveredPillAxis: 'column', rowIndex: 0 },
+        },
+      },
+      transform: { gridTrackAffordanceDragRef: { current: null } },
+    };
+
+    // before
+    armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: plainEvent, point } as never);
+
+    // result
     expect(armGridTrackAffordanceDragMock).toHaveBeenCalledWith(
       canvas,
-      { ...plainEvent, metaKey: true },
+      plainEvent,
       canvasRefs.transform.gridTrackAffordanceDragRef,
       dispatch,
       'frame-1',
@@ -223,5 +268,6 @@ describe('armGridTrackAffordanceOnPointerDown', () => {
       2,
       point,
     );
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });
