@@ -30,6 +30,7 @@ import slice, {
   setGridSettingsPanelOpen,
   setGridTrackSelection,
   setPaint,
+  setPanelGridTrackSelection,
   setPenActiveVertexId,
   setSelection,
   setTemporaryActiveTool,
@@ -124,6 +125,7 @@ describe('design slice', () => {
           viewport: { x: 0, y: 0, zoom: 1 },
         },
       },
+      panelGridTrackSelection: null,
       penActiveVertexId: null,
       preferences: {
         areAdditionalLabelsVisible: true,
@@ -706,6 +708,21 @@ describe('design slice', () => {
 
     // result
     expect(cleared.gridTrackSelection).toBeNull();
+  });
+
+  it('should set and clear the panel grid track selection', () => {
+    // action
+    const selection = { axis: 'column' as const, frameId: 'frame-1', indices: [1] };
+    const set = slice(undefined, setPanelGridTrackSelection(selection));
+
+    // result
+    expect(set.panelGridTrackSelection).toEqual(selection);
+
+    // action
+    const cleared = slice(set, setPanelGridTrackSelection(null));
+
+    // result
+    expect(cleared.panelGridTrackSelection).toBeNull();
   });
 
   it('should toggle the Actions panel open flag', () => {

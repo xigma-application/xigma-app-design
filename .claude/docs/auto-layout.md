@@ -623,14 +623,20 @@ value field and `var(--color-neutral-1)` handle digits (`GridTrackRow--selected`
   handle that's part of a multi-selection**, released without any `pointermove`, collapses the
   selection to just that one row (its own `linkedIndices` group) — `commitGridTrackReorder`
   branches on `hasMoved`, and only an actual move goes through `controls.onReorder`.
-- **Undo/redo no longer carries the track selection — known regression, see History #21.** The
-  revision-keyed `WeakMap<frameRef, number[]>` restore mechanism this section used to describe
+- **Undo/redo carries the track selection via the design snapshot itself — see History #21/#22.**
+  The revision-keyed `WeakMap<frameRef, number[]>` restore mechanism this section used to describe
   (`syncExternalGridTrackSelection`) was removed along with the parent-level selection mirror it
-  depended on. Undo/redo still correctly restores the track *structure* (frame reference
-  round-trips through `replaceDesignSnapshot`, same as before), but nothing re-derives
-  `panelGridTrackSelection` from that restored structure, so a selection made before an undone
-  reorder does not come back highlighted. e2e test-cases-auto-layout.md #37 is `test.skip`ped with
-  a TODO until a replacement (compatible with the two-field, no-reactive-relay model above) exists.
+  depended on, which briefly regressed undo/redo of the track selection (e2e
+  test-cases-auto-layout.md #37 was `test.skip`ped for a time). The replacement is not a watcher:
+  `gridTrackSelection`/`panelGridTrackSelection` were added as two more fields on
+  `TDesignSnapshot`, captured by `getDesignSnapshot` and restored by `handleReplaceDesignSnapshot`
+  exactly like `pages` already is — the same mechanism node `selectedIds` rides on "for free"
+  because it's nested inside `TDesignPage`. `historyMiddleware` snapshots `design.gridTrackSelection`
+  / `design.panelGridTrackSelection` immediately before every undoable action (they are not
+  themselves in `UNDOABLE_ACTION_TYPES`, so selecting a track is not its own undo step), so undoing
+  e.g. a track reorder restores whatever the selection was the instant before that reorder
+  committed. No `useEffect`, no ref, no equality guard — a plain read/write into the existing
+  snapshot pipeline.
 - **Global keyboard shortcuts (undo included) work from inside the panel's own fields** —
   `UITools.TextField`/`TextFieldWrapper` and `UITools.Dropdown` both unconditionally rendered
   `data-test-bypass-global-shortcuts="true"` on their input/trigger (the mechanism
@@ -1287,3 +1293,20 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     #20(f) — it was wired through the same relay-based `useGridTrackList` — regressing e2e #37,
     left `test.skip`ped (accepted tradeoff, not reintroduced) rather than rebuilt on top of a
     mechanism just proven to cause this class of bug.
+22. **2026-09-11 — grid flow, undo/redo restored for track selection (§13 "Undo/redo carries the
+    track selection via the design snapshot itself").** Follow-up to #21's accepted regression.
+    Root cause of *why* undo/redo used to work at all: node selection (`selectedIds`) was never
+    special-cased for history — it just happens to live *inside* `TDesignPage`, and
+    `getDesignSnapshot`/`handleReplaceDesignSnapshot` already capture/restore the whole `pages`
+    record on every undoable action, so `selectedIds` rides along for free. `gridTrackSelection` /
+    `panelGridTrackSelection`, by contrast, are top-level sibling fields on `TDesignState` outside
+    `pages`, so the snapshot never touched them — that was the entire mechanical cause of the
+    regression, not anything about the relay removal itself. Fix: added both fields to
+    `TDesignSnapshot`, captured in `getDesignSnapshot` and restored in
+    `handleReplaceDesignSnapshot`, mirroring the exact pattern `selectedIds` already uses. Neither
+    field is in `historyMiddleware`'s `UNDOABLE_ACTION_TYPES` (selecting a track alone still isn't
+    its own undo step), but every undoable action's pre-mutation snapshot now captures whatever the
+    selection was at that instant, so undoing e.g. a two-track reorder restores both tracks
+    selected at their old positions — no watcher, ref, or equality guard involved, just two more
+    fields in an existing imperative snapshot/restore pipeline. Un-skipped e2e #37 (now passing) and
+    reworded the doc/table entries that described it as a known regression.

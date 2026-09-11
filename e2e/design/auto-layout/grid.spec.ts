@@ -1471,12 +1471,7 @@ test.describe('auto-layout — Grid flow', () => {
     await expect(columns.locator('[data-test-grid-track-row="0"]')).not.toHaveClass(/--selected/);
   });
 
-  // TODO: the revision-keyed WeakMap that restored the panel's track selection across undo/redo
-  // (syncExternalGridTrackSelection) was removed when gridTrackSelection was split into
-  // independent canvas/panel store fields to fix a canvas↔panel selection desync loop. Undo now
-  // restores the track structure but not panelGridTrackSelection, so a restored multi-track
-  // selection no longer comes back. No replacement mechanism exists yet — skipped until one does.
-  test.skip('undoing a two-track reorder brings both tracks back selected, not just one', async ({ page }) => {
+  test('undoing a two-track reorder brings both tracks back selected, not just one', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-auto-layout-grid-undo-reorder-selection');

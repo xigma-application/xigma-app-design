@@ -81,7 +81,9 @@ export type TDesignState = {
 
 export type TDesignSnapshot = {
   activePageId: string;
+  gridTrackSelection?: TGridTrackSelection | null;
   pages: Record<string, TDesignPage>;
+  panelGridTrackSelection?: TGridTrackSelection | null;
 };
 
 export type TReorderPayload = {

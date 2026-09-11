@@ -86,18 +86,23 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
 
 type TSnapshotOverrides = {
   activePageId?: string;
+  gridTrackSelection?: TDesignSnapshot['gridTrackSelection'];
   nodes?: Record<string, TSceneNode>;
+  panelGridTrackSelection?: TDesignSnapshot['panelGridTrackSelection'];
   rootOrder?: string[];
   selectedIds?: string[];
 };
 
 const buildSnapshot = ({
   activePageId = 'page-1',
+  gridTrackSelection = null,
   nodes = {},
+  panelGridTrackSelection = null,
   rootOrder = [],
   selectedIds = [],
 }: TSnapshotOverrides = {}): TDesignSnapshot => ({
   activePageId,
+  gridTrackSelection,
   pages: {
     [activePageId]: {
       backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
@@ -112,6 +117,7 @@ const buildSnapshot = ({
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
+  panelGridTrackSelection,
 });
 
 describe('handleReplaceDesignSnapshot', () => {
@@ -265,5 +271,37 @@ describe('handleReplaceDesignSnapshot', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([survivor.id]);
+  });
+
+  it('should restore the canvas and panel grid track selection from the snapshot', () => {
+    // mock
+    const state = buildState({ gridTrackSelection: null, panelGridTrackSelection: null });
+    const snapshot = buildSnapshot({
+      gridTrackSelection: { axis: 'column', frameId: frame.id, indices: [0, 2] },
+      panelGridTrackSelection: { axis: 'column', frameId: frame.id, indices: [0, 2] },
+    });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.gridTrackSelection).toEqual({ axis: 'column', frameId: frame.id, indices: [0, 2] });
+    expect(state.panelGridTrackSelection).toEqual({ axis: 'column', frameId: frame.id, indices: [0, 2] });
+  });
+
+  it('should clear the canvas and panel grid track selection when the snapshot has none', () => {
+    // mock
+    const state = buildState({
+      gridTrackSelection: { axis: 'row', frameId: frame.id, indices: [1] },
+      panelGridTrackSelection: { axis: 'row', frameId: frame.id, indices: [1] },
+    });
+    const snapshot = buildSnapshot();
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.gridTrackSelection).toBeNull();
+    expect(state.panelGridTrackSelection).toBeNull();
   });
 });
