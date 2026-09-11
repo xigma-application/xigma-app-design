@@ -104,19 +104,21 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
           variant="outline"
         />
       </span>
-      <UITools.TextField
-        aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
-        bypassGlobalShortcuts={false}
-        className={cx(styles.GridTrackRow__value, { [styles['GridTrackRow__value--hug']]: isHug })}
-        defaultValue={getTrackValueFieldText(track)}
-        e2eValue={`${E2EAttribute.gridTrackValue}-${track.index}`}
-        endAdornment={isFill ? <FillWeightMenu onSelect={onChangeValue} value={track.value} /> : undefined}
-        inputRef={inputRef}
-        onBlur={valueBlurHandlerByMode[track.mode]}
-        onClick={handleValueClick}
-        onFocus={isFill ? selectNumberPortion : undefined}
-        type={isFill ? 'text' : 'number'}
-      />
+      <span onClick={stopRowSelectPropagation} style={{ display: 'contents' }}>
+        <UITools.TextField
+          aria-label={t(`${translationNameSpace}.trackValueAriaLabel`)}
+          bypassGlobalShortcuts={false}
+          className={cx(styles.GridTrackRow__value, { [styles['GridTrackRow__value--hug']]: isHug })}
+          defaultValue={getTrackValueFieldText(track)}
+          e2eValue={`${E2EAttribute.gridTrackValue}-${track.index}`}
+          endAdornment={isFill ? <FillWeightMenu onSelect={onChangeValue} value={track.value} /> : undefined}
+          inputRef={inputRef}
+          onBlur={valueBlurHandlerByMode[track.mode]}
+          onClick={handleValueClick}
+          onFocus={isFill ? selectNumberPortion : undefined}
+          type={isFill ? 'text' : 'number'}
+        />
+      </span>
       <Tooltip align="end" content={removeTooltip}>
         <UITools.Button
           ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)}

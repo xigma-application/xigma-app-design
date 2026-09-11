@@ -155,50 +155,54 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </svg>
             </button>
           </span>
-          <div
-            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          <span
+            style="display: contents;"
           >
             <div
-              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
-              data-test-text-field="grid-track-value-0"
+              class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
             >
-              <input
-                aria-label="Track size value"
-                class="_TextFieldWrapper__input_9a3a67"
-                data-test-text-field-input="grid-track-value-0"
-                type="text"
-                value="1fr"
-              />
-              <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="grid-track-value-0"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="dialog"
-                  aria-label="Fill weight presets"
-                  class="_ButtonMenu_7516ba"
-                  data-state="closed"
-                  type="button"
+                <input
+                  aria-label="Track size value"
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-text-field-input="grid-track-value-0"
+                  type="text"
+                  value="1fr"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
                 >
-                  <svg
-                    class="Icon"
-                    data-fpl-icon-size="16"
-                    fill="none"
-                    height="10"
-                    style="color: var(--color-neutral-1);"
-                    viewBox="0 0 16 16"
-                    width="10"
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Fill weight presets"
+                    class="_ButtonMenu_7516ba"
+                    data-state="closed"
+                    type="button"
                   >
-                    <path
-                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                      data-svg-property="fill"
-                      fill="white"
-                    />
-                  </svg>
-                </button>
-              </span>
+                    <svg
+                      class="Icon"
+                      data-fpl-icon-size="16"
+                      fill="none"
+                      height="10"
+                      style="color: var(--color-neutral-1);"
+                      viewBox="0 0 16 16"
+                      width="10"
+                    >
+                      <path
+                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        data-svg-property="fill"
+                        fill="white"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
@@ -290,50 +294,54 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </svg>
             </button>
           </span>
-          <div
-            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          <span
+            style="display: contents;"
           >
             <div
-              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
-              data-test-text-field="grid-track-value-1"
+              class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
             >
-              <input
-                aria-label="Track size value"
-                class="_TextFieldWrapper__input_9a3a67"
-                data-test-text-field-input="grid-track-value-1"
-                type="text"
-                value="1fr"
-              />
-              <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="grid-track-value-1"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="dialog"
-                  aria-label="Fill weight presets"
-                  class="_ButtonMenu_7516ba"
-                  data-state="closed"
-                  type="button"
+                <input
+                  aria-label="Track size value"
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-text-field-input="grid-track-value-1"
+                  type="text"
+                  value="1fr"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
                 >
-                  <svg
-                    class="Icon"
-                    data-fpl-icon-size="16"
-                    fill="none"
-                    height="10"
-                    style="color: var(--color-neutral-1);"
-                    viewBox="0 0 16 16"
-                    width="10"
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Fill weight presets"
+                    class="_ButtonMenu_7516ba"
+                    data-state="closed"
+                    type="button"
                   >
-                    <path
-                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                      data-svg-property="fill"
-                      fill="white"
-                    />
-                  </svg>
-                </button>
-              </span>
+                    <svg
+                      class="Icon"
+                      data-fpl-icon-size="16"
+                      fill="none"
+                      height="10"
+                      style="color: var(--color-neutral-1);"
+                      viewBox="0 0 16 16"
+                      width="10"
+                    >
+                      <path
+                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        data-svg-property="fill"
+                        fill="white"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
@@ -425,50 +433,54 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </svg>
             </button>
           </span>
-          <div
-            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          <span
+            style="display: contents;"
           >
             <div
-              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
-              data-test-text-field="grid-track-value-2"
+              class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
             >
-              <input
-                aria-label="Track size value"
-                class="_TextFieldWrapper__input_9a3a67"
-                data-test-text-field-input="grid-track-value-2"
-                type="text"
-                value="1fr"
-              />
-              <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="grid-track-value-2"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="dialog"
-                  aria-label="Fill weight presets"
-                  class="_ButtonMenu_7516ba"
-                  data-state="closed"
-                  type="button"
+                <input
+                  aria-label="Track size value"
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-text-field-input="grid-track-value-2"
+                  type="text"
+                  value="1fr"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
                 >
-                  <svg
-                    class="Icon"
-                    data-fpl-icon-size="16"
-                    fill="none"
-                    height="10"
-                    style="color: var(--color-neutral-1);"
-                    viewBox="0 0 16 16"
-                    width="10"
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Fill weight presets"
+                    class="_ButtonMenu_7516ba"
+                    data-state="closed"
+                    type="button"
                   >
-                    <path
-                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                      data-svg-property="fill"
-                      fill="white"
-                    />
-                  </svg>
-                </button>
-              </span>
+                    <svg
+                      class="Icon"
+                      data-fpl-icon-size="16"
+                      fill="none"
+                      height="10"
+                      style="color: var(--color-neutral-1);"
+                      viewBox="0 0 16 16"
+                      width="10"
+                    >
+                      <path
+                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        data-svg-property="fill"
+                        fill="white"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
@@ -608,50 +620,54 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </svg>
             </button>
           </span>
-          <div
-            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          <span
+            style="display: contents;"
           >
             <div
-              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
-              data-test-text-field="grid-track-value-0"
+              class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
             >
-              <input
-                aria-label="Track size value"
-                class="_TextFieldWrapper__input_9a3a67"
-                data-test-text-field-input="grid-track-value-0"
-                type="text"
-                value="1fr"
-              />
-              <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="grid-track-value-0"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="dialog"
-                  aria-label="Fill weight presets"
-                  class="_ButtonMenu_7516ba"
-                  data-state="closed"
-                  type="button"
+                <input
+                  aria-label="Track size value"
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-text-field-input="grid-track-value-0"
+                  type="text"
+                  value="1fr"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
                 >
-                  <svg
-                    class="Icon"
-                    data-fpl-icon-size="16"
-                    fill="none"
-                    height="10"
-                    style="color: var(--color-neutral-1);"
-                    viewBox="0 0 16 16"
-                    width="10"
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Fill weight presets"
+                    class="_ButtonMenu_7516ba"
+                    data-state="closed"
+                    type="button"
                   >
-                    <path
-                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                      data-svg-property="fill"
-                      fill="white"
-                    />
-                  </svg>
-                </button>
-              </span>
+                    <svg
+                      class="Icon"
+                      data-fpl-icon-size="16"
+                      fill="none"
+                      height="10"
+                      style="color: var(--color-neutral-1);"
+                      viewBox="0 0 16 16"
+                      width="10"
+                    >
+                      <path
+                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        data-svg-property="fill"
+                        fill="white"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
@@ -743,50 +759,54 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </svg>
             </button>
           </span>
-          <div
-            class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
+          <span
+            style="display: contents;"
           >
             <div
-              class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
-              data-test-text-field="grid-track-value-1"
+              class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
             >
-              <input
-                aria-label="Track size value"
-                class="_TextFieldWrapper__input_9a3a67"
-                data-test-text-field-input="grid-track-value-1"
-                type="text"
-                value="1fr"
-              />
-              <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+              <div
+                class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+                data-test-text-field="grid-track-value-1"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="dialog"
-                  aria-label="Fill weight presets"
-                  class="_ButtonMenu_7516ba"
-                  data-state="closed"
-                  type="button"
+                <input
+                  aria-label="Track size value"
+                  class="_TextFieldWrapper__input_9a3a67"
+                  data-test-text-field-input="grid-track-value-1"
+                  type="text"
+                  value="1fr"
+                />
+                <span
+                  class="_TextFieldWrapper__endAdornment_9a3a67"
                 >
-                  <svg
-                    class="Icon"
-                    data-fpl-icon-size="16"
-                    fill="none"
-                    height="10"
-                    style="color: var(--color-neutral-1);"
-                    viewBox="0 0 16 16"
-                    width="10"
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Fill weight presets"
+                    class="_ButtonMenu_7516ba"
+                    data-state="closed"
+                    type="button"
                   >
-                    <path
-                      d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                      data-svg-property="fill"
-                      fill="white"
-                    />
-                  </svg>
-                </button>
-              </span>
+                    <svg
+                      class="Icon"
+                      data-fpl-icon-size="16"
+                      fill="none"
+                      height="10"
+                      style="color: var(--color-neutral-1);"
+                      viewBox="0 0 16 16"
+                      width="10"
+                    >
+                      <path
+                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        data-svg-property="fill"
+                        fill="white"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"

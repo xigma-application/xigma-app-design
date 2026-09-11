@@ -174,6 +174,27 @@ describe('GridTrackRow', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
+  it('should not change the row selection when opening the fill weight-preset menu', () => {
+    const onSelect = vi.fn();
+
+    renderRow({ onSelect });
+    fireEvent.click(screen.getByRole('button', { name: 'Fill weight presets' }));
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('should not change the row selection when picking a fill weight preset', () => {
+    const onChangeValue = vi.fn();
+    const onSelect = vi.fn();
+
+    renderRow({ onChangeValue, onSelect });
+    fireEvent.click(screen.getByRole('button', { name: 'Fill weight presets' }));
+    fireEvent.click(screen.getByText('2fr'));
+
+    expect(onChangeValue).toHaveBeenCalledWith(2);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('should commit a numeric value on blur and ignore a blank one', () => {
     const onChangeValue = vi.fn();
 
