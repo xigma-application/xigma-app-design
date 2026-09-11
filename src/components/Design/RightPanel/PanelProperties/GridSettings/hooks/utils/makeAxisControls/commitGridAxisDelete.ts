@@ -6,7 +6,7 @@ import { TFrameNode, TGridTrackSize, TSceneNode } from 'types/design/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 // utils
-import { commitGridAxisTracks } from '../commitGridAxisTracks';
+import { commitGridAxisTracks } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisTracks';
 import { commitGridDeleteChildUpdates } from '../commitGridDeleteChildUpdates';
 import { commitGridLayoutExit } from '../commitGridLayoutExit';
 import { getGridTrackChildren } from 'store/design/utils/autoLayout/gridTracks/getGridTrackChildren';

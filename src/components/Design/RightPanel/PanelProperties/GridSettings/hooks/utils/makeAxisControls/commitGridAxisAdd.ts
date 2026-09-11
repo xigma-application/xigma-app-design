@@ -7,7 +7,7 @@ import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 // utils
 import { addGridTrack } from 'store/design/utils/autoLayout/gridTracks/addGridTrack';
-import { commitGridAxisTracks } from '../commitGridAxisTracks';
+import { commitGridAxisTracks } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisTracks';
 
 export const commitGridAxisAdd = (
   dispatch: AppDispatch,

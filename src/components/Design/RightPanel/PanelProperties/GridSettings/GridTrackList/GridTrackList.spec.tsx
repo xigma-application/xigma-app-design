@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import GridTrackList from './GridTrackList';
@@ -7,6 +8,12 @@ import { TooltipProvider } from 'shared';
 // hooks
 import { TGridAxisControls } from '../hooks/types';
 import { TGridTrackSelectionCoordinator } from '../hooks/useGridTrackSelectionCoordinator';
+
+// store
+import { setGridTrackSelection, setPanelGridTrackSelection } from 'store/design/slice';
+import { store } from 'store';
+
+const TEST_FRAME_ID = 'frame-1';
 
 const permissiveCoordinator = (): TGridTrackSelectionCoordinator => ({
   activeAxis: null,
@@ -30,23 +37,31 @@ const controls = (overrides: Partial<TGridAxisControls> = {}): TGridAxisControls
 
 const renderList = (props: Partial<Parameters<typeof GridTrackList>[0]> = {}): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <GridTrackList
-        addAriaLabel="Add column"
-        addTooltip="Add column"
-        axis="column"
-        controls={controls()}
-        coordinator={permissiveCoordinator()}
-        crossAxisTrackCount={2}
-        e2eValue="grid-columns"
-        label="Columns"
-        onHighlightCellsChange={vi.fn()}
-        {...props}
-      />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <GridTrackList
+          addAriaLabel="Add column"
+          addTooltip="Add column"
+          axis="column"
+          controls={controls()}
+          coordinator={permissiveCoordinator()}
+          crossAxisTrackCount={2}
+          e2eValue="grid-columns"
+          frameId={TEST_FRAME_ID}
+          label="Columns"
+          onHighlightCellsChange={vi.fn()}
+          {...props}
+        />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('GridTrackList', () => {
+  afterEach(() => {
+    store.dispatch(setGridTrackSelection(null));
+    store.dispatch(setPanelGridTrackSelection(null));
+  });
+
   it('should render one row per track under its section label', () => {
     renderList();
 

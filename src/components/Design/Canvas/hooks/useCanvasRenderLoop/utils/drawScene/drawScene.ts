@@ -161,7 +161,7 @@ export const drawScene = (
   drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
   drawGridSlots(ctx, selectedNodes, nodesById);
-  drawGridSectionHighlight(ctx, gridSectionHighlight, nodesById);
+  drawGridSectionHighlight(ctx, gridSectionHighlight, gridTrackSelection, refs, nodesById);
   drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById, gridTrackSelection);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);

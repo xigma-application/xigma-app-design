@@ -15,6 +15,7 @@ import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
 import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
 import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
+import { disarmGridTrackAffordanceDrag } from './disarmGridTrackAffordanceDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
 import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
@@ -58,6 +59,7 @@ export const handlePointerUp = (
   disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.cornerRadiusDragRef);
   disarmAutoLayoutGapDrag(canvas, event, canvasRefs.transform.autoLayoutGapDragRef);
   disarmAutoLayoutPaddingDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutPaddingDragRef);
+  disarmGridTrackAffordanceDrag(canvas, event, dispatch, canvasRefs.transform.gridTrackAffordanceDragRef);
   disarmSmartSelectionGapDrag(canvas, event, dispatch, canvasRefs.smartSelection.gapDragRef);
   disarmSmartSelectionSwapDrag(canvas, event, dispatch, canvasRefs.smartSelection.swapDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);

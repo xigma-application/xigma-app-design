@@ -12,6 +12,7 @@ import {
   setGridSectionHighlight,
   setGridSettingsPanelOpen,
   setGridTrackSelection,
+  setPanelGridTrackSelection,
   setSelection,
   updateNode,
 } from 'store/design/slice';
@@ -67,6 +68,7 @@ describe('GridSettings', () => {
     store.dispatch(setGridSettingsPanelOpen(false));
     store.dispatch(setGridSectionHighlight(null));
     store.dispatch(setGridTrackSelection(null));
+    store.dispatch(setPanelGridTrackSelection(null));
   });
 
   it('should render the header and one row per column and row track', () => {
@@ -136,7 +138,7 @@ describe('GridSettings', () => {
     const { container } = renderGridSettings();
 
     act(() => {
-      store.dispatch(setGridTrackSelection({ axis: 'column', frameId, indices: [2] }));
+      store.dispatch(setPanelGridTrackSelection({ axis: 'column', frameId, indices: [2] }));
     });
 
     expect(container.querySelector('[data-test-grid-track-row="2"]')?.className).toContain('GridTrackRow--selected');
@@ -149,7 +151,7 @@ describe('GridSettings', () => {
     const { container } = renderGridSettings();
 
     act(() => {
-      store.dispatch(setGridTrackSelection({ axis: 'row', frameId, indices: [1] }));
+      store.dispatch(setPanelGridTrackSelection({ axis: 'row', frameId, indices: [1] }));
     });
 
     await waitFor(() => {
@@ -166,7 +168,7 @@ describe('GridSettings', () => {
     const { container } = renderGridSettings();
 
     act(() => {
-      store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'other-frame', indices: [2] }));
+      store.dispatch(setPanelGridTrackSelection({ axis: 'column', frameId: 'other-frame', indices: [2] }));
     });
 
     expect(container.querySelector('[data-test-grid-track-row="0"]')?.className).toContain('GridTrackRow--selected');
@@ -196,7 +198,7 @@ describe('GridSettings', () => {
     const { container } = renderGridSettings();
 
     act(() => {
-      store.dispatch(setGridTrackSelection({ axis: 'column', frameId, indices: [0, 2] }));
+      store.dispatch(setPanelGridTrackSelection({ axis: 'column', frameId, indices: [0, 2] }));
     });
 
     expect(container.querySelector('[data-test-grid-track-row="0"]')?.className).toContain('GridTrackRow--selected');

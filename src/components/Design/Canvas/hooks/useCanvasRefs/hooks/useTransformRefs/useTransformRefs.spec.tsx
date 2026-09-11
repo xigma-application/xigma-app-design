@@ -25,6 +25,7 @@ describe('useTransformRefs behaviors', () => {
       equalSpacingGuidesRef: { current: null },
       gridDragGhostRef: { current: null },
       gridDropTargetRef: { current: null },
+      gridTrackAffordanceDragRef: { current: null },
       matchedPairGuidesRef: { current: null },
       resizedNodeIdsRef: { current: null },
       rotateDragRef: { current: null },

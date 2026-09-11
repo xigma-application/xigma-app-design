@@ -3,7 +3,7 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TGridTrackAxis, TGridTrackReorderChildUpdate } from 'store/design/utils/autoLayout/gridTracks/types';
+import { TGridTrackAxis, TGridTrackReorderChildUpdate } from './types';
 
 export const commitGridReorderChildUpdates = (
   dispatch: AppDispatch,

@@ -10,27 +10,36 @@ import {
 import { getAutoLayoutFrameCenter } from 'store/design/utils/autoLayout/getAutoLayoutFrameCenter';
 
 // types
+import { TCanvasRefs, TGridSectionHighlight, TGridTrackSelection } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
-import { TGridSectionHighlight } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
-import { getGridSectionHighlightRects } from 'utils/canvas/gridSlots/getGridSectionHighlightRects';
+import { getGridSectionHighlightCells } from 'utils/canvas/gridSlots/getGridSectionHighlightCells';
+import { getGridSectionHighlightDragRects } from 'utils/canvas/gridSlots/getGridSectionHighlightDragRects';
 import { isGridFrame } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerMove/continueDrag/updateDragDropTarget/isGridFrame';
 
 export const drawGridSectionHighlight = (
   context: TDrawSceneContext,
   highlight: TGridSectionHighlight | null,
+  gridTrackSelection: TGridTrackSelection | null,
+  refs: TCanvasRefs,
   nodesById: Record<string, TSceneNode>,
 ): void => {
-  const frame = highlight ? (nodesById[highlight.frameId] ?? null) : null;
+  const source = getGridSectionHighlightCells(nodesById, highlight, gridTrackSelection);
+  const frame = source ? nodesById[source.frameId] : null;
 
-  if (highlight && isGridFrame(frame)) {
+  if (source && isGridFrame(frame)) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
     const frameCenter = getAutoLayoutFrameCenter(frame);
-    const { cellRects, outlineRect } = getGridSectionHighlightRects(frame, nodesById, highlight.cells);
+    const { cellRects, outlineRect } = getGridSectionHighlightDragRects(
+      frame,
+      nodesById,
+      source.cells,
+      refs.transform.gridTrackAffordanceDragRef.current,
+    );
 
     cellRects.forEach((rect) => {
       drawRect(

@@ -3,6 +3,9 @@ import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { TDrawSceneContext } from '../types';
 
+// store
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
 // utils
 import { drawGridSectionHighlight } from '../drawGridSectionHighlight/drawGridSectionHighlight';
 
@@ -68,6 +71,8 @@ describe('drawGridSectionHighlight', () => {
         ],
         frameId: 'frame-1',
       },
+      null,
+      createCanvasRefs(),
       { 'frame-1': frame },
     );
 
@@ -80,7 +85,7 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame({ rotation: 30 });
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
@@ -88,7 +93,7 @@ describe('drawGridSectionHighlight', () => {
   it('should draw nothing when the highlight is null', () => {
     const gl = createGlMock();
 
-    drawGridSectionHighlight(context(gl), null, {});
+    drawGridSectionHighlight(context(gl), null, null, createCanvasRefs(), {});
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
@@ -96,7 +101,7 @@ describe('drawGridSectionHighlight', () => {
   it('should draw nothing when the frame is missing', () => {
     const gl = createGlMock();
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'gone' }, {});
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'gone' }, null, createCanvasRefs(), {});
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
@@ -105,7 +110,7 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame({ layoutMode: LayoutMode.horizontal });
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
@@ -114,7 +119,7 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame();
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 9, row: 9 }], frameId: 'frame-1' }, { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 9, row: 9 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });

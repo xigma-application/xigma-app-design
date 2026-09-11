@@ -3,15 +3,15 @@ import { AppDispatch } from 'store';
 
 // types
 import { TFrameNode, TGridTrackSize, TSceneNode } from 'types/design/types';
-import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
+import { TGridTrackAxis } from './types';
 
 // utils
-import { commitGridAxisTracks } from '../commitGridAxisTracks';
-import { commitGridReorderChildUpdates } from '../commitGridReorderChildUpdates';
-import { getGridTrackChildren } from 'store/design/utils/autoLayout/gridTracks/getGridTrackChildren';
-import { getGridTrackReorderChildUpdates } from 'store/design/utils/autoLayout/gridTracks/getGridTrackReorderChildUpdates';
+import { commitGridAxisTracks } from './commitGridAxisTracks';
+import { commitGridReorderChildUpdates } from './commitGridReorderChildUpdates';
+import { getGridTrackChildren } from './getGridTrackChildren';
+import { getGridTrackReorderChildUpdates } from './getGridTrackReorderChildUpdates';
 import { isContiguous } from './isContiguous';
-import { moveGridTrackBlock } from 'store/design/utils/autoLayout/gridTracks/moveGridTrackBlock';
+import { moveGridTrackBlock } from './moveGridTrackBlock';
 
 export const commitGridAxisReorder = (
   dispatch: AppDispatch,

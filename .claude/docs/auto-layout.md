@@ -588,52 +588,49 @@ value field and `var(--color-neutral-1)` handle digits (`GridTrackRow--selected`
   *whole* group instead of the bare index whenever the grabbed row isn't already part of an
   explicit multi-selection — an explicit Ctrl/Shift selection is never auto-extended, so a
   deliberate partial selection can still exercise the rejection path.
-- **Ctrl/Shift multi-select** lives in `useGridTrackSelection` (`getGridTrackRangeIndices` /
-  `getGridTrackToggledIndices`); a contiguous selection drags as one block.
+- **Ctrl/Shift multi-select** lives in `useGridTrackList` (`getGridTrackRangeIndices` /
+  `getGridTrackToggledIndices`, called from `commitGridTrackSelect`); a contiguous selection drags
+  as one block.
+- **Two independent selection fields, written directly by whichever side the interaction happened
+  on** — `TDesignState` carries `gridTrackSelection` (canvas-facing, what `drawGridTrackAffordance`
+  paints) *and* `panelGridTrackSelection` (panel-facing, what `useGridTrackList` reads) as two
+  separate `TGridTrackSelection | null` fields, instead of the panel deriving its own display from
+  the canvas field. A canvas pointer handler (`armGridTrackAffordanceOnPointerDown` /
+  `armGridTrackAffordanceDrag` / `disarmGridTrackAffordanceDrag`) and every panel commit
+  (`commitGridTrackSelect` / `commitGridTrackReorder` / a delete) each call the one shared
+  `publishGridTrackSelection(dispatch, selection)` helper, which writes **both** fields with the
+  same value in the same dispatch — never a `useEffect` that watches one field and republishes the
+  other. `useGridTrackList` reads `panelGridTrackSelection` straight off the store via
+  `useAppSelector`, falling back to its own `useState` (`localIndices`, seeded from
+  `initialSelectedIndices`) only when nothing external currently applies to this axis+frame;
+  `getGridTrackRawIndices(panelSelection, axis, frameId, isSuppressed, localIndices)` is the one
+  place that picks between them (see History #21 for why the fields had to split).
 - **Only one axis selected at a time** — `useGridTrackSelectionCoordinator` (one instance per
   panel, shared by both `GridTrackList`s via props) tracks a single `activeAxis: 'column' | 'row'
   | null`, defaulting to `'column'`. `isSuppressed(axis)` is true whenever a *different* axis owns
-  the selection; each `useGridTrackList` clears itself in an effect keyed on that. `onSelectRow`,
-  a successful reorder and the auto-extend-on-grab path all call `onSelectionChange(axis, true)`
-  to claim the axis synchronously (in the same handler as the state change, not a later effect —
-  computing `isSuppressed` from a stale `activeAxis` during the very render that claims it would
-  otherwise have the just-selected axis immediately suppress itself). Columns starts with column 1
-  pre-selected (`GridSettings` passes `initialSelectedIndices={[0]}` only to the Columns list),
-  matching the coordinator's own `'column'` default so nothing needs to reconcile at mount.
-- **Selection follows the drag, not "clears on drop"** — a successful reorder calls
-  `setSelection(newIndices)` with `onReorder`'s returned new positions instead of clearing, so the
-  moved track(s) stay visibly selected wherever they landed. A rejected reorder leaves the
-  selection exactly as the grab already set it. Deleting still clears (nothing sensible to keep
-  selected). **A plain click on a handle that's part of a multi-selection**, released without any
-  `pointermove`, collapses the selection to just that one row (its own `linkedIndices` group) —
-  `commitGridTrackReorder` branches on `hasMoved`, and only an actual move goes through
-  `controls.onReorder`.
-- **Undo/redo carries the track selection** (`syncExternalGridTrackSelection`) — the panel's
-  selection is tied to undo/redo history without living in the Redux store. `useGridTrackList`
-  keeps a `WeakMap<frameRef, number[]>` (`selectionByRevisionRef`) and, in an effect keyed on
-  `controls.revision` *and* `selectedIndices`, records "the selection as it stands for this frame
-  reference" on every render where the reference is stable. When `controls.revision` (the frame
-  node reference) **changes**:
-  - if the new reference is one the map has seen → `setSelection` to its recorded value. This is
-    an undo/redo landing: Redux/Immer's `replaceDesignSnapshot` restores the *exact* historical
-    `pages` sub-tree (the history middleware snapshots the reference, never a clone; nothing
-    re-runs layout sync on replace), so the frame reference round-trips and its recorded selection
-    comes back with it. Undoing a 2-track reorder re-selects **both** original tracks at their
-    restored positions; undoing an add/delete restores whatever was selected before it.
-  - else if `isSelfChangeRef` is set (this hook's own `onAdd`/`onChangeMode`/`onChangeValue`/
-    `onDeleteRow`/successful-reorder flags it synchronously right before dispatching) → leave the
-    selection alone (the commit util already set the right one) and record it under the new
-    reference.
-  - else → a reference the panel never recorded (an edit made elsewhere while the panel is open,
-    or a state from before it opened) → reset to `initialSelectedIndicesRef` (`[0]` for Columns,
-    `[]` for Rows).
-
-  Comparing frame *identity* rather than the tracks' derived content was a deliberate earlier fix
-  (an old version diffed a JSON signature of `{ mode, value, linkedIndices }`, which can't tell an
-  undo of a swap of two identical `Fill, 1fr` tracks apart from a no-op); the `WeakMap` then turned
-  that same identity signal into a full history round-trip instead of a blunt reset. `WeakMap`
-  keying means entries GC themselves once a frame reference falls out of the history stack — no
-  manual bound.
+  the selection — `getGridTrackRawIndices` returns `[]` for a suppressed axis's local fallback, and
+  also for either axis when `panelGridTrackSelection` belongs to the *other* axis of the same
+  frame (so a canvas click on a row hides the column list's stale local default instead of both
+  showing selected at once). `onSelectRow`, a successful reorder and the auto-extend-on-grab path
+  all call `onSelectionChange(axis, true)` to claim the axis synchronously (in the same handler as
+  the state change, not a later effect). Columns starts with column 1 pre-selected (`GridSettings`
+  passes `initialSelectedIndices={[0]}` only to the Columns list), matching the coordinator's own
+  `'column'` default so nothing needs to reconcile at mount.
+- **Selection follows the drag, not "clears on drop"** — a successful reorder publishes
+  `onReorder`'s returned new positions instead of clearing, so the moved track(s) stay visibly
+  selected wherever they landed. A rejected reorder leaves the selection exactly as the grab
+  already set it. Deleting still clears (nothing sensible to keep selected). **A plain click on a
+  handle that's part of a multi-selection**, released without any `pointermove`, collapses the
+  selection to just that one row (its own `linkedIndices` group) — `commitGridTrackReorder`
+  branches on `hasMoved`, and only an actual move goes through `controls.onReorder`.
+- **Undo/redo no longer carries the track selection — known regression, see History #21.** The
+  revision-keyed `WeakMap<frameRef, number[]>` restore mechanism this section used to describe
+  (`syncExternalGridTrackSelection`) was removed along with the parent-level selection mirror it
+  depended on. Undo/redo still correctly restores the track *structure* (frame reference
+  round-trips through `replaceDesignSnapshot`, same as before), but nothing re-derives
+  `panelGridTrackSelection` from that restored structure, so a selection made before an undone
+  reorder does not come back highlighted. e2e test-cases-auto-layout.md #37 is `test.skip`ped with
+  a TODO until a replacement (compatible with the two-field, no-reactive-relay model above) exists.
 - **Global keyboard shortcuts (undo included) work from inside the panel's own fields** —
   `UITools.TextField`/`TextFieldWrapper` and `UITools.Dropdown` both unconditionally rendered
   `data-test-bypass-global-shortcuts="true"` on their input/trigger (the mechanism
@@ -1267,3 +1264,26 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     (§13 "Undo/redo carries the track selection"). This flipped e2e #31 — undoing an add now
     brings back the pre-add selection instead of resetting. `a`–`f` each got a `grid.spec.ts`
     regression.
+21. **2026-09-11 — grid flow, canvas↔panel track-selection ping-pong crash (§13 "Only one axis
+    selected at a time").** Live use hit `Uncaught Error: Maximum update depth exceeded`,
+    specifically with a 2-column-spanning child selected. Root cause took most of a session to
+    isolate: `GridSettings` mirrored each `GridTrackList`'s selection into its own
+    `columnSelectedIndices`/`rowSelectedIndices` state (via an `onSelectedIndicesChange` callback)
+    and published *that* to `gridTrackSelection`; the mirror lagged one render behind the child's
+    live selection whenever the child was *also* syncing an external (canvas-driven) value in the
+    same cascade, so the parent intermittently republished the stale value, the child's own
+    `syncExternalSelectedIndices` effect reacted to that publish and corrected itself, the parent's
+    next render republished *its* now-stale copy back — an unbounded loop with two real,
+    alternating values (`[0]` / `[0, 1]`), not a false-positive from a bad equality check (several
+    were fixed along the way — order-insensitivity in two comparisons, a decentralized publish
+    that still let both axes race when `activeAxis` was `null` — none of which were the actual
+    cause). Confirmed by disabling the panel's publish entirely and watching the loop stop.
+    Fixed by removing the reactive relay altogether rather than patching the comparison again (the
+    user's explicit call, after three narrower fixes each reproduced the same crash): split
+    `gridTrackSelection` into the two independent `gridTrackSelection` (canvas) /
+    `panelGridTrackSelection` (panel) fields described above, with every interaction site writing
+    both directly through `publishGridTrackSelection` and neither side ever watching-then-rewriting
+    the other. This also **removed** the revision-keyed undo/redo selection-restore mechanism from
+    #20(f) — it was wired through the same relay-based `useGridTrackList` — regressing e2e #37,
+    left `test.skip`ped (accepted tradeoff, not reintroduced) rather than rebuilt on top of a
+    mechanism just proven to cause this class of bug.

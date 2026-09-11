@@ -7,7 +7,7 @@ import { TFrameNode, TGridTrackSize } from 'types/design/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 // utils
-import { commitGridAxisTracks } from '../commitGridAxisTracks';
+import { commitGridAxisTracks } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisTracks';
 
 export const commitGridAxisValueChange = (
   dispatch: AppDispatch,

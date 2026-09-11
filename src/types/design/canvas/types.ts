@@ -318,6 +318,15 @@ export type TGridTrackSelection = {
   indices: number[];
 };
 
+export type TGridTrackAffordanceDragState = {
+  axis: TGridTrackAxis;
+  dropIndex: number;
+  frameId: string;
+  ghostPosition: TPoint;
+  hasMoved: boolean;
+  sourceIndices: number[];
+};
+
 export type TGridDragGhost = {
   nodeIds: string[];
   offset: TPoint;
@@ -377,6 +386,7 @@ export type TTransformRefs = {
   equalSpacingGuidesRef: RefObject<TEqualSpacingGuides | null>;
   gridDragGhostRef: RefObject<TGridDragGhost | null>;
   gridDropTargetRef: RefObject<TGridDropTargetHover | null>;
+  gridTrackAffordanceDragRef: RefObject<TGridTrackAffordanceDragState | null>;
   matchedPairGuidesRef: RefObject<TMatchedPairGuides | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;

@@ -436,6 +436,42 @@ describe('handleSetSelection', () => {
     expect(state.revealedMinMax).toEqual({ maxHeight: false, maxWidth: false, minHeight: false, minWidth: true });
   });
 
+  it('should clear the grid track affordance state when the selection changes', () => {
+    // mock
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id], {
+      gridSectionHighlight: { cells: [{ column: 0, row: 0 }], frameId: frame.id },
+      gridTrackSelection: { axis: 'column', frameId: frame.id, indices: [0, 1] },
+      isGridSettingsPanelOpen: true,
+    });
+
+    // before
+    handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.gridTrackSelection).toBeNull();
+    expect(state.gridSectionHighlight).toBeNull();
+    expect(state.isGridSettingsPanelOpen).toBe(false);
+  });
+
+  it('should clear the grid track affordance state even when re-clicking the already-selected frame', () => {
+    // mock — a plain click inside an already-selected grid frame (not a pill grab) still closes the
+    // Grid Settings panel and hides the canvas affordances, even though selectedIds itself is unchanged
+    const state = buildState({ [frame.id]: frame }, [frame.id], {
+      gridSectionHighlight: { cells: [{ column: 0, row: 0 }], frameId: frame.id },
+      gridTrackSelection: { axis: 'column', frameId: frame.id, indices: [0] },
+      isGridSettingsPanelOpen: true,
+    });
+
+    // before
+    handleSetSelection(state, [frame.id]);
+
+    // result
+    expect(state.gridTrackSelection).toBeNull();
+    expect(state.gridSectionHighlight).toBeNull();
+    expect(state.isGridSettingsPanelOpen).toBe(false);
+  });
+
   it('should keep a freshly drawn ellipse guide selected while no text has bound to it yet', () => {
     // mock — the moment right after drawing a text-on-path ellipse, before startTextEdit's draft
     // ever becomes a real committed text node — the guide is legitimately the thing selected here

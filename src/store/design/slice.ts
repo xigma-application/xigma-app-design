@@ -60,6 +60,7 @@ import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot
 import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSendSelectionToBack } from './utils/handleSendSelectionToBack';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
+import { handleSetGridSettingsPanelOpen } from './utils/handleSetGridSettingsPanelOpen';
 import { handleSetSelection } from './utils/handleSetSelection/handleSetSelection';
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
 import { handleSetViewport } from './utils/handleSetViewport';
@@ -120,6 +121,7 @@ const initialState: TDesignState = {
       viewport: DEFAULT_VIEWPORT,
     },
   },
+  panelGridTrackSelection: null,
   penActiveVertexId: null,
   preferences: {
     areAdditionalLabelsVisible: true,
@@ -198,9 +200,7 @@ const designSlice = createSlice({
     setGridSectionHighlight: (state, action: PayloadAction<TGridSectionHighlight | null>) => {
       state.gridSectionHighlight = action.payload;
     },
-    setGridSettingsPanelOpen: (state, action: PayloadAction<boolean>) => {
-      state.isGridSettingsPanelOpen = action.payload;
-    },
+    setGridSettingsPanelOpen: (state, action: PayloadAction<boolean>) => handleSetGridSettingsPanelOpen(state, action.payload),
     setGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
       state.gridTrackSelection = action.payload;
     },
@@ -215,6 +215,9 @@ const designSlice = createSlice({
     },
     setPaint: (state, action: PayloadAction<TSolidPaint>) => {
       getActivePage(state).paint = action.payload;
+    },
+    setPanelGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
+      state.panelGridTrackSelection = action.payload;
     },
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
@@ -307,6 +310,7 @@ export const {
   setMediaToolArmed,
   setMinMaxRevealed,
   setPaint,
+  setPanelGridTrackSelection,
   setPenActiveVertexId,
   setSelection,
   setTemporaryActiveTool,

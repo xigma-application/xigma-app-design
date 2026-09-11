@@ -10,6 +10,7 @@ import {
   TAutoLayoutReorderPreview,
   TGridDragGhost,
   TGridDropTargetHover,
+  TGridTrackAffordanceDragState,
   TTransformRefs,
 } from 'types/design/canvas/types';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
@@ -35,6 +36,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const equalSpacingGuidesRef = useRef<TEqualSpacingGuides | null>(null);
   const gridDragGhostRef = useRef<TGridDragGhost | null>(null);
   const gridDropTargetRef = useRef<TGridDropTargetHover | null>(null);
+  const gridTrackAffordanceDragRef = useRef<TGridTrackAffordanceDragState | null>(null);
   const matchedPairGuidesRef = useRef<TMatchedPairGuides | null>(null);
   const resizedNodeIdsRef = useRef<Set<string> | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
@@ -58,6 +60,7 @@ export const useTransformRefs = (): TTransformRefs => {
       equalSpacingGuidesRef,
       gridDragGhostRef,
       gridDropTargetRef,
+      gridTrackAffordanceDragRef,
       matchedPairGuidesRef,
       resizedNodeIdsRef,
       rotateDragRef,

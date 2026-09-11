@@ -3,7 +3,7 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
+import { TGridTrackAxis } from './types';
 import { TGridTrackSize } from 'types/design/types';
 
 export const commitGridAxisTracks = (
@@ -20,14 +20,12 @@ export const commitGridAxisTracks = (
         id: frameId,
       }),
     );
-
-    return;
+  } else {
+    dispatch(
+      updateNode({
+        changes: count === undefined ? { gridRowSizes: tracks } : { gridRowCount: count, gridRowSizes: tracks },
+        id: frameId,
+      }),
+    );
   }
-
-  dispatch(
-    updateNode({
-      changes: count === undefined ? { gridRowSizes: tracks } : { gridRowCount: count, gridRowSizes: tracks },
-      id: frameId,
-    }),
-  );
 };

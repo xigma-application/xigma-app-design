@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs, TGridTrackSelection } from 'types/design/canvas/types';
+import { TCanvasRefs, TGridTrackAffordanceDragState, TGridTrackSelection } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TFrameNode } from 'types/design/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
@@ -10,8 +10,19 @@ import { TPoint } from 'types/canvas';
 import { buildGridTracks } from 'store/design/utils/autoLayout/computeGridLayoutPositions/resolveGridLayout/buildGridTracks';
 import { DEFAULT_GRID_TRACK } from 'store/design/utils/autoLayout/gridTracks/buildGridTrackList';
 import { drawGridTrackAffordanceAxis } from './drawGridTrackAffordanceAxis';
-import { getGridTrackAffordanceAxisDraws } from 'utils/canvas/gridSlots/getGridTrackAffordanceAxisDraws';
+import { getGridTrackAffordanceAxisDraws, TGridTrackAffordanceDraw } from 'utils/canvas/gridSlots/getGridTrackAffordanceAxisDraws';
 import { getGridTrackAffordancePillCenters } from 'utils/canvas/gridSlots/getGridTrackAffordancePillCenters';
+import { isGridTrackAffordanceDrawSuppressed } from 'utils/canvas/gridSlots/isGridTrackAffordanceDrawSuppressed';
+
+const getVisibleGridTrackAffordanceDraws = (
+  axis: TGridTrackAxis,
+  hover: TCanvasRefs['hover']['hoveredGridTrackAffordanceRef']['current'],
+  selection: TGridTrackSelection | null,
+  dragState: TGridTrackAffordanceDragState | null,
+): TGridTrackAffordanceDraw[] =>
+  getGridTrackAffordanceAxisDraws(axis, hover, selection).filter(
+    (draw) => !isGridTrackAffordanceDrawSuppressed(axis, draw.index, dragState),
+  );
 
 export const drawGridTrackAffordanceAxisDraws = (
   context: TDrawSceneContext,
@@ -22,8 +33,9 @@ export const drawGridTrackAffordanceAxisDraws = (
   selection: TGridTrackSelection | null,
   offset: number,
   frameCenter: TPoint,
+  dragState: TGridTrackAffordanceDragState | null,
 ): void => {
-  const draws = getGridTrackAffordanceAxisDraws(axis, hover, selection);
+  const draws = getVisibleGridTrackAffordanceDraws(axis, hover, selection, dragState);
   const trackCount = axis === 'column' ? layout.columnCount : layout.rowCount;
   const providedSizes = axis === 'column' ? frame.gridColumnSizes : frame.gridRowSizes;
   const trackSizes = axis === 'column' ? layout.columnSizes : layout.rowSizes;

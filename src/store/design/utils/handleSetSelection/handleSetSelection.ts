@@ -7,6 +7,14 @@ import { dropDescendantsOfSelected } from './dropDescendantsOfSelected';
 import { dropTextPathGuides } from './dropTextPathGuides';
 import { exitVectorEditingIfNeeded } from './exitVectorEditingIfNeeded';
 import { getActivePage } from '../getActivePage';
+import { resetGridTrackAffordanceState } from '../resetGridTrackAffordanceState';
+
+const resetRevealedMinMaxIfSelectionChanged = (state: TDesignState, selectionChanged: boolean): void => {
+  if (selectionChanged) {
+    state.revealedMinMax = { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false };
+    state.hoveredDimensionField = null;
+  }
+};
 
 export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[]): void => {
   const page = getActivePage(state);
@@ -17,11 +25,7 @@ export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[
 
   deleteDegenerateDeselectedNodes(state, deselectedIds);
   exitVectorEditingIfNeeded(state, normalizedIds);
-
-  if (selectionChanged) {
-    state.revealedMinMax = { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false };
-    state.hoveredDimensionField = null;
-  }
-
+  resetRevealedMinMaxIfSelectionChanged(state, selectionChanged);
+  resetGridTrackAffordanceState(state);
   page.selectedIds = normalizedIds;
 };

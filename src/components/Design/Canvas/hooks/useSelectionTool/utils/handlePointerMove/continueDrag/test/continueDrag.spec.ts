@@ -52,6 +52,7 @@ const createCanvasRefs = (): TCanvasRefs =>
       equalSpacingGuidesRef: { current: null },
       gridDragGhostRef: { current: null },
       gridDropTargetRef: { current: null },
+      gridTrackAffordanceDragRef: { current: null },
       matchedPairGuidesRef: { current: null },
     },
     vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },

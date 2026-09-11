@@ -3,7 +3,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
-import { TCanvasRefs, TGridTrackSelection } from 'types/design/canvas/types';
+import { TCanvasRefs, TGridTrackAffordanceDragState, TGridTrackSelection } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../../types';
 import { TFrameNode } from 'types/design/types';
 
@@ -11,9 +11,17 @@ import { TFrameNode } from 'types/design/types';
 import { drawGridTrackAffordance } from '../drawGridTrackAffordance';
 
 const drawGridTrackAffordanceAxisDrawsMock = vi.fn();
+const drawGridTrackAffordanceDropIndicatorMock = vi.fn();
+const drawGridTrackAffordanceGhostMock = vi.fn();
 
 vi.mock('../drawGridTrackAffordanceAxisDraws', () => ({
   drawGridTrackAffordanceAxisDraws: (...args: unknown[]): void => drawGridTrackAffordanceAxisDrawsMock(...args),
+}));
+vi.mock('../drawGridTrackAffordanceDropIndicator', () => ({
+  drawGridTrackAffordanceDropIndicator: (...args: unknown[]): void => drawGridTrackAffordanceDropIndicatorMock(...args),
+}));
+vi.mock('../drawGridTrackAffordanceGhost', () => ({
+  drawGridTrackAffordanceGhost: (...args: unknown[]): void => drawGridTrackAffordanceGhostMock(...args),
 }));
 
 const context: TDrawSceneContext = {
@@ -47,6 +55,8 @@ const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 describe('drawGridTrackAffordance', () => {
   beforeEach(() => {
     drawGridTrackAffordanceAxisDrawsMock.mockClear();
+    drawGridTrackAffordanceDropIndicatorMock.mockClear();
+    drawGridTrackAffordanceGhostMock.mockClear();
   });
 
   it('should draw both axes when the hovered cell belongs to the selected frame', () => {
@@ -64,6 +74,14 @@ describe('drawGridTrackAffordance', () => {
     drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
 
     expect(drawGridTrackAffordanceAxisDrawsMock).toHaveBeenCalledTimes(2);
+    expect(drawGridTrackAffordanceDropIndicatorMock).toHaveBeenCalledTimes(1);
+    expect(drawGridTrackAffordanceDropIndicatorMock).toHaveBeenCalledWith(
+      context,
+      frame,
+      expect.anything(),
+      refs.transform.gridTrackAffordanceDragRef.current,
+      expect.anything(),
+    );
 
     const [, , , columnAxis, columnHover] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[0];
     const [, , , rowAxis, rowHover] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[1];
@@ -96,6 +114,7 @@ describe('drawGridTrackAffordance', () => {
     drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
 
     expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
+    expect(drawGridTrackAffordanceDropIndicatorMock).not.toHaveBeenCalled();
   });
 
   it('should draw nothing when the hover state belongs to a different frame, and drop a selection for a different frame too', () => {
@@ -131,5 +150,45 @@ describe('drawGridTrackAffordance', () => {
     drawGridTrackAffordance(context, [], refs, {}, null);
 
     expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the ghost and indicator even without a hover or selection, once a drag for this frame is active', () => {
+    const frame = gridFrame();
+    const refs = createCanvasRefs();
+    const dragState: TGridTrackAffordanceDragState = {
+      axis: 'column',
+      dropIndex: 1,
+      frameId: 'frame-1',
+      ghostPosition: { x: 0, y: 0 },
+      hasMoved: true,
+      sourceIndices: [0],
+    };
+
+    refs.transform.gridTrackAffordanceDragRef.current = dragState;
+
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
+
+    expect(drawGridTrackAffordanceAxisDrawsMock).toHaveBeenCalledTimes(2);
+    expect(drawGridTrackAffordanceDropIndicatorMock).toHaveBeenCalledWith(context, frame, expect.anything(), dragState, expect.anything());
+    expect(drawGridTrackAffordanceGhostMock).toHaveBeenCalledWith(context, frame, expect.anything(), dragState, expect.anything());
+  });
+
+  it('should ignore a drag that belongs to a different frame', () => {
+    const frame = gridFrame();
+    const refs = createCanvasRefs();
+
+    refs.transform.gridTrackAffordanceDragRef.current = {
+      axis: 'column',
+      dropIndex: 1,
+      frameId: 'other-frame',
+      ghostPosition: { x: 0, y: 0 },
+      hasMoved: true,
+      sourceIndices: [0],
+    };
+
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
+
+    expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
+    expect(drawGridTrackAffordanceGhostMock).not.toHaveBeenCalled();
   });
 });

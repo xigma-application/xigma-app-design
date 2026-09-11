@@ -1,6 +1,7 @@
 // utils
 import { bindTarget } from './bindTarget';
 import { drawLeafNode } from '../drawLeafNode';
+import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
 import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
@@ -15,13 +16,14 @@ import { TSceneNode } from 'types/design/types';
 
 export const drawSceneNodes = (
   context: TDrawSceneContext,
-  sceneNodes: TSceneNode[],
+  rawSceneNodes: TSceneNode[],
   rootOrder: string[],
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   refs: TCanvasRefs,
-  nodesById: Record<string, TSceneNode>,
+  rawNodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
+  const { nodesById, sceneNodes } = getGridTrackAffordanceDragSceneNodes(refs, rawNodesById, rawSceneNodes);
   const paintLeaf = (node: TSceneNode): void => drawLeafNode(context, node, pathOutlineStyles, refs, nodesById, editingPathId);
 
   if (

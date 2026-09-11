@@ -71,6 +71,8 @@ export const selectGridSectionHighlight = (state: RootState): TGridSectionHighli
 
 export const selectGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.gridTrackSelection ?? null;
 
+export const selectPanelGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.panelGridTrackSelection ?? null;
+
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
 
 export const selectIsGridSettingsPanelOpen = (state: RootState): boolean => Boolean(state.design.isGridSettingsPanelOpen);

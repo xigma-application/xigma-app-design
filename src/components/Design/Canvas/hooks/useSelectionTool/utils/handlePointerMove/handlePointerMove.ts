@@ -14,6 +14,7 @@ import { continueEllipseArcDrag } from './continueEllipseArcDrag';
 import { continueEllipseArcRatioDrag } from './continueEllipseArcRatioDrag';
 import { continueEllipseArcRotateDrag } from './continueEllipseArcRotateDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
+import { continueGridTrackAffordanceDrag } from './continueGridTrackAffordanceDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
 import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
@@ -62,6 +63,7 @@ export const handlePointerMove = (
   continueCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.cornerRadiusDragRef);
   continueAutoLayoutGapDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutGapDragRef);
   continueAutoLayoutPaddingDrag(canvas, event, dispatch, canvasRefs.transform.autoLayoutPaddingDragRef);
+  continueGridTrackAffordanceDrag(canvas, event, canvasRefs.transform.gridTrackAffordanceDragRef);
   continueSmartSelectionGapDrag(canvas, event, dispatch, canvasRefs.smartSelection.gapDragRef);
   continueSmartSelectionSwapDrag(canvas, event, dispatch, canvasRefs.smartSelection.swapDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);

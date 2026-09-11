@@ -11,7 +11,7 @@ import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { commitGridAxisAdd } from './commitGridAxisAdd';
 import { commitGridAxisDelete } from './commitGridAxisDelete';
 import { commitGridAxisModeChange } from './commitGridAxisModeChange';
-import { commitGridAxisReorder } from './commitGridAxisReorder';
+import { commitGridAxisReorder } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisReorder';
 import { commitGridAxisValueChange } from './commitGridAxisValueChange';
 import { getGridResolvedTrackSizes } from 'store/design/utils/autoLayout/getGridResolvedTrackSizes';
 import { getGridTrackChildren } from 'store/design/utils/autoLayout/gridTracks/getGridTrackChildren';

@@ -72,6 +72,7 @@ export type TDesignState = {
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
   pages: Record<string, TDesignPage>;
+  panelGridTrackSelection?: TGridTrackSelection | null;
   penActiveVertexId: string | null;
   preferences: TPreferences;
   revealedMinMax: TRevealedMinMax;
