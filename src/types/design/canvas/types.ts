@@ -312,6 +312,12 @@ export type TGridSectionHighlight = {
   frameId: string;
 };
 
+export type TGridTrackSelection = {
+  axis: TGridTrackAxis;
+  frameId: string;
+  indices: number[];
+};
+
 export type TGridDragGhost = {
   nodeIds: string[];
   offset: TPoint;

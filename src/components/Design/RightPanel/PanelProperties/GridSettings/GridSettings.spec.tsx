@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ReactElement } from 'react';
 
@@ -7,8 +7,20 @@ import GridSettings from './GridSettings';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setGridSectionHighlight, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
-import { selectActivePage, selectGridSectionHighlight, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
+import {
+  addNode,
+  setGridSectionHighlight,
+  setGridSettingsPanelOpen,
+  setGridTrackSelection,
+  setSelection,
+  updateNode,
+} from 'store/design/slice';
+import {
+  selectActivePage,
+  selectGridSectionHighlight,
+  selectGridTrackSelection,
+  selectIsGridSettingsPanelOpen,
+} from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -54,6 +66,7 @@ describe('GridSettings', () => {
     store.dispatch(setSelection([]));
     store.dispatch(setGridSettingsPanelOpen(false));
     store.dispatch(setGridSectionHighlight(null));
+    store.dispatch(setGridTrackSelection(null));
   });
 
   it('should render the header and one row per column and row track', () => {
@@ -115,6 +128,92 @@ describe('GridSettings', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close grid settings' }));
 
     expect(selectIsGridSettingsPanelOpen(store.getState())).toBe(false);
+  });
+
+  it('should select the matching column row when a track selection is dispatched from outside the panel (e.g. a canvas click)', () => {
+    const frameId = selectGridFrame();
+
+    const { container } = renderGridSettings();
+
+    act(() => {
+      store.dispatch(setGridTrackSelection({ axis: 'column', frameId, indices: [2] }));
+    });
+
+    expect(container.querySelector('[data-test-grid-track-row="2"]')?.className).toContain('GridTrackRow--selected');
+    expect(container.querySelector('[data-test-grid-track-row="0"]')?.className).not.toContain('GridTrackRow--selected');
+  });
+
+  it('should select the matching row-list row when a row-axis track selection is dispatched from outside the panel', async () => {
+    const frameId = selectGridFrame();
+
+    const { container } = renderGridSettings();
+
+    act(() => {
+      store.dispatch(setGridTrackSelection({ axis: 'row', frameId, indices: [1] }));
+    });
+
+    await waitFor(() => {
+      const rowRows = container.querySelectorAll('[data-test-grid-track-row]');
+      const rowListSecondRow = Array.from(rowRows).filter((row) => row.getAttribute('data-test-grid-track-row') === '1')[1];
+
+      expect(rowListSecondRow?.className).toContain('GridTrackRow--selected');
+    });
+  });
+
+  it('should ignore a track selection dispatched for a different frame', () => {
+    selectGridFrame();
+
+    const { container } = renderGridSettings();
+
+    act(() => {
+      store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'other-frame', indices: [2] }));
+    });
+
+    expect(container.querySelector('[data-test-grid-track-row="0"]')?.className).toContain('GridTrackRow--selected');
+    expect(container.querySelector('[data-test-grid-track-row="2"]')?.className).not.toContain('GridTrackRow--selected');
+  });
+
+  it('should switch the published track selection back to a column after a row was the active axis', () => {
+    const frameId = selectGridFrame();
+
+    const { container } = renderGridSettings();
+    const rowRows = Array.from(container.querySelectorAll('[data-test-grid-track-row="0"]'));
+
+    act(() => {
+      fireEvent.click(rowRows[1]);
+    });
+
+    act(() => {
+      fireEvent.click(container.querySelector('[data-test-grid-track-row="1"]') as Element);
+    });
+
+    expect(selectGridTrackSelection(store.getState())).toEqual({ axis: 'column', frameId, indices: [1] });
+  });
+
+  it('should show every selected column as expanded/selected when a multi-track selection is dispatched from outside the panel', () => {
+    const frameId = selectGridFrame();
+
+    const { container } = renderGridSettings();
+
+    act(() => {
+      store.dispatch(setGridTrackSelection({ axis: 'column', frameId, indices: [0, 2] }));
+    });
+
+    expect(container.querySelector('[data-test-grid-track-row="0"]')?.className).toContain('GridTrackRow--selected');
+    expect(container.querySelector('[data-test-grid-track-row="1"]')?.className).not.toContain('GridTrackRow--selected');
+    expect(container.querySelector('[data-test-grid-track-row="2"]')?.className).toContain('GridTrackRow--selected');
+  });
+
+  it('should clear the published track selection once the only selected row is toggled off', () => {
+    selectGridFrame();
+
+    const { container } = renderGridSettings();
+
+    act(() => {
+      fireEvent.click(container.querySelector('[data-test-grid-track-row="0"]') as Element, { metaKey: true });
+    });
+
+    expect(selectGridTrackSelection(store.getState())).toBeNull();
   });
 
   it('should match the snapshot', () => {

@@ -7,6 +7,7 @@ describe('useGridTrackSelectionCoordinator', () => {
   it('should default to columns as the active axis', () => {
     const { result } = renderHook(() => useGridTrackSelectionCoordinator());
 
+    expect(result.current.activeAxis).toBe('column');
     expect(result.current.isSuppressed('column')).toBe(false);
     expect(result.current.isSuppressed('row')).toBe(true);
   });
@@ -16,6 +17,7 @@ describe('useGridTrackSelectionCoordinator', () => {
 
     act(() => result.current.onSelectionChange('row', true));
 
+    expect(result.current.activeAxis).toBe('row');
     expect(result.current.isSuppressed('row')).toBe(false);
     expect(result.current.isSuppressed('column')).toBe(true);
   });
@@ -37,6 +39,7 @@ describe('useGridTrackSelectionCoordinator', () => {
     act(() => result.current.onSelectionChange('row', true));
     act(() => result.current.onSelectionChange('row', false));
 
+    expect(result.current.activeAxis).toBeNull();
     expect(result.current.isSuppressed('row')).toBe(false);
     expect(result.current.isSuppressed('column')).toBe(false);
   });

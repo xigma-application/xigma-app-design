@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 export type TGridTrackSelectionCoordinator = {
+  activeAxis: TGridTrackAxis | null;
   isSuppressed: (axis: TGridTrackAxis) => boolean;
   onSelectionChange: (axis: TGridTrackAxis, hasSelection: boolean) => void;
 };
@@ -19,5 +20,5 @@ export const useGridTrackSelectionCoordinator = (): TGridTrackSelectionCoordinat
     }
   };
 
-  return { isSuppressed: (axis) => activeAxis !== null && activeAxis !== axis, onSelectionChange };
+  return { activeAxis, isSuppressed: (axis) => activeAxis !== null && activeAxis !== axis, onSelectionChange };
 };

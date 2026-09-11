@@ -28,9 +28,11 @@ export type TGridTrackListProps = {
   coordinator: TGridTrackSelectionCoordinator;
   crossAxisTrackCount: number;
   e2eValue: string;
+  externalSelectedIndices?: number[];
   initialSelectedIndices?: number[];
   label: string;
   onHighlightCellsChange: (cells: TGridCellPosition[]) => void;
+  onSelectedIndicesChange?: (indices: number[]) => void;
 };
 
 export const GridTrackList: FC<TGridTrackListProps> = ({
@@ -41,15 +43,21 @@ export const GridTrackList: FC<TGridTrackListProps> = ({
   coordinator,
   crossAxisTrackCount,
   e2eValue,
+  externalSelectedIndices,
   initialSelectedIndices,
   label,
   onHighlightCellsChange,
+  onSelectedIndicesChange,
 }) => {
-  const list = useGridTrackList(controls, axis, coordinator, initialSelectedIndices);
+  const list = useGridTrackList(controls, axis, coordinator, initialSelectedIndices, externalSelectedIndices);
 
   useEffect(() => {
     onHighlightCellsChange(getGridSectionCells(axis, list.selectedIndices, crossAxisTrackCount));
   }, [axis, crossAxisTrackCount, list.selectedIndices, onHighlightCellsChange]);
+
+  useEffect(() => {
+    onSelectedIndicesChange?.(list.selectedIndices);
+  }, [list.selectedIndices, onSelectedIndicesChange]);
 
   return (
     <UITools.Section addAriaLabel={addAriaLabel} addTooltip={addTooltip} e2eValue={e2eValue} label={label} onAdd={list.onAdd}>

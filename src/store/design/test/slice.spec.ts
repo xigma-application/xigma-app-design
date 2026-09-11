@@ -28,6 +28,7 @@ import slice, {
   setBackgroundPaint,
   setGridSectionHighlight,
   setGridSettingsPanelOpen,
+  setGridTrackSelection,
   setPaint,
   setPenActiveVertexId,
   setSelection,
@@ -96,6 +97,7 @@ describe('design slice', () => {
       editingTextBox: null,
       editingTextContent: '',
       gridSectionHighlight: null,
+      gridTrackSelection: null,
       hoveredDimensionField: null,
       isActionsPanelOpen: false,
       isGridSettingsPanelOpen: false,
@@ -689,6 +691,21 @@ describe('design slice', () => {
 
     // result
     expect(cleared.gridSectionHighlight).toBeNull();
+  });
+
+  it('should set and clear the grid track selection', () => {
+    // action
+    const selection = { axis: 'column' as const, frameId: 'frame-1', indices: [1] };
+    const set = slice(undefined, setGridTrackSelection(selection));
+
+    // result
+    expect(set.gridTrackSelection).toEqual(selection);
+
+    // action
+    const cleared = slice(set, setGridTrackSelection(null));
+
+    // result
+    expect(cleared.gridTrackSelection).toBeNull();
   });
 
   it('should toggle the Actions panel open flag', () => {

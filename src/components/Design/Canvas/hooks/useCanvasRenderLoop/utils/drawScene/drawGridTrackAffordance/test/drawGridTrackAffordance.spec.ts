@@ -2,18 +2,18 @@
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // types
-import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { LayoutMode, NodeType } from 'types/design/enums';
+import { TCanvasRefs, TGridTrackSelection } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../../types';
 import { TFrameNode } from 'types/design/types';
 
 // utils
 import { drawGridTrackAffordance } from '../drawGridTrackAffordance';
 
-const drawGridTrackAffordanceAxisMock = vi.fn();
+const drawGridTrackAffordanceAxisDrawsMock = vi.fn();
 
-vi.mock('../drawGridTrackAffordanceAxis', () => ({
-  drawGridTrackAffordanceAxis: (...args: unknown[]): void => drawGridTrackAffordanceAxisMock(...args),
+vi.mock('../drawGridTrackAffordanceAxisDraws', () => ({
+  drawGridTrackAffordanceAxisDraws: (...args: unknown[]): void => drawGridTrackAffordanceAxisDrawsMock(...args),
 }));
 
 const context: TDrawSceneContext = {
@@ -46,10 +46,10 @@ const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 describe('drawGridTrackAffordance', () => {
   beforeEach(() => {
-    drawGridTrackAffordanceAxisMock.mockClear();
+    drawGridTrackAffordanceAxisDrawsMock.mockClear();
   });
 
-  it('should draw both the column and row axes for the hovered cell, collapsed, when no pill is hovered', () => {
+  it('should draw both axes when the hovered cell belongs to the selected frame', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
@@ -61,92 +61,44 @@ describe('drawGridTrackAffordance', () => {
       rowIndex: 0,
     };
 
-    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
 
-    expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(2);
+    expect(drawGridTrackAffordanceAxisDrawsMock).toHaveBeenCalledTimes(2);
 
-    const [, , columnAxis, columnIsExpanded] = drawGridTrackAffordanceAxisMock.mock.calls[0];
-    const [, , rowAxis, rowIsExpanded] = drawGridTrackAffordanceAxisMock.mock.calls[1];
+    const [, , , columnAxis, columnHover] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[0];
+    const [, , , rowAxis, rowHover] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[1];
 
     expect(columnAxis).toBe('column');
-    expect(columnIsExpanded).toBe(false);
+    expect(columnHover).toEqual(refs.hover.hoveredGridTrackAffordanceRef.current);
     expect(rowAxis).toBe('row');
-    expect(rowIsExpanded).toBe(false);
+    expect(rowHover).toEqual(refs.hover.hoveredGridTrackAffordanceRef.current);
   });
 
-  it('should mark only the hovered axis as expanded, and pass along its track and resolved size', () => {
-    const frame = gridFrame({ gridColumnSizes: [{ mode: SizingMode.fill, value: 2 }] });
+  it('should draw both axes, with a null hover, when there is no hover but a pinned selection exists for this frame', () => {
+    const frame = gridFrame();
     const refs = createCanvasRefs();
+    const selection: TGridTrackSelection = { axis: 'column', frameId: 'frame-1', indices: [0] };
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = {
-      columnIndex: 0,
-      frameId: 'frame-1',
-      hoveredHandlePart: 'value',
-      hoveredPillAxis: 'column',
-      rowIndex: 0,
-    };
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, selection);
 
-    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
+    expect(drawGridTrackAffordanceAxisDrawsMock).toHaveBeenCalledTimes(2);
 
-    const [, , , columnIsExpanded, columnHandlePart, columnTrack] = drawGridTrackAffordanceAxisMock.mock.calls[0];
-    const [, , , rowIsExpanded, rowHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[1];
+    const [, , , , hoverArg, selectionArg] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[0];
 
-    expect(columnIsExpanded).toBe(true);
-    expect(columnHandlePart).toBe('value');
-    expect(columnTrack).toEqual({ mode: SizingMode.fill, value: 2 });
-    expect(rowIsExpanded).toBe(false);
-    expect(rowHandlePart).toBeNull();
+    expect(hoverArg).toBeNull();
+    expect(selectionArg).toEqual(selection);
   });
 
-  it('should pass the hovered handle part to the row axis when the row pill is the expanded one', () => {
+  it('should draw nothing when there is neither a hover nor a pinned selection', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = {
-      columnIndex: 0,
-      frameId: 'frame-1',
-      hoveredHandlePart: 'grip',
-      hoveredPillAxis: 'row',
-      rowIndex: 0,
-    };
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
 
-    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
-
-    const [, , , columnIsExpanded, columnHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[0];
-    const [, , , rowIsExpanded, rowHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[1];
-
-    expect(columnIsExpanded).toBe(false);
-    expect(columnHandlePart).toBeNull();
-    expect(rowIsExpanded).toBe(true);
-    expect(rowHandlePart).toBe('grip');
+    expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
   });
 
-  it('should still draw when the hovered index is stale and past the resolved tracks', () => {
-    const frame = gridFrame();
-    const refs = createCanvasRefs();
-
-    refs.hover.hoveredGridTrackAffordanceRef.current = {
-      columnIndex: 99,
-      frameId: 'frame-1',
-      hoveredHandlePart: null,
-      hoveredPillAxis: null,
-      rowIndex: 99,
-    };
-
-    expect(() => drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame })).not.toThrow();
-    expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(2);
-  });
-
-  it('should draw nothing when there is no hover state', () => {
-    const frame = gridFrame();
-    const refs = createCanvasRefs();
-
-    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
-
-    expect(drawGridTrackAffordanceAxisMock).not.toHaveBeenCalled();
-  });
-
-  it('should draw nothing when the hover state belongs to a different frame', () => {
+  it('should draw nothing when the hover state belongs to a different frame, and drop a selection for a different frame too', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
@@ -158,9 +110,11 @@ describe('drawGridTrackAffordance', () => {
       rowIndex: 0,
     };
 
-    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
+    const selection: TGridTrackSelection = { axis: 'column', frameId: 'other-frame', indices: [0] };
 
-    expect(drawGridTrackAffordanceAxisMock).not.toHaveBeenCalled();
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, selection);
+
+    expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
   });
 
   it('should draw nothing when no grid frame is selected', () => {
@@ -174,8 +128,8 @@ describe('drawGridTrackAffordance', () => {
       rowIndex: 0,
     };
 
-    drawGridTrackAffordance(context, [], refs, {});
+    drawGridTrackAffordance(context, [], refs, {}, null);
 
-    expect(drawGridTrackAffordanceAxisMock).not.toHaveBeenCalled();
+    expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
   });
 });

@@ -19,7 +19,11 @@ import { commitGridTrackReorder } from './utils/commitGridTrackReorder';
 import { commitGridTrackSelect } from './utils/commitGridTrackSelect';
 import { commitGridTrackValueChange } from './utils/commitGridTrackValueChange';
 import { syncExternalGridTrackSelection } from './utils/syncExternalGridTrackSelection/syncExternalGridTrackSelection';
+import { syncExternalSelectedIndices } from './utils/syncExternalSelectedIndices';
 import { syncSuppressedGridTrackSelection } from './utils/syncSuppressedGridTrackSelection';
+
+// constants
+import { EMPTY_EXTERNAL_SELECTED_INDICES } from './constants';
 
 export type TUseGridTrackListResult = {
   beginDrag: TFunc<[number, ReactPointerEvent]>;
@@ -39,6 +43,7 @@ export const useGridTrackList = (
   axis: TGridTrackAxis,
   coordinator: TGridTrackSelectionCoordinator,
   initialSelectedIndices: number[] = [],
+  externalSelectedIndices: number[] = EMPTY_EXTERNAL_SELECTED_INDICES,
 ): TUseGridTrackListResult => {
   const trackCount = controls.tracks.length;
   const {
@@ -52,25 +57,8 @@ export const useGridTrackList = (
   const initialSelectedIndicesRef = useRef(initialSelectedIndices);
   const previousRevisionRef = useRef(controls.revision);
   const selectionByRevisionRef = useRef(new WeakMap<object, number[]>());
-
-  useEffect(() => {
-    syncSuppressedGridTrackSelection(isSuppressed, clearSelection);
-  }, [clearSelection, isSuppressed]);
-
-  useEffect(() => {
-    syncExternalGridTrackSelection(
-      axis,
-      controls,
-      coordinator,
-      isSelfChangeRef,
-      previousRevisionRef,
-      initialSelectedIndicesRef,
-      selectionByRevisionRef,
-      selectedIndices,
-      setSelection,
-    );
-  }, [axis, controls.revision, coordinator, selectedIndices, setSelection]);
-
+  const lastExternalSelectedIndicesRef = useRef<number[]>(EMPTY_EXTERNAL_SELECTED_INDICES);
+  const lastIsSuppressedRef = useRef(false);
   const { beginDrag, dragState, registerRow } = useGridTrackReorderDrag(
     trackCount,
     (sourceIndices, insertionSlot, grabbedIndex, hasMoved) =>
@@ -86,6 +74,28 @@ export const useGridTrackList = (
         hasMoved,
       ),
   );
+
+  useEffect(() => {
+    syncSuppressedGridTrackSelection(isSuppressed, clearSelection, lastIsSuppressedRef);
+  }, [clearSelection, isSuppressed]);
+
+  useEffect(() => {
+    syncExternalSelectedIndices(axis, coordinator, externalSelectedIndices, lastExternalSelectedIndicesRef, setSelection);
+  }, [axis, coordinator, externalSelectedIndices, setSelection]);
+
+  useEffect(() => {
+    syncExternalGridTrackSelection(
+      axis,
+      controls,
+      coordinator,
+      isSelfChangeRef,
+      previousRevisionRef,
+      initialSelectedIndicesRef,
+      selectionByRevisionRef,
+      selectedIndices,
+      setSelection,
+    );
+  }, [axis, controls.revision, coordinator, selectedIndices, setSelection]);
 
   return {
     beginDrag: (index: number, event: ReactPointerEvent): void =>

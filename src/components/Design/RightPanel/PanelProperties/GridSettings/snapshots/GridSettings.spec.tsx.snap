@@ -123,34 +123,38 @@ exports[`GridSettings > should match the snapshot 1`] = `
               />
             </svg>
           </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
-            data-state="closed"
-            type="button"
+          <span
+            style="display: contents;"
           >
-            <span
-              class="_Dropdown__label_cc217a"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+              data-state="closed"
+              type="button"
             >
-              Fill
-            </span>
-            <svg
-              class="Icon"
-              data-fpl-icon-size="16"
-              fill="none"
-              height="12"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 16 16"
-              width="12"
-            >
-              <path
-                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                data-svg-property="fill"
-                fill="white"
-              />
-            </svg>
-          </button>
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Fill
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
           <div
             class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
           >
@@ -254,34 +258,38 @@ exports[`GridSettings > should match the snapshot 1`] = `
               />
             </svg>
           </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
-            data-state="closed"
-            type="button"
+          <span
+            style="display: contents;"
           >
-            <span
-              class="_Dropdown__label_cc217a"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+              data-state="closed"
+              type="button"
             >
-              Fill
-            </span>
-            <svg
-              class="Icon"
-              data-fpl-icon-size="16"
-              fill="none"
-              height="12"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 16 16"
-              width="12"
-            >
-              <path
-                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                data-svg-property="fill"
-                fill="white"
-              />
-            </svg>
-          </button>
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Fill
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
           <div
             class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
           >
@@ -385,34 +393,38 @@ exports[`GridSettings > should match the snapshot 1`] = `
               />
             </svg>
           </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
-            data-state="closed"
-            type="button"
+          <span
+            style="display: contents;"
           >
-            <span
-              class="_Dropdown__label_cc217a"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+              data-state="closed"
+              type="button"
             >
-              Fill
-            </span>
-            <svg
-              class="Icon"
-              data-fpl-icon-size="16"
-              fill="none"
-              height="12"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 16 16"
-              width="12"
-            >
-              <path
-                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                data-svg-property="fill"
-                fill="white"
-              />
-            </svg>
-          </button>
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Fill
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
           <div
             class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
           >
@@ -564,34 +576,38 @@ exports[`GridSettings > should match the snapshot 1`] = `
               />
             </svg>
           </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
-            data-state="closed"
-            type="button"
+          <span
+            style="display: contents;"
           >
-            <span
-              class="_Dropdown__label_cc217a"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+              data-state="closed"
+              type="button"
             >
-              Fill
-            </span>
-            <svg
-              class="Icon"
-              data-fpl-icon-size="16"
-              fill="none"
-              height="12"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 16 16"
-              width="12"
-            >
-              <path
-                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                data-svg-property="fill"
-                fill="white"
-              />
-            </svg>
-          </button>
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Fill
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
           <div
             class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
           >
@@ -695,34 +711,38 @@ exports[`GridSettings > should match the snapshot 1`] = `
               />
             </svg>
           </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
-            data-state="closed"
-            type="button"
+          <span
+            style="display: contents;"
           >
-            <span
-              class="_Dropdown__label_cc217a"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _GridTrackRow__mode_bdfaf0"
+              data-state="closed"
+              type="button"
             >
-              Fill
-            </span>
-            <svg
-              class="Icon"
-              data-fpl-icon-size="16"
-              fill="none"
-              height="12"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 16 16"
-              width="12"
-            >
-              <path
-                d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
-                data-svg-property="fill"
-                fill="white"
-              />
-            </svg>
-          </button>
+              <span
+                class="_Dropdown__label_cc217a"
+              >
+                Fill
+              </span>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </span>
           <div
             class="_TextField_bd2800 _GridTrackRow__value_bdfaf0"
           >

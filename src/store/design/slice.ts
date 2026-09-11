@@ -33,7 +33,7 @@ import {
 } from './types';
 import { ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
-import { TGridSectionHighlight } from 'types/design/canvas/types';
+import { TGridSectionHighlight, TGridTrackSelection } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TSolidPaint } from 'types/design/paint/types';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -93,6 +93,7 @@ const initialState: TDesignState = {
   editingTextBox: null,
   editingTextContent: '',
   gridSectionHighlight: null,
+  gridTrackSelection: null,
   hoveredDimensionField: null,
   isActionsPanelOpen: false,
   isGridSettingsPanelOpen: false,
@@ -200,6 +201,9 @@ const designSlice = createSlice({
     setGridSettingsPanelOpen: (state, action: PayloadAction<boolean>) => {
       state.isGridSettingsPanelOpen = action.payload;
     },
+    setGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
+      state.gridTrackSelection = action.payload;
+    },
     setHoveredDimensionField: (state, action: PayloadAction<TDimensionHintField | null>) => {
       state.hoveredDimensionField = action.payload;
     },
@@ -298,6 +302,7 @@ export const {
   setDesignHintLabelKey,
   setGridSectionHighlight,
   setGridSettingsPanelOpen,
+  setGridTrackSelection,
   setHoveredDimensionField,
   setMediaToolArmed,
   setMinMaxRevealed,

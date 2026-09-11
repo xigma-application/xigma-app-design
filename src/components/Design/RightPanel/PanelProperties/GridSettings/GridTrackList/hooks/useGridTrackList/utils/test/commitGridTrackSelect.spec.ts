@@ -5,6 +5,7 @@ import { TGridTrackSelectionCoordinator } from '../../../../../hooks/useGridTrac
 import { commitGridTrackSelect } from '../commitGridTrackSelect';
 
 const coordinator = (overrides: Partial<TGridTrackSelectionCoordinator> = {}): TGridTrackSelectionCoordinator => ({
+  activeAxis: null,
   isSuppressed: () => false,
   onSelectionChange: vi.fn(),
   ...overrides,

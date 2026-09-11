@@ -5,6 +5,7 @@ import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPo
 import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
+import { armGridTrackAffordanceOnPointerDown } from './armResolvers/armGridTrackAffordanceOnPointerDown';
 import { armGroupBoundsOnPointerDown } from './armResolvers/armGroupBoundsOnPointerDown';
 import { armGroupChildToggleOnPointerDown } from './armResolvers/armGroupChildToggleOnPointerDown';
 import { armHitOnPointerDown } from './armResolvers/armHitOnPointerDown';
@@ -73,6 +74,7 @@ export const ARM_RESOLVERS = [
   armRotateOnPointerDown,
   armAutoLayoutGapOnPointerDown,
   armAutoLayoutPaddingOnPointerDown,
+  armGridTrackAffordanceOnPointerDown,
   armSmartSelectionSwapOnPointerDown,
   armSmartSelectionGapOnPointerDown,
   armSmartSelectionSuggestionOnPointerDown,

@@ -9,6 +9,7 @@ import { TGridAxisControls } from '../hooks/types';
 import { TGridTrackSelectionCoordinator } from '../hooks/useGridTrackSelectionCoordinator';
 
 const permissiveCoordinator = (): TGridTrackSelectionCoordinator => ({
+  activeAxis: null,
   isSuppressed: () => false,
   onSelectionChange: vi.fn(),
 });

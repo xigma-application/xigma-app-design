@@ -9,10 +9,17 @@ import GridTrackList from './GridTrackList/GridTrackList';
 import { useGridSectionHighlight } from './hooks/useGridSectionHighlight';
 import { useGridSettingsPanel } from './hooks/useGridSettingsPanel';
 import { useGridTrackSelectionCoordinator } from './hooks/useGridTrackSelectionCoordinator';
+import { useGridTrackSelectionSync } from './hooks/useGridTrackSelectionSync';
 
 // others
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
-import { translationNameSpace } from './constants';
+import { COLUMN_INITIAL_SELECTION, translationNameSpace } from './constants';
+import { getActiveSelectedIndices } from './utils/getActiveSelectedIndices';
+import { getExternalSelectedIndices } from './utils/getExternalSelectedIndices';
+
+// store
+import { selectGridTrackSelection } from 'store/design/selectors';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './grid-settings.module.scss';
@@ -21,16 +28,21 @@ import styles from './grid-settings.module.scss';
 import { E2EAttribute } from 'types/e2e';
 import { TGridCellPosition } from 'types/design/canvas/types';
 
-const COLUMN_INITIAL_SELECTION = [0];
-
 const GridSettings: FC = () => {
   const { t } = useTranslation();
   const { columns, frameId, onClose, rows } = useGridSettingsPanel();
   const coordinator = useGridTrackSelectionCoordinator();
   const [columnCells, setColumnCells] = useState<TGridCellPosition[]>([]);
   const [rowCells, setRowCells] = useState<TGridCellPosition[]>([]);
+  const [columnSelectedIndices, setColumnSelectedIndices] = useState<number[]>([]);
+  const [rowSelectedIndices, setRowSelectedIndices] = useState<number[]>([]);
+  const gridTrackSelection = useAppSelector(selectGridTrackSelection);
+  const externalColumnIndices = getExternalSelectedIndices('column', frameId, gridTrackSelection);
+  const externalRowIndices = getExternalSelectedIndices('row', frameId, gridTrackSelection);
+  const activeSelectedIndices = getActiveSelectedIndices(coordinator.activeAxis, columnSelectedIndices, rowSelectedIndices);
 
   useGridSectionHighlight(frameId, columnCells, rowCells);
+  useGridTrackSelectionSync(frameId, coordinator.activeAxis, activeSelectedIndices);
 
   return (
     <div className={styles.GridSettings} {...getAttributes(E2EAttribute.gridSettingsPanel, '')}>
@@ -43,9 +55,11 @@ const GridSettings: FC = () => {
         coordinator={coordinator}
         crossAxisTrackCount={rows.tracks.length}
         e2eValue="grid-columns"
+        externalSelectedIndices={externalColumnIndices}
         initialSelectedIndices={COLUMN_INITIAL_SELECTION}
         label={t(`${translationNameSpace}.columns.label`)}
         onHighlightCellsChange={setColumnCells}
+        onSelectedIndicesChange={setColumnSelectedIndices}
       />
       <GridTrackList
         addAriaLabel={t(`${translationNameSpace}.addRowAriaLabel`)}
@@ -55,8 +69,10 @@ const GridSettings: FC = () => {
         coordinator={coordinator}
         crossAxisTrackCount={columns.tracks.length}
         e2eValue="grid-rows"
+        externalSelectedIndices={externalRowIndices}
         label={t(`${translationNameSpace}.rows.label`)}
         onHighlightCellsChange={setRowCells}
+        onSelectedIndicesChange={setRowSelectedIndices}
       />
     </div>
   );

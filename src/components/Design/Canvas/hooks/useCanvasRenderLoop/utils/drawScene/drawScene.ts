@@ -10,6 +10,7 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectGridSectionHighlight,
+  selectGridTrackSelection,
   selectNodes,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
@@ -123,6 +124,7 @@ export const drawScene = (
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const smartSelectionNodes = selectSmartSelectionNodes(state);
   const gridSectionHighlight = selectGridSectionHighlight(state);
+  const gridTrackSelection = selectGridTrackSelection(state);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
   const valuesNodeByid = Object.values(nodesById);
@@ -160,7 +162,7 @@ export const drawScene = (
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
   drawGridSlots(ctx, selectedNodes, nodesById);
   drawGridSectionHighlight(ctx, gridSectionHighlight, nodesById);
-  drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById);
+  drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById, gridTrackSelection);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

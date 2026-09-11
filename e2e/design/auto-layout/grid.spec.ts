@@ -84,6 +84,13 @@ const readColumnTrack = (page: Page, index: number): Promise<{ mode?: string; va
     return sizes?.[trackIndex];
   }, index);
 
+const readGridTrackSelection = (page: Page): Promise<{ axis?: string; frameId?: string; indices?: number[] } | null> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.gridTrackSelection ?? null;
+  });
+
 const unique = (values: number[]): number[] => [...new Set(values)];
 
 type TGridState = { anchors: (number | undefined)[][]; childIds: string[]; gridAutoPlacement?: boolean };
@@ -1958,5 +1965,86 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readColumnTrack(page, 2)).toEqual(triggerTrack);
     // the untouched, unselected column keeps its own default fill mode
     expect(await readColumnTrack(page, 1)).toMatchObject({ mode: 'fill' });
+  });
+
+  test('clicking a track affordance pill on the canvas selects it in the panel and opens the Grid settings panel', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-click-select');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    // the row pill sits 40px left of the frame, vertically centered
+    await page.mouse.click(FRAME.x1 - 40, (FRAME.y1 + FRAME.y2) / 2);
+
+    await expect(page.locator('[data-test-grid-settings-panel]')).toBeVisible();
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'row', indices: [0] });
+
+    const rowsSection = page.locator('[data-test-section="grid-rows"]');
+
+    await expect(rowsSection.locator('[data-test-grid-track-row="0"]')).toHaveClass(/GridTrackRow--selected/);
+  });
+
+  test('Cmd/Ctrl-clicking a second column pill on the canvas adds it to the selection, matching the panel’s own multi-select', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-click-multi-select');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    // switching to Grid seeds a default of two equal-width columns — their pills sit 40px above the
+    // frame, centered on each column
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+    const column1X = FRAME.x1 + (3 * (FRAME.x2 - FRAME.x1)) / 4;
+
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+
+    await page.keyboard.down('Control');
+    await page.mouse.click(column1X, columnPillY);
+    await page.keyboard.up('Control');
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1] });
+  });
+
+  test('selecting a row in the panel pins its expanded control on the canvas even while the mouse is elsewhere', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-panel-click-pins-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const safeArea = await designPage.canvasSafeArea();
+
+    // move away from the frame first, so neither screenshot is influenced by hover
+    await page.mouse.move(200, 200);
+    await page.waitForTimeout(150);
+    const beforeSelection = await page.screenshot({ clip: safeArea });
+
+    await openGridSettings(page);
+    await page.locator('[data-test-section="grid-rows"] [data-test-grid-track-row="0"]').click();
+
+    await page.mouse.move(200, 200);
+    await page.waitForTimeout(150);
+    const afterSelection = await page.screenshot({ clip: safeArea });
+
+    expect(beforeSelection.equals(afterSelection)).toBe(false);
   });
 });

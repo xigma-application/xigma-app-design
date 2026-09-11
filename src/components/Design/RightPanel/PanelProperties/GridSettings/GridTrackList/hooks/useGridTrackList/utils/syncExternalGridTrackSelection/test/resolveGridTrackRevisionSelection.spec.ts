@@ -5,6 +5,7 @@ import { TGridTrackSelectionCoordinator } from '../../../../../../hooks/useGridT
 import { resolveGridTrackRevisionSelection } from '../resolveGridTrackRevisionSelection';
 
 const coordinator = (overrides: Partial<TGridTrackSelectionCoordinator> = {}): TGridTrackSelectionCoordinator => ({
+  activeAxis: null,
   isSuppressed: () => false,
   onSelectionChange: vi.fn(),
   ...overrides,

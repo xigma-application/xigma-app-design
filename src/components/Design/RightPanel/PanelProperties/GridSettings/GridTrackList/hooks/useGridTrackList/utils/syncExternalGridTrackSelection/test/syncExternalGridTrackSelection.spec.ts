@@ -19,6 +19,7 @@ const controls = (overrides: Partial<TGridAxisControls> = {}): TGridAxisControls
 });
 
 const coordinator = (overrides: Partial<TGridTrackSelectionCoordinator> = {}): TGridTrackSelectionCoordinator => ({
+  activeAxis: null,
   isSuppressed: () => false,
   onSelectionChange: vi.fn(),
   ...overrides,

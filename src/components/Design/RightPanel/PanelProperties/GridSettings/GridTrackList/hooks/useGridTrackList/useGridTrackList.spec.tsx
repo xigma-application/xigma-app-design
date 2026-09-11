@@ -26,6 +26,7 @@ const controls = (overrides: Partial<TGridAxisControls> = {}): TGridAxisControls
 });
 
 const permissiveCoordinator = (): TGridTrackSelectionCoordinator => ({
+  activeAxis: null,
   isSuppressed: () => false,
   onSelectionChange: vi.fn(),
 });
@@ -43,6 +44,45 @@ describe('useGridTrackList', () => {
     const { result } = renderHook(() => useGridTrackList(controls(), 'column', permissiveCoordinator(), [0]));
 
     expect(result.current.selectedIndices).toEqual([0]);
+  });
+
+  it('should adopt an externally-driven selected index, reporting it to the coordinator like a real click', () => {
+    const coordinator = permissiveCoordinator();
+    const { result } = renderHook(() => useGridTrackList(controls(), 'column', coordinator, [], [2]));
+
+    expect(result.current.selectedIndices).toEqual([2]);
+    expect(coordinator.onSelectionChange).toHaveBeenCalledWith('column', true);
+  });
+
+  it('should adopt a full externally-driven multi-selection at once (e.g. a Cmd/Shift click on the canvas)', () => {
+    const coordinator = permissiveCoordinator();
+    const { result } = renderHook(() => useGridTrackList(controls(), 'column', coordinator, [], [0, 2]));
+
+    expect(result.current.selectedIndices).toEqual([0, 2]);
+    expect(coordinator.onSelectionChange).toHaveBeenCalledWith('column', true);
+  });
+
+  it('should not re-apply an external selection that already matches the current selection', () => {
+    const coordinator = permissiveCoordinator();
+    const { result, rerender } = renderHook(
+      ({ externalSelectedIndices }) => useGridTrackList(controls(), 'column', coordinator, [], externalSelectedIndices),
+      { initialProps: { externalSelectedIndices: [2] } },
+    );
+
+    expect(result.current.selectedIndices).toEqual([2]);
+
+    (coordinator.onSelectionChange as ReturnType<typeof vi.fn>).mockClear();
+    rerender({ externalSelectedIndices: [2] });
+
+    expect(coordinator.onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it('should do nothing when there is no external selection', () => {
+    const coordinator = permissiveCoordinator();
+    const { result } = renderHook(() => useGridTrackList(controls(), 'column', coordinator, [], []));
+
+    expect(result.current.selectedIndices).toEqual([]);
+    expect(coordinator.onSelectionChange).not.toHaveBeenCalled();
   });
 
   it('should delete the whole selection when the deleted row is part of it, then clear it', () => {
