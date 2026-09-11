@@ -48,6 +48,15 @@ describe('CanvasValueLabelInput', () => {
     expect(screen.getByRole('textbox')).toHaveStyle({ height: '24px', left: '10px', minWidth: '40px', top: '20px' });
   });
 
+  it('should append an optional caller-provided class alongside its own default styling', () => {
+    // before
+    setup({ className: 'custom-class' });
+
+    // result
+    expect(screen.getByRole('textbox').className).toMatch(/CanvasValueLabelInput/);
+    expect(screen.getByRole('textbox')).toHaveClass('custom-class');
+  });
+
   it('should grow and shrink its character size with the typed text', async () => {
     // before
     setup();
@@ -105,6 +114,29 @@ describe('CanvasValueLabelInput', () => {
 
     // result
     expect(onCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onLiveChange with every typed character, without waiting for commit', async () => {
+    // before
+    const onLiveChange = vi.fn();
+    setup({ onLiveChange });
+    const input = screen.getByRole<HTMLInputElement>('textbox');
+    await userEvent.clear(input);
+    onLiveChange.mockClear();
+    await userEvent.type(input, '25');
+
+    // result
+    expect(onLiveChange).toHaveBeenNthCalledWith(1, '2');
+    expect(onLiveChange).toHaveBeenNthCalledWith(2, '25');
+  });
+
+  it('should not require onLiveChange to be passed', async () => {
+    // before
+    setup({ onLiveChange: undefined });
+    const input = screen.getByRole<HTMLInputElement>('textbox');
+
+    // result — no crash when typing without a live-change listener
+    await expect(userEvent.type(input, '5')).resolves.toBeUndefined();
   });
 
   it('should keep key presses from reaching the canvas keyboard shortcuts', () => {

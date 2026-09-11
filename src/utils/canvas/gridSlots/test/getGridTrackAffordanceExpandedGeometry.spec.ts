@@ -9,8 +9,8 @@ describe('getGridTrackAffordanceExpandedGeometry', () => {
   it('should size the badge to fit the grip, the text and the chevron with padding between and around them', () => {
     const geometry = getGridTrackAffordanceExpandedGeometry(CENTER, BOUNDS, 1);
 
-    // grip 6 + gap 5 + text 20 + gap 5 + chevron 6 + padding 5*2
-    expect(geometry.badgeWidth).toBeCloseTo(52, 5);
+    // grip 5 + gap 5 + text 20 + gap 5 + chevron 6 + padding 5*2
+    expect(geometry.badgeWidth).toBeCloseTo(51, 5);
     // tallest content is the text (14) here, plus padding 3*2
     expect(geometry.badgeHeight).toBeCloseTo(20, 5);
   });
@@ -27,7 +27,7 @@ describe('getGridTrackAffordanceExpandedGeometry', () => {
     const geometry = getGridTrackAffordanceExpandedGeometry(CENTER, BOUNDS, 1);
     const leftEdge = CENTER.x - geometry.badgeWidth / 2;
 
-    expect(geometry.gripCenter).toEqual({ x: leftEdge + 5 + 3, y: 50 });
+    expect(geometry.gripCenter).toEqual({ x: leftEdge + 5 + 2.5, y: 50 });
     expect(geometry.textCenter.x).toBeGreaterThan(geometry.gripCenter.x);
     expect(geometry.chevronCenter.x).toBeGreaterThan(geometry.textCenter.x);
     expect(geometry.textCenter.y).toBe(50);

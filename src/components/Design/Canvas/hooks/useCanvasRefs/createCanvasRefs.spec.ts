@@ -27,6 +27,7 @@ describe('createCanvasRefs behaviors', () => {
       frameName: { editingLabelRef: { current: null } },
       guides: { draggingGuideRef: { current: null }, hoveredGuideRef: { current: null }, selectedGuideRef: { current: null } },
       hover: {
+        editingGridTrackValueRef: { current: null },
         hoverRef: { current: null },
         hoveredAutoLayoutGapRef: { current: null },
         hoveredAutoLayoutPaddingBandsRef: { current: null },

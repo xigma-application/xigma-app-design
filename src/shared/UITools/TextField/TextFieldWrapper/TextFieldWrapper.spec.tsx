@@ -81,7 +81,7 @@ describe('TextFieldWrapper behaviors', () => {
     document.removeEventListener('keydown', onDocumentKeyDown);
   });
 
-  it('should let a non-Enter key keep bubbling to global shortcut listeners', () => {
+  it('should keep a non-Enter key from bubbling to global shortcut listeners too', () => {
     // mock
     const onDocumentKeyDown = vi.fn();
     document.addEventListener('keydown', onDocumentKeyDown);
@@ -94,7 +94,7 @@ describe('TextFieldWrapper behaviors', () => {
     fireEvent.keyDown(input, { key: 'a' });
 
     // result
-    expect(onDocumentKeyDown).toHaveBeenCalled();
+    expect(onDocumentKeyDown).not.toHaveBeenCalled();
     document.removeEventListener('keydown', onDocumentKeyDown);
   });
 

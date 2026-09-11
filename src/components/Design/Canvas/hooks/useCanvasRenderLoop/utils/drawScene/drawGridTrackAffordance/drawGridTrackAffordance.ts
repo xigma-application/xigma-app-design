@@ -29,14 +29,16 @@ export const drawGridTrackAffordance = (
     const selection = gridTrackSelection && gridTrackSelection.frameId === frame.id ? gridTrackSelection : null;
     const rawDragState = refs.transform.gridTrackAffordanceDragRef.current;
     const dragState = rawDragState && rawDragState.frameId === frame.id ? rawDragState : null;
+    const rawEditingValue = refs.hover.editingGridTrackValueRef.current;
+    const editingValue = rawEditingValue && rawEditingValue.frameId === frame.id ? rawEditingValue : null;
 
-    if (hover || selection || dragState) {
+    if (hover || selection || dragState || editingValue) {
       const layout = getGridTrackLayout(frame, nodesById);
       const frameCenter = getAutoLayoutFrameCenter(frame);
       const offset = getGridTrackAffordancePillOffset(context.viewport.zoom);
 
-      drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', hover, selection, offset, frameCenter, dragState);
-      drawGridTrackAffordanceAxisDraws(context, frame, layout, 'row', hover, selection, offset, frameCenter, dragState);
+      drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', hover, selection, offset, frameCenter, dragState, editingValue);
+      drawGridTrackAffordanceAxisDraws(context, frame, layout, 'row', hover, selection, offset, frameCenter, dragState, editingValue);
       drawGridTrackAffordanceDropIndicator(context, frame, layout, dragState, frameCenter);
       drawGridTrackAffordanceGhost(context, frame, layout, dragState, frameCenter);
     }

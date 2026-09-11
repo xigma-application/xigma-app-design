@@ -10,9 +10,9 @@ import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 // utils
 import { commitGridAxisAdd } from './commitGridAxisAdd';
 import { commitGridAxisDelete } from './commitGridAxisDelete';
-import { commitGridAxisModeChange } from './commitGridAxisModeChange';
+import { commitGridAxisModeChange } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisModeChange';
 import { commitGridAxisReorder } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisReorder';
-import { commitGridAxisValueChange } from './commitGridAxisValueChange';
+import { commitGridAxisValueChange } from 'store/design/utils/autoLayout/gridTracks/commitGridAxisValueChange';
 import { getGridResolvedTrackSizes } from 'store/design/utils/autoLayout/getGridResolvedTrackSizes';
 import { getGridTrackChildren } from 'store/design/utils/autoLayout/gridTracks/getGridTrackChildren';
 import { getGridTrackLinkedIndices } from 'store/design/utils/autoLayout/gridTracks/getGridTrackLinkedIndices';

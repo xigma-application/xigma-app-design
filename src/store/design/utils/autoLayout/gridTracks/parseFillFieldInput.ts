@@ -6,22 +6,15 @@ export type TFillFieldParseResult = { mode: SizingMode.fill; value: number } | {
 export const parseFillFieldInput = (raw: string): TFillFieldParseResult => {
   const trimmed = raw.trim();
   const fillMatch = trimmed.match(/^(-?\d*\.?\d+)fr$/);
-
-  if (fillMatch) {
-    const weight = parseFloat(fillMatch[1]);
-
-    if (weight > 0) {
-      return { mode: SizingMode.fill, value: weight };
-    }
-
-    return { mode: null };
-  }
-
+  const weight = fillMatch ? parseFloat(fillMatch[1]) : NaN;
   const parsed = parseFloat(trimmed);
 
-  if (!Number.isNaN(parsed)) {
-    return { mode: SizingMode.fixed, value: parsed };
+  switch (true) {
+    case fillMatch !== null && weight > 0:
+      return { mode: SizingMode.fill, value: weight };
+    case fillMatch === null && !Number.isNaN(parsed):
+      return { mode: SizingMode.fixed, value: parsed };
+    default:
+      return { mode: null };
   }
-
-  return { mode: null };
 };

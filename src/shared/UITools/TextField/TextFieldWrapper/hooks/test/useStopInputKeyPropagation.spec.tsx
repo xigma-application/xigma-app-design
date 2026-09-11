@@ -50,7 +50,7 @@ describe('useStopInputKeyPropagation', () => {
     expect(blur).not.toHaveBeenCalled();
   });
 
-  it('should leave the input untouched for any other key', () => {
+  it('should stop propagation without blurring for any other key', () => {
     // mock
     const blur = vi.fn();
     const stopPropagation = vi.fn();
@@ -61,7 +61,7 @@ describe('useStopInputKeyPropagation', () => {
 
     // result
     expect(blur).not.toHaveBeenCalled();
-    expect(stopPropagation).not.toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
   });
 
   it('should still forward every key to the given onKeyDown prop', () => {

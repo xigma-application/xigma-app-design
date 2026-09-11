@@ -2,6 +2,7 @@
 import { THoverRefs } from 'types/design/canvas/types';
 
 export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs => ({
+  editingGridTrackValueRef: { current: null },
   hoverRef: { current: null },
   hoveredAutoLayoutGapRef: { current: null },
   hoveredAutoLayoutPaddingBandsRef: { current: null },

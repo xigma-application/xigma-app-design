@@ -173,6 +173,32 @@ describe('drawGridTrackAffordance', () => {
     expect(drawGridTrackAffordanceGhostMock).toHaveBeenCalledWith(context, frame, expect.anything(), dragState, expect.anything());
   });
 
+  it('should draw both axes, with a null hover, when there is no hover/selection but a live value edit is in progress for this frame', () => {
+    const frame = gridFrame();
+    const refs = createCanvasRefs();
+
+    refs.hover.editingGridTrackValueRef.current = { axis: 'column', frameId: 'frame-1', index: 0, text: '250' };
+
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
+
+    expect(drawGridTrackAffordanceAxisDrawsMock).toHaveBeenCalledTimes(2);
+
+    const [, , , , , , , , , editingValueArg] = drawGridTrackAffordanceAxisDrawsMock.mock.calls[0];
+
+    expect(editingValueArg).toEqual(refs.hover.editingGridTrackValueRef.current);
+  });
+
+  it('should ignore a live value edit that belongs to a different frame', () => {
+    const frame = gridFrame();
+    const refs = createCanvasRefs();
+
+    refs.hover.editingGridTrackValueRef.current = { axis: 'column', frameId: 'other-frame', index: 0, text: '250' };
+
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame }, null);
+
+    expect(drawGridTrackAffordanceAxisDrawsMock).not.toHaveBeenCalled();
+  });
+
   it('should ignore a drag that belongs to a different frame', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();

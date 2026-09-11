@@ -646,6 +646,32 @@ value field and `var(--color-neutral-1)` handle digits (`GridTrackRow--selected`
   preserving every other call site's existing behaviour) that `GridTrackRow` passes `false` for
   its mode dropdown and value field specifically, so Cmd+Z reaches the app's `undo` thunk even
   while the user is still focused on a field they were just editing.
+- **Editing a track's value directly on the canvas** — clicking an *already-selected* pill's value
+  band (`hoveredHandlePart === 'value'`) opens an inline editor there, with the same fr/fixed/hug
+  parsing rules and multi-selection propagation as the panel's own value field (see History #23).
+  It is a second plain click, not a double-click: `armGridTrackValueEditOnPointerDown` runs *before*
+  `armGridTrackAffordanceOnPointerDown` in the resolver chain and only fires when the clicked index
+  is already part of `gridTrackSelection` for that axis+frame, in which case it dispatches
+  `gridTrackValueEditRequest` (a `{axis, frameId, index} | null` redux field) and returns `true`,
+  short-circuiting the chain before the ordinary select-resolver can run — this is *why* clicking a
+  value that's part of a multi-selection opens editing instead of collapsing the group to just that
+  row, the opposite of the panel's own handle-click behaviour a few bullets up. A resolver (plain
+  dispatch, no React) can't hold local edit state itself, so redux is the bridge to
+  `GridTrackValueLabelEditOverlay`'s `useGridTrackValueLabelEditor` hook, which watches the request
+  via `useSelector` and renders a real `<input>` (`CanvasValueLabelInput`, shared with the vector
+  variable-width tool) positioned over the pill with `worldToScreen`. Typing calls
+  `commitGridTrackValueLiveChange` on every keystroke, which recomputes the pill's badge/grip/chevron
+  geometry from the *live* typed text (capped at `GRID_TRACK_AFFORDANCE_VALUE_MAX_WIDTH_PX`) and
+  writes it into `refs.hover.editingGridTrackValueRef` so `drawGridTrackAffordanceExpanded` draws the
+  grip and chevron pushed apart to match — otherwise a long typed value would grow independently on
+  each side (the WebGL pill computing its own, uncapped width from the full raw string) and visibly
+  diverge from the input's width. While a pill is mid-edit its real WebGL text glyphs aren't drawn at
+  all (the opaque input already covers that area); `CanvasValueLabelInput`'s font was changed to
+  `'Inter MSDF'` (a `@font-face` already declared for exactly this, pointing at the same `.ttf` the
+  MSDF atlas was built from) so the DOM input's own text measurement lines up with the WebGL
+  measurement without a fudge factor. Enter/blur commits via `commitGridTrackValueEdit` (the same
+  per-mode fill/fixed/hug branches as the panel), Escape cancels; either way the hook dispatches
+  `gridTrackValueEditRequest(null)`, whose `useEffect` clears the ref and local state.
 
 ### Panel — resizing a grid that already has children (`resolveGridResize`)
 
@@ -1310,3 +1336,35 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     selected at their old positions — no watcher, ref, or equality guard involved, just two more
     fields in an existing imperative snapshot/restore pipeline. Un-skipped e2e #37 (now passing) and
     reworded the doc/table entries that described it as a known regression.
+23. **2026-09-11/12 — grid flow, editing a track's value directly on the canvas (§13 "Editing a
+    track's value directly on the canvas").** New affordance: click a value pill that's already
+    selected (a second plain click, not a double-click) to edit it in place, with the panel's exact
+    fr/fixed/hug parsing and multi-selection propagation. First build used `useDoubleClickActivation`
+    (the same mechanism `VectorWidthLabelEditOverlay`/frame-rename use) — dropped once the user asked
+    for multi-selection to survive entering edit mode, since a double-click's own first pointerdown
+    always runs the ordinary select-resolver first, collapsing any existing multi-selection before
+    the dblclick handler even fires. Replaced with a dedicated pointerdown resolver
+    (`armGridTrackValueEditOnPointerDown`), ordered *before* `armGridTrackAffordanceOnPointerDown`,
+    that only claims the click when the index is already selected — dispatching a small
+    `gridTrackValueEditRequest` redux field instead of local state, since a resolver has no React
+    state to set directly; `useGridTrackValueLabelEditor` watches that field via `useSelector`. Two
+    rendering-sync bugs surfaced once real (non-numeric, `"fr"`-suffixed) text needed to render
+    inside the shared `CanvasValueLabelInput`: (a) the DOM input's `font-weight: 600` didn't match
+    the MSDF atlas's `Inter-Regular` metrics the WebGL badge/grip/chevron geometry was computed from,
+    so the two disagreed on how wide the same string was — fixed by pointing the input at the
+    already-declared-but-unused `'Inter MSDF'` @font-face (the literal same `.ttf` the atlas was
+    built from) instead of chasing the mismatch with padding constants; (b) for text long enough to
+    hit the (separately, deliberately capped) 100px badge-width ceiling, the WebGL draw computed its
+    *own* uncapped geometry from the full raw string independent of the input, so the two visibly
+    diverged — fixed by extracting the clamp+pad bounds computation into
+    `getGridTrackValueEditBounds` and having `drawGridTrackAffordanceExpanded` use it (and skip
+    drawing the real glyphs entirely) whenever the pill it's drawing is the one currently being
+    edited, rather than maintaining two independent geometry computations. Also added
+    `data-test-bypass-global-shortcuts` to `CanvasValueLabelInput` (it didn't have it before; nothing
+    that shared it needed to type letters like "f"/"r" that collide with tool shortcuts) — without it
+    typing "fr" silently dropped those two keystrokes. Purely a test-authoring gotcha, not a product
+    bug: e2e coverage for this needed `Meta` rather than `Control` as the multi-select modifier,
+    since Chromium's macOS build treats a Control-held click as a contextmenu trigger (mimicking the
+    native macOS convention) — harmless for the existing single ctrl-click assertions elsewhere in
+    this file, but fatal for a test that clicks the canvas again afterward, since the still-open
+    context menu silently swallows that next click.

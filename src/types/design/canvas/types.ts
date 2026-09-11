@@ -253,7 +253,21 @@ export type TGridTrackAffordanceHover = {
   rowIndex: number;
 };
 
+export type TEditingGridTrackValue = {
+  axis: TGridTrackAxis;
+  frameId: string;
+  index: number;
+  text: string;
+};
+
+export type TGridTrackValueEditRequest = {
+  axis: TGridTrackAxis;
+  frameId: string;
+  index: number;
+};
+
 export type THoverRefs = {
+  editingGridTrackValueRef: RefObject<TEditingGridTrackValue | null>;
   hoverRef: RefObject<string | null>;
   hoveredAutoLayoutGapRef: RefObject<TAutoLayoutGapHoverState | null>;
   hoveredAutoLayoutPaddingBandsRef: RefObject<TAutoLayoutPaddingSide[] | null>;

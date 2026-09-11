@@ -5,6 +5,7 @@ import {
   TAutoLayoutGapHoverState,
   TAutoLayoutPaddingHoverState,
   TCornerRadiusHandleHover,
+  TEditingGridTrackValue,
   TGridTrackAffordanceHover,
   THoverRefs,
   TRightPanelPaddingGuideState,
@@ -20,6 +21,7 @@ import { TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TPoint } from 'types/canvas';
 
 export const useHoverRefs = (): THoverRefs => {
+  const editingGridTrackValueRef = useRef<TEditingGridTrackValue | null>(null);
   const hoverRef = useRef<string | null>(null);
   const hoveredAutoLayoutGapRef = useRef<TAutoLayoutGapHoverState | null>(null);
   const hoveredAutoLayoutPaddingBandsRef = useRef<TAutoLayoutPaddingSide[] | null>(null);
@@ -56,6 +58,7 @@ export const useHoverRefs = (): THoverRefs => {
 
   if (hoverRefsRef.current === null) {
     hoverRefsRef.current = {
+      editingGridTrackValueRef,
       hoverRef,
       hoveredAutoLayoutGapRef,
       hoveredAutoLayoutPaddingBandsRef,

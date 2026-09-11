@@ -20,16 +20,18 @@ export const drawGridTrackAffordanceAxis = (
   resolvedSize: number,
   rotation: number,
   rotationCenter: TPoint,
+  textOverride: string | null,
 ): void => {
   if (isExpanded) {
     drawGridTrackAffordanceExpanded(
       context,
       center,
       axis,
-      getGridTrackAffordanceValueText(track, resolvedSize),
+      textOverride ?? getGridTrackAffordanceValueText(track, resolvedSize),
       hoveredHandlePart,
       rotation,
       rotationCenter,
+      textOverride !== null,
     );
   } else {
     drawGridTrackAffordancePill(context, center, axis, rotation, rotationCenter);

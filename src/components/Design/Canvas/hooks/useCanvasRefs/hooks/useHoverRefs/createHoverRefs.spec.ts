@@ -8,6 +8,7 @@ describe('createHoverRefs behaviors', () => {
 
     // result
     expect(refs).toEqual({
+      editingGridTrackValueRef: { current: null },
       hoverRef: { current: null },
       hoveredAutoLayoutGapRef: { current: null },
       hoveredAutoLayoutPaddingBandsRef: { current: null },

@@ -4,6 +4,7 @@ type TParams = {
   initialValue: number | string;
   onCancel: TFunc;
   onCommit: TFunc<[string]>;
+  onLiveChange?: TFunc<[string]>;
 };
 
 type TCanvasValueLabelInput = {
@@ -14,10 +15,15 @@ type TCanvasValueLabelInput = {
   value: string;
 };
 
-export const useCanvasValueLabelInput = ({ initialValue, onCancel, onCommit }: TParams): TCanvasValueLabelInput => {
+export const useCanvasValueLabelInput = ({ initialValue, onCancel, onCommit, onLiveChange }: TParams): TCanvasValueLabelInput => {
   const inputRef = useRef<HTMLInputElement>(null);
   const settledRef = useRef(false);
   const [value, setValue] = useState(String(initialValue));
+
+  const handleChange = (raw: string): void => {
+    setValue(raw);
+    onLiveChange?.(raw);
+  };
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -45,7 +51,7 @@ export const useCanvasValueLabelInput = ({ initialValue, onCancel, onCommit }: T
 
   return {
     handleBlur: (): void => settle(() => onCommit(value)),
-    handleChange: setValue,
+    handleChange,
     handleKeyDown,
     inputRef,
     value,

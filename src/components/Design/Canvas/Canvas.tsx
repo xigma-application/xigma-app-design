@@ -6,6 +6,7 @@ import AutoLayoutPaddingEditOverlay from './AutoLayoutPaddingEditOverlay/AutoLay
 import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
+import GridTrackValueLabelEditOverlay from './GridTrackValueLabelEditOverlay/GridTrackValueLabelEditOverlay';
 import GuideContextMenuPanel from './GuideContextMenuPanel/GuideContextMenuPanel';
 import RulersLayer from './RulersLayer/RulersLayer';
 import ScrollbarsLayer from './ScrollbarsLayer/ScrollbarsLayer';
@@ -110,6 +111,7 @@ const Canvas: FC = () => {
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />
+      <GridTrackValueLabelEditOverlay />
       <SectionNameLabelEditOverlay />
       <AutoLayoutPaddingEditOverlay />
       <Comment />

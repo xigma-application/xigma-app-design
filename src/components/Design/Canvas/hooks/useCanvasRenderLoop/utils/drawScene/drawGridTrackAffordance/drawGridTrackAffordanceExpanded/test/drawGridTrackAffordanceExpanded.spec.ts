@@ -6,6 +6,7 @@ import { drawGridTrackAffordanceExpanded } from '../drawGridTrackAffordanceExpan
 
 const buildGlyphQuadsMock = vi.fn();
 const getGlyphQuadBoundsMock = vi.fn();
+const getGridTrackValueEditBoundsMock = vi.fn();
 const getGridTrackAffordanceExpandedGeometryMock = vi.fn();
 const getGridTrackAffordanceHandleBandsMock = vi.fn();
 const drawRectMock = vi.fn();
@@ -19,6 +20,9 @@ vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
 }));
 vi.mock('utils/canvas/text/getGlyphQuadBounds', () => ({
   getGlyphQuadBounds: (...args: unknown[]): unknown => getGlyphQuadBoundsMock(...args),
+}));
+vi.mock('utils/canvas/gridSlots/getGridTrackValueEditBounds', () => ({
+  getGridTrackValueEditBounds: (...args: unknown[]): unknown => getGridTrackValueEditBoundsMock(...args),
 }));
 vi.mock('utils/canvas/gridSlots/getGridTrackAffordanceExpandedGeometry', () => ({
   getGridTrackAffordanceExpandedGeometry: (...args: unknown[]): unknown => getGridTrackAffordanceExpandedGeometryMock(...args),
@@ -71,6 +75,7 @@ describe('drawGridTrackAffordanceExpanded', () => {
   beforeEach(() => {
     buildGlyphQuadsMock.mockClear().mockReturnValue([]);
     getGlyphQuadBoundsMock.mockClear().mockReturnValue(BOUNDS);
+    getGridTrackValueEditBoundsMock.mockClear().mockReturnValue(BOUNDS);
     getGridTrackAffordanceExpandedGeometryMock.mockClear().mockReturnValue(GEOMETRY);
     getGridTrackAffordanceHandleBandsMock.mockClear().mockReturnValue(BANDS);
     drawRectMock.mockClear();
@@ -83,7 +88,7 @@ describe('drawGridTrackAffordanceExpanded', () => {
   it('should draw nothing when the text produces no glyphs', () => {
     getGlyphQuadBoundsMock.mockReturnValue(null);
 
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 }, false);
 
     expect(drawRectMock).not.toHaveBeenCalled();
     expect(drawGridTrackAffordanceGripMock).not.toHaveBeenCalled();
@@ -92,7 +97,7 @@ describe('drawGridTrackAffordanceExpanded', () => {
   });
 
   it('should draw the rounded badge background centered on the given point, using the label colors', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 }, false);
 
     const [, , , rect] = drawRectMock.mock.calls[0];
 
@@ -104,13 +109,13 @@ describe('drawGridTrackAffordanceExpanded', () => {
   });
 
   it('should draw the grip at its geometry center, using the given axis', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'row', '1fr', null, 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'row', '1fr', null, 0, { x: 0, y: 0 }, false);
 
     expect(drawGridTrackAffordanceGripMock).toHaveBeenCalledWith(context, GEOMETRY.gripCenter, 'row', 0, { x: 0, y: 0 });
   });
 
   it('should draw the value text and the chevron at their own geometry centers', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 }, false);
 
     expect(drawValueLabelTextMock).toHaveBeenCalledWith(
       context.gl,
@@ -128,14 +133,14 @@ describe('drawGridTrackAffordanceExpanded', () => {
   });
 
   it('should not draw a handle highlight when no handle part is hovered', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', null, 0, { x: 0, y: 0 }, false);
 
     expect(getGridTrackAffordanceHandleBandsMock).not.toHaveBeenCalled();
     expect(drawGridTrackAffordanceHandleHighlightMock).not.toHaveBeenCalled();
   });
 
   it('should draw the highlight for the hovered handle part, before the icons/text', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', 'grip', 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', 'grip', 0, { x: 0, y: 0 }, false);
 
     expect(getGridTrackAffordanceHandleBandsMock).toHaveBeenCalledWith(CENTER, GEOMETRY);
     expect(drawGridTrackAffordanceHandleHighlightMock).toHaveBeenCalledWith(context, BANDS.grip, 0, { x: 0, y: 0 });
@@ -145,8 +150,35 @@ describe('drawGridTrackAffordanceExpanded', () => {
   });
 
   it('should draw the highlight for the value band when that part is hovered', () => {
-    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', 'value', 0, { x: 0, y: 0 });
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '1fr', 'value', 0, { x: 0, y: 0 }, false);
 
     expect(drawGridTrackAffordanceHandleHighlightMock).toHaveBeenCalledWith(context, BANDS.value, 0, { x: 0, y: 0 });
+  });
+
+  it('should size the badge from the clamped edit bounds, not the raw text bounds, while a live edit is in progress', () => {
+    const editBounds = { maxX: 40, maxY: 5, minX: -40, minY: -5 };
+    getGridTrackValueEditBoundsMock.mockReturnValue(editBounds);
+
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '99999999999999', null, 0, { x: 0, y: 0 }, true);
+
+    expect(getGridTrackValueEditBoundsMock).toHaveBeenCalledWith('99999999999999', 1);
+    expect(getGridTrackAffordanceExpandedGeometryMock).toHaveBeenCalledWith(CENTER, editBounds, 1);
+  });
+
+  it('should not draw the value text glyphs while a live edit is in progress — the HTML input already covers that area', () => {
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '3fr', null, 0, { x: 0, y: 0 }, true);
+
+    expect(drawValueLabelTextMock).not.toHaveBeenCalled();
+    expect(drawRectMock).toHaveBeenCalled();
+    expect(drawGridTrackAffordanceGripMock).toHaveBeenCalled();
+    expect(drawGridTrackAffordanceChevronMock).toHaveBeenCalled();
+  });
+
+  it('should draw nothing when editing and the clamped edit bounds resolve to null', () => {
+    getGridTrackValueEditBoundsMock.mockReturnValue(null);
+
+    drawGridTrackAffordanceExpanded(context, CENTER, 'column', '', null, 0, { x: 0, y: 0 }, true);
+
+    expect(drawRectMock).not.toHaveBeenCalled();
   });
 });

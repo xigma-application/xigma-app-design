@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs, TGridTrackAffordanceDragState, TGridTrackSelection } from 'types/design/canvas/types';
+import { TCanvasRefs, TEditingGridTrackValue, TGridTrackAffordanceDragState, TGridTrackSelection } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TFrameNode } from 'types/design/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
@@ -34,6 +34,7 @@ export const drawGridTrackAffordanceAxisDraws = (
   offset: number,
   frameCenter: TPoint,
   dragState: TGridTrackAffordanceDragState | null,
+  editingValue: TEditingGridTrackValue | null,
 ): void => {
   const draws = getVisibleGridTrackAffordanceDraws(axis, hover, selection, dragState);
   const trackCount = axis === 'column' ? layout.columnCount : layout.rowCount;
@@ -44,6 +45,7 @@ export const drawGridTrackAffordanceAxisDraws = (
     const cell = { column: axis === 'column' ? draw.index : 0, row: axis === 'row' ? draw.index : 0 };
     const pillCenters = getGridTrackAffordancePillCenters(frame, layout, cell, offset);
     const track = buildGridTracks(trackCount, providedSizes, DEFAULT_GRID_TRACK)[draw.index] ?? DEFAULT_GRID_TRACK;
+    const textOverride = editingValue && editingValue.axis === axis && editingValue.index === draw.index ? editingValue.text : null;
 
     drawGridTrackAffordanceAxis(
       context,
@@ -55,6 +57,7 @@ export const drawGridTrackAffordanceAxisDraws = (
       trackSizes[draw.index] ?? 0,
       frame.rotation,
       frameCenter,
+      textOverride,
     );
   });
 };

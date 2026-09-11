@@ -15,6 +15,8 @@ const FRAME = { x1: 600, x2: 1100, y1: 150, y2: 700 };
 
 const flowGroup = (page: Page): Locator => page.locator('[data-test-toggle-button-group="flow"]');
 
+const canvasTrackValueInput = (page: Page): Locator => page.locator('[class*="GridTrackValueLabelEditOverlay__input"]');
+
 const setFlow = async (page: Page, option: 'Grid' | 'Horizontal'): Promise<void> => {
   await flowGroup(page).getByLabel(option, { exact: true }).click();
 };
@@ -2196,5 +2198,137 @@ test.describe('auto-layout — Grid flow', () => {
 
     await expect(page.locator('[data-test-grid-settings-panel]')).not.toBeVisible();
     await expect.poll(() => readGridTrackSelection(page)).toBeNull();
+  });
+
+  test('clicking an already-selected track pill’s value on the canvas edits it in place, keeping it in fill mode for an "Nfr" input', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-value-edit-fr');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    // the seeded 2-column grid's first column pill, centered on the column, above the frame
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+
+    // first click selects the track; a second click on an already-selected value opens editing —
+    // this (not a double-click) is what avoids collapsing a multi-selection, see the next test
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+    await page.mouse.click(column0X, columnPillY);
+    await expect(canvasTrackValueInput(page)).toBeFocused();
+    await canvasTrackValueInput(page).selectText();
+    await page.keyboard.type('3fr');
+    await page.keyboard.press('Enter');
+
+    await expect.poll(() => readColumnTrack(page, 0)).toEqual({ mode: 'fill', value: 3 });
+  });
+
+  test('clicking an already-selected track pill’s value on the canvas drops it out of fill for a bare number, same as the panel field', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-value-edit-fixed');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+
+    // a bare number (no "fr" unit) drops the track out of fill, to fixed — same as the panel field
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+    await page.mouse.click(column0X, columnPillY);
+    await expect(canvasTrackValueInput(page)).toBeFocused();
+    await canvasTrackValueInput(page).selectText();
+    await page.keyboard.type('150');
+    await page.keyboard.press('Enter');
+
+    await expect.poll(() => readColumnTrack(page, 0)).toEqual({ mode: 'fixed', value: 150 });
+  });
+
+  test('clicking a value pill that is part of a multi-selection applies the new value to every selected track, without dropping the rest of the selection', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-value-edit-multi-select');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+    const column1X = FRAME.x1 + (3 * (FRAME.x2 - FRAME.x1)) / 4;
+
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+
+    // Cmd (not Ctrl) — holding Control into a click triggers Chromium's macOS-style
+    // contextmenu convention, which would swallow the next click on the canvas below
+    await page.keyboard.down('Meta');
+    await page.mouse.click(column1X, columnPillY);
+    await page.keyboard.up('Meta');
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1] });
+
+    // clicking column 0's already-selected value must not collapse the pair down to just [0]
+    await page.mouse.click(column0X, columnPillY);
+    await expect(canvasTrackValueInput(page)).toBeFocused();
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1] });
+
+    await canvasTrackValueInput(page).selectText();
+    await page.keyboard.type('200');
+    await page.keyboard.press('Enter');
+
+    const triggerTrack = await readColumnTrack(page, 0);
+
+    expect(triggerTrack).toEqual({ mode: 'fixed', value: 200 });
+    expect(await readColumnTrack(page, 1)).toEqual(triggerTrack);
+  });
+
+  test('pressing Escape while editing a canvas track value leaves it unchanged', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-value-edit-escape');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+    await page.mouse.click(column0X, columnPillY);
+    await expect(canvasTrackValueInput(page)).toBeFocused();
+    await canvasTrackValueInput(page).selectText();
+    await page.keyboard.type('999');
+    await page.keyboard.press('Escape');
+
+    // no commit happened, so the track's stored size is still whatever it started as (unset —
+    // the default fill weight only gets written to the node on an actual commit)
+    await expect(canvasTrackValueInput(page)).toHaveCount(0);
+    expect(await readColumnTrack(page, 0)).toBeUndefined();
   });
 });

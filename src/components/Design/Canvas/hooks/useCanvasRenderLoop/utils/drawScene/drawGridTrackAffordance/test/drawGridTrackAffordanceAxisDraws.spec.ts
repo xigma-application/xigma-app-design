@@ -2,7 +2,12 @@
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TFrameNode } from 'types/design/types';
-import { TGridTrackAffordanceDragState, TGridTrackAffordanceHover, TGridTrackSelection } from 'types/design/canvas/types';
+import {
+  TEditingGridTrackValue,
+  TGridTrackAffordanceDragState,
+  TGridTrackAffordanceHover,
+  TGridTrackSelection,
+} from 'types/design/canvas/types';
 
 // utils
 import { drawGridTrackAffordanceAxisDraws } from '../drawGridTrackAffordanceAxisDraws';
@@ -59,7 +64,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
       rowIndex: 0,
     };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', hover, null, 40, frameCenter, null);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', hover, null, 40, frameCenter, null, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(1);
 
@@ -75,7 +80,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
   });
 
   it('should draw nothing when there is no hover and no selection for this axis', () => {
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, null, 40, frameCenter, null);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, null, 40, frameCenter, null, null);
 
     expect(drawGridTrackAffordanceAxisMock).not.toHaveBeenCalled();
   });
@@ -83,7 +88,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
   it('should draw a single expanded pinned pill when only a selection exists on this axis, with no hover', () => {
     const selection: TGridTrackSelection = { axis: 'column', frameId: 'frame-1', indices: [0] };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(1);
 
@@ -103,7 +108,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
     };
     const selection: TGridTrackSelection = { axis: 'row', frameId: 'frame-1', indices: [1] };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'row', hover, selection, 40, frameCenter, null);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'row', hover, selection, 40, frameCenter, null, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(2);
   });
@@ -111,7 +116,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
   it('should draw one expanded pill per selected index in a multi-selection', () => {
     const selection: TGridTrackSelection = { axis: 'column', frameId: 'frame-1', indices: [0, 1, 2] };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(3);
     drawGridTrackAffordanceAxisMock.mock.calls.forEach(([, , , isExpanded]) => expect(isExpanded).toBe(true));
@@ -128,7 +133,7 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
       sourceIndices: [1],
     };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, dragState);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, dragState, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(2);
   });
@@ -144,8 +149,30 @@ describe('drawGridTrackAffordanceAxisDraws', () => {
       sourceIndices: [1],
     };
 
-    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, dragState);
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, dragState, null);
 
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('should pass the live-edited text through as an override for the track currently being typed into', () => {
+    const selection: TGridTrackSelection = { axis: 'column', frameId: 'frame-1', indices: [0] };
+    const editingValue: TEditingGridTrackValue = { axis: 'column', frameId: 'frame-1', index: 0, text: '250' };
+
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null, editingValue);
+
+    const [, , , , , , , , , textOverride] = drawGridTrackAffordanceAxisMock.mock.calls[0];
+
+    expect(textOverride).toBe('250');
+  });
+
+  it('should not override the text of a track other than the one being edited', () => {
+    const selection: TGridTrackSelection = { axis: 'column', frameId: 'frame-1', indices: [0] };
+    const editingValue: TEditingGridTrackValue = { axis: 'row', frameId: 'frame-1', index: 0, text: '250' };
+
+    drawGridTrackAffordanceAxisDraws(context, frame, layout, 'column', null, selection, 40, frameCenter, null, editingValue);
+
+    const [, , , , , , , , , textOverride] = drawGridTrackAffordanceAxisMock.mock.calls[0];
+
+    expect(textOverride).toBeNull();
   });
 });

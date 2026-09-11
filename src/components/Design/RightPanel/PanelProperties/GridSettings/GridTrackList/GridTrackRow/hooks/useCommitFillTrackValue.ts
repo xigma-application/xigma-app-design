@@ -1,7 +1,7 @@
 import { FocusEvent } from 'react';
 
 // utils
-import { parseFillFieldInput } from '../utils/parseFillFieldInput';
+import { parseFillFieldInput } from 'store/design/utils/autoLayout/gridTracks/parseFillFieldInput';
 
 // types
 import { SizingMode } from 'types/design/enums';
