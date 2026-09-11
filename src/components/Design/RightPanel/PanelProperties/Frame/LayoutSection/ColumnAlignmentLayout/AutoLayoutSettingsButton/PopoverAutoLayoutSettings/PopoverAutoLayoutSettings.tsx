@@ -75,19 +75,19 @@ export const PopoverAutoLayoutSettings: FC<TPopoverAutoLayoutSettingsProps> = ({
         autoSpacing={autoSpacingPreviewValue}
         canvasStacking={canvasStackingPreviewValue}
         insideStroke={insideStrokePreviewValue}
+        isLegacyLayout={isLegacyLayout}
         layout={layoutPreviewValue}
       />
       <div className={styles.PopoverAutoLayoutSettings__rows}>
-        {isLegacyLayout && (
-          <PopoverAutoLayoutSettingsInsideStroke
-            onHoverOption={onHoverInsideStrokeOption}
-            onMouseEnter={onMouseEnterInsideStroke}
-            onMouseLeave={onMouseLeaveInsideStroke}
-            onSelect={onSelectInsideStroke}
-            options={insideStrokeOptions}
-            value={insideStrokeValue}
-          />
-        )}
+        <PopoverAutoLayoutSettingsInsideStroke
+          isLegacyLayout={isLegacyLayout}
+          onHoverOption={onHoverInsideStrokeOption}
+          onMouseEnter={onMouseEnterInsideStroke}
+          onMouseLeave={onMouseLeaveInsideStroke}
+          onSelect={onSelectInsideStroke}
+          options={insideStrokeOptions}
+          value={insideStrokeValue}
+        />
         {!isGridLayout && (
           <PopoverAutoLayoutSettingsCanvasStacking
             onHoverOption={onHoverCanvasStackingOption}

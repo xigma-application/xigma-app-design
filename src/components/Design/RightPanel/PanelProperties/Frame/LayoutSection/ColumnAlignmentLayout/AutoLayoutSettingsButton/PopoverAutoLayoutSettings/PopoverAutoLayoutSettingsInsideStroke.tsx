@@ -16,6 +16,7 @@ import { TInsideStroke } from './types';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 
 export type TPopoverAutoLayoutSettingsInsideStrokeProps = {
+  isLegacyLayout: boolean;
   onHoverOption: TFunc<[TInsideStroke | null]>;
   onMouseEnter: TFunc;
   onMouseLeave: TFunc;
@@ -25,6 +26,7 @@ export type TPopoverAutoLayoutSettingsInsideStrokeProps = {
 };
 
 export const PopoverAutoLayoutSettingsInsideStroke: FC<TPopoverAutoLayoutSettingsInsideStrokeProps> = ({
+  isLegacyLayout,
   onHoverOption,
   onMouseEnter,
   onMouseLeave,
@@ -33,13 +35,10 @@ export const PopoverAutoLayoutSettingsInsideStroke: FC<TPopoverAutoLayoutSetting
   value,
 }) => {
   const { t } = useTranslation();
+  const labelKey = isLegacyLayout ? 'insideStroke.legacyLabel' : 'insideStroke.label';
 
   return (
-    <PopoverAutoLayoutSettingsRow
-      label={t(`${translationNameSpace}.insideStroke.label`)}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
+    <PopoverAutoLayoutSettingsRow label={t(`${translationNameSpace}.${labelKey}`)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <UITools.Dropdown
         className={styles.PopoverAutoLayoutSettings__dropdown}
         onHoverOption={onHoverOption}

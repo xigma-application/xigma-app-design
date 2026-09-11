@@ -6,6 +6,7 @@ import PreviewAlignTextBaseline from '../PreviewAlignTextBaseline/PreviewAlignTe
 import PreviewAutoSpacing from '../PreviewAutoSpacing/PreviewAutoSpacing';
 import PreviewCanvasStacking from '../PreviewCanvasStacking/PreviewCanvasStacking';
 import PreviewInsideStroke from '../PreviewInsideStroke/PreviewInsideStroke';
+import PreviewInsideStrokeUpdated from '../PreviewInsideStrokeUpdated/PreviewInsideStrokeUpdated';
 import PreviewLayout from '../PreviewLayout/PreviewLayout';
 
 // others
@@ -22,11 +23,12 @@ export type TPreviewValues = {
   autoSpacing: TAutoSpacing | null;
   canvasStacking: TCanvasStacking | null;
   insideStroke: TInsideStroke | null;
+  isLegacyLayout: boolean;
   layout: TLayoutVersion | null;
 };
 
 export const getPreviewContent = (values: TPreviewValues, t: TFunction): ReactNode => {
-  const { alignTextBaseline, autoSpacing, canvasStacking, insideStroke, layout } = values;
+  const { alignTextBaseline, autoSpacing, canvasStacking, insideStroke, isLegacyLayout, layout } = values;
 
   const state = insideStroke
     ? { kind: 'insideStroke' as const, value: insideStroke }
@@ -42,7 +44,7 @@ export const getPreviewContent = (values: TPreviewValues, t: TFunction): ReactNo
 
   switch (state.kind) {
     case 'insideStroke':
-      return <PreviewInsideStroke value={state.value} />;
+      return isLegacyLayout ? <PreviewInsideStroke value={state.value} /> : <PreviewInsideStrokeUpdated value={state.value} />;
     case 'canvasStacking':
       return <PreviewCanvasStacking value={state.value} />;
     case 'alignTextBaseline':

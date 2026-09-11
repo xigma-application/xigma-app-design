@@ -105,8 +105,19 @@ describe('getFrameLayoutPadding', () => {
       expect(getFrameLayoutPadding(padded)).toEqual({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 });
     });
 
-    it('should not read the inside-stroke toggle', () => {
+    it('should ignore the inside-stroke toggle for a non-inside-aligned stroke', () => {
       const padded = frame({ insideStroke: InsideStroke.included, strokeColor: '#000', strokeWidth: 4 });
+
+      expect(getFrameLayoutPadding(padded)).toEqual({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 });
+    });
+
+    it('should still respect the inside-stroke toggle for an inside-aligned stroke', () => {
+      const padded = frame({
+        insideStroke: InsideStroke.excluded,
+        strokeAlign: StrokeAlign.inside,
+        strokeColor: '#000',
+        strokeWidth: 4,
+      });
 
       expect(getFrameLayoutPadding(padded)).toEqual({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 });
     });

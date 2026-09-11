@@ -11,6 +11,7 @@ const NO_PREVIEW: TPopoverAutoLayoutSettingsPreviewProps = {
   autoSpacing: null,
   canvasStacking: null,
   insideStroke: null,
+  isLegacyLayout: false,
   layout: null,
 };
 
@@ -23,13 +24,22 @@ describe('PopoverAutoLayoutSettingsPreview', () => {
     expect(screen.getByText('Preview')).toBeInTheDocument();
   });
 
-  it('should render the inside stroke preview visual instead of the placeholder when a value is passed', () => {
+  it('should render the updated inside stroke preview visual instead of the placeholder when a value is passed', () => {
     // before
     const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} insideStroke={InsideStroke.included} />);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();
-    expect(container.querySelector('[class*="PreviewInsideStroke"]')).not.toBeNull();
+    expect(container.querySelector('[class*="PreviewInsideStrokeUpdated"]')).not.toBeNull();
+  });
+
+  it('should render the legacy inside stroke preview visual instead of the placeholder for a legacy layout', () => {
+    // before
+    const { container } = render(<PopoverAutoLayoutSettingsPreview {...NO_PREVIEW} insideStroke={InsideStroke.included} isLegacyLayout />);
+
+    // result
+    expect(screen.queryByText('Preview')).not.toBeInTheDocument();
+    expect(container.querySelector('[class*="PreviewInsideStroke__tile-left"]')).not.toBeNull();
   });
 
   it('should render the canvas stacking preview visual instead of the placeholder when a value is passed', () => {

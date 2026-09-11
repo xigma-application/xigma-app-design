@@ -62,26 +62,26 @@ describe('PopoverAutoLayoutSettings snapshots', () => {
 });
 
 describe('PopoverAutoLayoutSettings behaviors', () => {
-  it('should render every row label, with the inside stroke row only under the legacy layout version', () => {
+  it('should render every row label, labeling the inside stroke row "Strokes" under the legacy layout version', () => {
     // before
     selectAFrame(LayoutMode.horizontal, { layoutVersion: LayoutVersion.legacy });
     renderSettings();
 
     // result
-    expect(screen.getByText('Inside stroke')).toBeInTheDocument();
+    expect(screen.getByText('Strokes')).toBeInTheDocument();
     expect(screen.getByText('Canvas stacking')).toBeInTheDocument();
     expect(screen.getByText('Align text baseline')).toBeInTheDocument();
     expect(screen.getByText('Auto spacing')).toBeInTheDocument();
     expect(screen.getByText('Layout')).toBeInTheDocument();
   });
 
-  it('should hide the inside stroke row under the updated layout version, since the stroke alignment drives it automatically', () => {
+  it('should still show the inside stroke row under the updated layout version, labeled "Inside stroke"', () => {
     // before — a fresh frame defaults to the updated engine
     selectAFrame(LayoutMode.horizontal);
     renderSettings();
 
     // result
-    expect(screen.queryByText('Inside stroke')).not.toBeInTheDocument();
+    expect(screen.getByText('Inside stroke')).toBeInTheDocument();
     expect(screen.getByText('Layout')).toBeInTheDocument();
   });
 
@@ -118,13 +118,13 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     expect(screen.getByText('Preview')).toBeInTheDocument();
 
     // action
-    fireEvent.mouseEnter(screen.getByText('Inside stroke').parentElement!);
+    fireEvent.mouseEnter(screen.getByText('Strokes').parentElement!);
 
     // result
     expect(screen.queryByText('Preview')).not.toBeInTheDocument();
 
     // action
-    fireEvent.mouseLeave(screen.getByText('Inside stroke').parentElement!);
+    fireEvent.mouseLeave(screen.getByText('Strokes').parentElement!);
 
     // result
     expect(screen.getByText('Preview')).toBeInTheDocument();
@@ -306,13 +306,13 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     expect(container.querySelector('[class*="PreviewLayout--legacy"]')).not.toBeNull();
   });
 
-  it('should only show the inside stroke and layout rows for a legacy grid layout', () => {
+  it('should only show the strokes and layout rows for a legacy grid layout', () => {
     // before
     selectAFrame(LayoutMode.grid, { layoutVersion: LayoutVersion.legacy });
     renderSettings(vi.fn(), LayoutMode.grid);
 
     // result
-    expect(screen.getByText('Inside stroke')).toBeInTheDocument();
+    expect(screen.getByText('Strokes')).toBeInTheDocument();
     expect(screen.getByText('Layout')).toBeInTheDocument();
     expect(screen.queryByText('Canvas stacking')).not.toBeInTheDocument();
     expect(screen.queryByText('Align text baseline')).not.toBeInTheDocument();
@@ -325,7 +325,7 @@ describe('PopoverAutoLayoutSettings behaviors', () => {
     renderSettings(vi.fn(), LayoutMode.vertical);
 
     // result — every other row still shows for a vertical frame
-    expect(screen.getByText('Inside stroke')).toBeInTheDocument();
+    expect(screen.getByText('Strokes')).toBeInTheDocument();
     expect(screen.getByText('Canvas stacking')).toBeInTheDocument();
     expect(screen.getByText('Auto spacing')).toBeInTheDocument();
     expect(screen.getByText('Layout')).toBeInTheDocument();

@@ -7,11 +7,16 @@ import { TFrameNode } from 'types/design/types';
 import { getFramePadding } from './getFramePadding';
 
 const strokeAffectsLayout = (frame: TFrameNode, layoutVersion: LayoutVersion): boolean => {
-  if (layoutVersion === LayoutVersion.legacy) {
-    return (frame.insideStroke ?? InsideStroke.included) === InsideStroke.included;
-  }
+  const isInsideStrokeIncluded = (frame.insideStroke ?? InsideStroke.included) === InsideStroke.included;
 
-  return (frame.strokeAlign ?? StrokeAlign.center) === StrokeAlign.inside;
+  switch (true) {
+    case layoutVersion === LayoutVersion.legacy:
+      return isInsideStrokeIncluded;
+    case (frame.strokeAlign ?? StrokeAlign.center) === StrokeAlign.inside:
+      return isInsideStrokeIncluded;
+    default:
+      return false;
+  }
 };
 
 export const getFrameLayoutPadding = (frame: TFrameNode, layoutVersion: LayoutVersion = LayoutVersion.updated): TAutoLayoutPadding => {

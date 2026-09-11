@@ -15,6 +15,7 @@ export type TPopoverAutoLayoutSettingsPreviewProps = {
   autoSpacing: TAutoSpacing | null;
   canvasStacking: TCanvasStacking | null;
   insideStroke: TInsideStroke | null;
+  isLegacyLayout: boolean;
   layout: TLayoutVersion | null;
 };
 
@@ -23,13 +24,14 @@ export const PopoverAutoLayoutSettingsPreview: FC<TPopoverAutoLayoutSettingsPrev
   autoSpacing,
   canvasStacking,
   insideStroke,
+  isLegacyLayout,
   layout,
 }) => {
   const { t } = useTranslation();
 
   return (
     <div className={styles.PopoverAutoLayoutSettingsPreview}>
-      {getPreviewContent({ alignTextBaseline, autoSpacing, canvasStacking, insideStroke, layout }, t)}
+      {getPreviewContent({ alignTextBaseline, autoSpacing, canvasStacking, insideStroke, isLegacyLayout, layout }, t)}
     </div>
   );
 };

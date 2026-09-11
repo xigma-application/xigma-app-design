@@ -9,15 +9,31 @@ import { getPreviewContent, TPreviewValues } from '../getPreviewContent';
 
 const t = i18n.t;
 
-const NO_PREVIEW: TPreviewValues = { alignTextBaseline: null, autoSpacing: null, canvasStacking: null, insideStroke: null, layout: null };
+const NO_PREVIEW: TPreviewValues = {
+  alignTextBaseline: null,
+  autoSpacing: null,
+  canvasStacking: null,
+  insideStroke: null,
+  isLegacyLayout: false,
+  layout: null,
+};
 
 describe('getPreviewContent', () => {
-  it('should render the inside stroke preview when an inside stroke value is set', () => {
+  it('should render the updated inside stroke preview when an inside stroke value is set under the updated layout version', () => {
     // before
-    const { container } = render(getPreviewContent({ ...NO_PREVIEW, insideStroke: InsideStroke.included }, t));
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, insideStroke: InsideStroke.included, isLegacyLayout: false }, t));
 
     // result
-    expect(container.querySelector('[class*="PreviewInsideStroke"]')).not.toBeNull();
+    expect(container.querySelector('[class*="PreviewInsideStrokeUpdated"]')).not.toBeNull();
+  });
+
+  it('should render the legacy inside stroke preview when an inside stroke value is set under the legacy layout version', () => {
+    // before
+    const { container } = render(getPreviewContent({ ...NO_PREVIEW, insideStroke: InsideStroke.included, isLegacyLayout: true }, t));
+
+    // result
+    expect(container.querySelector('[class*="PreviewInsideStroke__tile-left"]')).not.toBeNull();
+    expect(container.querySelector('[class*="PreviewInsideStrokeUpdated"]')).toBeNull();
   });
 
   it('should render the canvas stacking preview when a canvas stacking value is set', () => {
@@ -61,6 +77,7 @@ describe('getPreviewContent', () => {
           autoSpacing: AutoSpacing.between,
           canvasStacking: CanvasStacking.lastOnTop,
           insideStroke: InsideStroke.included,
+          isLegacyLayout: false,
           layout: LayoutVersion.legacy,
         },
         t,
@@ -68,7 +85,7 @@ describe('getPreviewContent', () => {
     );
 
     // result
-    expect(container.querySelector('[class*="PreviewInsideStroke"]')).not.toBeNull();
+    expect(container.querySelector('[class*="PreviewInsideStrokeUpdated"]')).not.toBeNull();
     expect(container.querySelector('[class*="PreviewCanvasStacking"]')).toBeNull();
     expect(container.querySelector('[class*="PreviewAlignTextBaseline"]')).toBeNull();
     expect(container.querySelector('[class*="PreviewAutoSpacing"]')).toBeNull();

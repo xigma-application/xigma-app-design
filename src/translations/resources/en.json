@@ -475,6 +475,7 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.canvasStacking.option.lastOnTop": "Last on top",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.header": "Auto layout settings",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.label": "Inside stroke",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.legacyLabel": "Strokes",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.option.excluded": "Excluded",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.option.included": "Included",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.layout.infoTooltip": "The updated layout is more consistent with CSS. The legacy version is available temporarily while you transition.",

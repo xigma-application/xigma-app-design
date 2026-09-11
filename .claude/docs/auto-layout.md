@@ -26,9 +26,12 @@ child of one (fill). Gap: `horizontalGap` / `verticalGap` (numbers) with `horizo
 `verticalGapMode` (`GapMode: fixed | auto`). Spacing when gap is auto: `autoSpacing` (`between |
 around | evenly`, default `between`). Padding: `paddingTop/Right/Bottom/Left`. Extras exposed through
 the settings popover: `canvasStacking` (`firstOnTop | lastOnTop`, default `lastOnTop`),
-`alignTextBaseline` (`off | on`), `insideStroke` (`included | excluded`, **legacy only**),
-`strokeAlign` (`center | inside | outside`, default `center` — the updated-version switch for whether
-a stroke affects layout). `TBaseNode.ignoreAutoLayout` opts a single child out entirely.
+`alignTextBaseline` (`off | on`), `insideStroke` (`included | excluded`, default `included` — shown
+in the popover under **both** layout versions, labeled "Strokes" for legacy and "Inside stroke" for
+updated), `strokeAlign` (`center | inside | outside`, default `center` — under `updated`, only a
+`strokeAlign === inside` stroke is even eligible to affect layout; `insideStroke` then decides
+whether that eligible stroke actually counts). `TBaseNode.ignoreAutoLayout` opts a single child out
+entirely.
 
 Enums: `src/types/design/enums.ts`.
 
@@ -169,8 +172,8 @@ layout:
 
 ```ts
 strokeAffectsLayout = layoutVersion === legacy
-  ? (frame.insideStroke ?? included) === included          // the popover toggle
-  : (frame.strokeAlign  ?? center)   === inside;            // updated: only inside strokes count
+  ? (frame.insideStroke ?? included) === included                                    // legacy: the toggle alone decides
+  : (frame.strokeAlign ?? center) === inside && (frame.insideStroke ?? included) === included; // updated: inside-aligned AND the toggle included
 ```
 
 `getAutoLayoutContentBox(frame, padding)` → `{ x: frame.x + paddingLeft, y: frame.y + paddingTop,
@@ -240,7 +243,7 @@ default to `updated`, existing ones stayed `legacy`. This app matches that per-f
 | 1 | Frame never narrower than its padding | `clampAutoLayoutFrameToPadding.ts` | floor a non-hug axis at `paddingStart + paddingEnd` | never clamps |
 | 5 | Auto gap never overlaps | `getAutoLayoutPrimarySpacing.ts` (`clampToZero = layoutVersion !== legacy`) → `getDistributedGap` | distributed gap / around / evenly leftovers floored at 0 | may go negative, children overlap |
 | 6 | Lone child in a "between" auto stack | `getAutoLayoutPrimaryLayout.ts` (`isLegacyLoneBetween`) | start-aligned (`edgeOffset: 0`) | centred |
-| 2, 3 | Only inside strokes affect layout; the toggle is gone | `getFrameLayoutPadding.ts` | keyed on `strokeAlign === inside` (no toggle) | keyed on the `insideStroke` popover toggle |
+| 2, 3 | Only an inside-aligned stroke is even eligible to affect layout | `getFrameLayoutPadding.ts` | eligible only when `strokeAlign === inside`, then the `insideStroke` toggle still decides | eligible unconditionally, the `insideStroke` toggle alone decides |
 | 4 | Fill children split by content area | `getAutoLayoutChildStrokeInset.ts` → `getAutoLayoutFillSizes.ts` | reserve each fill child's inside-stroke width so **content areas** end up equal | split total width evenly, ignore child strokes |
 
 Everything else just threads `layoutVersion` through; the default is `updated` at every level.
@@ -259,14 +262,17 @@ selected frame, and every row's commit util is the same one-liner: `dispatch(upd
 
 | Row | Shown when | Field | Engine effect |
 |---|---|---|---|
-| Inside stroke | `layoutVersion === legacy` only | `insideStroke` | legacy branch of `getFrameLayoutPadding` — `included` adds the frame stroke width to all four padding sides |
+| Inside stroke / Strokes | always (labeled "Strokes" under legacy, "Inside stroke" under updated) | `insideStroke` | `included` adds the frame's stroke width to all four padding sides — unconditionally under legacy, only when `strokeAlign === inside` under updated (§6) |
 | Canvas stacking | not grid | `canvasStacking` | `getFrameChildIdsInPaintOrder(frame)` = `firstOnTop ? [...childIds].reverse() : childIds`; used by `renderClippedFrame` / `renderFrameNode` / `getRenderOrderedNodes` |
 | Align text baseline | horizontal only | `alignTextBaseline` | `getAutoLayoutSyncPositions` gates it to horizontal+`on`; then text children align by baseline (`counterOffset = maxBaseline - getAutoLayoutChildBaselineOffset(child)`, `getTextBaselineOffset(fontSize)` from the MSDF atlas metrics) and the frame's counter hug size uses `getAutoLayoutBaselineExtent` |
 | Auto spacing | not grid; disabled unless the primary gap mode is auto | `autoSpacing` | `getAutoLayoutPrimarySpacing`: `between` / `around` / `evenly` (§2) |
 | Layout version | always | `layoutVersion` | `legacy` vs `updated` (§6) |
 
 The popover also renders a live mini preview (`PopoverAutoLayoutSettingsPreview/`) driven by hover
-over each row. Per-child `ignoreAutoLayout` is a separate toggle (not in this popover).
+over each row. The Inside-stroke/Strokes row swaps preview graphics with the layout version too:
+`PreviewInsideStroke` (two side-by-side tiles) for legacy, `PreviewInsideStrokeUpdated` (a single
+tile) for updated — `getPreviewContent.ts` picks between them off the same `isLegacyLayout` flag
+that picks the row's label. Per-child `ignoreAutoLayout` is a separate toggle (not in this popover).
 
 ## 8. Rotation — two "bounds" concepts, don't mix them up
 
@@ -1368,3 +1374,19 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     native macOS convention) — harmless for the existing single ctrl-click assertions elsewhere in
     this file, but fatal for a test that clicks the canvas again afterward, since the still-open
     context menu silently swallows that next click.
+24. **2026-09-12 — the Inside stroke/Strokes popover row was wrongly hidden under `updated`.**
+    Entry #5 shipped `getFrameLayoutPadding` keyed on `strokeAlign === inside` for `updated` with no
+    manual override, and hid the popover row entirely outside `legacy` — read at the time as "the
+    toggle is gone" under the new engine. Checked against Figma's own docs
+    (help.figma.com's auto-layout/Flexbox articles + the legacy `strokesIncludedInLayout` plugin-API
+    property): that's wrong — `updated` still has a manual Included/Excluded toggle, it just only
+    matters for a stroke that's already inside-aligned (a centered/outside stroke is unconditionally
+    excluded regardless of the toggle). Fixed by reusing the same `insideStroke` field for both
+    versions — `strokeAffectsLayout` in `getFrameLayoutPadding.ts` now requires `strokeAlign ===
+    inside` *and* `insideStroke === included` for `updated`, `insideStroke === included` alone for
+    `legacy` — and always rendering the row, labeled "Strokes" under legacy (matching Figma's own
+    label there) and "Inside stroke" under updated. No new field, no change to how `strokeAlign`
+    itself gets set (still code-only, see entry #5). Added a dedicated `PreviewInsideStrokeUpdated`
+    (single-tile) preview component alongside the existing two-tile `PreviewInsideStroke`, since
+    Figma's own mini-preview graphic for this row differs by version too;
+    `getPreviewContent.ts` picks between them off the same `isLegacyLayout` flag used for the label.

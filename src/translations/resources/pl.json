@@ -487,6 +487,7 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.canvasStacking.option.lastOnTop": "Ostatni na wierzchu",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.header": "Ustawienia auto layout",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.label": "Obrys wewnętrzny",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.legacyLabel": "Obrysy",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.option.excluded": "Wykluczony",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.insideStroke.option.included": "Uwzględniony",
   "design.rightPanel.panelProperties.frame.layoutSection.columnAlignmentLayout.popoverAutoLayoutSettings.layout.infoTooltip": "Zaktualizowany layout jest bardziej spójny z CSS. Wersja legacy jest dostępna tymczasowo na czas przejścia.",
