@@ -33,6 +33,12 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
     }
   };
 
+  const handlePointerDown = (): void => {
+    if (refs.hover.hoveredGridTrackAffordanceRef.current?.hoveredHandlePart === 'grip') {
+      setClassName('pressing');
+    }
+  };
+
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
     lastPointerClientPositionRef.current = null;
     refs.transform.distanceGuidesRef.current = null;
@@ -48,6 +54,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale || activeTool === ToolName.comment)) {
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
+      const onPointerDown = (): void => handlePointerDown();
       const onPointerLeave = (): void => handlePointerLeave(canvas);
       const onModifierKeyDown = (event: KeyboardEvent): void =>
         handleModifierKeyChange(canvas, event, lastPointerClientPositionRef, handlePointerMove);
@@ -55,6 +62,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         handleModifierKeyChange(canvas, event, lastPointerClientPositionRef, handlePointerMove);
 
       canvas.addEventListener('pointermove', onPointerMove);
+      canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointerup', onPointerMove);
       canvas.addEventListener('pointerleave', onPointerLeave);
       window.addEventListener('keydown', onModifierKeyDown);
@@ -62,6 +70,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
 
       return (): void => {
         canvas.removeEventListener('pointermove', onPointerMove);
+        canvas.removeEventListener('pointerdown', onPointerDown);
         canvas.removeEventListener('pointerup', onPointerMove);
         canvas.removeEventListener('pointerleave', onPointerLeave);
         window.removeEventListener('keydown', onModifierKeyDown);

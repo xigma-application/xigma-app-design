@@ -1891,6 +1891,39 @@ test.describe('auto-layout — Grid flow', () => {
     expect(onPill.equals(insideFrame)).toBe(false);
   });
 
+  test('hovering the expanded control switches the cursor per sub-element, and pressing the grip shows the pressing cursor', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-affordance-cursors');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const pillCenterX = FRAME.x1 - 40;
+    const pillCenterY = (FRAME.y1 + FRAME.y2) / 2;
+
+    // the value band sits centered on the pill — hovering it should show a text-input cursor
+    await page.mouse.move(pillCenterX, pillCenterY);
+    await page.waitForTimeout(150);
+    await expect.poll(() => designPage.canvas.evaluate((el) => (el as HTMLElement).style.cursor)).toBe('text');
+
+    // the grip band sits left of center — hovering it should show the hand cursor
+    await page.mouse.move(pillCenterX - 15, pillCenterY);
+    await page.waitForTimeout(150);
+    await expect.poll(() => designPage.canvas.evaluate((el) => el.className)).toContain('--hand');
+
+    // holding the mouse down on the grip should swap to the pressing cursor
+    await page.mouse.down();
+    await expect.poll(() => designPage.canvas.evaluate((el) => el.className)).toContain('--pressing');
+    await page.mouse.up();
+  });
+
   test('picking a mode from the dropdown applies the same mode and value to the whole multi-selection', async ({ page }) => {
     const designPage = new DesignPage(page);
 

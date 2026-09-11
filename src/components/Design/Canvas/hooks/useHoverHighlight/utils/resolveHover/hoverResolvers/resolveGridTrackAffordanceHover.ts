@@ -3,10 +3,14 @@ import { getSelectedGridFrame } from 'store/design/utils/autoLayout/getSelectedG
 
 // types
 import { THoverResolverContext, THoverResult } from '../types';
+import { TGridTrackAffordanceHandlePart } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { buildGridTracks } from 'store/design/utils/autoLayout/computeGridLayoutPositions/resolveGridLayout/buildGridTracks';
+import { DEFAULT_GRID_TRACK } from 'store/design/utils/autoLayout/gridTracks/buildGridTrackList';
 import { getGridDropCell } from 'utils/canvas/gridSlots/getGridDropCell';
+import { getGridTrackAffordanceHoveredHandlePart } from 'utils/canvas/gridSlots/getGridTrackAffordanceHoveredHandlePart';
 import { getGridTrackAffordanceHoveredPillAxis } from 'utils/canvas/gridSlots/getGridTrackAffordanceHoveredPillAxis';
 import { getGridTrackAffordancePillCenters } from 'utils/canvas/gridSlots/getGridTrackAffordancePillCenters';
 import { getGridTrackAffordancePillOffset } from 'utils/canvas/gridSlots/getGridTrackAffordancePillOffset';
@@ -41,11 +45,38 @@ export const resolveGridTrackAffordanceHover = ({
       const pillCenters = getGridTrackAffordancePillCenters(frame, layout, cell, pillOffset);
       const isOverColumnPill = isPointInGridTrackAffordanceHoverZone(localPoint, pillCenters.column, 'column', viewport.zoom);
       const isOverRowPill = isPointInGridTrackAffordanceHoverZone(localPoint, pillCenters.row, 'row', viewport.zoom);
+      const hoveredPillAxis = getGridTrackAffordanceHoveredPillAxis(isOverColumnPill, isOverRowPill);
+      let hoveredHandlePart: TGridTrackAffordanceHandlePart | null = null;
+
+      if (hoveredPillAxis === 'column') {
+        const columnTrack = buildGridTracks(layout.columnCount, frame.gridColumnSizes, DEFAULT_GRID_TRACK)[cell.column];
+
+        hoveredHandlePart = getGridTrackAffordanceHoveredHandlePart(
+          localPoint,
+          pillCenters.column,
+          columnTrack,
+          layout.columnSizes[cell.column],
+          viewport.zoom,
+        );
+      }
+
+      if (hoveredPillAxis === 'row') {
+        const rowTrack = buildGridTracks(layout.rowCount, frame.gridRowSizes, DEFAULT_GRID_TRACK)[cell.row] ?? DEFAULT_GRID_TRACK;
+
+        hoveredHandlePart = getGridTrackAffordanceHoveredHandlePart(
+          localPoint,
+          pillCenters.row,
+          rowTrack,
+          layout.rowSizes[cell.row] ?? 0,
+          viewport.zoom,
+        );
+      }
 
       refs.hover.hoveredGridTrackAffordanceRef.current = {
         columnIndex: cell.column,
         frameId: frame.id,
-        hoveredPillAxis: getGridTrackAffordanceHoveredPillAxis(isOverColumnPill, isOverRowPill),
+        hoveredHandlePart,
+        hoveredPillAxis,
         rowIndex: cell.row,
       };
 

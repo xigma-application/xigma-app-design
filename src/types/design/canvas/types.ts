@@ -243,9 +243,12 @@ export type TRightPanelPaddingGuideState = {
   sides: TAutoLayoutPaddingSide[];
 };
 
+export type TGridTrackAffordanceHandlePart = 'chevron' | 'grip' | 'value';
+
 export type TGridTrackAffordanceHover = {
   columnIndex: number;
   frameId: string;
+  hoveredHandlePart: TGridTrackAffordanceHandlePart | null;
   hoveredPillAxis: TGridTrackAxis | null;
   rowIndex: number;
 };

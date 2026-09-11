@@ -379,6 +379,48 @@ describe('useHoverHighlight behaviors', () => {
     expect(gridTrackAffordanceRef.current).toBeNull();
   });
 
+  it('should switch to the pressing cursor when the pointer goes down on the grid track affordance grip', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const { classNameRef, gridTrackAffordanceRef } = renderHoverHighlight(canvasRef);
+
+    gridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: 'grip',
+      hoveredPillAxis: 'column',
+      rowIndex: 0,
+    };
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+
+    // result
+    expect(classNameRef.current).toBe('pressing');
+  });
+
+  it('should leave the cursor untouched on pointer down when the grip is not the hovered handle part', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const { classNameRef, gridTrackAffordanceRef } = renderHoverHighlight(canvasRef);
+
+    gridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: 'value',
+      hoveredPillAxis: 'column',
+      rowIndex: 0,
+    };
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+
+    // result
+    expect(classNameRef.current).not.toBe('pressing');
+  });
+
   it('should ignore pointer moves while a button is held (mid-drag elsewhere)', () => {
     // mock
     addFrameNode(400, 400);

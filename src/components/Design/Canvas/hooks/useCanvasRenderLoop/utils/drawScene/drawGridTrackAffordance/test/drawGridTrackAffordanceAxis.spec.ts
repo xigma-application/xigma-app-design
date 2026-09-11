@@ -26,16 +26,16 @@ describe('drawGridTrackAffordanceAxis', () => {
   });
 
   it('should draw the collapsed pill when the axis is not the hovered one', () => {
-    drawGridTrackAffordanceAxis(context, center, 'column', false, { mode: SizingMode.fill, value: 1 }, 100, 0, rotationCenter);
+    drawGridTrackAffordanceAxis(context, center, 'column', false, null, { mode: SizingMode.fill, value: 1 }, 100, 0, rotationCenter);
 
     expect(drawGridTrackAffordancePillMock).toHaveBeenCalledWith(context, center, 'column', 0, rotationCenter);
     expect(drawGridTrackAffordanceExpandedMock).not.toHaveBeenCalled();
   });
 
   it('should draw the expanded control with the formatted track value when the axis is expanded', () => {
-    drawGridTrackAffordanceAxis(context, center, 'row', true, { mode: SizingMode.fill, value: 2 }, 100, 0, rotationCenter);
+    drawGridTrackAffordanceAxis(context, center, 'row', true, 'grip', { mode: SizingMode.fill, value: 2 }, 100, 0, rotationCenter);
 
-    expect(drawGridTrackAffordanceExpandedMock).toHaveBeenCalledWith(context, center, 'row', '2fr', 0, rotationCenter);
+    expect(drawGridTrackAffordanceExpandedMock).toHaveBeenCalledWith(context, center, 'row', '2fr', 'grip', 0, rotationCenter);
     expect(drawGridTrackAffordancePillMock).not.toHaveBeenCalled();
   });
 });

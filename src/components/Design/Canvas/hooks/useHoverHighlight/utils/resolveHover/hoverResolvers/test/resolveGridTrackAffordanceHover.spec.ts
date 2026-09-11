@@ -1,5 +1,5 @@
 // types
-import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
+import { LayoutMode, NodeType, SizingMode, ToolName } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { THoverResolverContext } from '../../types';
 
@@ -60,6 +60,7 @@ describe('resolveGridTrackAffordanceHover', () => {
     expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
       columnIndex: 2,
       frameId: 'frame-1',
+      hoveredHandlePart: null,
       hoveredPillAxis: null,
       rowIndex: 0,
     });
@@ -69,13 +70,15 @@ describe('resolveGridTrackAffordanceHover', () => {
     // mock
     const refs = createCanvasRefs();
 
-    // before — this point lands exactly on column 1's pill (offset 40px above the frame)
+    // before — this point lands exactly on column 1's pill center (offset 40px above the frame),
+    // which is also the exact center of the expanded badge's value band
     resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 150, y: -40 }, refs, selectedNodes: [frame] }));
 
     // result
     expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
       columnIndex: 1,
       frameId: 'frame-1',
+      hoveredHandlePart: 'value',
       hoveredPillAxis: 'column',
       rowIndex: 0,
     });
@@ -92,6 +95,7 @@ describe('resolveGridTrackAffordanceHover', () => {
     expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
       columnIndex: 0,
       frameId: 'frame-1',
+      hoveredHandlePart: null,
       hoveredPillAxis: null,
       rowIndex: 0,
     });
@@ -101,23 +105,46 @@ describe('resolveGridTrackAffordanceHover', () => {
     // mock
     const refs = createCanvasRefs();
 
-    // before — row 0's pill sits 40px left of the frame, vertically centered on the 200px-tall row
+    // before — row 0's pill sits 40px left of the frame, vertically centered on the 200px-tall row,
+    // which is also the exact center of the expanded badge's value band
     resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: -40, y: 100 }, refs, selectedNodes: [frame] }));
 
     // result
     expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
       columnIndex: 0,
       frameId: 'frame-1',
+      hoveredHandlePart: 'value',
       hoveredPillAxis: 'row',
       rowIndex: 0,
     });
+  });
+
+  it('should fall back to the default track when the hovered row overflows past the last resolved row track', () => {
+    // mock — a single 50px fixed row inside a much taller frame leaves overflow room below it,
+    // where getGridTrackIndexAt (row allows overflow) returns an out-of-range index
+    const tallFrame: TFrameNode = { ...frame, gridRowSizes: [{ mode: SizingMode.fixed, value: 50 }], height: 400 };
+    const refs = createCanvasRefs();
+
+    // before — 20px below the row's own pill center, but still within its hover margin
+    resolveGridTrackAffordanceHover(
+      createContext({ nodesById: { 'frame-1': tallFrame }, point: { x: -40, y: 70 }, refs, selectedNodes: [tallFrame] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toMatchObject({ hoveredPillAxis: 'row', rowIndex: 1 });
   });
 
   it('should clear the ref and return undefined once the pointer leaves the extended zone', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    };
 
     // before
     const result = resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 1000, y: 1000 }, refs, selectedNodes: [frame] }));
@@ -131,7 +158,13 @@ describe('resolveGridTrackAffordanceHover', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    };
 
     // before
     const result = resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 150, y: 100 }, refs, selectedNodes: [] }));

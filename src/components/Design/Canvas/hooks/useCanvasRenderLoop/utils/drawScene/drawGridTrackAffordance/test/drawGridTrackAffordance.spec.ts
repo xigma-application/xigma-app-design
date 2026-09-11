@@ -53,7 +53,13 @@ describe('drawGridTrackAffordance', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 1, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 1,
+      frameId: 'frame-1',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    };
 
     drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
 
@@ -72,23 +78,60 @@ describe('drawGridTrackAffordance', () => {
     const frame = gridFrame({ gridColumnSizes: [{ mode: SizingMode.fill, value: 2 }] });
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: 'column', rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: 'value',
+      hoveredPillAxis: 'column',
+      rowIndex: 0,
+    };
 
     drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
 
-    const [, , , columnIsExpanded, columnTrack] = drawGridTrackAffordanceAxisMock.mock.calls[0];
-    const [, , , rowIsExpanded] = drawGridTrackAffordanceAxisMock.mock.calls[1];
+    const [, , , columnIsExpanded, columnHandlePart, columnTrack] = drawGridTrackAffordanceAxisMock.mock.calls[0];
+    const [, , , rowIsExpanded, rowHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[1];
 
     expect(columnIsExpanded).toBe(true);
+    expect(columnHandlePart).toBe('value');
     expect(columnTrack).toEqual({ mode: SizingMode.fill, value: 2 });
     expect(rowIsExpanded).toBe(false);
+    expect(rowHandlePart).toBeNull();
+  });
+
+  it('should pass the hovered handle part to the row axis when the row pill is the expanded one', () => {
+    const frame = gridFrame();
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: 'grip',
+      hoveredPillAxis: 'row',
+      rowIndex: 0,
+    };
+
+    drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
+
+    const [, , , columnIsExpanded, columnHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[0];
+    const [, , , rowIsExpanded, rowHandlePart] = drawGridTrackAffordanceAxisMock.mock.calls[1];
+
+    expect(columnIsExpanded).toBe(false);
+    expect(columnHandlePart).toBeNull();
+    expect(rowIsExpanded).toBe(true);
+    expect(rowHandlePart).toBe('grip');
   });
 
   it('should still draw when the hovered index is stale and past the resolved tracks', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 99, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 99 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 99,
+      frameId: 'frame-1',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 99,
+    };
 
     expect(() => drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame })).not.toThrow();
     expect(drawGridTrackAffordanceAxisMock).toHaveBeenCalledTimes(2);
@@ -107,7 +150,13 @@ describe('drawGridTrackAffordance', () => {
     const frame = gridFrame();
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'other-frame', hoveredPillAxis: null, rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'other-frame',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    };
 
     drawGridTrackAffordance(context, [frame], refs, { 'frame-1': frame });
 
@@ -117,7 +166,13 @@ describe('drawGridTrackAffordance', () => {
   it('should draw nothing when no grid frame is selected', () => {
     const refs: TCanvasRefs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: null,
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    };
 
     drawGridTrackAffordance(context, [], refs, {});
 

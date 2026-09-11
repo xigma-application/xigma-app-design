@@ -4,6 +4,7 @@ import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // types
 import { TDrawSceneContext } from '../../types';
+import { TGridTrackAffordanceHandlePart } from 'types/design/canvas/types';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { TPoint } from 'types/canvas';
 
@@ -11,16 +12,19 @@ import { TPoint } from 'types/canvas';
 import { buildGlyphQuads } from 'utils/canvas/text/buildGlyphQuads';
 import { drawGridTrackAffordanceChevron } from './drawGridTrackAffordanceChevron';
 import { drawGridTrackAffordanceGrip } from './drawGridTrackAffordanceGrip';
+import { drawGridTrackAffordanceHandleHighlight } from './drawGridTrackAffordanceHandleHighlight';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawValueLabelText } from 'utils/canvas/text/drawValueLabel/drawValueLabelText';
 import { getGlyphQuadBounds } from 'utils/canvas/text/getGlyphQuadBounds';
-import { getGridTrackAffordanceExpandedGeometry } from './getGridTrackAffordanceExpandedGeometry';
+import { getGridTrackAffordanceExpandedGeometry } from 'utils/canvas/gridSlots/getGridTrackAffordanceExpandedGeometry';
+import { getGridTrackAffordanceHandleBands } from 'utils/canvas/gridSlots/getGridTrackAffordanceHandleBands';
 
 export const drawGridTrackAffordanceExpanded = (
   context: TDrawSceneContext,
   center: TPoint,
   axis: TGridTrackAxis,
   text: string,
+  hoveredHandlePart: TGridTrackAffordanceHandlePart | null,
   rotation: number,
   rotationCenter: TPoint,
 ): void => {
@@ -50,6 +54,13 @@ export const drawGridTrackAffordanceExpanded = (
       rotation,
       rotationCenter,
     );
+
+    if (hoveredHandlePart) {
+      const bands = getGridTrackAffordanceHandleBands(center, geometry);
+
+      drawGridTrackAffordanceHandleHighlight(context, bands[hoveredHandlePart], rotation, rotationCenter);
+    }
+
     drawGridTrackAffordanceGrip(context, geometry.gripCenter, axis, rotation, rotationCenter);
     drawValueLabelText(gl, imageContext, rawVertices, bounds, geometry.textCenter, rotation, fontSize, canvasWidth, canvasHeight, viewport);
     drawGridTrackAffordanceChevron(context, geometry.chevronCenter, rotation, rotationCenter);
