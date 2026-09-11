@@ -10,6 +10,7 @@ import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensio
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
+import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
@@ -245,6 +246,7 @@ export type TRightPanelPaddingGuideState = {
 export type TGridTrackAffordanceHover = {
   columnIndex: number;
   frameId: string;
+  hoveredPillAxis: TGridTrackAxis | null;
   rowIndex: number;
 };
 

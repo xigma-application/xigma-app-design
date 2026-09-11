@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, SELECTION_SIZE_LABEL_EDGE_GAP_PX } from 'constant/canvas';
+import { SELECTION_SIZE_LABEL_EDGE_GAP_PX, SIZE_LABEL_FILL } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -171,7 +171,7 @@ describe('drawSelectionSizeLabel', () => {
     expect(anchor.x).toBeCloseTo(100, 5);
     expect(anchor.y).toBeCloseTo(100, 5);
     expect(offsetDirection.y).toBeCloseTo(1, 5);
-    expect(options).toEqual({ angleDeg: expect.closeTo(0, 5), edgeGapPx: SELECTION_SIZE_LABEL_EDGE_GAP_PX, fill: DRAFT_FRAME_STROKE });
+    expect(options).toEqual({ angleDeg: expect.closeTo(0, 5), edgeGapPx: SELECTION_SIZE_LABEL_EDGE_GAP_PX, fill: SIZE_LABEL_FILL });
   });
 
   it('should keep the badge parallel to the edge when the single node is rotated', () => {
@@ -223,7 +223,7 @@ describe('drawSelectionSizeLabel', () => {
     expect(options).toEqual({
       angleDeg: expect.closeTo(0, 5),
       edgeGapPx: SELECTION_SIZE_LABEL_EDGE_GAP_PX,
-      fill: DRAFT_FRAME_STROKE,
+      fill: SIZE_LABEL_FILL,
     });
   });
 

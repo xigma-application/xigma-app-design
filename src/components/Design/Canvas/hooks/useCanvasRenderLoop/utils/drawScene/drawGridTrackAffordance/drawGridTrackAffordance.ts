@@ -8,10 +8,12 @@ import { TDrawSceneContext } from '../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { drawGridTrackAffordancePill } from './drawGridTrackAffordancePill';
+import { buildGridTracks } from 'store/design/utils/autoLayout/computeGridLayoutPositions/resolveGridLayout/buildGridTracks';
+import { DEFAULT_GRID_TRACK } from 'store/design/utils/autoLayout/gridTracks/buildGridTrackList';
+import { drawGridTrackAffordanceAxis } from './drawGridTrackAffordanceAxis';
+import { getGridTrackAffordancePillCenters } from 'utils/canvas/gridSlots/getGridTrackAffordancePillCenters';
 import { getGridTrackAffordancePillOffset } from 'utils/canvas/gridSlots/getGridTrackAffordancePillOffset';
 import { getGridTrackLayout } from 'utils/canvas/gridSlots/getGridTrackLayout';
-import { getGridTrackOffset } from 'utils/canvas/gridSlots/getGridTrackOffset';
 
 export const drawGridTrackAffordance = (
   context: TDrawSceneContext,
@@ -26,18 +28,30 @@ export const drawGridTrackAffordance = (
     const layout = getGridTrackLayout(frame, nodesById);
     const frameCenter = getAutoLayoutFrameCenter(frame);
     const offset = getGridTrackAffordancePillOffset(context.viewport.zoom);
-    const columnCenterX =
-      frame.x +
-      layout.padding.paddingLeft +
-      getGridTrackOffset(layout.columnSizes, layout.columnGap, hover.columnIndex) +
-      (layout.columnSizes[hover.columnIndex] ?? 0) / 2;
-    const rowCenterY =
-      frame.y +
-      layout.padding.paddingTop +
-      getGridTrackOffset(layout.rowSizes, layout.rowGap, hover.rowIndex) +
-      (layout.rowSizes[hover.rowIndex] ?? 0) / 2;
+    const pillCenters = getGridTrackAffordancePillCenters(frame, layout, { column: hover.columnIndex, row: hover.rowIndex }, offset);
+    const rowTrack = buildGridTracks(layout.rowCount, frame.gridRowSizes, DEFAULT_GRID_TRACK)[hover.rowIndex] ?? DEFAULT_GRID_TRACK;
+    const columnTrack =
+      buildGridTracks(layout.columnCount, frame.gridColumnSizes, DEFAULT_GRID_TRACK)[hover.columnIndex] ?? DEFAULT_GRID_TRACK;
 
-    drawGridTrackAffordancePill(context, { x: columnCenterX, y: frame.y - offset }, 'column', frame.rotation, frameCenter);
-    drawGridTrackAffordancePill(context, { x: frame.x - offset, y: rowCenterY }, 'row', frame.rotation, frameCenter);
+    drawGridTrackAffordanceAxis(
+      context,
+      pillCenters.column,
+      'column',
+      hover.hoveredPillAxis === 'column',
+      columnTrack,
+      layout.columnSizes[hover.columnIndex] ?? 0,
+      frame.rotation,
+      frameCenter,
+    );
+    drawGridTrackAffordanceAxis(
+      context,
+      pillCenters.row,
+      'row',
+      hover.hoveredPillAxis === 'row',
+      rowTrack,
+      layout.rowSizes[hover.rowIndex] ?? 0,
+      frame.rotation,
+      frameCenter,
+    );
   }
 };

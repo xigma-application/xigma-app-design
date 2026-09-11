@@ -1866,6 +1866,31 @@ test.describe('auto-layout — Grid flow', () => {
     expect(hovered.equals(idle)).toBe(false);
   });
 
+  test('hovering directly on the affordance pill expands it into a grip/value/chevron control', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-affordance-expand');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const safeArea = await designPage.canvasSafeArea();
+
+    await page.mouse.move(FRAME.x1 - 40, (FRAME.y1 + FRAME.y2) / 2);
+    await page.waitForTimeout(150);
+    const onPill = await page.screenshot({ clip: safeArea });
+
+    await page.mouse.move(FRAME.x1 + 150, FRAME.y1 + 150);
+    await page.waitForTimeout(150);
+    const insideFrame = await page.screenshot({ clip: safeArea });
+
+    expect(onPill.equals(insideFrame)).toBe(false);
+  });
+
   test('picking a mode from the dropdown applies the same mode and value to the whole multi-selection', async ({ page }) => {
     const designPage = new DesignPage(page);
 

@@ -49,7 +49,7 @@ const frame: TFrameNode = {
 const nodesById = { 'frame-1': frame };
 
 describe('resolveGridTrackAffordanceHover', () => {
-  it('should resolve both the hovered column and row when the pointer is over a cell deep inside the frame', () => {
+  it('should resolve both the hovered column and row when the pointer is over a cell deep inside the frame, with no pill hovered', () => {
     // mock
     const refs = createCanvasRefs();
 
@@ -57,21 +57,31 @@ describe('resolveGridTrackAffordanceHover', () => {
     resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 250, y: 150 }, refs, selectedNodes: [frame] }));
 
     // result
-    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({ columnIndex: 2, frameId: 'frame-1', rowIndex: 0 });
+    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
+      columnIndex: 2,
+      frameId: 'frame-1',
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    });
   });
 
-  it('should keep resolving from the extended top-left margin, outside the frame', () => {
+  it('should keep resolving from the extended top-left margin, outside the frame, and detect landing on the column pill itself', () => {
     // mock
     const refs = createCanvasRefs();
 
-    // before
+    // before — this point lands exactly on column 1's pill (offset 40px above the frame)
     resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 150, y: -40 }, refs, selectedNodes: [frame] }));
 
     // result
-    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({ columnIndex: 1, frameId: 'frame-1', rowIndex: 0 });
+    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
+      columnIndex: 1,
+      frameId: 'frame-1',
+      hoveredPillAxis: 'column',
+      rowIndex: 0,
+    });
   });
 
-  it('should default to track 1x1 in the corner margin', () => {
+  it('should default to track 1x1 in the corner margin, with no pill hovered', () => {
     // mock
     const refs = createCanvasRefs();
 
@@ -79,14 +89,35 @@ describe('resolveGridTrackAffordanceHover', () => {
     resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: -40, y: -40 }, refs, selectedNodes: [frame] }));
 
     // result
-    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({ columnIndex: 0, frameId: 'frame-1', rowIndex: 0 });
+    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredPillAxis: null,
+      rowIndex: 0,
+    });
+  });
+
+  it('should detect landing on the row pill itself', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — row 0's pill sits 40px left of the frame, vertically centered on the 200px-tall row
+    resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: -40, y: 100 }, refs, selectedNodes: [frame] }));
+
+    // result
+    expect(refs.hover.hoveredGridTrackAffordanceRef.current).toEqual({
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredPillAxis: 'row',
+      rowIndex: 0,
+    });
   });
 
   it('should clear the ref and return undefined once the pointer leaves the extended zone', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
 
     // before
     const result = resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 1000, y: 1000 }, refs, selectedNodes: [frame] }));
@@ -100,7 +131,7 @@ describe('resolveGridTrackAffordanceHover', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', rowIndex: 0 };
+    refs.hover.hoveredGridTrackAffordanceRef.current = { columnIndex: 0, frameId: 'frame-1', hoveredPillAxis: null, rowIndex: 0 };
 
     // before
     const result = resolveGridTrackAffordanceHover(createContext({ nodesById, point: { x: 150, y: 100 }, refs, selectedNodes: [] }));

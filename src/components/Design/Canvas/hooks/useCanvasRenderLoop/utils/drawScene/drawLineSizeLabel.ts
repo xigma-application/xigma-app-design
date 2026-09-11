@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, SELECTION_SIZE_LABEL_EDGE_GAP_PX } from 'constant/canvas';
+import { SELECTION_SIZE_LABEL_EDGE_GAP_PX, SIZE_LABEL_FILL } from 'constant/canvas';
 
 // types
 import { TDrawSceneContext } from './types';
@@ -17,6 +17,6 @@ export const drawLineSizeLabel = (context: TDrawSceneContext, x1: number, y1: nu
   drawValueLabel(gl, program, buffer, imageContext, text, anchor, offsetDirection, canvasWidth, canvasHeight, viewport, {
     angleDeg,
     edgeGapPx: SELECTION_SIZE_LABEL_EDGE_GAP_PX,
-    fill: DRAFT_FRAME_STROKE,
+    fill: SIZE_LABEL_FILL,
   });
 };
