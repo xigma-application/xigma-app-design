@@ -57,4 +57,14 @@ describe('Frame behaviors', () => {
     expect(screen.getByText('Layout')).toBeInTheDocument();
     expect(screen.getByText('Flow')).toBeInTheDocument();
   });
+
+  it('should render the Appearance section', () => {
+    // before
+    renderFrame();
+
+    // result
+    expect(screen.getByText('Appearance')).toBeInTheDocument();
+    expect(screen.getByText('Opacity')).toBeInTheDocument();
+    expect(screen.getByText('Corner radius')).toBeInTheDocument();
+  });
 });

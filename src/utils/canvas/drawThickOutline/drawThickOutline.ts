@@ -25,6 +25,7 @@ export const drawThickOutline = (
   viewport: TViewport,
   rotation: number,
   strokeAlign: StrokeAlign = StrokeAlign.center,
+  alpha = 1,
   rotationCenter?: TPoint,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -47,6 +48,6 @@ export const drawThickOutline = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  gl.uniform4fv(colorLocation, hexToRgbaFloat(color));
+  gl.uniform4fv(colorLocation, hexToRgbaFloat(color, alpha));
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 };

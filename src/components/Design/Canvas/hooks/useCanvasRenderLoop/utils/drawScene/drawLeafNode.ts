@@ -17,6 +17,7 @@ import { drawTextLeafNode } from './drawTextLeafNode';
 import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide/drawVectorNodeOrTextPathGuide';
 import { getAutoLayoutDragOpacity } from './getAutoLayoutDragOpacity';
 import { getAutoLayoutReorderRenderNode } from './getAutoLayoutReorderRenderNode';
+import { getEffectiveOpacity } from './getEffectiveOpacity';
 import { getGridDragRenderNode } from './getGridDragRenderNode';
 
 export const drawLeafNode = (
@@ -28,23 +29,23 @@ export const drawLeafNode = (
   editingPathId?: string | null,
 ): void => {
   const node = getGridDragRenderNode(refs, getAutoLayoutReorderRenderNode(refs, rawNode, nodesById), nodesById);
-  const dragOpacity = getAutoLayoutDragOpacity(refs, node.id);
+  const opacity = getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(refs, node.id);
 
   switch (node.type) {
     case NodeType.ellipse:
-      drawEllipseLeafNode(context, node, dragOpacity);
+      drawEllipseLeafNode(context, node, opacity);
       break;
     case NodeType.polygon:
-      drawPolygonLeafNode(context, node, dragOpacity);
+      drawPolygonLeafNode(context, node, opacity);
       break;
     case NodeType.star:
-      drawStarLeafNode(context, node, dragOpacity);
+      drawStarLeafNode(context, node, opacity);
       break;
     case NodeType.media:
       drawMediaLeafNode(context, node);
       break;
     case NodeType.line:
-      drawLineLeafNode(context, node, dragOpacity);
+      drawLineLeafNode(context, node, opacity);
       break;
     case NodeType.path:
       drawPathOutline(context, node, pathOutlineStyles.get(node.id));
@@ -59,6 +60,6 @@ export const drawLeafNode = (
       drawTextLeafNode(context, node, nodesById);
       break;
     default:
-      drawBoxLeafNode(context, node, dragOpacity);
+      drawBoxLeafNode(context, node, opacity);
   }
 };

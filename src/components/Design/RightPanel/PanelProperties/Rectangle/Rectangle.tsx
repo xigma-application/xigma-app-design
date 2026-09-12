@@ -2,6 +2,7 @@ import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import PositionSection from '../Common/PositionSection/PositionSection';
@@ -22,6 +23,7 @@ const Rectangle: FC = () => {
         <ColumnDimensions />
         <ColumnGridChildSpan />
       </UITools.Section>
+      <AppearanceSection />
     </Fragment>
   );
 };

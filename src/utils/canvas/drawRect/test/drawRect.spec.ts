@@ -61,6 +61,28 @@ describe('drawRect', () => {
     expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLE_FAN, expect.anything(), expect.anything());
   });
 
+  it('should delegate to the rounded rendering when only an individual corner radius is set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawRect(
+      gl,
+      program,
+      buffer,
+      { cornerRadiusTopLeft: 10, fill: '#ffffff', height: 60, width: 100, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+    );
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
+  });
+
   it('should delegate to the plain quad rendering when cornerRadius is absent entirely', () => {
     // mock
     const gl = createGlMock();

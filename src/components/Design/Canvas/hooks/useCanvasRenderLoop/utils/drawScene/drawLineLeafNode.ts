@@ -9,7 +9,7 @@ import { TLineNode } from 'types/design/types';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
 
-export const drawLineLeafNode = (context: TDrawContext, node: TLineNode, dragOpacity: number): void => {
+export const drawLineLeafNode = (context: TDrawContext, node: TLineNode, opacity: number): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   drawLine(
@@ -22,7 +22,7 @@ export const drawLineLeafNode = (context: TDrawContext, node: TLineNode, dragOpa
     canvasWidth,
     canvasHeight,
     viewport,
-    dragOpacity,
+    opacity,
   );
   drawLineEndpointArrowheads(context, node);
 };

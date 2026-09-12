@@ -126,6 +126,7 @@ describe('drawThickOutline', () => {
       IDENTITY_VIEWPORT,
       90,
       StrokeAlign.center,
+      1,
       { x: 0, y: 0 },
     );
 

@@ -39,7 +39,18 @@ export const continueCornerRadiusDrag = (
       const radius = getCornerRadiusFromPoint(point, bounds, resolvedCorner);
       const roundedRadius = Math.min(Math.round(radius), getMaxCornerRadius(bounds));
 
-      dispatch(updateNode({ changes: { cornerRadius: roundedRadius }, id: nodeId }));
+      dispatch(
+        updateNode({
+          changes: {
+            cornerRadius: roundedRadius,
+            cornerRadiusBottomLeft: undefined,
+            cornerRadiusBottomRight: undefined,
+            cornerRadiusTopLeft: undefined,
+            cornerRadiusTopRight: undefined,
+          },
+          id: nodeId,
+        }),
+      );
     }
   }
 };

@@ -58,4 +58,14 @@ describe('Rectangle behaviors', () => {
     expect(screen.getByText('Dimensions')).toBeInTheDocument();
     expect(screen.queryByText('Flow')).not.toBeInTheDocument();
   });
+
+  it('should render the Appearance section', () => {
+    // before
+    renderRectangle();
+
+    // result
+    expect(screen.getByText('Appearance')).toBeInTheDocument();
+    expect(screen.getByText('Opacity')).toBeInTheDocument();
+    expect(screen.getByText('Corner radius')).toBeInTheDocument();
+  });
 });

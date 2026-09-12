@@ -6,10 +6,10 @@ import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 
-export const drawBoxLeafNode = (context: TDrawContext, node: TFrameNode | TRectangleNode | TSectionNode, dragOpacity: number): void => {
+export const drawBoxLeafNode = (context: TDrawContext, node: TFrameNode | TRectangleNode | TSectionNode, opacity: number): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
-  drawRect(gl, program, buffer, { ...node, fillAlpha: dragOpacity }, canvasWidth, canvasHeight, viewport, node.rotation);
+  drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
 
   if ('strokeColor' in node && node.strokeColor && node.strokeWidth) {
     drawThickOutline(
@@ -24,6 +24,7 @@ export const drawBoxLeafNode = (context: TDrawContext, node: TFrameNode | TRecta
       viewport,
       node.rotation,
       node.strokeAlign,
+      opacity,
     );
   }
 };

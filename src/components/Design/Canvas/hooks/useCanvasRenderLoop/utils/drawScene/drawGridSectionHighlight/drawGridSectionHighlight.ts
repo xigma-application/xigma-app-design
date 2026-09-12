@@ -68,6 +68,7 @@ export const drawGridSectionHighlight = (
         viewport,
         frame.rotation,
         undefined,
+        undefined,
         frameCenter,
       );
     }

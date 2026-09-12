@@ -71,6 +71,7 @@ describe('drawBoxLeafNode', () => {
       IDENTITY_VIEWPORT,
       0,
       StrokeAlign.inside,
+      1,
     );
   });
 

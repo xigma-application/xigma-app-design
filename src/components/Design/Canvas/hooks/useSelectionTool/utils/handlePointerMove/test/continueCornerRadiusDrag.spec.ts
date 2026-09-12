@@ -119,6 +119,41 @@ describe('continueCornerRadiusDrag', () => {
     expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(50.5);
   });
 
+  it('should clear the individual per-corner overrides so the dragged uniform radius takes over', () => {
+    // mock
+    const idA = addRectangleNode(0, 0, 100, 50);
+
+    store.dispatch(
+      updateNode({
+        changes: { cornerRadiusBottomLeft: 3, cornerRadiusBottomRight: 4, cornerRadiusTopLeft: 1, cornerRadiusTopRight: 2 },
+        id: idA,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const cornerRadiusDragRef = createCornerRadiusDragRef({
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      candidates: ['ne'],
+      corner: 'ne',
+      hasMoved: false,
+      nodeId: idA,
+      pointerStart: { x: 100, y: 0 },
+      rotation: 0,
+    });
+
+    // before
+    continueCornerRadiusDrag(canvas, pointerEvent(80, 10), store.dispatch, cornerRadiusDragRef);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode;
+
+    expect(node.cornerRadius).toBe(20);
+    expect(node.cornerRadiusTopLeft).toBeUndefined();
+    expect(node.cornerRadiusTopRight).toBeUndefined();
+    expect(node.cornerRadiusBottomLeft).toBeUndefined();
+    expect(node.cornerRadiusBottomRight).toBeUndefined();
+  });
+
   it('should un-rotate the query point before computing the radius on a rotated node', () => {
     // mock — a 100x50 rect rotated 90deg around its center (50, 25); the ne corner (100, 0) swings
     // to world (75, 75)

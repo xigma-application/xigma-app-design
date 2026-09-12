@@ -113,7 +113,7 @@ describe('drawLeafNode', () => {
 
     // result — the fill is dimmed, but the stroke outline still draws at full opacity (not covered by this scope)
     expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.5 }, 200, 150, IDENTITY_VIEWPORT, 0);
-    expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined);
+    expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined, 0.5);
   });
 
   it('should draw a rectangle at its live reorder-preview position instead of its real stored x/y', () => {
@@ -159,6 +159,33 @@ describe('drawLeafNode', () => {
 
     // result
     expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1 }, 200, 150, IDENTITY_VIEWPORT, 0);
+  });
+
+  it("should dim a child rectangle by its ancestor frame's opacity, compounded with its own", () => {
+    // mock
+    const parentFrame = {
+      childIds: ['r1'],
+      clipContent: false,
+      fill: '#fff',
+      height: 100,
+      id: 'f1',
+      name: 'Frame',
+      opacity: 0.5,
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TSceneNode;
+    const node = rect({ opacity: 0.5, parentId: 'f1' });
+    const nodesById = { f1: parentFrame, r1: node };
+
+    // action
+    drawLeafNode(context, node, new Map(), createCanvasRefs(), nodesById);
+
+    // result
+    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.25 }, 200, 150, IDENTITY_VIEWPORT, 0);
   });
 
   it('should draw an ellipse with the arc defaults and threaded opacity, skipping the stroke when unset', () => {

@@ -85,6 +85,7 @@ export type TBaseNode = {
   minHeight?: number;
   minWidth?: number;
   name: string;
+  opacity?: number;
   parentId: string | null;
   rotation: number;
   width: number;
@@ -113,6 +114,11 @@ export type TFrameNode = TBaseNode & {
   canvasStacking?: CanvasStacking;
   childIds: string[];
   clipContent: boolean;
+  cornerRadius?: number;
+  cornerRadiusBottomLeft?: number;
+  cornerRadiusBottomRight?: number;
+  cornerRadiusTopLeft?: number;
+  cornerRadiusTopRight?: number;
   fill: string;
   gridAutoPlacement?: boolean;
   gridColumnCount?: number;
@@ -174,6 +180,10 @@ export type TPolygonNode = TBaseNode & {
 
 export type TRectangleNode = TBaseNode & {
   cornerRadius?: number;
+  cornerRadiusBottomLeft?: number;
+  cornerRadiusBottomRight?: number;
+  cornerRadiusTopLeft?: number;
+  cornerRadiusTopRight?: number;
   fill: string;
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
