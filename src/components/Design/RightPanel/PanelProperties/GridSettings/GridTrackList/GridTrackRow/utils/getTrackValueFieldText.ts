@@ -1,5 +1,5 @@
 // utils
-import { roundTrackSize } from './roundTrackSize';
+import { roundTrackSize } from 'store/design/utils/autoLayout/gridTracks/roundTrackSize';
 
 // types
 import { SizingMode } from 'types/design/enums';

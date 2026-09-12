@@ -1,5 +1,10 @@
 // store
-import { setGridSettingsPanelOpen, setGridTrackSelection, setPanelGridTrackSelection } from 'store/design/slice';
+import {
+  setGridSettingsPanelOpen,
+  setGridTrackModeMenuRequest,
+  setGridTrackSelection,
+  setPanelGridTrackSelection,
+} from 'store/design/slice';
 import { store } from 'store';
 
 // utils
@@ -46,6 +51,72 @@ describe('armGridTrackAffordanceOnPointerDown', () => {
     expect(dispatch).toHaveBeenCalledWith(setPanelGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [2] }));
     expect(dispatch).toHaveBeenCalledWith(setGridSettingsPanelOpen(true));
     expect(armGridTrackAffordanceDragMock).not.toHaveBeenCalled();
+  });
+
+  it('should select the hovered track and open the mode menu instead of the grid settings panel when the chevron is clicked', () => {
+    // mock
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 2, frameId: 'frame-1', hoveredHandlePart: 'chevron', hoveredPillAxis: 'column', rowIndex: 0 },
+        },
+      },
+      transform: { gridTrackAffordanceDragRef: { current: null } },
+    };
+
+    // before
+    const result = armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: plainEvent } as never);
+
+    // result
+    expect(result).toBe(true);
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [2] }));
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackModeMenuRequest({ axis: 'column', frameId: 'frame-1', index: 2 }));
+    expect(dispatch).not.toHaveBeenCalledWith(setGridSettingsPanelOpen(true));
+  });
+
+  it('should keep the whole multi-selection when the clicked chevron is already part of it, instead of collapsing to just that track', () => {
+    // mock
+    store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 2] }));
+
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 0, frameId: 'frame-1', hoveredHandlePart: 'chevron', hoveredPillAxis: 'column', rowIndex: 0 },
+        },
+      },
+      transform: { gridTrackAffordanceDragRef: { current: null } },
+    };
+
+    // before
+    armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: plainEvent } as never);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 2] }));
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackModeMenuRequest({ axis: 'column', frameId: 'frame-1', index: 0 }));
+  });
+
+  it('should select just the clicked track on a plain chevron click when it is not already part of the current selection', () => {
+    // mock
+    store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [0, 2] }));
+
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 1, frameId: 'frame-1', hoveredHandlePart: 'chevron', hoveredPillAxis: 'column', rowIndex: 0 },
+        },
+      },
+      transform: { gridTrackAffordanceDragRef: { current: null } },
+    };
+
+    // before
+    armGridTrackAffordanceOnPointerDown({ canvas, canvasRefs, dispatch, event: plainEvent } as never);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [1] }));
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackModeMenuRequest({ axis: 'column', frameId: 'frame-1', index: 1 }));
   });
 
   it('should select the hovered row track when the value of the row pill is hovered', () => {

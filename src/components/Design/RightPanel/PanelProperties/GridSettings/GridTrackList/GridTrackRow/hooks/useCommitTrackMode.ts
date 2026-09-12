@@ -2,7 +2,7 @@
 import { SizingMode } from 'types/design/enums';
 
 // utils
-import { roundTrackSize } from '../utils/roundTrackSize';
+import { roundTrackSize } from 'store/design/utils/autoLayout/gridTracks/roundTrackSize';
 
 export const useCommitTrackMode = (onChangeMode: (mode: SizingMode, value?: number) => void, resolvedSize: number): TFunc<[SizingMode]> => {
   return (mode: SizingMode): void => {

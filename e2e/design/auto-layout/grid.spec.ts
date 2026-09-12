@@ -2331,4 +2331,69 @@ test.describe('auto-layout — Grid flow', () => {
     await expect(canvasTrackValueInput(page)).toHaveCount(0);
     expect(await readColumnTrack(page, 0)).toBeUndefined();
   });
+
+  test('clicking a track pill’s chevron on the canvas opens a mode menu with the same options as the panel', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-mode-menu-open');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+
+    // the chevron band sits right of the value, mirroring the grip band's offset on the left
+    await page.mouse.click(column0X + 15, columnPillY);
+
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+    await expect(page.getByText('Fixed width', { exact: false })).toBeVisible();
+    await expect(page.getByText('Hug contents')).toBeVisible();
+    await expect(page.getByText('Fill container', { exact: false })).toBeVisible();
+    // the Grid settings panel is not what opened here — the on-canvas menu covers the same control
+    await expect(page.locator('[data-test-grid-settings-panel]')).not.toBeVisible();
+  });
+
+  test('picking a mode from the canvas chevron menu applies it to the whole multi-selection, matching the panel dropdown', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-canvas-mode-menu-multi-select');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await selectFrameRow(page);
+
+    const columnPillY = FRAME.y1 - 40;
+    const column0X = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 4;
+    const column1X = FRAME.x1 + (3 * (FRAME.x2 - FRAME.x1)) / 4;
+
+    await page.mouse.click(column0X, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0] });
+
+    // Cmd (not Ctrl) — holding Control into a click triggers Chromium's macOS-style
+    // contextmenu convention, which would swallow the next click on the canvas below
+    await page.keyboard.down('Meta');
+    await page.mouse.click(column1X, columnPillY);
+    await page.keyboard.up('Meta');
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1] });
+
+    // opening the chevron menu on the already-selected column 0 must not drop column 1
+    await page.mouse.click(column0X + 15, columnPillY);
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1] });
+
+    await page.getByText('Hug contents').click();
+
+    expect(await readColumnTrack(page, 0)).toMatchObject({ mode: 'hug' });
+    expect(await readColumnTrack(page, 1)).toMatchObject({ mode: 'hug' });
+    await expect(page.getByText('Hug contents')).not.toBeVisible();
+  });
 });

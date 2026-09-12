@@ -8,7 +8,12 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TDesignPage, TDimensionHintField, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
-import { TGridSectionHighlight, TGridTrackSelection, TGridTrackValueEditRequest } from 'types/design/canvas/types';
+import {
+  TGridSectionHighlight,
+  TGridTrackModeMenuRequest,
+  TGridTrackSelection,
+  TGridTrackValueEditRequest,
+} from 'types/design/canvas/types';
 import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
 import { TSolidPaint } from 'types/design/paint/types';
@@ -68,6 +73,9 @@ export const selectEditingTextBox = (state: RootState): TEditingTextBox | null =
 export const selectEditingTextContent = (state: RootState): string => state.design.editingTextContent;
 
 export const selectGridSectionHighlight = (state: RootState): TGridSectionHighlight | null => state.design.gridSectionHighlight ?? null;
+
+export const selectGridTrackModeMenuRequest = (state: RootState): TGridTrackModeMenuRequest | null =>
+  state.design.gridTrackModeMenuRequest ?? null;
 
 export const selectGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.gridTrackSelection ?? null;
 

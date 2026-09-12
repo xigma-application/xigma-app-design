@@ -6,6 +6,7 @@ import AutoLayoutPaddingEditOverlay from './AutoLayoutPaddingEditOverlay/AutoLay
 import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
+import GridTrackModeMenuOverlay from './GridTrackModeMenuOverlay/GridTrackModeMenuOverlay';
 import GridTrackValueLabelEditOverlay from './GridTrackValueLabelEditOverlay/GridTrackValueLabelEditOverlay';
 import GuideContextMenuPanel from './GuideContextMenuPanel/GuideContextMenuPanel';
 import RulersLayer from './RulersLayer/RulersLayer';
@@ -112,6 +113,7 @@ const Canvas: FC = () => {
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />
       <GridTrackValueLabelEditOverlay />
+      <GridTrackModeMenuOverlay />
       <SectionNameLabelEditOverlay />
       <AutoLayoutPaddingEditOverlay />
       <Comment />

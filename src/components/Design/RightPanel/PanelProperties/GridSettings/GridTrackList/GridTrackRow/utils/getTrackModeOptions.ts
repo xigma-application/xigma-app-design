@@ -1,8 +1,8 @@
 import { TFunction } from 'i18next';
 
 // others
-import { TRACK_MODE_OPTIONS } from '../constants';
-import { roundTrackSize } from './roundTrackSize';
+import { roundTrackSize } from 'store/design/utils/autoLayout/gridTracks/roundTrackSize';
+import { TRACK_MODE_OPTIONS } from 'store/design/utils/autoLayout/gridTracks/constants';
 import { translationNameSpace } from '../../../constants';
 
 // types

@@ -678,6 +678,25 @@ value field and `var(--color-neutral-1)` handle digits (`GridTrackRow--selected`
   measurement without a fudge factor. Enter/blur commits via `commitGridTrackValueEdit` (the same
   per-mode fill/fixed/hug branches as the panel), Escape cancels; either way the hook dispatches
   `gridTrackValueEditRequest(null)`, whose `useEffect` clears the ref and local state.
+- **Picking a track's mode from its chevron, on the canvas** — clicking the pill's chevron band
+  (`hoveredHandlePart === 'chevron'`) opens an on-canvas dropdown (`GridTrackModeMenuOverlay`, a
+  `Menu`/`MenuCompound.MenuItem` from `@xigma/components` with a virtual `anchorRef` positioned
+  under the chevron via `worldToScreen`) listing the same three options — icon, label and current
+  value/checkmark — as `GridTrackRow`'s own mode dropdown in the panel
+  (`getGridTrackModeMenuOptions` reuses the shared `TRACK_MODE_OPTIONS` icon/label-key table and
+  `translationNameSpace`, both relocated — alongside `roundTrackSize` — from the panel's
+  `GridTrackRow` folder into `store/design/utils/autoLayout/gridTracks/` so Canvas can import them
+  cleanly, mirroring how `commitGridAxisValueChange`/`commitGridAxisModeChange`/`parseFillFieldInput`
+  were relocated for the value-edit feature above). Unlike the value editor, this does *not* need a
+  second click to disambiguate from the ordinary select-resolver: `armGridTrackAffordanceOnPointerDown`
+  itself handles the chevron case (no separate earlier resolver), but only recomputes the click's
+  selection via `getGridTrackAffordanceClickIndices` when the clicked index is *not already* part of
+  the current `gridTrackSelection` — when it is, the whole multi-selection is left untouched before
+  dispatching `gridTrackModeMenuRequest`, which is what lets picking a mode from the canvas menu apply
+  to every selected track (`commitGridTrackModeMenuChange`, same `selectedIndices.includes(index) ?
+  selectedIndices : [index]` fan-out as the panel's `commitGridTrackModeChange`) instead of just the
+  one clicked. A chevron click also no longer dispatches `setGridSettingsPanelOpen(true)` (unlike
+  every other part of the pill) since the on-canvas menu already offers the same control inline.
 
 ### Panel — resizing a grid that already has children (`resolveGridResize`)
 
@@ -1390,3 +1409,28 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     (single-tile) preview component alongside the existing two-tile `PreviewInsideStroke`, since
     Figma's own mini-preview graphic for this row differs by version too;
     `getPreviewContent.ts` picks between them off the same `isLegacyLayout` flag used for the label.
+25. **2026-09-12 — grid flow, picking a track's mode from its chevron on the canvas (§13 "Picking
+    a track's mode from its chevron, on the canvas").** New affordance: the pill's chevron band,
+    previously just part of the generic click-anywhere-selects-and-opens-the-panel fallback, now
+    opens an on-canvas dropdown with the same three mode options as the panel's own `GridTrackRow`
+    dropdown. First attempt reused the generic fallback's selection recomputation unchanged (only
+    branching *after* selection on which action to dispatch) — broke exactly the multi-selection
+    case the value-edit feature (#23) already had to solve: a plain chevron click always recomputes
+    the click's indices via `getGridTrackAffordanceClickIndices`, which for an unmodified click
+    always collapses to `[index]`, so opening the menu on one track of an existing multi-selection
+    silently dropped every other selected track *before* the menu even opened — caught by a new e2e
+    test, not the unit suite (the unit specs mock `canvasRefs`/`dispatch` directly and don't exercise
+    two sequential real clicks). Fixed in `armGridTrackAffordanceOnPointerDown.ts` itself (no
+    separate earlier resolver needed, unlike #23): the selection recompute is skipped — leaving
+    `currentIndices` untouched — specifically when `hoveredHandlePart === 'chevron'` *and* the
+    clicked index is already in the current selection; otherwise it behaves like any other click
+    (collapses to just that track, same as clicking the value or grip band). Reused rather than
+    duplicated: `TRACK_MODE_OPTIONS`/`getTrackModeOptions`'s icon+label-key table and
+    `roundTrackSize`, relocated from the panel's `GridTrackRow` folder into
+    `store/design/utils/autoLayout/gridTracks/` (mirroring the earlier relocation of
+    `commitGridAxisValueChange`/`commitGridAxisModeChange`/`parseFillFieldInput` for the same
+    reason) so the canvas overlay's `getGridTrackModeMenuOptions` could build byte-identical labels
+    without hand-duplicating the `{{value}}` interpolation rules; `getGridAxisTrackCount` (already
+    shared) turned out to be an exact pre-existing duplicate of the value-edit overlay's own
+    file-local `getGridTrackEditTrackCount` — used the shared one for the new code rather than
+    adding a third copy, but left the older duplicate alone (out of scope for this change).

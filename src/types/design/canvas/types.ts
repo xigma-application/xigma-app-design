@@ -266,6 +266,12 @@ export type TGridTrackValueEditRequest = {
   index: number;
 };
 
+export type TGridTrackModeMenuRequest = {
+  axis: TGridTrackAxis;
+  frameId: string;
+  index: number;
+};
+
 export type THoverRefs = {
   editingGridTrackValueRef: RefObject<TEditingGridTrackValue | null>;
   hoverRef: RefObject<string | null>;

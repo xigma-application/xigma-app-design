@@ -1,15 +1,31 @@
 // store
+import { AppDispatch, store } from 'store';
 import { selectGridTrackSelection } from 'store/design/selectors';
-import { setGridSettingsPanelOpen } from 'store/design/slice';
-import { store } from 'store';
+import { setGridSettingsPanelOpen, setGridTrackModeMenuRequest } from 'store/design/slice';
 
 // types
 import { TArmContext } from '../types';
+import { TGridTrackAffordanceHandlePart } from 'types/design/canvas/types';
+import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 
 // utils
 import { armGridTrackAffordanceDrag } from '../armGridTrackAffordanceDrag';
 import { getGridTrackAffordanceClickIndices } from 'utils/canvas/gridSlots/getGridTrackAffordanceClickIndices';
 import { publishGridTrackSelection } from 'store/design/utils/publishGridTrackSelection';
+
+const openGridTrackAffordanceMenu = (
+  dispatch: AppDispatch,
+  hoveredHandlePart: TGridTrackAffordanceHandlePart | null,
+  axis: TGridTrackAxis,
+  frameId: string,
+  index: number,
+): void => {
+  if (hoveredHandlePart === 'chevron') {
+    dispatch(setGridTrackModeMenuRequest({ axis, frameId, index }));
+  } else {
+    dispatch(setGridSettingsPanelOpen(true));
+  }
+};
 
 export const armGridTrackAffordanceOnPointerDown = ({ canvas, canvasRefs, dispatch, event, point }: TArmContext): true | undefined => {
   const hover = canvasRefs.hover.hoveredGridTrackAffordanceRef.current;
@@ -35,13 +51,13 @@ export const armGridTrackAffordanceOnPointerDown = ({ canvas, canvasRefs, dispat
 
     const current = selectGridTrackSelection(store.getState());
     const currentIndices = current?.frameId === hover.frameId && current.axis === axis ? current.indices : [];
-    const indices = getGridTrackAffordanceClickIndices(currentIndices, index, {
-      meta: event.metaKey || event.ctrlKey,
-      shift: event.shiftKey,
-    });
+    const opensModeMenuOnAlreadySelected = hover.hoveredHandlePart === 'chevron' && currentIndices.includes(index);
+    const indices = opensModeMenuOnAlreadySelected
+      ? currentIndices
+      : getGridTrackAffordanceClickIndices(currentIndices, index, { meta: event.metaKey || event.ctrlKey, shift: event.shiftKey });
 
     publishGridTrackSelection(dispatch, { axis, frameId: hover.frameId, indices });
-    dispatch(setGridSettingsPanelOpen(true));
+    openGridTrackAffordanceMenu(dispatch, hover.hoveredHandlePart, axis, hover.frameId, index);
 
     return true;
   }
