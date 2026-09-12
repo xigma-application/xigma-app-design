@@ -1,5 +1,4 @@
 .CornerSmoothingPopover {
-  padding-bottom: 8px;
   width: 100%;
 
   &__row {
@@ -7,6 +6,7 @@
     display: flex;
     justify-content: space-between;
     padding: 8px 16px;
+    padding-bottom: 20px;
   }
 
   &__slider.CornerSmoothingPopover__slider {
