@@ -210,6 +210,16 @@ Anything sitting inside a grid also gets Column span / Row span fields under its
       it, and it stops as soon as it runs into the edge of the grid or another element; changing
       the grid's size drops any spanning child back to a single cell
 
+## Stage 27 — Appearance section (Opacity, Corner radius, Hide/Show)
+
+Rectangle and Frame panels now show an Appearance section. Opacity works like it does in a browser
+— it's not just a see-through tint on that one shape, a parent's opacity dims everything inside it
+too, compounding with each child's own opacity. Corner radius shows one shared value, or "Mixed"
+when a shape's four corners don't match; a toggle expands it into four separate fields, one per
+corner. A Hide/Show eye button sits in the section header next to a Blend mode button.
+
+- [ ] the Blend mode button doesn't do anything yet — just the icon for now
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

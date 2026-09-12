@@ -285,6 +285,36 @@ original flat fan, byte-for-byte moved) or `drawRoundedPolygon.ts` — the secon
 (`utils/canvas/drawStar/`) is the third instance, same shape: dispatches on `TStarNode.cornerRadius?:
 number` to `drawStandardStar.ts` or `drawRoundedStar.ts`.
 
+Rectangle and Frame only (not Polygon/Star — out of scope so far) also carry four independent
+optional overrides: `cornerRadiusTopLeft/TopRight/BottomLeft/BottomRight`. `drawRect.ts`'s rounded
+branch now triggers on *any* of the five fields being truthy, not just the scalar; `getRoundedRectPoints.ts`
+resolves each of its four `CORNER_ARCS` entries via `getRadius(rect) ?? rect.cornerRadius` (own
+override, else the uniform scalar), each independently clamped to the same single `getMaxCornerRadius`
+cap (no per-corner-aware max — a deliberate simplification, not exact anti-overlap geometry). The
+stroke ring (`getRoundedRingVertices.ts`, `drawThickOutline.ts`) still only ever reads the uniform
+scalar — per-corner overrides affect the fill silhouette only, not the stroke. Dragging a canvas
+corner-radius handle (`continueCornerRadiusDrag.ts`) always writes the scalar *and* clears all four
+overrides in the same `updateNode` dispatch, so the two editing surfaces (canvas handles, right-panel
+individual fields — `properties-panel.md`) never end up disagreeing about which one is "live".
+
+**Opacity cascades down the tree, like CSS group opacity — not a per-node color-alpha tint.**
+`TBaseNode.opacity?: number` (0-1) exists on every node type, but only `properties-panel.md`'s
+Appearance section currently exposes it (Rectangle/Frame). `drawLeafNode.ts` computes one multiplier
+per node, once, before its `switch`: `getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(...)`.
+`getEffectiveOpacity.ts` walks `node.parentId` up through `nodesById` to the root, multiplying in
+`(current.opacity ?? 1)` at every step it's a box scene node (`isBoxSceneNode` guard — `TLineNode`/
+`TVectorNode` don't have the field, contribute `1` and just pass the walk through to their own
+parent) — so a Frame at 50% dims every descendant, compounding with each one's own opacity, not just
+itself. This replaces the old plain `dragOpacity` pass-through (still named that in
+`getAutoLayoutDragOpacity.ts` itself — the 0.5-while-dragged-over-an-auto-layout-drop-target value,
+unrelated to this) to `drawBoxLeafNode`/`drawEllipseLeafNode`/`drawPolygonLeafNode`/`drawStarLeafNode`/
+`drawLineLeafNode`'s now-renamed `opacity` param. Two known gaps, not fixed: `drawMediaLeafNode`/
+`drawTextLeafNode` take no alpha param at all yet (image/MSDF-text pipelines have no alpha uniform
+wired), and `drawThickOutline`'s stroke alpha (added alongside this, `alpha = 1` default param) is
+only ever fed the box path's own combined opacity — Ellipse/Polygon/Star's stroke calls
+(`drawThickEllipseOutline`, and their own ring/outline equivalents) still don't take an alpha
+argument, so a rounded shape's *stroke* doesn't dim, only its fill does.
+
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
 `useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer
 listeners (so dragging never dispatches per pixel), and read by `drawScene` via `.current` every
