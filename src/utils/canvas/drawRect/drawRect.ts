@@ -12,6 +12,7 @@ export type TDrawableRect = TDraftRect & {
   cornerRadiusBottomRight?: number;
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
+  cornerSmoothing?: number;
   fill?: string;
   fillAlpha?: number;
   stroke?: string;

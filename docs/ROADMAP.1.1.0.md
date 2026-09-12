@@ -218,6 +218,11 @@ too, compounding with each child's own opacity. Corner radius shows one shared v
 when a shape's four corners don't match; a toggle expands it into four separate fields, one per
 corner. A Hide/Show eye button sits in the section header next to a Blend mode button.
 
+Once the four separate corner fields are open, a Corner smoothing button next to them opens a small
+panel with a slider (plus an "iOS" marker for the smoothing level Apple uses) and a percentage field.
+It now really reshapes the corners into the same rounder, softer "squircle" curve Figma and iOS use,
+instead of a plain circular corner.
+
 - [ ] the Blend mode button doesn't do anything yet — just the icon for now
 
 ## Related

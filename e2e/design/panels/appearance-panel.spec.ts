@@ -9,6 +9,7 @@ type TReadableNode = {
   cornerRadiusBottomRight?: number;
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
+  cornerSmoothing?: number;
   hidden?: boolean;
   opacity?: number;
 };
@@ -128,6 +129,40 @@ test.describe('Design panels — Appearance section', () => {
 
     expect(after.equals(before)).toBe(false);
     await expect(page.getByLabel('Show', { exact: true })).toBeVisible();
+  });
+
+  test('setting a corner smoothing percentage commits it as a 0-1 fraction and reshapes a rounded corner', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-corner-smoothing');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const cornerRadiusInput = page.locator('[data-test-text-field-input="corner-radius"]');
+
+    await cornerRadiusInput.click();
+    await cornerRadiusInput.fill('40');
+    await cornerRadiusInput.press('Enter');
+
+    const before = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Individual corner radius').click();
+    await page.getByLabel('Corner smoothing').click();
+
+    const smoothingInput = page.locator('[data-test-text-field-input="corner-smoothing"]');
+
+    await smoothingInput.click();
+    await smoothingInput.fill('60');
+    await smoothingInput.press('Enter');
+
+    const id = await readFirstNodeId(page);
+
+    expect((await readNode(page, id)).cornerSmoothing).toBe(0.6);
+
+    const after = await designPage.canvas.screenshot();
+
+    expect(after.equals(before)).toBe(false);
   });
 
   test("reducing a frame's opacity visually dims its child shape too", async ({ page }) => {

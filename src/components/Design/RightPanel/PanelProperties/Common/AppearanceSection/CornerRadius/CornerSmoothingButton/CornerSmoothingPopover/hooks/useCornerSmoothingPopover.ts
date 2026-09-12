@@ -1,15 +1,22 @@
-import { FocusEvent, useState } from 'react';
+// store
+import { selectSelectedNodes } from 'store/design/selectors';
+import { useAppDispatch, useAppSelector } from 'store';
 
-export type TUseCornerSmoothingPopoverResult = {
-  onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
-  onSliderChange: TFunc<[number]>;
-  value: number;
-};
+// types
+import { isAppearanceNode } from '../../../../types';
+import { TUseCornerSmoothingPopoverResult } from './types';
 
-const clampSmoothing = (raw: number): number => Math.min(100, Math.max(0, Math.round(raw)));
+// utils
+import { clampSmoothing } from './utils/clampSmoothing';
+import { commitSmoothingChange } from './utils/commitSmoothingChange';
 
 export const useCornerSmoothingPopover = (): TUseCornerSmoothingPopoverResult => {
-  const [value, setValue] = useState(0);
+  const dispatch = useAppDispatch();
+  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
+  const id = node?.id ?? '';
+  const value = clampSmoothing((node?.cornerSmoothing ?? 0) * 100);
+  const commit = (percentage: number): void => commitSmoothingChange(dispatch, id, clampSmoothing(percentage));
 
   return {
     onBlur: (event): void => {
@@ -17,12 +24,12 @@ export const useCornerSmoothingPopover = (): TUseCornerSmoothingPopoverResult =>
       const parsed = Number(stripped);
 
       if (stripped !== '' && !Number.isNaN(parsed)) {
-        setValue(clampSmoothing(parsed));
+        commit(parsed);
       } else {
         event.target.value = `${value}%`;
       }
     },
-    onSliderChange: (next): void => setValue(clampSmoothing(next)),
+    onSliderChange: commit,
     value,
   };
 };

@@ -64,4 +64,30 @@ describe('getRoundedRectPoints', () => {
     // result
     expect(points[0]).toEqual({ x: 0, y: 0 });
   });
+
+  it('should trace a squircle corner instead of a plain arc once cornerSmoothing is set', () => {
+    // before
+    const rounded = getRoundedRectPoints({ cornerRadius: 10, height: 60, width: 100, x: 0, y: 0 }, 4);
+    const smoothed = getRoundedRectPoints({ cornerRadius: 10, cornerSmoothing: 0.6, height: 60, width: 100, x: 0, y: 0 }, 4);
+
+    // result — the squircle branch samples 3 curve pieces instead of one arc, so each corner grows
+    expect(smoothed.length).toBeGreaterThan(rounded.length);
+    // nw corner still starts on the left edge (reach = (1 + 0.6) * 10 = 16) and ends on the top edge
+    expect(smoothed[0].x).toBeCloseTo(0);
+    expect(smoothed[0].y).toBeCloseTo(16);
+    expect(smoothed[12].x).toBeCloseTo(16);
+    expect(smoothed[12].y).toBeCloseTo(0);
+  });
+
+  it('should ignore cornerSmoothing on a sharp (radius 0) corner', () => {
+    // before
+    const points = getRoundedRectPoints({ cornerRadius: 0, cornerSmoothing: 1, height: 60, width: 100, x: 0, y: 0 }, 2);
+
+    // result
+    expect(points.slice(0, 3)).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+    ]);
+  });
 });

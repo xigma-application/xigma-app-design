@@ -1,15 +1,52 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import CornerSmoothingPopover from './CornerSmoothingPopover';
 import { TooltipProvider } from 'shared';
 
+// store
+import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+import { TRectangleNode } from 'types/design/types';
+
 const renderPopover = (onClose: TFunc = vi.fn()): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <CornerSmoothingPopover onClose={onClose} />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <CornerSmoothingPopover onClose={onClose} />
+      </TooltipProvider>
+    </Provider>,
   );
+
+const addAndSelectRectangle = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: 10,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+  const id = rootOrder[rootOrder.length - 1];
+
+  store.dispatch(setSelection([id]));
+
+  return id;
+};
+
+const read = (id: string): TRectangleNode => selectActivePage(store.getState()).nodes[id] as TRectangleNode;
 
 describe('CornerSmoothingPopover snapshots', () => {
   it('should render the header, slider, value field, and iOS preview', () => {
@@ -22,6 +59,10 @@ describe('CornerSmoothingPopover snapshots', () => {
 });
 
 describe('CornerSmoothingPopover behaviors', () => {
+  afterEach(() => {
+    store.dispatch(setSelection([]));
+  });
+
   it('should render the header title and the iOS preview label', () => {
     // before
     renderPopover();
@@ -47,6 +88,8 @@ describe('CornerSmoothingPopover behaviors', () => {
 
   it('should start at 0% and commit a typed value on blur', () => {
     // before
+    const id = addAndSelectRectangle();
+
     renderPopover();
 
     const getInput = (): HTMLInputElement => screen.getByRole('textbox', { name: 'Corner smoothing value' }) as HTMLInputElement;
@@ -59,10 +102,13 @@ describe('CornerSmoothingPopover behaviors', () => {
 
     // result
     expect(getInput().value).toBe('60%');
+    expect(read(id).cornerSmoothing).toBe(0.6);
   });
 
   it('should clamp a typed value above 100 down to 100', () => {
     // before
+    const id = addAndSelectRectangle();
+
     renderPopover();
 
     const getInput = (): HTMLInputElement => screen.getByRole('textbox', { name: 'Corner smoothing value' }) as HTMLInputElement;
@@ -73,5 +119,6 @@ describe('CornerSmoothingPopover behaviors', () => {
 
     // result
     expect(getInput().value).toBe('100%');
+    expect(read(id).cornerSmoothing).toBe(1);
   });
 });

@@ -45,7 +45,12 @@ node's folder. Today:
   `BorderRadiusL/T/R/B` respectively (that naming does **not** match TL/TR/BL/BR — verified against
   Figma's own icon placement, not guessable from the SVG paths alone). Dragging a canvas
   corner-radius handle (`continueCornerRadiusDrag`) clears all four per-corner fields back to
-  uniform, so canvas and panel never disagree about which mode is active. The eye button dispatches
+  uniform, so canvas and panel never disagree about which mode is active. Once the individual view
+  is open, its `buttonsIcon` also renders `CornerSmoothingButton` — a popover (slider + clamped
+  percentage input, an "iOS" mark at 60%) reading/writing a single node-level `cornerSmoothing`
+  (0-1 fraction, `CornerSmoothingPopover/hooks/useCornerSmoothingPopover`, same commit/clamp shape
+  as `useOpacity`) that reshapes all four corners' curve at once — real geometry, not per-corner
+  (`canvas-rendering-pipeline.md`'s corner-radius section). The eye button dispatches
   the pre-existing `toggleNodeHidden` (already cascades to descendants via
   `cascadeSetGroupChildrenFlag` — no new wiring needed there).
 

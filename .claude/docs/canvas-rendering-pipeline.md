@@ -297,6 +297,26 @@ corner-radius handle (`continueCornerRadiusDrag.ts`) always writes the scalar *a
 overrides in the same `updateNode` dispatch, so the two editing surfaces (canvas handles, right-panel
 individual fields — `properties-panel.md`) never end up disagreeing about which one is "live".
 
+**`cornerSmoothing?: number` (0-1, Rectangle/Frame only) reshapes the fill silhouette into a Figma-style
+squircle — same "fill silhouette only" scope as the per-corner overrides above, not the stroke ring.**
+`getRoundedRectPoints.ts` dispatches per corner: `smoothing <= 0 || radius <= 0` keeps the original
+plain-arc path byte-for-byte (`getCircularCornerPoints.ts`, extracted verbatim, not rewritten) —
+`smoothing > 0` and a real radius instead calls `shapes/squircle/getSquircleCornerPoints.ts`, a port of
+Figma's own squircle geometry (`getSquircleCornerPathParams.ts` computes the same `a/b/c/d/p`
+Bezier-ramp/reduced-arc/Bezier-ramp shape Figma's blog post + the reverse-engineered `figma-squircle`
+package describe, clamping smoothing down when the corner radius leaves no room for it, same idea as
+`getMaxCornerRadius`'s uniform budget rather than `figma-squircle`'s own per-edge proportional
+distribution). Each `CORNER_ARCS` entry now also carries `entryDir`/`exitDir`/`vertex` (the two edge
+directions meeting at that corner, and the corner's sharp-corner point) alongside its existing
+`center`/`getRadius`/`startAngle`, since the squircle path is built relative to the two straight edges
+rather than around a fixed circle center. `sampleCubicBezier.ts`/`sampleCornerArc.ts` tessellate the
+three pieces into world-space points (the arc sampler takes the shorter angular path between its two
+known endpoints, so it never sweeps the long way around); `drawRoundedRect.ts`/`toFanVertices.ts`
+consume the resulting point list exactly like the plain-arc case, no changes needed there. Wired from
+`CornerSmoothingPopover/hooks/useCornerSmoothingPopover.ts` (`properties-panel.md`) straight to
+`node.cornerSmoothing` — the popover UI itself predates this wiring and was already real, only the
+node field and this geometry are new.
+
 **Opacity cascades down the tree, like CSS group opacity — not a per-node color-alpha tint.**
 `TBaseNode.opacity?: number` (0-1) exists on every node type, but only `properties-panel.md`'s
 Appearance section currently exposes it (Rectangle/Frame). `drawLeafNode.ts` computes one multiplier
