@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC, useRef } from 'react';
 
 // components
@@ -10,6 +11,7 @@ import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hoo
 
 // hooks
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
+import { useIsNoSelection } from './hooks/useIsNoSelection';
 import { useReportPanelWidth } from 'components/Design/hooks/useReportPanelWidth/useReportPanelWidth';
 import { useResizeHandler } from 'hooks';
 
@@ -17,7 +19,7 @@ import { useResizeHandler } from 'hooks';
 import { RIGHT_PANEL_RESIZE_SETTINGS } from './constants';
 
 // store
-import { selectIsUiHidden, selectIsUiMinimized } from 'store/design/selectors';
+import { selectAreRulersVisible, selectIsUiHidden, selectIsUiMinimized } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -27,6 +29,8 @@ const RightPanel: FC = () => {
   const panelRef = useRef<HTMLDivElement>(null);
   const isUiHidden = useAppSelector(selectIsUiHidden);
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
+  const areRulersVisible = useAppSelector(selectAreRulersVisible);
+  const isNoSelection = useIsNoSelection();
   const { cursorX, onMouseDownX, width } = useResizeHandler(RIGHT_PANEL_RESIZE_SETTINGS, panelRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownX);
   const { layout } = useCanvasRefsContext();
@@ -37,12 +41,19 @@ const RightPanel: FC = () => {
     return null;
   }
 
-  if (isUiMinimized) {
+  if (isUiMinimized && isNoSelection) {
     return <MinimizedHeader />;
   }
 
   return (
-    <div className={styles.RightPanel} ref={panelRef} style={{ width }}>
+    <div
+      className={cx(styles.RightPanel, {
+        [styles['RightPanel--floating']]: isUiMinimized,
+        [styles['RightPanel--withRulers']]: isUiMinimized && areRulersVisible,
+      })}
+      ref={panelRef}
+      style={{ width }}
+    >
       <div className={styles['RightPanel__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorX }} />
       <Header />
       <PanelProperties />

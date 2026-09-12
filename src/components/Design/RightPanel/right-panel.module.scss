@@ -14,4 +14,26 @@
     top: 0;
     width: 2px;
   }
+
+  &--floating {
+    border-left: none;
+    border-radius: 8px;
+    box-shadow: var(--elevation-100-canvas);
+    height: auto;
+    max-height: calc(100vh - 12px - 12px);
+    min-height: calc(100vh - 12px - 12px);
+    overflow-y: auto;
+    right: 12px;
+    top: 12px;
+    transition:
+      top 80ms ease-out,
+      min-height 80ms ease-out,
+      max-height 80ms ease-out;
+
+    &.RightPanel--withRulers {
+      max-height: calc(100vh - 32px - 12px);
+      min-height: calc(100vh - 32px - 12px);
+      top: 32px;
+    }
+  }
 }

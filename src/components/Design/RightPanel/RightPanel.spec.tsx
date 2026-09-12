@@ -14,8 +14,12 @@ import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hoo
 import { RIGHT_PANEL_DEFAULT_WIDTH, RIGHT_PANEL_MAX_WIDTH, RIGHT_PANEL_MIN_WIDTH } from './constants';
 
 // store
-import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { addNode, setSelection, toggleRulers, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
 
 let capturedRightPanelWidthRef: { current: number } | null = null;
 
@@ -23,6 +27,26 @@ const RefsProbe: FC = () => {
   capturedRightPanelWidthRef = useCanvasRefsContext().layout.rightPanelWidthRef;
 
   return null;
+};
+
+const addRectangleNode = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
 };
 
 const renderRightPanel = (): ReturnType<typeof render> =>
@@ -127,6 +151,37 @@ describe('RightPanel behaviors', () => {
     // result
     expect(container.querySelector('[class*="RightPanel"]')).toBeNull();
     expect(container.querySelector('[class*="MinimizedHeader"]')).not.toBeNull();
+  });
+
+  it('should render the full floating panel instead of MinimizedHeader while minimized with a selection', () => {
+    // before
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([rectangleId]));
+    store.dispatch(toggleUiMinimized());
+    const { container } = renderRightPanel();
+
+    // result
+    expect(container.querySelector('[class*="MinimizedHeader"]')).toBeNull();
+    expect(container.querySelector('[class*="RightPanel--floating"]')).not.toBeNull();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should add the RightPanel--withRulers modifier while minimized, selected, and rulers are visible', () => {
+    // before
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([rectangleId]));
+    store.dispatch(toggleUiMinimized());
+    store.dispatch(toggleRulers());
+    const { container } = renderRightPanel();
+
+    // result
+    expect(container.querySelector('[class*="RightPanel--withRulers"]')).not.toBeNull();
+
+    // cleanup
+    store.dispatch(toggleRulers());
+    store.dispatch(setSelection([]));
   });
 
   it('should render nothing while the UI is hidden', () => {

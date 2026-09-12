@@ -9,6 +9,7 @@ import Rectangle from './Rectangle/Rectangle';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
+import { useIsNoSelection } from '../hooks/useIsNoSelection';
 
 // store
 import { selectActiveTool, selectIsGridSettingsPanelOpen, selectSelectedNodes } from 'store/design/selectors';
@@ -21,6 +22,7 @@ const PanelProperties: FC = () => {
   const activeTool = useAppSelector(selectActiveTool);
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const isGridSettingsPanelOpen = useAppSelector(selectIsGridSettingsPanelOpen);
+  const isNoSelection = useIsNoSelection();
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
   const isGridFrameSelected = selectedNode?.type === NodeType.frame && selectedNode.layoutMode === LayoutMode.grid;
 
@@ -29,7 +31,7 @@ const PanelProperties: FC = () => {
   switch (true) {
     case activeTool === ToolName.frame:
       return <FrameTool />;
-    case selectedNodes.length === 0:
+    case isNoSelection:
       return <NoSelection />;
     case isGridFrameSelected && isGridSettingsPanelOpen:
       return <GridSettings />;
