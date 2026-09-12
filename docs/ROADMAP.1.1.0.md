@@ -223,7 +223,8 @@ panel with a slider (plus an "iOS" marker for the smoothing level Apple uses) an
 It now really reshapes the corners into the same rounder, softer "squircle" curve Figma and iOS use,
 instead of a plain circular corner.
 
-- [ ] the Blend mode button doesn't do anything yet — just the icon for now
+- [ ] the Blend mode button opens a menu with every blend mode option, but picking one doesn't
+      change the shape yet — nothing is saved
 
 ## Related
 

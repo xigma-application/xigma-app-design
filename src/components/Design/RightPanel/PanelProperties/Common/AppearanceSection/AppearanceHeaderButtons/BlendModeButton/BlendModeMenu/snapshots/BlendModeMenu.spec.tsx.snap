@@ -1,0 +1,648 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BlendModeMenu snapshots > should render every blend mode option grouped with separators 1`] = `
+<DocumentFragment>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 1;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Pass through
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Normal
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Darken
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Multiply
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Plus darker
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Color burn
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Lighten
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Screen
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Plus lighter
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Color dodge
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Overlay
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Soft light
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Hard light
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Difference
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Exclusion
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverSeparator_f8884f"
+  />
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Hue
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Saturation
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Color
+      </span>
+    </div>
+  </div>
+  <div
+    class="_PopoverItem_9483de"
+    type="button"
+  >
+    <span
+      style="opacity: 0;"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        fill="none"
+        height="14"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="14"
+      >
+        <path
+          d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </span>
+    <div
+      class="_PopoverItem__row_9483de"
+    >
+      <span
+        class="_PopoverItem__label_9483de"
+      >
+        Luminosity
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

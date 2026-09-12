@@ -1,7 +1,7 @@
 import { FC, Fragment } from 'react';
 
 // components
-import BlendModeButton from './BlendModeButton';
+import BlendModeButton from './BlendModeButton/BlendModeButton';
 import VisibilityToggle from './VisibilityToggle';
 
 const AppearanceHeaderButtons: FC = () => (

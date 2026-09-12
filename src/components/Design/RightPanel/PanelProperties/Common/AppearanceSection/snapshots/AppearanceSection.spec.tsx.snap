@@ -44,11 +44,11 @@ exports[`AppearanceSection snapshots > should render the collapsed opacity and c
           </svg>
         </button>
         <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
           aria-label="Apply blend mode"
-          aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonMenu_7516ba"
           data-state="closed"
-          style="padding: 5.5px;"
           type="button"
         >
           <svg

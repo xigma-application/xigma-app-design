@@ -34,7 +34,7 @@ node's folder. Today:
   in both the Frame and Rectangle panels; self-hides otherwise. **Display only so far** — the
   fields are uncontrolled and read `gridColumnSpan`/`gridRowSpan` (default 1) without committing.
 - `Common/AppearanceSection/` — Opacity + Corner radius row, plus a Hide/Show eye button and a
-  (still non-functional) Blend mode button in the section header. Gates on `isAppearanceNode`
+  Blend mode button in the section header. Gates on `isAppearanceNode`
   (`type === NodeType.frame || NodeType.rectangle` — the only two types with a `cornerRadius`
   field today). `Opacity/useOpacity` reads/writes `node.opacity` (0-1 fraction, 0-100% in the UI).
   `CornerRadius/useCornerRadius` mirrors `ColumnPadding`'s merged/individual split: one field
@@ -50,7 +50,17 @@ node's folder. Today:
   percentage input, an "iOS" mark at 60%) reading/writing a single node-level `cornerSmoothing`
   (0-1 fraction, `CornerSmoothingPopover/hooks/useCornerSmoothingPopover`, same commit/clamp shape
   as `useOpacity`) that reshapes all four corners' curve at once — real geometry, not per-corner
-  (`canvas-rendering-pipeline.md`'s corner-radius section). The eye button dispatches
+  (`canvas-rendering-pipeline.md`'s corner-radius section). `AppearanceHeaderButtons/BlendModeButton/`
+  opens a `UITools.ButtonMenu` listing every CSS/Figma-style blend mode (`BlendModeMenu`, options from
+  `types/design/constants.ts`'s `BLEND_MODE_GROUPS`, grouped with `PopoverSeparator` exactly like the
+  screenshot spec — Pass through/Normal, then the darken/lighten/contrast/component families, then the
+  HSL family), each a `PopoverItem` with its own checkmark. **UI only, not wired** — there is no
+  `blendMode` field on any node yet; `useBlendModeMenu` holds the selected `BlendMode` (from
+  `types/design/enums.ts`) in local `useState` only, defaulting to `passThrough`, and resets on every
+  reopen since the menu unmounts when the popover closes. The `BlendMode` enum + `BLEND_MODE_GROUPS`
+  constant were deliberately put in the global `types/design/` layer (not nested under this button's
+  own folder) because blend mode is a Design-domain concept other future features (e.g. per-fill blend
+  mode) will need the same option list for. The eye button dispatches
   the pre-existing `toggleNodeHidden` (already cascades to descendants via
   `cascadeSetGroupChildrenFlag` — no new wiring needed there).
 

@@ -33,6 +33,28 @@ export enum AutoSpacing {
   evenly = 'evenly',
 }
 
+export enum BlendMode {
+  color = 'color',
+  colorBurn = 'colorBurn',
+  colorDodge = 'colorDodge',
+  darken = 'darken',
+  difference = 'difference',
+  exclusion = 'exclusion',
+  hardLight = 'hardLight',
+  hue = 'hue',
+  lighten = 'lighten',
+  luminosity = 'luminosity',
+  multiply = 'multiply',
+  normal = 'normal',
+  overlay = 'overlay',
+  passThrough = 'passThrough',
+  plusDarker = 'plusDarker',
+  plusLighter = 'plusLighter',
+  saturation = 'saturation',
+  screen = 'screen',
+  softLight = 'softLight',
+}
+
 export enum CanvasStacking {
   firstOnTop = 'firstOnTop',
   lastOnTop = 'lastOnTop',
