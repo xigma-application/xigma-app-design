@@ -281,6 +281,52 @@ describe('useColumnFlow', () => {
     expect(readNode(frameId).gridColumnCount).toBe(5);
   });
 
+  it('should default gridAutoPlacement to true', () => {
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // result
+    expect(result.current.gridAutoPlacement).toBe(true);
+  });
+
+  it('should read the selected frame’s existing gridAutoPlacement flag', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // result
+    expect(result.current.gridAutoPlacement).toBe(false);
+  });
+
+  it('should dispatch the toggled gridAutoPlacement flag on the selected frame', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action
+    act(() => result.current.onGridAutoPlacementChange());
+
+    // result
+    expect(readNode(frameId).gridAutoPlacement).toBe(false);
+    expect(result.current.gridAutoPlacement).toBe(false);
+
+    // action
+    act(() => result.current.onGridAutoPlacementChange());
+
+    // result
+    expect(readNode(frameId).gridAutoPlacement).toBe(true);
+    expect(result.current.gridAutoPlacement).toBe(true);
+  });
+
   it('should leave a direct child’s fill untouched when flipping between horizontal and vertical', () => {
     // mock
     const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal);

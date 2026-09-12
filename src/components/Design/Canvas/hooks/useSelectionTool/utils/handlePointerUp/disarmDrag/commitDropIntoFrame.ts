@@ -1,9 +1,3 @@
-// others
-import { applyGridDrop } from './applyGridDrop';
-import { applyGridInsert } from './applyGridInsert';
-import { getDropNodeOrder } from '../../getDropNodeOrder';
-import { resolveDropTargetIndex } from './resolveDropTargetIndex';
-
 // store
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { isDropTargetContainer } from 'store/design/utils/nodeHierarchy/isDropTargetContainer';
@@ -15,6 +9,14 @@ import { AppDispatch, store } from 'store';
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
+
+// utils
+import { applyGridDrop } from './applyGridDrop';
+import { applyGridInsert } from './applyGridInsert';
+import { fillSizeNodesForGridAutoInsert } from './fillSizeNodesForGridAutoInsert';
+import { getDropNodeOrder } from '../../getDropNodeOrder';
+import { getGridAutoInsertIndex } from './getGridAutoInsertIndex';
+import { resolveDropTargetIndex } from './resolveDropTargetIndex';
 
 export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState, canvasRefs: TCanvasRefs): void => {
   if (dragState.hasMoved) {
@@ -35,15 +37,25 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
     const isSameParentIndicatorDrop =
       targetParentId !== null && targetParentId === currentParentId && autoLayoutDropTarget?.frameId === targetParentId;
     const isGridDrop = targetParentId !== null && gridDropTarget?.frameId === targetParentId;
+    const isRepositioningExistingGridChild = isGridDrop && targetParentId === currentParentId;
+    const isGridFrameTarget = targetFrame?.type === NodeType.frame;
+    const targetGridAutoPlacement = isGridFrameTarget && (targetFrame.gridAutoPlacement ?? true);
+    const gridAutoPlacementBlocksReposition = isRepositioningExistingGridChild && targetGridAutoPlacement;
+    const isNewGridInsertUnderAutoPlacement =
+      isGridDrop && !isRepositioningExistingGridChild && isGridFrameTarget && targetGridAutoPlacement;
+    const gridAutoInsertIndex =
+      isNewGridInsertUnderAutoPlacement && gridDropTarget ? getGridAutoInsertIndex(targetFrame, gridDropTarget) : null;
 
     if (
-      matchingReorderPreview ||
-      isSameParentIndicatorDrop ||
-      isGridDrop ||
-      (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot))
+      !gridAutoPlacementBlocksReposition &&
+      (matchingReorderPreview ||
+        isSameParentIndicatorDrop ||
+        isGridDrop ||
+        (targetParentId !== currentParentId && (targetParentId !== null || canDragOutToRoot)))
     ) {
       const targetIndex = resolveDropTargetIndex({
         autoLayoutDropTarget,
+        gridAutoInsertIndex,
         matchingReorderPreview,
         page,
         targetFrame,
@@ -53,7 +65,9 @@ export const commitDropIntoFrame = (dispatch: AppDispatch, dragState: TDragState
       dispatch(moveNodes({ nodeIds, targetIndex, targetParentId }));
 
       if (isGridDrop && gridDropTarget && targetParentId) {
-        if (gridDropTarget.insertIndex !== undefined && targetFrame?.type === NodeType.frame) {
+        if (isNewGridInsertUnderAutoPlacement) {
+          fillSizeNodesForGridAutoInsert(dispatch, nodeIds);
+        } else if (gridDropTarget.insertIndex !== undefined && targetFrame?.type === NodeType.frame) {
           applyGridInsert(dispatch, targetFrame, page.nodes, gridDropTarget.insertIndex, nodeIds);
         } else {
           applyGridDrop(dispatch, targetParentId, gridDropTarget.cells, nodeIds);

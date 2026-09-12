@@ -445,6 +445,24 @@ frame centre). `applyAutoLayoutSyncChildPosition` also recurses into a nested `g
 Returns `TAutoLayoutChildPosition[]` in `sizes` order — the exact shape the applier already
 consumes.
 
+### Panel — the Flow row's automatic-positioning toggle (`ColumnFlow/ColumnFlowButtonIcons.tsx`)
+
+The Flow row already had one extension point next to its `ToggleButtonGroup` — `buttonsIcon`
+(`UITools.SectionColumn`'s separate slot, not a 5th member of the mutually-exclusive group) — used
+for the horizontal-only Wrap button. `ColumnFlowButtonIcons` now branches on `value` (the current
+flow) with a `switch`: `'horizontal'` → Wrap (unchanged), `'grid'` → a new `FollowPath`-icon toggle
+button (`Toggle automatic positioning`, matching Figma's own tooltip text), anything else → `[]`.
+`useColumnFlow` exposes `gridAutoPlacement` (`frameNode?.gridAutoPlacement ?? true`) and
+`onGridAutoPlacementChange` (`dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement } }))`)
+alongside the existing `wrap`/`onWrapChange`, and the button's `selected` prop mirrors it (pressed
+= on). No other side effect: flipping the flag doesn't itself write anchors or touch `childIds` —
+turning it **on** relies entirely on the existing engine behaviour that already ignores anchors
+whenever `gridAutoPlacement` is true (`placeGridCells`'s `useAnchor = !autoPlacement && hasAnchor`,
+§ engine), so any previously-anchored children snap back into row-major (`getAutoFlowGridPlacement`,
+left-to-right/top-row-down) order the moment the frame re-syncs — no dedicated "compact" step was
+needed. Turning it **off** is likewise a bare flag flip; nothing is anchored until the user
+actually drags something (see the drop-commit branches above and below).
+
 ### Panel — `LayoutSection/ColumnAlignmentLayout/GridArea/`
 
 Ported faithfully from x-design's `shared/UITools/GridArea/` (structure + popup). When
@@ -841,14 +859,32 @@ that overflow (the grid grows on drop, not on hover) — `GRID_SLOT_ACTIVE_FILL`
 `getAutoLayoutDragOpacity` dims the dragged nodes to `0.5` whenever the ref is set, indicator or
 not.
 
-On drop (`commitDropIntoFrame`):
-- **Cell hover** (`applyGridDrop`) — `moveNodes` appends the nodes, then per node `updateNode`
-  sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and `widthSizingMode` /
-  `heightSizingMode = fill` (the element ignores its own size and fills the cell), and the frame
-  flips to `gridAutoPlacement: false` so the anchors take. The grid grows rows to the dropped
-  cells via the engine's `derivedRowCount` — no explicit `gridRowCount` write.
-- **Indicator hover** (`applyGridInsert`, driven by `getGridInsertPlacements`) — reading-order
-  insert: `placeGridCells` resolves every *other* child's current reading index
+On drop (`commitDropIntoFrame`), the *first* branch is whether the dragged node is already a
+child of this exact grid (`isRepositioningExistingGridChild`, i.e. `targetParentId ===
+currentParentId`) versus a fresh insertion — and, for either, whether the frame's
+`gridAutoPlacement` is currently on (`?? true`) or explicitly `false` (manual):
+
+- **Repositioning an already-placed grid child while `gridAutoPlacement` is on** —
+  `gridAutoPlacementBlocksReposition` short-circuits the whole commit to a no-op: no `moveNodes`,
+  no anchor, no flag flip. Automatic positioning fully owns an existing child's cell, so trying to
+  drag it elsewhere just visually snaps back (the ghost, §"Canvas — the grid drag ghost" below,
+  still rides the cursor mid-drag — only the *commit* is refused). Switching the frame to manual
+  first (the `ColumnFlow` "Toggle automatic positioning" button, §"Panel — the Flow row's
+  automatic-positioning toggle") is what unblocks it.
+- **A brand-new element (not yet a child of this frame) while `gridAutoPlacement` is on** —
+  `isNewGridInsertUnderAutoPlacement`: the insert still happens, but as a plain `childIds` reorder
+  (`getGridAutoInsertIndex` — reuses `insertIndex` when the hover resolved an insert, else derives
+  `row * columnCount + column` from `cells[0]`), with **no anchor and no `gridAutoPlacement`
+  flip** — the auto-flow engine re-derives every child's cell from that new order on its own, the
+  same way it always has. `fillSizeNodesForGridAutoInsert` still stretches the dropped node(s) to
+  fill whatever cell it lands in, matching the manual-mode drop's own fill behaviour.
+- **Cell hover, manual mode** (`applyGridDrop`) — `moveNodes` appends the nodes, then per node
+  `updateNode` sets `gridColumnAnchorIndex` / `gridRowAnchorIndex` from `cells[i]` and
+  `widthSizingMode` / `heightSizingMode = fill`, and the frame flips to `gridAutoPlacement: false`
+  so the anchors take. The grid grows rows to the dropped cells via the engine's
+  `derivedRowCount` — no explicit `gridRowCount` write.
+- **Indicator hover, manual mode** (`applyGridInsert`, driven by `getGridInsertPlacements`) —
+  reading-order insert: `placeGridCells` resolves every *other* child's current reading index
   (`row * columnCount + column`); the dragged nodes take `insertIndex .. insertIndex + N - 1`;
   every existing child at or past `insertIndex` **ripples forward** to the nearest free reading
   index at or after `insertIndex + N` (a child that already sat further out than the ripple stays
@@ -857,12 +893,13 @@ On drop (`commitDropIntoFrame`):
   `gridAutoPlacement: false`; dragged nodes also get `widthSizingMode` / `heightSizingMode = fill`
   like a plain cell drop. `childIds` order itself is untouched — the reorder is anchor-driven.
 
-Everything above is agnostic to where the dragged node came from: dragging a *fresh* element in
-from outside the grid and dragging an *already-placed* grid child to a new cell go through the
-exact same `armGridDropTarget` → `drawGridDropTarget` → `commitDropIntoFrame` pipeline (the same
-occupancy scan naturally "merges" several scattered-but-selected grid children into adjacent free
-cells, since `count`/`draggedCount` is just the selection size and their own old cells are simply
-excluded from occupancy like any other moved node).
+Once `gridAutoPlacement` is `false`, dragging a fresh element in and dragging an already-placed
+grid child to a new cell go through the exact same `armGridDropTarget` → `drawGridDropTarget` →
+`commitDropIntoFrame` pipeline (the same occupancy scan naturally "merges" several
+scattered-but-selected grid children into adjacent free cells, since `count`/`draggedCount` is
+just the selection size and their own old cells are simply excluded from occupancy like any other
+moved node) — that parity only holds under manual placement; under automatic placement the two
+cases diverge exactly as described above.
 
 ### Canvas — the grid drag ghost (dragging an already-placed grid child)
 
@@ -1434,3 +1471,33 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     shared) turned out to be an exact pre-existing duplicate of the value-edit overlay's own
     file-local `getGridTrackEditTrackCount` — used the shared one for the new code rather than
     adding a third copy, but left the older duplicate alone (out of scope for this change).
+26. **2026-09-12 — grid flow, the "Toggle automatic positioning" button (§13 "Panel — the Flow
+    row's automatic-positioning toggle" and the `commitDropIntoFrame` drop-commit branches).**
+    `gridAutoPlacement` and its engine-side handling (`placeGridCells`'s `useAnchor = !autoPlacement
+    && hasAnchor`) already existed from Phase 1 — this was purely the missing UI plus two real drop
+    behaviour changes, modelled on Figma's own automatic-positioning toggle (confirmed against
+    Figma's help docs, since the plugin-API reference is silent on the interaction details): (a)
+    dragging an *already-placed* grid child while automatic positioning is on must be a no-op
+    (Figma snaps it back), and (b) dropping a *brand-new* element while automatic positioning is on
+    must insert it into `childIds` at the nearest reading-order position **without** anchoring it
+    or flipping the frame to manual — letting the existing auto-flow engine re-derive everyone's
+    cell, the same way CSS `grid-auto-flow` insertion already works for the linear engines'
+    reorder-by-drag. Landed in three passes after live back-and-forth on the exact model (asked
+    before coding, per the size of the behaviour change): first only (a), which broke several
+    *pre-existing* e2e tests whose whole premise was "drag an unanchored child within a
+    freshly-graded grid and expect it to anchor" (a scenario that only worked before because
+    nothing had ever set `gridAutoPlacement` — those tests now explicitly flip it to manual first,
+    via the panel button or a direct `updateNode`, before exercising drag-to-reposition); then (b)
+    was added after the user pointed out new-element drops must *not* disable automatic positioning
+    either (initial instinct — and the pre-existing code's actual behaviour — was to always anchor
+    +flip on drop, matching Figma's *manual*-mode semantics, not automatic's); a follow-up
+    correction added `fillSizeNodesForGridAutoInsert` so the auto-inserted node still stretches to
+    fill its cell (dropped, not just re-flowing an existing member) even though it isn't anchored.
+    One non-obvious gotcha while fixing the affected e2e tests: toggling automatic positioning off
+    via the *panel button* immediately before a *column-count resize* step (rather than right
+    before the actual repositioning drag) caused the resize-repack pass to implicitly anchor
+    previously-unanchored siblings too — moving the toggle to fire right before the drag it's
+    actually gating (or dispatching the store flag directly, bypassing the panel for pure test
+    setup) avoided the side effect; a second e2e gotcha was clicking to select an existing grid
+    child before dragging it (as the "ghost drag" test above already established) rather than
+    relying on a bare mouse-down, since the frame stays the active RightPanel selection otherwise.

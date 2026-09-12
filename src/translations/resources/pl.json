@@ -502,6 +502,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Przycinaj zawartość",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.freeForm": "Dowolna forma",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.grid": "Siatka",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.gridAutoPlacementAriaLabel": "Przełącz automatyczne pozycjonowanie",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.gridAutoPlacementTooltip": "Przełącz automatyczne pozycjonowanie",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Poziomy układ",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.label": "Przepływ",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.vertical": "Pionowy układ",

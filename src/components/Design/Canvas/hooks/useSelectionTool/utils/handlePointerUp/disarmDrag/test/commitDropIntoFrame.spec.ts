@@ -1,5 +1,5 @@
 // store
-import { addNode, deleteNode, moveNodes, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -155,8 +155,8 @@ describe('commitDropIntoFrame', () => {
     expect(page.rootOrder).not.toContain(rectId);
   });
 
-  it('should drop the selection into the exact hovered grid cell, pin it there, and stretch it to fill', () => {
-    // mock — 2-column grid, one child already inside
+  it('should insert a brand-new element into the grid by reading-order position while automatic positioning is on, instead of anchoring it', () => {
+    // mock — 2-column grid, one child already inside; automatic positioning stays at its default (true)
     const gridId = addGridFrameNode(0, 0);
     const firstId = addRectNode(10, 10);
 
@@ -176,7 +176,38 @@ describe('commitDropIntoFrame', () => {
     // action
     commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
 
-    // result
+    // result — reordered into childIds so the auto-flow engine places it: no anchor, no flag
+    // flip, but it still stretches to fill whatever cell it lands in
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[gridId] as { childIds: string[] }).childIds).toEqual([firstId, droppedId]);
+    expect(page.nodes[gridId]).not.toMatchObject({ gridAutoPlacement: false });
+    expect(page.nodes[droppedId]).not.toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 2 });
+    expect(page.nodes[droppedId]).toMatchObject({ heightSizingMode: SizingMode.fill, widthSizingMode: SizingMode.fill });
+  });
+
+  it('should still pin a brand-new element into the exact hovered grid cell and stretch it to fill once automatic positioning is off', () => {
+    // mock — 2-column grid already switched to manual placement
+    const gridId = addGridFrameNode(0, 0);
+    const firstId = addRectNode(10, 10);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId], targetIndex: 0, targetParentId: gridId }));
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: gridId }));
+
+    const droppedId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([droppedId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: { current: { cells: [{ column: 1, row: 2 }], frameId: gridId } },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — unchanged manual-mode behavior: anchored at the exact cell, stretched to fill
     const page = selectActivePage(store.getState());
     expect((page.nodes[gridId] as { childIds: string[] }).childIds).toEqual([firstId, droppedId]);
     expect(page.nodes[gridId]).toMatchObject({ gridAutoPlacement: false });
@@ -188,8 +219,59 @@ describe('commitDropIntoFrame', () => {
     });
   });
 
-  it('should insert the selection at the indicator index and push the trailing grid children forward', () => {
-    // mock — 2-column grid holding two children in reading order
+  it('should block repositioning a child already inside the grid while automatic positioning is on (the default), leaving it untouched', () => {
+    // mock — 2-column grid, two children already inside; dragging the first one onto another cell
+    const gridId = addGridFrameNode(0, 0);
+    const firstId = addRectNode(10, 10);
+    const secondId = addRectNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId, secondId], targetIndex: 0, targetParentId: gridId }));
+    store.dispatch(setSelection([firstId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: { current: { cells: [{ column: 1, row: 2 }], frameId: gridId } },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — nothing committed: no anchor, no reorder, gridAutoPlacement left alone
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[gridId] as { childIds: string[] }).childIds).toEqual([firstId, secondId]);
+    expect(page.nodes[firstId]).not.toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 2 });
+    expect(page.nodes[gridId]).not.toMatchObject({ gridAutoPlacement: false });
+  });
+
+  it('should still allow repositioning a child already inside the grid once automatic positioning is explicitly off', () => {
+    // mock — same setup, but the frame has already been switched to manual placement
+    const gridId = addGridFrameNode(0, 0);
+    const firstId = addRectNode(10, 10);
+    const secondId = addRectNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId, secondId], targetIndex: 0, targetParentId: gridId }));
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: gridId }));
+    store.dispatch(setSelection([firstId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: { current: { cells: [{ column: 1, row: 2 }], frameId: gridId } },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — the explicit drop still commits, exactly like the manual-mode drag it always was
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[firstId]).toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 2 });
+  });
+
+  it('should insert a brand-new element at the indicator’s reading-order position while automatic positioning is on, without anchoring anyone', () => {
+    // mock — 2-column grid holding two children in reading order; automatic positioning stays on
     const gridId = addGridFrameNode(0, 0);
     const aId = addRectNode(10, 10);
     const bId = addRectNode(20, 20);
@@ -212,7 +294,44 @@ describe('commitDropIntoFrame', () => {
     // action
     commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
 
-    // result — dropped node takes reading index 1, "b" slides into the next row
+    // result — dropped node takes reading index 1 via a plain reorder; the auto-flow engine (not
+    // an explicit anchor) is what then pushes "b" into the next row; the dropped node still
+    // stretches to fill its cell, but "b" (never explicitly dropped) keeps its own sizing
+    const page = selectActivePage(store.getState());
+    expect((page.nodes[gridId] as { childIds: string[] }).childIds).toEqual([aId, droppedId, bId]);
+    expect(page.nodes[gridId]).not.toMatchObject({ gridAutoPlacement: false });
+    expect(page.nodes[droppedId]).not.toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 0 });
+    expect(page.nodes[droppedId]).toMatchObject({ heightSizingMode: SizingMode.fill, widthSizingMode: SizingMode.fill });
+    expect(page.nodes[bId]).not.toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 1 });
+  });
+
+  it('should still insert at the indicator index and anchor-push the trailing grid children once automatic positioning is off', () => {
+    // mock — same 2-column grid, but already switched to manual placement
+    const gridId = addGridFrameNode(0, 0);
+    const aId = addRectNode(10, 10);
+    const bId = addRectNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [aId, bId], targetIndex: 0, targetParentId: gridId }));
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: gridId }));
+
+    const droppedId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([droppedId]));
+
+    const canvasRefs = createCanvasRefs({
+      transform: {
+        dropTargetFrameIdRef: { current: gridId },
+        gridDropTargetRef: {
+          current: { cells: [], frameId: gridId, indicator: { column: 1, row: 0, side: 'left' }, insertIndex: 1 },
+        },
+      },
+    });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result — unchanged manual-mode behavior: dropped node takes reading index 1, "b" slides
+    // into the next row, both explicitly anchored
     const page = selectActivePage(store.getState());
     expect(page.nodes[gridId]).toMatchObject({ gridAutoPlacement: false });
     expect(page.nodes[droppedId]).toMatchObject({

@@ -490,6 +490,8 @@
   "design.rightPanel.panelProperties.frame.layoutSection.columnClipContent.label": "Clip content",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.freeForm": "Free form",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.grid": "Grid",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.gridAutoPlacementAriaLabel": "Toggle automatic positioning",
+  "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.gridAutoPlacementTooltip": "Toggle automatic positioning",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.horizontal": "Horizontal",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.label": "Flow",
   "design.rightPanel.panelProperties.frame.layoutSection.columnFlow.vertical": "Vertical",

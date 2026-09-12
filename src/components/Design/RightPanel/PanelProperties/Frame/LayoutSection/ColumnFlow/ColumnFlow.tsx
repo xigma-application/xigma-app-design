@@ -13,11 +13,11 @@ import { translationNameSpace } from './constants';
 
 const ColumnFlow: FC = () => {
   const { t } = useTranslation();
-  const { onChange, onWrapChange, toggleButtons, value, wrap } = useColumnFlow();
+  const { gridAutoPlacement, onChange, onGridAutoPlacementChange, onWrapChange, toggleButtons, value, wrap } = useColumnFlow();
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={ColumnFlowButtonIcons(value, wrap, onWrapChange, t)}
+      buttonsIcon={ColumnFlowButtonIcons(value, wrap, onWrapChange, t, gridAutoPlacement, onGridAutoPlacementChange)}
       gridColumnType={UITools.GridColumnType.single}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin

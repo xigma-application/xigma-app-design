@@ -12,6 +12,7 @@ const frame = (childIds: string[]): TSceneNode => ({ childIds, id: 'f1', type: N
 
 const base = {
   autoLayoutDropTarget: null,
+  gridAutoInsertIndex: null,
   matchingReorderPreview: null,
   page,
   targetFrame: null,
@@ -31,6 +32,10 @@ describe('resolveDropTargetIndex', () => {
         targetParentId: 'f1',
       }),
     ).toBe(2);
+  });
+
+  it('should use the grid auto-insert index when the drop is a new grid element under automatic positioning', () => {
+    expect(resolveDropTargetIndex({ ...base, gridAutoInsertIndex: 4, targetFrame: frame(['x', 'y']) })).toBe(4);
   });
 
   it('should append to the target container when there is no indicator', () => {

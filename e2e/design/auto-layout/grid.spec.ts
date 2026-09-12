@@ -286,6 +286,14 @@ test.describe('auto-layout — Grid flow', () => {
     // a second rectangle out on the canvas, to drag into the grid
     await designPage.drawRectangle(1400, 600, 1470, 660);
 
+    const droppedId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const { rootOrder } = pages[activePageId];
+
+      return rootOrder[rootOrder.length - 1];
+    });
+
     const safeArea = await designPage.canvasSafeArea();
     const beforeHover = await page.screenshot({ clip: safeArea });
 
@@ -301,19 +309,16 @@ test.describe('auto-layout — Grid flow', () => {
     await page.mouse.up();
     await page.waitForTimeout(150);
 
-    const dropped = await page.evaluate(async () => {
+    const dropped = await page.evaluate(async (nodeId) => {
       const { store } = await import('/src/store/index.ts');
       const { activePageId, pages } = store.getState().design;
       const activePage = pages[activePageId];
       const [frameId] = activePage.rootOrder;
       const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
-      const last = activePage.nodes[frame.childIds[frame.childIds.length - 1]] as unknown as {
-        heightSizingMode?: string;
-        widthSizingMode?: string;
-      };
+      const node = activePage.nodes[nodeId] as unknown as { heightSizingMode?: string; widthSizingMode?: string };
 
-      return { childCount: frame.childIds.length, heightSizingMode: last.heightSizingMode, widthSizingMode: last.widthSizingMode };
-    });
+      return { childCount: frame.childIds.length, heightSizingMode: node.heightSizingMode, widthSizingMode: node.widthSizingMode };
+    }, droppedId);
 
     expect(dropped.childCount).toBe(2);
     expect(dropped.widthSizingMode).toBe('fill');
@@ -342,6 +347,14 @@ test.describe('auto-layout — Grid flow', () => {
     // neighbour is occupied too, so this is an insertion, not a plain cell drop
     await designPage.drawRectangle(1400, 500, 1460, 540);
 
+    const droppedId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const { rootOrder } = pages[activePageId];
+
+      return rootOrder[rootOrder.length - 1];
+    });
+
     const cellOneLeftEdge = FRAME.x1 + (FRAME.x2 - FRAME.x1) / 2;
 
     await page.mouse.move(1430, 520);
@@ -351,37 +364,54 @@ test.describe('auto-layout — Grid flow', () => {
     await page.mouse.up();
     await page.waitForTimeout(150);
 
-    const layout = await page.evaluate(async () => {
+    const layout = await page.evaluate(async (nodeId) => {
       const { store } = await import('/src/store/index.ts');
       const { activePageId, pages } = store.getState().design;
       const activePage = pages[activePageId];
       const [frameId] = activePage.rootOrder;
       const frame = activePage.nodes[frameId] as unknown as { childIds: string[]; gridAutoPlacement?: boolean };
-      const read = (id: string): { column?: number; row?: number; x: number; y: number } => {
+      const read = (
+        id: string,
+      ): { column?: number; heightSizingMode?: string; row?: number; widthSizingMode?: string; x: number; y: number } => {
         const node = activePage.nodes[id] as unknown as {
           gridColumnAnchorIndex?: number;
           gridRowAnchorIndex?: number;
+          heightSizingMode?: string;
+          widthSizingMode?: string;
           x: number;
           y: number;
         };
 
-        return { column: node.gridColumnAnchorIndex, row: node.gridRowAnchorIndex, x: Math.round(node.x), y: Math.round(node.y) };
+        return {
+          column: node.gridColumnAnchorIndex,
+          heightSizingMode: node.heightSizingMode,
+          row: node.gridRowAnchorIndex,
+          widthSizingMode: node.widthSizingMode,
+          x: Math.round(node.x),
+          y: Math.round(node.y),
+        };
       };
 
       return {
+        childIds: frame.childIds,
         gridAutoPlacement: frame.gridAutoPlacement,
-        inserted: read(frame.childIds[2]),
-        pushed: read(frame.childIds[1]),
+        inserted: read(nodeId),
+        pushed: read(frame.childIds[2]),
       };
-    });
+    }, droppedId);
 
-    // the frame switched to manual placement; the dropped node took cell (1,0)
-    expect(layout.gridAutoPlacement).toBe(false);
-    expect(layout.inserted.column).toBe(1);
-    expect(layout.inserted.row).toBe(0);
-    // the child that used to sit there was pushed into the next row
-    expect(layout.pushed.column).toBe(0);
-    expect(layout.pushed.row).toBe(1);
+    // automatic positioning stayed on: the dropped node took reading index 1 by reordering
+    // childIds, not by an explicit anchor, and still stretches to fill its cell
+    expect(layout.childIds[1]).toBe(droppedId);
+    expect(layout.gridAutoPlacement).not.toBe(false);
+    expect(layout.inserted.column).toBeUndefined();
+    expect(layout.inserted.row).toBeUndefined();
+    expect(layout.inserted.widthSizingMode).toBe('fill');
+    expect(layout.inserted.heightSizingMode).toBe('fill');
+    // the child that used to sit there was pushed into the next row by the auto-flow engine —
+    // also without ever getting an explicit anchor
+    expect(layout.pushed.column).toBeUndefined();
+    expect(layout.pushed.row).toBeUndefined();
     expect(layout.pushed.y).toBeGreaterThan(layout.inserted.y);
   });
 
@@ -413,6 +443,18 @@ test.describe('auto-layout — Grid flow', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(150);
 
+    // repositioning an already-placed child is blocked while automatic positioning is on — switch
+    // to manual now, after the grid is already sized (that resize step itself still ran under
+    // automatic positioning, same as a real drag-to-reposition would require)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    });
+
     const columnWidth = (FRAME.x2 - FRAME.x1) / 3;
     const rowHeight = (FRAME.y2 - FRAME.y1) / 2;
     const cellPoint = (column: number, row: number): { x: number; y: number } => ({
@@ -434,12 +476,102 @@ test.describe('auto-layout — Grid flow', () => {
     const { anchors, gridAutoPlacement } = await readGridState(page);
     const draggedAnchors = anchors.filter((anchor) => anchor[0] !== undefined);
 
-    // manual placement kicked in; the dragged pair — two columns apart before the drag — landed
+    // still in manual placement; the dragged pair — two columns apart before the drag — landed
     // on the same row in two ADJACENT columns, merged together instead of keeping their old gap
     expect(gridAutoPlacement).toBe(false);
     expect(draggedAnchors).toHaveLength(2);
     expect(draggedAnchors[0]?.[1]).toBe(draggedAnchors[1]?.[1]);
     expect(Math.abs((draggedAnchors[0]?.[0] ?? 0) - (draggedAnchors[1]?.[0] ?? 0))).toBe(1);
+  });
+
+  test('the automatic-positioning toggle only shows for Grid flow, and flips gridAutoPlacement on click', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-auto-placement-toggle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+
+    // not shown for any other flow
+    await expect(page.getByLabel('Toggle automatic positioning')).not.toBeVisible();
+
+    await setFlow(page, 'Grid');
+    const toggle = page.getByLabel('Toggle automatic positioning');
+
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(
+      await page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const [frameId] = pages[activePageId].rootOrder;
+
+        return (pages[activePageId].nodes[frameId] as unknown as { gridAutoPlacement?: boolean }).gridAutoPlacement;
+      }),
+    ).toBe(false);
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('dragging an already-placed grid child leaves it untouched while automatic positioning is on, but repositions it once toggled off', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-auto-placement-blocks-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // one child dragged in, then switched to Grid: it auto-places into column 0
+    await designPage.drawRectangle(1400, 250, 1460, 310);
+    await dragInto(page, { x: 1430, y: 280 }, { x: 800, y: 400 });
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    // two equal-width columns; the (small, still fixed-size) child sits near the top-left of
+    // its own cell — same inset used by the other existing-grid-child drag tests in this file
+    const cellHalfWidth = (FRAME.x2 - FRAME.x1) / 2;
+    const firstCell = { x: FRAME.x1 + 20, y: FRAME.y1 + 15 };
+    const secondCellEmptySpot = { x: FRAME.x1 + cellHalfWidth + 20, y: FRAME.y1 + 15 };
+
+    const before = await getChildren(page);
+
+    // select the child itself (not just the frame) before dragging it, same as any other
+    // existing-grid-child drag in this file
+    await designPage.click(firstCell.x, firstCell.y);
+
+    // try to drag it into the (empty) second column while automatic positioning is still on
+    // (the default) — the drag itself is a no-op, so the layout stays untouched
+    await page.mouse.move(firstCell.x, firstCell.y);
+    await page.mouse.down();
+    await page.mouse.move(secondCellEmptySpot.x, secondCellEmptySpot.y, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    expect(await getChildren(page)).toEqual(before);
+
+    // turn automatic positioning off, then the exact same drag actually repositions the child —
+    // re-select the frame first, since the blocked drag attempt above left the child selected
+    await selectFrameRow(page);
+    await page.getByLabel('Toggle automatic positioning').click();
+    await designPage.click(firstCell.x, firstCell.y);
+    await page.mouse.move(firstCell.x, firstCell.y);
+    await page.mouse.down();
+    await page.mouse.move(secondCellEmptySpot.x, secondCellEmptySpot.y, { steps: 10 });
+    await page.waitForTimeout(150);
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    expect(await getChildren(page)).not.toEqual(before);
   });
 
   test('holding the modifier disables the grid drop mechanism entirely, leaving placement untouched', async ({ page }) => {
@@ -534,6 +666,17 @@ test.describe('auto-layout — Grid flow', () => {
     await expect(flowGroup(page)).toBeVisible();
     await selectFrameRow(page);
     await setFlow(page, 'Grid');
+
+    // manual placement, so the two drops below anchor explicitly instead of just reordering
+    // childIds (which is what a drop does while automatic positioning is still on)
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    });
 
     // drag two rectangles into specific cells of the 2-column grid — this anchors both explicitly
     await designPage.drawRectangle(1400, 250, 1450, 290);

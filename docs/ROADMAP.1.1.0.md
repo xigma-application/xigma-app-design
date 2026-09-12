@@ -188,9 +188,14 @@ write-up: `.claude/docs/auto-layout.md` §13.
       share-the-space with a value; add a track, delete a track, and drag a track by its number to
       reorder it — the cells and any placed children move with it, and a move that would tear a
       spanning child apart snaps back
-- [ ] dragging those track sizes directly on the canvas — this is the last part
+- [x] dragging those track sizes directly on the canvas — a track's grip drags to reorder it, its
+      value pill edits in place (same fr/fixed/hug rules as the panel), and its chevron opens a
+      dropdown for Fixed/Hug/Fill, all working across a multi-selection
 - [x] letting a child span several cells, from its Column span / Row span fields (see Stage 26)
-- [ ] later: reordering the cells with the keyboard
+- [x] a "Toggle automatic positioning" button on the Flow row (Grid only) switches between
+      auto-placing children in reading order and pinning them to manually-picked cells, matching
+      Figma: dragging an already-placed child is blocked while automatic, dropping a brand-new one
+      still slots it in by position without switching the frame to manual
 
 ## Stage 26 — Rectangle properties panel
 

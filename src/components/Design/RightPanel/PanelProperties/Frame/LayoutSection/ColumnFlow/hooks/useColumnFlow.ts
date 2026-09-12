@@ -16,7 +16,9 @@ import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 import { getChildrenFillResetChanges } from 'store/design/utils/autoLayout/getChildrenFillResetChanges';
 
 export type TUseColumnFlowResult = {
+  gridAutoPlacement: boolean;
   onChange: TFunc<[string]>;
+  onGridAutoPlacementChange: TFunc;
   onWrapChange: TFunc;
   toggleButtons: TToggleButton[];
   value: string;
@@ -32,6 +34,7 @@ export const useColumnFlow = (): TUseColumnFlowResult => {
   const id = frameNode?.id ?? '';
   const value = frameNode?.layoutMode ?? LayoutMode.freeForm;
   const wrap = frameNode?.layoutWrap ?? false;
+  const gridAutoPlacement = frameNode?.gridAutoPlacement ?? true;
 
   const onChange = (nextValue: string): void => {
     const isGrid = nextValue === LayoutMode.grid;
@@ -56,7 +59,9 @@ export const useColumnFlow = (): TUseColumnFlowResult => {
   };
 
   return {
+    gridAutoPlacement,
     onChange,
+    onGridAutoPlacementChange: () => dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement }, id })),
     onWrapChange: () => dispatch(updateNode({ changes: wrap ? { layoutWrap: false, verticalGap: 0 } : { layoutWrap: true }, id })),
     toggleButtons: FLOW_OPTIONS.map(({ icon, labelKey, value: optionValue }) => ({
       ariaLabel: t(`${translationNameSpace}.${labelKey}`),

@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 
 type TResolveDropTargetIndexParams = {
   autoLayoutDropTarget: TAutoLayoutDropTargetHover | null;
+  gridAutoInsertIndex: number | null;
   matchingReorderPreview: TAutoLayoutReorderPreview | null;
   page: TDesignPage;
   targetFrame: TSceneNode | null;
@@ -16,6 +17,7 @@ type TResolveDropTargetIndexParams = {
 
 export const resolveDropTargetIndex = ({
   autoLayoutDropTarget,
+  gridAutoInsertIndex,
   matchingReorderPreview,
   page,
   targetFrame,
@@ -29,6 +31,8 @@ export const resolveDropTargetIndex = ({
       return matchingReorderPreview!.activeIndex;
     case isAutoLayoutDrop:
       return autoLayoutDropTarget!.index;
+    case gridAutoInsertIndex !== null:
+      return gridAutoInsertIndex!;
     case targetContainer !== null:
       return targetContainer!.childIds.length;
     default:
