@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import CornerSmoothingButton from './CornerSmoothingButton';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderButton = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <CornerSmoothingButton />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <CornerSmoothingButton />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

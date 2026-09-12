@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import AutoLayoutSettingsButton from './AutoLayoutSettingsButton';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderButton = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <AutoLayoutSettingsButton />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <AutoLayoutSettingsButton />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

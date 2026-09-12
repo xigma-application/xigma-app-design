@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import { ColumnAlignmentLayoutButtonIcons } from '../ColumnAlignmentLayoutButtonIcons';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
@@ -21,7 +24,9 @@ describe('ColumnAlignmentLayoutButtonIcons', () => {
     // before
     render(
       <Provider store={store}>
-        <TooltipProvider>{ColumnAlignmentLayoutButtonIcons()}</TooltipProvider>
+        <CanvasRefsProvider>
+          <TooltipProvider>{ColumnAlignmentLayoutButtonIcons()}</TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 
