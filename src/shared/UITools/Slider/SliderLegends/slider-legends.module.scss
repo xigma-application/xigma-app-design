@@ -1,0 +1,15 @@
+.SliderLegends {
+  height: 14px;
+  position: relative;
+  width: 100%;
+
+  &__legend {
+    color: var(--color-ramp-400);
+    font-size: 11px;
+    font-weight: 450;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+}

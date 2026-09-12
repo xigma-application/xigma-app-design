@@ -6,7 +6,7 @@ import AppearanceHeaderButtons from './AppearanceHeaderButtons/AppearanceHeaderB
 import CornerRadiusButtonIcons from './CornerRadius/CornerRadiusButtonIcons';
 import CornerRadiusFieldList from './CornerRadius/CornerRadiusFieldList';
 import CornerRadiusInput from './CornerRadius/CornerRadiusInput';
-import CornerSmoothingButton from './CornerRadius/CornerSmoothingButton';
+import CornerSmoothingButton from './CornerRadius/CornerSmoothingButton/CornerSmoothingButton';
 import OpacityField from './Opacity/OpacityField';
 import { UITools } from 'shared';
 

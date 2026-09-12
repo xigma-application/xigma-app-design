@@ -1,0 +1,21 @@
+.CornerSmoothingPopover {
+  padding-bottom: 8px;
+  width: 100%;
+
+  &__row {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+  }
+
+  &__slider.CornerSmoothingPopover__slider {
+    flex-shrink: 0;
+    width: 158px;
+  }
+
+  &__input.CornerSmoothingPopover__input {
+    flex: 0 0 44px;
+    width: 44px;
+  }
+}

@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SliderLegends snapshots > should render a legend positioned from its mark value 1`] = `
+<DocumentFragment>
+  <div
+    class="_SliderLegends_7bcef1"
+  >
+    <span
+      class="_SliderLegends__legend_7bcef1"
+      style="left: calc(8px + 0.6 * (100% - 16px));"
+    >
+      iOS
+    </span>
+  </div>
+</DocumentFragment>
+`;

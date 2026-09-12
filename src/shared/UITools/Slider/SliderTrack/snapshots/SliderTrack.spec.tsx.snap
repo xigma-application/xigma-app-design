@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SliderTrack snapshots > should render the rail, fill, marks, and thumb positioned from value 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="50"
+    class="_SliderTrack_5e04e4"
+    data-no-drag="true"
+    role="slider"
+    tabindex="0"
+  >
+    <div
+      class="_SliderTrack__rail_5e04e4"
+    >
+      <div
+        class="_SliderTrack__fill_5e04e4"
+        style="width: calc(8px + 0.5 * (100% - 16px));"
+      />
+      <div
+        class="_SliderTrack__mark_5e04e4"
+        style="left: calc(8px + 0.6 * (100% - 16px));"
+      />
+    </div>
+    <div
+      class="_SliderTrack__thumb_5e04e4 _SliderTrack__thumb--active_5e04e4"
+      style="left: calc(8px + 0.5 * (100% - 16px));"
+    />
+  </div>
+</DocumentFragment>
+`;

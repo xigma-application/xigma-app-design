@@ -88,6 +88,18 @@ describe('useOpacity', () => {
     expect(read(id).opacity).toBe(0.75);
   });
 
+  it('should ignore a non-numeric typed value instead of committing 0', () => {
+    const id = addRectangle({ opacity: 0.2 });
+
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderUseOpacity();
+
+    act(() => result.current.onBlur(focusEventFor('abc')));
+
+    expect(read(id).opacity).toBe(0.2);
+  });
+
   it('should reset the field to the current value when the typed value is blank', () => {
     const id = addRectangle({ opacity: 0.5 });
 

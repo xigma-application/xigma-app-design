@@ -16,6 +16,7 @@ import Popover, { PopoverCompound } from './Popover/Popover';
 import SearchInput from './SearchInput/SearchInput';
 import Section from './Section/Section';
 import SectionColumn from './SectionColumn/SectionColumn';
+import Slider from './Slider/Slider';
 import Tabs from './Tabs/Tabs';
 import TextField from './TextField/TextField';
 import ToggleButtonGroup from './ToggleButtonGroup/ToggleButtonGroup';
@@ -41,6 +42,7 @@ export const UITools = {
   SearchInput,
   Section,
   SectionColumn,
+  Slider,
   Tabs,
   TextField,
   ToggleButtonGroup,

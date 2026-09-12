@@ -1,0 +1,106 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CornerSmoothingPopover snapshots > should render the header, slider, value field, and iOS preview 1`] = `
+<DocumentFragment>
+  <div
+    class="_CornerSmoothingPopover_91ece7"
+  >
+    <div
+      class="_CornerSmoothingPopoverHeader_a0f84a"
+    >
+      <span
+        class="_CornerSmoothingPopoverHeader__title_a0f84a"
+      >
+        Corner smoothing
+      </span>
+      <button
+        aria-label="Close"
+        aria-pressed="false"
+        class="_Button_b88d2e _CornerSmoothingPopoverHeader__close_a0f84a"
+        data-state="closed"
+        style="padding: 0px;"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24L"
+          fill="none"
+          height="22"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="22"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M17.354 6.646a.5.5 0 0 1 0 .708L12.707 12l4.647 4.646a.5.5 0 0 1-.708.708L12 12.707l-4.646 4.647a.5.5 0 0 1-.708-.708L11.293 12 6.646 7.354a.5.5 0 0 1 .708-.707L12 11.293l4.646-4.647a.5.5 0 0 1 .708 0"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_CornerSmoothingPopover__row_91ece7"
+    >
+      <div
+        class="_Slider_8f9d96 _CornerSmoothingPopover__slider_91ece7"
+      >
+        <div
+          aria-label="Corner smoothing value"
+          aria-valuemax="100"
+          aria-valuemin="0"
+          aria-valuenow="0"
+          class="_SliderTrack_5e04e4"
+          data-no-drag="true"
+          role="slider"
+          tabindex="0"
+        >
+          <div
+            class="_SliderTrack__rail_5e04e4"
+          >
+            <div
+              class="_SliderTrack__fill_5e04e4"
+              style="width: calc(8px + 0 * (100% - 16px));"
+            />
+            <div
+              class="_SliderTrack__mark_5e04e4"
+              style="left: calc(8px + 0.6 * (100% - 16px));"
+            />
+          </div>
+          <div
+            class="_SliderTrack__thumb_5e04e4"
+            style="left: calc(8px + 0 * (100% - 16px));"
+          />
+        </div>
+        <div
+          class="_SliderLegends_7bcef1"
+        >
+          <span
+            class="_SliderLegends__legend_7bcef1"
+            style="left: calc(8px + 0.6 * (100% - 16px));"
+          >
+            iOS
+          </span>
+        </div>
+      </div>
+      <div
+        class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67 _CornerSmoothingPopover__input_91ece7"
+        data-test-text-field="corner-smoothing"
+      >
+        <input
+          aria-label="Corner smoothing value"
+          class="_TextFieldWrapper__input_9a3a67"
+          data-test-bypass-global-shortcuts="true"
+          data-test-text-field-input="corner-smoothing"
+          type="text"
+          value="0%"
+        />
+        <span
+          class="_TextFieldWrapper__endAdornment_9a3a67"
+        />
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

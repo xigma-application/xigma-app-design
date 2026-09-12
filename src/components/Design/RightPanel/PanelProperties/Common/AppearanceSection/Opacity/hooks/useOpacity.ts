@@ -20,9 +20,10 @@ export const useOpacity = (): TUseOpacityResult => {
 
   return {
     onBlur: (event): void => {
-      const parsed = Number(event.target.value.replace(/[^\d.-]/g, ''));
+      const stripped = event.target.value.trim().replace(/[^\d.-]/g, '');
+      const parsed = Number(stripped);
 
-      if (event.target.value.trim() !== '' && !Number.isNaN(parsed)) {
+      if (stripped !== '' && !Number.isNaN(parsed)) {
         commit(parsed);
       } else {
         event.target.value = `${value}%`;
