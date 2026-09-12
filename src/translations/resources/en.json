@@ -378,6 +378,8 @@
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.individualAriaLabel": "Individual corner radius",
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.individualTooltip": "Individual corner radius",
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.mixed": "Mixed",
+  "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.smoothingAriaLabel": "Corner smoothing",
+  "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.smoothingTooltip": "Corner smoothing",
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.tooltip": "Corner radius",
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.tooltipBottomLeft": "Bottom left corner radius",
   "design.rightPanel.panelProperties.common.appearanceSection.cornerRadius.tooltipBottomRight": "Bottom right corner radius",

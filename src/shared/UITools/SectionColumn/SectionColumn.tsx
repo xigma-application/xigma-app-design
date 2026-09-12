@@ -20,6 +20,7 @@ export type TSectionColumnProps = {
   children: ReactNode;
   gridColumnType?: GridColumnType;
   labels?: [string] | [string, string];
+  withBottomAlignedButtons?: boolean;
   withBottomMargin?: boolean;
   withInputConnector?: boolean;
   withTopAlignedButtons?: boolean;
@@ -31,6 +32,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
   children,
   gridColumnType,
   labels,
+  withBottomAlignedButtons = false,
   withBottomMargin = false,
   withInputConnector = false,
   withTopAlignedButtons = false,
@@ -51,6 +53,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
         <SectionColumnLabels labels={labels} width={width} />
         <div
           className={cx(styles.SectionColumn__row, {
+            [styles['SectionColumn__row--bottom-aligned']]: withBottomAlignedButtons,
             [styles['SectionColumn__row--top-aligned']]: withTopAlignedButtons,
           })}
         >

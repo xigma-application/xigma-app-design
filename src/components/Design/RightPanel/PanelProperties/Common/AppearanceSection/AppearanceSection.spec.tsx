@@ -156,6 +156,19 @@ describe('AppearanceSection behaviors', () => {
     expect((screen.getByLabelText('Bottom right corner radius') as HTMLInputElement).value).toBe('4');
   });
 
+  it('should show the Corner smoothing button only once individual corners are revealed', () => {
+    const id = addRectangle();
+
+    store.dispatch(setSelection([id]));
+    renderAppearanceSection();
+
+    expect(screen.queryByLabelText('Corner smoothing')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Individual corner radius'));
+
+    expect(screen.getByLabelText('Corner smoothing')).toBeInTheDocument();
+  });
+
   it('should move only one corner when editing an individual field', () => {
     const id = addRectangle({ cornerRadius: 4, cornerRadiusTopRight: 4 });
 

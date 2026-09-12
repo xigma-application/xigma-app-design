@@ -107,6 +107,34 @@ describe('SectionColumn behaviors', () => {
     expect(container.querySelector('[class*="SectionColumn__row--top-aligned"]')).not.toBeNull();
   });
 
+  it('should not bottom-align the row by default', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumn__row--bottom-aligned"]')).toBeNull();
+  });
+
+  it('should apply the bottom-aligned row modifier class when withBottomAlignedButtons is given', () => {
+    // before
+    const { container } = render(
+      <Provider store={store}>
+        <SectionColumn withBottomAlignedButtons>
+          <span>body</span>
+        </SectionColumn>
+      </Provider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SectionColumn__row--bottom-aligned"]')).not.toBeNull();
+  });
+
   it('should render the given buttonsIcon', () => {
     // before
     const { container } = render(

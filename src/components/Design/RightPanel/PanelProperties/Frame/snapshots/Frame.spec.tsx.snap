@@ -1001,16 +1001,16 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
           aria-pressed="false"
           class="_Button_b88d2e"
           data-state="closed"
-          style="padding: 0px;"
+          style="padding: 5.5px;"
           type="button"
         >
           <svg
             class="Icon"
             fill="none"
-            height="16"
+            height="13"
             style="color: var(--color-neutral-1);"
             viewBox="0 0 10 13"
-            width="16"
+            width="13"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path

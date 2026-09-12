@@ -6,6 +6,7 @@ import AppearanceHeaderButtons from './AppearanceHeaderButtons/AppearanceHeaderB
 import CornerRadiusButtonIcons from './CornerRadius/CornerRadiusButtonIcons';
 import CornerRadiusFieldList from './CornerRadius/CornerRadiusFieldList';
 import CornerRadiusInput from './CornerRadius/CornerRadiusInput';
+import CornerSmoothingButton from './CornerRadius/CornerSmoothingButton';
 import OpacityField from './Opacity/OpacityField';
 import { UITools } from 'shared';
 
@@ -42,7 +43,11 @@ const AppearanceSection: FC = () => {
         />
       </UITools.SectionColumn>
       {cornerRadius.isIndividual && (
-        <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs}>
+        <UITools.SectionColumn
+          buttonsIcon={[<CornerSmoothingButton key="corner-smoothing" />]}
+          gridColumnType={UITools.GridColumnType.twoInputs}
+          withBottomAlignedButtons
+        >
           <CornerRadiusFieldList fields={cornerRadius.individualFields} />
         </UITools.SectionColumn>
       )}
