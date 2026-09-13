@@ -5,7 +5,7 @@ import GradientPanel from './GradientPanel';
 import { TooltipProvider } from 'shared';
 
 // hooks
-import { useGradientPanel } from './hooks/useGradientPanel';
+import { useGradientPanel } from './hooks/useGradientPanel/useGradientPanel';
 
 const GradientPanelHarness = (): ReturnType<typeof GradientPanel> => {
   const gradientPanel = useGradientPanel();

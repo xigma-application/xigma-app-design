@@ -10,6 +10,7 @@ export type TUseFillSectionResult = {
   fills: TPaint[];
   isRowDragging: (index: number) => boolean;
   isRowSelected: (index: number) => boolean;
+  nodeId: string | undefined;
   onAdd: TFunc;
   onChange: (index: number, paint: TPaint) => void;
   onDragEnd: TFunc;

@@ -237,6 +237,64 @@ node's folder. Today:
   dock to its own parent panel rather than float near whatever small control opened it" case in
   `ColorPicker` can reuse the same `DockedPanelContext` slot.
 
+  **A gradient fill on Rectangle/Frame is now actually editable, with on-canvas handles and a
+  working rotate.** Previously a non-solid `fills[]` entry rendered as the dead, read-only swatch
+  described above — `FillRow`'s non-solid branch now type-switches three ways: `solid` keeps
+  `ColorPickerInput`, `image` keeps the old static swatch (image editing stays out of scope), and any
+  `gradient-*` paint renders a new `GradientFillControl` (`FillRow/GradientFillControl/`) that opens
+  the real `UITools.ColorPicker` directly (same call shape `VectorEditPaintTool` already used),
+  seeded with `initialActiveTab={ColorPickerTab.gradient}` and a new `initialGradient={{start, end,
+  stops}}` prop so the panel reflects the paint actually being edited instead of always resetting to
+  `DEFAULT_GRADIENT_STOPS`. Its `onGradientChange`/`onChange` write a real `TGradientPaint`/
+  `TSolidPaint` straight back through the existing `onChange(index, paint)` → `commitFills` →
+  `updateNode({changes:{fills}})` path already used for solid fills — no new commit mechanism needed.
+
+  Rotate previously only worked for the vector Paint tool, which converts an abstract `angle` through
+  a 4-entry `getGradientPointsFromAngle` lookup (0/90/180/270 only, lossy). `useGradientPanel` now
+  supports a second, parallel internal mode: when constructed with `initialGradient`, it tracks real
+  `{start, end}` points instead of `angle`, and `rotate()` rotates those two points 90° around the
+  normalized center `{0.5,0.5}` (`hooks/useRotateGradient.ts`, via `utils/math/rotatePoint`) — real
+  geometry, not a quantized lookup. The vector tool's own `useSetGradientPaint` consumer is
+  untouched: it still gets `angle` back (points-mode is simply never engaged when `initialGradient`
+  isn't passed), so nothing about its existing flow changed. `TGradientPanelChange` grew optional
+  `start`/`end` fields to carry this without touching the angle-mode shape at all.
+
+  `useGradientPanel.ts` (`Body/GradientPanel/hooks/useGradientPanel/`) is a promoted-hook folder
+  (per `xigma-module-structure`): the hook itself is just `useState` wiring, and each action
+  (`addStop`/`removeStop`/`setStopPosition`/`setStopColor`/`flip`/`rotate`/`setType`) is its own
+  hook under `hooks/useGradientPanel/hooks/`, taking the exact reactive state/setters/`onChange` it
+  needs as params and returning the handler — mirroring the existing `useSelectFillRow`/
+  `useSetPaint`-style "hook that returns one closure" pattern already used elsewhere in this repo.
+  There is deliberately no separate `utils/` layer of one-line pure functions here — each hook's own
+  computation (the nearest-stop lookup, the sort-by-position, the point rotation) lives inlined in
+  its own file's body; the only files that stayed genuinely shared (used by more than this one hook)
+  are `GradientPanel/utils/getGradientStopsCss.ts` and `translations`.
+
+  **The on-canvas gradient handles** are a new `drawGradientHandleLayer` (`Canvas/hooks/
+  useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/`), modeled directly on the sibling
+  `drawEllipseArcHandleLayer/` folder shape (flat files + nested `test/`). It draws, for a
+  `gradient-linear` paint only (radial/angular/diamond and dragging the handles are explicitly out of
+  scope for now): the start→end line (`drawGradientLine`), a round handle at each endpoint
+  (`drawGradientEndpointHandles`), and one square per stop (`drawGradientStopHandles`) positioned via
+  `lerp(start, end, stop.position)` with a small perpendicular offset so the swatch doesn't sit on
+  top of the line — colored to the stop's own color, highlighted blue when it matches the currently
+  selected stop. World-space math (`getGradientWorldPoints.ts`) follows the exact same pattern as
+  `getEllipseArcValueLabelAnchor.ts`: map the paint's normalized 0..1 `start`/`end` into the node's
+  unrotated local bounds, then `rotatePoint(..., node.rotation)` around the bounds center.
+
+  The one real architectural question this raised: the draw loop is imperative (reads Redux + mutable
+  refs each frame), but "a gradient is being edited, for which node/paint/stop" lives in the
+  `ColorPicker`'s own React component state, several component layers above the canvas. Rather than
+  inventing a new ref-based bridge, this reuses the existing `editingNodeId`-style precedent: a small
+  transient `design.gradientEditor: {nodeId, paintIndex, selectedStopIndex} | null` slice field (a
+  plain `setGradientEditor` reducer, explicitly **not** included in `getDesignSnapshot` — undo/redo
+  should never restore "which gradient panel happened to be open"), written via a `useEffect` in
+  `GradientFillControl` (`hooks/useSyncGradientEditor.ts`) while its picker is open on the Gradient
+  tab, cleared on close/unmount. `ColorPicker` itself stays fully Redux-agnostic — it only gained a
+  generic `onGradientPanelStateChange?: {isGradientTabActive, selectedStopIndex}` callback
+  (`hooks/useNotifyGradientPanelState.ts`); the Redux write happens one level up, in the Fill-section-
+  specific `GradientFillControl`, not in the shared `ColorPicker`/`GradientPanel` components.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

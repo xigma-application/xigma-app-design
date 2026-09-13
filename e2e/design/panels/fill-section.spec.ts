@@ -3,7 +3,15 @@ import { test, expect, Page } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
-type TReadablePaint = { color?: string; opacity: number; type: string; visible?: boolean };
+type TReadablePaint = {
+  color?: string;
+  end?: { x: number; y: number };
+  opacity: number;
+  start?: { x: number; y: number };
+  stops?: { color: string; opacity: number; position: number }[];
+  type: string;
+  visible?: boolean;
+};
 type TReadableNode = { fills?: TReadablePaint[] };
 
 const readFirstNodeId = (page: Page): Promise<string> =>
@@ -216,5 +224,70 @@ test.describe('Design panels — Fill section', () => {
     // docked flush against the left edge of the gradient panel, not floating over the small swatch that opened it
     expect(stopPanelBox.x + stopPanelBox.width).toBeCloseTo(gradientPanelBox.x, 0);
     expect(stopPanelBox.y).toBeCloseTo(gradientPanelBox.y, 0);
+  });
+
+  test('rotating a shape gradient fill updates its stored direction and the rendered canvas, with handles shown while editing', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // seed a real gradient-linear fill on the node, since the Fill panel has no UI path yet to
+    // convert a solid fill into a persisted gradient (out of scope for this feature)
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    const beforeRotate = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Hex color').click();
+    await expect(page.getByRole('button', { name: 'Rotate gradient' })).toBeVisible();
+
+    // result — the canvas overlay handles (line + endpoints + stop swatches) appear while editing
+    const afterOpen = await designPage.canvas.screenshot();
+
+    expect(afterOpen.equals(beforeRotate)).toBe(false);
+
+    await page.getByRole('button', { name: 'Rotate gradient' }).click();
+
+    const node = await readNode(page, id);
+    const { end, start } = node.fills![0];
+
+    expect(start!.x).toBeCloseTo(0.5);
+    expect(start!.y).toBeCloseTo(0);
+    expect(end!.x).toBeCloseTo(0.5);
+    expect(end!.y).toBeCloseTo(1);
+
+    // result — the shape's own rendered gradient direction changed too
+    const afterRotate = await designPage.canvas.screenshot();
+
+    expect(afterRotate.equals(afterOpen)).toBe(false);
   });
 });

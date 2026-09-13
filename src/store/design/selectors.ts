@@ -6,7 +6,7 @@ import { RootState } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
-import { TDesignPage, TDimensionHintField, TRevealedMinMax } from './types';
+import { TDesignPage, TDimensionHintField, TGradientEditorState, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import {
   TGridSectionHighlight,
@@ -71,6 +71,8 @@ export const selectEditingSelectionStart = (state: RootState): number => state.d
 export const selectEditingTextBox = (state: RootState): TEditingTextBox | null => state.design.editingTextBox;
 
 export const selectEditingTextContent = (state: RootState): string => state.design.editingTextContent;
+
+export const selectGradientEditor = (state: RootState): TGradientEditorState | null => state.design.gradientEditor;
 
 export const selectGridSectionHighlight = (state: RootState): TGridSectionHighlight | null => state.design.gridSectionHighlight ?? null;
 

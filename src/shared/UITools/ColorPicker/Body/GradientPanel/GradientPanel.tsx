@@ -10,7 +10,7 @@ import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
 import styles from './gradient-panel.module.scss';
 
 // types
-import { TUseGradientPanelResult } from './hooks/useGradientPanel';
+import { TUseGradientPanelResult } from './hooks/useGradientPanel/useGradientPanel';
 
 export type TGradientPanelProps = { gradientPanel: TUseGradientPanelResult };
 

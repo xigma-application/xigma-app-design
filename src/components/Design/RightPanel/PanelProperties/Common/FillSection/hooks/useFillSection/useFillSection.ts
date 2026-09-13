@@ -40,6 +40,7 @@ export const useFillSection = (): TUseFillSectionResult => {
     fills,
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index) => selectedIndices.includes(index),
+    nodeId,
     onAdd: (): void => commit([...fills, makeSolidPaint(DEFAULT_VECTOR_PAINT_COLOR)]),
     onChange: (index, paint): void => commit(fills.map((fill, fillIndex) => (fillIndex === index ? paint : fill))),
     onDragEnd: () => dispatch(endHistoryGesture()),

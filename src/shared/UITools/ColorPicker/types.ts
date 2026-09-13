@@ -4,7 +4,8 @@ import { CSSProperties, ReactNode } from 'react';
 import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 
 // types
-import { TGradientPanelChange } from './Body/GradientPanel/types';
+import { ColorPickerTab } from './enums';
+import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/types';
 
 export type TColorPickerValue = { alpha: number; hex: string };
 
@@ -13,17 +14,22 @@ export type THsl = { h: number; l: number; s: number };
 
 export type TColorPickerPreview = { style: CSSProperties; type: 'gradient' } | { type: 'solid'; value: TColorPickerValue };
 
+export type TGradientPanelState = { isGradientTabActive: boolean; selectedStopIndex: number | null };
+
 export type TColorPickerProps = {
   align?: TPopoverProps['align'];
   avoidCollisions?: TPopoverProps['avoidCollisions'];
   className?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
+  initialActiveTab?: ColorPickerTab;
+  initialGradient?: TInitialGradient;
   moveable?: boolean;
   onChange: TFunc<[TColorPickerValue]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
+  onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
   onOpenChange?: TFunc<[boolean]>;
   paintTypeRow?: boolean;
   presets?: TColorPickerValue[];

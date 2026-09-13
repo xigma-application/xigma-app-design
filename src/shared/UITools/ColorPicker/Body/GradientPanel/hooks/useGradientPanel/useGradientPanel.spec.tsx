@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 // hooks
-import { useGradientPanel } from '../useGradientPanel';
+import { useGradientPanel } from './useGradientPanel';
 
 describe('useGradientPanel', () => {
   it('should default to two stops and none selected', () => {
@@ -228,6 +228,56 @@ describe('useGradientPanel', () => {
 
     // result
     expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-radial' });
+  });
+
+  it('should seed stops and points from an initial gradient instead of the defaults', () => {
+    // before
+    const { result } = renderHook(() =>
+      useGradientPanel(undefined, {
+        end: { x: 1, y: 1 },
+        start: { x: 0, y: 0 },
+        stops: [
+          { color: '#111111', opacity: 100, position: 0 },
+          { color: '#222222', opacity: 50, position: 1 },
+        ],
+      }),
+    );
+
+    // result
+    expect(result.current.stops.map(({ color, opacity, position }) => ({ color, opacity, position }))).toEqual([
+      { color: '#111111', opacity: 100, position: 0 },
+      { color: '#222222', opacity: 50, position: 1 },
+    ]);
+    expect(result.current.angle).toBe(0);
+  });
+
+  it('should rotate the real start/end points around the gradient center when seeded with an initial gradient', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useGradientPanel(onChange, {
+        end: { x: 1, y: 0.5 },
+        start: { x: 0, y: 0.5 },
+        stops: [
+          { color: '#ffffff', opacity: 100, position: 0 },
+          { color: '#000000', opacity: 100, position: 1 },
+        ],
+      }),
+    );
+
+    // action
+    act(() => result.current.rotate());
+
+    // result — rotating {x:0,y:0.5}/{x:1,y:0.5} by 90° around {0.5,0.5} swaps to a vertical line
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+
+    expect(lastCall.start.x).toBeCloseTo(0.5);
+    expect(lastCall.start.y).toBeCloseTo(0);
+    expect(lastCall.end.x).toBeCloseTo(0.5);
+    expect(lastCall.end.y).toBeCloseTo(1);
+    expect(result.current.angle).toBe(0);
   });
 
   it('should not notify onChange when addStop is a no-op past the max stop count', () => {

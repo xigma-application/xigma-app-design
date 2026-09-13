@@ -5,7 +5,7 @@ import { useSetActiveTab } from '../useSetActiveTab';
 
 // types
 import { ColorPickerTab } from '../../enums';
-import { TUseGradientPanelResult } from '../../Body/GradientPanel/hooks/useGradientPanel';
+import { TUseGradientPanelResult } from '../../Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 
 const VALUE = { alpha: 100, hex: '#ff0000' };
 

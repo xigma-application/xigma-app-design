@@ -1,8 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import FillRow from './FillRow';
 import { TooltipProvider } from 'shared';
+
+// store
+import { store } from 'store';
 
 // types
 import { TPaint } from 'types/design/paint/types';
@@ -11,22 +15,26 @@ const SOLID_PAINT: TPaint = { color: '#ff0000', opacity: 80, type: 'solid' };
 
 const renderFillRow = (overrides: Partial<Parameters<typeof FillRow>[0]> = {}): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <FillRow
-        isDragging={false}
-        isSelected={false}
-        onChange={vi.fn()}
-        onDragEnd={vi.fn()}
-        onDragStart={vi.fn()}
-        onRemove={vi.fn()}
-        onSelect={vi.fn()}
-        onStartDrag={vi.fn()}
-        onToggleVisible={vi.fn()}
-        paint={SOLID_PAINT}
-        registerRow={vi.fn()}
-        {...overrides}
-      />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <FillRow
+          isDragging={false}
+          isSelected={false}
+          nodeId="node-1"
+          onChange={vi.fn()}
+          onDragEnd={vi.fn()}
+          onDragStart={vi.fn()}
+          onRemove={vi.fn()}
+          onSelect={vi.fn()}
+          onStartDrag={vi.fn()}
+          onToggleVisible={vi.fn()}
+          paint={SOLID_PAINT}
+          paintIndex={0}
+          registerRow={vi.fn()}
+          {...overrides}
+        />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('FillRow behaviors', () => {
@@ -89,7 +97,7 @@ describe('FillRow behaviors', () => {
     expect(onRemove).toHaveBeenCalled();
   });
 
-  it('should render a non-editable gradient preview and label for a gradient fill', () => {
+  it('should render a gradient swatch and label for a gradient fill', () => {
     // before
     renderFillRow({
       paint: {
@@ -107,6 +115,28 @@ describe('FillRow behaviors', () => {
     // result
     expect(screen.getByText('Gradient')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Hide fill' })).toBeInTheDocument();
+  });
+
+  it('should open a working gradient editor, defaulting to the Gradient tab, when the swatch is clicked', () => {
+    // before
+    renderFillRow({
+      paint: {
+        end: { x: 1, y: 0.5 },
+        opacity: 100,
+        start: { x: 0, y: 0.5 },
+        stops: [
+          { color: '#ffffff', opacity: 100, position: 0 },
+          { color: '#000000', opacity: 100, position: 1 },
+        ],
+        type: 'gradient-linear',
+      },
+    });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Rotate gradient' })).toBeInTheDocument();
   });
 
   it('should start a drag from the handle', () => {

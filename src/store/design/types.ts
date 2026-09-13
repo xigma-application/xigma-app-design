@@ -34,6 +34,8 @@ export type TMaskConnectorLine = {
 
 export type TMaskConnectorInfo = TMaskConnectorLine[];
 
+export type TGradientEditorState = { nodeId: string; paintIndex: number; selectedStopIndex: number | null };
+
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;
   areFrameOutlinesVisible: boolean;
@@ -62,6 +64,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  gradientEditor: TGradientEditorState | null;
   gridSectionHighlight?: TGridSectionHighlight | null;
   gridTrackModeMenuRequest?: TGridTrackModeMenuRequest | null;
   gridTrackSelection?: TGridTrackSelection | null;

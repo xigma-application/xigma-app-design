@@ -23,6 +23,7 @@ import {
   TDesignSnapshot,
   TDesignState,
   TDimensionHintField,
+  TGradientEditorState,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
   TReorderPayload,
@@ -98,6 +99,7 @@ const initialState: TDesignState = {
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  gradientEditor: null,
   gridSectionHighlight: null,
   gridTrackModeMenuRequest: null,
   gridTrackSelection: null,
@@ -203,6 +205,9 @@ const designSlice = createSlice({
     },
     setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
       state.designHintLabelKey = action.payload;
+    },
+    setGradientEditor: (state, action: PayloadAction<TGradientEditorState | null>) => {
+      state.gradientEditor = action.payload;
     },
     setGridSectionHighlight: (state, action: PayloadAction<TGridSectionHighlight | null>) => {
       state.gridSectionHighlight = action.payload;
@@ -319,6 +324,7 @@ export const {
   setActiveTool,
   setBackgroundPaint,
   setDesignHintLabelKey,
+  setGradientEditor,
   setGridSectionHighlight,
   setGridSettingsPanelOpen,
   setGridTrackModeMenuRequest,

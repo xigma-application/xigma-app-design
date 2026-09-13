@@ -3,6 +3,7 @@ import { FC, PointerEvent as ReactPointerEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import GradientFillControl from './GradientFillControl/GradientFillControl';
 import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
@@ -23,6 +24,7 @@ import { translationNameSpace } from '../constants';
 export type TFillRowProps = {
   isDragging: boolean;
   isSelected: boolean;
+  nodeId: string | undefined;
   onChange: TFunc<[TPaint]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
@@ -31,12 +33,14 @@ export type TFillRowProps = {
   onStartDrag: TFunc<[ReactPointerEvent]>;
   onToggleVisible: TFunc;
   paint: TPaint;
+  paintIndex: number;
   registerRow: (element: HTMLElement | null) => void;
 };
 
 export const FillRow: FC<TFillRowProps> = ({
   isDragging,
   isSelected,
+  nodeId,
   onChange,
   onDragEnd,
   onDragStart,
@@ -45,6 +49,7 @@ export const FillRow: FC<TFillRowProps> = ({
   onStartDrag,
   onToggleVisible,
   paint,
+  paintIndex,
   registerRow,
 }) => {
   const { t } = useTranslation();
@@ -92,7 +97,7 @@ export const FillRow: FC<TFillRowProps> = ({
             toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
             triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
           />
-        ) : (
+        ) : paint.type === 'image' ? (
           <div className={styles.FillRow__gradient}>
             <span className={styles.FillRow__gradientSwatch} style={getNonSolidFillSwatchStyle(paint)} />
             <span className={styles.FillRow__gradientLabel}>{t(`${translationNameSpace}.gradientLabel`)}</span>
@@ -105,6 +110,15 @@ export const FillRow: FC<TFillRowProps> = ({
               <Icon name={isVisible ? 'EyesOpened' : 'EyesClosed'} size={16} />
             </button>
           </div>
+        ) : (
+          <GradientFillControl
+            isVisible={isVisible}
+            nodeId={nodeId}
+            onChange={onChange}
+            onToggleVisible={onToggleVisible}
+            paint={paint}
+            paintIndex={paintIndex}
+          />
         )}
       </span>
       <Tooltip content={t(`${translationNameSpace}.deleteTooltip`)}>

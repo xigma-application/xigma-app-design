@@ -13,9 +13,10 @@ import Popover from 'shared/UITools/Popover/Popover';
 import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
+import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
-import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel';
+import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 
 // others
 import { DEFAULT_ACTIVE_TAB, DEFAULT_PRESETS } from './constants';
@@ -38,11 +39,14 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   freezePositionOnGrow,
   headerExtra,
+  initialActiveTab,
+  initialGradient,
   moveable = false,
   onChange,
   onDragEnd,
   onDragStart,
   onGradientChange,
+  onGradientPanelStateChange,
   onOpenChange,
   paintTypeRow = false,
   presets = DEFAULT_PRESETS,
@@ -55,10 +59,10 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   triggerClassName,
   value,
 }) => {
-  const [activeTab, setActiveTab] = useState(DEFAULT_ACTIVE_TAB);
+  const [activeTab, setActiveTab] = useState(initialActiveTab ?? DEFAULT_ACTIVE_TAB);
   const [dockedPanel, setDockedPanel] = useState<ReactNode>(null);
   const colorModel = useColorModel(value, onChange);
-  const gradientPanel = useGradientPanel(onGradientChange);
+  const gradientPanel = useGradientPanel(onGradientChange, initialGradient);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const handleInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
@@ -67,6 +71,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
     activeTab === ColorPickerTab.gradient
       ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type, gradientPanel.angle), type: 'gradient' }
       : { type: 'solid', value };
+
+  useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
 
   return (
     <Popover

@@ -7,7 +7,7 @@ import { TTab } from 'shared/UITools/Tabs/types';
 import { ColorPickerTab } from '../enums';
 import { TColorPickerValue } from '../types';
 import { TGradientPanelChange } from '../Body/GradientPanel/types';
-import { TUseGradientPanelResult } from '../Body/GradientPanel/hooks/useGradientPanel';
+import { TUseGradientPanelResult } from '../Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 
 const isColorPickerTab = (value: string): value is ColorPickerTab => value === ColorPickerTab.solid || value === ColorPickerTab.gradient;
 

@@ -9,6 +9,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectGradientEditor,
   selectGridSectionHighlight,
   selectGridTrackSelection,
   selectNodes,
@@ -47,6 +48,7 @@ import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawFrameOutlines } from './drawFrameOutlines';
+import { drawGradientHandleLayer } from './drawGradientHandleLayer/drawGradientHandleLayer';
 import { drawGridDropTarget } from './drawGridDropTarget/drawGridDropTarget';
 import { drawGridSectionHighlight } from './drawGridSectionHighlight/drawGridSectionHighlight';
 import { drawGridSlots } from './drawGridSlots/drawGridSlots';
@@ -111,6 +113,7 @@ export const drawScene = (
   const areRulersVisible = selectAreRulersVisible(state);
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
+  const gradientEditor = selectGradientEditor(state);
   const guideLines = selectAllGuideLines(state);
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
@@ -170,6 +173,7 @@ export const drawScene = (
   drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
   drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
+  drawGradientHandleLayer(ctx, selectedNodes, gradientEditor);
   drawFrame(ctx, refs);
   drawDraftSizeLabel(ctx, refs);
   drawDraftFrameNameLabel(ctx, refs, nodesById);

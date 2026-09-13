@@ -24,6 +24,7 @@ export const FillSection: FC = () => {
     fills,
     isRowDragging,
     isRowSelected,
+    nodeId,
     onAdd,
     onChange,
     onDragEnd,
@@ -52,6 +53,7 @@ export const FillSection: FC = () => {
             isDragging={isRowDragging(index)}
             isSelected={isRowSelected(index)}
             key={index}
+            nodeId={nodeId}
             onChange={(paint): void => onChange(index, paint)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
@@ -60,6 +62,7 @@ export const FillSection: FC = () => {
             onStartDrag={(event): void => onStartDrag(index, event)}
             onToggleVisible={(): void => onToggleVisible(index)}
             paint={paint}
+            paintIndex={index}
             registerRow={registerRow(index)}
           />
         ))}
