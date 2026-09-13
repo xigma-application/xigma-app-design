@@ -6,7 +6,7 @@ import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TText
 import { convertNodeToVector, isConvertibleToVectorNode } from '../convertNodeToVector';
 
 const RECTANGLE: TRectangleNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r',
   name: 'R',

@@ -10,7 +10,7 @@ const buildSection = (name: string): TSceneNode =>
 
 const buildRect = (name: string): TSceneNode =>
   ({
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height: 10,
     id: name,
     name,

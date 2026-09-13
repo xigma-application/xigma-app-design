@@ -22,7 +22,7 @@ const leaf = (id: string, overrides: Partial<TEllipseNode> = {}): TEllipseNode =
 const frame = (id: string, overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: false,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: id,

@@ -38,7 +38,7 @@ const context = (gl: WebGL2RenderingContext): TDrawSceneContext => ({
 const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 2,
   gridRowCount: 3,
   height: 300,
@@ -55,7 +55,7 @@ const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const rectangle: TRectangleNode = {
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',

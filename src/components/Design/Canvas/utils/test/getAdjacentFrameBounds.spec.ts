@@ -8,7 +8,7 @@ import { getAdjacentFrameBounds } from '../getAdjacentFrameBounds';
 const buildFrame = (id: string, x: number): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 100,
   id,
   name: id,

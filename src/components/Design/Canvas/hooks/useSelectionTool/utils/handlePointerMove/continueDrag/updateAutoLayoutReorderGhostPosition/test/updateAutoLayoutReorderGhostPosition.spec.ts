@@ -14,7 +14,7 @@ import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThro
 import { updateAutoLayoutReorderGhostPosition } from '../updateAutoLayoutReorderGhostPosition';
 
 const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'r1',
   name: 'Rectangle',
@@ -33,7 +33,7 @@ const dragState = (nodeOrigins: TDragState['nodeOrigins']): TDragState =>
 const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   id: 'frame-1',
   layoutMode: LayoutMode.grid,
@@ -49,7 +49,17 @@ const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

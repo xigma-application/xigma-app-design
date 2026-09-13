@@ -35,7 +35,7 @@ describe('LayersTree', () => {
     stubVirtualizerViewport(5000);
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Frame A',
         parentId: null,
@@ -48,7 +48,7 @@ describe('LayersTree', () => {
     );
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Frame B',
         parentId: null,
@@ -115,7 +115,7 @@ describe('LayersTree', () => {
     // mock — a third node so there is something to drag the [A,B] selection past
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Frame C',
         parentId: null,
@@ -190,7 +190,7 @@ describe('LayersTree', () => {
       store.dispatch(groupNodes());
       store.dispatch(
         addNode({
-          fill: '#ff0000',
+          fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           height: 10,
           name: 'Frame C',
           parentId: null,
@@ -245,7 +245,7 @@ describe('LayersTree', () => {
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
         addNode({
-          fill: '#ff0000',
+          fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           height: 10,
           name: 'Frame C',
           parentId: null,
@@ -329,7 +329,7 @@ describe('LayersTree', () => {
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
         addNode({
-          fill: '#ff0000',
+          fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           height: 10,
           name: 'Frame C',
           parentId: null,
@@ -371,7 +371,7 @@ describe('LayersTree', () => {
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
         addNode({
-          fill: '#ff0000',
+          fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           height: 10,
           name: 'Frame C',
           parentId: null,

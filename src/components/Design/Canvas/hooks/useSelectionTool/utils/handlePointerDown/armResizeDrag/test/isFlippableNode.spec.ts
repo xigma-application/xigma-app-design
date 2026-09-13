@@ -6,7 +6,7 @@ import { TSceneNode } from 'types/design/types';
 import { isFlippableNode } from '../isFlippableNode';
 
 const rect: TSceneNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'a',
   name: 'Rectangle',
@@ -18,7 +18,18 @@ const rect: TSceneNode = {
   y: 0,
 };
 
-const ellipse: TSceneNode = { ...rect, type: NodeType.ellipse };
+const ellipse: TSceneNode = {
+  fill: '#fff',
+  height: 10,
+  id: 'a',
+  name: 'Ellipse',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.ellipse,
+  width: 10,
+  x: 0,
+  y: 0,
+};
 
 describe('isFlippableNode', () => {
   it('should return true for a flippable node type (ellipse)', () => {

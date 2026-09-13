@@ -6,7 +6,18 @@ import { TSceneNode } from 'types/design/types';
 import { getDragDropTargetFrame } from '../getDragDropTargetFrame';
 
 const rect = (id: string, x: number, y: number, width = 50, height = 50, parentId: string | null = null): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId, rotation: 0, type: NodeType.rectangle, width, x, y }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 const frame = (
   id: string,
@@ -19,7 +30,7 @@ const frame = (
   ({
     childIds,
     clipContent: true,
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height,
     id,
     name: 'Frame',

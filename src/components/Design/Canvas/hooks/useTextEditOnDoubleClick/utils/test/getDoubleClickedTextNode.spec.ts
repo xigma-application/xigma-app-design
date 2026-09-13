@@ -28,7 +28,7 @@ const textNode: TTextNode = {
 const frameNode: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame',

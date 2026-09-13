@@ -7,7 +7,7 @@ import { TRectangleNode, TVectorNode } from 'types/design/types';
 import { buildClosedVectorLoop } from './utils/buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius';
-import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
 
@@ -21,20 +21,21 @@ const getRectangleCorners = (node: TRectangleNode): TPoint[] => [
 export const convertRectangleToVector = (node: TRectangleNode): TVectorNode => {
   const radius = Math.min(Math.max(node.cornerRadius ?? 0, 0), getMaxCornerRadius(node));
   const { segments, vertices } = buildClosedVectorLoop(getRectangleCorners(node), radius);
+  const fillColor = getSolidPaintColor(node.fills) ?? '';
   const base: TVectorNode = {
-    defaultFill: [makeSolidPaint(node.fill)],
+    defaultFill: node.fills,
     filledFaceKeys: [],
     id: node.id,
     name: node.name,
     parentId: node.parentId,
     rotation: node.rotation,
     segments,
-    strokeColor: node.fill,
+    strokeColor: fillColor,
     strokeWidth: SHAPE_VECTOR_STROKE_WIDTH,
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices,
   };
 
-  return { ...base, ...getFillDataForClosedLoop(base, node.fill) };
+  return { ...base, ...getFillDataForClosedLoop(base, fillColor) };
 };

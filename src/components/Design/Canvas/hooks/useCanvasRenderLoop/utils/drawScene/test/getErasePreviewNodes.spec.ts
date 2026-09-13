@@ -38,7 +38,7 @@ const vectorNode: TVectorNode = {
 const otherNode: TSceneNode = { ...vectorNode, id: 'v2' };
 
 const rectangleNode: TSceneNode = {
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r1',
   name: 'Rectangle',

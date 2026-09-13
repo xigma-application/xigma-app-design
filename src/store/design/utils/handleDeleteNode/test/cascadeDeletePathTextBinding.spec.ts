@@ -8,7 +8,7 @@ import { cascadeDeletePathTextBinding } from '../cascadeDeletePathTextBinding';
 import { getActivePage } from '../../getActivePage';
 
 const rect = (id: string): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',

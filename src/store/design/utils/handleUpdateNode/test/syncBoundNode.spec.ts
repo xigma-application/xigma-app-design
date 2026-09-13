@@ -162,7 +162,7 @@ describe('syncBoundNode', () => {
   it('should do nothing for a node type that binds nothing, such as a rectangle', () => {
     // mock
     const rect: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 10,
       id: 'rect-1',
       name: 'Rectangle',

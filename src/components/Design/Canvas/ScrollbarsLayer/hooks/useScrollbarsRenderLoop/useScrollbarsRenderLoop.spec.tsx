@@ -125,7 +125,7 @@ describe('useScrollbarsRenderLoop', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame',
         parentId: null,
@@ -223,7 +223,7 @@ describe('useScrollbarsRenderLoop', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame',
         parentId: null,

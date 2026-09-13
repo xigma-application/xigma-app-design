@@ -24,7 +24,7 @@ const addGridFrame = (overrides: Partial<TFrameNode> = {}): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       gridColumnCount: 3,
       gridRowCount: 2,
       height: 200,
@@ -50,7 +50,17 @@ const addGridFrame = (overrides: Partial<TFrameNode> = {}): string => {
 
 const addChild = (parentId: string, changes: Record<string, unknown> = {}): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 10, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 10,
+      name: 'Rect',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { nodes, rootOrder } = selectActivePage(store.getState());

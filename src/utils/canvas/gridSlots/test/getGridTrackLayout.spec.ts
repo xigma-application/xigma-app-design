@@ -8,7 +8,7 @@ import { getGridTrackLayout } from '../getGridTrackLayout';
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 2,
   gridRowCount: 2,
   height: 100,
@@ -25,7 +25,7 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const child = (id: string, overrides: Partial<TSceneNode> = {}): TSceneNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: id,

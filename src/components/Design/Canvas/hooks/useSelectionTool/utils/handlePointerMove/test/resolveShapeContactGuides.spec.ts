@@ -13,7 +13,18 @@ import { resolveShapeContactGuides } from '../resolveShapeContactGuides';
 
 const addRect = (x: number, y: number, width = 100, height = 100, overrides: Record<string, unknown> = {}): string => {
   store.dispatch(
-    addNode({ fill: '#000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y, ...overrides }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+      ...overrides,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

@@ -14,7 +14,7 @@ vi.mock('../../renderClippedFrame', () => ({ renderClippedFrame: vi.fn() }));
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['child-a'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'frame-1',
   name: 'Frame 1',

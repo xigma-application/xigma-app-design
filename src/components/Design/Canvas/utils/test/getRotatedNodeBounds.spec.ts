@@ -9,7 +9,7 @@ describe('getRotatedNodeBounds', () => {
   it('should return the raw bounds unchanged when rotation is 0', () => {
     // mock
     const rectangle: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 10,
       id: '1',
       name: 'Rectangle',
@@ -28,7 +28,7 @@ describe('getRotatedNodeBounds', () => {
   it('should return a wider axis-aligned bounding box for a rotated square', () => {
     // mock
     const square: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 10,
       id: '1',
       name: 'Square',
@@ -54,7 +54,7 @@ describe('getRotatedNodeBounds', () => {
   it('should swap width and height for a 90deg rotated rectangle', () => {
     // mock
     const rectangle: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 10,
       id: '1',
       name: 'Rectangle',

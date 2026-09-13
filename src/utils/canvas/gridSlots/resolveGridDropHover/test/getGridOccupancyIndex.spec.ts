@@ -9,7 +9,7 @@ import { getGridOccupancyIndex } from '../getGridOccupancyIndex';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridAutoPlacement: false,
   gridColumnCount: 2,
   gridRowCount: 2,
@@ -28,7 +28,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 const anchored = (id: string, column: number, row: number, columnSpan = 1, rowSpan = 1): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     gridColumnAnchorIndex: column,
     gridColumnSpan: columnSpan,
     gridRowAnchorIndex: row,

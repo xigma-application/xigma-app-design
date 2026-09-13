@@ -11,7 +11,7 @@ const padding: TAutoLayoutPadding = { paddingBottom: 30, paddingLeft: 30, paddin
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'frame-1',
   name: 'Frame',

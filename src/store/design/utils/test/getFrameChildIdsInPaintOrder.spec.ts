@@ -8,7 +8,7 @@ import { getFrameChildIdsInPaintOrder } from '../getFrameChildIdsInPaintOrder';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['a', 'b', 'c'],
   clipContent: false,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame',

@@ -9,7 +9,7 @@ describe('getNodeBounds', () => {
   it('should return the box fields directly for a box-shaped node', () => {
     // mock
     const rectangle: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 20,
       id: '1',
       name: 'Rectangle',

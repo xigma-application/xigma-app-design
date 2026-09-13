@@ -28,7 +28,7 @@ export const handleCreateFramePreset = (dispatch: AppDispatch, refs: TCanvasRefs
       addNode({
         childIds: [],
         clipContent: true,
-        fill: FRAME_FILL,
+        fills: [{ color: FRAME_FILL, opacity: 100, type: 'solid' }],
         height: preset.height,
         name: 'Frame',
         parentId: null,

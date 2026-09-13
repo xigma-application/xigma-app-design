@@ -55,7 +55,7 @@ import { TGroupNode, TMaskNode, TRectangleNode, TSceneNode } from 'types/design/
 const node: TSceneNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   guides: [{ axis: 'y', id: 'frame-guide', position: 5 }],
   height: 10,
   id: 'node-1',

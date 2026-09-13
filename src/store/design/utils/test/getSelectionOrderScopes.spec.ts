@@ -7,7 +7,18 @@ import { TSceneNode } from 'types/design/types';
 import { getSelectionOrderScopes } from '../getSelectionOrderScopes';
 
 const buildRect = (id: string, parentId: string | null = null): TSceneNode =>
-  ({ fill: '#ffffff', height: 10, id, name: id, parentId, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }) as TSceneNode;
+  ({
+    fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
+    height: 10,
+    id,
+    name: id,
+    parentId,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width: 10,
+    x: 0,
+    y: 0,
+  }) as TSceneNode;
 
 const buildGroup = (id: string, childIds: string[]): TSceneNode =>
   ({ childIds, height: 10, id, name: id, parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }) as TSceneNode;

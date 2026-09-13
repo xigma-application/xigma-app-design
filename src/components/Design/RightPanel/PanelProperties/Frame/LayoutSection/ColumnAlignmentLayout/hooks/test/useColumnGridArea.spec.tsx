@@ -24,7 +24,7 @@ const addGridFrame = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 200,
       layoutMode: LayoutMode.grid,
       name: 'Frame',
@@ -44,7 +44,17 @@ const addGridFrame = (): string => {
 
 const addChild = (parentId: string): void => {
   store.dispatch(
-    addNode({ fill: '#000', height: 10, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 10,
+      name: 'Rect',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { nodes, rootOrder } = selectActivePage(store.getState());

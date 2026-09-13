@@ -22,7 +22,7 @@ const renderUseCornerRadius = (): ReturnType<typeof renderHook<ReturnType<typeof
 const addRectangle = (overrides: Partial<TRectangleNode> = {}): string => {
   store.dispatch(
     addNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 10,
       name: 'Rectangle',
       parentId: null,

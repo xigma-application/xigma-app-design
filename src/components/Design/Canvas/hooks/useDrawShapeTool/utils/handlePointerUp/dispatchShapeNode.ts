@@ -6,6 +6,9 @@ import { AppDispatch } from 'store';
 import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 
+// utils
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+
 export const dispatchShapeNode = (
   dispatch: AppDispatch,
   rect: TDraftRect,
@@ -15,10 +18,15 @@ export const dispatchShapeNode = (
 ): void => {
   switch (type) {
     case NodeType.frame:
-      dispatch(addNode({ ...rect, childIds: [], clipContent: true, fill, name, parentId: null, rotation: 0, type }));
+      dispatch(
+        addNode({ ...rect, childIds: [], clipContent: true, fills: [makeSolidPaint(fill)], name, parentId: null, rotation: 0, type }),
+      );
       break;
     case NodeType.section:
       dispatch(addNode({ ...rect, childIds: [], fill, name, parentId: null, rotation: 0, type }));
+      break;
+    case NodeType.rectangle:
+      dispatch(addNode({ ...rect, fills: [makeSolidPaint(fill)], name, parentId: null, rotation: 0, type }));
       break;
     default:
       dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, type }));

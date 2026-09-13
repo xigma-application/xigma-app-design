@@ -8,7 +8,7 @@ import { getGridResolvedTrackSizes } from '../getGridResolvedTrackSizes';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 3,
   gridRowCount: 1,
   height: 100,
@@ -25,7 +25,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const rect = (id: string, overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 40,
   id,
   name: id,

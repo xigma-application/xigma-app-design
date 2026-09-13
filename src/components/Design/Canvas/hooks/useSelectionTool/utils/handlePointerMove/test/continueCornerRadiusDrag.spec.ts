@@ -31,7 +31,17 @@ const createCornerRadiusDragRef = (
 
 const addRectangleNode = (x: number, y: number, width: number, height: number): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }),
+    addNode({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

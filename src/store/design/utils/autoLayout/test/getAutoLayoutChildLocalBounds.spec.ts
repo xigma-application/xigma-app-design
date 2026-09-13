@@ -6,7 +6,7 @@ import { TLineNode, TRectangleNode } from 'types/design/types';
 import { getAutoLayoutChildLocalBounds } from '../getAutoLayoutChildLocalBounds';
 
 const rect = (rotation: number): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'a',
   name: 'Rectangle',

@@ -1,3 +1,5 @@
+import { omit } from 'lodash';
+
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignState } from '../../types';
@@ -9,7 +11,7 @@ import { handleAddNode } from '../handleAddNode';
 const node: TSceneNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'node-1',
   name: 'Frame',
@@ -20,6 +22,8 @@ const node: TSceneNode = {
   x: 0,
   y: 0,
 };
+
+const sectionNode: TSceneNode = { ...omit(node, 'fills'), fill: '#ff0000', type: NodeType.section };
 
 const lineNode: TSceneNode = {
   id: 'line-1',
@@ -175,7 +179,7 @@ describe('handleAddNode', () => {
           guides: [],
           id: 'page-1',
           name: 'Page 1',
-          nodes: { 'section-1': { ...node, id: 'section-1', name: 'Section (1)', type: NodeType.section } },
+          nodes: { 'section-1': { ...sectionNode, id: 'section-1', name: 'Section (1)' } },
           paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
           rootOrder: ['section-1'],
           selectedIds: [],
@@ -194,7 +198,7 @@ describe('handleAddNode', () => {
     };
 
     // before
-    handleAddNode(state, { ...node, name: 'Section', type: NodeType.section });
+    handleAddNode(state, { ...sectionNode, name: 'Section' });
 
     // result
     expect(state.pages['page-1'].nodes[node.id].name).toBe('Section (2)');

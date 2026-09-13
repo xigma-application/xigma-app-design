@@ -8,7 +8,18 @@ import { getSmartSelectionSuggestion } from '../getSmartSelectionSuggestion';
 const VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const rect = (id: string, x: number, y: number, width = 50, height = 50, rotation = 0): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation, type: NodeType.rectangle, width, x, y }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId: null,
+    rotation,
+    type: NodeType.rectangle,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 describe('getSmartSelectionSuggestion', () => {
   it('should return null when fewer than 3 nodes are selected', () => {

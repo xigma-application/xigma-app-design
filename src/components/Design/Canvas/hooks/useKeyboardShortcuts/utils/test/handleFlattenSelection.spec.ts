@@ -135,7 +135,17 @@ describe('handleFlattenSelection', () => {
   it('should replace a convertible shape with its vector equivalent, keeping its id', async () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 0, y: 0 }),
+      addNode({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 20,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const [rectId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([rectId]));

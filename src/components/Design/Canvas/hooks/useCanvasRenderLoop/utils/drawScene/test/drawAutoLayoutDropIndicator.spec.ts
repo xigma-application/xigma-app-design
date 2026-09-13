@@ -23,7 +23,7 @@ const buffer = {} as WebGLBuffer;
 const frame = (rotation: number): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'f1',
   name: 'Frame',

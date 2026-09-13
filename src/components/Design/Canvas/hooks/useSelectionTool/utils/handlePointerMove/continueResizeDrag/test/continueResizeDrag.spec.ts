@@ -42,7 +42,7 @@ const addFrameNode = (x: number, y: number, width: number, height: number, paren
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height,
       name: 'Frame',
       parentId,
@@ -82,7 +82,7 @@ const addAutoLayoutFrameNode = (x: number, y: number, width: number, height: num
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',

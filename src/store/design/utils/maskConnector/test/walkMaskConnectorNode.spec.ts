@@ -7,7 +7,7 @@ import { TMaskConnectorLine } from 'store/design/types';
 import { walkMaskConnectorNode } from '../walkMaskConnectorNode';
 
 const rect = (id: string, overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',

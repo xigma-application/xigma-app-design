@@ -6,7 +6,7 @@ import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { getAutoLayoutNodeLocalBounds } from '../getAutoLayoutNodeLocalBounds';
 
 const rect = (x: number, y: number, rotation = 0): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'a',
   name: 'Rectangle',
@@ -21,7 +21,7 @@ const rect = (x: number, y: number, rotation = 0): TRectangleNode => ({
 const frame = (rotation: number): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame',

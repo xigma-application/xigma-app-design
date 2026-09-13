@@ -134,7 +134,7 @@ describe('handlePointerUp', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 400,
         name: 'Frame',
         parentId: null,
@@ -166,7 +166,7 @@ describe('handlePointerUp', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 400,
         name: 'Frame',
         parentId: null,
@@ -198,7 +198,7 @@ describe('handlePointerUp', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 400,
         name: 'Frame',
         parentId: null,

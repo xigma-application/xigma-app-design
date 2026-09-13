@@ -24,7 +24,7 @@ const addFrame = (layoutMode?: LayoutMode): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 200,
       layoutMode,
       name: 'Frame',
@@ -45,7 +45,7 @@ const addFrame = (layoutMode?: LayoutMode): string => {
 const addRectangle = (): string => {
   store.dispatch(
     addNode({
-      fill: '#00ff00',
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Rectangle',
       parentId: null,

@@ -15,7 +15,7 @@ const addFrame = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'F',
       parentId: null,
@@ -34,7 +34,17 @@ const addFrame = (): string => {
 
 const addRect = (): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 10, name: 'R', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 10,
+      name: 'R',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

@@ -23,7 +23,7 @@ vi.mock('shared', () => ({
 const frameNode: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'frame-1',
   name: 'Frame',
@@ -35,7 +35,7 @@ const frameNode: TFrameNode = {
   y: 0,
 };
 const rectangleNode: TRectangleNode = {
-  fill: '#00ff00',
+  fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',

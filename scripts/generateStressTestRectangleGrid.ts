@@ -4,6 +4,9 @@ import { nanoid } from '@reduxjs/toolkit';
 import { NodeType } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
+// utils
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+
 const RECTANGLE_SIZE = 10;
 const GAP = 4;
 const COLUMNS = 10;
@@ -15,7 +18,7 @@ export const generateStressTestRectangleGrid = (count = 100): TRectangleNode[] =
     const y = Math.floor(index / COLUMNS) * (RECTANGLE_SIZE + GAP);
 
     return {
-      fill: FILL_COLOR,
+      fills: [makeSolidPaint(FILL_COLOR)],
       height: RECTANGLE_SIZE,
       id: nanoid(),
       name: `Rectangle ${index + 1}`,

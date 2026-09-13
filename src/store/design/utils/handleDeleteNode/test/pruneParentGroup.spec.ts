@@ -8,7 +8,7 @@ import { getActivePage } from '../../getActivePage';
 import { pruneParentGroup } from '../pruneParentGroup';
 
 const rect = (id: string, parentId: string | null, x = 0): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',
@@ -147,7 +147,7 @@ describe('pruneParentGroup', () => {
     const layoutFrame: TFrameNode = {
       childIds: ['a', 'b'],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 10,
       id: 'frame-1',
       layoutMode: LayoutMode.horizontal,

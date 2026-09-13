@@ -8,7 +8,7 @@ import { getActivePage } from '../getActivePage';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r',
   name: 'Rectangle',

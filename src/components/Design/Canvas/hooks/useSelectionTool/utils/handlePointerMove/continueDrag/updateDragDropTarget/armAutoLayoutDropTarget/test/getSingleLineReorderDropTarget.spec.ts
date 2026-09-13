@@ -9,7 +9,7 @@ import { getSingleLineReorderDropTarget } from '../getSingleLineReorderDropTarge
 const frame: TAutoLayoutFrame = {
   childIds: ['1', '2', '3', '4'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,

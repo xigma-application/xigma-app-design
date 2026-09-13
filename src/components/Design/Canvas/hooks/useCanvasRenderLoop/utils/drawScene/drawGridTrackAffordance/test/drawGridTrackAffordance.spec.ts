@@ -37,7 +37,7 @@ const context: TDrawSceneContext = {
 const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 3,
   height: 200,
   id: 'frame-1',

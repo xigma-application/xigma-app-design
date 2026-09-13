@@ -6,7 +6,7 @@ import { TEllipseNode, TRectangleNode } from 'types/design/types';
 import { hasCornerRadius } from '../hasCornerRadius';
 
 const rectangle: TRectangleNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'rect-1',
   name: 'Rectangle',

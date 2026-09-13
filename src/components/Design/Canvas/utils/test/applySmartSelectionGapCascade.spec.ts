@@ -11,7 +11,17 @@ import { applySmartSelectionGapCascade } from '../applySmartSelectionGapCascade'
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 50, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 50, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 50,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 50,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

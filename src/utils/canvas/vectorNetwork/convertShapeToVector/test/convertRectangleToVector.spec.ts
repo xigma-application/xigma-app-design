@@ -6,7 +6,7 @@ import { TRectangleNode } from 'types/design/types';
 import { convertRectangleToVector } from '../convertRectangleToVector';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#00ff00',
+  fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'rect-1',
   name: 'Rectangle 1',

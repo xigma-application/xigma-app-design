@@ -6,7 +6,7 @@ import { TRectangleNode } from 'types/design/types';
 import { getConstraintGuideCentre } from '../getConstraintGuideCentre';
 
 const child = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'r1',
   name: 'Rectangle',

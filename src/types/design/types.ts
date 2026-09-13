@@ -122,7 +122,7 @@ export type TFrameNode = TBaseNode & {
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
   cornerSmoothing?: number;
-  fill: string;
+  fills: TPaint[];
   gridAutoPlacement?: boolean;
   gridColumnCount?: number;
   gridColumnSizes?: TGridTrackSize[];
@@ -188,7 +188,7 @@ export type TRectangleNode = TBaseNode & {
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
   cornerSmoothing?: number;
-  fill: string;
+  fills: TPaint[];
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;

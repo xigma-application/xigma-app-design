@@ -7,7 +7,7 @@ import { TGroupNode, TRectangleNode } from 'types/design/types';
 import { handleMoveNodesToPage } from '../handleMoveNodesToPage';
 
 const buildRect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'rect-1',
   name: 'Rectangle',

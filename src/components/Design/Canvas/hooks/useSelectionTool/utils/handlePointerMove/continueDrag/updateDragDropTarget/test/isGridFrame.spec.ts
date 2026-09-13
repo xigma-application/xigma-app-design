@@ -8,7 +8,7 @@ import { isGridFrame } from '../isGridFrame';
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'f1',
   layoutMode: LayoutMode.grid,
@@ -22,7 +22,7 @@ const frame: TFrameNode = {
 };
 
 const rectangle: TRectangleNode = {
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r1',
   name: 'Rectangle',

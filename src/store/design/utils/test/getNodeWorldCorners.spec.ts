@@ -6,7 +6,7 @@ import { TLineNode, TRectangleNode } from 'types/design/types';
 import { getNodeWorldCorners } from '../getNodeWorldCorners';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r',
   name: 'Rectangle',

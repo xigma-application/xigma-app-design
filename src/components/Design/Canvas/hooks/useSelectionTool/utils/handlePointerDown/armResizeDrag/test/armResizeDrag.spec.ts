@@ -29,7 +29,7 @@ const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current
 const frame = (id: string, x: number, y: number, width: number, height: number, rotation = 0): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height,
   id,
   name: 'Frame',
@@ -209,7 +209,7 @@ describe('armResizeDrag', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'A',
         parentId: null,
@@ -224,7 +224,7 @@ describe('armResizeDrag', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'B',
         parentId: null,
@@ -268,7 +268,7 @@ describe('armResizeDrag', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'A',
         parentId: null,
@@ -283,7 +283,7 @@ describe('armResizeDrag', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'B',
         parentId: null,

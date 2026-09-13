@@ -129,7 +129,7 @@ describe('getSectionNameLabelEditTarget', () => {
 
     store.dispatch(
       addNode({
-        fill: '#ffffff',
+        fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Rectangle',
         parentId: null,

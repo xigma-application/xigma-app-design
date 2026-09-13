@@ -8,7 +8,7 @@ import { isPointOnFrameNameLabel } from '../isPointOnFrameNameLabel';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 300,
   id: 'frame-1',
   name: 'Frame',

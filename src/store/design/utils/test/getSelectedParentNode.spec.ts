@@ -6,7 +6,7 @@ import { TSceneNode } from 'types/design/types';
 import { getSelectedParentNode } from '../getSelectedParentNode';
 
 const rect = (id: string, parentId: string | null): TSceneNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',

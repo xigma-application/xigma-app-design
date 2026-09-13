@@ -6,7 +6,7 @@ import { TRectangleNode } from 'types/design/types';
 import { isAutoLayoutFlowChild } from '../isAutoLayoutFlowChild';
 
 const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r1',
   name: 'Rectangle',

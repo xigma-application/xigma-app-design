@@ -39,7 +39,7 @@ const buildFrame = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
 
 const buildRectangle = (): TSceneNode =>
   ({
-    fill: '#ffffff',
+    fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
     height: 10,
     id: 'rect-1',
     name: 'Rectangle',

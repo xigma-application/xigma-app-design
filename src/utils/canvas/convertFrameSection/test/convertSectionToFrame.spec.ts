@@ -27,7 +27,7 @@ describe('convertSectionToFrame', () => {
     expect(convertSectionToFrame(section)).toEqual({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 100,
       hidden: undefined,
       id: 'section-1',

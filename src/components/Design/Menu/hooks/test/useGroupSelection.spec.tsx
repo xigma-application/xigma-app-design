@@ -22,7 +22,7 @@ describe('useGroupSelection', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -37,7 +37,7 @@ describe('useGroupSelection', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'B',
         parentId: null,

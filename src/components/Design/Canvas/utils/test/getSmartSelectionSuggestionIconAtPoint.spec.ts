@@ -8,7 +8,18 @@ import { getSmartSelectionSuggestionIconAtPoint } from '../getSmartSelectionSugg
 const VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const rect = (id: string, x: number, y: number, width = 50, height = 50): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 describe('getSmartSelectionSuggestionIconAtPoint', () => {
   it('should return null when no suggestion exists, regardless of the point', () => {

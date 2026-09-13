@@ -769,10 +769,7 @@ exports[`App snapshots > should render App 1`] = `
                     />
                     <div
                       class="_Color__picker-alpha_a21594"
-                      style="background-color: rgb(68, 68, 68);"
-                    />
-                    <div
-                      class="_Color__picker-texture_a21594"
+                      style="--color-alpha-preview: rgba(68, 68, 68, 1);"
                     />
                   </div>
                 </button>

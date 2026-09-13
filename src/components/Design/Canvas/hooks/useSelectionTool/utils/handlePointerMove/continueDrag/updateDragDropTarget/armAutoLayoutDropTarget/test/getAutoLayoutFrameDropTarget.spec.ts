@@ -34,7 +34,7 @@ const buildContext = (
 const autoLayoutFrame: TAutoLayoutFrame = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 300,
   horizontalGap: 20,
   id: 'frame-1',

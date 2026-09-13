@@ -161,4 +161,29 @@ describe('Section behaviors', () => {
     // result
     expect(container.querySelector('[class*="Section--noSeparator"]')).not.toBeNull();
   });
+
+  it('should treat itself as empty when hasContent={false} is given, even though children is truthy', () => {
+    // before — a wrapper div that always renders regardless of an underlying list being empty
+    // (e.g. FillSection's rows container) can't be detected by the default Boolean(children) check
+    const { container } = renderSection(
+      <Section hasContent={false} label="Fill">
+        <div>always rendered</div>
+      </Section>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--empty"]')).not.toBeNull();
+  });
+
+  it('should treat itself as non-empty when hasContent={true} is given, even though items is empty', () => {
+    // before
+    const { container } = renderSection(
+      <Section<string> hasContent items={[]} label="Fill">
+        {(name) => <span>{name}</span>}
+      </Section>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--empty"]')).toBeNull();
+  });
 });

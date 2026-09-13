@@ -21,7 +21,7 @@ describe('getShapeOutlineTargets', () => {
   it('should return one outline target per selected strokeable shape', () => {
     // mock
     const rectId = addSelectedNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Rect',
       parentId: null,
@@ -46,7 +46,7 @@ describe('getShapeOutlineTargets', () => {
   it('should drop a selected strokeable shape whose stroke yields no outline', () => {
     // mock — a rectangle with no stroke set
     addSelectedNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Rect',
       parentId: null,
@@ -69,7 +69,7 @@ describe('getShapeOutlineTargets', () => {
     addSelectedNode({
       childIds: [],
       clipContent: true,
-      fill: '#ffffff',
+      fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Frame',
       parentId: null,

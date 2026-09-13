@@ -10,7 +10,7 @@ import { getAutoLayoutDropTargetContext } from '../getAutoLayoutDropTargetContex
 
 const node = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 20,
     id,
     name: 'Rectangle',
@@ -27,7 +27,7 @@ const nodesById = { a: node('a', 0, 0), b: node('b', 0, 20), dragged: node('drag
 const autoLayoutFrame: TAutoLayoutFrame = {
   childIds: ['a', 'b', 'dragged'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 300,
   id: 'frame-1',
   layoutMode: LayoutMode.vertical,

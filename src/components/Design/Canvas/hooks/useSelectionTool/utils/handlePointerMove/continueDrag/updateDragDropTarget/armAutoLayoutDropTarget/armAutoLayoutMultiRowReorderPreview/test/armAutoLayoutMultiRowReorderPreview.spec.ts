@@ -10,7 +10,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 // six 100x100 children, two per row: [a,b] / [c,d] / [e,f]; dragging the {c,d} block
 const gridNode = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 100,
     id,
     name: 'Rectangle',
@@ -40,7 +40,7 @@ const gridNodes = {
 const gridFrame: TAutoLayoutFrame = {
   childIds: ['a', 'b', 'c', 'd', 'e', 'f'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 600,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,

@@ -77,7 +77,17 @@ const pointerEvent = (options: Partial<PointerEventInit> = {}): PointerEvent =>
 
 const addRectangleNode = (x: number, y: number, size = 100): TRectangleNode => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
+    addNode({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { nodes, rootOrder } = selectActivePage(store.getState());
@@ -220,7 +230,7 @@ const ellipse: TEllipseNode = {
 
 const rectangle: TRectangleNode = {
   cornerRadius: 20,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'rectangle-1',
   name: 'Rectangle',

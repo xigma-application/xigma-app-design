@@ -29,7 +29,7 @@ const context = {
 const buildFrame = (id: string): TSceneNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 20,
   id,
   name: 'Frame',
@@ -42,7 +42,7 @@ const buildFrame = (id: string): TSceneNode => ({
 });
 
 const buildRectangle = (id: string): TSceneNode => ({
-  fill: '#00ff00',
+  fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   height: 20,
   id,
   name: 'Rectangle',

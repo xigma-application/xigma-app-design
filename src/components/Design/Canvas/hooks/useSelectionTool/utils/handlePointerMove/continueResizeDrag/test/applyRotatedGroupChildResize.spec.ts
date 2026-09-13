@@ -21,7 +21,7 @@ describe('applyRotatedGroupChildResize', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'A',
         parentId: null,
@@ -36,7 +36,7 @@ describe('applyRotatedGroupChildResize', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'B',
         parentId: null,
@@ -77,7 +77,7 @@ describe('applyRotatedGroupChildResize', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 40,
         name: 'A',
         parentId: null,
@@ -92,7 +92,7 @@ describe('applyRotatedGroupChildResize', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 40,
         name: 'B',
         parentId: null,

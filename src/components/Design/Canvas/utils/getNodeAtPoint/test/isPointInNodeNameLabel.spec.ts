@@ -10,7 +10,7 @@ import { isPointInNodeNameLabel } from '../isPointInNodeNameLabel';
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 50,
   id: 'frame-a',
   name: 'Frame 1',
@@ -66,7 +66,7 @@ describe('isPointInNodeNameLabel', () => {
 
   it('should return false for a node type that has no name label at all', () => {
     const rect: TSceneNode = {
-      fill: '#000000',
+      fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
       height: 50,
       id: 'rect-a',
       name: 'Rectangle 1',

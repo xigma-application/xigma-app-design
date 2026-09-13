@@ -26,7 +26,7 @@ const context: TDrawSceneContext = {
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   horizontalGap: 30,
   id: 'frame-1',
@@ -178,7 +178,7 @@ describe('drawAutoLayoutGapLabel', () => {
     // mock
     const refs = createCanvasRefs();
     const rectangle: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 50,
       id: 'frame-1',
       name: 'Rectangle',

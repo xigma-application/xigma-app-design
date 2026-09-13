@@ -16,7 +16,7 @@ import { TSceneNode } from 'types/design/types';
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 const buildNode = (id: string): TSceneNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: id,

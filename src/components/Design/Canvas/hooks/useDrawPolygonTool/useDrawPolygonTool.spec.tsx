@@ -308,7 +308,7 @@ describe('useDrawPolygonTool alignment snap', () => {
 
     store.dispatch(
       addNode({
-        fill: '#000000',
+        fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -345,7 +345,7 @@ describe('useDrawPolygonTool alignment snap', () => {
 
     store.dispatch(
       addNode({
-        fill: '#000000',
+        fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,

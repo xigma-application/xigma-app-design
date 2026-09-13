@@ -25,7 +25,7 @@ const addFrameNode = (width: number, height: number, lockedAspectRatio = false):
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height,
       lockedAspectRatio,
       name: 'Frame',
@@ -53,7 +53,7 @@ const addAutoLayoutFrameNode = (
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 50,
       heightSizingMode,
       layoutMode,

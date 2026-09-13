@@ -7,8 +7,8 @@ import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { getOverriddenGridDragAncestor } from '../getOverriddenGridDragAncestor';
 
-const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
-const frame: TFrameNode = { childIds: ['r'], clipContent: true, fill: '#fff', height: 20, id: 'f', name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }; // prettier-ignore
+const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+const frame: TFrameNode = { childIds: ['r'], clipContent: true, fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'f', name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }; // prettier-ignore
 
 const refsWithGhost = (nodeIds: string[]): TCanvasRefs =>
   createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds, offset: { x: 7, y: -4 } } } } });

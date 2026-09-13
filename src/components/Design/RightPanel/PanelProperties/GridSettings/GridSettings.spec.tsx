@@ -39,7 +39,7 @@ const selectGridFrame = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 200,
       layoutMode: LayoutMode.grid,
       name: 'Frame',

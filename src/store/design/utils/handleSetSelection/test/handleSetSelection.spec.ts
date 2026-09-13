@@ -57,7 +57,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'frame-1',
   name: 'Frame',
@@ -133,7 +133,7 @@ const buildTextNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 });
 
 const groupChild: TRectangleNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'child-1',
   name: 'Rectangle',

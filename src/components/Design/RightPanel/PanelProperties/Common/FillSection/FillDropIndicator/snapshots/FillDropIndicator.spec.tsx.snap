@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FillDropIndicator snapshots > should render FillDropIndicator 1`] = `
+<DocumentFragment>
+  <div
+    class="_FillDropIndicator_fe2edb"
+    style="transform: translateY(0px);"
+  />
+</DocumentFragment>
+`;

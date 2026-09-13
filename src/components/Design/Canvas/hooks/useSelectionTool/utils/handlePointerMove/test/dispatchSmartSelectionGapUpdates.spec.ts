@@ -13,7 +13,17 @@ import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThro
 
 const addRect = (x: number, y: number, size = 50): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -36,7 +46,7 @@ const addAutoLayoutFrame = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 400,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',

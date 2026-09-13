@@ -75,7 +75,7 @@ describe('invalidateVectorWidthProfile', () => {
   it('should do nothing for a non-vector node', () => {
     // mock
     const rect = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' as const }],
       height: 10,
       id: 'rect-1',
       name: 'Rectangle',

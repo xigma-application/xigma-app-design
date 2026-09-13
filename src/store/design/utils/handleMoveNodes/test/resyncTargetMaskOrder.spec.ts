@@ -21,7 +21,7 @@ const buildPage = (overrides: Partial<TDesignPage>): TDesignPage => ({
 });
 
 const buildRect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'rect-1',
   name: 'Rectangle',
@@ -37,7 +37,7 @@ const buildRect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
 const buildFrame = (overrides: Partial<TFrameNode>): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'frame-1',
   name: 'Frame',

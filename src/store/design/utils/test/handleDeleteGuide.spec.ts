@@ -10,7 +10,7 @@ import { handleDeleteGuide } from '../handleDeleteGuide';
 const frame = (id: string): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id,
   name: id,

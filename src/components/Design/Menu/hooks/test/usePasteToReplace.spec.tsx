@@ -26,7 +26,7 @@ describe('usePasteToReplace', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Source',
         parentId: null,
@@ -45,7 +45,7 @@ describe('usePasteToReplace', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#0000ff',
+        fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Target',
         parentId: null,

@@ -91,6 +91,61 @@ node's folder. Today:
   the pre-existing `toggleNodeHidden` (already cascades to descendants via
   `cascadeSetGroupChildrenFlag` — no new wiring needed there).
 
+- `Common/FillSection/` — the Fill list: zero or more `TPaint[]` layers (first item = topmost,
+  matching the vector paint stack's own ordering), each editable, reorderable and independently
+  hideable/deletable, plus a header "Apply styles and variables" button
+  (`ApplyStylesButton/`, `StylesAndVariables` icon — deliberately a no-op for now, the button and
+  its icon exist ahead of the feature). Gates on `isAppearanceNode` (the same `TFrameNode |
+  TRectangleNode` guard as `AppearanceSection`, imported from there rather than duplicated), so this
+  is Rectangle- and Frame-only today — Ellipse/Star/Polygon/Section/Text keep their pre-existing
+  single `fill: string`. Getting here required widening `TFrameNode`/`TRectangleNode.fill: string`
+  to `fills: TPaint[]` in the type layer itself (a real data-model migration, not just new UI —
+  `TSceneNodeChanges`, node creation in `dispatchShapeNode.ts`/`toolSettings.ts`,
+  `convertFrameToSection`/`convertSectionToFrame`, and `convertRectangleToVector` all had to move
+  from a single hex to a paint array or back, using the shared `utils/design/paint/makeSolidPaint`
+  / `getSolidPaintColor` round-trip helpers); `convertRectangleToVector` now forwards the whole
+  `fills` array as the new vector node's `defaultFill` instead of collapsing it to one solid paint,
+  a fidelity improvement that fell out of the migration for free. Each row reuses
+  `UITools.ColorPickerInput` in `simple` mode (solid-only — no gradient tab) for the swatch/hex/opacity/
+  visibility cluster; a non-solid paint already sitting in `fills` (nothing in this UI creates one)
+  renders a read-only gradient-preview swatch instead (`getNonSolidFillSwatchStyle`, angle derived
+  from the paint's `start`/`end` via `utils/design/paint/getGradientAngleFromPoints` since a
+  committed `TGradientPaint` has no stored angle, only endpoints) with its own eye toggle but no
+  editing. Rendering the real fill (solid or otherwise) on the canvas is
+  `canvas-rendering-pipeline.md`'s `drawBoxLeafNode`/`getBoxFillPolygon` section — the same GPU
+  paint-stack pipeline vector faces already used, reused verbatim for a box's whole outline as a
+  single "face".
+
+  Drag reordering and click-selection are a deliberate 1:1 port of `GridSettings/GridTrackList`'s
+  own mechanism (down to reusing its exact index-math shape), not a simplified one-off — this was a
+  direct correction mid-build after a first pass shipped single-item-only dragging with no drop
+  indicator and no selection highlight. `useFillSelection` mirrors `useGridTrackSelection` exactly
+  (plain click replaces the selection and sets the shift-anchor; meta/ctrl toggles one index in;
+  shift extends an inclusive range from that anchor; a `useEffect` drops any selected index once it
+  falls outside a shrunken `fillCount`) and `useFillReorderDrag` mirrors `useGridTrackReorderDrag`
+  (multi-index `sourceIndices`, a `dropIndex` computed each `pointermove` from every registered
+  row's live `getBoundingClientRect()`, reported to the caller on `pointerup` whether or not the
+  pointer actually moved). The one piece written fresh rather than ported is the actual array
+  splice: grid tracks reject a non-contiguous drag outright (`isContiguous` in
+  `commitGridAxisReorder.ts`, because linked grid cells can't reorder around a gap); a flat fill
+  list has no such constraint, so `getFillReorderResult` moves an arbitrary (possibly
+  non-contiguous) `sourceIndices` set to one insertion point in a single pass — sort the sources,
+  pull them out, count how many sat before the insertion slot to re-anchor it, splice the moved
+  block back in — and returns the block's new indices so the drag can re-select what it just
+  moved. `resolveFillDragIndices` reproduces grid's "grab an unselected row → drag just that row,
+  replacing the selection" vs. "grab a row already inside the selection → drag the whole selection"
+  branch (`commitGridTrackReorder`'s `!hasMoved` case collapses back to a single-row selection even
+  when nothing moved, so a press-and-release on one of several selected rows without dragging acts
+  like a plain click). `useClearFillSelectionOnOutsideClick` is new, not ported — Grid never needed
+  it (its selection lives inside a `GridSettingsHeader`-owned popover that closes/clears on its own)
+  — a `mousedown` listener attached to `document` only while `selectedIndices.length > 0`, checking
+  `containerRef.current.contains(event.target)` (same shape as
+  `EditableInput/useEditableInputActionToggle`'s own outside-click check) so anywhere outside the
+  Fill rows — including back on the still-selected canvas shape itself — drops the selection.
+  Multi-select intentionally stays drag-only: editing a row's own hex/opacity/visibility/delete
+  always acts on that one row's index regardless of how many rows are currently selected (mirrors
+  Grid too — its per-row `onChangeValue`/`onDelete` are single-index the same way).
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`
@@ -99,14 +154,14 @@ i18n for the shared sections lives under `…panelProperties.common.*`.
 `FrameHeaderButtons` = HTML-tag toggle + the shared component button, all passed into
 `Common/PanelHeader`) → `Common/PositionSection` → `LayoutSection/` (flow, dimensions from
 `Common/`, grid child span from `Common/`, min/max, alignment/gap/grid, padding, clip-content —
-the auto-layout-specific rows, frame-only) → `Common/AppearanceSection`.
+the auto-layout-specific rows, frame-only) → `Common/AppearanceSection` → `Common/FillSection`.
 
 ## `Rectangle/`
 
 `Rectangle.tsx` = `RectangleHeader` (`Common/PanelHeader` with the label only + the shared
 component button, no dropdown) → `Common/PositionSection` → a bare `UITools.Section` labelled
-"Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan` → `Common/AppearanceSection`.
-No auto-layout rows.
+"Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan` → `Common/AppearanceSection`
+→ `Common/FillSection`. No auto-layout rows.
 
 ## Adding a panel for another node type
 

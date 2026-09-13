@@ -6,7 +6,7 @@ import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 import { getNodesBoundingBox } from '../getNodesBoundingBox';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r',
   name: 'Rectangle',

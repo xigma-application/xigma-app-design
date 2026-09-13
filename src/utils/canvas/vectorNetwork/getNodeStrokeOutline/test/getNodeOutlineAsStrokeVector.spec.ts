@@ -7,7 +7,7 @@ import { getNodeOutlineAsStrokeVector } from '../getNodeOutlineAsStrokeVector';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',

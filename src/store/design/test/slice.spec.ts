@@ -67,7 +67,7 @@ import { TFrameNode } from 'types/design/types';
 const frameNodePayload: Omit<TFrameNode, 'id'> = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   name: 'Frame 1',
   parentId: null,
@@ -234,7 +234,7 @@ describe('design slice', () => {
     // before
     const withNode = slice(undefined, addNode(frameNodePayload));
     const [id] = withNode.pages[withNode.activePageId].rootOrder;
-    const replacement: TFrameNode = { ...frameNodePayload, fill: '#00ff00', id, width: 999 };
+    const replacement: TFrameNode = { ...frameNodePayload, fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }], id, width: 999 };
 
     // action
     const state = slice(withNode, replaceNode({ id, node: replacement }));

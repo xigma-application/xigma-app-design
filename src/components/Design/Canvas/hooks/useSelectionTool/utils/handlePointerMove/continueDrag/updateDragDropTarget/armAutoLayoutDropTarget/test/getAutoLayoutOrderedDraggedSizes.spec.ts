@@ -6,7 +6,18 @@ import { TSceneNode } from 'types/design/types';
 import { getAutoLayoutOrderedDraggedSizes } from '../getAutoLayoutOrderedDraggedSizes';
 
 const node = (id: string, width: number, height: number): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x: 0, y: 0 }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width,
+    x: 0,
+    y: 0,
+  }) as TSceneNode;
 
 describe('getAutoLayoutOrderedDraggedSizes', () => {
   it('should return each moved node’s own size, in the given order, tagged as the dragged placeholder', () => {

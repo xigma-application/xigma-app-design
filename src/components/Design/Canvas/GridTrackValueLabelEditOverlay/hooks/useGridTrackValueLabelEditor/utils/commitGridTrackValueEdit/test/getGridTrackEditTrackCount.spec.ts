@@ -26,7 +26,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode =>
 
 const child = (id: string): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 10,
     id,
     name: id,

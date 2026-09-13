@@ -9,7 +9,7 @@ import { handleReplaceDesignSnapshot } from '../handleReplaceDesignSnapshot';
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'frame-1',
   name: 'Frame',
@@ -182,7 +182,7 @@ describe('handleReplaceDesignSnapshot', () => {
     // was open for editing is no longer NodeType.vector in the restored snapshot
     const vector = buildVectorNode();
     const rectangle: TRectangleNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 40,
       id: vector.id,
       name: 'Rectangle',

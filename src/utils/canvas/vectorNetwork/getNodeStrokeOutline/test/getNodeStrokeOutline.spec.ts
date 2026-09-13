@@ -8,7 +8,7 @@ import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',

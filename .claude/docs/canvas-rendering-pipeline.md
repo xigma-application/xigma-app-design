@@ -195,7 +195,7 @@ plain-color row's own `dragSnapshotProgram` split (below), not a fully independe
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline`, `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces) |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5) |
 | plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
@@ -317,11 +317,14 @@ per draw call; draw order is simply whatever `drawScene` calls in sequence.
 
 **Committed nodes** (`store.design.nodes`, read via `selectOrderedNodes`) render through
 `drawSceneNodes.ts` — one `switch (node.type)` dispatching to `drawEllipse`/`drawPolygon`/`drawStar`/
-`drawImage`/`drawLine` (+arrowheads)/`drawPathOutline`/`drawMsdfText`/default `drawRect`. Rectangle
-has no dedicated `case` — it falls through the same `default: drawRect(node, ...)` as Frame/Section,
-because `drawRect.ts` itself branches on the node's own optional `cornerRadius` field (structural
-typing: passing a `TRectangleNode` through satisfies `TDrawableRect`'s optional `cornerRadius?:
-number` with no cast needed) rather than the dispatcher needing to know a rectangle can be rounded.
+`drawImage`/`drawLine` (+arrowheads)/`drawPathOutline`/`drawMsdfText`/default `drawBoxLeafNode`.
+Rectangle has no dedicated `case` — it falls through the same `default: drawBoxLeafNode(node, ...)`
+as Frame/Section, and `drawBoxLeafNode` itself branches on `'fills' in node` to pick the fill path
+(see the paint-stack paragraph below); `drawRect.ts` only ever draws the fill for the branch that
+lands outside that — Section, still a single `fill: string` — because it branches on the node's own
+optional `cornerRadius` field (structural typing: passing a `TSectionNode`-shaped rect through
+satisfies `TDrawableRect`'s optional `cornerRadius?: number` with no cast needed) rather than the
+caller needing to know a rectangle can be rounded.
 `drawPolygon.ts` (its own `utils/canvas/drawPolygon/` folder, not `shapes/` anymore) branches the
 same way on `TPolygonNode.cornerRadius?: number`, dispatching to `drawStandardPolygon.ts` (the
 original flat fan, byte-for-byte moved) or `drawRoundedPolygon.ts` — the second instance of the
@@ -378,6 +381,34 @@ wired), and `drawThickOutline`'s stroke alpha (added alongside this, `alpha = 1`
 only ever fed the box path's own combined opacity — Ellipse/Polygon/Star's stroke calls
 (`drawThickEllipseOutline`, and their own ring/outline equivalents) still don't take an alpha
 argument, so a rounded shape's *stroke* doesn't dim, only its fill does.
+
+**A box node's fill is a real `TPaint[]` stack, not a flat hex, for Rectangle and Frame** — the
+Fill section (`properties-panel.md`) needed this, and `TSectionNode`/`TEllipseNode`/`TStarNode`/
+`TPolygonNode`/`TTextNode` deliberately kept the old single `fill: string` (out of scope; see that
+doc for why only these two). Rather than build a second paint-stack renderer, `drawBoxLeafNode.ts`
+reuses the vector one verbatim: `getBoxFillPolygon.ts` turns the box's own geometry into the same
+shape a vector face already is — `getRoundedRectPoints` (the same corner-radius/squircle tessellation
+above) rotated rigidly around the node's own center by its `rotation` field (vector nodes never
+need this step, since a vector node's rotation is baked into its point coordinates already, not a
+separate transform applied at render time) — and hands that single closed polygon, plus the node's
+whole `fills` array, straight to `drawVectorFillGroup` (`vector-network.md` §79's per-paint solid/
+gradient dispatch and `getFaceGroupBlendMode`/`compositeBlend` isolation path) exactly as if it were
+one vector face's paint stack. Nothing in that function or its callees (`drawVectorFillPaints`,
+`drawVectorFill`, `drawVectorGradientFill`, `getFaceGroupBlendMode`) actually mentions vectors — they
+only take `TPoint[][]` polygons and a `TPaint[]`, which is what made this reuse possible instead of a
+second GPU implementation; `getScaledFillPaints.ts` folds the node's own cascading opacity
+(`getEffectiveOpacity`, above) into each paint's `opacity` before the stack is drawn, since
+`drawVectorFillPaints` has no separate "outer opacity" parameter of its own. `faceBufferCache`/
+`nodeBounds` are both passed as `null` for a box — the polygon is recomputed fresh every frame
+(cheap, four corners) so persistent-buffer caching would only add bookkeeping, and gradient bounds
+fall back to the polygon's own bounding box exactly like a vector face with no explicit
+`nodeBounds` override. `drawBoxLeafNode.ts` and its two new siblings still live as flat files in
+`drawScene/` (not promoted to a folder — neither function is complex enough yet to warrant one),
+importing `drawVectorFillGroup` one level over from its `drawVectorNodeOrTextPathGuide/
+drawSceneVectorNode/` folder; that reach is a same-feature (`Canvas/`) sibling import, not the
+global-utils-reaching-into-`components/` violation the module-structure rules actually forbid, and
+the two-argument `getScaledFillPaints`/`getBoxFillPolygon` pair are correspondingly plain siblings
+too rather than a promoted `drawBoxLeafNode/` folder's own `utils/`.
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
 `useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer
@@ -923,6 +954,8 @@ need.
   vectorGradientFillFragmentShaderSource,vectorGradientFillConstants}.ts`
 - Vector gradient fill (§3, `vector-network.md` §79): `utils/canvas/drawVectorNode/
   {drawVectorGradientFill,getGradientStopUniformArrays,getGradientTypeIndex,getVectorFillBounds}.ts`
+- Box node fill via the vector paint-stack pipeline (§5, `properties-panel.md`'s Fill section):
+  `.../drawScene/{drawBoxLeafNode,getBoxFillPolygon,getScaledFillPaints}.ts`
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;

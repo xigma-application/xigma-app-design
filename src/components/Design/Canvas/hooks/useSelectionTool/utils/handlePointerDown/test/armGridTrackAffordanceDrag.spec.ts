@@ -1,8 +1,20 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, deleteNode, setGridSettingsPanelOpen, setGridTrackSelection, setPanelGridTrackSelection, updateNode } from 'store/design/slice';
-import { selectActivePage, selectGridTrackSelection, selectIsGridSettingsPanelOpen, selectPanelGridTrackSelection } from 'store/design/selectors';
+import {
+  addNode,
+  deleteNode,
+  setGridSettingsPanelOpen,
+  setGridTrackSelection,
+  setPanelGridTrackSelection,
+  updateNode,
+} from 'store/design/slice';
+import {
+  selectActivePage,
+  selectGridTrackSelection,
+  selectIsGridSettingsPanelOpen,
+  selectPanelGridTrackSelection,
+} from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +40,7 @@ const addFrame = (overrides: { childIds?: string[]; gridAutoPlacement?: boolean;
     addNode({
       childIds: overrides.childIds ?? [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       gridAutoPlacement: overrides.gridAutoPlacement ?? false,
       gridColumnCount: overrides.gridColumnCount ?? 4,
       height: 200,

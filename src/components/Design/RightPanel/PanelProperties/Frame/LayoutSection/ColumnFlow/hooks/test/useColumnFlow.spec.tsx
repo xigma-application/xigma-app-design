@@ -24,7 +24,7 @@ const addFrameNode = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 50,
       name: 'Frame',
       parentId: null,
@@ -46,7 +46,7 @@ const addAutoLayoutFrameNode = (layoutMode: LayoutMode): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 50,
       layoutMode,
       name: 'Frame',

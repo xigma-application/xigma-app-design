@@ -64,7 +64,7 @@ const renderScrollbarDrag = (
 const addOverflowNode = (): void => {
   store.dispatch(
     addNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 2000,
       name: 'Frame',
       parentId: null,
@@ -80,7 +80,7 @@ const addOverflowNode = (): void => {
 const addOffscreenNode = (): void => {
   store.dispatch(
     addNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 300,
       name: 'Frame',
       parentId: null,

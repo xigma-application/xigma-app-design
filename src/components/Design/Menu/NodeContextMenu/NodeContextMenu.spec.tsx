@@ -28,8 +28,18 @@ const BASE_NODE = {
   y: 0,
 };
 
-const buildRectangleNode = (): TRectangleNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.rectangle });
-const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, childIds: [], clipContent: true, fill: '#000000', type: NodeType.frame });
+const buildRectangleNode = (): TRectangleNode => ({
+  ...BASE_NODE,
+  fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  type: NodeType.rectangle,
+});
+const buildFrameNode = (): TFrameNode => ({
+  ...BASE_NODE,
+  childIds: [],
+  clipContent: true,
+  fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  type: NodeType.frame,
+});
 const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, childIds: [], fill: '#000000', type: NodeType.section });
 const buildGroupNode = (): TGroupNode => ({ ...BASE_NODE, childIds: [], type: NodeType.group });
 const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
@@ -109,7 +119,17 @@ const buildMaskScene = (): { maskId: string; nodeId: string } => {
   const maskId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
 
   store.dispatch(
-    addNode({ fill: '#000000', height: 100, name: 'Node', parentId: null, rotation: 0, type: NodeType.rectangle, width: 100, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      height: 100,
+      name: 'Node',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
   );
   const nodeId = selectActivePage(store.getState()).rootOrder.slice(-1)[0];
 

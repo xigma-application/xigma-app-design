@@ -7,7 +7,7 @@ import { getNearestNodeId } from '../getNearestNodeId';
 
 const box = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 50,
     id,
     name: 'Rectangle',

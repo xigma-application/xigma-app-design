@@ -1,0 +1,7 @@
+export const getFillToggledIndices = (selected: number[], index: number): number[] => {
+  if (selected.includes(index)) {
+    return selected.filter((value) => value !== index);
+  }
+
+  return [...selected, index].sort((left, right) => left - right);
+};

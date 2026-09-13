@@ -22,7 +22,7 @@ vi.mock('../renderIntoTarget', () => ({
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['child-a', 'child-b'],
   clipContent: true,
-  fill: '#123456',
+  fills: [{ color: '#123456', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'frame-1',
   name: 'Frame 1',

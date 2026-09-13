@@ -44,8 +44,9 @@ export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChang
           className={styles.StopRow__remove}
           disabled={!canRemove}
           onClick={onRemove}
+          style={{ padding: 0 }}
         >
-          <Icon name="Minus" size={12} />
+          <Icon name="Minus" size={24} />
         </UITools.Button>
       </Tooltip>
     </div>

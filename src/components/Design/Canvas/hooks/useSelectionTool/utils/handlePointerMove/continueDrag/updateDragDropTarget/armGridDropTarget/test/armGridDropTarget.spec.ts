@@ -10,7 +10,7 @@ const refs = (): TCanvasRefs => ({ transform: { gridDropTargetRef: { current: nu
 
 const anchoredChild = (id: string, column: number, row: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     gridColumnAnchorIndex: column,
     gridRowAnchorIndex: row,
     height: 10,
@@ -27,7 +27,7 @@ const anchoredChild = (id: string, column: number, row: number): TSceneNode =>
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridAutoPlacement: false,
   gridColumnCount: 2,
   gridRowCount: 2,

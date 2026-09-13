@@ -45,7 +45,7 @@ const buffer = {} as WebGLBuffer;
 
 const rect = (id: string, x: number, y = 0): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 50,
     id,
     name: 'Rectangle',

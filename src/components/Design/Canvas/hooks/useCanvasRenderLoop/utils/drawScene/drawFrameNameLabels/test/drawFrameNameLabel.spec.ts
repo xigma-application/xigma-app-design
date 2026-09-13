@@ -49,7 +49,7 @@ const ANCHOR = { angleDeg: 0, maxWidth: 200, point: { x: 20, y: -12 } };
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame 1',

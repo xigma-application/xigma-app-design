@@ -38,7 +38,7 @@ describe('getNodeAxisAlignedBounds', () => {
   it('should return a box node’s own x/y/width/height as-is', () => {
     // mock
     const rect: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 30,
       id: 'r',
       name: 'Rectangle',

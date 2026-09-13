@@ -19,7 +19,7 @@ const dragState = (nodeOrigins: TDragState['nodeOrigins'], candidateShapes: TDra
 
 const rect = (id: string, x: number, y: number, width = 100, height = 100): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height,
     id,
     name: 'Rectangle',

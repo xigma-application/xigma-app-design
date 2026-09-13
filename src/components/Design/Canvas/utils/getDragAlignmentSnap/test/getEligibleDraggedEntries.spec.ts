@@ -7,7 +7,7 @@ import { getEligibleDraggedEntries } from '../getEligibleDraggedEntries';
 
 const rect = (id: string): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 100,
     id,
     name: 'Rectangle',

@@ -119,7 +119,7 @@ describe('continuePathOffsetDrag', () => {
 
     store.dispatch(
       addNode({
-        fill: '#ffffff',
+        fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Rect',
         parentId: null,

@@ -36,7 +36,7 @@ const addFrame = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 80,
       layoutMode: LayoutMode.horizontal,
       maxWidth: 400,

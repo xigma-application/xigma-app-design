@@ -11,7 +11,7 @@ const viewport = { x: 10, y: 20, zoom: 2 };
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,
@@ -38,7 +38,7 @@ describe('getAutoLayoutPaddingEditDetails', () => {
 
   it('should return null when the referenced node is not a frame', () => {
     const rectangle: TRectangleNode = {
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 50,
       id: 'frame-1',
       name: 'Rectangle',

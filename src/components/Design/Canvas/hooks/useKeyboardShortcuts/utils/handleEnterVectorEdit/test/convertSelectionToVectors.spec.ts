@@ -38,7 +38,7 @@ import { convertSelectionToVectors } from '../convertSelectionToVectors';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 
 const rectangleNode: TRectangleNode = {
-  fill: '#00ff00',
+  fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'r1',
   name: 'Rectangle',

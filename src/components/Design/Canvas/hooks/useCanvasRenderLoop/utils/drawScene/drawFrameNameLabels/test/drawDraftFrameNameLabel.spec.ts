@@ -49,7 +49,7 @@ describe('drawDraftFrameNameLabel', () => {
       {
         childIds: [],
         clipContent: true,
-        fill: '#ffffff',
+        fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
         height: 100,
         id: '',
         name: 'Frame 3',

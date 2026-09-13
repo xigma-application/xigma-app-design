@@ -15,7 +15,7 @@ const addFrameNode = (): TFrameNode => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ffffff',
+      fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Frame',
       parentId: null,
@@ -34,7 +34,17 @@ const addFrameNode = (): TFrameNode => {
 
 const addRectangleNode = (parentId: string | null): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 10, name: 'Rectangle', parentId, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      height: 10,
+      name: 'Rectangle',
+      parentId,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

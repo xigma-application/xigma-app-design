@@ -6,7 +6,7 @@ import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { getAutoLayoutGapHandles } from '../getAutoLayoutGapHandles';
 
 const rect = (x: number, y: number, width = 50, height = 50): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height,
   id: `rect-${x}-${y}`,
   name: 'Rectangle',
@@ -21,7 +21,7 @@ const rect = (x: number, y: number, width = 50, height = 50): TRectangleNode => 
 const frame = (layoutMode: LayoutMode, overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   id: 'frame-1',
   layoutMode,

@@ -2,10 +2,13 @@
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TSectionNode } from 'types/design/types';
 
+// utils
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+
 export const convertSectionToFrame = (node: TSectionNode): TFrameNode => ({
   childIds: node.childIds,
   clipContent: true,
-  fill: node.fill,
+  fills: [makeSolidPaint(node.fill)],
   height: node.height,
   hidden: node.hidden,
   id: node.id,

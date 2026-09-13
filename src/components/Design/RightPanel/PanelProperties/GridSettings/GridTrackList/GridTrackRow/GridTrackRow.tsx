@@ -125,9 +125,9 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
           className={styles.GridTrackRow__delete}
           disabled={!canDelete}
           onClick={onDelete}
-          style={{ padding: 2 }}
+          style={{ padding: 0 }}
         >
-          <Icon name="Minus" size={12} />
+          <Icon name="Minus" size={24} />
         </UITools.Button>
       </Tooltip>
     </div>

@@ -11,7 +11,17 @@ import { pinRotatedGroupBounds } from '../pinRotatedGroupBounds';
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;

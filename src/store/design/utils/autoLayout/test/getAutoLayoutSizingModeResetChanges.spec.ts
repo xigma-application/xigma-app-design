@@ -8,7 +8,7 @@ import { getAutoLayoutSizingModeResetChanges } from '../getAutoLayoutSizingModeR
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,
@@ -23,7 +23,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 50,
   id: 'rect-1',
   name: 'Rectangle',

@@ -11,7 +11,19 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 import { updateNudgeDistanceGuide } from '../updateNudgeDistanceGuide';
 
 const addRect = (x: number, y: number, width = 20, height = 20): string => {
-  store.dispatch(addNode({ fill: '#000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }));
+  store.dispatch(
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
+  );
 
   const { rootOrder } = selectActivePage(store.getState());
 

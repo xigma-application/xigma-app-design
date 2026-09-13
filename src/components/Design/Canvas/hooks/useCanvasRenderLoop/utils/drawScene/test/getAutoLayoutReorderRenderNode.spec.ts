@@ -9,7 +9,7 @@ import { TGroupNode, TLineNode, TMaskNode, TRectangleNode, TVectorNode } from 't
 describe('getAutoLayoutReorderRenderNode', () => {
   it('should return the node unchanged when no reorder preview position is active for it', () => {
     // mock
-    const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
     const refs = createCanvasRefs();
 
     // result
@@ -18,7 +18,7 @@ describe('getAutoLayoutReorderRenderNode', () => {
 
   it('should shift a box node’s x/y to its overridden preview position', () => {
     // mock
-    const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { r: { x: 40, y: 60 } } } } },
     });
@@ -66,7 +66,7 @@ describe('getAutoLayoutReorderRenderNode', () => {
 
   it('should return the node unchanged when the preview covers a different node id', () => {
     // mock
-    const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { other: { x: 40, y: 60 } } } } },
     });
@@ -78,7 +78,7 @@ describe('getAutoLayoutReorderRenderNode', () => {
   it('should shift a leaf whose parent group has the override — regression for the group/mask ghost staying in place', () => {
     // mock — the group itself is the dragged auto-layout member (only its id is in `positions`); its
     // leaf child has no entry of its own, so it must inherit the group's delta instead of sitting still
-    const rect: TRectangleNode = { fill: '#fff', height: 10, id: 'r', name: 'Rectangle', parentId: 'g', rotation: 0, type: NodeType.rectangle, width: 10, x: 5, y: 5 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 10, id: 'r', name: 'Rectangle', parentId: 'g', rotation: 0, type: NodeType.rectangle, width: 10, x: 5, y: 5 }; // prettier-ignore
     const group: TGroupNode = { childIds: ['r'], height: 10, id: 'g', name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 10, x: 5, y: 5 }; // prettier-ignore
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { g: { x: 25, y: 45 } } } } },
@@ -90,7 +90,7 @@ describe('getAutoLayoutReorderRenderNode', () => {
 
   it('should shift a leaf two levels deep whose grandparent mask container has the override', () => {
     // mock — nested group inside a mask container; only the mask's id has an override
-    const rect: TRectangleNode = { fill: '#fff', height: 10, id: 'r', name: 'Rectangle', parentId: 'inner', rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 10, id: 'r', name: 'Rectangle', parentId: 'inner', rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }; // prettier-ignore
     const inner: TGroupNode = { childIds: ['r'], height: 10, id: 'inner', name: 'Group', parentId: 'mask-1', rotation: 0, type: NodeType.group, width: 10, x: 0, y: 0 }; // prettier-ignore
     const mask: TMaskNode = { childIds: ['inner'], height: 10, id: 'mask-1', name: 'Mask group', parentId: null, rotation: 0, type: NodeType.mask, width: 10, x: 0, y: 0 }; // prettier-ignore
     const refs = createCanvasRefs({

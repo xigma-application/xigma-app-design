@@ -11,7 +11,19 @@ import { TSmartSelectionNode } from 'types/design/smartSelection/types';
 import { applyGridAppendSuggestion } from '../applyGridAppendSuggestion';
 
 const addRect = (x: number, y: number, width = 50, height = 50, rotation = 0): string => {
-  store.dispatch(addNode({ fill: '#000', height, name: 'Rectangle', parentId: null, rotation, type: NodeType.rectangle, width, x, y }));
+  store.dispatch(
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
+  );
 
   const { rootOrder } = selectActivePage(store.getState());
 

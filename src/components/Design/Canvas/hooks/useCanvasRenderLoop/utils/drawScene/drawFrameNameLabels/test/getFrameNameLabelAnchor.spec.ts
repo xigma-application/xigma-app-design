@@ -11,7 +11,7 @@ import { getFrameNameLabelAnchor } from '../getFrameNameLabelAnchor';
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame 1',

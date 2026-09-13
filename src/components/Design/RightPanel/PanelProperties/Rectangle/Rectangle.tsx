@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
+import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
 import RectangleHeader from './RectangleHeader/RectangleHeader';
 import { UITools } from 'shared';
@@ -24,6 +25,7 @@ const Rectangle: FC = () => {
         <ColumnGridChildSpan />
       </UITools.Section>
       <AppearanceSection />
+      <FillSection />
     </Fragment>
   );
 };

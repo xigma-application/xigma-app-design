@@ -25,6 +25,7 @@ export type TSectionProps<TItem = never> = {
   children?: ReactNode | ((item: TItem, index: number) => ReactNode);
   component?: ReactElement;
   e2eValue?: TE2EValue;
+  hasContent?: boolean;
   items?: TItem[];
   label?: ReactNode;
   onAdd?: TFunc;
@@ -37,12 +38,13 @@ export const Section = <TItem,>({
   children,
   component,
   e2eValue = '',
+  hasContent: hasContentProp,
   items,
   label,
   onAdd,
   separator = true,
 }: TSectionProps<TItem>): ReactElement => {
-  const hasContent = isArray(items) && isRenderItem<TItem>(children) ? items.length > 0 : Boolean(children);
+  const hasContent = hasContentProp ?? (isArray(items) && isRenderItem<TItem>(children) ? items.length > 0 : Boolean(children));
 
   return (
     <E2EDataAttribute type={E2EAttribute.section} value={e2eValue}>

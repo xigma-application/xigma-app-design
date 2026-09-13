@@ -13,7 +13,7 @@ import { getChainGapDragSnap } from '../getChainGapDragSnap';
 const addRect = (x: number, y: number, size = 20, overrides: Record<string, unknown> = {}): string => {
   store.dispatch(
     addNode({
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Rectangle',
       parentId: null,

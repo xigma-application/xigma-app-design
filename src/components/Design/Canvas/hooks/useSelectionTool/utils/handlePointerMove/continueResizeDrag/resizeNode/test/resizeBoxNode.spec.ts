@@ -15,7 +15,7 @@ const addFrameNode = (): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 50,
       name: 'Frame',
       parentId: null,
@@ -37,7 +37,7 @@ const addAutoLayoutFrameNode = (heightSizingMode?: SizingMode, widthSizingMode?:
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 100,
       heightSizingMode,
       horizontalGap: 10,
@@ -60,7 +60,17 @@ const addAutoLayoutFrameNode = (heightSizingMode?: SizingMode, widthSizingMode?:
 
 const addRectNode = (width: number, height: number): string => {
   store.dispatch(
-    addNode({ fill: '#00ff00', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

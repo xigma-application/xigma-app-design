@@ -4,7 +4,7 @@ import { TGroupNode, TRectangleNode } from 'types/design/types';
 import { isAppearanceNode } from '../types';
 
 const rectangle: TRectangleNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r1',
   name: 'Rectangle',

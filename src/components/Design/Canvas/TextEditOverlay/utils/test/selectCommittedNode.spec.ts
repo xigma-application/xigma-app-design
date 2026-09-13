@@ -54,7 +54,7 @@ describe('selectCommittedNode', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame 1',
         parentId: null,

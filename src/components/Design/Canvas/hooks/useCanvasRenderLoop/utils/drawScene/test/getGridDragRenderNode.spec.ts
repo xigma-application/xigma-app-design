@@ -9,7 +9,7 @@ import { getGridDragRenderNode } from '../getGridDragRenderNode';
 describe('getGridDragRenderNode', () => {
   it('should return the node unchanged when no grid drag ghost is active for it', () => {
     // mock
-    const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
     const refs = createCanvasRefs();
 
     // result
@@ -18,7 +18,7 @@ describe('getGridDragRenderNode', () => {
 
   it('should shift a box node’s x/y by the ghost’s offset', () => {
     // mock
-    const rect: TRectangleNode = { fill: '#fff', height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
+    const rect: TRectangleNode = { fills: [{ color: '#fff', opacity: 100, type: 'solid' }], height: 20, id: 'r', name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 5, y: 15 }; // prettier-ignore
     const refs = createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds: ['r'], offset: { x: 10, y: -5 } } } } });
 
     // result

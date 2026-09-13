@@ -23,7 +23,7 @@ const addFrame = (overrides: { rotation?: number } = {}): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       gridColumnCount: 2,
       height: 200,
       layoutMode: LayoutMode.grid,

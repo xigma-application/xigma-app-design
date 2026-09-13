@@ -417,7 +417,7 @@ describe('useKeyboardShortcuts behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,
@@ -454,7 +454,7 @@ describe('useKeyboardShortcuts behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,
@@ -624,7 +624,7 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,
@@ -690,7 +690,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,
@@ -710,7 +710,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
   const addRectangleNode = (x = 0, y = 0): string => {
     realStore.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -1040,7 +1040,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,
@@ -1191,7 +1191,7 @@ describe('useKeyboardShortcuts zoom behaviors', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame',
         parentId: null,

@@ -42,7 +42,7 @@ describe('getResizeNodeOrigin', () => {
   it('should capture box/rotation and null flip for a non-flippable box node', () => {
     // mock
     const rect: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 10,
       id: 'r',
       name: 'Rectangle',

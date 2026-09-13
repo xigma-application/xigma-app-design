@@ -22,7 +22,7 @@ const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect
 const menuNode: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#000000',
+  fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'menu-node',
   name: 'Node',
@@ -57,7 +57,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -72,7 +72,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'B',
         parentId: null,
@@ -108,7 +108,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -123,7 +123,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'B',
         parentId: null,
@@ -166,7 +166,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -200,7 +200,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Source',
         parentId: null,
@@ -219,7 +219,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#0000ff',
+        fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Target',
         parentId: null,
@@ -256,7 +256,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -304,7 +304,7 @@ describe('LayerContextMenu', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'A',
         parentId: null,
@@ -375,7 +375,17 @@ describe('LayerContextMenu', () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 0, y: 0 }),
+      addNode({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 20,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const [rectId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     const rectNode = selectActivePage(store.getState()).nodes[rectId];
@@ -399,7 +409,7 @@ describe('LayerContextMenu', () => {
     const user = userEvent.setup();
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rect',
         parentId: null,

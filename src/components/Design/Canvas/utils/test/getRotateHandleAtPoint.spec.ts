@@ -1,6 +1,8 @@
+import { omit } from 'lodash';
+
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getRotateHandleAtPoint } from '../getRotateHandleAtPoint';
@@ -19,7 +21,7 @@ const frame = (
 ): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height,
   id,
   name: 'Frame',
@@ -74,10 +76,10 @@ describe('getRotateHandleAtPoint', () => {
 
   it('should return null when the single selected node is a section — sections can’t be rotated', () => {
     // mock — same geometry/position as the frame ring test below, which does detect a hit
-    const section = frame('section-1', 0, 0, 100, 100);
+    const section: TSceneNode = { ...omit(frame('section-1', 0, 0, 100, 100), 'fills'), fill: '#ff0000', type: NodeType.section };
 
     // result
-    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [{ ...section, type: NodeType.section }], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [section], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should detect the ring just outside a corner handle, on a single selected vector node', () => {

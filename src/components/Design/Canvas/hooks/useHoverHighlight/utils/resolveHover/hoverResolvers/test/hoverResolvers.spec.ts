@@ -134,7 +134,7 @@ const ellipse: TEllipseNode = {
 
 const rectangle: TRectangleNode = {
   cornerRadius: 20,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'rectangle-1',
   name: 'Rectangle',
@@ -208,7 +208,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const managedLayoutFrame: TFrameNode = {
       childIds: ['row-a', 'row-b'],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 100,
       id: 'managed-frame',
       layoutMode: LayoutMode.grid,
@@ -747,7 +747,7 @@ describe('resolvePlainNodeHover', () => {
   const frameWithChild: TFrameNode = {
     childIds: ['frame-child'],
     clipContent: true,
-    fill: '#ffffff',
+    fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
     height: 300,
     id: 'frame-1',
     name: 'Frame',

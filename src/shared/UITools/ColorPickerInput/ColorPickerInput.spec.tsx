@@ -80,6 +80,20 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByLabelText('Background color')).toBeInTheDocument();
   });
 
+  it('should report when the picker popover opens', () => {
+    // mock
+    const onOpenChange = vi.fn();
+
+    // before
+    renderColorPickerInput({ onOpenChange, triggerAriaLabel: 'Background color' });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Background color'));
+
+    // result
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it('should render the percent unit', () => {
     // before
     renderColorPickerInput();

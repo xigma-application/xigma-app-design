@@ -11,7 +11,19 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { resolveDistanceGuides } from '../resolveDistanceGuides';
 
 const addRect = (x: number, y: number, width = 100, height = 100): string => {
-  store.dispatch(addNode({ fill: '#000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }));
+  store.dispatch(
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
+  );
 
   const { rootOrder } = selectActivePage(store.getState());
 

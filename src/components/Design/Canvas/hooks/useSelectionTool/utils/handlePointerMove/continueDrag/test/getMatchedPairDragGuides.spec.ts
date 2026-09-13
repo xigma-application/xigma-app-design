@@ -13,7 +13,7 @@ import { getMatchedPairDragGuides } from '../getMatchedPairDragGuides';
 const addRect = (x: number, y: number, width: number, height: number, overrides: Record<string, unknown> = {}): string => {
   store.dispatch(
     addNode({
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height,
       name: 'Rectangle',
       parentId: null,

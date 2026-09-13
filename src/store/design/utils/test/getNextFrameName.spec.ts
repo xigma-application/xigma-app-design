@@ -9,7 +9,7 @@ const buildFrame = (name: string): TSceneNode =>
   ({
     childIds: [],
     clipContent: true,
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height: 10,
     id: name,
     name,
@@ -23,7 +23,7 @@ const buildFrame = (name: string): TSceneNode =>
 
 const buildRect = (name: string): TSceneNode =>
   ({
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height: 10,
     id: name,
     name,

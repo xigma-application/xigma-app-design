@@ -60,7 +60,7 @@ describe('Canvas context menu', () => {
     // mock
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -92,7 +92,7 @@ describe('Canvas context menu', () => {
     const user = userEvent.setup();
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -127,7 +127,7 @@ describe('Canvas context menu', () => {
     const user = userEvent.setup();
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -196,7 +196,7 @@ describe('Canvas context menu', () => {
 
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,

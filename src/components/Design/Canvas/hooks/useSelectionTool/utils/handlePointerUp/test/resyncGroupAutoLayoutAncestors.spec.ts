@@ -11,7 +11,17 @@ import { resyncGroupAutoLayoutAncestors } from '../resyncGroupAutoLayoutAncestor
 
 const addRect = (x: number, y: number, size = 20): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -32,7 +42,7 @@ const addAutoLayoutFrame = (x: number, y: number, size = 200): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: size,
       layoutMode: LayoutMode.horizontal,
       name: 'Frame',

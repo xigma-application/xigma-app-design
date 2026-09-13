@@ -8,7 +8,7 @@ import { getGridTrackChildren } from '../getGridTrackChildren';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['a', 'b'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 3,
   height: 200,
   id: 'grid-1',

@@ -8,7 +8,7 @@ import { isNodeManagedLayoutChild } from '../isNodeManagedLayoutChild';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   name: 'Frame',
@@ -22,7 +22,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r1',
   name: 'Rectangle',

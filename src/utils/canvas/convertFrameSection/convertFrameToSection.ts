@@ -2,9 +2,12 @@
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TSectionNode } from 'types/design/types';
 
+// utils
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
+
 export const convertFrameToSection = (node: TFrameNode): TSectionNode => ({
   childIds: node.childIds,
-  fill: node.fill,
+  fill: getSolidPaintColor(node.fills) ?? '',
   height: node.height,
   hidden: node.hidden,
   id: node.id,

@@ -8,7 +8,7 @@ import { getGridLayoutSyncPositions } from '../getGridLayoutSyncPositions';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   id: 'frame-1',
   name: 'Frame',

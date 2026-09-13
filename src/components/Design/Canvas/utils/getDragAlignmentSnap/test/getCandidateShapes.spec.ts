@@ -7,7 +7,7 @@ import { getCandidateShapes } from '../getCandidateShapes';
 
 const rect = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 40,
     id,
     name: 'Rectangle',

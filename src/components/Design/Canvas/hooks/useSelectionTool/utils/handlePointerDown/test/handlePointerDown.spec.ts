@@ -63,7 +63,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Frame',
       parentId: null,
@@ -84,7 +84,7 @@ const addRectangleNode = (x: number, y: number, size: number, cornerRadius: numb
   store.dispatch(
     addNode({
       cornerRadius,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Rectangle',
       parentId: null,

@@ -18,10 +18,11 @@ import { useHexCommit } from './hooks/useHexCommit';
 import styles from './color-picker-input.module.scss';
 
 // types
-import { TColorPickerValue } from '../ColorPicker/types';
+import { TColorPickerProps, TColorPickerValue } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
 export type TColorPickerInputProps = {
+  align?: TColorPickerProps['align'];
   alpha: number;
   className?: string;
   e2eValue?: TE2EValue;
@@ -31,8 +32,10 @@ export type TColorPickerInputProps = {
   onCommitHex: TFunc<[string]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
+  onOpenChange?: TFunc<[boolean]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
+  side?: TColorPickerProps['side'];
   simple?: boolean;
   title?: string;
   toggleVisibilityAriaLabel?: string;
@@ -41,6 +44,7 @@ export type TColorPickerInputProps = {
 };
 
 export const ColorPickerInput: FC<TColorPickerInputProps> = ({
+  align = 'end',
   alpha,
   className = '',
   e2eValue = '',
@@ -50,8 +54,10 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onCommitHex,
   onDragEnd,
   onDragStart,
+  onOpenChange,
   onPickerChange,
   onToggleVisibility,
+  side = 'top',
   simple = false,
   title,
   toggleVisibilityAriaLabel,
@@ -72,12 +78,13 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           onBlur={onBlurHex}
           startAdornment={
             <ColorPicker
-              align="end"
+              align={align}
               moveable
               onChange={onPickerChange}
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
-              side="top"
+              onOpenChange={onOpenChange}
+              side={side}
               simple={simple}
               title={title}
               trigger={<Color alpha={alpha} color={hex} cursor="default" />}

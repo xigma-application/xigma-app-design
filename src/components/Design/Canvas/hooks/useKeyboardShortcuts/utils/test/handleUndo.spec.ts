@@ -33,7 +33,7 @@ describe('handleUndo', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame',
         parentId: null,

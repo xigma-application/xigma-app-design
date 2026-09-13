@@ -43,7 +43,7 @@ describe('useSelectTreeItem', () => {
         addNode({
           childIds: [],
           clipContent: true,
-          fill: '#ff0000',
+          fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           height: 10,
           name,
           parentId: null,
@@ -206,7 +206,7 @@ describe('useSelectTreeItem — nested rows', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name,
         parentId: null,
@@ -223,7 +223,17 @@ describe('useSelectTreeItem — nested rows', () => {
 
   const addNamedRectangle = (name: string): string => {
     store.dispatch(
-      addNode({ fill: '#00ff00', height: 5, name, parentId: null, rotation: 0, type: NodeType.rectangle, width: 5, x: 0, y: 0 }),
+      addNode({
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+        height: 5,
+        name,
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 5,
+        x: 0,
+        y: 0,
+      }),
     );
 
     return selectOrderedNodes(store.getState()).at(-1)!.id;

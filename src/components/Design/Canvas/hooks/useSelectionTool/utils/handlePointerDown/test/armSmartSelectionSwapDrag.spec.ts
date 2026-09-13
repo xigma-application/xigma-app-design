@@ -21,7 +21,17 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerd
 
 const addRect = (x: number, y: number, width = 50, height = 50): string =>
   store.dispatch(
-    addNode({ fill: '#ff0000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }),
+    addNode({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
   ).payload.id;
 
 describe('armSmartSelectionSwapDrag', () => {

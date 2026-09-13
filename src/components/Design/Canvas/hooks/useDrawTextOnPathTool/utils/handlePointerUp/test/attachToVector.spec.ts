@@ -82,7 +82,7 @@ describe('attachToVector', () => {
     // mock — a rectangle, not yet any kind of vector
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 50,
         name: 'Rectangle',
         parentId: null,

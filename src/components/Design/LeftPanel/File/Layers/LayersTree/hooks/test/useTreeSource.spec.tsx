@@ -24,7 +24,7 @@ describe('useTreeSource', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Frame A',
         parentId: null,
@@ -39,7 +39,7 @@ describe('useTreeSource', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Frame B',
         parentId: null,
@@ -94,7 +94,7 @@ describe('useTreeSource', () => {
     // mock — two rectangles moved into frame A, in order, so childIds ends up [rectA, rectB]
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 5,
         name: 'Rectangle A',
         parentId: null,
@@ -108,7 +108,7 @@ describe('useTreeSource', () => {
     const rectA = selectActivePage(store.getState()).rootOrder.at(-1) as string;
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 5,
         name: 'Rectangle B',
         parentId: null,
@@ -138,7 +138,7 @@ describe('useTreeSource', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 100,
         layoutMode: LayoutMode.vertical,
         name: 'Auto-layout Frame',
@@ -154,7 +154,7 @@ describe('useTreeSource', () => {
 
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 5,
         name: 'Rectangle A',
         parentId: null,
@@ -168,7 +168,7 @@ describe('useTreeSource', () => {
     const rectA = selectActivePage(store.getState()).rootOrder.at(-1) as string;
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 5,
         name: 'Rectangle B',
         parentId: null,
@@ -199,7 +199,7 @@ describe('useTreeSource', () => {
     // mock — a rectangle, unlike a frame, is never a container
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Rectangle',
         parentId: null,

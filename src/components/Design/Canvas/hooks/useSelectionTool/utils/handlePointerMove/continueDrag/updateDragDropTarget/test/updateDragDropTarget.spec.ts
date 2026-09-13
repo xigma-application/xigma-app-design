@@ -30,7 +30,7 @@ const addAutoLayoutFrame = (x: number, y: number, size: number, layoutMode: Layo
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: size,
       layoutMode,
       name: 'Frame',
@@ -51,7 +51,7 @@ const addFrame = (x: number, y: number, size: number): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Frame',
       parentId: null,
@@ -68,7 +68,17 @@ const addFrame = (x: number, y: number, size: number): string => {
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;
@@ -330,7 +340,7 @@ describe('updateDragDropTarget', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 300,
         layoutMode: LayoutMode.vertical,
         name: 'Frame',
@@ -368,7 +378,7 @@ describe('updateDragDropTarget', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#fff',
+        fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
         height: 300,
         layoutMode: LayoutMode.vertical,
         name: 'Frame',

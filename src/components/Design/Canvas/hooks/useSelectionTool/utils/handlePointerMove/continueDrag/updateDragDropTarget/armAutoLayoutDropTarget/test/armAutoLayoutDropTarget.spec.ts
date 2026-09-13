@@ -10,7 +10,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 const autoLayoutFrame: TAutoLayoutFrame = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 300,
   id: 'frame-1',
   layoutMode: LayoutMode.vertical,
@@ -24,7 +24,7 @@ const autoLayoutFrame: TAutoLayoutFrame = {
 };
 
 const draggedRect: TSceneNode = {
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'dragged',
   name: 'Rectangle',

@@ -43,7 +43,7 @@ const addFrameNode = (overrides: { childIds?: string[] } = {}): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 10,
       name: 'Frame',
       parentId: null,
@@ -74,7 +74,7 @@ const addGroupNode = (childIds: string[]): string => {
 const addRectangleNode = (): string => {
   store.dispatch(
     addNode({
-      fill: '#00ff00',
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
       height: 40,
       name: 'Rectangle',
       parentId: null,

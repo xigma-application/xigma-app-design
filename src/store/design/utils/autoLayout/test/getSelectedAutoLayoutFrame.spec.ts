@@ -8,7 +8,7 @@ import { getSelectedAutoLayoutFrame } from '../getSelectedAutoLayoutFrame';
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,
@@ -22,7 +22,7 @@ const frame: TFrameNode = {
 };
 
 const rectangle: TRectangleNode = {
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 50,
   id: 'rect-1',
   name: 'Rectangle',

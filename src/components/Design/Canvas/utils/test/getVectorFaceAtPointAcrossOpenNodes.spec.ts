@@ -65,7 +65,7 @@ describe('getVectorFaceAtPointAcrossOpenNodes', () => {
   it('should skip a node id that isn’t a vector node, instead of throwing', () => {
     // mock — a non-vector node sits at the same id as the point, real vector node is elsewhere in the list
     const rectangleNode: TSceneNode = {
-      fill: '#000000',
+      fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
       height: 100,
       id: 'n1',
       name: 'Rectangle',

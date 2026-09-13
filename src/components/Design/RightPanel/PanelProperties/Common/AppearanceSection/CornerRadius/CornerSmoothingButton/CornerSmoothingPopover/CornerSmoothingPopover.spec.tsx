@@ -26,7 +26,7 @@ const renderPopover = (onClose: TFunc = vi.fn()): ReturnType<typeof render> =>
 const addAndSelectRectangle = (): string => {
   store.dispatch(
     addNode({
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 10,
       name: 'Rectangle',
       parentId: null,

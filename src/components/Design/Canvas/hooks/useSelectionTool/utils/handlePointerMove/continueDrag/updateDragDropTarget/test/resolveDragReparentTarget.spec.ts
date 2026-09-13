@@ -19,7 +19,7 @@ const addAutoLayoutFrame = (x: number, y: number, size: number): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: size,
       layoutMode: LayoutMode.vertical,
       name: 'Frame',
@@ -40,7 +40,7 @@ const addGridFrame = (x: number, y: number, size: number): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       gridColumnCount: 2,
       height: size,
       layoutMode: LayoutMode.grid,
@@ -62,7 +62,7 @@ const addFrame = (x: number, y: number, size: number): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Frame',
       parentId: null,
@@ -79,7 +79,17 @@ const addFrame = (x: number, y: number, size: number): string => {
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x, y }),
+    addNode({
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;

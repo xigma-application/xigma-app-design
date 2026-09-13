@@ -6,7 +6,7 @@ import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 10,
   id: '1',
   name: 'Rectangle',

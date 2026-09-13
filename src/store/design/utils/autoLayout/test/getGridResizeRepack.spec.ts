@@ -8,7 +8,7 @@ import { resolveGridResize } from '../getGridResizeRepack';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridAutoPlacement: false,
   gridColumnCount: 2,
   height: 200,
@@ -26,7 +26,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 const anchored = (id: string, column: number, row: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     gridColumnAnchorIndex: column,
     gridRowAnchorIndex: row,
     height: 10,

@@ -138,7 +138,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
 
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({
-      fill: config.fill,
+      fills: [{ color: config.fill, opacity: 100, type: 'solid' }],
       height: 30,
       // every shape auto-numbers off the page's existing nodes of the same type/base name
       // (getNextNodeName) rather than keeping the tool's raw default name
@@ -315,7 +315,7 @@ describe('useDrawShapeTool alignment snap', () => {
 
     store.dispatch(
       addNode({
-        fill: '#000000',
+        fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -352,7 +352,7 @@ describe('useDrawShapeTool alignment snap', () => {
 
     store.dispatch(
       addNode({
-        fill: '#000000',
+        fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,

@@ -7,7 +7,7 @@ import { expandSelectedContainers } from '../expandSelectedContainers';
 
 const rect = (id: string): TSceneNode =>
   ({
-    fill: '#000000',
+    fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
     height: 10,
     id,
     name: id,
@@ -23,7 +23,7 @@ const frame = (id: string, childIds: string[]): TSceneNode =>
   ({
     childIds,
     clipContent: true,
-    fill: '#ffffff',
+    fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
     height: 10,
     id,
     name: id,

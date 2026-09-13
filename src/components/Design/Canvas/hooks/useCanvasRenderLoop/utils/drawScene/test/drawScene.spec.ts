@@ -37,10 +37,14 @@ const createGlMock = (): WebGL2RenderingContext =>
     colorMask: vi.fn(),
     createBuffer: vi.fn(() => ({})),
     createTexture: vi.fn(() => ({})),
+    disable: vi.fn(),
     drawArrays: vi.fn(),
+    enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
     getUniformLocation: vi.fn(() => ({})),
+    stencilFunc: vi.fn(),
+    stencilOp: vi.fn(),
     texImage2D: vi.fn(),
     texParameteri: vi.fn(),
     uniform1f: vi.fn(),
@@ -182,7 +186,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame 1',
         parentId: null,
@@ -211,7 +215,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#336699',
+        fills: [{ color: '#336699', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Hidden Frame',
         parentId: null,
@@ -262,7 +266,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff9900',
+        fills: [{ color: '#ff9900', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame 3',
         parentId: null,
@@ -295,7 +299,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Frame 2',
         parentId: null,
@@ -331,7 +335,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#0000ff',
+        fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Group A',
         parentId: null,
@@ -346,7 +350,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#0000ff',
+        fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Group B',
         parentId: null,
@@ -385,7 +389,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff00ff',
+        fills: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Child of A',
         parentId: 'frame-a',
@@ -400,7 +404,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ff00ff',
+        fills: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Child of B',
         parentId: 'frame-b',
@@ -439,7 +443,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#123456',
+        fills: [{ color: '#123456', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Editing Frame',
         parentId: null,
@@ -491,7 +495,7 @@ describe('drawScene', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#654321',
+        fills: [{ color: '#654321', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Editing Frame 2',
         parentId: null,
@@ -596,7 +600,7 @@ describe('drawScene', () => {
     store.dispatch(
       addNode({
         cornerRadius: 15,
-        fill: '#aabbcc',
+        fills: [{ color: '#aabbcc', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Rounded Rectangle',
         parentId: null,
@@ -692,7 +696,7 @@ describe('drawScene', () => {
     store.dispatch(
       addNode({
         cornerRadius: 0,
-        fill: '#aabbcc',
+        fills: [{ color: '#aabbcc', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Dragging Rectangle',
         parentId: null,

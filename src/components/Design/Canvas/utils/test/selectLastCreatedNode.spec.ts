@@ -21,7 +21,7 @@ describe('selectLastCreatedNode', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#FFFFFF',
+        fills: [{ color: '#FFFFFF', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame 1',
         parentId: null,
@@ -36,7 +36,7 @@ describe('selectLastCreatedNode', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#FFFFFF',
+        fills: [{ color: '#FFFFFF', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame 2',
         parentId: null,

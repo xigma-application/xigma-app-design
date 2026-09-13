@@ -32,7 +32,7 @@ const context: TDrawSceneContext = {
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 3,
   gridColumnSizes: [{ mode: SizingMode.fill, value: 2 }],
   height: 200,

@@ -21,7 +21,7 @@ describe('getNodeOutlinePath', () => {
   it('should return an outline for a rectangle node', () => {
     // mock
     const node: TRectangleNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 40,
       id: 'rect-1',
       name: 'Rectangle',
@@ -185,7 +185,7 @@ describe('getNodeOutlinePath', () => {
     const node: TFrameNode = {
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 40,
       id: 'frame-1',
       name: 'Frame',

@@ -28,7 +28,7 @@ const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current
 const frame = (id: string, x: number, y: number, width: number, height: number): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height,
   id,
   name: 'Frame',

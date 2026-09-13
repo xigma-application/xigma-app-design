@@ -40,7 +40,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const rectangle: TRectangleNode = {
   cornerRadius: 15,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'rect-1',
   name: 'Rectangle',

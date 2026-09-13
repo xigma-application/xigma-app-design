@@ -9,7 +9,7 @@ import { withGridSpanPreview } from '../withGridSpanPreview';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['drag'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 4,
   height: 200,
   id: 'grid-1',

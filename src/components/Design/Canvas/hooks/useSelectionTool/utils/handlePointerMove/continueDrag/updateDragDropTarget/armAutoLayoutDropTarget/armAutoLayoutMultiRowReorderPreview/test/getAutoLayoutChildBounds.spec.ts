@@ -8,7 +8,7 @@ import { getAutoLayoutChildBounds } from '../getAutoLayoutChildBounds';
 
 const rect = (id: string, x: number, y: number, rotation = 0): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 20,
     id,
     name: 'Rectangle',
@@ -23,7 +23,7 @@ const rect = (id: string, x: number, y: number, rotation = 0): TSceneNode =>
 const frame = (rotation: number): TAutoLayoutFrame => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame-1',
   layoutMode: LayoutMode.horizontal,

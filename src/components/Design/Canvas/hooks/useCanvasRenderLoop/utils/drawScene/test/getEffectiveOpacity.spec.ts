@@ -8,7 +8,7 @@ import { getEffectiveOpacity } from '../getEffectiveOpacity';
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: false,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'frame',
   name: 'Frame',
@@ -22,7 +22,7 @@ const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'rect',
   name: 'Rectangle',

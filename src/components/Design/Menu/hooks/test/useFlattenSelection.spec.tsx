@@ -19,7 +19,17 @@ describe('useFlattenSelection', () => {
   it('should flatten the selected convertible node into a vector when called', async () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 0, y: 0 }),
+      addNode({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 20,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const [rectId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([rectId]));

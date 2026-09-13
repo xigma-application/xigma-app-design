@@ -5,11 +5,13 @@ import { ELLIPSE_DEFAULT_ARC_ANGLE, LINE_RENDER_STROKE_WIDTH } from 'constant/ca
 import { NodeType, PathType } from 'types/design/enums';
 import { TDrawSceneContext } from '../types';
 import { TImageRenderContext } from '../../../types';
-import { TSceneNode } from 'types/design/types';
+import { TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { drawLeafNode } from '../drawLeafNode';
+import { getBoxFillPolygon } from '../getBoxFillPolygon';
+import { getScaledFillPaints } from '../getScaledFillPaints';
 
 const drawEllipseNodeMock = vi.fn();
 const drawEllipseArcMock = vi.fn();
@@ -24,6 +26,7 @@ const drawPolygonMock = vi.fn();
 const drawRectMock = vi.fn();
 const drawStarMock = vi.fn();
 const drawThickOutlineMock = vi.fn();
+const drawVectorFillGroupMock = vi.fn();
 const drawVectorNodeOrTextPathGuideMock = vi.fn();
 const getOrLoadTextureMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
@@ -47,6 +50,9 @@ vi.mock('utils/canvas/drawStar/drawStar', () => ({ drawStar: (...args: unknown[]
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
   drawThickOutline: (...args: unknown[]): void => drawThickOutlineMock(...args),
 }));
+vi.mock('../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorFillGroup', () => ({
+  drawVectorFillGroup: (...args: unknown[]): void => drawVectorFillGroupMock(...args),
+}));
 vi.mock('../drawVectorNodeOrTextPathGuide/drawVectorNodeOrTextPathGuide', () => ({
   drawVectorNodeOrTextPathGuide: (...args: unknown[]): void => drawVectorNodeOrTextPathGuideMock(...args),
 }));
@@ -65,7 +71,7 @@ const context: TDrawSceneContext = { buffer, canvasHeight: 150, canvasWidth: 200
 
 const rect = (overrides: Record<string, unknown> = {}): TSceneNode =>
   ({
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height: 20,
     id: 'r1',
     name: 'Rectangle',
@@ -92,7 +98,13 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(node as TRectangleNode)],
+      getScaledFillPaints((node as TRectangleNode).fills, 1),
+    );
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
 
@@ -112,7 +124,13 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result — the fill is dimmed, but the stroke outline still draws at full opacity (not covered by this scope)
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.5 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(node as TRectangleNode)],
+      getScaledFillPaints((node as TRectangleNode).fills, 0.5),
+    );
     expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined, 0.5);
   });
 
@@ -127,7 +145,15 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1, x: 40, y: 60 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    const previewNode = { ...node, x: 40, y: 60 } as TRectangleNode;
+
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(previewNode)],
+      getScaledFillPaints(previewNode.fills, 1),
+    );
   });
 
   it('should not dim a rectangle that is dragged but not currently over an auto-layout frame', () => {
@@ -139,7 +165,13 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(node as TRectangleNode)],
+      getScaledFillPaints((node as TRectangleNode).fills, 1),
+    );
   });
 
   it('should not dim some other node also over the drop target frame that is not itself being dragged', () => {
@@ -158,7 +190,13 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 1 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(node as TRectangleNode)],
+      getScaledFillPaints((node as TRectangleNode).fills, 1),
+    );
   });
 
   it("should dim a child rectangle by its ancestor frame's opacity, compounded with its own", () => {
@@ -166,7 +204,7 @@ describe('drawLeafNode', () => {
     const parentFrame = {
       childIds: ['r1'],
       clipContent: false,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 100,
       id: 'f1',
       name: 'Frame',
@@ -185,7 +223,13 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), createCanvasRefs(), nodesById);
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.25 }, 200, 150, IDENTITY_VIEWPORT, 0);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [getBoxFillPolygon(node as TRectangleNode)],
+      getScaledFillPaints((node as TRectangleNode).fills, 0.25),
+    );
   });
 
   it('should draw an ellipse with the arc defaults and threaded opacity, skipping the stroke when unset', () => {

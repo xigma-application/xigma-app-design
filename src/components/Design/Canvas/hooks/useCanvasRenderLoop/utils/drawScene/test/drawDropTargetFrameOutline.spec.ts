@@ -24,7 +24,7 @@ const frame = (id: string, x: number, y: number, width: number, height: number, 
   ({
     childIds: [],
     clipContent: true,
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height,
     id,
     name: 'Frame',
@@ -52,7 +52,18 @@ const section = (id: string, x: number, y: number, width: number, height: number
   }) as TSceneNode;
 
 const rect = (id: string, x: number, y: number, width: number, height: number): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 describe('drawDropTargetFrameOutline', () => {
   beforeEach(() => {

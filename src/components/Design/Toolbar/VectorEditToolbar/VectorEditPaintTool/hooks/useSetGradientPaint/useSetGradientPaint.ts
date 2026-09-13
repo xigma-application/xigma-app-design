@@ -7,8 +7,8 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { TGradientPanelChange } from 'shared/UITools/ColorPicker/Body/GradientPanel/types';
 
 // utils
-import { getGradientPointsFromAngle } from './utils/getGradientPointsFromAngle';
-import { mapEditableStopsToGradientStops } from './utils/mapEditableStopsToGradientStops';
+import { getGradientPointsFromAngle } from 'utils/design/paint/getGradientPointsFromAngle';
+import { mapEditableStopsToGradientStops } from 'utils/design/paint/mapEditableStopsToGradientStops';
 
 export const useSetGradientPaint = (): TFunc<[TGradientPanelChange]> => {
   const dispatch = useAppDispatch();

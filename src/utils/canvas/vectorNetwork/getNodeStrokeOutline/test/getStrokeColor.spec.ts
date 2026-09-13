@@ -6,7 +6,7 @@ import { TLineNode, TRectangleNode } from 'types/design/types';
 import { getStrokeColor } from '../getStrokeColor';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',

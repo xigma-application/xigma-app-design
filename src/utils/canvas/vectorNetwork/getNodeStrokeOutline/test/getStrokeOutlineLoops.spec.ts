@@ -1,3 +1,5 @@
+import { omit } from 'lodash';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
@@ -6,7 +8,7 @@ import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/desi
 import { getStrokeOutlineLoops } from '../getStrokeOutlineLoops';
 
 const RECTANGLE: TRectangleNode = {
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'rect-1',
   name: 'Rectangle',
@@ -18,7 +20,7 @@ const RECTANGLE: TRectangleNode = {
   y: 0,
 };
 
-const ELLIPSE: TEllipseNode = { ...RECTANGLE, id: 'ellipse-1', name: 'Ellipse', type: NodeType.ellipse };
+const ELLIPSE: TEllipseNode = { ...omit(RECTANGLE, 'fills'), fill: '#ffffff', id: 'ellipse-1', name: 'Ellipse', type: NodeType.ellipse };
 
 const LINE: TLineNode = {
   id: 'line-1',

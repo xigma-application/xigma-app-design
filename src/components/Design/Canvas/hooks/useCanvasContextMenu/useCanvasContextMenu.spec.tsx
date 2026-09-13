@@ -43,7 +43,7 @@ describe('useCanvasContextMenu', () => {
     // mock
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -74,7 +74,7 @@ describe('useCanvasContextMenu', () => {
     // mock
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -121,7 +121,7 @@ describe('useCanvasContextMenu', () => {
     // mock — a group child that isn't in the current selection yet
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,
@@ -150,7 +150,7 @@ describe('useCanvasContextMenu', () => {
     // mock — a node sitting under the click point, which a real right-click would otherwise hit
     store.dispatch(
       addNode({
-        fill: '#ff0000',
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         height: 20,
         name: 'Rectangle',
         parentId: null,

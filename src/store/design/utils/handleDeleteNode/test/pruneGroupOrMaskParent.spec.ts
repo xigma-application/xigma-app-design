@@ -8,7 +8,7 @@ import { getActivePage } from '../../getActivePage';
 import { pruneGroupOrMaskParent } from '../pruneGroupOrMaskParent';
 
 const rect = (id: string, parentId: string | null, x = 0): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',

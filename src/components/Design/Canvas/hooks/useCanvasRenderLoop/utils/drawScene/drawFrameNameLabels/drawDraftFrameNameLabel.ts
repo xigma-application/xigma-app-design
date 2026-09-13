@@ -21,7 +21,7 @@ export const drawDraftFrameNameLabel = (context: TDrawSceneContext, refs: TCanva
     const draftFrame: TFrameNode = {
       childIds: [],
       clipContent: true,
-      fill: draftShape.fill,
+      fills: [{ color: draftShape.fill, opacity: 100, type: 'solid' }],
       height: draftShape.height,
       id: '',
       name: getNextFrameName(nodes),

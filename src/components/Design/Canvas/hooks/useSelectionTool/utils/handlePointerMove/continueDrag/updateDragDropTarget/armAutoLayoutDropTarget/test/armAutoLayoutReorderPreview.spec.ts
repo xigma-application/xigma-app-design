@@ -9,7 +9,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 
 const sibling = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 20,
     id,
     name: 'Rectangle',

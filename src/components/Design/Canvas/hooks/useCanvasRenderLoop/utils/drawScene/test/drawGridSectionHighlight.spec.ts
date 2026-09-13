@@ -40,7 +40,7 @@ const context = (gl: WebGL2RenderingContext): TDrawSceneContext => ({
 const gridFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 2,
   gridRowCount: 3,
   height: 300,
@@ -85,7 +85,9 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame({ rotation: 30 });
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), {
+      'frame-1': frame,
+    });
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
@@ -110,7 +112,9 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame({ layoutMode: LayoutMode.horizontal });
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 0, row: 0 }], frameId: 'frame-1' }, null, createCanvasRefs(), {
+      'frame-1': frame,
+    });
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
@@ -119,7 +123,9 @@ describe('drawGridSectionHighlight', () => {
     const gl = createGlMock();
     const frame = gridFrame();
 
-    drawGridSectionHighlight(context(gl), { cells: [{ column: 9, row: 9 }], frameId: 'frame-1' }, null, createCanvasRefs(), { 'frame-1': frame });
+    drawGridSectionHighlight(context(gl), { cells: [{ column: 9, row: 9 }], frameId: 'frame-1' }, null, createCanvasRefs(), {
+      'frame-1': frame,
+    });
 
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });

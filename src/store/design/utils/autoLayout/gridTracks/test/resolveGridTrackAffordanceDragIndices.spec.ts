@@ -8,7 +8,7 @@ import { resolveGridTrackAffordanceDragIndices } from '../resolveGridTrackAfford
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridAutoPlacement: false,
   gridColumnCount: 4,
   height: 200,

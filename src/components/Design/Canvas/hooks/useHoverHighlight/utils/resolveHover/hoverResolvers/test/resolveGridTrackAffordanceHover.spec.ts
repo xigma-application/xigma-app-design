@@ -32,7 +32,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
 const frame: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   gridColumnCount: 3,
   height: 200,
   id: 'frame-1',

@@ -8,7 +8,7 @@ import { cascadeDeleteGroupChildren } from '../cascadeDeleteGroupChildren';
 import { getActivePage } from '../../getActivePage';
 
 const rect = (id: string, parentId: string | null = null): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Rectangle',

@@ -151,7 +151,7 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     const frameNode = {
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 10,
       id: '3',
       name: 'Frame',

@@ -8,7 +8,7 @@ import { getAutoLayoutSiblingEntries } from '../getAutoLayoutSiblingEntries';
 const frame = (childIds: string[]): TFrameNode => ({
   childIds,
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 300,
   id: 'frame-1',
   name: 'Frame',
@@ -22,7 +22,7 @@ const frame = (childIds: string[]): TFrameNode => ({
 
 const rect = (id: string, x: number, y: number): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 20,
     id,
     name: 'Rectangle',

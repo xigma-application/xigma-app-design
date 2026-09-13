@@ -38,7 +38,7 @@ const buildFrame = (): TSceneNode =>
   ({
     childIds: [],
     clipContent: true,
-    fill: '#ffffff',
+    fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
     height: 100,
     id: 'frame-1',
     name: 'Frame 1',

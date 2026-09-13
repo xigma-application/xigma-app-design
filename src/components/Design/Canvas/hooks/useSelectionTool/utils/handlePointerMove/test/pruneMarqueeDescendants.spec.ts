@@ -7,7 +7,7 @@ import { pruneMarqueeDescendants } from '../pruneMarqueeDescendants';
 
 const rect = (id: string, parentId: string | null = null): TSceneNode =>
   ({
-    fill: '#000',
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
     height: 10,
     id,
     name: 'Rectangle',
@@ -23,7 +23,7 @@ const frame = (id: string, childIds: string[], parentId: string | null = null): 
   ({
     childIds,
     clipContent: true,
-    fill: '#fff',
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
     height: 100,
     id,
     name: 'Frame',

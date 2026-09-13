@@ -15,7 +15,7 @@ const addFrame = (x: number, y: number, width: number, height: number, layoutMod
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ffffff',
+      fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       height,
       layoutMode,
       name: 'Frame',
@@ -32,7 +32,19 @@ const addFrame = (x: number, y: number, width: number, height: number, layoutMod
 };
 
 const addChildRect = (frameId: string, x: number, y: number, width = 40, height = 40): string => {
-  store.dispatch(addNode({ fill: '#ff0000', height, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }));
+  store.dispatch(
+    addNode({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      height,
+      name: 'Rect',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
+  );
 
   const childId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
 
@@ -167,7 +179,7 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#00ff00',
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Inner',
         parentId: null,

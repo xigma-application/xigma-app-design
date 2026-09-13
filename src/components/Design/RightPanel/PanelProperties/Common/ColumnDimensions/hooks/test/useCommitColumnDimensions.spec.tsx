@@ -21,7 +21,7 @@ const addFrameNode = (width: number, height: number, widthSizingMode?: SizingMod
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height,
       name: 'Frame',
       parentId: null,

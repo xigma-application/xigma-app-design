@@ -10,7 +10,7 @@ import { handleUpdateNode } from '../handleUpdateNode';
 const node: TFrameNode = {
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'node-1',
   name: 'Frame',
@@ -330,7 +330,7 @@ describe('handleUpdateNode', () => {
   it('should move a rotated group box directly on a plain x/y update, without scaling its children', () => {
     // mock
     const child: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'child',
       name: 'Rectangle',
@@ -366,7 +366,7 @@ describe('handleUpdateNode', () => {
   it('should lay out its children when a frame’s layoutMode is switched to horizontal', () => {
     // mock
     const a: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'a',
       name: 'Rectangle',
@@ -392,7 +392,7 @@ describe('handleUpdateNode', () => {
   it('should reflow the siblings of an auto-layout frame after one child is resized', () => {
     // mock
     const a: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'a',
       name: 'Rectangle',
@@ -417,7 +417,7 @@ describe('handleUpdateNode', () => {
   it('should resync the parent group bounds after moving a child node', () => {
     // mock
     const child: TRectangleNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 10,
       id: 'child',
       name: 'Rectangle',

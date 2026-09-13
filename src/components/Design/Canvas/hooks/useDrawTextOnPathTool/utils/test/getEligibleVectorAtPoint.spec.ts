@@ -53,7 +53,7 @@ describe('getEligibleVectorAtPoint', () => {
       addNode({
         childIds: [],
         clipContent: true,
-        fill: '#ffffff',
+        fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Frame',
         parentId: null,
@@ -73,7 +73,7 @@ describe('getEligibleVectorAtPoint', () => {
     // mock
     store.dispatch(
       addNode({
-        fill: '#ffffff',
+        fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
         height: 100,
         name: 'Rectangle',
         parentId: null,

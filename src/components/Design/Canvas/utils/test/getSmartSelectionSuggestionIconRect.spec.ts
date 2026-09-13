@@ -6,7 +6,18 @@ import { TSceneNode } from 'types/design/types';
 import { getSmartSelectionSuggestionIconRect } from '../getSmartSelectionSuggestionIconRect';
 
 const rect = (id: string, x: number, y: number, width = 50, height = 50): TSceneNode =>
-  ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }) as TSceneNode;
+  ({
+    fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Rectangle',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.rectangle,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 describe('getSmartSelectionSuggestionIconRect', () => {
   it('should place a 24px icon inside the selection bbox, inset from its bottom-right corner by an 8px margin', () => {

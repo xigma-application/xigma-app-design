@@ -10,7 +10,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 const parent: TConstraintGuideParent = { height: 200, rotation: 0, width: 400, x: 100, y: 100 };
 
 const child = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'r1',
   name: 'Rectangle',

@@ -6,7 +6,7 @@ import { TRectangleNode } from 'types/design/types';
 import { getRotatedGroupBounds } from '../getRotatedGroupBounds';
 
 const rect = (x: number, y: number, width: number, height: number): TRectangleNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height,
   id: 'r',
   name: 'Rectangle',

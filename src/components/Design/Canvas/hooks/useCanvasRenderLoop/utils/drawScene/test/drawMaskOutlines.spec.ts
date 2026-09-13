@@ -55,7 +55,7 @@ const buildMaskParent = (id: string, childIds: string[]): TMaskNode => ({
 const buildFrame = (id: string, parentId: string | null): TSceneNode => ({
   childIds: [],
   clipContent: true,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 20,
   id,
   name: 'Frame',

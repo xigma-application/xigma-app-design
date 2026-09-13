@@ -27,7 +27,7 @@ const addFrame = (rotation = 0): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       gridAutoPlacement: false,
       gridColumnCount: 3,
       gridColumnSizes: [

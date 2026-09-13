@@ -24,7 +24,7 @@ const viewport = { x: 0, y: 0, zoom: 1 };
 const frame: TFrameNode = {
   childIds: ['a', 'b'],
   clipContent: true,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 200,
   horizontalGap: 30,
   id: 'frame-1',
@@ -40,7 +40,7 @@ const frame: TFrameNode = {
 };
 
 const rectangle: TRectangleNode = {
-  fill: '#000',
+  fills: [{ color: '#000', opacity: 100, type: 'solid' }],
   height: 50,
   id: 'rect-1',
   name: 'Rectangle',

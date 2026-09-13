@@ -21,7 +21,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({
       childIds: [],
       clipContent: true,
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: size,
       name: 'Frame',
       parentId: null,
