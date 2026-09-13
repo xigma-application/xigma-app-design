@@ -6,6 +6,7 @@ import Body from './Body/Body';
 import ColorSampler from './ColorSampler/ColorSampler';
 import Footer from './Footer/Footer';
 import Header from './Header/Header';
+import PaintTypeRow from './PaintTypeRow/PaintTypeRow';
 import Popover from 'shared/UITools/Popover/Popover';
 
 // hooks
@@ -42,6 +43,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onDragStart,
   onGradientChange,
   onOpenChange,
+  paintTypeRow = false,
   presets = DEFAULT_PRESETS,
   side,
   sideOffset,
@@ -87,6 +89,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
           tabs={simple ? CUSTOM_LIBRARY_TABS : undefined}
           title={title}
         />
+        {paintTypeRow && <PaintTypeRow />}
         <Body
           activeTab={activeTab}
           alpha={value.alpha}

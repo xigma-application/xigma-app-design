@@ -146,6 +146,60 @@ node's folder. Today:
   always acts on that one row's index regardless of how many rows are currently selected (mirrors
   Grid too — its per-row `onChangeValue`/`onDelete` are single-index the same way).
 
+  Each row's `ColorPickerInput` also opts into a new `paintTypeRow` flag
+  (`ColorPickerInput` → `ColorPicker` → `ColorPicker/PaintTypeRow/`), a row of icon buttons rendered
+  between the header tabs and the body, meant to eventually switch the open fill between paint
+  kinds (solid/gradient/image/video/pattern). Only a single, non-interactive "Solid" button exists
+  so far (`Icon name="Solid"`, added to `@xigma/components` the same way as `StylesAndVariables`;
+  its second, tinted path uses a distinct `data-svg-property="fill-ramp-400"`, wired up as a
+  `$svg-fixed-properties` map entry in `@xigma/scss`'s `svg-color` mixin rather than a one-off CSS
+  rule, so a future icon needing another fixed accent tone is just another map entry). Styled with a
+  dedicated `--active` modifier (`background-color: var(--color-surface)`) instead of `UITools.Button`'s
+  generic `selected` prop, since that one maps to the (differently-toned) `--color-bg-selected` token —
+  this is intentionally not wired to anything yet. `paintTypeRow` defaults to `false` and is opt-in per
+  call site: `FillRow` sets it, but the other two `simple`-mode `ColorPickerInput` consumers
+  (`ColumnBackground`, `GradientPanel/StopsList/StopRow`) don't, so they don't gain this row just
+  because they share `simple`.
+
+  **A cross-portal `stopPropagation()` gotcha, found via live testing, not a test failure:** each
+  row originally wrapped its `ColorPickerInput` (and its gradient-preview branch) in
+  `<span onClick={stopRowSelectPropagation}>` to stop a click on the swatch/hex/opacity fields from
+  also selecting the row (the row's own `onClick` sits on an ancestor `<div>`). That handler called
+  `event.stopPropagation()` — which, because React's synthetic events call the underlying native
+  `Event.stopPropagation()` too, silently broke outside-click dismissal for *any* Radix popover
+  opened from inside that span: `ColorPicker`'s own popover content (and the nested paint-type/format
+  `Dropdown` inside it) is portaled to `document.body`, but still bubbles through the React tree back
+  to this span (React portals bubble via the React tree, not the DOM tree) — so a click meant to
+  dismiss the nested popover by landing on a plain area of the open picker never reached the
+  `document`-level listener Radix's dismissable layer relies on. Fixed by deleting the
+  `stopPropagation()` handler entirely and instead having `useSelectFillRow`'s own click handler
+  bail out via `event.target.closest('[data-no-select], [data-radix-popper-content-wrapper]')` — the
+  first selector marks the (non-portaled) swatch/fields wrapper the same way `data-no-drag` marks a
+  no-drag zone for `usePopoverDrag`; the second is Radix's own wrapper attribute, needed because a
+  portaled click's real DOM ancestry never includes the row's `data-no-select` span, only whatever
+  Radix actually rendered around it. `GridTrackRow` (the component this was ported from) has the
+  exact same `stopRowSelectPropagation`-wrapped `UITools.Dropdown` pattern and is presumably exposed
+  to the same bug, but that wasn't in scope here and wasn't touched. Root-caused (not just patched)
+  with a real red→green e2e check: a Playwright test reproducing the exact repro (open the picker,
+  open the nested format dropdown, click a plain area) was confirmed to fail against the reverted
+  `stopPropagation()` code before the fix landed.
+
+  The paint-type row also uncovered two shared-component bugs, both fixed at their actual root rather
+  than patched in `FillRow`: (1) `Sampler` (the eyedropper trigger, `ColorPicker/Sampler/`) uses
+  `UITools.ButtonMenu` purely to get open/closed state for its icon color — it never passes
+  `children`, so `Popover`'s `PopoverPrimitive.Content` was mounting anyway as a visible-but-empty
+  floating box. Fixed in the shared `Popover.tsx` itself (`{content && <PopoverPrimitive.Portal>...`)
+  rather than replacing `ButtonMenu` in `Sampler` — the correct general rule is "no children, no
+  popover," which benefits every other empty-content `ButtonMenu`/`Popover` caller too, not just this
+  one. (2) The `SaturationMap`/`HueSlider`/`AlphaSlider` thumbs previously shared one
+  `getThumbOffset(fraction, radiusPx)` util that inset the whole travel range by the thumb's own
+  radius, so a thumb's *center* could never reach the true 0%/100% edge — only `SaturationMap` (a 2D
+  square, corners visually read fine with the thumb's ring overflowing past the edge) needed that
+  fixed; `HueSlider`/`AlphaSlider` (thin 1D bars) look broken with an overflowing thumb, so they kept
+  the old inset math under a new, separately-named `getSliderThumbOffset.ts` (identical formula,
+  `SLIDER_THUMB_RADIUS` restored in `ColorPicker/constants.ts`), while `SaturationMap` alone uses the
+  simplified `getThumbOffset(fraction) => ${fraction * 100}%`.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

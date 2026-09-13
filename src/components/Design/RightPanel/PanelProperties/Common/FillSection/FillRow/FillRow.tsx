@@ -9,7 +9,6 @@ import { Icon, Tooltip, UITools } from 'shared';
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
-import { useStopFillRowSelectPropagation } from './hooks/useStopFillRowSelectPropagation';
 
 // styles
 import styles from './fill-row.module.scss';
@@ -53,7 +52,6 @@ export const FillRow: FC<TFillRowProps> = ({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const handleClick = useSelectFillRow(onSelect);
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
-  const stopRowSelectPropagation = useStopFillRowSelectPropagation();
 
   return (
     <div
@@ -70,9 +68,9 @@ export const FillRow: FC<TFillRowProps> = ({
         onPointerDown={handlePointerDown}
         type="button"
       >
-        <Icon color="neutral2" name="RowGrabber" size={8} />
+        <Icon color="neutral2" name="RowGrabber" size={7} />
       </button>
-      <span onClick={stopRowSelectPropagation} style={{ display: 'contents' }}>
+      <span data-no-select style={{ display: 'contents' }}>
         {paint.type === 'solid' ? (
           <UITools.ColorPickerInput
             align="start"
@@ -87,6 +85,7 @@ export const FillRow: FC<TFillRowProps> = ({
             onOpenChange={setIsPickerOpen}
             onPickerChange={({ alpha, hex }): void => onChange({ ...paint, color: hex, opacity: alpha })}
             onToggleVisibility={onToggleVisible}
+            paintTypeRow
             side="right"
             simple
             toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}

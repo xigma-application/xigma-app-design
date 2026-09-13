@@ -77,6 +77,30 @@ test('picking a preset color inside the open popover keeps it open and updates t
   await expect(page.locator('[data-test-text-field-input="background-color"]')).not.toHaveValue('444444');
 });
 
+test('closes the format dropdown when clicking a plain area of the moveable color picker panel', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-right-panel-background-picker-dropdown-outside-click');
+  await expect(designPage.canvas).toBeVisible();
+
+  await page.getByLabel('Background color').click();
+
+  const panel = page.locator('[class*="ColorPicker_"]').first();
+
+  await expect(panel).toBeVisible();
+
+  await panel.getByText('Hex', { exact: true }).click();
+
+  const dropdownPanel = page.locator('[class*="DropdownPanel_"]');
+
+  await expect(dropdownPanel).toBeVisible();
+
+  // a plain, non-interactive strip of padding inside the picker — not a control, not data-no-drag
+  await panel.locator('[class*="SolidPanel__switchers"]').click({ position: { x: 2, y: 5 } });
+
+  await expect(dropdownPanel).toHaveCount(0);
+});
+
 test('toggling the eye off then back on restores the original canvas background, without hiding anything else on the canvas', async ({
   page,
 }) => {

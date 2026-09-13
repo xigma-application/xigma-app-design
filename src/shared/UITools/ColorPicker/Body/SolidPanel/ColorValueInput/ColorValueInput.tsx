@@ -29,7 +29,13 @@ export const ColorValueInput: FC<TColorValueInputProps> = ({ alpha, colorModel }
 
   return (
     <div className={styles.ColorValueInput}>
-      <UITools.Dropdown className={styles.ColorValueInput__formatTrigger} onSelect={setFormat} options={formatOptions} value={format} />
+      <UITools.Dropdown
+        className={styles.ColorValueInput__formatTrigger}
+        onSelect={setFormat}
+        options={formatOptions}
+        value={format}
+        variant="outline"
+      />
       <UITools.FieldGroup>
         {renderValueField(format, alpha, colorModel, rgb)}
         {format !== ColorFormat.css && <AlphaField alpha={alpha} onCommit={colorModel.setAlpha} />}

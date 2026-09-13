@@ -12,7 +12,7 @@ exports[`SaturationMap snapshots > should render SaturationMap with the thumb po
     >
       <div
         class="_SaturationMap__thumb_3b3079"
-        style="left: calc(8px + 1 * (100% - 16px)); top: calc(8px + 0 * (100% - 16px));"
+        style="background-color: rgb(255, 0, 0); left: 100%; top: 0%;"
       />
     </div>
   </div>

@@ -145,6 +145,17 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByLabelText('Toggle background visibility')).toBeInTheDocument();
   });
 
+  it('should forward paintTypeRow to the underlying color picker', () => {
+    // before
+    renderColorPickerInput({ paintTypeRow: true, triggerAriaLabel: 'Background color' });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Background color'));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
+  });
+
   it('should report onDragStart/onDragEnd around a drag on the alpha scrubber', () => {
     // mock
     const onDragEnd = vi.fn();

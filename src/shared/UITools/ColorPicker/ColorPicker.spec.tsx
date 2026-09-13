@@ -255,6 +255,33 @@ describe('ColorPicker behaviors', () => {
     expect(screen.queryByText('Gradient')).not.toBeInTheDocument();
   });
 
+  it('should not show the paint type row by default', () => {
+    // before
+    renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Solid' })).not.toBeInTheDocument();
+  });
+
+  it('should show the Solid paint type button when paintTypeRow is set', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
+  });
+
   it('should show a plain title label instead of any tabs when title is set', () => {
     // before
     renderColorPicker({

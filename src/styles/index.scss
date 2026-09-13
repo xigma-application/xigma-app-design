@@ -8,7 +8,7 @@
 }
 
 :root {
-  --color-input-background: #313131;
+  --color-input-background: var(--color-surface);
 }
 
 @media (prefers-color-scheme: light) {
@@ -18,7 +18,7 @@
 }
 
 :root[data-theme='dark'] {
-  --color-input-background: #313131;
+  --color-input-background: var(--color-surface);
 }
 
 :root[data-theme='light'] {

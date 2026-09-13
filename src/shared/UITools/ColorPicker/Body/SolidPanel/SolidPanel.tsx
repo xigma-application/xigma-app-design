@@ -24,7 +24,13 @@ export type TSolidPanelProps = {
 
 export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onCloseSampler, onDragEnd, onDragStart, onOpenSampler }) => (
   <div className={styles.SolidPanel}>
-    <SaturationMap hsv={colorModel.hsv} onChange={colorModel.setHsv} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+    <SaturationMap
+      color={colorModel.hex}
+      hsv={colorModel.hsv}
+      onChange={colorModel.setHsv}
+      onDragEnd={onDragEnd}
+      onDragStart={onDragStart}
+    />
     <div className={styles.SolidPanel__controls}>
       <div className={styles.SolidPanel__switchers}>
         <Sampler onClose={onCloseSampler} onOpen={onOpenSampler} />

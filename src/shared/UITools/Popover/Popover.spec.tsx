@@ -164,6 +164,20 @@ describe('Popover behaviors', () => {
     expect(screen.getByText('Popover content')).toBeInTheDocument();
   });
 
+  it('should not render an empty content panel when there are no children', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(<Popover trigger={<span>Open</span>}>{undefined}</Popover>);
+
+    // action
+    await user.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('should wrap its children in a PopoverScrollArea when scrollable', async () => {
     // mock
     const user = userEvent.setup();

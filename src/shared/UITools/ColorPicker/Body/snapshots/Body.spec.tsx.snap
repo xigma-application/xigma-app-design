@@ -18,7 +18,7 @@ exports[`Body snapshots > should render Body with the solid panel 1`] = `
         >
           <div
             class="_SaturationMap__thumb_3b3079"
-            style="left: calc(8px + 1 * (100% - 16px)); top: calc(8px + 0 * (100% - 16px));"
+            style="background-color: rgb(255, 0, 0); left: 100%; top: 0%;"
           />
         </div>
       </div>
@@ -91,7 +91,7 @@ exports[`Body snapshots > should render Body with the solid panel 1`] = `
           <button
             aria-expanded="false"
             aria-haspopup="dialog"
-            class="_Dropdown_cc217a _ColorValueInput__formatTrigger_9ed6f4"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _ColorValueInput__formatTrigger_9ed6f4"
             data-state="closed"
             data-test-bypass-global-shortcuts="true"
             type="button"

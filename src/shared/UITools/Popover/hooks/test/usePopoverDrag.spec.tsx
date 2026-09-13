@@ -47,6 +47,61 @@ describe('usePopoverDrag', () => {
     expect(result.current.offset).toEqual({ x: 30, y: -10 });
   });
 
+  it('should not capture the pointer for a plain click with no movement, so it never blocks a nested popover from closing', () => {
+    // mock
+    const background = document.createElement('div');
+    const downEvent = createPointerDownEvent(background, 100, 100);
+
+    // before
+    const { result } = renderHook(() => usePopoverDrag(true));
+
+    // action
+    act(() => result.current.onPointerDown(downEvent));
+    act(() => result.current.onPointerUp(createPointerDownEvent(background, 100, 100)));
+
+    // result
+    expect(downEvent.currentTarget.setPointerCapture).not.toHaveBeenCalled();
+    expect(result.current.offset).toEqual({ x: 0, y: 0 });
+  });
+
+  it('should ignore movement below the drag threshold', () => {
+    // mock
+    const background = document.createElement('div');
+
+    // before
+    const { result } = renderHook(() => usePopoverDrag(true));
+
+    act(() => result.current.onPointerDown(createPointerDownEvent(background, 100, 100)));
+
+    // action
+    const moveEvent = createPointerDownEvent(background, 101, 100);
+
+    act(() => result.current.onPointerMove(moveEvent));
+
+    // result
+    expect(moveEvent.currentTarget.setPointerCapture).not.toHaveBeenCalled();
+    expect(result.current.offset).toEqual({ x: 0, y: 0 });
+  });
+
+  it('should capture the pointer and start moving once movement crosses the drag threshold', () => {
+    // mock
+    const background = document.createElement('div');
+
+    // before
+    const { result } = renderHook(() => usePopoverDrag(true));
+
+    act(() => result.current.onPointerDown(createPointerDownEvent(background, 100, 100)));
+
+    // action
+    const moveEvent = createPointerDownEvent(background, 105, 100);
+
+    act(() => result.current.onPointerMove(moveEvent));
+
+    // result
+    expect(moveEvent.currentTarget.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(result.current.offset).toEqual({ x: 5, y: 0 });
+  });
+
   it('should not start a drag when the pointerdown target is interactive', () => {
     // mock
     const button = document.createElement('button');

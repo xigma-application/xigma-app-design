@@ -6,7 +6,7 @@ import SaturationMap from './SaturationMap';
 describe('SaturationMap snapshots', () => {
   it('should render SaturationMap with the thumb positioned from saturation/value', () => {
     // before
-    const { asFragment } = render(<SaturationMap hsv={{ h: 0, s: 100, v: 100 }} onChange={vi.fn()} />);
+    const { asFragment } = render(<SaturationMap color="#ff0000" hsv={{ h: 0, s: 100, v: 100 }} onChange={vi.fn()} />);
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -19,7 +19,7 @@ describe('SaturationMap behaviors', () => {
     const onChange = vi.fn();
 
     // before
-    const { container } = render(<SaturationMap hsv={{ h: 0, s: 0, v: 0 }} onChange={onChange} />);
+    const { container } = render(<SaturationMap color="#ff0000" hsv={{ h: 0, s: 0, v: 0 }} onChange={onChange} />);
     const track = container.querySelector('[class*="SaturationMap__input"]') as HTMLDivElement;
 
     vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({ height: 100, left: 0, top: 0, width: 100 } as DOMRect);
@@ -38,7 +38,7 @@ describe('SaturationMap behaviors', () => {
 
     // before
     const { container } = render(
-      <SaturationMap hsv={{ h: 0, s: 0, v: 0 }} onChange={vi.fn()} onDragEnd={onDragEnd} onDragStart={onDragStart} />,
+      <SaturationMap color="#ff0000" hsv={{ h: 0, s: 0, v: 0 }} onChange={vi.fn()} onDragEnd={onDragEnd} onDragStart={onDragStart} />,
     );
     const track = container.querySelector('[class*="SaturationMap__input"]') as HTMLDivElement;
 
@@ -51,5 +51,14 @@ describe('SaturationMap behaviors', () => {
     // result
     expect(onDragStart).toHaveBeenCalledTimes(1);
     expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fill the thumb with the current color', () => {
+    // before
+    const { container } = render(<SaturationMap color="#ff0000" hsv={{ h: 0, s: 100, v: 100 }} onChange={vi.fn()} />);
+    const thumb = container.querySelector('[class*="SaturationMap__thumb"]') as HTMLDivElement;
+
+    // result
+    expect(thumb.style.backgroundColor).toBe('rgb(255, 0, 0)');
   });
 });

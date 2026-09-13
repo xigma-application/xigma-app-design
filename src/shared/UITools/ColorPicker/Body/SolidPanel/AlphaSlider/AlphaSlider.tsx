@@ -10,7 +10,7 @@ import { SLIDER_THUMB_RADIUS } from '../../../constants';
 import styles from './alpha-slider.module.scss';
 
 // utils
-import { getThumbOffset } from '../../../utils/getThumbOffset';
+import { getSliderThumbOffset } from '../../../utils/getSliderThumbOffset';
 
 export type TAlphaSliderProps = {
   alpha: number;
@@ -37,7 +37,7 @@ export const AlphaSlider: FC<TAlphaSliderProps> = ({ alpha, color, onChange, onD
       ref={trackRef}
     >
       <div className={styles.AlphaSlider__gradient} style={{ backgroundImage: `linear-gradient(to right, transparent, ${color})` }} />
-      <div className={styles.AlphaSlider__thumb} style={{ left: getThumbOffset(alpha / 100, SLIDER_THUMB_RADIUS) }} />
+      <div className={styles.AlphaSlider__thumb} style={{ left: getSliderThumbOffset(alpha / 100, SLIDER_THUMB_RADIUS) }} />
     </div>
   );
 };

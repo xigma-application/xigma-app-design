@@ -13,7 +13,7 @@ import styles from './hue-slider.module.scss';
 import { THsv } from '../../../types';
 
 // utils
-import { getThumbOffset } from '../../../utils/getThumbOffset';
+import { getSliderThumbOffset } from '../../../utils/getSliderThumbOffset';
 
 export type THueSliderProps = {
   hue: THsv['h'];
@@ -38,7 +38,7 @@ export const HueSlider: FC<THueSliderProps> = ({ hue, onChange, onDragEnd, onDra
       onPointerUp={onPointerUp}
       ref={trackRef}
     >
-      <div className={styles.HueSlider__thumb} style={{ left: getThumbOffset(hue / 360, SLIDER_THUMB_RADIUS) }} />
+      <div className={styles.HueSlider__thumb} style={{ left: getSliderThumbOffset(hue / 360, SLIDER_THUMB_RADIUS) }} />
     </div>
   );
 };

@@ -185,4 +185,15 @@ describe('FillRow behaviors', () => {
     // result
     expect(container.querySelector('[class*="FillRow--pickerOpen"]')).toBeInTheDocument();
   });
+
+  it('should show the Solid paint type button once the color picker is open', () => {
+    // before
+    renderFillRow();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
+  });
 });

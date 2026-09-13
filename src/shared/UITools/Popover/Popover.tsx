@@ -67,24 +67,26 @@ export const Popover: FC<TPopoverProps> = ({
           {trigger}
         </PopoverPrimitive.Trigger>
       </Tooltip>
-      <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
-          align={align}
-          avoidCollisions={avoidCollisions}
-          className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
-          collisionPadding={scrollable ? 10 : undefined}
-          onInteractOutside={onInteractOutside}
-          onPointerDown={moveable ? onPointerDown : undefined}
-          onPointerMove={moveable ? onPointerMove : undefined}
-          onPointerUp={moveable ? onPointerUp : undefined}
-          ref={contentRef}
-          side={side}
-          sideOffset={sideOffset}
-          style={moveable ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : undefined}
-        >
-          {content}
-        </PopoverPrimitive.Content>
-      </PopoverPrimitive.Portal>
+      {content && (
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            align={align}
+            avoidCollisions={avoidCollisions}
+            className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
+            collisionPadding={scrollable ? 10 : undefined}
+            onInteractOutside={onInteractOutside}
+            onPointerDown={moveable ? onPointerDown : undefined}
+            onPointerMove={moveable ? onPointerMove : undefined}
+            onPointerUp={moveable ? onPointerUp : undefined}
+            ref={contentRef}
+            side={side}
+            sideOffset={sideOffset}
+            style={moveable ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : undefined}
+          >
+            {content}
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      )}
     </PopoverPrimitive.Root>
   );
 };

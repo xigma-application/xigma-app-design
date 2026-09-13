@@ -11,8 +11,9 @@ export type TUsePopoverDragResult = {
 };
 
 const INTERACTIVE_SELECTOR = 'button, input, textarea, select, a, [role="button"], [data-no-drag]';
+const DRAG_THRESHOLD_PX = 3;
 
-type TDragStart = { originX: number; originY: number; startX: number; startY: number };
+type TDragStart = { hasCaptured: boolean; originX: number; originY: number; startX: number; startY: number };
 
 export const usePopoverDrag = (moveable: boolean, onOpenChange?: TFunc<[boolean]>): TUsePopoverDragResult => {
   const [offset, setOffset] = useState<TPopoverDragOffset>({ x: 0, y: 0 });
@@ -34,8 +35,7 @@ export const usePopoverDrag = (moveable: boolean, onOpenChange?: TFunc<[boolean]
     }
 
     if (!target.closest(INTERACTIVE_SELECTOR)) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-      dragStartRef.current = { originX: offset.x, originY: offset.y, startX: event.clientX, startY: event.clientY };
+      dragStartRef.current = { hasCaptured: false, originX: offset.x, originY: offset.y, startX: event.clientX, startY: event.clientY };
     }
   };
 
@@ -43,10 +43,19 @@ export const usePopoverDrag = (moveable: boolean, onOpenChange?: TFunc<[boolean]
     const dragStart = dragStartRef.current;
 
     if (dragStart && event.buttons === 1) {
-      setOffset({
-        x: dragStart.originX + (event.clientX - dragStart.startX),
-        y: dragStart.originY + (event.clientY - dragStart.startY),
-      });
+      const deltaX = event.clientX - dragStart.startX;
+      const deltaY = event.clientY - dragStart.startY;
+
+      if (!dragStart.hasCaptured) {
+        if (Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD_PX) {
+          return;
+        }
+
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragStart.hasCaptured = true;
+      }
+
+      setOffset({ x: dragStart.originX + deltaX, y: dragStart.originY + deltaY });
     }
   };
 

@@ -25,6 +25,7 @@ export type TColorPickerProps = {
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onOpenChange?: TFunc<[boolean]>;
+  paintTypeRow?: boolean;
   presets?: TColorPickerValue[];
   side?: TPopoverProps['side'];
   sideOffset?: number;

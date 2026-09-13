@@ -161,4 +161,33 @@ test.describe('Design panels — Fill section', () => {
 
     await expect(row).not.toHaveClass(/FillRow--selected/);
   });
+
+  test('closes the format dropdown when clicking a plain area of the fill color picker', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-picker-dropdown-outside-click');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    await panel.getByText('Hex', { exact: true }).click();
+
+    const dropdownPanel = page.locator('[class*="DropdownPanel_"]');
+
+    await expect(dropdownPanel).toBeVisible();
+
+    // a plain, non-interactive strip of padding inside the picker, far from the open dropdown panel
+    await panel
+      .locator('[class*="SaturationMap_"]')
+      .first()
+      .click({ position: { x: 2, y: 2 } });
+
+    await expect(dropdownPanel).toHaveCount(0);
+  });
 });

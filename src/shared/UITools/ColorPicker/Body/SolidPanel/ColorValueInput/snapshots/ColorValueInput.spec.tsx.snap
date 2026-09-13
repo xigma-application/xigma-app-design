@@ -8,7 +8,7 @@ exports[`ColorValueInput snapshots > should render ColorValueInput defaulting to
     <button
       aria-expanded="false"
       aria-haspopup="dialog"
-      class="_Dropdown_cc217a _ColorValueInput__formatTrigger_9ed6f4"
+      class="_Dropdown_cc217a _Dropdown--outline_cc217a _ColorValueInput__formatTrigger_9ed6f4"
       data-state="closed"
       data-test-bypass-global-shortcuts="true"
       type="button"

@@ -62,4 +62,15 @@ describe('Sampler behaviors', () => {
     // result
     expect(screen.getByRole('button').querySelector('svg')).toHaveStyle({ color: 'var(--color-blue-1)' });
   });
+
+  it('should not show an empty dropdown panel when clicked, since the sampler has its own dedicated overlay', () => {
+    // before
+    renderSampler(vi.fn());
+
+    // action
+    fireEvent.click(screen.getByRole('button'));
+
+    // result
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });

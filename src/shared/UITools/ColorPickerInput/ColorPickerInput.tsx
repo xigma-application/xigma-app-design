@@ -35,6 +35,7 @@ export type TColorPickerInputProps = {
   onOpenChange?: TFunc<[boolean]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
+  paintTypeRow?: boolean;
   side?: TColorPickerProps['side'];
   simple?: boolean;
   title?: string;
@@ -57,6 +58,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onOpenChange,
   onPickerChange,
   onToggleVisibility,
+  paintTypeRow = false,
   side = 'top',
   simple = false,
   title,
@@ -84,6 +86,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               onOpenChange={onOpenChange}
+              paintTypeRow={paintTypeRow}
               side={side}
               simple={simple}
               title={title}
