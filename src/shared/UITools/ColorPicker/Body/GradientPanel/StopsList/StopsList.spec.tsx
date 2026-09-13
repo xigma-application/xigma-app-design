@@ -61,7 +61,7 @@ describe('StopsList behaviors', () => {
     expect(screen.getByLabelText('Add stop')).toBeDisabled();
   });
 
-  it('should open the full color picker for the clicked stop', () => {
+  it('should not open a floating popover for the clicked stop, since it docks via context instead', () => {
     // before
     renderStopsList();
 
@@ -69,7 +69,7 @@ describe('StopsList behaviors', () => {
     fireEvent.click(screen.getAllByLabelText('Stop color')[0]);
 
     // result
-    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.queryByText('Custom')).not.toBeInTheDocument();
   });
 
   it('should select a stop when its row is clicked', () => {

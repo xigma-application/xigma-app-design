@@ -190,4 +190,31 @@ test.describe('Design panels — Fill section', () => {
 
     await expect(dropdownPanel).toHaveCount(0);
   });
+
+  test('docks a gradient stop color panel flush against the gradient panel, not floating over its own swatch', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-stop-picker-docking');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByRole('button', { name: 'Gradient' }).click();
+
+    const gradientPanel = page.locator('[class*="ColorPicker_"]:not([class*="ColorPicker__"])').first();
+    const gradientPanelBox = (await gradientPanel.boundingBox())!;
+
+    await page.getByRole('button', { name: 'Stop color' }).first().click();
+
+    const stopPanel = page.locator('[class*="StopColorPanel_"]:not([class*="StopColorPanel__"])');
+
+    await expect(stopPanel).toBeVisible();
+
+    const stopPanelBox = (await stopPanel.boundingBox())!;
+
+    // docked flush against the left edge of the gradient panel, not floating over the small swatch that opened it
+    expect(stopPanelBox.x + stopPanelBox.width).toBeCloseTo(gradientPanelBox.x, 0);
+    expect(stopPanelBox.y).toBeCloseTo(gradientPanelBox.y, 0);
+  });
 });

@@ -18,6 +18,7 @@
   "colorPicker.gradient.type.diamond": "Diamentowy",
   "colorPicker.gradient.type.linear": "Liniowy",
   "colorPicker.gradient.type.radial": "Radialny",
+  "colorPicker.paintType.gradient": "Gradient",
   "colorPicker.paintType.solid": "Jednolity",
   "colorPicker.sampler.prompt.description": "Kliknij, aby pobrać",
   "colorPicker.sampler.tooltip": "Próbkuj kolor",

@@ -35,6 +35,7 @@ export type TColorPickerInputProps = {
   onOpenChange?: TFunc<[boolean]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
+  onTriggerClick?: TFunc;
   paintTypeRow?: boolean;
   side?: TColorPickerProps['side'];
   simple?: boolean;
@@ -58,6 +59,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onOpenChange,
   onPickerChange,
   onToggleVisibility,
+  onTriggerClick,
   paintTypeRow = false,
   side = 'top',
   simple = false,
@@ -79,22 +81,28 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           maxLength={6}
           onBlur={onBlurHex}
           startAdornment={
-            <ColorPicker
-              align={align}
-              moveable
-              onChange={onPickerChange}
-              onDragEnd={onDragEnd}
-              onDragStart={onDragStart}
-              onOpenChange={onOpenChange}
-              paintTypeRow={paintTypeRow}
-              side={side}
-              simple={simple}
-              title={title}
-              trigger={<Color alpha={alpha} color={hex} cursor="default" />}
-              triggerAriaLabel={triggerAriaLabel}
-              triggerClassName={styles.ColorPickerInput__trigger}
-              value={{ alpha, hex }}
-            />
+            onTriggerClick ? (
+              <button aria-label={triggerAriaLabel} className={styles.ColorPickerInput__trigger} onClick={onTriggerClick} type="button">
+                <Color alpha={alpha} color={hex} cursor="default" />
+              </button>
+            ) : (
+              <ColorPicker
+                align={align}
+                moveable
+                onChange={onPickerChange}
+                onDragEnd={onDragEnd}
+                onDragStart={onDragStart}
+                onOpenChange={onOpenChange}
+                paintTypeRow={paintTypeRow}
+                side={side}
+                simple={simple}
+                title={title}
+                trigger={<Color alpha={alpha} color={hex} cursor="default" />}
+                triggerAriaLabel={triggerAriaLabel}
+                triggerClassName={styles.ColorPickerInput__trigger}
+                value={{ alpha, hex }}
+              />
+            )
           }
         />
         <TextFieldWrapper

@@ -200,6 +200,43 @@ node's folder. Today:
   `SLIDER_THUMB_RADIUS` restored in `ColorPicker/constants.ts`), while `SaturationMap` alone uses the
   simplified `getThumbOffset(fraction) => ${fraction * 100}%`.
 
+  **The `PaintTypeRow` icon row is now functional** (not just the static "Solid" placeholder
+  described above): a second "Gradient" icon was added (`Icon name="Gradient"`, same
+  `xigma-app-shared` registration flow as `Solid`), and `PaintTypeRow` now takes `activeTab`/
+  `onSelectTab` from `ColorPicker.tsx` — the SAME `handleSetActiveTab`/`useSetActiveTab` mechanism
+  the plain-text Solid/Gradient `Header` tabs already used, just exposed as icon buttons instead
+  (used in `simple` mode, where the text tabs are replaced by Custom/Libraries). Clicking Gradient
+  switches `Body` to `GradientPanel` exactly like the vector Paint tool's own tab does.
+
+  **Editing a gradient stop's own color needed a real layout fix, not a floating popover.** Each
+  `StopRow` used to open its OWN nested `ColorPicker` popover for its swatch (positioned relative to
+  the swatch itself, via Radix's default trigger-anchored floating-ui placement) — visually this
+  meant the stop's color editor floated right at the tiny swatch icon, disconnected from the
+  gradient panel that opened it. The ask was for it to *dock* flush against the gradient panel's own
+  edge instead (two panels side by side, sharing a border, Figma-style) — **not** achievable through
+  Radix's `Popover.Anchor`/`virtualRef` decoupling mechanism: multiple attempts (a virtual anchor
+  pointing at the outer panel's DOM node, then a real `asChild`-wrapped fixed-position marker div at
+  the outer panel's measured rect) both produced a correctly-computed anchor rect (verified via
+  direct browser console logging) that Radix's own floating-ui integration nonetheless never
+  actually applied — `--radix-popper-anchor-width/height` on the resulting content wrapper stayed
+  `0px` regardless, and the panel kept rendering pinned to the viewport's top-left corner. Given a
+  "docked, always in the same place relative to its parent" panel is fundamentally a static-layout
+  problem, not a floating-anchor problem, the actual fix drops Radix positioning for this one case
+  entirely: `ColorPicker.tsx` owns a `dockedPanel: ReactNode` state slot rendered as an
+  absolutely-positioned sibling (`.ColorPicker__docked`, `position: absolute; right: 100%; top: 0`,
+  requiring `.ColorPicker` itself to be `position: relative`) inside its own 240px panel box, and
+  exposes a setter through a new `DockedPanelContext` (`ColorPicker/DockedPanelContext.ts`) so a
+  deeply-nested descendant (`StopRow`, 4 levels down through `Body`/`GradientPanel`/`StopsList`) can
+  push arbitrary content up into that slot without prop-threading through every intermediate
+  component. `ColorPickerInput` gained a new `onTriggerClick?: TFunc` escape hatch — when given, the
+  swatch renders as a plain button calling it instead of opening its own nested `ColorPicker`
+  popover — and `StopRow` uses it to call `setDockedPanel` with a new `StopColorPanel` component
+  (`StopRow/StopColorPanel/`, wraps the existing `SolidPanel` + `ColorSampler` + its own
+  `useColorModel`/`useColorSampler` instances, plus a close button) instead. This is a real,
+  general-purpose mechanism now, not a one-off hack: any future "detached editor panel that must
+  dock to its own parent panel rather than float near whatever small control opened it" case in
+  `ColorPicker` can reuse the same `DockedPanelContext` slot.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

@@ -1,0 +1,11 @@
+.StopColorPanel {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 8px 0;
+  }
+}

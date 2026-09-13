@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, useState } from 'react';
+import { FC, ReactNode, useState } from 'react';
 
 // components
 import Body from './Body/Body';
@@ -20,6 +20,7 @@ import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel';
 // others
 import { DEFAULT_ACTIVE_TAB, DEFAULT_PRESETS } from './constants';
 import { CUSTOM_LIBRARY_TABS } from './Header/constants';
+import { DockedPanelContext } from './DockedPanelContext';
 
 // styles
 import styles from './color-picker.module.scss';
@@ -55,6 +56,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   value,
 }) => {
   const [activeTab, setActiveTab] = useState(DEFAULT_ACTIVE_TAB);
+  const [dockedPanel, setDockedPanel] = useState<ReactNode>(null);
   const colorModel = useColorModel(value, onChange);
   const gradientPanel = useGradientPanel(onGradientChange);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
@@ -89,18 +91,21 @@ export const ColorPicker: FC<TColorPickerProps> = ({
           tabs={simple ? CUSTOM_LIBRARY_TABS : undefined}
           title={title}
         />
-        {paintTypeRow && <PaintTypeRow />}
-        <Body
-          activeTab={activeTab}
-          alpha={value.alpha}
-          colorModel={colorModel}
-          gradientPanel={gradientPanel}
-          onCloseSampler={colorSampler.close}
-          onDragEnd={onDragEnd}
-          onDragStart={onDragStart}
-          onOpenSampler={colorSampler.open}
-        />
+        {paintTypeRow && <PaintTypeRow activeTab={activeTab} onSelectTab={handleSetActiveTab} />}
+        <DockedPanelContext.Provider value={setDockedPanel}>
+          <Body
+            activeTab={activeTab}
+            alpha={value.alpha}
+            colorModel={colorModel}
+            gradientPanel={gradientPanel}
+            onCloseSampler={colorSampler.close}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onOpenSampler={colorSampler.open}
+          />
+        </DockedPanelContext.Provider>
         {activeTab === ColorPickerTab.solid && <Footer onSelectPreset={colorModel.setPreset} presets={presets} />}
+        {dockedPanel && <div className={styles.ColorPicker__docked}>{dockedPanel}</div>}
       </div>
       {colorSampler.isActive && <ColorSampler onClose={colorSampler.close} onPick={colorSampler.pick} />}
     </Popover>

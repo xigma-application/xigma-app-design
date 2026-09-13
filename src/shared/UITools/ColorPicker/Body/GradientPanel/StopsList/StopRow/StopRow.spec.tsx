@@ -1,27 +1,44 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ReactNode, useState } from 'react';
 
 // components
 import StopRow from './StopRow';
 import { TooltipProvider } from 'shared';
+
+// others
+import { DockedPanelContext } from '../../../../DockedPanelContext';
 
 // types
 import { TEditableGradientStop } from '../../types';
 
 const STOP: TEditableGradientStop = { color: '#ff0000', id: 'stop-1', opacity: 80, position: 0.5 };
 
+const DockedPanelHost = ({ children }: { children: ReactNode }): ReactNode => {
+  const [dockedPanel, setDockedPanel] = useState<ReactNode>(null);
+
+  return (
+    <DockedPanelContext.Provider value={setDockedPanel}>
+      {children}
+      {dockedPanel}
+    </DockedPanelContext.Provider>
+  );
+};
+
 const renderStopRow = (overrides: Partial<Parameters<typeof StopRow>[0]> = {}): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <StopRow
-        canRemove
-        isSelected={false}
-        onColorChange={vi.fn()}
-        onPositionChange={vi.fn()}
-        onRemove={vi.fn()}
-        onSelect={vi.fn()}
-        stop={STOP}
-        {...overrides}
-      />
+      <DockedPanelHost>
+        <StopRow
+          canRemove
+          isSelected={false}
+          onColorChange={vi.fn()}
+          onPositionChange={vi.fn()}
+          onRemove={vi.fn()}
+          onSelect={vi.fn()}
+          stop={STOP}
+          {...overrides}
+        />
+      </DockedPanelHost>
     </TooltipProvider>,
   );
 
@@ -58,15 +75,31 @@ describe('StopRow behaviors', () => {
     expect(onSelect).toHaveBeenCalled();
   });
 
-  it('should open the full color picker when the swatch is clicked', () => {
+  it('should open a docked color panel when the swatch is clicked, instead of a floating popover', () => {
     // before
     renderStopRow();
 
     // action
     fireEvent.click(screen.getByLabelText('Stop color'));
 
+    // result — the docked SolidPanel, not the Custom/Libraries popover tabs
+    expect(screen.queryByText('Custom')).not.toBeInTheDocument();
+    expect(screen.getAllByDisplayValue('ff0000')).toHaveLength(2);
+  });
+
+  it('should close the docked color panel when its close button is clicked', () => {
+    // before
+    renderStopRow();
+
+    fireEvent.click(screen.getByLabelText('Stop color'));
+
+    expect(screen.getAllByDisplayValue('ff0000')).toHaveLength(2);
+
+    // action
+    fireEvent.click(screen.getByLabelText('Close'));
+
     // result
-    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.getAllByDisplayValue('ff0000')).toHaveLength(1);
   });
 
   it('should report a position change from the position field', () => {

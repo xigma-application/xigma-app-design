@@ -1,10 +1,14 @@
 import cx from 'classnames';
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
 import PositionField from './PositionField/PositionField';
+import StopColorPanel from './StopColorPanel/StopColorPanel';
 import { Icon, Tooltip, UITools } from 'shared';
+
+// others
+import { DockedPanelContext } from '../../../../DockedPanelContext';
 
 // styles
 import styles from './stop-row.module.scss';
@@ -25,6 +29,17 @@ export type TStopRowProps = {
 
 export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChange, onPositionChange, onRemove, onSelect, stop }) => {
   const { t } = useTranslation();
+  const setDockedPanel = useContext(DockedPanelContext);
+
+  const openColorPanel = (): void => {
+    setDockedPanel?.(
+      <StopColorPanel
+        onClose={() => setDockedPanel?.(null)}
+        onColorChange={onColorChange}
+        value={{ alpha: stop.opacity, hex: stop.color }}
+      />,
+    );
+  };
 
   return (
     <div className={cx(styles.StopRow, { [styles['StopRow--selected']]: isSelected })} data-no-drag onClick={onSelect}>
@@ -35,6 +50,7 @@ export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChang
         onCommitAlpha={(opacity): void => onColorChange({ alpha: opacity, hex: stop.color })}
         onCommitHex={(hex): void => onColorChange({ alpha: stop.opacity, hex })}
         onPickerChange={onColorChange}
+        onTriggerClick={openColorPanel}
         simple
         triggerAriaLabel={t('colorPicker.gradient.stops.colorAriaLabel')}
       />

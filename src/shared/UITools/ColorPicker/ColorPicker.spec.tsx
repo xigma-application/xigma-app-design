@@ -282,6 +282,47 @@ describe('ColorPicker behaviors', () => {
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
   });
 
+  it('should switch the body to the gradient panel when the paint type row Gradient button is clicked, even in simple mode', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      onGradientChange: vi.fn(),
+      paintTypeRow: true,
+      simple: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+
+    // result
+    expect(screen.getByText('Stops')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Gradient' }).className).toMatch(/active/);
+  });
+
+  it('should switch back to the solid panel when the paint type row Solid button is clicked', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      onGradientChange: vi.fn(),
+      paintTypeRow: true,
+      simple: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Solid' }));
+
+    // result
+    expect(screen.queryByText('Stops')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Solid' }).className).toMatch(/active/);
+  });
+
   it('should show a plain title label instead of any tabs when title is set', () => {
     // before
     renderColorPicker({
