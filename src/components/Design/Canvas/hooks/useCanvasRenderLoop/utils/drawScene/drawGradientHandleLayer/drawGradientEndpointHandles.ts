@@ -1,12 +1,15 @@
-// others
-import { DIMENSION_HINT_GUIDE_BLUE, RADIUS_HANDLE_FILL, RADIUS_HANDLE_SIZE } from 'constant/canvas';
-
 // types
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
+
+const ENDPOINT_HANDLE_SIZE = 8;
+const ENDPOINT_HANDLE_FILL = '#ffffff';
+const ENDPOINT_HANDLE_SHADOW_COLOR = '#000000';
+const ENDPOINT_HANDLE_SHADOW_ALPHA = 0.35;
+const ENDPOINT_HANDLE_SHADOW_EXTRA_SIZE = 3;
 
 export const drawGradientEndpointHandles = (
   gl: WebGL2RenderingContext,
@@ -17,7 +20,8 @@ export const drawGradientEndpointHandles = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
+  const handleRadius = ENDPOINT_HANDLE_SIZE / 2 / viewport.zoom;
+  const shadowRadius = (ENDPOINT_HANDLE_SIZE + ENDPOINT_HANDLE_SHADOW_EXTRA_SIZE) / 2 / viewport.zoom;
 
   points.forEach((point) => {
     drawEllipse(
@@ -25,9 +29,26 @@ export const drawGradientEndpointHandles = (
       program,
       buffer,
       {
-        fill: RADIUS_HANDLE_FILL,
+        fill: ENDPOINT_HANDLE_SHADOW_COLOR,
+        fillAlpha: ENDPOINT_HANDLE_SHADOW_ALPHA,
+        height: shadowRadius * 2,
+        width: shadowRadius * 2,
+        x: point.x - shadowRadius,
+        y: point.y - shadowRadius,
+      },
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      0,
+    );
+
+    drawEllipse(
+      gl,
+      program,
+      buffer,
+      {
+        fill: ENDPOINT_HANDLE_FILL,
         height: handleRadius * 2,
-        stroke: DIMENSION_HINT_GUIDE_BLUE,
         width: handleRadius * 2,
         x: point.x - handleRadius,
         y: point.y - handleRadius,

@@ -5,7 +5,7 @@ import { getGradientStopHandlePositions } from '../getGradientStopHandlePosition
 import { TGradientStop } from 'types/design/paint/types';
 
 describe('getGradientStopHandlePositions', () => {
-  it('should place each stop along the start-end line, offset to one side', () => {
+  it('should place each stop along the start-end line, offset above it', () => {
     // before
     const stops: TGradientStop[] = [
       { color: '#ffffff', opacity: 100, position: 0 },
@@ -16,13 +16,26 @@ describe('getGradientStopHandlePositions', () => {
     // action
     const positions = getGradientStopHandlePositions({ x: 0, y: 0 }, { x: 100, y: 0 }, stops, 1);
 
-    // result — for a horizontal line, the perpendicular offset only moves the y coordinate
+    // result — x follows the line's lerp, y is always shifted upward by a fixed amount
     expect(positions[0].x).toBeCloseTo(0);
     expect(positions[1].x).toBeCloseTo(50);
     expect(positions[2].x).toBeCloseTo(100);
-    expect(positions[0].y).not.toBe(0);
+    expect(positions[0].y).toBeLessThan(0);
     expect(positions[0].y).toBe(positions[1].y);
     expect(positions[1].y).toBe(positions[2].y);
+  });
+
+  it('should offset upward regardless of the line direction, unlike a direction-dependent perpendicular', () => {
+    // before
+    const stops: TGradientStop[] = [{ color: '#ffffff', opacity: 100, position: 0.5 }];
+
+    // action — a diagonal line and its exact reverse
+    const forward = getGradientStopHandlePositions({ x: 0, y: 0 }, { x: 100, y: 100 }, stops, 1);
+    const reversed = getGradientStopHandlePositions({ x: 100, y: 100 }, { x: 0, y: 0 }, stops, 1);
+
+    // result — same midpoint, same upward offset either way
+    expect(forward[0]).toEqual(reversed[0]);
+    expect(forward[0].y).toBeLessThan(50);
   });
 
   it('should shrink the offset as zoom increases, keeping a constant screen-space distance', () => {
@@ -37,7 +50,7 @@ describe('getGradientStopHandlePositions', () => {
     expect(Math.abs(atZoom2[0].y)).toBeCloseTo(Math.abs(atZoom1[0].y) / 2);
   });
 
-  it('should not throw when start and end coincide', () => {
+  it('should still offset upward when start and end coincide', () => {
     // before
     const stops: TGradientStop[] = [{ color: '#ffffff', opacity: 100, position: 0 }];
 
@@ -45,6 +58,7 @@ describe('getGradientStopHandlePositions', () => {
     const positions = getGradientStopHandlePositions({ x: 5, y: 5 }, { x: 5, y: 5 }, stops, 1);
 
     // result
-    expect(positions[0]).toEqual({ x: 5, y: 5 });
+    expect(positions[0].x).toBeCloseTo(5);
+    expect(positions[0].y).toBeLessThan(5);
   });
 });
