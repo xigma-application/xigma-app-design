@@ -21,10 +21,12 @@ export const useScrollThumb = (scrollRef: RefObject<HTMLDivElement | null>, axis
     if (scrollElement) {
       const updateMetrics = (): void => setMetrics(getScrollMetrics(scrollElement, axisProps));
       const resizeObserver = new ResizeObserver(updateMetrics);
+      const mutationObserver = new MutationObserver(updateMetrics);
 
       updateMetrics();
       scrollElement.addEventListener('scroll', updateMetrics);
       resizeObserver.observe(scrollElement);
+      mutationObserver.observe(scrollElement, { childList: true, subtree: true });
 
       if (scrollElement.firstElementChild) {
         resizeObserver.observe(scrollElement.firstElementChild);
@@ -33,6 +35,7 @@ export const useScrollThumb = (scrollRef: RefObject<HTMLDivElement | null>, axis
       return (): void => {
         scrollElement.removeEventListener('scroll', updateMetrics);
         resizeObserver.disconnect();
+        mutationObserver.disconnect();
       };
     }
   }, [scrollRef, axisProps]);

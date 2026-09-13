@@ -33,6 +33,8 @@ export type TColorPickerInputProps = {
   onDragStart?: TFunc;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
+  simple?: boolean;
+  title?: string;
   toggleVisibilityAriaLabel?: string;
   toggleVisibilityTooltip?: ReactNode;
   triggerAriaLabel?: string;
@@ -50,6 +52,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onDragStart,
   onPickerChange,
   onToggleVisibility,
+  simple = false,
+  title,
   toggleVisibilityAriaLabel,
   toggleVisibilityTooltip,
   triggerAriaLabel,
@@ -74,6 +78,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               side="top"
+              simple={simple}
+              title={title}
               trigger={<Color alpha={alpha} color={hex} cursor="default" />}
               triggerAriaLabel={triggerAriaLabel}
               triggerClassName={styles.ColorPickerInput__trigger}

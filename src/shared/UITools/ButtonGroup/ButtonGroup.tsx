@@ -29,7 +29,7 @@ export const ButtonGroup: FC<TButtonGroupProps> = ({ buttons, className = '', e2
       {buttons.map(({ active = false, ariaLabel, disabled = false, name, onClick, tooltip }) => (
         <Tooltip content={tooltip} key={kebabCase(name)}>
           <Button active={active} ariaLabel={ariaLabel} className={styles.ButtonGroup__button} disabled={disabled} onClick={onClick}>
-            <Icon name={name} size={12} />
+            <Icon name={name} size={24} />
           </Button>
         </Tooltip>
       ))}

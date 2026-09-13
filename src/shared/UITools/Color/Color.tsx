@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC } from 'react';
+import { CSSProperties, FC } from 'react';
 
 // styles
 import styles from './color.module.scss';
@@ -16,8 +16,10 @@ export const Color: FC<TColorProps> = ({ alpha, className = '', color, cursor = 
   return (
     <div className={cx(styles.Color, { [styles['Color--cursor-default']]: cursor === 'default' }, className)}>
       <div className={styles.Color__picker} style={{ backgroundColor: rgbToCssString({ ...rgb, a: 100 }) }} />
-      <div className={styles['Color__picker-alpha']} style={{ backgroundColor: rgbToCssString({ ...rgb, a: alpha }) }} />
-      <div className={styles['Color__picker-texture']} />
+      <div
+        className={styles['Color__picker-alpha']}
+        style={{ '--color-alpha-preview': rgbToCssString({ ...rgb, a: alpha }) } as CSSProperties}
+      />
     </div>
   );
 };

@@ -30,6 +30,35 @@ describe('ColorPicker snapshots', () => {
 });
 
 describe('ColorPicker behaviors', () => {
+  it('should pass a solid preview to a function trigger by default', () => {
+    // mock
+    const trigger = vi.fn().mockReturnValue(<button type="button">Open</button>);
+
+    // before
+    renderColorPicker({ onChange: vi.fn(), trigger, value: { alpha: 100, hex: '#ff0000' } });
+
+    // result
+    expect(trigger).toHaveBeenCalledWith({ type: 'solid', value: { alpha: 100, hex: '#ff0000' } });
+  });
+
+  it('should pass a gradient preview to a function trigger once the Gradient tab is selected', () => {
+    // mock
+    const trigger = vi.fn().mockReturnValue(<button type="button">Open</button>);
+
+    // before
+    renderColorPicker({ onChange: vi.fn(), trigger, value: { alpha: 100, hex: '#ff0000' } });
+    fireEvent.click(screen.getByText('Open'));
+
+    // action
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // result
+    const lastPreview = trigger.mock.calls[trigger.mock.calls.length - 1][0];
+
+    expect(lastPreview.type).toBe('gradient');
+    expect(lastPreview.style.background).toContain('linear-gradient');
+  });
+
   it('should call onChange with the clicked preset hex and alpha, overriding the current value', () => {
     // mock
     const onChange = vi.fn();
@@ -117,7 +146,7 @@ describe('ColorPicker behaviors', () => {
     expect(screen.getByRole('button', { name: 'Open' }).className).toContain('custom-trigger');
   });
 
-  it('should not switch to the gradient tab since it is disabled', () => {
+  it('should switch to the gradient panel when the gradient tab is clicked', () => {
     // before
     renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });
 
@@ -126,7 +155,58 @@ describe('ColorPicker behaviors', () => {
     fireEvent.click(screen.getByText('Gradient'));
 
     // result
-    expect(screen.getByText('Solid').className).toMatch(/active/);
+    expect(screen.getByText('Gradient').className).toMatch(/active/);
+    expect(screen.getByText('Stops')).toBeInTheDocument();
+  });
+
+  it('should hide the preset swatches footer on the gradient tab', () => {
+    // before
+    renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // result
+    expect(document.querySelector('[class*="Footer__colors"]')).not.toBeInTheDocument();
+  });
+
+  it('should show Custom/Libraries tabs instead of Solid/Gradient when simple is set', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      simple: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.getByText('Libraries')).toBeInTheDocument();
+    expect(screen.queryByText('Solid')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gradient')).not.toBeInTheDocument();
+  });
+
+  it('should show a plain title label instead of any tabs when title is set', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      title: 'Custom',
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.queryByText('Libraries')).not.toBeInTheDocument();
+    expect(screen.queryByText('Solid')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gradient')).not.toBeInTheDocument();
   });
 
   it('should report onDragStart/onDragEnd when dragging a slider inside the popover', () => {

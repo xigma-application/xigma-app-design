@@ -1,0 +1,20 @@
+@use '../../../../../styles/mixins/scrollbar';
+
+.GradientPanel {
+  @include scrollbar.scrollbar-hidden;
+
+  display: flex;
+  flex-direction: column;
+  max-height: 456px;
+  overflow-y: auto;
+  position: relative;
+
+  &__scrollThumb {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__scrollThumb {
+    opacity: 1;
+  }
+}

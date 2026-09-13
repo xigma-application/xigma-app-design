@@ -19,14 +19,20 @@ export type THeaderProps = {
   activeTab: ColorPickerTab;
   extra?: ReactNode;
   setActiveTab: TFunc<[TTab['name']]>;
+  tabs?: TTab[];
+  title?: string;
 };
 
-export const Header: FC<THeaderProps> = ({ activeTab, extra, setActiveTab }) => {
+export const Header: FC<THeaderProps> = ({ activeTab, extra, setActiveTab, tabs = TABS, title }) => {
   const { t } = useTranslation();
 
   return (
     <div className={styles.Header}>
-      <UITools.Tabs activeTab={activeTab} setActiveTab={setActiveTab} tabs={TABS} />
+      {title ? (
+        <span className={styles.Header__title}>{title}</span>
+      ) : (
+        <UITools.Tabs activeTab={activeTab} setActiveTab={setActiveTab} tabs={tabs} />
+      )}
       <div className={styles.Header__actions}>
         {extra}
         <Tooltip content={t('common.close')}>

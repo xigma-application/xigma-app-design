@@ -16,7 +16,7 @@ exports[`Header snapshots > should render Header 1`] = `
         Solid
       </div>
       <div
-        class="_Tabs__tab_3d6798 _Tabs__tab--disabled_3d6798"
+        class="_Tabs__tab_3d6798"
         data-no-drag="true"
         data-state="closed"
       >

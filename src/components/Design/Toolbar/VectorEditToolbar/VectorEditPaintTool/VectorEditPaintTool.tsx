@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -31,19 +31,24 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
   if (isActive) {
     return (
       <UITools.ColorPicker
+        freezePositionOnGrow
         headerExtra={<FaceBlendModeButton />}
         moveable
         onChange={handleChange}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
-        trigger={
+        trigger={(preview): ReactNode => (
           <>
             <div className={styles['VectorEditPaintTool__swatch-wrapper']}>
-              <UITools.Color alpha={value.alpha} className={styles.VectorEditPaintTool__swatch} color={value.hex} />
+              {preview.type === 'gradient' ? (
+                <div className={styles.VectorEditPaintTool__swatch} style={preview.style} />
+              ) : (
+                <UITools.Color alpha={preview.value.alpha} className={styles.VectorEditPaintTool__swatch} color={preview.value.hex} />
+              )}
             </div>
             <span className={cx(toolbarStyles.VectorEditToolbar__label, toolbarStyles['VectorEditToolbar__label--active'])}>{label}</span>
           </>
-        }
+        )}
         triggerAriaLabel={label}
         triggerClassName={styles.VectorEditPaintTool__trigger}
         value={value}

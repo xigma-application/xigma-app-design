@@ -14,19 +14,27 @@ import { useColorSampler } from './hooks/useColorSampler';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
+import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel';
 
 // others
 import { DEFAULT_ACTIVE_TAB, DEFAULT_PRESETS } from './constants';
+import { CUSTOM_LIBRARY_TABS } from './Header/constants';
 
 // styles
 import styles from './color-picker.module.scss';
 
 // types
-import { TColorPickerProps } from './types';
+import { ColorPickerTab } from './enums';
+import { TColorPickerPreview, TColorPickerProps } from './types';
+
+// utils
+import { getGradientPreviewStyle } from './utils/getGradientPreviewStyle';
 
 export const ColorPicker: FC<TColorPickerProps> = ({
   align,
+  avoidCollisions,
   className = '',
+  freezePositionOnGrow,
   headerExtra,
   moveable = false,
   onChange,
@@ -36,6 +44,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   presets = DEFAULT_PRESETS,
   side,
   sideOffset,
+  simple = false,
+  title,
   trigger,
   triggerAriaLabel,
   triggerClassName,
@@ -44,34 +54,49 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [activeTab, setActiveTab] = useState(DEFAULT_ACTIVE_TAB);
   const handleSetActiveTab = useSetActiveTab(setActiveTab);
   const colorModel = useColorModel(value, onChange);
+  const gradientPanel = useGradientPanel();
   const colorSampler = useColorSampler(colorModel.setHex);
   const handleInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
   const handleOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
+  const preview: TColorPickerPreview =
+    activeTab === ColorPickerTab.gradient
+      ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type), type: 'gradient' }
+      : { type: 'solid', value };
 
   return (
     <Popover
       align={align}
+      avoidCollisions={avoidCollisions}
       className={styles.ColorPicker__popover}
+      freezePositionOnGrow={freezePositionOnGrow}
       moveable={moveable}
       onInteractOutside={handleInteractOutside}
       onOpenChange={handleOpenChange}
       side={side}
       sideOffset={sideOffset}
-      trigger={trigger}
+      trigger={typeof trigger === 'function' ? trigger(preview) : trigger}
       triggerAriaLabel={triggerAriaLabel}
       triggerClassName={triggerClassName}
     >
       <div className={cx(styles.ColorPicker, className)}>
-        <Header activeTab={activeTab} extra={headerExtra} setActiveTab={handleSetActiveTab} />
+        <Header
+          activeTab={activeTab}
+          extra={headerExtra}
+          setActiveTab={handleSetActiveTab}
+          tabs={simple ? CUSTOM_LIBRARY_TABS : undefined}
+          title={title}
+        />
         <Body
+          activeTab={activeTab}
           alpha={value.alpha}
           colorModel={colorModel}
+          gradientPanel={gradientPanel}
           onCloseSampler={colorSampler.close}
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
           onOpenSampler={colorSampler.open}
         />
-        <Footer onSelectPreset={colorModel.setPreset} presets={presets} />
+        {activeTab === ColorPickerTab.solid && <Footer onSelectPreset={colorModel.setPreset} presets={presets} />}
       </div>
       {colorSampler.isActive && <ColorSampler onClose={colorSampler.close} onPick={colorSampler.pick} />}
     </Popover>

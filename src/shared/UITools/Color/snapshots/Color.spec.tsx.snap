@@ -11,10 +11,7 @@ exports[`Color snapshots > should render Color at full alpha 1`] = `
     />
     <div
       class="_Color__picker-alpha_a21594"
-      style="background-color: rgb(255, 0, 0);"
-    />
-    <div
-      class="_Color__picker-texture_a21594"
+      style="--color-alpha-preview: rgba(255, 0, 0, 1);"
     />
   </div>
 </DocumentFragment>
@@ -31,10 +28,7 @@ exports[`Color snapshots > should render Color at partial alpha 1`] = `
     />
     <div
       class="_Color__picker-alpha_a21594"
-      style="background-color: rgba(0, 0, 255, 0.5);"
-    />
-    <div
-      class="_Color__picker-texture_a21594"
+      style="--color-alpha-preview: rgba(0, 0, 255, 0.5);"
     />
   </div>
 </DocumentFragment>

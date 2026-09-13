@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`GradientBar snapshots > should render a thumb for each stop 1`] = `
+<DocumentFragment>
+  <div
+    class="_GradientBar_97e637"
+  >
+    <div
+      class="_GradientBar__wrapper_97e637"
+      data-no-drag="true"
+    >
+      <div
+        class="_GradientBar__gradient_97e637"
+        style="background-image: linear-gradient(to right, rgb(255, 255, 255) 0%, rgb(0, 0, 0) 100%);"
+      />
+      <button
+        aria-label="Stop marker"
+        class="_GradientBar__thumb_97e637 _GradientBar__thumb--selected_97e637"
+        style="left: 0%;"
+        type="button"
+      >
+        <span
+          class="_GradientBar__thumb-color_97e637"
+          style="background-color: rgb(255, 255, 255);"
+        />
+      </button>
+      <button
+        aria-label="Stop marker"
+        class="_GradientBar__thumb_97e637"
+        style="left: 100%;"
+        type="button"
+      >
+        <span
+          class="_GradientBar__thumb-color_97e637"
+          style="background-color: rgb(0, 0, 0);"
+        />
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;

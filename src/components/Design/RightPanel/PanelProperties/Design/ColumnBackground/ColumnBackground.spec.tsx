@@ -70,4 +70,17 @@ describe('ColumnBackground behaviors', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
     expect(readPaint().visible).toBe(false);
   });
+
+  it('should show a plain "Custom" title in the color picker header, without Solid/Gradient tabs', () => {
+    // before
+    renderColumnBackground();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Background color'));
+
+    // result
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.queryByText('Solid')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gradient')).not.toBeInTheDocument();
+  });
 });

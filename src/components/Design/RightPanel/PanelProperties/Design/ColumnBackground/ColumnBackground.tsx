@@ -27,6 +27,8 @@ const ColumnBackground: FC = () => {
       onDragStart={onDragStart}
       onPickerChange={onPickerChange}
       onToggleVisibility={onToggleVisibility}
+      simple
+      title={t('colorPicker.tabs.custom')}
       toggleVisibilityAriaLabel={t(`${translationNameSpace}.background.toggleVisibilityAriaLabel`)}
       toggleVisibilityTooltip={t(`${translationNameSpace}.background.toggleVisibilityTooltip`)}
       triggerAriaLabel={t(`${translationNameSpace}.background.colorTriggerAriaLabel`)}

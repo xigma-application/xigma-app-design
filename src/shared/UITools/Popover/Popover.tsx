@@ -11,6 +11,7 @@ import PopoverScrollArea from './PopoverScrollArea/PopoverScrollArea';
 import PopoverSeparator from './PopoverSeparator/PopoverSeparator';
 
 // hooks
+import { useFreezePositionOnGrow } from './hooks/useFreezePositionOnGrow';
 import { usePopoverDrag } from './hooks/usePopoverDrag';
 
 // styles
@@ -22,6 +23,7 @@ export type TPopoverProps = {
   avoidCollisions?: boolean;
   children: ReactNode;
   className?: string;
+  freezePositionOnGrow?: boolean;
   moveable?: boolean;
   onInteractOutside?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
@@ -41,6 +43,7 @@ export const Popover: FC<TPopoverProps> = ({
   avoidCollisions = true,
   children,
   className = '',
+  freezePositionOnGrow = false,
   moveable = false,
   onInteractOutside,
   onOpenChange,
@@ -54,6 +57,8 @@ export const Popover: FC<TPopoverProps> = ({
   triggerTooltip,
 }) => {
   const { handleOpenChange, offset, onPointerDown, onPointerMove, onPointerUp } = usePopoverDrag(moveable, onOpenChange);
+  const contentRef = useFreezePositionOnGrow(freezePositionOnGrow);
+  const content = scrollable ? <PopoverScrollArea>{children}</PopoverScrollArea> : children;
 
   return (
     <PopoverPrimitive.Root onOpenChange={handleOpenChange} open={open}>
@@ -72,11 +77,12 @@ export const Popover: FC<TPopoverProps> = ({
           onPointerDown={moveable ? onPointerDown : undefined}
           onPointerMove={moveable ? onPointerMove : undefined}
           onPointerUp={moveable ? onPointerUp : undefined}
+          ref={contentRef}
           side={side}
           sideOffset={sideOffset}
           style={moveable ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : undefined}
         >
-          {scrollable ? <PopoverScrollArea>{children}</PopoverScrollArea> : children}
+          {content}
         </PopoverPrimitive.Content>
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>

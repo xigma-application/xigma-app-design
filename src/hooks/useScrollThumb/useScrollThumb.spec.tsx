@@ -119,6 +119,24 @@ describe('useScrollThumb behaviors', () => {
     expect(result.current.thumbSizeRatio).toBe(1);
   });
 
+  it('should re-measure when a child is added to or removed from the scroll element, without a resize or scroll event', async () => {
+    // mock
+    const scrollElement = createScrollElement(84, 168, 0);
+    const scrollRef: RefObject<HTMLDivElement | null> = { current: scrollElement };
+
+    // before
+    const { result } = renderHook(() => useScrollThumb(scrollRef));
+
+    expect(result.current.thumbSizeRatio).toBeCloseTo(0.5);
+
+    // action — a new row is appended (e.g. a gradient stop), growing the real content height
+    Object.defineProperty(scrollElement, 'scrollHeight', { configurable: true, value: 336 });
+    scrollElement.appendChild(document.createElement('div'));
+
+    // result
+    await vi.waitFor(() => expect(result.current.thumbSizeRatio).toBeCloseTo(0.25));
+  });
+
   it('should also observe the content wrapper so the thumb tracks content that grows', () => {
     // mock
     const scrollElement = createScrollElement(84, 336, 0);

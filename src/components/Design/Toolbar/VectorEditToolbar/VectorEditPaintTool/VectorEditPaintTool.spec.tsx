@@ -81,6 +81,20 @@ describe('VectorEditPaintTool', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('should show a gradient preview in the trigger swatch once the Gradient tab is selected', () => {
+    // before
+    renderVectorEditPaintTool(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
+
+    // action
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // result — the exact swatch, not its wrapper (whose class also matches the "swatch" substring)
+    const swatch = document.querySelector('[class*="VectorEditPaintTool__swatch_"]') as HTMLElement;
+
+    expect(swatch.style.background).toContain('linear-gradient');
+  });
+
   it('should dispatch setPaint when a preset is picked from the open panel', () => {
     // before
     renderVectorEditPaintTool(true);

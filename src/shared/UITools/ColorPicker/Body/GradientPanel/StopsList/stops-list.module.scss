@@ -1,0 +1,19 @@
+.StopsList {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 2px;
+  padding-left: 8px;
+
+  &__header {
+    align-items: center;
+    color: var(--color-neutral-2);
+    display: flex;
+    font-size: 11px;
+    height: 32px;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    margin-top: 8px;
+    padding: 0 8px;
+  }
+}

@@ -1,23 +1,39 @@
 import { FC } from 'react';
 
 // components
-import SolidPanel, { TSolidPanelProps } from './SolidPanel/SolidPanel';
+import GradientPanel from './GradientPanel/GradientPanel';
+import SolidPanel from './SolidPanel/SolidPanel';
 
 // styles
 import styles from './body.module.scss';
 
-export type TBodyProps = TSolidPanelProps;
+// types
+import { ColorPickerTab } from '../enums';
+import { TBodyProps } from './types';
 
-export const Body: FC<TBodyProps> = ({ alpha, colorModel, onCloseSampler, onDragEnd, onDragStart, onOpenSampler }) => (
+export const Body: FC<TBodyProps> = ({
+  activeTab,
+  alpha,
+  colorModel,
+  gradientPanel,
+  onCloseSampler,
+  onDragEnd,
+  onDragStart,
+  onOpenSampler,
+}) => (
   <div className={styles.Body}>
-    <SolidPanel
-      alpha={alpha}
-      colorModel={colorModel}
-      onCloseSampler={onCloseSampler}
-      onDragEnd={onDragEnd}
-      onDragStart={onDragStart}
-      onOpenSampler={onOpenSampler}
-    />
+    {activeTab === ColorPickerTab.gradient ? (
+      <GradientPanel gradientPanel={gradientPanel} />
+    ) : (
+      <SolidPanel
+        alpha={alpha}
+        colorModel={colorModel}
+        onCloseSampler={onCloseSampler}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        onOpenSampler={onOpenSampler}
+      />
+    )}
   </div>
 );
 

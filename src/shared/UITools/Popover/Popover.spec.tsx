@@ -146,6 +146,24 @@ describe('Popover behaviors', () => {
     expect(screen.queryByText('Trigger tooltip')).not.toBeInTheDocument();
   });
 
+  it('should render normally when freezePositionOnGrow is set, without changing the content markup', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(
+      <Popover freezePositionOnGrow trigger={<span>Open</span>}>
+        Popover content
+      </Popover>,
+    );
+
+    // action
+    await user.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.getByText('Popover content')).toBeInTheDocument();
+  });
+
   it('should wrap its children in a PopoverScrollArea when scrollable', async () => {
     // mock
     const user = userEvent.setup();

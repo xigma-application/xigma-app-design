@@ -1,0 +1,18 @@
+.GradientActions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  height: 48px;
+  justify-content: space-between;
+  padding: 0 16px;
+
+  &__type-dropdown {
+    width: 96px;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 4px;
+  }
+}
