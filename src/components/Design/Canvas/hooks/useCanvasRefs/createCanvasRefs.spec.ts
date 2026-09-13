@@ -11,6 +11,7 @@ describe('createCanvasRefs behaviors', () => {
 
     // result
     expect(refs).toEqual({
+      blendMode: { previewRef: { current: null } },
       canvasRef: { current: null },
       colorSampleRequestRef: { current: null },
       cornerRadius: {

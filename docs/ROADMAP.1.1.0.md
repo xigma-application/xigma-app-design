@@ -226,8 +226,12 @@ instead of a plain circular corner.
 The Blend mode button's menu is now real too: picking a mode actually changes how the shape mixes
 with whatever is behind it, the same way it works in Figma — a Frame or Group set to anything other
 than the default "Pass through" also affects how its children blend with things outside the group,
-not just the group itself. Backgrounds/fills getting their own separate blend mode is a later step,
-not part of this one.
+not just the group itself. The button's icon fills in once a mode other than the default is picked,
+and its tooltip changes from "Apply blend mode" to "Remove blend mode" to match — clicking it again
+at that point clears the mode straight away instead of reopening the menu; opening the menu again
+needs one more click. Hovering an option in the menu also now previews it live on the shape, the same
+way Figma does, without actually committing anything until it's clicked. Backgrounds/fills getting
+their own separate blend mode is a later step, not part of this one.
 
 ## Related
 

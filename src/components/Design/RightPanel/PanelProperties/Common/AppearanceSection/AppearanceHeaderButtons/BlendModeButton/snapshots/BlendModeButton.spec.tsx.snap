@@ -6,8 +6,10 @@ exports[`BlendModeButton snapshots > should render the trigger with the menu clo
     aria-expanded="false"
     aria-haspopup="dialog"
     aria-label="Apply blend mode"
-    class="_ButtonMenu_7516ba"
+    aria-pressed="false"
+    class="_Button_b88d2e"
     data-state="closed"
+    style="padding: 5.5px;"
     type="button"
   >
     <svg

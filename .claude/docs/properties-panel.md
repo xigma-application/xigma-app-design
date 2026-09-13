@@ -51,16 +51,39 @@ node's folder. Today:
   (0-1 fraction, `CornerSmoothingPopover/hooks/useCornerSmoothingPopover`, same commit/clamp shape
   as `useOpacity`) that reshapes all four corners' curve at once — real geometry, not per-corner
   (`canvas-rendering-pipeline.md`'s corner-radius section). `AppearanceHeaderButtons/BlendModeButton/`
-  opens a `UITools.ButtonMenu` listing every CSS/Figma-style blend mode (`BlendModeMenu`, options from
-  `types/design/constants.ts`'s `BLEND_MODE_GROUPS`, grouped with `PopoverSeparator` exactly like the
-  screenshot spec — Pass through/Normal, then the darken/lighten/contrast/component families, then the
-  HSL family), each a `PopoverItem` with its own checkmark. `useBlendModeMenu` reads/writes the
-  selected node's own `TBaseNode.blendMode?: BlendMode` via `updateNode` (same commit shape as
-  `useOpacity`/`useCornerSmoothingPopover`), defaulting to `passThrough` when unset — real node data,
-  and really rendered (`canvas-rendering-pipeline.md` §11: layer isolation + full CSS/W3C blend-formula
-  compositing, not a placeholder). The `BlendMode` enum + `BLEND_MODE_GROUPS` constant were
-  deliberately put in the global `types/design/` layer (not nested under this button's own folder)
-  because blend mode is a Design-domain concept other future features (e.g. per-fill blend mode —
+  opens a `UITools.Popover` (not `ButtonMenu` — it needs full open-state control, see below) listing
+  every CSS/Figma-style blend mode (`BlendModeMenu`, options from `types/design/constants.ts`'s
+  `BLEND_MODE_GROUPS`, grouped with `PopoverSeparator` exactly like the screenshot spec — Pass
+  through/Normal, then the darken/lighten/contrast/component families, then the HSL family), each a
+  `PopoverItem` with its own checkmark. State ownership sits at the **button**, not the menu —
+  `useBlendModeButton` reads/writes the selected node's own `TBaseNode.blendMode?: BlendMode` via
+  `updateNode` (same commit shape as `useOpacity`/`useCornerSmoothingPopover`), defaulting to
+  `passThrough` when unset, and `BlendModeMenu` is purely presentational (`nodeId`/`onSelect`/`value`
+  props) so the button can react to clicks on its own trigger without the menu ever mounting. Three
+  behaviors layer on top of the plain read/write: (1) the trigger icon swaps `DropEmpty` ⇄
+  `DropFilled` depending on `value !== passThrough`, with the tooltip swapping in lockstep
+  (`tooltip.addBlendMode` / `tooltip.removeBlendMode` — a `tooltip.*` namespace, not nested under
+  `blendMode.*`, since the user asked for it split out that way); (2) clicking the trigger while a
+  real blend mode is set **doesn't reopen the menu — it resets to Pass through instead**, requiring a
+  second click to actually reopen once back at the default. Both live entirely in `onOpenChange`, not
+  a raw click handler: `UITools.Popover` is used in fully-controlled mode (`open`/`onOpenChange`) and
+  Radix calls `onOpenChange(true)` on every trigger click regardless of the reason, so the hook just
+  intercepts that callback (`nextOpen && !isDefault` → commit the reset, don't call `setOpen(true)`)
+  instead of fighting Radix over `preventDefault` on a `UITools.Button` whose `onClick` prop is
+  deliberately typed as a zero-arg `TFunc` (no native event ever reaches it) — the callback-level
+  intercept works with that constraint instead of against it. (3) **Hovering** an option previews it
+  live on the canvas without committing — `useBlendModeHoverPreview` (menu-side) writes
+  `{ blendMode, nodeId }` onto a new ephemeral `refs.blendMode.previewRef` on `mouseenter`/clears it on
+  `mouseleave` (each `PopoverItem` sits inside its own plain `<div>` wrapper carrying those handlers,
+  rather than extending the shared `PopoverItem` component itself); `getNodeBlendMode.ts`
+  (`canvas-rendering-pipeline.md` §11) now checks that ref before falling back to the node's own
+  committed field, so the renderer can't tell a preview from a real value — same "ephemeral ref the
+  render loop reads fresh every frame, never touches Redux" shape as every other in-progress/drag
+  visual in this codebase. The button clears the ref itself whenever the popover closes for any
+  reason (picking a value, clicking outside, the reset-click above), so a preview can never outlive
+  its popover. The `BlendMode` enum + `BLEND_MODE_GROUPS` constant were deliberately put in the global
+  `types/design/` layer (not nested under this button's own folder) because blend mode is a
+  Design-domain concept other future features (e.g. per-fill blend mode —
   deliberately *not* built alongside this; `TPaintBase` in `types/design/paint/types.ts` has no
   `blendMode` of its own yet) will need the same option list for. The eye button dispatches
   the pre-existing `toggleNodeHidden` (already cascades to descendants via

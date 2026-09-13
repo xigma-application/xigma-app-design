@@ -1,4 +1,5 @@
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { getNodeBlendMode } from '../getNodeBlendMode';
 
 // types
@@ -8,17 +9,35 @@ import { TSceneNode } from 'types/design/types';
 describe('getNodeBlendMode', () => {
   it("should read a box node's own blendMode", () => {
     // before
-    const node = { blendMode: BlendMode.multiply, type: NodeType.rectangle } as unknown as TSceneNode;
+    const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
 
     // result
-    expect(getNodeBlendMode(node)).toBe(BlendMode.multiply);
+    expect(getNodeBlendMode(node, createCanvasRefs())).toBe(BlendMode.multiply);
   });
 
   it('should return undefined for a node type with no blendMode field', () => {
     // before
-    const node = { type: NodeType.line } as unknown as TSceneNode;
+    const node = { id: 'node-1', type: NodeType.line } as unknown as TSceneNode;
 
     // result
-    expect(getNodeBlendMode(node)).toBeUndefined();
+    expect(getNodeBlendMode(node, createCanvasRefs())).toBeUndefined();
+  });
+
+  it('should prefer a live hover preview over the committed blendMode', () => {
+    // before
+    const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-1' } } } });
+
+    // result
+    expect(getNodeBlendMode(node, refs)).toBe(BlendMode.screen);
+  });
+
+  it('should ignore a preview meant for a different node', () => {
+    // before
+    const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-2' } } } });
+
+    // result
+    expect(getNodeBlendMode(node, refs)).toBe(BlendMode.multiply);
   });
 });

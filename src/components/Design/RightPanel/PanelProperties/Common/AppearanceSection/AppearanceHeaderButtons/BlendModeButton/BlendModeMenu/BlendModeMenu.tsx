@@ -5,19 +5,26 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // hooks
-import { useBlendModeMenu } from './hooks/useBlendModeMenu';
+import { useBlendModeHoverPreview } from './hooks/useBlendModeHoverPreview';
 
 // others
 import { translationNameSpace } from '../../../constants';
 
 // types
 import { BLEND_MODE_GROUPS } from 'types/design/constants';
+import { BlendMode } from 'types/design/enums';
 
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
-export const BlendModeMenu: FC = () => {
+export type TBlendModeMenuProps = {
+  nodeId: string;
+  onSelect: (blendMode: BlendMode) => TFunc;
+  value: BlendMode;
+};
+
+export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ nodeId, onSelect, value }) => {
   const { t } = useTranslation();
-  const { selectBlendMode, value } = useBlendModeMenu();
+  const { onOptionMouseEnter, onOptionMouseLeave } = useBlendModeHoverPreview(nodeId);
 
   return (
     <Fragment>
@@ -25,12 +32,13 @@ export const BlendModeMenu: FC = () => {
         <Fragment key={group[0]}>
           {index > 0 && <PopoverSeparator />}
           {group.map((blendMode) => (
-            <PopoverItem
-              key={blendMode}
-              label={t(`${translationNameSpace}.blendMode.options.${blendMode}`)}
-              onClick={selectBlendMode(blendMode)}
-              selected={value === blendMode}
-            />
+            <div key={blendMode} onMouseEnter={onOptionMouseEnter(blendMode)} onMouseLeave={onOptionMouseLeave}>
+              <PopoverItem
+                label={t(`${translationNameSpace}.blendMode.options.${blendMode}`)}
+                onClick={onSelect(blendMode)}
+                selected={value === blendMode}
+              />
+            </div>
           ))}
         </Fragment>
       ))}

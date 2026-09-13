@@ -13,7 +13,7 @@ import { getNodeBlendMode } from '../getNodeBlendMode';
 import { renderIntoTarget } from '../renderIntoTarget';
 
 export const renderIsolatedBlendNode = (renderer: TMaskRenderer, node: TSceneNode, target: TRenderTarget | null): void => {
-  const { context, pool } = renderer;
+  const { context, pool, refs } = renderer;
 
   bindTarget(renderer, target);
 
@@ -22,7 +22,7 @@ export const renderIsolatedBlendNode = (renderer: TMaskRenderer, node: TSceneNod
 
   renderIntoTarget(renderer, contentTarget, () => dispatchNodeType(renderer, node, contentTarget));
   bindTarget(renderer, target);
-  compositeBlend(context, contentTarget.texture, backdrop.texture, getNodeBlendMode(node) ?? BlendMode.normal);
+  compositeBlend(context, contentTarget.texture, backdrop.texture, getNodeBlendMode(node, refs) ?? BlendMode.normal);
 
   pool.release(contentTarget);
   pool.release(backdrop);

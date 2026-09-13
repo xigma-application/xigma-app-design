@@ -10,6 +10,7 @@ import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensio
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
+import { BlendMode } from 'types/design/enums';
 import { TGridTrackAxis } from 'store/design/utils/autoLayout/gridTracks/types';
 import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
@@ -472,6 +473,12 @@ export type TShapeBuilderRefs = {
   vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
 };
 
+export type TBlendModePreview = { blendMode: BlendMode; nodeId: string };
+
+export type TBlendModeRefs = {
+  previewRef: RefObject<TBlendModePreview | null>;
+};
+
 export type TFrameNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
@@ -546,6 +553,7 @@ export type TSmartSelectionRefs = {
 };
 
 export type TCanvasRefs = {
+  blendMode: TBlendModeRefs;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
   cornerRadius: TCornerRadiusRefs;

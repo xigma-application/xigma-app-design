@@ -8,6 +8,7 @@ import { useVectorCutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/h
 import { useVectorEditRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorEditRefs/useVectorEditRefs';
 import { useVectorEraseRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorEraseRefs/useVectorEraseRefs';
 import { useVectorMultiSelectRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorMultiSelectRefs/useVectorMultiSelectRefs';
+import { useBlendModeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useBlendModeRefs/useBlendModeRefs';
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
@@ -36,6 +37,7 @@ import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TDraftEntity } from 'types/design/types';
 
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
+  const blendModeRefs = useBlendModeRefs();
   const cornerRadiusRefs = useCornerRadiusRefs();
   const ellipseArcRefs = useEllipseArcRefs();
   const frameNameRefs = useFrameNameRefs();
@@ -66,6 +68,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
 
   const refs = useMemo<TCanvasRefs>(
     () => ({
+      blendMode: blendModeRefs,
       canvasRef,
       colorSampleRequestRef,
       cornerRadius: cornerRadiusRefs,
@@ -95,6 +98,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       vertexCount: vertexCountRefs,
     }),
     [
+      blendModeRefs,
       cornerRadiusRefs,
       ellipseArcRefs,
       frameNameRefs,

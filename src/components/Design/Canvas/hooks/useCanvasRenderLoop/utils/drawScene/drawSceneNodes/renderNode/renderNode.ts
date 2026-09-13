@@ -11,7 +11,7 @@ export const renderNode = (renderer: TMaskRenderer, id: string, target: TRenderT
   const node = renderer.sceneNodeById.get(id);
 
   if (node) {
-    if (hasRealBlendMode(node)) {
+    if (hasRealBlendMode(node, renderer.refs)) {
       renderIsolatedBlendNode(renderer, node, target);
     } else {
       dispatchNodeType(renderer, node, target);

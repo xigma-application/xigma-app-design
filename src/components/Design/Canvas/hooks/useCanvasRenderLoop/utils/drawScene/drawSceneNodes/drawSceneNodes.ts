@@ -32,7 +32,7 @@ export const drawSceneNodes = (
       (node) =>
         node.type === NodeType.mask ||
         (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0) ||
-        hasRealBlendMode(node),
+        hasRealBlendMode(node, refs),
     )
   ) {
     sceneNodes.forEach(paintLeaf);
@@ -45,6 +45,7 @@ export const drawSceneNodes = (
       hoistedIds: getHoistedDragIds(refs, sceneNodeById),
       paintLeaf,
       pool: imageContext.renderTargetPool,
+      refs,
       sceneNodeById,
     };
 

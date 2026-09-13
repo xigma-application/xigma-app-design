@@ -1,4 +1,5 @@
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TSceneNode } from 'types/design/types';
@@ -9,5 +10,6 @@ export type TMaskRenderer = {
   hoistedIds: Set<string>;
   paintLeaf: (node: TSceneNode) => void;
   pool: TRenderTargetPool;
+  refs: TCanvasRefs;
   sceneNodeById: Map<string, TSceneNode>;
 };

@@ -643,8 +643,17 @@ in screen space afterwards, unchanged.
 
 **Blend mode (`TBaseNode.blendMode?: BlendMode`, every node type except `TLineNode`/`TVectorNode` —
 same carve-out as opacity, `getNodeBlendMode.ts` narrows via `'blendMode' in node`) reuses this same
-tree-walker rather than adding a second one.** `renderNode.ts` — every node, leaf or container, drag
-or committed — checks `hasRealBlendMode(node)` before doing anything else: `undefined`/`Pass through`
+tree-walker rather than adding a second one.** `TMaskRenderer` carries `refs: TCanvasRefs` (threaded
+in from `drawSceneNodes.ts`, which already had `refs` as its own param) purely so this mechanism can
+reach `refs.blendMode.previewRef` — the properties-panel's hover-preview ephemeral ref
+(`properties-panel.md`'s BlendModeButton section) — `getNodeBlendMode.ts` checks
+`getBlendModePreview(refs, node.id)` first and only falls back to the node's own committed field when
+nothing is being previewed for that id, so a live hover and a committed value are indistinguishable to
+the renderer. `hasRealBlendMode(node, refs)` (same preview-aware check) also gates
+`drawSceneNodes.ts`'s own top-level fast-path test, alongside the pre-existing mask/clip-content
+checks — otherwise a scene with zero *committed* blend modes would never even enter the tree-walk
+while something is merely being previewed. `renderNode.ts` — every node, leaf or container, drag
+or committed — checks `hasRealBlendMode(node, refs)` before doing anything else: `undefined`/`Pass through`
 dispatches straight to `dispatchNodeType` exactly as before (zero behavioral change, this is the
 overwhelmingly common case); any other mode routes through `renderIsolatedBlendNode.ts` instead,
 which (1) captures whatever is *already* drawn into the current target as a `u_backdrop` texture

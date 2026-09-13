@@ -19,6 +19,7 @@ describe('CanvasRefsProvider behaviors', () => {
 
     // result
     expect(result.current).toEqual({
+      blendMode: { previewRef: { current: null } },
       canvasRef: { current: null },
       colorSampleRequestRef: { current: null },
       cornerRadius: {
@@ -35,6 +36,7 @@ describe('CanvasRefsProvider behaviors', () => {
       frameName: { editingLabelRef: { current: null } },
       guides: { draggingGuideRef: { current: null }, hoveredGuideRef: { current: null }, selectedGuideRef: { current: null } },
       hover: {
+        editingGridTrackValueRef: { current: null },
         hoverRef: { current: null },
         hoveredAutoLayoutGapRef: { current: null },
         hoveredAutoLayoutPaddingBandsRef: { current: null },

@@ -1,4 +1,5 @@
 // hooks
+import { createBlendModeRefs } from './hooks/useBlendModeRefs/createBlendModeRefs';
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
 import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
@@ -32,6 +33,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   colorSampleRequestRef: { current: null },
   draftRef: { current: null },
   ...overrides,
+  blendMode: createBlendModeRefs(overrides.blendMode),
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
   ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
   frameName: createFrameNameRefs(overrides.frameName),

@@ -4,6 +4,7 @@ import { TMaskRenderer } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { renderFrameNode } from '../renderFrameNode';
 import { renderGroupNode } from '../renderGroupNode';
 import { renderIsolatedBlendNode } from '../renderIsolatedBlendNode';
@@ -20,6 +21,7 @@ vi.mock('../renderIsolatedBlendNode', () => ({ renderIsolatedBlendNode: vi.fn() 
 const buildRenderer = (nodes: Record<string, Partial<TSceneNode>>): TMaskRenderer =>
   ({
     paintLeaf: vi.fn(),
+    refs: createCanvasRefs(),
     sceneNodeById: new Map(Object.entries(nodes) as [string, TSceneNode][]),
   }) as unknown as TMaskRenderer;
 

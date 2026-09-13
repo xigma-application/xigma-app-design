@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 import { bindTarget } from '../../bindTarget';
 import { captureBackdropTexture } from '../../captureBackdropTexture';
 import { compositeBlend } from '../../../compositeBlend';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { dispatchNodeType } from '../dispatchNodeType';
 import { renderIntoTarget } from '../../renderIntoTarget';
 import { renderIsolatedBlendNode } from '../renderIsolatedBlendNode';
@@ -29,8 +30,8 @@ describe('renderIsolatedBlendNode', () => {
     const backdrop = { tag: 'backdrop-target', texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => contentTarget), release: vi.fn() } as unknown as TMaskRenderer['pool'];
     const context = { tag: 'context' } as unknown as TMaskRenderer['context'];
-    const renderer = { context, pool } as unknown as TMaskRenderer;
-    const node = { blendMode: BlendMode.multiply, type: NodeType.rectangle } as unknown as TSceneNode;
+    const renderer = { context, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
+    const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
     const target = { tag: 'outer-target' } as unknown as TRenderTarget;
 
     (captureBackdropTexture as unknown as ReturnType<typeof vi.fn>).mockReturnValue(backdrop);
@@ -54,8 +55,8 @@ describe('renderIsolatedBlendNode', () => {
     const contentTarget = { tag: 'content-target' } as unknown as TRenderTarget;
     const backdrop = { texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => contentTarget), release: vi.fn() } as unknown as TMaskRenderer['pool'];
-    const renderer = { context: {}, pool } as unknown as TMaskRenderer;
-    const node = { type: NodeType.line } as unknown as TSceneNode;
+    const renderer = { context: {}, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
+    const node = { id: 'node-1', type: NodeType.line } as unknown as TSceneNode;
 
     (captureBackdropTexture as unknown as ReturnType<typeof vi.fn>).mockReturnValue(backdrop);
 

@@ -188,6 +188,65 @@ test.describe('Design panels — Appearance section', () => {
     expect(after.equals(before)).toBe(false);
   });
 
+  test('clicking the blend mode trigger again resets it to Pass through instead of reopening the menu', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-blend-mode-reset');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Apply blend mode').click();
+    await page.getByText('Multiply', { exact: true }).click();
+
+    const id = await readFirstNodeId(page);
+
+    expect((await readNode(page, id)).blendMode).toBe('multiply');
+
+    // action — clicking again resets instead of opening the menu
+    await page.getByLabel('Apply blend mode').click();
+
+    expect((await readNode(page, id)).blendMode).toBe('passThrough');
+    await expect(page.getByText('Luminosity')).not.toBeVisible();
+
+    // action — the next click now opens the menu again, since it's back to default
+    await page.getByLabel('Apply blend mode').click();
+
+    await expect(page.getByText('Luminosity')).toBeVisible();
+  });
+
+  test('hovering a blend mode option previews it on the canvas without committing until clicked', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-blend-mode-hover-preview');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const before = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Apply blend mode').click();
+    await page.getByText('Screen', { exact: true }).hover();
+
+    const duringHover = await designPage.canvas.screenshot();
+
+    // result — the canvas already reflects the hovered mode, but nothing is committed yet
+    expect(duringHover.equals(before)).toBe(false);
+    expect((await readNode(page, id)).blendMode ?? 'passThrough').toBe('passThrough');
+
+    // action — closing the popover (via its own trigger, still at the default value) without
+    // clicking an option should drop the preview
+    await page.getByLabel('Apply blend mode').click();
+    await page.waitForTimeout(100);
+
+    const afterUnhover = await designPage.canvas.screenshot();
+
+    // result — the preview is gone (visibly different from the hovered state) and still uncommitted
+    expect(afterUnhover.equals(duringHover)).toBe(false);
+    expect((await readNode(page, id)).blendMode ?? 'passThrough').toBe('passThrough');
+  });
+
   test("reducing a frame's opacity visually dims its child shape too", async ({ page }) => {
     const designPage = new DesignPage(page);
 

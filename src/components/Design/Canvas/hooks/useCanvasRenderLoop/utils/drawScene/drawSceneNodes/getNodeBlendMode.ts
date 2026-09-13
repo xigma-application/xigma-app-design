@@ -1,5 +1,10 @@
 // types
 import { BlendMode } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
-export const getNodeBlendMode = (node: TSceneNode): BlendMode | undefined => ('blendMode' in node ? node.blendMode : undefined);
+// utils
+import { getBlendModePreview } from 'utils/canvas/blendMode/getBlendModePreview';
+
+export const getNodeBlendMode = (node: TSceneNode, refs: TCanvasRefs): BlendMode | undefined =>
+  getBlendModePreview(refs, node.id) ?? ('blendMode' in node ? node.blendMode : undefined);

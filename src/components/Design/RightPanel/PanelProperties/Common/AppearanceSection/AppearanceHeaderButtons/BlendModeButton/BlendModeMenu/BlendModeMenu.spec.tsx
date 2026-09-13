@@ -1,49 +1,38 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { Provider } from 'react-redux';
+import { FC } from 'react';
 
 // components
 import BlendModeMenu from './BlendModeMenu';
 
-// store
-import { addNode, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
-import { store } from 'store';
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { BlendMode } from 'types/design/enums';
+import { TBlendModePreview } from 'types/design/canvas/types';
 
-const renderBlendModeMenu = (): ReturnType<typeof render> =>
-  render(
-    <Provider store={store}>
-      <PopoverPrimitive.Root open>
-        <BlendModeMenu />
-      </PopoverPrimitive.Root>
-    </Provider>,
-  );
+let capturedPreviewRef: { current: TBlendModePreview | null } | null = null;
 
-const addAndSelectRectangle = (): string => {
-  store.dispatch(
-    addNode({
-      fill: '#ff0000',
-      height: 10,
-      name: 'Rectangle',
-      parentId: null,
-      rotation: 0,
-      type: NodeType.rectangle,
-      width: 10,
-      x: 0,
-      y: 0,
-    }),
-  );
+const RefsProbe: FC = () => {
+  capturedPreviewRef = useCanvasRefsContext().blendMode.previewRef;
 
-  const { rootOrder } = selectActivePage(store.getState());
-  const id = rootOrder[rootOrder.length - 1];
-
-  store.dispatch(setSelection([id]));
-
-  return id;
+  return null;
 };
+
+const renderBlendModeMenu = (
+  value: BlendMode = BlendMode.passThrough,
+  onSelect: TFunc<[BlendMode], TFunc> = () => vi.fn(),
+): ReturnType<typeof render> =>
+  render(
+    <CanvasRefsProvider>
+      <RefsProbe />
+      <PopoverPrimitive.Root open>
+        <BlendModeMenu nodeId="node-1" onSelect={onSelect} value={value} />
+      </PopoverPrimitive.Root>
+    </CanvasRefsProvider>,
+  );
 
 describe('BlendModeMenu snapshots', () => {
   it('should render every blend mode option grouped with separators', () => {
@@ -56,10 +45,6 @@ describe('BlendModeMenu snapshots', () => {
 });
 
 describe('BlendModeMenu behaviors', () => {
-  afterEach(() => {
-    store.dispatch(setSelection([]));
-  });
-
   it('should render every blend mode option', () => {
     // before
     renderBlendModeMenu();
@@ -90,10 +75,10 @@ describe('BlendModeMenu behaviors', () => {
     });
   });
 
-  it('should mark Pass through as selected by default, and no other option', () => {
+  it('should mark the given value as selected, and no other option', () => {
     // before
-    renderBlendModeMenu();
-    const selectedItem = screen.getByText('Pass through').closest('div')!.parentElement!;
+    renderBlendModeMenu(BlendMode.multiply);
+    const selectedItem = screen.getByText('Multiply').closest('div')!.parentElement!;
     const otherItem = screen.getByText('Normal').closest('div')!.parentElement!;
 
     // result — PopoverItem renders a Check icon with opacity 1 when selected, 0 otherwise
@@ -101,19 +86,42 @@ describe('BlendModeMenu behaviors', () => {
     expect(otherItem.querySelector('span[style*="opacity: 1"]')).toBeNull();
   });
 
-  it('should move the selection to the clicked option and commit it onto the node', () => {
-    // before
-    const id = addAndSelectRectangle();
+  it('should call onSelect with the clicked blend mode', () => {
+    // mock
+    const onSelect = vi.fn(() => vi.fn());
 
-    renderBlendModeMenu();
+    // before
+    renderBlendModeMenu(BlendMode.passThrough, onSelect);
 
     // action
-    fireEvent.click(screen.getByText('Multiply'));
+    fireEvent.click(screen.getByText('Screen'));
 
     // result
-    const selectedItem = screen.getByText('Multiply').closest('div')!.parentElement!;
+    expect(onSelect).toHaveBeenCalledWith(BlendMode.screen);
+  });
 
-    expect(selectedItem.querySelector('span[style*="opacity: 1"]')).not.toBeNull();
-    expect((selectActivePage(store.getState()).nodes[id] as { blendMode?: string }).blendMode).toBe('multiply');
+  it('should preview the hovered blend mode for the given node without changing the actual value', () => {
+    // before
+    renderBlendModeMenu();
+
+    // action — the hover wrapper sits one level above PopoverItem's own root div
+    fireEvent.mouseEnter(screen.getByText('Multiply').closest('div')!.parentElement!.parentElement!);
+
+    // result
+    expect(capturedPreviewRef?.current).toEqual({ blendMode: BlendMode.multiply, nodeId: 'node-1' });
+  });
+
+  it('should clear the preview when the pointer leaves the option', () => {
+    // before
+    renderBlendModeMenu();
+    const row = screen.getByText('Multiply').closest('div')!.parentElement!.parentElement!;
+
+    fireEvent.mouseEnter(row);
+
+    // action
+    fireEvent.mouseLeave(row);
+
+    // result
+    expect(capturedPreviewRef?.current).toBeNull();
   });
 });
