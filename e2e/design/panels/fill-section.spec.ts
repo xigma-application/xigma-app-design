@@ -30,6 +30,16 @@ const readNode = (page: Page, id: string): Promise<TReadableNode> =>
     return pages[activePageId].nodes[nodeId] as TReadableNode;
   }, id);
 
+// samples a single pixel's RGB out of a tiny clipped screenshot — same PNG-decode technique
+// mask.spec.ts / vector-edit.spec.ts use for pixel-level assertions
+const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
+  const { PNG } = await import('pngjs');
+  const screenshot = await page.screenshot({ clip: { height: 1, width: 1, x, y } });
+  const png = PNG.sync.read(screenshot);
+
+  return [png.data[0], png.data[1], png.data[2]];
+};
+
 test.describe('Design panels — Fill section', () => {
   test('adding a fill stacks a second solid layer on top and changes the render', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -322,5 +332,50 @@ test.describe('Design panels — Fill section', () => {
     const afterSwitch = await designPage.canvas.screenshot();
 
     expect(afterSwitch.equals(beforeSwitch)).toBe(false);
+  });
+
+  test('a gradient stop clamps to its own color past its own position, instead of falling back to the first stop', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-stop-clamp');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // white at 0%, black at 50% — everything from 50% to 100% should stay solid black, not
+    // fall back to the first stop's white
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 0.5 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    // rectangle spans x:700-900, y:200-360 — sample at t≈0.9 (x=880), well past the last stop
+    const [r, g, b] = await readPixelColor(page, 880, 280);
+
+    expect(r).toBeLessThan(40);
+    expect(g).toBeLessThan(40);
+    expect(b).toBeLessThan(40);
   });
 });

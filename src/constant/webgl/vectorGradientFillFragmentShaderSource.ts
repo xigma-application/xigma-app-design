@@ -21,7 +21,7 @@ const float PI = 3.14159265359;
 
 vec4 sampleGradient(float t) {
   float clampedT = clamp(t, 0.0, 1.0);
-  vec4 color = u_stopColors[0];
+  vec4 color = clampedT <= u_stopPositions[0] ? u_stopColors[0] : u_stopColors[u_stopCount - 1];
 
   for (int i = 0; i < MAX_STOPS - 1; i++) {
     if (i >= u_stopCount - 1) {
