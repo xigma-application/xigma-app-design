@@ -82,8 +82,10 @@ describe('StopRow behaviors', () => {
     // action
     fireEvent.click(screen.getByLabelText('Stop color'));
 
-    // result — the docked SolidPanel, not the Custom/Libraries popover tabs
-    expect(screen.queryByText('Custom')).not.toBeInTheDocument();
+    // result — the docked panel keeps its own Custom/Libraries header, but it's not a full nested
+    // ColorPicker popover: no Solid/Gradient tab (only shown by the non-simple default header)
+    expect(screen.getByText('Custom')).toBeInTheDocument();
+    expect(screen.queryByText('Solid')).not.toBeInTheDocument();
     expect(screen.getAllByDisplayValue('ff0000')).toHaveLength(2);
   });
 
