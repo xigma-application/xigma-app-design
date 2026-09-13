@@ -3,7 +3,7 @@ import { TDrawSceneContext } from '../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFillPaints';
+import { drawVectorFillGroup } from './drawVectorFillGroup';
 import { drawVectorRoundedCaps } from 'utils/canvas/drawVectorNode/drawVectorRoundedCaps';
 import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawVectorThickStrokeVertices';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
@@ -14,24 +14,12 @@ import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupF
 
 export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
-  const { faceBufferCache, isAlphaWriteEnabled, strokeBufferCache } = imageContext;
+  const { faceBufferCache, strokeBufferCache } = imageContext;
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
 
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
-    drawVectorFillPaints(
-      gl,
-      program,
-      buffer,
-      faceBufferCache,
-      nodeBounds,
-      polygons,
-      paint,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      isAlphaWriteEnabled,
-    );
+    drawVectorFillGroup(context, faceBufferCache, nodeBounds, polygons, paint);
   });
 
   if (renderedNode.widthProfile) {

@@ -83,9 +83,11 @@ node's folder. Today:
   reason (picking a value, clicking outside, the reset-click above), so a preview can never outlive
   its popover. The `BlendMode` enum + `BLEND_MODE_GROUPS` constant were deliberately put in the global
   `types/design/` layer (not nested under this button's own folder) because blend mode is a
-  Design-domain concept other future features (e.g. per-fill blend mode —
-  deliberately *not* built alongside this; `TPaintBase` in `types/design/paint/types.ts` has no
-  `blendMode` of its own yet) will need the same option list for. The eye button dispatches
+  Design-domain concept other future features need the same option list for — per-fill blend mode on a
+  single vector face is exactly that next feature (`TPaintBase.blendMode?: BlendMode`,
+  `vector-network.md` §78's `Toolbar/VectorEditToolbar/VectorEditPaintTool/FaceBlendModeButton/`), built
+  as a sibling of this button rather than a variant of it since its state lives on the live paint-tool
+  state (`page.paint`) instead of a selected node. The eye button dispatches
   the pre-existing `toggleNodeHidden` (already cascades to descendants via
   `cascadeSetGroupChildrenFlag` — no new wiring needed there).
 

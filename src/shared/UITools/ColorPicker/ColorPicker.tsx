@@ -27,6 +27,7 @@ import { TColorPickerProps } from './types';
 export const ColorPicker: FC<TColorPickerProps> = ({
   align,
   className = '',
+  headerExtra,
   moveable = false,
   onChange,
   onDragEnd,
@@ -61,7 +62,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
       triggerClassName={triggerClassName}
     >
       <div className={cx(styles.ColorPicker, className)}>
-        <Header activeTab={activeTab} setActiveTab={handleSetActiveTab} />
+        <Header activeTab={activeTab} extra={headerExtra} setActiveTab={handleSetActiveTab} />
         <Body
           alpha={value.alpha}
           colorModel={colorModel}

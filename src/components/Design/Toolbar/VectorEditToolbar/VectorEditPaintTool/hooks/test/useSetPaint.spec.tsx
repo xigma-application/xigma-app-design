@@ -9,6 +9,9 @@ import { DEFAULT_PAINT } from 'store/design/constants';
 import { setPaint } from 'store/design/slice';
 import { store } from 'store';
 
+// types
+import { BlendMode } from 'types/design/enums';
+
 const renderUseSetPaint = (): ReturnType<typeof renderHook<ReturnType<typeof useSetPaint>, unknown>> =>
   renderHook(() => useSetPaint(), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
 
@@ -30,5 +33,19 @@ describe('useSetPaint', () => {
       opacity: 50,
       type: 'solid',
     });
+  });
+
+  it('should preserve the current blend mode when the color or opacity changes', () => {
+    // mock
+    store.dispatch(setPaint({ ...DEFAULT_PAINT, blendMode: BlendMode.multiply }));
+
+    // before
+    const { result } = renderUseSetPaint();
+
+    // action
+    result.current({ alpha: 50, hex: '#ff0000' });
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint.blendMode).toBe(BlendMode.multiply);
   });
 });

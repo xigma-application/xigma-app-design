@@ -1,5 +1,6 @@
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ReactNode } from 'react';
 
 // components
 import Header from './Header';
@@ -12,11 +13,12 @@ const renderHeader = (
   activeTab: ColorPickerTab,
   setActiveTab: TFunc<[string]>,
   onOpenChange?: TFunc<[boolean]>,
+  extra?: ReactNode,
 ): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
       <PopoverPrimitive.Root onOpenChange={onOpenChange} open>
-        <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Header activeTab={activeTab} extra={extra} setActiveTab={setActiveTab} />
       </PopoverPrimitive.Root>
     </TooltipProvider>,
   );
@@ -72,5 +74,13 @@ describe('Header behaviors', () => {
 
     // result
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('should render the extra slot next to the close button', () => {
+    // before
+    renderHeader(ColorPickerTab.solid, vi.fn(), vi.fn(), <button type="button">Extra</button>);
+
+    // result
+    expect(screen.getByText('Extra')).toBeInTheDocument();
   });
 });

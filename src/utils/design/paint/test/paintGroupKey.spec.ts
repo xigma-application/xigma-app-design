@@ -3,6 +3,7 @@ import { makeSolidPaint } from '../makeSolidPaint';
 import { paintGroupKey } from '../paintGroupKey';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { TGradientPaint, TImagePaint } from 'types/design/paint/types';
 
 describe('paintGroupKey', () => {
@@ -45,5 +46,11 @@ describe('paintGroupKey', () => {
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
     expect(paintGroupKey([image])).not.toBe(paintGroupKey([{ ...image, scaleMode: 'tile' }]));
+  });
+
+  it('should distinguish stacks that differ only in blend mode', () => {
+    const solid = makeSolidPaint('#abcdef');
+
+    expect(paintGroupKey([solid])).not.toBe(paintGroupKey([{ ...solid, blendMode: BlendMode.multiply }]));
   });
 });

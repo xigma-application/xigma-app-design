@@ -5360,6 +5360,64 @@ Coverage: unit (every step kept `tsc --build --force` at the pre-existing baseli
 test set green before committing — no fixed percentage claimed here since the churn was fixture-rename
 volume, not new branches). e2e untouched — no vector-fill e2e spec exists yet to extend.
 
+## 78. Per-face blend mode on the Paint tool — a `blendMode` field on `TPaintBase`, isolated per paint-group compositing, and a reset-to-Normal after every stroke
+
+Follow-up to §77's paint model and to the node-level Blend mode feature (`canvas-rendering-pipeline.md`
+§11, `properties-panel.md`'s `BlendModeButton`): the user explicitly scoped fill/background blend mode
+out of that earlier feature ("Ale tło nie dziś" — not the background today); this closes that gap for a
+single painted face, while a fill's own future background/stroke blend mode stays deferred.
+
+- **The field** — `blendMode?: BlendMode` added straight to `TPaintBase` (`types/design/paint/types.ts`),
+  so every paint variant (solid today, gradient/image later) gets it for free with no new `TVectorNode`
+  field. `FACE_BLEND_MODE_GROUPS` (`types/design/constants.ts`) reuses the node-level `BLEND_MODE_GROUPS`
+  with `passThrough` filtered out of the first group — a single fill has nothing to "pass through" to,
+  matching Figma's own fill blend-mode picker (Normal is the only neutral option there).
+  `paintGroupKey.ts` folds `blendMode` into its head so two faces with the same color but different
+  blend modes never collapse into one draw group.
+- **The tool-state picker** — unlike the node button (reads/writes a selected node immediately), blend
+  mode here is *live tool state* on `page.paint.blendMode` (`store/design/slice.ts`'s new
+  `setPaintBlendMode` reducer), exactly like `paint.color`/`paint.opacity` already were — there's no
+  node to commit onto until a face is actually painted. `useSetPaint.ts` (the color/opacity path) now
+  explicitly preserves the current `blendMode` when dispatching, since its payload had always replaced
+  the whole `TSolidPaint` object wholesale.
+- **The UI** — `VectorEditPaintTool/FaceBlendModeButton/` (new sibling to the existing paint-tool hooks),
+  wired into `UITools.ColorPicker` via a new generic `headerExtra` slot on `Header`/`ColorPicker`
+  (`shared/UITools/ColorPicker/`) rather than teaching the shared color picker about `BlendMode` — the
+  slot renders next to the picker's existing Close button (a new `.Header__actions` flex wrapper replaces
+  the old absolutely-positioned lone Close button). `useFaceBlendModeButton` mirrors the node button's
+  icon-swap (`DropEmpty`/`DropFilled` on `value !== BlendMode.normal`) but skips its click-to-reset and
+  hover-preview refinements — not asked for here, and there is no selected node for a canvas preview to
+  target. `UITools.ButtonMenu` gained a `triggerTooltip` pass-through (already on the underlying
+  `Popover`) so this button gets a tooltip without adopting the fully-controlled `Popover` the node
+  button needed.
+- **The reset** — `disarmVectorPaintDrag.ts` (pointer-up) now takes `dispatch` and, unless the stroke
+  was a remove (`isVectorPaintRemoveRef`), dispatches `setPaintBlendMode(BlendMode.normal)` once the
+  stroke ends — a fill's blend mode is a one-shot choice per stroke, not a sticky tool setting, per the
+  user's explicit spec ("jak wypełnimy tło to blend mode w tym picker wraca do defualt").
+- **The render path** — real GPU compositing, not just a stored field. `groupFilledFacesForRendering`'s
+  groups already carry a `TPaint[]` per group; `drawVectorNode.ts`'s per-group loop now calls a new
+  `drawVectorFillGroup.ts` (`drawSceneVectorNode/`, feature-local — needs `TDrawSceneContext`/
+  `compositeBlend`, so it can't live in the global `utils/canvas/drawVectorNode/` layer next to
+  `drawVectorFillPaints`/`drawVectorFill` themselves). `getFaceGroupBlendMode.ts` resolves the group's
+  real blend mode (`undefined` for Normal/Pass through, matching `hasRealBlendMode`'s node-level
+  convention). When one is set, the group is drawn isolated: capture the current framebuffer's backdrop
+  via `gl.copyTexImage2D` (same technique as `captureBackdropTexture.ts`, inlined rather than reused
+  since that helper is typed against the mask/blend `TMaskRenderer`, not the plain `TDrawSceneContext`
+  this call site has), render the group into a fresh pool target with alpha write forced on and the
+  mask-compositing pipeline's `blendFuncSeparate(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, ONE, ONE_MINUS_SRC_ALPHA)`
+  active (needed for correct alpha accumulation across a multi-layer paint stack, exactly like an
+  isolated node render needs it), then restore the exact previous framebuffer/viewport/blend-func/
+  alpha-write state (queried via `gl.getParameter`, not assumed to be "the canvas") before calling the
+  existing `compositeBlend.ts`. This isolation is scoped to the static render path only —
+  `drawVectorNodeDragSnapshot.ts`/`ResizeSnapshot.ts`/`RotateSnapshot.ts` still draw with plain alpha
+  during an active drag, snapping to the real blended look once the drag ends and the static path
+  re-renders (a deliberate scope cut, not a bug: those snapshots ignored blend mode already since it
+  didn't exist before this feature).
+- **First e2e spec for the Paint tool at all** — `e2e/design/vector/vector-paint-blend-mode.spec.ts`.
+  §77 above and the Stage 3 roadmap entry both note no Paint-tool e2e coverage existed yet; this feature's
+  own scenario (pick Multiply, paint a face, confirm it committed and visibly rendered, confirm the
+  picker reset to Normal) is the first one, not a backfill of the rest of Stage 3.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

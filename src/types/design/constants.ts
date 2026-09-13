@@ -9,3 +9,7 @@ export const BLEND_MODE_GROUPS: readonly (readonly BlendMode[])[] = [
   [BlendMode.difference, BlendMode.exclusion],
   [BlendMode.hue, BlendMode.saturation, BlendMode.color, BlendMode.luminosity],
 ];
+
+export const FACE_BLEND_MODE_GROUPS: readonly (readonly BlendMode[])[] = BLEND_MODE_GROUPS.map((group) =>
+  group.filter((blendMode) => blendMode !== BlendMode.passThrough),
+);

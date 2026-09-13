@@ -1,4 +1,5 @@
 // types
+import { BlendMode } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 export type TPaintType = 'gradient-angular' | 'gradient-linear' | 'gradient-radial' | 'image' | 'solid';
@@ -12,6 +13,7 @@ export type TGradientStop = {
 };
 
 type TPaintBase = {
+  blendMode?: BlendMode;
   opacity: number;
   visible?: boolean;
 };

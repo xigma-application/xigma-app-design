@@ -9,13 +9,19 @@
   padding-right: 32px;
   position: relative;
 
+  &__actions {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+  }
+
   &__close {
     height: 24px;
     justify-content: center;
     padding: 0;
-    position: absolute;
-    right: 8px;
-    top: 8px;
     width: 24px;
   }
 }

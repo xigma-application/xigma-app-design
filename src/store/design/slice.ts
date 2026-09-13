@@ -31,7 +31,7 @@ import {
   TTextEditSelection,
   TUpdateGuidePayload,
 } from './types';
-import { ToolName } from 'types/design/enums';
+import { BlendMode, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import {
   TGridSectionHighlight,
@@ -229,6 +229,9 @@ const designSlice = createSlice({
     setPaint: (state, action: PayloadAction<TSolidPaint>) => {
       getActivePage(state).paint = action.payload;
     },
+    setPaintBlendMode: (state, action: PayloadAction<BlendMode>) => {
+      getActivePage(state).paint.blendMode = action.payload;
+    },
     setPanelGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
       state.panelGridTrackSelection = action.payload;
     },
@@ -325,6 +328,7 @@ export const {
   setMediaToolArmed,
   setMinMaxRevealed,
   setPaint,
+  setPaintBlendMode,
   setPanelGridTrackSelection,
   setPenActiveVertexId,
   setSelection,

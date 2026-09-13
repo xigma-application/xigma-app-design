@@ -8,7 +8,7 @@ const gradientKey = (head: string, paint: TGradientPaint): string => {
 };
 
 const singlePaintKey = (paint: TPaint): string => {
-  const head = `${paint.type}:${paint.opacity}:${paint.visible === false ? 0 : 1}`;
+  const head = `${paint.type}:${paint.opacity}:${paint.visible === false ? 0 : 1}:${paint.blendMode ?? ''}`;
 
   switch (paint.type) {
     case 'solid':

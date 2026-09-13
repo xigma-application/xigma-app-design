@@ -678,6 +678,14 @@ passthrough despite its name) rather than a duplicate file, same "MSDF reuses im
 precedent from §3. Combines for free with masks/clip-content nesting, since it's just another
 wrapping layer around the same `renderNode`/`target` recursion, not a parallel mechanism.
 
+This node-level mechanism deliberately excludes `TLineNode`/`TVectorNode` (same carve-out as opacity).
+A vector's own *faces* got a narrower version of the same trick instead, one level down: per-face
+blend mode (`vector-network.md` §78) lives on each paint layer (`TPaintBase.blendMode`), not the node,
+so `drawVectorNode.ts` isolates per paint-group rather than per node — `drawVectorFillGroup.ts`
+inlines the backdrop-capture/isolated-render/restore steps directly against `TDrawSceneContext` (no
+`TMaskRenderer` at this call site to reuse `bindTarget`/`captureBackdropTexture` against) before
+handing off to the same `compositeBlend.ts` used here.
+
 ## 12. Rulers — the one non-WebGL rendering surface
 
 `Canvas/RulersLayer/` is a second `<canvas>` element, absolutely positioned over the WebGL one

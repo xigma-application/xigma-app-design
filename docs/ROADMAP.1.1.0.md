@@ -233,6 +233,11 @@ needs one more click. Hovering an option in the menu also now previews it live o
 way Figma does, without actually committing anything until it's clicked. Backgrounds/fills getting
 their own separate blend mode is a later step, not part of this one.
 
+The Paint tool's color picker now has its own blend mode picker too, right next to its close button —
+pick one and the next face you paint uses it, actually blending against whatever's behind that face on
+the canvas. It's a one-time choice per stroke: once you finish painting, the picker drops back to
+Normal instead of staying set for the next face.
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

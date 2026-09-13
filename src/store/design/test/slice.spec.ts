@@ -30,6 +30,7 @@ import slice, {
   setGridSettingsPanelOpen,
   setGridTrackSelection,
   setPaint,
+  setPaintBlendMode,
   setPanelGridTrackSelection,
   setPenActiveVertexId,
   setSelection,
@@ -60,7 +61,7 @@ import slice, {
 } from '../slice';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { BlendMode, NodeType, ToolName } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const frameNodePayload: Omit<TFrameNode, 'id'> = {
@@ -98,7 +99,9 @@ describe('design slice', () => {
       editingTextBox: null,
       editingTextContent: '',
       gridSectionHighlight: null,
+      gridTrackModeMenuRequest: null,
       gridTrackSelection: null,
+      gridTrackValueEditRequest: null,
       hoveredDimensionField: null,
       isActionsPanelOpen: false,
       isGridSettingsPanelOpen: false,
@@ -554,6 +557,14 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[state.activePageId].paint).toEqual({ color: '#ff0000', opacity: 50, type: 'solid' });
+  });
+
+  it('should set the paint blend mode', () => {
+    // before
+    const state = slice(undefined, setPaintBlendMode(BlendMode.multiply));
+
+    // result
+    expect(state.pages[state.activePageId].paint.blendMode).toBe(BlendMode.multiply);
   });
 
   it('should set the background paint independently of the vector paint tool paint', () => {

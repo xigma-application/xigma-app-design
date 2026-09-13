@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import FaceBlendModeButton from './FaceBlendModeButton/FaceBlendModeButton';
 import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
@@ -30,6 +31,7 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
   if (isActive) {
     return (
       <UITools.ColorPicker
+        headerExtra={<FaceBlendModeButton />}
         moveable
         onChange={handleChange}
         onDragEnd={onDragEnd}

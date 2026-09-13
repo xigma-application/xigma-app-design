@@ -1,3 +1,9 @@
+// store
+import { setPaintBlendMode } from 'store/design/slice';
+
+// types
+import { BlendMode } from 'types/design/enums';
+
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { disarmVectorPaintDrag } from '../disarmVectorPaintDrag';
@@ -17,17 +23,19 @@ describe('disarmVectorPaintDrag', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
+    const dispatch = vi.fn();
     const setClassName = vi.fn();
 
     // before
-    disarmVectorPaintDrag(canvas, pointerEvent(), canvasRefs, setClassName);
+    disarmVectorPaintDrag(canvas, pointerEvent(), dispatch, canvasRefs, setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
     expect(setClassName).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('should clear the paint path and touched faces, release pointer capture, and reset the cursor', () => {
+  it('should clear the paint path and touched faces, release pointer capture, and reset the cursor without resetting the blend mode when removing', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
@@ -45,10 +53,11 @@ describe('disarmVectorPaintDrag', () => {
 
     canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = true;
 
+    const dispatch = vi.fn();
     const setClassName = vi.fn();
 
     // before
-    disarmVectorPaintDrag(canvas, pointerEvent(2), canvasRefs, setClassName);
+    disarmVectorPaintDrag(canvas, pointerEvent(2), dispatch, canvasRefs, setClassName);
 
     // result
     expect(canvasRefs.vectorPaint.vectorPaintPathRef.current).toBeNull();
@@ -57,5 +66,24 @@ describe('disarmVectorPaintDrag', () => {
     expect(canvasRefs.vectorPaint.isVectorPaintRemoveRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith('paint');
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should reset the tool blend mode back to Normal once a fill stroke ends', () => {
+    // mock
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs({
+      vectorPaint: {
+        vectorPaintPathRef: { current: [{ x: 0, y: 0 }] },
+      },
+    });
+    const dispatch = vi.fn();
+    const setClassName = vi.fn();
+
+    // before
+    disarmVectorPaintDrag(canvas, pointerEvent(), dispatch, canvasRefs, setClassName);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(setPaintBlendMode(BlendMode.normal));
   });
 });

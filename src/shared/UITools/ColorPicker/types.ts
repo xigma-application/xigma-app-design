@@ -11,6 +11,7 @@ export type THsl = { h: number; l: number; s: number };
 export type TColorPickerProps = {
   align?: TPopoverProps['align'];
   className?: string;
+  headerExtra?: ReactNode;
   moveable?: boolean;
   onChange: TFunc<[TColorPickerValue]>;
   onDragEnd?: TFunc;

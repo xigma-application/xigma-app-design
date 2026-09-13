@@ -74,7 +74,7 @@ export const handlePointerUp = (
   disarmVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorLassoDrag(canvas, event, canvasRefs, setClassName);
-  disarmVectorPaintDrag(canvas, event, canvasRefs, setClassName);
+  disarmVectorPaintDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorShapeBuilderDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs);
