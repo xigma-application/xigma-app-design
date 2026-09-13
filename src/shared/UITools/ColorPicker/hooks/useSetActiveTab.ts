@@ -20,15 +20,13 @@ export const useSetActiveTab =
     onGradientChange?: TFunc<[TGradientPanelChange]>,
   ): TFunc<[TTab['name']]> =>
   (tabName) => {
-    if (!isColorPickerTab(tabName)) {
-      return;
-    }
+    if (isColorPickerTab(tabName)) {
+      setActiveTab(tabName);
 
-    setActiveTab(tabName);
-
-    if (tabName === ColorPickerTab.gradient) {
-      onGradientChange?.({ angle: gradientPanel.angle, stops: gradientPanel.stops, type: gradientPanel.type });
-    } else {
-      onChange(value);
+      if (tabName === ColorPickerTab.gradient) {
+        onGradientChange?.({ angle: gradientPanel.angle, stops: gradientPanel.stops, type: gradientPanel.type });
+      } else {
+        onChange(value);
+      }
     }
   };
