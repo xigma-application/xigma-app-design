@@ -29,11 +29,24 @@ const scalePoint = (point: TPoint, snapshot: TVectorNodeResizeSnapshot): TPoint 
 
 export const drawVectorNodeResizeSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
-  const { isAlphaWriteEnabled } = imageContext;
+  const { gradientProgram, isAlphaWriteEnabled } = imageContext;
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
     const scaledFaces = points.map((face) => face.map((point) => scalePoint(point, snapshot)));
-    drawVectorFillPaints(gl, program, buffer, null, null, scaledFaces, paint, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      buffer,
+      null,
+      null,
+      scaledFaces,
+      paint,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      isAlphaWriteEnabled,
+    );
   });
 
   const scaledSegments = snapshot.flattenedSegments.map((segment) => ({

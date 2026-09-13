@@ -16,7 +16,7 @@ import {
 } from 'types/design/canvas/types';
 import { TComment, TFrameNode, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
-import { TSolidPaint } from 'types/design/paint/types';
+import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
@@ -116,7 +116,7 @@ export const selectAllGuideLines = createSelector([selectPageGuides, selectFrame
   getAllGuideLines(pageGuides, frameGuides),
 );
 
-export const selectPaint = createSelector([selectActivePage], (page): TSolidPaint => page.paint);
+export const selectPaint = createSelector([selectActivePage], (page): TPaint => page.paint);
 
 export const selectBackgroundPaint = createSelector([selectActivePage], (page): TSolidPaint => page.backgroundPaint);
 

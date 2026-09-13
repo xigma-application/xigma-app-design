@@ -188,16 +188,60 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 
 Six GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts` (the 5th,
 `maskComposite`, was added for masks — see §11; the 6th, `checkerboard`, for the hidden/partially-
-transparent background indicator above):
+transparent background indicator above). A 7th pair — `gradientProgram`/`dragGradientProgram` — was
+added for real gradient-paint rendering (`vector-network.md` §79); it isn't in this table's six
+because it follows the exact same "one fragment shader, two vertex-shader variants" shape as the
+plain-color row's own `dragSnapshotProgram` split (below), not a fully independent program:
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline`, `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline`, `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces) |
+| plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 | pixel grid | `gridVertexShaderSource.ts` (not world-space like the other three — see §10) | `gridFragmentShaderSource.ts` | — | `drawPixelGrid.ts` |
 | mask composite | `maskCompositeVertexShaderSource.ts` (passthrough clip-space quad + texcoords) | `maskCompositeFragmentShaderSource.ts` (`content.rgb, content.a * mask.a`) | — | `compositeMask.ts` (masks, §11) |
 | checkerboard | **same vertex source as pixel grid** (`gridVertexShaderSource.ts`, reused) | `checkerboardFragmentShaderSource.ts` (`u_viewportOffset`/`u_zoom` convert `v_screenPos` to world space before the `floor`/`mod` squares, so the pattern pans/zooms with the canvas like the pixel grid does, not fixed to the viewport; `CHECKERBOARD_COLOR_A`/`_B`/`_SQUARE_SIZE_PX` from `constant/canvas.ts`; final color is `mix(checkerColor, u_paintColor, u_paintMix)`) | — | `drawCheckerboardBackground.ts`, from `drawSceneBackground.ts` when the page background is hidden or below full opacity |
+| vector gradient fill | `vectorGradientFillVertexShaderSource.ts` (adds `u_translate` — same reuse trick as the drag variant above, unconditionally, so one program serves both the static and drag-preview paths) | `vectorGradientFillFragmentShaderSource.ts` | — | `drawVectorGradientFill.ts`, for any non-solid, non-image `TPaint` layer (`vector-network.md` §79) |
+
+Vector gradient fill fragment shader (the newest "interesting one" — four gradient types share one
+fixed-size stop-interpolation loop, `MAX_STOPS` from `constant/webgl/vectorGradientFillConstants.ts`
+interpolated into the GLSL source string at module-load time since WebGL array-uniform sizes must be
+compile-time constants):
+```glsl
+#version 300 es
+precision mediump float;
+#define MAX_STOPS 8
+uniform vec4 u_stopColors[MAX_STOPS];
+uniform float u_stopPositions[MAX_STOPS];
+uniform int u_stopCount;
+uniform vec2 u_start;
+uniform vec2 u_end;
+uniform int u_gradientTypeIndex; // 0 linear, 1 radial, 2 angular, 3 diamond
+uniform float u_opacity;
+in vec2 v_localPosition; // 0..1 UV within the fill's own bounding box, from the vertex shader
+out vec4 outColor;
+void main() {
+  vec2 center = (u_start + u_end) * 0.5;
+  float t = 0.0;
+  if (u_gradientTypeIndex == 0) {
+    // linear: project v_localPosition onto the start->end axis
+  } else if (u_gradientTypeIndex == 1) {
+    // radial: euclidean distance from center, normalized by |end - center|
+  } else if (u_gradientTypeIndex == 2) {
+    // angular: atan2 sweep from the start->end direction, normalized to 0..1
+  } else {
+    // diamond: Chebyshev-ish |dx|/halfWidth + |dy|/halfHeight, so a square box's
+    // gradient corners come out flat instead of rounded — matches Figma's diamond swatch
+  }
+  vec4 color = sampleGradient(t); // stop-interpolation loop, clamped and normalized 0..1 — see the real file
+  outColor = vec4(color.rgb, color.a * u_opacity);
+}
+```
+`v_localPosition` is computed in the vertex shader from `u_boundsOrigin`/`u_boundsSize` (the fill's
+own bounding box in world space, same value `getVectorFillCoveringQuad.ts` uses for its covering
+quad) rather than a second vertex attribute — the same "reuse the position buffer, add bounds
+uniforms" trick avoids uploading a parallel UV buffer per face.
 
 Plain-color vertex shader (every program's transform math is identical, only the fragment stage
 differs per program):
@@ -684,7 +728,11 @@ blend mode (`vector-network.md` §78) lives on each paint layer (`TPaintBase.ble
 so `drawVectorNode.ts` isolates per paint-group rather than per node — `drawVectorFillGroup.ts`
 inlines the backdrop-capture/isolated-render/restore steps directly against `TDrawSceneContext` (no
 `TMaskRenderer` at this call site to reuse `bindTarget`/`captureBackdropTexture` against) before
-handing off to the same `compositeBlend.ts` used here.
+handing off to the same `compositeBlend.ts` used here. `getFaceGroupBlendMode.ts`/
+`drawVectorFillGroup.ts` only ever read `paint.blendMode` (on `TPaintBase`, so every paint variant),
+never `paint.type` — gradient paints (§3's new gradient program, `vector-network.md` §79) got real
+per-face blend-mode compositing for free the moment `drawVectorFillPaints.ts` stopped skipping them,
+no changes needed here.
 
 ## 12. Rulers — the one non-WebGL rendering surface
 
@@ -871,7 +919,10 @@ need.
   (`TImageRenderContext`)
 - Shaders: `constant/webgl/{vertexShaderSource,fragmentShaderSource,imageVertexShaderSource,
   imageFragmentShaderSource,msdfFragmentShaderSource,msdfAtlas,gridVertexShaderSource,
-  gridFragmentShaderSource}.ts`
+  gridFragmentShaderSource,vectorDragVertexShaderSource,vectorGradientFillVertexShaderSource,
+  vectorGradientFillFragmentShaderSource,vectorGradientFillConstants}.ts`
+- Vector gradient fill (§3, `vector-network.md` §79): `utils/canvas/drawVectorNode/
+  {drawVectorGradientFill,getGradientStopUniformArrays,getGradientTypeIndex,getVectorFillBounds}.ts`
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;

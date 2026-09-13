@@ -44,7 +44,20 @@ const drawIsolatedFillGroup = (
   setAlphaWriteEnabled(gl, imageContext, true);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-  drawVectorFillPaints(gl, program, buffer, faceBufferCache, nodeBounds, polygons, paint, canvasWidth, canvasHeight, viewport, true);
+  drawVectorFillPaints(
+    gl,
+    program,
+    imageContext.gradientProgram,
+    buffer,
+    faceBufferCache,
+    nodeBounds,
+    polygons,
+    paint,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+    true,
+  );
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer);
   gl.viewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);
@@ -74,6 +87,7 @@ export const drawVectorFillGroup = (
     drawVectorFillPaints(
       gl,
       program,
+      imageContext.gradientProgram,
       buffer,
       faceBufferCache,
       nodeBounds,

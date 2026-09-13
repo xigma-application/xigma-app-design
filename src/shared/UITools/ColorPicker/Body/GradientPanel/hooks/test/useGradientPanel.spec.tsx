@@ -183,4 +183,70 @@ describe('useGradientPanel', () => {
     // result
     expect(result.current.angle).toBe(0);
   });
+
+  it('should stop allowing more stops once the max supported by the gradient shader is reached', () => {
+    // before
+    const { result } = renderHook(() => useGradientPanel());
+
+    // action — 2 default stops + 6 more = 8 (MAX_STOPS), one add per act so each sees fresh state
+    for (let index = 0; index < 6; index += 1) {
+      act(() => result.current.addStop(0.5));
+    }
+
+    // result
+    expect(result.current.stops).toHaveLength(8);
+    expect(result.current.canAddStop).toBe(false);
+
+    // action — a 9th add is a no-op
+    act(() => result.current.addStop(0.5));
+
+    // result
+    expect(result.current.stops).toHaveLength(8);
+  });
+
+  it('should notify onChange with the updated stops, type, and angle after every mutation', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useGradientPanel(onChange));
+
+    // action
+    act(() => result.current.rotate());
+
+    // result
+    expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-linear' });
+
+    // action
+    act(() => result.current.setType('gradient-radial'));
+
+    // result
+    expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-radial' });
+
+    // action
+    act(() => result.current.addStop(0.5));
+
+    // result
+    expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-radial' });
+  });
+
+  it('should not notify onChange when addStop is a no-op past the max stop count', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useGradientPanel(onChange));
+
+    for (let index = 0; index < 6; index += 1) {
+      act(() => result.current.addStop(0.5));
+    }
+
+    onChange.mockClear();
+
+    // action
+    act(() => result.current.addStop(0.5));
+
+    // result
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

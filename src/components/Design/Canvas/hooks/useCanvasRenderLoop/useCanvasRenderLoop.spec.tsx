@@ -144,7 +144,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     expect(cancelAnimationFrameMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should delete all eight compiled programs on unmount', () => {
+  it('should delete all ten compiled programs on unmount', () => {
     // mock
     const { canvasRef, deleteProgram } = createGlCanvasRef();
 
@@ -155,6 +155,6 @@ describe('useCanvasRenderLoop behaviors', () => {
     unmount();
 
     // result
-    expect(deleteProgram).toHaveBeenCalledTimes(8);
+    expect(deleteProgram).toHaveBeenCalledTimes(10);
   });
 });

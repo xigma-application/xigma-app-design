@@ -2,7 +2,7 @@
 import { BlendMode } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
-export type TPaintType = 'gradient-angular' | 'gradient-linear' | 'gradient-radial' | 'image' | 'solid';
+export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'solid';
 
 export type TImageScaleMode = 'fill' | 'fit' | 'stretch' | 'tile';
 
@@ -27,7 +27,7 @@ export type TGradientPaint = TPaintBase & {
   end: TPoint;
   start: TPoint;
   stops: TGradientStop[];
-  type: 'gradient-angular' | 'gradient-linear' | 'gradient-radial';
+  type: 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial';
 };
 
 export type TImagePaint = TPaintBase & {

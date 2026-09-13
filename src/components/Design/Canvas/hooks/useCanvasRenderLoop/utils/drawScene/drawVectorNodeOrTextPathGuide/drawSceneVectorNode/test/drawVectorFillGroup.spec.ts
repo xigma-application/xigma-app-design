@@ -57,13 +57,19 @@ const createGlMock = (): WebGL2RenderingContext =>
     viewport: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
 
+const GRADIENT_PROGRAM = {} as WebGLProgram;
+
 const createContext = (gl: WebGL2RenderingContext, pool: TRenderTargetPool): TDrawSceneContext =>
   ({
     buffer: {} as WebGLBuffer,
     canvasHeight: 200,
     canvasWidth: 200,
     gl,
-    imageContext: { isAlphaWriteEnabled: false, renderTargetPool: pool } as unknown as TImageRenderContext,
+    imageContext: {
+      gradientProgram: GRADIENT_PROGRAM,
+      isAlphaWriteEnabled: false,
+      renderTargetPool: pool,
+    } as unknown as TImageRenderContext,
     program: {} as WebGLProgram,
     viewport: { x: 0, y: 0, zoom: 1 },
   }) as TDrawSceneContext;
@@ -88,6 +94,7 @@ describe('drawVectorFillGroup', () => {
     expect(drawVectorFillPaints).toHaveBeenCalledWith(
       gl,
       context.program,
+      GRADIENT_PROGRAM,
       context.buffer,
       null,
       null,
@@ -133,6 +140,7 @@ describe('drawVectorFillGroup', () => {
     expect(drawVectorFillPaints).toHaveBeenCalledWith(
       gl,
       context.program,
+      GRADIENT_PROGRAM,
       context.buffer,
       null,
       null,

@@ -40,6 +40,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onChange,
   onDragEnd,
   onDragStart,
+  onGradientChange,
   onOpenChange,
   presets = DEFAULT_PRESETS,
   side,
@@ -52,15 +53,15 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   value,
 }) => {
   const [activeTab, setActiveTab] = useState(DEFAULT_ACTIVE_TAB);
-  const handleSetActiveTab = useSetActiveTab(setActiveTab);
   const colorModel = useColorModel(value, onChange);
-  const gradientPanel = useGradientPanel();
+  const gradientPanel = useGradientPanel(onGradientChange);
+  const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const handleInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
   const handleOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
   const preview: TColorPickerPreview =
     activeTab === ColorPickerTab.gradient
-      ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type), type: 'gradient' }
+      ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type, gradientPanel.angle), type: 'gradient' }
       : { type: 'solid', value };
 
   return (

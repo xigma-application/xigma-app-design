@@ -12,6 +12,8 @@ import MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/maskCompositeF
 import MASK_COMPOSITE_VERTEX_SHADER_SOURCE from 'constant/webgl/maskCompositeVertexShaderSource';
 import MSDF_FRAGMENT_SHADER_SOURCE from 'constant/webgl/msdfFragmentShaderSource';
 import VECTOR_DRAG_VERTEX_SHADER_SOURCE from 'constant/webgl/vectorDragVertexShaderSource';
+import VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE from 'constant/webgl/vectorGradientFillFragmentShaderSource';
+import VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE from 'constant/webgl/vectorGradientFillVertexShaderSource';
 import VERTEX_SHADER_SOURCE from 'constant/webgl/vertexShaderSource';
 import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
@@ -40,6 +42,9 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const blendCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, BLEND_COMPOSITE_FRAGMENT_SHADER_SOURCE);
     const blendCompositeBuffer = gl && gl.createBuffer();
     const dragSnapshotProgram = gl && createProgram(gl, VECTOR_DRAG_VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+    const gradientProgram = gl && createProgram(gl, VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE, VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE);
+    const dragGradientProgram =
+      gl && createProgram(gl, VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE, VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE);
 
     if (
       canvas &&
@@ -57,7 +62,9 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       maskCompositeBuffer &&
       blendCompositeProgram &&
       blendCompositeBuffer &&
-      dragSnapshotProgram
+      dragSnapshotProgram &&
+      gradientProgram &&
+      dragGradientProgram
     ) {
       const stopRenderLoop = setupRenderLoop(
         gl,
@@ -75,6 +82,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         blendCompositeProgram,
         blendCompositeBuffer,
         dragSnapshotProgram,
+        gradientProgram,
+        dragGradientProgram,
         canvas,
         refs,
       );
@@ -95,6 +104,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteProgram(maskCompositeProgram);
         gl.deleteProgram(blendCompositeProgram);
         gl.deleteProgram(dragSnapshotProgram);
+        gl.deleteProgram(gradientProgram);
+        gl.deleteProgram(dragGradientProgram);
       };
     }
   }, [refs]);

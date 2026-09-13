@@ -2,7 +2,7 @@
 import { TEditableGradientStop, TGradientType } from './types';
 
 export const MIN_STOPS = 2;
-
+export const MAX_STOPS = 8;
 export const ANGLE_STEP = 90;
 
 export const DEFAULT_GRADIENT_STOPS: TEditableGradientStop[] = [

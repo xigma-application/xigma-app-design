@@ -16,6 +16,7 @@ import { TColorPickerValue } from '../../../types';
 import { TEditableGradientStop } from '../types';
 
 export type TStopsListProps = {
+  canAddStop: boolean;
   canRemoveStop: boolean;
   onAddStop: TFunc<[number]>;
   onRemoveStop: TFunc<[string]>;
@@ -27,6 +28,7 @@ export type TStopsListProps = {
 };
 
 export const StopsList: FC<TStopsListProps> = ({
+  canAddStop,
   canRemoveStop,
   onAddStop,
   onRemoveStop,
@@ -45,6 +47,7 @@ export const StopsList: FC<TStopsListProps> = ({
         <Tooltip content={t('colorPicker.gradient.stops.addAriaLabel')}>
           <UITools.Button
             ariaLabel={t('colorPicker.gradient.stops.addAriaLabel')}
+            disabled={!canAddStop}
             onClick={(): void => onAddStop(ADD_STOP_POSITION)}
             style={{ padding: 0 }}
           >

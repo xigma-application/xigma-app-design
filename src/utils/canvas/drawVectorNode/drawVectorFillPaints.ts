@@ -5,10 +5,12 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { drawVectorFill } from './drawVectorFill';
+import { drawVectorGradientFill } from './drawVectorGradientFill';
 
 export const drawVectorFillPaints = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
+  gradientProgram: WebGLProgram,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
   nodeBounds: TDraftRect | null,
@@ -20,23 +22,40 @@ export const drawVectorFillPaints = (
   isAlphaWriteEnabled: boolean,
 ): void => {
   paints.forEach((paint) => {
-    if (paint.visible !== false && paint.type === 'solid') {
+    if (paint.visible !== false) {
       const alpha = paint.opacity / 100;
 
-      drawVectorFill(
-        gl,
-        program,
-        buffer,
-        faceBufferCache,
-        nodeBounds,
-        faces,
-        paint.color,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        isAlphaWriteEnabled,
-        alpha,
-      );
+      if (paint.type === 'solid') {
+        drawVectorFill(
+          gl,
+          program,
+          buffer,
+          faceBufferCache,
+          nodeBounds,
+          faces,
+          paint.color,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          isAlphaWriteEnabled,
+          alpha,
+        );
+      } else if (paint.type !== 'image') {
+        drawVectorGradientFill(
+          gl,
+          gradientProgram,
+          buffer,
+          faceBufferCache,
+          nodeBounds,
+          faces,
+          paint,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          isAlphaWriteEnabled,
+          alpha,
+        );
+      }
     }
   });
 };

@@ -33,6 +33,7 @@ export const GradientPanel: FC<TGradientPanelProps> = ({ gradientPanel }) => {
         stops={gradientPanel.stops}
       />
       <StopsList
+        canAddStop={gradientPanel.canAddStop}
         canRemoveStop={gradientPanel.canRemoveStop}
         onAddStop={gradientPanel.addStop}
         onRemoveStop={gradientPanel.removeStop}

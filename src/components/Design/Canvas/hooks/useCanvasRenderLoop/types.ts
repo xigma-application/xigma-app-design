@@ -13,12 +13,14 @@ export type TImageRenderContext = {
   buffer: WebGLBuffer;
   cache: Map<string, WebGLTexture>;
   checkerboardProgram: WebGLProgram;
+  dragGradientProgram: WebGLProgram;
   dragSnapshotFaceBufferCache: WeakMap<TPoint[], WebGLBuffer>;
   dragSnapshotProgram: WebGLProgram;
   dragSnapshotStrokeBufferCache: WeakMap<number[], WebGLBuffer>;
   dragSnapshotTrackedByNodeId: Map<string, TVectorNodeDragSnapshot>;
   ellipseArcLengthCache: Map<string, TEllipseArcLengthSample[]>;
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>;
+  gradientProgram: WebGLProgram;
   gridBuffer: WebGLBuffer;
   gridProgram: WebGLProgram;
   isAlphaWriteEnabled: boolean;

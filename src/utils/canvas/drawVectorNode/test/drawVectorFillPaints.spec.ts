@@ -5,20 +5,26 @@ import { TGradientPaint, TImagePaint, TSolidPaint } from 'types/design/paint/typ
 import { drawVectorFillPaints } from '../drawVectorFillPaints';
 
 const drawVectorFillMock = vi.fn();
+const drawVectorGradientFillMock = vi.fn();
 
 vi.mock('../drawVectorFill', () => ({
   drawVectorFill: (...args: unknown[]): unknown => drawVectorFillMock(...args),
+}));
+vi.mock('../drawVectorGradientFill', () => ({
+  drawVectorGradientFill: (...args: unknown[]): unknown => drawVectorGradientFillMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
+const gradientProgram = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 const faces = [[{ x: 0, y: 0 }]];
 
 describe('drawVectorFillPaints', () => {
   beforeEach(() => {
     drawVectorFillMock.mockReset();
+    drawVectorGradientFillMock.mockReset();
   });
 
   it('should draw a single opaque solid layer at full alpha', () => {
@@ -26,7 +32,7 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledWith(
@@ -43,6 +49,7 @@ describe('drawVectorFillPaints', () => {
       false,
       1,
     );
+    expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });
 
   it('should convert a partial paint opacity (0-100) into the 0-1 alpha drawVectorFill expects', () => {
@@ -50,7 +57,7 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#00ff00', opacity: 40, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenLastCalledWith(
@@ -75,7 +82,7 @@ describe('drawVectorFillPaints', () => {
     const top: TSolidPaint = { color: '#222222', opacity: 50, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [bottom, top], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [bottom, top], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
@@ -88,13 +95,14 @@ describe('drawVectorFillPaints', () => {
     const hidden: TSolidPaint = { color: '#000000', opacity: 100, type: 'solid', visible: false };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [hidden], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [hidden], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
+    expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });
 
-  it('should skip gradient and image layers — not rendered until a later step', () => {
+  it('should draw a gradient layer through the gradient program, not the solid one', () => {
     // mock
     const gradient: TGradientPaint = {
       end: { x: 1, y: 1 },
@@ -103,12 +111,37 @@ describe('drawVectorFillPaints', () => {
       stops: [],
       type: 'gradient-linear',
     };
+
+    // before
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [gradient], 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(drawVectorGradientFillMock).toHaveBeenCalledWith(
+      gl,
+      gradientProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      gradient,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+    );
+    expect(drawVectorFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should skip image layers — not rendered until a later step', () => {
+    // mock
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
     // before
-    drawVectorFillPaints(gl, program, buffer, null, null, faces, [gradient, image], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [image], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
+    expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });
 });

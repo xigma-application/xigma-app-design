@@ -16,6 +16,7 @@ const renderStopsList = (overrides: Partial<Parameters<typeof StopsList>[0]> = {
   render(
     <TooltipProvider>
       <StopsList
+        canAddStop
         canRemoveStop={false}
         onAddStop={vi.fn()}
         onRemoveStop={vi.fn()}
@@ -50,6 +51,14 @@ describe('StopsList behaviors', () => {
 
     // result
     expect(onAddStop).toHaveBeenCalledWith(0.5);
+  });
+
+  it('should disable the add button once the max stop count is reached', () => {
+    // before
+    renderStopsList({ canAddStop: false });
+
+    // result
+    expect(screen.getByLabelText('Add stop')).toBeDisabled();
   });
 
   it('should open the full color picker for the clicked stop', () => {

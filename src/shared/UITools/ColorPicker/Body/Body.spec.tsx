@@ -19,6 +19,7 @@ const colorModel = {
 const gradientPanel = {
   addStop: vi.fn(),
   angle: 0,
+  canAddStop: true,
   canRemoveStop: false,
   flip: vi.fn(),
   removeStop: vi.fn(),

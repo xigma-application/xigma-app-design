@@ -40,7 +40,7 @@ import {
   TGridTrackValueEditRequest,
 } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TSolidPaint } from 'types/design/paint/types';
+import { TPaint, TSolidPaint } from 'types/design/paint/types';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
 // utils
@@ -226,7 +226,7 @@ const designSlice = createSlice({
     setMinMaxRevealed: (state, action: PayloadAction<{ bound: keyof TRevealedMinMax; value: boolean }>) => {
       state.revealedMinMax[action.payload.bound] = action.payload.value;
     },
-    setPaint: (state, action: PayloadAction<TSolidPaint>) => {
+    setPaint: (state, action: PayloadAction<TPaint>) => {
       getActivePage(state).paint = action.payload;
     },
     setPaintBlendMode: (state, action: PayloadAction<BlendMode>) => {

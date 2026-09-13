@@ -5418,6 +5418,88 @@ single painted face, while a fill's own future background/stroke blend mode stay
   own scenario (pick Multiply, paint a face, confirm it committed and visibly rendered, confirm the
   picker reset to Normal) is the first one, not a backfill of the rest of Stage 3.
 
+## 79. Gradient paints become real — a GPU shader, button-only rotation, a fourth "diamond" type, and a tab-switch bug the feature itself surfaced
+
+Closes §77's explicitly-deferred gap ("gradients... left as stubs for the next feature"): the
+`ColorPicker`'s Gradient tab already existed as a UI-only feature (stops, a live CSS preview swatch
+in the toolbar trigger) with zero effect on the actual canvas — `drawVectorFillPaints.ts` silently
+skipped any non-solid paint. The user's ask was narrow ("niech ten gradient działa uzględniajac
+blend mode i rotacje za pomocą przycisku tylko" — make it work, respecting blend mode and
+button-only rotation) but doing that honestly meant building the missing GPU half of §77's paint
+model, not just wiring a flag.
+
+- **The model** — `TPaintType`/`TGradientPaint['type']` gained `'gradient-diamond'` (previously
+  UI-only in `GradientPanel`'s own `TGradientType`, absent from the data model entirely). Confirmed
+  with the user up front, before writing any shader code, since diamond could instead have rendered
+  as radial or been hidden from the real Paint tool entirely — the user chose full real support.
+- **The shader** — new `gradientProgram`/`dragGradientProgram` pair, `canvas-rendering-pipeline.md`
+  §3. One fragment shader handles all four types by branching on `u_gradientTypeIndex`: linear
+  projects onto the `start`→`end` axis, radial is Euclidean distance from center, angular is an
+  `atan2` sweep, diamond is a Chebyshev-style `|dx|/halfWidth + |dy|/halfHeight` (flat corners on a
+  square box, matching Figma's own diamond swatch rather than a rounded radial). Stops upload as
+  fixed-size `MAX_GRADIENT_STOPS = 8` uniform arrays (`getGradientStopUniformArrays.ts`) — no
+  dynamic-length uniform arrays in WebGL, so `GradientPanel`'s own `MAX_STOPS` constant mirrors the
+  same limit and disables its own "+" button past it, independently (no shared import — a UI
+  constant and a shader constant that happen to agree, not a strict single source of truth).
+  `drawVectorGradientFill.ts` (`utils/canvas/drawVectorNode/`, global — no Design-domain imports, per
+  `[[xigma-module-structure]]`) mirrors `drawVectorFill.ts`'s even-odd stencil-then-cover-quad
+  technique exactly, just with the gradient program's extra uniforms instead of a flat `u_color`.
+  `getVectorFillBounds.ts` was extracted out of `getVectorFillCoveringQuad.ts` (pre-existing
+  bbox-from-faces-or-nodeBounds logic) since the gradient draw needs the same bounds twice — once for
+  the covering quad, once for the `u_boundsOrigin`/`u_boundsSize` uniforms the vertex shader uses to
+  turn world-space `a_position` into a 0..1 local UV.
+- **Rotation is button-only by construction, not by restriction** — `GradientPanel`'s rotate button
+  already stepped `angle` by `ANGLE_STEP = 90` in a plain `useState`, but that state was completely
+  dead: not read by the CSS preview (`getGradientPreviewStyle.ts` hardcoded `to right`), not read by
+  Redux, not read anywhere. `getGradientPointsFromAngle.ts` turns the angle into the paint's real
+  `start`/`end: TPoint` (normalized 0..1, box-relative) via a plain 4-entry lookup table, not
+  `Math.cos`/`Math.sin` — `Math.cos(Math.PI / 2)` isn't exactly `0` in floating point, and since the
+  button only ever lands on a cardinal angle, trig would introduce drift onto what should be exact
+  edge-midpoint coordinates for no benefit. A deliberate, not-a-bug consequence: Radial and Diamond
+  render identically at all four angles, since their math only reads distance from center, not
+  direction — rotating a symmetric shape has nothing to change. Linear and Angular do visibly rotate.
+  `getGradientPreviewStyle.ts`'s CSS swatch was fixed to match (`getGradientCssAngle.ts` converts our
+  clockwise-from-right convention to CSS's clockwise-from-top one, `(angle + 90) % 360`), so the
+  toolbar preview and the real GPU render never disagree.
+- **The store** — `TDesignPage.paint`/`setPaint`/`selectPaint` widened `TSolidPaint` → `TPaint`
+  (§77 had these typed solid-only from the start, "gradients are a render-dispatch addition, not
+  another data-model migration" — this is that addition). `usePaintColorPickerValue.ts`'s `value`
+  (the Solid tab's own displayed color) now falls back to `DEFAULT_VECTOR_PAINT` when the live paint
+  is actually a gradient, rather than reading `.color` off a value that might not have one.
+- **`ColorPicker` gained `onGradientChange`** (`shared/UITools/ColorPicker/`) — the shared picker
+  already had `onChange` for the Solid tab; gradient stop/type/angle edits had nowhere to report to
+  outside the component (`useGradientPanel`'s state was local-only). `useGradientPanel` now takes an
+  optional `onChange` and calls it with the freshly-computed `{ stops, type, angle }` from inside
+  each mutator (`addStop`/`rotate`/`setType`/etc.) directly — not a `useEffect` watching `[stops,
+  type, angle]`, even though that would also work, per this repo's standing preference for writing
+  at the interaction site over reactive state-watching. `VectorEditPaintTool`'s new
+  `useSetGradientPaint.ts` hook is the gradient-side mirror of §77's `useSetPaint.ts`: maps the
+  panel's `TEditableGradientStop[]` down to real `TGradientStop[]` (dropping the UI-only `id`),
+  resolves `start`/`end` via `getGradientPointsFromAngle`, and preserves `blendMode` off the current
+  `page.paint` exactly like `useSetPaint` already did (§78) — blend mode needed zero new work beyond
+  this, since `getFaceGroupBlendMode`/`drawVectorFillGroup` already only look at `paint.blendMode`,
+  never `paint.type` (`canvas-rendering-pipeline.md` §11).
+- **A bug the feature surfaced against itself, live**: after all of the above shipped, opening the
+  Gradient tab and immediately closing the picker — without touching a single stop — painted a face
+  as flat solid, not a gradient. Root cause: `onGradientChange`/`onChange` only fired from inside
+  `useGradientPanel`'s own mutators, and merely switching tabs is not a mutation — the default
+  2-stop gradient state sat in `useGradientPanel`'s `useState` from the moment the picker mounted,
+  never once reaching Redux, until the user rotated or dragged a stop. Fixed by moving tab-switch
+  handling itself into `useSetActiveTab.ts`: it now takes `onChange`/`onGradientChange`/`value`/
+  `gradientPanel` alongside the state setter, and commits the *other* tab's current paint every time
+  the active tab actually changes — switching to Gradient dispatches the panel's present
+  stops/type/angle even if untouched, switching back to Solid dispatches the current `value`. Both
+  directions needed the fix, symmetric with how Figma's own fill-type tabs behave.
+
+Coverage: unit (`getGradientPointsFromAngle`, `mapEditableStopsToGradientStops`,
+`getGradientStopUniformArrays`, `getGradientTypeIndex`, `getVectorFillBounds`,
+`drawVectorGradientFill`, `getGradientCssAngle`, plus `useSetActiveTab`'s new tab-commit branches, all
+new; `drawVectorFillPaints`/`useGradientPanel`/`ColorPicker`/`usePaintColorPickerValue` extended).
+e2e: `e2e/design/vector/vector-paint-gradient.spec.ts` — two scenarios, one painting after an
+explicit rotate (checks the committed `start`/`end` match the rotated angle and the render actually
+changed), one reproducing the tab-switch bug above directly (open Gradient, close immediately, paint
+— still a real gradient).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

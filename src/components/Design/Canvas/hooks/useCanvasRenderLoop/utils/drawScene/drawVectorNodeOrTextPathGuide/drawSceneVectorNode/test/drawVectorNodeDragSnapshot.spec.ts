@@ -25,6 +25,8 @@ const createGlMock = (): WebGL2RenderingContext =>
     useProgram: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
 
+const DRAG_GRADIENT_PROGRAM = {} as WebGLProgram;
+
 const buildContext = (
   gl: WebGL2RenderingContext,
   buffer: WebGLBuffer,
@@ -37,6 +39,7 @@ const buildContext = (
   canvasWidth: 200,
   gl,
   imageContext: {
+    dragGradientProgram: DRAG_GRADIENT_PROGRAM,
     dragSnapshotFaceBufferCache,
     dragSnapshotProgram,
     dragSnapshotStrokeBufferCache,
@@ -107,6 +110,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       1,
       gl,
       program,
+      DRAG_GRADIENT_PROGRAM,
       buffer,
       faceBufferCache,
       null,
@@ -121,6 +125,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       2,
       gl,
       program,
+      DRAG_GRADIENT_PROGRAM,
       buffer,
       faceBufferCache,
       null,

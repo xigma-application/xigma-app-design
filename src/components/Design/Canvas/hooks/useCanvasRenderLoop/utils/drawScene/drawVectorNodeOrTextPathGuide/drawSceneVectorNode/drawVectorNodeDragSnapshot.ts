@@ -8,15 +8,21 @@ import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawV
 
 export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeDragSnapshot): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
-  const { dragSnapshotFaceBufferCache, dragSnapshotProgram, dragSnapshotStrokeBufferCache, isAlphaWriteEnabled } = imageContext;
+  const { dragGradientProgram, dragSnapshotFaceBufferCache, dragSnapshotProgram, dragSnapshotStrokeBufferCache, isAlphaWriteEnabled } =
+    imageContext;
   const translateLocation = gl.getUniformLocation(dragSnapshotProgram, 'u_translate');
+  const gradientTranslateLocation = gl.getUniformLocation(dragGradientProgram, 'u_translate');
 
   gl.useProgram(dragSnapshotProgram);
   gl.uniform2f(translateLocation, snapshot.deltaX, snapshot.deltaY);
+  gl.useProgram(dragGradientProgram);
+  gl.uniform2f(gradientTranslateLocation, snapshot.deltaX, snapshot.deltaY);
+
   snapshot.facesByPaint.forEach(({ paint, points }) => {
     drawVectorFillPaints(
       gl,
       dragSnapshotProgram,
+      dragGradientProgram,
       buffer,
       dragSnapshotFaceBufferCache,
       null,

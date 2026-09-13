@@ -3,6 +3,9 @@ import { CSSProperties, ReactNode } from 'react';
 // components
 import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 
+// types
+import { TGradientPanelChange } from './Body/GradientPanel/types';
+
 export type TColorPickerValue = { alpha: number; hex: string };
 
 export type THsv = { h: number; s: number; v: number };
@@ -20,6 +23,7 @@ export type TColorPickerProps = {
   onChange: TFunc<[TColorPickerValue]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
+  onGradientChange?: TFunc<[TGradientPanelChange]>;
   onOpenChange?: TFunc<[boolean]>;
   presets?: TColorPickerValue[];
   side?: TPopoverProps['side'];

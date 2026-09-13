@@ -10,7 +10,7 @@ import {
   TGridTrackValueEditRequest,
 } from 'types/design/canvas/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
-import { TSolidPaint } from 'types/design/paint/types';
+import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 export type TDesignPage = {
   backgroundPaint: TSolidPaint;
@@ -19,7 +19,7 @@ export type TDesignPage = {
   id: string;
   name: string;
   nodes: Record<string, TSceneNode>;
-  paint: TSolidPaint;
+  paint: TPaint;
   rootOrder: string[];
   selectedIds: string[];
   viewport: TViewport;

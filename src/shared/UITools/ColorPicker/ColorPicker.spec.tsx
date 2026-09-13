@@ -59,6 +59,71 @@ describe('ColorPicker behaviors', () => {
     expect(lastPreview.style.background).toContain('linear-gradient');
   });
 
+  it('should call onGradientChange immediately when the Gradient tab is opened, even without touching the panel', () => {
+    // mock
+    const onGradientChange = vi.fn();
+
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      onGradientChange,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+    fireEvent.click(screen.getByText('Open'));
+
+    // action
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // result
+    expect(onGradientChange).toHaveBeenCalledWith({ angle: 0, stops: expect.any(Array), type: 'gradient-linear' });
+  });
+
+  it('should call onChange with the current solid value when switching back from Gradient to Solid', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderColorPicker({
+      onChange,
+      onGradientChange: vi.fn(),
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByText('Gradient'));
+    onChange.mockClear();
+
+    // action
+    fireEvent.click(screen.getByText('Solid'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ alpha: 100, hex: '#ff0000' });
+  });
+
+  it('should call onGradientChange with the updated stops, type, and angle when the gradient panel changes', () => {
+    // mock
+    const onGradientChange = vi.fn();
+
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      onGradientChange,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // action
+    const rotateButton = screen.getByLabelText('Rotate gradient');
+
+    fireEvent.click(rotateButton);
+
+    // result
+    expect(onGradientChange).toHaveBeenCalledWith(expect.objectContaining({ angle: 90, type: 'gradient-linear' }));
+  });
+
   it('should call onChange with the clicked preset hex and alpha, overriding the current value', () => {
     // mock
     const onChange = vi.fn();

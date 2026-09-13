@@ -95,6 +95,31 @@ describe('VectorEditPaintTool', () => {
     expect(swatch.style.background).toContain('linear-gradient');
   });
 
+  it('should commit a real gradient paint to the store as soon as the Gradient tab opens, before touching any stop', () => {
+    // before
+    renderVectorEditPaintTool(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
+
+    // action
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toMatchObject({ type: 'gradient-linear' });
+  });
+
+  it('should revert to a solid paint in the store when switching back from Gradient to Solid', () => {
+    // before
+    renderVectorEditPaintTool(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // action
+    fireEvent.click(screen.getByText('Solid'));
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toMatchObject({ type: 'solid' });
+  });
+
   it('should dispatch setPaint when a preset is picked from the open panel', () => {
     // before
     renderVectorEditPaintTool(true);
