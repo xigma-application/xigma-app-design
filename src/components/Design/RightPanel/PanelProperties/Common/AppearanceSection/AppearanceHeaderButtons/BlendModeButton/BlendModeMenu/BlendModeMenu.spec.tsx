@@ -1,15 +1,49 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { Provider } from 'react-redux';
 
 // components
 import BlendModeMenu from './BlendModeMenu';
 
+// store
+import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
 const renderBlendModeMenu = (): ReturnType<typeof render> =>
   render(
-    <PopoverPrimitive.Root open>
-      <BlendModeMenu />
-    </PopoverPrimitive.Root>,
+    <Provider store={store}>
+      <PopoverPrimitive.Root open>
+        <BlendModeMenu />
+      </PopoverPrimitive.Root>
+    </Provider>,
   );
+
+const addAndSelectRectangle = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: 10,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+  const id = rootOrder[rootOrder.length - 1];
+
+  store.dispatch(setSelection([id]));
+
+  return id;
+};
 
 describe('BlendModeMenu snapshots', () => {
   it('should render every blend mode option grouped with separators', () => {
@@ -22,6 +56,10 @@ describe('BlendModeMenu snapshots', () => {
 });
 
 describe('BlendModeMenu behaviors', () => {
+  afterEach(() => {
+    store.dispatch(setSelection([]));
+  });
+
   it('should render every blend mode option', () => {
     // before
     renderBlendModeMenu();
@@ -63,8 +101,10 @@ describe('BlendModeMenu behaviors', () => {
     expect(otherItem.querySelector('span[style*="opacity: 1"]')).toBeNull();
   });
 
-  it('should move the selection to the clicked option', () => {
+  it('should move the selection to the clicked option and commit it onto the node', () => {
     // before
+    const id = addAndSelectRectangle();
+
     renderBlendModeMenu();
 
     // action
@@ -74,5 +114,6 @@ describe('BlendModeMenu behaviors', () => {
     const selectedItem = screen.getByText('Multiply').closest('div')!.parentElement!;
 
     expect(selectedItem.querySelector('span[style*="opacity: 1"]')).not.toBeNull();
+    expect((selectActivePage(store.getState()).nodes[id] as { blendMode?: string }).blendMode).toBe('multiply');
   });
 });

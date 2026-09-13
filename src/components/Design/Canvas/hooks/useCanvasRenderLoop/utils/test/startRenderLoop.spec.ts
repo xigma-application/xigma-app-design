@@ -23,6 +23,8 @@ const requestAnimationFrameMock = vi.fn((callback: FrameRequestCallback) => {
 });
 const cancelAnimationFrameMock = vi.fn();
 const IMAGE_CONTEXT: TImageRenderContext = {
+  blendCompositeBuffer: {} as WebGLBuffer,
+  blendCompositeProgram: {} as WebGLProgram,
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   checkerboardProgram: {} as WebGLProgram,

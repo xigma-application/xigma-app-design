@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 // others
+import BLEND_COMPOSITE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/blendCompositeFragmentShaderSource';
 import CHECKERBOARD_FRAGMENT_SHADER_SOURCE from 'constant/webgl/checkerboardFragmentShaderSource';
 import FRAGMENT_SHADER_SOURCE from 'constant/webgl/fragmentShaderSource';
 import GRID_FRAGMENT_SHADER_SOURCE from 'constant/webgl/gridFragmentShaderSource';
@@ -36,6 +37,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const checkerboardProgram = gl && createProgram(gl, GRID_VERTEX_SHADER_SOURCE, CHECKERBOARD_FRAGMENT_SHADER_SOURCE);
     const maskCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE);
     const maskCompositeBuffer = gl && gl.createBuffer();
+    const blendCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, BLEND_COMPOSITE_FRAGMENT_SHADER_SOURCE);
+    const blendCompositeBuffer = gl && gl.createBuffer();
     const dragSnapshotProgram = gl && createProgram(gl, VECTOR_DRAG_VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
 
     if (
@@ -52,6 +55,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       checkerboardProgram &&
       maskCompositeProgram &&
       maskCompositeBuffer &&
+      blendCompositeProgram &&
+      blendCompositeBuffer &&
       dragSnapshotProgram
     ) {
       const stopRenderLoop = setupRenderLoop(
@@ -67,6 +72,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         checkerboardProgram,
         maskCompositeProgram,
         maskCompositeBuffer,
+        blendCompositeProgram,
+        blendCompositeBuffer,
         dragSnapshotProgram,
         canvas,
         refs,
@@ -79,12 +86,14 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteBuffer(msdfBuffer);
         gl.deleteBuffer(gridBuffer);
         gl.deleteBuffer(maskCompositeBuffer);
+        gl.deleteBuffer(blendCompositeBuffer);
         gl.deleteProgram(program);
         gl.deleteProgram(imageProgram);
         gl.deleteProgram(msdfProgram);
         gl.deleteProgram(gridProgram);
         gl.deleteProgram(checkerboardProgram);
         gl.deleteProgram(maskCompositeProgram);
+        gl.deleteProgram(blendCompositeProgram);
         gl.deleteProgram(dragSnapshotProgram);
       };
     }

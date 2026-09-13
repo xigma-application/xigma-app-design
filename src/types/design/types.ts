@@ -5,6 +5,7 @@ import {
   AlignmentLayout,
   AlignmentVertical,
   AutoSpacing,
+  BlendMode,
   CanvasStacking,
   GapMode,
   InsideStroke,
@@ -67,6 +68,7 @@ export type TGridTrackSize = { mode: SizingMode; value?: number };
 
 export type TBaseNode = {
   alignment?: TNodeAlignment;
+  blendMode?: BlendMode;
   gridChildHorizontalAlign?: AlignmentHorizontal;
   gridChildVerticalAlign?: AlignmentVertical;
   gridColumnAnchorIndex?: number;

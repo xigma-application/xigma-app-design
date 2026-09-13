@@ -3,6 +3,7 @@ import { bindTarget } from './bindTarget';
 import { drawLeafNode } from '../drawLeafNode';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
+import { hasRealBlendMode } from './hasRealBlendMode';
 import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
 
@@ -28,7 +29,10 @@ export const drawSceneNodes = (
 
   if (
     !sceneNodes.some(
-      (node) => node.type === NodeType.mask || (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0),
+      (node) =>
+        node.type === NodeType.mask ||
+        (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0) ||
+        hasRealBlendMode(node),
     )
   ) {
     sceneNodes.forEach(paintLeaf);

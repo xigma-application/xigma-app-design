@@ -620,25 +620,54 @@ opposite direction) — every pointer interaction resolves via math against node
 (`getNodeAtPoint.ts` and friends), so the grid can never intercept or shadow a click regardless of
 where it sits in the paint order.
 
-## 11. Mask compositing — the one offscreen-framebuffer pass
+## 11. Mask & blend-mode compositing — the offscreen-framebuffer passes
 
-Masks (`masks.md`) are the only thing in this renderer that renders to an offscreen framebuffer
-instead of straight to the default one. `drawSceneNodes.ts` is now two paths: with **no** `isMask`
-node in the scene it is the exact old flat `sceneNodes.forEach` over `drawLeafNode` (the old
-per-`NodeType` switch, extracted verbatim), touching no framebuffer/viewport/blend/colour-mask
-state. With one present it walks the tree from `rootOrder` (`drawSceneNodes/` folder,
-`TMaskRenderer`-threaded helpers), and for each group whose first `isMask` child opens a scope it:
-renders the siblings *before* the mask (the rows above it in the Layers panel) into `contentTarget`,
-the mask node into `maskTarget` (both from
-`createRenderTargetPool`, drawing-buffer-sized, packed depth/stencil so a vector mask's own
-`drawVectorFill` stencil pass still works), then `compositeMask` draws a full-screen quad
-`content.rgb, content.a * mask.a` back onto the framebuffer that group was being drawn into — the
-screen, or an outer scope's `contentTarget` when nested. The pass runs under
+Masks (`masks.md`) and layer blend modes are the only things in this renderer that render to an
+offscreen framebuffer instead of straight to the default one. `drawSceneNodes.ts` is now two paths:
+with **no** `isMask` node, no clip-content frame, and no node carrying a real (non-Pass-through)
+`blendMode` anywhere in the scene (`hasRealBlendMode.ts`) it is the exact old flat
+`sceneNodes.forEach` over `drawLeafNode` (the old per-`NodeType` switch, extracted verbatim into
+`dispatchNodeType.ts`), touching no framebuffer/viewport/blend/colour-mask state. With any of those
+present it walks the tree from `rootOrder` (`drawSceneNodes/` folder, `TMaskRenderer`-threaded
+helpers), and for each group whose first `isMask` child opens a scope it: renders the siblings
+*before* the mask (the rows above it in the Layers panel) into `contentTarget`, the mask node into
+`maskTarget` (both from `createRenderTargetPool`, drawing-buffer-sized, packed depth/stencil so a
+vector mask's own `drawVectorFill` stencil pass still works), then `compositeMask` draws a
+full-screen quad `content.rgb, content.a * mask.a` back onto the framebuffer that group was being
+drawn into — the screen, or an outer scope's `contentTarget` when nested. The pass runs under
 `blendFuncSeparate(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, ONE, ONE_MINUS_SRC_ALPHA)` and toggles
 `colorMask`'s alpha bit on for offscreen targets / off for the screen (the state
 `drawSceneBackground` leaves), restoring the plain `blendFunc` and rebinding the default
 framebuffer at the end. Only pixel fills go through this — selection/hover/handle layers still draw
 in screen space afterwards, unchanged.
+
+**Blend mode (`TBaseNode.blendMode?: BlendMode`, every node type except `TLineNode`/`TVectorNode` —
+same carve-out as opacity, `getNodeBlendMode.ts` narrows via `'blendMode' in node`) reuses this same
+tree-walker rather than adding a second one.** `renderNode.ts` — every node, leaf or container, drag
+or committed — checks `hasRealBlendMode(node)` before doing anything else: `undefined`/`Pass through`
+dispatches straight to `dispatchNodeType` exactly as before (zero behavioral change, this is the
+overwhelmingly common case); any other mode routes through `renderIsolatedBlendNode.ts` instead,
+which (1) captures whatever is *already* drawn into the current target as a `u_backdrop` texture
+(`captureBackdropTexture.ts`, a raw `gl.copyTexImage2D` off the currently-bound framebuffer — this is
+what makes it "isolation": a container's children render into a fresh transparent `contentTarget`
+first via the ordinary `dispatchNodeType` recursion, so their own blend modes only ever see each
+other, not whatever is behind the whole group, matching Figma's Pass-through-vs-Normal-or-other
+semantics — a leaf gets the identical treatment, its fill+stroke draws composited with each other
+before the layer's own blend mode applies once), (2) renders the node/subtree into that
+`contentTarget` same as a mask's content pass, (3) `compositeBlend.ts` draws the full-screen quad
+that actually blends — real per-pixel CSS/W3C compositing-and-blending formulas (multiply through
+luminosity, plus Figma's own Plus-darker/Plus-lighter as clamped linear burn/dodge) in
+`constant/webgl/blendCompositeFragmentShaderSource.ts`, keyed off `u_blendMode` via
+`getBlendModeShaderIndex.ts` — not an approximation via `gl.blendFunc` (most of these modes, the
+whole non-separable HSL group especially, aren't expressible as a fixed-function blend equation at
+all). The composite shader computes the standard non-premultiplied source-over-with-blend formula
+(`Co = (1-αs)·αb·Cb + αs·[(1-αb)·Cs + αb·B(Cb,Cs)]`, un-premultiplied by `αo` at the end) and draws
+with blending *disabled* (`compositeBlend.ts` toggles `gl.disable`/`enable(gl.BLEND)` tightly around
+just that one draw call) since the shader itself already folds the backdrop in — reusing the mask
+composite's vertex shader (`maskCompositeVertexShaderSource.ts`, already a generic fullscreen-quad
+passthrough despite its name) rather than a duplicate file, same "MSDF reuses image's vertex shader"
+precedent from §3. Combines for free with masks/clip-content nesting, since it's just another
+wrapping layer around the same `renderNode`/`target` recursion, not a parallel mechanism.
 
 ## 12. Rulers — the one non-WebGL rendering surface
 

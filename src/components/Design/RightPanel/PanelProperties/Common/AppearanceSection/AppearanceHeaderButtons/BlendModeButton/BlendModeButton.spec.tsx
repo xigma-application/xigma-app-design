@@ -1,14 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import BlendModeButton from './BlendModeButton';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderBlendModeButton = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <BlendModeButton />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <BlendModeButton />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('BlendModeButton snapshots', () => {

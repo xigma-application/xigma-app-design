@@ -223,8 +223,11 @@ panel with a slider (plus an "iOS" marker for the smoothing level Apple uses) an
 It now really reshapes the corners into the same rounder, softer "squircle" curve Figma and iOS use,
 instead of a plain circular corner.
 
-- [ ] the Blend mode button opens a menu with every blend mode option, but picking one doesn't
-      change the shape yet — nothing is saved
+The Blend mode button's menu is now real too: picking a mode actually changes how the shape mixes
+with whatever is behind it, the same way it works in Figma — a Frame or Group set to anything other
+than the default "Pass through" also affects how its children blend with things outside the group,
+not just the group itself. Backgrounds/fills getting their own separate blend mode is a later step,
+not part of this one.
 
 ## Related
 

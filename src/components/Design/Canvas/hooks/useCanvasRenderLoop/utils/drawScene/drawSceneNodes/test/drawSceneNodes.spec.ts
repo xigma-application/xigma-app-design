@@ -1,5 +1,5 @@
 // types
-import { NodeType, PathType } from 'types/design/enums';
+import { BlendMode, NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../../types';
 import {
   TBoxSceneNode,
@@ -47,11 +47,14 @@ const createGlMock = (): WebGL2RenderingContext =>
     clear: vi.fn(),
     clearColor: vi.fn(),
     colorMask: vi.fn(),
+    copyTexImage2D: vi.fn(),
     createBuffer: vi.fn(() => ({})),
     createTexture: vi.fn(() => ({})),
+    disable: vi.fn(),
     drawArrays: vi.fn(),
     drawingBufferHeight: 200,
     drawingBufferWidth: 200,
+    enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     generateMipmap: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
@@ -69,6 +72,8 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
+  blendCompositeBuffer: {} as WebGLBuffer,
+  blendCompositeProgram: {} as WebGLProgram,
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   checkerboardProgram: {} as WebGLProgram,
@@ -744,6 +749,36 @@ describe('drawSceneNodes', () => {
       expect(pool.acquire).not.toHaveBeenCalled();
       expect(gl.bindFramebuffer).not.toHaveBeenCalled();
       expect(gl.blendFuncSeparate).not.toHaveBeenCalled();
+    });
+
+    it('should isolate and composite a leaf node that has a real blend mode, unlike the flat fast path above', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const a = buildNode({ blendMode: BlendMode.multiply, id: 'a', type: NodeType.rectangle });
+      const b = buildNode({ id: 'b' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [a, b],
+        ['a', 'b'],
+        new Map(),
+        createCanvasRefs(),
+        { a, b },
+      );
+
+      // result
+      expect(pool.acquire).toHaveBeenCalled();
+      expect(gl.copyTexImage2D).toHaveBeenCalledWith(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, 200, 200, 0);
     });
 
     it('should silently skip a child id that is not in the visible scene (e.g. hidden)', () => {

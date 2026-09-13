@@ -71,6 +71,8 @@ describe('setupRenderLoop', () => {
       {} as WebGLProgram,
       {} as WebGLBuffer,
       {} as WebGLProgram,
+      {} as WebGLBuffer,
+      {} as WebGLProgram,
       canvas,
       createCanvasRefs(),
     );
@@ -105,6 +107,8 @@ describe('setupRenderLoop', () => {
       gridProgram,
       gridBuffer,
       {} as WebGLProgram,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
       {} as WebGLProgram,
       {} as WebGLBuffer,
       {} as WebGLProgram,

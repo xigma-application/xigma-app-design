@@ -1,11 +1,12 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { BlendMode, NodeType } from 'types/design/enums';
 import { TMaskRenderer } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { renderFrameNode } from '../renderFrameNode';
 import { renderGroupNode } from '../renderGroupNode';
+import { renderIsolatedBlendNode } from '../renderIsolatedBlendNode';
 import { renderMaskNode } from '../renderMaskNode';
 import { renderNode } from '../renderNode';
 import { renderSectionNode } from '../renderSectionNode';
@@ -14,6 +15,7 @@ vi.mock('../renderGroupNode', () => ({ renderGroupNode: vi.fn() }));
 vi.mock('../renderMaskNode', () => ({ renderMaskNode: vi.fn() }));
 vi.mock('../renderFrameNode', () => ({ renderFrameNode: vi.fn() }));
 vi.mock('../renderSectionNode', () => ({ renderSectionNode: vi.fn() }));
+vi.mock('../renderIsolatedBlendNode', () => ({ renderIsolatedBlendNode: vi.fn() }));
 
 const buildRenderer = (nodes: Record<string, Partial<TSceneNode>>): TMaskRenderer =>
   ({
@@ -77,5 +79,25 @@ describe('renderNode', () => {
     expect(renderGroupNode).not.toHaveBeenCalled();
     expect(renderFrameNode).not.toHaveBeenCalled();
     expect(renderSectionNode).not.toHaveBeenCalled();
+  });
+
+  it('should isolate a node with a real blend mode instead of dispatching it directly', () => {
+    const rect = { blendMode: BlendMode.multiply, id: 'rect-1', type: NodeType.rectangle };
+    const renderer = buildRenderer({ 'rect-1': rect });
+
+    renderNode(renderer, 'rect-1', null);
+
+    expect(renderIsolatedBlendNode).toHaveBeenCalledWith(renderer, renderer.sceneNodeById.get('rect-1'), null);
+    expect(renderer.paintLeaf).not.toHaveBeenCalled();
+  });
+
+  it('should dispatch normally when the blend mode is Pass through', () => {
+    const rect = { blendMode: BlendMode.passThrough, id: 'rect-1', type: NodeType.rectangle };
+    const renderer = buildRenderer({ 'rect-1': rect });
+
+    renderNode(renderer, 'rect-1', null);
+
+    expect(renderer.paintLeaf).toHaveBeenCalledWith(renderer.sceneNodeById.get('rect-1'));
+    expect(renderIsolatedBlendNode).not.toHaveBeenCalled();
   });
 });

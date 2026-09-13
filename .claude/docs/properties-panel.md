@@ -54,13 +54,15 @@ node's folder. Today:
   opens a `UITools.ButtonMenu` listing every CSS/Figma-style blend mode (`BlendModeMenu`, options from
   `types/design/constants.ts`'s `BLEND_MODE_GROUPS`, grouped with `PopoverSeparator` exactly like the
   screenshot spec — Pass through/Normal, then the darken/lighten/contrast/component families, then the
-  HSL family), each a `PopoverItem` with its own checkmark. **UI only, not wired** — there is no
-  `blendMode` field on any node yet; `useBlendModeMenu` holds the selected `BlendMode` (from
-  `types/design/enums.ts`) in local `useState` only, defaulting to `passThrough`, and resets on every
-  reopen since the menu unmounts when the popover closes. The `BlendMode` enum + `BLEND_MODE_GROUPS`
-  constant were deliberately put in the global `types/design/` layer (not nested under this button's
-  own folder) because blend mode is a Design-domain concept other future features (e.g. per-fill blend
-  mode) will need the same option list for. The eye button dispatches
+  HSL family), each a `PopoverItem` with its own checkmark. `useBlendModeMenu` reads/writes the
+  selected node's own `TBaseNode.blendMode?: BlendMode` via `updateNode` (same commit shape as
+  `useOpacity`/`useCornerSmoothingPopover`), defaulting to `passThrough` when unset — real node data,
+  and really rendered (`canvas-rendering-pipeline.md` §11: layer isolation + full CSS/W3C blend-formula
+  compositing, not a placeholder). The `BlendMode` enum + `BLEND_MODE_GROUPS` constant were
+  deliberately put in the global `types/design/` layer (not nested under this button's own folder)
+  because blend mode is a Design-domain concept other future features (e.g. per-fill blend mode —
+  deliberately *not* built alongside this; `TPaintBase` in `types/design/paint/types.ts` has no
+  `blendMode` of its own yet) will need the same option list for. The eye button dispatches
   the pre-existing `toggleNodeHidden` (already cascades to descendants via
   `cascadeSetGroupChildrenFlag` — no new wiring needed there).
 

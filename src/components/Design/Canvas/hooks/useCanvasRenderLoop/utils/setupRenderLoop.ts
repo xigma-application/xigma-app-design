@@ -19,6 +19,8 @@ export const setupRenderLoop = (
   checkerboardProgram: WebGLProgram,
   maskCompositeProgram: WebGLProgram,
   maskCompositeBuffer: WebGLBuffer,
+  blendCompositeProgram: WebGLProgram,
+  blendCompositeBuffer: WebGLBuffer,
   dragSnapshotProgram: WebGLProgram,
   canvas: HTMLCanvasElement,
   refs: TCanvasRefs,
@@ -27,6 +29,8 @@ export const setupRenderLoop = (
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   const imageContext: TImageRenderContext = {
+    blendCompositeBuffer,
+    blendCompositeProgram,
     buffer: imageBuffer,
     cache: new Map(),
     checkerboardProgram,

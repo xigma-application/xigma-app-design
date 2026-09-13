@@ -4,6 +4,7 @@ import { test, expect, Page } from '@playwright/test';
 import { DesignPage } from '../model/DesignPage';
 
 type TReadableNode = {
+  blendMode?: string;
   cornerRadius?: number;
   cornerRadiusBottomLeft?: number;
   cornerRadiusBottomRight?: number;
@@ -159,6 +160,28 @@ test.describe('Design panels — Appearance section', () => {
     const id = await readFirstNodeId(page);
 
     expect((await readNode(page, id)).cornerSmoothing).toBe(0.6);
+
+    const after = await designPage.canvas.screenshot();
+
+    expect(after.equals(before)).toBe(false);
+  });
+
+  test('picking a blend mode commits it onto the node and actually changes how the shape renders', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-blend-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const before = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Apply blend mode').click();
+    await page.getByText('Multiply', { exact: true }).click();
+
+    const id = await readFirstNodeId(page);
+
+    expect((await readNode(page, id)).blendMode).toBe('multiply');
 
     const after = await designPage.canvas.screenshot();
 

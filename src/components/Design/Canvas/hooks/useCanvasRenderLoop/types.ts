@@ -8,6 +8,8 @@ import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetP
 import { TTextGeometry } from 'utils/canvas/text/getOrBuildTextGeometry';
 
 export type TImageRenderContext = {
+  blendCompositeBuffer: WebGLBuffer;
+  blendCompositeProgram: WebGLProgram;
   buffer: WebGLBuffer;
   cache: Map<string, WebGLTexture>;
   checkerboardProgram: WebGLProgram;
