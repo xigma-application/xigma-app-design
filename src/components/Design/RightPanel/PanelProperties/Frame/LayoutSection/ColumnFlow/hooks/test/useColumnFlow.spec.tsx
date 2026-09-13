@@ -327,6 +327,59 @@ describe('useColumnFlow', () => {
     expect(result.current.gridAutoPlacement).toBe(true);
   });
 
+  it('should freeze every child’s current auto-flowed cell into an explicit anchor when turning automatic positioning off', () => {
+    // mock — a 2-column grid with two children that were never anchored (e.g. auto-inserted while
+    // automatic positioning was on), so track-reorder-carries-child and manual repositioning would
+    // otherwise have nothing to work with
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { gridColumnCount: 2, layoutMode: LayoutMode.grid }, id: frameId }));
+
+    const firstId = addAutoLayoutFrameNode(LayoutMode.freeForm);
+    const secondId = addAutoLayoutFrameNode(LayoutMode.freeForm);
+
+    moveIntoParent(firstId, frameId);
+    moveIntoParent(secondId, frameId);
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    expect(readNode(firstId).gridColumnAnchorIndex).toBeUndefined();
+
+    // action — turn automatic positioning off
+    act(() => result.current.onGridAutoPlacementChange());
+
+    // result — both children got stamped with their current (auto-flowed) cell; moveNodes with
+    // targetIndex 0 each time means "second" landed first in childIds, "first" second
+    expect(readNode(frameId).gridAutoPlacement).toBe(false);
+    expect(readNode(secondId)).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 });
+    expect(readNode(firstId)).toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 0 });
+  });
+
+  it('should not touch any child anchors when turning automatic positioning back on', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 2, layoutMode: LayoutMode.grid }, id: frameId }));
+
+    const childId = addAutoLayoutFrameNode(LayoutMode.freeForm);
+
+    moveIntoParent(childId, frameId);
+    store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 1, gridRowAnchorIndex: 3 }, id: childId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderUseColumnFlow();
+
+    // action — turn automatic positioning back on
+    act(() => result.current.onGridAutoPlacementChange());
+
+    // result — the manual anchor is left exactly as it was (the engine simply ignores it now)
+    expect(readNode(frameId).gridAutoPlacement).toBe(true);
+    expect(readNode(childId)).toMatchObject({ gridColumnAnchorIndex: 1, gridRowAnchorIndex: 3 });
+  });
+
   it('should leave a direct child’s fill untouched when flipping between horizontal and vertical', () => {
     // mock
     const parentId = addAutoLayoutFrameNode(LayoutMode.horizontal);

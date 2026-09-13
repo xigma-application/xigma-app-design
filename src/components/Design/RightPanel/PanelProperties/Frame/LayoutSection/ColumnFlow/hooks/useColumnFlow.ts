@@ -13,6 +13,7 @@ import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
+import { commitGridAutoPlacementFreeze } from 'store/design/utils/autoLayout/gridTracks/commitGridAutoPlacementFreeze';
 import { getChildrenFillResetChanges } from 'store/design/utils/autoLayout/getChildrenFillResetChanges';
 
 export type TUseColumnFlowResult = {
@@ -58,10 +59,18 @@ export const useColumnFlow = (): TUseColumnFlowResult => {
     }
   };
 
+  const onGridAutoPlacementChange = (): void => {
+    if (gridAutoPlacement && frameNode) {
+      commitGridAutoPlacementFreeze(dispatch, frameNode, nodes);
+    }
+
+    dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement }, id }));
+  };
+
   return {
     gridAutoPlacement,
     onChange,
-    onGridAutoPlacementChange: () => dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement }, id })),
+    onGridAutoPlacementChange,
     onWrapChange: () => dispatch(updateNode({ changes: wrap ? { layoutWrap: false, verticalGap: 0 } : { layoutWrap: true }, id })),
     toggleButtons: FLOW_OPTIONS.map(({ icon, labelKey, value: optionValue }) => ({
       ariaLabel: t(`${translationNameSpace}.${labelKey}`),

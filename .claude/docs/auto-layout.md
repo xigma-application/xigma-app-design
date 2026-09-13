@@ -453,15 +453,29 @@ for the horizontal-only Wrap button. `ColumnFlowButtonIcons` now branches on `va
 flow) with a `switch`: `'horizontal'` → Wrap (unchanged), `'grid'` → a new `FollowPath`-icon toggle
 button (`Toggle automatic positioning`, matching Figma's own tooltip text), anything else → `[]`.
 `useColumnFlow` exposes `gridAutoPlacement` (`frameNode?.gridAutoPlacement ?? true`) and
-`onGridAutoPlacementChange` (`dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement } }))`)
-alongside the existing `wrap`/`onWrapChange`, and the button's `selected` prop mirrors it (pressed
-= on). No other side effect: flipping the flag doesn't itself write anchors or touch `childIds` —
-turning it **on** relies entirely on the existing engine behaviour that already ignores anchors
+`onGridAutoPlacementChange` alongside the existing `wrap`/`onWrapChange`, and the button's
+`selected` prop mirrors it (pressed = on).
+
+Turning it **on** relies entirely on the existing engine behaviour that already ignores anchors
 whenever `gridAutoPlacement` is true (`placeGridCells`'s `useAnchor = !autoPlacement && hasAnchor`,
 § engine), so any previously-anchored children snap back into row-major (`getAutoFlowGridPlacement`,
-left-to-right/top-row-down) order the moment the frame re-syncs — no dedicated "compact" step was
-needed. Turning it **off** is likewise a bare flag flip; nothing is anchored until the user
-actually drags something (see the drop-commit branches above and below).
+left-to-right/top-row-down) order the moment the frame re-syncs — no dedicated "un-compact" step is
+needed, and `onGridAutoPlacementChange` leaves every child's stored anchor untouched (the engine
+just stops reading it).
+
+Turning it **off** is *not* a bare flag flip — `onGridAutoPlacementChange` first calls
+`commitGridAutoPlacementFreeze` (`store/design/utils/autoLayout/gridTracks/`), which computes
+every child's *current* auto-flowed cell (`getGridAutoPlacementFreezeAnchors`: `getGridPlacementInputs`
++ `placeGridCells(..., true)` — forcing auto-flow regardless of the frame's actual flag, since this
+runs *before* the flip) and `updateNode`s each child's `gridColumnAnchorIndex`/`gridRowAnchorIndex`
+to match, before dispatching the flag flip itself. Without this, a child that was only ever
+auto-placed (e.g. dropped in while automatic positioning was already on, per the drop-commit branch
+above — that path deliberately never writes an anchor) would have **no anchor at all**, and every
+other manual-mode feature that depends on one — dragging it to a new cell, and especially the
+track-reorder-carries-an-anchored-child behaviour (§ below) — would silently have nothing to act
+on: the track array still reorders, but the unanchored child keeps auto-flowing by `childIds` order
+as if the toggle had no effect on it (see History #27 — this was a real, reported regression before
+the freeze step existed).
 
 ### Panel — `LayoutSection/ColumnAlignmentLayout/GridArea/`
 
@@ -1501,3 +1515,23 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     setup) avoided the side effect; a second e2e gotcha was clicking to select an existing grid
     child before dragging it (as the "ghost drag" test above already established) rather than
     relying on a bare mouse-down, since the frame stays the active RightPanel selection otherwise.
+27. **2026-09-14 — the automatic-positioning toggle didn't freeze anchors, so track-reorder looked
+    broken (§13 "Panel — the Flow row's automatic-positioning toggle").** User report: "moving
+    columns/rows leaves the element in place as if auto were still on, even though it's off."
+    Root cause: entry #26 shipped the toggle as a bare flag flip, on the theory that manual mode
+    only needs to matter once the user actually drags something. That's true for children that
+    already have an anchor (e.g. from a manual-mode drop before the toggle even existed) but false
+    for a child that was only ever *auto*-placed — since entry #26 also changed new-element drops
+    to skip writing an anchor while automatic positioning is on, a grid built entirely through
+    normal auto-flow drops has **no anchors on anyone**, so switching to manual mode did nothing
+    for it: `getGridTrackChildren`'s own `gridAutoPlacement === false` gate was satisfied, but every
+    child's `anchorIndex` was `undefined`, so `getGridTrackReorderChildUpdates` had nothing to
+    remap on a track reorder, and the child kept auto-flowing by `childIds` order as if manual mode
+    had never engaged. Fixed by making the toggle's OFF transition actively freeze the current
+    layout: `commitGridAutoPlacementFreeze` reads every child's live auto-flowed cell (via
+    `placeGridCells(..., true)`, forced auto regardless of the frame's real flag, called before the
+    flip) and stamps it as an explicit anchor pair before the flag itself flips to `false`. This is
+    the missing half of "manual mode should behave like Figma's own toggle" — the ON transition
+    already needed no code (the engine just stops reading anchors), but the OFF transition needs to
+    *create* the anchors the rest of manual mode assumes exist, not wait for the user's first drag
+    to establish them one child at a time.

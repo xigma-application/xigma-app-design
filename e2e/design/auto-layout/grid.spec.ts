@@ -1577,6 +1577,86 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readAnchors()).toEqual(afterFirst);
   });
 
+  test('toggling automatic positioning off freezes every child into an anchor, so a track reorder still carries a never-anchored child', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-auto-placement-freeze-reorder');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // three children dragged in while the frame is still free-form, then switched to a 3-column
+    // grid: they auto-place at (0,0) (1,0) (2,0) — none of them ever gets an explicit anchor,
+    // since automatic positioning stays on the whole time
+    for (const targetY of [250, 320, 390]) {
+      await designPage.drawRectangle(1400, targetY, 1460, targetY + 40);
+      await dragInto(page, { x: 1430, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    const thirdChildId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const [frameId] = activePage.rootOrder;
+      const frame = activePage.nodes[frameId] as unknown as { childIds: string[] };
+
+      return frame.childIds[2];
+    });
+
+    const anchorOf = (nodeId: string): Promise<{ column?: number; row?: number }> =>
+      page.evaluate(async (id) => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+        const node = pages[activePageId].nodes[id] as unknown as { gridColumnAnchorIndex?: number; gridRowAnchorIndex?: number };
+
+        return { column: node.gridColumnAnchorIndex, row: node.gridRowAnchorIndex };
+      }, nodeId);
+
+    // before the toggle, the third child has no anchor at all
+    expect(await anchorOf(thirdChildId)).toEqual({ column: undefined, row: undefined });
+
+    // turn automatic positioning off — this must freeze every child's current auto-flowed cell
+    // into an explicit anchor, not just flip the flag
+    await selectFrameRow(page);
+    await page.getByLabel('Toggle automatic positioning').click();
+
+    await expect.poll(() => anchorOf(thirdChildId)).toEqual({ column: 2, row: 0 });
+
+    // reorder the third column track to the front via the Grid settings panel's own handle
+    await openGridSettings(page);
+
+    const columns = page.locator('[data-test-section="grid-columns"]');
+    const handle = columns.locator('[data-test-grid-track-row="2"]').getByRole('button', { name: 'Reorder track' });
+    const target = columns.locator('[data-test-grid-track-row="0"]');
+    const from = await handle.boundingBox();
+    const to = await target.boundingBox();
+
+    await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to!.x + to!.width / 2, to!.y + 2, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    // the child that was frozen at column 2 followed its track to the front, column 0 — before
+    // the freeze fix this child had no anchor at all, so the reorder had nothing to carry
+    await expect.poll(() => anchorOf(thirdChildId)).toEqual({ column: 0, row: 0 });
+  });
+
   test('undo/redo works from inside the track value field, and carries the panel’s track selection with it', async ({ page }) => {
     const designPage = new DesignPage(page);
 
