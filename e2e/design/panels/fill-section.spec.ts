@@ -378,4 +378,71 @@ test.describe('Design panels — Fill section', () => {
     expect(g).toBeLessThan(40);
     expect(b).toBeLessThan(40);
   });
+
+  test('dragging a gradient stop past another stop does not disturb the crossed stop own position or color', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-stop-drag-past');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // three stops: white at 0%, red at 50%, black at 100%
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#ff0000', opacity: 100, position: 0.5 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    const thumbs = page.getByLabel('Stop marker');
+
+    await expect(thumbs).toHaveCount(3);
+
+    const barBox = (await page.locator('[class*="GradientBar__wrapper"]').boundingBox())!;
+    const lastThumbBox = (await thumbs.nth(2).boundingBox())!;
+    const lastThumbY = lastThumbBox.y + lastThumbBox.height / 2;
+
+    // drag the 100% (black) stop leftward, past the 50% (red) stop, landing near 20%
+    await page.mouse.move(lastThumbBox.x + lastThumbBox.width / 2, lastThumbY);
+    await page.mouse.down();
+    await page.mouse.move(barBox.x + barBox.width * 0.2, lastThumbY, { steps: 20 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const stops = node.fills![0].stops!;
+
+    expect(stops).toHaveLength(3);
+
+    const redStop = stops.find((stop) => stop.color === '#ff0000');
+    const blackStop = stops.find((stop) => stop.color === '#000000');
+
+    // result — the crossed (red) stop must still be exactly where it was, not "stolen" mid-drag
+    expect(redStop!.position).toBeCloseTo(0.5, 1);
+    // result — the dragged (black) stop actually landed where the drag ended, left of the red stop
+    expect(blackStop!.position).toBeLessThan(0.3);
+  });
 });

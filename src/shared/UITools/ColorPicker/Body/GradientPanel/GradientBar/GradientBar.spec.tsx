@@ -68,7 +68,7 @@ describe('GradientBar behaviors', () => {
     expect(onAddStop).not.toHaveBeenCalled();
   });
 
-  it('should move the dragged stop while the button is pressed', () => {
+  it('should move the dragged stop while the button is pressed, tracked window-wide so crossing another stop cannot steal it', () => {
     // mock
     const onMoveStop = vi.fn();
 
@@ -82,8 +82,9 @@ describe('GradientBar behaviors', () => {
 
     const thumb = screen.getAllByLabelText('Stop marker')[1];
 
-    // action
-    thumb.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, buttons: 1, clientX: 100, pointerId: 1 }));
+    // action — the drag starts on the thumb itself, but is then tracked on window, not the thumb
+    thumb.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 200, pointerId: 1 }));
+    window.dispatchEvent(new PointerEvent('pointermove', { clientX: 100, pointerId: 1 }));
 
     // result
     expect(onMoveStop).toHaveBeenCalledWith('stop-2', 0.5);

@@ -1,15 +1,14 @@
-import { PointerEvent as ReactPointerEvent, RefObject, useRef } from 'react';
+import { PointerEvent as ReactPointerEvent, RefObject, useCallback, useEffect, useRef } from 'react';
 
 // types
-import { TEditableGradientStop } from '../../types';
+import { TEditableGradientStop } from '../../../types';
 
 // utils
-import { getPositionFromClientX } from '../utils/getPositionFromClientX';
+import { findStopNearClientX } from './utils/findStopNearClientX';
+import { getPositionFromClientX } from '../../utils/getPositionFromClientX';
 
 export type TThumbPointerHandlers = {
   onPointerDown: TFunc<[ReactPointerEvent<HTMLButtonElement>]>;
-  onPointerMove: TFunc<[ReactPointerEvent<HTMLButtonElement>]>;
-  onPointerUp: TFunc<[ReactPointerEvent<HTMLButtonElement>]>;
 };
 
 export type TUseGradientBarDragResult = {
@@ -25,14 +24,6 @@ export type TUseGradientBarDragOptions = {
   stops: TEditableGradientStop[];
 };
 
-const STOP_HIT_RADIUS_PX = 10;
-
-const findStopNearClientX = (stops: TEditableGradientStop[], clientX: number, bar: HTMLDivElement): TEditableGradientStop | undefined => {
-  const rect = bar.getBoundingClientRect();
-
-  return stops.find((stop) => Math.abs(clientX - (rect.left + stop.position * rect.width)) <= STOP_HIT_RADIUS_PX);
-};
-
 export const useGradientBarDrag = ({
   onAddStop,
   onMoveStop,
@@ -40,6 +31,23 @@ export const useGradientBarDrag = ({
   stops,
 }: TUseGradientBarDragOptions): TUseGradientBarDragResult => {
   const barRef = useRef<HTMLDivElement>(null);
+  const draggingStopIdRef = useRef<string | null>(null);
+
+  const handleWindowPointerMove = useCallback(
+    (event: PointerEvent): void => {
+      const bar = barRef.current;
+      const stopId = draggingStopIdRef.current;
+
+      if (bar && stopId) {
+        onMoveStop(stopId, getPositionFromClientX(event.clientX, bar));
+      }
+    },
+    [onMoveStop],
+  );
+
+  const handleWindowPointerEnd = useCallback((): void => {
+    draggingStopIdRef.current = null;
+  }, []);
 
   const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
     const bar = barRef.current;
@@ -58,20 +66,22 @@ export const useGradientBarDrag = ({
   const getThumbHandlers = (stopId: string): TThumbPointerHandlers => ({
     onPointerDown: (event): void => {
       event.stopPropagation();
-      event.currentTarget.setPointerCapture(event.pointerId);
+      draggingStopIdRef.current = stopId;
       onSelectStop(stopId);
     },
-    onPointerMove: (event): void => {
-      const bar = barRef.current;
-
-      if (bar && event.buttons === 1) {
-        onMoveStop(stopId, getPositionFromClientX(event.clientX, bar));
-      }
-    },
-    onPointerUp: (event): void => {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    },
   });
+
+  useEffect(() => {
+    window.addEventListener('pointermove', handleWindowPointerMove);
+    window.addEventListener('pointerup', handleWindowPointerEnd);
+    window.addEventListener('pointercancel', handleWindowPointerEnd);
+
+    return (): void => {
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener('pointerup', handleWindowPointerEnd);
+      window.removeEventListener('pointercancel', handleWindowPointerEnd);
+    };
+  }, [handleWindowPointerEnd, handleWindowPointerMove]);
 
   return { barRef, getThumbHandlers, onTrackPointerDown };
 };

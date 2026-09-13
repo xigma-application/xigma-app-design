@@ -1,8 +1,8 @@
 import { PointerEvent as ReactPointerEvent } from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 // hooks
-import { useGradientBarDrag } from '../useGradientBarDrag';
+import { useGradientBarDrag } from './useGradientBarDrag';
 
 // types
 import { TEditableGradientStop } from '../../../types';
@@ -20,21 +20,28 @@ const createBar = (): HTMLDivElement => {
   return bar;
 };
 
-const createEvent = <TElement extends HTMLElement>(
+const createPointerDownEvent = <TElement extends HTMLElement>(
   clientX: number,
-  options: { buttons?: number; sameAsCurrentTarget?: boolean } = {},
+  options: { sameAsCurrentTarget?: boolean } = {},
 ): ReactPointerEvent<TElement> => {
   const target = {};
-  const currentTarget = { releasePointerCapture: vi.fn(), setPointerCapture: vi.fn() };
+  const currentTarget = {};
 
   return {
-    buttons: options.buttons ?? 1,
     clientX,
     currentTarget,
     pointerId: 1,
     stopPropagation: vi.fn(),
     target: options.sameAsCurrentTarget === false ? target : currentTarget,
   } as unknown as ReactPointerEvent<TElement>;
+};
+
+const dispatchWindowPointerMove = (clientX: number): void => {
+  window.dispatchEvent(new PointerEvent('pointermove', { clientX }));
+};
+
+const dispatchWindowPointerUp = (): void => {
+  window.dispatchEvent(new PointerEvent('pointerup'));
 };
 
 describe('useGradientBarDrag', () => {
@@ -47,7 +54,7 @@ describe('useGradientBarDrag', () => {
     result.current.barRef.current = createBar();
 
     // action
-    result.current.onTrackPointerDown(createEvent(100));
+    result.current.onTrackPointerDown(createPointerDownEvent(100));
 
     // result
     expect(onAddStop).toHaveBeenCalledWith(0.5);
@@ -63,7 +70,7 @@ describe('useGradientBarDrag', () => {
     result.current.barRef.current = createBar();
 
     // action
-    result.current.onTrackPointerDown(createEvent(4));
+    result.current.onTrackPointerDown(createPointerDownEvent(4));
 
     // result
     expect(onSelectStop).toHaveBeenCalledWith('stop-1');
@@ -79,13 +86,13 @@ describe('useGradientBarDrag', () => {
     result.current.barRef.current = createBar();
 
     // action
-    result.current.onTrackPointerDown(createEvent(100, { sameAsCurrentTarget: false }));
+    result.current.onTrackPointerDown(createPointerDownEvent(100, { sameAsCurrentTarget: false }));
 
     // result
     expect(onAddStop).not.toHaveBeenCalled();
   });
 
-  it('should select the stop and capture the pointer on thumb pointer down', () => {
+  it('should select the stop on thumb pointer down', () => {
     // mock
     const onSelectStop = vi.fn();
 
@@ -93,18 +100,17 @@ describe('useGradientBarDrag', () => {
     const { result } = renderHook(() => useGradientBarDrag({ onAddStop: vi.fn(), onMoveStop: vi.fn(), onSelectStop, stops: STOPS }));
     result.current.barRef.current = createBar();
 
-    const event = createEvent<HTMLButtonElement>(50);
+    const event = createPointerDownEvent<HTMLButtonElement>(50);
 
     // action
     result.current.getThumbHandlers('stop-1').onPointerDown(event);
 
     // result
     expect(event.stopPropagation).toHaveBeenCalled();
-    expect(event.currentTarget.setPointerCapture).toHaveBeenCalledWith(1);
     expect(onSelectStop).toHaveBeenCalledWith('stop-1');
   });
 
-  it('should move the stop to the dragged position while the button is pressed', () => {
+  it('should move the dragged stop on a window-level pointermove after thumb pointer down', () => {
     // mock
     const onMoveStop = vi.fn();
 
@@ -113,13 +119,58 @@ describe('useGradientBarDrag', () => {
     result.current.barRef.current = createBar();
 
     // action
-    result.current.getThumbHandlers('stop-1').onPointerMove(createEvent<HTMLButtonElement>(150));
+    result.current.getThumbHandlers('stop-1').onPointerDown(createPointerDownEvent(50));
+    act(() => dispatchWindowPointerMove(150));
 
     // result
     expect(onMoveStop).toHaveBeenCalledWith('stop-1', 0.75);
   });
 
-  it('should not move the stop on pointer move once the button is released', () => {
+  it('should keep moving the same dragged stop even after the stops array is reordered mid-drag (crossing another stop)', () => {
+    // mock — regression for the bug where crossing another stop briefly "stole" the drag: reordering
+    // used to physically move the thumb's DOM node, which silently released native pointer capture
+    const onMoveStop = vi.fn();
+
+    // before
+    const { rerender, result } = renderHook(
+      ({ currentStops }: { currentStops: TEditableGradientStop[] }) =>
+        useGradientBarDrag({ onAddStop: vi.fn(), onMoveStop, onSelectStop: vi.fn(), stops: currentStops }),
+      { initialProps: { currentStops: STOPS } },
+    );
+    result.current.barRef.current = createBar();
+
+    result.current.getThumbHandlers('stop-2').onPointerDown(createPointerDownEvent(200));
+
+    // stop-2 crosses stop-1 and the array gets re-sorted by position
+    rerender({ currentStops: [STOPS[1], STOPS[0]] });
+
+    // action
+    act(() => dispatchWindowPointerMove(10));
+
+    // result — still moving stop-2, not stop-1
+    expect(onMoveStop).toHaveBeenCalledWith('stop-2', 0.05);
+    expect(onMoveStop).not.toHaveBeenCalledWith('stop-1', expect.anything());
+  });
+
+  it('should stop moving any stop after a window-level pointerup', () => {
+    // mock
+    const onMoveStop = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useGradientBarDrag({ onAddStop: vi.fn(), onMoveStop, onSelectStop: vi.fn(), stops: STOPS }));
+    result.current.barRef.current = createBar();
+
+    result.current.getThumbHandlers('stop-1').onPointerDown(createPointerDownEvent(50));
+
+    // action
+    act(() => dispatchWindowPointerUp());
+    act(() => dispatchWindowPointerMove(150));
+
+    // result
+    expect(onMoveStop).not.toHaveBeenCalled();
+  });
+
+  it('should not move any stop from a window pointermove without a preceding thumb pointer down', () => {
     // mock
     const onMoveStop = vi.fn();
 
@@ -128,23 +179,9 @@ describe('useGradientBarDrag', () => {
     result.current.barRef.current = createBar();
 
     // action
-    result.current.getThumbHandlers('stop-1').onPointerMove(createEvent<HTMLButtonElement>(150, { buttons: 0 }));
+    act(() => dispatchWindowPointerMove(150));
 
     // result
     expect(onMoveStop).not.toHaveBeenCalled();
-  });
-
-  it('should release the pointer capture on thumb pointer up', () => {
-    // before
-    const { result } = renderHook(() =>
-      useGradientBarDrag({ onAddStop: vi.fn(), onMoveStop: vi.fn(), onSelectStop: vi.fn(), stops: STOPS }),
-    );
-    const event = createEvent<HTMLButtonElement>(0);
-
-    // action
-    result.current.getThumbHandlers('stop-1').onPointerUp(event);
-
-    // result
-    expect(event.currentTarget.releasePointerCapture).toHaveBeenCalledWith(1);
   });
 });

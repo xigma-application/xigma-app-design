@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // hooks
-import { useGradientBarDrag } from './hooks/useGradientBarDrag';
+import { useGradientBarDrag } from './hooks/useGradientBarDrag/useGradientBarDrag';
 
 // styles
 import styles from './gradient-bar.module.scss';
