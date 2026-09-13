@@ -60,6 +60,14 @@
     width: 16px;
   }
 
+  &__gradientTrigger {
+    background: none;
+    border: none;
+    display: flex;
+    flex-shrink: 0;
+    padding: 0;
+  }
+
   &__gradientLabel {
     color: var(--color-neutral-2);
     flex: 1;

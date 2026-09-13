@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useAddStop } from './hooks/useAddStop';
 import { useFlipStops } from './hooks/useFlipStops';
 import { useRemoveStop } from './hooks/useRemoveStop';
+import { useResetGradientPanelOnReopen } from './hooks/useResetGradientPanelOnReopen';
 import { useRotateGradient, TGradientPoints } from './hooks/useRotateGradient';
 import { useSetGradientType } from './hooks/useSetGradientType';
 import { useSetStopColor } from './hooks/useSetStopColor';
@@ -34,7 +35,11 @@ export type TUseGradientPanelResult = {
   type: TGradientType;
 };
 
-export const useGradientPanel = (onChange?: TFunc<[TGradientPanelChange]>, initialGradient?: TInitialGradient): TUseGradientPanelResult => {
+export const useGradientPanel = (
+  onChange?: TFunc<[TGradientPanelChange]>,
+  initialGradient?: TInitialGradient,
+  resetKey?: number,
+): TUseGradientPanelResult => {
   const initialStops = initialGradient ? initialGradient.stops.map((stop) => ({ ...stop, id: nanoid() })) : DEFAULT_GRADIENT_STOPS;
   const initialPoints = initialGradient ? { end: initialGradient.end, start: initialGradient.start } : null;
   const [stops, setStops] = useState(initialStops);
@@ -42,9 +47,7 @@ export const useGradientPanel = (onChange?: TFunc<[TGradientPanelChange]>, initi
   const [angle, setAngle] = useState(0);
   const [points, setPoints] = useState<TGradientPoints | null>(initialPoints);
   const [type, setType] = useState<TGradientType>(DEFAULT_GRADIENT_TYPE);
-
   const selectStop = (id: string): void => setSelectedStopId(id);
-
   const addStop = useAddStop(stops, setStops, selectStop, type, angle, points, onChange);
   const removeStop = useRemoveStop(stops, setStops, selectedStopId, setSelectedStopId, type, angle, points, onChange);
   const setStopPosition = useSetStopPosition(stops, setStops, type, angle, points, onChange);
@@ -52,6 +55,8 @@ export const useGradientPanel = (onChange?: TFunc<[TGradientPanelChange]>, initi
   const flip = useFlipStops(stops, setStops, type, angle, points, onChange);
   const rotate = useRotateGradient(stops, type, angle, setAngle, points, setPoints, onChange);
   const setGradientType = useSetGradientType(setType, stops, angle, points, onChange);
+
+  useResetGradientPanelOnReopen(resetKey, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
 
   return {
     addStop,

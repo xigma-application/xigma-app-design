@@ -10,6 +10,6 @@ export const TABS: TTab[] = [
 ];
 
 export const CUSTOM_LIBRARY_TABS: TTab[] = [
-  { labelTranslationKey: 'colorPicker.tabs.custom', name: ColorPickerTab.solid },
+  { labelTranslationKey: 'colorPicker.tabs.custom', name: 'custom' },
   { disabled: true, labelTranslationKey: 'colorPicker.tabs.libraries', name: 'libraries' },
 ];

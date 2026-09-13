@@ -11,6 +11,7 @@ import { useColorModel } from '../../../../../hooks/useColorModel';
 import { useColorSampler } from '../../../../../hooks/useColorSampler';
 
 // others
+import { DEFAULT_LIBRARY_TAB } from '../../../../../constants';
 import { CUSTOM_LIBRARY_TABS } from '../../../../../Header/constants';
 
 // styles
@@ -18,7 +19,6 @@ import headerStyles from '../../../../../Header/header.module.scss';
 import styles from './stop-color-panel.module.scss';
 
 // types
-import { ColorPickerTab } from '../../../../../enums';
 import { TColorPickerValue } from '../../../../../types';
 
 export type TStopColorPanelProps = { onClose: TFunc; onColorChange: TFunc<[TColorPickerValue]>; value: TColorPickerValue };
@@ -33,7 +33,7 @@ export const StopColorPanel: FC<TStopColorPanelProps> = ({ onClose, onColorChang
   return (
     <div className={styles.StopColorPanel}>
       <div className={headerStyles.Header}>
-        <UITools.Tabs activeTab={ColorPickerTab.solid} setActiveTab={noopSetActiveTab} tabs={CUSTOM_LIBRARY_TABS} />
+        <UITools.Tabs activeTab={DEFAULT_LIBRARY_TAB} setActiveTab={noopSetActiveTab} tabs={CUSTOM_LIBRARY_TABS} />
         <div className={headerStyles.Header__actions}>
           <Tooltip content={t('common.close')}>
             <UITools.Button ariaLabel={t('common.close')} onClick={onClose} style={{ padding: 0 }}>

@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { useState } from 'react';
 
 // components
 import FillRow from './FillRow';
@@ -12,6 +13,28 @@ import { store } from 'store';
 import { TPaint } from 'types/design/paint/types';
 
 const SOLID_PAINT: TPaint = { color: '#ff0000', opacity: 80, type: 'solid' };
+
+const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnType<typeof FillRow> => {
+  const [paint, setPaint] = useState(initialPaint);
+
+  return (
+    <FillRow
+      isDragging={false}
+      isSelected={false}
+      nodeId="node-1"
+      onChange={setPaint}
+      onDragEnd={vi.fn()}
+      onDragStart={vi.fn()}
+      onRemove={vi.fn()}
+      onSelect={vi.fn()}
+      onStartDrag={vi.fn()}
+      onToggleVisible={vi.fn()}
+      paint={paint}
+      paintIndex={0}
+      registerRow={vi.fn()}
+    />
+  );
+};
 
 const renderFillRow = (overrides: Partial<Parameters<typeof FillRow>[0]> = {}): ReturnType<typeof render> =>
   render(
@@ -97,12 +120,12 @@ describe('FillRow behaviors', () => {
     expect(onRemove).toHaveBeenCalled();
   });
 
-  it('should render a gradient swatch and label for a gradient fill', () => {
+  it('should show the gradient type label and the paint overall opacity for a gradient fill, in the same input as a solid fill', () => {
     // before
     renderFillRow({
       paint: {
         end: { x: 1, y: 0.5 },
-        opacity: 100,
+        opacity: 40,
         start: { x: 0, y: 0.5 },
         stops: [
           { color: '#ffffff', opacity: 100, position: 0 },
@@ -113,7 +136,8 @@ describe('FillRow behaviors', () => {
     });
 
     // result
-    expect(screen.getByText('Gradient')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Linear')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('40')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Hide fill' })).toBeInTheDocument();
   });
 
@@ -225,5 +249,25 @@ describe('FillRow behaviors', () => {
 
     // result
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
+  });
+
+  it('should keep the picker open and showing gradient content after clicking Gradient converts a solid fill mid-edit', async () => {
+    // before — a controlled wrapper feeds onChange's committed paint back in as new props, the
+    // same way the real Redux round-trip does, so paint.type genuinely flips while the picker is open
+    render(
+      <Provider store={store}>
+        <TooltipProvider>
+          <ControlledFillRow initialPaint={SOLID_PAINT} />
+        </TooltipProvider>
+      </Provider>,
+    );
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+
+    // result — the same still-open picker now shows gradient content, it wasn't torn down and
+    // replaced by a fresh, closed one when the underlying committed paint became a real gradient
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Rotate gradient' })).toBeInTheDocument());
   });
 });

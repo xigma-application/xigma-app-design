@@ -290,4 +290,37 @@ test.describe('Design panels — Fill section', () => {
 
     expect(afterRotate.equals(afterOpen)).toBe(false);
   });
+
+  test('switching a solid fill to Gradient via the paint type row actually converts and applies it, not just previews it', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-solid-to-gradient');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const beforeSwitch = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Hex color').click();
+    await page.getByRole('button', { name: 'Gradient' }).click();
+
+    const node = await readNode(page, id);
+    const paint = node.fills![0];
+
+    expect(paint.type).toBe('gradient-linear');
+    expect(paint.start).toBeTruthy();
+    expect(paint.end).toBeTruthy();
+    expect(paint.stops).toHaveLength(2);
+
+    // result — two genuinely distinct stop colors, not the same solid color duplicated into both
+    expect(paint.stops![0].color).not.toBe(paint.stops![1].color);
+
+    // result — the shape's own render actually changed too, not just the picker's own scratch preview
+    const afterSwitch = await designPage.canvas.screenshot();
+
+    expect(afterSwitch.equals(beforeSwitch)).toBe(false);
+  });
 });

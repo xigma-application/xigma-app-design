@@ -3,18 +3,25 @@ import { FC, PointerEvent as ReactPointerEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import GradientFillControl from './GradientFillControl/GradientFillControl';
 import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
+import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
+import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
+import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
+
+// others
+import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
 
 // styles
 import styles from './fill-row.module.scss';
 
 // types
+import { ColorPickerTab } from 'shared/UITools/ColorPicker/enums';
+import { GRADIENT_TYPE_LABEL_KEY } from 'shared/UITools/ColorPicker/Body/GradientPanel/constants';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
@@ -55,8 +62,17 @@ export const FillRow: FC<TFillRowProps> = ({
   const { t } = useTranslation();
   const isVisible = paint.visible !== false;
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [gradientPanelState, setGradientPanelState] = useState(DEFAULT_GRADIENT_PANEL_STATE);
   const handleClick = useSelectFillRow(onSelect);
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
+  const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
+  const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
+  const isGradient = paint.type !== 'solid' && paint.type !== 'image';
+  const hex = isGradient ? (paint.stops[0]?.color ?? '#000000') : paint.type === 'solid' ? paint.color : '#000000';
+  const value = { alpha: paint.opacity, hex };
+  const hexDisplayValue = isGradient ? t(GRADIENT_TYPE_LABEL_KEY[paint.type]) : undefined;
+
+  useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
 
   return (
     <div
@@ -76,28 +92,7 @@ export const FillRow: FC<TFillRowProps> = ({
         <Icon color="neutral2" name="RowGrabber" size={7} />
       </button>
       <span data-no-select style={{ display: 'contents' }}>
-        {paint.type === 'solid' ? (
-          <UITools.ColorPickerInput
-            align="start"
-            alpha={paint.opacity}
-            className={styles.FillRow__color}
-            hex={paint.color}
-            isVisible={isVisible}
-            onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
-            onCommitHex={(hex): void => onChange({ ...paint, color: hex })}
-            onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
-            onOpenChange={setIsPickerOpen}
-            onPickerChange={({ alpha, hex }): void => onChange({ ...paint, color: hex, opacity: alpha })}
-            onToggleVisibility={onToggleVisible}
-            paintTypeRow
-            side="right"
-            simple
-            toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
-            toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
-            triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
-          />
-        ) : paint.type === 'image' ? (
+        {paint.type === 'image' ? (
           <div className={styles.FillRow__gradient}>
             <span className={styles.FillRow__gradientSwatch} style={getNonSolidFillSwatchStyle(paint)} />
             <span className={styles.FillRow__gradientLabel}>{t(`${translationNameSpace}.gradientLabel`)}</span>
@@ -111,13 +106,30 @@ export const FillRow: FC<TFillRowProps> = ({
             </button>
           </div>
         ) : (
-          <GradientFillControl
+          <UITools.ColorPickerInput
+            align="start"
+            alpha={value.alpha}
+            className={styles.FillRow__color}
+            hex={value.hex}
+            hexDisplayValue={hexDisplayValue}
+            initialActiveTab={isGradient ? ColorPickerTab.gradient : undefined}
+            initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops } : undefined}
             isVisible={isVisible}
-            nodeId={nodeId}
-            onChange={onChange}
-            onToggleVisible={onToggleVisible}
-            paint={paint}
-            paintIndex={paintIndex}
+            onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
+            onCommitHex={(hex): void => handleSolidChange({ alpha: value.alpha, hex })}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onGradientChange={handleGradientChange}
+            onGradientPanelStateChange={setGradientPanelState}
+            onOpenChange={setIsPickerOpen}
+            onPickerChange={handleSolidChange}
+            onToggleVisibility={onToggleVisible}
+            paintTypeRow
+            side="right"
+            simple
+            toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
+            toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
+            triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
           />
         )}
       </span>

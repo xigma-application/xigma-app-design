@@ -1,9 +1,9 @@
 // types
 import { TColorPickerValue } from 'shared/UITools/ColorPicker/types';
-import { TGradientPaint, TSolidPaint } from 'types/design/paint/types';
+import { TGradientPaint, TPaint, TSolidPaint } from 'types/design/paint/types';
 
 export const useHandleSolidPaintChange = (
-  paint: TGradientPaint,
+  paint: TPaint,
   onChange: TFunc<[TGradientPaint | TSolidPaint]>,
 ): TFunc<[TColorPickerValue]> => {
   return ({ alpha, hex }: TColorPickerValue): void => {

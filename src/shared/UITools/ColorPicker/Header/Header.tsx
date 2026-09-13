@@ -12,11 +12,10 @@ import { TABS } from './constants';
 import styles from './header.module.scss';
 
 // types
-import { ColorPickerTab } from '../enums';
 import { TTab } from 'shared/UITools/Tabs/types';
 
 export type THeaderProps = {
-  activeTab: ColorPickerTab;
+  activeTab: TTab['name'];
   extra?: ReactNode;
   setActiveTab: TFunc<[TTab['name']]>;
   tabs?: TTab[];

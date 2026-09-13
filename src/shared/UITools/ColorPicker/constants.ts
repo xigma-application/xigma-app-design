@@ -6,6 +6,8 @@ export const translationNameSpace = 'colorPicker';
 
 export const DEFAULT_ACTIVE_TAB = ColorPickerTab.solid;
 
+export const DEFAULT_LIBRARY_TAB = 'custom';
+
 export const SLIDER_THUMB_RADIUS = 8;
 
 // approximated from a design reference screenshot; adjust exact hex values as needed

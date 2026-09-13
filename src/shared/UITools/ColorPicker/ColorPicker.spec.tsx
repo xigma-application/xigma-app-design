@@ -302,6 +302,25 @@ describe('ColorPicker behaviors', () => {
     expect(screen.getByRole('button', { name: 'Gradient' }).className).toMatch(/active/);
   });
 
+  it('should keep the Custom tab visually active after switching the paint type row to Gradient — Custom/Libraries and Solid/Gradient are independent states', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      onGradientChange: vi.fn(),
+      paintTypeRow: true,
+      simple: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+
+    // result
+    expect(screen.getByText('Custom').className).toMatch(/active/);
+  });
+
   it('should switch back to the solid panel when the paint type row Solid button is clicked', () => {
     // before
     renderColorPicker({

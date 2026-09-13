@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useRef } from 'react';
 
 // @xigma
 import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
@@ -18,8 +18,10 @@ import { useHexCommit } from './hooks/useHexCommit';
 import styles from './color-picker-input.module.scss';
 
 // types
-import { TColorPickerProps, TColorPickerValue } from '../ColorPicker/types';
+import { ColorPickerTab } from '../ColorPicker/enums';
+import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
+import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
 
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
@@ -27,11 +29,16 @@ export type TColorPickerInputProps = {
   className?: string;
   e2eValue?: TE2EValue;
   hex: string;
+  hexDisplayValue?: string;
+  initialActiveTab?: ColorPickerTab;
+  initialGradient?: TInitialGradient;
   isVisible?: boolean;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
+  onGradientChange?: TFunc<[TGradientPanelChange]>;
+  onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
   onOpenChange?: TFunc<[boolean]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
@@ -51,11 +58,16 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   className = '',
   e2eValue = '',
   hex,
+  hexDisplayValue,
+  initialActiveTab,
+  initialGradient,
   isVisible = true,
   onCommitAlpha,
   onCommitHex,
   onDragEnd,
   onDragStart,
+  onGradientChange,
+  onGradientPanelStateChange,
   onOpenChange,
   onPickerChange,
   onToggleVisibility,
@@ -68,18 +80,25 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   toggleVisibilityTooltip,
   triggerAriaLabel,
 }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const onBlurHex = useHexCommit(hex, onCommitHex);
   const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
   const rounded = Math.round(alpha);
 
+  const handleHexFieldClick = (): void => {
+    rootRef.current?.querySelector<HTMLButtonElement>(`.${styles.ColorPickerInput__trigger}`)?.click();
+  };
+
   return (
-    <div className={cx(styles.ColorPickerInput, className)}>
+    <div className={cx(styles.ColorPickerInput, className)} ref={rootRef}>
       <FieldGroup className={styles.ColorPickerInput__fields}>
         <TextFieldWrapper
-          defaultValue={hex.replace('#', '')}
+          defaultValue={hexDisplayValue ?? hex.replace('#', '')}
           e2eValue={`${e2eValue}-color`}
           maxLength={6}
-          onBlur={onBlurHex}
+          onBlur={hexDisplayValue ? undefined : onBlurHex}
+          onClick={hexDisplayValue ? handleHexFieldClick : undefined}
+          readOnly={Boolean(hexDisplayValue)}
           startAdornment={
             onTriggerClick ? (
               <button aria-label={triggerAriaLabel} className={styles.ColorPickerInput__trigger} onClick={onTriggerClick} type="button">
@@ -88,10 +107,14 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                initialActiveTab={initialActiveTab}
+                initialGradient={initialGradient}
                 moveable
                 onChange={onPickerChange}
                 onDragEnd={onDragEnd}
                 onDragStart={onDragStart}
+                onGradientChange={onGradientChange}
+                onGradientPanelStateChange={onGradientPanelStateChange}
                 onOpenChange={onOpenChange}
                 paintTypeRow={paintTypeRow}
                 side={side}

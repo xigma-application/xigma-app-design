@@ -156,6 +156,46 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
   });
 
+  it('should show hexDisplayValue instead of the raw hex, as a read-only field, when given', () => {
+    // before
+    renderColorPickerInput({ hex: '#abcdef', hexDisplayValue: 'Linear' });
+
+    // result
+    const input = screen.getByDisplayValue('Linear');
+
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute('readonly');
+    expect(screen.queryByDisplayValue('abcdef')).not.toBeInTheDocument();
+  });
+
+  it('should open the picker by clicking the read-only hexDisplayValue field, not by editing it', () => {
+    // mock
+    const onOpenChange = vi.fn();
+
+    // before
+    renderColorPickerInput({ hexDisplayValue: 'Linear', onOpenChange, triggerAriaLabel: 'Background color' });
+
+    // action
+    fireEvent.click(screen.getByDisplayValue('Linear'));
+
+    // result
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('should not attempt to commit hexDisplayValue as a hex color on blur', () => {
+    // mock
+    const onCommitHex = vi.fn();
+
+    // before
+    renderColorPickerInput({ hexDisplayValue: 'Linear', onCommitHex });
+
+    // action
+    fireEvent.blur(screen.getByDisplayValue('Linear'));
+
+    // result
+    expect(onCommitHex).not.toHaveBeenCalled();
+  });
+
   it('should report onDragStart/onDragEnd around a drag on the alpha scrubber', () => {
     // mock
     const onDragEnd = vi.fn();
