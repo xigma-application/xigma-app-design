@@ -6,6 +6,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorGradientFill } from './drawVectorGradientFill';
+import { drawVectorPatternFill } from './drawVectorPatternFill';
 
 export const drawVectorFillPaints = (
   gl: WebGL2RenderingContext,
@@ -40,7 +41,21 @@ export const drawVectorFillPaints = (
           isAlphaWriteEnabled,
           alpha,
         );
-      } else if (paint.type !== 'image' && paint.type !== 'pattern') {
+      } else if (paint.type === 'pattern') {
+        drawVectorPatternFill(
+          gl,
+          program,
+          buffer,
+          faceBufferCache,
+          nodeBounds,
+          faces,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          isAlphaWriteEnabled,
+          alpha,
+        );
+      } else if (paint.type !== 'image') {
         drawVectorGradientFill(
           gl,
           gradientProgram,

@@ -2305,8 +2305,31 @@ test.describe('Design panels — Fill section', () => {
 
     expect(node.fills![0].type).toBe('pattern');
 
-    // result — the still-open picker shows the (currently non-functional) Pattern panel content
+    // result — the still-open picker shows the Pattern panel content
     await expect(page.getByRole('button', { name: 'Select source...' })).toBeVisible();
+  });
+
+  test('a pattern fill with no source renders a placeholder dot grid on the shape instead of nothing', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-placeholder-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const before = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Hex color').click();
+
+    // action
+    await page.getByLabel('Pattern').click();
+
+    // result — the render changes, and a dot grid cell center is a solid white dot, not the solid
+    // color the shape started with nor a blank/untouched canvas (no background fill — dots only)
+    const after = await designPage.canvas.screenshot();
+
+    expect(after.equals(before)).toBe(false);
+    expect(await readPixelColor(page, 710, 210)).toEqual([255, 255, 255]);
   });
 
   test('editing the Pattern panel’s tile type and scale commits them onto the pattern paint', async ({ page }) => {

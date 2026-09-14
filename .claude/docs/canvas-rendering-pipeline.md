@@ -195,7 +195,7 @@ plain-color row's own `dragSnapshotProgram` split (below), not a fully independe
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5) |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below) |
 | plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
@@ -409,6 +409,33 @@ drawSceneVectorNode/` folder; that reach is a same-feature (`Canvas/`) sibling i
 global-utils-reaching-into-`components/` violation the module-structure rules actually forbid, and
 the two-argument `getScaledFillPaints`/`getBoxFillPolygon` pair are correspondingly plain siblings
 too rather than a promoted `drawBoxLeafNode/` folder's own `utils/`.
+
+**`pattern`-type paints draw a static placeholder, not the real pattern yet.** `TPatternPaint`
+(`alignmentIndex`/`direction`/`scale`/`spacingX`/`spacingY`/`tileType`, `properties-panel.md`'s
+Pattern panel) has no source image to sample, so `drawVectorFillPaints.ts` routes it to
+`drawVectorPatternFill.ts` instead of `drawVectorFill`/`drawVectorGradientFill` — a third sibling in
+the same dispatch `if`, reusing the plain-color `program`/stencil-clip technique verbatim
+(`gl.STENCIL_TEST` even-odd mask from `faces`, then draws composited only where `stencilFunc` is
+`NOTEQUAL 0`). Inside that clip it draws **only** a grid of small white circles
+(`getPatternPlaceholderDotVertices.ts`, `PATTERN_PLACEHOLDER_DOT_COLOR`) before
+`gl.disable(gl.STENCIL_TEST)` — no background quad; everywhere between dots is left untouched
+(transparent), matching the reference look of sparse dots with nothing behind them, not a filled
+swatch. The dots are built as **one flattened triangle-list covering every dot** and uploaded/drawn
+in a single `bufferData`/`drawArrays` call — not one `TRIANGLE_FAN` draw call per dot — since a
+hot-path per-frame draw can't afford hundreds of draw calls for a single fill layer the way the
+sparse, one-off handle circles in `drawEllipse.ts` can. Dot centers come from dividing the fill's
+bounds into a `PATTERN_PLACEHOLDER_DOT_SPACING_PX` grid (`Math.round(width/height ÷ spacing)`
+columns/rows, so the grid always fits evenly with no cut-off edge dot); those bounds are resolved
+via `getVectorFillBounds(faces, nodeBounds)` — the same helper `getVectorFillCoveringQuad` calls
+internally — rather than reading `nodeBounds` directly, because `drawBoxLeafNode.ts` always passes
+`nodeBounds` as `null` for a Rectangle/Frame fill (§5 above); reading `nodeBounds` directly here was
+a real bug during development (dots silently never drew for any box fill, only for a vector face
+with an explicit override) caught by a live screenshot, not by the unit tests, since the mocked GL
+context doesn't distinguish "dot grid computed but empty" from "dot grid never attempted". None of
+`TPatternPaint`'s own fields are read yet — the panel's Scale/Spacing/Alignment/Direction controls
+don't affect this render at all until an actual pattern source picker lands; this placeholder only
+replaces the previous behavior of `pattern` silently drawing nothing (the same no-op `'image'`
+paints still get, since texture-fill compositing isn't wired up for either yet).
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
 `useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer

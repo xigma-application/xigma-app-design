@@ -46,6 +46,22 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByDisplayValue('38')).toBeInTheDocument();
   });
 
+  it('should not show a center dot on the swatch by default', () => {
+    // before
+    const { container } = renderColorPickerInput();
+
+    // result
+    expect(container.querySelector('[class*="Color__dot"]')).toBeNull();
+  });
+
+  it('should show a center dot on the swatch when isPattern is set, for a pattern fill with no source', () => {
+    // before
+    const { container } = renderColorPickerInput({ isPattern: true });
+
+    // result
+    expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
+  });
+
   it('should keep the alpha field’s "%" adornment visible while the field is focused', () => {
     // before
     const { container } = renderColorPickerInput();

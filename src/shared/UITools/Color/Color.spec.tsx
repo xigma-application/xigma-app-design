@@ -37,4 +37,29 @@ describe('Color behaviors', () => {
     // result
     expect(container.querySelector('[class*="Color--cursor-default"]')).not.toBeNull();
   });
+
+  it('should not show a center dot by default', () => {
+    // before
+    const { container } = render(<Color alpha={100} color="#ffffff" />);
+
+    // result
+    expect(container.querySelector('[class*="Color__dot"]')).toBeNull();
+  });
+
+  it('should show a center dot when dot is set, for a pattern fill with no source', () => {
+    // before
+    const { container } = render(<Color alpha={100} color="#ffffff" dot />);
+
+    // result
+    expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
+  });
+
+  it('should render no background fill at all when dot is set — just the dot, not the color/alpha halves', () => {
+    // before
+    const { container } = render(<Color alpha={100} color="#ffffff" dot />);
+
+    // result
+    expect(container.querySelector('[class*="Color__picker"]:not([class*="Color__picker-alpha"])')).toBeNull();
+    expect(container.querySelector('[class*="Color__picker-alpha"]')).toBeNull();
+  });
 });

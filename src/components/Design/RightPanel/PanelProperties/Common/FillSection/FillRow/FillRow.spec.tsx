@@ -263,16 +263,26 @@ describe('FillRow behaviors', () => {
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
   });
 
-  it('should show the literal "Pattern" text and a white swatch for a pattern fill, in the same input as a solid fill', () => {
+  it('should show the literal "Pattern" text and a backgroundless swatch with a center dot for a pattern fill, in the same input as a solid fill', () => {
     // before
     const { container } = renderFillRow({
-      paint: { alignmentIndex: 0, opacity: 60, scale: 100, spacingX: 0, spacingY: 0, tileType: 'rectangular', type: 'pattern' },
+      paint: {
+        alignmentIndex: 0,
+        direction: 'horizontal',
+        opacity: 60,
+        scale: 100,
+        spacingX: 0,
+        spacingY: 0,
+        tileType: 'rectangular',
+        type: 'pattern',
+      },
     });
 
     // result
     expect(screen.getByDisplayValue('Pattern')).toBeInTheDocument();
     expect(screen.getByDisplayValue('60')).toBeInTheDocument();
-    expect(container.querySelector('[style*="255, 255, 255"]')).toBeInTheDocument();
+    expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
+    expect(container.querySelector('[style*="255, 255, 255"]')).not.toBeInTheDocument();
   });
 
   it('should keep the picker open and showing pattern content after clicking Pattern converts a solid fill mid-edit', async () => {

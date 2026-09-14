@@ -34,6 +34,7 @@ export type TColorPickerInputProps = {
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
   initialPattern?: TInitialPattern;
+  isPattern?: boolean;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
   isVisible?: boolean;
   onCommitAlpha: TFunc<[number]>;
@@ -66,6 +67,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   initialActiveTab,
   initialGradient,
   initialPattern,
+  isPattern = false,
   isPointerOverGradientHandle,
   isVisible = true,
   onCommitAlpha,
@@ -109,7 +111,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           startAdornment={
             onTriggerClick ? (
               <button aria-label={triggerAriaLabel} className={styles.ColorPickerInput__trigger} onClick={onTriggerClick} type="button">
-                <Color alpha={alpha} color={hex} cursor="default" />
+                <Color alpha={alpha} color={hex} cursor="default" dot={isPattern} />
               </button>
             ) : (
               <ColorPicker
@@ -130,7 +132,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 side={side}
                 simple={simple}
                 title={title}
-                trigger={<Color alpha={alpha} color={hex} cursor="default" />}
+                trigger={<Color alpha={alpha} color={hex} cursor="default" dot={isPattern} />}
                 triggerAriaLabel={triggerAriaLabel}
                 triggerClassName={styles.ColorPickerInput__trigger}
                 value={{ alpha, hex }}

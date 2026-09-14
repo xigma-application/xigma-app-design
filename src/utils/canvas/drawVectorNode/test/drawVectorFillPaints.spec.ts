@@ -6,12 +6,16 @@ import { drawVectorFillPaints } from '../drawVectorFillPaints';
 
 const drawVectorFillMock = vi.fn();
 const drawVectorGradientFillMock = vi.fn();
+const drawVectorPatternFillMock = vi.fn();
 
 vi.mock('../drawVectorFill', () => ({
   drawVectorFill: (...args: unknown[]): unknown => drawVectorFillMock(...args),
 }));
 vi.mock('../drawVectorGradientFill', () => ({
   drawVectorGradientFill: (...args: unknown[]): unknown => drawVectorGradientFillMock(...args),
+}));
+vi.mock('../drawVectorPatternFill', () => ({
+  drawVectorPatternFill: (...args: unknown[]): unknown => drawVectorPatternFillMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -25,6 +29,7 @@ describe('drawVectorFillPaints', () => {
   beforeEach(() => {
     drawVectorFillMock.mockReset();
     drawVectorGradientFillMock.mockReset();
+    drawVectorPatternFillMock.mockReset();
   });
 
   it('should draw a single opaque solid layer at full alpha', () => {
@@ -143,9 +148,10 @@ describe('drawVectorFillPaints', () => {
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
+    expect(drawVectorPatternFillMock).not.toHaveBeenCalled();
   });
 
-  it('should skip pattern layers instead of drawing them as a gradient — the panel has no source to render yet', () => {
+  it('should draw a pattern layer as a placeholder through the solid program, not as a gradient', () => {
     // mock
     const pattern: TPatternPaint = {
       alignmentIndex: 0,
@@ -162,6 +168,7 @@ describe('drawVectorFillPaints', () => {
     drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [pattern], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
+    expect(drawVectorPatternFillMock).toHaveBeenCalledWith(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false, 1);
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });

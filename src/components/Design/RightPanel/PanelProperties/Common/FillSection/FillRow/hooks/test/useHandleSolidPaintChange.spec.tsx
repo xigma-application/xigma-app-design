@@ -4,10 +4,11 @@ import { renderHook } from '@testing-library/react';
 import { useHandleSolidPaintChange } from '../useHandleSolidPaintChange';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { TGradientPaint } from 'types/design/paint/types';
 
 const paint: TGradientPaint = {
-  blendMode: 'normal',
+  blendMode: BlendMode.normal,
   end: { x: 1, y: 1 },
   opacity: 100,
   start: { x: 0, y: 0 },

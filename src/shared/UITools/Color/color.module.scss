@@ -8,6 +8,7 @@
   grid-template-columns: repeat(2, 1fr);
   height: 16px;
   overflow: hidden;
+  position: relative;
   width: 16px;
 
   &--cursor-default {
@@ -16,6 +17,18 @@
 
   &__picker {
     height: 100%;
+  }
+
+  &__dot {
+    background-color: var(--color-neutral-2);
+    border-radius: 50%;
+    height: 4px;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
   }
 
   &__picker-alpha {
