@@ -1,0 +1,99 @@
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
+
+// hooks
+import { TUsePatternPanelResult, usePatternPanel } from '../usePatternPanel';
+
+// others
+import { DEFAULT_PATTERN_PANEL_STATE } from '../../constants';
+
+// types
+import { TInitialPattern, TPatternPanelChange } from '../../types';
+
+const SEEDED_PATTERN: TInitialPattern = { alignmentIndex: 5, scale: 200, spacingX: 10, spacingY: 20, tileType: 'circular' };
+
+type TProps = { initialPattern: TInitialPattern | undefined; resetKey: number | undefined };
+
+const renderUsePatternPanel = (
+  onChange: TFunc<[TPatternPanelChange]> | undefined,
+  initialPattern: TInitialPattern | undefined,
+  resetKey: number | undefined,
+): RenderHookResult<TUsePatternPanelResult, TProps> =>
+  renderHook(({ initialPattern: seed, resetKey: key }: TProps) => usePatternPanel(onChange, seed, key), {
+    initialProps: { initialPattern, resetKey },
+  });
+
+describe('usePatternPanel', () => {
+  it('should default to the rectangular tile type, 100% scale, no spacing, and the first alignment point when there is no initialPattern', () => {
+    // before
+    const { result } = renderUsePatternPanel(undefined, undefined, 1);
+
+    // result
+    expect(result.current).toMatchObject(DEFAULT_PATTERN_PANEL_STATE);
+  });
+
+  it('should seed from initialPattern when given', () => {
+    // before
+    const { result } = renderUsePatternPanel(undefined, SEEDED_PATTERN, 1);
+
+    // result
+    expect(result.current).toMatchObject(SEEDED_PATTERN);
+  });
+
+  it('should update local state and call onChange with the full state on every setter', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderUsePatternPanel(onChange, undefined, 1);
+
+    // action
+    act(() => result.current.setScale(50));
+
+    // result
+    expect(result.current.scale).toBe(50);
+    expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_PATTERN_PANEL_STATE, scale: 50 });
+  });
+
+  it('should reset to defaults on reset(), regardless of the seeded initialPattern', () => {
+    // before
+    const { result } = renderUsePatternPanel(undefined, SEEDED_PATTERN, 1);
+
+    // action
+    act(() => result.current.reset());
+
+    // result
+    expect(result.current).toMatchObject(DEFAULT_PATTERN_PANEL_STATE);
+  });
+
+  it('should do nothing on the first render, even when resetKey is already defined', () => {
+    // before
+    const { result } = renderUsePatternPanel(undefined, SEEDED_PATTERN, 1);
+
+    // result — seeded from initialPattern on mount, not reset
+    expect(result.current).toMatchObject(SEEDED_PATTERN);
+  });
+
+  it('should reseed from the (possibly new) initialPattern when resetKey changes', () => {
+    // before
+    const { rerender, result } = renderUsePatternPanel(undefined, undefined, 1);
+
+    // action — the panel is edited locally, then the picker session changes (reopened on a different paint)
+    act(() => result.current.setScale(75));
+    act(() => rerender({ initialPattern: SEEDED_PATTERN, resetKey: 2 }));
+
+    // result
+    expect(result.current).toMatchObject(SEEDED_PATTERN);
+  });
+
+  it('should not reseed when resetKey stays the same across a rerender', () => {
+    // before
+    const { rerender, result } = renderUsePatternPanel(undefined, undefined, 1);
+
+    // action
+    act(() => result.current.setScale(75));
+    act(() => rerender({ initialPattern: SEEDED_PATTERN, resetKey: 1 }));
+
+    // result
+    expect(result.current.scale).toBe(75);
+  });
+});

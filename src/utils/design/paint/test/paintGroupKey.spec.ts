@@ -4,7 +4,7 @@ import { paintGroupKey } from '../paintGroupKey';
 
 // types
 import { BlendMode } from 'types/design/enums';
-import { TGradientPaint, TImagePaint } from 'types/design/paint/types';
+import { TGradientPaint, TImagePaint, TPatternPaint } from 'types/design/paint/types';
 
 describe('paintGroupKey', () => {
   it('should produce an identical key for two structurally equal solid stacks', () => {
@@ -46,6 +46,21 @@ describe('paintGroupKey', () => {
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
     expect(paintGroupKey([image])).not.toBe(paintGroupKey([{ ...image, scaleMode: 'tile' }]));
+  });
+
+  it('should key a pattern paint without throwing, even though it has no gradient geometry', () => {
+    const pattern: TPatternPaint = {
+      alignmentIndex: 0,
+      opacity: 100,
+      scale: 100,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+
+    expect(() => paintGroupKey([pattern])).not.toThrow();
+    expect(paintGroupKey([pattern])).not.toBe(paintGroupKey([{ ...pattern, opacity: 50 }]));
   });
 
   it('should distinguish stacks that differ only in blend mode', () => {

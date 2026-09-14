@@ -263,6 +263,36 @@ describe('FillRow behaviors', () => {
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
   });
 
+  it('should show the literal "Pattern" text and a white swatch for a pattern fill, in the same input as a solid fill', () => {
+    // before
+    const { container } = renderFillRow({
+      paint: { alignmentIndex: 0, opacity: 60, scale: 100, spacingX: 0, spacingY: 0, tileType: 'rectangular', type: 'pattern' },
+    });
+
+    // result
+    expect(screen.getByDisplayValue('Pattern')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('60')).toBeInTheDocument();
+    expect(container.querySelector('[style*="255, 255, 255"]')).toBeInTheDocument();
+  });
+
+  it('should keep the picker open and showing pattern content after clicking Pattern converts a solid fill mid-edit', async () => {
+    // before — a controlled wrapper feeds onChange's committed paint back in as new props, the
+    // same way the real Redux round-trip does, so paint.type genuinely flips while the picker is open
+    render(
+      <TestProviders>
+        <ControlledFillRow initialPaint={SOLID_PAINT} />
+      </TestProviders>,
+    );
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByRole('button', { name: 'Pattern' }));
+
+    // result — the same still-open picker now shows the pattern content, it wasn't torn down and
+    // replaced by a fresh, closed one when the underlying committed paint became a real pattern paint
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Select source...' })).toBeInTheDocument());
+  });
+
   it('should keep the picker open and showing gradient content after clicking Gradient converts a solid fill mid-edit', async () => {
     // before — a controlled wrapper feeds onChange's committed paint back in as new props, the
     // same way the real Redux round-trip does, so paint.type genuinely flips while the picker is open

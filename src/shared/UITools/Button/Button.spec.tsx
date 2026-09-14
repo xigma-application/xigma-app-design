@@ -36,9 +36,9 @@ describe('Button snapshots', () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  it('should render Button in its medium size', () => {
+  it('should render Button in its large size', () => {
     // before
-    const { asFragment } = render(<Button size="medium">Click</Button>);
+    const { asFragment } = render(<Button size="large">Click</Button>);
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -50,6 +50,41 @@ describe('Button snapshots', () => {
 
     // result
     expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('should render Button in its secondary color', () => {
+    // before
+    const { asFragment } = render(<Button color="secondary">Click</Button>);
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
+});
+
+describe('Button size', () => {
+  it('should default to medium', () => {
+    // before
+    const { container } = render(<Button>Click</Button>);
+
+    // result
+    expect(container.querySelector('[class*="Button--large"]')).toBeNull();
+    expect(container.querySelector('[class*="Button--small"]')).toBeNull();
+  });
+
+  it('should apply the large size class only when asked', () => {
+    // before
+    const { container } = render(<Button size="large">Click</Button>);
+
+    // result
+    expect(container.querySelector('[class*="Button--large"]')).not.toBeNull();
+  });
+
+  it('should apply the small size class only when asked', () => {
+    // before
+    const { container } = render(<Button size="small">Click</Button>);
+
+    // result
+    expect(container.querySelector('[class*="Button--small"]')).not.toBeNull();
   });
 });
 

@@ -22,6 +22,7 @@ import { ColorPickerTab } from '../ColorPicker/enums';
 import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
+import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
 
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
@@ -32,6 +33,7 @@ export type TColorPickerInputProps = {
   hexDisplayValue?: string;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
+  initialPattern?: TInitialPattern;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
   isVisible?: boolean;
   onCommitAlpha: TFunc<[number]>;
@@ -41,6 +43,7 @@ export type TColorPickerInputProps = {
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
   onOpenChange?: TFunc<[boolean]>;
+  onPatternChange?: TFunc<[TPatternPanelChange]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
   onTriggerClick?: TFunc;
@@ -62,6 +65,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   hexDisplayValue,
   initialActiveTab,
   initialGradient,
+  initialPattern,
   isPointerOverGradientHandle,
   isVisible = true,
   onCommitAlpha,
@@ -71,6 +75,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onGradientChange,
   onGradientPanelStateChange,
   onOpenChange,
+  onPatternChange,
   onPickerChange,
   onToggleVisibility,
   onTriggerClick,
@@ -111,6 +116,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 align={align}
                 initialActiveTab={initialActiveTab}
                 initialGradient={initialGradient}
+                initialPattern={initialPattern}
                 isPointerOverGradientHandle={isPointerOverGradientHandle}
                 moveable
                 onChange={onPickerChange}
@@ -119,6 +125,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onGradientChange={onGradientChange}
                 onGradientPanelStateChange={onGradientPanelStateChange}
                 onOpenChange={onOpenChange}
+                onPatternChange={onPatternChange}
                 paintTypeRow={paintTypeRow}
                 side={side}
                 simple={simple}

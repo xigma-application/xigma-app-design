@@ -78,4 +78,39 @@ describe('PaintTypeRow behaviors', () => {
     // result
     expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.solid);
   });
+
+  it('should show the Pattern button, not marked as the current paint type when solid is active', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.solid);
+
+    // result
+    const button = screen.getByRole('button', { name: 'Pattern' });
+
+    expect(button).toBeInTheDocument();
+    expect(button.className).not.toContain('PaintTypeRow__button--active');
+    expect(container.querySelectorAll('[class*="PaintTypeRow__button--active"]')).toHaveLength(1);
+  });
+
+  it('should mark Pattern as active when the pattern tab is active', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.pattern);
+
+    // result
+    expect(screen.getByRole('button', { name: 'Pattern' }).className).toContain('PaintTypeRow__button--active');
+    expect(container.querySelectorAll('[class*="PaintTypeRow__button--active"]')).toHaveLength(1);
+  });
+
+  it('should call onSelectTab with pattern when the Pattern button is clicked', () => {
+    // mock
+    const onSelectTab = vi.fn();
+
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, onSelectTab);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Pattern' }));
+
+    // result
+    expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.pattern);
+  });
 });

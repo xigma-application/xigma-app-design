@@ -40,6 +40,18 @@ export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, onSelectTab })
           <Icon name="Gradient" size={24} />
         </UITools.Button>
       </Tooltip>
+      <Tooltip content={t('colorPicker.paintType.pattern')}>
+        <UITools.Button
+          ariaLabel={t('colorPicker.paintType.pattern')}
+          className={cx(styles.PaintTypeRow__button, {
+            [styles['PaintTypeRow__button--active']]: activeTab === ColorPickerTab.pattern,
+          })}
+          onClick={(): void => onSelectTab(ColorPickerTab.pattern)}
+          style={{ padding: 0 }}
+        >
+          <Icon name="Pattern" size={24} />
+        </UITools.Button>
+      </Tooltip>
     </div>
   );
 };

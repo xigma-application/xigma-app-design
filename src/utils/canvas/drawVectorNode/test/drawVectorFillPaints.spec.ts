@@ -1,5 +1,5 @@
 // types
-import { TGradientPaint, TImagePaint, TSolidPaint } from 'types/design/paint/types';
+import { TGradientPaint, TImagePaint, TPatternPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
 import { drawVectorFillPaints } from '../drawVectorFillPaints';
@@ -139,6 +139,26 @@ describe('drawVectorFillPaints', () => {
 
     // before
     drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [image], 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(drawVectorFillMock).not.toHaveBeenCalled();
+    expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should skip pattern layers instead of drawing them as a gradient — the panel has no source to render yet', () => {
+    // mock
+    const pattern: TPatternPaint = {
+      alignmentIndex: 0,
+      opacity: 100,
+      scale: 100,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+
+    // before
+    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [pattern], 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();

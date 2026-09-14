@@ -37,10 +37,24 @@ const gradientPanel = {
   type: 'gradient-linear' as const,
 };
 
+const patternPanel = {
+  alignmentIndex: 0,
+  reset: vi.fn(),
+  scale: 100,
+  setAlignmentIndex: vi.fn(),
+  setScale: vi.fn(),
+  setSpacingX: vi.fn(),
+  setSpacingY: vi.fn(),
+  setTileType: vi.fn(),
+  spacingX: 0,
+  spacingY: 0,
+  tileType: 'rectangular' as const,
+};
+
 const renderBody = (activeTab: ColorPickerTab): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <Body activeTab={activeTab} alpha={100} colorModel={colorModel} gradientPanel={gradientPanel} />
+      <Body activeTab={activeTab} alpha={100} colorModel={colorModel} gradientPanel={gradientPanel} patternPanel={patternPanel} />
     </TooltipProvider>,
   );
 
@@ -69,5 +83,13 @@ describe('Body behaviors', () => {
 
     // result
     expect(screen.getByText('Stops')).toBeInTheDocument();
+  });
+
+  it('should render the pattern panel for the pattern tab', () => {
+    // before
+    renderBody(ColorPickerTab.pattern);
+
+    // result
+    expect(screen.getByRole('button', { name: 'Select source...' })).toBeInTheDocument();
   });
 });

@@ -7,9 +7,12 @@ import { TTab } from 'shared/UITools/Tabs/types';
 import { ColorPickerTab } from '../enums';
 import { TColorPickerValue } from '../types';
 import { TGradientPanelChange } from '../Body/GradientPanel/types';
+import { TPatternPanelChange } from '../Body/PatternPanel/types';
 import { TUseGradientPanelResult } from '../Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
+import { TUsePatternPanelResult } from '../Body/PatternPanel/hooks/usePatternPanel';
 
-const isColorPickerTab = (value: string): value is ColorPickerTab => value === ColorPickerTab.solid || value === ColorPickerTab.gradient;
+const isColorPickerTab = (value: string): value is ColorPickerTab =>
+  value === ColorPickerTab.solid || value === ColorPickerTab.gradient || value === ColorPickerTab.pattern;
 
 export const useSetActiveTab =
   (
@@ -17,17 +20,33 @@ export const useSetActiveTab =
     onChange: TFunc<[TColorPickerValue]>,
     value: TColorPickerValue,
     gradientPanel: TUseGradientPanelResult,
+    patternPanel: TUsePatternPanelResult,
     onGradientChange?: TFunc<[TGradientPanelChange]>,
+    onPatternChange?: TFunc<[TPatternPanelChange]>,
   ): TFunc<[TTab['name']]> =>
   (tabName) => {
     if (isColorPickerTab(tabName)) {
       setActiveTab(tabName);
 
-      if (tabName === ColorPickerTab.gradient) {
-        onGradientChange?.({ angle: gradientPanel.angle, stops: gradientPanel.stops, type: gradientPanel.type });
-      } else {
-        onChange(value);
-        gradientPanel.reset();
+      switch (tabName) {
+        case ColorPickerTab.gradient:
+          onGradientChange?.({ angle: gradientPanel.angle, stops: gradientPanel.stops, type: gradientPanel.type });
+          patternPanel.reset();
+          break;
+        case ColorPickerTab.pattern:
+          onPatternChange?.({
+            alignmentIndex: patternPanel.alignmentIndex,
+            scale: patternPanel.scale,
+            spacingX: patternPanel.spacingX,
+            spacingY: patternPanel.spacingY,
+            tileType: patternPanel.tileType,
+          });
+          gradientPanel.reset();
+          break;
+        default:
+          onChange(value);
+          gradientPanel.reset();
+          patternPanel.reset();
       }
     }
   };

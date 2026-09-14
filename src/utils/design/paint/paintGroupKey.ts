@@ -15,6 +15,8 @@ const singlePaintKey = (paint: TPaint): string => {
       return `${head}:${paint.color}`;
     case 'image':
       return `${head}:${paint.ref}:${paint.scaleMode}`;
+    case 'pattern':
+      return head;
     default:
       return gradientKey(head, paint);
   }

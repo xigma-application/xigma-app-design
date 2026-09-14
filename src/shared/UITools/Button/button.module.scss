@@ -29,6 +29,14 @@
     border: 1px solid var(--color-neutral-3);
   }
 
+  &--secondary {
+    background-color: var(--color-neutral-4);
+
+    &:hover {
+      background-color: var(--color-neutral-4);
+    }
+  }
+
   &--selected {
     background-color: var(--color-bg-selected);
     color: var(--color-icon-selected);
@@ -40,7 +48,12 @@
     }
   }
 
-  &--medium {
+  &--small {
+    height: 24px;
+    padding: 0 8px;
+  }
+
+  &--large {
     height: 32px;
     padding: 0 12px;
   }

@@ -1,0 +1,13 @@
+.PatternField {
+  &__label {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+    user-select: none;
+  }
+
+  &__unit {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+    user-select: none;
+  }
+}

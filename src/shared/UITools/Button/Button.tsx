@@ -4,7 +4,9 @@ import { ComponentPropsWithoutRef, forwardRef, ReactNode } from 'react';
 // styles
 import styles from './button.module.scss';
 
-export type TButtonSize = 'medium' | 'small';
+export type TButtonColor = 'primary' | 'secondary';
+
+export type TButtonSize = 'large' | 'medium' | 'small';
 
 export type TButtonVariant = 'outline' | 'solid';
 
@@ -13,6 +15,7 @@ export type TButtonProps = {
   ariaLabel?: string;
   children: ReactNode;
   className?: string;
+  color?: TButtonColor;
   disabled?: boolean;
   onClick?: TFunc;
   selected?: boolean;
@@ -27,10 +30,11 @@ export const Button = forwardRef<HTMLButtonElement, TButtonProps>(
       ariaLabel,
       children,
       className = '',
+      color = 'primary',
       disabled = false,
       onClick,
       selected = false,
-      size = 'small',
+      size = 'medium',
       variant = 'solid',
       ...rest
     },
@@ -45,9 +49,11 @@ export const Button = forwardRef<HTMLButtonElement, TButtonProps>(
         {
           [styles['Button--active']]: active,
           [styles['Button--disabled']]: disabled,
-          [styles['Button--medium']]: size === 'medium',
+          [styles['Button--large']]: size === 'large',
           [styles['Button--outline']]: variant === 'outline',
+          [styles['Button--secondary']]: color === 'secondary',
           [styles['Button--selected']]: selected,
+          [styles['Button--small']]: size === 'small',
         },
         className,
       )}

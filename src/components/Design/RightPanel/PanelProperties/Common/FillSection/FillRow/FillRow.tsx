@@ -3,12 +3,14 @@ import { FC, PointerEvent as ReactPointerEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import { FillImagePreview } from './FillImagePreview/FillImagePreview';
 import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
+import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
 import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
@@ -16,6 +18,7 @@ import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
+import { translationNameSpace } from '../constants';
 
 // styles
 import styles from './fill-row.module.scss';
@@ -26,8 +29,7 @@ import { GRADIENT_TYPE_LABEL_KEY } from 'shared/UITools/ColorPicker/Body/Gradien
 import { TPaint } from 'types/design/paint/types';
 
 // utils
-import { getNonSolidFillSwatchStyle } from './utils/getNonSolidFillSwatchStyle';
-import { translationNameSpace } from '../constants';
+import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
 
 export type TFillRowProps = {
   isDragging: boolean;
@@ -68,11 +70,13 @@ export const FillRow: FC<TFillRowProps> = ({
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
   const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
+  const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
-  const isGradient = paint.type !== 'solid' && paint.type !== 'image';
-  const hex = isGradient ? (paint.stops[0]?.color ?? '#000000') : paint.type === 'solid' ? paint.color : '#000000';
+  const isPattern = paint.type === 'pattern';
+  const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern';
+  const hex = isGradient ? (paint.stops[0]?.color ?? '#000000') : isPattern ? '#ffffff' : paint.type === 'solid' ? paint.color : '#000000';
   const value = { alpha: paint.opacity, hex };
-  const hexDisplayValue = isGradient ? t(GRADIENT_TYPE_LABEL_KEY[paint.type]) : undefined;
+  const hexDisplayValue = isGradient ? t(GRADIENT_TYPE_LABEL_KEY[paint.type]) : isPattern ? 'Pattern' : undefined;
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
 
@@ -95,18 +99,7 @@ export const FillRow: FC<TFillRowProps> = ({
       </button>
       <span data-no-select style={{ display: 'contents' }}>
         {paint.type === 'image' ? (
-          <div className={styles.FillRow__gradient}>
-            <span className={styles.FillRow__gradientSwatch} style={getNonSolidFillSwatchStyle(paint)} />
-            <span className={styles.FillRow__gradientLabel}>{t(`${translationNameSpace}.gradientLabel`)}</span>
-            <button
-              aria-label={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
-              className={styles.FillRow__toggle}
-              onClick={onToggleVisible}
-              type="button"
-            >
-              <Icon name={isVisible ? 'EyesOpened' : 'EyesClosed'} size={16} />
-            </button>
-          </div>
+          <FillImagePreview isVisible={isVisible} onToggleVisible={onToggleVisible} paint={paint} />
         ) : (
           <UITools.ColorPickerInput
             align="start"
@@ -114,8 +107,9 @@ export const FillRow: FC<TFillRowProps> = ({
             className={styles.FillRow__color}
             hex={value.hex}
             hexDisplayValue={hexDisplayValue}
-            initialActiveTab={isGradient ? ColorPickerTab.gradient : undefined}
+            initialActiveTab={isGradient ? ColorPickerTab.gradient : isPattern ? ColorPickerTab.pattern : undefined}
             initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
+            initialPattern={getInitialPatternFromPaint(paint)}
             isPointerOverGradientHandle={isPointerOverGradientHandle}
             isVisible={isVisible}
             onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
@@ -125,6 +119,7 @@ export const FillRow: FC<TFillRowProps> = ({
             onGradientChange={handleGradientChange}
             onGradientPanelStateChange={setGradientPanelState}
             onOpenChange={setIsPickerOpen}
+            onPatternChange={handlePatternChange}
             onPickerChange={handleSolidChange}
             onToggleVisibility={onToggleVisible}
             paintTypeRow

@@ -2,9 +2,11 @@
 import { BlendMode } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
-export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'solid';
+export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'pattern' | 'solid';
 
 export type TImageScaleMode = 'fill' | 'fit' | 'stretch' | 'tile';
+
+export type TPatternTileType = 'circular' | 'rectangular';
 
 export type TGradientStop = {
   color: string;
@@ -37,4 +39,13 @@ export type TImagePaint = TPaintBase & {
   type: 'image';
 };
 
-export type TPaint = TGradientPaint | TImagePaint | TSolidPaint;
+export type TPatternPaint = TPaintBase & {
+  alignmentIndex: number;
+  scale: number;
+  spacingX: number;
+  spacingY: number;
+  tileType: TPatternTileType;
+  type: 'pattern';
+};
+
+export type TPaint = TGradientPaint | TImagePaint | TPatternPaint | TSolidPaint;

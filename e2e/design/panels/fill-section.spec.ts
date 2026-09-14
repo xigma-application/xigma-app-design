@@ -4,11 +4,16 @@ import { test, expect, Page } from '@playwright/test';
 import { DesignPage } from '../model/DesignPage';
 
 type TReadablePaint = {
+  alignmentIndex?: number;
   color?: string;
   end?: { x: number; y: number };
   opacity: number;
+  scale?: number;
+  spacingX?: number;
+  spacingY?: number;
   start?: { x: number; y: number };
   stops?: { color: string; opacity: number; position: number }[];
+  tileType?: string;
   type: string;
   visible?: boolean;
 };
@@ -2275,5 +2280,86 @@ test.describe('Design panels — Fill section', () => {
     const widthAfter = (await alphaField.boundingBox())!.width;
 
     expect(widthAfter).toBeCloseTo(widthBefore, 0);
+  });
+
+  test('switching a solid fill to Pattern commits a pattern paint and shows the Pattern panel', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-switch-to-pattern');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+
+    // action
+    await page.getByLabel('Pattern').click();
+
+    // result — the fill row now shows the literal "Pattern" text, and the committed paint is real
+    await expect(page.locator('input[value="Pattern"]')).toBeVisible();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].type).toBe('pattern');
+
+    // result — the still-open picker shows the (currently non-functional) Pattern panel content
+    await expect(page.getByRole('button', { name: 'Select source...' })).toBeVisible();
+  });
+
+  test('editing the Pattern panel’s tile type and scale commits them onto the pattern paint', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-properties-commit');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+
+    // action
+    await page.getByLabel('Circular', { exact: true }).click();
+
+    const scaleInput = page.locator('[data-test-text-field-input="pattern-scale"]');
+
+    await scaleInput.fill('50');
+    await scaleInput.blur();
+
+    // result
+    const node = await readNode(page, id);
+    const fill = node.fills![0];
+
+    expect(fill.tileType).toBe('circular');
+    expect(fill.scale).toBe(50);
+  });
+
+  test('switching away from Pattern and back resets the panel instead of resurfacing the old values', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-resets-on-tab-switch');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByLabel('Circular', { exact: true }).click();
+
+    const scaleInput = page.locator('[data-test-text-field-input="pattern-scale"]');
+
+    await scaleInput.fill('50');
+    await scaleInput.blur();
+
+    // action — leave Pattern, then come back in the same open session
+    await page.getByLabel('Solid').click();
+    await page.getByLabel('Pattern').click();
+
+    // result — a fresh default, not the 50%/circular values from the earlier edit
+    await expect(page.getByRole('button', { name: 'Rectangular' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(scaleInput).toHaveValue('100');
   });
 });

@@ -60,7 +60,7 @@ exports[`PresentShare snapshots > should render PresentShare 1`] = `
     </div>
     <button
       aria-pressed="false"
-      class="_Button_b88d2e _Button--medium_b88d2e _PresentShare__share_ba683c"
+      class="_Button_b88d2e _PresentShare__share_ba683c"
       type="button"
     >
       Share

@@ -23,6 +23,7 @@ import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
 import { useTrackIsDragging } from './hooks/useTrackIsDragging';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
+import { usePatternPanel } from './Body/PatternPanel/hooks/usePatternPanel';
 
 // others
 import { DEFAULT_ACTIVE_TAB, DEFAULT_LIBRARY_TAB, DEFAULT_PRESETS } from './constants';
@@ -34,10 +35,10 @@ import styles from './color-picker.module.scss';
 
 // types
 import { ColorPickerTab } from './enums';
-import { TColorPickerPreview, TColorPickerProps } from './types';
+import { TColorPickerProps } from './types';
 
 // utils
-import { getGradientPreviewStyle } from './utils/getGradientPreviewStyle';
+import { getColorPickerPreview } from './utils/getColorPickerPreview';
 
 export const ColorPicker: FC<TColorPickerProps> = ({
   align,
@@ -47,6 +48,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   headerExtra,
   initialActiveTab,
   initialGradient,
+  initialPattern,
   isPointerOverGradientHandle,
   moveable = false,
   onChange,
@@ -55,6 +57,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onGradientChange,
   onGradientPanelStateChange,
   onOpenChange,
+  onPatternChange,
   paintTypeRow = false,
   presets = DEFAULT_PRESETS,
   side,
@@ -74,17 +77,15 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const colorModel = useColorModel(value, onChange);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
-  const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
+  const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
+  const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, patternPanel, onGradientChange, onPatternChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
   const ignoreGradientCanvasInteractOutside = useIgnoreGradientCanvasInteractOutside(isPointerOverGradientHandle);
   const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
   const handleInteractOutside = useHandleInteractOutside(ignoreSamplerInteractOutside, ignoreGradientCanvasInteractOutside);
-  const preview: TColorPickerPreview =
-    activeTab === ColorPickerTab.gradient
-      ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type, gradientPanel.angle), type: 'gradient' }
-      : { type: 'solid', value };
+  const preview = getColorPickerPreview(activeTab, gradientPanel.stops, gradientPanel.type, gradientPanel.angle, value);
 
   useResetActiveTabOnReopen(openSessionId, initialActiveTab, DEFAULT_ACTIVE_TAB, setActiveTab);
   useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
@@ -123,6 +124,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
             onOpenSampler={colorSampler.open}
+            patternPanel={patternPanel}
           />
         </DockedPanelContext.Provider>
         {activeTab === ColorPickerTab.solid && <Footer onSelectPreset={colorModel.setPreset} presets={presets} />}

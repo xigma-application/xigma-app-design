@@ -40,7 +40,7 @@ export const drawVectorFillPaints = (
           isAlphaWriteEnabled,
           alpha,
         );
-      } else if (paint.type !== 'image') {
+      } else if (paint.type !== 'image' && paint.type !== 'pattern') {
         drawVectorGradientFill(
           gl,
           gradientProgram,
