@@ -194,6 +194,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh       |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render    |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel          |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 428 | Rotating a gradient on the canvas, then dragging a stop in the popover, keeps the canvas rotation               |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 429 | Moving a gradient stop on the canvas updates its position live in the open popover                             |  ✅  |         ✅ `fill-section.spec.ts`         |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -499,3 +501,16 @@ pass, including the docked stop-color editor's own saturation map. One e2e gotch
 `Control+z` sent while focus is still on the type dropdown's own trigger button does nothing — that
 component swallows the keydown — so the test clicks the inert "Stops" label first to move focus off
 it before invoking the shortcut.
+
+#428-#429: the very next report after #425-#427, and really the flip side of the same coin. The
+`historyRevision` mechanism from #426 only caught undo/redo (`replaceDesignSnapshot`); a canvas-driven
+gradient drag dispatches the same `updateNode` action the panel's own edits use, so it wasn't
+detected as "external" at all — rotating/moving the line on the canvas, then dragging a stop inside
+the still-open popover, silently snapped the line back to its pre-rotation position (#428), and
+dragging a stop's position on the canvas never showed up in the popover's own position field while it
+stayed open (#429). Fixed with a general resync (`useSyncGradientPanelWithLivePaint.ts`) that
+reconciles points/type/stops from the live paint on every render where they actually differ, gated by
+a new `isDraggingRef` (`useTrackIsDragging.ts`, wrapping the popover's existing `onDragStart`/`onDragEnd`)
+so the panel's own in-progress drag is never fought mid-gesture. This made `historyRevision` redundant
+— undo/redo is just another "external change" the general mechanism now catches — so it was removed
+again along with its prop-threading, rather than leaving two overlapping sync mechanisms in place.

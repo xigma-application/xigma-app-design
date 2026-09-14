@@ -104,7 +104,6 @@ const initialState: TDesignState = {
   gridTrackModeMenuRequest: null,
   gridTrackSelection: null,
   gridTrackValueEditRequest: null,
-  historyRevision: 0,
   hoveredDimensionField: null,
   isActionsPanelOpen: false,
   isGridSettingsPanelOpen: false,

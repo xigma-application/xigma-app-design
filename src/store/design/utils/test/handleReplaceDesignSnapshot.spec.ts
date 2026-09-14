@@ -304,16 +304,4 @@ describe('handleReplaceDesignSnapshot', () => {
     expect(state.gridTrackSelection).toBeNull();
     expect(state.panelGridTrackSelection).toBeNull();
   });
-
-  it('should bump historyRevision so open panels can detect an undo/redo happened', () => {
-    // mock
-    const state = buildState({ historyRevision: 2 });
-    const snapshot = buildSnapshot();
-
-    // before
-    handleReplaceDesignSnapshot(state, snapshot);
-
-    // result
-    expect(state.historyRevision).toBe(3);
-  });
 });

@@ -1,5 +1,5 @@
 import { nanoid } from '@reduxjs/toolkit';
-import { useState } from 'react';
+import { RefObject, useRef, useState } from 'react';
 
 // hooks
 import { useAddStop } from './hooks/useAddStop';
@@ -11,7 +11,7 @@ import { useRotateGradient, TGradientPoints } from './hooks/useRotateGradient';
 import { useSetGradientType } from './hooks/useSetGradientType';
 import { useSetStopColor } from './hooks/useSetStopColor';
 import { useSetStopPosition } from './hooks/useSetStopPosition';
-import { useSyncExternalStopChanges } from './hooks/useSyncExternalStopChanges';
+import { useSyncGradientPanelWithLivePaint } from './hooks/useSyncGradientPanelWithLivePaint';
 
 // others
 import { DEFAULT_GRADIENT_STOPS, DEFAULT_GRADIENT_TYPE, MAX_STOPS, MIN_STOPS } from '../../constants';
@@ -42,8 +42,10 @@ export const useGradientPanel = (
   onChange?: TFunc<[TGradientPanelChange]>,
   initialGradient?: TInitialGradient,
   resetKey?: number,
-  historyRevision?: number,
+  isDraggingRef?: RefObject<boolean>,
 ): TUseGradientPanelResult => {
+  const fallbackIsDraggingRef = useRef(false);
+  const effectiveIsDraggingRef = isDraggingRef ?? fallbackIsDraggingRef;
   const initialStops = initialGradient ? initialGradient.stops.map((stop) => ({ ...stop, id: nanoid() })) : DEFAULT_GRADIENT_STOPS;
   const initialPoints = initialGradient ? { end: initialGradient.end, start: initialGradient.start } : null;
   const [stops, setStops] = useState(initialStops);
@@ -61,8 +63,19 @@ export const useGradientPanel = (
   const setGradientType = useSetGradientType(setType, setPoints, stops, onChange);
   const reset = useResetGradientPanel(setStops, setSelectedStopId, setAngle, setPoints, setType);
 
-  useResyncGradientPanelState(resetKey, historyRevision, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
-  useSyncExternalStopChanges(initialGradient, stops, setStops, setSelectedStopId);
+  useResyncGradientPanelState(resetKey, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
+  useSyncGradientPanelWithLivePaint(
+    initialGradient,
+    effectiveIsDraggingRef,
+    stops,
+    setStops,
+    selectedStopId,
+    setSelectedStopId,
+    points,
+    setPoints,
+    type,
+    setType,
+  );
 
   return {
     addStop,

@@ -10,7 +10,6 @@ export const handleReplaceDesignSnapshot = (state: TDesignState, snapshot: TDesi
   state.activePageId = snapshot.activePageId;
   state.gridTrackSelection = snapshot.gridTrackSelection ?? null;
   state.panelGridTrackSelection = snapshot.panelGridTrackSelection ?? null;
-  state.historyRevision = (state.historyRevision ?? 0) + 1;
 
   const page = getActivePage(state);
   const hadVectorEditingNodeIds = state.vectorEditingNodeIds.length > 0;

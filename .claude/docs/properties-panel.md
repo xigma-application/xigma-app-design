@@ -356,12 +356,11 @@ node's folder. Today:
 
   The docked panel's stop list is `TEditableGradientStop[]` (has a React-key `id`, panel-local,
   never persisted) while Redux holds plain `TGradientStop[]` (no id) — adding a stop from the canvas
-  changes Redux only, so the two representations drift out of sync. `useSyncExternalStopChanges.ts`
-  (new hook under `useGradientPanel/hooks/`) reconciles them on any external stop-count change: it
-  matches each incoming external stop against the current local list by
-  `position`+`color`+`opacity` to preserve existing ids (never regenerating an id for a stop that
-  didn't change, which would remount that stop's `StopRow`/`GradientBar` thumb), assigns a fresh
-  `nanoid()` only to a genuinely new stop, and selects that new stop automatically.
+  changes Redux only, so the two representations drift out of sync. Originally reconciled by a
+  narrower `useSyncExternalStopChanges.ts` (only on a stop-*count* change); superseded by
+  `useSyncGradientPanelWithLivePaint.ts` — see the "canvas ↔ popover sync" follow-up below for why
+  that widening became necessary, and for the general form of the same
+  `position`+`color`+`opacity` id-preserving reconciliation described here.
 
   **Dragging the line's own start/end endpoint rotates the whole gradient**, continuously, directly
   on the canvas — separate from the discrete 90°-at-a-time panel rotate button described above. The
@@ -764,10 +763,10 @@ node's folder. Today:
 **Three more GradientPanel bugs, all traced to the same root cause: `useGradientPanel`'s local
 state is a working copy seeded once from the paint, not a live mirror of it.** `useGradientPanel.ts`
 (`stops`/`selectedStopId`/`angle`/`points`/`type`) is plain `useState`, seeded from the
-`initialGradient` prop only on mount and re-seeded only by two narrow effects: reopening the popover
-(`useResyncGradientPanelState.ts`, formerly `useResetGradientPanelOnReopen.ts`) and a stop-count
-mismatch (`useSyncExternalStopChanges.ts`). Anything else that changes the paint out from under the
-open panel — switching to Solid, or an undo/redo — left this local state stale.
+`initialGradient` prop only on mount and re-seeded only by one narrow effect: reopening the popover
+(`useResyncGradientPanelState.ts`, formerly `useResetGradientPanelOnReopen.ts`). Anything else that
+changes the paint out from under the open panel — switching to Solid, an undo/redo, or (see the
+follow-up further below) a canvas-driven edit — left this local state stale.
 
 - **Switching to Solid didn't reset the gradient state**, so switching back to Gradient in the same
   popover session resurfaced the old paint's stops/type/points instead of starting fresh. Since this
@@ -777,22 +776,12 @@ open panel — switching to Solid, or an undo/redo — left this local state sta
   had, factored out so both can call it), and `useSetActiveTab.ts` calls it directly in its
   solid-tab branch, right next to the existing `onChange(value)` call.
 
-- **Undo/redo didn't refresh the open panel at all** — not the stops, not even the type dropdown —
-  because `updateNode` (every panel edit) and `replaceDesignSnapshot` (what `undo`/`redo` dispatch,
-  `store/history/actions.ts`) both just change `paint` in Redux the same way from this component's
-  point of view, so there was no signal to tell "the panel's own edit echoing back" apart from "the
-  ground truth changed underneath it." Undo/redo needed a real resync, but naively re-seeding on
-  every `initialGradient` prop change would have fought every keystroke (the panel's own `onChange`
-  round-trips through Redux and back into a new `initialGradient` reference on *every* edit) — the
-  exact "two sides both think they're the source of truth" trap. The fix uses a signal that only
-  `replaceDesignSnapshot` ever touches: a new `design.historyRevision` counter (optional on
-  `TDesignState`, so the ~50 existing test fixtures that build a full `TDesignState` object literal
-  didn't all need a new required field), bumped in `handleReplaceDesignSnapshot.ts` and nowhere else.
-  `selectHistoryRevision` is threaded as a plain prop all the way down (`FillRow` → `ColorPickerInput`
-  → `ColorPicker` → `useGradientPanel`, alongside the existing `resetKey`/`openSessionId`) rather than
-  read directly inside `shared/UITools/ColorPicker`, which stays Redux-free. `useResyncGradientPanelState`
-  now re-seeds on *either* `resetKey` or `historyRevision` changing — ordinary edits never bump the
-  latter, so there's no fight, only genuine external replacements force a resync.
+- **Undo/redo didn't refresh the open panel at all** — not the stops, not even the type dropdown.
+  First fixed narrowly with a `design.historyRevision` counter bumped only by `replaceDesignSnapshot`
+  (what `undo`/`redo` dispatch) — then superseded a session later by the general
+  canvas-sync mechanism below, which covers undo/redo as just one more kind of "external change" and
+  made the counter dead weight, so it (and its `selectHistoryRevision` prop-threading) was removed
+  again. See the follow-up section for the mechanism that replaced it and why.
 
 - **Continuous drags inside the gradient panel spammed one history entry per pixel** — the
   begin/end-gesture coalescing pattern (`beginHistoryGesture`/`endHistoryGesture`,
@@ -815,6 +804,48 @@ open panel — switching to Solid, or an undo/redo — left this local state sta
   itself. Any e2e test that needs global keyboard shortcuts to reach the app while a dropdown was
   just used must click something else inert first (e.g. the "Stops" label) to move focus off the
   trigger.
+
+**Follow-up: canvas ↔ popover live sync, and why the `historyRevision` counter above got removed
+again.** Two more reports, both really the same gap: (1) rotate/move a linear gradient's line *on
+the canvas*, then drag a stop *inside the still-open popover* — the line snaps back to its original,
+un-rotated position/angle. (2) drag a stop's position *on the canvas* while the popover is open — the
+popover's own stop-position field never updates to show it. Root cause: `historyRevision` only
+covered `replaceDesignSnapshot` (undo/redo); a canvas-driven gradient drag dispatches the exact same
+`updateNode` action type the panel's own edits use (via `commitFills`), so there was no signal at all
+distinguishing "an external actor changed this paint" from "my own edit is echoing back" for that
+case — the panel's stale local `points`/`type` just kept winning every time it was touched next.
+
+The general fix, in a new `useSyncGradientPanelWithLivePaint.ts` (replacing the older, narrower
+`useSyncExternalStopChanges.ts`): resync `points`/`type`/`stops` from the live `initialGradient` prop
+on *every* render where any of them actually differ from local state — unless the popover's own drag
+is currently in progress. The gate is the key piece that keeps this from becoming a "two sides both
+think they're the source of truth" loop (Redux and local state can otherwise fight forever, each
+correcting the other one render late): a new `useTrackIsDragging.ts` wraps the `onDragStart`/`onDragEnd`
+callbacks `ColorPicker.tsx` already
+receives (the same ones used for history-gesture coalescing above) in an `isDraggingRef`, passed down
+into `useGradientPanel`. While `isDraggingRef.current` is true, the sync effect is a no-op — the
+panel's own in-progress drag is trusted as the freshest source, uncontested — and only once the drag
+ends does the *next* genuinely-different live value (if any) get picked up. Every other panel
+interaction (rotate button, flip, type switch, add/remove stop, position/hex field commit-on-blur)
+already calls `onChange` synchronously in the same handler that updates local state, so by the time
+this effect runs, Redux and local state agree already — the resync is a real no-op for those, not
+just a gated one, confirmed by `stateRef`-based reads that avoid stale-closure re-runs.
+
+This also made the `historyRevision` counter redundant: undo/redo is just another kind of "external
+change" the same mechanism now catches, since the popover is never "dragging" (from its own
+perspective) when a keyboard shortcut fires. Removed `design.historyRevision`,
+`selectHistoryRevision`, and the `historyRevision` prop threaded through
+`FillRow`/`ColorPickerInput`/`ColorPicker` — keeping two overlapping "is this external?" signals
+around would only have confused the next reader. One test-writing trap worth flagging: a `renderHook`
+callback that builds its `initialGradient` argument as a fresh inline object literal recreates it
+(and its nested `stops`/`start`/`end`) on every re-render regardless of whether anything really
+changed, unlike the real app's Redux-backed prop (which only gets a new reference when the
+underlying paint actually changes) — a test written against a static/frozen `initialGradient` while
+calling a local-only mutator like `reset()` will see the sync effect "correct" the local change right
+back, since nothing marks that frozen value as stale. The fix is in the test, not the code: use
+`renderHook`'s own `rerender` to advance `initialGradient` the same way the real prop would (e.g. to
+`undefined` right after `reset()`, mirroring `useSetActiveTab`'s Solid-branch actually turning the
+paint solid in the same interaction).
 
 i18n for the shared sections lives under `…panelProperties.common.*`.
 

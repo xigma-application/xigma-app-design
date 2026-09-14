@@ -21,6 +21,7 @@ import { useOpenSessionId } from './hooks/useOpenSessionId';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
+import { useTrackIsDragging } from './hooks/useTrackIsDragging';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 
 // others
@@ -44,7 +45,6 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   freezePositionOnGrow,
   headerExtra,
-  historyRevision,
   initialActiveTab,
   initialGradient,
   isPointerOverGradientHandle,
@@ -72,7 +72,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
-  const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, historyRevision);
+  const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
+  const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
@@ -119,8 +120,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             colorModel={colorModel}
             gradientPanel={gradientPanel}
             onCloseSampler={colorSampler.close}
-            onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
             onOpenSampler={colorSampler.open}
           />
         </DockedPanelContext.Provider>

@@ -69,7 +69,6 @@ export type TDesignState = {
   gridTrackModeMenuRequest?: TGridTrackModeMenuRequest | null;
   gridTrackSelection?: TGridTrackSelection | null;
   gridTrackValueEditRequest?: TGridTrackValueEditRequest | null;
-  historyRevision?: number;
   hoveredDimensionField?: TDimensionHintField | null;
   isActionsPanelOpen: boolean;
   isGridSettingsPanelOpen?: boolean;

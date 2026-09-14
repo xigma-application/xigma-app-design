@@ -2122,4 +2122,131 @@ test.describe('Design panels — Fill section', () => {
 
     expect(undoneColor).toBe('#ffffff');
   });
+
+  test('rotating a gradient on the canvas, then dragging a stop inside the popover, keeps the canvas rotation', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-canvas-rotate-then-popover-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // horizontal gradient across the rectangle (bounds 700,200 - 900,360, center 800,280)
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // rotate the line 90° via the canvas (same drag as the dedicated rotate test above)
+    await page.mouse.move(900, 288);
+    await page.mouse.down();
+    await page.mouse.move(800, 150, { steps: 10 });
+    await page.mouse.up();
+
+    const rotated = await readNode(page, id);
+
+    expect(rotated.fills![0].end!.x).toBeCloseTo(0.5, 1);
+    expect(rotated.fills![0].end!.y).toBeCloseTo(0, 1);
+
+    // action — now drag a stop's thumb inside the still-open popover's own gradient bar
+    const barBox = (await page.locator('[class*="GradientBar__wrapper"]').boundingBox())!;
+    const thumbs = page.getByLabel('Stop marker');
+    const blackThumbBox = (await thumbs.nth(1).boundingBox())!;
+    const thumbY = blackThumbBox.y + blackThumbBox.height / 2;
+
+    await page.mouse.move(blackThumbBox.x + blackThumbBox.width / 2, thumbY);
+    await page.mouse.down();
+    await page.mouse.move(barBox.x + barBox.width * 0.7, thumbY, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    // result — the popover drag only moved the stop's position; the line is still the rotated one,
+    // not reset back to the original horizontal start/end
+    expect(node.fills![0].end!.x).toBeCloseTo(0.5, 1);
+    expect(node.fills![0].end!.y).toBeCloseTo(0, 1);
+    expect(node.fills![0].start!.x).toBeCloseTo(0.5, 1);
+    expect(node.fills![0].start!.y).toBeCloseTo(1, 1);
+    expect(node.fills![0].stops!.find((stop) => stop.color === '#000000')!.position).toBeCloseTo(0.7, 1);
+  });
+
+  test('moving a gradient stop on the canvas updates its position live in the open popover', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-canvas-stop-move-live-popover');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    const blackStopPositionField = page.getByLabel('Stop position').nth(1);
+
+    await expect(blackStopPositionField).toHaveValue('100%');
+
+    // action — drag the black stop's on-canvas swatch from the right edge toward the middle
+    await page.mouse.move(900, 258);
+    await page.mouse.down();
+    await page.mouse.move(800, 258, { steps: 10 });
+    await page.mouse.up();
+
+    // result — the still-open popover's own position field reflects the canvas-driven change live,
+    // instead of staying stuck on the value it had when the popover was opened
+    const updatedValue = await blackStopPositionField.inputValue();
+
+    expect(updatedValue).not.toBe('100%');
+    expect(Number(updatedValue.replace('%', ''))).toBeGreaterThan(40);
+    expect(Number(updatedValue.replace('%', ''))).toBeLessThan(60);
+  });
 });

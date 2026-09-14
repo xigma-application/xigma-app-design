@@ -3,6 +3,9 @@ import { act, renderHook } from '@testing-library/react';
 // hooks
 import { useGradientPanel } from './useGradientPanel';
 
+// types
+import { TInitialGradient } from '../../types';
+
 describe('useGradientPanel', () => {
   it('should default to two stops and none selected', () => {
     // before
@@ -314,17 +317,21 @@ describe('useGradientPanel', () => {
   });
 
   it('should reset stops, type, points, and selection to the plain defaults, e.g. when switching a paint to Solid', () => {
-    // before — seeded from a paint that is not the default (radial, custom stops, rotated)
-    const { result } = renderHook(() =>
-      useGradientPanel(undefined, {
-        end: { x: 0.5, y: 1 },
-        start: { x: 0.5, y: 0.5 },
-        stops: [
-          { color: '#111111', opacity: 100, position: 0 },
-          { color: '#222222', opacity: 50, position: 1 },
-        ],
-        type: 'gradient-radial',
-      }),
+    // before — seeded from a paint that is not the default (radial, custom stops, rotated); the
+    // paint itself turns solid (initialGradient becomes undefined) in the very same interaction
+    // that calls reset(), exactly like useSetActiveTab's Solid-tab branch does
+    const seededGradient: TInitialGradient = {
+      end: { x: 0.5, y: 1 },
+      start: { x: 0.5, y: 0.5 },
+      stops: [
+        { color: '#111111', opacity: 100, position: 0 },
+        { color: '#222222', opacity: 50, position: 1 },
+      ],
+      type: 'gradient-radial',
+    };
+    const { rerender, result } = renderHook<ReturnType<typeof useGradientPanel>, { initialGradient: TInitialGradient | undefined }>(
+      ({ initialGradient }) => useGradientPanel(undefined, initialGradient),
+      { initialProps: { initialGradient: seededGradient } },
     );
 
     act(() => result.current.rotate());
@@ -332,6 +339,7 @@ describe('useGradientPanel', () => {
 
     // action
     act(() => result.current.reset());
+    rerender({ initialGradient: undefined });
 
     // result
     expect(result.current.type).toBe('gradient-linear');
