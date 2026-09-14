@@ -7,13 +7,16 @@ import { TSceneNode } from 'types/design/types';
 import { TDrawSceneContext } from '../types';
 
 // utils
+import { drawGradientAddStopPreview } from './drawGradientAddStopPreview';
 import { drawGradientEndpointHandles } from './drawGradientEndpointHandles';
 import { drawGradientLine } from './drawGradientLine';
 import { drawGradientStopHandles } from './drawGradientStopHandles';
 import { drawGradientStopValueLabel } from './drawGradientStopValueLabel';
-import { getGradientStopHandlePositions } from './getGradientStopHandlePositions';
+import { getGradientStopHandlePositions, STOP_HANDLE_OFFSET_PX } from './getGradientStopHandlePositions';
 import { getGradientWorldPoints } from './getGradientWorldPoints';
+import { getInterpolatedGradientColor } from '../../../../../utils/getInterpolatedGradientColor';
 import { getNodeBounds } from '../../../../../utils/getNodeBounds';
+import { getPointAlongGradientLine } from '../../../../../utils/getPointAlongGradientLine';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
 const drawActiveGradientStopValueLabel = (
@@ -24,6 +27,25 @@ const drawActiveGradientStopValueLabel = (
 ): void => {
   if (activeStopIndex !== null && stops[activeStopIndex]) {
     drawGradientStopValueLabel(context, stopPositions[activeStopIndex], stops[activeStopIndex].position);
+  }
+};
+
+const drawGradientAddStopHoverPreview = (
+  context: TDrawSceneContext,
+  start: TPoint,
+  end: TPoint,
+  stops: TGradientStop[],
+  activeStopIndex: number | null,
+  lineHoverPosition: number | null,
+): void => {
+  if (activeStopIndex === null && lineHoverPosition !== null) {
+    const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+    const pointOnLine = getPointAlongGradientLine(start, end, lineHoverPosition);
+    const previewPosition: TPoint = { x: pointOnLine.x, y: pointOnLine.y - STOP_HANDLE_OFFSET_PX / viewport.zoom };
+    const { color, opacity } = getInterpolatedGradientColor(stops, lineHoverPosition);
+
+    drawGradientAddStopPreview(gl, program, buffer, previewPosition, color, opacity, canvasWidth, canvasHeight, viewport);
+    drawGradientStopValueLabel(context, previewPosition, lineHoverPosition);
   }
 };
 
@@ -46,21 +68,14 @@ export const drawGradientHandleLayer = (
       const dragState = refs.gradientStop.gradientStopDragRef.current;
       const isDraggingThisPaint = dragState?.nodeId === selectedNode.id && dragState?.paintIndex === gradientEditor.paintIndex;
       const activeStopIndex = isDraggingThisPaint ? dragState.draggedStopIndex : refs.hover.hoveredGradientStopIndexRef.current;
+      const stops = paint.stops;
+      const selectedStopIndex = gradientEditor.selectedStopIndex;
 
       drawGradientLine(gl, program, buffer, start, end, canvasWidth, canvasHeight, viewport);
       drawGradientEndpointHandles(gl, program, buffer, [start, end], canvasWidth, canvasHeight, viewport);
-      drawGradientStopHandles(
-        gl,
-        program,
-        buffer,
-        paint.stops,
-        stopPositions,
-        gradientEditor.selectedStopIndex,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-      );
-      drawActiveGradientStopValueLabel(context, paint.stops, stopPositions, activeStopIndex);
+      drawGradientStopHandles(gl, program, buffer, stops, stopPositions, selectedStopIndex, canvasWidth, canvasHeight, viewport);
+      drawActiveGradientStopValueLabel(context, stops, stopPositions, activeStopIndex);
+      drawGradientAddStopHoverPreview(context, start, end, stops, activeStopIndex, refs.hover.hoveredGradientLinePositionRef.current);
     }
   }
 };

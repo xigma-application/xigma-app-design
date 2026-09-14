@@ -554,4 +554,123 @@ test.describe('Design panels — Fill section', () => {
     expect(gradientEditor).not.toBeNull();
     await expect(page.getByRole('button', { name: 'Rotate gradient' })).toBeVisible();
   });
+
+  test('clicking the gradient guide line on the canvas adds a new stop there and selects it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-add-stop-on-line');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // white at 0%, black at 100% — line runs world (700,280) -> (900,280)
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // hovering the middle of the line (away from either stop's own swatch) shows the add-stop preview
+    const beforeHover = await designPage.canvas.screenshot();
+
+    await page.mouse.move(800, 280);
+
+    const afterHover = await designPage.canvas.screenshot();
+
+    expect(afterHover.equals(beforeHover)).toBe(false);
+
+    // clicking there adds a new stop at ~50% and selects it
+    await page.mouse.down();
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const stops = node.fills![0].stops!;
+
+    expect(stops).toHaveLength(3);
+
+    const newStop = stops.find((stop) => stop.color !== '#ffffff' && stop.color !== '#000000') ?? stops[1];
+
+    expect(newStop.position).toBeCloseTo(0.5, 1);
+
+    const gradientEditor = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.gradientEditor;
+    });
+
+    expect(gradientEditor?.selectedStopIndex).toBe(stops.indexOf(newStop));
+
+    // result — the docked panel's own stop list/bar picks up the canvas-added stop too, not just Redux
+    await expect(page.getByLabel('Stop marker')).toHaveCount(3);
+  });
+
+  test('clicking near an existing stop on the canvas does not add a new one — stops take priority over the line', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-stop-priority-over-line');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the black stop's own swatch: world (900, 280), offset up by 22
+    await page.mouse.move(900, 258);
+    await page.mouse.down();
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].stops).toHaveLength(2);
+  });
 });

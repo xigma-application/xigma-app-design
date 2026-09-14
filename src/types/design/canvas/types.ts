@@ -295,6 +295,7 @@ export type THoverRefs = {
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
+  hoveredGradientLinePositionRef: RefObject<number | null>;
   hoveredGradientStopIndexRef: RefObject<number | null>;
   hoveredGridTrackAffordanceRef: RefObject<TGridTrackAffordanceHover | null>;
   hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;

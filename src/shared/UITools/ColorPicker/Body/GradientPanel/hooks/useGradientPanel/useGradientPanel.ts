@@ -10,6 +10,7 @@ import { useRotateGradient, TGradientPoints } from './hooks/useRotateGradient';
 import { useSetGradientType } from './hooks/useSetGradientType';
 import { useSetStopColor } from './hooks/useSetStopColor';
 import { useSetStopPosition } from './hooks/useSetStopPosition';
+import { useSyncExternalStopChanges } from './hooks/useSyncExternalStopChanges';
 
 // others
 import { DEFAULT_GRADIENT_STOPS, DEFAULT_GRADIENT_TYPE, MAX_STOPS, MIN_STOPS } from '../../constants';
@@ -57,6 +58,7 @@ export const useGradientPanel = (
   const setGradientType = useSetGradientType(setType, stops, angle, points, onChange);
 
   useResetGradientPanelOnReopen(resetKey, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
+  useSyncExternalStopChanges(initialGradient, stops, setStops, setSelectedStopId);
 
   return {
     addStop,

@@ -32,6 +32,7 @@ import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover
 import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
 import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandleHover';
 import { resolveEllipseArcRotateHandleHover } from './resolveEllipseArcRotateHandleHover';
+import { resolveGradientLineHandleHover } from './resolveGradientLineHandleHover';
 import { resolveGradientStopHandleHover } from './resolveGradientStopHandleHover';
 import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
 import { resolvePolygonVertexCountHandleHover } from './resolvePolygonVertexCountHandleHover';
@@ -94,6 +95,7 @@ export const resolveToolHover = (
   resolveEllipseArcRotateHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveEllipseArcRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveGradientStopHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
+  resolveGradientLineHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolvePolygonCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolvePolygonVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);

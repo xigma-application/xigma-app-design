@@ -54,4 +54,20 @@ describe('useIsPointerOverGradientHandle', () => {
     // result
     expect(result.current()).toBe(true);
   });
+
+  it('should return true while hovering the gradient guide line, not just an existing stop', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.hover.hoveredGradientLinePositionRef.current = 0.5;
+
+    // result
+    expect(result.current()).toBe(true);
+  });
 });

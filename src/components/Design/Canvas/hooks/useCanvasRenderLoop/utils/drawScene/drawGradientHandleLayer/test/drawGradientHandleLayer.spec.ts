@@ -10,6 +10,7 @@ const drawGradientLineMock = vi.fn();
 const drawGradientEndpointHandlesMock = vi.fn();
 const drawGradientStopHandlesMock = vi.fn();
 const drawGradientStopValueLabelMock = vi.fn();
+const drawGradientAddStopPreviewMock = vi.fn();
 
 vi.mock('../drawGradientLine', () => ({
   drawGradientLine: (...args: unknown[]): void => drawGradientLineMock(...args),
@@ -22,6 +23,9 @@ vi.mock('../drawGradientStopHandles', () => ({
 }));
 vi.mock('../drawGradientStopValueLabel', () => ({
   drawGradientStopValueLabel: (...args: unknown[]): void => drawGradientStopValueLabelMock(...args),
+}));
+vi.mock('../drawGradientAddStopPreview', () => ({
+  drawGradientAddStopPreview: (...args: unknown[]): void => drawGradientAddStopPreviewMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -67,6 +71,7 @@ describe('drawGradientHandleLayer', () => {
     drawGradientEndpointHandlesMock.mockClear();
     drawGradientStopHandlesMock.mockClear();
     drawGradientStopValueLabelMock.mockClear();
+    drawGradientAddStopPreviewMock.mockClear();
   });
 
   it('should draw nothing when no gradient editor is active', () => {
@@ -173,5 +178,48 @@ describe('drawGradientHandleLayer', () => {
 
     // result
     expect(drawGradientStopValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw the add-stop preview when the line is not hovered', () => {
+    // before
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    expect(drawGradientAddStopPreviewMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the add-stop preview above the line, at the interpolated gradient color there, with its value label', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredGradientLinePositionRef.current = 0.5;
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result — line runs world (0,50) -> (100,50); 0.5 lands at (50, 50), offset up by 18 (zoom 1) -> (50, 32)
+    expect(drawGradientAddStopPreviewMock).toHaveBeenCalledTimes(1);
+
+    const [, , , previewPosition, color] = drawGradientAddStopPreviewMock.mock.calls[0];
+
+    expect(previewPosition).toEqual({ x: 50, y: 32 });
+    // rectangle()'s stops are white (0%) and black (100%); the midpoint blends to mid-gray
+    expect(color).toBe('#808080');
+
+    const [, , labelPosition] = drawGradientStopValueLabelMock.mock.calls[0];
+
+    expect(labelPosition).toBe(0.5);
+  });
+
+  it('should not draw the add-stop preview while an existing stop is hovered or dragged, even if the line position ref is set', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredGradientLinePositionRef.current = 0.5;
+    refs.hover.hoveredGradientStopIndexRef.current = 1;
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    expect(drawGradientAddStopPreviewMock).not.toHaveBeenCalled();
   });
 });

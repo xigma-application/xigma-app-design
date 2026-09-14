@@ -8,7 +8,9 @@ export const useIsPointerOverGradientHandle = (): TFunc<[], boolean> => {
 
   return useCallback(
     (): boolean =>
-      canvasRefs.hover.hoveredGradientStopIndexRef.current !== null || canvasRefs.gradientStop.gradientStopDragRef.current !== null,
+      canvasRefs.hover.hoveredGradientStopIndexRef.current !== null ||
+      canvasRefs.hover.hoveredGradientLinePositionRef.current !== null ||
+      canvasRefs.gradientStop.gradientStopDragRef.current !== null,
     [canvasRefs],
   );
 };

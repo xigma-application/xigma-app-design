@@ -30,6 +30,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRotateHandleRef = useRef<string | null>(null);
+  const hoveredGradientLinePositionRef = useRef<number | null>(null);
   const hoveredGradientStopIndexRef = useRef<number | null>(null);
   const hoveredGridTrackAffordanceRef = useRef<TGridTrackAffordanceHover | null>(null);
   const hoveredPolygonCornerRadiusHandleRef = useRef<string | null>(null);
@@ -68,6 +69,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredEllipseArcHandleRef,
       hoveredEllipseArcRatioHandleRef,
       hoveredEllipseArcRotateHandleRef,
+      hoveredGradientLinePositionRef,
       hoveredGradientStopIndexRef,
       hoveredGridTrackAffordanceRef,
       hoveredPolygonCornerRadiusHandleRef,

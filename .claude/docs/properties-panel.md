@@ -295,6 +295,74 @@ node's folder. Today:
   (`hooks/useNotifyGradientPanelState.ts`); the Redux write happens one level up, in the Fill-section-
   specific `GradientFillControl`, not in the shared `ColorPicker`/`GradientPanel` components.
 
+  **The on-canvas handles became fully interactive** (hover cursor + a `%` value label that follows
+  the stop, click-to-select, click-and-drag to reposition, and click-on-the-line to insert a new
+  stop) in a later pass — still scoped to `gradient-linear` only, still leaving the vector Paint
+  tool's own separate gradient flow untouched. Hit-testing and hover both go through the same two
+  ordered-array dispatch tables every other canvas tool uses (`ARM_RESOLVERS`/`HOVER_RESOLVERS`,
+  first match wins): `armGradientStopOnPointerDown`/`armAddGradientStopOnPointerDown` (in that
+  order — an existing stop must always win over "add a new one here") and, in parallel,
+  `resolveGradientStopHover`/`resolveGradientLineHover`. Stop-vs-line priority is additionally baked
+  into the geometry itself as a second line of defense: `getGradientLinePositionAtPoint.ts` calls
+  `getGradientStopHandleAtPoint.ts` first and bails to `null` on a hit, so the line can never steal a
+  click or hover meant for a stop even if a resolver-ordering change is made in the future.
+
+  Dragging a stop is tracked by **color+opacity fingerprint, not array index**
+  (`TGradientStopDragState = {color, draggedStopIndex, nodeId, opacity, paintIndex}` in
+  `types/design/canvas/types.ts`, held in a new `gradientStop.gradientStopDragRef` — its own
+  `useGradientStopRefs`/`createGradientStopRefs` folder under `useCanvasRefs/hooks/`, the same shape
+  as `useEllipseArcRefs`). This is required because `paint.stops` must stay position-sorted for the
+  shader's `sampleGradient` loop to render correctly, so a cross-over drag re-sorts the array mid-drag
+  and shifts every later stop's index; `continueGradientStopDrag.ts` re-finds the dragged stop each
+  frame by matching color+opacity against the stop nearest the drag's last known position, rather
+  than trusting a stale index.
+
+  Two Radix-`Popover` interactions with this new canvas surface needed explicit fixes, both in
+  `ColorPicker.tsx`'s `onInteractOutside` handler (composed via `useHandleInteractOutside` from
+  `useIgnoreSamplerInteractOutside` + a new `useIgnoreGradientCanvasInteractOutside`, driven by a
+  `isPointerOverGradientHandle?: TFunc<[], boolean>` prop threaded down from `FillRow` via
+  `useIsPointerOverGradientHandle.ts`, which just checks whether any of the three gradient hover/drag
+  refs are non-null):
+  - Clicking a stop landed on the `<canvas>`, which Radix's dismissable-layer treats as "outside" the
+    popover's React tree, closing it. Fixed narrowly — only swallow the outside-click when the pointer
+    is actually over a gradient handle/line, not for every canvas click (a real click on the shape
+    itself must still close the picker, by design).
+  - Even with that fix, drag-then-release-off-the-handle still closed the popover. Root cause (found
+    by reading `@radix-ui/react-dismissable-layer`'s source directly): when the initiating `pointerdown`
+    lands outside the popover, Radix doesn't dismiss synchronously — it defers to a one-time `click`
+    listener that fires *after* `pointerup`. Any ref cleared synchronously on `pointerup` is already
+    stale by the time that deferred check runs. Fixed in `disarmGradientStopDrag.ts` by clearing
+    `gradientStopDragRef` inside a `setTimeout(0)` instead of inline.
+
+  **Adding a stop by clicking the guide line** reuses the exact same stop-handle visual for its hover
+  preview (`drawSingleGradientStopHandle.ts`, extracted so both `drawGradientStopHandles.ts` and the
+  new `drawGradientAddStopPreview.ts` share one draw function instead of a plain placeholder dot),
+  offset above the line by the same `STOP_HANDLE_OFFSET_PX` real stops use, and colored via a new
+  `getInterpolatedGradientColor.ts` (linear RGB+opacity blend between the two bracketing stops,
+  clamped to the first/last stop outside the stops' own range) rather than the nearest stop's raw
+  color — so clicking to add a stop never visibly changes the gradient. `armAddGradientStopOnPointerDown`
+  uses the same interpolation to color the actual persisted stop it inserts.
+
+  Two bugs unrelated to this new interactivity, found and fixed while building it: (1) the
+  `sampleGradient` GLSL loop (`vectorGradientFillFragmentShaderSource.ts`) seeded its out-of-range
+  fallback color as always `u_stopColors[0]`, so dragging the last stop inward left the remaining
+  range rendering the *first* stop's color instead of clamping to the *last* one — fixed by picking
+  the fallback based on which side of the range `t` falls on. (2) the docked panel's own
+  `GradientBar` thumb-drag used native per-thumb `setPointerCapture`, which is silently released
+  whenever the thumb's DOM node is reordered (which happens on every frame while dragging past
+  another stop, since thumbs are re-sorted by position) — the drag would visibly "steal" onto the
+  wrong thumb mid-gesture. Fixed by tracking the drag via a stable ref (`draggingStopIdRef`) plus
+  `window`-level `pointermove`/`pointerup`/`pointercancel` listeners instead of capture.
+
+  The docked panel's stop list is `TEditableGradientStop[]` (has a React-key `id`, panel-local,
+  never persisted) while Redux holds plain `TGradientStop[]` (no id) — adding a stop from the canvas
+  changes Redux only, so the two representations drift out of sync. `useSyncExternalStopChanges.ts`
+  (new hook under `useGradientPanel/hooks/`) reconciles them on any external stop-count change: it
+  matches each incoming external stop against the current local list by
+  `position`+`color`+`opacity` to preserve existing ids (never regenerating an id for a stop that
+  didn't change, which would remount that stop's `StopRow`/`GradientBar` thumb), assigns a fresh
+  `nanoid()` only to a genuinely new stop, and selects that new stop automatically.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`
