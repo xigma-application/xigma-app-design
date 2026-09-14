@@ -98,11 +98,47 @@ describe('useIsPointerOverGradientHandle', () => {
     const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
 
     canvasRefs.gradientRotate.gradientRotateDragRef.current = {
+      angleOffset: 0,
       draggedEndpoint: 'start',
+      mode: 'box',
       nodeId: 'node-a',
       paintIndex: 0,
+      pivot: { x: 50, y: 50 },
       pointerPosition: { x: 0, y: 0 },
+      radius: 50,
     };
+
+    // result
+    expect(result.current()).toBe(true);
+  });
+
+  it('should return true while hovering the tight endpoint-move zone', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.hover.hoveredGradientEndpointMoveRef.current = 'start';
+
+    // result
+    expect(result.current()).toBe(true);
+  });
+
+  it('should return true while a gradient endpoint move drag is in progress, even if the cursor has strayed off the endpoint', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef.current = { endpoint: 'start', nodeId: 'node-a', paintIndex: 0 };
 
     // result
     expect(result.current()).toBe(true);

@@ -713,10 +713,11 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
 
-    // grab the end endpoint (900,280) and drag it up toward the top-mid edge (800,150) — the whole
-    // line rotates as a rigid body around the shape's center, so the start endpoint must swing all
-    // the way around to the opposite (bottom-mid) edge
-    await page.mouse.move(900, 280);
+    // grab 8px below the end endpoint (900,280) — past its inner 6px move zone, inside the outer
+    // rotate ring — and drag toward the top-mid edge (800,150); the whole line rotates as a rigid
+    // body around the shape's center, so the start endpoint must swing all the way around to the
+    // opposite (bottom-mid) edge
+    await page.mouse.move(900, 288);
     await page.mouse.down();
     await page.mouse.move(800, 150, { steps: 10 });
     await page.mouse.up();
@@ -729,7 +730,7 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].start!.y).toBeCloseTo(1, 1);
   });
 
-  test('clicking right on a gradient endpoint does not add a new stop there — rotating takes priority over the line', async ({
+  test('clicking right on a gradient endpoint does not add a new stop there — the endpoint takes priority over the line', async ({
     page,
   }) => {
     const designPage = new DesignPage(page);
@@ -778,5 +779,388 @@ test.describe('Design panels — Fill section', () => {
 
     expect(node.fills![0].stops).toHaveLength(2);
     expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
+
+  test('rotating a gradient whose endpoints do not touch the shape edge pivots around its own center, not the shape', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-line-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // bounds 700,200 - 900,360 (center 800,280); a short gradient fully inside the shape,
+    // touching neither edge: start world (760,280), end world (840,296) — pivot (800,288), radius ~40.8
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.7, y: 0.6 },
+                opacity: 100,
+                start: { x: 0.3, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px below the start endpoint (760,280) — past its inner move zone — and drag it well off
+    // any snap axis relative to the pivot
+    await page.mouse.move(760, 288);
+    await page.mouse.down();
+    await page.mouse.move(850, 250, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const pivot = { x: 800, y: 288 };
+    const radius = Math.hypot(80, 16) / 2;
+    const startWorld = { x: 700 + node.fills![0].start!.x * 200, y: 200 + node.fills![0].start!.y * 160 };
+    const endWorld = { x: 700 + node.fills![0].end!.x * 200, y: 200 + node.fills![0].end!.y * 160 };
+
+    // both endpoints stay exactly the original half-length away from the pivot — a box-mode rotate
+    // would instead snap them onto the rectangle's own edge, at very different distances
+    expect(Math.hypot(startWorld.x - pivot.x, startWorld.y - pivot.y)).toBeCloseTo(radius, 0);
+    expect(Math.hypot(endWorld.x - pivot.x, endWorld.y - pivot.y)).toBeCloseTo(radius, 0);
+  });
+
+  test('rotating a gradient whose endpoints both touch the same single edge also pivots around the line, not the box', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-same-edge');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // bounds 700,200 - 900,360 (center 800,280); both endpoints sit only on the TOP edge, at
+    // different x — a real regression: sharing one edge (with no distinct wall each) was wrongly
+    // treated the same as spanning two different edges, forcing the line through the box center on
+    // the very next rotate frame and making the far endpoint visibly "jump"
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.8, y: 0 },
+                opacity: 100,
+                start: { x: 0.2, y: 0 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px below the start endpoint (740,200) — past its inner move zone — and drag it a short,
+    // gentle distance; a box-center pivot would immediately force the line through (800,280) and
+    // send the untouched end endpoint jumping across the shape
+    await page.mouse.move(740, 208);
+    await page.mouse.down();
+    await page.mouse.move(760, 230, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const pivot = { x: 800, y: 200 };
+    const radius = 60;
+    const startWorld = { x: 700 + node.fills![0].start!.x * 200, y: 200 + node.fills![0].start!.y * 160 };
+    const endWorld = { x: 700 + node.fills![0].end!.x * 200, y: 200 + node.fills![0].end!.y * 160 };
+
+    expect(Math.hypot(startWorld.x - pivot.x, startWorld.y - pivot.y)).toBeCloseTo(radius, 0);
+    expect(Math.hypot(endWorld.x - pivot.x, endWorld.y - pivot.y)).toBeCloseTo(radius, 0);
+  });
+
+  test('a gentle rotation of a box-attached, off-center gradient does not jump the other endpoint', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-off-center-box');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // bounds 700,200 - 900,360 (center 800,280); a corner-to-corner line along the BOTTOM edge —
+    // start at the bottom-left corner, end at the bottom-right corner. Each corner touches a
+    // distinct wall (left vs right), so this is still "box" mode, but the line itself does not pass
+    // through the box center at all (it's the bottom edge, y=360, not y=280) — a real reported
+    // regression where any rotation, however gentle, immediately forced the line through the center
+    // and sent the untouched endpoint jumping far across the shape
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 1 },
+                opacity: 100,
+                start: { x: 0, y: 1 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px above the end endpoint (900,360) — past its inner move zone — and nudge it only
+    // slightly, staying close to its own starting angle
+    await page.mouse.move(900, 352);
+    await page.mouse.down();
+    await page.mouse.move(895, 345, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const startWorld = { x: 700 + node.fills![0].start!.x * 200, y: 200 + node.fills![0].start!.y * 160 };
+    const endWorld = { x: 700 + node.fills![0].end!.x * 200, y: 200 + node.fills![0].end!.y * 160 };
+
+    // both endpoints stay close to their original corners; the old box-center-symmetric model would
+    // instead have snapped the untouched start endpoint over 100px away from (700,360)
+    expect(Math.hypot(startWorld.x - 700, startWorld.y - 360)).toBeLessThan(30);
+    expect(Math.hypot(endWorld.x - 900, endWorld.y - 360)).toBeLessThan(30);
+  });
+
+  test('rotating a gradient snaps to exactly horizontal when the angle is close to it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-snap');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px below the end endpoint (900,280) — past its inner move zone, so this actually arms
+    // the rotate drag — then move to just 5px off horizontal over 100px of travel (~2.9deg from the
+    // box center), inside the snap tolerance, so it should lock exactly onto y=0.5 instead of
+    // landing at the raw, slightly-off position
+    await page.mouse.move(900, 288);
+    await page.mouse.down();
+    await page.mouse.move(900, 285, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
+  });
+
+  test('grabbing right at a gradient endpoint moves it freely, leaving the other endpoint untouched', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-endpoint-move');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab exactly on the start endpoint (700,280) and drag it well away from any snap landmark —
+    // this must move the point freely instead of rotating the line
+    await page.mouse.move(700, 280);
+    await page.mouse.down();
+    await page.mouse.move(770, 250, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].start!.x).toBeCloseTo(0.35, 2);
+    expect(node.fills![0].start!.y).toBeCloseTo(0.3125, 2);
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
+
+  test('dragging a gradient endpoint freely snaps onto a shape corner', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-endpoint-move-snap');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab the end endpoint (900,280) and drag it a few px shy of the bottom-right corner (900,360)
+    await page.mouse.move(900, 280);
+    await page.mouse.down();
+    await page.mouse.move(897, 357, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].end).toEqual({ x: 1, y: 1 });
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
+  });
+
+  test('dragging a gradient endpoint past the shape edge lets it travel outside the shape, like Figma', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-endpoint-move-outside');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab the end endpoint (900,280) and drag it well past the right edge (900) — far from any snap landmark
+    await page.mouse.move(900, 280);
+    await page.mouse.down();
+    await page.mouse.move(950, 250, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].end!.x).toBeCloseTo(1.25, 2);
+    expect(node.fills![0].end!.y).toBeCloseTo(0.3125, 2);
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
   });
 });

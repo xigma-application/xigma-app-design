@@ -169,8 +169,15 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                     |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                       |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority           |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 403 | Rotating a gradient whose endpoints don't touch the shape edge pivots around the line's own center, not the box  |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 404 | Rotating a gradient snaps to exactly horizontal/vertical when the angle is close to it, with a guide             |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 405 | Grabbing right on a gradient endpoint moves it freely, leaving the other endpoint untouched                       |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 406 | Dragging a gradient endpoint freely snaps onto a shape corner (edge/center landmarks)                             |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box          |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump      |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma       |  ✅  |         ✅ `fill-section.spec.ts`         |
 
-#393-#402 are all real, reported regressions.
+#393-#409 are all real, reported regressions.
 
 #395: the gradient fragment shader's `sampleGradient` seeded its "outside every stop's range"
 fallback color to `u_stopColors[0]` unconditionally, so a stop dragged short of the far end (e.g.
@@ -219,3 +226,47 @@ bounding box edge, so they visibly slide around the shape's perimeter. #402 is t
 priority-guard pattern as #400, one hit-test zone further out: the rotate hit-test also bails the
 line's own hit-test near the endpoints, so clicking exactly on an endpoint rotates instead of
 inserting a spurious stop there.
+
+#403: that box-center pivot only applies when both endpoints already touch the shape's bounding-box
+edge at drag-start. A gradient the user positioned freely inside the shape (not spanning it) instead
+pivots around the *line's own midpoint*, at its own frozen half-length radius — checked once when the
+drag starts and never re-evaluated mid-gesture (an explicit user call: re-checking every frame would
+make the pivot jump under the cursor). #404: either mode also snaps the line to exactly horizontal or
+vertical when the angle comes within 3° of one, showing a smart guide — reusing the app's existing
+alignment-guide ref/draw pipeline (built for snapping a dragged shape to a sibling's edge) rather than
+adding new drawing code, since it was already wired unconditionally into the render loop.
+
+#405-#406: grabbing right on an endpoint (a tight ~6px zone, tighter than the rotate ring around it)
+moves that one point freely instead of rotating — added after it turned out the rotate-only version
+left no way to just reposition a point at all. It affects only the dragged endpoint (unlike rotate,
+which always moves both). #406: while moving, each axis independently snaps to 0/0.5/1 (the shape's
+edges and center), reusing the same alignment-guide pipeline as #404 — but this one can show both a
+horizontal and a vertical guide at once, e.g. when landing exactly on a corner.
+
+#407: "box" mode's distinct-walls requirement was made explicit after the user pointed out that two
+endpoints sharing only the *same* single wall (both on the top edge, say) must not be treated the same
+as a true corner-to-corner span — refined via `getTouchedRectEdges.ts`, which returns every wall a
+point touches (a corner touches two) so "distinct" can be checked properly instead of just "each
+touches *some* wall."
+
+#408 is the deeper regression underneath #401/#403/#407: "box" mode measured both endpoints' angles
+from the box's own geometric center unconditionally, which is only correct when the line already
+straddles that center symmetrically (any true diagonal always does, by construction — which is why
+#401 never caught this). The user's own repro didn't: a corner-to-corner line along one entire edge
+(both ends on the bottom wall, touching distinct left/right walls too, so still legitimately "box"
+mode) sits nowhere near the vertical center. The very first rotate frame forced it through the center
+anyway, snapping the untouched endpoint far from where it started ("wygląda jak reset pozycji żeby
+trzymały się środka"). Fixed by freezing an *angle offset* at arm-time (the real gap between the
+non-dragged endpoint's starting angle and what naive antipodal symmetry would predict) and adding it
+back every frame — a true diagonal's offset works out to 0 (no behavior change), while an off-center
+line keeps its own shape continuously as it rotates. An earlier fix attempt (casting a ray from the
+line's own frozen midpoint to the box edge, instead of from the box center) was mathematically sound
+in general but degenerated to a zero-length collapse whenever that frozen midpoint itself sat exactly
+on a wall — exactly this case — since the antipodal ray then points back into the very wall it's
+already on. Reverted in favor of the always-safely-interior box-center-plus-offset approach.
+
+#409: the free-move interaction (#405) originally clamped the dragged endpoint to the shape's own
+0..1 bounds ("tylko w obrębie elementu"). The user later asked for that clamp to be removed —
+Figma lets a gradient endpoint travel outside the shape entirely. Nothing downstream assumed the
+0..1 range (the world-point lerp, the hit-test, and the per-axis landmark snap all already worked
+for any value), so the fix was simply deleting the clamp in `continueGradientEndpointMoveDrag.ts`.

@@ -11,8 +11,10 @@ export const useIsPointerOverGradientHandle = (): TFunc<[], boolean> => {
       canvasRefs.hover.hoveredGradientStopIndexRef.current !== null ||
       canvasRefs.hover.hoveredGradientLinePositionRef.current !== null ||
       canvasRefs.hover.hoveredGradientRotateEndpointRef.current !== null ||
+      canvasRefs.hover.hoveredGradientEndpointMoveRef.current !== null ||
       canvasRefs.gradientStop.gradientStopDragRef.current !== null ||
-      canvasRefs.gradientRotate.gradientRotateDragRef.current !== null,
+      canvasRefs.gradientRotate.gradientRotateDragRef.current !== null ||
+      canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef.current !== null,
     [canvasRefs],
   );
 };

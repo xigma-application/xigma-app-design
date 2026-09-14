@@ -12,6 +12,7 @@ import { useBlendModeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/h
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
+import { useGradientEndpointMoveRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientEndpointMoveRefs/useGradientEndpointMoveRefs';
 import { useGradientRotateRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientRotateRefs/useGradientRotateRefs';
 import { useGradientStopRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientStopRefs/useGradientStopRefs';
 import { useGuideRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGuideRefs/useGuideRefs';
@@ -43,6 +44,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const cornerRadiusRefs = useCornerRadiusRefs();
   const ellipseArcRefs = useEllipseArcRefs();
   const frameNameRefs = useFrameNameRefs();
+  const gradientEndpointMoveRefs = useGradientEndpointMoveRefs();
   const gradientRotateRefs = useGradientRotateRefs();
   const gradientStopRefs = useGradientStopRefs();
   const guideRefs = useGuideRefs();
@@ -79,6 +81,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       draftRef,
       ellipseArc: ellipseArcRefs,
       frameName: frameNameRefs,
+      gradientEndpointMove: gradientEndpointMoveRefs,
       gradientRotate: gradientRotateRefs,
       gradientStop: gradientStopRefs,
       guides: guideRefs,
@@ -108,6 +111,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       cornerRadiusRefs,
       ellipseArcRefs,
       frameNameRefs,
+      gradientEndpointMoveRefs,
       gradientRotateRefs,
       gradientStopRefs,
       guideRefs,

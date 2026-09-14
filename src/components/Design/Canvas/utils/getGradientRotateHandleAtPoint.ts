@@ -5,6 +5,7 @@ import { TGradientRotateEndpoint } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { getGradientEndpointMoveHandleAtPoint, GRADIENT_ENDPOINT_MOVE_RADIUS_PX } from './getGradientEndpointMoveHandleAtPoint';
 import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
 import { getNodeBounds } from './getNodeBounds';
@@ -33,20 +34,23 @@ export const getGradientRotateHandleAtPoint = (
     selectedNodes.length === 1 &&
     node.id === gradientEditor.nodeId &&
     isAppearanceNode(node) &&
-    !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
+    !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
+    !getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
     const paint = node.fills[gradientEditor.paintIndex];
 
     if (paint?.type === 'gradient-linear') {
       const bounds = getNodeBounds(node);
       const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
-      const tolerance = GRADIENT_ROTATE_HANDLE_RADIUS_PX / viewport.zoom;
+      const innerRadius = GRADIENT_ENDPOINT_MOVE_RADIUS_PX / viewport.zoom;
+      const outerRadius = GRADIENT_ROTATE_HANDLE_RADIUS_PX / viewport.zoom;
       const distanceToStart = Math.hypot(point.x - start.x, point.y - start.y);
       const distanceToEnd = Math.hypot(point.x - end.x, point.y - end.y);
+      const hitsStartRing = distanceToStart > innerRadius && distanceToStart <= outerRadius;
+      const hitsEndRing = distanceToEnd > innerRadius && distanceToEnd <= outerRadius;
 
-      if (distanceToStart <= tolerance || distanceToEnd <= tolerance) {
+      if (hitsStartRing || hitsEndRing) {
         const endpoint: TGradientRotateEndpoint = distanceToStart <= distanceToEnd ? 'start' : 'end';
-
         return { bounds, endpoint, nodeId: node.id, paintIndex: gradientEditor.paintIndex, rotation: node.rotation };
       }
     }

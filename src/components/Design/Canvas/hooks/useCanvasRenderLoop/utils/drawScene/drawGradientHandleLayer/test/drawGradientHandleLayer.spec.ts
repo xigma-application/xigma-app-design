@@ -258,10 +258,14 @@ describe('drawGradientHandleLayer', () => {
 
     refs.hover.hoveredGradientRotateEndpointRef.current = { endpoint: 'start', pointerPosition: { x: 20, y: 30 } };
     refs.gradientRotate.gradientRotateDragRef.current = {
+      angleOffset: 0,
       draggedEndpoint: 'end',
+      mode: 'box',
       nodeId: 'rect-1',
       paintIndex: 0,
+      pivot: { x: 50, y: 50 },
       pointerPosition: { x: 40, y: 60 },
+      radius: 50,
     };
 
     drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
@@ -277,10 +281,14 @@ describe('drawGradientHandleLayer', () => {
     const refs = createCanvasRefs();
 
     refs.gradientRotate.gradientRotateDragRef.current = {
+      angleOffset: 0,
       draggedEndpoint: 'start',
+      mode: 'box',
       nodeId: 'other-node',
       paintIndex: 0,
+      pivot: { x: 50, y: 50 },
       pointerPosition: { x: 40, y: 60 },
+      radius: 50,
     };
 
     drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);

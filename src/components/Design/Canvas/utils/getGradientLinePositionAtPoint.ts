@@ -4,6 +4,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { getGradientEndpointMoveHandleAtPoint } from './getGradientEndpointMoveHandleAtPoint';
 import { getGradientRotateHandleAtPoint } from './getGradientRotateHandleAtPoint';
 import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
@@ -28,6 +29,7 @@ export const getGradientLinePositionAtPoint = (
     node.id === gradientEditor.nodeId &&
     isAppearanceNode(node) &&
     !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
+    !getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
     !getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
     const paint = node.fills[gradientEditor.paintIndex];

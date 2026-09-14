@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TGradientRotateDragState, TGradientRotateEndpoint } from 'types/design/canvas/types';
+import { TGradientRotateDragState, TGradientRotateEndpoint, TGradientRotateMode } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 
 export const armGradientRotateDrag = (
@@ -12,7 +12,11 @@ export const armGradientRotateDrag = (
   paintIndex: number,
   endpoint: TGradientRotateEndpoint,
   pointerPosition: TPoint,
+  mode: TGradientRotateMode,
+  pivot: TPoint,
+  radius: number,
+  angleOffset: number,
 ): void => {
-  gradientRotateDragRef.current = { draggedEndpoint: endpoint, nodeId, paintIndex, pointerPosition };
+  gradientRotateDragRef.current = { angleOffset, draggedEndpoint: endpoint, mode, nodeId, paintIndex, pivot, pointerPosition, radius };
   canvas.setPointerCapture(event.pointerId);
 };

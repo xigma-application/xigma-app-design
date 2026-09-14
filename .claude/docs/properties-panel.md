@@ -424,6 +424,105 @@ node's folder. Today:
   this override existed in the shared component already but nothing had used it until this label
   needed a genuinely tight gap.
 
+  **The rotate pivot itself is one of two modes, decided once at drag-start and frozen for the whole
+  gesture** (locked with the user before implementing — this was the trickiest part of the whole
+  feature). Mode selection: both endpoints must touch the shape's bounding-box edge, and on *distinct*
+  walls specifically (`getTouchedRectEdges.ts` — global `utils/canvas/`, returns the *set* of walls a
+  point touches, since a corner touches two at once; `isPointOnRectPerimeter.ts` is now just
+  `getTouchedRectEdges(...).size > 0`) — sharing only the same single wall does **not** count, even
+  though each point independently "touches an edge." Confirmed by the user with a concrete
+  counter-example: two points both sitting on the top edge, at different x, must *not* behave like a
+  true corner-to-corner span. If distinct walls are found, the drag stays in **`'box'` mode**; if
+  either endpoint is off the edge entirely, or both share one wall, it switches to **`'line'` mode**
+  (pivot = the line's own frozen midpoint, radius = half its own frozen length —
+  `getGradientEndpointsAroundPivot.ts`). The mode itself is decided once at
+  `armGradientRotateOnPointerDown.ts` and never re-evaluated mid-drag (the user explicitly rejected
+  re-checking every frame, to avoid the pivot jumping mode under the cursor mid-gesture).
+
+  **A real, reported regression inside `'box'` mode itself, found after shipping the above:** the
+  first version always measured both endpoints' angles from the *box's own geometric center* — correct
+  only when the gradient's start/end already straddle that center symmetrically (e.g. a true corner
+  diagonal, which always passes through the center by construction). For a line that touches two
+  distinct walls *without* passing through the center — the user's own repro: both endpoints on the
+  bottom edge, one at the bottom-left corner, one at the bottom-right corner, i.e. a horizontal line
+  along the bottom, nowhere near the vertical center — the very first rotate frame forced the whole
+  line onto a through-center configuration, snapping the untouched endpoint to a wildly different spot
+  ("wygląda jak reset pozycji żeby trzymały się środka"). The fix keeps measuring both angles from the
+  box center (still always safely interior, never degenerate the way an off-center pivot can be — see
+  below), but freezes an **angle offset** at arm-time
+  (`getGradientRotateAngleOffset` in `armGradientRotateOnPointerDown.ts`): the actual gap between the
+  non-dragged endpoint's real starting angle and what naive antipodal symmetry (`draggedAngle + 180°`)
+  would predict. Each continue-frame, the other endpoint's angle is `draggedAngle + 180° + angleOffset`
+  instead of a bare `+ 180°` — for a true diagonal, `angleOffset` comes out to (a multiple of) `0°` so
+  behavior is bit-for-bit unchanged; for the bottom-edge case it preserves the line's own 90°-ish
+  subtended angle throughout the whole gesture, so it rotates continuously with no jump, exactly the
+  "kijek" (stick through the center) mental model the user described — just generalized to a line that
+  isn't a full diameter. An earlier attempt at this same fix computed a *frozen pivot point* (the
+  line's own original midpoint) and cast rays from *that* to the box edge
+  (`getRectBoundaryPointFromPoint.ts`, `getGradientEndpointsFromPivot.ts`) — mathematically sound for
+  most angles, but degenerate whenever that frozen pivot itself sits exactly on a wall (exactly the
+  bottom-edge case!): the antipodal ray, pointing back into the same wall the pivot already touches,
+  collapses to zero length. The center-with-frozen-offset approach sidesteps this entirely since the
+  box center is never on a wall; `getGradientEndpointsFromPivot.ts` was deleted again once this was
+  found, but `getRectBoundaryPointFromPoint.ts` stayed — `getRectPerimeterPointAtAngle.ts` is now just
+  a call to it with `origin` fixed at the box center, so the general "ray from an interior point to the
+  rect boundary" primitive is still there for the box-center case (`radius` still varies per-angle for
+  a non-square box, unlike the fixed-radius `'line'` mode).
+
+  `getGradientAngleFromPoint.ts` gained an optional `pivot` parameter (defaults to the bounds center)
+  so the same function serves both modes — it still always un-rotates the cursor's world point by
+  `node.rotation` around the bounds center first (rotation is always physically anchored there,
+  regardless of which conceptual pivot the gradient math uses), then measures the angle from whichever
+  pivot was asked for.
+
+  **A smart guide snaps the line to exactly horizontal or vertical** while dragging, in either mode
+  (`getGradientRotateSnapAngle.ts`: within 3° of a 0/90/180/270 multiple, replace the raw angle with
+  the exact snapped one before computing the endpoints). This reuses the app's existing alignment-guide
+  *rendering* pipeline verbatim — `refs.transform.alignmentGuideRef` and its `TAlignmentGuide`
+  type/`drawAlignmentGuide.ts` draw function are already wired unconditionally into `drawScene.ts`
+  (originally built for snapping a dragged shape's edge to a sibling shape's edge), so no new drawing
+  code was needed: `continueGradientRotateDrag.ts` just writes a `TAlignmentGuide` into that same ref
+  when snapped (`getGradientRotateAxisGuide.ts` builds it — a guide segment spanning the shape's full
+  width/height through the pivot, rotated into world space by `node.rotation` since everything
+  upstream of it is computed in the node's unrotated local frame) and clears it to `null` otherwise;
+  `disarmGradientRotateDrag.ts` clears it unconditionally on release, mirroring `disarmDrag.ts`'s own
+  existing clear for the ordinary move-drag case.
+
+  **Grabbing right on an endpoint moves it freely instead of rotating** — a third, innermost
+  interaction, added after the user pointed out the rotate-only version left no way to just
+  reposition a point. The three interactions are concentric rings around each endpoint, exactly
+  mirroring the existing node corner's resize-vs-rotate handoff (`CORNER_HANDLE_SIZE` /
+  `ROTATE_HANDLE_OUTER_RADIUS_PX`, `isInRotateRing.ts`): a tight **move** zone
+  (`GRADIENT_ENDPOINT_MOVE_RADIUS_PX = 6`, `getGradientEndpointMoveHandleAtPoint.ts`) wins first, an
+  outer **rotate** ring (`GRADIENT_ROTATE_HANDLE_RADIUS_PX = 10`, now checked as an annulus —
+  `distance > innerRadius && distance <= outerRadius` — in `getGradientRotateHandleAtPoint.ts`, which
+  imports the move radius as its inner exclusion) applies beyond that, and the line-hit-test for
+  adding a new stop bails on both. This full 4-level priority (stop > move > rotate > add-line) is
+  wired into both `ARM_RESOLVERS` and `HOVER_RESOLVERS` in that exact order, plus the usual
+  hover-pre-pass/bail-on-higher-priority double encoding every earlier gradient interaction in this
+  file already uses. The move cursor reuses the *same* CSS class (`'positioning'`, `positioner.png`)
+  the gradient **stops** already use — dragging a point freely is the same kind of interaction
+  either way, so it gets the same cursor, not the rotate one.
+
+  Moving is deliberately the simplest math in the whole gradient-editing feature: the dragged
+  endpoint's normalized position is set directly to the (unrotated) cursor position —
+  `continueGradientEndpointMoveDrag.ts` — with **no effect at all on the other endpoint** (unlike
+  rotate, which always moves both). The point is **not** clamped to 0..1 — it can travel outside the
+  shape's own bounds, matching Figma (an earlier version of this feature clamped to 0..1; the user
+  explicitly asked for it to be removed). Nothing downstream assumes 0..1: `getGradientWorldPoints`
+  is a plain lerp that works for any value, the endpoint hit-test/hover only cares about the world
+  point's distance from the cursor, and the snap-to-landmark logic below is per-axis and only
+  triggers near 0/0.5/1 regardless of how far out the raw value can go. While moving, each axis
+  independently snaps to 0/0.5/1 — the shape's own edges and center —
+  (`getGradientMoveSnapPoint.ts`, tolerance in px converted per-axis since bounds width/height
+  usually differ) and the same shared `alignmentGuideRef`/`TAlignmentGuide` pipeline the rotate
+  angle-snap already established gets a second producer, `getGradientMoveSnapGuide.ts`: it can show
+  **both** a horizontal and a vertical guide line at once (e.g. snapping exactly onto a corner),
+  since `TAlignmentGuide`'s two fields are independently nullable — something the single-axis
+  rotate-angle guide never needed. `toNormalizedGradientPoint.ts` (the raw
+  world-point-to-0..1-relative-to-bounds conversion) was promoted from a rotate-drag-local helper to
+  a shared `Canvas/utils/` function once this second consumer needed the identical math.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

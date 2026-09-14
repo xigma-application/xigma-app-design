@@ -14,6 +14,7 @@ import { continueEllipseArcDrag } from './continueEllipseArcDrag';
 import { continueEllipseArcRatioDrag } from './continueEllipseArcRatioDrag';
 import { continueEllipseArcRotateDrag } from './continueEllipseArcRotateDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
+import { continueGradientEndpointMoveDrag } from './continueGradientEndpointMoveDrag';
 import { continueGradientRotateDrag } from './continueGradientRotateDrag';
 import { continueGradientStopDrag } from './continueGradientStopDrag';
 import { continueGridTrackAffordanceDrag } from './continueGridTrackAffordanceDrag';
@@ -77,7 +78,8 @@ export const handlePointerMove = (
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRatioDragRef);
   continueGradientStopDrag(canvas, event, dispatch, canvasRefs.gradientStop.gradientStopDragRef);
-  continueGradientRotateDrag(canvas, event, dispatch, canvasRefs.gradientRotate.gradientRotateDragRef);
+  continueGradientEndpointMoveDrag(canvas, event, dispatch, canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef, canvasRefs);
+  continueGradientRotateDrag(canvas, event, dispatch, canvasRefs.gradientRotate.gradientRotateDragRef, canvasRefs);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);
   continueVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);

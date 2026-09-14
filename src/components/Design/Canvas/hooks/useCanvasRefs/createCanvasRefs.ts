@@ -3,6 +3,7 @@ import { createBlendModeRefs } from './hooks/useBlendModeRefs/createBlendModeRef
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
 import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
+import { createGradientEndpointMoveRefs } from './hooks/useGradientEndpointMoveRefs/createGradientEndpointMoveRefs';
 import { createGradientRotateRefs } from './hooks/useGradientRotateRefs/createGradientRotateRefs';
 import { createGradientStopRefs } from './hooks/useGradientStopRefs/createGradientStopRefs';
 import { createGuideRefs } from './hooks/useGuideRefs/createGuideRefs';
@@ -39,6 +40,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
   ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
   frameName: createFrameNameRefs(overrides.frameName),
+  gradientEndpointMove: createGradientEndpointMoveRefs(overrides.gradientEndpointMove),
   gradientRotate: createGradientRotateRefs(overrides.gradientRotate),
   gradientStop: createGradientStopRefs(overrides.gradientStop),
   guides: createGuideRefs(overrides.guides),

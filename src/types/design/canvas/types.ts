@@ -104,11 +104,17 @@ export type TGradientStopRefs = {
 
 export type TGradientRotateEndpoint = 'end' | 'start';
 
+export type TGradientRotateMode = 'box' | 'line';
+
 export type TGradientRotateDragState = {
+  angleOffset: number;
   draggedEndpoint: TGradientRotateEndpoint;
+  mode: TGradientRotateMode;
   nodeId: string;
   paintIndex: number;
+  pivot: TPoint;
   pointerPosition: TPoint;
+  radius: number;
 };
 
 export type TGradientRotateHoverState = {
@@ -118,6 +124,16 @@ export type TGradientRotateHoverState = {
 
 export type TGradientRotateRefs = {
   gradientRotateDragRef: RefObject<TGradientRotateDragState | null>;
+};
+
+export type TGradientEndpointMoveDragState = {
+  endpoint: TGradientRotateEndpoint;
+  nodeId: string;
+  paintIndex: number;
+};
+
+export type TGradientEndpointMoveRefs = {
+  gradientEndpointMoveDragRef: RefObject<TGradientEndpointMoveDragState | null>;
 };
 
 export type TSliceDraft = TDraftRect & { rotation: number };
@@ -313,6 +329,7 @@ export type THoverRefs = {
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
+  hoveredGradientEndpointMoveRef: RefObject<TGradientRotateEndpoint | null>;
   hoveredGradientLinePositionRef: RefObject<number | null>;
   hoveredGradientRotateEndpointRef: RefObject<TGradientRotateHoverState | null>;
   hoveredGradientStopIndexRef: RefObject<number | null>;
@@ -593,6 +610,7 @@ export type TCanvasRefs = {
   draftRef: RefObject<TDraftEntity | null>;
   ellipseArc: TEllipseArcRefs;
   frameName: TFrameNameRefs;
+  gradientEndpointMove: TGradientEndpointMoveRefs;
   gradientRotate: TGradientRotateRefs;
   gradientStop: TGradientStopRefs;
   guides: TGuideRefs;

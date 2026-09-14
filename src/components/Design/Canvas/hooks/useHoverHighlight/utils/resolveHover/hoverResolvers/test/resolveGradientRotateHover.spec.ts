@@ -63,10 +63,10 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
 // the line runs world (0,50) -> (100,50): start at (0,50), end at (100,50)
 
 describe('resolveGradientRotateHover', () => {
-  it('should return the rotate cursor when the point is within the rotate radius of an endpoint', () => {
-    // before
+  it('should return the rotate cursor when the point is within the outer rotate ring of an endpoint', () => {
+    // before — 8px from the start endpoint: past the 6px inner move zone, within the 10px outer ring
     const result = resolveGradientRotateHover(
-      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 5, y: 50 }, selectedNodes: [rectangle] }),
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 8, y: 50 }, selectedNodes: [rectangle] }),
     );
 
     // result

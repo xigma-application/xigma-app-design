@@ -25,14 +25,30 @@ describe('armGradientRotateDrag', () => {
     const gradientRotateDragRef = createGradientRotateDragRef();
 
     // before
-    armGradientRotateDrag(canvas, pointerEvent(3), gradientRotateDragRef, 'node-a', 0, 'start', { x: 5, y: 50 });
+    armGradientRotateDrag(
+      canvas,
+      pointerEvent(3),
+      gradientRotateDragRef,
+      'node-a',
+      0,
+      'start',
+      { x: 5, y: 50 },
+      'box',
+      { x: 50, y: 50 },
+      40,
+      0.5,
+    );
 
     // result
     expect(gradientRotateDragRef.current).toEqual({
+      angleOffset: 0.5,
       draggedEndpoint: 'start',
+      mode: 'box',
       nodeId: 'node-a',
       paintIndex: 0,
+      pivot: { x: 50, y: 50 },
       pointerPosition: { x: 5, y: 50 },
+      radius: 40,
     });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
   });

@@ -41,11 +41,11 @@ describe('resolveGradientRotateHandleHover', () => {
     // mock
     const refs = createCanvasRefs();
 
-    // before
-    resolveGradientRotateHandleHover({ x: 5, y: 50 }, [rectangle], IDENTITY_VIEWPORT, GRADIENT_EDITOR, refs);
+    // before — 8px from the endpoint, past the 6px inner move zone, within the 10px outer ring
+    resolveGradientRotateHandleHover({ x: 8, y: 50 }, [rectangle], IDENTITY_VIEWPORT, GRADIENT_EDITOR, refs);
 
     // result
-    expect(refs.hover.hoveredGradientRotateEndpointRef.current).toEqual({ endpoint: 'start', pointerPosition: { x: 5, y: 50 } });
+    expect(refs.hover.hoveredGradientRotateEndpointRef.current).toEqual({ endpoint: 'start', pointerPosition: { x: 8, y: 50 } });
   });
 
   it('should set the hovered endpoint when hovering the end handle', () => {
@@ -53,7 +53,7 @@ describe('resolveGradientRotateHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveGradientRotateHandleHover({ x: 95, y: 50 }, [rectangle], IDENTITY_VIEWPORT, GRADIENT_EDITOR, refs);
+    resolveGradientRotateHandleHover({ x: 92, y: 50 }, [rectangle], IDENTITY_VIEWPORT, GRADIENT_EDITOR, refs);
 
     // result
     expect(refs.hover.hoveredGradientRotateEndpointRef.current?.endpoint).toBe('end');

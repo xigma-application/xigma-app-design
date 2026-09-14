@@ -53,20 +53,24 @@ describe('getGradientRotateHandleAtPoint', () => {
     expect(getGradientRotateHandleAtPoint({ x: 0, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
   });
 
-  it('should hit the start endpoint within the rotate radius', () => {
-    const hit = getGradientRotateHandleAtPoint({ x: 5, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+  it('should hit the start endpoint within the outer rotate ring', () => {
+    const hit = getGradientRotateHandleAtPoint({ x: 8, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
 
     expect(hit).toEqual({ bounds: { height: 100, width: 100, x: 0, y: 0 }, endpoint: 'start', nodeId: 'rect-1', paintIndex: 0, rotation: 0 });
   });
 
-  it('should hit the end endpoint within the rotate radius', () => {
-    const hit = getGradientRotateHandleAtPoint({ x: 95, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+  it('should hit the end endpoint within the outer rotate ring', () => {
+    const hit = getGradientRotateHandleAtPoint({ x: 92, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
 
     expect(hit?.endpoint).toBe('end');
   });
 
   it('should return null when the point is nowhere near either endpoint', () => {
     expect(getGradientRotateHandleAtPoint({ x: 50, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
+  });
+
+  it('should return null within the inner move radius — moving the point takes priority over rotating it', () => {
+    expect(getGradientRotateHandleAtPoint({ x: 5, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
   });
 
   it('should return null when a stop swatch is hit instead — stops take priority', () => {
@@ -76,7 +80,7 @@ describe('getGradientRotateHandleAtPoint', () => {
     expect(hit).toBeNull();
   });
 
-  it('should shrink the hit radius as zoom increases', () => {
+  it('should shrink the outer hit radius as zoom increases', () => {
     const point = { x: 8, y: 50 };
 
     expect(getGradientRotateHandleAtPoint(point, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).not.toBeNull();
