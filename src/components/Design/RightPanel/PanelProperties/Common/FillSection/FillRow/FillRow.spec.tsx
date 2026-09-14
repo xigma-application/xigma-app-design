@@ -1,16 +1,30 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 // components
 import FillRow from './FillRow';
 import { TooltipProvider } from 'shared';
+
+// core
+import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/context';
+
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // store
 import { store } from 'store';
 
 // types
 import { TPaint } from 'types/design/paint/types';
+
+const TestProviders = ({ children }: { children: ReactNode }): ReactNode => (
+  <Provider store={store}>
+    <CanvasRefsContext.Provider value={createCanvasRefs()}>
+      <TooltipProvider>{children}</TooltipProvider>
+    </CanvasRefsContext.Provider>
+  </Provider>
+);
 
 const SOLID_PAINT: TPaint = { color: '#ff0000', opacity: 80, type: 'solid' };
 
@@ -38,26 +52,24 @@ const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnTy
 
 const renderFillRow = (overrides: Partial<Parameters<typeof FillRow>[0]> = {}): ReturnType<typeof render> =>
   render(
-    <Provider store={store}>
-      <TooltipProvider>
-        <FillRow
-          isDragging={false}
-          isSelected={false}
-          nodeId="node-1"
-          onChange={vi.fn()}
-          onDragEnd={vi.fn()}
-          onDragStart={vi.fn()}
-          onRemove={vi.fn()}
-          onSelect={vi.fn()}
-          onStartDrag={vi.fn()}
-          onToggleVisible={vi.fn()}
-          paint={SOLID_PAINT}
-          paintIndex={0}
-          registerRow={vi.fn()}
-          {...overrides}
-        />
-      </TooltipProvider>
-    </Provider>,
+    <TestProviders>
+      <FillRow
+        isDragging={false}
+        isSelected={false}
+        nodeId="node-1"
+        onChange={vi.fn()}
+        onDragEnd={vi.fn()}
+        onDragStart={vi.fn()}
+        onRemove={vi.fn()}
+        onSelect={vi.fn()}
+        onStartDrag={vi.fn()}
+        onToggleVisible={vi.fn()}
+        paint={SOLID_PAINT}
+        paintIndex={0}
+        registerRow={vi.fn()}
+        {...overrides}
+      />
+    </TestProviders>,
   );
 
 describe('FillRow behaviors', () => {
@@ -255,11 +267,9 @@ describe('FillRow behaviors', () => {
     // before — a controlled wrapper feeds onChange's committed paint back in as new props, the
     // same way the real Redux round-trip does, so paint.type genuinely flips while the picker is open
     render(
-      <Provider store={store}>
-        <TooltipProvider>
-          <ControlledFillRow initialPaint={SOLID_PAINT} />
-        </TooltipProvider>
-      </Provider>,
+      <TestProviders>
+        <ControlledFillRow initialPaint={SOLID_PAINT} />
+      </TestProviders>,
     );
 
     // action

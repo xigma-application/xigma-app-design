@@ -8,6 +8,7 @@ import {
   selectEditingNodeId,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectGradientEditor,
   selectNodes,
   selectSelectedNodes,
   selectSmartSelectionNodes,
@@ -31,6 +32,7 @@ import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover
 import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
 import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandleHover';
 import { resolveEllipseArcRotateHandleHover } from './resolveEllipseArcRotateHandleHover';
+import { resolveGradientStopHandleHover } from './resolveGradientStopHandleHover';
 import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
 import { resolvePolygonVertexCountHandleHover } from './resolvePolygonVertexCountHandleHover';
 import { resolveStarCornerRadiusHandleHover } from './resolveStarCornerRadiusHandleHover';
@@ -72,6 +74,7 @@ export const resolveToolHover = (
     editingContent: selectEditingTextContent(state),
     editingNodeId: selectEditingNodeId(state),
     editingTextBox,
+    gradientEditor: selectGradientEditor(state),
     isControlPressed,
     leafNodes: getHoverLeafNodes(state, nodesById, isControlPressed),
     nodesById,
@@ -90,6 +93,7 @@ export const resolveToolHover = (
   resolveEllipseArcHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveEllipseArcRotateHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveEllipseArcRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
+  resolveGradientStopHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolvePolygonCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolvePolygonVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);

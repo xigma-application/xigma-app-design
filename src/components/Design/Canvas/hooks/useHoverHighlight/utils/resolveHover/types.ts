@@ -2,6 +2,7 @@
 import { TDraftRect, TEditingTextBox, TPoint, TResizeHandle } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TCanvasRefs, TVectorMultiSelectBox } from 'types/design/canvas/types';
+import { TGradientEditorState } from 'store/design/types';
 import { ToolName } from 'types/design/enums';
 
 export type THoverResult = {
@@ -15,6 +16,7 @@ export type THoverResolverContext = {
   editingContent: string;
   editingNodeId: string | null;
   editingTextBox: TEditingTextBox | null;
+  gradientEditor: TGradientEditorState | null;
   isControlPressed: boolean;
   leafNodes: TSceneNode[];
   nodesById: Record<string, TSceneNode>;

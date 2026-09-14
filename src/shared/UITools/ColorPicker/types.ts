@@ -24,6 +24,7 @@ export type TColorPickerProps = {
   headerExtra?: ReactNode;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
+  isPointerOverGradientHandle?: TFunc<[], boolean>;
   moveable?: boolean;
   onChange: TFunc<[TColorPickerValue]>;
   onDragEnd?: TFunc;

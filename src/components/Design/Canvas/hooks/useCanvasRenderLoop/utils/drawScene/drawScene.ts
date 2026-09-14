@@ -173,7 +173,7 @@ export const drawScene = (
   drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
   drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
-  drawGradientHandleLayer(ctx, selectedNodes, gradientEditor);
+  drawGradientHandleLayer(ctx, selectedNodes, gradientEditor, refs);
   drawFrame(ctx, refs);
   drawDraftSizeLabel(ctx, refs);
   drawDraftFrameNameLabel(ctx, refs, nodesById);

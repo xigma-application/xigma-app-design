@@ -5,6 +5,7 @@ import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPo
 import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
+import { armGradientStopOnPointerDown } from './armResolvers/armGradientStopOnPointerDown';
 import { armGridTrackAffordanceOnPointerDown } from './armResolvers/armGridTrackAffordanceOnPointerDown';
 import { armGridTrackValueEditOnPointerDown } from './armResolvers/armGridTrackValueEditOnPointerDown';
 import { armGroupBoundsOnPointerDown } from './armResolvers/armGroupBoundsOnPointerDown';
@@ -65,6 +66,7 @@ export const ARM_RESOLVERS = [
   armPolygonVertexCountOnPointerDown,
   armStarVertexCountOnPointerDown,
   armStarRatioOnPointerDown,
+  armGradientStopOnPointerDown,
   armEllipseArcOnPointerDown,
   armEllipseArcRotateOnPointerDown,
   armEllipseArcRatioOnPointerDown,

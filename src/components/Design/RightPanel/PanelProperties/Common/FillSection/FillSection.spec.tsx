@@ -5,6 +5,12 @@ import { Provider } from 'react-redux';
 import FillSection from './FillSection';
 import { TooltipProvider } from 'shared';
 
+// core
+import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/context';
+
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -40,9 +46,11 @@ const read = (id: string): TRectangleNode => selectActivePage(store.getState()).
 const renderFillSection = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <FillSection />
-      </TooltipProvider>
+      <CanvasRefsContext.Provider value={createCanvasRefs()}>
+        <TooltipProvider>
+          <FillSection />
+        </TooltipProvider>
+      </CanvasRefsContext.Provider>
     </Provider>,
   );
 

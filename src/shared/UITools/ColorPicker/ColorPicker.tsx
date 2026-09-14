@@ -12,7 +12,9 @@ import Popover from 'shared/UITools/Popover/Popover';
 // hooks
 import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
+import { useHandleInteractOutside } from './hooks/useHandleInteractOutside';
 import { useHandleOpenChange } from './hooks/useHandleOpenChange';
+import { useIgnoreGradientCanvasInteractOutside } from './hooks/useIgnoreGradientCanvasInteractOutside';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
 import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
 import { useOpenSessionId } from './hooks/useOpenSessionId';
@@ -44,6 +46,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   headerExtra,
   initialActiveTab,
   initialGradient,
+  isPointerOverGradientHandle,
   moveable = false,
   onChange,
   onDragEnd,
@@ -71,9 +74,11 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
   const colorSampler = useColorSampler(colorModel.setHex);
-  const handleInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
+  const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
+  const ignoreGradientCanvasInteractOutside = useIgnoreGradientCanvasInteractOutside(isPointerOverGradientHandle);
   const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
+  const handleInteractOutside = useHandleInteractOutside(ignoreSamplerInteractOutside, ignoreGradientCanvasInteractOutside);
   const preview: TColorPickerPreview =
     activeTab === ColorPickerTab.gradient
       ? { style: getGradientPreviewStyle(gradientPanel.stops, gradientPanel.type, gradientPanel.angle), type: 'gradient' }

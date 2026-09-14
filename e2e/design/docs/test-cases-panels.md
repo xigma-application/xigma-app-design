@@ -138,3 +138,59 @@ Layers-panel order, since the whole point of the bug was that the write path onl
 DOM row positions and the real `useTreeSource` read order interact — a synthetic `resolveTreeDrop`
 call with hand-built rows can't by itself prove the two sides ever call it with matching
 expectations.
+
+## Fill section
+
+`Common/FillSection/` (`FillRow/`) lists a node's `fills: TPaint[]` and edits each through
+`UITools.ColorPickerInput` — the same input for solid and gradient paints, only its swatch/hex
+adornment differs (`hexDisplayValue` shows the gradient type name, e.g. "Linear", instead of a raw
+hex). Opening a gradient paint's picker also arms `design.gradientEditor` (a transient, non-history
+Redux slice), which drives a Figma-style on-canvas overlay (`drawGradientHandleLayer`): the
+start→end guide line, endpoint dots, and one swatch handle per stop, each independently draggable
+directly on the canvas (not just via the docked panel's own `GradientBar`).
+
+| #   | Scenario                                                                                                       | Unit |                    E2E                    |
+| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------------: |
+| 385 | Adding a fill stacks a second solid layer on top and changes the render                                           |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 386 | Deleting every fill leaves the shape with none and clears the render                                              |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 387 | Typing a hex value commits it onto the fill and changes the render                                                |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 388 | Hiding a fill via the eye toggle stops it from rendering without removing it                                      |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 389 | Dragging a fill row past another reorders the stack, showing a drop indicator and a selected handle mid-drag      |  —   |         ✅ `fill-section.spec.ts`         |
+| 390 | Clicking a fill row selects it, and clicking outside the fill list clears the selection                           |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 391 | Closes the format dropdown when clicking a plain area of the fill color picker                                    |  —   |         ✅ `fill-section.spec.ts`         |
+| 392 | Docks a gradient stop's own color panel flush against the gradient panel, not floating over its own swatch        |  —   |         ✅ `fill-section.spec.ts`         |
+| 393 | Rotating a shape's gradient fill (panel button) updates its stored start/end and the rendered canvas              |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 394 | Switching a solid fill to Gradient via the paint-type row actually converts and commits it, not just previews it  |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 395 | A gradient stop clamps to its own color past its own position, instead of falling back to the first stop's color  |  —   |         ✅ `fill-section.spec.ts`         |
+| 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop           |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                  |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release |  —   |         ✅ `fill-section.spec.ts`         |
+
+#393-#398 are all real, reported regressions.
+
+#395: the gradient fragment shader's `sampleGradient` seeded its "outside every stop's range"
+fallback color to `u_stopColors[0]` unconditionally, so a stop dragged short of the far end (e.g.
+white at 0%, black moved to 50%) rendered white from 50%-100% instead of clamping to black — the
+seed needed to pick `u_stopColors[0]` or `u_stopColors[count-1]` depending on which side of the
+range `t` fell on. GLSL isn't unit-testable here, so this is e2e-only, sampling a pixel past the
+last stop.
+
+#396: `useGradientBarDrag`'s thumbs are re-sorted by position on every drag update, which physically
+reorders their DOM nodes once a drag crosses another stop — and reordering the element currently
+holding native `setPointerCapture` silently releases it, so the very next `pointermove` lands on
+whichever thumb is now on top and briefly drags _that_ one instead ("kiedy zderzam się z innym
+stopem to na chwilę go zabiera"). Fixed by tracking the drag via a ref plus `window`-level
+`pointermove`/`pointerup` listeners instead of per-thumb capture, immune to any DOM reordering.
+
+#397-#398 are the canvas-side counterpart: gradient stops became draggable directly on the on-canvas
+overlay (previously render-only), reusing the same hit-test/arm/continue/disarm pattern as every
+other canvas handle (`getGradientStopHandleAtPoint`, `armGradientStopDrag`,
+`continueGradientStopDrag`), with the dragged stop re-identified by its own color+opacity fingerprint
+each frame (not by array index, which shifts under it exactly like #396) since the shader still
+needs `paint.stops` kept position-sorted for correct interpolation. #398 is a second regression this
+introduced: Radix's `Popover` defers its "was this click outside the content" check to the native
+`click` event that fires _after_ `pointerup`, so clearing the drag ref synchronously on pointerup
+made that deferred check see "no drag in progress" and dismiss the fill picker — fixed by deferring
+the ref clear one macrotask (`setTimeout(0)`) past pointerup, and by narrowing the picker's
+`onInteractOutside` guard to only ignore clicks that actually hit a gradient handle (not every
+canvas click, which would wrongly keep the picker open when clicking the shape itself elsewhere).

@@ -12,6 +12,7 @@ import { useBlendModeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/h
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
+import { useGradientStopRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientStopRefs/useGradientStopRefs';
 import { useGuideRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGuideRefs/useGuideRefs';
 import { useHoverRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useHoverRefs/useHoverRefs';
 import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLassoMarqueeRefs/useLassoMarqueeRefs';
@@ -41,6 +42,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const cornerRadiusRefs = useCornerRadiusRefs();
   const ellipseArcRefs = useEllipseArcRefs();
   const frameNameRefs = useFrameNameRefs();
+  const gradientStopRefs = useGradientStopRefs();
   const guideRefs = useGuideRefs();
   const hoverRefs = useHoverRefs();
   const lassoMarqueeRefs = useLassoMarqueeRefs();
@@ -75,6 +77,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       draftRef,
       ellipseArc: ellipseArcRefs,
       frameName: frameNameRefs,
+      gradientStop: gradientStopRefs,
       guides: guideRefs,
       hover: hoverRefs,
       lassoMarquee: lassoMarqueeRefs,
@@ -102,6 +105,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       cornerRadiusRefs,
       ellipseArcRefs,
       frameNameRefs,
+      gradientStopRefs,
       guideRefs,
       hoverRefs,
       lassoMarqueeRefs,

@@ -10,6 +10,7 @@ import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelec
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
 import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
+import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 
@@ -67,6 +68,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
   const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
+  const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isGradient = paint.type !== 'solid' && paint.type !== 'image';
   const hex = isGradient ? (paint.stops[0]?.color ?? '#000000') : paint.type === 'solid' ? paint.color : '#000000';
   const value = { alpha: paint.opacity, hex };
@@ -114,6 +116,7 @@ export const FillRow: FC<TFillRowProps> = ({
             hexDisplayValue={hexDisplayValue}
             initialActiveTab={isGradient ? ColorPickerTab.gradient : undefined}
             initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops } : undefined}
+            isPointerOverGradientHandle={isPointerOverGradientHandle}
             isVisible={isVisible}
             onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
             onCommitHex={(hex): void => handleSolidChange({ alpha: value.alpha, hex })}

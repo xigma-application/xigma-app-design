@@ -90,6 +90,18 @@ export type TEllipseArcRatioDragState = {
   rotation: number;
 };
 
+export type TGradientStopDragState = {
+  color: string;
+  draggedStopIndex: number;
+  nodeId: string;
+  opacity: number;
+  paintIndex: number;
+};
+
+export type TGradientStopRefs = {
+  gradientStopDragRef: RefObject<TGradientStopDragState | null>;
+};
+
 export type TSliceDraft = TDraftRect & { rotation: number };
 
 export type TPenPreview = {
@@ -283,6 +295,7 @@ export type THoverRefs = {
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
+  hoveredGradientStopIndexRef: RefObject<number | null>;
   hoveredGridTrackAffordanceRef: RefObject<TGridTrackAffordanceHover | null>;
   hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;
   hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
@@ -560,6 +573,7 @@ export type TCanvasRefs = {
   draftRef: RefObject<TDraftEntity | null>;
   ellipseArc: TEllipseArcRefs;
   frameName: TFrameNameRefs;
+  gradientStop: TGradientStopRefs;
   guides: TGuideRefs;
   hover: THoverRefs;
   lassoMarquee: TLassoMarqueeRefs;

@@ -15,6 +15,7 @@ import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
 import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
 import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
+import { disarmGradientStopDrag } from './disarmGradientStopDrag';
 import { disarmGridTrackAffordanceDrag } from './disarmGridTrackAffordanceDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
@@ -70,6 +71,7 @@ export const handlePointerUp = (
   disarmEllipseArcDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcDragRef);
   disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRatioDragRef);
+  disarmGradientStopDrag(canvas, event, canvasRefs.gradientStop.gradientStopDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);
   disarmVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);

@@ -445,4 +445,113 @@ test.describe('Design panels — Fill section', () => {
     // result — the dragged (black) stop actually landed where the drag ended, left of the red stop
     expect(blackStop!.position).toBeLessThan(0.3);
   });
+
+  test('dragging a gradient stop directly on the canvas moves it along the guide', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-stop-canvas-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // horizontal gradient across the rectangle: white at 0%, black at 100%
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the black stop's own on-canvas swatch: world (900, 280) — the end of the gradient line —
+    // offset 22 world px upward toward its indicator; the viewport is identity (1:1) fresh on load
+    await page.mouse.move(900, 258);
+    await page.mouse.down();
+    await page.mouse.move(800, 258, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const stops = node.fills![0].stops!;
+    const blackStop = stops.find((stop) => stop.color === '#000000');
+
+    expect(stops).toHaveLength(2);
+    expect(blackStop!.position).toBeCloseTo(0.5, 1);
+  });
+
+  test('the fill picker stays open after dragging a gradient stop, even if the cursor strays off it before release', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-stop-drag-stray-release');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab the black stop's swatch, drag it, then let the cursor stray well away from it before releasing
+    await page.mouse.move(900, 258);
+    await page.mouse.down();
+    await page.mouse.move(850, 258, { steps: 5 });
+    await page.mouse.move(850, 30, { steps: 5 });
+    await page.mouse.up();
+
+    // result — the picker (and the gradient editor it drives) survives the release, it doesn't
+    // get treated as an "outside click" that dismisses the popover
+    const gradientEditor = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.gradientEditor;
+    });
+
+    expect(gradientEditor).not.toBeNull();
+    await expect(page.getByRole('button', { name: 'Rotate gradient' })).toBeVisible();
+  });
 });

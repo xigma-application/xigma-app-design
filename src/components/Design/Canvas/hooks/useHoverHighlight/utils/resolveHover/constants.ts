@@ -3,6 +3,7 @@ import { resolveAutoLayoutPaddingHover } from './hoverResolvers/resolveAutoLayou
 import { resolveCornerRadiusHover } from './hoverResolvers/resolveCornerRadiusHover';
 import { resolveEditingTextHover } from './hoverResolvers/resolveEditingTextHover';
 import { resolveEllipseArcHover } from './hoverResolvers/resolveEllipseArcHover';
+import { resolveGradientStopHover } from './hoverResolvers/resolveGradientStopHover';
 import { resolveGridTrackAffordanceHandleHover } from './hoverResolvers/resolveGridTrackAffordanceHandleHover';
 import { resolveGridTrackAffordanceHover } from './hoverResolvers/resolveGridTrackAffordanceHover';
 import { resolveLineEndpointHover } from './hoverResolvers/resolveLineEndpointHover';
@@ -24,6 +25,7 @@ export const HOVER_RESOLVERS = [
   resolveGridTrackAffordanceHover,
   resolveGridTrackAffordanceHandleHover,
   resolveLineEndpointHover,
+  resolveGradientStopHover,
   resolvePathOffsetHover,
   resolveEditingTextHover,
   resolvePolygonVertexHover,

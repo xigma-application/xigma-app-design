@@ -37,6 +37,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   editingContent: '',
   editingNodeId: null,
   editingTextBox: null,
+  gradientEditor: null,
   isControlPressed: false,
   leafNodes: [],
   nodesById: {},

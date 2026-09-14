@@ -32,6 +32,7 @@ export type TColorPickerInputProps = {
   hexDisplayValue?: string;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
+  isPointerOverGradientHandle?: TFunc<[], boolean>;
   isVisible?: boolean;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
@@ -61,6 +62,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   hexDisplayValue,
   initialActiveTab,
   initialGradient,
+  isPointerOverGradientHandle,
   isVisible = true,
   onCommitAlpha,
   onCommitHex,
@@ -109,6 +111,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 align={align}
                 initialActiveTab={initialActiveTab}
                 initialGradient={initialGradient}
+                isPointerOverGradientHandle={isPointerOverGradientHandle}
                 moveable
                 onChange={onPickerChange}
                 onDragEnd={onDragEnd}
