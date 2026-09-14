@@ -34,6 +34,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredEllipseArcRotateHandleRef = useRef<string | null>(null);
   const hoveredGradientEndpointMoveRef = useRef<TGradientRotateEndpoint | null>(null);
   const hoveredGradientLinePositionRef = useRef<number | null>(null);
+  const hoveredGradientRadiusHandleRef = useRef<string | null>(null);
   const hoveredGradientRotateEndpointRef = useRef<TGradientRotateHoverState | null>(null);
   const hoveredGradientStopIndexRef = useRef<number | null>(null);
   const hoveredGridTrackAffordanceRef = useRef<TGridTrackAffordanceHover | null>(null);
@@ -75,6 +76,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredEllipseArcRotateHandleRef,
       hoveredGradientEndpointMoveRef,
       hoveredGradientLinePositionRef,
+      hoveredGradientRadiusHandleRef,
       hoveredGradientRotateEndpointRef,
       hoveredGradientStopIndexRef,
       hoveredGridTrackAffordanceRef,

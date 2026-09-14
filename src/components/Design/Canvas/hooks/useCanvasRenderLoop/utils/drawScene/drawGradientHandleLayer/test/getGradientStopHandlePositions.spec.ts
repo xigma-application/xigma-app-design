@@ -25,7 +25,20 @@ describe('getGradientStopHandlePositions', () => {
     expect(positions[1].y).toBe(positions[2].y);
   });
 
-  it('should offset upward regardless of the line direction, unlike a direction-dependent perpendicular', () => {
+  it('should offset perpendicular to the line, not always straight up — a vertical line needs a sideways offset', () => {
+    // before — a vertical line (e.g. a radial gradient's default start->end axis): offsetting purely
+    // in y would keep the stop at the same x, still sitting exactly on the line
+    const stops: TGradientStop[] = [{ color: '#ffffff', opacity: 100, position: 0.5 }];
+
+    // action
+    const positions = getGradientStopHandlePositions({ x: 50, y: 0 }, { x: 50, y: 100 }, stops, 1);
+
+    // result — moved sideways off the line's x, not further along its own y range
+    expect(positions[0].x).not.toBeCloseTo(50);
+    expect(positions[0].y).toBeCloseTo(50);
+  });
+
+  it('should mirror to the opposite side when the line direction reverses, since the offset is now a true perpendicular', () => {
     // before
     const stops: TGradientStop[] = [{ color: '#ffffff', opacity: 100, position: 0.5 }];
 
@@ -33,9 +46,10 @@ describe('getGradientStopHandlePositions', () => {
     const forward = getGradientStopHandlePositions({ x: 0, y: 0 }, { x: 100, y: 100 }, stops, 1);
     const reversed = getGradientStopHandlePositions({ x: 100, y: 100 }, { x: 0, y: 0 }, stops, 1);
 
-    // result — same midpoint, same upward offset either way
-    expect(forward[0]).toEqual(reversed[0]);
-    expect(forward[0].y).toBeLessThan(50);
+    // result — same midpoint on the line itself, but offset to opposite sides
+    expect(forward[0].x).toBeCloseTo(100 - reversed[0].x);
+    expect(forward[0].y).toBeCloseTo(100 - reversed[0].y);
+    expect(forward[0]).not.toEqual(reversed[0]);
   });
 
   it('should shrink the offset as zoom increases, keeping a constant screen-space distance', () => {

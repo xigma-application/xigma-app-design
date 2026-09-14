@@ -12,6 +12,7 @@ const drawGradientStopHandlesMock = vi.fn();
 const drawGradientStopValueLabelMock = vi.fn();
 const drawGradientAddStopPreviewMock = vi.fn();
 const drawGradientRotateAngleLabelMock = vi.fn();
+const drawGradientRadiusGuideMock = vi.fn();
 
 vi.mock('../drawGradientLine', () => ({
   drawGradientLine: (...args: unknown[]): void => drawGradientLineMock(...args),
@@ -30,6 +31,9 @@ vi.mock('../drawGradientAddStopPreview', () => ({
 }));
 vi.mock('../drawGradientRotateAngleLabel', () => ({
   drawGradientRotateAngleLabel: (...args: unknown[]): void => drawGradientRotateAngleLabelMock(...args),
+}));
+vi.mock('../drawGradientRadiusGuide', () => ({
+  drawGradientRadiusGuide: (...args: unknown[]): void => drawGradientRadiusGuideMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -77,6 +81,7 @@ describe('drawGradientHandleLayer', () => {
     drawGradientStopValueLabelMock.mockClear();
     drawGradientAddStopPreviewMock.mockClear();
     drawGradientRotateAngleLabelMock.mockClear();
+    drawGradientRadiusGuideMock.mockClear();
   });
 
   it('should draw nothing when no gradient editor is active', () => {
@@ -129,7 +134,94 @@ describe('drawGradientHandleLayer', () => {
 
     const stopHandlesArgs = drawGradientStopHandlesMock.mock.calls[0];
 
-    expect(stopHandlesArgs[5]).toBe(1);
+    expect(stopHandlesArgs[4]).toBe(1);
+  });
+
+  it('should also draw the line, endpoint handles, and stop handles for a radial gradient fill', () => {
+    // before
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: 1 }, createCanvasRefs());
+
+    // result — the start->end line is drawn once; the radius handle gets a lone point, no connecting
+    // line ("niech sobie w powietrzu wisi") — so it only adds a second endpoint-handles call
+    expect(drawGradientLineMock).toHaveBeenCalledTimes(1);
+    expect(drawGradientEndpointHandlesMock).toHaveBeenCalledTimes(2);
+    expect(drawGradientStopHandlesMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw the perpendicular radius handle for a radial gradient, at a full primary-radius away from the center', () => {
+    // before — start (0,50), end (100,50): the radius handle sits perpendicular to that axis, at world (0, 150)
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    const [, radiusHandlePoints] = drawGradientEndpointHandlesMock.mock.calls[1];
+
+    expect(radiusHandlePoints).toEqual([{ x: 0, y: 150 }]);
+  });
+
+  it('should not draw the orange radius guide when the radius handle is not being dragged', () => {
+    // before
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    expect(drawGradientRadiusGuideMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the orange radius guide, from the center to the handle, while the radius handle is being dragged', () => {
+    // before
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const refs = createCanvasRefs();
+
+    refs.gradientRadius.gradientRadiusDragRef.current = { nodeId: 'rect-1', paintIndex: 0 };
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result — center (0,50), radius handle (0,150) for this configuration
+    expect(drawGradientRadiusGuideMock).toHaveBeenCalledTimes(1);
+
+    const [, center, radiusHandle] = drawGradientRadiusGuideMock.mock.calls[0];
+
+    expect(center).toEqual({ x: 0, y: 50 });
+    expect(radiusHandle).toEqual({ x: 0, y: 150 });
+  });
+
+  it('should ignore a radius drag ref belonging to a different node or paint index', () => {
+    // before
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const refs = createCanvasRefs();
+
+    refs.gradientRadius.gradientRadiusDragRef.current = { nodeId: 'other-node', paintIndex: 0 };
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    expect(drawGradientRadiusGuideMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw the radius guide for a linear gradient, which has no radius handle at all', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.gradientRadius.gradientRadiusDragRef.current = { nodeId: 'rect-1', paintIndex: 0 };
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    expect(drawGradientRadiusGuideMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw a second line or handle for a linear gradient fill', () => {
+    // before
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    expect(drawGradientLineMock).toHaveBeenCalledTimes(1);
+    expect(drawGradientEndpointHandlesMock).toHaveBeenCalledTimes(1);
   });
 
   it('should not draw a value label when no stop is hovered or dragged', () => {
@@ -151,7 +243,7 @@ describe('drawGradientHandleLayer', () => {
     // result
     expect(drawGradientStopValueLabelMock).toHaveBeenCalledTimes(1);
 
-    const [, , position] = drawGradientStopValueLabelMock.mock.calls[0];
+    const [, , , position] = drawGradientStopValueLabelMock.mock.calls[0];
 
     expect(position).toBe(1);
   });
@@ -161,14 +253,20 @@ describe('drawGradientHandleLayer', () => {
     const refs = createCanvasRefs();
 
     refs.hover.hoveredGradientStopIndexRef.current = 0;
-    refs.gradientStop.gradientStopDragRef.current = { color: '#ffffff', draggedStopIndex: 0, nodeId: 'rect-1', opacity: 100, paintIndex: 0 };
+    refs.gradientStop.gradientStopDragRef.current = {
+      color: '#ffffff',
+      draggedStopIndex: 0,
+      nodeId: 'rect-1',
+      opacity: 100,
+      paintIndex: 0,
+    };
 
     drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
 
     // result
     expect(drawGradientStopValueLabelMock).toHaveBeenCalledTimes(1);
 
-    const [, , position] = drawGradientStopValueLabelMock.mock.calls[0];
+    const [, , , position] = drawGradientStopValueLabelMock.mock.calls[0];
 
     expect(position).toBe(0);
   });
@@ -177,7 +275,13 @@ describe('drawGradientHandleLayer', () => {
     // before
     const refs = createCanvasRefs();
 
-    refs.gradientStop.gradientStopDragRef.current = { color: '#ffffff', draggedStopIndex: 0, nodeId: 'other-node', opacity: 100, paintIndex: 0 };
+    refs.gradientStop.gradientStopDragRef.current = {
+      color: '#ffffff',
+      draggedStopIndex: 0,
+      nodeId: 'other-node',
+      opacity: 100,
+      paintIndex: 0,
+    };
 
     drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
 
@@ -204,13 +308,13 @@ describe('drawGradientHandleLayer', () => {
     // result — line runs world (0,50) -> (100,50); 0.5 lands at (50, 50), offset up by 18 (zoom 1) -> (50, 32)
     expect(drawGradientAddStopPreviewMock).toHaveBeenCalledTimes(1);
 
-    const [, , , previewPosition, color] = drawGradientAddStopPreviewMock.mock.calls[0];
+    const [, previewPosition, , color] = drawGradientAddStopPreviewMock.mock.calls[0];
 
     expect(previewPosition).toEqual({ x: 50, y: 32 });
     // rectangle()'s stops are white (0%) and black (100%); the midpoint blends to mid-gray
     expect(color).toBe('#808080');
 
-    const [, , labelPosition] = drawGradientStopValueLabelMock.mock.calls[0];
+    const [, , , labelPosition] = drawGradientStopValueLabelMock.mock.calls[0];
 
     expect(labelPosition).toBe(0.5);
   });

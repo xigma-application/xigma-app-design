@@ -26,6 +26,7 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const POSITION = { x: 50, y: 50 };
+const DOWN = { x: 0, y: 1 };
 
 describe('drawSingleGradientStopHandle', () => {
   it('should draw a backdrop fill, a pointer triangle, a border stroke, and a swatch fill', () => {
@@ -35,7 +36,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
 
     // result — backdrop fill, pointer triangle, border stroke, swatch fill
     expect(gl.drawArrays).toHaveBeenCalledTimes(4);
@@ -51,7 +52,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
 
     // result — bufferData order: backdrop, pointer, border, swatch
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -74,7 +75,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -101,7 +102,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#00ff00', 50, false, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#00ff00', 50, false, 100, 100, IDENTITY_VIEWPORT);
 
     // result — 4th uniform4fv call (backdrop, pointer, border, swatch) is the swatch fill color
     const colorCalls = (gl.uniform4fv as ReturnType<typeof vi.fn>).mock.calls;
@@ -117,7 +118,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#00ff00', 100, true, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#00ff00', 100, true, 100, 100, IDENTITY_VIEWPORT);
 
     // result — 4 uniform4fv calls: backdrop fill, pointer fill, border stroke, swatch fill
     const colorCalls = (gl.uniform4fv as ReturnType<typeof vi.fn>).mock.calls;
@@ -137,7 +138,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     const colorCalls = (gl.uniform4fv as ReturnType<typeof vi.fn>).mock.calls;
@@ -155,7 +156,7 @@ describe('drawSingleGradientStopHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSingleGradientStopHandle(gl, program, buffer, POSITION, '#ff0000', 100, false, 100, 100, { x: 0, y: 0, zoom: 2 });
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, { x: 0, y: 0, zoom: 2 });
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -167,5 +168,47 @@ describe('drawSingleGradientStopHandle', () => {
 
     expect(widthOf(bufferDataCalls[0][1] as Float32Array)).toBeCloseTo(12); // 24 / 2 world units
     expect(widthOf(bufferDataCalls[0][1] as Float32Array) * 2).toBeCloseTo(24); // 24 screen px
+  });
+
+  it('should rotate the backdrop, border, and swatch to align an edge with the gradient line, not stay axis-aligned', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — a 45deg direction: a rotated square's bounding box widens to size*sqrt(2)
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, { x: 1, y: 1 }, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const widthOf = (vertices: Float32Array): number => {
+      const xs = Array.from(vertices).filter((_, i) => i % 2 === 0);
+
+      return Math.max(...xs) - Math.min(...xs);
+    };
+
+    expect(widthOf(bufferDataCalls[0][1] as Float32Array)).toBeCloseTo(24 * Math.sqrt(2), 1);
+    expect(widthOf(bufferDataCalls[2][1] as Float32Array)).toBeCloseTo(20 * Math.sqrt(2), 1);
+    expect(widthOf(bufferDataCalls[3][1] as Float32Array)).toBeCloseTo(19 * Math.sqrt(2), 1);
+  });
+
+  it('should stay axis-aligned (no visible difference) when the direction points straight down, same as before rotation support existed', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawSingleGradientStopHandle(gl, program, buffer, POSITION, DOWN, '#ff0000', 100, false, 100, 100, IDENTITY_VIEWPORT);
+
+    // result — a square rotated by exactly 90deg has the same bounding box as unrotated
+    const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const widthOf = (vertices: Float32Array): number => {
+      const xs = Array.from(vertices).filter((_, i) => i % 2 === 0);
+
+      return Math.max(...xs) - Math.min(...xs);
+    };
+
+    expect(widthOf(bufferDataCalls[0][1] as Float32Array)).toBeCloseTo(24);
   });
 });

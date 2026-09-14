@@ -17,7 +17,13 @@ describe('drawGradientAddStopPreview', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientAddStopPreview(gl, program, buffer, { x: 50, y: 50 }, '#ff0000', 80, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientAddStopPreview(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
+      { x: 50, y: 50 },
+      { x: 0, y: 1 },
+      '#ff0000',
+      80,
+    );
 
     // result
     expect(drawSingleGradientStopHandleMock).toHaveBeenCalledWith(
@@ -25,6 +31,7 @@ describe('drawGradientAddStopPreview', () => {
       program,
       buffer,
       { x: 50, y: 50 },
+      { x: 0, y: 1 },
       '#ff0000',
       80,
       false,

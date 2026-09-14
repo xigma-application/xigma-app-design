@@ -9,6 +9,7 @@ import { TArmContext } from '../types';
 import { armGradientEndpointMoveDrag } from '../armGradientEndpointMoveDrag';
 import { getGradientEndpointMoveHandleAtPoint } from '../../../../../utils/getGradientEndpointMoveHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
 
 export const armGradientEndpointMoveOnPointerDown = ({
   canvas,
@@ -25,7 +26,7 @@ export const armGradientEndpointMoveOnPointerDown = ({
   if (moveHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[moveHit.paintIndex];
 
-    if (paint?.type === 'gradient-linear') {
+    if (isLineHandleGradientPaint(paint)) {
       armGradientEndpointMoveDrag(
         canvas,
         event,

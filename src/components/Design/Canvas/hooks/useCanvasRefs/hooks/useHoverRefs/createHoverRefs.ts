@@ -13,6 +13,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredEllipseArcRotateHandleRef: { current: null },
   hoveredGradientEndpointMoveRef: { current: null },
   hoveredGradientLinePositionRef: { current: null },
+  hoveredGradientRadiusHandleRef: { current: null },
   hoveredGradientRotateEndpointRef: { current: null },
   hoveredGradientStopIndexRef: { current: null },
   hoveredGridTrackAffordanceRef: { current: null },

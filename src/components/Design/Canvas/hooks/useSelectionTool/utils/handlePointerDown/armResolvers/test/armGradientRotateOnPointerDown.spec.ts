@@ -181,6 +181,86 @@ describe('armGradientRotateOnPointerDown', () => {
     expect(radius).toBeCloseTo(30, 5);
   });
 
+  it('should arm a radial gradient rotate drag on the outer ring around the center point', () => {
+    // mock — a radial gradient centered at (50,50) with its radius reaching (50,100) (100px radius)
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const radialRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0]],
+    };
+
+    // before — 8px left of the center (50,50), past its inner move zone, within the outer rotate ring
+    // (the left side is used deliberately: the stop at position 0 sits offset to the right of the
+    // center for this vertical line, so grabbing on the left avoids colliding with it)
+    const result = armGradientRotateOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      point: { x: 42, y: 50 },
+      selectedNodes: [radialRectangle],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result — mode 'radial', pivot = the center in local pixel space, radius = the full center->edge
+    // distance (50), draggedEndpoint always 'end' since the center itself never moves in this mode
+    expect(result).toBe(true);
+    expect(armGradientRotateDragMock).toHaveBeenCalledWith(
+      canvas,
+      event,
+      canvasRefs.gradientRotate.gradientRotateDragRef,
+      'rect-1',
+      0,
+      'end',
+      { x: 42, y: 50 },
+      'radial',
+      { x: 50, y: 50 },
+      50,
+      0,
+    );
+  });
+
+  it('should also arm a radial gradient rotate drag when grabbing the outer ring around the edge point, still pivoting at the center', () => {
+    // mock — same radial gradient: center (50,50), edge (50,100)
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const radialRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0]],
+    };
+
+    // before — 8px below the edge point (50,100), past its inner move zone, within the outer rotate ring
+    const result = armGradientRotateOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      point: { x: 50, y: 108 },
+      selectedNodes: [radialRectangle],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result — identical arm state to grabbing the center's own ring: the pivot is always the center,
+    // and the point that actually moves is always 'end', regardless of which ring was grabbed
+    expect(result).toBe(true);
+    expect(armGradientRotateDragMock).toHaveBeenCalledWith(
+      canvas,
+      event,
+      canvasRefs.gradientRotate.gradientRotateDragRef,
+      'rect-1',
+      0,
+      'end',
+      { x: 50, y: 108 },
+      'radial',
+      { x: 50, y: 50 },
+      50,
+      0,
+    );
+  });
+
   it('should return undefined and arm nothing when there is no active gradient editor', () => {
     // mock
     const dispatch = vi.fn();

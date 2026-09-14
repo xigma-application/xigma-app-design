@@ -15,6 +15,7 @@ import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getPositionAlongGradientLine } from '../../../../utils/getPositionAlongGradientLine';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradientPaint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 type TGradientStopCandidate = { index: number; stop: TGradientStop };
@@ -50,7 +51,7 @@ export const continueGradientStopDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'gradient-linear') {
+      if (isLineHandleGradientPaint(paint)) {
         const referencePosition = paint.stops[draggedStopIndex]?.position ?? 0;
         const candidates = findGradientStopCandidates(paint.stops, color, opacity);
         const resolved = resolveClosestGradientStopCandidate(candidates, referencePosition);

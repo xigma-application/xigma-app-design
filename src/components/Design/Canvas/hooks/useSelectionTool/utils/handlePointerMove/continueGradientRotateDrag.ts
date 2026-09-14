@@ -18,6 +18,7 @@ import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRectPerimeterPointAtAngle } from 'utils/canvas/getRectPerimeterPointAtAngle';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradientPaint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
 
@@ -48,13 +49,29 @@ const getLineModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRec
   return { guidePivot: dragState.pivot, localPoints, snap };
 };
 
+const getRadialModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRect, worldPoint: TPoint, rotation: number): TGradientRotateFrame => {
+  const angle = getGradientAngleFromPoint(worldPoint, bounds, rotation, dragState.pivot);
+  const end: TPoint = { x: dragState.pivot.x + Math.cos(angle) * dragState.radius, y: dragState.pivot.y + Math.sin(angle) * dragState.radius };
+
+  return { guidePivot: dragState.pivot, localPoints: { end, start: dragState.pivot }, snap: null };
+};
+
 const getGradientRotateFrame = (
   dragState: TGradientRotateDragState,
   bounds: TDraftRect,
   worldPoint: TPoint,
   rotation: number,
-): TGradientRotateFrame =>
-  dragState.mode === 'box' ? getBoxModeFrame(dragState, bounds, worldPoint, rotation) : getLineModeFrame(dragState, bounds, worldPoint, rotation);
+): TGradientRotateFrame => {
+  if (dragState.mode === 'box') {
+    return getBoxModeFrame(dragState, bounds, worldPoint, rotation);
+  }
+
+  if (dragState.mode === 'radial') {
+    return getRadialModeFrame(dragState, bounds, worldPoint, rotation);
+  }
+
+  return getLineModeFrame(dragState, bounds, worldPoint, rotation);
+};
 
 export const continueGradientRotateDrag = (
   canvas: HTMLCanvasElement,
@@ -73,7 +90,7 @@ export const continueGradientRotateDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'gradient-linear') {
+      if (isLineHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
         const worldPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const frame = getGradientRotateFrame(dragState, bounds, worldPoint, node.rotation);

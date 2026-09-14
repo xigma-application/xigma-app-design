@@ -25,7 +25,7 @@ describe('drawGradientStopValueLabel', () => {
 
   it('should draw a percentage badge above the stop, in the gradient guide blue', () => {
     // before
-    drawGradientStopValueLabel(context, { x: 50, y: 50 }, 0.29);
+    drawGradientStopValueLabel(context, { x: 50, y: 50 }, { x: 0, y: -1 }, 0.29);
 
     // result
     const [, , , , text, anchor, direction, , , , options] = drawValueLabelMock.mock.calls[0];

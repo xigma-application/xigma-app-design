@@ -82,4 +82,11 @@ describe('getGradientStopHandleAtPoint', () => {
     expect(getGradientStopHandleAtPoint({ x: 5, y: 39 }, [rectangle()], zoomedViewport, GRADIENT_EDITOR)).not.toBeNull();
     expect(getGradientStopHandleAtPoint({ x: 7, y: 39 }, [rectangle()], zoomedViewport, GRADIENT_EDITOR)).toBeNull();
   });
+
+  it('should also hit stops on the start->end line of a radial gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientStopHandleAtPoint({ x: 0, y: 28 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, stopIndex: 0 });
+  });
 });

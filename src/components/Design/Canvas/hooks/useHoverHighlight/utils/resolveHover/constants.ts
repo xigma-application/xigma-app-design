@@ -5,6 +5,7 @@ import { resolveEditingTextHover } from './hoverResolvers/resolveEditingTextHove
 import { resolveEllipseArcHover } from './hoverResolvers/resolveEllipseArcHover';
 import { resolveGradientEndpointMoveHover } from './hoverResolvers/resolveGradientEndpointMoveHover';
 import { resolveGradientLineHover } from './hoverResolvers/resolveGradientLineHover';
+import { resolveGradientRadiusHover } from './hoverResolvers/resolveGradientRadiusHover';
 import { resolveGradientRotateHover } from './hoverResolvers/resolveGradientRotateHover';
 import { resolveGradientStopHover } from './hoverResolvers/resolveGradientStopHover';
 import { resolveGridTrackAffordanceHandleHover } from './hoverResolvers/resolveGridTrackAffordanceHandleHover';
@@ -30,6 +31,7 @@ export const HOVER_RESOLVERS = [
   resolveLineEndpointHover,
   resolveGradientStopHover,
   resolveGradientEndpointMoveHover,
+  resolveGradientRadiusHover,
   resolveGradientRotateHover,
   resolveGradientLineHover,
   resolvePathOffsetHover,

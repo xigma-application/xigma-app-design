@@ -12,11 +12,13 @@ export const useConvertSolidToGradientPaint = (
 ): TFunc<[TGradientPanelChange]> => {
   return ({ angle, end, start, stops, type }: TGradientPanelChange): void => {
     const points = start && end ? { end, start } : getGradientPointsFromAngle(angle);
+    const radiusRatio = type === 'gradient-radial' ? (paint.type === 'gradient-radial' ? (paint.radiusRatio ?? 1) : 1) : undefined;
 
     onChange({
       blendMode: paint.blendMode,
       end: points.end,
       opacity: paint.opacity,
+      radiusRatio,
       start: points.start,
       stops: mapEditableStopsToGradientStops(stops),
       type,

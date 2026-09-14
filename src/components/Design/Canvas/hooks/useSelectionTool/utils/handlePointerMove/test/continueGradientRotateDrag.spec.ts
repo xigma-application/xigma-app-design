@@ -64,7 +64,7 @@ const getGradientPoints = (nodeId: string): { end: TPoint; start: TPoint } | nul
   const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
   const paint = node.fills[0];
 
-  return paint.type === 'gradient-linear' ? { end: paint.end, start: paint.start } : null;
+  return paint.type === 'gradient-linear' || paint.type === 'gradient-radial' ? { end: paint.end, start: paint.start } : null;
 };
 
 const expectPointCloseTo = (point: TPoint, expected: TPoint): void => {
@@ -283,6 +283,72 @@ describe('continueGradientRotateDrag', () => {
 
     // before — 45deg off axis, well outside the snap tolerance
     continueGradientRotateDrag(canvas, pointerEvent(100, 0), store.dispatch, dragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
+  it('should rotate the end point around the fixed center at a constant radius, in "radial" mode', () => {
+    // mock — a radial gradient centered at (50,50) with its edge at (50,100), a 50px radius
+    const nodeId = addGradientRectangle();
+
+    store.dispatch(
+      updateNode({
+        changes: { fills: [{ end: { x: 0.5, y: 1 }, opacity: 100, start: { x: 0.5, y: 0.5 }, stops: [], type: 'gradient-radial' }] },
+        id: nodeId,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const dragRef = createGradientRotateDragRef({
+      angleOffset: 0,
+      draggedEndpoint: 'end',
+      mode: 'radial',
+      nodeId,
+      paintIndex: 0,
+      pivot: { x: 50, y: 50 },
+      pointerPosition: { x: 58, y: 50 },
+      radius: 50,
+    });
+    const canvasRefs = createCanvasRefs();
+
+    // before — pointer moves directly right of the center, 50px away (a quarter turn from the original
+    // straight-down position)
+    continueGradientRotateDrag(canvas, pointerEvent(100, 50), store.dispatch, dragRef, canvasRefs);
+
+    // result — the center (start) never moves; only the edge point (end) swings around it
+    const points = getGradientPoints(nodeId);
+
+    expectPointCloseTo(points!.start, { x: 0.5, y: 0.5 });
+    expectPointCloseTo(points!.end, { x: 1, y: 0.5 });
+  });
+
+  it('should never snap the angle or show an alignment guide in "radial" mode', () => {
+    const nodeId = addGradientRectangle();
+
+    store.dispatch(
+      updateNode({
+        changes: { fills: [{ end: { x: 0.5, y: 1 }, opacity: 100, start: { x: 0.5, y: 0.5 }, stops: [], type: 'gradient-radial' }] },
+        id: nodeId,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const dragRef = createGradientRotateDragRef({
+      angleOffset: 0,
+      draggedEndpoint: 'end',
+      mode: 'radial',
+      nodeId,
+      paintIndex: 0,
+      pivot: { x: 50, y: 50 },
+      pointerPosition: { x: 58, y: 50 },
+      radius: 50,
+    });
+    const canvasRefs = createCanvasRefs();
+
+    // before — pointer sits exactly on the horizontal axis from the center, which would snap in "box"/
+    // "line" mode; radial mode has no snap at all, per an explicit product decision
+    continueGradientRotateDrag(canvas, pointerEvent(100, 50), store.dispatch, dragRef, canvasRefs);
 
     // result
     expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();

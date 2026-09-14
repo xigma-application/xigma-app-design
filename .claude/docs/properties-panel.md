@@ -523,6 +523,122 @@ node's folder. Today:
   world-point-to-0..1-relative-to-bounds conversion) was promoted from a rotate-drag-local helper to
   a shared `Canvas/utils/` function once this second consumer needed the identical math.
 
+  **Radial gradients get the same start/end handles as linear, plus one extra "radius" handle.**
+  `gradient-radial` paints already existed as a `TGradientPaint['type']` value (reusing the exact
+  same `start`/`end`/`stops` shape as linear), but had zero on-canvas editing and a shader model
+  where the visual center was the *midpoint* of start/end (radius = half their distance) — neither
+  point was actually the center. This was changed so `start` is the true center (radius =
+  `|end - start|`, `t = 0` exactly at `start`), matching Figma and matching what a "center point"
+  should mean; this is a rendering-visible change for any pre-existing `gradient-radial` paint; the
+  vector Paint tool's own gradient rendering shares the same shader/draw function
+  (`drawVectorGradientFill.ts`) so this fix applies there too.
+
+  A brand new field, `TGradientPaint.radiusRatio?: number` (default `1` when absent — a perfect
+  circle), scales a *second*, always-perpendicular radius, making the shape an ellipse.
+  `getGradientRadiusHandleNormalizedPoint.ts` computes that handle's position purely in the paint's
+  own normalized (0..1, bounds-relative, anisotropic) space — `start + perpendicular(end-start) *
+  |end-start| * radiusRatio` — deliberately *not* in true screen-pixel space, so the handle always
+  lands exactly on the shader's own iso-line regardless of the shape's aspect ratio (the shader
+  computes distance in that same anisotropic space too, so a non-square shape already renders an
+  ellipse even at `radiusRatio = 1` — this is intentional, matching Figma). Dragging it
+  (`continueGradientRadiusDrag.ts`) is locked to that perpendicular axis by construction: the raw
+  cursor position is projected onto the perpendicular direction via `getGradientRadiusRatioFromPoint.ts`
+  and only that scalar component becomes the new ratio (any component along the primary start→end
+  axis is ignored) — no rotation/skew is possible from this handle, per an explicit product decision
+  (Figma allows some skew here; this app deliberately doesn't, to keep the model simple). The ratio
+  is **not** clamped to an upper bound (same "let it travel freely" philosophy as endpoint move) but
+  is floored at a small epsilon (`MIN_RADIUS_RATIO = 0.01`) so it can never collapse the ellipse to a
+  zero-width line, which would make the handle un-graspable again.
+
+  Reuse vs. new code, concretely: `getGradientStopHandleAtPoint`, `getGradientEndpointMoveHandleAtPoint`,
+  `getGradientLinePositionAtPoint`, `continueGradientStopDrag`, `continueGradientEndpointMoveDrag`, the
+  arm resolvers for stop/move/add-stop, and `drawGradientHandleLayer`'s main branch all had their
+  `paint.type === 'gradient-linear'` guard widened to a shared `isLineHandleGradientPaint(paint)`
+  predicate (`paint.type === 'gradient-linear' || 'gradient-radial'`) — every one of those
+  interactions (drag a stop, move an endpoint, click the line to add a stop) is literally identical
+  math for radial as for linear, since both are driven by the same `start`/`end`/`stops`. The
+  dragging `start` (the center) moves only that point, exactly like linear's move — deliberately
+  *not* translating the whole gradient, an explicit product decision made when the model was locked
+  with the user before implementing this. The radius handle itself is entirely new (own refs group
+  `gradientRadius`/`useGradientRadiusRefs`, own arm/continue/disarm trio, own hover resolvers), with
+  hit-test priority stop > move > **radius** > line, checked after move so a hovered move-zone always
+  wins the (rare) overlap case. It is drawn as a **lone point only** — `drawGradientEndpointHandles`
+  reused for it, but *not* `drawGradientLine`: an explicit user correction ("nie ma sensu niech sobie
+  jakby w powietrzu niby wisi" — it doesn't make sense, let it just hang in the air) after the first
+  version connected it to the center with the same white line the start/end axis uses, which read as
+  a second gradient axis rather than a standalone scale control. While the radius handle is actively
+  being dragged (`refs.gradientRadius.gradientRadiusDragRef` matches the current node/paint),
+  `drawGradientRadiusGuide.ts` draws a temporary line from the center to the handle in the same
+  orange (`ALIGNMENT_GUIDE_STROKE`, `#cd4422`) used by ordinary alignment/snap guides elsewhere,
+  plus a small crosshair at each end — this only appears mid-drag (the "does it make sense to
+  visually connect them" question is different while the user is actively manipulating the radius vs.
+  at rest, per explicit feedback), it does not itself imply real snapping (there is none for the
+  radius handle currently).
+
+  **Radial does get its own rotate, after all** — an initial version left the rotate ring
+  linear-only, reasoning that free-moving `end` already sets both angle and magnitude in one motion.
+  The user pushed back: they also wanted a dedicated *fixed-radius* rotate, reachable from **either**
+  the center's own ring or the edge point's own ring, always pivoting at the center. Implemented by
+  widening `getGradientRotateHandleAtPoint.ts`'s existing dual-ring check (already shared via
+  `isLineHandleGradientPaint`) rather than writing a separate radial-only hit-test, and adding a
+  third `TGradientRotateMode` value, `'radial'`, to the existing box/line dispatcher in
+  `continueGradientRotateDrag.ts` (`getRadialModeFrame`). Because the center never moves in this
+  mode, arming is endpoint-agnostic: whichever ring is grabbed (`getGradientRotateHandleAtPoint`
+  still reports which one, for the angle-label hover), `armGradientRotateOnPointerDown.ts` always
+  freezes `pivot = local start` and `radius = |local end - local start|` and always sets
+  `draggedEndpoint: 'end'`, since the edge point is the only one that ever actually moves. No angle
+  snapping was added for this mode (an explicit product decision — linear's box/line rotate still
+  snaps to axis angles via `getGradientRotateSnapAngle`, radial's does not).
+
+  **Switching gradient type resets the points to that type's own default**, rather than carrying
+  over whatever `start`/`end` the previous type had. Before this, `useSetGradientType` always
+  forwarded the panel's existing `points` state unchanged, so e.g. a linear gradient's arbitrary
+  diagonal line would be reinterpreted as-is under `gradient-radial`'s new "start = true center"
+  model — putting the center wherever `start` happened to be (often off in a corner), not at the
+  visual middle of the shape. Fixed with a small per-type default table baked into
+  `useSetGradientType.ts` itself (only one caller, so no new top-level util): non-radial types get
+  the existing horizontal default (`{start: (0,0.5), end: (1,0.5)}` — this also keeps
+  angular/diamond correctly centered, since their shader still derives "center" as the *midpoint* of
+  start/end, and this pair's midpoint is exactly the box center); `gradient-radial` gets `{start:
+  (0.5,0.5), end: (0.5,1)}` — true center, radius reaching the bottom edge, matching Figma's own
+  default radial. The hook now also calls `setPoints` (previously it only forwarded to `onChange`
+  and let the type-switch's points go stale in local state), so every subsequent edit in the same
+  session (add a stop, drag a stop) keeps using the freshly-reset points instead of silently
+  reverting to whatever was there before the switch.
+
+  **Gradient stop markers now offset perpendicular to the line, not always straight up, and rotate
+  to match it.** `getGradientStopHandlePositions.ts` originally nudged every stop by a fixed
+  `(0, -offset)` — correct-looking only for a near-horizontal line (linear's usual default), and a
+  real, reported bug for radial's new default vertical line: offsetting a point on a vertical line
+  purely in y just slides it further along that *same* line, so the stop marker still visually sat
+  exactly on top of the guide instead of beside it. Fixed with a new shared
+  `getGradientPerpendicularOffsetDirection(start, end)` (one of the two 90° rotations of the
+  start→end vector, chosen so it reduces to the historical `(0,-1)` for a horizontal line — no visual
+  change for any existing near-horizontal linear gradient) used everywhere a stop-adjacent element
+  needs to know "which way is away from the line": the stop position offset itself, the little
+  connecting pointer triangle's anchor/orientation (`drawGradientStopPointer.ts`, generalized from a
+  hardcoded "always points down" triangle to one built from an arbitrary `direction` vector — base
+  perpendicular to it, tip along it), the value-label's extra margin
+  (`getGradientStopValueLabelAnchor.ts`), and the "add stop" hover preview's offset position, all of
+  which previously hardcoded the same "up" assumption independently. A first attempt reversing only
+  the position-offset formula (leaving the pointer triangle hardcoded "down") caused a real runtime
+  crash (`drawGradientAddStopPreview.ts` had its own separate, easy-to-miss call into
+  `drawSingleGradientStopHandle` that wasn't updated for the new parameter) and, before that, a test
+  regression where a rotate-ring hit-test's hardcoded grab-point coordinate happened to land on a
+  stop that had moved — both are the kind of "one direction number touches many call sites" trap this
+  kind of change invites; grep every consumer of the changed function before considering it done, not
+  just the ones the type-checker complains about.
+
+  On top of the position fix, the user asked for one more thing: the stop's backdrop/border/swatch
+  squares (`drawSingleGradientStopHandle.ts`) should **rotate** so one edge sits parallel to the
+  line, instead of always staying axis-aligned regardless of the line's angle (visually, an
+  axis-aligned square offset from a steep diagonal line doesn't read as "belonging" to it the way a
+  square rotated to match the line's angle does). `drawRect` already accepted a `rotation` (degrees,
+  around the rect's own center by default) that every call here had been passing `0` for; now it's
+  `atan2(towardLineDirection.y, towardLineDirection.x)` in degrees. Since these are all perfect
+  squares, only the rotation *mod 90°* is visually distinguishable, so no sign/direction convention
+  needed to be agonized over — any of the four equivalent right-angle offsets looks identical.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

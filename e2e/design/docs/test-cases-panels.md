@@ -176,8 +176,18 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box          |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump      |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma       |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 410 | Moving a radial gradient's center point on the canvas moves only that point (start/end handles reused)          |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 411 | Dragging a radial gradient's perpendicular radius handle reshapes it into an ellipse                             |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 412 | Switching a gradient's type via the panel resets its points to that type's own default (e.g. radial: centered)  |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius     |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge     |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging |  ✅  |         ✅ `fill-section.spec.ts`         |
 
-#393-#409 are all real, reported regressions.
+#393-#409 are all real, reported regressions. #410-#415 are new feature coverage (radial gradient
+on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as same-day
+follow-up feedback right after #410-#411 landed, rather than requested up front — #412 (switching
+types left stale, nonsensical positions behind) and #413-#415 (the rotate ring and radius guide the
+first radial pass didn't include) are closer to fast-follow fixes than a fresh feature request.
 
 #395: the gradient fragment shader's `sampleGradient` seeded its "outside every stop's range"
 fallback color to `u_stopColors[0]` unconditionally, so a stop dragged short of the far end (e.g.
@@ -270,3 +280,60 @@ already on. Reverted in favor of the always-safely-interior box-center-plus-offs
 Figma lets a gradient endpoint travel outside the shape entirely. Nothing downstream assumed the
 0..1 range (the world-point lerp, the hit-test, and the per-axis landmark snap all already worked
 for any value), so the fix was simply deleting the clamp in `continueGradientEndpointMoveDrag.ts`.
+
+#410-#411: radial gradients (`gradient-radial`, previously render-only with no on-canvas editing at
+all) got the same start/end/stop handles as linear for free, by widening every hit-test/drag guard
+from a literal `paint.type === 'gradient-linear'` check to a shared `isLineHandleGradientPaint`
+predicate — #410 confirms moving the center point (`start`) behaves exactly like linear's endpoint
+move (only that point changes; an explicit product decision, not a translate-the-whole-gradient
+model). #411 covers the one genuinely new piece: a second, always-perpendicular "radius" handle
+(`radiusRatio` field, new) that reshapes the circle into an ellipse — locked to the perpendicular
+axis by construction, so it can only scale, never skew or rotate. This also uncovered (and fixed) a
+pre-existing modeling issue: the radial shader treated the *midpoint* of start/end as the visual
+center, when `start` should be the center (matching Figma) — fixed alongside, see
+`.claude/docs/properties-panel.md` for the full technical writeup. The radius handle also lost its
+connecting line after #410-#411 shipped — the user pointed out it read as a second gradient axis,
+not a scale control, so it now renders as a lone point instead.
+
+#412: switching a gradient's type via the panel's dropdown (`useSetGradientType`) used to keep
+whatever `start`/`end` the *previous* type had, verbatim. Combined with #410-#411's fix (radial's
+`start` is now the true center, not the midpoint of start/end), this meant switching an arbitrary
+linear gradient to radial put the new "center" wherever the old line's start point happened to be —
+often nowhere near the shape's middle. Fixed by giving type-switching its own small per-type default
+table: radial resets to a centered point with the radius reaching the bottom edge; every other type
+resets to the existing default horizontal line (which also keeps angular/diamond centered, since
+their center is still the midpoint of start/end). Test drives the actual dropdown UI (not just a
+Redux dispatch) to catch regressions in the real click path.
+
+#413-#414: the first radial pass left rotation to `end`'s free-move alone (it already sets angle and
+magnitude at once), on the theory that a dedicated fixed-radius rotate ring wasn't needed the way
+linear's box/line modes needed one. The user asked for it back: a genuine rotate, reachable from
+*either* the center's ring or the edge point's ring, both pivoting at the center and holding the
+radius constant. Implemented as a third `TGradientRotateMode` ('radial') on the existing rotate
+dispatcher rather than a parallel hit-test/arm/continue stack — `getGradientRotateHandleAtPoint`'s
+dual-ring check was already shared via `isLineHandleGradientPaint`, so it needed no radial-specific
+branch at all once widened. #413 confirms grabbing the center's ring; #414 confirms grabbing the
+edge point's ring produces the *same* rotation (still pivoting at the center, never at the edge
+point itself) — arming is endpoint-agnostic on purpose, since the center never moves in this mode
+regardless of which ring was grabbed.
+
+#415: while the radius handle (#411) is being dragged, a temporary guide line + crosshairs now
+connects it back to the center, in the same orange used by ordinary alignment/snap guides elsewhere
+in the app — cleared the instant the drag ends. An earlier version tried asserting an exact RGB
+sample at the guide's midpoint, which turned out fragile against the radial's own busy, continuously
+blended fill color underneath; the test instead samples the *same* pixel once mid-drag and once
+right after release at the same cursor position (so the underlying fill is provably identical in
+both frames) and asserts the two differ — isolating the guide's presence as the only variable,
+without needing to know its exact rendered color.
+
+Also worth recording even without its own numbered e2e scenario: fixing #415 alongside a stop-marker
+bug the user found — `getGradientStopHandlePositions` offset every stop by a fixed "up" vector,
+which only kept the marker off the line for a near-horizontal gradient; a vertical line (radial's own
+default) kept the offset marker sitting exactly on top of the guide instead of beside it. Generalized
+to a real perpendicular-to-the-line offset, plus rotating the marker's own square (`drawRect` already
+took a rotation angle, previously always `0`) so one edge sits parallel to the line rather than
+staying axis-aligned. Covered by unit tests (`getGradientPerpendicularOffsetDirection.spec.ts`,
+updated `getGradientStopHandlePositions`/`drawGradientStopPointer`/`drawSingleGradientStopHandle`
+specs) rather than a new e2e scenario — the change has no Redux-observable effect (a stop's own
+`position` field never changes), only a rendering one, so exact-geometry unit coverage is the more
+precise and less fragile way to pin it down than sampling canvas pixels.

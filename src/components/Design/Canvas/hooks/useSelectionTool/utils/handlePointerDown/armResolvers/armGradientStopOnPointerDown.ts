@@ -10,6 +10,7 @@ import { TArmContext } from '../types';
 import { armGradientStopDrag } from '../armGradientStopDrag';
 import { getGradientStopHandleAtPoint } from '../../../../../utils/getGradientStopHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
 
 export const armGradientStopOnPointerDown = ({
   canvas,
@@ -27,7 +28,7 @@ export const armGradientStopOnPointerDown = ({
   if (gradientStopHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[gradientStopHit.paintIndex];
 
-    if (paint?.type === 'gradient-linear') {
+    if (isLineHandleGradientPaint(paint)) {
       const stop = paint.stops[gradientStopHit.stopIndex];
 
       armGradientStopDrag(

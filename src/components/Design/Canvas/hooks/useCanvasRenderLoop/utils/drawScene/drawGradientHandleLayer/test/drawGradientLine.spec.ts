@@ -29,7 +29,11 @@ describe('drawGradientLine', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientLine(gl, program, buffer, { x: 0, y: 0 }, { x: 10, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientLine(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -50,7 +54,11 @@ describe('drawGradientLine', () => {
     const buffer = {} as WebGLBuffer;
 
     // before — a horizontal segment, so the perpendicular (vertical) vertex offset reveals half-width
-    drawGradientLine(gl, program, buffer, { x: 0, y: 0 }, { x: 10, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientLine(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+    );
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -67,7 +75,11 @@ describe('drawGradientLine', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientLine(gl, program, buffer, { x: 0, y: 0 }, { x: 10, y: 0 }, 100, 100, { x: 0, y: 0, zoom: 2 });
+    drawGradientLine(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: { x: 0, y: 0, zoom: 2 } },
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+    );
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

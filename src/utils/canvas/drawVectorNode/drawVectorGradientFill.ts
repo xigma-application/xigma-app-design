@@ -40,6 +40,7 @@ export const drawVectorGradientFill = (
     const endLocation = gl.getUniformLocation(program, 'u_end');
     const gradientTypeIndexLocation = gl.getUniformLocation(program, 'u_gradientTypeIndex');
     const opacityLocation = gl.getUniformLocation(program, 'u_opacity');
+    const radiusRatioLocation = gl.getUniformLocation(program, 'u_radiusRatio');
 
     gl.useProgram(program);
     gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
@@ -54,6 +55,7 @@ export const drawVectorGradientFill = (
     gl.uniform2f(endLocation, paint.end.x, paint.end.y);
     gl.uniform1i(gradientTypeIndexLocation, getGradientTypeIndex(paint.type));
     gl.uniform1f(opacityLocation, alpha);
+    gl.uniform1f(radiusRatioLocation, paint.type === 'gradient-radial' ? (paint.radiusRatio ?? 1) : 1);
     gl.enableVertexAttribArray(positionLocation);
 
     gl.clear(gl.STENCIL_BUFFER_BIT);

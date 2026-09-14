@@ -55,7 +55,7 @@ export const useGradientPanel = (
   const setStopColor = useSetStopColor(stops, setStops, type, angle, points, onChange);
   const flip = useFlipStops(stops, setStops, type, angle, points, onChange);
   const rotate = useRotateGradient(stops, type, angle, setAngle, points, setPoints, onChange);
-  const setGradientType = useSetGradientType(setType, stops, angle, points, onChange);
+  const setGradientType = useSetGradientType(setType, setPoints, stops, onChange);
 
   useResetGradientPanelOnReopen(resetKey, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
   useSyncExternalStopChanges(initialGradient, stops, setStops, setSelectedStopId);

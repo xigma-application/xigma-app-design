@@ -86,4 +86,24 @@ describe('getGradientRotateHandleAtPoint', () => {
     expect(getGradientRotateHandleAtPoint(point, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).not.toBeNull();
     expect(getGradientRotateHandleAtPoint(point, [rectangle()], { x: 0, y: 0, zoom: 4 }, GRADIENT_EDITOR)).toBeNull();
   });
+
+  it('should hit the outer rotate ring around the center point of a radial gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientRotateHandleAtPoint({ x: 8, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ bounds: { height: 100, width: 100, x: 0, y: 0 }, endpoint: 'start', nodeId: 'rect-1', paintIndex: 0, rotation: 0 });
+  });
+
+  it('should return null for a radial gradient within the inner move radius of the center — moving takes priority', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+
+    expect(getGradientRotateHandleAtPoint({ x: 5, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
+  });
+
+  it('should also hit the outer rotate ring around the edge point of a radial gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientRotateHandleAtPoint({ x: 92, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit?.endpoint).toBe('end');
+  });
 });

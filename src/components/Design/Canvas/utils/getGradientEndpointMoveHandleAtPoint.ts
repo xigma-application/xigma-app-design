@@ -9,6 +9,7 @@ import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
 import { getNodeBounds } from './getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from './isLineHandleGradientPaint';
 
 export const GRADIENT_ENDPOINT_MOVE_RADIUS_PX = 6;
 
@@ -35,7 +36,7 @@ export const getGradientEndpointMoveHandleAtPoint = (
   ) {
     const paint = node.fills[gradientEditor.paintIndex];
 
-    if (paint?.type === 'gradient-linear') {
+    if (isLineHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);
       const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
       const tolerance = GRADIENT_ENDPOINT_MOVE_RADIUS_PX / viewport.zoom;

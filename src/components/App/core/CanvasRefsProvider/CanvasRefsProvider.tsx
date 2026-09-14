@@ -13,6 +13,7 @@ import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRef
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
 import { useGradientEndpointMoveRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientEndpointMoveRefs/useGradientEndpointMoveRefs';
+import { useGradientRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientRadiusRefs/useGradientRadiusRefs';
 import { useGradientRotateRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientRotateRefs/useGradientRotateRefs';
 import { useGradientStopRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientStopRefs/useGradientStopRefs';
 import { useGuideRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGuideRefs/useGuideRefs';
@@ -45,6 +46,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const ellipseArcRefs = useEllipseArcRefs();
   const frameNameRefs = useFrameNameRefs();
   const gradientEndpointMoveRefs = useGradientEndpointMoveRefs();
+  const gradientRadiusRefs = useGradientRadiusRefs();
   const gradientRotateRefs = useGradientRotateRefs();
   const gradientStopRefs = useGradientStopRefs();
   const guideRefs = useGuideRefs();
@@ -82,6 +84,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       ellipseArc: ellipseArcRefs,
       frameName: frameNameRefs,
       gradientEndpointMove: gradientEndpointMoveRefs,
+      gradientRadius: gradientRadiusRefs,
       gradientRotate: gradientRotateRefs,
       gradientStop: gradientStopRefs,
       guides: guideRefs,
@@ -112,6 +115,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       ellipseArcRefs,
       frameNameRefs,
       gradientEndpointMoveRefs,
+      gradientRadiusRefs,
       gradientRotateRefs,
       gradientStopRefs,
       guideRefs,

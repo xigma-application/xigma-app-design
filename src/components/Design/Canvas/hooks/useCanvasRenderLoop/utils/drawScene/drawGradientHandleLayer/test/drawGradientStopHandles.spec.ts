@@ -8,6 +8,7 @@ vi.mock('../drawSingleGradientStopHandle', () => ({
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const DOWN = { x: 0, y: 1 };
 const STOPS = [
   { color: '#ff0000', opacity: 100, position: 0 },
   { color: '#00ff00', opacity: 50, position: 1 },
@@ -29,7 +30,13 @@ describe('drawGradientStopHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopHandles(gl, program, buffer, STOPS, POSITIONS, null, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientStopHandles(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
+      STOPS,
+      POSITIONS,
+      DOWN,
+      null,
+    );
 
     // result
     expect(drawSingleGradientStopHandleMock).toHaveBeenCalledTimes(2);
@@ -39,6 +46,7 @@ describe('drawGradientStopHandles', () => {
       program,
       buffer,
       POSITIONS[0],
+      DOWN,
       '#ff0000',
       100,
       false,
@@ -52,6 +60,7 @@ describe('drawGradientStopHandles', () => {
       program,
       buffer,
       POSITIONS[1],
+      DOWN,
       '#00ff00',
       50,
       false,
@@ -68,12 +77,18 @@ describe('drawGradientStopHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopHandles(gl, program, buffer, STOPS, POSITIONS, 1, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientStopHandles(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
+      STOPS,
+      POSITIONS,
+      DOWN,
+      1,
+    );
 
     // result
     const [firstCall, secondCall] = drawSingleGradientStopHandleMock.mock.calls;
 
-    expect(firstCall[6]).toBe(false);
-    expect(secondCall[6]).toBe(true);
+    expect(firstCall[7]).toBe(false);
+    expect(secondCall[7]).toBe(true);
   });
 });

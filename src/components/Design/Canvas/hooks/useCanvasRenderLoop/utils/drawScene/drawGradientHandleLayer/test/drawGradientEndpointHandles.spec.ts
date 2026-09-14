@@ -34,7 +34,7 @@ describe('drawGradientEndpointHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEndpointHandles(gl, program, buffer, POINTS, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientEndpointHandles({ buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT }, POINTS);
 
     // result — 2 points x (shadow fill + white fill) = 4 fan draws, no stroke pass
     expect(gl.drawArrays).toHaveBeenCalledTimes(4);
@@ -48,7 +48,7 @@ describe('drawGradientEndpointHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEndpointHandles(gl, program, buffer, POINTS, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientEndpointHandles({ buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT }, POINTS);
 
     // result — for the first endpoint: shadow pass then white pass
     const colorCalls = (gl.uniform4fv as ReturnType<typeof vi.fn>).mock.calls;
@@ -65,7 +65,7 @@ describe('drawGradientEndpointHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEndpointHandles(gl, program, buffer, POINTS, 100, 100, IDENTITY_VIEWPORT);
+    drawGradientEndpointHandles({ buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT }, POINTS);
 
     // result — bufferData: [shadow vertices, dot vertices, ...] for the first endpoint
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -86,7 +86,7 @@ describe('drawGradientEndpointHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEndpointHandles(gl, program, buffer, POINTS, 100, 100, { x: 0, y: 0, zoom: 4 });
+    drawGradientEndpointHandles({ buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: { x: 0, y: 0, zoom: 4 } }, POINTS);
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

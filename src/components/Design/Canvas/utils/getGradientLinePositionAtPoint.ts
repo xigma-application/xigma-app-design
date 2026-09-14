@@ -11,7 +11,9 @@ import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvas
 import { getNodeBounds } from './getNodeBounds';
 import { getPointAlongGradientLine } from './getPointAlongGradientLine';
 import { getPositionAlongGradientLine } from './getPositionAlongGradientLine';
+import { getGradientRadiusHandleAtPoint } from './getGradientRadiusHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from './isLineHandleGradientPaint';
 
 const GRADIENT_LINE_HIT_TOLERANCE_PX = 8;
 
@@ -30,11 +32,12 @@ export const getGradientLinePositionAtPoint = (
     isAppearanceNode(node) &&
     !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
     !getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
-    !getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
+    !getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
+    !getGradientRadiusHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
     const paint = node.fills[gradientEditor.paintIndex];
 
-    if (paint?.type === 'gradient-linear') {
+    if (isLineHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);
       const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
       const position = getPositionAlongGradientLine(point, start, end);

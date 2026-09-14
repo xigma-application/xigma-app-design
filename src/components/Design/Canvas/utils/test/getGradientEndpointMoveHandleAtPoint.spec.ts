@@ -83,4 +83,11 @@ describe('getGradientEndpointMoveHandleAtPoint', () => {
     expect(getGradientEndpointMoveHandleAtPoint(point, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).not.toBeNull();
     expect(getGradientEndpointMoveHandleAtPoint(point, [rectangle()], { x: 0, y: 0, zoom: 4 }, GRADIENT_EDITOR)).toBeNull();
   });
+
+  it('should also hit the start/end move handles of a radial gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientEndpointMoveHandleAtPoint({ x: 3, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ endpoint: 'start', nodeId: 'rect-1', paintIndex: 0 });
+  });
 });

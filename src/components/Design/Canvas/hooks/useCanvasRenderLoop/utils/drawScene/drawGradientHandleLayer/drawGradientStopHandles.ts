@@ -1,28 +1,27 @@
 // types
 import { TPoint } from 'types/canvas';
 import { TGradientStop } from 'types/design/paint/types';
-import { TViewport } from 'types/design/types';
+import { TDrawContext } from '../types';
 
 // utils
 import { drawSingleGradientStopHandle } from './drawSingleGradientStopHandle';
 
 export const drawGradientStopHandles = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  ctx: TDrawContext,
   stops: TGradientStop[],
   positions: TPoint[],
+  towardLineDirection: TPoint,
   selectedStopIndex: number | null,
-  canvasWidth: number,
-  canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = ctx;
+
   stops.forEach((stop, index) => {
     drawSingleGradientStopHandle(
       gl,
       program,
       buffer,
       positions[index],
+      towardLineDirection,
       stop.color,
       stop.opacity,
       index === selectedStopIndex,

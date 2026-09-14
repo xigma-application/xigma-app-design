@@ -143,4 +143,36 @@ describe('useIsPointerOverGradientHandle', () => {
     // result
     expect(result.current()).toBe(true);
   });
+
+  it('should return true while hovering the radius handle', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.hover.hoveredGradientRadiusHandleRef.current = 'node-a';
+
+    // result
+    expect(result.current()).toBe(true);
+  });
+
+  it('should return true while a gradient radius drag is in progress, even if the cursor has strayed off the handle', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.gradientRadius.gradientRadiusDragRef.current = { nodeId: 'node-a', paintIndex: 0 };
+
+    // result
+    expect(result.current()).toBe(true);
+  });
 });

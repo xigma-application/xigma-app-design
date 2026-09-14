@@ -1,3 +1,6 @@
+// types
+import { TPoint } from 'types/canvas';
+
 // utils
 import { drawGradientStopPointer } from '../drawGradientStopPointer';
 import { hexToRgbaFloat } from 'utils/canvas/hexToRgbaFloat';
@@ -22,6 +25,8 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
+const DOWN: TPoint = { x: 0, y: 1 };
+
 describe('drawGradientStopPointer', () => {
   it('should draw a single filled-triangle pass', () => {
     // mock
@@ -30,21 +35,21 @@ describe('drawGradientStopPointer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, '#cacaca', 100, 100, IDENTITY_VIEWPORT);
+    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, DOWN, '#cacaca', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 3);
   });
 
-  it('should point down 6 wide by 3 tall from the given top-center point', () => {
+  it('should point down 6 wide by 3 tall from the given anchor when direction is straight down', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, '#cacaca', 100, 100, IDENTITY_VIEWPORT);
+    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, DOWN, '#cacaca', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     const [vertices] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[0].slice(1) as [Float32Array];
@@ -56,6 +61,24 @@ describe('drawGradientStopPointer', () => {
     expect(Math.max(...ys)).toBeCloseTo(53);
   });
 
+  it('should rotate to point sideways when given a horizontal direction', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — points right instead of down
+    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, { x: 1, y: 0 }, '#cacaca', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — the tip (the vertex farthest from y=50) now extends in x, not y
+    const [vertices] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[0].slice(1) as [Float32Array];
+    const xs = Array.from(vertices).filter((_, i) => i % 2 === 0);
+    const ys = Array.from(vertices).filter((_, i) => i % 2 === 1);
+
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(3);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(6);
+  });
+
   it('should use the given fill color', () => {
     // mock
     const gl = createGlMock();
@@ -63,7 +86,7 @@ describe('drawGradientStopPointer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, DOWN, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), hexToRgbaFloat('#0d99ff'));
@@ -76,7 +99,7 @@ describe('drawGradientStopPointer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, '#cacaca', 100, 100, { x: 0, y: 0, zoom: 2 });
+    drawGradientStopPointer(gl, program, buffer, { x: 50, y: 50 }, DOWN, '#cacaca', 100, 100, { x: 0, y: 0, zoom: 2 });
 
     // result
     const [vertices] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[0].slice(1) as [Float32Array];

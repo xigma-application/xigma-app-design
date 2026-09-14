@@ -13,6 +13,7 @@ uniform vec2 u_start;
 uniform vec2 u_end;
 uniform int u_gradientTypeIndex;
 uniform float u_opacity;
+uniform float u_radiusRatio;
 
 in vec2 v_localPosition;
 out vec4 outColor;
@@ -50,8 +51,16 @@ void main() {
     float axisLengthSq = dot(axis, axis);
     t = axisLengthSq > 0.0 ? dot(v_localPosition - u_start, axis) / axisLengthSq : 0.0;
   } else if (u_gradientTypeIndex == 1) {
-    float radius = length(u_end - center);
-    t = radius > 0.0 ? length(v_localPosition - center) / radius : 0.0;
+    float primaryRadius = length(axis);
+
+    if (primaryRadius > 0.0) {
+      vec2 direction = axis / primaryRadius;
+      vec2 perpendicular = vec2(-direction.y, direction.x);
+      vec2 relative = v_localPosition - u_start;
+      float a = dot(relative, direction) / primaryRadius;
+      float b = dot(relative, perpendicular) / (primaryRadius * u_radiusRatio);
+      t = length(vec2(a, b));
+    }
   } else if (u_gradientTypeIndex == 2) {
     vec2 baseDirection = u_end - center;
     float baseAngle = atan(baseDirection.y, baseDirection.x);

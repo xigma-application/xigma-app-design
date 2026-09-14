@@ -12,7 +12,8 @@ export const drawGradientStopPointer = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  topCenter: TPoint,
+  anchor: TPoint,
+  direction: TPoint,
   fill: string,
   canvasWidth: number,
   canvasHeight: number,
@@ -20,6 +21,10 @@ export const drawGradientStopPointer = (
 ): void => {
   const width = POINTER_WIDTH / viewport.zoom;
   const height = POINTER_HEIGHT / viewport.zoom;
+  const perpendicular: TPoint = { x: -direction.y, y: direction.x };
+  const baseLeft: TPoint = { x: anchor.x - (perpendicular.x * width) / 2, y: anchor.y - (perpendicular.y * width) / 2 };
+  const baseRight: TPoint = { x: anchor.x + (perpendicular.x * width) / 2, y: anchor.y + (perpendicular.y * width) / 2 };
+  const tip: TPoint = { x: anchor.x + direction.x * height, y: anchor.y + direction.y * height };
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
   const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
@@ -35,14 +40,7 @@ export const drawGradientStopPointer = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(
     gl.ARRAY_BUFFER,
-    new Float32Array([
-      topCenter.x - width / 2,
-      topCenter.y,
-      topCenter.x + width / 2,
-      topCenter.y,
-      topCenter.x,
-      topCenter.y + height,
-    ]),
+    new Float32Array([baseLeft.x, baseLeft.y, baseRight.x, baseRight.y, tip.x, tip.y]),
     gl.STATIC_DRAW,
   );
   gl.uniform4fv(colorLocation, hexToRgbaFloat(fill));

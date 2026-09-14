@@ -80,5 +80,28 @@ export const armGradientRotateOnPointerDown = ({
 
       return true;
     }
+
+    if (paint?.type === 'gradient-radial') {
+      const { bounds } = rotateHit;
+      const localStart: TPoint = { x: bounds.x + paint.start.x * bounds.width, y: bounds.y + paint.start.y * bounds.height };
+      const localEnd: TPoint = { x: bounds.x + paint.end.x * bounds.width, y: bounds.y + paint.end.y * bounds.height };
+      const radius = Math.hypot(localEnd.x - localStart.x, localEnd.y - localStart.y);
+
+      armGradientRotateDrag(
+        canvas,
+        event,
+        canvasRefs.gradientRotate.gradientRotateDragRef,
+        rotateHit.nodeId,
+        rotateHit.paintIndex,
+        'end',
+        point,
+        'radial',
+        localStart,
+        radius,
+        0,
+      );
+
+      return true;
+    }
   }
 };

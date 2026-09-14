@@ -25,6 +25,7 @@ export type TSolidPaint = TPaintBase & {
 
 export type TGradientPaint = TPaintBase & {
   end: TPoint;
+  radiusRatio?: number;
   start: TPoint;
   stops: TGradientStop[];
   type: 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial';

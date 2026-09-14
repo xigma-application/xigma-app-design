@@ -20,6 +20,7 @@ export const drawSingleGradientStopHandle = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   position: TPoint,
+  towardLineDirection: TPoint,
   color: string,
   opacity: number,
   isSelected: boolean,
@@ -30,6 +31,7 @@ export const drawSingleGradientStopHandle = (
   const backdropSize = STOP_HANDLE_BACKDROP_SIZE / viewport.zoom;
   const borderSize = STOP_HANDLE_BORDER_SIZE / viewport.zoom;
   const swatchSize = STOP_HANDLE_SWATCH_SIZE / viewport.zoom;
+  const rotationDegrees = (Math.atan2(towardLineDirection.y, towardLineDirection.x) * 180) / Math.PI;
 
   drawRect(
     gl,
@@ -45,13 +47,14 @@ export const drawSingleGradientStopHandle = (
     canvasWidth,
     canvasHeight,
     viewport,
-    0,
+    rotationDegrees,
   );
   drawGradientStopPointer(
     gl,
     program,
     buffer,
-    { x: position.x, y: position.y + backdropSize / 2 },
+    { x: position.x + towardLineDirection.x * (backdropSize / 2), y: position.y + towardLineDirection.y * (backdropSize / 2) },
+    towardLineDirection,
     isSelected ? DIMENSION_HINT_GUIDE_BLUE : STOP_HANDLE_BACKDROP_FILL,
     canvasWidth,
     canvasHeight,
@@ -71,7 +74,7 @@ export const drawSingleGradientStopHandle = (
     canvasWidth,
     canvasHeight,
     viewport,
-    0,
+    rotationDegrees,
   );
   drawRect(
     gl,
@@ -88,6 +91,6 @@ export const drawSingleGradientStopHandle = (
     canvasWidth,
     canvasHeight,
     viewport,
-    0,
+    rotationDegrees,
   );
 };

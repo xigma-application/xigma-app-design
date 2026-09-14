@@ -1163,4 +1163,316 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].end!.y).toBeCloseTo(0.3125, 2);
     expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
   });
+
+  test('moving a radial gradient’s center point on the canvas moves only that point', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-radial-move');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab exactly on the center point (700,280) and drag it, well away from any snap landmark
+    await page.mouse.move(700, 280);
+    await page.mouse.down();
+    await page.mouse.move(770, 250, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].start!.x).toBeCloseTo(0.35, 2);
+    expect(node.fills![0].start!.y).toBeCloseTo(0.3125, 2);
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
+
+  test('dragging a radial gradient’s perpendicular radius handle reshapes the ellipse', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-radial-radius-handle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the perpendicular radius handle for this configuration sits at world (700, 440) — 80px below
+    // the shape's bottom edge, a full primary-radius (160px) away from the center at (700,280)
+    await page.mouse.move(700, 440);
+    await page.mouse.down();
+    await page.mouse.move(700, 360, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].radiusRatio).toBeCloseTo(0.5, 2);
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
+
+  test('dragging the outer ring around a radial gradient’s center rotates the whole ellipse around it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-radial-rotate-from-center');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // center (800,280), edge straight down at (800,360) — an 80px radius
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px left of the center (800,280) — past the inner move zone, within the outer rotate ring
+    // (the left side is used deliberately: for this vertical line the stops are offset to the right
+    // of the axis, so grabbing on the left avoids colliding with the stop at position 0)
+    await page.mouse.move(792, 280);
+    await page.mouse.down();
+    await page.mouse.move(800, 200, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    // the center never moves; the edge point swings from straight-down to straight-up, radius unchanged
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end!.x).toBeCloseTo(0.5, 2);
+    expect(node.fills![0].end!.y).toBeCloseTo(0, 2);
+  });
+
+  test('dragging the outer ring around a radial gradient’s edge point also rotates around the center', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-radial-rotate-from-edge');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // center (800,280), edge straight down at (800,360) — an 80px radius
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px below the edge point (800,360) — past its inner move zone, within its outer rotate ring
+    await page.mouse.move(800, 368);
+    await page.mouse.down();
+    await page.mouse.move(700, 280, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    // still pivots at the center, not the edge point itself
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end!.x).toBeCloseTo(0.1, 2);
+    expect(node.fills![0].end!.y).toBeCloseTo(0.5, 2);
+  });
+
+  test('dragging a radial gradient’s radius handle shows an orange guide from the center, only while dragging', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-radial-radius-guide');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the handle follows the cursor 1:1, so once it settles at (700,400) the fill itself (radiusRatio)
+    // is identical whether the drag is still active or just released — only the guide overlay differs.
+    // Sampling the same point (the guide's midpoint) in both states isolates exactly that difference,
+    // without needing to know the guide's exact color against the moving gradient fill underneath it
+    await page.mouse.move(700, 440);
+    await page.mouse.down();
+    await page.mouse.move(700, 400, { steps: 10 });
+    await page.waitForTimeout(50);
+
+    const duringDrag = await readPixelColor(page, 700, 340);
+
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    const afterRelease = await readPixelColor(page, 700, 340);
+
+    expect(duringDrag).not.toEqual(afterRelease);
+  });
+
+  test('switching a shape gradient to Radial via the panel resets its points to a centered default', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-type-switch-reset');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // an unrelated diagonal line — simulates a gradient with a position left over from before
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.9, y: 0.1 },
+                opacity: 100,
+                start: { x: 0.2, y: 0.8 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    await page.locator('[class*="GradientActions__type-dropdown"]').click();
+    await page.getByText('Radial', { exact: true }).click();
+
+    const node = await readNode(page, id);
+
+    // radial's default: point A (center) at the shape's center, point B on the bottom edge
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 0.5, y: 1 });
+    expect(node.fills![0].type).toBe('gradient-radial');
+  });
 });

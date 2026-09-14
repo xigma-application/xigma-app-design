@@ -34,6 +34,7 @@ import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandl
 import { resolveEllipseArcRotateHandleHover } from './resolveEllipseArcRotateHandleHover';
 import { resolveGradientEndpointMoveHandleHover } from './resolveGradientEndpointMoveHandleHover';
 import { resolveGradientLineHandleHover } from './resolveGradientLineHandleHover';
+import { resolveGradientRadiusHandleHover } from './resolveGradientRadiusHandleHover';
 import { resolveGradientRotateHandleHover } from './resolveGradientRotateHandleHover';
 import { resolveGradientStopHandleHover } from './resolveGradientStopHandleHover';
 import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
@@ -98,6 +99,7 @@ export const resolveToolHover = (
   resolveEllipseArcRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveGradientStopHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveGradientEndpointMoveHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
+  resolveGradientRadiusHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveGradientRotateHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveGradientLineHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);

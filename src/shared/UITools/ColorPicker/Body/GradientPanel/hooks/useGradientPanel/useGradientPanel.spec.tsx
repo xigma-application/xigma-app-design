@@ -217,17 +217,30 @@ describe('useGradientPanel', () => {
     // result
     expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-linear' });
 
-    // action
+    // action — switching type resets the points to that type's own default (radial: centered, reaching
+    // the bottom edge), regardless of whatever angle/points the gradient previously had
     act(() => result.current.setType('gradient-radial'));
 
     // result
-    expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-radial' });
+    expect(onChange).toHaveBeenLastCalledWith({
+      angle: 0,
+      end: { x: 0.5, y: 1 },
+      start: { x: 0.5, y: 0.5 },
+      stops: result.current.stops,
+      type: 'gradient-radial',
+    });
 
     // action
     act(() => result.current.addStop(0.5));
 
     // result
-    expect(onChange).toHaveBeenLastCalledWith({ angle: 90, stops: result.current.stops, type: 'gradient-radial' });
+    expect(onChange).toHaveBeenLastCalledWith({
+      angle: 90,
+      end: { x: 0.5, y: 1 },
+      start: { x: 0.5, y: 0.5 },
+      stops: result.current.stops,
+      type: 'gradient-radial',
+    });
   });
 
   it('should seed stops and points from an initial gradient instead of the defaults', () => {

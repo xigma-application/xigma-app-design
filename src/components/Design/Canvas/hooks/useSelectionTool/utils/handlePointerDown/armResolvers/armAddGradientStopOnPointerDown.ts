@@ -11,6 +11,7 @@ import { TGradientStop } from 'types/design/paint/types';
 import { getGradientLinePositionAtPoint } from '../../../../../utils/getGradientLinePositionAtPoint';
 import { getInterpolatedGradientColor } from '../../../../../utils/getInterpolatedGradientColor';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
 import { MAX_STOPS } from 'shared/UITools/ColorPicker/Body/GradientPanel/constants';
 
 export const armAddGradientStopOnPointerDown = ({ dispatch, point, selectedNodes, viewport }: TArmContext): true | undefined => {
@@ -21,7 +22,7 @@ export const armAddGradientStopOnPointerDown = ({ dispatch, point, selectedNodes
   if (gradientLineHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[gradientLineHit.paintIndex];
 
-    if (paint?.type === 'gradient-linear' && paint.stops.length < MAX_STOPS) {
+    if (isLineHandleGradientPaint(paint) && paint.stops.length < MAX_STOPS) {
       const { color, opacity } = getInterpolatedGradientColor(paint.stops, gradientLineHit.position);
       const newStop: TGradientStop = { color, opacity, position: gradientLineHit.position };
       const sortedStops = [...paint.stops, newStop].sort((a, b) => a.position - b.position);

@@ -91,4 +91,19 @@ describe('getGradientLinePositionAtPoint', () => {
     expect(getGradientLinePositionAtPoint(point, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).not.toBeNull();
     expect(getGradientLinePositionAtPoint(point, [rectangle()], { x: 0, y: 0, zoom: 4 }, GRADIENT_EDITOR)).toBeNull();
   });
+
+  it('should also add stops onto the start->end line of a radial gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientLinePositionAtPoint({ x: 50, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, position: 0.5 });
+  });
+
+  it('should return null on a radial gradient when the point is on its perpendicular radius handle instead', () => {
+    // a small radiusRatio (0.05) pulls the radius handle in close to the line, at world (0, 55) —
+    // close enough that the line's own hit-test would otherwise match it too, if it didn't bail first
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], radiusRatio: 0.05, type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+
+    expect(getGradientLinePositionAtPoint({ x: 0, y: 55 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
+  });
 });

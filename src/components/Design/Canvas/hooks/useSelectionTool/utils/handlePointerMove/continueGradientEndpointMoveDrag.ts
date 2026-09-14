@@ -15,6 +15,7 @@ import { getGradientMoveSnapPoint } from '../../../../utils/getGradientMoveSnapP
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradientPaint';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
@@ -36,7 +37,7 @@ export const continueGradientEndpointMoveDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'gradient-linear') {
+      if (isLineHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
         const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
         const viewport = selectViewport(state);
