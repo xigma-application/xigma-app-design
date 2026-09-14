@@ -30,6 +30,7 @@ export type TColorPickerInputProps = {
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
+  historyRevision?: number;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
@@ -60,6 +61,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   e2eValue = '',
   hex,
   hexDisplayValue,
+  historyRevision,
   initialActiveTab,
   initialGradient,
   isPointerOverGradientHandle,
@@ -109,6 +111,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                historyRevision={historyRevision}
                 initialActiveTab={initialActiveTab}
                 initialGradient={initialGradient}
                 isPointerOverGradientHandle={isPointerOverGradientHandle}

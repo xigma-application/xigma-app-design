@@ -23,6 +23,7 @@ const gradientPanel = {
   canRemoveStop: false,
   flip: vi.fn(),
   removeStop: vi.fn(),
+  reset: vi.fn(),
   rotate: vi.fn(),
   selectStop: vi.fn(),
   selectedStopId: null,

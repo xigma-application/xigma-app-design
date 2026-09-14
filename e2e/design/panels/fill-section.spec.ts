@@ -781,9 +781,7 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
   });
 
-  test('rotating a gradient whose endpoints do not touch the shape edge pivots around its own center, not the shape', async ({
-    page,
-  }) => {
+  test('rotating a gradient whose endpoints do not touch the shape edge pivots around its own center, not the shape', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-gradient-rotate-line-mode');
@@ -841,9 +839,7 @@ test.describe('Design panels — Fill section', () => {
     expect(Math.hypot(endWorld.x - pivot.x, endWorld.y - pivot.y)).toBeCloseTo(radius, 0);
   });
 
-  test('rotating a gradient whose endpoints both touch the same single edge also pivots around the line, not the box', async ({
-    page,
-  }) => {
+  test('rotating a gradient whose endpoints both touch the same single edge also pivots around the line, not the box', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-gradient-rotate-same-edge');
@@ -1780,7 +1776,9 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].type).toBe('gradient-angular');
   });
 
-  test('dragging an angular gradient stop around the ellipse moves it by angle, not by linear position along the line', async ({ page }) => {
+  test('dragging an angular gradient stop around the ellipse moves it by angle, not by linear position along the line', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-angular-stop-drag');
@@ -1949,5 +1947,179 @@ test.describe('Design panels — Fill section', () => {
     await page.getByLabel('Hex color').click();
 
     await expect(page.locator('[class*="GradientActions__type-dropdown"]')).toHaveText('Angular');
+  });
+
+  test('switching a gradient fill to Solid and back to Gradient starts fresh, instead of resurfacing the old paint', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-solid-resets-gradient-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // a custom radial gradient, far from the plain default
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.9, y: 0.1 },
+                opacity: 100,
+                radiusRatio: 0.4,
+                start: { x: 0.2, y: 0.8 },
+                stops: [
+                  { color: '#ff00ff', opacity: 100, position: 0 },
+                  { color: '#00ffff', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // action — switch to Solid, then back to Gradient in the same open session
+    await page.getByLabel('Solid').click();
+    await page.getByLabel('Gradient').click();
+
+    const node = await readNode(page, id);
+    const fill = node.fills![0];
+
+    // result — a fresh plain default (linear, default stops), not the old radial/custom paint
+    expect(fill.type).toBe('gradient-linear');
+    expect(fill.start).toEqual({ x: 0, y: 0.5 });
+    expect(fill.end).toEqual({ x: 1, y: 0.5 });
+    expect(fill.stops).toEqual([
+      { color: '#d9d9d9', opacity: 100, position: 0 },
+      { color: '#737373', opacity: 100, position: 1 },
+    ]);
+  });
+
+  test('undoing a gradient type change updates the open panel’s own type dropdown, not just the render', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-undo-updates-open-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    await page.locator('[class*="GradientActions__type-dropdown"]').click();
+    await page.getByText('Radial', { exact: true }).click();
+
+    await expect(page.locator('[class*="GradientActions__type-dropdown"]')).toHaveText('Radial');
+
+    // move focus off the dropdown's own trigger button first — it swallows keydown itself otherwise
+    await page.getByText('Stops', { exact: false }).first().click();
+
+    // action — undo the type switch while the panel is still open
+    await page.keyboard.press('Control+z');
+
+    // result — the node itself is back to linear...
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].type).toBe('gradient-linear');
+
+    // ...and so is the panel's own dropdown, which used to stay stuck on the pre-undo value
+    await expect(page.locator('[class*="GradientActions__type-dropdown"]')).toHaveText('Linear');
+  });
+
+  test('dragging a stop color on the saturation map coalesces into a single undo step, instead of one per pixel', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-saturation-drag-history');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Stop color').first().click();
+
+    const map = page.locator('[class*="SaturationMap__input"]');
+    const mapBox = (await map.boundingBox())!;
+
+    // action — drag from the white corner (s:0, v:100) across to the fully-saturated corner (s:100, v:100),
+    // in many small steps so an uncoalesced implementation would push many separate history entries
+    await page.mouse.move(mapBox.x + 1, mapBox.y + 1);
+    await page.mouse.down();
+    await page.mouse.move(mapBox.x + mapBox.width - 1, mapBox.y + 1, { steps: 15 });
+    await page.mouse.up();
+
+    const draggedColor = (await readNode(page, id)).fills![0].stops![0].color;
+
+    expect(draggedColor).not.toBe('#ffffff');
+
+    // action — a single undo
+    await page.keyboard.press('Control+z');
+
+    // result — the whole drag reverts in one step, back to the exact original color
+    const undoneColor = (await readNode(page, id)).fills![0].stops![0].color;
+
+    expect(undoneColor).toBe('#ffffff');
   });
 });

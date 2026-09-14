@@ -21,11 +21,17 @@ import styles from './stop-color-panel.module.scss';
 // types
 import { TColorPickerValue } from '../../../../../types';
 
-export type TStopColorPanelProps = { onClose: TFunc; onColorChange: TFunc<[TColorPickerValue]>; value: TColorPickerValue };
+export type TStopColorPanelProps = {
+  onClose: TFunc;
+  onColorChange: TFunc<[TColorPickerValue]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
+  value: TColorPickerValue;
+};
 
 const noopSetActiveTab = (): void => undefined;
 
-export const StopColorPanel: FC<TStopColorPanelProps> = ({ onClose, onColorChange, value }) => {
+export const StopColorPanel: FC<TStopColorPanelProps> = ({ onClose, onColorChange, onDragEnd, onDragStart, value }) => {
   const { t } = useTranslation();
   const colorModel = useColorModel(value, onColorChange);
   const colorSampler = useColorSampler(colorModel.setHex);
@@ -42,7 +48,14 @@ export const StopColorPanel: FC<TStopColorPanelProps> = ({ onClose, onColorChang
           </Tooltip>
         </div>
       </div>
-      <SolidPanel alpha={value.alpha} colorModel={colorModel} onCloseSampler={colorSampler.close} onOpenSampler={colorSampler.open} />
+      <SolidPanel
+        alpha={value.alpha}
+        colorModel={colorModel}
+        onCloseSampler={colorSampler.close}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        onOpenSampler={colorSampler.open}
+      />
       {colorSampler.isActive && <ColorSampler onClose={colorSampler.close} onPick={colorSampler.pick} />}
     </div>
   );

@@ -44,6 +44,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   freezePositionOnGrow,
   headerExtra,
+  historyRevision,
   initialActiveTab,
   initialGradient,
   isPointerOverGradientHandle,
@@ -71,7 +72,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
-  const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId);
+  const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, historyRevision);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, onGradientChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);

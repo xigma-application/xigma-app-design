@@ -81,6 +81,8 @@ export const selectGridTrackModeMenuRequest = (state: RootState): TGridTrackMode
 
 export const selectGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.gridTrackSelection ?? null;
 
+export const selectHistoryRevision = (state: RootState): number => state.design.historyRevision ?? 0;
+
 export const selectGridTrackValueEditRequest = (state: RootState): TGridTrackValueEditRequest | null =>
   state.design.gridTrackValueEditRequest ?? null;
 

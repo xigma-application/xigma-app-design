@@ -11,9 +11,10 @@ const VALUE = { alpha: 100, hex: '#ff0000' };
 
 const GRADIENT_PANEL = {
   angle: 90,
+  reset: vi.fn(),
   stops: [{ color: '#ffffff', id: 'a', opacity: 100, position: 0 }],
   type: 'gradient-radial',
-} as TUseGradientPanelResult;
+} as unknown as TUseGradientPanelResult;
 
 describe('useSetActiveTab', () => {
   it('should call setActiveTab when the tab name is a known ColorPickerTab', () => {
@@ -78,6 +79,34 @@ describe('useSetActiveTab', () => {
 
     // result
     expect(onChange).toHaveBeenCalledWith(VALUE);
+  });
+
+  it('should reset the gradient panel state when switching to Solid, so a later switch back to Gradient starts fresh', () => {
+    // mock
+    const reset = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }));
+
+    // action
+    result.current(ColorPickerTab.solid);
+
+    // result
+    expect(reset).toHaveBeenCalled();
+  });
+
+  it('should not reset the gradient panel state when switching to Gradient', () => {
+    // mock
+    const reset = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }));
+
+    // action
+    result.current(ColorPickerTab.gradient);
+
+    // result
+    expect(reset).not.toHaveBeenCalled();
   });
 
   it('should not commit anything when the tab name is unknown', () => {

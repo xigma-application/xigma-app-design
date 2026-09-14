@@ -27,6 +27,7 @@ export const useSetActiveTab =
         onGradientChange?.({ angle: gradientPanel.angle, stops: gradientPanel.stops, type: gradientPanel.type });
       } else {
         onChange(value);
+        gradientPanel.reset();
       }
     }
   };

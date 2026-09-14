@@ -19,6 +19,8 @@ export type TUseGradientBarDragResult = {
 
 export type TUseGradientBarDragOptions = {
   onAddStop: TFunc<[number]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onMoveStop: TFunc<[string, number]>;
   onSelectStop: TFunc<[string]>;
   stops: TEditableGradientStop[];
@@ -26,6 +28,8 @@ export type TUseGradientBarDragOptions = {
 
 export const useGradientBarDrag = ({
   onAddStop,
+  onDragEnd,
+  onDragStart,
   onMoveStop,
   onSelectStop,
   stops,
@@ -46,8 +50,11 @@ export const useGradientBarDrag = ({
   );
 
   const handleWindowPointerEnd = useCallback((): void => {
-    draggingStopIdRef.current = null;
-  }, []);
+    if (draggingStopIdRef.current) {
+      draggingStopIdRef.current = null;
+      onDragEnd?.();
+    }
+  }, [onDragEnd]);
 
   const onTrackPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
     const bar = barRef.current;
@@ -68,6 +75,7 @@ export const useGradientBarDrag = ({
       event.stopPropagation();
       draggingStopIdRef.current = stopId;
       onSelectStop(stopId);
+      onDragStart?.();
     },
   });
 

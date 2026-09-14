@@ -17,15 +17,32 @@ import { getThumbOffset } from './utils/getThumbOffset';
 
 export type TGradientBarProps = {
   onAddStop: TFunc<[number]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onMoveStop: TFunc<[string, number]>;
   onSelectStop: TFunc<[string]>;
   selectedStopId: string | null;
   stops: TEditableGradientStop[];
 };
 
-export const GradientBar: FC<TGradientBarProps> = ({ onAddStop, onMoveStop, onSelectStop, selectedStopId, stops }) => {
+export const GradientBar: FC<TGradientBarProps> = ({
+  onAddStop,
+  onDragEnd,
+  onDragStart,
+  onMoveStop,
+  onSelectStop,
+  selectedStopId,
+  stops,
+}) => {
   const { t } = useTranslation();
-  const { barRef, getThumbHandlers, onTrackPointerDown } = useGradientBarDrag({ onAddStop, onMoveStop, onSelectStop, stops });
+  const { barRef, getThumbHandlers, onTrackPointerDown } = useGradientBarDrag({
+    onAddStop,
+    onDragEnd,
+    onDragStart,
+    onMoveStop,
+    onSelectStop,
+    stops,
+  });
 
   return (
     <div className={styles.GradientBar}>

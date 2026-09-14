@@ -8,8 +8,9 @@ import { DEFAULT_GRADIENT_STOPS, DEFAULT_GRADIENT_TYPE } from '../../../constant
 import { TEditableGradientStop, TGradientType, TInitialGradient } from '../../../types';
 import { TGradientPoints } from './useRotateGradient';
 
-export const useResetGradientPanelOnReopen = (
+export const useResyncGradientPanelState = (
   resetKey: number | undefined,
+  historyRevision: number | undefined,
   initialGradient: TInitialGradient | undefined,
   setStops: Dispatch<SetStateAction<TEditableGradientStop[]>>,
   setSelectedStopId: Dispatch<SetStateAction<string | null>>,
@@ -34,5 +35,5 @@ export const useResetGradientPanelOnReopen = (
       setPoints(seed ? { end: seed.end, start: seed.start } : null);
       setType(seed?.type ?? DEFAULT_GRADIENT_TYPE);
     }
-  }, [resetKey]);
+  }, [resetKey, historyRevision]);
 };

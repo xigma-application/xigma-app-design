@@ -12,9 +12,9 @@ import styles from './gradient-panel.module.scss';
 // types
 import { TUseGradientPanelResult } from './hooks/useGradientPanel/useGradientPanel';
 
-export type TGradientPanelProps = { gradientPanel: TUseGradientPanelResult };
+export type TGradientPanelProps = { gradientPanel: TUseGradientPanelResult; onDragEnd?: TFunc; onDragStart?: TFunc };
 
-export const GradientPanel: FC<TGradientPanelProps> = ({ gradientPanel }) => {
+export const GradientPanel: FC<TGradientPanelProps> = ({ gradientPanel, onDragEnd, onDragStart }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -27,6 +27,8 @@ export const GradientPanel: FC<TGradientPanelProps> = ({ gradientPanel }) => {
       />
       <GradientBar
         onAddStop={gradientPanel.addStop}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
         onMoveStop={gradientPanel.setStopPosition}
         onSelectStop={gradientPanel.selectStop}
         selectedStopId={gradientPanel.selectedStopId}
@@ -36,6 +38,8 @@ export const GradientPanel: FC<TGradientPanelProps> = ({ gradientPanel }) => {
         canAddStop={gradientPanel.canAddStop}
         canRemoveStop={gradientPanel.canRemoveStop}
         onAddStop={gradientPanel.addStop}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
         onRemoveStop={gradientPanel.removeStop}
         onSelectStop={gradientPanel.selectStop}
         onSetStopColor={gradientPanel.setStopColor}

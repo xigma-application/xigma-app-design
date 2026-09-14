@@ -761,6 +761,61 @@ node's folder. Today:
   squares, only the rotation *mod 90°* is visually distinguishable, so no sign/direction convention
   needed to be agonized over — any of the four equivalent right-angle offsets looks identical.
 
+**Three more GradientPanel bugs, all traced to the same root cause: `useGradientPanel`'s local
+state is a working copy seeded once from the paint, not a live mirror of it.** `useGradientPanel.ts`
+(`stops`/`selectedStopId`/`angle`/`points`/`type`) is plain `useState`, seeded from the
+`initialGradient` prop only on mount and re-seeded only by two narrow effects: reopening the popover
+(`useResyncGradientPanelState.ts`, formerly `useResetGradientPanelOnReopen.ts`) and a stop-count
+mismatch (`useSyncExternalStopChanges.ts`). Anything else that changes the paint out from under the
+open panel — switching to Solid, or an undo/redo — left this local state stale.
+
+- **Switching to Solid didn't reset the gradient state**, so switching back to Gradient in the same
+  popover session resurfaced the old paint's stops/type/points instead of starting fresh. Since this
+  is a direct, local interaction (clicking the Solid tab), it's fixed at the interaction site rather
+  than with another watch-effect: `useGradientPanel` now also returns a `reset()` (new
+  `useResetGradientPanel.ts`, the same five-setter reset body `useResyncGradientPanelState` already
+  had, factored out so both can call it), and `useSetActiveTab.ts` calls it directly in its
+  solid-tab branch, right next to the existing `onChange(value)` call.
+
+- **Undo/redo didn't refresh the open panel at all** — not the stops, not even the type dropdown —
+  because `updateNode` (every panel edit) and `replaceDesignSnapshot` (what `undo`/`redo` dispatch,
+  `store/history/actions.ts`) both just change `paint` in Redux the same way from this component's
+  point of view, so there was no signal to tell "the panel's own edit echoing back" apart from "the
+  ground truth changed underneath it." Undo/redo needed a real resync, but naively re-seeding on
+  every `initialGradient` prop change would have fought every keystroke (the panel's own `onChange`
+  round-trips through Redux and back into a new `initialGradient` reference on *every* edit) — the
+  exact "two sides both think they're the source of truth" trap. The fix uses a signal that only
+  `replaceDesignSnapshot` ever touches: a new `design.historyRevision` counter (optional on
+  `TDesignState`, so the ~50 existing test fixtures that build a full `TDesignState` object literal
+  didn't all need a new required field), bumped in `handleReplaceDesignSnapshot.ts` and nowhere else.
+  `selectHistoryRevision` is threaded as a plain prop all the way down (`FillRow` → `ColorPickerInput`
+  → `ColorPicker` → `useGradientPanel`, alongside the existing `resetKey`/`openSessionId`) rather than
+  read directly inside `shared/UITools/ColorPicker`, which stays Redux-free. `useResyncGradientPanelState`
+  now re-seeds on *either* `resetKey` or `historyRevision` changing — ordinary edits never bump the
+  latter, so there's no fight, only genuine external replacements force a resync.
+
+- **Continuous drags inside the gradient panel spammed one history entry per pixel** — the
+  begin/end-gesture coalescing pattern (`beginHistoryGesture`/`endHistoryGesture`,
+  `store/history/actions.ts` — a pending pre-drag snapshot is only actually pushed once per gesture,
+  see `createHistoryStack.ts`'s `snapshotPushedThisGesture`) already covered the Solid panel and
+  every canvas drag, but `onDragStart`/`onDragEnd` simply never reached the Gradient tab: `Body.tsx`
+  only forwarded them to `SolidPanel`, not `GradientPanel`. Threaded them all the way through
+  `GradientPanel` → `GradientBar` (wired into `useGradientBarDrag`'s existing thumb
+  pointerdown/window-pointerup handlers) and → `StopsList` → `StopRow` (its own alpha
+  `ScrubbableInput`, plus forwarded again into the docked `StopColorPanel` → `SolidPanel`, so a stop's
+  saturation-map/hue/alpha drags coalesce the same way the main fill's do). All new props are
+  optional and additive, so the vector Paint tool's gradient flow (`VectorEditPaintTool.tsx`, which
+  already passes its own `onDragStart`/`onDragEnd` into the same shared `ColorPicker`) picked up the
+  same fix for free. `useGradientBarDrag`'s `onDragEnd` is now guarded on "was a drag actually in
+  progress" before calling it — not required for correctness (`endGesture()` is a no-op if no gesture
+  is open) but avoids firing it on every unrelated pointerup while the bar is visible.
+
+  E2E gotcha worth remembering: sending `Control+z` while focus sits on `GradientActions`' own type
+  dropdown *trigger button* does nothing — the shared `Dropdown` component swallows the keydown
+  itself. Any e2e test that needs global keyboard shortcuts to reach the app while a dropdown was
+  just used must click something else inert first (e.g. the "Stops" label) to move focus off the
+  trigger.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

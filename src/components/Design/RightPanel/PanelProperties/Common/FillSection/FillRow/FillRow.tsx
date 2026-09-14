@@ -17,6 +17,10 @@ import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
 
+// store
+import { selectHistoryRevision } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 // styles
 import styles from './fill-row.module.scss';
 
@@ -61,6 +65,7 @@ export const FillRow: FC<TFillRowProps> = ({
   registerRow,
 }) => {
   const { t } = useTranslation();
+  const historyRevision = useAppSelector(selectHistoryRevision);
   const isVisible = paint.visible !== false;
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [gradientPanelState, setGradientPanelState] = useState(DEFAULT_GRADIENT_PANEL_STATE);
@@ -114,6 +119,7 @@ export const FillRow: FC<TFillRowProps> = ({
             className={styles.FillRow__color}
             hex={value.hex}
             hexDisplayValue={hexDisplayValue}
+            historyRevision={historyRevision}
             initialActiveTab={isGradient ? ColorPickerTab.gradient : undefined}
             initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
             isPointerOverGradientHandle={isPointerOverGradientHandle}

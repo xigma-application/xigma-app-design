@@ -174,6 +174,43 @@ describe('StopRow behaviors', () => {
     expect(screen.getByLabelText('Remove stop')).toBeDisabled();
   });
 
+  it('should report onDragStart/onDragEnd around a drag on the alpha scrubber, so it coalesces into one history entry', () => {
+    // mock
+    const onDragEnd = vi.fn();
+    const onDragStart = vi.fn();
+
+    // before
+    const { container } = renderStopRow({ onDragEnd, onDragStart });
+    const scrubber = container.querySelector('[class*="ScrubbableInput"]') as HTMLDivElement;
+
+    // action
+    fireEvent.mouseDown(scrubber, { clientX: 0, clientY: 0 });
+    fireEvent.mouseUp(scrubber, { clientX: 0, clientY: 0 });
+
+    // result
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+    expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should forward onDragStart/onDragEnd into the docked stop color panel', () => {
+    // mock
+    const onDragStart = vi.fn();
+
+    // before
+    renderStopRow({ onDragStart });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Stop color'));
+
+    // result — the docked SolidPanel's saturation map drag is wrapped with the same gesture
+    const saturationMap = document.querySelector('[class*="SaturationMap__input"]') as HTMLDivElement;
+
+    vi.spyOn(saturationMap, 'getBoundingClientRect').mockReturnValue({ height: 100, left: 0, top: 0, width: 100 } as DOMRect);
+    saturationMap.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 25, clientY: 25, pointerId: 1 }));
+
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+  });
+
   it('should show the remove tooltip on focus', async () => {
     // before
     renderStopRow();

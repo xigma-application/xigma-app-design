@@ -23,7 +23,7 @@ export const Body: FC<TBodyProps> = ({
 }) => (
   <div className={styles.Body}>
     {activeTab === ColorPickerTab.gradient ? (
-      <GradientPanel gradientPanel={gradientPanel} />
+      <GradientPanel gradientPanel={gradientPanel} onDragEnd={onDragEnd} onDragStart={onDragStart} />
     ) : (
       <SolidPanel
         alpha={alpha}

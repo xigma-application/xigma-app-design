@@ -21,13 +21,25 @@ export type TStopRowProps = {
   canRemove: boolean;
   isSelected: boolean;
   onColorChange: TFunc<[TColorPickerValue]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onPositionChange: TFunc<[number]>;
   onRemove: TFunc;
   onSelect: TFunc;
   stop: TEditableGradientStop;
 };
 
-export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChange, onPositionChange, onRemove, onSelect, stop }) => {
+export const StopRow: FC<TStopRowProps> = ({
+  canRemove,
+  isSelected,
+  onColorChange,
+  onDragEnd,
+  onDragStart,
+  onPositionChange,
+  onRemove,
+  onSelect,
+  stop,
+}) => {
   const { t } = useTranslation();
   const setDockedPanel = useContext(DockedPanelContext);
 
@@ -36,6 +48,8 @@ export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChang
       <StopColorPanel
         onClose={() => setDockedPanel?.(null)}
         onColorChange={onColorChange}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
         value={{ alpha: stop.opacity, hex: stop.color }}
       />,
     );
@@ -49,6 +63,8 @@ export const StopRow: FC<TStopRowProps> = ({ canRemove, isSelected, onColorChang
         hex={stop.color}
         onCommitAlpha={(opacity): void => onColorChange({ alpha: opacity, hex: stop.color })}
         onCommitHex={(hex): void => onColorChange({ alpha: stop.opacity, hex })}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
         onPickerChange={onColorChange}
         onTriggerClick={openColorPanel}
         simple

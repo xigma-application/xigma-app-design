@@ -170,6 +170,59 @@ describe('useGradientBarDrag', () => {
     expect(onMoveStop).not.toHaveBeenCalled();
   });
 
+  it('should call onDragStart when a thumb drag begins, so the whole drag coalesces into one history entry', () => {
+    // mock
+    const onDragStart = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useGradientBarDrag({ onAddStop: vi.fn(), onDragStart, onMoveStop: vi.fn(), onSelectStop: vi.fn(), stops: STOPS }),
+    );
+    result.current.barRef.current = createBar();
+
+    // action
+    result.current.getThumbHandlers('stop-1').onPointerDown(createPointerDownEvent(50));
+
+    // result
+    expect(onDragStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onDragEnd once the thumb drag is released on a window-level pointerup', () => {
+    // mock
+    const onDragEnd = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useGradientBarDrag({ onAddStop: vi.fn(), onDragEnd, onMoveStop: vi.fn(), onSelectStop: vi.fn(), stops: STOPS }),
+    );
+    result.current.barRef.current = createBar();
+
+    result.current.getThumbHandlers('stop-1').onPointerDown(createPointerDownEvent(50));
+
+    // action
+    act(() => dispatchWindowPointerUp());
+
+    // result
+    expect(onDragEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onDragEnd on a pointerup with no preceding thumb drag', () => {
+    // mock
+    const onDragEnd = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useGradientBarDrag({ onAddStop: vi.fn(), onDragEnd, onMoveStop: vi.fn(), onSelectStop: vi.fn(), stops: STOPS }),
+    );
+    result.current.barRef.current = createBar();
+
+    // action
+    act(() => dispatchWindowPointerUp());
+
+    // result
+    expect(onDragEnd).not.toHaveBeenCalled();
+  });
+
   it('should not move any stop from a window pointermove without a preceding thumb pointer down', () => {
     // mock
     const onMoveStop = vi.fn();

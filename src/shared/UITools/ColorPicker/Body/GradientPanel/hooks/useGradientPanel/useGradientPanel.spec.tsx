@@ -313,6 +313,36 @@ describe('useGradientPanel', () => {
     expect(result.current.angle).toBe(0);
   });
 
+  it('should reset stops, type, points, and selection to the plain defaults, e.g. when switching a paint to Solid', () => {
+    // before — seeded from a paint that is not the default (radial, custom stops, rotated)
+    const { result } = renderHook(() =>
+      useGradientPanel(undefined, {
+        end: { x: 0.5, y: 1 },
+        start: { x: 0.5, y: 0.5 },
+        stops: [
+          { color: '#111111', opacity: 100, position: 0 },
+          { color: '#222222', opacity: 50, position: 1 },
+        ],
+        type: 'gradient-radial',
+      }),
+    );
+
+    act(() => result.current.rotate());
+    act(() => result.current.selectStop(result.current.stops[0].id));
+
+    // action
+    act(() => result.current.reset());
+
+    // result
+    expect(result.current.type).toBe('gradient-linear');
+    expect(result.current.angle).toBe(0);
+    expect(result.current.selectedStopId).toBeNull();
+    expect(result.current.stops.map(({ color, opacity, position }) => ({ color, opacity, position }))).toEqual([
+      { color: '#d9d9d9', opacity: 100, position: 0 },
+      { color: '#737373', opacity: 100, position: 1 },
+    ]);
+  });
+
   it('should not notify onChange when addStop is a no-op past the max stop count', () => {
     // mock
     const onChange = vi.fn();

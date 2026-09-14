@@ -22,6 +22,7 @@ export type TColorPickerProps = {
   className?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
+  historyRevision?: number;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
   isPointerOverGradientHandle?: TFunc<[], boolean>;

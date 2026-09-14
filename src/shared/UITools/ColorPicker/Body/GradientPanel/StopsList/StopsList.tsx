@@ -19,6 +19,8 @@ export type TStopsListProps = {
   canAddStop: boolean;
   canRemoveStop: boolean;
   onAddStop: TFunc<[number]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
   onRemoveStop: TFunc<[string]>;
   onSelectStop: TFunc<[string]>;
   onSetStopColor: TFunc<[string, TColorPickerValue]>;
@@ -31,6 +33,8 @@ export const StopsList: FC<TStopsListProps> = ({
   canAddStop,
   canRemoveStop,
   onAddStop,
+  onDragEnd,
+  onDragStart,
   onRemoveStop,
   onSelectStop,
   onSetStopColor,
@@ -61,6 +65,8 @@ export const StopsList: FC<TStopsListProps> = ({
           isSelected={selectedStopId === stop.id}
           key={stop.id}
           onColorChange={(value): void => onSetStopColor(stop.id, value)}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
           onPositionChange={(position): void => onSetStopPosition(stop.id, position)}
           onRemove={(): void => onRemoveStop(stop.id)}
           onSelect={(): void => onSelectStop(stop.id)}

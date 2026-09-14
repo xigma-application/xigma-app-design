@@ -191,6 +191,9 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                     |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                   |  —   |         ✅ `fill-section.spec.ts`         |
 | 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's      |  —   |         ✅ `fill-section.spec.ts`         |
+| 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh       |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render    |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel          |  ✅  |         ✅ `fill-section.spec.ts`         |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -475,3 +478,24 @@ during this work, unrelated to diamond: `useConvertSolidToGradientPaint` (which 
 including a plain stop-color edit, funnels through) only preserved `radiusRatio` for
 `type === 'gradient-radial'`, so editing a stop's color on an *angular* gradient with a custom
 `radiusRatio` silently reset it to 1 on the next keystroke — fixed by widening that check too.
+
+#425-#427: three separate bugs reported together, all in the same root cause — `useGradientPanel`'s
+local state is a working copy seeded once from the paint, with no general mechanism to notice the
+paint changed underneath it. #425: switching to Solid left the old gradient's stops/type/points
+sitting in local state, so switching back to Gradient in the same popover session resurfaced the old
+paint instead of a fresh default — fixed by resetting that local state directly in the Solid-tab
+click handler (`useSetActiveTab.ts`), not with another watch-effect. #426: undo/redo changes the
+paint in Redux exactly the same way a real edit does (`replaceDesignSnapshot` vs. `updateNode`), so
+the open panel had no way to tell "my own edit echoing back" apart from "the ground truth changed
+externally" — fixed with a new `design.historyRevision` counter, bumped only by
+`replaceDesignSnapshot`, that the panel now also resyncs on (alongside the existing reopen-triggered
+reset), so undo/redo now updates every part of the open panel, the type dropdown included, which
+previously stayed frozen on its pre-undo value. #427: dragging on a stop's saturation map or the
+gradient bar pushed one history entry per pixel, because the existing begin/end-gesture coalescing
+already used everywhere else (canvas drags, the Solid panel) simply never reached the Gradient tab —
+`Body.tsx` only forwarded `onDragStart`/`onDragEnd` to `SolidPanel`. Threading them into
+`GradientPanel`/`GradientBar`/`StopsList`/`StopRow`/`StopColorPanel` fixed it for the whole tab in one
+pass, including the docked stop-color editor's own saturation map. One e2e gotcha from writing #426:
+`Control+z` sent while focus is still on the type dropdown's own trigger button does nothing — that
+component swallows the keydown — so the test clicks the inert "Stops" label first to move focus off
+it before invoking the shortcut.

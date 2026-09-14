@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { useAddStop } from './hooks/useAddStop';
 import { useFlipStops } from './hooks/useFlipStops';
 import { useRemoveStop } from './hooks/useRemoveStop';
-import { useResetGradientPanelOnReopen } from './hooks/useResetGradientPanelOnReopen';
+import { useResetGradientPanel } from './hooks/useResetGradientPanel';
+import { useResyncGradientPanelState } from './hooks/useResyncGradientPanelState';
 import { useRotateGradient, TGradientPoints } from './hooks/useRotateGradient';
 import { useSetGradientType } from './hooks/useSetGradientType';
 import { useSetStopColor } from './hooks/useSetStopColor';
@@ -26,6 +27,7 @@ export type TUseGradientPanelResult = {
   canRemoveStop: boolean;
   flip: TFunc;
   removeStop: TFunc<[string]>;
+  reset: TFunc;
   rotate: TFunc;
   selectStop: TFunc<[string]>;
   selectedStopId: string | null;
@@ -40,6 +42,7 @@ export const useGradientPanel = (
   onChange?: TFunc<[TGradientPanelChange]>,
   initialGradient?: TInitialGradient,
   resetKey?: number,
+  historyRevision?: number,
 ): TUseGradientPanelResult => {
   const initialStops = initialGradient ? initialGradient.stops.map((stop) => ({ ...stop, id: nanoid() })) : DEFAULT_GRADIENT_STOPS;
   const initialPoints = initialGradient ? { end: initialGradient.end, start: initialGradient.start } : null;
@@ -56,8 +59,9 @@ export const useGradientPanel = (
   const flip = useFlipStops(stops, setStops, type, angle, points, onChange);
   const rotate = useRotateGradient(stops, type, angle, setAngle, points, setPoints, onChange);
   const setGradientType = useSetGradientType(setType, setPoints, stops, onChange);
+  const reset = useResetGradientPanel(setStops, setSelectedStopId, setAngle, setPoints, setType);
 
-  useResetGradientPanelOnReopen(resetKey, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
+  useResyncGradientPanelState(resetKey, historyRevision, initialGradient, setStops, setSelectedStopId, setAngle, setPoints, setType);
   useSyncExternalStopChanges(initialGradient, stops, setStops, setSelectedStopId);
 
   return {
@@ -67,6 +71,7 @@ export const useGradientPanel = (
     canRemoveStop: stops.length > MIN_STOPS,
     flip,
     removeStop,
+    reset,
     rotate,
     selectStop,
     selectedStopId,
