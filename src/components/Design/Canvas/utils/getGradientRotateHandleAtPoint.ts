@@ -1,25 +1,31 @@
 // types
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TGradientEditorState } from 'store/design/types';
-import { TPoint } from 'types/canvas';
+import { TGradientRotateEndpoint } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getGradientRotateHandleAtPoint } from './getGradientRotateHandleAtPoint';
 import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
 import { getNodeBounds } from './getNodeBounds';
-import { getPointAlongGradientLine } from './getPointAlongGradientLine';
-import { getPositionAlongGradientLine } from './getPositionAlongGradientLine';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
-const GRADIENT_LINE_HIT_TOLERANCE_PX = 8;
+export const GRADIENT_ROTATE_HANDLE_RADIUS_PX = 10;
 
-export const getGradientLinePositionAtPoint = (
+export type TGradientRotateHandleHit = {
+  bounds: TDraftRect;
+  endpoint: TGradientRotateEndpoint;
+  nodeId: string;
+  paintIndex: number;
+  rotation: number;
+};
+
+export const getGradientRotateHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
   gradientEditor: TGradientEditorState | null,
-): { nodeId: string; paintIndex: number; position: number } | null => {
+): TGradientRotateHandleHit | null => {
   const [node] = selectedNodes;
 
   if (
@@ -27,20 +33,21 @@ export const getGradientLinePositionAtPoint = (
     selectedNodes.length === 1 &&
     node.id === gradientEditor.nodeId &&
     isAppearanceNode(node) &&
-    !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
-    !getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
+    !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
     const paint = node.fills[gradientEditor.paintIndex];
 
     if (paint?.type === 'gradient-linear') {
       const bounds = getNodeBounds(node);
       const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
-      const position = getPositionAlongGradientLine(point, start, end);
-      const pointOnLine = getPointAlongGradientLine(start, end, position);
-      const tolerance = GRADIENT_LINE_HIT_TOLERANCE_PX / viewport.zoom;
+      const tolerance = GRADIENT_ROTATE_HANDLE_RADIUS_PX / viewport.zoom;
+      const distanceToStart = Math.hypot(point.x - start.x, point.y - start.y);
+      const distanceToEnd = Math.hypot(point.x - end.x, point.y - end.y);
 
-      if (Math.hypot(point.x - pointOnLine.x, point.y - pointOnLine.y) <= tolerance) {
-        return { nodeId: node.id, paintIndex: gradientEditor.paintIndex, position };
+      if (distanceToStart <= tolerance || distanceToEnd <= tolerance) {
+        const endpoint: TGradientRotateEndpoint = distanceToStart <= distanceToEnd ? 'start' : 'end';
+
+        return { bounds, endpoint, nodeId: node.id, paintIndex: gradientEditor.paintIndex, rotation: node.rotation };
       }
     }
   }

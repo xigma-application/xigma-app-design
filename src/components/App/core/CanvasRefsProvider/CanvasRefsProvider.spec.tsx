@@ -34,6 +34,7 @@ describe('CanvasRefsProvider behaviors', () => {
         ellipseArcRotateDragRef: { current: null },
       },
       frameName: { editingLabelRef: { current: null } },
+      gradientRotate: { gradientRotateDragRef: { current: null } },
       gradientStop: { gradientStopDragRef: { current: null } },
       guides: { draggingGuideRef: { current: null }, hoveredGuideRef: { current: null }, selectedGuideRef: { current: null } },
       hover: {
@@ -47,6 +48,7 @@ describe('CanvasRefsProvider behaviors', () => {
         hoveredEllipseArcRatioHandleRef: { current: null },
         hoveredEllipseArcRotateHandleRef: { current: null },
         hoveredGradientLinePositionRef: { current: null },
+        hoveredGradientRotateEndpointRef: { current: null },
         hoveredGradientStopIndexRef: { current: null },
         hoveredGridTrackAffordanceRef: { current: null },
         hoveredPolygonCornerRadiusHandleRef: { current: null },

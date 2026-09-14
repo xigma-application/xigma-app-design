@@ -6,6 +6,7 @@ import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointe
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
 import { armAddGradientStopOnPointerDown } from './armResolvers/armAddGradientStopOnPointerDown';
+import { armGradientRotateOnPointerDown } from './armResolvers/armGradientRotateOnPointerDown';
 import { armGradientStopOnPointerDown } from './armResolvers/armGradientStopOnPointerDown';
 import { armGridTrackAffordanceOnPointerDown } from './armResolvers/armGridTrackAffordanceOnPointerDown';
 import { armGridTrackValueEditOnPointerDown } from './armResolvers/armGridTrackValueEditOnPointerDown';
@@ -68,6 +69,7 @@ export const ARM_RESOLVERS = [
   armStarVertexCountOnPointerDown,
   armStarRatioOnPointerDown,
   armGradientStopOnPointerDown,
+  armGradientRotateOnPointerDown,
   armAddGradientStopOnPointerDown,
   armEllipseArcOnPointerDown,
   armEllipseArcRotateOnPointerDown,

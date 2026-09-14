@@ -673,4 +673,110 @@ test.describe('Design panels — Fill section', () => {
 
     expect(node.fills![0].stops).toHaveLength(2);
   });
+
+  test('dragging a gradient endpoint on the canvas rotates the line around the shape', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // horizontal gradient across the rectangle (bounds 700,200 - 900,360, center 800,280):
+    // start at the left-mid edge (700,280), end at the right-mid edge (900,280)
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab the end endpoint (900,280) and drag it up toward the top-mid edge (800,150) — the whole
+    // line rotates as a rigid body around the shape's center, so the start endpoint must swing all
+    // the way around to the opposite (bottom-mid) edge
+    await page.mouse.move(900, 280);
+    await page.mouse.down();
+    await page.mouse.move(800, 150, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].end!.x).toBeCloseTo(0.5, 1);
+    expect(node.fills![0].end!.y).toBeCloseTo(0, 1);
+    expect(node.fills![0].start!.x).toBeCloseTo(0.5, 1);
+    expect(node.fills![0].start!.y).toBeCloseTo(1, 1);
+  });
+
+  test('clicking right on a gradient endpoint does not add a new stop there — rotating takes priority over the line', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-gradient-rotate-priority-over-line');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the end endpoint sits right at world (900, 280); clicking it without dragging should neither
+    // add a stop there nor move the endpoint
+    await page.mouse.move(900, 280);
+    await page.mouse.down();
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].stops).toHaveLength(2);
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
 });

@@ -70,4 +70,41 @@ describe('useIsPointerOverGradientHandle', () => {
     // result
     expect(result.current()).toBe(true);
   });
+
+  it('should return true while hovering a rotate endpoint', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.hover.hoveredGradientRotateEndpointRef.current = { endpoint: 'start', pointerPosition: { x: 0, y: 0 } };
+
+    // result
+    expect(result.current()).toBe(true);
+  });
+
+  it('should return true while a gradient rotate drag is in progress, even if the cursor has strayed off the endpoint', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <CanvasRefsContext.Provider value={canvasRefs}>{children}</CanvasRefsContext.Provider>
+    );
+
+    // before
+    const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
+
+    canvasRefs.gradientRotate.gradientRotateDragRef.current = {
+      draggedEndpoint: 'start',
+      nodeId: 'node-a',
+      paintIndex: 0,
+      pointerPosition: { x: 0, y: 0 },
+    };
+
+    // result
+    expect(result.current()).toBe(true);
+  });
 });

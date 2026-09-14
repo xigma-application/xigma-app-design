@@ -165,8 +165,12 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop           |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                  |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release |  —   |         ✅ `fill-section.spec.ts`         |
+| 399 | Clicking the gradient guide line on the canvas adds a new stop there, at the interpolated color, and selects it   |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                     |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                       |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority           |  ✅  |         ✅ `fill-section.spec.ts`         |
 
-#393-#398 are all real, reported regressions.
+#393-#402 are all real, reported regressions.
 
 #395: the gradient fragment shader's `sampleGradient` seeded its "outside every stop's range"
 fallback color to `u_stopColors[0]` unconditionally, so a stop dragged short of the far end (e.g.
@@ -194,3 +198,24 @@ made that deferred check see "no drag in progress" and dismiss the fill picker �
 the ref clear one macrotask (`setTimeout(0)`) past pointerup, and by narrowing the picker's
 `onInteractOutside` guard to only ignore clicks that actually hit a gradient handle (not every
 canvas click, which would wrongly keep the picker open when clicking the shape itself elsewhere).
+
+#399: hovering the guide line itself (not an existing stop) now shows an "add stop here" preview —
+the same real stop-handle visual, offset above the line exactly like a real stop, colored via the
+actual interpolated gradient color at that position (not the nearest stop's raw color, so adding a
+stop never visibly changes the gradient) — and clicking inserts + selects it. #400 confirms existing
+stops keep priority over the line at the same spot (the line's own hit-test explicitly bails when the
+stop hit-test already matched, same defensive double-encoding as the resolver-array ordering).
+Adding a stop from the canvas only touched Redux, so the docked panel's own stop list/`GradientBar`
+didn't reflect it — fixed by `useSyncExternalStopChanges`, reconciling the panel's local
+`TEditableGradientStop[]` against Redux's plain `TGradientStop[]` by position+color+opacity so
+existing stops keep their React key (`id`) and only the genuinely new one gets a fresh one; #399's
+own assertion on the panel's stop-marker count covers this reconciliation too.
+
+#401-#402: the line's own start/end endpoints became draggable to rotate the gradient continuously
+(separate from the panel's discrete 90°-at-a-time rotate button, #393). Dragging either endpoint
+rotates the whole line as a rigid body around the shape's bounds center — both endpoints are
+recomputed every frame as the two opposite intersections of a line through the center with the
+bounding box edge, so they visibly slide around the shape's perimeter. #402 is the same
+priority-guard pattern as #400, one hit-test zone further out: the rotate hit-test also bails the
+line's own hit-test near the endpoints, so clicking exactly on an endpoint rotates instead of
+inserting a spurious stop there.

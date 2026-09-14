@@ -76,6 +76,14 @@ describe('getGradientLinePositionAtPoint', () => {
     expect(hit).toBeNull();
   });
 
+  it('should return null when the point is within the rotate handle radius of an endpoint — rotating takes priority', () => {
+    // the line's own endpoint sits at world (0, 50); (0, 43) is 7px away, within both the line's own
+    // 8px tolerance and the endpoint's 10px rotate radius — rotate must win the tie
+    const hit = getGradientLinePositionAtPoint({ x: 0, y: 43 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toBeNull();
+  });
+
   it('should shrink the hit tolerance as zoom increases', () => {
     // 6 world units off the line at zoom 1 (tolerance 8) hits, but at zoom 4 (tolerance 2) it should not
     const point = { x: 50, y: 56 };

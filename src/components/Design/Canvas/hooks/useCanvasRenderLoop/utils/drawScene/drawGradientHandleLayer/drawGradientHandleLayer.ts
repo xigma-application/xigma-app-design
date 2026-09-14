@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TCanvasRefs, TGradientRotateDragState } from 'types/design/canvas/types';
 import { TGradientEditorState } from 'store/design/types';
 import { TGradientStop } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
@@ -10,6 +10,7 @@ import { TDrawSceneContext } from '../types';
 import { drawGradientAddStopPreview } from './drawGradientAddStopPreview';
 import { drawGradientEndpointHandles } from './drawGradientEndpointHandles';
 import { drawGradientLine } from './drawGradientLine';
+import { drawGradientRotateAngleLabel } from './drawGradientRotateAngleLabel';
 import { drawGradientStopHandles } from './drawGradientStopHandles';
 import { drawGradientStopValueLabel } from './drawGradientStopValueLabel';
 import { getGradientStopHandlePositions, STOP_HANDLE_OFFSET_PX } from './getGradientStopHandlePositions';
@@ -27,6 +28,23 @@ const drawActiveGradientStopValueLabel = (
 ): void => {
   if (activeStopIndex !== null && stops[activeStopIndex]) {
     drawGradientStopValueLabel(context, stopPositions[activeStopIndex], stops[activeStopIndex].position);
+  }
+};
+
+const drawActiveGradientRotateAngleLabel = (
+  context: TDrawSceneContext,
+  start: TPoint,
+  end: TPoint,
+  isRotatingThisPaint: boolean,
+  rotateDragState: TGradientRotateDragState | null,
+  refs: TCanvasRefs,
+): void => {
+  const pointerPosition = isRotatingThisPaint && rotateDragState
+    ? rotateDragState.pointerPosition
+    : (refs.hover.hoveredGradientRotateEndpointRef.current?.pointerPosition ?? null);
+
+  if (pointerPosition) {
+    drawGradientRotateAngleLabel(context, pointerPosition, start, end);
   }
 };
 
@@ -68,6 +86,8 @@ export const drawGradientHandleLayer = (
       const dragState = refs.gradientStop.gradientStopDragRef.current;
       const isDraggingThisPaint = dragState?.nodeId === selectedNode.id && dragState?.paintIndex === gradientEditor.paintIndex;
       const activeStopIndex = isDraggingThisPaint ? dragState.draggedStopIndex : refs.hover.hoveredGradientStopIndexRef.current;
+      const rotateDragState = refs.gradientRotate.gradientRotateDragRef.current;
+      const isRotatingThisPaint = rotateDragState?.nodeId === selectedNode.id && rotateDragState?.paintIndex === gradientEditor.paintIndex;
       const stops = paint.stops;
       const selectedStopIndex = gradientEditor.selectedStopIndex;
 
@@ -76,6 +96,7 @@ export const drawGradientHandleLayer = (
       drawGradientStopHandles(gl, program, buffer, stops, stopPositions, selectedStopIndex, canvasWidth, canvasHeight, viewport);
       drawActiveGradientStopValueLabel(context, stops, stopPositions, activeStopIndex);
       drawGradientAddStopHoverPreview(context, start, end, stops, activeStopIndex, refs.hover.hoveredGradientLinePositionRef.current);
+      drawActiveGradientRotateAngleLabel(context, start, end, isRotatingThisPaint, rotateDragState, refs);
     }
   }
 };

@@ -75,10 +75,11 @@ describe('armAddGradientStopOnPointerDown', () => {
 
     const dispatch = vi.fn();
 
-    // before — clicking near the black (position 1) end, 90% of the way from white to black
+    // before — clicking near the black (position 1) end, 80% of the way from white to black (kept
+    // outside the endpoint's own 10px rotate-handle radius, which now takes priority closer in)
     const result = armAddGradientStopOnPointerDown({
       dispatch,
-      point: { x: 90, y: 50 },
+      point: { x: 80, y: 50 },
       selectedNodes: [rectangle()],
       viewport: IDENTITY_VIEWPORT,
     } as never);
@@ -87,11 +88,11 @@ describe('armAddGradientStopOnPointerDown', () => {
 
     const updateCall = dispatch.mock.calls.find(([action]) => action.type === 'design/updateNode');
     const fills = updateCall![0].payload.changes.fills;
-    const newStop = fills[0].stops.find((stop: { position: number }) => stop.position === 0.9);
+    const newStop = fills[0].stops.find((stop: { position: number }) => stop.position === 0.8);
 
     // result — the new stop matches the gradient's own rendered color there, so adding it doesn't
     // visually change the gradient at all
-    expect(newStop).toEqual({ color: '#1a1a1a', opacity: 100, position: 0.9 });
+    expect(newStop).toEqual({ color: '#333333', opacity: 100, position: 0.8 });
   });
 
   it('should return undefined and dispatch nothing when there is no active gradient editor', () => {

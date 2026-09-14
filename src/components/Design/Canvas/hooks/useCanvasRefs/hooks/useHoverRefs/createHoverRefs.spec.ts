@@ -18,6 +18,7 @@ describe('createHoverRefs behaviors', () => {
       hoveredEllipseArcRatioHandleRef: { current: null },
       hoveredEllipseArcRotateHandleRef: { current: null },
       hoveredGradientLinePositionRef: { current: null },
+      hoveredGradientRotateEndpointRef: { current: null },
       hoveredGradientStopIndexRef: { current: null },
       hoveredGridTrackAffordanceRef: { current: null },
       hoveredPolygonCornerRadiusHandleRef: { current: null },

@@ -6,6 +6,7 @@ import {
   TAutoLayoutPaddingHoverState,
   TCornerRadiusHandleHover,
   TEditingGridTrackValue,
+  TGradientRotateHoverState,
   TGridTrackAffordanceHover,
   THoverRefs,
   TRightPanelPaddingGuideState,
@@ -31,6 +32,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRotateHandleRef = useRef<string | null>(null);
   const hoveredGradientLinePositionRef = useRef<number | null>(null);
+  const hoveredGradientRotateEndpointRef = useRef<TGradientRotateHoverState | null>(null);
   const hoveredGradientStopIndexRef = useRef<number | null>(null);
   const hoveredGridTrackAffordanceRef = useRef<TGridTrackAffordanceHover | null>(null);
   const hoveredPolygonCornerRadiusHandleRef = useRef<string | null>(null);
@@ -70,6 +72,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredEllipseArcRatioHandleRef,
       hoveredEllipseArcRotateHandleRef,
       hoveredGradientLinePositionRef,
+      hoveredGradientRotateEndpointRef,
       hoveredGradientStopIndexRef,
       hoveredGridTrackAffordanceRef,
       hoveredPolygonCornerRadiusHandleRef,

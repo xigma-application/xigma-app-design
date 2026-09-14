@@ -363,6 +363,67 @@ node's folder. Today:
   didn't change, which would remount that stop's `StopRow`/`GradientBar` thumb), assigns a fresh
   `nanoid()` only to a genuinely new stop, and selects that new stop automatically.
 
+  **Dragging the line's own start/end endpoint rotates the whole gradient**, continuously, directly
+  on the canvas — separate from the discrete 90°-at-a-time panel rotate button described above. The
+  model (locked with the user before implementing, since it's real geometry): grabbing either
+  endpoint and dragging rotates the line as a rigid body around the shape's bounds center, not just
+  that one point — both `paint.start` and `paint.end` are recomputed every frame as the two opposite
+  intersections of a line through the center with the (unrotated, local) bounding box edge, so the
+  handles visibly slide around the shape's perimeter as the angle changes. Two new pure-geometry
+  utilities carry this: `utils/canvas/getRectPerimeterPointAtAngle.ts` (global — given a rect and an
+  angle, the point where a ray from its center exits the rectangle boundary; genuinely
+  domain-generic, so it lives beside the existing `getRectPerimeterPoint.ts` rather than under
+  `Canvas/utils/`) and `Canvas/utils/getGradientEndpointsAtAngle.ts` (gradient-specific: calls the
+  above twice, at `angle` and `angle + π`, for the two opposite edge points).
+  `Canvas/utils/getGradientAngleFromPoint.ts` is the inverse — given a world point, returns the
+  continuous angle from the bounds center, unrotating by `node.rotation` first via `rotatePoint`
+  exactly like `getRotateCursorAngle.ts` already does for the node's own corner-rotate handles.
+  `continueGradientRotateDrag.ts` ties these together each pointermove: compute the angle toward the
+  cursor, get both edge points at that angle, then assign whichever one matches the *dragged*
+  endpoint (`draggedEndpoint: 'start' | 'end'` in the new `TGradientRotateDragState`) to the point at
+  the raw angle (so it tracks the cursor) and the other to the point at `angle + π` — this is what
+  keeps a drag on `end` from silently swapping the gradient's own direction.
+
+  Hit-testing, hover, and drag-arming for these endpoints mirror the exact same
+  refs-group/hover-prepass/arm-resolver/continue/disarm pattern the stop-drag and add-stop-on-line
+  features already established (`getGradientRotateHandleAtPoint.ts`, a dedicated
+  `useGradientRotateRefs` folder holding `gradientRotateDragRef`, `resolveGradientRotateHandleHover`
+  + `resolveGradientRotateHover` wired into the same `HOVER_RESOLVERS`/pre-pass list, and
+  `armGradientRotateOnPointerDown` inserted into `ARM_RESOLVERS` right after the stop resolver and
+  before the add-stop-on-line one — stop > rotate > add-line is the full priority order now, each
+  later hit-test explicitly bailing via the earlier one, same defensive double-encoding as before).
+  The rotate hit radius reuses the exact same 10px-ish tolerance idiom as the stop radius, just its
+  own constant (`GRADIENT_ROTATE_HANDLE_RADIUS_PX`), confirmed by the user as fine as-is (it isn't a
+  ring restricted to outside the shape like the node's own corner-rotate zone — a plain radius around
+  the endpoint, since the endpoint already sits on the shape's edge).
+
+  The cursor while hovering/dragging a rotate endpoint **reuses the node's own existing 4-quadrant
+  cursor system verbatim** — `getRotateCursorAngle` + `getRotatedCursorUrl('rotate', …)`, the same
+  two functions `resolveRotateHover.ts` already uses for the selection box's corner-rotate handles.
+  This was a deliberate explicit correction mid-session: an early draft computed a continuous cursor
+  angle from the endpoint's exact position instead (smoother in theory), but the user rejected it —
+  the requirement is specifically the same coarse 4-position snap as corners, not a continuous one,
+  "based on the starting position," so the continuous variant (`getGradientRotateCursorAngle.ts`) was
+  deleted again without ever being wired in.
+
+  A new **angle-following label** (`drawGradientRotateAngleLabel.ts`) shows the gradient's current
+  `${Math.round(angle)}°` right beside the cursor while hovering or dragging a rotate endpoint —
+  computed live each frame from the paint's actual current `start`/`end` world points via the
+  existing `getAngleBetweenPoints`, not from a value cached at drag-start, so it's correct on both the
+  hover-only and actively-dragging paths (merged in `drawGradientHandleLayer.ts` exactly like
+  `activeStopIndex` already merges hover vs. drag state). Positioning this one needed a different
+  technique than the stop/add-preview labels: those anchor to a fixed point in world space with a
+  small world-unit margin baked into the anchor itself
+  (`getGradientStopValueLabelAnchor.ts`'s `EXTRA_MARGIN_PX`), but "follow the mouse" needed the label
+  anchored exactly at the live pointer position with **no added manual offset** — `drawValueLabel`'s
+  shared badge-geometry helper already bakes in its own fixed 28px gap by default
+  (`VALUE_LABEL_OFFSET_PX`, `getValueLabelBadgeGeometry.ts`), which reads as "far" for a
+  mouse-following label; passing `edgeGapPx` in `drawValueLabel`'s options overrides that default
+  with a gap measured from the *badge's near edge* instead of its center, giving a small, precise,
+  tunable distance from the cursor (currently `EDGE_GAP_PX` in `drawGradientRotateAngleLabel.ts`) —
+  this override existed in the shared component already but nothing had used it until this label
+  needed a genuinely tight gap.
+
 i18n for the shared sections lives under `…panelProperties.common.*`.
 
 ## `Frame/`

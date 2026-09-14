@@ -11,6 +11,7 @@ const drawGradientEndpointHandlesMock = vi.fn();
 const drawGradientStopHandlesMock = vi.fn();
 const drawGradientStopValueLabelMock = vi.fn();
 const drawGradientAddStopPreviewMock = vi.fn();
+const drawGradientRotateAngleLabelMock = vi.fn();
 
 vi.mock('../drawGradientLine', () => ({
   drawGradientLine: (...args: unknown[]): void => drawGradientLineMock(...args),
@@ -26,6 +27,9 @@ vi.mock('../drawGradientStopValueLabel', () => ({
 }));
 vi.mock('../drawGradientAddStopPreview', () => ({
   drawGradientAddStopPreview: (...args: unknown[]): void => drawGradientAddStopPreviewMock(...args),
+}));
+vi.mock('../drawGradientRotateAngleLabel', () => ({
+  drawGradientRotateAngleLabel: (...args: unknown[]): void => drawGradientRotateAngleLabelMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -72,6 +76,7 @@ describe('drawGradientHandleLayer', () => {
     drawGradientStopHandlesMock.mockClear();
     drawGradientStopValueLabelMock.mockClear();
     drawGradientAddStopPreviewMock.mockClear();
+    drawGradientRotateAngleLabelMock.mockClear();
   });
 
   it('should draw nothing when no gradient editor is active', () => {
@@ -221,5 +226,66 @@ describe('drawGradientHandleLayer', () => {
 
     // result
     expect(drawGradientAddStopPreviewMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw the rotate angle label when no endpoint is hovered or dragged', () => {
+    // before
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    expect(drawGradientRotateAngleLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the rotate angle label at the hovered endpoint pointer position', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredGradientRotateEndpointRef.current = { endpoint: 'start', pointerPosition: { x: 20, y: 30 } };
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    expect(drawGradientRotateAngleLabelMock).toHaveBeenCalledTimes(1);
+
+    const [, pointerPosition] = drawGradientRotateAngleLabelMock.mock.calls[0];
+
+    expect(pointerPosition).toEqual({ x: 20, y: 30 });
+  });
+
+  it('should draw the rotate angle label from the drag state, taking priority over the hover ref', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredGradientRotateEndpointRef.current = { endpoint: 'start', pointerPosition: { x: 20, y: 30 } };
+    refs.gradientRotate.gradientRotateDragRef.current = {
+      draggedEndpoint: 'end',
+      nodeId: 'rect-1',
+      paintIndex: 0,
+      pointerPosition: { x: 40, y: 60 },
+    };
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    const [, pointerPosition] = drawGradientRotateAngleLabelMock.mock.calls[0];
+
+    expect(pointerPosition).toEqual({ x: 40, y: 60 });
+  });
+
+  it('should ignore a rotate drag ref belonging to a different node or paint index', () => {
+    // before
+    const refs = createCanvasRefs();
+
+    refs.gradientRotate.gradientRotateDragRef.current = {
+      draggedEndpoint: 'start',
+      nodeId: 'other-node',
+      paintIndex: 0,
+      pointerPosition: { x: 40, y: 60 },
+    };
+
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, refs);
+
+    // result
+    expect(drawGradientRotateAngleLabelMock).not.toHaveBeenCalled();
   });
 });
