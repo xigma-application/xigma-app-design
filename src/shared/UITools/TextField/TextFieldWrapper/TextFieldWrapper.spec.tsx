@@ -152,4 +152,20 @@ describe('TextFieldWrapper behaviors', () => {
     // result
     expect(screen.getByDisplayValue('ffffff')).not.toHaveAttribute('data-test-bypass-global-shortcuts');
   });
+
+  it('should not mark the end adornment to stay visible on focus by default', () => {
+    // before
+    const { container } = render(<TextFieldWrapper endAdornment={<span>%</span>} value="ffffff" />);
+
+    // result
+    expect(container.querySelector('[class*="TextFieldWrapper__endAdornment--keepOnFocus"]')).toBeNull();
+  });
+
+  it('should mark the end adornment to stay visible on focus when asked to', () => {
+    // before
+    const { container } = render(<TextFieldWrapper endAdornment={<span>%</span>} keepEndAdornmentOnFocus value="ffffff" />);
+
+    // result
+    expect(container.querySelector('[class*="TextFieldWrapper__endAdornment--keepOnFocus"]')).not.toBeNull();
+  });
 });

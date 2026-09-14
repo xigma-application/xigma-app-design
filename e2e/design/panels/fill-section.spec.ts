@@ -2249,4 +2249,31 @@ test.describe('Design panels — Fill section', () => {
     expect(Number(updatedValue.replace('%', ''))).toBeGreaterThan(40);
     expect(Number(updatedValue.replace('%', ''))).toBeLessThan(60);
   });
+
+  test('the alpha field’s "%" stays visible and the field does not resize while it is focused', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-alpha-percent-stays-visible-on-focus');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+
+    const alphaField = page.locator('[class*="ColorPickerInput__alpha"]');
+    const percentSign = alphaField.getByText('%');
+
+    await expect(percentSign).toBeVisible();
+    const widthBefore = (await alphaField.boundingBox())!.width;
+
+    // action — focus the alpha input
+    await alphaField.locator('input').click();
+
+    // result — the "%" is still there, and the field kept its width instead of expanding to fill
+    // the space the (before this fix, hidden-on-focus) adornment used to occupy
+    await expect(percentSign).toBeVisible();
+    const widthAfter = (await alphaField.boundingBox())!.width;
+
+    expect(widthAfter).toBeCloseTo(widthBefore, 0);
+  });
 });

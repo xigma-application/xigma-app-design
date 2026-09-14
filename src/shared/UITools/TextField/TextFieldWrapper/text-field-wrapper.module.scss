@@ -44,6 +44,10 @@
 
     &:focus ~ .TextFieldWrapper__endAdornment {
       display: none;
+
+      &.TextFieldWrapper__endAdornment--keepOnFocus {
+        display: contents;
+      }
     }
   }
 

@@ -22,6 +22,7 @@ export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>,
   e2eValue?: TE2EValue;
   endAdornment?: ReactNode;
   inputRef?: RefObject<HTMLInputElement | null>;
+  keepEndAdornmentOnFocus?: boolean;
   startAdornment?: ReactNode;
   variant?: TextFieldVariant;
 };
@@ -34,6 +35,7 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
   e2eValue = '',
   endAdornment,
   inputRef,
+  keepEndAdornmentOnFocus = false,
   onClick,
   onKeyDown,
   onMouseEnter,
@@ -70,7 +72,13 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
         {...(bypassGlobalShortcuts ? getAttributes(E2EAttribute.bypassGlobalShortcuts, 'true') : {})}
         {...restProps}
       />
-      <span className={styles.TextFieldWrapper__endAdornment}>{endAdornment}</span>
+      <span
+        className={cx(styles.TextFieldWrapper__endAdornment, {
+          [styles['TextFieldWrapper__endAdornment--keepOnFocus']]: keepEndAdornmentOnFocus,
+        })}
+      >
+        {endAdornment}
+      </span>
     </div>
   );
 };

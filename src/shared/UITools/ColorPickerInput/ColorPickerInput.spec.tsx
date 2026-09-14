@@ -40,6 +40,15 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByDisplayValue('38')).toBeInTheDocument();
   });
 
+  it('should keep the alpha field’s "%" adornment visible while the field is focused', () => {
+    // before
+    const { container } = renderColorPickerInput();
+
+    // result — opts into TextFieldWrapper's keepEndAdornmentOnFocus, instead of the "%" (and the
+    // input's width along with it) disappearing for the duration of the focus
+    expect(container.querySelector('[class*="TextFieldWrapper__endAdornment--keepOnFocus"]')).not.toBeNull();
+  });
+
   it('should commit a normalised hex on blur when the typed value is valid', () => {
     // mock
     const onCommitHex = vi.fn();

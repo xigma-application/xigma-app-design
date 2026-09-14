@@ -231,7 +231,7 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
                 value="100"
               />
               <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+                class="_TextFieldWrapper__endAdornment_9a3a67 _TextFieldWrapper__endAdornment--keepOnFocus_9a3a67"
               >
                 <div
                   class="ScrubbableInput"
@@ -342,7 +342,7 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
                 value="100"
               />
               <span
-                class="_TextFieldWrapper__endAdornment_9a3a67"
+                class="_TextFieldWrapper__endAdornment_9a3a67 _TextFieldWrapper__endAdornment--keepOnFocus_9a3a67"
               >
                 <div
                   class="ScrubbableInput"

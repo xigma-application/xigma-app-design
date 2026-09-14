@@ -71,7 +71,7 @@ exports[`Design snapshots > should render the Page section with its background c
             value="100"
           />
           <span
-            class="_TextFieldWrapper__endAdornment_9a3a67"
+            class="_TextFieldWrapper__endAdornment_9a3a67 _TextFieldWrapper__endAdornment--keepOnFocus_9a3a67"
           >
             <div
               class="ScrubbableInput"

@@ -140,6 +140,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
               <span className={styles.ColorPickerInput__unit}>%</span>
             </ScrubbableInput>
           }
+          keepEndAdornmentOnFocus
           max={100}
           min={0}
           onBlur={onBlurAlpha}
