@@ -39,9 +39,11 @@ const gradientPanel = {
 
 const patternPanel = {
   alignmentIndex: 0,
+  direction: 'horizontal' as const,
   reset: vi.fn(),
   scale: 100,
   setAlignmentIndex: vi.fn(),
+  setDirection: vi.fn(),
   setScale: vi.fn(),
   setSpacingX: vi.fn(),
   setSpacingY: vi.fn(),
@@ -51,10 +53,19 @@ const patternPanel = {
   tileType: 'rectangular' as const,
 };
 
+const patternSourcePicking = { close: vi.fn(), isActive: false, open: vi.fn() };
+
 const renderBody = (activeTab: ColorPickerTab): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <Body activeTab={activeTab} alpha={100} colorModel={colorModel} gradientPanel={gradientPanel} patternPanel={patternPanel} />
+      <Body
+        activeTab={activeTab}
+        alpha={100}
+        colorModel={colorModel}
+        gradientPanel={gradientPanel}
+        patternPanel={patternPanel}
+        patternSourcePicking={patternSourcePicking}
+      />
     </TooltipProvider>,
   );
 

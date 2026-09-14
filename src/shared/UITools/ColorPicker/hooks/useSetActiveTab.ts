@@ -36,6 +36,7 @@ export const useSetActiveTab =
         case ColorPickerTab.pattern:
           onPatternChange?.({
             alignmentIndex: patternPanel.alignmentIndex,
+            direction: patternPanel.direction,
             scale: patternPanel.scale,
             spacingX: patternPanel.spacingX,
             spacingY: patternPanel.spacingY,

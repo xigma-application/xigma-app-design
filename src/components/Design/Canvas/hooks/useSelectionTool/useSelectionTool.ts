@@ -7,7 +7,7 @@ import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNa
 import { useSelectionToolRefs } from './hooks/useSelectionToolRefs/useSelectionToolRefs';
 
 // store
-import { selectActiveTool, selectEditingTextBox } from 'store/design/selectors';
+import { selectActiveTool, selectEditingTextBox, selectIsPatternSourcePicking } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -32,22 +32,29 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const editingTextBox = useAppSelector(selectEditingTextBox);
   const isCanvasCaretEditingActive = shouldUseCanvasCaretEditing(editingTextBox);
+  const isPatternSourcePicking = useAppSelector(selectIsPatternSourcePicking);
   const dispatch = useAppDispatch();
   const selectionRefs = useSelectionToolRefs();
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
-    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
-    handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    if (!isPatternSourcePicking) {
+      lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
+      handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    }
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
-    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
-    handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    if (!isPatternSourcePicking) {
+      lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
+      handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    }
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
-    handlePointerUp(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    if (!isPatternSourcePicking) {
+      handlePointerUp(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+    }
   };
 
   const onPointerLeave = (canvasRefs: TCanvasRefs): void => {
@@ -179,5 +186,5 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         lastPointerClientPositionRef.current = null;
       };
     }
-  }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);
+  }, [activeTool, dispatch, isCanvasCaretEditingActive, isPatternSourcePicking, refs, selectionRefs, setClassName]);
 };

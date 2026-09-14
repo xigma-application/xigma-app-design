@@ -5,7 +5,7 @@ import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNa
 
 // store
 import { deleteAllGuides, deleteGuide } from 'store/design/slice';
-import { selectActiveTool } from 'store/design/selectors';
+import { selectActiveTool, selectIsPatternSourcePicking } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -23,6 +23,7 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
   const activeTool = useAppSelector(selectActiveTool);
+  const isPatternSourcePicking = useAppSelector(selectIsPatternSourcePicking);
   const dispatch = useAppDispatch();
   const { setClassName } = useClassNames();
   const anchorRef = useRef<TVirtualAnchor>({ getBoundingClientRect: () => new DOMRect() });
@@ -53,6 +54,35 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
     }
   }, [dispatch, selectedGuide]);
 
+  const onPointerDown = useCallback(
+    (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+      if (!isPatternSourcePicking) {
+        handlePointerDown(canvas, event, dispatch, refs, setSelectedGuide, setRulerMenu);
+      }
+    },
+    [dispatch, isPatternSourcePicking, refs],
+  );
+
+  const onPointerMove = useCallback(
+    (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+      if (!isPatternSourcePicking) {
+        handlePointerMove(canvas, event, refs, setClassName);
+      }
+    },
+    [isPatternSourcePicking, refs, setClassName],
+  );
+
+  const onPointerUp = useCallback(
+    (canvas: HTMLCanvasElement, event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs),
+    [dispatch, refs],
+  );
+
+  const onContextMenu = useCallback(
+    (canvas: HTMLCanvasElement, event: MouseEvent): void =>
+      handleContextMenu(canvas, event, refs, openMenuAt, setRulerMenu, setSelectedGuide),
+    [openMenuAt, refs],
+  );
+
   useEffect(() => {
     refs.guides.selectedGuideRef.current = selectedGuide;
   }, [selectedGuide, refs]);
@@ -61,21 +91,21 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
     const canvas = refs.canvasRef.current;
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, refs, setSelectedGuide, setRulerMenu);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, refs, setClassName);
-      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs);
-      const onContextMenu = (event: MouseEvent): void => handleContextMenu(canvas, event, refs, openMenuAt, setRulerMenu, setSelectedGuide);
+      const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event);
+      const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event);
+      const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event);
+      const contextMenuListener = (event: MouseEvent): void => onContextMenu(canvas, event);
 
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerup', onPointerUp);
-      canvas.addEventListener('contextmenu', onContextMenu);
+      canvas.addEventListener('pointerdown', pointerDownListener);
+      canvas.addEventListener('pointermove', pointerMoveListener);
+      canvas.addEventListener('pointerup', pointerUpListener);
+      canvas.addEventListener('contextmenu', contextMenuListener);
 
       return (): void => {
-        canvas.removeEventListener('pointerdown', onPointerDown);
-        canvas.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('pointerup', onPointerUp);
-        canvas.removeEventListener('contextmenu', onContextMenu);
+        canvas.removeEventListener('pointerdown', pointerDownListener);
+        canvas.removeEventListener('pointermove', pointerMoveListener);
+        canvas.removeEventListener('pointerup', pointerUpListener);
+        canvas.removeEventListener('contextmenu', contextMenuListener);
         refs.guides.draggingGuideRef.current = null;
         refs.guides.hoveredGuideRef.current = null;
         setClassName(null);
@@ -83,7 +113,7 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
         setRulerMenu(null);
       };
     }
-  }, [activeTool, dispatch, openMenuAt, refs, setClassName]);
+  }, [activeTool, onContextMenu, onPointerDown, onPointerMove, onPointerUp, refs, setClassName]);
 
   return { anchorRef, isMenuOpen, onMenuOpenChange, removeAllGuides, removeSelectedGuide, rulerMenu, selectedGuide };
 };

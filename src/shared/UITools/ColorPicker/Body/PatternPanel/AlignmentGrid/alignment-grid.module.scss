@@ -1,7 +1,12 @@
 .AlignmentGrid {
+  align-items: center;
+  background-color: var(--color-surface);
+  border-radius: 5px;
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(3, 1fr);
+  height: 63px;
+  justify-content: center;
 
   &__point {
     align-items: center;
@@ -10,34 +15,39 @@
     border-radius: 2px;
     cursor: pointer;
     display: flex;
-    height: 16px;
+    height: 10px;
     justify-content: center;
+    margin: 0 auto;
     padding: 0;
-    width: 16px;
+    width: 10px;
 
-    &:hover .AlignmentGrid__dot {
-      background: var(--color-neutral-3);
+    &:hover {
+      background-color: var(--color-ramp-400);
+
+      .AlignmentGrid__dot {
+        background: none;
+      }
     }
   }
 
   &__dot {
-    background: var(--color-neutral-4);
+    background: var(--color-ramp-400);
     border-radius: 1px;
     display: block;
-    height: 4px;
-    width: 4px;
+    height: 2px;
+    width: 2px;
   }
 
   &__point--selected {
     .AlignmentGrid__dot {
-      background: var(--color-blue-1);
+      background: var(--color-blue-2);
       border-radius: 2px;
       height: 10px;
       width: 10px;
     }
 
     &:hover .AlignmentGrid__dot {
-      background: var(--color-blue-1);
+      background: var(--color-blue-2);
     }
   }
 }

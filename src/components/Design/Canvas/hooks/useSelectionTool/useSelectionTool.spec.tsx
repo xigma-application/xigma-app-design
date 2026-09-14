@@ -10,7 +10,15 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSelectionTool } from './useSelectionTool';
 
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, startTextEdit, stopTextEdit } from 'store/design/slice';
+import {
+  addNode,
+  setActiveTool,
+  setPatternSourcePicking,
+  setSelection,
+  setVectorEditingNodeIds,
+  startTextEdit,
+  stopTextEdit,
+} from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -158,6 +166,7 @@ describe('useSelectionTool behaviors', () => {
     store.dispatch(setSelection([]));
     store.dispatch(stopTextEdit());
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setPatternSourcePicking(false));
 
     // drag dispatches are throttled to one per animation frame — run the callback immediately so these
     // pointer-event-driven tests can assert on the store synchronously, same as before the throttle existed
@@ -218,6 +227,46 @@ describe('useSelectionTool behaviors', () => {
     renderSelectionTool(canvasRef);
 
     // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it('should not deselect, and not react at all, while picking a pattern source, even on empty canvas', () => {
+    // mock
+    const idA = addFrameNode(220, 220);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
+
+    // result — the selection (and therefore whatever panel is showing it, e.g. an open picker
+    // popover) survives the click instead of being cleared
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+  });
+
+  it('should resume reacting to pointer events once picking a pattern source ends', () => {
+    // mock
+    const idA = addFrameNode(230, 230);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    act(() => store.dispatch(setPatternSourcePicking(false)));
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
 
     // result

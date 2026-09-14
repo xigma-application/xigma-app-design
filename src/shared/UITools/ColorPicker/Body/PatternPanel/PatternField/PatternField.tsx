@@ -1,10 +1,13 @@
-import { FC, FocusEvent } from 'react';
+import { FC } from 'react';
 
 // @xigma
 import { Icon, ScrubbableInput, TIconProps } from '@xigma/components';
 
 // components
 import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFieldWrapper';
+
+// hooks
+import { usePatternFieldCommit } from './hooks/usePatternFieldCommit';
 
 // styles
 import styles from './pattern-field.module.scss';
@@ -24,28 +27,22 @@ export type TPatternFieldProps = {
 };
 
 export const PatternField: FC<TPatternFieldProps> = ({ ariaLabel, e2eValue, icon, label, onChange, onDragEnd, onDragStart, value }) => {
-  const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
-    const parsed = Number(event.target.value);
-    onChange(Number.isNaN(parsed) ? value : Math.min(FIELD_MAX, Math.max(FIELD_MIN, parsed)));
-  };
+  const { onBlur, onKeyDown } = usePatternFieldCommit(value, FIELD_MIN, FIELD_MAX, onChange);
 
   return (
     <TextFieldWrapper
       aria-label={ariaLabel}
       className={styles.PatternField}
-      defaultValue={value}
+      defaultValue={`${value}%`}
       e2eValue={e2eValue}
-      endAdornment={<span className={styles.PatternField__unit}>%</span>}
-      keepEndAdornmentOnFocus
-      max={FIELD_MAX}
-      min={FIELD_MIN}
-      onBlur={handleBlur}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
       startAdornment={
         <ScrubbableInput max={FIELD_MAX} min={FIELD_MIN} onChange={onChange} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value}>
           {icon ? <Icon color="neutral2" name={icon} size={12} /> : <span className={styles.PatternField__label}>{label}</span>}
         </ScrubbableInput>
       }
-      type="number"
+      type="text"
     />
   );
 };

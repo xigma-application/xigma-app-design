@@ -5,11 +5,12 @@ import { DEFAULT_PATTERN_PANEL_STATE } from '../constants';
 
 // types
 import { TInitialPattern, TPatternPanelChange, TPatternPanelState } from '../types';
-import { TPatternTileType } from 'types/design/paint/types';
+import { TPatternDirection, TPatternTileType } from 'types/design/paint/types';
 
 export type TUsePatternPanelResult = TPatternPanelState & {
   reset: TFunc;
   setAlignmentIndex: TFunc<[number]>;
+  setDirection: TFunc<[TPatternDirection]>;
   setScale: TFunc<[number]>;
   setSpacingX: TFunc<[number]>;
   setSpacingY: TFunc<[number]>;
@@ -44,6 +45,7 @@ export const usePatternPanel = (
     ...state,
     reset: (): void => setState(DEFAULT_PATTERN_PANEL_STATE),
     setAlignmentIndex: (alignmentIndex): void => commit({ ...state, alignmentIndex }),
+    setDirection: (direction): void => commit({ ...state, direction }),
     setScale: (scale): void => commit({ ...state, scale }),
     setSpacingX: (spacingX): void => commit({ ...state, spacingX }),
     setSpacingY: (spacingY): void => commit({ ...state, spacingY }),

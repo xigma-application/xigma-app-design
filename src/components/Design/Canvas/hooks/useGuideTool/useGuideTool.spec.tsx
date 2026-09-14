@@ -12,7 +12,7 @@ import { useGuideTool } from './useGuideTool';
 
 // store
 import { selectActivePage, selectAreRulersVisible } from 'store/design/selectors';
-import { addGuide, setActiveTool, setViewport, toggleRulers } from 'store/design/slice';
+import { addGuide, setActiveTool, setPatternSourcePicking, setViewport, toggleRulers } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -61,6 +61,7 @@ describe('useGuideTool behaviors', () => {
     capturedClassName = null;
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+    store.dispatch(setPatternSourcePicking(false));
 
     if (!selectAreRulersVisible(store.getState())) {
       store.dispatch(toggleRulers());
@@ -94,6 +95,28 @@ describe('useGuideTool behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).guides).toContainEqual({ axis: 'y', id: expect.any(String), position: 80 });
+    expect(guideRefs.draggingGuideRef.current).toBeNull();
+  });
+
+  it('should not react to pointer events while picking a pattern source, even from the ruler gutter', () => {
+    // mock
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+    const guidesBefore = selectActivePage(store.getState()).guides;
+
+    // before
+    const { guideRefs } = renderGuideTool(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 5));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 100, 80));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 80));
+    });
+
+    // result — no new guide got added, unlike the equivalent drag in the test above
+    expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
     expect(guideRefs.draggingGuideRef.current).toBeNull();
   });
 

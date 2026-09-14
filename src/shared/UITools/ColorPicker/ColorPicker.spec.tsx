@@ -1,18 +1,24 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ComponentProps } from 'react';
+import { Provider } from 'react-redux';
 
 // components
 import ColorPicker from './ColorPicker';
 import { TooltipProvider } from 'shared';
+
+// store
+import { store } from 'store';
 
 // utils
 import { registerColorPixelSampler } from 'utils/canvas/colorPixelSampler/colorPixelSamplerRegistry';
 
 const renderColorPicker = (props: ComponentProps<typeof ColorPicker>): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <ColorPicker {...props} />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <ColorPicker {...props} />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('ColorPicker snapshots', () => {

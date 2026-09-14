@@ -1,13 +1,11 @@
 .PatternField {
   &__label {
+    align-items: center;
     color: var(--color-neutral-2);
+    display: flex;
     font-size: 11px;
+    justify-content: center;
     user-select: none;
-  }
-
-  &__unit {
-    color: var(--color-neutral-2);
-    font-size: 11px;
-    user-select: none;
+    width: 12px;
   }
 }

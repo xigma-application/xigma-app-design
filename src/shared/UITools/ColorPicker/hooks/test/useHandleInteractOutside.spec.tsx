@@ -4,13 +4,20 @@ import { renderHook } from '@testing-library/react';
 import { useHandleInteractOutside } from '../useHandleInteractOutside';
 
 describe('useHandleInteractOutside', () => {
-  it('should call both ignore handlers with the same event', () => {
+  it('should call all three ignore handlers with the same event', () => {
     // mock
     const ignoreSamplerInteractOutside = vi.fn();
     const ignoreGradientCanvasInteractOutside = vi.fn();
+    const ignorePatternSourcePickingInteractOutside = vi.fn();
 
     // before
-    const { result } = renderHook(() => useHandleInteractOutside(ignoreSamplerInteractOutside, ignoreGradientCanvasInteractOutside));
+    const { result } = renderHook(() =>
+      useHandleInteractOutside(
+        ignoreSamplerInteractOutside,
+        ignoreGradientCanvasInteractOutside,
+        ignorePatternSourcePickingInteractOutside,
+      ),
+    );
     const event = {} as Event;
 
     // action
@@ -19,5 +26,6 @@ describe('useHandleInteractOutside', () => {
     // result
     expect(ignoreSamplerInteractOutside).toHaveBeenCalledWith(event);
     expect(ignoreGradientCanvasInteractOutside).toHaveBeenCalledWith(event);
+    expect(ignorePatternSourcePickingInteractOutside).toHaveBeenCalledWith(event);
   });
 });

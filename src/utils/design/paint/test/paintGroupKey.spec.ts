@@ -51,6 +51,7 @@ describe('paintGroupKey', () => {
   it('should key a pattern paint without throwing, even though it has no gradient geometry', () => {
     const pattern: TPatternPaint = {
       alignmentIndex: 0,
+      direction: 'horizontal',
       opacity: 100,
       scale: 100,
       spacingX: 0,

@@ -1,8 +1,9 @@
 // types
-import { TPatternTileType } from 'types/design/paint/types';
+import { TPatternDirection, TPatternTileType } from 'types/design/paint/types';
 
 export type TPatternPanelState = {
   alignmentIndex: number;
+  direction: TPatternDirection;
   scale: number;
   spacingX: number;
   spacingY: number;

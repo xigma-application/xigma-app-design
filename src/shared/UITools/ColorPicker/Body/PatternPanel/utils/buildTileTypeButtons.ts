@@ -11,9 +11,9 @@ export const buildTileTypeButtons = (t: TFunction): TToggleButton[] => [
     value: 'rectangular',
   },
   {
-    ariaLabel: t('colorPicker.pattern.tileType.circular'),
+    ariaLabel: t('colorPicker.pattern.tileType.hexagonal'),
     icon: 'CircularPattern',
-    tooltip: t('colorPicker.pattern.tileType.circular'),
-    value: 'circular',
+    tooltip: t('colorPicker.pattern.tileType.hexagonal'),
+    value: 'hexagonal',
   },
 ];

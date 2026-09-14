@@ -10,14 +10,17 @@ import PaintTypeRow from './PaintTypeRow/PaintTypeRow';
 import Popover from 'shared/UITools/Popover/Popover';
 
 // hooks
+import { useClosePatternSourcePickingOnEscape } from './hooks/useClosePatternSourcePickingOnEscape';
 import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
 import { useHandleInteractOutside } from './hooks/useHandleInteractOutside';
 import { useHandleOpenChange } from './hooks/useHandleOpenChange';
 import { useIgnoreGradientCanvasInteractOutside } from './hooks/useIgnoreGradientCanvasInteractOutside';
+import { useIgnorePatternSourcePickingInteractOutside } from './hooks/useIgnorePatternSourcePickingInteractOutside';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
 import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
 import { useOpenSessionId } from './hooks/useOpenSessionId';
+import { usePatternSourcePicking } from './hooks/usePatternSourcePicking';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
@@ -80,15 +83,22 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, patternPanel, onGradientChange, onPatternChange);
   const colorSampler = useColorSampler(colorModel.setHex);
+  const patternSourcePicking = usePatternSourcePicking();
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
   const ignoreGradientCanvasInteractOutside = useIgnoreGradientCanvasInteractOutside(isPointerOverGradientHandle);
-  const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
+  const ignorePatternSourcePickingInteractOutside = useIgnorePatternSourcePickingInteractOutside(patternSourcePicking.isActive);
+  const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, patternSourcePicking.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
-  const handleInteractOutside = useHandleInteractOutside(ignoreSamplerInteractOutside, ignoreGradientCanvasInteractOutside);
   const preview = getColorPickerPreview(activeTab, gradientPanel.stops, gradientPanel.type, gradientPanel.angle, value);
+  const handleInteractOutside = useHandleInteractOutside(
+    ignoreSamplerInteractOutside,
+    ignoreGradientCanvasInteractOutside,
+    ignorePatternSourcePickingInteractOutside,
+  );
 
   useResetActiveTabOnReopen(openSessionId, initialActiveTab, DEFAULT_ACTIVE_TAB, setActiveTab);
   useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
+  useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
 
   return (
     <Popover
@@ -125,6 +135,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onDragStart={handleDragStart}
             onOpenSampler={colorSampler.open}
             patternPanel={patternPanel}
+            patternSourcePicking={patternSourcePicking}
           />
         </DockedPanelContext.Provider>
         {activeTab === ColorPickerTab.solid && <Footer onSelectPreset={colorModel.setPreset} presets={presets} />}

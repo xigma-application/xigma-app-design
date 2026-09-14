@@ -18,7 +18,14 @@ const GRADIENT_PAINT: TGradientPaint = {
   type: 'gradient-linear',
 };
 
-const CHANGE: TPatternPanelChange = { alignmentIndex: 2, scale: 150, spacingX: 5, spacingY: 10, tileType: 'circular' };
+const CHANGE: TPatternPanelChange = {
+  alignmentIndex: 2,
+  direction: 'vertical',
+  scale: 150,
+  spacingX: 5,
+  spacingY: 10,
+  tileType: 'hexagonal',
+};
 
 describe('useConvertToPatternPaint', () => {
   it('should build a TPatternPaint carrying over blendMode, opacity, and visible from a solid paint, plus the panel change', () => {

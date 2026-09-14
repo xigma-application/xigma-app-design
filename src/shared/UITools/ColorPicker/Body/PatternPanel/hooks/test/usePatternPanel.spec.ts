@@ -9,7 +9,14 @@ import { DEFAULT_PATTERN_PANEL_STATE } from '../../constants';
 // types
 import { TInitialPattern, TPatternPanelChange } from '../../types';
 
-const SEEDED_PATTERN: TInitialPattern = { alignmentIndex: 5, scale: 200, spacingX: 10, spacingY: 20, tileType: 'circular' };
+const SEEDED_PATTERN: TInitialPattern = {
+  alignmentIndex: 5,
+  direction: 'vertical',
+  scale: 200,
+  spacingX: 10,
+  spacingY: 20,
+  tileType: 'hexagonal',
+};
 
 type TProps = { initialPattern: TInitialPattern | undefined; resetKey: number | undefined };
 
@@ -52,6 +59,21 @@ describe('usePatternPanel', () => {
     // result
     expect(result.current.scale).toBe(50);
     expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_PATTERN_PANEL_STATE, scale: 50 });
+  });
+
+  it('should update the direction on setDirection()', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderUsePatternPanel(onChange, undefined, 1);
+
+    // action
+    act(() => result.current.setDirection('vertical'));
+
+    // result
+    expect(result.current.direction).toBe('vertical');
+    expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_PATTERN_PANEL_STATE, direction: 'vertical' });
   });
 
   it('should reset to defaults on reset(), regardless of the seeded initialPattern', () => {

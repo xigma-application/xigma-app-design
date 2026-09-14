@@ -92,6 +92,8 @@ export const selectIsGridSettingsPanelOpen = (state: RootState): boolean => Bool
 
 export const selectIsMediaToolArmed = (state: RootState): boolean => state.design.isMediaToolArmed;
 
+export const selectIsPatternSourcePicking = (state: RootState): boolean => state.design.isPatternSourcePicking;
+
 export const selectIsUiHidden = (state: RootState): boolean => state.design.isUiHidden;
 
 export const selectIsUiMinimized = (state: RootState): boolean => state.design.isUiMinimized;

@@ -6,7 +6,9 @@ export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-lin
 
 export type TImageScaleMode = 'fill' | 'fit' | 'stretch' | 'tile';
 
-export type TPatternTileType = 'circular' | 'rectangular';
+export type TPatternDirection = 'horizontal' | 'vertical';
+
+export type TPatternTileType = 'hexagonal' | 'rectangular';
 
 export type TGradientStop = {
   color: string;
@@ -41,6 +43,7 @@ export type TImagePaint = TPaintBase & {
 
 export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
+  direction: TPatternDirection;
   scale: number;
   spacingX: number;
   spacingY: number;

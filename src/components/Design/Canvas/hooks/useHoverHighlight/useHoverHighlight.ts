@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
-import { selectActiveTool } from 'store/design/selectors';
+import { selectActiveTool, selectIsPatternSourcePicking } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -22,20 +22,25 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
   const { canvasRef, hover } = refs;
   const { hoverRef } = hover;
   const activeTool = useAppSelector(selectActiveTool);
+  const isPatternSourcePicking = useAppSelector(selectIsPatternSourcePicking);
   const { setClassName } = useClassNames();
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (event.buttons === 0) {
-      lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
-      resolveHover(canvas, event, hoverRef, setClassName, activeTool, refs);
-      resolveDistanceGuides(event, activeTool, refs, setClassName);
+    if (!isPatternSourcePicking) {
+      if (event.buttons === 0) {
+        lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
+        resolveHover(canvas, event, hoverRef, setClassName, activeTool, refs);
+        resolveDistanceGuides(event, activeTool, refs, setClassName);
+      }
     }
   };
 
   const handlePointerDown = (): void => {
-    if (refs.hover.hoveredGridTrackAffordanceRef.current?.hoveredHandlePart === 'grip') {
-      setClassName('pressing');
+    if (!isPatternSourcePicking) {
+      if (refs.hover.hoveredGridTrackAffordanceRef.current?.hoveredHandlePart === 'grip') {
+        setClassName('pressing');
+      }
     }
   };
 
@@ -83,5 +88,5 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         setHoverState(canvas, hoverRef, setClassName, null, '', null);
       };
     }
-  }, [activeTool, canvasRef, hoverRef, setClassName]);
+  }, [activeTool, canvasRef, hoverRef, isPatternSourcePicking, setClassName]);
 };

@@ -149,6 +149,7 @@ describe('drawVectorFillPaints', () => {
     // mock
     const pattern: TPatternPaint = {
       alignmentIndex: 0,
+      direction: 'horizontal',
       opacity: 100,
       scale: 100,
       spacingX: 0,

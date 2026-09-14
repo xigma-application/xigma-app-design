@@ -13,12 +13,24 @@ import { translationNameSpace } from '../constants';
 // styles
 import styles from './pattern-source-preview.module.scss';
 
-export const PatternSourcePreview: FC = () => {
+// types
+import { TUsePatternSourcePickingResult } from '../../../hooks/usePatternSourcePicking';
+
+export type TPatternSourcePreviewProps = { patternSourcePicking: TUsePatternSourcePickingResult };
+
+export const PatternSourcePreview: FC<TPatternSourcePreviewProps> = ({ patternSourcePicking }) => {
   const { t } = useTranslation();
+  const { close, isActive, open } = patternSourcePicking;
 
   return (
     <div className={styles.PatternSourcePreview}>
-      <UITools.Button color="secondary" size="small" variant="outline">
+      <UITools.Button
+        active={isActive}
+        color={isActive ? 'primary' : 'secondary'}
+        onClick={isActive ? close : open}
+        size="small"
+        variant={isActive ? 'solid' : 'outline'}
+      >
         <Icon name="Source" size={24} />
         {t(`${translationNameSpace}.selectSourceLabel`)}
       </UITools.Button>

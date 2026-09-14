@@ -73,6 +73,7 @@ export type TDesignState = {
   isActionsPanelOpen: boolean;
   isGridSettingsPanelOpen?: boolean;
   isMediaToolArmed: boolean;
+  isPatternSourcePicking: boolean;
   isUiHidden: boolean;
   isUiMinimized: boolean;
   lastFrameTool: ToolName;

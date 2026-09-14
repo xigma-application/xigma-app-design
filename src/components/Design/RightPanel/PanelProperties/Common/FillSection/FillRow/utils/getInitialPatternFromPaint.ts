@@ -4,8 +4,8 @@ import { TPaint } from 'types/design/paint/types';
 
 export const getInitialPatternFromPaint = (paint: TPaint): TInitialPattern | undefined => {
   if (paint.type === 'pattern') {
-    const { alignmentIndex, scale, spacingX, spacingY, tileType } = paint;
-    return { alignmentIndex, scale, spacingX, spacingY, tileType };
+    const { alignmentIndex, direction, scale, spacingX, spacingY, tileType } = paint;
+    return { alignmentIndex, direction, scale, spacingX, spacingY, tileType };
   }
 
   return undefined;

@@ -19,11 +19,12 @@ const GRADIENT_PANEL = {
 
 const PATTERN_PANEL = {
   alignmentIndex: 3,
+  direction: 'vertical',
   reset: vi.fn(),
   scale: 150,
   spacingX: 5,
   spacingY: 10,
-  tileType: 'circular',
+  tileType: 'hexagonal',
 } as unknown as TUsePatternPanelResult;
 
 describe('useSetActiveTab', () => {
@@ -150,7 +151,14 @@ describe('useSetActiveTab', () => {
     result.current(ColorPickerTab.pattern);
 
     // result
-    expect(onPatternChange).toHaveBeenCalledWith({ alignmentIndex: 3, scale: 150, spacingX: 5, spacingY: 10, tileType: 'circular' });
+    expect(onPatternChange).toHaveBeenCalledWith({
+      alignmentIndex: 3,
+      direction: 'vertical',
+      scale: 150,
+      spacingX: 5,
+      spacingY: 10,
+      tileType: 'hexagonal',
+    });
   });
 
   it('should reset the gradient panel state when switching to Pattern', () => {

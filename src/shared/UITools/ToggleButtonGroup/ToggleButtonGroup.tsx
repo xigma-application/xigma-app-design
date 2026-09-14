@@ -45,7 +45,7 @@ export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
             onMouseLeave={() => onHoverOption?.(null)}
             type="button"
           >
-            <Icon name={icon} size={12} />
+            <Icon name={icon} size={24} />
           </button>
         </Tooltip>
       ))}

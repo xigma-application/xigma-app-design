@@ -108,6 +108,7 @@ const initialState: TDesignState = {
   isActionsPanelOpen: false,
   isGridSettingsPanelOpen: false,
   isMediaToolArmed: false,
+  isPatternSourcePicking: false,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: DEFAULT_FRAME_TOOL,
@@ -240,6 +241,9 @@ const designSlice = createSlice({
     setPanelGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
       state.panelGridTrackSelection = action.payload;
     },
+    setPatternSourcePicking: (state, action: PayloadAction<boolean>) => {
+      state.isPatternSourcePicking = action.payload;
+    },
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
     },
@@ -336,6 +340,7 @@ export const {
   setPaint,
   setPaintBlendMode,
   setPanelGridTrackSelection,
+  setPatternSourcePicking,
   setPenActiveVertexId,
   setSelection,
   setTemporaryActiveTool,

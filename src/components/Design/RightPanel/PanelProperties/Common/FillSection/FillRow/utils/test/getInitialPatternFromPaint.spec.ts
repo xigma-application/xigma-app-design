@@ -6,6 +6,7 @@ describe('getInitialPatternFromPaint', () => {
     expect(
       getInitialPatternFromPaint({
         alignmentIndex: 4,
+        direction: 'vertical',
         opacity: 100,
         scale: 150,
         spacingX: 10,
@@ -15,6 +16,7 @@ describe('getInitialPatternFromPaint', () => {
       }),
     ).toEqual({
       alignmentIndex: 4,
+      direction: 'vertical',
       scale: 150,
       spacingX: 10,
       spacingY: 20,

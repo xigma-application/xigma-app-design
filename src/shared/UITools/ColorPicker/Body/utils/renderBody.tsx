@@ -10,13 +10,31 @@ import { ColorPickerTab } from '../../enums';
 import { TBodyProps } from '../types';
 
 export const renderBody = (props: TBodyProps): ReactNode => {
-  const { activeTab, alpha, colorModel, gradientPanel, onCloseSampler, onDragEnd, onDragStart, onOpenSampler, patternPanel } = props;
+  const {
+    activeTab,
+    alpha,
+    colorModel,
+    gradientPanel,
+    onCloseSampler,
+    onDragEnd,
+    onDragStart,
+    onOpenSampler,
+    patternPanel,
+    patternSourcePicking,
+  } = props;
 
   switch (activeTab) {
     case ColorPickerTab.gradient:
       return <GradientPanel gradientPanel={gradientPanel} onDragEnd={onDragEnd} onDragStart={onDragStart} />;
     case ColorPickerTab.pattern:
-      return <PatternPanel onDragEnd={onDragEnd} onDragStart={onDragStart} patternPanel={patternPanel} />;
+      return (
+        <PatternPanel
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          patternPanel={patternPanel}
+          patternSourcePicking={patternSourcePicking}
+        />
+      );
     default:
       return (
         <SolidPanel

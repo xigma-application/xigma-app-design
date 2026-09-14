@@ -11,7 +11,16 @@ import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/u
 import { useHoverHighlight } from './useHoverHighlight';
 
 // store
-import { addNode, groupNodes, setActiveTool, setSelection, startTextEdit, stopTextEdit, updateNode } from 'store/design/slice';
+import {
+  addNode,
+  groupNodes,
+  setActiveTool,
+  setPatternSourcePicking,
+  setSelection,
+  startTextEdit,
+  stopTextEdit,
+  updateNode,
+} from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -223,6 +232,7 @@ describe('useHoverHighlight behaviors', () => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
     store.dispatch(stopTextEdit());
+    store.dispatch(setPatternSourcePicking(false));
   });
 
   it('should not react to pointer events when the default tool is not active', () => {
@@ -241,6 +251,49 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(hoverRef.current).toBeNull();
     expect(idA).toBeTruthy();
+  });
+
+  it('should not react to pointer events while picking a pattern source, even when hovering a node', () => {
+    // mock — this hook would normally set the cursor class to null/hover-based on plain move,
+    // which must not stomp the pattern-source-picking cursor another hook has already set
+    const idA = addFrameNode(180, 180);
+
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 185, 185));
+    });
+
+    // result
+    expect(hoverRef.current).toBeNull();
+    expect(idA).toBeTruthy();
+  });
+
+  it('should resume reacting to pointer events once picking a pattern source ends', () => {
+    // mock
+    const idA = addFrameNode(190, 190);
+
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => store.dispatch(setPatternSourcePicking(false)));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 195, 195));
+    });
+
+    // result
+    expect(hoverRef.current).toBe(idA);
   });
 
   it('should still show a hover outline over a node while the Comment tool is active', () => {

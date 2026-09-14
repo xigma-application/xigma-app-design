@@ -6,6 +6,7 @@ import { DesignPage } from '../model/DesignPage';
 type TReadablePaint = {
   alignmentIndex?: number;
   color?: string;
+  direction?: string;
   end?: { x: number; y: number };
   opacity: number;
   scale?: number;
@@ -2322,7 +2323,7 @@ test.describe('Design panels — Fill section', () => {
     await page.getByLabel('Pattern').click();
 
     // action
-    await page.getByLabel('Circular', { exact: true }).click();
+    await page.getByLabel('Hexagonal', { exact: true }).click();
 
     const scaleInput = page.locator('[data-test-text-field-input="pattern-scale"]');
 
@@ -2333,7 +2334,7 @@ test.describe('Design panels — Fill section', () => {
     const node = await readNode(page, id);
     const fill = node.fills![0];
 
-    expect(fill.tileType).toBe('circular');
+    expect(fill.tileType).toBe('hexagonal');
     expect(fill.scale).toBe(50);
   });
 
@@ -2347,7 +2348,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Pattern').click();
-    await page.getByLabel('Circular', { exact: true }).click();
+    await page.getByLabel('Hexagonal', { exact: true }).click();
 
     const scaleInput = page.locator('[data-test-text-field-input="pattern-scale"]');
 
@@ -2358,8 +2359,36 @@ test.describe('Design panels — Fill section', () => {
     await page.getByLabel('Solid').click();
     await page.getByLabel('Pattern').click();
 
-    // result — a fresh default, not the 50%/circular values from the earlier edit
+    // result — a fresh default, not the 50%/hexagonal values from the earlier edit
     await expect(page.getByRole('button', { name: 'Rectangular' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(scaleInput).toHaveValue('100');
+    await expect(scaleInput).toHaveValue('100%');
+  });
+
+  test('the Direction row only shows for the Hexagonal tile type', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-direction-row');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+
+    // result — not shown for the default Rectangular tile type
+    await expect(page.getByRole('button', { exact: true, name: 'Horizontal' })).not.toBeVisible();
+
+    // action
+    await page.getByLabel('Hexagonal', { exact: true }).click();
+
+    // result — shown once Hexagonal is selected, and clicking Vertical commits it onto the paint
+    await expect(page.getByRole('button', { exact: true, name: 'Horizontal' })).toBeVisible();
+    await page.getByRole('button', { exact: true, name: 'Vertical' }).click();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].direction).toBe('vertical');
   });
 });

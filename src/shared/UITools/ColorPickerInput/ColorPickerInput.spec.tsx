@@ -1,23 +1,29 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ComponentProps } from 'react';
+import { Provider } from 'react-redux';
 
 // components
 import ColorPickerInput from './ColorPickerInput';
 import { TooltipProvider } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderColorPickerInput = (props: Partial<ComponentProps<typeof ColorPickerInput>> = {}): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <ColorPickerInput
-        alpha={100}
-        e2eValue="background"
-        hex="#444444"
-        onCommitAlpha={vi.fn()}
-        onCommitHex={vi.fn()}
-        onPickerChange={vi.fn()}
-        {...props}
-      />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <ColorPickerInput
+          alpha={100}
+          e2eValue="background"
+          hex="#444444"
+          onCommitAlpha={vi.fn()}
+          onCommitHex={vi.fn()}
+          onPickerChange={vi.fn()}
+          {...props}
+        />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('ColorPickerInput snapshots', () => {

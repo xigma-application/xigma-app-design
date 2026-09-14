@@ -12,7 +12,7 @@ import { useDrawingCursor } from './useDrawingCursor';
 import { useHandTool } from '../useHandTool/useHandTool';
 
 // store
-import { setActiveTool } from 'store/design/slice';
+import { setActiveTool, setPatternSourcePicking } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -43,6 +43,7 @@ const renderDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
 describe('useDrawingCursor behaviors', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setPatternSourcePicking(false));
   });
 
   it('should apply the drawing cursor class when the Frame tool is active', () => {
@@ -111,6 +112,52 @@ describe('useDrawingCursor behaviors', () => {
 
     // result
     expect(classNameRef.current).not.toBe('drawing');
+  });
+
+  it('should apply the pattern-source-picking cursor class when picking a pattern source, even for the default tool', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    const classNameRef = renderDrawingCursor(canvasRef);
+
+    // result
+    expect(classNameRef.current).toBe('pattern-source-picking');
+  });
+
+  it('should prefer the pattern-source-picking cursor over a drawing tool cursor', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.rectangle));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    const classNameRef = renderDrawingCursor(canvasRef);
+
+    // result
+    expect(classNameRef.current).toBe('pattern-source-picking');
+  });
+
+  it('should fall back to the tool cursor once picking a pattern source ends', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.rectangle));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    const classNameRef = renderDrawingCursor(canvasRef);
+
+    expect(classNameRef.current).toBe('pattern-source-picking');
+
+    // action
+    act(() => store.dispatch(setPatternSourcePicking(false)));
+
+    // result
+    expect(classNameRef.current).toBe('drawing');
   });
 
   it('should do nothing when the canvas has no element yet', () => {
