@@ -85,6 +85,24 @@ describe('drawGradientEllipseGuide', () => {
     expect(colorCalls[1]).toEqual(hexToRgbaFloat('#ffffff', 1));
   });
 
+  it('should draw nothing for a diamond gradient — its boundary is a rhombus, not an ellipse', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawGradientEllipseGuide(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT },
+      BOUNDS,
+      0,
+      { ...PAINT, type: 'gradient-diamond' },
+    );
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
   it('should also draw the ellipse guide for an angular gradient', () => {
     // mock
     const gl = createGlMock();

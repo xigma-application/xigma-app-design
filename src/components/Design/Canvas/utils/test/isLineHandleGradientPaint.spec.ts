@@ -20,9 +20,9 @@ describe('isLineHandleGradientPaint', () => {
     );
   });
 
-  it('should return false for a diamond gradient paint', () => {
+  it('should return true for a diamond gradient paint', () => {
     expect(isLineHandleGradientPaint({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-diamond' })).toBe(
-      false,
+      true,
     );
   });
 

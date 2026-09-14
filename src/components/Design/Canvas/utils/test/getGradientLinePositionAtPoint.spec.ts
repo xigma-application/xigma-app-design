@@ -99,6 +99,13 @@ describe('getGradientLinePositionAtPoint', () => {
     expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, position: 0.5 });
   });
 
+  it('should also add stops onto the start->end line of a diamond gradient, same as radial', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-diamond' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientLinePositionAtPoint({ x: 50, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, position: 0.5 });
+  });
+
   it('should return null for an angular gradient — clicking its line never adds a stop', () => {
     // an angular stop's position is an angle, not a linear lerp along the line, so line-click add-stop
     // does not apply to it

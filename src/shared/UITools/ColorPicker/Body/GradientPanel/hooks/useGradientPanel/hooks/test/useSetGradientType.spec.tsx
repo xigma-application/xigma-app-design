@@ -54,7 +54,7 @@ describe('useSetGradientType', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 } }));
   });
 
-  it('should reset the points to the default horizontal line when switching to a non-radial, non-angular type', () => {
+  it('should reset the points to the default horizontal line when switching to linear', () => {
     // mock
     const onChange = vi.fn();
 
@@ -62,11 +62,26 @@ describe('useSetGradientType', () => {
     const { result } = renderSetGradientType(onChange);
 
     // action
-    act(() => result.current.setGradientType('gradient-diamond'));
+    act(() => result.current.setGradientType('gradient-linear'));
 
     // result
     expect(result.current.points).toEqual({ end: { x: 1, y: 0.5 }, start: { x: 0, y: 0.5 } });
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ end: { x: 1, y: 0.5 }, start: { x: 0, y: 0.5 } }));
+  });
+
+  it('should reset the points to a centered radius reaching the bottom edge when switching to diamond', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before — points start out as an unrelated diagonal line, simulating a prior gradient's state
+    const { result } = renderSetGradientType(onChange);
+
+    // action
+    act(() => result.current.setGradientType('gradient-diamond'));
+
+    // result
+    expect(result.current.points).toEqual({ end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 } });
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 } }));
   });
 
   it('should reset the points to a centered radius reaching the bottom edge when switching to angular', () => {

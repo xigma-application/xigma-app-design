@@ -10,6 +10,9 @@ import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
 import { getVectorFillBounds } from './getVectorFillBounds';
 import { getVectorFillCoveringQuad } from './getVectorFillCoveringQuad';
 
+const getGradientRadiusRatio = (paint: TGradientPaint): number =>
+  paint.type === 'gradient-radial' || paint.type === 'gradient-angular' || paint.type === 'gradient-diamond' ? (paint.radiusRatio ?? 1) : 1;
+
 export const drawVectorGradientFill = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -55,7 +58,7 @@ export const drawVectorGradientFill = (
     gl.uniform2f(endLocation, paint.end.x, paint.end.y);
     gl.uniform1i(gradientTypeIndexLocation, getGradientTypeIndex(paint.type));
     gl.uniform1f(opacityLocation, alpha);
-    gl.uniform1f(radiusRatioLocation, paint.type === 'gradient-radial' || paint.type === 'gradient-angular' ? (paint.radiusRatio ?? 1) : 1);
+    gl.uniform1f(radiusRatioLocation, getGradientRadiusRatio(paint));
     gl.enableVertexAttribArray(positionLocation);
 
     gl.clear(gl.STENCIL_BUFFER_BIT);

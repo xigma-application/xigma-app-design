@@ -17,6 +17,24 @@ const RADIAL_PAINT: TGradientPaint = {
   type: 'gradient-radial',
 };
 
+const ANGULAR_PAINT: TGradientPaint = {
+  end: { x: 0.5, y: 1 },
+  opacity: 100,
+  radiusRatio: 0.6,
+  start: { x: 0.5, y: 0.5 },
+  stops: [{ color: '#ffffff', opacity: 100, position: 0 }],
+  type: 'gradient-angular',
+};
+
+const DIAMOND_PAINT: TGradientPaint = {
+  end: { x: 0.5, y: 1 },
+  opacity: 100,
+  radiusRatio: 0.7,
+  start: { x: 0.5, y: 0.5 },
+  stops: [{ color: '#ffffff', opacity: 100, position: 0 }],
+  type: 'gradient-diamond',
+};
+
 describe('useConvertSolidToGradientPaint', () => {
   it('should build a real TGradientPaint with points derived from angle when the panel change has no start/end', () => {
     // mock
@@ -109,6 +127,46 @@ describe('useConvertSolidToGradientPaint', () => {
 
     // result
     expect(onChange.mock.calls[0][0].radiusRatio).toBe(0.4);
+  });
+
+  it('should preserve the existing radiusRatio when the paint is already angular, e.g. while editing a stop color', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useConvertSolidToGradientPaint(ANGULAR_PAINT, onChange));
+
+    // action — editing a stop color, not touching the type or the radius handle
+    result.current({
+      angle: 0,
+      end: ANGULAR_PAINT.end,
+      start: ANGULAR_PAINT.start,
+      stops: [{ color: '#ff0000', id: 'stop-1', opacity: 100, position: 0 }],
+      type: 'gradient-angular',
+    });
+
+    // result
+    expect(onChange.mock.calls[0][0].radiusRatio).toBe(0.6);
+  });
+
+  it('should preserve the existing radiusRatio when the paint is already diamond, e.g. while editing a stop color', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useConvertSolidToGradientPaint(DIAMOND_PAINT, onChange));
+
+    // action — editing a stop color, not touching the type or the radius handle
+    result.current({
+      angle: 0,
+      end: DIAMOND_PAINT.end,
+      start: DIAMOND_PAINT.start,
+      stops: [{ color: '#ff0000', id: 'stop-1', opacity: 100, position: 0 }],
+      type: 'gradient-diamond',
+    });
+
+    // result
+    expect(onChange.mock.calls[0][0].radiusRatio).toBe(0.7);
   });
 
   it('should omit radiusRatio when the resulting type is not radial', () => {

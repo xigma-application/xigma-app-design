@@ -1523,6 +1523,212 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].type).toBe('gradient-angular');
   });
 
+  test('switching a shape gradient to Diamond via the panel resets its points to a centered default, same as Radial', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-diamond-type-switch-reset');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.9, y: 0.1 },
+                opacity: 100,
+                start: { x: 0.2, y: 0.8 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    await page.locator('[class*="GradientActions__type-dropdown"]').click();
+    await page.getByText('Diamond', { exact: true }).click();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 0.5, y: 1 });
+    expect(node.fills![0].type).toBe('gradient-diamond');
+  });
+
+  test('a diamond gradient renders as an actual diamond shape instead of a flat fill', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-diamond-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // centered diamond default: A (center) at the shape's center, B on the bottom edge — the
+    // shape's 4 corners sit outside the diamond (t > 1, clamped to the last stop's color) while
+    // the center sits at t = 0 (the first stop's color)
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-diamond',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await designPage.click(1500, 600); // deselect
+
+    const [centerR, centerG, centerB] = await readPixelColor(page, 800, 280);
+    const [cornerR, cornerG, cornerB] = await readPixelColor(page, 701, 201);
+
+    // the shader bug clamped almost the entire fill to the last stop's color (near-black)
+    // everywhere except a thin band — so the center must be near-white, not near-black
+    expect(centerR).toBeGreaterThan(200);
+    expect(centerG).toBeGreaterThan(200);
+    expect(centerB).toBeGreaterThan(200);
+
+    expect(cornerR).toBeLessThan(50);
+    expect(cornerG).toBeLessThan(50);
+    expect(cornerB).toBeLessThan(50);
+  });
+
+  test('dragging a diamond gradient’s perpendicular radius handle reshapes it, exactly like radial’s', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-diamond-radius-handle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-diamond',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // the perpendicular radius handle for this configuration sits at world (700, 440) — 80px below
+    // the shape's bottom edge, a full primary-radius (160px) away from the center at (700,280)
+    await page.mouse.move(700, 440);
+    await page.mouse.down();
+    await page.mouse.move(700, 360, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].radiusRatio).toBeCloseTo(0.5, 2);
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+  });
+
+  test('dragging the outer ring around a diamond gradient’s center rotates the whole shape around it, exactly like radial’s', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-diamond-rotate-from-center');
+    await expect(designPage.canvas).toBeVisible();
+
+    // center (800,280), edge straight down at (800,360) — an 80px radius
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-diamond',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab 8px left of the center (800,280) — past the inner move zone, within the outer rotate ring
+    await page.mouse.move(792, 280);
+    await page.mouse.down();
+    await page.mouse.move(800, 200, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    // the center never moves; the edge point swings from straight-down to straight-up, radius unchanged
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end!.x).toBeCloseTo(0.5, 2);
+    expect(node.fills![0].end!.y).toBeCloseTo(0, 2);
+  });
+
   test('dragging an angular gradient’s perpendicular radius handle reshapes its ellipse, just like radial’s', async ({ page }) => {
     const designPage = new DesignPage(page);
 

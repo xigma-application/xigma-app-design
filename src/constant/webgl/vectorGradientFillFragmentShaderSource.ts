@@ -43,7 +43,6 @@ vec4 sampleGradient(float t) {
 }
 
 void main() {
-  vec2 center = (u_start + u_end) * 0.5;
   vec2 axis = u_end - u_start;
   float t = 0.0;
 
@@ -80,9 +79,17 @@ void main() {
       t = angle / (2.0 * PI);
     }
   } else {
-    vec2 halfSize = max(abs(u_end - center), vec2(0.0001));
-    vec2 distance = abs(v_localPosition - center);
-    t = distance.x / halfSize.x + distance.y / halfSize.y;
+    vec2 primaryAxis = u_end - u_start;
+    float primaryRadius = length(primaryAxis);
+
+    if (primaryRadius > 0.0) {
+      vec2 direction = primaryAxis / primaryRadius;
+      vec2 perpendicular = vec2(-direction.y, direction.x);
+      vec2 relative = v_localPosition - u_start;
+      float a = dot(relative, direction) / primaryRadius;
+      float b = dot(relative, perpendicular) / (primaryRadius * u_radiusRatio);
+      t = abs(a) + abs(b);
+    }
   }
 
   vec4 color = sampleGradient(t);

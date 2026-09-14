@@ -187,6 +187,10 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line   |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                          |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear               |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 421 | Switching a gradient's type to Diamond resets its points to a centered default, same as radial/angular          |  —   |         ✅ `fill-section.spec.ts`         |
+| 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                     |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                   |  —   |         ✅ `fill-section.spec.ts`         |
+| 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's      |  —   |         ✅ `fill-section.spec.ts`         |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -438,3 +442,36 @@ sites that compute an angular stop's own orientation (`getGradientStopDirections
 tests (exact-geometry assertions, including one that deliberately proves the new function *diverges*
 from the old one for a stretched ellipse) rather than a new e2e scenario, same rendering-only
 reasoning as the fixes above.
+
+#421-#422: the diamond gradient type had never actually worked — a shape with a diamond fill
+rendered as almost solid flat color, unrelated to and predating the angular work above. Root cause
+in the shader (`vectorGradientFillFragmentShaderSource.ts`): diamond's branch computed
+`halfSize = abs(u_end - center)` where `center = (u_start + u_end) * 0.5`, which only produces a
+sensible (nonzero on both axes) `halfSize` if `u_start`/`u_end` are two *opposite corners* of the
+diamond's bounding box. But diamond's default points were still the linear "two opposite edge
+points on the same horizontal line" (`start: (0, 0.5)`, `end: (1, 0.5)`) — under that model `center`
+lands at `(0.5, 0.5)` and `halfSize` comes out `(0.5, 0)`, a zero y-extent; dividing by that
+(clamped to `0.0001`) blew `t` up to a huge value everywhere except a thin horizontal band, so
+`sampleGradient` clamped almost the entire fill to the last stop's color. Fixed the same way angular
+was: diamond's branch now pivots at `u_start` like radial/angular, projecting onto the primary axis
+and its `radiusRatio`-scaled perpendicular exactly like radial's branch, but sums the two components
+with `abs(a) + abs(b)` (L1 distance) instead of `length(vec2(a, b))` (L2) — that's the only
+difference between an ellipse and a diamond in this shared basis. `getDefaultGradientPoints` and the
+`radiusRatio` uniform gate both widened to include `'gradient-diamond'` alongside radial/angular, so
+switching to Diamond now seeds a proper centered default too. At the time of this fix, diamond still
+had no on-canvas handles — `isLineHandleGradientPaint`/`isEllipseHandleGradientPaint` deliberately
+still excluded it.
+
+#423-#424: the user confirmed diamond should get the exact same on-canvas handle rules as radial. This
+turned out to need no new geometry at all: diamond's `stop.position` is already a plain linear lerp
+along the line (same as radial — only angular diverges into angle-based positions), so every
+position/direction helper already fell into the shared non-angular branch. The fix was purely widening
+`isLineHandleGradientPaint` and `isEllipseHandleGradientPaint` to include `'gradient-diamond'`, which
+transitively wired up the whole handle overlay, the radiusRatio/aspect handle and its drag, and the
+`'radial'` fixed-pivot rotate mode. Deliberately not widened: the ellipse-guide-curve drawer keeps its
+own narrower check, since a diamond's real boundary is a rhombus, not an ellipse, and drawing a curved
+guide over it would be misleading — no diamond-shaped guide exists yet. A pre-existing bug surfaced
+during this work, unrelated to diamond: `useConvertSolidToGradientPaint` (which every panel change,
+including a plain stop-color edit, funnels through) only preserved `radiusRatio` for
+`type === 'gradient-radial'`, so editing a stop's color on an *angular* gradient with a custom
+`radiusRatio` silently reset it to 1 on the next keystroke — fixed by widening that check too.

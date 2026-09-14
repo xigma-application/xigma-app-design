@@ -655,9 +655,59 @@ node's folder. Today:
   a perfect circle, reducing to the original formula when `radiusRatio` is 1 (the default), so every
   existing angular gradient renders unchanged. `drawVectorGradientFill.ts`'s
   `paint.type === 'gradient-radial' ? radiusRatio : 1` uniform gate widened to include
-  `'gradient-angular'` to match. Diamond's branch still uses the old shared `center` midpoint
-  variable, untouched — it wasn't part of this change and still uses the "two opposite points"
-  default.
+  `'gradient-angular'` to match.
+
+  **Diamond had the same "two opposite points" bug the angular fix above describes, except it was
+  never actually fixed for diamond — a shape with a diamond fill rendered as almost solid flat
+  color instead of a diamond.** Diamond's shader branch computed `halfSize = abs(u_end - center)`
+  where `center = (u_start + u_end) * 0.5`, expecting `u_start`/`u_end` to be two *opposite
+  corners* of the diamond's bounding box (so `halfSize` gets a nonzero x **and** y component). But
+  diamond's default points were still the linear "two opposite edge points on the same horizontal
+  line" default (`start: (0, 0.5)`, `end: (1, 0.5)`) — with those, `center` lands at `(0.5, 0.5)`
+  and `halfSize` is `(0.5, 0)`: a zero y-extent. Dividing by that (clamped to `0.0001`) made `t`
+  enormous everywhere except a thin horizontal band, so `sampleGradient` clamped almost the whole
+  fill to the last stop's color. Fixed the same way angular was: diamond now pivots at `u_start`
+  (the center) like radial/angular, projects onto the primary axis and its `radiusRatio`-scaled
+  perpendicular exactly like the radial branch, but sums the two components with `abs(a) + abs(b)`
+  (L1/Manhattan distance) instead of `length(vec2(a, b))` (L2/Euclidean) — that's the only
+  difference between an ellipse and a diamond in this basis. `getDefaultGradientPoints` in
+  `useSetGradientType.ts` and the `radiusRatio` uniform gate in `drawVectorGradientFill.ts` both
+  widened their `'gradient-radial' || 'gradient-angular'` checks to include `'gradient-diamond'` to
+  match, so switching a gradient to Diamond now seeds a proper centered default instead of the
+  broken flat line. Diamond did **not** get on-canvas handles as part of this render fix —
+  `isLineHandleGradientPaint`/`isEllipseHandleGradientPaint` deliberately still excluded it at this
+  point, since it has no ellipse-guide equivalent of its own (a rotated-square/rhombus guide); that
+  followed as a separate change, see below.
+
+  **Follow-up: diamond got the full radial handle set, confirmed by the user to follow "the same
+  rules as radial."** Unlike angular, diamond's `stop.position` is a plain linear lerp fraction
+  along the start->end line, identical to linear/radial (`continueGradientStopDrag`,
+  `getGradientStopPositions`, `getGradientStopDirections` all branch only on
+  `paint.type === 'gradient-angular'` — diamond already fell into their shared, non-angular
+  branch) — so no new position/direction math was needed, only widening the two gating predicates:
+  `isLineHandleGradientPaint` (whole handle overlay, rotate-handle hit-test, click-add-stop) and
+  `isEllipseHandleGradientPaint` (the 3rd radiusRatio/aspect handle, its drag, and the `'radial'`
+  rotate-mode dispatch in `armGradientRotateOnPointerDown` — fixed pivot at center, both endpoints
+  swing together, no box/line-attach snapping) both widened to
+  `'gradient-radial' || 'gradient-angular' || 'gradient-diamond'`. `getGradientLinePositionAtPoint`
+  (click-the-line-to-add-a-stop) also widened the same way it already had `'gradient-radial'` added
+  — every point along a diamond's line maps to a sensible lerp position, unlike angular.
+  Deliberately **not** widened: `drawGradientEllipseGuide.ts` keeps its own narrower
+  `isEllipseShapedGradientPaint` check (`'gradient-radial' || 'gradient-angular'` only) instead of
+  reusing the now-wider `isEllipseHandleGradientPaint` — a diamond's actual iso-color boundary is a
+  rhombus, not an ellipse, and the reference screenshot for diamond's default state showed no
+  boundary guide at all, so drawing an elliptical curve over it would be actively misleading; a
+  diamond-shaped guide is left as a future addition if the user asks for one specifically.
+
+  **Bug found along the way, affecting angular too, not just diamond:** `useConvertSolidToGradientPaint`
+  (the single function every `GradientPanel` `onChange` — including a plain stop-color edit —
+  funnels through before it reaches Redux) only preserved `radiusRatio` when
+  `type === 'gradient-radial'`. Since it re-derives `radiusRatio` from scratch on *every* panel
+  change, not just on a type switch, editing a stop's color on an angular gradient with a non-1
+  `radiusRatio` (set earlier by dragging the aspect handle) silently reset it back to 1 on the very
+  next keystroke — angular had this bug live before diamond's own handles even existed. Fixed by
+  widening the same condition there too (`'gradient-radial' || 'gradient-angular' || 'gradient-diamond'`
+  on both the incoming `type` and the existing `paint.type`).
 
   **The ellipse itself was never actually drawn as a curve** — the radial pass (and angular after
   it) only ever rendered the straight start→end line, the point handles, and the stop markers; a

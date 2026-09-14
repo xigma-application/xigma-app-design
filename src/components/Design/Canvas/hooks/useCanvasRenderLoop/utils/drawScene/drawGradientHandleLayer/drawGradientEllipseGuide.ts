@@ -9,7 +9,6 @@ import { TDrawContext } from '../types';
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
 import { getGradientEllipsePoint } from './getGradientEllipsePoint';
-import { isEllipseHandleGradientPaint } from 'components/Design/Canvas/utils/isEllipseHandleGradientPaint';
 
 const GRADIENT_ELLIPSE_GUIDE_COLOR = '#ffffff';
 const GRADIENT_ELLIPSE_GUIDE_WIDTH = 1;
@@ -17,8 +16,11 @@ const GRADIENT_ELLIPSE_GUIDE_SHADOW_COLOR = '#000000';
 const GRADIENT_ELLIPSE_GUIDE_SHADOW_ALPHA = 0.35;
 const GRADIENT_ELLIPSE_GUIDE_SHADOW_EXTRA_WIDTH = 2;
 
+const isEllipseShapedGradientPaint = (paint: TGradientPaint): boolean =>
+  paint.type === 'gradient-radial' || paint.type === 'gradient-angular';
+
 export const drawGradientEllipseGuide = (ctx: TDrawContext, bounds: TDraftRect, rotation: number, paint: TGradientPaint): void => {
-  if (isEllipseHandleGradientPaint(paint)) {
+  if (isEllipseShapedGradientPaint(paint)) {
     const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = ctx;
     const points = Array.from({ length: ELLIPSE_SEGMENTS }, (_, index) =>
       getGradientEllipsePoint(bounds, rotation, paint, index / ELLIPSE_SEGMENTS),
