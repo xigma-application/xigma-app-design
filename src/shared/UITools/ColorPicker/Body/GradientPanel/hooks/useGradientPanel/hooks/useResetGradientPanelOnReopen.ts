@@ -32,7 +32,7 @@ export const useResetGradientPanelOnReopen = (
       setSelectedStopId(null);
       setAngle(0);
       setPoints(seed ? { end: seed.end, start: seed.start } : null);
-      setType(DEFAULT_GRADIENT_TYPE);
+      setType(seed?.type ?? DEFAULT_GRADIENT_TYPE);
     }
   }, [resetKey]);
 };

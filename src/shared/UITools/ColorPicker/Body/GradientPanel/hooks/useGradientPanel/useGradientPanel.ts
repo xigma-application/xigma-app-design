@@ -47,7 +47,7 @@ export const useGradientPanel = (
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
   const [angle, setAngle] = useState(0);
   const [points, setPoints] = useState<TGradientPoints | null>(initialPoints);
-  const [type, setType] = useState<TGradientType>(DEFAULT_GRADIENT_TYPE);
+  const [type, setType] = useState<TGradientType>(initialGradient?.type ?? DEFAULT_GRADIENT_TYPE);
   const selectStop = (id: string): void => setSelectedStopId(id);
   const addStop = useAddStop(stops, setStops, selectStop, type, angle, points, onChange);
   const removeStop = useRemoveStop(stops, setStops, selectedStopId, setSelectedStopId, type, angle, points, onChange);

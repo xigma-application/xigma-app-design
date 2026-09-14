@@ -2,7 +2,7 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
-import { getGradientLinePositionAtPoint } from '../../../../../utils/getGradientLinePositionAtPoint';
+import { getGradientAddStopPositionAtPoint } from '../../../../../utils/getGradientAddStopPositionAtPoint';
 
 export const resolveGradientLineHover = ({
   gradientEditor,
@@ -10,9 +10,9 @@ export const resolveGradientLineHover = ({
   selectedNodes,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const gradientLineHit = getGradientLinePositionAtPoint(point, selectedNodes, viewport, gradientEditor);
+  const gradientAddStopHit = getGradientAddStopPositionAtPoint(point, selectedNodes, viewport, gradientEditor);
 
-  if (gradientLineHit) {
-    return { className: 'drawing', cursor: '', nodeId: gradientLineHit.nodeId };
+  if (gradientAddStopHit) {
+    return { className: 'drawing', cursor: '', nodeId: gradientAddStopHit.nodeId };
   }
 };

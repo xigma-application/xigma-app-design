@@ -596,15 +596,87 @@ node's folder. Today:
   diagonal line would be reinterpreted as-is under `gradient-radial`'s new "start = true center"
   model — putting the center wherever `start` happened to be (often off in a corner), not at the
   visual middle of the shape. Fixed with a small per-type default table baked into
-  `useSetGradientType.ts` itself (only one caller, so no new top-level util): non-radial types get
-  the existing horizontal default (`{start: (0,0.5), end: (1,0.5)}` — this also keeps
-  angular/diamond correctly centered, since their shader still derives "center" as the *midpoint* of
-  start/end, and this pair's midpoint is exactly the box center); `gradient-radial` gets `{start:
-  (0.5,0.5), end: (0.5,1)}` — true center, radius reaching the bottom edge, matching Figma's own
-  default radial. The hook now also calls `setPoints` (previously it only forwarded to `onChange`
-  and let the type-switch's points go stale in local state), so every subsequent edit in the same
-  session (add a stop, drag a stop) keeps using the freshly-reset points instead of silently
-  reverting to whatever was there before the switch.
+  `useSetGradientType.ts` itself (only one caller, so no new top-level util): non-radial,
+  non-angular types (linear, diamond) get the existing horizontal default (`{start: (0,0.5), end:
+  (1,0.5)}`); `gradient-radial` **and** `gradient-angular` both get `{start: (0.5,0.5), end: (0.5,
+  1)}` — true center, radius reaching the bottom edge, matching Figma's own default for both (see
+  "Angular reuses the radial ellipse handles" below for why angular needed the center model too).
+  The hook now also calls `setPoints` (previously it only forwarded to `onChange` and let the
+  type-switch's points go stale in local state), so every subsequent edit in the same session (add a
+  stop, drag a stop) keeps using the freshly-reset points instead of silently reverting to whatever
+  was there before the switch.
+
+  **Angular reuses the radial ellipse handles wholesale, with one different rule: stops move by
+  angle, not by lerp along the line.** `isLineHandleGradientPaint` (gates the whole handle overlay)
+  was widened again to `'gradient-linear' || 'gradient-radial' || 'gradient-angular'`; a new sibling
+  predicate `isEllipseHandleGradientPaint` (`'gradient-radial' || 'gradient-angular'`) replaced every
+  `paint.type === 'gradient-radial'` literal that gated the third radius/aspect handle and its drag
+  (`drawGradientRadiusHandles`, `armGradientRadiusOnPointerDown`, `continueGradientRadiusDrag`,
+  `getGradientRadiusHandleAtPoint`) and the rotate-mode dispatch (`armGradientRotateOnPointerDown`'s
+  `'radial'`-mode branch) — angular's center (`start`), rotate-from-either-ring, and radiusRatio
+  aspect handle are now byte-for-byte the same interactions as radial's, since none of that code ever
+  cared which of the two paint types it was. The one thing that *couldn't* be reused: a stop's
+  `position` on an angular gradient is an angle around the ellipse (matching the shader's
+  `atan2`-based `t`), not a linear fraction of the start->end segment — dragging a stop, hit-testing
+  it, and rendering its marker each needed an ellipse-angle counterpart alongside the existing
+  line-lerp math, dispatched on `paint.type === 'gradient-angular'` at each of the three call sites:
+  `continueGradientStopDrag` (new `getGradientStopDragPosition` local helper calls the new
+  `getPositionAroundGradientEllipse(normalizedPoint, start, end, radiusRatio)` instead of
+  `getPositionAlongGradientLine`), `getGradientStopHandleAtPoint` (calls the new
+  `getGradientAngularStopHandlePositions(bounds, rotation, paint)` instead of
+  `getGradientStopHandlePositions`), and `drawGradientHandleLayer` (same positions function, plus a
+  per-stop outward-direction array — `getGradientRadialOutwardDirection(stopPosition, center)` per
+  stop instead of one shared `awayFromLineDirection`, since each angular stop sits at its own angle
+  around the ellipse rather than all beside the same line; `drawGradientStopHandles` and the
+  active-stop value-label helper both took a `TPoint[]` instead of a single `TPoint` for this).
+  `getGradientAngularStopNormalizedPoint(paint, position)` is the forward map (position -> point on
+  the ellipse, in the same start/perpendicular/`radiusRatio` basis `getGradientRadiusHandleNormalizedPoint`
+  already used) and `getPositionAroundGradientEllipse` is its inverse — both live in normalized
+  (0-1, bounds-relative) space specifically so they line up with the shader's own `u_start`/`u_end`
+  space, not local pixel space (see the shader change below for why that space choice matters).
+  Deliberately **not** extended to angular: `getGradientLinePositionAtPoint` (click-the-line-to-
+  add-a-stop) — every point on the start->end segment maps to the same angle (0), so a linear-lerp
+  "position" computed from click-offset-along-the-line would be geometrically meaningless for
+  angular; it now checks `'gradient-linear' || 'gradient-radial'` explicitly instead of the widened
+  predicate, so angular gradients simply don't get canvas add-stop-by-click (still addable via the
+  panel's own stop list). Nothing needed to change for the "ellipse allowed outside the frame" case
+  the user specifically called out — no gradient handle code anywhere clamps `start`/`end`/the radius
+  handle to the node's bounds, so angular got that for free by inheriting the same drag code.
+
+  **The shader's angular branch changed to match this "center" model, and it now honors
+  `radiusRatio` too.** Before this, `vectorGradientFillFragmentShaderSource.ts`'s angular branch
+  computed its angle around `center = (u_start + u_end) * 0.5` (the *midpoint*) — a leftover from
+  when angular still used the same "two opposite edge points" default as linear. Once angular's
+  default (and its on-canvas handles) switched to the radial "start = center" model, that midpoint
+  math would have visually decoupled the rendered gradient's true center from where the on-canvas
+  center handle actually sits. Changed to mirror the radial branch exactly: pivot at `u_start`,
+  project onto the primary axis (`u_end - u_start`) and its perpendicular, and divide the
+  perpendicular component by `u_radiusRatio` before the `atan2` — an ellipse-warped sweep instead of
+  a perfect circle, reducing to the original formula when `radiusRatio` is 1 (the default), so every
+  existing angular gradient renders unchanged. `drawVectorGradientFill.ts`'s
+  `paint.type === 'gradient-radial' ? radiusRatio : 1` uniform gate widened to include
+  `'gradient-angular'` to match. Diamond's branch still uses the old shared `center` midpoint
+  variable, untouched — it wasn't part of this change and still uses the "two opposite points"
+  default.
+
+  **The ellipse itself was never actually drawn as a curve** — the radial pass (and angular after
+  it) only ever rendered the straight start→end line, the point handles, and the stop markers; a
+  user comparing against Figma's reference UI pointed out the missing oval outline that visually
+  connects them. Fixed with a new `drawGradientEllipseGuide.ts`, called unconditionally from
+  `drawGradientHandleLayer.ts` (it decides for itself, internally, whether the paint has an ellipse
+  to draw via `isEllipseHandleGradientPaint` — a no-op for linear). Rather than approximating a true
+  axis-aligned ellipse (which would be wrong for a rotated gradient on a non-square node — the
+  primary and secondary axes aren't generally orthogonal once you scale x/y independently by the
+  node's own width/height), it samples `ELLIPSE_SEGMENTS` points around the curve using the exact
+  same parametric formula the shader and the angular stop math already use — `getGradientEllipsePoint`
+  (renamed from `getGradientAngularStopWorldPoint`, and its normalized-space counterpart from
+  `getGradientAngularStopNormalizedPoint` to `getGradientEllipseNormalizedPoint`, once it became a
+  shared primitive rather than an angular-stop-only one) — and connects consecutive points with the
+  same thick-line-quad `drawLine` technique (shadow pass + white stroke) `drawGradientLine.ts`
+  already uses, rather than a native `GL_LINE_LOOP` (whose width can't be scaled with zoom). Guaranteed
+  by construction to pass exactly through the primary axis endpoint (`end`) and the radius handle
+  (both are just this same function evaluated at specific `position` values), so the curve always
+  lines up with the existing point handles, never drifts independently of them.
 
   **Gradient stop markers now offset perpendicular to the line, not always straight up, and rotate
   to match it.** `getGradientStopHandlePositions.ts` originally nudged every stop by a fixed

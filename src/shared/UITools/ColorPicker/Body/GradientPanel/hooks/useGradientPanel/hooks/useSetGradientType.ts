@@ -5,7 +5,9 @@ import { TEditableGradientStop, TGradientPanelChange, TGradientType } from '../.
 import { TGradientPoints } from './useRotateGradient';
 
 const getDefaultGradientPoints = (type: TGradientType): TGradientPoints =>
-  type === 'gradient-radial' ? { end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 } } : { end: { x: 1, y: 0.5 }, start: { x: 0, y: 0.5 } };
+  type === 'gradient-radial' || type === 'gradient-angular'
+    ? { end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 } }
+    : { end: { x: 1, y: 0.5 }, start: { x: 0, y: 0.5 } };
 
 export const useSetGradientType = (
   setType: Dispatch<SetStateAction<TGradientType>>,

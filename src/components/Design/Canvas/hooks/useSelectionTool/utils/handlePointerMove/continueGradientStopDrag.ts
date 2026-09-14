@@ -6,17 +6,21 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
+import { TDraftRect, TPoint } from 'types/canvas';
+import { TGradientPaint, TGradientStop } from 'types/design/paint/types';
 import { TGradientStopDragState } from 'types/design/canvas/types';
-import { TGradientStop } from 'types/design/paint/types';
 
 // utils
 import { getGradientWorldPoints } from '../../../useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getPositionAlongGradientLine } from '../../../../utils/getPositionAlongGradientLine';
+import { getPositionAroundGradientEllipse } from '../../../../utils/getPositionAroundGradientEllipse';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradientPaint';
+import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
+import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
 
 type TGradientStopCandidate = { index: number; stop: TGradientStop };
 
@@ -34,6 +38,25 @@ const resolveClosestGradientStopCandidate = (
         : closest,
     null,
   );
+
+const getGradientStopDragPosition = (
+  paint: TGradientPaint,
+  bounds: TDraftRect,
+  rotation: number,
+  worldPoint: TPoint,
+  start: TPoint,
+  end: TPoint,
+): number => {
+  if (paint.type === 'gradient-angular') {
+    const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const localPoint = rotation === 0 ? worldPoint : rotatePoint(worldPoint, boundsCenter, -rotation);
+    const normalizedPoint = toNormalizedGradientPoint(localPoint, bounds);
+
+    return getPositionAroundGradientEllipse(normalizedPoint, paint.start, paint.end, paint.radiusRatio ?? 1);
+  }
+
+  return getPositionAlongGradientLine(worldPoint, start, end);
+};
 
 export const continueGradientStopDrag = (
   canvas: HTMLCanvasElement,
@@ -60,7 +83,7 @@ export const continueGradientStopDrag = (
           const bounds = getNodeBounds(node);
           const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
           const worldPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
-          const position = getPositionAlongGradientLine(worldPoint, start, end);
+          const position = getGradientStopDragPosition(paint, bounds, node.rotation, worldPoint, start, end);
           const updatedStops = paint.stops.map((stop, index) => (index === resolved.index ? { ...stop, position } : stop));
           const sortedStops = [...updatedStops].sort((a, b) => a.position - b.position);
           const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, stops: sortedStops } : fill));

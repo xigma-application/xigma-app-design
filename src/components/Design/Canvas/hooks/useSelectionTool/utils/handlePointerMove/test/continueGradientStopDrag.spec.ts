@@ -62,7 +62,38 @@ const getStops = (nodeId: string): { color: string; opacity: number; position: n
   const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
   const paint = node.fills[0];
 
-  return paint.type === 'gradient-linear' ? paint.stops : [];
+  return paint.type === 'gradient-linear' || paint.type === 'gradient-angular' ? paint.stops : [];
+};
+
+const addAngularGradientRectangle = (): string => {
+  store.dispatch(
+    addNode({
+      fills: [
+        {
+          end: { x: 0.5, y: 1 },
+          opacity: 100,
+          start: { x: 0.5, y: 0.5 },
+          stops: [
+            { color: '#ffffff', opacity: 100, position: 0 },
+            { color: '#000000', opacity: 100, position: 1 },
+          ],
+          type: 'gradient-angular',
+        },
+      ],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
 };
 
 describe('continueGradientStopDrag', () => {
@@ -126,6 +157,20 @@ describe('continueGradientStopDrag', () => {
 
     // result
     expect(getStops(nodeId).find((stop) => stop.color === '#000000')?.position).toBe(1);
+  });
+
+  it('should move an angular gradient stop by angle around the ellipse, not by linear projection', () => {
+    // mock — center (50,50), primary axis endpoint (50,100); dragging to world (0,50), the perpendicular
+    // radius-handle point, lands at angle 0.25 — a linear-projection formula would instead clamp this to 0
+    const nodeId = addAngularGradientRectangle();
+    const canvas = createCanvas();
+    const dragRef = createGradientStopDragRef({ color: '#000000', draggedStopIndex: 1, nodeId, opacity: 100, paintIndex: 0 });
+
+    // before
+    continueGradientStopDrag(canvas, pointerEvent(0, 50), store.dispatch, dragRef);
+
+    // result
+    expect(getStops(nodeId).find((stop) => stop.color === '#000000')?.position).toBeCloseTo(0.25, 5);
   });
 
   it('should do nothing when the targeted paint is no longer a linear gradient', () => {

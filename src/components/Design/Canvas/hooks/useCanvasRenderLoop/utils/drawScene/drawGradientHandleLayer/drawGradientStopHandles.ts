@@ -10,7 +10,7 @@ export const drawGradientStopHandles = (
   ctx: TDrawContext,
   stops: TGradientStop[],
   positions: TPoint[],
-  towardLineDirection: TPoint,
+  towardLineDirections: TPoint[],
   selectedStopIndex: number | null,
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = ctx;
@@ -21,7 +21,7 @@ export const drawGradientStopHandles = (
       program,
       buffer,
       positions[index],
-      towardLineDirection,
+      towardLineDirections[index],
       stop.color,
       stop.opacity,
       index === selectedStopIndex,

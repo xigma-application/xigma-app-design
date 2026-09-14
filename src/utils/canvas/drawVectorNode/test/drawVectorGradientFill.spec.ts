@@ -182,7 +182,39 @@ describe('drawVectorGradientFill', () => {
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 0.4);
   });
 
-  it('should ignore radiusRatio for a non-radial paint, always passing 1', () => {
+  it('should pass the paint’s own radiusRatio for an angular paint', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorGradientFill(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      { ...GRADIENT_PAINT, radiusRatio: 0.4, type: 'gradient-angular' },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 0.4);
+  });
+
+  it('should ignore radiusRatio for a non-radial, non-angular paint, always passing 1', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;

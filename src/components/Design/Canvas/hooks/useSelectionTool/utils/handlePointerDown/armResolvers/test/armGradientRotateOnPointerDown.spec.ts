@@ -261,6 +261,44 @@ describe('armGradientRotateOnPointerDown', () => {
     );
   });
 
+  it('should also arm an angular gradient rotate drag in "radial" mode, same as a radial gradient', () => {
+    // mock — an angular gradient centered at (50,50) with its primary axis reaching (50,100) (100px radius)
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const angularRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-angular' } as TRectangleNode['fills'][0]],
+    };
+
+    // before — 8px left of the center (50,50), past its inner move zone, within the outer rotate ring
+    const result = armGradientRotateOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      point: { x: 42, y: 50 },
+      selectedNodes: [angularRectangle],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result — angular reuses the exact same "radial" pivot-at-center rotate mode
+    expect(result).toBe(true);
+    expect(armGradientRotateDragMock).toHaveBeenCalledWith(
+      canvas,
+      event,
+      canvasRefs.gradientRotate.gradientRotateDragRef,
+      'rect-1',
+      0,
+      'end',
+      { x: 42, y: 50 },
+      'radial',
+      { x: 50, y: 50 },
+      50,
+      0,
+    );
+  });
+
   it('should return undefined and arm nothing when there is no active gradient editor', () => {
     // mock
     const dispatch = vi.fn();

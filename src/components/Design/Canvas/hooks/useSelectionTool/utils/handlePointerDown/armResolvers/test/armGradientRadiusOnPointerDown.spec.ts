@@ -75,6 +75,32 @@ describe('armGradientRadiusOnPointerDown', () => {
     expect(armGradientRadiusDragMock).toHaveBeenCalledWith(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef, 'rect-1', 0);
   });
 
+  it('should also arm the radius drag for an angular gradient', () => {
+    // mock
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const angularRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]],
+    };
+
+    // before
+    const result = armGradientRadiusOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      point: { x: 0, y: 150 },
+      selectedNodes: [angularRectangle],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result
+    expect(result).toBe(true);
+    expect(armGradientRadiusDragMock).toHaveBeenCalledWith(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef, 'rect-1', 0);
+  });
+
   it('should return undefined and arm nothing when there is no active gradient editor', () => {
     // mock
     const dispatch = vi.fn();

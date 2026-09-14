@@ -9,6 +9,7 @@ import { getGradientRadiusHandleWorldPoint } from 'components/Design/Canvas/hook
 import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getNodeBounds } from './getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isEllipseHandleGradientPaint } from './isEllipseHandleGradientPaint';
 
 export const GRADIENT_RADIUS_HANDLE_RADIUS_PX = 6;
 
@@ -32,7 +33,7 @@ export const getGradientRadiusHandleAtPoint = (
   ) {
     const paint = node.fills[gradientEditor.paintIndex];
 
-    if (paint?.type === 'gradient-radial') {
+    if (isEllipseHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);
       const handleWorldPoint = getGradientRadiusHandleWorldPoint(bounds, node.rotation, paint);
       const tolerance = GRADIENT_RADIUS_HANDLE_RADIUS_PX / viewport.zoom;

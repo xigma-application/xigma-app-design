@@ -4,7 +4,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getGradientStopHandlePositions } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientStopHandlePositions';
+import { getGradientStopPositions } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientStopPositions';
 import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawGradientHandleLayer/getGradientWorldPoints';
 import { getNodeBounds } from './getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -26,7 +26,7 @@ export const getGradientStopHandleAtPoint = (
     if (isLineHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);
       const { end, start } = getGradientWorldPoints(bounds, node.rotation, paint);
-      const positions = getGradientStopHandlePositions(start, end, paint.stops, viewport.zoom);
+      const positions = getGradientStopPositions(bounds, node.rotation, paint, start, end, viewport.zoom);
       const tolerance = GRADIENT_STOP_HIT_RADIUS_PX / viewport.zoom;
       const stopIndex = positions.findIndex((position) => Math.hypot(point.x - position.x, point.y - position.y) <= tolerance);
 

@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getGradientLinePositionAtPoint } from '../../../../utils/getGradientLinePositionAtPoint';
+import { getGradientAddStopPositionAtPoint } from '../../../../utils/getGradientAddStopPositionAtPoint';
 
 export const resolveGradientLineHandleHover = (
   point: TPoint,
@@ -15,5 +15,5 @@ export const resolveGradientLineHandleHover = (
   refs: TCanvasRefs,
 ): void => {
   refs.hover.hoveredGradientLinePositionRef.current =
-    getGradientLinePositionAtPoint(point, selectedNodes, viewport, gradientEditor)?.position ?? null;
+    getGradientAddStopPositionAtPoint(point, selectedNodes, viewport, gradientEditor)?.position ?? null;
 };

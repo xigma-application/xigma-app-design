@@ -56,12 +56,13 @@ describe('useResetGradientPanelOnReopen', () => {
     expect(result.current.type).toBe(DEFAULT_GRADIENT_TYPE);
   });
 
-  it('should seed stops and points from the initialGradient when resetKey changes', () => {
+  it('should seed stops, points, and type from the initialGradient when resetKey changes', () => {
     // mock
     const initialGradient: TInitialGradient = {
       end: { x: 1, y: 0 },
       start: { x: 0, y: 1 },
       stops: [{ color: '#ff0000', opacity: 100, position: 0 }],
+      type: 'gradient-angular',
     };
 
     // before
@@ -70,12 +71,12 @@ describe('useResetGradientPanelOnReopen', () => {
     // action
     act(() => rerender({ initialGradient, resetKey: 2 }));
 
-    // result
+    // result — the paint's own type must be reflected too, not always reset to the default (linear)
     expect(result.current.stops).toHaveLength(1);
     expect(result.current.stops[0]).toEqual(expect.objectContaining({ color: '#ff0000', opacity: 100, position: 0 }));
     expect(result.current.stops[0].id).toBeTruthy();
     expect(result.current.points).toEqual({ end: { x: 1, y: 0 }, start: { x: 0, y: 1 } });
-    expect(result.current.type).toBe(DEFAULT_GRADIENT_TYPE);
+    expect(result.current.type).toBe('gradient-angular');
   });
 
   it('should not reset again when resetKey stays the same across a rerender', () => {

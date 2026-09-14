@@ -34,7 +34,7 @@ describe('drawGradientStopHandles', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
       STOPS,
       POSITIONS,
-      DOWN,
+      [DOWN, DOWN],
       null,
     );
 
@@ -81,7 +81,7 @@ describe('drawGradientStopHandles', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, program, viewport: IDENTITY_VIEWPORT },
       STOPS,
       POSITIONS,
-      DOWN,
+      [DOWN, DOWN],
       1,
     );
 

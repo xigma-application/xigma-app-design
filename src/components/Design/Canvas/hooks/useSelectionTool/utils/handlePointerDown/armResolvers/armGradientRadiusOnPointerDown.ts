@@ -9,6 +9,7 @@ import { TArmContext } from '../types';
 import { armGradientRadiusDrag } from '../armGradientRadiusDrag';
 import { getGradientRadiusHandleAtPoint } from '../../../../../utils/getGradientRadiusHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isEllipseHandleGradientPaint } from '../../../../../utils/isEllipseHandleGradientPaint';
 
 export const armGradientRadiusOnPointerDown = ({
   canvas,
@@ -25,9 +26,8 @@ export const armGradientRadiusOnPointerDown = ({
   if (radiusHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[radiusHit.paintIndex];
 
-    if (paint?.type === 'gradient-radial') {
+    if (isEllipseHandleGradientPaint(paint)) {
       armGradientRadiusDrag(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef, radiusHit.nodeId, radiusHit.paintIndex);
-
       return true;
     }
   }

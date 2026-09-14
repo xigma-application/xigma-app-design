@@ -12,6 +12,7 @@ import { armGradientRotateDrag } from '../armGradientRotateDrag';
 import { getGradientRotateHandleAtPoint } from '../../../../../utils/getGradientRotateHandleAtPoint';
 import { getTouchedRectEdges, TRectEdge } from 'utils/canvas/getTouchedRectEdges';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isEllipseHandleGradientPaint } from '../../../../../utils/isEllipseHandleGradientPaint';
 
 const GRADIENT_EDGE_ATTACH_TOLERANCE_PX = 0.5;
 
@@ -81,7 +82,7 @@ export const armGradientRotateOnPointerDown = ({
       return true;
     }
 
-    if (paint?.type === 'gradient-radial') {
+    if (isEllipseHandleGradientPaint(paint)) {
       const { bounds } = rotateHit;
       const localStart: TPoint = { x: bounds.x + paint.start.x * bounds.width, y: bounds.y + paint.start.y * bounds.height };
       const localEnd: TPoint = { x: bounds.x + paint.end.x * bounds.width, y: bounds.y + paint.end.y * bounds.height };

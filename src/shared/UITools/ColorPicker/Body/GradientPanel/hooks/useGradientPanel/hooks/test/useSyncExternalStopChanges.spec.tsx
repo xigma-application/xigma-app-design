@@ -31,6 +31,7 @@ const gradientWithStops = (stops: { color: string; opacity: number; position: nu
   end: { x: 1, y: 0.5 },
   start: { x: 0, y: 0.5 },
   stops,
+  type: 'gradient-linear',
 });
 
 describe('useSyncExternalStopChanges', () => {

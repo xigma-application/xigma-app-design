@@ -62,16 +62,23 @@ void main() {
       t = length(vec2(a, b));
     }
   } else if (u_gradientTypeIndex == 2) {
-    vec2 baseDirection = u_end - center;
-    float baseAngle = atan(baseDirection.y, baseDirection.x);
-    vec2 direction = v_localPosition - center;
-    float angle = atan(direction.y, direction.x) - baseAngle;
+    vec2 primaryAxis = u_end - u_start;
+    float primaryRadius = length(primaryAxis);
 
-    if (angle < 0.0) {
-      angle += 2.0 * PI;
+    if (primaryRadius > 0.0) {
+      vec2 direction = primaryAxis / primaryRadius;
+      vec2 perpendicular = vec2(-direction.y, direction.x);
+      vec2 relative = v_localPosition - u_start;
+      float a = dot(relative, direction);
+      float b = dot(relative, perpendicular) / u_radiusRatio;
+      float angle = atan(b, a);
+
+      if (angle < 0.0) {
+        angle += 2.0 * PI;
+      }
+
+      t = angle / (2.0 * PI);
     }
-
-    t = angle / (2.0 * PI);
   } else {
     vec2 halfSize = max(abs(u_end - center), vec2(0.0001));
     vec2 distance = abs(v_localPosition - center);

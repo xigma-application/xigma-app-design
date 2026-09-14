@@ -253,6 +253,7 @@ describe('useGradientPanel', () => {
           { color: '#111111', opacity: 100, position: 0 },
           { color: '#222222', opacity: 50, position: 1 },
         ],
+        type: 'gradient-linear',
       }),
     );
 
@@ -262,6 +263,24 @@ describe('useGradientPanel', () => {
       { color: '#222222', opacity: 50, position: 1 },
     ]);
     expect(result.current.angle).toBe(0);
+  });
+
+  it('should seed the type from an initial gradient instead of always defaulting to linear', () => {
+    // before — the picker was opened on a shape whose fill is already an angular gradient
+    const { result } = renderHook(() =>
+      useGradientPanel(undefined, {
+        end: { x: 0.5, y: 1 },
+        start: { x: 0.5, y: 0.5 },
+        stops: [
+          { color: '#111111', opacity: 100, position: 0 },
+          { color: '#222222', opacity: 50, position: 1 },
+        ],
+        type: 'gradient-angular',
+      }),
+    );
+
+    // result — the type dropdown reads straight off this value, so it must reflect the real paint
+    expect(result.current.type).toBe('gradient-angular');
   });
 
   it('should rotate the real start/end points around the gradient center when seeded with an initial gradient', () => {
@@ -277,6 +296,7 @@ describe('useGradientPanel', () => {
           { color: '#ffffff', opacity: 100, position: 0 },
           { color: '#000000', opacity: 100, position: 1 },
         ],
+        type: 'gradient-linear',
       }),
     );
 

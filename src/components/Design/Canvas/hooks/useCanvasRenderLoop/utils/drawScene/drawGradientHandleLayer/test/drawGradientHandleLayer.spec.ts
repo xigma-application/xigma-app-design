@@ -7,6 +7,7 @@ import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs'
 import { drawGradientHandleLayer } from '../drawGradientHandleLayer';
 
 const drawGradientLineMock = vi.fn();
+const drawGradientEllipseGuideMock = vi.fn();
 const drawGradientEndpointHandlesMock = vi.fn();
 const drawGradientStopHandlesMock = vi.fn();
 const drawGradientStopValueLabelMock = vi.fn();
@@ -16,6 +17,9 @@ const drawGradientRadiusGuideMock = vi.fn();
 
 vi.mock('../drawGradientLine', () => ({
   drawGradientLine: (...args: unknown[]): void => drawGradientLineMock(...args),
+}));
+vi.mock('../drawGradientEllipseGuide', () => ({
+  drawGradientEllipseGuide: (...args: unknown[]): void => drawGradientEllipseGuideMock(...args),
 }));
 vi.mock('../drawGradientEndpointHandles', () => ({
   drawGradientEndpointHandles: (...args: unknown[]): void => drawGradientEndpointHandlesMock(...args),
@@ -76,6 +80,7 @@ const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
 describe('drawGradientHandleLayer', () => {
   beforeEach(() => {
     drawGradientLineMock.mockClear();
+    drawGradientEllipseGuideMock.mockClear();
     drawGradientEndpointHandlesMock.mockClear();
     drawGradientStopHandlesMock.mockClear();
     drawGradientStopValueLabelMock.mockClear();
@@ -137,6 +142,20 @@ describe('drawGradientHandleLayer', () => {
     expect(stopHandlesArgs[4]).toBe(1);
   });
 
+  it('should always delegate the ellipse guide to drawGradientEllipseGuide, which decides for itself whether the paint has one', () => {
+    // before
+    drawGradientHandleLayer(CONTEXT, [rectangle()], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result — called unconditionally for every gradient type; drawGradientEllipseGuide itself is
+    // the one that no-ops for linear (see its own spec)
+    expect(drawGradientEllipseGuideMock).toHaveBeenCalledTimes(1);
+
+    const [, , rotation, paint] = drawGradientEllipseGuideMock.mock.calls[0];
+
+    expect(rotation).toBe(0);
+    expect(paint).toEqual(rectangle().fills[0]);
+  });
+
   it('should also draw the line, endpoint handles, and stop handles for a radial gradient fill', () => {
     // before
     const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
@@ -148,6 +167,47 @@ describe('drawGradientHandleLayer', () => {
     expect(drawGradientLineMock).toHaveBeenCalledTimes(1);
     expect(drawGradientEndpointHandlesMock).toHaveBeenCalledTimes(2);
     expect(drawGradientStopHandlesMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should also draw the line, endpoint handles, and stop handles for an angular gradient fill', () => {
+    // before
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: 1 }, createCanvasRefs());
+
+    // result — angular reuses the radial-style ellipse: line + endpoint handles, plus the radius handle
+    expect(drawGradientLineMock).toHaveBeenCalledTimes(1);
+    expect(drawGradientEndpointHandlesMock).toHaveBeenCalledTimes(2);
+    expect(drawGradientStopHandlesMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw the perpendicular radius handle for an angular gradient too, at a full primary-radius away from the center', () => {
+    // before — start (0,50), end (100,50): the radius handle sits perpendicular to that axis, at world (0, 150)
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result
+    const [, radiusHandlePoints] = drawGradientEndpointHandlesMock.mock.calls[1];
+
+    expect(radiusHandlePoints).toEqual([{ x: 0, y: 150 }]);
+  });
+
+  it('should position angular gradient stops by angle around the ellipse, not linearly along the line', () => {
+    // before — position 0 and position 1 both point back at the same angle (a full turn apart), so both stops
+    // land on the same point on the ellipse (the primary axis endpoint), unlike linear/radial's lerp-along-the-line
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+
+    drawGradientHandleLayer(CONTEXT, [node], { nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }, createCanvasRefs());
+
+    // result — the ellipse point itself is (100,50); nudged 18px further out (away from the center at
+    // (0,50)) so the marker sits beside the curve instead of straddling it, same as radial/linear's offset
+    const [, , stopPositions] = drawGradientStopHandlesMock.mock.calls[0];
+
+    expect(stopPositions[0].x).toBeCloseTo(118, 5);
+    expect(stopPositions[0].y).toBeCloseTo(50, 5);
+    expect(stopPositions[1].x).toBeCloseTo(118, 5);
+    expect(stopPositions[1].y).toBeCloseTo(50, 5);
   });
 
   it('should draw the perpendicular radius handle for a radial gradient, at a full primary-radius away from the center', () => {

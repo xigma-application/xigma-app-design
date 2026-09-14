@@ -182,12 +182,21 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius     |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge     |  ✅  |         ✅ `fill-section.spec.ts`         |
 | 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 416 | Switching a gradient's type to Angular resets its points to a centered default, same as radial                  |  —   |         ✅ `fill-section.spec.ts`         |
+| 417 | Dragging an angular gradient's perpendicular radius handle reshapes its ellipse, same as radial's               |  —   |         ✅ `fill-section.spec.ts`         |
+| 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line   |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                          |  ✅  |         ✅ `fill-section.spec.ts`         |
+| 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear               |  ✅  |         ✅ `fill-section.spec.ts`         |
 
-#393-#409 are all real, reported regressions. #410-#415 are new feature coverage (radial gradient
-on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as same-day
-follow-up feedback right after #410-#411 landed, rather than requested up front — #412 (switching
-types left stale, nonsensical positions behind) and #413-#415 (the rotate ring and radius guide the
-first radial pass didn't include) are closer to fast-follow fixes than a fresh feature request.
+#393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
+gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
+same-day follow-up feedback right after #410-#411 landed, rather than requested up front — #412
+(switching types left stale, nonsensical positions behind) and #413-#415 (the rotate ring and radius
+guide the first radial pass didn't include) are closer to fast-follow fixes than a fresh feature
+request. #416-#418 (angular) came later still, as a separate request specifically to extend the
+already-shipped radial handles onto the angular gradient type, and #419-#420 are same-day follow-up
+fixes on top of #416-#418 in exactly the #412-#415 mold — gaps the angular pass itself left behind,
+caught by the user comparing directly against the on-canvas result.
 
 #395: the gradient fragment shader's `sampleGradient` seeded its "outside every stop's range"
 fallback color to `u_stopColors[0]` unconditionally, so a stop dragged short of the far end (e.g.
@@ -301,9 +310,10 @@ whatever `start`/`end` the *previous* type had, verbatim. Combined with #410-#41
 linear gradient to radial put the new "center" wherever the old line's start point happened to be —
 often nowhere near the shape's middle. Fixed by giving type-switching its own small per-type default
 table: radial resets to a centered point with the radius reaching the bottom edge; every other type
-resets to the existing default horizontal line (which also keeps angular/diamond centered, since
-their center is still the midpoint of start/end). Test drives the actual dropdown UI (not just a
-Redux dispatch) to catch regressions in the real click path.
+resets to the existing default horizontal line (which keeps diamond centered, since its own center
+is still the midpoint of start/end — angular later moved onto the radial-style centered default too,
+see #416-#418). Test drives the actual dropdown UI (not just a Redux dispatch) to catch regressions
+in the real click path.
 
 #413-#414: the first radial pass left rotation to `end`'s free-move alone (it already sets angle and
 magnitude at once), on the theory that a dedicated fixed-radius rotate ring wasn't needed the way
@@ -326,6 +336,26 @@ right after release at the same cursor position (so the underlying fill is prova
 both frames) and asserts the two differ — isolating the guide's presence as the only variable,
 without needing to know its exact rendered color.
 
+#416-#418: angular gradients (`gradient-angular`, previously render-only, same as radial before
+#410) got the exact same center/edge/radius-ratio handles as radial for free, by widening every
+`paint.type === 'gradient-radial'` guard that gated them (the radius handle draw/arm/continue/
+hit-test, and the rotate dispatcher's `'radial'`-mode branch) to a shared `isEllipseHandleGradientPaint`
+predicate — #416-#417 confirm the type-switch default and the radius handle behave identically to
+radial's own #412/#411. #418 covers the one thing that couldn't just be reused: an angular stop's
+`position` is an angle around the ellipse (matching the fragment shader's own `atan2`-based
+interpolation), not a linear fraction of the start->end segment the way every other gradient type's
+stops work — dragging a stop off the line entirely (onto the perpendicular radius-handle point, in
+the test) had to land at the angle that point sits at (0.25 of a full turn) rather than clamping to
+0 or 1 the way a line-projection formula would. This also meant the "click the line to add a stop"
+feature (#399) deliberately does *not* apply to angular: every point on the start->end segment maps
+to the same angle, so there is no meaningful position to derive from a click offset along it. Fixing
+this properly also required correcting the fragment shader's angular branch, which had been deriving
+its center from the *midpoint* of start/end (a leftover from angular's old symmetric-default model)
+instead of `start` itself, the same pre-existing modeling gap #410-#411 had already fixed for radial
+— see `.claude/docs/properties-panel.md` for the full technical writeup, including why the shader
+change also had to start honoring `radiusRatio` for angular to keep the rendered fill consistent with
+what the on-canvas ellipse handle now shows.
+
 Also worth recording even without its own numbered e2e scenario: fixing #415 alongside a stop-marker
 bug the user found — `getGradientStopHandlePositions` offset every stop by a fixed "up" vector,
 which only kept the marker off the line for a near-horizontal gradient; a vertical line (radial's own
@@ -337,3 +367,74 @@ updated `getGradientStopHandlePositions`/`drawGradientStopPointer`/`drawSingleGr
 specs) rather than a new e2e scenario — the change has no Redux-observable effect (a stop's own
 `position` field never changes), only a rendering one, so exact-geometry unit coverage is the more
 precise and less fragile way to pin it down than sampling canvas pixels.
+
+Also worth recording without a numbered e2e scenario: after #416-#418 shipped, the user pointed out
+that the ellipse itself was never actually drawn as a curve on the canvas — radial (and now angular)
+only ever rendered the straight start->end line plus the point handles, missing the oval outline
+Figma's own reference UI shows connecting them. Fixed with a new `drawGradientEllipseGuide`, always
+called from `drawGradientHandleLayer` (it no-ops itself for linear via `isEllipseHandleGradientPaint`).
+Covered entirely by unit tests (`drawGradientEllipseGuide.spec.ts`, plus the renamed
+`getGradientEllipsePoint`/`getGradientEllipseNormalizedPoint` specs) for the same reason as the
+stop-marker offset fix above — purely a rendering change with no Redux-observable effect, so
+exact-geometry assertions on the drawn line segments are more precise than a canvas pixel sample.
+
+One more follow-up once the ellipse guide (above) made the curve visible: an angular stop marker's
+own position (`getGradientAngularStopHandlePositions`) placed the marker's *center* exactly on the
+ellipse, unlike linear/radial's stops which are nudged `STOP_HANDLE_OFFSET_PX` (18px) off their line
+so the marker sits *beside* the guide with its little pointer notch touching it. With no such
+offset, an angular marker straddled the curve with its notch pointing inward past it instead of
+touching it from outside — the user caught this by comparing the on-canvas notch against the curve
+directly. Fixed by reusing the exact same `STOP_HANDLE_OFFSET_PX` constant, applied in the outward-
+from-center direction (`getGradientRadialOutwardDirection`) instead of perpendicular-to-the-line,
+threading the world center point and zoom through to `getGradientAngularStopHandlePositions` (both
+were already available at every call site via `getGradientStopPositions`, just previously unused for
+the angular branch). Covered by updated unit tests on that function plus `getGradientStopPositions`/
+`drawGradientHandleLayer`/`getGradientStopHandleAtPoint` specs (exact offset math) and the e2e
+`fill-section.spec.ts` angular stop-drag test (updated grab point) — no new numbered scenario, same
+reasoning as the two fixes above it.
+
+#419: with the ellipse guide now visible (the fix above), the user tried clicking directly on it to
+add a stop, the same way clicking the straight line already works for linear/radial (#399) — nothing
+happened, since `getGradientLinePositionAtPoint` explicitly excludes angular (a deliberate scope cut
+made when angular's stop-by-angle model first shipped: every point on the straight line maps to the
+same angle, so a line-click position is meaningless for it). Fixed with a new
+`getGradientEllipsePositionAtPoint.ts`, the ellipse-curve counterpart of the line hit-test (same
+priority-guard chain — stop/endpoint-move/rotate/radius handles all still win over it — but computes
+`position` via `getPositionAroundGradientEllipse` and checks distance against the actual curve point,
+`getGradientEllipsePoint`, rather than a projected line point), and a new
+`getGradientAddStopPositionAtPoint.ts` wrapper that dispatches to it for angular paints and falls
+back to the existing line hit-test otherwise — replacing `getGradientLinePositionAtPoint` at its
+three call sites (`armAddGradientStopOnPointerDown`, `resolveGradientLineHover`,
+`resolveGradientLineHandleHover`) so the add-stop cursor, hover ref, and click handler all agree on
+which guide applies. `drawGradientAddStopHoverPreview` also needed the angular branch: its ghost
+preview marker now samples the ellipse (`getGradientEllipsePoint`) instead of the line, and reuses
+the same outward-offset direction as the real stop markers.
+
+#420: opening the color picker on a shape whose fill was already `gradient-angular` showed "Linear"
+in the type dropdown regardless — `useGradientPanel`'s `type` state (what the dropdown's `value` prop
+reads) was hardcoded to always initialize from `DEFAULT_GRADIENT_TYPE`, both on first mount and on
+every reopen (`useResetGradientPanelOnReopen`), never from the paint actually being edited. This
+affected every non-linear type equally (radial included), just surfaced here specifically while
+testing angular. Root cause: `TInitialGradient` (what `FillRow` builds from the real paint and passes
+down as `initialGradient`) never carried a `type` field at all — only `start`/`end`/`stops`. Fixed by
+adding `type` to `TInitialGradient`, populating it in `FillRow.tsx` from `paint.type`, and seeding
+`useGradientPanel`'s `type` state from `initialGradient?.type` (falling back to the default only when
+there's no seed, e.g. a brand-new gradient) in both places it was previously hardcoded.
+
+Also worth recording without its own numbered scenario: right after #419-#420, the user flagged that
+an angular stop marker's own rotation looked "tilted too much" at some positions around the ellipse.
+The marker's rotation (and its outward offset direction) had been computed as the vector from the
+ellipse's center to the stop — correct only at the 4 axis vertices of a true ellipse; everywhere else,
+"away from center" and the curve's own tangent/normal diverge for anything other than a perfect circle
+(a non-1 `radiusRatio`, or simply a non-square node, both turn the normalized-space circle into a
+genuine world-space ellipse). Fixed with a new `getGradientEllipseNormalDirection.ts`, computing the
+true normal from the curve's derivative (tangent) at that position instead of approximating it from
+the center, with the correct outward-facing sign disambiguated against the old radial approximation —
+it reduces to the exact same vector at the axis vertices and on a perfect circle (proven by a unit
+test looping every position for a square node), so no existing screenshot/geometry changes, only the
+previously-wrong in-between angles. Replaced `getGradientRadialOutwardDirection` at all three call
+sites that compute an angular stop's own orientation (`getGradientStopDirections`,
+`getGradientAngularStopHandlePositions`, `drawGradientAddStopHoverPreview`) — covered entirely by unit
+tests (exact-geometry assertions, including one that deliberately proves the new function *diverges*
+from the old one for a stretched ellipse) rather than a new e2e scenario, same rendering-only
+reasoning as the fixes above.

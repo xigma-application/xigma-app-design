@@ -99,6 +99,14 @@ describe('getGradientLinePositionAtPoint', () => {
     expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, position: 0.5 });
   });
 
+  it('should return null for an angular gradient — clicking its line never adds a stop', () => {
+    // an angular stop's position is an angle, not a linear lerp along the line, so line-click add-stop
+    // does not apply to it
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+
+    expect(getGradientLinePositionAtPoint({ x: 50, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
+  });
+
   it('should return null on a radial gradient when the point is on its perpendicular radius handle instead', () => {
     // a small radiusRatio (0.05) pulls the radius handle in close to the line, at world (0, 55) —
     // close enough that the line's own hit-test would otherwise match it too, if it didn't bail first

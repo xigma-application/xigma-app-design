@@ -14,6 +14,7 @@ import { getGradientRadiusRatioFromPoint } from '../../../../utils/getGradientRa
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isEllipseHandleGradientPaint } from '../../../../utils/isEllipseHandleGradientPaint';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
@@ -34,7 +35,7 @@ export const continueGradientRadiusDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'gradient-radial') {
+      if (isEllipseHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
         const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
         const viewport = selectViewport(state);

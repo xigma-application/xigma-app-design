@@ -14,9 +14,9 @@ describe('isLineHandleGradientPaint', () => {
     );
   });
 
-  it('should return false for an angular gradient paint', () => {
+  it('should return true for an angular gradient paint', () => {
     expect(isLineHandleGradientPaint({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-angular' })).toBe(
-      false,
+      true,
     );
   });
 

@@ -64,6 +64,15 @@ describe('getGradientRadiusHandleAtPoint', () => {
     expect(getGradientRadiusHandleAtPoint({ x: 0, y: 165 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
   });
 
+  it('should also hit the radius handle for an angular gradient', () => {
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+
+    expect(getGradientRadiusHandleAtPoint({ x: 0, y: 152 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toEqual({
+      nodeId: 'rect-1',
+      paintIndex: 0,
+    });
+  });
+
   it('should move with a custom radiusRatio', () => {
     const node = rectangle({ fills: [{ ...rectangle().fills[0], radiusRatio: 0.4 } as TRectangleNode['fills'][0]] });
 

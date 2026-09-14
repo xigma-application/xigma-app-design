@@ -55,7 +55,7 @@ export const drawVectorGradientFill = (
     gl.uniform2f(endLocation, paint.end.x, paint.end.y);
     gl.uniform1i(gradientTypeIndexLocation, getGradientTypeIndex(paint.type));
     gl.uniform1f(opacityLocation, alpha);
-    gl.uniform1f(radiusRatioLocation, paint.type === 'gradient-radial' ? (paint.radiusRatio ?? 1) : 1);
+    gl.uniform1f(radiusRatioLocation, paint.type === 'gradient-radial' || paint.type === 'gradient-angular' ? (paint.radiusRatio ?? 1) : 1);
     gl.enableVertexAttribArray(positionLocation);
 
     gl.clear(gl.STENCIL_BUFFER_BIT);

@@ -1475,4 +1475,273 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills![0].end).toEqual({ x: 0.5, y: 1 });
     expect(node.fills![0].type).toBe('gradient-radial');
   });
+
+  test('switching a shape gradient to Angular via the panel resets its points to a centered default, same as Radial', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-angular-type-switch-reset');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.9, y: 0.1 },
+                opacity: 100,
+                start: { x: 0.2, y: 0.8 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    await page.locator('[class*="GradientActions__type-dropdown"]').click();
+    await page.getByText('Angular', { exact: true }).click();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].start).toEqual({ x: 0.5, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 0.5, y: 1 });
+    expect(node.fills![0].type).toBe('gradient-angular');
+  });
+
+  test('dragging an angular gradient’s perpendicular radius handle reshapes its ellipse, just like radial’s', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-angular-radius-handle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-angular',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // same geometry as the radial radius-handle test: the perpendicular handle sits at world (700, 440)
+    await page.mouse.move(700, 440);
+    await page.mouse.down();
+    await page.mouse.move(700, 360, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].radiusRatio).toBeCloseTo(0.5, 2);
+    expect(node.fills![0].start).toEqual({ x: 0, y: 0.5 });
+    expect(node.fills![0].end).toEqual({ x: 1, y: 0.5 });
+    expect(node.fills![0].type).toBe('gradient-angular');
+  });
+
+  test('dragging an angular gradient stop around the ellipse moves it by angle, not by linear position along the line', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-angular-stop-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // center (800,280), primary axis endpoint straight down at (800,360) — both default stops
+    // (position 0 and 1) coincide there, since a full turn wraps an angular gradient back onto itself
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-angular',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // grab the coincident stop marker — the ellipse point (800,360) nudged 18px further out (away
+    // from the center at (800,280)), same as radial/linear's beside-the-line offset — and drag it to
+    // (700,280), the perpendicular radius-handle point, which sits at angle 0.25 around the ellipse
+    // (a linear-projection formula would instead clamp this point, off the start->end line entirely,
+    // to position 0)
+    await page.mouse.move(800, 378);
+    await page.mouse.down();
+    await page.mouse.move(700, 280, { steps: 10 });
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const stops = node.fills![0].stops!;
+
+    expect(stops.find((stop) => stop.color === '#ffffff')?.position).toBeCloseTo(0.25, 2);
+    expect(stops.find((stop) => stop.color === '#000000')?.position).toBe(1);
+  });
+
+  test('clicking the ellipse guide on an angular gradient adds a new stop there and selects it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-angular-add-stop-on-ellipse');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // center (800,280), primary axis endpoint (800,360) — world (729,337) sits on the ellipse at
+    // angle 0.125 (45deg), clear of the center/endpoint/radius-handle hit zones
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-angular',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    await page.getByLabel('Hex color').click();
+
+    // hovering the ellipse (away from any handle or existing stop) shows the add-stop preview
+    const beforeHover = await designPage.canvas.screenshot();
+
+    await page.mouse.move(729, 337);
+
+    const afterHover = await designPage.canvas.screenshot();
+
+    expect(afterHover.equals(beforeHover)).toBe(false);
+
+    // clicking there adds a new stop at ~12.5% and selects it
+    await page.mouse.down();
+    await page.mouse.up();
+
+    const node = await readNode(page, id);
+    const stops = node.fills![0].stops!;
+
+    expect(stops).toHaveLength(3);
+
+    const addedStop = stops.find((stop) => stop.position !== 0 && stop.position !== 1);
+
+    expect(addedStop?.position).toBeCloseTo(0.125, 2);
+
+    const gradientEditor = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.gradientEditor;
+    });
+
+    expect(gradientEditor?.selectedStopIndex).toBe(stops.indexOf(addedStop!));
+
+    // result — the docked panel's own stop list/bar picks up the canvas-added stop too, not just Redux
+    await expect(page.getByLabel('Stop marker')).toHaveCount(3);
+  });
+
+  test('opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-angular-dropdown-reflects-type');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [
+              {
+                end: { x: 0.5, y: 1 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ffffff', opacity: 100, position: 0 },
+                  { color: '#000000', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-angular',
+              },
+            ],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    // before this fix the panel always seeded its local type state to the default (Linear),
+    // regardless of the paint actually being edited
+    await page.getByLabel('Hex color').click();
+
+    await expect(page.locator('[class*="GradientActions__type-dropdown"]')).toHaveText('Angular');
+  });
 });

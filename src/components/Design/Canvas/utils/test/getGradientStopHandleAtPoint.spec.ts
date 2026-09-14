@@ -89,4 +89,13 @@ describe('getGradientStopHandleAtPoint', () => {
 
     expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, stopIndex: 0 });
   });
+
+  it('should hit an angular gradient stop at its position around the ellipse, not the linear lerp offset', () => {
+    // both default stops (position 0 and 1) coincide at the primary axis endpoint (100, 50) for angular,
+    // nudged 18px further out (away from the center at (0,50)) to sit beside the ellipse curve
+    const node = rectangle({ fills: [{ ...rectangle().fills[0], type: 'gradient-angular' } as TRectangleNode['fills'][0]] });
+    const hit = getGradientStopHandleAtPoint({ x: 118, y: 50 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    expect(hit).toEqual({ nodeId: 'rect-1', paintIndex: 0, stopIndex: 0 });
+  });
 });

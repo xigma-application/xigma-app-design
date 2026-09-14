@@ -115,7 +115,7 @@ export const FillRow: FC<TFillRowProps> = ({
             hex={value.hex}
             hexDisplayValue={hexDisplayValue}
             initialActiveTab={isGradient ? ColorPickerTab.gradient : undefined}
-            initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops } : undefined}
+            initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
             isPointerOverGradientHandle={isPointerOverGradientHandle}
             isVisible={isVisible}
             onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
