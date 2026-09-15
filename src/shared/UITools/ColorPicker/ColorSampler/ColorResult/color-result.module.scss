@@ -1,13 +1,22 @@
 .ColorResult {
   align-items: center;
+  column-gap: 2px;
   display: flex;
+  height: 24px;
+
+  &__selected-color-wrapper {
+    align-items: center;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
+  }
 
   &__selected-color {
     border: 1px solid var(--color-neutral-3);
     border-radius: 2.5px;
     box-sizing: border-box;
     height: 16px;
-    margin: 8px;
     width: 16px;
   }
 

@@ -23,7 +23,7 @@ const Avatar: FC = () => {
         <Tooltip content={t(`${translationNameSpace}.multiplayerTools`)}>
           <span className={styles.Avatar__trigger}>
             <AvatarBadge />
-            <Icon name="ChevronDown" size={16} />
+            <Icon name="ChevronDown" size={24} />
           </span>
         </Tooltip>
       }

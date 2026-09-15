@@ -23,6 +23,7 @@ import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../Co
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
 import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
+import ButtonIcon from '../ButtonIcon/ButtonIcon';
 
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
@@ -158,14 +159,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
       </FieldGroup>
       {onToggleVisibility && (
         <Tooltip align="end" content={toggleVisibilityTooltip}>
-          <button
-            aria-label={toggleVisibilityAriaLabel}
-            className={styles.ColorPickerInput__toggle}
-            onClick={onToggleVisibility}
-            type="button"
-          >
-            <Icon name={isVisible ? 'EyesOpened' : 'EyesClosed'} size={16} />
-          </button>
+          <ButtonIcon ariaLabel={toggleVisibilityAriaLabel} name={isVisible ? 'EyesOpened' : 'EyesClosed'} onClick={onToggleVisibility} />
         </Tooltip>
       )}
     </div>

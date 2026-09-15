@@ -16,7 +16,7 @@ export const ColorPrompt: FC = () => {
 
   return (
     <div className={cx(styles.ColorPrompt)}>
-      <Icon name="EyesDropper" size={12} />
+      <Icon name="EyesDropper" size={24} />
       <span className={styles.ColorPrompt__description}>{t(`${translationNameSpace}.description`)}</span>
     </div>
   );

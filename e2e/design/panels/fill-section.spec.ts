@@ -2389,6 +2389,76 @@ test.describe('Design panels — Fill section', () => {
     expect(isPatternSourcePicking).toBe(false);
   });
 
+  test('hovering an eligible node while picking a pattern source shows a live highlight, like the default tool', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-hover-highlight');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a second, plain rectangle — eligible to be picked as a pattern source
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+
+    // reselect the target rectangle, whose own draw was superseded by the source rectangle's
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+
+    // move off both shapes first, so the "before" screenshot has no stale hover from an earlier step
+    await page.mouse.move(1550, 600);
+
+    // a tight clip around just the eligible rectangle, so unrelated pixels under the open picker
+    // popover elsewhere on screen can't introduce noise into the comparison
+    const clip = { height: 120, width: 120, x: 990, y: 190 };
+    const beforeHover = await page.screenshot({ clip });
+
+    // action — hover the eligible rectangle without clicking
+    await page.mouse.move(1050, 250);
+
+    const afterHover = await page.screenshot({ clip });
+
+    // result — a live outline is drawn around the hovered, pickable rectangle
+    expect(afterHover.equals(beforeHover)).toBe(false);
+  });
+
+  test('hovering a node that already has a pattern fill while picking a source shows no highlight', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-hover-refused');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a second rectangle that is itself already a pattern consumer — not eligible as a source
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+    await designPage.canvas.click({ position: { x: 1050, y: 250 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+
+    // reselect the target, arm picking
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+
+    await page.mouse.move(1550, 600);
+
+    // a tight clip around just the ineligible rectangle, so unrelated pixels under the open picker
+    // popover elsewhere on screen can't introduce noise into the comparison
+    const clip = { height: 120, width: 120, x: 990, y: 190 };
+    const beforeHover = await page.screenshot({ clip });
+
+    // action — hover the ineligible, pattern-holding rectangle without clicking
+    await page.mouse.move(1050, 250);
+
+    const afterHover = await page.screenshot({ clip });
+
+    // result — no outline is drawn, since picking it would create a chain
+    expect(afterHover.equals(beforeHover)).toBe(true);
+  });
+
   test('a picked pattern source renders live, repeating its own color across the shape', async ({ page }) => {
     const designPage = new DesignPage(page);
 

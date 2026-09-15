@@ -2,8 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // hooks
 import { useVisibilityToggle } from './hooks/useVisibilityToggle';
@@ -19,9 +18,11 @@ const VisibilityToggle: FC = () => {
 
   return (
     <Tooltip content={t(`${translationNameSpace}.${tooltipKey}`)}>
-      <Button ariaLabel={t(`${translationNameSpace}.${ariaLabelKey}`)} onClick={onToggle} style={{ padding: 5 }}>
-        <Icon name={hidden ? 'EyesClosed' : 'EyesOpened'} size={14} />
-      </Button>
+      <UITools.ButtonIcon
+        ariaLabel={t(`${translationNameSpace}.${ariaLabelKey}`)}
+        name={hidden ? 'EyesClosed' : 'EyesOpened'}
+        onClick={onToggle}
+      />
     </Tooltip>
   );
 };

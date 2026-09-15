@@ -8,7 +8,7 @@ import { Icon, TIconProps } from '@xigma/components';
 import styles from './button-icon.module.scss';
 
 export type TButtonIconProps = {
-  ariaLabel: string;
+  ariaLabel?: string;
   className?: string;
   disabled?: boolean;
   name: TIconProps['name'];

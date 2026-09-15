@@ -35,13 +35,13 @@ const PresentShare: FC = () => {
           align="end"
           className={styles['PresentShare__present-options']}
           sideOffset={-2}
-          trigger={<Icon name="ChevronDown" size={16} />}
+          trigger={<Icon name="ChevronDown" size={24} />}
           triggerAriaLabel={t(`${translationNameSpace}.presentOptions`)}
         >
           <PresentOptionsMenu />
         </UITools.ButtonMenu>
       </div>
-      <UITools.Button className={styles.PresentShare__share} size="large">
+      <UITools.Button active className={styles.PresentShare__share} size="large">
         {t(`${translationNameSpace}.share`)}
       </UITools.Button>
     </div>

@@ -212,6 +212,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 444 | A numeric pattern offset (X/Y, in px) nudges the tile grid independently of the alignment point                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 446 | Hovering an eligible node while picking a pattern source shows a live highlight, like the default tool            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 447 | Hovering a node that already has a pattern fill while picking a source shows no highlight                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -589,3 +591,13 @@ unrelated blend-mode isolation path in `drawVectorFillGroup.ts`, fixed alongside
 identical bug) enabled alpha writes _after_ `gl.clear()` instead of before — leaving a recycled
 target's old alpha untouched by the clear, so old opaque pixels survived with their RGB zeroed to
 black. See `.claude/docs/canvas-rendering-pipeline.md` for the full mechanism.
+
+#446/#447 close a real, user-reported gap: while picking a pattern source, moving the cursor over the
+canvas showed no feedback at all — nothing lit up under a pickable shape, unlike the default tool's
+ordinary hover outline. `useHoverHighlight.ts` used to skip hover resolution entirely whenever
+`isPatternSourcePicking` was armed; it now runs a dedicated resolver
+(`resolvePatternSourcePickHover.ts`) that hit-tests the same way a click would and only highlights the
+hit when it passes the same `doesNodeHavePatternInSubtree` eligibility check `handlePatternSourcePick.ts`
+already enforces at click-time — so a node that would be refused as a source (#443) never lights up as
+if it could be picked. #446 verifies the eligible case shows a highlight; #447 verifies an
+already-pattern-holding node stays unhighlighted.

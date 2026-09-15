@@ -20,7 +20,9 @@ export const ColorResult: FC<TColorResultProps> = ({ colors }) => {
 
   return (
     <div className={cx(styles.ColorResult)}>
-      <div className={styles['ColorResult__selected-color']} style={{ backgroundColor: `rgba(${r},${g},${b},${a})` }} />
+      <div className={styles['ColorResult__selected-color-wrapper']}>
+        <div className={styles['ColorResult__selected-color']} style={{ backgroundColor: `rgba(${r},${g},${b},${a})` }} />
+      </div>
       <span className={styles.ColorResult__hex}>{rgbToHex({ b, g, r })}</span>
     </div>
   );

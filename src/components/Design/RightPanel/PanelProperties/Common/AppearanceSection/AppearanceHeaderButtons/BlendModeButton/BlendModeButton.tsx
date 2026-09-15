@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import BlendModeMenu from './BlendModeMenu/BlendModeMenu';
-import { Icon, UITools } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useBlendModeButton } from './hooks/useBlendModeButton';
@@ -20,11 +20,7 @@ const BlendModeButton: FC = () => {
       asChild
       onOpenChange={onOpenChange}
       open={open}
-      trigger={
-        <UITools.Button ariaLabel={t(`${translationNameSpace}.blendMode.ariaLabel`)} selected={open} style={{ padding: 5.5 }}>
-          <Icon name={icon} size={13} />
-        </UITools.Button>
-      }
+      trigger={<UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.blendMode.ariaLabel`)} name={icon} selected={open} />}
       triggerTooltip={t(`${translationNameSpace}.tooltip.${isDefault ? 'addBlendMode' : 'removeBlendMode'}`)}
     >
       <BlendModeMenu nodeId={nodeId} onSelect={selectBlendMode} value={value} />

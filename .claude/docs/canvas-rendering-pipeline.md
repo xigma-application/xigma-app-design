@@ -472,6 +472,23 @@ picking B (which is A's own consumer) is refused exactly like picking itself wou
 depth (e.g. against data saved before this rule existed), but with chains blocked at pick-time it
 should never actually trigger in practice.
 
+**Hovering during pattern-source picking shows a live eligibility highlight, reusing the default
+tool's own outline.** `useHoverHighlight.ts`'s `handlePointerMove` used to skip hover resolution
+entirely while `isPatternSourcePicking` (so nothing lit up under the cursor even though the default
+tool's own hover outline would there) — a real gap reported by the user. Now that branch calls
+`resolvePatternSourcePickHover.ts` (a sibling to `resolveHover.ts`, not a further branch inside it,
+since the eligibility rule it needs — `doesNodeHavePatternInSubtree.ts`, the same guard
+`handlePatternSourcePick.ts` checks at click-time — has nothing to do with the ordinary tool-hover
+resolvers): it hit-tests via `getNodeAtPoint`, same as a click would, and only writes the hit's id
+into `hoverRef` when it's not excluded by that same subtree check, else `null`. No changes were
+needed in `drawScene.ts`/`drawHoverOutline.ts` — they already draw purely off `hoverRef.current`
+regardless of tool/mode, so once the ref is populated the exact same per-`NodeType` outline draws.
+The four handle-affordance layers (corner radius/vertex count/star ratio/ellipse arc) that also key
+off `hoveredNode` self-gate on `hoveredNode.id === selectedNode.id`, i.e. they only ever show for the
+already-*selected* node — since the picking target (selected, being edited) is exactly the node
+`doesNodeHavePatternInSubtree` excludes from ever being hoverable-as-eligible, no extra gating was
+needed to keep those interactive-looking handles from spuriously appearing during picking.
+
 The tile itself renders live: `resolvePatternSourceTile.ts` (`drawBoxLeafNode.ts`'s
 `resolvePatternPaintTile` calls it whenever a pattern paint has a live `sourceNodeId`) renders the
 source's own subtree (`collectPatternSourceSubtree.ts` walks `childIds`, so a Frame's children come

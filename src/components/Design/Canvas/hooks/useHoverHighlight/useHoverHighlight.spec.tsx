@@ -253,10 +253,57 @@ describe('useHoverHighlight behaviors', () => {
     expect(idA).toBeTruthy();
   });
 
-  it('should not react to pointer events while picking a pattern source, even when hovering a node', () => {
-    // mock — this hook would normally set the cursor class to null/hover-based on plain move,
-    // which must not stomp the pattern-source-picking cursor another hook has already set
+  it('should highlight an eligible node while picking a pattern source, without touching the cursor class', () => {
+    // mock — the cursor class must stay whatever the picking-mode hook already set (not this
+    // hook's own hover-based class), while the hovered node still gets a live outline
     const idA = addFrameNode(180, 180);
+
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+    const classNameBeforeMove = classNameRef.current;
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 185, 185));
+    });
+
+    // result
+    expect(hoverRef.current).toBe(idA);
+    expect(classNameRef.current).toBe(classNameBeforeMove);
+  });
+
+  it('should not highlight a node that already has a pattern fill while picking a pattern source', () => {
+    // mock — picking this node as a source would create a chain, which is blocked entirely
+    store.dispatch(
+      addNode({
+        fills: [
+          {
+            alignmentIndex: 0,
+            direction: 'horizontal',
+            offsetX: 0,
+            offsetY: 0,
+            opacity: 100,
+            scale: 100,
+            spacingX: 0,
+            spacingY: 0,
+            tileType: 'rectangular',
+            type: 'pattern',
+          },
+        ],
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 180,
+        y: 180,
+      }),
+    );
 
     store.dispatch(setPatternSourcePicking(true));
 
@@ -272,7 +319,6 @@ describe('useHoverHighlight behaviors', () => {
 
     // result
     expect(hoverRef.current).toBeNull();
-    expect(idA).toBeTruthy();
   });
 
   it('should resume reacting to pointer events once picking a pattern source ends', () => {

@@ -16,6 +16,7 @@ import { TPoint } from 'types/canvas';
 import { handleModifierKeyChange } from './utils/handleModifierKeyChange';
 import { resolveDistanceGuides } from './utils/resolveDistanceGuides';
 import { resolveHover } from './utils/resolveHover/resolveHover';
+import { resolvePatternSourcePickHover } from './utils/resolvePatternSourcePickHover';
 import { setHoverState } from './utils/setHoverState';
 
 export const useHoverHighlight = (refs: TCanvasRefs): void => {
@@ -27,6 +28,12 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    if (isPatternSourcePicking) {
+      if (event.buttons === 0) {
+        resolvePatternSourcePickHover(canvas, event, hoverRef);
+      }
+    }
+
     if (!isPatternSourcePicking) {
       if (event.buttons === 0) {
         lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
