@@ -3,7 +3,7 @@ import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { TABS } from './constants';
@@ -36,9 +36,7 @@ export const Header: FC<THeaderProps> = ({ activeTab, extra, setActiveTab, tabs 
         {extra}
         <Tooltip content={t('common.close')}>
           <PopoverPrimitive.Close asChild>
-            <UITools.Button ariaLabel={t('common.close')} className={styles.Header__close}>
-              <Icon name="Close" size={22} />
-            </UITools.Button>
+            <UITools.ButtonIcon ariaLabel={t('common.close')} className={styles.Header__close} name="Close" />
           </PopoverPrimitive.Close>
         </Tooltip>
       </div>

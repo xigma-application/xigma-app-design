@@ -66,7 +66,7 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
         </>
       }
     >
-      <UITools.Button active={false} className={toolbarStyles['VectorEditToolbar__tool-button']} onClick={handleSelect}>
+      <UITools.Button active={false} className={toolbarStyles['VectorEditToolbar__tool-button']} onClick={handleSelect} variant="link">
         <Icon color="neutral1" name={tool.icon} size={ICON_SIZE} />
         <span className={toolbarStyles.VectorEditToolbar__label}>{label}</span>
       </UITools.Button>

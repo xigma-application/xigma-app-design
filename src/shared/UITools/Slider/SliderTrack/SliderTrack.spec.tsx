@@ -103,6 +103,107 @@ describe('SliderTrack behaviors', () => {
     expect(container.querySelector('[class*="SliderTrack__thumb--active"]')).not.toBeNull();
   });
 
+  it('should render no base dot by default (baseValue defaults to min)', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={-100}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={0}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__baseDot"]')).toBeNull();
+  });
+
+  it('should render a base dot at baseValue once it differs from min', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        baseValue={0}
+        marks={[]}
+        max={100}
+        min={-100}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={0}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__baseDot"]')).not.toBeNull();
+  });
+
+  it('should not mark the thumb active while the value sits exactly on a non-min baseValue', () => {
+    // before — the handle returns to its neutral/inactive look once back at the base point
+    const { container } = render(
+      <SliderTrack
+        baseValue={0}
+        marks={[]}
+        max={100}
+        min={-100}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={0}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__thumb--active"]')).toBeNull();
+  });
+
+  it('should mark the thumb active once the value moves off a non-min baseValue', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        baseValue={0}
+        marks={[]}
+        max={100}
+        min={-100}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={20}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__thumb--active"]')).not.toBeNull();
+  });
+
+  it('should fill from the base point toward the value on either side of it', () => {
+    // before — dragging left of a centered base point (0 in a [-100,100] range) fills leftward
+    const { container } = render(
+      <SliderTrack
+        baseValue={0}
+        marks={[]}
+        max={100}
+        min={-100}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={-50}
+      />,
+    );
+    const fill = container.querySelector('[class*="SliderTrack__fill"]') as HTMLElement;
+
+    // result — fill's left edge sits at the (lower) thumb position, not at the track's own start
+    expect(fill.style.left).not.toBe('0px');
+    expect(fill.style.width).toBe('');
+  });
+
   it('should expose its aria attributes from the given range and value', () => {
     // before
     render(

@@ -18,6 +18,7 @@ export type { TSliderMark } from './types';
 
 export type TSliderProps = {
   ariaLabel?: string;
+  baseValue?: number;
   className?: string;
   marks?: TSliderMark[];
   max: number;
@@ -28,13 +29,25 @@ export type TSliderProps = {
   value: number;
 };
 
-export const Slider: FC<TSliderProps> = ({ ariaLabel, className, marks = [], max, min, onChange, onDragEnd, onDragStart, value }) => {
-  const { onPointerDown, onPointerMove, onPointerUp, trackRef } = useSliderDrag({ max, min, onChange, onDragEnd, onDragStart });
+export const Slider: FC<TSliderProps> = ({
+  ariaLabel,
+  baseValue,
+  className,
+  marks = [],
+  max,
+  min,
+  onChange,
+  onDragEnd,
+  onDragStart,
+  value,
+}) => {
+  const { onPointerDown, onPointerMove, onPointerUp, trackRef } = useSliderDrag({ baseValue, max, min, onChange, onDragEnd, onDragStart });
 
   return (
     <div className={cx(styles.Slider, className)}>
       <SliderTrack
         ariaLabel={ariaLabel}
+        baseValue={baseValue}
         marks={marks}
         max={max}
         min={min}

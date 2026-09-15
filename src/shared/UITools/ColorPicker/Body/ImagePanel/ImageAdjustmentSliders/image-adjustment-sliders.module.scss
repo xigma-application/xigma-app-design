@@ -1,0 +1,18 @@
+.ImageAdjustmentSliders {
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 128px;
+    height: 32px;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+
+  &__label {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+  }
+}

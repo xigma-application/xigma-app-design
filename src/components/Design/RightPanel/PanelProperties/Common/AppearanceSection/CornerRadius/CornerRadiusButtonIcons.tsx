@@ -2,22 +2,19 @@ import { ReactNode } from 'react';
 import { TFunction } from 'i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../constants';
 
 export const CornerRadiusButtonIcons = (isIndividual: boolean, onToggle: TFunc, t: TFunction): ReactNode[] => [
   <Tooltip content={t(`${translationNameSpace}.cornerRadius.individualTooltip`)} key="individual-corner-radius">
-    <Button
+    <UITools.ButtonIcon
       ariaLabel={t(`${translationNameSpace}.cornerRadius.individualAriaLabel`)}
+      name="Corners"
       onClick={onToggle}
       selected={isIndividual}
-      style={{ padding: 0 }}
-    >
-      <Icon name="Corners" size={24} />
-    </Button>
+    />
   </Tooltip>,
 ];
 

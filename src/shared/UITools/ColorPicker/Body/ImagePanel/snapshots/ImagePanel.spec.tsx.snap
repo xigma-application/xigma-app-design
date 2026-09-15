@@ -1,0 +1,386 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
+<DocumentFragment>
+  <div
+    class="_ImagePanel_865bf3"
+  >
+    <div
+      class="_ImageFillModeRow_f1f306"
+    >
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        class="_Dropdown_cc217a _Dropdown--outline_cc217a _ImageFillModeRow__dropdown_f1f306"
+        data-state="closed"
+        data-test-bypass-global-shortcuts="true"
+        type="button"
+      >
+        <span
+          class="_Dropdown__label_cc217a"
+        >
+          Fill
+        </span>
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24"
+          fill="none"
+          height="12"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="12"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Rotate image"
+        aria-pressed="false"
+        class="_Button_b88d2e _Button--outline_b88d2e _Button--secondary_b88d2e _Button--small_b88d2e"
+        style="padding: 0px;"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24"
+          fill="none"
+          height="24"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            d="M11.054 9.543a1.5 1.5 0 0 1 2.007.103l3.293 3.293a1.5 1.5 0 0 1 0 2.121l-3.293 3.293a1.5 1.5 0 0 1-2.121 0L7.647 15.06a1.5 1.5 0 0 1 0-2.121l3.293-3.293zm1.3.81a.5.5 0 0 0-.707 0l-3.293 3.293a.5.5 0 0 0 0 .707l3.293 3.293a.5.5 0 0 0 .629.064l.078-.064 3.293-3.293a.5.5 0 0 0 .064-.629l-.064-.078zM9.526 5.767a3.5 3.5 0 0 1 4.949 0L16 7.292V6a.5.5 0 0 1 1 0v2.5a.5.5 0 0 1-.5.5H14a.5.5 0 0 1 0-1h1.293l-1.525-1.526a2.5 2.5 0 0 0-3.535 0l-2.38 2.379a.5.5 0 0 1-.706-.707z"
+            data-svg-property="fill"
+            fill="white"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_ImageSourcePreview_b163e6"
+    >
+      <button
+        aria-pressed="false"
+        class="_Button_b88d2e _Button--primary_b88d2e _Button--small_b88d2e"
+        type="button"
+      >
+        Upload from computer
+      </button>
+      <button
+        aria-pressed="false"
+        class="_Button_b88d2e _Button--secondary_b88d2e _Button--small_b88d2e"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="Icon"
+          data-fpl-icon-size="24"
+          fill="none"
+          height="24"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            d="M16 6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM8 7a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm2.225 4.082a.5.5 0 0 1 .629.064l4 4a.5.5 0 1 1-.707.707L10.5 12.208l-1.646 1.646a.5.5 0 1 1-.708-.707l2-2zM14.5 8a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3m0 1a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1"
+            data-svg-property="fill"
+            fill="white"
+          />
+        </svg>
+        Make an image
+      </button>
+    </div>
+    <div
+      class="_ImageAdjustmentSliders_8f3b7b"
+    >
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Exposure
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Exposure"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Contrast
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Contrast"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Saturation
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Saturation"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Temperature
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Temperature"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Tint
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Tint"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Highlights
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Highlights"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="_ImageAdjustmentSliders__row_8f3b7b"
+      >
+        <span
+          class="_ImageAdjustmentSliders__label_8f3b7b"
+        >
+          Shadows
+        </span>
+        <div
+          class="_Slider_8f9d96"
+        >
+          <div
+            aria-label="Shadows"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
+          >
+            <div
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(8px + 0.5 * (100% - 16px));"
+              />
+            </div>
+            <div
+              class="_SliderTrack__thumb_5e04e4"
+              style="left: calc(8px + 0.5 * (100% - 16px));"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

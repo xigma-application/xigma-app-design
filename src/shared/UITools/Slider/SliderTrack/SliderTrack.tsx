@@ -16,6 +16,7 @@ import { getThumbOffset } from '../utils/getThumbOffset';
 
 export type TSliderTrackProps = {
   ariaLabel?: string;
+  baseValue?: number;
   marks: TSliderMark[];
   max: number;
   min: number;
@@ -28,6 +29,7 @@ export type TSliderTrackProps = {
 
 export const SliderTrack: FC<TSliderTrackProps> = ({
   ariaLabel,
+  baseValue,
   marks,
   max,
   min,
@@ -39,7 +41,15 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
 }) => {
   const fraction = (value - min) / (max - min);
   const thumbOffset = getThumbOffset(fraction, SLIDER_THUMB_RADIUS);
-  const hasValue = value !== min;
+  const effectiveBaseValue = baseValue ?? min;
+  const baseOffset = getMarkOffset(effectiveBaseValue, min, max);
+  const hasValue = value !== effectiveBaseValue;
+  const fillStyle =
+    effectiveBaseValue === min
+      ? { width: thumbOffset }
+      : value >= effectiveBaseValue
+        ? { left: baseOffset, right: `calc(100% - ${thumbOffset})` }
+        : { left: thumbOffset, right: `calc(100% - ${baseOffset})` };
 
   return (
     <div
@@ -57,7 +67,8 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
       tabIndex={0}
     >
       <div className={styles.SliderTrack__rail}>
-        <div className={styles.SliderTrack__fill} style={{ width: thumbOffset }} />
+        <div className={styles.SliderTrack__fill} style={fillStyle} />
+        {effectiveBaseValue !== min && <div className={styles.SliderTrack__baseDot} style={{ left: baseOffset }} />}
         {marks.map((mark) => (
           <div className={styles.SliderTrack__mark} key={mark.value} style={{ left: getMarkOffset(mark.value, min, max) }} />
         ))}

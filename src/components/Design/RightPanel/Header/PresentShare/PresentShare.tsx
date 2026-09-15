@@ -27,9 +27,7 @@ const PresentShare: FC = () => {
             </>
           }
         >
-          <UITools.Button ariaLabel={t(`${translationNameSpace}.present`)} className={styles.PresentShare__present}>
-            <Icon name="Play" size={24} />
-          </UITools.Button>
+          <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.present`)} className={styles.PresentShare__present} name="Play" />
         </Tooltip>
         <UITools.ButtonMenu
           align="end"

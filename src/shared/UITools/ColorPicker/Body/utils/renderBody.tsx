@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 
 // components
 import GradientPanel from '../GradientPanel/GradientPanel';
+import ImagePanel from '../ImagePanel/ImagePanel';
 import PatternPanel from '../PatternPanel/PatternPanel';
 import SolidPanel from '../SolidPanel/SolidPanel';
 
@@ -37,6 +38,8 @@ export const renderBody = (props: TBodyProps): ReactNode => {
           sourceNodeId={patternSourceNodeId}
         />
       );
+    case ColorPickerTab.image:
+      return <ImagePanel />;
     default:
       return (
         <SolidPanel

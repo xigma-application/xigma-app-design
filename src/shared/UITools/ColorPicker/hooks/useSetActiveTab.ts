@@ -12,7 +12,7 @@ import { TUseGradientPanelResult } from '../Body/GradientPanel/hooks/useGradient
 import { TUsePatternPanelResult } from '../Body/PatternPanel/hooks/usePatternPanel';
 
 const isColorPickerTab = (value: string): value is ColorPickerTab =>
-  value === ColorPickerTab.solid || value === ColorPickerTab.gradient || value === ColorPickerTab.pattern;
+  value === ColorPickerTab.solid || value === ColorPickerTab.gradient || value === ColorPickerTab.pattern || value === ColorPickerTab.image;
 
 export const useSetActiveTab =
   (
@@ -45,6 +45,10 @@ export const useSetActiveTab =
             tileType: patternPanel.tileType,
           });
           gradientPanel.reset();
+          break;
+        case ColorPickerTab.image:
+          gradientPanel.reset();
+          patternPanel.reset();
           break;
         default:
           onChange(value);

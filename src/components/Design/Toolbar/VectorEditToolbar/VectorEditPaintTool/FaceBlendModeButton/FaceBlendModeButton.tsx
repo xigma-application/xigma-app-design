@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import FaceBlendModeMenu from './FaceBlendModeMenu/FaceBlendModeMenu';
-import { Icon, UITools } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { useFaceBlendModeButton } from './hooks/useFaceBlendModeButton';
@@ -21,11 +21,7 @@ const FaceBlendModeButton: FC = () => {
       asChild
       onOpenChange={onOpenChange}
       open={open}
-      trigger={
-        <UITools.Button ariaLabel={label} selected={open} style={{ padding: 5.5 }}>
-          <Icon name={icon} size={13} />
-        </UITools.Button>
-      }
+      trigger={<UITools.ButtonIcon ariaLabel={label} name={icon} selected={open} />}
       triggerTooltip={label}
     >
       <FaceBlendModeMenu onSelect={selectBlendMode} value={value} />

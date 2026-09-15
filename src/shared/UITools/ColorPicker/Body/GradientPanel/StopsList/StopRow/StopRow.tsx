@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import PositionField from './PositionField/PositionField';
 import StopColorPanel from './StopColorPanel/StopColorPanel';
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { DockedPanelContext } from '../../../../DockedPanelContext';
@@ -72,15 +72,13 @@ export const StopRow: FC<TStopRowProps> = ({
         triggerAriaLabel={t('colorPicker.gradient.stops.colorAriaLabel')}
       />
       <Tooltip content={t('colorPicker.gradient.stops.removeAriaLabel')}>
-        <UITools.Button
+        <UITools.ButtonIcon
           ariaLabel={t('colorPicker.gradient.stops.removeAriaLabel')}
           className={styles.StopRow__remove}
           disabled={!canRemove}
+          name="Minus"
           onClick={onRemove}
-          style={{ padding: 0 }}
-        >
-          <Icon name="Minus" size={24} />
-        </UITools.Button>
+        />
       </Tooltip>
     </div>
   );

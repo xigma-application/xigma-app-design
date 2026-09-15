@@ -32,7 +32,12 @@ const VectorEditToolButton: FC<TVectorEditToolButtonProps> = ({ isActive, tool }
         </>
       }
     >
-      <UITools.Button active={isActive} className={styles['VectorEditToolbar__tool-button']} onClick={handleClick}>
+      <UITools.Button
+        active={isActive}
+        className={cx(styles['VectorEditToolbar__tool-button'], { [styles['VectorEditToolbar__tool-button--active']]: isActive })}
+        onClick={handleClick}
+        variant="link"
+      >
         <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
         <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
           {t(tool.labelKey)}

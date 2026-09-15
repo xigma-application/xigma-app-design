@@ -3,11 +3,11 @@ import { Fragment, ReactElement, ReactNode } from 'react';
 import { isArray } from 'lodash';
 
 // @xigma
-import { Icon, Tooltip } from '@xigma/components';
+import { Tooltip } from '@xigma/components';
 
 // components
-import Button from '../Button/Button';
 import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
+import { UITools } from 'shared';
 
 // styles
 import styles from './section.module.scss';
@@ -57,9 +57,7 @@ export const Section = <TItem,>({
                 {component}
                 {onAdd && (
                   <Tooltip align="end" content={addTooltip}>
-                    <Button ariaLabel={addAriaLabel} onClick={onAdd} style={{ padding: 0 }}>
-                      <Icon name="Plus" size={24} />
-                    </Button>
+                    <UITools.ButtonIcon ariaLabel={addAriaLabel} name="Plus" onClick={onAdd} />
                   </Tooltip>
                 )}
               </div>

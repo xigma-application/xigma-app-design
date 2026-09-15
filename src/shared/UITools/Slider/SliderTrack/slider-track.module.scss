@@ -1,6 +1,7 @@
 .SliderTrack {
   cursor: pointer;
   display: block;
+  height: 16px;
   position: relative;
   touch-action: none;
   width: 100%;
@@ -26,6 +27,30 @@
     pointer-events: none;
     position: absolute;
     top: 0;
+  }
+
+  &__baseDot {
+    background-color: var(--color-blue-1);
+    border-radius: 50%;
+    height: 16px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+
+    &::after {
+      background-color: var(--color-neutral-1);
+      border-radius: 50%;
+      content: '';
+      display: block;
+      height: 4px;
+      left: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+    }
   }
 
   &__mark {

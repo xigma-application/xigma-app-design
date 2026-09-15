@@ -8,7 +8,7 @@ export type TButtonColor = 'primary' | 'secondary';
 
 export type TButtonSize = 'large' | 'medium' | 'small';
 
-export type TButtonVariant = 'outline' | 'solid';
+export type TButtonVariant = 'link' | 'outline' | 'solid';
 
 export type TButtonProps = {
   active?: boolean;
@@ -50,7 +50,9 @@ export const Button = forwardRef<HTMLButtonElement, TButtonProps>(
           [styles['Button--active']]: active,
           [styles['Button--disabled']]: disabled,
           [styles['Button--large']]: size === 'large',
+          [styles['Button--link']]: variant === 'link',
           [styles['Button--outline']]: variant === 'outline',
+          [styles['Button--primary']]: color === 'primary',
           [styles['Button--secondary']]: color === 'secondary',
           [styles['Button--selected']]: selected,
           [styles['Button--small']]: size === 'small',

@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +12,7 @@ import { useSelectVectorEditTool } from '../../VectorEditToolButton/hooks/useSel
 
 // others
 import { TOOL_ICON, TOOL_LABEL } from '../../../constants';
-import { ICON_SIZE, MORE_TOOLS, TMoreToolName, translationNameSpace } from '../../constants';
+import { MORE_TOOLS, TMoreToolName, translationNameSpace } from '../../constants';
 
 // store
 import { selectActiveTool } from 'store/design/selectors';
@@ -42,15 +43,15 @@ const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ tool
           </>
         }
       >
-        <UITools.Button
+        <UITools.ButtonIcon
           active={isActive}
           ariaLabel={t(TOOL_LABEL[toolName])}
-          className={styles['VectorEditToolbar__tool-button']}
+          className={cx(styles['VectorEditToolbar__tool-button'], { [styles['VectorEditToolbar__tool-button--active']]: isActive })}
+          color={isActive ? 'onBlue1' : 'neutral1'}
           disabled={isDisabled}
+          name={TOOL_ICON[toolName]}
           onClick={handleSelect}
-        >
-          <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={TOOL_ICON[toolName]} size={ICON_SIZE} />
-        </UITools.Button>
+        />
       </Tooltip>
       <UITools.ButtonMenu
         className={styles['VectorEditToolbar__more-chevron']}

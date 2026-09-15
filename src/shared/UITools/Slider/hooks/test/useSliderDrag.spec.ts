@@ -119,6 +119,70 @@ describe('useSliderDrag', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('should snap to baseValue when the pointer lands within the snap threshold on pointer down', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before — track width 100 maps 1:1 to the [0,100] range, so base 50 sits at pixel 50
+    const { result } = renderHook(() => useSliderDrag({ baseValue: 50, max: 100, min: 0, onChange }));
+
+    result.current.trackRef.current = createTrack();
+
+    // action — 2px away from the base point, inside the snap threshold
+    result.current.onPointerDown(createEvent(52));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(50);
+  });
+
+  it('should snap to baseValue when the pointer lands within the snap threshold on pointer move', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useSliderDrag({ baseValue: 50, max: 100, min: 0, onChange }));
+
+    result.current.trackRef.current = createTrack();
+
+    // action — 2px away from the base point, inside the snap threshold
+    result.current.onPointerMove(createEvent(48));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(50);
+  });
+
+  it('should report the raw value once the pointer moves outside the snap threshold', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useSliderDrag({ baseValue: 50, max: 100, min: 0, onChange }));
+
+    result.current.trackRef.current = createTrack();
+
+    // action — 10px away from the base point, outside the snap threshold
+    result.current.onPointerDown(createEvent(60));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(60);
+  });
+
+  it('should not snap when no baseValue is given', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useSliderDrag({ max: 100, min: 0, onChange }));
+
+    result.current.trackRef.current = createTrack();
+
+    // action
+    result.current.onPointerDown(createEvent(51));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(51);
+  });
+
   it('should release the pointer and call onDragEnd on pointer up', () => {
     // mock
     const onChange = vi.fn();

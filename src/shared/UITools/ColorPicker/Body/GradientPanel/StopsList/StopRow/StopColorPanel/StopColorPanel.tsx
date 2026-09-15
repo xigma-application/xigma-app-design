@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import ColorSampler from '../../../../../ColorSampler/ColorSampler';
 import SolidPanel from '../../../../SolidPanel/SolidPanel';
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // hooks
 import { useColorModel } from '../../../../../hooks/useColorModel';
@@ -42,9 +42,7 @@ export const StopColorPanel: FC<TStopColorPanelProps> = ({ onClose, onColorChang
         <UITools.Tabs activeTab={DEFAULT_LIBRARY_TAB} setActiveTab={noopSetActiveTab} tabs={CUSTOM_LIBRARY_TABS} />
         <div className={headerStyles.Header__actions}>
           <Tooltip content={t('common.close')}>
-            <UITools.Button ariaLabel={t('common.close')} onClick={onClose} style={{ padding: 0 }}>
-              <Icon name="Close" size={22} />
-            </UITools.Button>
+            <UITools.ButtonIcon ariaLabel={t('common.close')} name="Close" onClick={onClose} />
           </Tooltip>
         </div>
       </div>

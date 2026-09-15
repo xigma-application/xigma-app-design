@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { GRADIENT_TYPE_LABEL_KEY, GRADIENT_TYPE_ORDER } from '../constants';
@@ -30,14 +30,10 @@ export const GradientActions: FC<TGradientActionsProps> = ({ onFlip, onRotate, o
       />
       <div className={styles.GradientActions__buttons}>
         <Tooltip content={t('colorPicker.gradient.actions.flip')}>
-          <UITools.Button ariaLabel={t('colorPicker.gradient.actions.flip')} onClick={onFlip} style={{ padding: 0 }}>
-            <Icon name="SwapHorizontal" size={24} />
-          </UITools.Button>
+          <UITools.ButtonIcon ariaLabel={t('colorPicker.gradient.actions.flip')} name="SwapHorizontal" onClick={onFlip} />
         </Tooltip>
         <Tooltip content={t('colorPicker.gradient.actions.rotate')}>
-          <UITools.Button ariaLabel={t('colorPicker.gradient.actions.rotate')} onClick={onRotate} style={{ padding: 0 }}>
-            <Icon name="ToggleRotate" size={24} />
-          </UITools.Button>
+          <UITools.ButtonIcon ariaLabel={t('colorPicker.gradient.actions.rotate')} name="ToggleRotate" onClick={onRotate} />
         </Tooltip>
       </div>
     </div>

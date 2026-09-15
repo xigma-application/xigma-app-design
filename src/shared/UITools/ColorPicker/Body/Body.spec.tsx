@@ -126,4 +126,12 @@ describe('Body behaviors', () => {
     // result
     expect(screen.getByRole('button', { name: 'Select source...' })).toBeInTheDocument();
   });
+
+  it('should render the image panel for the image tab', () => {
+    // before
+    renderBody(ColorPickerTab.image);
+
+    // result
+    expect(screen.getByRole('button', { name: 'Upload from computer' })).toBeInTheDocument();
+  });
 });

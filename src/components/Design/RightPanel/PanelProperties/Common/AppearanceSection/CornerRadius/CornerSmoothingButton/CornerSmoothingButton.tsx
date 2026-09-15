@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import CornerSmoothingPopover from './CornerSmoothingPopover/CornerSmoothingPopover';
-import { Icon, UITools } from 'shared';
+import { UITools } from 'shared';
 
 // hooks
 import { usePanelEdgeSideOffset } from 'components/Design/RightPanel/hooks/usePanelEdgeSideOffset';
@@ -32,14 +32,12 @@ export const CornerSmoothingButton: FC = () => {
       side="left"
       sideOffset={sideOffset}
       trigger={
-        <UITools.Button
+        <UITools.ButtonIcon
           ariaLabel={t(`${translationNameSpace}.cornerRadius.smoothingAriaLabel`)}
+          name="Properties"
           ref={triggerRef}
           selected={open}
-          style={{ padding: 6 }}
-        >
-          <Icon name="Properties" size={12} />
-        </UITools.Button>
+        />
       }
       triggerTooltip={t(`${translationNameSpace}.cornerRadius.smoothingTooltip`)}
     >

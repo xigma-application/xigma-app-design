@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ImageSourcePreview snapshots > should render ImageSourcePreview 1`] = `
+<DocumentFragment>
+  <div
+    class="_ImageSourcePreview_b163e6"
+  >
+    <button
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--small_b88d2e"
+      type="button"
+    >
+      Upload from computer
+    </button>
+    <button
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--secondary_b88d2e _Button--small_b88d2e"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="Icon"
+        data-fpl-icon-size="24"
+        fill="none"
+        height="24"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="24"
+      >
+        <path
+          d="M16 6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM8 7a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm2.225 4.082a.5.5 0 0 1 .629.064l4 4a.5.5 0 1 1-.707.707L10.5 12.208l-1.646 1.646a.5.5 0 1 1-.708-.707l2-2zM14.5 8a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3m0 1a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+      Make an image
+    </button>
+  </div>
+</DocumentFragment>
+`;

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -21,14 +21,12 @@ export const PopoverAutoLayoutSettingsHeader: FC<TPopoverAutoLayoutSettingsHeade
     <div className={styles.PopoverAutoLayoutSettingsHeader}>
       <span className={styles.PopoverAutoLayoutSettingsHeader__title}>{t(`${translationNameSpace}.header`)}</span>
       <Tooltip content={t('common.close')}>
-        <UITools.Button
+        <UITools.ButtonIcon
           ariaLabel={t('common.close')}
           className={styles.PopoverAutoLayoutSettingsHeader__close}
+          name="Close"
           onClick={onClose}
-          style={{ padding: 0 }}
-        >
-          <Icon name="Close" size={22} />
-        </UITools.Button>
+        />
       </Tooltip>
     </div>
   );

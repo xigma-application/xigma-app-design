@@ -13,16 +13,12 @@
   font-weight: 450;
   padding: 4px 8px;
 
-  &--active {
+  &--primary {
     background-color: var(--color-blue-1);
 
     &:hover {
       background-color: var(--color-blue-1);
     }
-  }
-
-  &--outline {
-    border: 1px solid var(--color-neutral-3);
   }
 
   &--secondary {
@@ -31,6 +27,14 @@
     &:hover {
       background-color: color-mix(in srgb, var(--color-neutral-4) 50%, transparent);
     }
+  }
+
+  &--outline {
+    border: 1px solid var(--color-neutral-3);
+  }
+
+  &--link {
+    background-color: unset;
   }
 
   &--small {

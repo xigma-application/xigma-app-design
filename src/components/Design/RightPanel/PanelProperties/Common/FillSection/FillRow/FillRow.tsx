@@ -136,9 +136,7 @@ export const FillRow: FC<TFillRowProps> = ({
         )}
       </span>
       <Tooltip content={t(`${translationNameSpace}.deleteTooltip`)}>
-        <UITools.Button ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)} onClick={onRemove} style={{ padding: 0 }}>
-          <Icon name="Minus" size={24} />
-        </UITools.Button>
+        <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)} name="Minus" onClick={onRemove} />
       </Tooltip>
     </div>
   );

@@ -37,6 +37,7 @@ export const GridAreaPopover: FC<TGridAreaPopoverProps> = ({ close, grid }) => {
       <CellsInput close={close} columns={grid.columns} onClickCell={grid.onClickCell} rows={grid.rows} />
       <UITools.Button
         className={styles['GridAreaPopover__settings-button']}
+        color="secondary"
         onClick={() => {
           grid.onOpenSettings();
           close();

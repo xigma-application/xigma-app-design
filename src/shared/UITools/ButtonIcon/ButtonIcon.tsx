@@ -8,8 +8,10 @@ import { Icon, TIconProps } from '@xigma/components';
 import styles from './button-icon.module.scss';
 
 export type TButtonIconProps = {
+  active?: boolean;
   ariaLabel?: string;
   className?: string;
+  color?: TIconProps['color'];
   disabled?: boolean;
   name: TIconProps['name'];
   onClick?: TFunc;
@@ -18,14 +20,15 @@ export type TButtonIconProps = {
 } & Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'className' | 'disabled' | 'name' | 'onClick' | 'type'>;
 
 export const ButtonIcon = forwardRef<HTMLButtonElement, TButtonIconProps>(
-  ({ ariaLabel, className = '', disabled = false, name, onClick, selected = false, size = 24, ...rest }, ref) => (
+  ({ active, ariaLabel, className = '', color, disabled = false, name, onClick, selected = false, size = 24, ...rest }, ref) => (
     <button
       {...rest}
       aria-label={ariaLabel}
-      aria-pressed={selected}
+      aria-pressed={active || selected}
       className={cx(
         styles.ButtonIcon,
         {
+          [styles['ButtonIcon--active']]: active,
           [styles['ButtonIcon--disabled']]: disabled,
           [styles['ButtonIcon--selected']]: selected,
         },
@@ -36,7 +39,7 @@ export const ButtonIcon = forwardRef<HTMLButtonElement, TButtonIconProps>(
       ref={ref}
       type="button"
     >
-      <Icon name={name} size={size} />
+      <Icon color={color} name={name} size={size} />
     </button>
   ),
 );

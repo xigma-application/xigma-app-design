@@ -2,7 +2,7 @@ import { FC, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
@@ -32,14 +32,10 @@ const PagesHeaderActions: FC<TPagesHeaderActionsProps> = ({ onAddPage, onStopPro
           </>
         }
       >
-        <button aria-label={searchLabel} className={styles.PagesHeaderActions__action} type="button">
-          <Icon name="Search" size={24} />
-        </button>
+        <UITools.ButtonIcon aria-label={searchLabel} name="Search" />
       </Tooltip>
       <Tooltip content={addLabel}>
-        <button aria-label={addLabel} className={styles.PagesHeaderActions__action} onClick={onAddPage} type="button">
-          <Icon name="Plus" size={24} />
-        </button>
+        <UITools.ButtonIcon aria-label={addLabel} name="Plus" onClick={onAddPage} />
       </Tooltip>
     </div>
   );

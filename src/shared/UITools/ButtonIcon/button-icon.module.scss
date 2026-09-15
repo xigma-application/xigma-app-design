@@ -17,6 +17,10 @@
     background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
   }
 
+  &--active {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+  }
+
   &--selected {
     background-color: var(--color-bg-selected);
 

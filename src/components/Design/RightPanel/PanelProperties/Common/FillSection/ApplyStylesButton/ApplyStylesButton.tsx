@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -12,9 +12,7 @@ export const ApplyStylesButton: FC = () => {
 
   return (
     <Tooltip align="end" content={t(`${translationNameSpace}.applyStylesTooltip`)}>
-      <UITools.Button ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)} style={{ padding: 0 }}>
-        <Icon name="StylesAndVariables" size={24} />
-      </UITools.Button>
+      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)} name="StylesAndVariables" />
     </Tooltip>
   );
 };

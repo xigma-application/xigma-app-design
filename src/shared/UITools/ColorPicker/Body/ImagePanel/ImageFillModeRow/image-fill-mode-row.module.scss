@@ -1,0 +1,12 @@
+.ImageFillModeRow {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  height: 48px;
+  justify-content: space-between;
+  padding: 0 16px;
+
+  &__dropdown {
+    width: 96px;
+  }
+}

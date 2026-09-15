@@ -1,6 +1,7 @@
 .SliderLegends {
   height: 14px;
   left: 0;
+  pointer-events: none;
   position: absolute;
   top: 100%;
   width: 100%;
@@ -10,7 +11,7 @@
     font-size: 11px;
     font-weight: 450;
     position: absolute;
-    top: 12px;
+    top: 5px;
     transform: translateX(-50%);
     white-space: nowrap;
   }

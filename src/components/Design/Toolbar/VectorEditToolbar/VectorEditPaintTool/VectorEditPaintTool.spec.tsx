@@ -43,6 +43,16 @@ describe('VectorEditPaintTool', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
+  it('should use the link variant while inactive, matching every other vector-edit tool button', () => {
+    // before — Button defaults to color="primary" (blue) when unspecified; only the link variant's
+    // own `background-color: unset` (declared after --primary in the stylesheet) neutralizes it, so
+    // dropping this variant would leave the button looking permanently highlighted at rest
+    renderVectorEditPaintTool(false);
+
+    // result
+    expect(screen.getByRole('button').className).toContain('Button--link');
+  });
+
   it('should dispatch setActiveTool without opening the picker when the inactive button is clicked', () => {
     // before
     renderVectorEditPaintTool(false);

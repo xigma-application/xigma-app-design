@@ -187,9 +187,8 @@ exports[`AppearanceSection snapshots > should render the collapsed opacity and c
             <button
               aria-label="Individual corner radius"
               aria-pressed="false"
-              class="_Button_b88d2e"
+              class="_ButtonIcon_2062db"
               data-state="closed"
-              style="padding: 0px;"
               type="button"
             >
               <svg

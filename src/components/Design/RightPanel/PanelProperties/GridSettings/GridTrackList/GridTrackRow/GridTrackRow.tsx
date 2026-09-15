@@ -3,7 +3,7 @@ import { FC, PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
-import { Icon, Tooltip } from '@xigma/components';
+import { Tooltip } from '@xigma/components';
 
 // components
 import FillWeightMenu from './FillWeightMenu/FillWeightMenu';
@@ -120,15 +120,13 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
         />
       </span>
       <Tooltip align="end" content={removeTooltip}>
-        <UITools.Button
+        <UITools.ButtonIcon
           ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)}
           className={styles.GridTrackRow__delete}
           disabled={!canDelete}
+          name="Minus"
           onClick={onDelete}
-          style={{ padding: 0 }}
-        >
-          <Icon name="Minus" size={24} />
-        </UITools.Button>
+        />
       </Tooltip>
     </div>
   );

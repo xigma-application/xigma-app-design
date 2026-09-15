@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import StopRow from './StopRow/StopRow';
-import { Icon, Tooltip, UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { ADD_STOP_POSITION } from './constants';
@@ -49,14 +49,12 @@ export const StopsList: FC<TStopsListProps> = ({
       <div className={styles.StopsList__header}>
         <span>{t('colorPicker.gradient.stops.title')}</span>
         <Tooltip content={t('colorPicker.gradient.stops.addAriaLabel')}>
-          <UITools.Button
+          <UITools.ButtonIcon
             ariaLabel={t('colorPicker.gradient.stops.addAriaLabel')}
             disabled={!canAddStop}
+            name="Plus"
             onClick={(): void => onAddStop(ADD_STOP_POSITION)}
-            style={{ padding: 0 }}
-          >
-            <Icon name="Plus" size={24} />
-          </UITools.Button>
+          />
         </Tooltip>
       </div>
       {stops.map((stop) => (

@@ -1,9 +1,13 @@
 import { PointerEvent as ReactPointerEvent, RefObject, useRef } from 'react';
 
+// others
+import { SLIDER_SNAP_THRESHOLD_PX } from '../constants';
+
 // utils
 import { clamp } from 'utils/math/clamp';
 
 export type TUseSliderDragOptions = {
+  baseValue?: number;
   max: number;
   min: number;
   onChange: TFunc<[number]>;
@@ -18,14 +22,30 @@ export type TUseSliderDragResult = {
   trackRef: RefObject<HTMLDivElement | null>;
 };
 
-const getValueFromEvent = (event: ReactPointerEvent<HTMLDivElement>, track: HTMLDivElement, min: number, max: number): number => {
+const getValueFromEvent = (
+  event: ReactPointerEvent<HTMLDivElement>,
+  track: HTMLDivElement,
+  min: number,
+  max: number,
+  baseValue?: number,
+): number => {
   const rect = track.getBoundingClientRect();
-  const fraction = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+  const pointerOffset = event.clientX - rect.left;
+  const fraction = clamp(pointerOffset / rect.width, 0, 1);
+  const value = min + fraction * (max - min);
 
-  return min + fraction * (max - min);
+  if (baseValue !== undefined) {
+    const baseOffset = ((baseValue - min) / (max - min)) * rect.width;
+
+    if (Math.abs(pointerOffset - baseOffset) <= SLIDER_SNAP_THRESHOLD_PX) {
+      return baseValue;
+    }
+  }
+
+  return value;
 };
 
-export const useSliderDrag = ({ max, min, onChange, onDragEnd, onDragStart }: TUseSliderDragOptions): TUseSliderDragResult => {
+export const useSliderDrag = ({ baseValue, max, min, onChange, onDragEnd, onDragStart }: TUseSliderDragOptions): TUseSliderDragResult => {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
@@ -34,7 +54,7 @@ export const useSliderDrag = ({ max, min, onChange, onDragEnd, onDragStart }: TU
     if (track) {
       event.currentTarget.setPointerCapture(event.pointerId);
       onDragStart?.();
-      onChange(getValueFromEvent(event, track, min, max));
+      onChange(getValueFromEvent(event, track, min, max, baseValue));
     }
   };
 
@@ -42,7 +62,7 @@ export const useSliderDrag = ({ max, min, onChange, onDragEnd, onDragStart }: TU
     const track = trackRef.current;
 
     if (track && event.buttons === 1) {
-      onChange(getValueFromEvent(event, track, min, max));
+      onChange(getValueFromEvent(event, track, min, max, baseValue));
     }
   };
 
