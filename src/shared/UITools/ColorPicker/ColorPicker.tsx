@@ -62,6 +62,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onOpenChange,
   onPatternChange,
   paintTypeRow = false,
+  patternSourceNodeId,
   presets = DEFAULT_PRESETS,
   side,
   sideOffset,
@@ -135,6 +136,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onDragStart={handleDragStart}
             onOpenSampler={colorSampler.open}
             patternPanel={patternPanel}
+            patternSourceNodeId={patternSourceNodeId}
             patternSourcePicking={patternSourcePicking}
           />
         </DockedPanelContext.Provider>

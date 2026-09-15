@@ -40,6 +40,7 @@ import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts/useKeyboardShortcuts';
 import { useRegisterColorPixelSampler } from './hooks/useRegisterColorPixelSampler/useRegisterColorPixelSampler';
+import { useRegisterPatternThumbnailSampler } from './hooks/useRegisterPatternThumbnailSampler/useRegisterPatternThumbnailSampler';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
 import { useSliceTool } from './hooks/useSliceTool/useSliceTool';
 import { useStraightCaretEditing } from './hooks/useStraightCaretEditing/useStraightCaretEditing';
@@ -101,6 +102,7 @@ const Canvas: FC = () => {
   useKeyboardShortcuts(refs);
   useCanvasRenderLoop(refs);
   useRegisterColorPixelSampler(refs);
+  useRegisterPatternThumbnailSampler(refs);
 
   return (
     <CanvasContextMenuPanel className={styles.Canvas} refs={refs}>

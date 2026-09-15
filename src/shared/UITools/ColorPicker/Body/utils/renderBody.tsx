@@ -20,6 +20,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     onDragStart,
     onOpenSampler,
     patternPanel,
+    patternSourceNodeId,
     patternSourcePicking,
   } = props;
 
@@ -33,6 +34,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
           onDragStart={onDragStart}
           patternPanel={patternPanel}
           patternSourcePicking={patternSourcePicking}
+          sourceNodeId={patternSourceNodeId}
         />
       );
     default:

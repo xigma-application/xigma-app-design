@@ -5,6 +5,7 @@ import { FC, ReactNode, useRef } from 'react';
 import { ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
+import ButtonIcon from '../ButtonIcon/ButtonIcon';
 import Color from '../Color/Color';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import FieldGroup from '../FieldGroup/FieldGroup';
@@ -13,6 +14,7 @@ import TextFieldWrapper from '../TextField/TextFieldWrapper/TextFieldWrapper';
 // hooks
 import { useAlphaCommit } from './hooks/useAlphaCommit';
 import { useHexCommit } from './hooks/useHexCommit';
+import { usePatternThumbnail } from '../ColorPicker/Body/PatternPanel/PatternSourcePreview/hooks/usePatternThumbnail';
 
 // styles
 import styles from './color-picker-input.module.scss';
@@ -23,7 +25,6 @@ import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../Co
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
 import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
-import ButtonIcon from '../ButtonIcon/ButtonIcon';
 
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
@@ -50,6 +51,7 @@ export type TColorPickerInputProps = {
   onToggleVisibility?: TFunc;
   onTriggerClick?: TFunc;
   paintTypeRow?: boolean;
+  patternSourceNodeId?: string | null;
   side?: TColorPickerProps['side'];
   simple?: boolean;
   title?: string;
@@ -83,6 +85,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onToggleVisibility,
   onTriggerClick,
   paintTypeRow = false,
+  patternSourceNodeId,
   side = 'top',
   simple = false,
   title,
@@ -94,6 +97,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   const onBlurHex = useHexCommit(hex, onCommitHex);
   const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
   const rounded = Math.round(alpha);
+  const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null);
 
   const handleHexFieldClick = (): void => {
     rootRef.current?.querySelector<HTMLButtonElement>(`.${styles.ColorPickerInput__trigger}`)?.click();
@@ -112,7 +116,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           startAdornment={
             onTriggerClick ? (
               <button aria-label={triggerAriaLabel} className={styles.ColorPickerInput__trigger} onClick={onTriggerClick} type="button">
-                <Color alpha={alpha} color={hex} cursor="default" dot={isPattern} />
+                <Color alpha={alpha} color={hex} cursor="default" dot={isPattern} thumbnailUrl={thumbnailUrl} />
               </button>
             ) : (
               <ColorPicker
@@ -130,10 +134,11 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onOpenChange={onOpenChange}
                 onPatternChange={onPatternChange}
                 paintTypeRow={paintTypeRow}
+                patternSourceNodeId={patternSourceNodeId}
                 side={side}
                 simple={simple}
                 title={title}
-                trigger={<Color alpha={alpha} color={hex} cursor="default" dot={isPattern} />}
+                trigger={<Color alpha={alpha} color={hex} cursor="default" dot={isPattern} thumbnailUrl={thumbnailUrl} />}
                 triggerAriaLabel={triggerAriaLabel}
                 triggerClassName={styles.ColorPickerInput__trigger}
                 value={{ alpha, hex }}

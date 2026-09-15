@@ -18,6 +18,12 @@ import { store } from 'store';
 // types
 import { TPaint } from 'types/design/paint/types';
 
+const usePatternThumbnailMock = vi.fn();
+
+vi.mock('shared/UITools/ColorPicker/Body/PatternPanel/PatternSourcePreview/hooks/usePatternThumbnail', () => ({
+  usePatternThumbnail: (...args: unknown[]): unknown => usePatternThumbnailMock(...args),
+}));
+
 const TestProviders = ({ children }: { children: ReactNode }): ReactNode => (
   <Provider store={store}>
     <CanvasRefsContext.Provider value={createCanvasRefs()}>
@@ -73,6 +79,10 @@ const renderFillRow = (overrides: Partial<Parameters<typeof FillRow>[0]> = {}): 
   );
 
 describe('FillRow behaviors', () => {
+  beforeEach(() => {
+    usePatternThumbnailMock.mockClear();
+  });
+
   it('should show the hex and opacity for a solid fill', () => {
     // before
     renderFillRow();
@@ -319,6 +329,45 @@ describe('FillRow behaviors', () => {
     expect(screen.getByDisplayValue('60')).toBeInTheDocument();
     expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
     expect(container.querySelector('[style*="255, 255, 255"]')).not.toBeInTheDocument();
+  });
+
+  it("should pass the pattern paint's sourceNodeId down to the source preview once the picker is open", () => {
+    // mock
+    usePatternThumbnailMock.mockReturnValue(null);
+
+    // before
+    renderFillRow({
+      paint: {
+        alignmentIndex: 0,
+        direction: 'horizontal',
+        offsetX: 0,
+        offsetY: 0,
+        opacity: 60,
+        scale: 100,
+        sourceNodeId: 'source-node-1',
+        spacingX: 0,
+        spacingY: 0,
+        tileType: 'rectangular',
+        type: 'pattern',
+      },
+    });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+
+    // result
+    expect(usePatternThumbnailMock).toHaveBeenCalledWith('source-node-1');
+  });
+
+  it('should never look up a pattern source thumbnail for a solid fill', () => {
+    // before
+    renderFillRow({ paint: SOLID_PAINT });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+
+    // result — a solid fill is never treated as having a pattern source, regardless of it being requested at mount
+    expect(usePatternThumbnailMock).toHaveBeenCalledWith(null);
   });
 
   it('should keep the picker open and showing pattern content after clicking Pattern converts a solid fill mid-edit', async () => {

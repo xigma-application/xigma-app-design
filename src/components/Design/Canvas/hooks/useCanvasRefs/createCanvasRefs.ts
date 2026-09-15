@@ -36,6 +36,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   canvasRef: { current: null },
   colorSampleRequestRef: { current: null },
   draftRef: { current: null },
+  patternThumbnailRequestRef: { current: null },
   ...overrides,
   blendMode: createBlendModeRefs(overrides.blendMode),
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),

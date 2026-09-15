@@ -1,6 +1,44 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PatternSourcePreview snapshots > should render PatternSourcePreview 1`] = `
+exports[`PatternSourcePreview snapshots > should render PatternSourcePreview with a resolved thumbnail 1`] = `
+<DocumentFragment>
+  <div
+    class="_PatternSourcePreview_6289b4"
+    style="background-image: url("data:image/png;base64,abc");"
+  >
+    <div
+      class="_PatternSourcePreview__overlay_6289b4"
+    >
+      <button
+        aria-pressed="false"
+        class="_Button_b88d2e _Button--outline_b88d2e _Button--secondary_b88d2e _Button--small_b88d2e"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24"
+          fill="none"
+          height="24"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M16.5 7h-9a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 6 16.5v-9A1.5 1.5 0 0 1 7.5 6h9A1.5 1.5 0 0 1 18 7.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5m-.582 8.917 1.215-.374.072-.022.309-.095.251-.077a.33.33 0 0 0 .024-.623l-.245-.096-.3-.118-.07-.027-3.158-1.241-.022-.009-.213-.083-.33-.13a.33.33 0 0 0-.429.428l.13.33.084.213.009.022 1.24 3.158.028.07.118.3.096.245a.33.33 0 0 0 .622-.023l.078-.252.095-.308.022-.072zm2.141.388-1.341.412-.413 1.342c-.37 1.202-2.049 1.266-2.509.095l-1.704-4.339c-.425-1.08.643-2.149 1.724-1.724l4.338 1.704c1.172.46 1.108 2.14-.095 2.51"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+        Select source...
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`PatternSourcePreview snapshots > should render PatternSourcePreview without a thumbnail 1`] = `
 <DocumentFragment>
   <div
     class="_PatternSourcePreview_6289b4"

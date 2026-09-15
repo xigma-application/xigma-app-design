@@ -1,14 +1,11 @@
-import { FC } from 'react';
-import { useTranslation } from 'react-i18next';
-
-// @xigma
-import { Icon } from '@xigma/components';
+import cx from 'classnames';
+import { CSSProperties, FC } from 'react';
 
 // components
-import { UITools } from 'shared';
+import PatternSourceButton from './PatternSourceButton/PatternSourceButton';
 
-// others
-import { translationNameSpace } from '../constants';
+// hooks
+import { usePatternThumbnail } from './hooks/usePatternThumbnail';
 
 // styles
 import styles from './pattern-source-preview.module.scss';
@@ -16,24 +13,19 @@ import styles from './pattern-source-preview.module.scss';
 // types
 import { TUsePatternSourcePickingResult } from '../../../hooks/usePatternSourcePicking';
 
-export type TPatternSourcePreviewProps = { patternSourcePicking: TUsePatternSourcePickingResult };
+export type TPatternSourcePreviewProps = { patternSourcePicking: TUsePatternSourcePickingResult; sourceNodeId?: string | null };
 
-export const PatternSourcePreview: FC<TPatternSourcePreviewProps> = ({ patternSourcePicking }) => {
-  const { t } = useTranslation();
-  const { close, isActive, open } = patternSourcePicking;
+export const PatternSourcePreview: FC<TPatternSourcePreviewProps> = ({ patternSourcePicking, sourceNodeId }) => {
+  const { isActive } = patternSourcePicking;
+  const thumbnailUrl = usePatternThumbnail(sourceNodeId);
+  const sourceButton = <PatternSourceButton patternSourcePicking={patternSourcePicking} />;
 
   return (
-    <div className={styles.PatternSourcePreview}>
-      <UITools.Button
-        active={isActive}
-        color={isActive ? 'primary' : 'secondary'}
-        onClick={isActive ? close : open}
-        size="small"
-        variant={isActive ? 'solid' : 'outline'}
-      >
-        <Icon name="Source" size={24} />
-        {t(`${translationNameSpace}.selectSourceLabel`)}
-      </UITools.Button>
+    <div
+      className={cx(styles.PatternSourcePreview, { [styles['PatternSourcePreview--active']]: isActive })}
+      style={thumbnailUrl ? ({ backgroundImage: `url("${thumbnailUrl}")` } as CSSProperties) : undefined}
+    >
+      {thumbnailUrl ? <div className={styles.PatternSourcePreview__overlay}>{sourceButton}</div> : sourceButton}
     </div>
   );
 };

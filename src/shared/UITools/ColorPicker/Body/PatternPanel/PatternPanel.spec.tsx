@@ -11,6 +11,12 @@ import { DEFAULT_PATTERN_PANEL_STATE } from './constants';
 import { TUsePatternPanelResult } from './hooks/usePatternPanel';
 import { TUsePatternSourcePickingResult } from '../../hooks/usePatternSourcePicking';
 
+const usePatternThumbnailMock = vi.fn();
+
+vi.mock('./PatternSourcePreview/hooks/usePatternThumbnail', () => ({
+  usePatternThumbnail: (...args: unknown[]): unknown => usePatternThumbnailMock(...args),
+}));
+
 const buildPatternPanel = (overrides: Partial<TUsePatternPanelResult> = {}): TUsePatternPanelResult => ({
   ...DEFAULT_PATTERN_PANEL_STATE,
   reset: vi.fn(),
@@ -35,14 +41,27 @@ const buildPatternSourcePicking = (overrides: Partial<TUsePatternSourcePickingRe
 const renderPatternPanel = (
   patternPanel: TUsePatternPanelResult = buildPatternPanel(),
   patternSourcePicking: TUsePatternSourcePickingResult = buildPatternSourcePicking(),
+  sourceNodeId?: string | null,
 ): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <PatternPanel patternPanel={patternPanel} patternSourcePicking={patternSourcePicking} />
+      <PatternPanel patternPanel={patternPanel} patternSourcePicking={patternSourcePicking} sourceNodeId={sourceNodeId} />
     </TooltipProvider>,
   );
 
 describe('PatternPanel behaviors', () => {
+  beforeEach(() => {
+    usePatternThumbnailMock.mockReturnValue(null);
+  });
+
+  it('should forward sourceNodeId to the source preview', () => {
+    // before
+    renderPatternPanel(undefined, undefined, 'node-a');
+
+    // result
+    expect(usePatternThumbnailMock).toHaveBeenCalledWith('node-a');
+  });
+
   it('should show the "Select source..." button, the tile type toggle, and the scale/spacing/alignment controls', () => {
     // before
     renderPatternPanel();

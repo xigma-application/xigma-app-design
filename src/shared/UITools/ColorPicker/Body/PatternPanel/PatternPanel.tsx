@@ -16,11 +16,12 @@ export type TPatternPanelProps = {
   onDragStart?: TFunc;
   patternPanel: TUsePatternPanelResult;
   patternSourcePicking: TUsePatternSourcePickingResult;
+  sourceNodeId?: string | null;
 };
 
-export const PatternPanel: FC<TPatternPanelProps> = ({ onDragEnd, onDragStart, patternPanel, patternSourcePicking }) => (
+export const PatternPanel: FC<TPatternPanelProps> = ({ onDragEnd, onDragStart, patternPanel, patternSourcePicking, sourceNodeId }) => (
   <div className={styles.PatternPanel}>
-    <PatternSourcePreview patternSourcePicking={patternSourcePicking} />
+    <PatternSourcePreview patternSourcePicking={patternSourcePicking} sourceNodeId={sourceNodeId} />
     <PatternSettings onDragEnd={onDragEnd} onDragStart={onDragStart} patternPanel={patternPanel} />
   </div>
 );

@@ -126,6 +126,7 @@ export const FillRow: FC<TFillRowProps> = ({
             onPickerChange={handleSolidChange}
             onToggleVisibility={onToggleVisible}
             paintTypeRow
+            patternSourceNodeId={isPattern ? paint.sourceNodeId : undefined}
             side="right"
             simple
             toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}

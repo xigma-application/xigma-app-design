@@ -39,6 +39,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TCanvasRefsProviderProps } from './types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TDraftEntity } from 'types/design/types';
+import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const blendModeRefs = useBlendModeRefs();
@@ -73,6 +74,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorSampleRequestRef = useRef<TColorSampleRequest | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
+  const patternThumbnailRequestRef = useRef<TPatternThumbnailRequest | null>(null);
 
   const refs = useMemo<TCanvasRefs>(
     () => ({
@@ -92,6 +94,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       lassoMarquee: lassoMarqueeRefs,
       layout: layoutRefs,
       media: mediaRefs,
+      patternThumbnailRequestRef,
       pen: penRefs,
       pencil: pencilRefs,
       sectionName: sectionNameRefs,

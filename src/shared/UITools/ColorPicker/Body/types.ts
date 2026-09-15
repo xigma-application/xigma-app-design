@@ -9,5 +9,6 @@ export type TBodyProps = TSolidPanelProps & {
   activeTab: ColorPickerTab;
   gradientPanel: TUseGradientPanelResult;
   patternPanel: TUsePatternPanelResult;
+  patternSourceNodeId?: string | null;
   patternSourcePicking: TUsePatternSourcePickingResult;
 };

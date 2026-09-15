@@ -7,6 +7,12 @@ import { TooltipProvider } from 'shared';
 // types
 import { ColorPickerTab } from '../enums';
 
+const usePatternThumbnailMock = vi.fn();
+
+vi.mock('./PatternPanel/PatternSourcePreview/hooks/usePatternThumbnail', () => ({
+  usePatternThumbnail: (...args: unknown[]): unknown => usePatternThumbnailMock(...args),
+}));
+
 const colorModel = {
   hex: '#ff0000',
   hsv: { h: 0, s: 100, v: 100 },
@@ -59,7 +65,7 @@ const patternPanel = {
 
 const patternSourcePicking = { close: vi.fn(), isActive: false, open: vi.fn() };
 
-const renderBody = (activeTab: ColorPickerTab): ReturnType<typeof render> =>
+const renderBody = (activeTab: ColorPickerTab, patternSourceNodeId?: string | null): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
       <Body
@@ -68,6 +74,7 @@ const renderBody = (activeTab: ColorPickerTab): ReturnType<typeof render> =>
         colorModel={colorModel}
         gradientPanel={gradientPanel}
         patternPanel={patternPanel}
+        patternSourceNodeId={patternSourceNodeId}
         patternSourcePicking={patternSourcePicking}
       />
     </TooltipProvider>,
@@ -84,6 +91,18 @@ describe('Body snapshots', () => {
 });
 
 describe('Body behaviors', () => {
+  beforeEach(() => {
+    usePatternThumbnailMock.mockReturnValue(null);
+  });
+
+  it('should forward patternSourceNodeId to the pattern panel', () => {
+    // before
+    renderBody(ColorPickerTab.pattern, 'node-a');
+
+    // result
+    expect(usePatternThumbnailMock).toHaveBeenCalledWith('node-a');
+  });
+
   it('should render the solid panel for the solid tab', () => {
     // before
     renderBody(ColorPickerTab.solid);

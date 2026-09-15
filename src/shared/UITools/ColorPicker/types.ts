@@ -36,6 +36,7 @@ export type TColorPickerProps = {
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
   paintTypeRow?: boolean;
+  patternSourceNodeId?: string | null;
   presets?: TColorPickerValue[];
   side?: TPopoverProps['side'];
   sideOffset?: number;
