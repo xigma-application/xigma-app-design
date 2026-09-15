@@ -23,7 +23,7 @@ const VectorEditMoreDropdownPlaceholder: FC = () => {
           <span className={styles.VectorEditToolbar__label} style={{ padding: '0' }}>
             {t(`${translationNameSpace}.more`)}
           </span>
-          <Icon name="ChevronDown" size={16} />
+          <Icon name="ChevronDown" size={24} />
         </div>
       }
       triggerAriaLabel={t(`${translationNameSpace}.more`)}

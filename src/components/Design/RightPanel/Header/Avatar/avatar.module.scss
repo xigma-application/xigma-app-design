@@ -10,6 +10,14 @@
     display: flex;
   }
 
+  &__icon {
+    align-items: center;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    width: 16px;
+  }
+
   &[data-state='open'] {
     background-color: var(--color-blue-1);
 

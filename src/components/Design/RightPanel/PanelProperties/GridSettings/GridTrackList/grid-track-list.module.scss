@@ -1,9 +1,7 @@
 .GridTrackList {
   display: flex;
   flex-direction: column;
-  margin-left: -16px;
   position: relative;
-  width: calc(100% + 24px);
 }
 
 .GridTrackDropIndicator {

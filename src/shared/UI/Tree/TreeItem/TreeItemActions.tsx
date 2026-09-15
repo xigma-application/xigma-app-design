@@ -2,14 +2,16 @@ import { FC, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import {
   NODE_ROW_HIDE_ARIA_LABEL_KEY,
   NODE_ROW_LOCK_ARIA_LABEL_KEY,
+  NODE_ROW_LOCK_TOOLTIP_KEY,
   NODE_ROW_SHOW_ARIA_LABEL_KEY,
   NODE_ROW_UNLOCK_ARIA_LABEL_KEY,
+  NODE_ROW_VISIBILITY_TOOLTIP_KEY,
 } from 'components/Design/LeftPanel/File/Layers/constants';
 
 // styles
@@ -30,26 +32,24 @@ const TreeItemActions: FC<TTreeItemActionsProps> = ({ isHidden, isLocked, onStop
 
   return (
     <div className={styles.TreeItemActions} onClick={onStopPropagation}>
-      <button
-        aria-label={hiddenLabel}
-        className={styles.TreeItemActions__action}
-        data-tree-item-action="hidden"
-        data-tree-item-action-active={isHidden || undefined}
-        onClick={onToggleHidden}
-        type="button"
-      >
-        <Icon color="neutral1" name={isHidden ? 'EyesClosed' : 'EyesOpened'} size={16} />
-      </button>
-      <button
-        aria-label={lockedLabel}
-        className={styles.TreeItemActions__action}
-        data-tree-item-action="locked"
-        data-tree-item-action-active={isLocked || undefined}
-        onClick={onToggleLocked}
-        type="button"
-      >
-        <Icon color="neutral1" name={isLocked ? 'Lock' : 'Unlock'} size={16} />
-      </button>
+      <Tooltip content={t(NODE_ROW_VISIBILITY_TOOLTIP_KEY)}>
+        <UITools.ButtonIcon
+          ariaLabel={hiddenLabel}
+          data-tree-item-action="hidden"
+          data-tree-item-action-active={isHidden || undefined}
+          name={isHidden ? 'EyesClosed' : 'EyesOpened'}
+          onClick={onToggleHidden}
+        />
+      </Tooltip>
+      <Tooltip content={t(NODE_ROW_LOCK_TOOLTIP_KEY)}>
+        <UITools.ButtonIcon
+          ariaLabel={lockedLabel}
+          data-tree-item-action="locked"
+          data-tree-item-action-active={isLocked || undefined}
+          name={isLocked ? 'Lock' : 'Unlock'}
+          onClick={onToggleLocked}
+        />
+      </Tooltip>
     </div>
   );
 };

@@ -49,7 +49,7 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
 
   return (
     <UITools.Popover
-      trigger={<Icon name="ChevronDown" size={16} />}
+      trigger={<Icon name="ChevronDown" size={24} />}
       triggerAriaLabel={`${tool} options`}
       triggerClassName={styles.ToolDropdown}
     >

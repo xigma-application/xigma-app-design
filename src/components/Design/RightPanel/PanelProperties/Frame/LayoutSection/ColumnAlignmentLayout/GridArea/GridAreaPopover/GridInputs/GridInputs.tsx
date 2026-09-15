@@ -51,7 +51,7 @@ export const GridInputs: FC<TGridInputsProps> = ({
           <GridInputCells
             endAdornment={
               <UITools.ButtonMenu
-                trigger={<Icon name="ChevronDown" size={10} />}
+                trigger={<Icon name="ChevronDown" size={24} />}
                 triggerAriaLabel={t(`${translationNameSpace}.grid.rowsModeMenuAriaLabel`)}
               >
                 <GridRowsModeMenu isAuto={isRowsAuto} onSetAuto={onSetRowsAuto} onSetFixed={onSetRowsFixed} value={rows} />

@@ -20,4 +20,19 @@ describe('PagesHeaderTitle', () => {
     expect(screen.getByText('Pages')).toBeInTheDocument();
     expect(screen.queryByText('Page 1')).not.toBeInTheDocument();
   });
+
+  it('should rotate the toggle icon via a class instead of swapping icons when expanded', () => {
+    // before
+    const { container: collapsedContainer } = render(<PagesHeaderTitle activePageName="Page 1" isExpanded={false} />);
+    const collapsedIcon = collapsedContainer.querySelector('[data-page-toggle] svg');
+
+    // action
+    const { container: expandedContainer } = render(<PagesHeaderTitle activePageName="Page 1" isExpanded />);
+    const expandedIcon = expandedContainer.querySelector('[data-page-toggle] svg');
+
+    // result
+    expect(collapsedIcon?.querySelector('path')?.getAttribute('d')).toBe(expandedIcon?.querySelector('path')?.getAttribute('d'));
+    expect(expandedIcon?.getAttribute('class')).toMatch(/--expanded/);
+    expect(collapsedIcon?.getAttribute('class')).not.toMatch(/--expanded/);
+  });
 });

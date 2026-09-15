@@ -11,6 +11,7 @@ import { usePatternFieldCommit } from './hooks/usePatternFieldCommit';
 
 // styles
 import styles from './pattern-field.module.scss';
+import InputAdornment from 'shared/UITools/InputAdornment/InputAdornment';
 
 const FIELD_MAX = 1000;
 const FIELD_MIN = 0;
@@ -54,7 +55,7 @@ export const PatternField: FC<TPatternFieldProps> = ({
       onKeyDown={onKeyDown}
       startAdornment={
         <ScrubbableInput max={max} min={min} onChange={onChange} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value}>
-          {icon ? <Icon color="neutral2" name={icon} size={12} /> : <span className={styles.PatternField__label}>{label}</span>}
+          {icon ? <InputAdornment icon={icon} /> : <InputAdornment label={label} />}
         </ScrubbableInput>
       }
       type="text"

@@ -1,19 +1,16 @@
 import { FC, FocusEvent } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
+import { ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
 import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFieldWrapper';
 
 // types
-import type { TIconProps } from 'shared';
+import { UITools, type TIconProps } from 'shared';
 
 // others
 import { CORNER_RADIUS_MAX, CORNER_RADIUS_MIN } from './constants';
-
-// styles
-import styles from './corner-radius-input.module.scss';
 
 export type TCornerRadiusInputProps = {
   ariaLabel: string;
@@ -42,13 +39,12 @@ const CornerRadiusInput: FC<TCornerRadiusInputProps> = ({
     <Tooltip content={tooltip}>
       <TextFieldWrapper
         aria-label={ariaLabel}
-        className={styles.CornerRadiusInput__input}
         defaultValue={value}
         e2eValue={e2eValue}
         onBlur={handleBlur}
         startAdornment={
           <ScrubbableInput max={CORNER_RADIUS_MAX} min={CORNER_RADIUS_MIN} onChange={onScrub} value={scrubValue}>
-            <Icon color="neutral2" name={iconName} size={24} />
+            <UITools.InputAdornment icon={iconName} />
           </ScrubbableInput>
         }
         type="text"

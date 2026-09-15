@@ -42,6 +42,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
+    &:first-child {
+      padding-left: 8px;
+    }
+
     &:focus ~ .TextFieldWrapper__endAdornment {
       display: none;
 

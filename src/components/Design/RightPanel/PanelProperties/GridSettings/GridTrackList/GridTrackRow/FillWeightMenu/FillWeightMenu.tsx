@@ -22,7 +22,7 @@ export const FillWeightMenu: FC<TFillWeightMenuProps> = ({ onSelect, value }) =>
   return (
     <UITools.ButtonMenu
       align="end"
-      trigger={<Icon name="ChevronDown" size={10} />}
+      trigger={<Icon name="ChevronDown" size={24} />}
       triggerAriaLabel={t(`${translationNameSpace}.fillWeightAriaLabel`)}
     >
       {FILL_WEIGHT_PRESETS.map((preset) => (

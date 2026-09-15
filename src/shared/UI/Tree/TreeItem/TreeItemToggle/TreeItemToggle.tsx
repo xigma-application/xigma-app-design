@@ -35,7 +35,7 @@ const TreeItemToggle: FC<TTreeItemToggleProps> = ({ isExpandable, isExpanded, on
           onClick={handleToggleExpandClick}
           type="button"
         >
-          <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={12} />
+          <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={24} />
         </button>
       )}
     </div>

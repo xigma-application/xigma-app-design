@@ -37,7 +37,7 @@ const FileNameMenu: FC<TFileNameMenuProps> = ({ onOpenChange, onRename, open }) 
     <Menu
       onOpenChange={onOpenChange}
       open={open}
-      trigger={<Icon name="ChevronDown" size={12} />}
+      trigger={<Icon name="ChevronDown" size={24} />}
       triggerAriaLabel={t(FILE_MENU_ARIA_LABEL_KEY)}
     >
       <MenuItem disabled label={t(FILE_MENU_SHOW_VERSION_HISTORY_KEY)} withCheck={false} />

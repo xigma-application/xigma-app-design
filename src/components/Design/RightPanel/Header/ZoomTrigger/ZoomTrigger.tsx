@@ -27,7 +27,10 @@ const ZoomTrigger: FC = () => {
       trigger={
         <Tooltip content={t(`${translationNameSpace}.tooltip`)}>
           <span className={styles.ZoomTrigger__label}>
-            {zoomPercentage}%<Icon name="ChevronDown" size={16} />
+            {zoomPercentage}%
+            <div className={styles.ZoomTrigger__icon}>
+              <Icon name="ChevronDown" size={24} />
+            </div>
           </span>
         </Tooltip>
       }

@@ -2,7 +2,7 @@ import { FC, FocusEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
-import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
+import { ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
 import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFieldWrapper';
@@ -10,6 +10,7 @@ import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFiel
 // others
 import { OPACITY_MAX, OPACITY_MIN } from './constants';
 import { translationNameSpace } from '../constants';
+import { UITools } from 'shared';
 
 export type TOpacityFieldProps = {
   onBlur: (event: FocusEvent<HTMLInputElement>) => void;
@@ -29,7 +30,7 @@ const OpacityField: FC<TOpacityFieldProps> = ({ onBlur, onScrub, value }) => {
         onBlur={onBlur}
         startAdornment={
           <ScrubbableInput max={OPACITY_MAX} min={OPACITY_MIN} onChange={onScrub} value={value}>
-            <Icon color="neutral2" name="Opacity" size={12} />
+            <UITools.InputAdornment icon="Opacity" />
           </ScrubbableInput>
         }
         type="text"

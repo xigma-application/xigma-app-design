@@ -60,6 +60,7 @@ export const StopRow: FC<TStopRowProps> = ({
       <PositionField onCommit={(percent): void => onPositionChange(percent / 100)} positionPercent={Math.round(stop.position * 100)} />
       <UITools.ColorPickerInput
         alpha={stop.opacity}
+        className={styles['StopRow__picker-input']}
         hex={stop.color}
         onCommitAlpha={(opacity): void => onColorChange({ alpha: opacity, hex: stop.color })}
         onCommitHex={(hex): void => onColorChange({ alpha: stop.opacity, hex })}

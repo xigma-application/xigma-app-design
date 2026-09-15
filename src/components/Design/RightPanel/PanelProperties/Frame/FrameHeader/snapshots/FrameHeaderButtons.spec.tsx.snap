@@ -8,9 +8,8 @@ exports[`FrameHeaderButtons snapshots > should render the html tag and component
     <button
       aria-label="Toggle ready for dev status"
       aria-pressed="false"
-      class="_Button_b88d2e"
+      class="_ButtonIcon_2062db"
       data-state="closed"
-      style="padding: 0px;"
       type="button"
     >
       <svg
@@ -32,9 +31,8 @@ exports[`FrameHeaderButtons snapshots > should render the html tag and component
     <button
       aria-label="Create component"
       aria-pressed="false"
-      class="_Button_b88d2e"
+      class="_ButtonIcon_2062db"
       data-state="closed"
-      style="padding: 0px;"
       type="button"
     >
       <svg

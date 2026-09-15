@@ -12,16 +12,18 @@ describe('LayersHeaderTitle', () => {
     expect(screen.getByText('Layers')).toBeInTheDocument();
   });
 
-  it('should render a different toggle icon when expanded', () => {
+  it('should rotate the toggle icon via a class instead of swapping icons when expanded', () => {
     // before
     const { container: collapsedContainer } = render(<LayersHeaderTitle isExpanded={false} />);
-    const collapsedIcon = collapsedContainer.querySelector('[data-layers-toggle] svg')?.outerHTML;
+    const collapsedIcon = collapsedContainer.querySelector('[data-layers-toggle] svg');
 
     // action
     const { container: expandedContainer } = render(<LayersHeaderTitle isExpanded />);
-    const expandedIcon = expandedContainer.querySelector('[data-layers-toggle] svg')?.outerHTML;
+    const expandedIcon = expandedContainer.querySelector('[data-layers-toggle] svg');
 
     // result
-    expect(expandedIcon).not.toBe(collapsedIcon);
+    expect(collapsedIcon?.querySelector('path')?.getAttribute('d')).toBe(expandedIcon?.querySelector('path')?.getAttribute('d'));
+    expect(expandedIcon?.getAttribute('class')).toMatch(/--expanded/);
+    expect(collapsedIcon?.getAttribute('class')).not.toMatch(/--expanded/);
   });
 });

@@ -12,6 +12,14 @@
     width: 16px;
   }
 
+  &__chevron {
+    transition: transform 100ms linear;
+
+    &--expanded {
+      transform: rotate(90deg);
+    }
+  }
+
   &__name {
     flex: 1;
     font-size: 11px;

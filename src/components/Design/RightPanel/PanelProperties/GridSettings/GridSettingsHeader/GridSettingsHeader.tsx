@@ -1,9 +1,6 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// @xigma
-import { Icon } from '@xigma/components';
-
 // components
 import { UITools } from 'shared';
 
@@ -19,11 +16,7 @@ export const GridSettingsHeader: FC<TGridSettingsHeaderProps> = ({ onClose }) =>
 
   return (
     <UITools.ComponentHeader
-      buttons={
-        <UITools.Button ariaLabel={t(`${translationNameSpace}.closeAriaLabel`)} onClick={onClose} style={{ padding: 0 }}>
-          <Icon name="Close" size={16} />
-        </UITools.Button>
-      }
+      buttons={<UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.closeAriaLabel`)} name="Close" onClick={onClose} />}
       e2eValue="grid-settings-header"
     >
       {t(`${translationNameSpace}.title`)}

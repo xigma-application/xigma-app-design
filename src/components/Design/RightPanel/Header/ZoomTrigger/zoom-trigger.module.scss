@@ -13,4 +13,12 @@
       color: var(--color-blue-2);
     }
   }
+
+  &__icon {
+    align-items: center;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    width: 16px;
+  }
 }

@@ -90,19 +90,18 @@ exports[`ColumnDimensions snapshots > should render the width and height fields 
           <button
             aria-label="Lock aspect ratio"
             aria-pressed="false"
-            class="_Button_b88d2e"
+            class="_ButtonIcon_2062db"
             data-state="closed"
-            style="padding: 6px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"

@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import cx from 'classnames';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -20,7 +21,12 @@ const LayersHeaderTitle: FC<TLayersHeaderTitleProps> = ({ isExpanded }) => {
   return (
     <div className={styles.LayersHeaderTitle}>
       <div className={styles.LayersHeaderTitle__toggle} data-layers-toggle>
-        <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={16} />
+        <Icon
+          className={cx(styles.LayersHeaderTitle__chevron, isExpanded && styles['LayersHeaderTitle__chevron--expanded'])}
+          color="neutral2"
+          name="ChevronRight"
+          size={16}
+        />
       </div>
       <span className={styles.LayersHeaderTitle__name}>{t(LAYERS_TITLE_KEY)}</span>
     </div>

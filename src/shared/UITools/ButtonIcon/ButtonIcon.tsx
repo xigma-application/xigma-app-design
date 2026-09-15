@@ -14,10 +14,11 @@ export type TButtonIconProps = {
   name: TIconProps['name'];
   onClick?: TFunc;
   selected?: boolean;
+  size?: TIconProps['size'];
 } & Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'className' | 'disabled' | 'name' | 'onClick' | 'type'>;
 
 export const ButtonIcon = forwardRef<HTMLButtonElement, TButtonIconProps>(
-  ({ ariaLabel, className = '', disabled = false, name, onClick, selected = false, ...rest }, ref) => (
+  ({ ariaLabel, className = '', disabled = false, name, onClick, selected = false, size = 24, ...rest }, ref) => (
     <button
       {...rest}
       aria-label={ariaLabel}
@@ -35,7 +36,7 @@ export const ButtonIcon = forwardRef<HTMLButtonElement, TButtonIconProps>(
       ref={ref}
       type="button"
     >
-      <Icon name={name} size={24} />
+      <Icon name={name} size={size} />
     </button>
   ),
 );

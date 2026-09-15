@@ -115,10 +115,10 @@ exports[`ColumnDimensionsField snapshots > should render the sizing-mode chevron
             class="Icon"
             data-fpl-icon-size="24"
             fill="none"
-            height="10"
+            height="24"
             style="color: var(--color-neutral-1);"
             viewBox="0 0 24 24"
-            width="10"
+            width="24"
           >
             <path
               clip-rule="evenodd"

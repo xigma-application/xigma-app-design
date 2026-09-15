@@ -249,10 +249,10 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
               class="Icon"
               data-fpl-icon-size="24"
               fill="none"
-              height="16"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="16"
+              width="24"
             >
               <path
                 d="M11.117 5.586A2 2 0 0 1 13 5.649l4 2.31.113.07A2 2 0 0 1 18 9.69v4.62a2 2 0 0 1-.887 1.66l-.113.072-4 2.309a2 2 0 0 1-1.883.063L11 18.351l-4-2.309a2 2 0 0 1-1-1.732V9.69a2 2 0 0 1 1-1.73l4-2.31zm1.383.93a1 1 0 0 0-1 0l-4 2.308-.11.074A1 1 0 0 0 7 9.69v4.62l.009.132c.04.305.22.578.491.734l4 2.31c.27.155.597.175.88.058l.12-.059 4-2.31a1 1 0 0 0 .491-.733L17 14.31V9.69a1 1 0 0 0-.39-.792l-.11-.074zM12 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
@@ -317,10 +317,10 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
                       class="Icon"
                       data-fpl-icon-size="24"
                       fill="none"
-                      height="12"
+                      height="24"
                       style="color: var(--color-neutral-1);"
                       viewBox="0 0 24 24"
-                      width="12"
+                      width="24"
                     >
                       <path
                         clip-rule="evenodd"
@@ -390,17 +390,16 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
                 data-page-toggle="true"
               >
                 <svg
-                  aria-hidden="true"
-                  class="Icon"
-                  data-fpl-icon-size="16"
+                  class="Icon _PagesHeaderTitle__chevron_1e8ba9"
+                  data-fpl-icon-size="24"
                   fill="none"
                   height="16"
                   style="color: var(--color-neutral-2);"
-                  viewBox="0 0 16 16"
+                  viewBox="0 0 24 24"
                   width="16"
                 >
                   <path
-                    d="M6.768 5.525a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-2.121 2.122a.5.5 0 0 1-.707-.708L8.535 8 6.768 6.232a.5.5 0 0 1 0-.707"
+                    d="M10.152 8.288a.75.75 0 0 1 1.061 0l3.182 3.182a.75.75 0 0 1 0 1.061l-3.182 3.183a.75.75 0 0 1-1.061-1.062L12.803 12l-2.651-2.652a.75.75 0 0 1 0-1.06"
                     data-svg-property="fill"
                     fill="white"
                   />
@@ -481,7 +480,7 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
                 data-layers-toggle="true"
               >
                 <svg
-                  class="Icon"
+                  class="Icon _LayersHeaderTitle__chevron_0e7692 _LayersHeaderTitle__chevron--expanded_0e7692"
                   data-fpl-icon-size="24"
                   fill="none"
                   height="16"
@@ -490,11 +489,9 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
                   width="16"
                 >
                   <path
-                    clip-rule="evenodd"
-                    d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
+                    d="M10.152 8.288a.75.75 0 0 1 1.061 0l3.182 3.182a.75.75 0 0 1 0 1.061l-3.182 3.183a.75.75 0 0 1-1.061-1.062L12.803 12l-2.651-2.652a.75.75 0 0 1 0-1.06"
                     data-svg-property="fill"
                     fill="white"
-                    fill-rule="evenodd"
                   />
                 </svg>
               </div>

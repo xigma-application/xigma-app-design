@@ -3,7 +3,7 @@ import { kebabCase } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
-import { Icon, ScrubbableInput, Tooltip, type TIconProps } from '@xigma/components';
+import { ScrubbableInput, Tooltip, type TIconProps } from '@xigma/components';
 
 // components
 import { UITools } from 'shared';
@@ -46,7 +46,7 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
             onChange={(next) => handleCommit(next.toString())}
             value={parseInt(value, 10) || GRID_COUNT_MIN}
           >
-            <Icon name={iconName} size={12} />
+            <UITools.InputAdornment icon={iconName} />
           </ScrubbableInput>
         }
         type="text"

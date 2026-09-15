@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import cx from 'classnames';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -22,7 +23,12 @@ const PagesHeaderTitle: FC<TPagesHeaderTitleProps> = ({ activePageName, isExpand
   return (
     <div className={styles.PagesHeaderTitle}>
       <div className={styles.PagesHeaderTitle__toggle} data-page-toggle>
-        <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={16} />
+        <Icon
+          className={cx(styles.PagesHeaderTitle__chevron, isExpanded && styles['PagesHeaderTitle__chevron--expanded'])}
+          color="neutral2"
+          name="ChevronRight"
+          size={16}
+        />
       </div>
       <span className={styles.PagesHeaderTitle__name}>{label}</span>
     </div>
