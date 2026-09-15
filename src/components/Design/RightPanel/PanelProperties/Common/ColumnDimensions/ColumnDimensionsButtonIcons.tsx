@@ -2,22 +2,19 @@ import { ReactNode } from 'react';
 import { TFunction } from 'i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
 
 export const ColumnDimensionsButtonIcons = (locked: boolean, onToggleLock: TFunc, t: TFunction): ReactNode[] => [
   <Tooltip content={t(`${translationNameSpace}.${locked ? 'unlockTooltip' : 'lockTooltip'}`)} key="lock-aspect-ratio">
-    <Button
+    <UITools.ButtonIcon
       ariaLabel={t(`${translationNameSpace}.${locked ? 'unlockAriaLabel' : 'lockAriaLabel'}`)}
+      name="AspectRatio"
       onClick={onToggleLock}
       selected={locked}
-      style={{ padding: 0 }}
-    >
-      <Icon name="AspectRatio" size={24} />
-    </Button>
+    />
   </Tooltip>,
 ];
 

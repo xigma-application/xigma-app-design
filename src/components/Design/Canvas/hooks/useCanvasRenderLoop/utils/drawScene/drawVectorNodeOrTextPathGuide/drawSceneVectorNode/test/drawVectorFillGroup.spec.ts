@@ -168,4 +168,35 @@ describe('drawVectorFillGroup', () => {
     expect(pool.release).toHaveBeenCalledWith(contentTarget);
     expect(pool.release).toHaveBeenCalledWith(backdrop);
   });
+
+  it("should enable alpha writes on the content target before clearing it, not after, so a recycled target's stale alpha is actually reset", () => {
+    // mock — clearing while alpha writes are still masked off (left over from a prior draw) would
+    // leave old opaque pixels behind, showing as a dark "shadow" once new content draws on top
+    const gl = createGlMock();
+    const backdrop = { tag: 'backdrop', texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
+    const contentTarget = {
+      framebuffer: { tag: 'fbo' },
+      height: 200,
+      tag: 'content',
+      texture: { tag: 'content-texture' },
+      width: 200,
+    } as unknown as TRenderTarget;
+    const pool = {
+      acquire: vi.fn().mockReturnValueOnce(backdrop).mockReturnValueOnce(contentTarget),
+      release: vi.fn(),
+    } as unknown as TRenderTargetPool;
+    const context = createContext(gl, pool);
+    const paint = [{ ...makeSolidPaint('#ff0000'), blendMode: BlendMode.multiply }];
+    const polygons = [[{ x: 0, y: 0 }]];
+
+    // action
+    drawVectorFillGroup(context, null, null, polygons, paint);
+
+    // result — the first setAlphaWriteEnabled(true) call (enabling the content target) happens
+    // before clear() touches that same target
+    const enableAlphaCall = (setAlphaWriteEnabled as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0];
+    const clearCall = (gl.clear as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0];
+
+    expect(enableAlphaCall).toBeLessThan(clearCall);
+  });
 });

@@ -2,8 +2,7 @@ import { Fragment, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // hooks
 import { useLayoutSectionButtons } from './hooks/useLayoutSectionButtons';
@@ -29,9 +28,7 @@ const LayoutSectionButtons = (): ReactNode[] => {
             }
             key="resize-to-fit"
           >
-            <Button ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)} onClick={onResizeToFit} style={{ padding: 6 }}>
-              <Icon name="FitLayout" size={12} />
-            </Button>
+            <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)} name="FitLayout" onClick={onResizeToFit} />
           </Tooltip>,
         ]
       : []),
@@ -45,14 +42,12 @@ const LayoutSectionButtons = (): ReactNode[] => {
       }
       key="auto-layout"
     >
-      <Button
+      <UITools.ButtonIcon
         ariaLabel={t(`${translationNameSpace}.autoLayoutAriaLabel`)}
+        name="AutoLayout"
         onClick={onToggleAutoLayout}
         selected={isAutoLayoutSelected}
-        style={{ padding: 6 }}
-      >
-        <Icon name="AutoLayout" size={12} />
-      </Button>
+      />
     </Tooltip>,
   ];
 };

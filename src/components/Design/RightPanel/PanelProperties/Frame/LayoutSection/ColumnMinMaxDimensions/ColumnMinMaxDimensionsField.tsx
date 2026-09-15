@@ -57,7 +57,7 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
       onMouseLeave={hintHover.onMouseLeave}
       startAdornment={
         <ScrubbableInput max={DIMENSIONS_MAX} min={0} onChange={onScrub} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value ?? 0}>
-          <Icon color="neutral2" name={icon} size={12} />
+          <UITools.InputAdornment icon={icon} />
         </ScrubbableInput>
       }
       type="number"

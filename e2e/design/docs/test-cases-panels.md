@@ -211,6 +211,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                      |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 444 | A numeric pattern offset (X/Y, in px) nudges the tile grid independently of the alignment point                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -578,3 +579,13 @@ i scale") that hadn't actually been built: a free-form numeric offset, distinct 
 (offset nudges on top of whichever alignment point is picked), and needed generalizing `PatternField`
 to support a `px` suffix and negative values, since every prior field on this panel was a `%`-only,
 0-1000-clamped percentage.
+
+#445 is a real, user-reported bug, first spotted as a black shadow trailing a shape used as a
+pattern source, then narrowed to a precise repro: type "Mama" into a text node, pattern a frame from
+it, then shrink the content to "M" — the "ama" glyphs' footprint stayed behind, solid black. Root
+cause: the render-target pool recycles physical textures, and both places that clear one before
+drawing fresh content into it (`renderNodeListToPatternSourceTile.ts` for patterns, and the
+unrelated blend-mode isolation path in `drawVectorFillGroup.ts`, fixed alongside since it's the
+identical bug) enabled alpha writes _after_ `gl.clear()` instead of before — leaving a recycled
+target's old alpha untouched by the clear, so old opaque pixels survived with their RGB zeroed to
+black. See `.claude/docs/canvas-rendering-pipeline.md` for the full mechanism.

@@ -41,9 +41,9 @@ const drawIsolatedFillGroup = (
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, contentTarget.framebuffer);
   gl.viewport(0, 0, contentTarget.width, contentTarget.height);
+  setAlphaWriteEnabled(gl, imageContext, true);
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-  setAlphaWriteEnabled(gl, imageContext, true);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
   drawVectorFillPaints(

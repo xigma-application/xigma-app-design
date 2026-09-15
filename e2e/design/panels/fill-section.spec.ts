@@ -2441,6 +2441,54 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
   });
 
+  test("shrinking a pattern source's text content does not leave a black shadow of the old glyphs", async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-text-shrink');
+    await expect(designPage.canvas).toBeVisible();
+
+    // text source, wide enough that "Mama" renders unclipped
+    await designPage.drawTextBox(1000, 200, 1300, 260);
+    await designPage.typeText('Mama');
+    await designPage.click(1550, 600);
+
+    // frame consumer, elsewhere
+    await designPage.drawFrame(700, 400, 900, 500);
+    const frameId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder[1];
+    });
+
+    await designPage.canvas.click({ position: { x: 800, y: 450 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1015, y: 208 } });
+
+    const node = await readNode(page, frameId);
+
+    expect(node.fills![0].sourceNodeId).toBeTruthy();
+
+    // result — with the full "Mama" content, this point (inside the "a" that "M" alone won't
+    // reach) shows glyph ink, not background — confirms the coordinate actually lands on the part
+    // of the word that's about to be removed
+    expect(await readPixelColor(page, 718, 410)).toEqual([255, 255, 255]);
+
+    // action — shrink the source text from "Mama" to just "M"
+    await designPage.click(1015, 208);
+    await page.keyboard.press('Enter');
+    await designPage.typeText('M');
+    await designPage.click(1550, 600);
+
+    // result — that same point, now past the end of "M", is neither the old glyph color nor a
+    // leftover black shadow (a stale-alpha bug: clearing a recycled render-target texture while
+    // alpha writes were still masked off zeroed the RGB channels but left the old opaque alpha
+    // behind, painting the removed glyphs' footprint solid black)
+    expect(await readPixelColor(page, 718, 410)).not.toEqual([0, 0, 0]);
+  });
+
   test('increasing pattern spacing opens a visible gap between tiles instead of leaving them flush', async ({ page }) => {
     const designPage = new DesignPage(page);
 

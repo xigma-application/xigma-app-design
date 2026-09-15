@@ -479,6 +479,25 @@ along) into an offscreen texture **once per frame**, reusing the render-target p
 masks/blend-mode isolation already do (`renderIsolatedFillGroup`'s save-framebuffer/viewport/blend-
 state → bind pool target → draw → restore dance, factored out into the shared
 `renderNodeListToPatternSourceTile.ts` so both the live and frozen resolvers use one code path).
+
+**A real, user-reported bug lived in the order of that bind-target/clear sequence.** Both
+`renderNodeListToPatternSourceTile.ts` and `drawIsolatedFillGroup` (in `drawVectorFillGroup.ts`, the
+blend-mode isolation path — same bug, unrelated to patterns, fixed alongside) used to call
+`gl.clear(COLOR_BUFFER_BIT | STENCIL_BUFFER_BIT)` *before* `setAlphaWriteEnabled(gl, imageContext,
+true)`. The render-target pool recycles physical textures across calls/frames — `gl.clear()` only
+resets the channels enabled by the *current* `colorMask`, and whatever drew into that target last
+(commonly the main canvas path, which runs with alpha writes disabled) left alpha-write masked off.
+So the clear zeroed RGB but left old alpha untouched: any pixel a *previous* occupant had drawn
+opaque (alpha 1) stayed opaque, now with RGB forced to black, while the new (often smaller) content
+drew correctly on top. Visually this showed up as a black "shadow" of a pattern source's *previous*
+appearance persisting after the source shrank — first reported as a vector shape's fill leaving a
+black triangular remainder, then reproduced precisely with a text node: type "Mama", pattern a frame
+from it, shrink the content to "M", and the "ama" glyphs' footprint stayed behind in black. Both
+functions now call `setAlphaWriteEnabled(gl, imageContext, true)` before `gl.clear(...)`, not after,
+so the clear actually resets alpha too. Regression-tested at two levels: a mocked-GL unit test in
+each function's own spec asserting the alpha-enable call's `mock.invocationCallOrder` precedes
+`clear()`'s (verified to fail on the old ordering), and a real-browser e2e case in
+`fill-section.spec.ts` reproducing the exact text-shrink scenario.
 `drawVectorPatternSourceTile.ts` then tiles that one texture across the consumer's clipped face with
 a dedicated fragment shader (`patternSourceTileFragmentShaderSource.ts`, paired with the existing
 gradient-fill vertex shader for its `v_localPosition`/`u_boundsOrigin`/`u_boundsSize` normalization —

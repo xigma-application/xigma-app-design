@@ -161,4 +161,28 @@ describe('resolvePatternSourceTile', () => {
     // result
     expect(pool.release).toHaveBeenCalledWith(target);
   });
+
+  it("should enable alpha writes before clearing, not after, so a recycled target's stale alpha is actually reset", () => {
+    // mock — a colorMask call with enabled=false left over from a prior draw would otherwise mask
+    // out the alpha channel during clear(), leaving old opaque pixels behind as a black "shadow"
+    // once the new (smaller) content is drawn on top with correct alpha
+    const gl = createGlMock();
+    const target = { framebuffer: {}, height: 200, texture: { tag: 'tile-texture' }, width: 200 } as unknown as TRenderTarget;
+    const pool = { acquire: vi.fn(() => target), release: vi.fn() } as unknown as TRenderTargetPool;
+    const context = {
+      gl,
+      imageContext: { isAlphaWriteEnabled: false, renderTargetPool: pool },
+    } as unknown as TDrawSceneContext;
+    const nodesById = { r1: rect('r1') };
+
+    // before
+    resolvePatternSourceTile(context, 'r1', nodesById, pathOutlineStyles, refs, null, 0);
+
+    // result
+    const colorMaskCall = (gl.colorMask as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0];
+    const clearCall = (gl.clear as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0];
+
+    expect(gl.colorMask).toHaveBeenCalledWith(true, true, true, true);
+    expect(colorMaskCall).toBeLessThan(clearCall);
+  });
 });

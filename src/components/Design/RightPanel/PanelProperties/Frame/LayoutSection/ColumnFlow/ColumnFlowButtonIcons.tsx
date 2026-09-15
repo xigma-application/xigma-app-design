@@ -2,8 +2,7 @@ import { ReactNode } from 'react';
 import { TFunction } from 'i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -20,22 +19,18 @@ export const ColumnFlowButtonIcons = (
     case 'horizontal':
       return [
         <Tooltip content={t(`${translationNameSpace}.wrapTooltip`)} key="wrap">
-          <Button ariaLabel={t(`${translationNameSpace}.wrapAriaLabel`)} onClick={onWrapChange} selected={wrap}>
-            <Icon name="Wrap" size={12} />
-          </Button>
+          <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.wrapAriaLabel`)} name="Wrap" onClick={onWrapChange} selected={wrap} />
         </Tooltip>,
       ];
     case 'grid':
       return [
         <Tooltip content={t(`${translationNameSpace}.gridAutoPlacementTooltip`)} key="grid-auto-placement">
-          <Button
+          <UITools.ButtonIcon
             ariaLabel={t(`${translationNameSpace}.gridAutoPlacementAriaLabel`)}
+            name="FollowPath"
             onClick={onGridAutoPlacementChange}
             selected={gridAutoPlacement}
-            style={{ padding: 0 }}
-          >
-            <Icon name="FollowPath" size={24} />
-          </Button>
+          />
         </Tooltip>,
       ];
     default:

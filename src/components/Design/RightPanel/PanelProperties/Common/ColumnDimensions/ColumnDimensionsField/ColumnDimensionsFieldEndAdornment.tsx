@@ -66,7 +66,7 @@ export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdor
   return (
     <UITools.ButtonMenu
       onOpenChange={onMenuOpenChange}
-      trigger={<Icon name="ChevronDown" size={10} />}
+      trigger={<Icon name="ChevronDown" size={24} />}
       triggerAriaLabel={t(`${translationNameSpace}.${axis === 'width' ? 'ariaLabelWidth' : 'ariaLabelHeight'}`)}
     >
       <ColumnDimensionsSizingMenu
