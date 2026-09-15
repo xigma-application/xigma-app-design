@@ -26,6 +26,11 @@ describe('getTouchedRectEdges', () => {
     expect(getTouchedRectEdges({ x: 0, y: 200 }, bounds, 0.5)).toEqual(new Set());
   });
 
+  it('should return an empty set when the point is out of horizontal range, even if it lines up with an edge’s y-coordinate', () => {
+    // y=0 matches the top edge's y-coordinate, but x=200 is well past the right edge
+    expect(getTouchedRectEdges({ x: 200, y: 0 }, bounds, 0.5)).toEqual(new Set());
+  });
+
   it('should honor the tolerance', () => {
     expect(getTouchedRectEdges({ x: 0.4, y: 50 }, bounds, 0.5)).toEqual(new Set(['left']));
     expect(getTouchedRectEdges({ x: 0.6, y: 50 }, bounds, 0.5)).toEqual(new Set());

@@ -181,7 +181,7 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
           />
         </div>
         <div
-          class="_ColorPickerInput_2cba41"
+          class="_ColorPickerInput_2cba41 _StopRow__picker-input_209440"
         >
           <div
             class="_FieldGroup_6b82ec _ColorPickerInput__fields_2cba41"
@@ -296,7 +296,7 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
           />
         </div>
         <div
-          class="_ColorPickerInput_2cba41"
+          class="_ColorPickerInput_2cba41 _StopRow__picker-input_209440"
         >
           <div
             class="_FieldGroup_6b82ec _ColorPickerInput__fields_2cba41"

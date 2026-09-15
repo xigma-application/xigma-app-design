@@ -321,6 +321,51 @@ describe('useHoverHighlight behaviors', () => {
     expect(hoverRef.current).toBeNull();
   });
 
+  it('should not resolve a pattern-source hover while a button is held (mid-drag elsewhere) while picking', () => {
+    // mock
+    const idA = addFrameNode(180, 180);
+
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 185, 185, { buttons: 1 }));
+    });
+
+    // result
+    expect(hoverRef.current).toBeNull();
+    expect(idA).toBeTruthy();
+  });
+
+  it('should not switch to the pressing cursor on pointer down while picking a pattern source', () => {
+    // mock
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+    const { classNameRef, gridTrackAffordanceRef } = renderHoverHighlight(canvasRef);
+
+    gridTrackAffordanceRef.current = {
+      columnIndex: 0,
+      frameId: 'frame-1',
+      hoveredHandlePart: 'grip',
+      hoveredPillAxis: 'column',
+      rowIndex: 0,
+    };
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+
+    // result
+    expect(classNameRef.current).not.toBe('pressing');
+  });
+
   it('should resume reacting to pointer events once picking a pattern source ends', () => {
     // mock
     const idA = addFrameNode(190, 190);
@@ -517,6 +562,16 @@ describe('useHoverHighlight behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
 
     // result
+    expect(classNameRef.current).not.toBe('pressing');
+  });
+
+  it('should not throw on pointer down when nothing on the grid track affordance is currently hovered', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const { classNameRef } = renderHoverHighlight(canvasRef);
+
+    // action & result
+    expect(() => canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0))).not.toThrow();
     expect(classNameRef.current).not.toBe('pressing');
   });
 

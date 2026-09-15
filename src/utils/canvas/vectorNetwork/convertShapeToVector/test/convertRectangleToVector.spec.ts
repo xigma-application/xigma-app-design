@@ -40,6 +40,17 @@ describe('convertRectangleToVector', () => {
     expect(result.fillByKey?.[result.filledFaceKeys[0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
+  it('should fall back to an empty stroke color when the rectangle has no solid fill', () => {
+    // mock
+    const node = buildRectangle({ fills: [] });
+
+    // action
+    const result = convertRectangleToVector(node);
+
+    // result
+    expect(result.strokeColor).toBe('');
+  });
+
   it('should round every corner into a curve when cornerRadius is set', () => {
     // mock
     const node = buildRectangle({ cornerRadius: 8 });

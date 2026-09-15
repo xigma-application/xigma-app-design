@@ -131,6 +131,31 @@ describe('armAddGradientStopOnPointerDown', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it('should only touch the fill at the editor’s own paintIndex, leaving earlier fills in the stack untouched', () => {
+    // mock — a solid fill stacked below the gradient one being edited (paintIndex: 1)
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 1, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const solidFill = { color: '#ff0000', opacity: 100, type: 'solid' as const };
+
+    // before
+    const result = armAddGradientStopOnPointerDown({
+      dispatch,
+      point: { x: 50, y: 50 },
+      selectedNodes: [rectangle({ fills: [solidFill, ...rectangle().fills] })],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result
+    expect(result).toBe(true);
+
+    const updateCall = dispatch.mock.calls.find(([action]) => action.type === 'design/updateNode');
+    const fills = updateCall![0].payload.changes.fills;
+
+    expect(fills[0]).toEqual(solidFill);
+    expect(fills[1].stops).toHaveLength(3);
+  });
+
   it('should return undefined once the gradient is already at MAX_STOPS', () => {
     // mock
     store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));

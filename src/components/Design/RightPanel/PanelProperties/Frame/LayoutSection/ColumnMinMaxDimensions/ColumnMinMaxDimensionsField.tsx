@@ -1,7 +1,7 @@
 import { FC, FocusEvent, useEffect, useRef } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput, TIconProps } from '@xigma/components';
+import { ScrubbableInput, TIconProps } from '@xigma/components';
 
 // components
 import { UITools } from 'shared';

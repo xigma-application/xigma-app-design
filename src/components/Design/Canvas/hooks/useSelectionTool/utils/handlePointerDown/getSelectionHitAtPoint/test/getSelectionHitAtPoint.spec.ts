@@ -315,6 +315,18 @@ describe('getSelectionHitAtPoint', () => {
       expect(hit?.id).toBe(childId);
     });
 
+    it('should return null, not the child, when the click lands on the part of an unselected child clipped away by its parent frame', () => {
+      const frameId = addFrameNode(20500, 20500, 400);
+      const overflowingChildId = addRectNode(20890, 20520, 40); // spans x 20890..20930, past the frame's right edge at 20900
+
+      store.dispatch(moveNodes({ nodeIds: [overflowingChildId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(setSelection([]));
+
+      const hit = getSelectionHitAtPoint({ x: 20915, y: 20535 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit).toBeNull();
+    });
+
     it('should still select the frame from a click on its name label', () => {
       const { frameId } = buildFrameWithChild();
 

@@ -61,6 +61,17 @@ describe('useGridTrackModeMenu', () => {
     expect(result.current.mode).toBeNull();
   });
 
+  it('should default the anchor to a zero-rect getBoundingClientRect before any request resolves', () => {
+    const { result } = renderMenu();
+
+    const rect = result.current.anchorRef.current.getBoundingClientRect();
+
+    expect(rect.x).toBe(0);
+    expect(rect.y).toBe(0);
+    expect(rect.width).toBe(0);
+    expect(rect.height).toBe(0);
+  });
+
   it('should open with the track’s current mode and the three sizing options when a request targets a valid track', () => {
     const frameId = addFrame([{ mode: SizingMode.fixed, value: 40 }]);
     const { result } = renderMenu();
@@ -70,6 +81,20 @@ describe('useGridTrackModeMenu', () => {
     expect(result.current.isOpen).toBe(true);
     expect(result.current.mode).toBe(SizingMode.fixed);
     expect(result.current.options.map((option) => option.value)).toEqual([SizingMode.fixed, SizingMode.hug, SizingMode.fill]);
+  });
+
+  it('should build an anchor whose getBoundingClientRect reflects the track’s screen position', () => {
+    const frameId = addFrame([{ mode: SizingMode.fixed, value: 40 }]);
+    const { result } = renderMenu();
+
+    act(() => store.dispatch(setGridTrackModeMenuRequest({ axis: 'column', frameId, index: 0 })));
+
+    const rect = result.current.anchorRef.current.getBoundingClientRect();
+
+    expect(rect.width).toBe(0);
+    expect(rect.height).toBe(0);
+    expect(Number.isFinite(rect.x)).toBe(true);
+    expect(Number.isFinite(rect.y)).toBe(true);
   });
 
   it('should close back to idle when the request is withdrawn', () => {
@@ -98,6 +123,16 @@ describe('useGridTrackModeMenu', () => {
     act(() => result.current.onOpenChange(false));
 
     expect(store.getState().design.gridTrackModeMenuRequest).toBeNull();
+  });
+
+  it('should not clear the request when onOpenChange(true) is called, as on the popover opening', () => {
+    const frameId = addFrame([{ mode: SizingMode.fixed, value: 40 }]);
+    const { result } = renderMenu();
+    act(() => store.dispatch(setGridTrackModeMenuRequest({ axis: 'column', frameId, index: 0 })));
+
+    act(() => result.current.onOpenChange(true));
+
+    expect(store.getState().design.gridTrackModeMenuRequest).not.toBeNull();
   });
 
   it('should commit the picked mode and close the menu on select', () => {

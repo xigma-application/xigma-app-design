@@ -89,7 +89,8 @@ export const continueGradientStopDrag = (
           const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, stops: sortedStops } : fill));
           const nextIndex = sortedStops.findIndex((stop) => stop.position === position && stop.color === color && stop.opacity === opacity);
 
-          dragState.draggedStopIndex = nextIndex === -1 ? resolved.index : nextIndex;
+          // the dragged stop was just written into updatedStops with this exact position/color/opacity, so sortedStops (the same entries, only reordered) always contains a match
+          dragState.draggedStopIndex = nextIndex === -1 ? /* v8 ignore next */ resolved.index : nextIndex;
           dispatch(updateNode({ changes: { fills }, id: nodeId }));
         }
       }

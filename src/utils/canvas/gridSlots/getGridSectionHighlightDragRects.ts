@@ -29,9 +29,10 @@ export const getGridSectionHighlightDragRects = (
     if (isDraggedBlock) {
       const offset = getGridTrackAffordanceDragOffset(frame, layout, dragState);
 
+      // isDraggedBlock already required inGrid.length > 0 via the same filter getGridSectionHighlightRects uses, so base.outlineRect is always non-null here
       return {
         cellRects: base.cellRects.map((rect) => shiftRect(rect, dragState.axis, offset)),
-        outlineRect: base.outlineRect ? shiftRect(base.outlineRect, dragState.axis, offset) : null,
+        outlineRect: base.outlineRect ? shiftRect(base.outlineRect, dragState.axis, offset) : /* v8 ignore next */ null,
       };
     }
   }

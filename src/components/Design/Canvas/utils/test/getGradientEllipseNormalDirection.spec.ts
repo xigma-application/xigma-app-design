@@ -63,6 +63,28 @@ describe('getGradientEllipseNormalDirection', () => {
     expect(Math.hypot(normalDirection.x, normalDirection.y)).toBeCloseTo(1, 5);
   });
 
+  it('should flip the raw curve-tangent normal when it points inward, so the result always points outward', () => {
+    // before — with a large enough radiusRatio, the naive 90°-rotated tangent points toward the
+    // center instead of away from it; the function must flip it, so the result still points outward
+    const stretchedPaint: TGradientPaint = { ...CIRCULAR_PAINT, radiusRatio: 5 };
+    const normalDirection = getGradientEllipseNormalDirection(BOUNDS, 0, stretchedPaint, 0.15);
+    const ellipsePoint = getGradientEllipsePoint(BOUNDS, 0, stretchedPaint, 0.15);
+    const outwardDirection = getGradientRadialOutwardDirection(ellipsePoint, { x: 50, y: 50 });
+
+    // result — the corrected normal always agrees with the outward hint, never opposes it
+    const dot = normalDirection.x * outwardDirection.x + normalDirection.y * outwardDirection.y;
+
+    expect(dot).toBeGreaterThan(0);
+    expect(Math.hypot(normalDirection.x, normalDirection.y)).toBeCloseTo(1, 5);
+  });
+
+  it('should fall back to pointing up when the tangent collapses to zero length', () => {
+    // before — radiusRatio 0 and position 0 both zero out the tangent's sin/cos terms simultaneously
+    const zeroTangentPaint: TGradientPaint = { ...CIRCULAR_PAINT, radiusRatio: 0 };
+
+    expect(getGradientEllipseNormalDirection(BOUNDS, 0, zeroTangentPaint, 0)).toEqual({ x: 0, y: -1 });
+  });
+
   it('should account for a rotated node', () => {
     // before — rotating the whole node 90deg should rotate the normal the same way
     const unrotated = getGradientEllipseNormalDirection(BOUNDS, 0, CIRCULAR_PAINT, 0);

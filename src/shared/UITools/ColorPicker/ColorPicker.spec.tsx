@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ComponentProps } from 'react';
 import { Provider } from 'react-redux';
 
@@ -128,6 +128,28 @@ describe('ColorPicker behaviors', () => {
 
     // result
     expect(onGradientChange).toHaveBeenCalledWith(expect.objectContaining({ angle: 90, type: 'gradient-linear' }));
+  });
+
+  it('should dock a stop color panel when a gradient stop swatch is clicked, and undock it on close', () => {
+    // mock
+    renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByText('Gradient'));
+
+    // action
+    fireEvent.click(screen.getAllByLabelText('Stop color')[0]);
+
+    // result
+    const dockedPanel = document.querySelector('[class*="ColorPicker__docked"]') as HTMLElement;
+
+    expect(dockedPanel).toBeInTheDocument();
+    expect(document.querySelector('[class*="StopColorPanel"]')).toBeInTheDocument();
+
+    // action — close it, from the docked panel's own close button
+    fireEvent.click(within(dockedPanel).getByLabelText('Close'));
+
+    // result
+    expect(document.querySelector('[class*="ColorPicker__docked"]')).not.toBeInTheDocument();
   });
 
   it('should call onChange with the clicked preset hex and alpha, overriding the current value', () => {

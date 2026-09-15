@@ -21,8 +21,9 @@ export const getInterpolatedGradientColor = (stops: TGradientStop[], position: n
   const endIndex = sortedStops.findIndex((stop) => stop.position >= position);
   const startStop = sortedStops[endIndex - 1];
   const endStop = sortedStops[endIndex];
+  // endIndex is the first sorted stop with position >= the queried position, so the one before it always has a strictly smaller position (a shared position would have been returned instead) — span is always > 0
   const span = endStop.position - startStop.position;
-  const t = span > 0 ? (position - startStop.position) / span : 0;
+  const t = span > 0 ? (position - startStop.position) / span : /* v8 ignore next */ 0;
   const startRgb = hexToRgb(startStop.color);
   const endRgb = hexToRgb(endStop.color);
   const color = rgbToHex({

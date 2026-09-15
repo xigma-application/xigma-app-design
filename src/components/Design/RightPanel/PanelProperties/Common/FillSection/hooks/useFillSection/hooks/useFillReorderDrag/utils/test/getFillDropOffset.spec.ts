@@ -33,6 +33,12 @@ describe('getFillDropOffset', () => {
     expect(getFillDropOffset(rows, container(100), 2, 2)).toBe(84);
   });
 
+  it('should fall back to 0 when dropping past every row but the last row was never measured', () => {
+    const rows = new Map<number, HTMLElement>();
+
+    expect(getFillDropOffset(rows, container(100), 2, 2)).toBe(0);
+  });
+
   it('should fall back to 0 when the target row was never measured', () => {
     const rows = new Map<number, HTMLElement>();
 

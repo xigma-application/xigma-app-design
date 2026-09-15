@@ -2,6 +2,9 @@ import { Provider } from 'react-redux';
 import { ReactNode } from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 
+// components
+import { TooltipProvider } from 'shared';
+
 // core
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
@@ -60,7 +63,9 @@ describe('useRenderRow', () => {
     const { result } = renderHook(() => useRenderRow(), { wrapper });
     render(
       <Provider store={store}>
-        <CanvasRefsProvider>{result.current(row, vi.fn())}</CanvasRefsProvider>
+        <CanvasRefsProvider>
+          <TooltipProvider>{result.current(row, vi.fn())}</TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 

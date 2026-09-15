@@ -145,6 +145,101 @@ describe('continueGradientRadiusDrag', () => {
     expect(getRadiusRatio(nodeId)).toBeCloseTo(0.4, 5);
   });
 
+  it('should not throw when the dragged node no longer exists', () => {
+    // mock — the node was deleted since the drag started
+    const canvas = createCanvas();
+    const dragRef = createGradientRadiusDragRef({ nodeId: 'gone', paintIndex: 0 });
+
+    // before / result
+    expect(() => continueGradientRadiusDrag(canvas, pointerEvent(0, 150), store.dispatch, dragRef)).not.toThrow();
+  });
+
+  it('should rotate the cursor into the node’s local space before measuring, for a rotated node', () => {
+    // mock — same gradient, rotated 45°: world (0,150) is the unrotated shape's own full-radius
+    // point (ratio 1, per the unrotated test above), so getting a different ratio here proves the
+    // cursor was actually rotated into local space before measuring, rather than used as-is
+    store.dispatch(
+      addNode({
+        fills: [
+          {
+            end: { x: 1, y: 0.5 },
+            opacity: 100,
+            start: { x: 0, y: 0.5 },
+            stops: [
+              { color: '#ffffff', opacity: 100, position: 0 },
+              { color: '#000000', opacity: 100, position: 1 },
+            ],
+            type: 'gradient-radial',
+          },
+        ],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: Math.PI / 4,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const canvas = createCanvas();
+    const dragRef = createGradientRadiusDragRef({ nodeId, paintIndex: 0 });
+
+    // before
+    continueGradientRadiusDrag(canvas, pointerEvent(0, 150), store.dispatch, dragRef);
+
+    // result
+    const ratio = getRadiusRatio(nodeId);
+
+    expect(ratio).toBeDefined();
+    expect(ratio).not.toBeCloseTo(1, 5);
+  });
+
+  it('should only touch the fill at the dragged paintIndex, leaving earlier fills in the stack untouched', () => {
+    // mock — a solid fill stacked below the gradient one being dragged (paintIndex: 1)
+    store.dispatch(
+      addNode({
+        fills: [
+          { color: '#ff0000', opacity: 100, type: 'solid' },
+          {
+            end: { x: 1, y: 0.5 },
+            opacity: 100,
+            start: { x: 0, y: 0.5 },
+            stops: [
+              { color: '#ffffff', opacity: 100, position: 0 },
+              { color: '#000000', opacity: 100, position: 1 },
+            ],
+            type: 'gradient-radial',
+          },
+        ],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const canvas = createCanvas();
+    const dragRef = createGradientRadiusDragRef({ nodeId, paintIndex: 1 });
+
+    // before
+    continueGradientRadiusDrag(canvas, pointerEvent(0, 90), store.dispatch, dragRef);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+    const gradientFill = node.fills[1];
+
+    expect(node.fills[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
+    expect(gradientFill.type === 'gradient-radial' ? gradientFill.radiusRatio : undefined).toBeCloseTo(0.4, 5);
+  });
+
   it('should do nothing when the targeted paint is no longer a radial gradient', () => {
     // mock — the fill was switched to solid since the drag started
     store.dispatch(

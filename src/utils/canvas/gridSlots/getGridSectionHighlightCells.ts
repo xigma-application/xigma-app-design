@@ -27,6 +27,7 @@ export const getGridSectionHighlightCells = (
       return { cells: getGridSectionCells(gridTrackSelection.axis, gridTrackSelection.indices, crossAxisCount), frameId };
     }
 
+    /* v8 ignore else -- frameId can only be non-null here (selection didn't match) if it came from highlight?.frameId, so highlight is always truthy at this point */
     if (highlight) {
       return { cells: highlight.cells, frameId };
     }

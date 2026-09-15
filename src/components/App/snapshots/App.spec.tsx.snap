@@ -593,23 +593,27 @@ exports[`App snapshots > should render App 1`] = `
                 >
                   X
                 </span>
-                <svg
-                  class="Icon"
-                  data-fpl-icon-size="24"
-                  fill="none"
-                  height="24"
-                  style="color: var(--color-neutral-1);"
-                  viewBox="0 0 24 24"
-                  width="24"
+                <div
+                  class="_Avatar__icon_b0cebb"
                 >
-                  <path
-                    clip-rule="evenodd"
-                    d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
-                    data-svg-property="fill"
-                    fill="white"
-                    fill-rule="evenodd"
-                  />
-                </svg>
+                  <svg
+                    class="Icon"
+                    data-fpl-icon-size="24"
+                    fill="none"
+                    height="24"
+                    style="color: var(--color-neutral-1);"
+                    viewBox="0 0 24 24"
+                    width="24"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
+                      data-svg-property="fill"
+                      fill="white"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </div>
               </span>
             </button>
             <div
@@ -1046,10 +1050,10 @@ exports[`App snapshots > should render App 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="16"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="16"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -1109,10 +1113,10 @@ exports[`App snapshots > should render App 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="16"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="16"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -1171,10 +1175,10 @@ exports[`App snapshots > should render App 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="16"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="16"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -1232,10 +1236,10 @@ exports[`App snapshots > should render App 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="16"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="16"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -1293,10 +1297,10 @@ exports[`App snapshots > should render App 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="16"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="16"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"

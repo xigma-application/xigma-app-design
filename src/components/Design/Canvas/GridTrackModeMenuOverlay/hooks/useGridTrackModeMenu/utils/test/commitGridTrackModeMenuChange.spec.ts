@@ -35,9 +35,44 @@ const addFrame = (gridColumnSizes?: { mode: SizingMode; value?: number }[]): str
   return rootOrder[rootOrder.length - 1];
 };
 
+const addFrameWithRows = (gridRowSizes: { mode: SizingMode; value?: number }[]): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#fff',
+      gridRowCount: gridRowSizes.length,
+      gridRowSizes,
+      height: 200,
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 400,
+      x: 0,
+      y: 0,
+    } as never),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const targetFor = (frameId: string, index = 0, resolvedSize = 40): TGridTrackModeMenuTarget => ({
   anchor: { x: 0, y: 0 },
   axis: 'column',
+  frameId,
+  index,
+  mode: SizingMode.fixed,
+  resolvedSize,
+  trackValue: 1,
+});
+
+const rowTargetFor = (frameId: string, index = 0, resolvedSize = 40): TGridTrackModeMenuTarget => ({
+  anchor: { x: 0, y: 0 },
+  axis: 'row',
   frameId,
   index,
   mode: SizingMode.fixed,
@@ -117,6 +152,22 @@ describe('commitGridTrackModeMenuChange', () => {
 
     expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({
       gridColumnSizes: [
+        { mode: SizingMode.hug, value: 40 },
+        { mode: SizingMode.fixed, value: 60 },
+      ],
+    });
+  });
+
+  it('should read/write row track sizes, not column ones, when the target axis is row', () => {
+    const frameId = addFrameWithRows([
+      { mode: SizingMode.fixed, value: 40 },
+      { mode: SizingMode.fixed, value: 60 },
+    ]);
+
+    commitGridTrackModeMenuChange(store.dispatch, store.getState(), rowTargetFor(frameId, 0), SizingMode.hug);
+
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({
+      gridRowSizes: [
         { mode: SizingMode.hug, value: 40 },
         { mode: SizingMode.fixed, value: 60 },
       ],

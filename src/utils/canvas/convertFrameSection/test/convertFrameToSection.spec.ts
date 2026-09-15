@@ -58,6 +58,12 @@ describe('convertFrameToSection', () => {
     expect(section).not.toHaveProperty('strokeWidth');
   });
 
+  it('should fall back to an empty string fill when the frame has no solid fill', () => {
+    const frame = buildFrame({ fills: [] });
+
+    expect(convertFrameToSection(frame).fill).toBe('');
+  });
+
   it('should carry over the frame’s children instead of discarding them', () => {
     const frame = buildFrame({ childIds: ['a', 'b'] });
 

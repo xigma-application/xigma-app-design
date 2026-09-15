@@ -26,6 +26,7 @@ export const armGradientEndpointMoveOnPointerDown = ({
   if (moveHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[moveHit.paintIndex];
 
+    /* v8 ignore if -- getGradientEndpointMoveHandleAtPoint already checked isLineHandleGradientPaint on this exact paint before returning a hit, so this is always true here */
     if (isLineHandleGradientPaint(paint)) {
       armGradientEndpointMoveDrag(
         canvas,

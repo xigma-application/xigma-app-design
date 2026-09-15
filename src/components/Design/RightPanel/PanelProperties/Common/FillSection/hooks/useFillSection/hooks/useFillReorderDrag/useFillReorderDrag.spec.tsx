@@ -81,6 +81,23 @@ describe('useFillReorderDrag', () => {
     expect(commit).not.toHaveBeenCalled();
   });
 
+  it('should not throw or double-commit on a stray extra pointerup once the drag has already ended', () => {
+    const commit = vi.fn();
+    const setSelection = vi.fn();
+    const { result } = renderHook(() => useFillReorderDrag(fills, commit, setSelection, containerRef()));
+
+    act(() => result.current.beginDrag([0], 0, pointerEvent()));
+
+    // two pointerup events land before React can process the first state update in between
+    act(() => {
+      window.dispatchEvent(new PointerEvent('pointerup'));
+      window.dispatchEvent(new PointerEvent('pointerup'));
+    });
+
+    expect(setSelection).toHaveBeenCalledTimes(1);
+    expect(result.current.dragState).toBeNull();
+  });
+
   it('should forget a row element when it unmounts', () => {
     const { result } = renderHook(() => useFillReorderDrag(fills.slice(0, 2), vi.fn(), vi.fn(), containerRef()));
 

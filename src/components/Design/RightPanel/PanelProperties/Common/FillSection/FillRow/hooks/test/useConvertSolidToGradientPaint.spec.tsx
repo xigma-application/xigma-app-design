@@ -109,6 +109,27 @@ describe('useConvertSolidToGradientPaint', () => {
     expect(onChange.mock.calls[0][0].radiusRatio).toBe(1);
   });
 
+  it('should default radiusRatio to 1 when the paint is already radial but has none set yet', () => {
+    // mock
+    const onChange = vi.fn();
+    const radialPaintWithoutRatio: TGradientPaint = { ...RADIAL_PAINT, radiusRatio: undefined };
+
+    // before
+    const { result } = renderHook(() => useConvertSolidToGradientPaint(radialPaintWithoutRatio, onChange));
+
+    // action
+    result.current({
+      angle: 0,
+      end: RADIAL_PAINT.end,
+      start: RADIAL_PAINT.start,
+      stops: [{ color: '#ff0000', id: 'stop-1', opacity: 100, position: 0 }],
+      type: 'gradient-radial',
+    });
+
+    // result
+    expect(onChange.mock.calls[0][0].radiusRatio).toBe(1);
+  });
+
   it('should preserve the existing radiusRatio when the paint is already radial', () => {
     // mock
     const onChange = vi.fn();

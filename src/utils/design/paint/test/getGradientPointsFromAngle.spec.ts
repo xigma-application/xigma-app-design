@@ -18,6 +18,10 @@ describe('getGradientPointsFromAngle', () => {
     expect(getGradientPointsFromAngle(270)).toEqual({ end: { x: 0.5, y: 0 }, start: { x: 0.5, y: 1 } });
   });
 
+  it('should fall back to the angle-0 points for an angle with no exact lookup entry', () => {
+    expect(getGradientPointsFromAngle(45)).toEqual({ end: { x: 1, y: 0.5 }, start: { x: 0, y: 0.5 } });
+  });
+
   it('should wrap a negative or out-of-range angle into the 0-360 lookup', () => {
     expect(getGradientPointsFromAngle(-90)).toEqual({ end: { x: 0.5, y: 0 }, start: { x: 0.5, y: 1 } });
     expect(getGradientPointsFromAngle(450)).toEqual({ end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0 } });

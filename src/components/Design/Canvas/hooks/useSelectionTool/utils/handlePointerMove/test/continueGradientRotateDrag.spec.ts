@@ -354,6 +354,78 @@ describe('continueGradientRotateDrag', () => {
     expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
   });
 
+  it('should not throw when the dragged node no longer exists', () => {
+    // mock — the node was deleted since the drag started
+    const canvas = createCanvas();
+    const dragRef = createGradientRotateDragRef({
+      angleOffset: 0,
+      draggedEndpoint: 'start',
+      mode: 'box',
+      nodeId: 'gone',
+      paintIndex: 0,
+      pivot: { x: 50, y: 50 },
+      pointerPosition: { x: 0, y: 0 },
+      radius: 50,
+    });
+
+    // before / result
+    expect(() => continueGradientRotateDrag(canvas, pointerEvent(100, 0), store.dispatch, dragRef, createCanvasRefs())).not.toThrow();
+  });
+
+  it('should only touch the fill at the dragged paintIndex, leaving earlier fills in the stack untouched', () => {
+    // mock — a solid fill stacked below the gradient one being dragged (paintIndex: 1)
+    store.dispatch(
+      addNode({
+        fills: [
+          { color: '#ff0000', opacity: 100, type: 'solid' },
+          {
+            end: { x: 1, y: 0.5 },
+            opacity: 100,
+            start: { x: 0, y: 0.5 },
+            stops: [
+              { color: '#ffffff', opacity: 100, position: 0 },
+              { color: '#000000', opacity: 100, position: 1 },
+            ],
+            type: 'gradient-linear',
+          },
+        ],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const canvas = createCanvas();
+    const dragRef = createGradientRotateDragRef({
+      angleOffset: 0,
+      draggedEndpoint: 'start',
+      mode: 'box',
+      nodeId,
+      paintIndex: 1,
+      pivot: { x: 50, y: 50 },
+      pointerPosition: { x: 0, y: 0 },
+      radius: 50,
+    });
+
+    // before
+    continueGradientRotateDrag(canvas, pointerEvent(100, 0), store.dispatch, dragRef, createCanvasRefs());
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+
+    expect(node.fills[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
+
+    const gradientFill = node.fills[1];
+
+    expectPointCloseTo(gradientFill.type === 'gradient-linear' ? gradientFill.start : { x: NaN, y: NaN }, { x: 1, y: 0 });
+  });
+
   it('should do nothing when the targeted paint is no longer a linear gradient', () => {
     // mock — the fill was switched to solid since the drag started
     store.dispatch(

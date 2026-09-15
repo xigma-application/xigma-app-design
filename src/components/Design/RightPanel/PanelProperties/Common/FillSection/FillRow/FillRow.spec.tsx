@@ -82,6 +82,31 @@ describe('FillRow behaviors', () => {
     expect(screen.getByDisplayValue('80')).toBeInTheDocument();
   });
 
+  it('should commit an opacity change through onChange, preserving the rest of the paint', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderFillRow({ onChange });
+
+    // action
+    fireEvent.blur(screen.getByDisplayValue('80'), { target: { value: '50' } });
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ color: '#ff0000', opacity: 50, type: 'solid' });
+  });
+
+  it('should render an image preview, with its own swatch and visibility toggle, for an image fill', () => {
+    // mock
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
+
+    // before
+    const { container } = renderFillRow({ paint: imagePaint });
+
+    // result
+    expect(container.querySelector('[class*="FillImagePreview"]')).toBeInTheDocument();
+  });
+
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {
     // mock
     const onChange = vi.fn();
@@ -130,6 +155,15 @@ describe('FillRow behaviors', () => {
 
     // result
     expect(onRemove).toHaveBeenCalled();
+  });
+
+  it('should not throw and fall back to a default swatch color for a gradient fill with no stops yet', () => {
+    // before / result
+    expect(() =>
+      renderFillRow({
+        paint: { end: { x: 1, y: 0.5 }, opacity: 100, start: { x: 0, y: 0.5 }, stops: [], type: 'gradient-linear' },
+      }),
+    ).not.toThrow();
   });
 
   it('should show the gradient type label and the paint overall opacity for a gradient fill, in the same input as a solid fill', () => {

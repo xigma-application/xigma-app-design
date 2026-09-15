@@ -82,6 +82,7 @@ export const armGradientRotateOnPointerDown = ({
       return true;
     }
 
+    /* v8 ignore if -- getGradientRotateHandleAtPoint already guarantees paint is line/radial/angular/diamond, and the branch above just excluded linear, so whatever remains is always an ellipse-handle paint */
     if (isEllipseHandleGradientPaint(paint)) {
       const { bounds } = rotateHit;
       const localStart: TPoint = { x: bounds.x + paint.start.x * bounds.width, y: bounds.y + paint.start.y * bounds.height };

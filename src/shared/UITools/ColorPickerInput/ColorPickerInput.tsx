@@ -2,7 +2,7 @@ import cx from 'classnames';
 import { FC, ReactNode, useRef } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
+import { ScrubbableInput, Tooltip } from '@xigma/components';
 
 // components
 import Color from '../Color/Color';

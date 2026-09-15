@@ -150,6 +150,36 @@ describe('armGradientRotateOnPointerDown', () => {
     expect(mode).toBe('box');
   });
 
+  it('should compute the angle offset from the dragged corner when it is the end endpoint, not just the start', () => {
+    // mock — same corner-to-corner line as the box-mode test above, but grabbed at its END corner
+    store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));
+
+    const dispatch = vi.fn();
+    const cornerRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], end: { x: 1, y: 1 }, start: { x: 0, y: 1 } } as TRectangleNode['fills'][0]],
+    };
+
+    // before — 8px from the end corner (100,100), past its inner move zone
+    const result = armGradientRotateOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      point: { x: 92, y: 100 },
+      selectedNodes: [cornerRectangle],
+      viewport: IDENTITY_VIEWPORT,
+    } as never);
+
+    // result
+    expect(result).toBe(true);
+
+    const [, , , , , endpoint, , mode] = armGradientRotateDragMock.mock.calls[0];
+
+    expect(endpoint).toBe('end');
+    expect(mode).toBe('box');
+  });
+
   it('should fall back to "line" mode when both endpoints sit on the same single edge — no distinct wall to justify a box-center pivot', () => {
     // mock — both endpoints sit only on the top edge, at different x positions
     store.dispatch(setGradientEditor({ nodeId: 'rect-1', paintIndex: 0, selectedStopIndex: null }));

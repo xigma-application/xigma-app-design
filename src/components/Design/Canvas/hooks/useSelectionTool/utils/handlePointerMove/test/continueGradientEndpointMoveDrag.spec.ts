@@ -158,6 +158,99 @@ describe('continueGradientEndpointMoveDrag', () => {
     expect(points!.start).toEqual({ x: 0, y: 0.5 });
   });
 
+  it('should rotate the cursor into the node’s local space before normalizing, for a rotated node', () => {
+    // mock — rotating a point around its own bounds center always leaves it fixed, regardless of
+    // angle, so clicking exactly at the center is a rotation-independent way to prove the rotated
+    // math path runs (and lands correctly) without depending on rotatePoint's own sign convention
+    store.dispatch(
+      addNode({
+        fills: [
+          {
+            end: { x: 1, y: 0.5 },
+            opacity: 100,
+            start: { x: 0, y: 0.5 },
+            stops: [
+              { color: '#ffffff', opacity: 100, position: 0 },
+              { color: '#000000', opacity: 100, position: 1 },
+            ],
+            type: 'gradient-linear',
+          },
+        ],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: Math.PI / 4,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const canvas = createCanvas();
+    const dragRef = createGradientEndpointMoveDragRef({ endpoint: 'start', nodeId, paintIndex: 0 });
+
+    // before — world (50,50) is exactly the bounds center
+    continueGradientEndpointMoveDrag(canvas, pointerEvent(50, 50), store.dispatch, dragRef, createCanvasRefs());
+
+    // result
+    const points = getGradientPoints(nodeId);
+
+    expect(points!.start).toEqual({ x: 0.5, y: 0.5 });
+  });
+
+  it('should only touch the fill at the dragged paintIndex, leaving earlier fills in the stack untouched', () => {
+    // mock — a solid fill stacked below the gradient one being dragged (paintIndex: 1)
+    store.dispatch(
+      addNode({
+        fills: [
+          { color: '#ff0000', opacity: 100, type: 'solid' },
+          {
+            end: { x: 1, y: 0.5 },
+            opacity: 100,
+            start: { x: 0, y: 0.5 },
+            stops: [
+              { color: '#ffffff', opacity: 100, position: 0 },
+              { color: '#000000', opacity: 100, position: 1 },
+            ],
+            type: 'gradient-linear',
+          },
+        ],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const canvas = createCanvas();
+    const dragRef = createGradientEndpointMoveDragRef({ endpoint: 'start', nodeId, paintIndex: 1 });
+
+    // before
+    continueGradientEndpointMoveDrag(canvas, pointerEvent(30, 40), store.dispatch, dragRef, createCanvasRefs());
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+
+    expect(node.fills[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
+    expect((node.fills[1] as { start: TPoint }).start).toEqual({ x: 0.3, y: 0.4 });
+  });
+
+  it('should not throw when the dragged node no longer exists', () => {
+    // mock — the node was deleted since the drag started
+    const canvas = createCanvas();
+    const dragRef = createGradientEndpointMoveDragRef({ endpoint: 'start', nodeId: 'gone', paintIndex: 0 });
+
+    // before / result
+    expect(() => continueGradientEndpointMoveDrag(canvas, pointerEvent(30, 40), store.dispatch, dragRef, createCanvasRefs())).not.toThrow();
+  });
+
   it('should do nothing when the targeted paint is no longer a linear gradient', () => {
     // mock — the fill was switched to solid since the drag started
     store.dispatch(

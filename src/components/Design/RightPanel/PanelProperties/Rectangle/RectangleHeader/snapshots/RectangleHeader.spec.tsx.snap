@@ -21,9 +21,8 @@ exports[`RectangleHeader snapshots > should render the Rectangle label with the 
       <button
         aria-label="Create component"
         aria-pressed="false"
-        class="_Button_b88d2e"
+        class="_ButtonIcon_2062db"
         data-state="closed"
-        style="padding: 0px;"
         type="button"
       >
         <svg

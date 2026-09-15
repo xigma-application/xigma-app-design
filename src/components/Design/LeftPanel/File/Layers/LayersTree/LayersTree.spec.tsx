@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import LayersTree from './LayersTree';
+import { TooltipProvider } from 'shared';
 
 // core
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
@@ -22,7 +23,9 @@ const renderLayersTree = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <CanvasRefsProvider>
-        <LayersTree />
+        <TooltipProvider>
+          <LayersTree />
+        </TooltipProvider>
       </CanvasRefsProvider>
     </Provider>,
   );

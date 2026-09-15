@@ -53,6 +53,26 @@ describe('armGridTrackValueEditOnPointerDown', () => {
     expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: setGridTrackSelection.type }));
   });
 
+  it('should read the row index, not the column index, when the hovered pill axis is row', () => {
+    // mock
+    store.dispatch(setGridTrackSelection({ axis: 'row', frameId: 'frame-1', indices: [4] }));
+    const dispatch = vi.fn();
+    const canvasRefs = {
+      hover: {
+        hoveredGridTrackAffordanceRef: {
+          current: { columnIndex: 0, frameId: 'frame-1', hoveredHandlePart: 'value', hoveredPillAxis: 'row', rowIndex: 4 },
+        },
+      },
+    };
+
+    // before
+    const result = armGridTrackValueEditOnPointerDown({ canvasRefs, dispatch } as never);
+
+    // result
+    expect(result).toBe(true);
+    expect(dispatch).toHaveBeenCalledWith(setGridTrackValueEditRequest({ axis: 'row', frameId: 'frame-1', index: 4 }));
+  });
+
   it('should return undefined, leaving selection to run, when the clicked value is not yet selected', () => {
     // mock
     store.dispatch(setGridTrackSelection({ axis: 'column', frameId: 'frame-1', indices: [1] }));

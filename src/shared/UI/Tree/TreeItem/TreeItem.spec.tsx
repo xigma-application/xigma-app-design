@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 
 // components
 import TreeItem, { TTreeItemProps } from './TreeItem';
+import { TooltipProvider } from 'shared';
 
 // core
 import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/context';
@@ -29,7 +30,9 @@ const renderTreeItem = (isSelected: boolean, node: TSceneNode, extraProps: Parti
   render(
     <Provider store={store}>
       <CanvasRefsContext.Provider value={canvasRefs}>
-        <TreeItem isSelected={isSelected} node={node} renderIcon={(): null => null} {...extraProps} />
+        <TooltipProvider>
+          <TreeItem isSelected={isSelected} node={node} renderIcon={(): null => null} {...extraProps} />
+        </TooltipProvider>
       </CanvasRefsContext.Provider>
     </Provider>,
   );

@@ -59,6 +59,40 @@ describe('useFillSelection', () => {
     expect(result.current.selectedIndices).toEqual([]);
   });
 
+  it('should be a no-op to clear an already-empty selection', () => {
+    const { result } = renderHook(() => useFillSelection(4));
+
+    act(() => result.current.clearSelection());
+
+    expect(result.current.selectedIndices).toEqual([]);
+  });
+
+  it('should replace the selection outright via setSelection, anchoring on its last index', () => {
+    const { result } = renderHook(() => useFillSelection(4));
+
+    act(() => result.current.setSelection([1, 3]));
+
+    expect(result.current.selectedIndices).toEqual([1, 3]);
+
+    // result — the anchor moved to the last given index (3), so a further shift-click ranges from there
+    act(() => result.current.onSelectRow(0, { meta: false, shift: true }));
+
+    expect(result.current.selectedIndices).toEqual([0, 1, 2, 3]);
+  });
+
+  it('should clear the anchor when setSelection is given an empty array', () => {
+    const { result } = renderHook(() => useFillSelection(4));
+
+    act(() => result.current.setSelection([]));
+
+    expect(result.current.selectedIndices).toEqual([]);
+
+    // result — with no anchor, a shift-click falls back to a plain select instead of ranging
+    act(() => result.current.onSelectRow(2, { meta: false, shift: true }));
+
+    expect(result.current.selectedIndices).toEqual([2]);
+  });
+
   it('should drop indices that fall outside a shrunken fill count', () => {
     const { result, rerender } = renderHook(({ count }) => useFillSelection(count), { initialProps: { count: 4 } });
 

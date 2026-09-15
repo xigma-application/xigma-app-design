@@ -88,6 +88,16 @@ describe('getGridTrackModeMenuTarget', () => {
     expect(target).toMatchObject({ axis: 'row', frameId, index: 0 });
   });
 
+  it('should fall back to the default track and a zero resolved size for an out-of-range index', () => {
+    const frameId = addFrame();
+    const nodes = selectActivePage(store.getState()).nodes;
+    const request: TGridTrackModeMenuRequest = { axis: 'column', frameId, index: 99 };
+
+    const target = getGridTrackModeMenuTarget(request, nodes, 1);
+
+    expect(target).toMatchObject({ mode: SizingMode.fill, resolvedSize: 0, trackValue: 1 });
+  });
+
   it('should anchor a rotated frame’s chevron at a different screen point than an unrotated one', () => {
     const straightFrameId = addFrame({ rotation: 0 });
     const straightNodes = selectActivePage(store.getState()).nodes;

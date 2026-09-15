@@ -35,8 +35,44 @@ const addFrame = (gridColumnSizes?: { mode: SizingMode; value?: number }[]): str
   return rootOrder[rootOrder.length - 1];
 };
 
+const addFrameWithRows = (gridRowSizes: { mode: SizingMode; value?: number }[]): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#fff',
+      gridRowCount: gridRowSizes.length,
+      gridRowSizes,
+      height: 200,
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 400,
+      x: 0,
+      y: 0,
+    } as never),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const editFor = (frameId: string, index = 0): TGridTrackValueEditTarget => ({
   axis: 'column',
+  badgeHeight: 24,
+  badgeWidth: 40,
+  center: { x: 0, y: 0 },
+  frameId,
+  index,
+  pillCenter: { x: 0, y: 0 },
+  value: '',
+});
+
+const rowEditFor = (frameId: string, index = 0): TGridTrackValueEditTarget => ({
+  axis: 'row',
   badgeHeight: 24,
   badgeWidth: 40,
   center: { x: 0, y: 0 },
@@ -151,6 +187,16 @@ describe('commitGridTrackValueEdit', () => {
         { mode: SizingMode.fixed, value: 100 },
         { mode: SizingMode.fixed, value: 60 },
       ],
+    });
+  });
+
+  it('should read/write row track sizes, not column ones, when the edit axis is row', () => {
+    const frameId = addFrameWithRows([{ mode: SizingMode.fixed, value: 40 }]);
+
+    commitGridTrackValueEdit(store.dispatch, store.getState(), rowEditFor(frameId), '80');
+
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({
+      gridRowSizes: [{ mode: SizingMode.fixed, value: 80 }],
     });
   });
 

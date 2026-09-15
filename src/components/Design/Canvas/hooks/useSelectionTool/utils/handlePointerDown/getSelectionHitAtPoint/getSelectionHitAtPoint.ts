@@ -28,8 +28,9 @@ export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[]
     selectedNodes,
     viewport,
   };
+  // every resolver above (and `hit`/`selectedHit` themselves) already resolves through a clip-aware getNodeAtPoint, so an unselected node reaching here has never been clipped
   const pickable = (node: TSceneNode | null): TSceneNode | null =>
-    node && !selectedIds.has(node.id) && isPointClippedFromNode(point, node, nodesById) ? null : node;
+    node && !selectedIds.has(node.id) && isPointClippedFromNode(point, node, nodesById) ? /* v8 ignore next */ null : node;
 
   for (const resolve of SELECTION_HIT_RESOLVERS) {
     const result = resolve(context);

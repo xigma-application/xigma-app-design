@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput, TIconProps } from '@xigma/components';
+import { ScrubbableInput, TIconProps } from '@xigma/components';
 
 // components
 import TextFieldWrapper from 'shared/UITools/TextField/TextFieldWrapper/TextFieldWrapper';

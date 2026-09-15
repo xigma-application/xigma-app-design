@@ -2,12 +2,15 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import TreeItemActions from './TreeItemActions';
+import { TooltipProvider } from 'shared';
 
 describe('TreeItemActions', () => {
   it('should render "Hide layer" and "Lock layer" labels when not hidden/locked', () => {
     // before
     render(
-      <TreeItemActions isHidden={false} isLocked={false} onStopPropagation={vi.fn()} onToggleHidden={vi.fn()} onToggleLocked={vi.fn()} />,
+      <TooltipProvider>
+        <TreeItemActions isHidden={false} isLocked={false} onStopPropagation={vi.fn()} onToggleHidden={vi.fn()} onToggleLocked={vi.fn()} />
+      </TooltipProvider>,
     );
 
     // result
@@ -17,7 +20,11 @@ describe('TreeItemActions', () => {
 
   it('should render "Show layer" and "Unlock layer" labels when hidden/locked', () => {
     // before
-    render(<TreeItemActions isHidden isLocked onStopPropagation={vi.fn()} onToggleHidden={vi.fn()} onToggleLocked={vi.fn()} />);
+    render(
+      <TooltipProvider>
+        <TreeItemActions isHidden isLocked onStopPropagation={vi.fn()} onToggleHidden={vi.fn()} onToggleLocked={vi.fn()} />
+      </TooltipProvider>,
+    );
 
     // result
     expect(screen.getByRole('button', { name: 'Show layer' })).toBeInTheDocument();
@@ -28,13 +35,15 @@ describe('TreeItemActions', () => {
     // before
     const onToggleHidden = vi.fn();
     render(
-      <TreeItemActions
-        isHidden={false}
-        isLocked={false}
-        onStopPropagation={vi.fn()}
-        onToggleHidden={onToggleHidden}
-        onToggleLocked={vi.fn()}
-      />,
+      <TooltipProvider>
+        <TreeItemActions
+          isHidden={false}
+          isLocked={false}
+          onStopPropagation={vi.fn()}
+          onToggleHidden={onToggleHidden}
+          onToggleLocked={vi.fn()}
+        />
+      </TooltipProvider>,
     );
 
     // action
@@ -48,13 +57,15 @@ describe('TreeItemActions', () => {
     // before
     const onToggleLocked = vi.fn();
     render(
-      <TreeItemActions
-        isHidden={false}
-        isLocked={false}
-        onStopPropagation={vi.fn()}
-        onToggleHidden={vi.fn()}
-        onToggleLocked={onToggleLocked}
-      />,
+      <TooltipProvider>
+        <TreeItemActions
+          isHidden={false}
+          isLocked={false}
+          onStopPropagation={vi.fn()}
+          onToggleHidden={vi.fn()}
+          onToggleLocked={onToggleLocked}
+        />
+      </TooltipProvider>,
     );
 
     // action
@@ -68,13 +79,15 @@ describe('TreeItemActions', () => {
     // before
     const onStopPropagation = vi.fn();
     const { container } = render(
-      <TreeItemActions
-        isHidden={false}
-        isLocked={false}
-        onStopPropagation={onStopPropagation}
-        onToggleHidden={vi.fn()}
-        onToggleLocked={vi.fn()}
-      />,
+      <TooltipProvider>
+        <TreeItemActions
+          isHidden={false}
+          isLocked={false}
+          onStopPropagation={onStopPropagation}
+          onToggleHidden={vi.fn()}
+          onToggleLocked={vi.fn()}
+        />
+      </TooltipProvider>,
     );
 
     // action

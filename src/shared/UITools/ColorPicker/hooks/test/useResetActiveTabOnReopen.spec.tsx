@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import { useState } from 'react';
 
 // hooks
@@ -9,7 +9,10 @@ import { ColorPickerTab } from '../../enums';
 
 type TProps = { initialActiveTab: ColorPickerTab | undefined; openSessionId: number };
 
-const renderUseResetActiveTabOnReopen = (initialActiveTab: ColorPickerTab | undefined, openSessionId: number) =>
+const renderUseResetActiveTabOnReopen = (
+  initialActiveTab: ColorPickerTab | undefined,
+  openSessionId: number,
+): RenderHookResult<ColorPickerTab, TProps> =>
   renderHook(
     ({ initialActiveTab: initial, openSessionId: sessionId }: TProps) => {
       const [activeTab, setActiveTab] = useState(ColorPickerTab.gradient);

@@ -102,6 +102,26 @@ describe('usePopoverDrag', () => {
     expect(result.current.offset).toEqual({ x: 5, y: 0 });
   });
 
+  it('should keep moving without re-checking the threshold or re-capturing, once already captured', () => {
+    // mock
+    const background = document.createElement('div');
+
+    // before
+    const { result } = renderHook(() => usePopoverDrag(true));
+
+    act(() => result.current.onPointerDown(createPointerDownEvent(background, 100, 100)));
+    act(() => result.current.onPointerMove(createPointerDownEvent(background, 105, 100)));
+
+    // action — a further move in the same drag, well past the threshold already
+    const secondMoveEvent = createPointerDownEvent(background, 108, 100);
+
+    act(() => result.current.onPointerMove(secondMoveEvent));
+
+    // result — no redundant re-capture, offset keeps tracking from the drag's own origin
+    expect(secondMoveEvent.currentTarget.setPointerCapture).not.toHaveBeenCalled();
+    expect(result.current.offset).toEqual({ x: 8, y: 0 });
+  });
+
   it('should not start a drag when the pointerdown target is interactive', () => {
     // mock
     const button = document.createElement('button');

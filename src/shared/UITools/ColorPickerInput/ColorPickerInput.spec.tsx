@@ -62,6 +62,22 @@ describe('ColorPickerInput behaviors', () => {
     expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
   });
 
+  it('should render a plain trigger button calling onTriggerClick instead of opening the picker, when given', () => {
+    // mock
+    const onTriggerClick = vi.fn();
+    const onOpenChange = vi.fn();
+
+    // before
+    renderColorPickerInput({ onOpenChange, onTriggerClick, triggerAriaLabel: 'Background color' });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Background color'));
+
+    // result — the plain button fired the given callback directly, instead of opening the picker popover
+    expect(onTriggerClick).toHaveBeenCalledTimes(1);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
   it('should keep the alpha field’s "%" adornment visible while the field is focused', () => {
     // before
     const { container } = renderColorPickerInput();

@@ -138,4 +138,28 @@ describe('handlePointerUp', () => {
     expect(page.nodes[newId].type).toBe(NodeType.rectangle);
     expect(page.nodes[newId]).not.toHaveProperty('childIds');
   });
+
+  it('should create a plain ellipse with a single fill string, not a fills array', () => {
+    // before
+    handlePointerUp(
+      createCanvas(),
+      pointerEvent(120, 130),
+      store.dispatch,
+      store,
+      createCanvasRefs(),
+      IDENTITY_VIEWPORT,
+      { current: { x: 20, y: 20 } },
+      { current: [] },
+      '#00ff00',
+      'Ellipse',
+      NodeType.ellipse,
+    );
+
+    // result
+    const page = selectActivePage(store.getState());
+    const newId = page.rootOrder.at(-1) as string;
+
+    expect(page.nodes[newId]).toMatchObject({ fill: '#00ff00', type: NodeType.ellipse });
+    expect(page.nodes[newId]).not.toHaveProperty('fills');
+  });
 });

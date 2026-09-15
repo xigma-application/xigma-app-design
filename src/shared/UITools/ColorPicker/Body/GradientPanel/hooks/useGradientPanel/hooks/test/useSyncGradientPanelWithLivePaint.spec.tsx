@@ -154,6 +154,30 @@ describe('useSyncGradientPanelWithLivePaint', () => {
     expect(result.current.setSelectedStopId).toHaveBeenCalledWith(null);
   });
 
+  it('should keep the current selection when the selected stop survives reconciliation, even if another stop changed', () => {
+    // before — only the second (black) stop moves; the selected first (white) stop is untouched
+    const { rerender, result } = renderUseSync(undefined);
+
+    act(() =>
+      rerender({
+        initialGradient: {
+          end: { x: 1, y: 0.5 },
+          start: { x: 0, y: 0.5 },
+          stops: [
+            { color: '#ffffff', opacity: 100, position: 0 },
+            { color: '#000000', opacity: 100, position: 0.6 },
+          ],
+          type: 'gradient-linear',
+        },
+        isDragging: false,
+      }),
+    );
+
+    // result — stops were resynced (the second one changed), but the selection ('local-a') survives
+    expect(result.current.setStops).toHaveBeenCalled();
+    expect(result.current.setSelectedStopId).not.toHaveBeenCalled();
+  });
+
   it('should preserve stop ids and the selection when reconciled stops match local content exactly', () => {
     // before — same content as LOCAL_STOPS, just without ids (as it would arrive from Redux)
     const { result } = renderUseSync({

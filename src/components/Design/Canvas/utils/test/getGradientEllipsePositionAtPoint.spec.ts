@@ -4,6 +4,7 @@ import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { getGradientEllipsePositionAtPoint } from '../getGradientEllipsePositionAtPoint';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -84,6 +85,22 @@ describe('getGradientEllipsePositionAtPoint', () => {
 
   it('should return null when the point is over the radius handle instead — reshaping takes priority', () => {
     expect(getGradientEllipsePositionAtPoint({ x: 0, y: 50 }, [rectangle()], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
+  });
+
+  it('should rotate the cursor into the node’s local space before measuring, for a rotated node', () => {
+    // mock — rotating the shape by θ and pre-rotating the same query point by θ around the same
+    // center cancels out exactly, landing on the identical local point (14.64, 85.36) as the
+    // unrotated test above — so an identical result here proves the rotation math ran correctly
+    const rotation = Math.PI / 4;
+    const center = { x: 50, y: 50 };
+    const point = rotatePoint({ x: 14.64, y: 85.36 }, center, rotation);
+    const node = rectangle({ rotation });
+
+    // before
+    const hit = getGradientEllipsePositionAtPoint(point, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR);
+
+    // result
+    expect(hit?.position).toBeCloseTo(0.125, 2);
   });
 
   it('should shrink the hit tolerance as zoom increases', () => {

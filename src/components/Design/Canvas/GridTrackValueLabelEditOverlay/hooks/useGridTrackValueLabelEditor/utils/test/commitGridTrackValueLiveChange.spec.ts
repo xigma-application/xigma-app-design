@@ -84,6 +84,18 @@ describe('commitGridTrackValueLiveChange', () => {
     expect(refs.hover.editingGridTrackValueRef.current).toEqual({ axis: 'column', frameId, index: 0, text: '3fr' });
   });
 
+  it('should measure geometry using a single space when the typed text is empty, instead of an empty string', () => {
+    // mock
+    const frameId = addFrame();
+    const refs = createCanvasRefs();
+
+    // action
+    commitGridTrackValueLiveChange(refs, store.getState(), editFor(frameId), '');
+
+    // result
+    expect(getGridTrackValueEditGeometryMock).toHaveBeenCalledWith(expect.anything(), ' ', expect.anything(), expect.anything());
+  });
+
   it('should keep the edit target unchanged when the frame no longer exists', () => {
     // mock
     const refs = createCanvasRefs();

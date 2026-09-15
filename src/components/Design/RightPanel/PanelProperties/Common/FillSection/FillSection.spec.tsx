@@ -101,6 +101,52 @@ describe('FillSection behaviors', () => {
     expect(read(id).fills).toHaveLength(2);
   });
 
+  it('should commit a hex change onto the correct fill by index, leaving the others untouched', () => {
+    const id = addRectangle({
+      fills: [
+        { color: '#111111', opacity: 100, type: 'solid' },
+        { color: '#222222', opacity: 100, type: 'solid' },
+      ],
+    });
+
+    store.dispatch(setSelection([id]));
+
+    // before
+    renderFillSection();
+
+    // action — edit the second row's hex field
+    fireEvent.blur(screen.getByDisplayValue('222222'), { target: { value: '333333' } });
+
+    // result
+    expect(read(id).fills).toEqual([
+      { color: '#111111', opacity: 100, type: 'solid' },
+      { color: '#333333', opacity: 100, type: 'solid' },
+    ]);
+  });
+
+  it('should toggle visibility on the correct fill by index, leaving the others untouched', () => {
+    const id = addRectangle({
+      fills: [
+        { color: '#111111', opacity: 100, type: 'solid' },
+        { color: '#222222', opacity: 100, type: 'solid' },
+      ],
+    });
+
+    store.dispatch(setSelection([id]));
+
+    // before
+    renderFillSection();
+
+    // action — toggle the second row's visibility
+    fireEvent.click(screen.getAllByRole('button', { name: 'Hide fill' })[1]);
+
+    // result
+    expect(read(id).fills).toEqual([
+      { color: '#111111', opacity: 100, type: 'solid' },
+      { color: '#222222', opacity: 100, type: 'solid', visible: false },
+    ]);
+  });
+
   it('should allow removing every fill, leaving the node with none', () => {
     const id = addRectangle();
 

@@ -34,6 +34,15 @@ describe('getPositionAroundGradientEllipse', () => {
     expect(position).toBeCloseTo(0.25, 5);
   });
 
+  it('should wrap a negative angle into the 0..1 range, for a point on the opposite perpendicular side', () => {
+    // before — start (0,0.5), end (1,0.5): the negative-perpendicular side (-y) yields a raw negative
+    // atan2 angle, which must wrap around to 0.75 instead of staying negative
+    const position = getPositionAroundGradientEllipse({ x: 0, y: -0.5 }, { x: 0, y: 0.5 }, { x: 1, y: 0.5 }, 1);
+
+    // result
+    expect(position).toBeCloseTo(0.75, 5);
+  });
+
   it('should return 0 when start and end coincide', () => {
     // before
     const position = getPositionAroundGradientEllipse({ x: 5, y: 5 }, { x: 1, y: 1 }, { x: 1, y: 1 }, 1);

@@ -85,6 +85,40 @@ describe('useFillSection', () => {
     expect(read(id).fills).toEqual([gradientPaint]);
   });
 
+  it('should only replace the fill at the given index, leaving the others in the stack untouched', () => {
+    const id = addRectangle({
+      fills: [
+        { color: '#111111', opacity: 100, type: 'solid' },
+        { color: '#222222', opacity: 100, type: 'solid' },
+      ],
+    });
+
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderUseFillSection();
+
+    act(() => result.current.onChange(1, { color: '#333333', opacity: 100, type: 'solid' }));
+
+    expect(read(id).fills).toEqual([
+      { color: '#111111', opacity: 100, type: 'solid' },
+      { color: '#333333', opacity: 100, type: 'solid' },
+    ]);
+  });
+
+  it('should report isRowDragging false while idle, and true for the source row mid-drag', () => {
+    const id = addRectangle();
+
+    store.dispatch(setSelection([id]));
+
+    const { result } = renderUseFillSection();
+
+    expect(result.current.isRowDragging(0)).toBe(false);
+
+    act(() => result.current.onStartDrag(0, { preventDefault: vi.fn() } as unknown as ReactPointerEvent));
+
+    expect(result.current.isRowDragging(0)).toBe(true);
+  });
+
   it('should remove the fill at the given index, allowing the node to end up with none', () => {
     const id = addRectangle();
 

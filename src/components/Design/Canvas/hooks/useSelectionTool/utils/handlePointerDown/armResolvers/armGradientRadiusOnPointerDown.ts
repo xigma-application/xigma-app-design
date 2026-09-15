@@ -26,6 +26,7 @@ export const armGradientRadiusOnPointerDown = ({
   if (radiusHit && gradientEditor && isAppearanceNode(node)) {
     const paint = node.fills[radiusHit.paintIndex];
 
+    /* v8 ignore if -- getGradientRadiusHandleAtPoint already checked isEllipseHandleGradientPaint on this exact paint before returning a hit, so this is always true here */
     if (isEllipseHandleGradientPaint(paint)) {
       armGradientRadiusDrag(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef, radiusHit.nodeId, radiusHit.paintIndex);
       return true;

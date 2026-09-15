@@ -253,6 +253,40 @@ describe('useSelectionTool behaviors', () => {
     expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
+  it('should not react to a pointer move while picking a pattern source', () => {
+    // mock
+    const idA = addFrameNode(220, 220);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action & result — must not throw, and must not start a marquee/hover cycle
+    expect(() => canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 900, 900))).not.toThrow();
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+  });
+
+  it('should not react to a pointer up while picking a pattern source', () => {
+    // mock
+    const idA = addFrameNode(220, 220);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action & result
+    expect(() => canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 900, 900))).not.toThrow();
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+  });
+
   it('should resume reacting to pointer events once picking a pattern source ends', () => {
     // mock
     const idA = addFrameNode(230, 230);

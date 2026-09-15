@@ -20,7 +20,7 @@ exports[`InputAdornment snapshots > should render with an icon 1`] = `
       data-fpl-icon-size="24L"
       fill="none"
       height="24"
-      style="color: var(--color-neutral-1);"
+      style="color: var(--color-neutral-2);"
       viewBox="0 0 24 24"
       width="24"
     >

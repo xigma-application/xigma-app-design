@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
 import { useState } from 'react';
 
 // hooks
@@ -12,7 +12,12 @@ const STOPS: TEditableGradientStop[] = [
   { color: '#000000', id: 'stop-2', opacity: 100, position: 1 },
 ];
 
-const renderUseAddStop = (onChange = vi.fn(), initialStops = STOPS) => {
+type TResult = { addStop: TFunc<[number]>; stops: TEditableGradientStop[] };
+
+const renderUseAddStop = (
+  onChange = vi.fn(),
+  initialStops = STOPS,
+): { hook: RenderHookResult<TResult, unknown>; onChange: ReturnType<typeof vi.fn>; selectStop: ReturnType<typeof vi.fn> } => {
   const selectStop = vi.fn();
   const hook = renderHook(() => {
     const [stops, setStops] = useState(initialStops);

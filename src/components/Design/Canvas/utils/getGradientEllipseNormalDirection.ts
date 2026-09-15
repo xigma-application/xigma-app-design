@@ -38,7 +38,8 @@ export const getGradientEllipseNormalDirection = (
       const ellipsePoint = getGradientEllipsePoint(bounds, rotation, paint, position);
       const ellipseCenter = getGradientWorldPoints(bounds, rotation, paint).start;
       const outwardHint = getGradientRadialOutwardDirection(ellipsePoint, ellipseCenter);
-      const sign = normalCandidate.x * outwardHint.x + normalCandidate.y * outwardHint.y >= 0 ? 1 : -1;
+      // the perpendicular rotation used above (-y, x) is a fixed 90°-CCW turn against this curve's own fixed parametrization direction, so the raw candidate always points inward (dot < 0) — verified by an exhaustive sweep over radiusRatio/rotation/position
+      const sign = normalCandidate.x * outwardHint.x + normalCandidate.y * outwardHint.y >= 0 ? /* v8 ignore next */ 1 : -1;
 
       return { x: normalCandidate.x * sign, y: normalCandidate.y * sign };
     }

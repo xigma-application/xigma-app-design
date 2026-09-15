@@ -5,6 +5,7 @@ import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { resolveGradientRotateHover } from '../resolveGradientRotateHover';
 
 vi.mock('utils/canvas/createCursorRotator/getRotatedCursorUrl', () => ({
@@ -85,5 +86,18 @@ describe('resolveGradientRotateHover', () => {
     const result = resolveGradientRotateHover(createContext({ gradientEditor: null, point: { x: 0, y: 50 }, selectedNodes: [rectangle] }));
 
     expect(result).toBeUndefined();
+  });
+
+  it('should fall back to an empty cursor string when no rotated cursor url can be built', () => {
+    // mock
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
+
+    // before
+    const result = resolveGradientRotateHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 8, y: 50 }, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(result).toEqual({ className: null, cursor: '', nodeId: 'rect-1' });
   });
 });
