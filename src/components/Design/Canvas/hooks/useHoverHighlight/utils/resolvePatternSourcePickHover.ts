@@ -6,8 +6,10 @@ import { store } from 'store';
 
 // utils
 import { doesNodeHavePatternInSubtree } from '../../useSelectionTool/utils/handlePatternSourcePick/doesNodeHavePatternInSubtree';
-import { getNodeAtPoint } from '../../../utils/getNodeAtPoint/getNodeAtPoint';
+import { getGroupChildHitAtPoint } from '../../useSelectionTool/utils/handlePointerDown/getGroupChildHitAtPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { getSelectionHitAtPoint } from '../../useSelectionTool/utils/handlePointerDown/getSelectionHitAtPoint/getSelectionHitAtPoint';
+import { isControlPressed } from 'utils/isControlPressed';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 export const resolvePatternSourcePickHover = (canvas: HTMLCanvasElement, event: PointerEvent, hoverRef: RefObject<string | null>): void => {
@@ -15,7 +17,8 @@ export const resolvePatternSourcePickHover = (canvas: HTMLCanvasElement, event: 
   const viewport = selectViewport(state);
   const point = screenToWorld(getPointerPosition(canvas, event), viewport);
   const nodesById = selectNodes(state);
-  const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
+  const controlHit = isControlPressed(event) ? getGroupChildHitAtPoint(point, viewport) : null;
+  const hit = controlHit ?? getSelectionHitAtPoint(point, selectOrderedNodes(state), viewport);
 
   hoverRef.current = hit && !doesNodeHavePatternInSubtree(hit, nodesById) ? hit.id : null;
 };

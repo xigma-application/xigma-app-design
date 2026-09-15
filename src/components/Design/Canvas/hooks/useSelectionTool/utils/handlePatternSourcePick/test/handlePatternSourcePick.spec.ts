@@ -1,6 +1,6 @@
 // store
 import { selectActivePage, selectIsPatternSourcePicking } from 'store/design/selectors';
-import { addNode, setPatternSourcePickTarget, setPatternSourcePicking, setSelection } from 'store/design/slice';
+import { addNode, groupNodes, setPatternSourcePickTarget, setPatternSourcePicking, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -18,8 +18,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number, button = 0): PointerEvent =>
-  new PointerEvent('pointerdown', { button, clientX: x, clientY: y, pointerId: 1 });
+const pointerEvent = (x: number, y: number, button = 0, options: Partial<PointerEventInit> = {}): PointerEvent =>
+  new PointerEvent('pointerdown', { button, clientX: x, clientY: y, pointerId: 1, ...options });
 
 const addPatternRectangle = (x: number, y: number, size = 20): string => {
   store.dispatch(
@@ -331,5 +331,47 @@ describe('handlePatternSourcePick', () => {
     // result
     expect(getFills(solidId)[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
     expect(selectIsPatternSourcePicking(store.getState())).toBe(false);
+  });
+
+  it('should pick the whole group, not its child, on a plain click — matching default selection behavior', () => {
+    // mock
+    const targetId = addPatternRectangle(1300, 1300);
+    const childId = addSourceFrame(1400, 1400);
+    const siblingId = addSourceFrame(1500, 1400);
+
+    store.dispatch(setSelection([childId, siblingId]));
+    store.dispatch(groupNodes());
+
+    const { nodes } = selectActivePage(store.getState());
+    const groupId = nodes[childId].parentId;
+
+    store.dispatch(setSelection([]));
+    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    handlePatternSourcePick(createCanvas(), pointerEvent(1405, 1405), store.dispatch);
+
+    // result
+    expect(getFills(targetId)[0]).toMatchObject({ sourceNodeId: groupId });
+  });
+
+  it('should bypass the group parent and pick its child directly when Control is held — matching default selection behavior', () => {
+    // mock — same setup as above, but Control should reach the child, not the group
+    const targetId = addPatternRectangle(1600, 1300);
+    const childId = addSourceFrame(1700, 1400);
+    const siblingId = addSourceFrame(1800, 1400);
+
+    store.dispatch(setSelection([childId, siblingId]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    handlePatternSourcePick(createCanvas(), pointerEvent(1705, 1405, 0, { ctrlKey: true }), store.dispatch);
+
+    // result
+    expect(getFills(targetId)[0]).toMatchObject({ sourceNodeId: childId });
   });
 });

@@ -1,7 +1,9 @@
 // utils
 import { doesNodeHavePatternInSubtree } from './doesNodeHavePatternInSubtree';
-import { getNodeAtPoint } from 'components/Design/Canvas/utils/getNodeAtPoint/getNodeAtPoint';
+import { getGroupChildHitAtPoint } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerDown/getGroupChildHitAtPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
+import { getSelectionHitAtPoint } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerDown/getSelectionHitAtPoint/getSelectionHitAtPoint';
+import { isControlPressed } from 'utils/isControlPressed';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 // store
@@ -22,7 +24,8 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
       const nodesById = selectNodes(state);
-      const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
+      const controlHit = isControlPressed(event) ? getGroupChildHitAtPoint(point, viewport) : null;
+      const hit = controlHit ?? getSelectionHitAtPoint(point, selectOrderedNodes(state), viewport);
 
       if (hit && !doesNodeHavePatternInSubtree(hit, nodesById)) {
         const targetNode = nodesById[target.nodeId];

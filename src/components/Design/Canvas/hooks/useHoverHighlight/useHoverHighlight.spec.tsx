@@ -321,6 +321,55 @@ describe('useHoverHighlight behaviors', () => {
     expect(hoverRef.current).toBeNull();
   });
 
+  it('should highlight the whole group, not its child, while picking a pattern source — matching default hover', () => {
+    // mock
+    const idA = addFrameNode(1100, 600);
+    const idB = addFrameNode(1200, 600);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1110, 610));
+    });
+
+    // result
+    expect(hoverRef.current).not.toBe(idA);
+    expect(hoverRef.current).not.toBeNull();
+  });
+
+  it('should bypass the group parent and highlight its child while Control is held while picking a pattern source', () => {
+    // mock — same group as above, but Control should reach the child directly, matching default mode
+    const idA = addFrameNode(1300, 600);
+    const idB = addFrameNode(1400, 600);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+    store.dispatch(setPatternSourcePicking(true));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1310, 610, { ctrlKey: true }));
+    });
+
+    // result
+    expect(hoverRef.current).toBe(idA);
+  });
+
   it('should not resolve a pattern-source hover while a button is held (mid-drag elsewhere) while picking', () => {
     // mock
     const idA = addFrameNode(180, 180);
