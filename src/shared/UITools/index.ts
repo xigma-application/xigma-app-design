@@ -12,6 +12,7 @@ import ComponentHeader from './ComponentHeader/ComponentHeader';
 import Dropdown from './Dropdown/Dropdown';
 import EditableInput from './EditableInput/EditableInput';
 import FieldGroup from './FieldGroup/FieldGroup';
+import InputAdornment from './InputAdornment/InputAdornment';
 import Popover, { PopoverCompound } from './Popover/Popover';
 import SearchInput from './SearchInput/SearchInput';
 import Section from './Section/Section';
@@ -37,6 +38,7 @@ export const UITools = {
   EditableInput,
   FieldGroup,
   GridColumnType,
+  InputAdornment,
   Popover,
   PopoverCompound,
   SearchInput,

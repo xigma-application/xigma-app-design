@@ -13,7 +13,7 @@ const rotateSnapshotPoint = (point: TPoint, snapshot: TVectorNodeRotateSnapshot)
 
 export const drawVectorNodeRotateSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeRotateSnapshot): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
-  const { gradientProgram, isAlphaWriteEnabled } = imageContext;
+  const { gradientProgram, isAlphaWriteEnabled, patternTileProgram } = imageContext;
   const rotatedStrokeVertices: number[] = [];
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
@@ -22,11 +22,13 @@ export const drawVectorNodeRotateSnapshot = (context: TDrawSceneContext, snapsho
       gl,
       program,
       gradientProgram,
+      patternTileProgram,
       buffer,
       null,
       null,
       rotatedFaces,
       paint,
+      [],
       canvasWidth,
       canvasHeight,
       viewport,

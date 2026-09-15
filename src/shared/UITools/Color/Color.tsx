@@ -15,17 +15,19 @@ export const Color: FC<TColorProps> = ({ alpha, className = '', color, cursor = 
 
   return (
     <div className={cx(styles.Color, { [styles['Color--cursor-default']]: cursor === 'default' }, className)}>
-      {dot ? (
-        <div className={styles.Color__dot} />
-      ) : (
-        <>
-          <div className={styles.Color__picker} style={{ backgroundColor: rgbToCssString({ ...rgb, a: 100 }) }} />
-          <div
-            className={styles['Color__picker-alpha']}
-            style={{ '--color-alpha-preview': rgbToCssString({ ...rgb, a: alpha }) } as CSSProperties}
-          />
-        </>
-      )}
+      <div className={styles.Color__wrapper}>
+        {dot ? (
+          <div className={styles.Color__dot} />
+        ) : (
+          <>
+            <div className={styles.Color__picker} style={{ backgroundColor: rgbToCssString({ ...rgb, a: 100 }) }} />
+            <div
+              className={styles['Color__picker-alpha']}
+              style={{ '--color-alpha-preview': rgbToCssString({ ...rgb, a: alpha }) } as CSSProperties}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };

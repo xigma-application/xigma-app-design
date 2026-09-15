@@ -1,18 +1,29 @@
 .Color {
-  border-radius: 2.5px;
+  align-items: center;
   cursor:
     /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
     -webkit-image-set(url('../../../assets/icons/cursors/sampler.png') 8x) 8 24,
     auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  height: 16px;
-  overflow: hidden;
-  position: relative;
-  width: 16px;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+
+  width: 24px;
 
   &--cursor-default {
     cursor: default;
+  }
+
+  &__wrapper {
+    align-items: center;
+    border-radius: 2.5px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    height: 16px;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    width: 16px;
   }
 
   &__picker {

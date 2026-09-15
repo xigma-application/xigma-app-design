@@ -1,6 +1,12 @@
 // utils
 import { drawVectorPatternFill } from '../drawVectorPatternFill';
 
+const drawVectorPatternSourceTileMock = vi.fn();
+
+vi.mock('../drawVectorPatternSourceTile', () => ({
+  drawVectorPatternSourceTile: (...args: unknown[]): void => drawVectorPatternSourceTileMock(...args),
+}));
+
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
@@ -43,14 +49,64 @@ const faces = [
 ];
 
 describe('drawVectorPatternFill', () => {
+  beforeEach(() => {
+    drawVectorPatternSourceTileMock.mockClear();
+  });
+
+  it('should delegate to drawVectorPatternSourceTile, not the dot-grid placeholder, once a source is resolved', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const sourceTile = { height: 10, texture: {} as WebGLTexture, width: 10, x: 0, y: 0 };
+
+    // before
+    drawVectorPatternFill(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      100,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+    );
+
+    // result
+    expect(drawVectorPatternSourceTileMock).toHaveBeenCalledWith(
+      gl,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      100,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+    );
+    expect(gl.enable).not.toHaveBeenCalled();
+  });
+
   it('should skip every GL call when there are no faces to fill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, buffer, null, null, [], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, [], null, 100, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -62,10 +118,11 @@ describe('drawVectorPatternFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — no background quad: the stencil-mask fan pass is followed directly by the dot-grid pass
     expect(gl.clear).toHaveBeenCalledWith(gl.STENCIL_BUFFER_BIT);
@@ -81,10 +138,11 @@ describe('drawVectorPatternFill', () => {
     // dot grid must not depend on it being set
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -95,15 +153,16 @@ describe('drawVectorPatternFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const nodeBounds = { height: 4, width: 4, x: 0, y: 0 };
 
     // before — a tiny 4x4 nodeBounds fits exactly one dot cell, versus many across the 40x40 faces bbox
-    drawVectorPatternFill(gl, program, buffer, null, nodeBounds, faces, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, nodeBounds, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
     const smallDotCount = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls[1][2];
 
     gl.drawArrays = vi.fn();
-    drawVectorPatternFill(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
     const largeDotCount = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls[1][2];
 
     // result
@@ -114,10 +173,11 @@ describe('drawVectorPatternFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false, 0.5);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false, 0.5);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 1, 1, 0.5]);
@@ -127,10 +187,11 @@ describe('drawVectorPatternFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 1, 1, 1]);

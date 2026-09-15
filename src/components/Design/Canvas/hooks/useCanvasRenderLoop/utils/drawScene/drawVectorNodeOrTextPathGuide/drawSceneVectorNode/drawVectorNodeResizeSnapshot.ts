@@ -29,7 +29,7 @@ const scalePoint = (point: TPoint, snapshot: TVectorNodeResizeSnapshot): TPoint 
 
 export const drawVectorNodeResizeSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeResizeSnapshot): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
-  const { gradientProgram, isAlphaWriteEnabled } = imageContext;
+  const { gradientProgram, isAlphaWriteEnabled, patternTileProgram } = imageContext;
 
   snapshot.facesByPaint.forEach(({ paint, points }) => {
     const scaledFaces = points.map((face) => face.map((point) => scalePoint(point, snapshot)));
@@ -37,11 +37,13 @@ export const drawVectorNodeResizeSnapshot = (context: TDrawSceneContext, snapsho
       gl,
       program,
       gradientProgram,
+      patternTileProgram,
       buffer,
       null,
       null,
       scaledFaces,
       paint,
+      [],
       canvasWidth,
       canvasHeight,
       viewport,

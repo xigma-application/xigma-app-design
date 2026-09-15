@@ -1,20 +1,21 @@
 import { useEffect } from 'react';
 
 // others
-import BLEND_COMPOSITE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/blendCompositeFragmentShaderSource';
-import CHECKERBOARD_FRAGMENT_SHADER_SOURCE from 'constant/webgl/checkerboardFragmentShaderSource';
-import FRAGMENT_SHADER_SOURCE from 'constant/webgl/fragmentShaderSource';
-import GRID_FRAGMENT_SHADER_SOURCE from 'constant/webgl/gridFragmentShaderSource';
-import GRID_VERTEX_SHADER_SOURCE from 'constant/webgl/gridVertexShaderSource';
-import IMAGE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/imageFragmentShaderSource';
-import IMAGE_VERTEX_SHADER_SOURCE from 'constant/webgl/imageVertexShaderSource';
-import MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE from 'constant/webgl/maskCompositeFragmentShaderSource';
-import MASK_COMPOSITE_VERTEX_SHADER_SOURCE from 'constant/webgl/maskCompositeVertexShaderSource';
-import MSDF_FRAGMENT_SHADER_SOURCE from 'constant/webgl/msdfFragmentShaderSource';
-import VECTOR_DRAG_VERTEX_SHADER_SOURCE from 'constant/webgl/vectorDragVertexShaderSource';
-import VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE from 'constant/webgl/vectorGradientFillFragmentShaderSource';
-import VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE from 'constant/webgl/vectorGradientFillVertexShaderSource';
-import VERTEX_SHADER_SOURCE from 'constant/webgl/vertexShaderSource';
+import blendCompositeFragmentShaderSource from 'constant/webgl/blendCompositeFragmentShaderSource';
+import checkerboardFragmentShaderSource from 'constant/webgl/checkerboardFragmentShaderSource';
+import fragmentShaderSource from 'constant/webgl/fragmentShaderSource';
+import gridFragmentShaderSource from 'constant/webgl/gridFragmentShaderSource';
+import gridVertexShaderSource from 'constant/webgl/gridVertexShaderSource';
+import imageFragmentShaderSource from 'constant/webgl/imageFragmentShaderSource';
+import imageVertexShaderSource from 'constant/webgl/imageVertexShaderSource';
+import maskCompositeFragmentShaderSource from 'constant/webgl/maskCompositeFragmentShaderSource';
+import maskCompositeVertexShaderSource from 'constant/webgl/maskCompositeVertexShaderSource';
+import msdfFragmentShaderSource from 'constant/webgl/msdfFragmentShaderSource';
+import patternSourceTileFragmentShaderSource from 'constant/webgl/patternSourceTileFragmentShaderSource';
+import vectorDragVertexShaderSource from 'constant/webgl/vectorDragVertexShaderSource';
+import vectorGradientFillFragmentShaderSource from 'constant/webgl/vectorGradientFillFragmentShaderSource';
+import vectorGradientFillVertexShaderSource from 'constant/webgl/vectorGradientFillVertexShaderSource';
+import vertexShaderSource from 'constant/webgl/vertexShaderSource';
 import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
 // types
@@ -28,23 +29,23 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
   useEffect(() => {
     const canvas = refs.canvasRef.current;
     const gl = canvas?.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES);
-    const program = gl && createProgram(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+    const program = gl && createProgram(gl, vertexShaderSource, fragmentShaderSource);
     const buffer = gl && gl.createBuffer();
-    const imageProgram = gl && createProgram(gl, IMAGE_VERTEX_SHADER_SOURCE, IMAGE_FRAGMENT_SHADER_SOURCE);
+    const imageProgram = gl && createProgram(gl, imageVertexShaderSource, imageFragmentShaderSource);
     const imageBuffer = gl && gl.createBuffer();
-    const msdfProgram = gl && createProgram(gl, IMAGE_VERTEX_SHADER_SOURCE, MSDF_FRAGMENT_SHADER_SOURCE);
+    const msdfProgram = gl && createProgram(gl, imageVertexShaderSource, msdfFragmentShaderSource);
     const msdfBuffer = gl && gl.createBuffer();
-    const gridProgram = gl && createProgram(gl, GRID_VERTEX_SHADER_SOURCE, GRID_FRAGMENT_SHADER_SOURCE);
+    const gridProgram = gl && createProgram(gl, gridVertexShaderSource, gridFragmentShaderSource);
     const gridBuffer = gl && gl.createBuffer();
-    const checkerboardProgram = gl && createProgram(gl, GRID_VERTEX_SHADER_SOURCE, CHECKERBOARD_FRAGMENT_SHADER_SOURCE);
-    const maskCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, MASK_COMPOSITE_FRAGMENT_SHADER_SOURCE);
+    const checkerboardProgram = gl && createProgram(gl, gridVertexShaderSource, checkerboardFragmentShaderSource);
+    const maskCompositeProgram = gl && createProgram(gl, maskCompositeVertexShaderSource, maskCompositeFragmentShaderSource);
     const maskCompositeBuffer = gl && gl.createBuffer();
-    const blendCompositeProgram = gl && createProgram(gl, MASK_COMPOSITE_VERTEX_SHADER_SOURCE, BLEND_COMPOSITE_FRAGMENT_SHADER_SOURCE);
+    const blendCompositeProgram = gl && createProgram(gl, maskCompositeVertexShaderSource, blendCompositeFragmentShaderSource);
     const blendCompositeBuffer = gl && gl.createBuffer();
-    const dragSnapshotProgram = gl && createProgram(gl, VECTOR_DRAG_VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
-    const gradientProgram = gl && createProgram(gl, VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE, VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE);
-    const dragGradientProgram =
-      gl && createProgram(gl, VECTOR_GRADIENT_FILL_VERTEX_SHADER_SOURCE, VECTOR_GRADIENT_FILL_FRAGMENT_SHADER_SOURCE);
+    const dragSnapshotProgram = gl && createProgram(gl, vectorDragVertexShaderSource, fragmentShaderSource);
+    const gradientProgram = gl && createProgram(gl, vectorGradientFillVertexShaderSource, vectorGradientFillFragmentShaderSource);
+    const dragGradientProgram = gl && createProgram(gl, vectorGradientFillVertexShaderSource, vectorGradientFillFragmentShaderSource);
+    const patternTileProgram = gl && createProgram(gl, vectorGradientFillVertexShaderSource, patternSourceTileFragmentShaderSource);
 
     if (
       canvas &&
@@ -64,7 +65,8 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       blendCompositeBuffer &&
       dragSnapshotProgram &&
       gradientProgram &&
-      dragGradientProgram
+      dragGradientProgram &&
+      patternTileProgram
     ) {
       const stopRenderLoop = setupRenderLoop(
         gl,
@@ -84,6 +86,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         dragSnapshotProgram,
         gradientProgram,
         dragGradientProgram,
+        patternTileProgram,
         canvas,
         refs,
       );
@@ -106,6 +109,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteProgram(dragSnapshotProgram);
         gl.deleteProgram(gradientProgram);
         gl.deleteProgram(dragGradientProgram);
+        gl.deleteProgram(patternTileProgram);
       };
     }
   }, [refs]);

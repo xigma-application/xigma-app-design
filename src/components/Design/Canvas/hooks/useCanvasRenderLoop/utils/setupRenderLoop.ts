@@ -24,6 +24,7 @@ export const setupRenderLoop = (
   dragSnapshotProgram: WebGLProgram,
   gradientProgram: WebGLProgram,
   dragGradientProgram: WebGLProgram,
+  patternTileProgram: WebGLProgram,
   canvas: HTMLCanvasElement,
   refs: TCanvasRefs,
 ): (() => void) => {
@@ -51,6 +52,7 @@ export const setupRenderLoop = (
     maskCompositeProgram,
     msdfBuffer,
     msdfProgram,
+    patternTileProgram,
     program: imageProgram,
     renderTargetPool: createRenderTargetPool(gl),
     strokeBufferCache: new WeakMap(),

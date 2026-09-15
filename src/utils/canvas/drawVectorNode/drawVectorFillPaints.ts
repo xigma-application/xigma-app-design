@@ -7,22 +7,25 @@ import { TViewport } from 'types/design/types';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorGradientFill } from './drawVectorGradientFill';
 import { drawVectorPatternFill } from './drawVectorPatternFill';
+import { TPatternSourceTile } from './drawVectorPatternSourceTile';
 
 export const drawVectorFillPaints = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   gradientProgram: WebGLProgram,
+  patternTileProgram: WebGLProgram,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
   nodeBounds: TDraftRect | null,
   faces: TPoint[][],
   paints: TPaint[],
+  patternSourceTiles: (TPatternSourceTile | null)[],
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
 ): void => {
-  paints.forEach((paint) => {
+  paints.forEach((paint, index) => {
     if (paint.visible !== false) {
       const alpha = paint.opacity / 100;
 
@@ -45,10 +48,13 @@ export const drawVectorFillPaints = (
         drawVectorPatternFill(
           gl,
           program,
+          patternTileProgram,
           buffer,
           faceBufferCache,
           nodeBounds,
           faces,
+          patternSourceTiles[index] ?? null,
+          paint.scale,
           canvasWidth,
           canvasHeight,
           viewport,

@@ -58,6 +58,7 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const GRADIENT_PROGRAM = {} as WebGLProgram;
+const PATTERN_TILE_PROGRAM = {} as WebGLProgram;
 
 const createContext = (gl: WebGL2RenderingContext, pool: TRenderTargetPool): TDrawSceneContext =>
   ({
@@ -68,6 +69,7 @@ const createContext = (gl: WebGL2RenderingContext, pool: TRenderTargetPool): TDr
     imageContext: {
       gradientProgram: GRADIENT_PROGRAM,
       isAlphaWriteEnabled: false,
+      patternTileProgram: PATTERN_TILE_PROGRAM,
       renderTargetPool: pool,
     } as unknown as TImageRenderContext,
     program: {} as WebGLProgram,
@@ -95,11 +97,13 @@ describe('drawVectorFillGroup', () => {
       gl,
       context.program,
       GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
       context.buffer,
       null,
       null,
       polygons,
       paint,
+      [],
       200,
       200,
       context.viewport,
@@ -141,11 +145,13 @@ describe('drawVectorFillGroup', () => {
       gl,
       context.program,
       GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
       context.buffer,
       null,
       null,
       polygons,
       paint,
+      [],
       200,
       200,
       context.viewport,

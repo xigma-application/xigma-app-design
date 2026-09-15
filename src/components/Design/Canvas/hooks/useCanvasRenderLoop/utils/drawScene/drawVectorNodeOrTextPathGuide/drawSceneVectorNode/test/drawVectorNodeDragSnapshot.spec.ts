@@ -26,6 +26,7 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const DRAG_GRADIENT_PROGRAM = {} as WebGLProgram;
+const PATTERN_TILE_PROGRAM = {} as WebGLProgram;
 
 const buildContext = (
   gl: WebGL2RenderingContext,
@@ -44,6 +45,7 @@ const buildContext = (
     dragSnapshotProgram,
     dragSnapshotStrokeBufferCache,
     isAlphaWriteEnabled: false,
+    patternTileProgram: PATTERN_TILE_PROGRAM,
   } as TDrawSceneContext['imageContext'],
   program: {} as WebGLProgram,
   viewport: IDENTITY_VIEWPORT,
@@ -111,11 +113,13 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       DRAG_GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
       buffer,
       faceBufferCache,
       null,
       [faceA],
       snapshot.facesByPaint[0].paint,
+      [],
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -126,11 +130,13 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       DRAG_GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
       buffer,
       faceBufferCache,
       null,
       [faceB],
       snapshot.facesByPaint[1].paint,
+      [],
       200,
       150,
       IDENTITY_VIEWPORT,

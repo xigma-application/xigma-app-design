@@ -9,6 +9,7 @@ import { compositeBlend } from '../../compositeBlend';
 import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFillPaints';
 import { getFaceGroupBlendMode } from './getFaceGroupBlendMode';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
+import { TPatternSourceTile } from 'utils/canvas/drawVectorNode/drawVectorPatternSourceTile';
 
 const drawIsolatedFillGroup = (
   context: TDrawSceneContext,
@@ -16,6 +17,7 @@ const drawIsolatedFillGroup = (
   nodeBounds: TDraftRect | null,
   polygons: TPoint[][],
   paint: TPaint[],
+  patternSourceTiles: (TPatternSourceTile | null)[],
   blendMode: BlendMode,
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
@@ -48,11 +50,13 @@ const drawIsolatedFillGroup = (
     gl,
     program,
     imageContext.gradientProgram,
+    imageContext.patternTileProgram,
     buffer,
     faceBufferCache,
     nodeBounds,
     polygons,
     paint,
+    patternSourceTiles,
     canvasWidth,
     canvasHeight,
     viewport,
@@ -76,11 +80,12 @@ export const drawVectorFillGroup = (
   nodeBounds: TDraftRect | null,
   polygons: TPoint[][],
   paint: TPaint[],
+  patternSourceTiles: (TPatternSourceTile | null)[] = [],
 ): void => {
   const blendMode = getFaceGroupBlendMode(paint);
 
   if (blendMode) {
-    drawIsolatedFillGroup(context, faceBufferCache, nodeBounds, polygons, paint, blendMode);
+    drawIsolatedFillGroup(context, faceBufferCache, nodeBounds, polygons, paint, patternSourceTiles, blendMode);
   } else {
     const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
 
@@ -88,11 +93,13 @@ export const drawVectorFillGroup = (
       gl,
       program,
       imageContext.gradientProgram,
+      imageContext.patternTileProgram,
       buffer,
       faceBufferCache,
       nodeBounds,
       polygons,
       paint,
+      patternSourceTiles,
       canvasWidth,
       canvasHeight,
       viewport,

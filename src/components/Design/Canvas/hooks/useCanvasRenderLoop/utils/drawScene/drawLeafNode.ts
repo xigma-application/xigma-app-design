@@ -27,6 +27,7 @@ export const drawLeafNode = (
   refs: TCanvasRefs,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
+  patternSourceDepth = 0,
 ): void => {
   const node = getGridDragRenderNode(refs, getAutoLayoutReorderRenderNode(refs, rawNode, nodesById), nodesById);
   const opacity = getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(refs, node.id);
@@ -60,6 +61,6 @@ export const drawLeafNode = (
       drawTextLeafNode(context, node, nodesById);
       break;
     default:
-      drawBoxLeafNode(context, node, opacity);
+      drawBoxLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
   }
 };

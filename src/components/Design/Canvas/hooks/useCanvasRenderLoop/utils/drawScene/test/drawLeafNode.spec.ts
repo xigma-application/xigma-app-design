@@ -104,6 +104,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
+      [null],
     );
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
@@ -130,6 +131,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.5),
+      [null],
     );
     expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined, 0.5);
   });
@@ -153,6 +155,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(previewNode)],
       getScaledFillPaints(previewNode.fills, 1),
+      [null],
     );
   });
 
@@ -171,6 +174,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
+      [null],
     );
   });
 
@@ -196,6 +200,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
+      [null],
     );
   });
 
@@ -229,6 +234,7 @@ describe('drawLeafNode', () => {
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.25),
+      [null],
     );
   });
 

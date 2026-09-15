@@ -2,12 +2,12 @@
   align-items: center;
   border-radius: 5px;
   box-sizing: border-box;
-  column-gap: 5px;
   display: flex;
   flex: 1;
   height: 24px;
   min-width: 0;
-  padding: 0 5px;
+  padding: 0 8px;
+  padding-left: 0;
 
   &--filled {
     background-color: var(--color-surface);
@@ -39,6 +39,7 @@
     outline: none;
     overflow: hidden;
     padding: 0;
+    padding-right: 5px;
     text-overflow: ellipsis;
     white-space: nowrap;
 
@@ -53,5 +54,6 @@
 
   &__endAdornment {
     display: contents;
+    margin: 0 auto;
   }
 }

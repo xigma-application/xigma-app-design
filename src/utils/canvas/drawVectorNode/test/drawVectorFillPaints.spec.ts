@@ -22,6 +22,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const gradientProgram = {} as WebGLProgram;
+const patternTileProgram = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 const faces = [[{ x: 0, y: 0 }]];
 
@@ -37,7 +38,22 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [solid],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledWith(
@@ -62,7 +78,22 @@ describe('drawVectorFillPaints', () => {
     const solid: TSolidPaint = { color: '#00ff00', opacity: 40, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [solid], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [solid],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorFillMock).toHaveBeenLastCalledWith(
@@ -87,7 +118,22 @@ describe('drawVectorFillPaints', () => {
     const top: TSolidPaint = { color: '#222222', opacity: 50, type: 'solid' };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [bottom, top], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [bottom, top],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
@@ -100,7 +146,22 @@ describe('drawVectorFillPaints', () => {
     const hidden: TSolidPaint = { color: '#000000', opacity: 100, type: 'solid', visible: false };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [hidden], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [hidden],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
@@ -118,7 +179,22 @@ describe('drawVectorFillPaints', () => {
     };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [gradient], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [gradient],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorGradientFillMock).toHaveBeenCalledWith(
@@ -143,7 +219,22 @@ describe('drawVectorFillPaints', () => {
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [image], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
@@ -165,10 +256,40 @@ describe('drawVectorFillPaints', () => {
     };
 
     // before
-    drawVectorFillPaints(gl, program, gradientProgram, buffer, null, null, faces, [pattern], 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      [pattern],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
-    expect(drawVectorPatternFillMock).toHaveBeenCalledWith(gl, program, buffer, null, null, faces, 100, 100, IDENTITY_VIEWPORT, false, 1);
+    expect(drawVectorPatternFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      null,
+      100,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+    );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });

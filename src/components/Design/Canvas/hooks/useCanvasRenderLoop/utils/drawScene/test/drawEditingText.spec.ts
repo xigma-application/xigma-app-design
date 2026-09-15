@@ -56,6 +56,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   maskCompositeProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
+  patternTileProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
   renderTargetPool: {} as TImageRenderContext['renderTargetPool'],
   strokeBufferCache: new WeakMap(),
