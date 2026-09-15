@@ -2532,6 +2532,57 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 730, 210)).toEqual([0, 255, 0]);
   });
 
+  test('a numeric pattern offset nudges the tile grid independently of the alignment point', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-offset-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a small 20x20 source rectangle, filled pure green
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    // action — picking a source closes the picker popover, so reopen it, then add a 100% gap
+    // (a 20px tile plus a 20px gap, a 40px period)
+    await page.getByLabel('Hex color').click();
+
+    const spacingXInput = page.locator('[data-test-text-field-input="pattern-spacing-x"]');
+
+    await spacingXInput.fill('100');
+    await spacingXInput.blur();
+
+    // result — before any offset, the first tile cell (700-720) is green and the gap (720-740) is not
+    expect(await readPixelColor(page, 710, 210)).toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 210)).not.toEqual([0, 255, 0]);
+
+    // action — nudge the grid by exactly half the 40px period
+    const offsetXInput = page.locator('[data-test-text-field-input="pattern-offset-x"]');
+
+    await offsetXInput.fill('20');
+    await offsetXInput.blur();
+
+    // result — the tile and gap swap places: what was a tile is now a gap, and vice versa
+    expect(await readPixelColor(page, 710, 210)).not.toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 210)).toEqual([0, 255, 0]);
+  });
+
   test('hexagonal tiling with horizontal direction offsets alternate rows, creating a brick pattern', async ({ page }) => {
     const designPage = new DesignPage(page);
 

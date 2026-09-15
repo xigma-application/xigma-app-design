@@ -35,6 +35,7 @@
   "colorPicker.pattern.direction.horizontal": "Horizontal",
   "colorPicker.pattern.direction.vertical": "Vertical",
   "colorPicker.pattern.directionLabel": "Direction",
+  "colorPicker.pattern.offsetLabel": "Offset",
   "colorPicker.pattern.scaleLabel": "Scale",
   "colorPicker.pattern.selectSourceLabel": "Select source...",
   "colorPicker.pattern.spacingLabel": "Spacing",

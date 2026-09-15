@@ -8,14 +8,21 @@ export type TUsePatternFieldCommitResult = {
   onKeyDown: TFunc<[KeyboardEvent<HTMLInputElement>]>;
 };
 
-const commitPatternFieldValue = (input: HTMLInputElement, value: number, min: number, max: number, onCommit: TFunc<[number]>): void => {
-  const rawValue = input.value.replace('%', '').trim();
+const commitPatternFieldValue = (
+  input: HTMLInputElement,
+  value: number,
+  min: number,
+  max: number,
+  suffix: string,
+  onCommit: TFunc<[number]>,
+): void => {
+  const rawValue = input.value.replace(suffix, '').trim();
   const parsed = Number(rawValue);
 
   if (rawValue !== '' && !Number.isNaN(parsed)) {
     onCommit(clamp(parsed, min, max));
   } else {
-    input.value = `${value}%`;
+    input.value = `${value}${suffix}`;
   }
 };
 
@@ -23,12 +30,13 @@ export const usePatternFieldCommit = (
   value: number,
   min: number,
   max: number,
+  suffix: string,
   onCommit: TFunc<[number]>,
 ): TUsePatternFieldCommitResult => ({
-  onBlur: (event): void => commitPatternFieldValue(event.target, value, min, max, onCommit),
+  onBlur: (event): void => commitPatternFieldValue(event.target, value, min, max, suffix, onCommit),
   onKeyDown: (event): void => {
     if (event.key === 'Enter') {
-      commitPatternFieldValue(event.currentTarget, value, min, max, onCommit);
+      commitPatternFieldValue(event.currentTarget, value, min, max, suffix, onCommit);
       event.currentTarget.blur();
     }
   },

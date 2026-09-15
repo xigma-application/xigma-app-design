@@ -22,6 +22,9 @@ import { TPatternDirection, TPatternTileType } from 'types/design/paint/types';
 import { buildDirectionButtons } from '../utils/buildDirectionButtons';
 import { buildTileTypeButtons } from '../utils/buildTileTypeButtons';
 
+const OFFSET_MAX = 1000;
+const OFFSET_MIN = -1000;
+
 export type TPatternSettingsProps = { onDragEnd?: TFunc; onDragStart?: TFunc; patternPanel: TUsePatternPanelResult };
 
 export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragStart, patternPanel }) => {
@@ -29,9 +32,13 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
   const {
     alignmentIndex,
     direction,
+    offsetX,
+    offsetY,
     scale,
     setAlignmentIndex,
     setDirection,
+    setOffsetX,
+    setOffsetY,
     setScale,
     setSpacingX,
     setSpacingY,
@@ -95,6 +102,36 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
           value={spacingY}
+        />
+      </div>
+      <div className={styles.PatternSettings__row}>
+        <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.offsetLabel`)}</span>
+        <PatternField
+          ariaLabel={`${t(`${translationNameSpace}.offsetLabel`)} X`}
+          e2eValue="pattern-offset-x"
+          label="X"
+          max={OFFSET_MAX}
+          min={OFFSET_MIN}
+          onChange={setOffsetX}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          suffix="px"
+          value={offsetX}
+        />
+      </div>
+      <div className={styles.PatternSettings__row}>
+        <span className={styles.PatternSettings__label} />
+        <PatternField
+          ariaLabel={`${t(`${translationNameSpace}.offsetLabel`)} Y`}
+          e2eValue="pattern-offset-y"
+          label="Y"
+          max={OFFSET_MAX}
+          min={OFFSET_MIN}
+          onChange={setOffsetY}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          suffix="px"
+          value={offsetY}
         />
       </div>
       <div className={styles['PatternSettings__aligment-wrapper']}>

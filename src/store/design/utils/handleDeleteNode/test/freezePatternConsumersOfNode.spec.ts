@@ -62,6 +62,8 @@ const patternRect = (id: string, sourceNodeId: string | null, overrides: Partial
     {
       alignmentIndex: 0,
       direction: 'horizontal',
+      offsetX: 0,
+      offsetY: 0,
       opacity: 100,
       scale: 100,
       sourceNodeId,

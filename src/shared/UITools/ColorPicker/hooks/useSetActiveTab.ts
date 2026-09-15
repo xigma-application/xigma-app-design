@@ -37,6 +37,8 @@ export const useSetActiveTab =
           onPatternChange?.({
             alignmentIndex: patternPanel.alignmentIndex,
             direction: patternPanel.direction,
+            offsetX: patternPanel.offsetX,
+            offsetY: patternPanel.offsetY,
             scale: patternPanel.scale,
             spacingX: patternPanel.spacingX,
             spacingY: patternPanel.spacingY,

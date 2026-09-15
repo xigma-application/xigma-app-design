@@ -269,6 +269,8 @@ describe('FillRow behaviors', () => {
       paint: {
         alignmentIndex: 0,
         direction: 'horizontal',
+        offsetX: 0,
+        offsetY: 0,
         opacity: 60,
         scale: 100,
         spacingX: 0,

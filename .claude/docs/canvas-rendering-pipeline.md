@@ -495,6 +495,16 @@ matching edge/center/edge of the shape's own bounds, computed independently per 
 col → X). At the defaults (`spacingX`/`spacingY: 0`, `alignmentIndex: 0`) this reduces to exactly the
 old flush-top-left tiling, so no visual regression for existing pattern fills.
 
+`offsetX`/`offsetY` (plain world-space pixels, unlike every other pattern field which is a `%`) add a
+free-form nudge on top of the `alignmentIndex` grid rather than replacing it — `getPatternTileGridFractions.ts`
+just adds `paint.offsetX/offsetY` (divided by bounds size, same as the alignment offset) into the same
+`alignFrac` value, so picking a coarse corner/center via the 3×3 grid and then fine-tuning with a
+numeric offset compose naturally. This is also why `PatternField.tsx` (`usePatternFieldCommit.ts`)
+needed generalizing: every prior field (`scale`/`spacingX`/`spacingY`) was a hardcoded `%`-suffixed,
+0-1000-clamped percentage, but an offset needs a `px` suffix and a negative-allowed range, so both
+now take `min`/`max`/`suffix` props (defaulting to the old 0/1000/`%` behavior) instead of hardcoding
+them.
+
 `tileType: 'hexagonal'`/`direction` are read too, but note this isn't literal hexagon-shaped tiles —
 same as Figma's own "Hex Horizontal"/"Hex Vertical" pattern fill, it's a brick-style offset of
 alternating rows or columns by half a tile, still built from the same rectangular tile texture.

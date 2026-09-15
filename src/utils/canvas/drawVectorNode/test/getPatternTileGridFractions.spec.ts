@@ -9,6 +9,8 @@ const buildBounds = (overrides: Partial<TDraftRect> = {}): TDraftRect => ({ heig
 const buildPaint = (overrides: Partial<TPatternPaint> = {}): TPatternPaint => ({
   alignmentIndex: 0,
   direction: 'horizontal',
+  offsetX: 0,
+  offsetY: 0,
   opacity: 100,
   scale: 100,
   spacingX: 0,
@@ -81,6 +83,22 @@ describe('getPatternTileGridFractions', () => {
 
     // result — x flush right (30/40), y centered (15/40)
     expect(result.alignFrac).toEqual({ x: 0.75, y: 0.375 });
+  });
+
+  it('should nudge the grid by offsetX/offsetY on top of the default top-left alignment', () => {
+    // before — 5px offset as a fraction of the 40px bounds is 0.125
+    const result = getPatternTileGridFractions(buildBounds(), 10, 10, buildPaint({ offsetX: 5, offsetY: -5 }));
+
+    // result
+    expect(result.alignFrac).toEqual({ x: 0.125, y: -0.125 });
+  });
+
+  it('should add the offset on top of a non-default alignment point, not replace it', () => {
+    // before — center alignment (0.375) plus a 5px offset (0.125) = 0.5
+    const result = getPatternTileGridFractions(buildBounds(), 10, 10, buildPaint({ alignmentIndex: 4, offsetX: 5, offsetY: 5 }));
+
+    // result
+    expect(result.alignFrac).toEqual({ x: 0.5, y: 0.5 });
   });
 
   it('should fall back to a safe divisor when bounds are zero-sized, avoiding division by zero', () => {

@@ -210,6 +210,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 441 | Hexagonal tiling with Horizontal direction offsets alternate rows, creating a brick pattern                       |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                      |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 444 | A numeric pattern offset (X/Y, in px) nudges the tile grid independently of the alignment point                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -570,3 +571,10 @@ entirely") is to disallow `sourceNodeId` chains outright rather than detect cycl
 graph — a node (or anything in its own subtree, for a Frame source) that already has any `'pattern'`
 fill can never be picked as someone else's source. If C should look like A, C must pick A directly;
 routing through B (which itself consumes A) is refused the same way self-picking already was.
+
+#444 is the last field from the original design question's panel wishlist ("x y, file type, direction
+i scale") that hadn't actually been built: a free-form numeric offset, distinct from the 3×3
+`alignmentIndex` grid's 9 discrete positions. It composes with alignment rather than replacing it
+(offset nudges on top of whichever alignment point is picked), and needed generalizing `PatternField`
+to support a `px` suffix and negative values, since every prior field on this panel was a `%`-only,
+0-1000-clamped percentage.

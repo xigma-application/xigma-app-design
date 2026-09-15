@@ -14,6 +14,8 @@ const EXISTING_PATTERN_PAINT: TPatternPaint = {
   alignmentIndex: 0,
   direction: 'horizontal',
   frozenSourceSnapshot: null,
+  offsetX: 0,
+  offsetY: 0,
   opacity: 100,
   scale: 100,
   sourceNodeId: 'source-1',
@@ -34,6 +36,8 @@ const GRADIENT_PAINT: TGradientPaint = {
 const CHANGE: TPatternPanelChange = {
   alignmentIndex: 2,
   direction: 'vertical',
+  offsetX: 0,
+  offsetY: 0,
   scale: 150,
   spacingX: 5,
   spacingY: 10,

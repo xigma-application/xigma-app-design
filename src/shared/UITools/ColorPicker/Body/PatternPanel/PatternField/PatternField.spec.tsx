@@ -69,6 +69,50 @@ describe('PatternField behaviors', () => {
     expect(input.value).toBe('40%');
   });
 
+  it('should use a custom suffix instead of "%" when given one', () => {
+    // before
+    render(<PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" onChange={vi.fn()} suffix="px" value={0} />);
+
+    // result
+    expect(screen.getByDisplayValue('0px')).toBeInTheDocument();
+  });
+
+  it('should allow a negative value when a custom negative min is given', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    render(
+      <PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" max={500} min={-500} onChange={onChange} suffix="px" value={0} />,
+    );
+    const input = screen.getByDisplayValue('0px');
+
+    // action
+    fireEvent.change(input, { target: { value: '-200' } });
+    fireEvent.blur(input);
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(-200);
+  });
+
+  it('should clamp to a custom max instead of the default 1000', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    render(
+      <PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" max={500} min={-500} onChange={onChange} suffix="px" value={0} />,
+    );
+    const input = screen.getByDisplayValue('0px');
+
+    // action
+    fireEvent.change(input, { target: { value: '9000' } });
+    fireEvent.blur(input);
+
+    // result
+    expect(onChange).toHaveBeenCalledWith(500);
+  });
+
   it('should commit and blur the field when Enter is pressed', () => {
     // mock
     const onChange = vi.fn();

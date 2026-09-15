@@ -46,6 +46,8 @@ export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
   direction: TPatternDirection;
   frozenSourceSnapshot?: TSceneNode[] | null;
+  offsetX: number;
+  offsetY: number;
   scale: number;
   sourceNodeId?: string | null;
   spacingX: number;

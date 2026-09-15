@@ -52,6 +52,8 @@ const sourceTile = { height: 10, texture, width: 10, x: 0, y: 0 };
 const buildPaint = (overrides: Partial<TPatternPaint> = {}): TPatternPaint => ({
   alignmentIndex: 0,
   direction: 'horizontal',
+  offsetX: 0,
+  offsetY: 0,
   opacity: 100,
   scale: 100,
   spacingX: 0,

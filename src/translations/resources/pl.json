@@ -35,6 +35,7 @@
   "colorPicker.pattern.direction.horizontal": "Poziomo",
   "colorPicker.pattern.direction.vertical": "Pionowo",
   "colorPicker.pattern.directionLabel": "Kierunek",
+  "colorPicker.pattern.offsetLabel": "Przesunięcie",
   "colorPicker.pattern.scaleLabel": "Skala",
   "colorPicker.pattern.selectSourceLabel": "Wybierz źródło...",
   "colorPicker.pattern.spacingLabel": "Odstęp",

@@ -7,6 +7,8 @@ describe('getInitialPatternFromPaint', () => {
       getInitialPatternFromPaint({
         alignmentIndex: 4,
         direction: 'vertical',
+        offsetX: 0,
+        offsetY: 0,
         opacity: 100,
         scale: 150,
         spacingX: 10,
@@ -17,6 +19,8 @@ describe('getInitialPatternFromPaint', () => {
     ).toEqual({
       alignmentIndex: 4,
       direction: 'vertical',
+      offsetX: 0,
+      offsetY: 0,
       scale: 150,
       spacingX: 10,
       spacingY: 20,

@@ -15,7 +15,7 @@ describe('usePatternFieldCommit', () => {
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(50, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(50, 0, 1000, '%', onCommit));
 
     // action
     result.current.onBlur(createBlurEvent('2000'));
@@ -29,7 +29,7 @@ describe('usePatternFieldCommit', () => {
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, '%', onCommit));
 
     // action
     result.current.onBlur(createBlurEvent('60%'));
@@ -38,12 +38,26 @@ describe('usePatternFieldCommit', () => {
     expect(onCommit).toHaveBeenCalledWith(60);
   });
 
-  it('should not commit a non-numeric value and restore the previous value with a % sign', () => {
+  it('should strip a different suffix (e.g. "px") before parsing', () => {
     // mock
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(40, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(0, -1000, 1000, 'px', onCommit));
+
+    // action
+    result.current.onBlur(createBlurEvent('60px'));
+
+    // result
+    expect(onCommit).toHaveBeenCalledWith(60);
+  });
+
+  it('should not commit a non-numeric value and restore the previous value with the suffix', () => {
+    // mock
+    const onCommit = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePatternFieldCommit(40, 0, 1000, '%', onCommit));
     const event = createBlurEvent('abc');
 
     // action
@@ -59,7 +73,7 @@ describe('usePatternFieldCommit', () => {
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(40, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(40, 0, 1000, '%', onCommit));
     const event = createBlurEvent('');
 
     // action
@@ -75,7 +89,7 @@ describe('usePatternFieldCommit', () => {
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(50, 10, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(50, 10, 1000, '%', onCommit));
 
     // action
     result.current.onBlur(createBlurEvent('-20'));
@@ -84,12 +98,26 @@ describe('usePatternFieldCommit', () => {
     expect(onCommit).toHaveBeenCalledWith(10);
   });
 
+  it('should allow a negative minimum, for fields like a pattern offset', () => {
+    // mock
+    const onCommit = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePatternFieldCommit(0, -500, 500, 'px', onCommit));
+
+    // action
+    result.current.onBlur(createBlurEvent('-200'));
+
+    // result
+    expect(onCommit).toHaveBeenCalledWith(-200);
+  });
+
   it('should commit and blur the field when Enter is pressed', () => {
     // mock
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, '%', onCommit));
     const event = createKeyDownEvent('75', 'Enter');
 
     // action
@@ -105,7 +133,7 @@ describe('usePatternFieldCommit', () => {
     const onCommit = vi.fn();
 
     // before
-    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, onCommit));
+    const { result } = renderHook(() => usePatternFieldCommit(0, 0, 1000, '%', onCommit));
 
     // action
     result.current.onKeyDown(createKeyDownEvent('40', 'Tab'));

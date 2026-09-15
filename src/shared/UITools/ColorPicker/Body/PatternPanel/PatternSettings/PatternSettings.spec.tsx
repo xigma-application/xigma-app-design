@@ -15,6 +15,8 @@ const buildPatternPanel = (overrides: Partial<TUsePatternPanelResult> = {}): TUs
   reset: vi.fn(),
   setAlignmentIndex: vi.fn(),
   setDirection: vi.fn(),
+  setOffsetX: vi.fn(),
+  setOffsetY: vi.fn(),
   setScale: vi.fn(),
   setSpacingX: vi.fn(),
   setSpacingY: vi.fn(),

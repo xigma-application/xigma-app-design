@@ -31,7 +31,10 @@ export const getPatternTileGridFractions = (
   const alignOffsetY = getAxisAlignOffset(row, bounds.height, tileWorldHeight);
 
   return {
-    alignFrac: { x: alignOffsetX / safeBoundsWidth, y: alignOffsetY / safeBoundsHeight },
+    alignFrac: {
+      x: (alignOffsetX + paint.offsetX) / safeBoundsWidth,
+      y: (alignOffsetY + paint.offsetY) / safeBoundsHeight,
+    },
     periodFrac: { x: periodWidth / safeBoundsWidth, y: periodHeight / safeBoundsHeight },
     tileFrac: { x: tileWorldWidth / safeBoundsWidth, y: tileWorldHeight / safeBoundsHeight },
   };

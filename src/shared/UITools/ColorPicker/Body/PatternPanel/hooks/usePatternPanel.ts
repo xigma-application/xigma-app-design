@@ -11,6 +11,8 @@ export type TUsePatternPanelResult = TPatternPanelState & {
   reset: TFunc;
   setAlignmentIndex: TFunc<[number]>;
   setDirection: TFunc<[TPatternDirection]>;
+  setOffsetX: TFunc<[number]>;
+  setOffsetY: TFunc<[number]>;
   setScale: TFunc<[number]>;
   setSpacingX: TFunc<[number]>;
   setSpacingY: TFunc<[number]>;
@@ -46,6 +48,8 @@ export const usePatternPanel = (
     reset: (): void => setState(DEFAULT_PATTERN_PANEL_STATE),
     setAlignmentIndex: (alignmentIndex): void => commit({ ...state, alignmentIndex }),
     setDirection: (direction): void => commit({ ...state, direction }),
+    setOffsetX: (offsetX): void => commit({ ...state, offsetX }),
+    setOffsetY: (offsetY): void => commit({ ...state, offsetY }),
     setScale: (scale): void => commit({ ...state, scale }),
     setSpacingX: (spacingX): void => commit({ ...state, spacingX }),
     setSpacingY: (spacingY): void => commit({ ...state, spacingY }),
