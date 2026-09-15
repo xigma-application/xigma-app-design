@@ -3,6 +3,7 @@ import { PATTERN_PLACEHOLDER_DOT_COLOR } from 'constant/canvas';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
+import { TPatternPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -52,7 +53,7 @@ export const drawVectorPatternFill = (
   nodeBounds: TDraftRect | null,
   faces: TPoint[][],
   sourceTile: TPatternSourceTile | null,
-  scale: number,
+  paint: TPatternPaint,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -69,7 +70,7 @@ export const drawVectorPatternFill = (
         nodeBounds,
         faces,
         sourceTile,
-        scale,
+        paint,
         canvasWidth,
         canvasHeight,
         viewport,

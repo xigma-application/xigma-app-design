@@ -1,3 +1,6 @@
+// types
+import { TPatternPaint } from 'types/design/paint/types';
+
 // utils
 import { drawVectorPatternFill } from '../drawVectorPatternFill';
 
@@ -39,6 +42,16 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const pattern: TPatternPaint = {
+  alignmentIndex: 0,
+  direction: 'horizontal',
+  opacity: 100,
+  scale: 100,
+  spacingX: 0,
+  spacingY: 0,
+  tileType: 'rectangular',
+  type: 'pattern',
+};
 const faces = [
   [
     { x: 0, y: 0 },
@@ -71,7 +84,7 @@ describe('drawVectorPatternFill', () => {
       null,
       faces,
       sourceTile,
-      100,
+      pattern,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -88,7 +101,7 @@ describe('drawVectorPatternFill', () => {
       null,
       faces,
       sourceTile,
-      100,
+      pattern,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -106,7 +119,7 @@ describe('drawVectorPatternFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, [], null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, [], null, pattern, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -122,7 +135,7 @@ describe('drawVectorPatternFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, pattern, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — no background quad: the stencil-mask fan pass is followed directly by the dot-grid pass
     expect(gl.clear).toHaveBeenCalledWith(gl.STENCIL_BUFFER_BIT);
@@ -142,7 +155,7 @@ describe('drawVectorPatternFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, pattern, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -158,11 +171,25 @@ describe('drawVectorPatternFill', () => {
     const nodeBounds = { height: 4, width: 4, x: 0, y: 0 };
 
     // before — a tiny 4x4 nodeBounds fits exactly one dot cell, versus many across the 40x40 faces bbox
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, nodeBounds, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      nodeBounds,
+      faces,
+      null,
+      pattern,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
     const smallDotCount = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls[1][2];
 
     gl.drawArrays = vi.fn();
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, pattern, 100, 100, IDENTITY_VIEWPORT, false);
     const largeDotCount = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls[1][2];
 
     // result
@@ -177,7 +204,22 @@ describe('drawVectorPatternFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false, 0.5);
+    drawVectorPatternFill(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      null,
+      pattern,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+    );
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 1, 1, 0.5]);
@@ -191,7 +233,7 @@ describe('drawVectorPatternFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternFill(gl, program, patternTileProgram, buffer, null, null, faces, null, pattern, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 1, 1, 1]);

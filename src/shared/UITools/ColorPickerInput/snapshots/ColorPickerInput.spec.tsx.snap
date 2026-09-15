@@ -23,13 +23,17 @@ exports[`ColorPickerInput snapshots > should render the swatch trigger, the hex 
             class="_Color_a21594 _Color--cursor-default_a21594"
           >
             <div
-              class="_Color__picker_a21594"
-              style="background-color: rgb(68, 68, 68);"
-            />
-            <div
-              class="_Color__picker-alpha_a21594"
-              style="--color-alpha-preview: rgba(68, 68, 68, 1);"
-            />
+              class="_Color__wrapper_a21594"
+            >
+              <div
+                class="_Color__picker_a21594"
+                style="background-color: rgb(68, 68, 68);"
+              />
+              <div
+                class="_Color__picker-alpha_a21594"
+                style="--color-alpha-preview: rgba(68, 68, 68, 1);"
+              />
+            </div>
           </div>
         </button>
         <input

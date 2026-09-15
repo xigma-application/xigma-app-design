@@ -2,9 +2,8 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
 import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComponentButton';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
@@ -18,9 +17,7 @@ const FrameHeaderButtons: FC = () => {
   return (
     <div className={styles.FrameHeaderButtons}>
       <Tooltip align="end" content={t(`${translationNameSpace}.htmlTagTooltip`)}>
-        <Button ariaLabel={t(`${translationNameSpace}.htmlTagAriaLabel`)} onClick={() => {}} style={{ padding: 0 }}>
-          <Icon name="HtmlTag" size={24} />
-        </Button>
+        <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.htmlTagAriaLabel`)} name="HtmlTag" />
       </Tooltip>
       <PanelHeaderComponentButton />
     </div>

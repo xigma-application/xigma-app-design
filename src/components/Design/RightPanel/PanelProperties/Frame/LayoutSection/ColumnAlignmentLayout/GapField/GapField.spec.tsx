@@ -148,4 +148,12 @@ describe('GapField behaviors', () => {
     // result
     expect(screen.getByLabelText('Vertical gap options')).toBeInTheDocument();
   });
+
+  it('should not show the chevron menu trigger when the layout is a grid', () => {
+    // before
+    renderGapField({ isGrid: true });
+
+    // result
+    expect(screen.queryByLabelText('Horizontal gap options')).not.toBeInTheDocument();
+  });
 });

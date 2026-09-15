@@ -29,10 +29,10 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
       class="Icon"
       data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
       viewBox="0 0 24 24"
-      width="12"
+      width="24"
     >
       <path
         clip-rule="evenodd"
@@ -79,10 +79,10 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
       class="Icon"
       data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
       viewBox="0 0 24 24"
-      width="12"
+      width="24"
     >
       <path
         clip-rule="evenodd"
@@ -127,16 +127,16 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
     </span>
     <svg
       class="Icon"
+      data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
-      viewBox="0 0 14 12"
-      width="12"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
     >
       <path
         clip-rule="evenodd"
-        d="M0.5 12C0.367392 12 0.240215 11.9473 0.146447 11.8536C0.0526785 11.7598 0 11.6326 0 11.5V0.5C0 0.367392 0.0526785 0.240215 0.146447 0.146447C0.240215 0.0526785 0.367392 0 0.5 0C0.632608 0 0.759785 0.0526785 0.853553 0.146447C0.947321 0.240215 1 0.367392 1 0.5V11.5C1 11.6326 0.947321 11.7598 0.853553 11.8536C0.759785 11.9473 0.632608 12 0.5 12ZM13.5 12C13.3674 12 13.2402 11.9473 13.1464 11.8536C13.0527 11.7598 13 11.6326 13 11.5V0.5C13 0.367392 13.0527 0.240215 13.1464 0.146447C13.2402 0.0526785 13.3674 0 13.5 0C13.6326 0 13.7598 0.0526785 13.8536 0.146447C13.9473 0.240215 14 0.367392 14 0.5V11.5C14 11.6326 13.9473 11.7598 13.8536 11.8536C13.7598 11.9473 13.6326 12 13.5 12ZM2.604 2L4.486 10H5.516L7 4.062L8.485 10H9.514L11.396 2H10.369L8.985 7.88L7.515 2H6.485L5.015 7.88L3.63 2H2.604Z"
+        d="M5.5 18a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 1 0v11a.5.5 0 0 1-.5.5m13 0a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 1 0v11a.5.5 0 0 1-.5.5M7.604 8l1.882 8h1.03L12 10.062 13.485 16h1.029l1.882-8h-1.027l-1.384 5.88L12.515 8h-1.03l-1.47 5.88L8.63 8z"
         data-svg-property="fill"
         fill="white"
         fill-rule="evenodd"
@@ -180,21 +180,16 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
     </span>
     <svg
       class="Icon"
+      data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
-      viewBox="0 0 16 16"
-      width="12"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
     >
       <path
-        d="M7.5 2H8.5V14H7.5V2Z"
-        data-svg-property="fill"
-        fill="white"
-      />
-      <path
         clip-rule="evenodd"
-        d="M2.854 5.146L5.707 8L2.854 10.854L2.146 10.146L3.793 8.5H0V7.5H3.793L2.146 5.854L2.854 5.146ZM12.207 8.5L13.854 10.146L13.146 10.854L10.293 8L13.146 5.146L13.854 5.854L12.207 7.5H16V8.5H12.207Z"
+        d="m14.146 11.854 2 2a.5.5 0 0 0 .708-.708L15.707 12H19.5a.5.5 0 0 0 0-1h-3.793l1.147-1.146a.5.5 0 0 0-.708-.708l-2 2a.5.5 0 0 0 0 .708m-3.292 0-2 2a.5.5 0 0 1-.708-.708L9.293 12H5.5a.5.5 0 0 1 0-1h3.793L8.146 9.854a.5.5 0 1 1 .708-.708l2 2a.5.5 0 0 1 0 .708M13 5.5a.5.5 0 0 0-1 0v12a.5.5 0 0 0 1 0z"
         data-svg-property="fill"
         fill="white"
         fill-rule="evenodd"
@@ -235,21 +230,16 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
     </span>
     <svg
       class="Icon"
+      data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
-      viewBox="0 0 16 16"
-      width="12"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
     >
       <path
-        d="M1 2H2V14H1V2ZM14 2H15V14H14V2Z"
-        data-svg-property="fill"
-        fill="white"
-      />
-      <path
         clip-rule="evenodd"
-        d="M4.20697 8.5L5.85397 10.146L5.14597 10.854L2.29297 8L5.14597 5.146L5.85397 5.854L4.20697 7.5H11.793L10.146 5.854L10.854 5.146L13.707 8L10.854 10.854L10.146 10.146L11.793 8.5H4.20697Z"
+        d="M19 6.5a.5.5 0 0 0-1 0v10a.5.5 0 0 0 1 0zm-13 0a.5.5 0 0 0-1 0v10a.5.5 0 0 0 1 0zm10.854 4.646a.5.5 0 0 1 0 .708l-2.5 2.5a.5.5 0 0 1-.708-.708L15.293 12H8.707l1.647 1.646a.5.5 0 0 1-.708.708l-2.5-2.5a.5.5 0 0 1 0-.708l2.5-2.5a.5.5 0 0 1 .708.708L8.707 11h6.586l-1.647-1.646a.5.5 0 0 1 .708-.708z"
         data-svg-property="fill"
         fill="white"
         fill-rule="evenodd"
@@ -293,19 +283,17 @@ exports[`ColumnDimensionsSizingMenu snapshots > should render the width sizing o
     </span>
     <svg
       class="Icon"
-      height="12"
+      data-fpl-icon-size="24"
+      fill="none"
+      height="24"
       style="color: var(--color-neutral-1);"
-      viewBox="0 0 12 12"
-      width="12"
-      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
     >
       <path
-        d="m2 3.693 4-2.31 4 2.31v4.619l-4 2.31-4-2.31zM6 .23l5 2.887V8.89l-5 2.887L1 8.89V3.116zM7 6c0 .553-.448 1-1 1-.552 0-1-.447-1-1 0-.552.448-1 1-1 .552 0 1 .448 1 1"
+        d="M11.117 5.586A2 2 0 0 1 13 5.649l4 2.31.113.07A2 2 0 0 1 18 9.69v4.62a2 2 0 0 1-.887 1.66l-.113.072-4 2.309a2 2 0 0 1-1.883.063L11 18.351l-4-2.309a2 2 0 0 1-1-1.732V9.69a2 2 0 0 1 1-1.73l4-2.31zm1.383.93a1 1 0 0 0-1 0l-4 2.308-.11.074A1 1 0 0 0 7 9.69v4.62l.009.132c.04.305.22.578.491.734l4 2.31c.27.155.597.175.88.058l.12-.059 4-2.31a1 1 0 0 0 .491-.733L17 14.31V9.69a1 1 0 0 0-.39-.792l-.11-.074zM12 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2"
         data-svg-property="fill"
         fill="white"
-        fill-opacity="1"
-        fill-rule="evenodd"
-        stroke="none"
       />
     </svg>
     <div

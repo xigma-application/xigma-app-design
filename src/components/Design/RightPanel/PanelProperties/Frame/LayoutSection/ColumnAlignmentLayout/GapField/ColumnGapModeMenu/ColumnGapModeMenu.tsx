@@ -30,7 +30,7 @@ export const ColumnGapModeMenu: FC<TColumnGapModeMenuProps> = ({ canAuto, mode, 
         <PopoverItem label={t(`${translationNameSpace}.gapModeToggleLabel`)} onClick={onSelectAuto} selected={mode === GapMode.auto} />
       )}
       <PopoverSeparator />
-      <PopoverItem icon="Variables" iconSize={12} label={t(`${translationNameSpace}.applyVariable`)} />
+      <PopoverItem icon="Variables" iconSize={24} label={t(`${translationNameSpace}.applyVariable`)} />
     </>
   );
 };

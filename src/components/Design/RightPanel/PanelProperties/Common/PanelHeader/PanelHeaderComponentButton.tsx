@@ -2,8 +2,7 @@ import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
@@ -25,9 +24,7 @@ export const PanelHeaderComponentButton: FC = () => {
         </Fragment>
       }
     >
-      <Button ariaLabel={t(`${translationNameSpace}.componentAriaLabel`)} onClick={() => {}} style={{ padding: 0 }}>
-        <Icon name="Component" size={24} />
-      </Button>
+      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.componentAriaLabel`)} name="Component" />
     </Tooltip>
   );
 };

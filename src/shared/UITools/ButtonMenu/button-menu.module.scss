@@ -8,7 +8,7 @@
   color: var(--color-neutral-1);
   cursor: pointer;
   display: flex;
-  padding: 4px 8px;
+  padding: 0;
 
   &:hover {
     background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);

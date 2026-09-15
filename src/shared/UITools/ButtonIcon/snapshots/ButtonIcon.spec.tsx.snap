@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ButtonIcon snapshots > should render ButtonIcon in its default state 1`] = `
+<DocumentFragment>
+  <button
+    aria-label="Align left"
+    aria-pressed="false"
+    class="_ButtonIcon_2062db"
+    type="button"
+  >
+    <svg
+      class="Icon"
+      data-fpl-icon-size="24"
+      fill="none"
+      height="24"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 24 24"
+      width="24"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-4 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+        data-svg-fill-one="fill"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+      <path
+        d="M6 17.5a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 1 0z"
+        data-svg-fill-two="fill"
+        data-svg-property="fill"
+        fill="white"
+      />
+    </svg>
+  </button>
+</DocumentFragment>
+`;
+
+exports[`ButtonIcon snapshots > should render ButtonIcon in its disabled state 1`] = `
+<DocumentFragment>
+  <button
+    aria-label="Align left"
+    aria-pressed="false"
+    class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db"
+    disabled=""
+    type="button"
+  >
+    <svg
+      class="Icon"
+      data-fpl-icon-size="24"
+      fill="none"
+      height="24"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 24 24"
+      width="24"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-4 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+        data-svg-fill-one="fill"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+      <path
+        d="M6 17.5a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 1 0z"
+        data-svg-fill-two="fill"
+        data-svg-property="fill"
+        fill="white"
+      />
+    </svg>
+  </button>
+</DocumentFragment>
+`;
+
+exports[`ButtonIcon snapshots > should render ButtonIcon in its selected state 1`] = `
+<DocumentFragment>
+  <button
+    aria-label="Align left"
+    aria-pressed="true"
+    class="_ButtonIcon_2062db _ButtonIcon--selected_2062db"
+    type="button"
+  >
+    <svg
+      class="Icon"
+      data-fpl-icon-size="24"
+      fill="none"
+      height="24"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 24 24"
+      width="24"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M17.25 10a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75zm-4 5a.75.75 0 0 0 .75-.75v-.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75v.5c0 .414.336.75.75.75z"
+        data-svg-fill-one="fill"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+      <path
+        d="M6 17.5a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 1 0z"
+        data-svg-fill-two="fill"
+        data-svg-property="fill"
+        fill="white"
+      />
+    </svg>
+  </button>
+</DocumentFragment>
+`;

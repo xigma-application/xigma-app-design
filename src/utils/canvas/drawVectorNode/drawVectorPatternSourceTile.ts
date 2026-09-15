@@ -1,9 +1,11 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
+import { TPatternPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
+import { getPatternTileGridFractions } from './getPatternTileGridFractions';
 import { getVectorFillBounds } from './getVectorFillBounds';
 import { getVectorFillCoveringQuad } from './getVectorFillCoveringQuad';
 import { worldPointToTextureUV } from '../worldPointToTextureUV';
@@ -24,7 +26,7 @@ export const drawVectorPatternSourceTile = (
   nodeBounds: TDraftRect | null,
   faces: TPoint[][],
   sourceTile: TPatternSourceTile,
-  scale: number,
+  paint: TPatternPaint,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -33,8 +35,9 @@ export const drawVectorPatternSourceTile = (
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
-    const tileWorldWidth = Math.max(sourceTile.width * (scale / 100), 1);
-    const tileWorldHeight = Math.max(sourceTile.height * (scale / 100), 1);
+    const tileWorldWidth = Math.max(sourceTile.width * (paint.scale / 100), 1);
+    const tileWorldHeight = Math.max(sourceTile.height * (paint.scale / 100), 1);
+    const { alignFrac, periodFrac, tileFrac } = getPatternTileGridFractions(bounds, tileWorldWidth, tileWorldHeight, paint);
     const topLeftUV = worldPointToTextureUV({ x: sourceTile.x, y: sourceTile.y }, viewport, canvasWidth, canvasHeight);
     const point = { x: sourceTile.x + sourceTile.width, y: sourceTile.y + sourceTile.height };
     const bottomRightUV = worldPointToTextureUV(point, viewport, canvasWidth, canvasHeight);
@@ -46,7 +49,9 @@ export const drawVectorPatternSourceTile = (
     const boundsOriginLocation = gl.getUniformLocation(program, 'u_boundsOrigin');
     const boundsSizeLocation = gl.getUniformLocation(program, 'u_boundsSize');
     const textureLocation = gl.getUniformLocation(program, 'u_texture');
-    const tileCountLocation = gl.getUniformLocation(program, 'u_tileCount');
+    const periodFracLocation = gl.getUniformLocation(program, 'u_periodFrac');
+    const tileFracLocation = gl.getUniformLocation(program, 'u_tileFrac');
+    const alignFracLocation = gl.getUniformLocation(program, 'u_alignFrac');
     const tileOriginUVLocation = gl.getUniformLocation(program, 'u_tileOriginUV');
     const tileSizeUVLocation = gl.getUniformLocation(program, 'u_tileSizeUV');
     const opacityLocation = gl.getUniformLocation(program, 'u_opacity');
@@ -61,7 +66,9 @@ export const drawVectorPatternSourceTile = (
     gl.uniform2f(translateLocation, 0, 0);
     gl.uniform2f(boundsOriginLocation, bounds.x, bounds.y);
     gl.uniform2f(boundsSizeLocation, bounds.width, bounds.height);
-    gl.uniform2f(tileCountLocation, bounds.width / tileWorldWidth, bounds.height / tileWorldHeight);
+    gl.uniform2f(periodFracLocation, periodFrac.x, periodFrac.y);
+    gl.uniform2f(tileFracLocation, tileFrac.x, tileFrac.y);
+    gl.uniform2f(alignFracLocation, alignFrac.x, alignFrac.y);
     gl.uniform2f(tileOriginUVLocation, topLeftUV.x, topLeftUV.y);
     gl.uniform2f(tileSizeUVLocation, bottomRightUV.x - topLeftUV.x, bottomRightUV.y - topLeftUV.y);
     gl.uniform1f(opacityLocation, alpha);

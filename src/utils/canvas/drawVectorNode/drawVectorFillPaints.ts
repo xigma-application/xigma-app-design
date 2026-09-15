@@ -54,7 +54,7 @@ export const drawVectorFillPaints = (
           nodeBounds,
           faces,
           patternSourceTiles[index] ?? null,
-          paint.scale,
+          paint,
           canvasWidth,
           canvasHeight,
           viewport,

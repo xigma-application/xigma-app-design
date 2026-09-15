@@ -34,11 +34,11 @@ exports[`ColumnPosition snapshots > should render the X and Y fields 1`] = `
             <div
               class="ScrubbableInput"
             >
-              <span
-                class="_ColumnPositionField__label_f7c11b"
+              <div
+                class="_InputAdornment_bfc2de"
               >
                 X
-              </span>
+              </div>
             </div>
             <input
               aria-label="X position"
@@ -64,11 +64,11 @@ exports[`ColumnPosition snapshots > should render the X and Y fields 1`] = `
             <div
               class="ScrubbableInput"
             >
-              <span
-                class="_ColumnPositionField__label_f7c11b"
+              <div
+                class="_InputAdornment_bfc2de"
               >
                 Y
-              </span>
+              </div>
             </div>
             <input
               aria-label="Y position"

@@ -140,17 +140,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </span>
               <svg
                 class="Icon"
-                data-fpl-icon-size="16"
+                data-fpl-icon-size="24"
                 fill="none"
                 height="12"
                 style="color: var(--color-neutral-1);"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 width="12"
               >
                 <path
-                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  clip-rule="evenodd"
+                  d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                   data-svg-property="fill"
                   fill="white"
+                  fill-rule="evenodd"
                 />
               </svg>
             </button>
@@ -185,17 +187,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
                   >
                     <svg
                       class="Icon"
-                      data-fpl-icon-size="16"
+                      data-fpl-icon-size="24"
                       fill="none"
                       height="10"
                       style="color: var(--color-neutral-1);"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 24 24"
                       width="10"
                     >
                       <path
-                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        clip-rule="evenodd"
+                        d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                         data-svg-property="fill"
                         fill="white"
+                        fill-rule="evenodd"
                       />
                     </svg>
                   </button>
@@ -208,17 +212,17 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 2px;"
+            style="padding: 0px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24L"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -279,17 +283,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </span>
               <svg
                 class="Icon"
-                data-fpl-icon-size="16"
+                data-fpl-icon-size="24"
                 fill="none"
                 height="12"
                 style="color: var(--color-neutral-1);"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 width="12"
               >
                 <path
-                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  clip-rule="evenodd"
+                  d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                   data-svg-property="fill"
                   fill="white"
+                  fill-rule="evenodd"
                 />
               </svg>
             </button>
@@ -324,17 +330,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
                   >
                     <svg
                       class="Icon"
-                      data-fpl-icon-size="16"
+                      data-fpl-icon-size="24"
                       fill="none"
                       height="10"
                       style="color: var(--color-neutral-1);"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 24 24"
                       width="10"
                     >
                       <path
-                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        clip-rule="evenodd"
+                        d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                         data-svg-property="fill"
                         fill="white"
+                        fill-rule="evenodd"
                       />
                     </svg>
                   </button>
@@ -347,17 +355,17 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 2px;"
+            style="padding: 0px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24L"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -418,17 +426,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </span>
               <svg
                 class="Icon"
-                data-fpl-icon-size="16"
+                data-fpl-icon-size="24"
                 fill="none"
                 height="12"
                 style="color: var(--color-neutral-1);"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 width="12"
               >
                 <path
-                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  clip-rule="evenodd"
+                  d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                   data-svg-property="fill"
                   fill="white"
+                  fill-rule="evenodd"
                 />
               </svg>
             </button>
@@ -463,17 +473,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
                   >
                     <svg
                       class="Icon"
-                      data-fpl-icon-size="16"
+                      data-fpl-icon-size="24"
                       fill="none"
                       height="10"
                       style="color: var(--color-neutral-1);"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 24 24"
                       width="10"
                     >
                       <path
-                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        clip-rule="evenodd"
+                        d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                         data-svg-property="fill"
                         fill="white"
+                        fill-rule="evenodd"
                       />
                     </svg>
                   </button>
@@ -486,17 +498,17 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 2px;"
+            style="padding: 0px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24L"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -605,17 +617,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </span>
               <svg
                 class="Icon"
-                data-fpl-icon-size="16"
+                data-fpl-icon-size="24"
                 fill="none"
                 height="12"
                 style="color: var(--color-neutral-1);"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 width="12"
               >
                 <path
-                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  clip-rule="evenodd"
+                  d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                   data-svg-property="fill"
                   fill="white"
+                  fill-rule="evenodd"
                 />
               </svg>
             </button>
@@ -650,17 +664,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
                   >
                     <svg
                       class="Icon"
-                      data-fpl-icon-size="16"
+                      data-fpl-icon-size="24"
                       fill="none"
                       height="10"
                       style="color: var(--color-neutral-1);"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 24 24"
                       width="10"
                     >
                       <path
-                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        clip-rule="evenodd"
+                        d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                         data-svg-property="fill"
                         fill="white"
+                        fill-rule="evenodd"
                       />
                     </svg>
                   </button>
@@ -673,17 +689,17 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 2px;"
+            style="padding: 0px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24L"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -744,17 +760,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
               </span>
               <svg
                 class="Icon"
-                data-fpl-icon-size="16"
+                data-fpl-icon-size="24"
                 fill="none"
                 height="12"
                 style="color: var(--color-neutral-1);"
-                viewBox="0 0 16 16"
+                viewBox="0 0 24 24"
                 width="12"
               >
                 <path
-                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  clip-rule="evenodd"
+                  d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                   data-svg-property="fill"
                   fill="white"
+                  fill-rule="evenodd"
                 />
               </svg>
             </button>
@@ -789,17 +807,19 @@ exports[`GridSettings > should match the snapshot 1`] = `
                   >
                     <svg
                       class="Icon"
-                      data-fpl-icon-size="16"
+                      data-fpl-icon-size="24"
                       fill="none"
                       height="10"
                       style="color: var(--color-neutral-1);"
-                      viewBox="0 0 16 16"
+                      viewBox="0 0 24 24"
                       width="10"
                     >
                       <path
-                        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                        clip-rule="evenodd"
+                        d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
                         data-svg-property="fill"
                         fill="white"
+                        fill-rule="evenodd"
                       />
                     </svg>
                   </button>
@@ -812,17 +832,17 @@ exports[`GridSettings > should match the snapshot 1`] = `
             aria-pressed="false"
             class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 2px;"
+            style="padding: 0px;"
             type="button"
           >
             <svg
               class="Icon"
               data-fpl-icon-size="24L"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"

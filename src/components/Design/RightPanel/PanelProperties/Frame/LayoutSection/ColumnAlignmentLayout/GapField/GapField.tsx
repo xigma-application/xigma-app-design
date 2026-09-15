@@ -19,6 +19,7 @@ import { translationNameSpace } from '../constants';
 import { GapMode } from 'types/design/enums';
 
 export type TGapFieldProps = {
+  isGrid?: boolean;
   isHorizontal: boolean;
   mode: GapMode;
   modeDisabled?: boolean;
@@ -29,6 +30,7 @@ export type TGapFieldProps = {
 };
 
 export const GapField: FC<TGapFieldProps> = ({
+  isGrid = false,
   isHorizontal,
   mode,
   modeDisabled = false,
@@ -49,23 +51,25 @@ export const GapField: FC<TGapFieldProps> = ({
         defaultValue={isAuto ? autoLabel : value}
         e2eValue="gap"
         endAdornment={
-          <UITools.ButtonMenu
-            trigger={<Icon name="ChevronDown" size={10} />}
-            triggerAriaLabel={t(`${translationNameSpace}.gapModeMenuAriaLabel.${isHorizontal ? 'horizontal' : 'vertical'}`)}
-          >
-            <ColumnGapModeMenu
-              canAuto={!modeDisabled}
-              mode={mode}
-              onSelectAuto={onSelectAuto}
-              onSelectFixed={onSelectFixed}
-              value={value}
-            />
-          </UITools.ButtonMenu>
+          isGrid ? undefined : (
+            <UITools.ButtonMenu
+              trigger={<Icon name="ChevronDown" size={24} />}
+              triggerAriaLabel={t(`${translationNameSpace}.gapModeMenuAriaLabel.${isHorizontal ? 'horizontal' : 'vertical'}`)}
+            >
+              <ColumnGapModeMenu
+                canAuto={!modeDisabled}
+                mode={mode}
+                onSelectAuto={onSelectAuto}
+                onSelectFixed={onSelectFixed}
+                value={value}
+              />
+            </UITools.ButtonMenu>
+          )
         }
         onBlur={handleBlur}
         startAdornment={
           <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onCommit} value={value}>
-            <Icon color="neutral2" name={isHorizontal ? 'GapColumns' : 'GapRows'} size={10} />
+            <UITools.InputAdornment icon={isHorizontal ? 'GapColumns' : 'GapRows'} />
           </ScrubbableInput>
         }
         type={isAuto ? 'text' : 'number'}

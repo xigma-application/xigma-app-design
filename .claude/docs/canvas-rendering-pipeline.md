@@ -447,7 +447,13 @@ open. The next primary-button canvas click while armed is caught in `useSelectio
 handed to `handlePatternSourcePick.ts`, which hit-tests via the same `getNodeAtPoint` selection uses,
 writes the hit id onto the target paint's `sourceNodeId` through a plain `updateNode` (clearing any
 stale `frozenSourceSnapshot`, see below), and disarms picking — refusing only the trivial case of a
-node picking itself. Full cycle detection beyond that trivial case is still open, but a
+node picking itself. `useConvertToPatternPaint.ts` (the Pattern panel's settings → paint commit path)
+must explicitly carry `sourceNodeId`/`frozenSourceSnapshot` forward from the previous paint when it is
+already a pattern — it rebuilds the whole `TPatternPaint` from the panel's own state on every field
+edit, so a naive version silently dropped both fields (and thus the live source) the moment a user
+touched scale/spacing/alignment/tileType/direction after picking; this was caught and fixed while
+wiring spacing/alignment into the render, via an e2e test that picks a source and then edits a
+setting. Full cycle detection beyond the trivial self-pick case is still open, but a
 `patternSourceDepth` counter (`MAX_PATTERN_SOURCE_RESOLUTION_DEPTH = 4`, threaded through
 `drawLeafNode`/`drawBoxLeafNode`/every resolver below) caps runaway recursion if a multi-hop cycle
 ever forms, so the worst case is a few wasted render passes, never a hang.
@@ -462,11 +468,20 @@ state → bind pool target → draw → restore dance, factored out into the sha
 `drawVectorPatternSourceTile.ts` then tiles that one texture across the consumer's clipped face with
 a dedicated fragment shader (`patternSourceTileFragmentShaderSource.ts`, paired with the existing
 gradient-fill vertex shader for its `v_localPosition`/`u_boundsOrigin`/`u_boundsSize` normalization —
-no new vertex shader needed) — the fragment does `fract(v_localPosition * u_tileCount)` for the
-repeat, then maps that back into the source texture's own screen-space sub-rectangle via
-`worldPointToTextureUV.ts` (world → screen → UV, derived directly from this file's existing vertex
-shaders' own transform math, not guessed). `paint.scale` sizes the tile; `spacingX/Y`/`tileType`
-(hexagonal)/`direction`/`alignmentIndex` are still cosmetic-only, not yet read by any of this.
+no new vertex shader needed), then maps the in-tile UV back into the source texture's own
+screen-space sub-rectangle via `worldPointToTextureUV.ts` (world → screen → UV, derived directly from
+this file's existing vertex shaders' own transform math, not guessed). `paint.scale` sizes the tile;
+`spacingX`/`spacingY`/`alignmentIndex` are read too (`getPatternTileGridFractions.ts`, a pure CPU-side
+helper): the fragment does `mod(v_localPosition - u_alignFrac, u_periodFrac)` instead of a plain
+`fract(v_localPosition * u_tileCount)`, where `u_periodFrac` widens past `u_tileFrac` by the spacing
+percentage (a cell landing in that widened gap renders fully transparent instead of sampling the
+texture) and `u_alignFrac` shifts the grid's phase so a chosen point of the 3×3 `alignmentIndex` grid
+(the same `topLeft`/`top`/.../`bottomRight` layout as `AlignmentGrid.tsx`) sits flush with the
+matching edge/center/edge of the shape's own bounds, computed independently per axis (row → Y,
+col → X). At the defaults (`spacingX`/`spacingY: 0`, `alignmentIndex: 0`) this reduces to exactly the
+old flush-top-left tiling, so no visual regression for existing pattern fills. `tileType`
+(`hexagonal`)/`direction` are still cosmetic-only — the render always does rectangular tiling
+regardless of `tileType`; hexagonal offset-row/column tiling is unimplemented.
 
 **Deleting a pattern's source freezes the consumer instead of leaving a dangling reference.**
 `TPatternPaint.frozenSourceSnapshot?: TSceneNode[] | null` holds a `structuredClone` of the source's

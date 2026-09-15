@@ -2404,6 +2404,97 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
   });
 
+  test('increasing pattern spacing opens a visible gap between tiles instead of leaving them flush', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-spacing-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a small 20x20 source rectangle, filled pure green
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    // result — with no spacing, one tile width over (720-740) still shows the source color, flush
+    expect(await readPixelColor(page, 730, 210)).toEqual([0, 255, 0]);
+
+    // action — picking a source closes the picker popover, so reopen it to reach the spacing field,
+    // then widen the gap to 100% of the tile size (20px source tile, so a 20px gap)
+    await page.getByLabel('Hex color').click();
+
+    const spacingXInput = page.locator('[data-test-text-field-input="pattern-spacing-x"]');
+
+    await spacingXInput.fill('100');
+    await spacingXInput.blur();
+
+    // result — that same point (720-740 is now the gap between tile 0 and tile 1) no longer shows the source color
+    expect(await readPixelColor(page, 730, 210)).not.toEqual([0, 255, 0]);
+    // ...while the first tile cell itself is untouched
+    expect(await readPixelColor(page, 710, 210)).toEqual([0, 255, 0]);
+  });
+
+  test('changing pattern alignment shifts which part of the tile grid is flush with the shape', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-alignment-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a small 20x20 source rectangle, filled pure green
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    // action — picking a source closes the picker popover, so reopen it, then add a 100% gap
+    // (the alignment point only becomes visible once there's a gap for it to shift)
+    await page.getByLabel('Hex color').click();
+
+    const spacingXInput = page.locator('[data-test-text-field-input="pattern-spacing-x"]');
+
+    await spacingXInput.fill('100');
+    await spacingXInput.blur();
+
+    // result — with the default top-left alignment, the gap between tile 0 and tile 1 (720-740) hides the source color
+    expect(await readPixelColor(page, 730, 210)).not.toEqual([0, 255, 0]);
+
+    // action — pick the top-right alignment point (index 3, col 2 — flush against the shape's right edge)
+    await page.getByLabel('Alignment point 3').click();
+
+    // result — flushing the grid to the right shifts the gap elsewhere, so that same point is now inside a tile
+    expect(await readPixelColor(page, 730, 210)).toEqual([0, 255, 0]);
+  });
+
   test('deleting a pattern source freezes the consumer’s last appearance instead of reverting to the placeholder', async ({ page }) => {
     const designPage = new DesignPage(page);
 

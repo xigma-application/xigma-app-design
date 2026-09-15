@@ -68,6 +68,7 @@ const ColumnAlignmentLayout: FC = () => {
         )}
         {(isGrid || isHorizontal) && (
           <GapField
+            isGrid={isGrid}
             isHorizontal
             mode={horizontalGapMode}
             modeDisabled={isHorizontalGapModeDisabled}
@@ -79,6 +80,7 @@ const ColumnAlignmentLayout: FC = () => {
         )}
         {(isGrid || !isHorizontal || isWrap) && (
           <GapField
+            isGrid={isGrid}
             isHorizontal={false}
             mode={verticalGapMode}
             modeDisabled={isVerticalGapModeDisabled}

@@ -2,6 +2,7 @@
 import Accordion from './Accordion/Accordion';
 import Button from './Button/Button';
 import ButtonGroup from './ButtonGroup/ButtonGroup';
+import ButtonIcon from './ButtonIcon/ButtonIcon';
 import ButtonMenu from './ButtonMenu/ButtonMenu';
 import Checkbox from './Checkbox/Checkbox';
 import Chip from './Chip/Chip';
@@ -27,6 +28,7 @@ export const UITools = {
   Accordion,
   Button,
   ButtonGroup,
+  ButtonIcon,
   ButtonMenu,
   Checkbox,
   Chip,

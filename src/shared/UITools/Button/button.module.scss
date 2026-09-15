@@ -13,10 +13,6 @@
   font-weight: 450;
   padding: 4px 8px;
 
-  &:hover {
-    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
-  }
-
   &--active {
     background-color: var(--color-blue-1);
 
@@ -33,18 +29,7 @@
     background-color: var(--color-neutral-4);
 
     &:hover {
-      background-color: var(--color-neutral-4);
-    }
-  }
-
-  &--selected {
-    background-color: var(--color-bg-selected);
-    color: var(--color-icon-selected);
-
-    @include svg-color.svg-color(var(--color-icon-selected), true);
-
-    &:hover {
-      background-color: var(--color-bg-selected);
+      background-color: color-mix(in srgb, var(--color-neutral-4) 50%, transparent);
     }
   }
 

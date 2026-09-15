@@ -149,61 +149,64 @@ Redux slice), which drives a Figma-style on-canvas overlay (`drawGradientHandleL
 start→end guide line, endpoint dots, and one swatch handle per stop, each independently draggable
 directly on the canvas (not just via the docked panel's own `GradientBar`).
 
-| #   | Scenario                                                                                                          | Unit |            E2E            |
-| --- | ----------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 385 | Adding a fill stacks a second solid layer on top and changes the render                                           |  ✅  | ✅ `fill-section.spec.ts` |
-| 386 | Deleting every fill leaves the shape with none and clears the render                                              |  ✅  | ✅ `fill-section.spec.ts` |
-| 387 | Typing a hex value commits it onto the fill and changes the render                                                |  ✅  | ✅ `fill-section.spec.ts` |
-| 388 | Hiding a fill via the eye toggle stops it from rendering without removing it                                      |  ✅  | ✅ `fill-section.spec.ts` |
-| 389 | Dragging a fill row past another reorders the stack, showing a drop indicator and a selected handle mid-drag      |  —   | ✅ `fill-section.spec.ts` |
-| 390 | Clicking a fill row selects it, and clicking outside the fill list clears the selection                           |  ✅  | ✅ `fill-section.spec.ts` |
-| 391 | Closes the format dropdown when clicking a plain area of the fill color picker                                    |  —   | ✅ `fill-section.spec.ts` |
-| 392 | Docks a gradient stop's own color panel flush against the gradient panel, not floating over its own swatch        |  —   | ✅ `fill-section.spec.ts` |
-| 393 | Rotating a shape's gradient fill (panel button) updates its stored start/end and the rendered canvas              |  ✅  | ✅ `fill-section.spec.ts` |
-| 394 | Switching a solid fill to Gradient via the paint-type row actually converts and commits it, not just previews it  |  ✅  | ✅ `fill-section.spec.ts` |
-| 395 | A gradient stop clamps to its own color past its own position, instead of falling back to the first stop's color  |  —   | ✅ `fill-section.spec.ts` |
-| 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop           |  ✅  | ✅ `fill-section.spec.ts` |
-| 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                  |  ✅  | ✅ `fill-section.spec.ts` |
-| 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release |  —   | ✅ `fill-section.spec.ts` |
-| 399 | Clicking the gradient guide line on the canvas adds a new stop there, at the interpolated color, and selects it   |  ✅  | ✅ `fill-section.spec.ts` |
-| 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                      |  ✅  | ✅ `fill-section.spec.ts` |
-| 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                       |  ✅  | ✅ `fill-section.spec.ts` |
-| 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority           |  ✅  | ✅ `fill-section.spec.ts` |
-| 403 | Rotating a gradient whose endpoints don't touch the shape edge pivots around the line's own center, not the box   |  ✅  | ✅ `fill-section.spec.ts` |
-| 404 | Rotating a gradient snaps to exactly horizontal/vertical when the angle is close to it, with a guide              |  ✅  | ✅ `fill-section.spec.ts` |
-| 405 | Grabbing right on a gradient endpoint moves it freely, leaving the other endpoint untouched                       |  ✅  | ✅ `fill-section.spec.ts` |
-| 406 | Dragging a gradient endpoint freely snaps onto a shape corner (edge/center landmarks)                             |  ✅  | ✅ `fill-section.spec.ts` |
-| 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box           |  ✅  | ✅ `fill-section.spec.ts` |
-| 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump      |  ✅  | ✅ `fill-section.spec.ts` |
-| 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma        |  ✅  | ✅ `fill-section.spec.ts` |
-| 410 | Moving a radial gradient's center point on the canvas moves only that point (start/end handles reused)            |  ✅  | ✅ `fill-section.spec.ts` |
-| 411 | Dragging a radial gradient's perpendicular radius handle reshapes it into an ellipse                              |  ✅  | ✅ `fill-section.spec.ts` |
-| 412 | Switching a gradient's type via the panel resets its points to that type's own default (e.g. radial: centered)    |  ✅  | ✅ `fill-section.spec.ts` |
-| 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius       |  ✅  | ✅ `fill-section.spec.ts` |
-| 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge        |  ✅  | ✅ `fill-section.spec.ts` |
-| 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging    |  ✅  | ✅ `fill-section.spec.ts` |
-| 416 | Switching a gradient's type to Angular resets its points to a centered default, same as radial                    |  —   | ✅ `fill-section.spec.ts` |
-| 417 | Dragging an angular gradient's perpendicular radius handle reshapes its ellipse, same as radial's                 |  —   | ✅ `fill-section.spec.ts` |
-| 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line     |  ✅  | ✅ `fill-section.spec.ts` |
-| 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                            |  ✅  | ✅ `fill-section.spec.ts` |
-| 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear                 |  ✅  | ✅ `fill-section.spec.ts` |
-| 421 | Switching a gradient's type to Diamond resets its points to a centered default, same as radial/angular            |  —   | ✅ `fill-section.spec.ts` |
-| 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                       |  ✅  | ✅ `fill-section.spec.ts` |
-| 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                      |  —   | ✅ `fill-section.spec.ts` |
-| 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's         |  —   | ✅ `fill-section.spec.ts` |
-| 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh          |  ✅  | ✅ `fill-section.spec.ts` |
-| 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render       |  ✅  | ✅ `fill-section.spec.ts` |
-| 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel             |  ✅  | ✅ `fill-section.spec.ts` |
-| 428 | Rotating a gradient on the canvas, then dragging a stop in the popover, keeps the canvas rotation                 |  ✅  | ✅ `fill-section.spec.ts` |
-| 429 | Moving a gradient stop on the canvas updates its position live in the open popover                                |  ✅  | ✅ `fill-section.spec.ts` |
-| 430 | Switching a solid fill to Pattern commits a real pattern paint and shows the Pattern panel                        |  —   | ✅ `fill-section.spec.ts` |
-| 431 | A pattern fill with no source renders a placeholder dot grid instead of nothing                                   |  ✅  | ✅ `fill-section.spec.ts` |
-| 432 | Editing the Pattern panel's tile type and scale commits them onto the pattern paint                               |  —   | ✅ `fill-section.spec.ts` |
-| 433 | Switching away from Pattern and back resets the panel instead of resurfacing the old values                       |  —   | ✅ `fill-section.spec.ts` |
-| 434 | The Direction row only shows for the Hexagonal tile type                                                          |  —   | ✅ `fill-section.spec.ts` |
-| 435 | Picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking                  |  ✅  | ✅ `fill-section.spec.ts` |
-| 436 | A picked pattern source renders live and repeats as tiles, not a single stretched copy                            |  —   | ✅ `fill-section.spec.ts` |
-| 437 | Deleting a pattern's source freezes the consumer's last appearance instead of reverting to the placeholder        |  ✅  | ✅ `fill-section.spec.ts` |
+| #   | Scenario                                                                                                          | Unit |                             E2E                              |
+| --- | ----------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------------------------------: |
+| 385 | Adding a fill stacks a second solid layer on top and changes the render                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 386 | Deleting every fill leaves the shape with none and clears the render                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 387 | Typing a hex value commits it onto the fill and changes the render                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 388 | Hiding a fill via the eye toggle stops it from rendering without removing it                                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 389 | Dragging a fill row past another reorders the stack, showing a drop indicator and a selected handle mid-drag      |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 390 | Clicking a fill row selects it, and clicking outside the fill list clears the selection                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 391 | Closes the format dropdown when clicking a plain area of the fill color picker                                    |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 392 | Docks a gradient stop's own color panel flush against the gradient panel, not floating over its own swatch        |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 393 | Rotating a shape's gradient fill (panel button) updates its stored start/end and the rendered canvas              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 394 | Switching a solid fill to Gradient via the paint-type row actually converts and commits it, not just previews it  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 395 | A gradient stop clamps to its own color past its own position, instead of falling back to the first stop's color  |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 399 | Clicking the gradient guide line on the canvas adds a new stop there, at the interpolated color, and selects it   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 403 | Rotating a gradient whose endpoints don't touch the shape edge pivots around the line's own center, not the box   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 404 | Rotating a gradient snaps to exactly horizontal/vertical when the angle is close to it, with a guide              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 405 | Grabbing right on a gradient endpoint moves it freely, leaving the other endpoint untouched                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 406 | Dragging a gradient endpoint freely snaps onto a shape corner (edge/center landmarks)                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 410 | Moving a radial gradient's center point on the canvas moves only that point (start/end handles reused)            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 411 | Dragging a radial gradient's perpendicular radius handle reshapes it into an ellipse                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 412 | Switching a gradient's type via the panel resets its points to that type's own default (e.g. radial: centered)    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 416 | Switching a gradient's type to Angular resets its points to a centered default, same as radial                    |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 417 | Dragging an angular gradient's perpendicular radius handle reshapes its ellipse, same as radial's                 |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 421 | Switching a gradient's type to Diamond resets its points to a centered default, same as radial/angular            |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                      |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's         |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 428 | Rotating a gradient on the canvas, then dragging a stop in the popover, keeps the canvas rotation                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 429 | Moving a gradient stop on the canvas updates its position live in the open popover                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 430 | Switching a solid fill to Pattern commits a real pattern paint and shows the Pattern panel                        |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 431 | A pattern fill with no source renders a placeholder dot grid instead of nothing                                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 432 | Editing the Pattern panel's tile type and scale commits them onto the pattern paint                               |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 433 | Switching away from Pattern and back resets the panel instead of resurfacing the old values                       |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 434 | The Direction row only shows for the Hexagonal tile type                                                          |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 435 | Picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 436 | A picked pattern source renders live and repeats as tiles, not a single stretched copy                            |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 437 | Deleting a pattern's source freezes the consumer's last appearance instead of reverting to the placeholder        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 438 | Increasing pattern spacing opens a visible transparent gap between tiles instead of leaving them flush            |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 439 | Changing pattern alignment shifts which part of the tile grid sits flush with the shape                           |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 440 | Editing a Pattern panel setting after picking a source preserves the live sourceNodeId instead of dropping it     |  ✅  | ✅ `fill-section.spec.ts` (spacing test also exercises this) |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -542,3 +545,12 @@ actually removed) snapshots the source's own subtree onto `frozenSourceSnapshot`
 `sourceNodeId`, so the consumer keeps its last-known appearance forever rather than reverting to the
 dot-grid placeholder. Cycle-safety beyond the trivial self-pick case is still open, though a depth
 cap on the render side already prevents a multi-hop cycle from hanging the tab.
+
+#438-#440 wire the rest of the Pattern panel's settings into the actual render (`spacingX`/`spacingY`/
+`alignmentIndex` — `tileType: 'hexagonal'`/`direction` remain cosmetic-only, unimplemented). Fixing
+#438/#439 surfaced a real bug (#440): `useConvertToPatternPaint` rebuilds the whole `TPatternPaint`
+from the panel's own local state on every field edit, so it silently dropped `sourceNodeId`/
+`frozenSourceSnapshot` the moment a user touched any setting after picking a source — caught while
+writing #438's e2e test (reopening the panel and setting spacing turned the picked source's green
+tile white, i.e. it had reverted to the sourceless placeholder). Fixed by carrying both fields
+forward from the existing paint when it's already type `'pattern'`.

@@ -1,3 +1,6 @@
+// types
+import { TPatternPaint } from 'types/design/paint/types';
+
 // utils
 import { drawVectorPatternSourceTile } from '../drawVectorPatternSourceTile';
 
@@ -46,6 +49,17 @@ const faces = [
 ];
 const texture = {} as WebGLTexture;
 const sourceTile = { height: 10, texture, width: 10, x: 0, y: 0 };
+const buildPaint = (overrides: Partial<TPatternPaint> = {}): TPatternPaint => ({
+  alignmentIndex: 0,
+  direction: 'horizontal',
+  opacity: 100,
+  scale: 100,
+  spacingX: 0,
+  spacingY: 0,
+  tileType: 'rectangular',
+  type: 'pattern',
+  ...overrides,
+});
 
 describe('drawVectorPatternSourceTile', () => {
   it('should skip every GL call when there are no faces to fill', () => {
@@ -55,7 +69,7 @@ describe('drawVectorPatternSourceTile', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, [], sourceTile, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, [], sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -69,7 +83,7 @@ describe('drawVectorPatternSourceTile', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.activeTexture).toHaveBeenCalledWith(gl.TEXTURE0);
@@ -83,7 +97,7 @@ describe('drawVectorPatternSourceTile', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.enable).toHaveBeenCalledWith(gl.STENCIL_TEST);
@@ -93,40 +107,133 @@ describe('drawVectorPatternSourceTile', () => {
     expect(gl.disable).toHaveBeenCalledWith(gl.STENCIL_TEST);
   });
 
-  it('should size the tile count from the bounds relative to the source size scaled by the given percentage', () => {
-    // mock — 40x40 bounds, 10x10 tile at 100% scale = 4 tiles across each axis
+  it('should size the tile fraction from the bounds relative to the source size scaled by the given percentage', () => {
+    // mock — 40x40 bounds, 10x10 tile at 100% scale = tile covers a quarter of each axis
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const tileCountLocation = { tag: 'tileCount' };
+    const tileFracLocation = { tag: 'tileFrac' };
 
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
-      name === 'u_tileCount' ? tileCountLocation : {},
+      name === 'u_tileFrac' ? tileFracLocation : {},
     );
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, 100, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
-    expect(gl.uniform2f).toHaveBeenCalledWith(tileCountLocation, 4, 4);
+    expect(gl.uniform2f).toHaveBeenCalledWith(tileFracLocation, 0.25, 0.25);
   });
 
-  it('should shrink the tile count when the scale percentage grows the tile size', () => {
-    // mock — 40x40 bounds, 10x10 tile at 200% scale (20x20 effective) = 2 tiles across each axis
+  it('should grow the tile fraction when the scale percentage grows the tile size', () => {
+    // mock — 40x40 bounds, 10x10 tile at 200% scale (20x20 effective) = tile covers half of each axis
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const tileCountLocation = { tag: 'tileCount' };
+    const tileFracLocation = { tag: 'tileFrac' };
 
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
-      name === 'u_tileCount' ? tileCountLocation : {},
+      name === 'u_tileFrac' ? tileFracLocation : {},
     );
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, 200, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ scale: 200 }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
-    expect(gl.uniform2f).toHaveBeenCalledWith(tileCountLocation, 2, 2);
+    expect(gl.uniform2f).toHaveBeenCalledWith(tileFracLocation, 0.5, 0.5);
+  });
+
+  it('should widen the tile period, without changing the tile fraction, when spacing is added', () => {
+    // mock — 40x40 bounds, 10x10 tile, 100% spacing doubles the period to 20x20 (a 0.5 fraction)
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const periodFracLocation = { tag: 'periodFrac' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_periodFrac' ? periodFracLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ spacingX: 100, spacingY: 100 }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform2f).toHaveBeenCalledWith(periodFracLocation, 0.5, 0.5);
+  });
+
+  it('should offset the grid to center a tile on the shape when alignmentIndex picks the center point', () => {
+    // mock — 40x40 bounds, 10x10 tile, center alignment (index 4) offsets by (20 - 5) = 15 on each axis
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const alignFracLocation = { tag: 'alignFrac' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_alignFrac' ? alignFracLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ alignmentIndex: 4 }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform2f).toHaveBeenCalledWith(alignFracLocation, 0.375, 0.375);
+  });
+
+  it('should leave the grid flush with the top-left when alignmentIndex is 0', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const alignFracLocation = { tag: 'alignFrac' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_alignFrac' ? alignFracLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(gl.uniform2f).toHaveBeenCalledWith(alignFracLocation, 0, 0);
   });
 
   it('should composite at the given opacity', () => {
@@ -141,7 +248,7 @@ describe('drawVectorPatternSourceTile', () => {
     );
 
     // before
-    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, 100, 100, 100, IDENTITY_VIEWPORT, false, 0.5);
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false, 0.5);
 
     // result
     expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 0.5);

@@ -26,7 +26,7 @@ export const PanelHeader: FC<TPanelHeaderProps> = ({ buttons, e2eValue, label, m
         trigger={
           <span className={styles.PanelHeader__label}>
             {label}
-            <Icon name="ChevronDown" size={16} />
+            <Icon name="ChevronDown" size={24} />
           </span>
         }
         triggerAriaLabel={menuAriaLabel}

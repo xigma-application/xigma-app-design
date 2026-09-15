@@ -283,7 +283,7 @@ describe('drawVectorFillPaints', () => {
       null,
       faces,
       null,
-      100,
+      pattern,
       100,
       100,
       IDENTITY_VIEWPORT,
