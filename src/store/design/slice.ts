@@ -26,6 +26,7 @@ import {
   TGradientEditorState,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
+  TPatternSourcePickTarget,
   TReorderPayload,
   TRevealedMinMax,
   TStartTextEditPayload,
@@ -132,6 +133,7 @@ const initialState: TDesignState = {
     },
   },
   panelGridTrackSelection: null,
+  patternSourcePickTarget: null,
   penActiveVertexId: null,
   preferences: {
     areAdditionalLabelsVisible: true,
@@ -241,6 +243,9 @@ const designSlice = createSlice({
     setPanelGridTrackSelection: (state, action: PayloadAction<TGridTrackSelection | null>) => {
       state.panelGridTrackSelection = action.payload;
     },
+    setPatternSourcePickTarget: (state, action: PayloadAction<TPatternSourcePickTarget | null>) => {
+      state.patternSourcePickTarget = action.payload;
+    },
     setPatternSourcePicking: (state, action: PayloadAction<boolean>) => {
       state.isPatternSourcePicking = action.payload;
     },
@@ -340,6 +345,7 @@ export const {
   setPaint,
   setPaintBlendMode,
   setPanelGridTrackSelection,
+  setPatternSourcePickTarget,
   setPatternSourcePicking,
   setPenActiveVertexId,
   setSelection,

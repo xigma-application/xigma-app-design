@@ -15,6 +15,7 @@ import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
+import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
 
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
@@ -79,6 +80,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const hexDisplayValue = isGradient ? t(GRADIENT_TYPE_LABEL_KEY[paint.type]) : isPattern ? 'Pattern' : undefined;
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
+  useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
     <div

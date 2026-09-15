@@ -36,6 +36,8 @@ export type TMaskConnectorInfo = TMaskConnectorLine[];
 
 export type TGradientEditorState = { nodeId: string; paintIndex: number; selectedStopIndex: number | null };
 
+export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number };
+
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;
   areFrameOutlinesVisible: boolean;
@@ -84,6 +86,7 @@ export type TDesignState = {
   lastTextTool: ToolName;
   pages: Record<string, TDesignPage>;
   panelGridTrackSelection?: TGridTrackSelection | null;
+  patternSourcePickTarget: TPatternSourcePickTarget | null;
   penActiveVertexId: string | null;
   preferences: TPreferences;
   revealedMinMax: TRevealedMinMax;

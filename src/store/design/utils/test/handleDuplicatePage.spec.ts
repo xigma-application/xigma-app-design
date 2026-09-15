@@ -59,6 +59,7 @@ const buildState = (pages: TDesignPage[], activePageId: string): TDesignState =>
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   pages: Object.fromEntries(pages.map((page) => [page.id, page])),
+  patternSourcePickTarget: null,
   penActiveVertexId: null,
   preferences: {
     areAdditionalLabelsVisible: true,

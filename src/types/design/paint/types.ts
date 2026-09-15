@@ -45,6 +45,7 @@ export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
   direction: TPatternDirection;
   scale: number;
+  sourceNodeId?: string | null;
   spacingX: number;
   spacingY: number;
   tileType: TPatternTileType;

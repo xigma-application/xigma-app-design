@@ -6,7 +6,7 @@ import { RootState } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
-import { TDesignPage, TDimensionHintField, TGradientEditorState, TRevealedMinMax } from './types';
+import { TDesignPage, TDimensionHintField, TGradientEditorState, TPatternSourcePickTarget, TRevealedMinMax } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import {
   TGridSectionHighlight,
@@ -93,6 +93,8 @@ export const selectIsGridSettingsPanelOpen = (state: RootState): boolean => Bool
 export const selectIsMediaToolArmed = (state: RootState): boolean => state.design.isMediaToolArmed;
 
 export const selectIsPatternSourcePicking = (state: RootState): boolean => state.design.isPatternSourcePicking;
+
+export const selectPatternSourcePickTarget = (state: RootState): TPatternSourcePickTarget | null => state.design.patternSourcePickTarget;
 
 export const selectIsUiHidden = (state: RootState): boolean => state.design.isUiHidden;
 

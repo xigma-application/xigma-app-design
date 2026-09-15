@@ -10,6 +10,7 @@ type TReadablePaint = {
   end?: { x: number; y: number };
   opacity: number;
   scale?: number;
+  sourceNodeId?: string | null;
   spacingX?: number;
   spacingY?: number;
   start?: { x: number; y: number };
@@ -2307,6 +2308,48 @@ test.describe('Design panels — Fill section', () => {
 
     // result — the still-open picker shows the Pattern panel content
     await expect(page.getByRole('button', { name: 'Select source...' })).toBeVisible();
+  });
+
+  test('picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-pick');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const targetId = await readFirstNodeId(page);
+
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+
+    const sourceId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder[1];
+    });
+
+    // reselect the target rectangle, whose own draw was superseded by the source rectangle's
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+
+    // action — click the other rectangle on the canvas while picking is armed
+    await designPage.canvas.click({ position: { x: 1050, y: 250 } });
+
+    const node = await readNode(page, targetId);
+
+    expect(node.fills![0]).toMatchObject({ sourceNodeId: sourceId, type: 'pattern' });
+
+    const isPatternSourcePicking = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.isPatternSourcePicking;
+    });
+
+    expect(isPatternSourcePicking).toBe(false);
   });
 
   test('a pattern fill with no source renders a placeholder dot grid on the shape instead of nothing', async ({ page }) => {

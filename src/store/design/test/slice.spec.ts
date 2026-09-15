@@ -98,6 +98,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      gradientEditor: null,
       gridSectionHighlight: null,
       gridTrackModeMenuRequest: null,
       gridTrackSelection: null,
@@ -106,6 +107,7 @@ describe('design slice', () => {
       isActionsPanelOpen: false,
       isGridSettingsPanelOpen: false,
       isMediaToolArmed: false,
+      isPatternSourcePicking: false,
       isUiHidden: false,
       isUiMinimized: false,
       lastFrameTool: ToolName.frame,
@@ -129,6 +131,7 @@ describe('design slice', () => {
         },
       },
       panelGridTrackSelection: null,
+      patternSourcePickTarget: null,
       penActiveVertexId: null,
       preferences: {
         areAdditionalLabelsVisible: true,

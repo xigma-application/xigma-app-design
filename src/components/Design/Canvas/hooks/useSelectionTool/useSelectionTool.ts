@@ -21,6 +21,7 @@ import { adjustEraserDiameter } from './utils/adjustEraserDiameter';
 import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag';
 import { handleAltKeyChange } from './utils/handleAltKeyChange/handleAltKeyChange';
 import { handleModifierKeyChange } from './utils/handleModifierKeyChange/handleModifierKeyChange';
+import { handlePatternSourcePick } from './utils/handlePatternSourcePick/handlePatternSourcePick';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
@@ -38,7 +39,9 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
-    if (!isPatternSourcePicking) {
+    if (isPatternSourcePicking) {
+      handlePatternSourcePick(canvas, event, dispatch);
+    } else {
       lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
       handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
     }

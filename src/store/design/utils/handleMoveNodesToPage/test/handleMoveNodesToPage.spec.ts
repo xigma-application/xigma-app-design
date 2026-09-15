@@ -75,6 +75,7 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
     source: buildPage('source', source),
     target: buildPage('target', target),
   },
+  patternSourcePickTarget: null,
   penActiveVertexId: null,
   preferences: {
     areAdditionalLabelsVisible: true,

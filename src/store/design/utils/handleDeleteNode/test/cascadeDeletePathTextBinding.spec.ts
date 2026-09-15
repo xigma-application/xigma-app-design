@@ -90,6 +90,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
       ...page,
     },
   },
+  patternSourcePickTarget: null,
   penActiveVertexId: null,
   preferences: {
     areAdditionalLabelsVisible: true,

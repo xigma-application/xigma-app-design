@@ -437,6 +437,32 @@ don't affect this render at all until an actual pattern source picker lands; thi
 replaces the previous behavior of `pattern` silently drawing nothing (the same no-op `'image'`
 paints still get, since texture-fill compositing isn't wired up for either yet).
 
+**Picking a pattern source is wired end-to-end at the state layer, but not the render yet.**
+`TPatternPaint.sourceNodeId?: string | null` now exists and gets written for real: clicking
+"Select source..." (`PatternSourcePreview.tsx`) arms `design.isPatternSourcePicking`, while
+`useSyncPatternSourcePickTarget` (a `FillRow.tsx` effect mirroring `useSyncGradientEditor`) keeps
+`design.patternSourcePickTarget: {nodeId, paintIndex} | null` pointed at whichever row's picker is
+open. The next primary-button canvas click while armed is caught in `useSelectionTool.ts`'s own
+`onPointerDown` (a sibling branch to the normal `handlePointerDown`, not a separate listener) and
+handed to `handlePatternSourcePick.ts`, which hit-tests via the same `getNodeAtPoint` selection uses,
+writes the hit id onto the target paint's `sourceNodeId` through a plain `updateNode`, and disarms
+picking — refusing only the trivial case of a node picking itself. **The dot-grid placeholder still
+renders regardless of `sourceNodeId`** — `drawVectorPatternFill.ts` doesn't read it yet. Making the
+source's live appearance (including a Frame's children) actually tile onto the consumer is bigger
+than it looks: the render pipeline's fast path (`drawSceneNodes.ts`) only degenerates to a flat
+`sceneNodes.forEach(paintLeaf)` when nothing needs clip/mask/blend compositing, but a real source
+subtree (a Frame with `clipContent`, say) forces the render-target-pool path (`renderIds.ts`,
+`renderIntoTarget.ts`, `bindTarget.ts` — the same machinery masks and blend modes already use). The
+safe way to reuse that machinery without re-entrant `drawSceneNodes` calls per tile is to render the
+source subtree into an offscreen texture **once per frame** via `renderIntoTarget`, then repeat-tile
+that one texture across the consumer's clipped face with a small textured-quad draw (no existing
+tile-repeat shader to reuse — `drawImage.ts`/`drawMediaLeafNode.ts` draws exactly one unrepeated
+quad) — cheap and proven-safe, versus re-invoking the whole scene dispatcher once per grid cell.
+Also still open: cycle detection beyond the trivial self-pick case (A picks B picks A), and the
+"freeze a consumer's last-known appearance" behavior for when its source node is deleted (needs an
+actual snapshot copy, not just clearing `sourceNodeId`, since nothing else persists the source's
+rendered look once it's gone).
+
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
 `useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer
 listeners (so dragging never dispatches per pixel), and read by `drawScene` via `.current` every

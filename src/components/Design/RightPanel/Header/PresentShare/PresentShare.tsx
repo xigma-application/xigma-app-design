@@ -41,7 +41,7 @@ const PresentShare: FC = () => {
           <PresentOptionsMenu />
         </UITools.ButtonMenu>
       </div>
-      <UITools.Button className={styles.PresentShare__share} size="medium">
+      <UITools.Button className={styles.PresentShare__share} size="large">
         {t(`${translationNameSpace}.share`)}
       </UITools.Button>
     </div>

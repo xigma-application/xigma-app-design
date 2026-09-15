@@ -52,6 +52,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
             viewport: { x: 10, y: 20, zoom: 2 },
           },
         },
+        patternSourcePickTarget: null,
         penActiveVertexId: null,
         preferences: {
           areAdditionalLabelsVisible: true,
