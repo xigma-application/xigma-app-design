@@ -156,6 +156,88 @@ describe('handlePatternSourcePick', () => {
     expect(selectIsPatternSourcePicking(store.getState())).toBe(false);
   });
 
+  it('should refuse a node that itself has a pattern fill as a source, preventing any A<-B<-C chain', () => {
+    // mock — B already consumes a pattern from some other source; A now tries to pick B as its own source
+    const targetId = addPatternRectangle(700, 700);
+    const otherSourceId = addSourceFrame(750, 750);
+    const chainedConsumerId = addPatternRectangle(800, 800);
+
+    store.dispatch(setPatternSourcePickTarget({ nodeId: chainedConsumerId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+    handlePatternSourcePick(createCanvas(), pointerEvent(755, 755), store.dispatch);
+
+    expect(getFills(chainedConsumerId)[0]).toMatchObject({ sourceNodeId: otherSourceId });
+
+    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before — target tries to pick the already-a-consumer rectangle as its own source
+    handlePatternSourcePick(createCanvas(), pointerEvent(805, 805), store.dispatch);
+
+    // result — refused, same as picking itself
+    expect(getFills(targetId)[0]).not.toHaveProperty('sourceNodeId');
+    expect(selectIsPatternSourcePicking(store.getState())).toBe(false);
+  });
+
+  it('should refuse a frame whose descendant has a pattern fill, not just the frame itself', () => {
+    // mock — a frame containing a rectangle that itself has a pattern fill somewhere inside it
+    const targetId = addPatternRectangle(900, 900);
+
+    store.dispatch(
+      addNode({
+        fills: [
+          {
+            alignmentIndex: 0,
+            direction: 'horizontal',
+            opacity: 100,
+            scale: 100,
+            spacingX: 0,
+            spacingY: 0,
+            tileType: 'rectangular',
+            type: 'pattern',
+          },
+        ],
+        height: 10,
+        name: 'Nested pattern rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 955,
+        y: 955,
+      }),
+    );
+
+    const { rootOrder: rootOrderAfterChild } = selectActivePage(store.getState());
+    const nestedPatternId = rootOrderAfterChild[rootOrderAfterChild.length - 1];
+
+    store.dispatch(
+      addNode({
+        childIds: [nestedPatternId],
+        clipContent: false,
+        fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+        height: 60,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 60,
+        x: 950,
+        y: 950,
+      }),
+    );
+
+    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before — click lands on the frame itself (its own fill is plain solid), not the nested rectangle
+    handlePatternSourcePick(createCanvas(), pointerEvent(952, 952), store.dispatch);
+
+    // result — refused, since the frame's own subtree contains a pattern fill
+    expect(getFills(targetId)[0]).not.toHaveProperty('sourceNodeId');
+    expect(selectIsPatternSourcePicking(store.getState())).toBe(false);
+  });
+
   it('should disarm without throwing when the pick target points at a node that no longer exists', () => {
     // mock — a real node sits under the click point, but the target itself is stale
     addSourceFrame(1000, 1000);

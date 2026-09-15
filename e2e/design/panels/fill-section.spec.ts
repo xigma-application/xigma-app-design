@@ -2352,6 +2352,43 @@ test.describe('Design panels — Fill section', () => {
     expect(isPatternSourcePicking).toBe(false);
   });
 
+  test('picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-chain-refused');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const targetId = await readFirstNodeId(page);
+
+    // a second rectangle that is itself already a pattern consumer (no source picked yet)
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+    await designPage.canvas.click({ position: { x: 1050, y: 250 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+
+    // action — reselect the target, arm picking, then click the pattern-holding rectangle
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1050, y: 250 } });
+
+    // result — refused, same as picking itself: no sourceNodeId written, picking disarmed
+    const node = await readNode(page, targetId);
+
+    expect(node.fills![0].sourceNodeId).toBeFalsy();
+
+    const isPatternSourcePicking = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.isPatternSourcePicking;
+    });
+
+    expect(isPatternSourcePicking).toBe(false);
+  });
+
   test('a picked pattern source renders live, repeating its own color across the shape', async ({ page }) => {
     const designPage = new DesignPage(page);
 

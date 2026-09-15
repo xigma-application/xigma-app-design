@@ -209,6 +209,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 440 | Editing a Pattern panel setting after picking a source preserves the live sourceNodeId instead of dropping it     |  ✅  | ✅ `fill-section.spec.ts` (spacing test also exercises this) |
 | 441 | Hexagonal tiling with Horizontal direction offsets alternate rows, creating a brick pattern                       |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                      |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -562,3 +563,10 @@ pattern fill, it's a brick-style offset of alternating rows or columns by half a
 the same rectangular tile texture. Verified by picking a source, opening a spacing gap on one axis,
 and asserting the same point that was inside the gap on one row/column lands inside a tile once the
 neighboring row/column shifts by half a period.
+
+#443 closes out the original pattern-fill design question's last open item: cycle prevention. The
+decision (made explicitly, after going back and forth on "just detect real cycles" vs "block chains
+entirely") is to disallow `sourceNodeId` chains outright rather than detect cycles in the dependency
+graph — a node (or anything in its own subtree, for a Frame source) that already has any `'pattern'`
+fill can never be picked as someone else's source. If C should look like A, C must pick A directly;
+routing through B (which itself consumes A) is refused the same way self-picking already was.

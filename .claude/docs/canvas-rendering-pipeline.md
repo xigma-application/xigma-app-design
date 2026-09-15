@@ -446,17 +446,31 @@ open. The next primary-button canvas click while armed is caught in `useSelectio
 `onPointerDown` (a sibling branch to the normal `handlePointerDown`, not a separate listener) and
 handed to `handlePatternSourcePick.ts`, which hit-tests via the same `getNodeAtPoint` selection uses,
 writes the hit id onto the target paint's `sourceNodeId` through a plain `updateNode` (clearing any
-stale `frozenSourceSnapshot`, see below), and disarms picking — refusing only the trivial case of a
-node picking itself. `useConvertToPatternPaint.ts` (the Pattern panel's settings → paint commit path)
-must explicitly carry `sourceNodeId`/`frozenSourceSnapshot` forward from the previous paint when it is
-already a pattern — it rebuilds the whole `TPatternPaint` from the panel's own state on every field
-edit, so a naive version silently dropped both fields (and thus the live source) the moment a user
-touched scale/spacing/alignment/tileType/direction after picking; this was caught and fixed while
-wiring spacing/alignment into the render, via an e2e test that picks a source and then edits a
-setting. Full cycle detection beyond the trivial self-pick case is still open, but a
+stale `frozenSourceSnapshot`, see below), and disarms picking. `useConvertToPatternPaint.ts` (the
+Pattern panel's settings → paint commit path) must explicitly carry `sourceNodeId`/
+`frozenSourceSnapshot` forward from the previous paint when it is already a pattern — it rebuilds the
+whole `TPatternPaint` from the panel's own state on every field edit, so a naive version silently
+dropped both fields (and thus the live source) the moment a user touched scale/spacing/alignment/
+tileType/direction after picking; this was caught and fixed while wiring spacing/alignment into the
+render, via an e2e test that picks a source and then edits a setting.
+
+**Pattern chains (A←B←C) are disallowed outright, not just direct cycles.** This was a deliberate
+design call, not an oversight: rather than detecting cycles in a `sourceNodeId` graph (which gets
+complicated fast once a Frame source's whole subtree is in play — a container can pull in a
+descendant that itself has a pattern fill pointing anywhere), the rule is simply "a node can never be
+picked as a source if it (or anything in its own subtree) currently has any fill of type `'pattern'`,
+live-sourced or not". `doesNodeHavePatternInSubtree.ts` (a sibling file next to
+`handlePatternSourcePick.ts`, reusing the already-generic `getGroupSubtreeNodes` from
+`store/design/utils/nodeHierarchy/` — the same walker `freezePatternConsumersOfNode.ts` uses, rather
+than the render pipeline's own `collectPatternSourceSubtree.ts`, since this check lives outside the
+render feature) replaces the old "refuse only if picking itself" guard in `handlePatternSourcePick.ts`
+wholesale — self-pick is refused as a special case of this same check, since a node being edited
+always has a pattern fill on itself by definition. If C wants A's appearance, C must pick A directly;
+picking B (which is A's own consumer) is refused exactly like picking itself would be. A
 `patternSourceDepth` counter (`MAX_PATTERN_SOURCE_RESOLUTION_DEPTH = 4`, threaded through
-`drawLeafNode`/`drawBoxLeafNode`/every resolver below) caps runaway recursion if a multi-hop cycle
-ever forms, so the worst case is a few wasted render passes, never a hang.
+`drawLeafNode`/`drawBoxLeafNode`/every resolver below) still caps render recursion as defense in
+depth (e.g. against data saved before this rule existed), but with chains blocked at pick-time it
+should never actually trigger in practice.
 
 The tile itself renders live: `resolvePatternSourceTile.ts` (`drawBoxLeafNode.ts`'s
 `resolvePatternPaintTile` calls it whenever a pattern paint has a live `sourceNodeId`) renders the

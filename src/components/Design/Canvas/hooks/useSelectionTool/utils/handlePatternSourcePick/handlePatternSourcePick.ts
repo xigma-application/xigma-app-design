@@ -1,4 +1,5 @@
 // utils
+import { doesNodeHavePatternInSubtree } from './doesNodeHavePatternInSubtree';
 import { getNodeAtPoint } from 'components/Design/Canvas/utils/getNodeAtPoint/getNodeAtPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -20,10 +21,11 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
     if (target) {
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
+      const nodesById = selectNodes(state);
       const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
 
-      if (hit && hit.id !== target.nodeId) {
-        const targetNode = selectNodes(state)[target.nodeId];
+      if (hit && !doesNodeHavePatternInSubtree(hit, nodesById)) {
+        const targetNode = nodesById[target.nodeId];
 
         if (targetNode && 'fills' in targetNode) {
           const paint = targetNode.fills[target.paintIndex];
