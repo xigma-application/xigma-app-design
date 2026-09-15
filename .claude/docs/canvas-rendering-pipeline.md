@@ -437,31 +437,51 @@ don't affect this render at all until an actual pattern source picker lands; thi
 replaces the previous behavior of `pattern` silently drawing nothing (the same no-op `'image'`
 paints still get, since texture-fill compositing isn't wired up for either yet).
 
-**Picking a pattern source is wired end-to-end at the state layer, but not the render yet.**
-`TPatternPaint.sourceNodeId?: string | null` now exists and gets written for real: clicking
-"Select source..." (`PatternSourcePreview.tsx`) arms `design.isPatternSourcePicking`, while
+**Picking a pattern source is wired end-to-end, including a live tiled render and a freeze-on-delete
+fallback.** `TPatternPaint.sourceNodeId?: string | null` gets written for real: clicking "Select
+source..." (`PatternSourcePreview.tsx`) arms `design.isPatternSourcePicking`, while
 `useSyncPatternSourcePickTarget` (a `FillRow.tsx` effect mirroring `useSyncGradientEditor`) keeps
 `design.patternSourcePickTarget: {nodeId, paintIndex} | null` pointed at whichever row's picker is
 open. The next primary-button canvas click while armed is caught in `useSelectionTool.ts`'s own
 `onPointerDown` (a sibling branch to the normal `handlePointerDown`, not a separate listener) and
 handed to `handlePatternSourcePick.ts`, which hit-tests via the same `getNodeAtPoint` selection uses,
-writes the hit id onto the target paint's `sourceNodeId` through a plain `updateNode`, and disarms
-picking — refusing only the trivial case of a node picking itself. **The dot-grid placeholder still
-renders regardless of `sourceNodeId`** — `drawVectorPatternFill.ts` doesn't read it yet. Making the
-source's live appearance (including a Frame's children) actually tile onto the consumer is bigger
-than it looks: the render pipeline's fast path (`drawSceneNodes.ts`) only degenerates to a flat
-`sceneNodes.forEach(paintLeaf)` when nothing needs clip/mask/blend compositing, but a real source
-subtree (a Frame with `clipContent`, say) forces the render-target-pool path (`renderIds.ts`,
-`renderIntoTarget.ts`, `bindTarget.ts` — the same machinery masks and blend modes already use). The
-safe way to reuse that machinery without re-entrant `drawSceneNodes` calls per tile is to render the
-source subtree into an offscreen texture **once per frame** via `renderIntoTarget`, then repeat-tile
-that one texture across the consumer's clipped face with a small textured-quad draw (no existing
-tile-repeat shader to reuse — `drawImage.ts`/`drawMediaLeafNode.ts` draws exactly one unrepeated
-quad) — cheap and proven-safe, versus re-invoking the whole scene dispatcher once per grid cell.
-Also still open: cycle detection beyond the trivial self-pick case (A picks B picks A), and the
-"freeze a consumer's last-known appearance" behavior for when its source node is deleted (needs an
-actual snapshot copy, not just clearing `sourceNodeId`, since nothing else persists the source's
-rendered look once it's gone).
+writes the hit id onto the target paint's `sourceNodeId` through a plain `updateNode` (clearing any
+stale `frozenSourceSnapshot`, see below), and disarms picking — refusing only the trivial case of a
+node picking itself. Full cycle detection beyond that trivial case is still open, but a
+`patternSourceDepth` counter (`MAX_PATTERN_SOURCE_RESOLUTION_DEPTH = 4`, threaded through
+`drawLeafNode`/`drawBoxLeafNode`/every resolver below) caps runaway recursion if a multi-hop cycle
+ever forms, so the worst case is a few wasted render passes, never a hang.
+
+The tile itself renders live: `resolvePatternSourceTile.ts` (`drawBoxLeafNode.ts`'s
+`resolvePatternPaintTile` calls it whenever a pattern paint has a live `sourceNodeId`) renders the
+source's own subtree (`collectPatternSourceSubtree.ts` walks `childIds`, so a Frame's children come
+along) into an offscreen texture **once per frame**, reusing the render-target pool the same way
+masks/blend-mode isolation already do (`renderIsolatedFillGroup`'s save-framebuffer/viewport/blend-
+state → bind pool target → draw → restore dance, factored out into the shared
+`renderNodeListToPatternSourceTile.ts` so both the live and frozen resolvers use one code path).
+`drawVectorPatternSourceTile.ts` then tiles that one texture across the consumer's clipped face with
+a dedicated fragment shader (`patternSourceTileFragmentShaderSource.ts`, paired with the existing
+gradient-fill vertex shader for its `v_localPosition`/`u_boundsOrigin`/`u_boundsSize` normalization —
+no new vertex shader needed) — the fragment does `fract(v_localPosition * u_tileCount)` for the
+repeat, then maps that back into the source texture's own screen-space sub-rectangle via
+`worldPointToTextureUV.ts` (world → screen → UV, derived directly from this file's existing vertex
+shaders' own transform math, not guessed). `paint.scale` sizes the tile; `spacingX/Y`/`tileType`
+(hexagonal)/`direction`/`alignmentIndex` are still cosmetic-only, not yet read by any of this.
+
+**Deleting a pattern's source freezes the consumer instead of leaving a dangling reference.**
+`TPatternPaint.frozenSourceSnapshot?: TSceneNode[] | null` holds a `structuredClone` of the source's
+own subtree, taken at the moment of deletion. `handleDeleteNode.ts` calls
+`freezePatternConsumersOfNode(state, id)` *before* removing the node (so descendants are still live
+to clone): it scans every node's fills for a pattern paint whose `sourceNodeId` matches the
+about-to-be-deleted id, snapshots that source's subtree via the same `getGroupSubtreeNodes` util
+`relocateNodeSubtree.ts` already uses for cross-page moves (reusing an existing generic-container
+walk rather than writing a second one), and writes the clone onto `frozenSourceSnapshot` while
+clearing `sourceNodeId` to `null`. On the render side, `resolveFrozenPatternSourceTile.ts` mirrors
+`resolvePatternSourceTile.ts` but skips the "look up a live node" step entirely — the snapshot array
+already **is** the subtree, so it just builds a local `nodesById` from the snapshot's own ids and
+calls the same shared `renderNodeListToPatternSourceTile.ts`. `resolvePatternPaintTile` in
+`drawBoxLeafNode.ts` tries the live path first and only falls back to the frozen one, so a paint
+that somehow carries both (shouldn't happen in practice) always prefers the live source.
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
 `useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer

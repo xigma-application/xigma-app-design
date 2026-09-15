@@ -2404,6 +2404,48 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
   });
 
+  test('deleting a pattern source freezes the consumer’s last appearance instead of reverting to the placeholder', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-source-freeze-on-delete');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const targetId = await readFirstNodeId(page);
+
+    // a small 20x20 source rectangle, filled pure blue
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the blue rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    expect(await readPixelColor(page, 710, 210)).toEqual([0, 0, 255]);
+
+    // action — select the source rectangle itself and delete it
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+    await page.keyboard.press('Delete');
+
+    const node = await readNode(page, targetId);
+
+    // result — the paint is frozen: no more live sourceNodeId, but the render is untouched
+    expect(node.fills![0].sourceNodeId).toBeFalsy();
+    expect(await readPixelColor(page, 710, 210)).toEqual([0, 0, 255]);
+  });
+
   test('a pattern fill with no source renders a placeholder dot grid on the shape instead of nothing', async ({ page }) => {
     const designPage = new DesignPage(page);
 

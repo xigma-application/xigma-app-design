@@ -1,6 +1,7 @@
 // types
 import { BlendMode } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
+import { TSceneNode } from 'types/design/types';
 
 export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'pattern' | 'solid';
 
@@ -44,6 +45,7 @@ export type TImagePaint = TPaintBase & {
 export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
   direction: TPatternDirection;
+  frozenSourceSnapshot?: TSceneNode[] | null;
   scale: number;
   sourceNodeId?: string | null;
   spacingX: number;

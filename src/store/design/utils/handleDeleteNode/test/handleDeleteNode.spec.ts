@@ -260,6 +260,43 @@ describe('handleDeleteNode', () => {
     expect(getActivePage(state).nodes['group-1']).toBeUndefined();
   });
 
+  it('should freeze a pattern consumer’s source appearance and clear sourceNodeId when its source is deleted', () => {
+    // mock
+    const source: TRectangleNode = {
+      ...node,
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
+      id: 'source-1',
+      type: NodeType.rectangle,
+    };
+    const consumer: TRectangleNode = {
+      ...node,
+      fills: [
+        {
+          alignmentIndex: 0,
+          direction: 'horizontal',
+          opacity: 100,
+          scale: 100,
+          sourceNodeId: 'source-1',
+          spacingX: 0,
+          spacingY: 0,
+          tileType: 'rectangular',
+          type: 'pattern',
+        },
+      ],
+      id: 'consumer',
+      type: NodeType.rectangle,
+    };
+    const state = buildState({ consumer, 'source-1': source });
+
+    // before
+    handleDeleteNode(state, 'source-1');
+
+    // result — the consumer survives, its pattern paint is frozen instead of left dangling
+    const fill = (getActivePage(state).nodes.consumer as TRectangleNode).fills[0];
+
+    expect(fill).toMatchObject({ frozenSourceSnapshot: [source], sourceNodeId: null });
+  });
+
   it('should keep the parent group and resync its bounds when a non-last child is deleted', () => {
     // mock
     const first: TRectangleNode = { ...node, id: 'first', parentId: 'group-1', type: NodeType.rectangle, width: 10, x: 0 };

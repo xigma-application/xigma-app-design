@@ -30,7 +30,7 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
 
           if (paint && paint.type === 'pattern') {
             const nextFills: TPaint[] = targetNode.fills.map((fill, index) =>
-              index === target.paintIndex ? { ...paint, sourceNodeId: hit.id } : fill,
+              index === target.paintIndex ? { ...paint, frozenSourceSnapshot: null, sourceNodeId: hit.id } : fill,
             );
 
             dispatch(updateNode({ changes: { fills: nextFills }, id: target.nodeId }));

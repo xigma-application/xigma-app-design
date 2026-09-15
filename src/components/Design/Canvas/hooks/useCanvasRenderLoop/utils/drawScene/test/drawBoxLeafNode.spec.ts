@@ -12,6 +12,7 @@ const drawThickOutlineMock = vi.fn();
 const drawVectorFillGroupMock = vi.fn();
 const getBoxFillPolygonMock = vi.fn();
 const resolvePatternSourceTileMock = vi.fn();
+const resolveFrozenPatternSourceTileMock = vi.fn();
 
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
@@ -23,6 +24,9 @@ vi.mock('../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorFillGrou
 vi.mock('../getBoxFillPolygon', () => ({ getBoxFillPolygon: (...args: unknown[]): unknown => getBoxFillPolygonMock(...args) }));
 vi.mock('../resolvePatternSourceTile', () => ({
   resolvePatternSourceTile: (...args: unknown[]): unknown => resolvePatternSourceTileMock(...args),
+}));
+vi.mock('../resolveFrozenPatternSourceTile', () => ({
+  resolveFrozenPatternSourceTile: (...args: unknown[]): unknown => resolveFrozenPatternSourceTileMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -70,6 +74,7 @@ describe('drawBoxLeafNode', () => {
     vi.clearAllMocks();
     getBoxFillPolygonMock.mockReturnValue([{ x: 0, y: 0 }]);
     resolvePatternSourceTileMock.mockReturnValue(null);
+    resolveFrozenPatternSourceTileMock.mockReturnValue(null);
   });
 
   it('should draw the fill paint stack through the shared vector fill group, scaling opacity into each paint', () => {
@@ -145,6 +150,68 @@ describe('drawBoxLeafNode', () => {
     expect(resolvePatternSourceTileMock).toHaveBeenCalledWith(context, 'source-1', nodesById, pathOutlineStyles, refs, editingPathId, 0);
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [resolvedTile.tile]);
     expect(resolvedTile.release).toHaveBeenCalled();
+  });
+
+  it('should fall back to a frozen source snapshot when sourceNodeId is gone but a frozen snapshot remains', () => {
+    // mock
+    const resolvedTile = { release: vi.fn(), tile: { height: 10, texture: {} as WebGLTexture, width: 10, x: 0, y: 0 } };
+
+    resolveFrozenPatternSourceTileMock.mockReturnValue(resolvedTile);
+
+    const frozenSourceSnapshot = [rect({ id: 'source-1' })];
+    const pattern: TRectangleNode['fills'][number] = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      frozenSourceSnapshot,
+      opacity: 100,
+      scale: 100,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+    const node = rect({ fills: [pattern] });
+
+    // action
+    drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
+
+    // result
+    expect(resolvePatternSourceTileMock).not.toHaveBeenCalled();
+    expect(resolveFrozenPatternSourceTileMock).toHaveBeenCalledWith(
+      context,
+      frozenSourceSnapshot,
+      pathOutlineStyles,
+      refs,
+      editingPathId,
+      0,
+    );
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [resolvedTile.tile]);
+    expect(resolvedTile.release).toHaveBeenCalled();
+  });
+
+  it('should prefer a live sourceNodeId over a stale frozen snapshot when both are somehow present', () => {
+    // mock
+    const frozenSourceSnapshot = [rect({ id: 'old-source' })];
+    const pattern: TRectangleNode['fills'][number] = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      frozenSourceSnapshot,
+      opacity: 100,
+      scale: 100,
+      sourceNodeId: 'source-1',
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+    const node = rect({ fills: [pattern] });
+
+    // action
+    drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
+
+    // result
+    expect(resolvePatternSourceTileMock).toHaveBeenCalledWith(context, 'source-1', nodesById, pathOutlineStyles, refs, editingPathId, 0);
+    expect(resolveFrozenPatternSourceTileMock).not.toHaveBeenCalled();
   });
 
   it('should not resolve a pattern source tile for a pattern paint with no sourceNodeId', () => {

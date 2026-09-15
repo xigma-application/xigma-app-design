@@ -1,7 +1,7 @@
 import { FC, FocusEvent } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput } from '@xigma/components';
+import { ScrubbableInput } from '@xigma/components';
 
 // components
 import ColumnDimensionsFieldEndAdornment from './ColumnDimensionsFieldEndAdornment';
@@ -13,9 +13,6 @@ import { useColumnDimensionsFieldReveal } from './hooks/useColumnDimensionsField
 // others
 import { DIMENSIONS_MAX, DIMENSIONS_MIN } from '../constants';
 import { getMinMaxIcon } from './utils/getMinMaxIcon';
-
-// styles
-import styles from './column-dimensions-field.module.scss';
 
 // types
 import { SizingMode } from 'types/design/enums';
@@ -113,11 +110,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           onMouseUp={onDragEnd}
           value={value}
         >
-          {minMaxIcon ? (
-            <Icon color="neutral2" name={minMaxIcon} size={12} />
-          ) : (
-            <span className={styles.ColumnDimensionsField__label}>{label}</span>
-          )}
+          {minMaxIcon ? <UITools.InputAdornment icon={minMaxIcon} /> : <UITools.InputAdornment label={label} />}
         </ScrubbableInput>
       }
       type="number"

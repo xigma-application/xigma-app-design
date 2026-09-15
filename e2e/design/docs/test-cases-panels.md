@@ -202,6 +202,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 433 | Switching away from Pattern and back resets the panel instead of resurfacing the old values                       |  —   | ✅ `fill-section.spec.ts` |
 | 434 | The Direction row only shows for the Hexagonal tile type                                                          |  —   | ✅ `fill-section.spec.ts` |
 | 435 | Picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking                  |  ✅  | ✅ `fill-section.spec.ts` |
+| 436 | A picked pattern source renders live and repeats as tiles, not a single stretched copy                            |  —   | ✅ `fill-section.spec.ts` |
+| 437 | Deleting a pattern's source freezes the consumer's last appearance instead of reverting to the placeholder        |  ✅  | ✅ `fill-section.spec.ts` |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -530,6 +532,13 @@ pattern is still visibly distinct from a missing fill. #435 wires the "Select so
 (`useSyncPatternSourcePickTarget`, mirroring `useGradientEditor`'s own sync hook), so the next primary
 click on the canvas while armed (`handlePatternSourcePick`, wired into `useSelectionTool`'s existing
 pointer-down dispatch) writes the hit node's id onto `paint.sourceNodeId` and disarms — refusing only
-the trivial self-reference case (picking the node's own fill as its own source) for now. Making that
-picked source actually render live on the shape (instead of the dot-grid placeholder) and the
-consumer/source relationship's undo, deletion, and cycle-safety semantics are follow-up work.
+the trivial self-reference case (picking the node's own fill as its own source) for now.
+
+#436-#437 finish the loop: the picked source now actually renders, live, tiled onto the consumer
+(`resolvePatternSourceTile`/`drawVectorPatternSourceTile`, `.claude/docs/canvas-rendering-pipeline.md`
+has the shader/render-target details), and deleting that source no longer leaves a dangling
+`sourceNodeId` — `freezePatternConsumersOfNode` (called from `handleDeleteNode` before the node is
+actually removed) snapshots the source's own subtree onto `frozenSourceSnapshot` and clears
+`sourceNodeId`, so the consumer keeps its last-known appearance forever rather than reverting to the
+dot-grid placeholder. Cycle-safety beyond the trivial self-pick case is still open, though a depth
+cap on the render side already prevents a multi-hop cycle from hanging the tab.

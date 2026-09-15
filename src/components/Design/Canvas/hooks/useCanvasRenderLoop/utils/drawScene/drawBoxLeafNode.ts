@@ -11,7 +11,37 @@ import { drawVectorFillGroup } from './drawVectorNodeOrTextPathGuide/drawSceneVe
 import { getBoxFillPolygon } from './getBoxFillPolygon';
 import { getFillsInPaintOrder } from './getFillsInPaintOrder';
 import { getScaledFillPaints } from './getScaledFillPaints';
-import { resolvePatternSourceTile } from './resolvePatternSourceTile';
+import { resolveFrozenPatternSourceTile } from './resolveFrozenPatternSourceTile';
+import { resolvePatternSourceTile, TResolvedPatternSourceTile } from './resolvePatternSourceTile';
+
+const resolvePatternPaintTile = (
+  context: TDrawSceneContext,
+  paint: TFrameNode['fills'][number],
+  nodesById: Record<string, TSceneNode>,
+  pathOutlineStyles: Map<string, TPathOutlineStyle>,
+  refs: TCanvasRefs,
+  editingPathId: string | null | undefined,
+  patternSourceDepth: number,
+): TResolvedPatternSourceTile | null => {
+  if (paint.type === 'pattern') {
+    if (paint.sourceNodeId) {
+      return resolvePatternSourceTile(context, paint.sourceNodeId, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+    }
+
+    if (paint.frozenSourceSnapshot) {
+      return resolveFrozenPatternSourceTile(
+        context,
+        paint.frozenSourceSnapshot,
+        pathOutlineStyles,
+        refs,
+        editingPathId,
+        patternSourceDepth,
+      );
+    }
+  }
+
+  return null;
+};
 
 const drawBoxLeafNodeFill = (
   context: TDrawSceneContext,
@@ -28,9 +58,7 @@ const drawBoxLeafNodeFill = (
   if ('fills' in node) {
     const paints = getFillsInPaintOrder(getScaledFillPaints(node.fills, opacity));
     const resolvedTiles = paints.map((paint) =>
-      paint.type === 'pattern' && paint.sourceNodeId
-        ? resolvePatternSourceTile(context, paint.sourceNodeId, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth)
-        : null,
+      resolvePatternPaintTile(context, paint, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth),
     );
 
     drawVectorFillGroup(

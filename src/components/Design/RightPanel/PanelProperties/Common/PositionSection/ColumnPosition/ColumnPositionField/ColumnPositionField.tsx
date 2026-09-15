@@ -9,9 +9,6 @@ import { UITools } from 'shared';
 // others
 import { POSITION_MAX, POSITION_MIN } from '../constants';
 
-// styles
-import styles from './column-position-field.module.scss';
-
 // types
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
@@ -57,7 +54,7 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
           onMouseUp={onDragEnd}
           value={value}
         >
-          <span className={styles.ColumnPositionField__label}>{label}</span>
+          <UITools.InputAdornment label={label} />
         </ScrubbableInput>
       }
       type="number"

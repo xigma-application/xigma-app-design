@@ -1,7 +1,7 @@
 import { FC, FocusEvent } from 'react';
 
 // @xigma
-import { Icon, ScrubbableInput } from '@xigma/components';
+import { ScrubbableInput } from '@xigma/components';
 
 // components
 import { UITools } from 'shared';
@@ -46,7 +46,7 @@ export const ColumnRotationField: FC<TColumnRotationFieldProps> = ({
         onMouseUp={onDragEnd}
         value={value}
       >
-        <Icon color="neutral2" name="Protractor" size={12} />
+        <UITools.InputAdornment icon="Protractor" />
       </ScrubbableInput>
     }
     type="text"
