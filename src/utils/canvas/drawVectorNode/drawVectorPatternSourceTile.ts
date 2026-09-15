@@ -5,6 +5,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
+import { getPatternHexOffsetAxis } from './getPatternHexOffsetAxis';
 import { getPatternTileGridFractions } from './getPatternTileGridFractions';
 import { getVectorFillBounds } from './getVectorFillBounds';
 import { getVectorFillCoveringQuad } from './getVectorFillCoveringQuad';
@@ -38,6 +39,7 @@ export const drawVectorPatternSourceTile = (
     const tileWorldWidth = Math.max(sourceTile.width * (paint.scale / 100), 1);
     const tileWorldHeight = Math.max(sourceTile.height * (paint.scale / 100), 1);
     const { alignFrac, periodFrac, tileFrac } = getPatternTileGridFractions(bounds, tileWorldWidth, tileWorldHeight, paint);
+    const hexOffsetAxis = getPatternHexOffsetAxis(paint);
     const topLeftUV = worldPointToTextureUV({ x: sourceTile.x, y: sourceTile.y }, viewport, canvasWidth, canvasHeight);
     const point = { x: sourceTile.x + sourceTile.width, y: sourceTile.y + sourceTile.height };
     const bottomRightUV = worldPointToTextureUV(point, viewport, canvasWidth, canvasHeight);
@@ -55,6 +57,7 @@ export const drawVectorPatternSourceTile = (
     const tileOriginUVLocation = gl.getUniformLocation(program, 'u_tileOriginUV');
     const tileSizeUVLocation = gl.getUniformLocation(program, 'u_tileSizeUV');
     const opacityLocation = gl.getUniformLocation(program, 'u_opacity');
+    const hexOffsetAxisLocation = gl.getUniformLocation(program, 'u_hexOffsetAxis');
 
     gl.useProgram(program);
     gl.activeTexture(gl.TEXTURE0);
@@ -72,6 +75,7 @@ export const drawVectorPatternSourceTile = (
     gl.uniform2f(tileOriginUVLocation, topLeftUV.x, topLeftUV.y);
     gl.uniform2f(tileSizeUVLocation, bottomRightUV.x - topLeftUV.x, bottomRightUV.y - topLeftUV.y);
     gl.uniform1f(opacityLocation, alpha);
+    gl.uniform1i(hexOffsetAxisLocation, hexOffsetAxis);
     gl.enableVertexAttribArray(positionLocation);
 
     gl.clear(gl.STENCIL_BUFFER_BIT);

@@ -2,8 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import Button from 'shared/UITools/Button/Button';
-import { Icon, Tooltip } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -23,14 +22,12 @@ export const IgnoreAutoLayoutToggle: FC<TIgnoreAutoLayoutToggleProps> = ({ activ
 
   return (
     <Tooltip content={t(`${translationNameSpace}.ignoreAutoLayoutTooltip`)}>
-      <Button
+      <UITools.ButtonIcon
         ariaLabel={t(`${translationNameSpace}.ignoreAutoLayoutAriaLabel`)}
+        name="PositionSwitcher"
         onClick={onToggle}
         selected={active}
-        style={{ padding: 6 }}
-      >
-        <Icon name="PositionSwitcher" size={12} />
-      </Button>
+      />
     </Tooltip>
   );
 };

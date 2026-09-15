@@ -479,9 +479,21 @@ texture) and `u_alignFrac` shifts the grid's phase so a chosen point of the 3×3
 (the same `topLeft`/`top`/.../`bottomRight` layout as `AlignmentGrid.tsx`) sits flush with the
 matching edge/center/edge of the shape's own bounds, computed independently per axis (row → Y,
 col → X). At the defaults (`spacingX`/`spacingY: 0`, `alignmentIndex: 0`) this reduces to exactly the
-old flush-top-left tiling, so no visual regression for existing pattern fills. `tileType`
-(`hexagonal`)/`direction` are still cosmetic-only — the render always does rectangular tiling
-regardless of `tileType`; hexagonal offset-row/column tiling is unimplemented.
+old flush-top-left tiling, so no visual regression for existing pattern fills.
+
+`tileType: 'hexagonal'`/`direction` are read too, but note this isn't literal hexagon-shaped tiles —
+same as Figma's own "Hex Horizontal"/"Hex Vertical" pattern fill, it's a brick-style offset of
+alternating rows or columns by half a tile, still built from the same rectangular tile texture.
+`getPatternHexOffsetAxis.ts` (a pure CPU-side helper, mirroring `getPatternTileGridFractions.ts`)
+reduces `{tileType, direction}` to one integer uniform, `u_hexOffsetAxis`: `0` for `'rectangular'`
+(no offset), `1` for hexagonal+`'horizontal'` (offset alternates by row, shifting X), `2` for
+hexagonal+`'vertical'` (offset alternates by column, shifting Y). The fragment shader computes the
+row/column index via `floor(shifted.axis / u_periodFrac.axis)` *before* the `mod()` that produces the
+tile cell, checks its parity (`mod(index, 2.0)`), and subtracts half a period from the other axis's
+coordinate for odd rows/columns — done ahead of the existing `mod(shifted, u_periodFrac)` tile-cell
+math, so spacing/alignment/scale all keep working unchanged underneath the offset. At
+`tileType: 'rectangular'` the branch is skipped entirely (`u_hexOffsetAxis == 0`), so no regression
+for non-hexagonal fills.
 
 **Deleting a pattern's source freezes the consumer instead of leaving a dangling reference.**
 `TPatternPaint.frozenSourceSnapshot?: TSceneNode[] | null` holds a `structuredClone` of the source's

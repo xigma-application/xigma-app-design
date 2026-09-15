@@ -2495,6 +2495,107 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 730, 210)).toEqual([0, 255, 0]);
   });
 
+  test('hexagonal tiling with horizontal direction offsets alternate rows, creating a brick pattern', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-hex-horizontal-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a small 20x20 source rectangle, filled pure green
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    // action — picking a source closes the picker popover, so reopen it, then add a horizontal-only
+    // gap (100% of the 20px tile) so the row offset has a gap to shift into
+    await page.getByLabel('Hex color').click();
+
+    const spacingXInput = page.locator('[data-test-text-field-input="pattern-spacing-x"]');
+
+    await spacingXInput.fill('100');
+    await spacingXInput.blur();
+
+    // result — before switching tile type, both rows share the same gap column (720-740), so
+    // row 0 (y 200-220) and row 1 (y 220-240) both miss the source color at x 730
+    expect(await readPixelColor(page, 730, 210)).not.toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 230)).not.toEqual([0, 255, 0]);
+
+    // action — switch to Hexagonal (Horizontal is its default direction)
+    await page.getByLabel('Hexagonal', { exact: true }).click();
+
+    // result — row 1 is shifted half a tile in X, so the point that was in its gap now falls inside
+    // a tile, while row 0 (unshifted) still misses it — proving only alternate rows moved
+    expect(await readPixelColor(page, 730, 210)).not.toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 230)).toEqual([0, 255, 0]);
+  });
+
+  test('hexagonal tiling with vertical direction offsets alternate columns, creating a brick pattern', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-hex-vertical-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // a small 20x20 source rectangle, filled pure green
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    // action — picking a source closes the picker popover, so reopen it, then add a vertical-only
+    // gap (100% of the 20px tile) so the column offset has a gap to shift into
+    await page.getByLabel('Hex color').click();
+
+    const spacingYInput = page.locator('[data-test-text-field-input="pattern-spacing-y"]');
+
+    await spacingYInput.fill('100');
+    await spacingYInput.blur();
+
+    // result — before switching tile type, both columns share the same gap row (220-240), so
+    // column 0 (x 700-720) and column 1 (x 720-740) both miss the source color at y 230
+    expect(await readPixelColor(page, 710, 230)).not.toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 230)).not.toEqual([0, 255, 0]);
+
+    // action — switch to Hexagonal, then Vertical direction
+    await page.getByLabel('Hexagonal', { exact: true }).click();
+    await page.getByRole('button', { exact: true, name: 'Vertical' }).click();
+
+    // result — column 1 is shifted half a tile in Y, so the point that was in its gap now falls
+    // inside a tile, while column 0 (unshifted) still misses it — proving only alternate columns moved
+    expect(await readPixelColor(page, 710, 230)).not.toEqual([0, 255, 0]);
+    expect(await readPixelColor(page, 730, 230)).toEqual([0, 255, 0]);
+  });
+
   test('deleting a pattern source freezes the consumer’s last appearance instead of reverting to the placeholder', async ({ page }) => {
     const designPage = new DesignPage(page);
 

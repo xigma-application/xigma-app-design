@@ -207,6 +207,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 438 | Increasing pattern spacing opens a visible transparent gap between tiles instead of leaving them flush            |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 439 | Changing pattern alignment shifts which part of the tile grid sits flush with the shape                           |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 440 | Editing a Pattern panel setting after picking a source preserves the live sourceNodeId instead of dropping it     |  ✅  | ✅ `fill-section.spec.ts` (spacing test also exercises this) |
+| 441 | Hexagonal tiling with Horizontal direction offsets alternate rows, creating a brick pattern                       |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                      |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -546,11 +548,17 @@ actually removed) snapshots the source's own subtree onto `frozenSourceSnapshot`
 dot-grid placeholder. Cycle-safety beyond the trivial self-pick case is still open, though a depth
 cap on the render side already prevents a multi-hop cycle from hanging the tab.
 
-#438-#440 wire the rest of the Pattern panel's settings into the actual render (`spacingX`/`spacingY`/
-`alignmentIndex` — `tileType: 'hexagonal'`/`direction` remain cosmetic-only, unimplemented). Fixing
-#438/#439 surfaced a real bug (#440): `useConvertToPatternPaint` rebuilds the whole `TPatternPaint`
-from the panel's own local state on every field edit, so it silently dropped `sourceNodeId`/
+#438-#440 wire `spacingX`/`spacingY`/`alignmentIndex` into the actual render. Fixing #438/#439
+surfaced a real bug (#440): `useConvertToPatternPaint` rebuilds the whole `TPatternPaint` from the
+panel's own local state on every field edit, so it silently dropped `sourceNodeId`/
 `frozenSourceSnapshot` the moment a user touched any setting after picking a source — caught while
 writing #438's e2e test (reopening the panel and setting spacing turned the picked source's green
 tile white, i.e. it had reverted to the sourceless placeholder). Fixed by carrying both fields
 forward from the existing paint when it's already type `'pattern'`.
+
+#441-#442 finish `tileType: 'hexagonal'`/`direction`, the last two Pattern panel fields that didn't
+touch the render. This isn't literal hexagon-shaped tiles — like Figma's own Hex Horizontal/Vertical
+pattern fill, it's a brick-style offset of alternating rows or columns by half a tile, still sampling
+the same rectangular tile texture. Verified by picking a source, opening a spacing gap on one axis,
+and asserting the same point that was inside the gap on one row/column lands inside a tile once the
+neighboring row/column shifts by half a period.

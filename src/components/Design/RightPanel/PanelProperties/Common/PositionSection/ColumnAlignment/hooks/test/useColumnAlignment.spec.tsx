@@ -69,6 +69,27 @@ describe('useColumnAlignment', () => {
     expect(renderUseColumnAlignment().result.current.disabled).toBe(true);
   });
 
+  it('should be disabled when the parent uses auto layout and the child does not ignore it', () => {
+    const parentId = addFrame(null, 400, 300, LayoutMode.horizontal);
+    const childId = addFrame(null, 40, 40);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(setSelection([childId]));
+
+    expect(renderUseColumnAlignment().result.current.disabled).toBe(true);
+  });
+
+  it('should not be disabled when the parent uses auto layout but the child ignores it', () => {
+    const parentId = addFrame(null, 400, 300, LayoutMode.horizontal);
+    const childId = addFrame(null, 40, 40);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childId }));
+    store.dispatch(setSelection([childId]));
+
+    expect(renderUseColumnAlignment().result.current.disabled).toBe(false);
+  });
+
   it('should set the constraint and move the child to the anchor', () => {
     const { childId } = nested();
     const { result } = renderUseColumnAlignment();

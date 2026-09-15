@@ -236,6 +236,86 @@ describe('drawVectorPatternSourceTile', () => {
     expect(gl.uniform2f).toHaveBeenCalledWith(alignFracLocation, 0, 0);
   });
 
+  it('should pass a neutral hex offset axis of 0 for a rectangular tile type', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const hexOffsetAxisLocation = { tag: 'hexOffsetAxis' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_hexOffsetAxis' ? hexOffsetAxisLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith(hexOffsetAxisLocation, 0);
+  });
+
+  it('should pass hex offset axis 1 (offset rows) for a hexagonal tile type with horizontal direction', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const hexOffsetAxisLocation = { tag: 'hexOffsetAxis' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_hexOffsetAxis' ? hexOffsetAxisLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ direction: 'horizontal', tileType: 'hexagonal' }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith(hexOffsetAxisLocation, 1);
+  });
+
+  it('should pass hex offset axis 2 (offset columns) for a hexagonal tile type with vertical direction', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const hexOffsetAxisLocation = { tag: 'hexOffsetAxis' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_hexOffsetAxis' ? hexOffsetAxisLocation : {},
+    );
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ direction: 'vertical', tileType: 'hexagonal' }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith(hexOffsetAxisLocation, 2);
+  });
+
   it('should composite at the given opacity', () => {
     // mock
     const gl = createGlMock();
