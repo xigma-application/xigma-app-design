@@ -7,13 +7,13 @@ import ConstraintsToggle from '../ColumnConstraints/ConstraintsToggle';
 import { AlignmentHorizontal, AlignmentVertical } from 'types/design/enums';
 
 export const ColumnPositionConstraints = (
-  noParent: boolean,
+  hideConstraints: boolean,
   showConstraints: boolean,
   horizontal: AlignmentHorizontal | undefined,
   vertical: AlignmentVertical | undefined,
   onToggle: TFunc,
 ): ReactNode[] | undefined => {
-  if (noParent) {
+  if (hideConstraints) {
     return undefined;
   }
 

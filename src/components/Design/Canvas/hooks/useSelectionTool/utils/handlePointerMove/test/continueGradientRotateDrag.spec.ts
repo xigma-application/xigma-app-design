@@ -25,9 +25,9 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
 
-const createGradientRotateDragRef = (
-  dragState: TGradientRotateDragState | null = null,
-): RefObject<TGradientRotateDragState | null> => ({ current: dragState });
+const createGradientRotateDragRef = (dragState: TGradientRotateDragState | null = null): RefObject<TGradientRotateDragState | null> => ({
+  current: dragState,
+});
 
 const addGradientRectangle = (): string => {
   store.dispatch(
@@ -384,9 +384,7 @@ describe('continueGradientRotateDrag', () => {
     });
 
     // before / result — no crash, and the solid fill is left untouched
-    expect(() =>
-      continueGradientRotateDrag(canvas, pointerEvent(100, 0), store.dispatch, dragRef, createCanvasRefs()),
-    ).not.toThrow();
+    expect(() => continueGradientRotateDrag(canvas, pointerEvent(100, 0), store.dispatch, dragRef, createCanvasRefs())).not.toThrow();
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
       fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     });

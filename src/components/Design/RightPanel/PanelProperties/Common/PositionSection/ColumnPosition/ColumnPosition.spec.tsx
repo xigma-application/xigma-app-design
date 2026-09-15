@@ -151,6 +151,37 @@ describe('ColumnPosition behaviors', () => {
     expect(screen.queryByLabelText('Constraints')).not.toBeInTheDocument();
   });
 
+  it('should not render the constraints toggle for a grid child, since it aligns to its cell instead', () => {
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.grid, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(setSelection([childId]));
+
+    renderColumnPosition();
+
+    expect(screen.queryByLabelText('Constraints')).not.toBeInTheDocument();
+  });
+
+  it('should render the constraints toggle for a grid child that ignores auto layout (absolute position)', () => {
+    const parentId = addFrameNode(0, 0);
+
+    store.dispatch(updateNode({ changes: { height: 300, layoutMode: LayoutMode.grid, width: 400 }, id: parentId }));
+
+    const childId = addFrameNode(20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childId }));
+    store.dispatch(setSelection([childId]));
+
+    renderColumnPosition();
+
+    expect(screen.getByLabelText('Constraints')).toBeInTheDocument();
+  });
+
   it('should reveal the constraints panel when the toggle is clicked', () => {
     nestSelectedChild();
     renderColumnPosition();

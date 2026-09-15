@@ -52,7 +52,18 @@ export const drawGradientHandleLayer = (
       drawGradientEndpointHandles(context, [start, end]);
       drawGradientStopHandles(context, stops, stopPositions, towardLineDirections, selectedStopIndex);
       drawActiveGradientStopValueLabel(context, stops, stopPositions, stopDirections, activeStopIndex);
-      drawGradientAddStopHoverPreview(context, bounds, selectedNode.rotation, paint, start, end, awayFromLineDirection, stops, activeStopIndex, refs);
+      drawGradientAddStopHoverPreview(
+        context,
+        bounds,
+        selectedNode.rotation,
+        paint,
+        start,
+        end,
+        awayFromLineDirection,
+        stops,
+        activeStopIndex,
+        refs,
+      );
       drawActiveGradientRotateAngleLabel(context, start, end, isRotatingThisPaint, rotateDragState, refs);
       drawGradientRadiusHandles(context, bounds, selectedNode, paint, start, gradientEditor, refs);
     }

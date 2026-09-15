@@ -144,7 +144,19 @@ describe('drawVectorGradientFill', () => {
     ];
 
     // before
-    drawVectorGradientFill(gl, program, buffer, null, null, faces, { ...GRADIENT_PAINT, type: 'gradient-radial' }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorGradientFill(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      { ...GRADIENT_PAINT, type: 'gradient-radial' },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 1);
@@ -260,7 +272,19 @@ describe('drawVectorGradientFill', () => {
     ];
 
     // before
-    drawVectorGradientFill(gl, program, buffer, null, null, faces, { ...GRADIENT_PAINT, radiusRatio: 0.4 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorGradientFill(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      { ...GRADIENT_PAINT, radiusRatio: 0.4 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 1);

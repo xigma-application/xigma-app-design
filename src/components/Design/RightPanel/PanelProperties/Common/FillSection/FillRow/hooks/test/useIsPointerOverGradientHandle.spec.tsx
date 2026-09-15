@@ -49,7 +49,13 @@ describe('useIsPointerOverGradientHandle', () => {
     // before
     const { result } = renderHook(() => useIsPointerOverGradientHandle(), { wrapper });
 
-    canvasRefs.gradientStop.gradientStopDragRef.current = { color: '#000000', draggedStopIndex: 0, nodeId: 'node-a', opacity: 100, paintIndex: 0 };
+    canvasRefs.gradientStop.gradientStopDragRef.current = {
+      color: '#000000',
+      draggedStopIndex: 0,
+      nodeId: 'node-a',
+      opacity: 100,
+      paintIndex: 0,
+    };
 
     // result
     expect(result.current()).toBe(true);

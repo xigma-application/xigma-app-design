@@ -76,7 +76,9 @@ describe('resolveGradientEndpointMoveHover', () => {
   });
 
   it('should return undefined when there is no active gradient editor', () => {
-    const result = resolveGradientEndpointMoveHover(createContext({ gradientEditor: null, point: { x: 0, y: 50 }, selectedNodes: [rectangle] }));
+    const result = resolveGradientEndpointMoveHover(
+      createContext({ gradientEditor: null, point: { x: 0, y: 50 }, selectedNodes: [rectangle] }),
+    );
 
     expect(result).toBeUndefined();
   });

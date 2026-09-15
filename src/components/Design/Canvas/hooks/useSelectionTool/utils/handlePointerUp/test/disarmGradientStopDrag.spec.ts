@@ -43,7 +43,13 @@ describe('disarmGradientStopDrag', () => {
   it('should release pointer capture immediately', () => {
     // mock
     const canvas = createCanvas();
-    const gradientStopDragRef = createGradientStopDragRef({ color: '#000000', draggedStopIndex: 0, nodeId: 'node-a', opacity: 100, paintIndex: 0 });
+    const gradientStopDragRef = createGradientStopDragRef({
+      color: '#000000',
+      draggedStopIndex: 0,
+      nodeId: 'node-a',
+      opacity: 100,
+      paintIndex: 0,
+    });
 
     // before
     disarmGradientStopDrag(canvas, pointerEvent(2), gradientStopDragRef);
@@ -56,7 +62,13 @@ describe('disarmGradientStopDrag', () => {
     // mock — Radix's Popover defers its outside-interaction check to the native "click" event that
     // follows pointerup; clearing the ref synchronously here would make that check see no drag at all
     const canvas = createCanvas();
-    const gradientStopDragRef = createGradientStopDragRef({ color: '#000000', draggedStopIndex: 0, nodeId: 'node-a', opacity: 100, paintIndex: 0 });
+    const gradientStopDragRef = createGradientStopDragRef({
+      color: '#000000',
+      draggedStopIndex: 0,
+      nodeId: 'node-a',
+      opacity: 100,
+      paintIndex: 0,
+    });
 
     // before
     disarmGradientStopDrag(canvas, pointerEvent(2), gradientStopDragRef);
@@ -68,7 +80,13 @@ describe('disarmGradientStopDrag', () => {
   it('should clear the drag ref once the current tick finishes', () => {
     // mock
     const canvas = createCanvas();
-    const gradientStopDragRef = createGradientStopDragRef({ color: '#000000', draggedStopIndex: 0, nodeId: 'node-a', opacity: 100, paintIndex: 0 });
+    const gradientStopDragRef = createGradientStopDragRef({
+      color: '#000000',
+      draggedStopIndex: 0,
+      nodeId: 'node-a',
+      opacity: 100,
+      paintIndex: 0,
+    });
 
     // before
     disarmGradientStopDrag(canvas, pointerEvent(2), gradientStopDragRef);

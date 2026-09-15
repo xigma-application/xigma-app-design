@@ -45,12 +45,10 @@ describe('drawGradientEllipseGuide', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEllipseGuide(
-      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT },
-      BOUNDS,
-      0,
-      { ...PAINT, type: 'gradient-linear' },
-    );
+    drawGradientEllipseGuide({ buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT }, BOUNDS, 0, {
+      ...PAINT,
+      type: 'gradient-linear',
+    });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -92,12 +90,10 @@ describe('drawGradientEllipseGuide', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEllipseGuide(
-      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT },
-      BOUNDS,
-      0,
-      { ...PAINT, type: 'gradient-diamond' },
-    );
+    drawGradientEllipseGuide({ buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT }, BOUNDS, 0, {
+      ...PAINT,
+      type: 'gradient-diamond',
+    });
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -110,12 +106,10 @@ describe('drawGradientEllipseGuide', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawGradientEllipseGuide(
-      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT },
-      BOUNDS,
-      0,
-      { ...PAINT, type: 'gradient-angular' },
-    );
+    drawGradientEllipseGuide({ buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT }, BOUNDS, 0, {
+      ...PAINT,
+      type: 'gradient-angular',
+    });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(ELLIPSE_SEGMENTS * 2);

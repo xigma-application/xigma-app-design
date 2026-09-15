@@ -17,13 +17,14 @@ import { translationNameSpace } from './constants';
 const ColumnPosition: FC = () => {
   const { t } = useTranslation();
   const [showConstraints, setShowConstraints] = useState(false);
-  const { disabled: noParent, horizontal, vertical } = useColumnAlignment();
+  const { disabled: noParent, horizontal, isGridChild, vertical } = useColumnAlignment();
   const { disabledX, disabledY, onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useColumnPosition();
+  const hideConstraints = noParent || isGridChild;
 
   return (
     <Fragment>
       <UITools.SectionColumn
-        buttonsIcon={ColumnPositionConstraints(noParent, showConstraints, horizontal, vertical, () =>
+        buttonsIcon={ColumnPositionConstraints(hideConstraints, showConstraints, horizontal, vertical, () =>
           setShowConstraints((value) => !value),
         )}
         gridColumnType={UITools.GridColumnType.twoInputs}
@@ -55,7 +56,7 @@ const ColumnPosition: FC = () => {
           value={y}
         />
       </UITools.SectionColumn>
-      {showConstraints && !noParent ? <ColumnConstraints /> : null}
+      {showConstraints && !hideConstraints ? <ColumnConstraints /> : null}
     </Fragment>
   );
 };

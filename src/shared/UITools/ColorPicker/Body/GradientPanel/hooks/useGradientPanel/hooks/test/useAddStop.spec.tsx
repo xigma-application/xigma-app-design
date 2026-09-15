@@ -45,9 +45,7 @@ describe('useAddStop', () => {
 
     // result
     expect(selectStop).toHaveBeenCalledWith(hook.result.current.stops[1].id);
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ angle: 0, stops: hook.result.current.stops, type: 'gradient-linear' }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ angle: 0, stops: hook.result.current.stops, type: 'gradient-linear' }));
   });
 
   it('should do nothing once the max stop count is reached', () => {

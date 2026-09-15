@@ -17,9 +17,9 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerup', { pointerId });
 
-const createGradientRotateDragRef = (
-  dragState: TGradientRotateDragState | null = null,
-): RefObject<TGradientRotateDragState | null> => ({ current: dragState });
+const createGradientRotateDragRef = (dragState: TGradientRotateDragState | null = null): RefObject<TGradientRotateDragState | null> => ({
+  current: dragState,
+});
 
 const DRAG_STATE: TGradientRotateDragState = {
   angleOffset: 0,

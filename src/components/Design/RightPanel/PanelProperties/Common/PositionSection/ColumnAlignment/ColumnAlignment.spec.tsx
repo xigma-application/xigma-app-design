@@ -120,7 +120,7 @@ describe('ColumnAlignment behaviors', () => {
     expect((selectActivePage(store.getState()).nodes[childId] as { alignment?: unknown }).alignment).toEqual({ horizontal: 'center' });
   });
 
-  it('should mark the active alignment button as pressed and stay set on a repeated click', () => {
+  it('should not mark a freeform child alignment button as pressed, even once its constraint is set', () => {
     // mock
     const parentId = addFrameNode(null);
     const childId = addFrameNode(parentId);
@@ -130,8 +130,8 @@ describe('ColumnAlignment behaviors', () => {
     renderColumnAlignment();
     fireEvent.click(screen.getByLabelText('Align right'));
 
-    // result
-    expect(screen.getByLabelText('Align right')).toHaveAttribute('aria-pressed', 'true');
+    // result — pressed styling is reserved for grid children; a freeform/absolute child still writes the constraint
+    expect(screen.getByLabelText('Align right')).toHaveAttribute('aria-pressed', 'false');
 
     fireEvent.click(screen.getByLabelText('Align right'));
     expect((selectActivePage(store.getState()).nodes[childId] as { alignment?: unknown }).alignment).toEqual({ horizontal: 'right' });
@@ -155,7 +155,7 @@ describe('ColumnAlignment behaviors', () => {
     expect((selectActivePage(store.getState()).nodes[childId] as { x: number }).x).toBe(180);
   });
 
-  it('should default a grid child to the top-left corner being pressed', () => {
+  it('should not mark any button as pressed for a grid child with no explicit cell alignment', () => {
     // mock
     const parentId = addFrameNode(null, LayoutMode.grid);
     const childId = addFrameNode(parentId);
@@ -166,8 +166,8 @@ describe('ColumnAlignment behaviors', () => {
     renderColumnAlignment();
 
     // result
-    expect(screen.getByLabelText('Align left')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByLabelText('Align top')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Align left')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByLabelText('Align top')).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('should write gridChildHorizontalAlign/gridChildVerticalAlign for a grid child, not alignment', () => {

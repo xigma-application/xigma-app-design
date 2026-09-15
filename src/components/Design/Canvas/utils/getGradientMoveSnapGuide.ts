@@ -25,8 +25,6 @@ export const getGradientMoveSnapGuide = (
     horizontal: snappedY
       ? { anchor: toWorld({ x: bounds.x, y: localY }), match: toWorld({ x: bounds.x + bounds.width, y: localY }) }
       : null,
-    vertical: snappedX
-      ? { anchor: toWorld({ x: localX, y: bounds.y }), match: toWorld({ x: localX, y: bounds.y + bounds.height }) }
-      : null,
+    vertical: snappedX ? { anchor: toWorld({ x: localX, y: bounds.y }), match: toWorld({ x: localX, y: bounds.y + bounds.height }) } : null,
   };
 };

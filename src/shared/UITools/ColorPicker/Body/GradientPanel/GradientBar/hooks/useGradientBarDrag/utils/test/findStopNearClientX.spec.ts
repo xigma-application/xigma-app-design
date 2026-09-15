@@ -6,7 +6,8 @@ import { TEditableGradientStop } from '../../../../../types';
 
 const stop = (id: string, position: number): TEditableGradientStop => ({ color: '#000000', id, opacity: 100, position });
 
-const bar = (left: number, width: number): HTMLDivElement => ({ getBoundingClientRect: () => ({ left, width }) }) as unknown as HTMLDivElement;
+const bar = (left: number, width: number): HTMLDivElement =>
+  ({ getBoundingClientRect: () => ({ left, width }) }) as unknown as HTMLDivElement;
 
 describe('findStopNearClientX', () => {
   it('should return the stop within the hit radius of clientX', () => {

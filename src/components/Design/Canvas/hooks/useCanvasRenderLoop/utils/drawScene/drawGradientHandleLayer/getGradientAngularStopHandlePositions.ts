@@ -7,7 +7,12 @@ import { getGradientEllipseNormalDirection } from 'components/Design/Canvas/util
 import { getGradientEllipsePoint } from './getGradientEllipsePoint';
 import { STOP_HANDLE_OFFSET_PX } from './getGradientStopHandlePositions';
 
-export const getGradientAngularStopHandlePositions = (bounds: TDraftRect, rotation: number, paint: TGradientPaint, zoom: number): TPoint[] => {
+export const getGradientAngularStopHandlePositions = (
+  bounds: TDraftRect,
+  rotation: number,
+  paint: TGradientPaint,
+  zoom: number,
+): TPoint[] => {
   const offset = STOP_HANDLE_OFFSET_PX / zoom;
 
   return paint.stops.map((stop) => {

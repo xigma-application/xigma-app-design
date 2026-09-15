@@ -6,7 +6,11 @@ import { TGridTrackLayout } from './getGridTrackLayout';
 // utils
 import { getGridTrackOffset } from './getGridTrackOffset';
 
-export const getGridTrackAffordanceDragOffset = (frame: TFrameNode, layout: TGridTrackLayout, dragState: TGridTrackAffordanceDragState): number => {
+export const getGridTrackAffordanceDragOffset = (
+  frame: TFrameNode,
+  layout: TGridTrackLayout,
+  dragState: TGridTrackAffordanceDragState,
+): number => {
   const isColumn = dragState.axis === 'column';
   const sizes = isColumn ? layout.columnSizes : layout.rowSizes;
   const gap = isColumn ? layout.columnGap : layout.rowGap;

@@ -179,9 +179,7 @@ describe('continueGradientEndpointMoveDrag', () => {
     const dragRef = createGradientEndpointMoveDragRef({ endpoint: 'start', nodeId, paintIndex: 0 });
 
     // before / result — no crash, and the solid fill is left untouched
-    expect(() =>
-      continueGradientEndpointMoveDrag(canvas, pointerEvent(30, 40), store.dispatch, dragRef, createCanvasRefs()),
-    ).not.toThrow();
+    expect(() => continueGradientEndpointMoveDrag(canvas, pointerEvent(30, 40), store.dispatch, dragRef, createCanvasRefs())).not.toThrow();
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
       fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     });

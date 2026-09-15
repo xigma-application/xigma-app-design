@@ -188,7 +188,9 @@ describe('armGradientRotateOnPointerDown', () => {
     const dispatch = vi.fn();
     const radialRectangle: TRectangleNode = {
       ...rectangle,
-      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0]],
+      fills: [
+        { ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0],
+      ],
     };
 
     // before — 8px left of the center (50,50), past its inner move zone, within the outer rotate ring
@@ -229,7 +231,9 @@ describe('armGradientRotateOnPointerDown', () => {
     const dispatch = vi.fn();
     const radialRectangle: TRectangleNode = {
       ...rectangle,
-      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0]],
+      fills: [
+        { ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-radial' } as TRectangleNode['fills'][0],
+      ],
     };
 
     // before — 8px below the edge point (50,100), past its inner move zone, within the outer rotate ring
@@ -268,7 +272,9 @@ describe('armGradientRotateOnPointerDown', () => {
     const dispatch = vi.fn();
     const angularRectangle: TRectangleNode = {
       ...rectangle,
-      fills: [{ ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-angular' } as TRectangleNode['fills'][0]],
+      fills: [
+        { ...rectangle.fills[0], end: { x: 0.5, y: 1 }, start: { x: 0.5, y: 0.5 }, type: 'gradient-angular' } as TRectangleNode['fills'][0],
+      ],
     };
 
     // before — 8px left of the center (50,50), past its inner move zone, within the outer rotate ring

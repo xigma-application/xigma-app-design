@@ -22,9 +22,18 @@ import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradien
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
 
-type TGradientRotateFrame = { guidePivot: TPoint; localPoints: { end: TPoint; start: TPoint }; snap: ReturnType<typeof getGradientRotateSnapAngle> };
+type TGradientRotateFrame = {
+  guidePivot: TPoint;
+  localPoints: { end: TPoint; start: TPoint };
+  snap: ReturnType<typeof getGradientRotateSnapAngle>;
+};
 
-const getBoxModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRect, worldPoint: TPoint, rotation: number): TGradientRotateFrame => {
+const getBoxModeFrame = (
+  dragState: TGradientRotateDragState,
+  bounds: TDraftRect,
+  worldPoint: TPoint,
+  rotation: number,
+): TGradientRotateFrame => {
   const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
   const rawDraggedAngle = getGradientAngleFromPoint(worldPoint, bounds, rotation);
   const snap = getGradientRotateSnapAngle(rawDraggedAngle);
@@ -33,14 +42,17 @@ const getBoxModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRect
   const draggedLocal = getRectPerimeterPointAtAngle(bounds, draggedAngle);
   const otherLocal = getRectPerimeterPointAtAngle(bounds, otherAngle);
   const localPoints =
-    dragState.draggedEndpoint === 'start'
-      ? { end: otherLocal, start: draggedLocal }
-      : { end: draggedLocal, start: otherLocal };
+    dragState.draggedEndpoint === 'start' ? { end: otherLocal, start: draggedLocal } : { end: draggedLocal, start: otherLocal };
 
   return { guidePivot: boundsCenter, localPoints, snap };
 };
 
-const getLineModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRect, worldPoint: TPoint, rotation: number): TGradientRotateFrame => {
+const getLineModeFrame = (
+  dragState: TGradientRotateDragState,
+  bounds: TDraftRect,
+  worldPoint: TPoint,
+  rotation: number,
+): TGradientRotateFrame => {
   const rawAngle = getGradientAngleFromPoint(worldPoint, bounds, rotation, dragState.pivot);
   const snap = getGradientRotateSnapAngle(rawAngle);
   const angle = snap?.angle ?? rawAngle;
@@ -49,9 +61,17 @@ const getLineModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRec
   return { guidePivot: dragState.pivot, localPoints, snap };
 };
 
-const getRadialModeFrame = (dragState: TGradientRotateDragState, bounds: TDraftRect, worldPoint: TPoint, rotation: number): TGradientRotateFrame => {
+const getRadialModeFrame = (
+  dragState: TGradientRotateDragState,
+  bounds: TDraftRect,
+  worldPoint: TPoint,
+  rotation: number,
+): TGradientRotateFrame => {
   const angle = getGradientAngleFromPoint(worldPoint, bounds, rotation, dragState.pivot);
-  const end: TPoint = { x: dragState.pivot.x + Math.cos(angle) * dragState.radius, y: dragState.pivot.y + Math.sin(angle) * dragState.radius };
+  const end: TPoint = {
+    x: dragState.pivot.x + Math.cos(angle) * dragState.radius,
+    y: dragState.pivot.y + Math.sin(angle) * dragState.radius,
+  };
 
   return { guidePivot: dragState.pivot, localPoints: { end, start: dragState.pivot }, snap: null };
 };
@@ -62,15 +82,14 @@ const getGradientRotateFrame = (
   worldPoint: TPoint,
   rotation: number,
 ): TGradientRotateFrame => {
-  if (dragState.mode === 'box') {
-    return getBoxModeFrame(dragState, bounds, worldPoint, rotation);
+  switch (dragState.mode) {
+    case 'box':
+      return getBoxModeFrame(dragState, bounds, worldPoint, rotation);
+    case 'radial':
+      return getRadialModeFrame(dragState, bounds, worldPoint, rotation);
+    default:
+      return getLineModeFrame(dragState, bounds, worldPoint, rotation);
   }
-
-  if (dragState.mode === 'radial') {
-    return getRadialModeFrame(dragState, bounds, worldPoint, rotation);
-  }
-
-  return getLineModeFrame(dragState, bounds, worldPoint, rotation);
 };
 
 export const continueGradientRotateDrag = (

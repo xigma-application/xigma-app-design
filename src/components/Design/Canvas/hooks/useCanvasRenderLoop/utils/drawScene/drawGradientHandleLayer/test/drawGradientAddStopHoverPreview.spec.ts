@@ -34,7 +34,13 @@ const STOPS = [
   { color: '#000000', opacity: 100, position: 1 },
 ];
 
-const LINEAR_PAINT: TGradientPaint = { end: { x: 1, y: 0.5 }, opacity: 100, start: { x: 0, y: 0.5 }, stops: STOPS, type: 'gradient-linear' };
+const LINEAR_PAINT: TGradientPaint = {
+  end: { x: 1, y: 0.5 },
+  opacity: 100,
+  start: { x: 0, y: 0.5 },
+  stops: STOPS,
+  type: 'gradient-linear',
+};
 
 describe('drawGradientAddStopHoverPreview', () => {
   beforeEach(() => {
@@ -114,7 +120,13 @@ describe('drawGradientAddStopHoverPreview', () => {
   it('should draw the preview around the ellipse, offset outward, for an angular gradient', () => {
     // before — center (50,50), primary axis endpoint (50,100): hover position 0.25 sits on the ellipse
     // at (0,50), offset 18px further left (outward from the center)
-    const angularPaint: TGradientPaint = { end: { x: 0.5, y: 1 }, opacity: 100, start: { x: 0.5, y: 0.5 }, stops: STOPS, type: 'gradient-angular' };
+    const angularPaint: TGradientPaint = {
+      end: { x: 0.5, y: 1 },
+      opacity: 100,
+      start: { x: 0.5, y: 0.5 },
+      stops: STOPS,
+      type: 'gradient-angular',
+    };
     const refs = createCanvasRefs();
 
     refs.hover.hoveredGradientLinePositionRef.current = 0.25;

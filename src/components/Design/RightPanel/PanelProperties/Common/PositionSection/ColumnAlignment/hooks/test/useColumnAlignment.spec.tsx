@@ -175,14 +175,20 @@ describe('useColumnAlignment', () => {
     return { childId, parentId };
   };
 
-  it('should report a grid child and default its grid align to the top-left corner', () => {
+  it('should not be disabled for a grid child, unlike a flex auto-layout child', () => {
+    gridChild();
+
+    expect(renderUseColumnAlignment().result.current.disabled).toBe(false);
+  });
+
+  it('should report a grid child with no default grid align when nothing was explicitly set', () => {
     gridChild();
 
     const { result } = renderUseColumnAlignment();
 
     expect(result.current.isGridChild).toBe(true);
-    expect(result.current.gridHorizontal).toBe(AlignmentHorizontal.left);
-    expect(result.current.gridVertical).toBe(AlignmentVertical.top);
+    expect(result.current.gridHorizontal).toBeUndefined();
+    expect(result.current.gridVertical).toBeUndefined();
   });
 
   it('should not report a grid child for a non-grid parent', () => {

@@ -18,10 +18,9 @@ import { buildAlignmentButtons } from './utils/buildAlignmentButtons';
 
 const ColumnAlignment: FC = () => {
   const { t } = useTranslation();
-  const { disabled, gridHorizontal, gridVertical, horizontal, isGridChild, onSelectHorizontal, onSelectVertical, vertical } =
-    useColumnAlignment();
-  const displayHorizontal = isGridChild ? gridHorizontal : horizontal;
-  const displayVertical = isGridChild ? gridVertical : vertical;
+  const { disabled, gridHorizontal, gridVertical, isGridChild, onSelectHorizontal, onSelectVertical } = useColumnAlignment();
+  const displayHorizontal = isGridChild ? gridHorizontal : undefined;
+  const displayVertical = isGridChild ? gridVertical : undefined;
 
   return (
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>

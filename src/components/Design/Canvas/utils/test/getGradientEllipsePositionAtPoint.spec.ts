@@ -46,7 +46,12 @@ describe('getGradientEllipsePositionAtPoint', () => {
 
   it('should return null for a multi-node selection', () => {
     expect(
-      getGradientEllipsePositionAtPoint({ x: 14.64, y: 85.36 }, [rectangle(), rectangle({ id: 'rect-2' })], IDENTITY_VIEWPORT, GRADIENT_EDITOR),
+      getGradientEllipsePositionAtPoint(
+        { x: 14.64, y: 85.36 },
+        [rectangle(), rectangle({ id: 'rect-2' })],
+        IDENTITY_VIEWPORT,
+        GRADIENT_EDITOR,
+      ),
     ).toBeNull();
   });
 

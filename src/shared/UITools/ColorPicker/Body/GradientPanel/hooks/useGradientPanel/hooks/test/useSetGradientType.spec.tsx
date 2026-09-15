@@ -15,7 +15,9 @@ const STOPS: TEditableGradientStop[] = [
 
 const renderSetGradientType = (
   onChange: TFunc<[unknown]>,
-): ReturnType<typeof renderHook<{ points: TGradientPoints | null; setGradientType: TFunc<[TGradientType]>; type: TGradientType }, unknown>> =>
+): ReturnType<
+  typeof renderHook<{ points: TGradientPoints | null; setGradientType: TFunc<[TGradientType]>; type: TGradientType }, unknown>
+> =>
   renderHook(() => {
     const [type, setType] = useState<TGradientType>('gradient-linear');
     const [points, setPoints] = useState<TGradientPoints | null>({ end: { x: 1, y: 1 }, start: { x: 0, y: 0 } });

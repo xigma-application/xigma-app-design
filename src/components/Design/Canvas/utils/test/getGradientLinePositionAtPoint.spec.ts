@@ -117,7 +117,9 @@ describe('getGradientLinePositionAtPoint', () => {
   it('should return null on a radial gradient when the point is on its perpendicular radius handle instead', () => {
     // a small radiusRatio (0.05) pulls the radius handle in close to the line, at world (0, 55) —
     // close enough that the line's own hit-test would otherwise match it too, if it didn't bail first
-    const node = rectangle({ fills: [{ ...rectangle().fills[0], radiusRatio: 0.05, type: 'gradient-radial' } as TRectangleNode['fills'][0]] });
+    const node = rectangle({
+      fills: [{ ...rectangle().fills[0], radiusRatio: 0.05, type: 'gradient-radial' } as TRectangleNode['fills'][0]],
+    });
 
     expect(getGradientLinePositionAtPoint({ x: 0, y: 55 }, [node], IDENTITY_VIEWPORT, GRADIENT_EDITOR)).toBeNull();
   });

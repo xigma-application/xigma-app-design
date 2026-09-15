@@ -7,16 +7,16 @@ import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'ty
 
 // utils
 import { commitAlignmentConstraint } from './utils/commitAlignmentConstraint';
+import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
-import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 import { moveNodeToAlignment } from './utils/moveNodeToAlignment';
 import { setGridChildHorizontalAlign } from './utils/setGridChildHorizontalAlign';
 import { setGridChildVerticalAlign } from './utils/setGridChildVerticalAlign';
 
 export type TUseColumnAlignmentResult = {
   disabled: boolean;
-  gridHorizontal: AlignmentHorizontal;
-  gridVertical: AlignmentVertical;
+  gridHorizontal: AlignmentHorizontal | undefined;
+  gridVertical: AlignmentVertical | undefined;
   horizontal: AlignmentHorizontal | undefined;
   isGridChild: boolean;
   onSelectHorizontal: TFunc<[AlignmentHorizontal]>;
@@ -36,12 +36,12 @@ export const useColumnAlignment = (): TUseColumnAlignmentResult => {
   const parent = parentNode && 'width' in parentNode ? parentNode : undefined;
   const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
   const isGridChild = parentNode?.type === NodeType.frame && parentNode.layoutMode === LayoutMode.grid && !ignoresAutoLayout;
-  const managed = isManagedLayoutFrame(parentNode);
+  const isFlexManaged = parentNode !== undefined && isAutoLayoutFrame(parentNode);
 
   return {
-    disabled: !node?.parentId || (managed && !ignoresAutoLayout),
-    gridHorizontal: node?.gridChildHorizontalAlign ?? AlignmentHorizontal.left,
-    gridVertical: node?.gridChildVerticalAlign ?? AlignmentVertical.top,
+    disabled: !node?.parentId || (isFlexManaged && !ignoresAutoLayout),
+    gridHorizontal: node?.gridChildHorizontalAlign,
+    gridVertical: node?.gridChildVerticalAlign,
     horizontal: alignment?.horizontal,
     isGridChild,
     onSelectHorizontal: isGridChild

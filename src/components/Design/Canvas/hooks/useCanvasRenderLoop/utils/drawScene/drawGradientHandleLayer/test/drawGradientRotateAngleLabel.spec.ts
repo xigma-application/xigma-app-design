@@ -49,12 +49,7 @@ describe('drawGradientRotateAngleLabel', () => {
 
   it('should keep anchoring exactly at the pointer regardless of zoom — the zoom scaling happens downstream', () => {
     // before
-    drawGradientRotateAngleLabel(
-      { ...context, viewport: { x: 0, y: 0, zoom: 4 } },
-      { x: 20, y: 30 },
-      { x: 0, y: 50 },
-      { x: 100, y: 50 },
-    );
+    drawGradientRotateAngleLabel({ ...context, viewport: { x: 0, y: 0, zoom: 4 } }, { x: 20, y: 30 }, { x: 0, y: 50 }, { x: 100, y: 50 });
 
     // result
     const [, , , , , anchor, , , , , options] = drawValueLabelMock.mock.calls[0];
