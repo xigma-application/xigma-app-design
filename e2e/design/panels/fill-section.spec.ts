@@ -3381,6 +3381,40 @@ test.describe('Design panels — Fill section', () => {
     await expect(fillModeLabel).toHaveText('Fit');
   });
 
+  test('manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-manual-crop-pick');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — pick Crop from the dropdown directly, with no resize at all
+    await dropdownTrigger.click();
+    await page.getByText('Crop', { exact: true }).click();
+
+    // result — the underlying editor actually switched to crop mode, not just the dropdown label
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // result — dragging inside the shape now works right away, no resize needed first
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    const node = await readNode(page, id);
+
+    expect(node.fills?.[0].crop).toEqual({ height: node.height, rotation: 0, width: node.width, x: node.x! + 20, y: node.y! + 20 });
+  });
+
   test('dragging inside the shape while in crop mode selects and moves the image independently of the frame', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -3456,6 +3490,97 @@ test.describe('Design panels — Fill section', () => {
 
     // result
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, selectedTarget: 'frame' });
+  });
+
+  test('reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-reopen-dropdown');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode, then commit an actual crop by dragging the image
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    // fully close the panel: first Escape exits the editor, second deselects the node
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+
+    // reselect the shape and reopen the picker — it opens back on the Image tab automatically,
+    // since the fill is already an image paint
+    await designPage.click(800, 280);
+    await page.getByLabel('Hex color').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const fillModeLabel = panel.locator('[class*="ImageFillModeRow__dropdown"] [class*="Dropdown__label"]');
+
+    // result — the dropdown reflects the persisted crop immediately, without needing another resize
+    await expect(fillModeLabel).toHaveText('Crop');
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+  });
+
+  test('hovering the image crop rect handles while the image is the selected target shows resize/rotate cursors', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-cursors');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode and select the image as the target (a plain click, no drag)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await designPage.click(800, 280);
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    const frame = await readNode(page, (await readFirstNodeId(page)) as string);
+    const cropRect = { height: frame.height!, width: frame.width!, x: frame.x!, y: frame.y! };
+
+    // before — the plain default cursor, away from any handle
+    await page.mouse.move(cropRect.x + cropRect.width / 2, cropRect.y + cropRect.height / 2);
+    const defaultCursor = await designPage.cursorStyle();
+
+    // action — hover exactly on the crop rect's own nw corner handle
+    await page.mouse.move(cropRect.x, cropRect.y);
+
+    // result — a distinct custom cursor image is applied, not the plain default
+    await expect.poll(() => designPage.cursorStyle()).toContain('url(');
+
+    const resizeCursor = await designPage.cursorStyle();
+
+    expect(resizeCursor).not.toBe(defaultCursor);
+
+    // action — hover just outside that same corner, inside the rotate ring. The rotate cursor's
+    // own image asset loads lazily (createCursorRotator draws it once HTMLImageElement.complete
+    // is true) and hasn't necessarily been requested yet this session, so the very first hover
+    // here can resolve to no cursor at all until it finishes loading — nudge the pointer again
+    // once it's had time to load, the same way continuous real mouse movement naturally would.
+    await page.mouse.move(cropRect.x - 5, cropRect.y - 5);
+    await page.waitForTimeout(200);
+    await page.mouse.move(cropRect.x - 4, cropRect.y - 5);
+    await page.mouse.move(cropRect.x - 5, cropRect.y - 5);
+
+    // result — a different custom cursor image than the resize one
+    await expect.poll(() => designPage.cursorStyle()).toContain('url(');
+
+    const rotateCursor = await designPage.cursorStyle();
+
+    expect(rotateCursor).not.toBe(defaultCursor);
+    expect(rotateCursor).not.toBe(resizeCursor);
   });
 
   test('pressing Escape first exits the Image editor mode, keeping the node selected and the panel open, and only a second Escape deselects', async ({

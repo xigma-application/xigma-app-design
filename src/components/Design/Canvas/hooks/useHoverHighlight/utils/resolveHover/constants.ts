@@ -10,6 +10,8 @@ import { resolveGradientRotateHover } from './hoverResolvers/resolveGradientRota
 import { resolveGradientStopHover } from './hoverResolvers/resolveGradientStopHover';
 import { resolveGridTrackAffordanceHandleHover } from './hoverResolvers/resolveGridTrackAffordanceHandleHover';
 import { resolveGridTrackAffordanceHover } from './hoverResolvers/resolveGridTrackAffordanceHover';
+import { resolveImageCropResizeHover } from './hoverResolvers/resolveImageCropResizeHover';
+import { resolveImageCropRotateHover } from './hoverResolvers/resolveImageCropRotateHover';
 import { resolveLineEndpointHover } from './hoverResolvers/resolveLineEndpointHover';
 import { resolvePathOffsetHover } from './hoverResolvers/resolvePathOffsetHover';
 import { resolvePlainNodeHover } from './hoverResolvers/resolvePlainNodeHover';
@@ -40,6 +42,8 @@ export const HOVER_RESOLVERS = [
   resolveStarVertexHover,
   resolveStarRatioHover,
   resolveEllipseArcHover,
+  resolveImageCropResizeHover,
+  resolveImageCropRotateHover,
   resolveResizeHover,
   resolveCornerRadiusHover,
   resolveRotateHover,

@@ -78,7 +78,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
   const handleImageChange = useConvertToImagePaint(paint, onChange);
   const handleImageRotate = useRotateImagePaint(paint, onChange);
-  const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange);
+  const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isImage = paint.type === 'image';
@@ -88,7 +88,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive);
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, paint.type === 'image' && Boolean(paint.crop));
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (

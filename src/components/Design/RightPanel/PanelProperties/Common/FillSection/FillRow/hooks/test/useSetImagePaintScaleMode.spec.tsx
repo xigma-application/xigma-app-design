@@ -1,68 +1,114 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { ReactNode } from 'react';
+import { Provider } from 'react-redux';
 
 // hooks
 import { useSetImagePaintScaleMode } from '../useSetImagePaintScaleMode';
 
+// store
+import { selectImageEditor } from 'store/design/selectors';
+import { setImageEditor } from 'store/design/slice';
+import { store } from 'store';
+
 // types
-import { TImagePaint, TSolidPaint } from 'types/design/paint/types';
+import { TImagePaint } from 'types/design/paint/types';
 
-const IMAGE_PAINT: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-const SOLID_PAINT: TSolidPaint = { color: '#d9d9d9', opacity: 100, type: 'solid' };
+const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
-describe('useSetImagePaintScaleMode', () => {
-  it('should commit the picked scale mode onto the image paint, carrying over every other field', () => {
-    // mock
-    const onChange = vi.fn();
+const imagePaint: TImagePaint = { opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
 
-    // before
-    const { result } = renderHook(() => useSetImagePaintScaleMode(IMAGE_PAINT, onChange));
-
-    // action
-    result.current('fit');
-
-    // result
-    expect(onChange).toHaveBeenCalledWith({ ...IMAGE_PAINT, scaleMode: 'fit' });
+describe('useSetImagePaintScaleMode behaviors', () => {
+  afterEach(() => {
+    store.dispatch(setImageEditor(null));
   });
 
-  it('should commit back to fill from fit', () => {
-    // mock
-    const onChange = vi.fn();
-    const fitPaint: TImagePaint = { ...IMAGE_PAINT, scaleMode: 'fit' };
-
+  it('should forward fill to onChange as the paint scaleMode', () => {
     // before
-    const { result } = renderHook(() => useSetImagePaintScaleMode(fitPaint, onChange));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
 
     // action
-    result.current('fill');
+    act(() => result.current('fill'));
 
     // result
-    expect(onChange).toHaveBeenCalledWith({ ...fitPaint, scaleMode: 'fill' });
+    expect(onChange).toHaveBeenCalledWith({ ...imagePaint, scaleMode: 'fill' });
   });
 
-  it('should do nothing for a fill mode with no matching paint scale mode yet, such as crop or tile', () => {
-    // mock
-    const onChange = vi.fn();
-
+  it('should forward fit to onChange as the paint scaleMode', () => {
     // before
-    const { result } = renderHook(() => useSetImagePaintScaleMode(IMAGE_PAINT, onChange));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
 
     // action
-    result.current('crop');
-    result.current('tile');
+    act(() => result.current('fit'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...imagePaint, scaleMode: 'fit' });
+  });
+
+  it('should not touch onChange for crop, and instead flip the active image editor into crop mode', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'node-1', paintIndex: 0 }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('crop'));
 
     // result
     expect(onChange).not.toHaveBeenCalled();
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 0 });
+  });
+
+  it('should do nothing for crop when there is no active image editor for this node', () => {
+    // before
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('crop'));
+
+    // result
+    expect(onChange).not.toHaveBeenCalled();
+    expect(selectImageEditor(store.getState())).toBeNull();
+  });
+
+  it('should not dispatch again when the image editor is already in crop mode', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'node-1', paintIndex: 0, selectedTarget: 'image' }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('crop'));
+
+    // result — selectedTarget survives untouched, proving no redundant dispatch overwrote it
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 0, selectedTarget: 'image' });
+  });
+
+  it('should not flip an image editor that targets a different node or paint index', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'other-node', paintIndex: 0 }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('crop'));
+
+    // result
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'position', nodeId: 'other-node', paintIndex: 0 });
   });
 
   it('should do nothing for a non-image paint', () => {
-    // mock
-    const onChange = vi.fn();
-
     // before
-    const { result } = renderHook(() => useSetImagePaintScaleMode(SOLID_PAINT, onChange));
+    const onChange = vi.fn();
+    const { result } = renderHook(
+      () => useSetImagePaintScaleMode({ color: '#ff0000', opacity: 100, type: 'solid' }, onChange, 'node-1', 0),
+      { wrapper },
+    );
 
     // action
-    result.current('fit');
+    act(() => result.current('fill'));
 
     // result
     expect(onChange).not.toHaveBeenCalled();

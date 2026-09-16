@@ -226,6 +226,9 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 459 | Clicking the frame outside the moved image switches the selected target back to the frame                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 460 | Manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 461 | Reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 462 | Hovering the image crop rect's own handles while it is the selected target shows resize/rotate cursors           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -693,3 +696,24 @@ drag delta, and the frame node's own `x`/`y` are completely untouched — provin
 pull each other. #459 covers the reverse: after the image has been dragged away from part of the frame,
 clicking a point that is inside the frame but now outside the shifted image rect switches
 `selectedTarget` back to `'frame'`, matching the "image has click priority when overlapping" rule.
+
+#460-#462 are real, reported regressions found live-testing #458/#459 right after they landed. #460:
+picking "Crop" from the dropdown only ever updated the panel's own local `fillMode` display state —
+it never touched `imageEditor.mode` in Redux, so `armImageCropOnPointerDown` (gated on
+`imageEditor.mode === 'crop'`) never armed, and dragging the image silently did nothing until the user
+separately triggered a resize. Fixed in `useSetImagePaintScaleMode` by dispatching the mode flip
+directly when `fillMode === 'crop'`, the same way a resize-handle grab already does. #461: reopening
+the Image tab always reset `imageEditor.mode` back to `'position'` unconditionally, even when the
+paint already had a stored `crop`, so the dropdown reverted to "Fill" and the frame's L-bracket
+outline replaced the plain crop chrome until another resize forced it back. Fixed by seeding the
+reopen dispatch from whether `paint.crop` is already set (`useSyncImageEditor`'s new `hasStoredCrop`
+param, read through a ref so a crop committed mid-drag can't retrigger the effect and reset
+`selectedTarget`). #462: the image's own resize/rotate handles never got a hover cursor at all —
+`resolveResizeHover`/`resolveRotateHover` only ever tested the frame's handles. Fixed by adding
+`resolveImageCropResizeHover`/`resolveImageCropRotateHover` to the same `HOVER_RESOLVERS` chain, gated
+on `selectedTarget === 'image'`. This test also caught (and works around) a real quirk in the shared
+`createCursorRotator` utility: a cursor kind's PNG loads lazily on first use, so the very first hover
+onto a cursor kind that hasn't been requested yet in the session can resolve to no cursor until the
+image finishes loading — real continuous mouse movement papers over this by re-triggering hover
+resolution many times per second, but a scripted instant jump does not, so the test nudges the pointer
+again after a short wait, the same way organic mouse movement would.

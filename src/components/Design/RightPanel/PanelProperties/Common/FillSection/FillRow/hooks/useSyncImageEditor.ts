@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // store
 import { setImageEditor } from 'store/design/slice';
@@ -9,12 +9,15 @@ export const useSyncImageEditor = (
   paintIndex: number,
   isPickerOpen: boolean,
   isImageTabActive: boolean,
+  hasStoredCrop: boolean,
 ): void => {
   const dispatch = useAppDispatch();
+  const hasStoredCropRef = useRef(hasStoredCrop);
+  hasStoredCropRef.current = hasStoredCrop;
 
   useEffect(() => {
     if (nodeId && isPickerOpen && isImageTabActive) {
-      dispatch(setImageEditor({ mode: 'position', nodeId, paintIndex }));
+      dispatch(setImageEditor({ mode: hasStoredCropRef.current ? 'crop' : 'position', nodeId, paintIndex }));
     } else if (!nodeId || !isImageTabActive) {
       dispatch(setImageEditor(null));
     }
