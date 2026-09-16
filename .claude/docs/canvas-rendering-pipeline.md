@@ -474,6 +474,24 @@ uniform to exist at all, but **is not fed a real value yet** — `drawLeafNode.t
 fixed" paragraph above), so a Media node's own opacity slider remains a separate, pre-existing,
 still-unfixed bug; only the Fill-section image-paint path actually threads a live value through.
 
+**`paint.rotation` (0/90/180/270) rotates the image's own content within the fixed fill frame — a
+pure UV-remapping trick, no new shader/uniform needed.** The Fill panel's "Rotate 90°" button
+(`ImageFillModeRow.tsx`, wired via `useRotateImagePaint.ts` — `(paint.rotation + 90) % 360`, same
+`onChange` → `commitFills` → `updateNode` commit path every other paint edit uses, so it's undoable
+for free) only ever advances in 90° steps, which keeps the crop rectangle produced by
+`getImageFillCoverUv` axis-aligned even after rotation — no arbitrary-angle interpolation needed.
+`drawVectorImageFill.ts` swaps the *effective* image width/height passed into that cover-fit
+calculation whenever `rotation` is 90 or 270 (a sideways image behaves, for cropping purposes, like
+one with its dimensions swapped), then remaps each of the covering quad's 4 screen corners to its
+*texture* UV via `getRotatedFillUvCorner.ts` — a tiny pure function encoding "which original corner
+now shows at this screen corner" for each of the 4 rotation states (derived the same way you'd reason
+about physically rotating a printed photo: rotating 90° clockwise moves the left edge to the top, so
+the corner now displayed at top-left must sample what used to be the bottom-left corner — verified
+against that reasoning in `getRotatedFillUvCorner.spec.ts`, and end-to-end with a real two-color
+image + real WebGL render in the `fill-section.spec.ts` rotate/undo/redo e2e test). Only the vertex
+data changes — the quad's on-screen position/size is untouched, so no new shader or uniform was
+needed to add this.
+
 **Known, accepted limitations**: an image fill doesn't visually translate during an active
 drag-snapshot gesture (`drawVectorNodeDragSnapshot.ts` uses the same static, non-translating
 `imageProgram` rather than a `u_translate`-capable variant like the drag-preview solid/gradient

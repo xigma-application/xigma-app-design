@@ -140,6 +140,41 @@ describe('drawVectorImageFill', () => {
     expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([1, 0]);
   });
 
+  it('should rotate the sampled UVs by 90° instead of the quad geometry, for a square image needing no crop', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false, 1, 90);
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    // the on-screen quad's corners stay put; only which part of the texture each corner samples rotates
+    expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(2, 4))).toEqual([0, 1]);
+    expect(Array.from(uploadedVertices.slice(4, 6))).toEqual([40, 0]);
+    expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([0, 0]);
+  });
+
+  it('should swap the effective image width/height for the cover-fit crop once rotated 90°', () => {
+    // mock — 40x40 (1:1) bounds, a physically 80x40 (2:1) image rotated 90° behaves like a 40x80 (0.5:1) source
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 80 }, 100, 100, IDENTITY_VIEWPORT, false, 1, 90);
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    expect(Array.from(uploadedVertices.slice(2, 4))).toEqual([0.25, 1]);
+    expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([0.25, 0]);
+  });
+
   it('should default to fully opaque when no alpha is given', () => {
     // mock
     const gl = createGlMock();

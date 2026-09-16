@@ -81,6 +81,7 @@ export const drawVectorFillPaints = (
           viewport,
           isAlphaWriteEnabled,
           alpha,
+          paint.rotation,
         );
       } else {
         drawVectorGradientFill(

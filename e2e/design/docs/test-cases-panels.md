@@ -214,8 +214,9 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 446 | Hovering an eligible node while picking a pattern source shows a live highlight, like the default tool            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 447 | Hovering a node that already has a pattern fill while picking a source shows no highlight                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions   |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions    |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 449 | The fill's alpha field changes the rendered image's opacity, not just the paint's stored value                    |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 450 | The rotate button turns an image fill 90° per click, and each turn is its own undo/redo step                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -617,3 +618,13 @@ or squashing. #449 reuses the same upload flow, then drags the fill row's alpha 
 asserts the sampled pixel's red channel drops accordingly — the same opacity fix described in
 `.claude/docs/canvas-rendering-pipeline.md`'s image-fill section, verified here as a real rendered
 effect instead of only a unit assertion on the shader-uniform call.
+
+#450 covers the Fill panel's "Rotate 90°" button (`ImageFillModeRow.tsx`), a real feature added
+alongside pattern/gradient/image's existing rotate-style controls — previously present in the UI
+but with no `onClick` wired at all. It uploads a source image split vertically into two solid
+colors (red/blue), so each 90° turn moves a known color to a known screen edge and is detectable by
+pixel sampling, not just by reading `fills[0].rotation` from the store. Three consecutive clicks are
+asserted individually (90°/180°/270°, each with both the stored value and the rendered pixels), then
+two undos step back one turn at a time (not straight to the start, proving each click is its own
+history entry rather than one coalesced edit) and a redo re-applies the most recently undone turn —
+the "different cases" (multiple turns, undo, redo) the rotate button needed to be equipped with.

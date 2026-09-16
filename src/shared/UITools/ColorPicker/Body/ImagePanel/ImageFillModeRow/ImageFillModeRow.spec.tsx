@@ -1,12 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
 // components
-import ImageFillModeRow from './ImageFillModeRow';
+import ImageFillModeRow, { TImageFillModeRowProps } from './ImageFillModeRow';
+import { TooltipProvider } from 'shared';
+
+const renderImageFillModeRow = (props: Partial<TImageFillModeRowProps> = {}): ReturnType<typeof render> =>
+  render(
+    <TooltipProvider>
+      <ImageFillModeRow fillMode="fill" setFillMode={vi.fn()} {...props} />
+    </TooltipProvider>,
+  );
 
 describe('ImageFillModeRow snapshots', () => {
   it('should render ImageFillModeRow', () => {
     // before
-    const { asFragment } = render(<ImageFillModeRow fillMode="fill" setFillMode={vi.fn()} />);
+    const { asFragment } = renderImageFillModeRow();
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -16,7 +24,7 @@ describe('ImageFillModeRow snapshots', () => {
 describe('ImageFillModeRow behaviors', () => {
   it('should show the current fill mode as the dropdown value', () => {
     // before
-    render(<ImageFillModeRow fillMode="crop" setFillMode={vi.fn()} />);
+    renderImageFillModeRow({ fillMode: 'crop' });
 
     // result
     expect(screen.getByText('Crop')).toBeInTheDocument();
@@ -24,7 +32,7 @@ describe('ImageFillModeRow behaviors', () => {
 
   it('should render the rotate button', () => {
     // before
-    render(<ImageFillModeRow fillMode="fill" setFillMode={vi.fn()} />);
+    renderImageFillModeRow();
 
     // result
     expect(screen.getByRole('button', { name: 'Rotate image' })).toBeInTheDocument();
@@ -35,7 +43,7 @@ describe('ImageFillModeRow behaviors', () => {
     const setFillMode = vi.fn();
 
     // before
-    render(<ImageFillModeRow fillMode="fill" setFillMode={setFillMode} />);
+    renderImageFillModeRow({ setFillMode });
 
     // action
     fireEvent.click(screen.getByText('Fill'));
@@ -43,5 +51,30 @@ describe('ImageFillModeRow behaviors', () => {
 
     // result
     expect(setFillMode).toHaveBeenCalledWith('tile');
+  });
+
+  it('should call onRotate when the rotate button is clicked', () => {
+    // mock
+    const onRotate = vi.fn();
+
+    // before
+    renderImageFillModeRow({ onRotate });
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate image' }));
+
+    // result
+    expect(onRotate).toHaveBeenCalled();
+  });
+
+  it('should show the "Rotate 90°" tooltip on focus', async () => {
+    // before
+    renderImageFillModeRow();
+
+    // action
+    fireEvent.focus(screen.getByLabelText('Rotate image'));
+
+    // result
+    expect(await screen.findAllByText('Rotate 90°', {}, { timeout: 2000 })).not.toHaveLength(0);
   });
 });

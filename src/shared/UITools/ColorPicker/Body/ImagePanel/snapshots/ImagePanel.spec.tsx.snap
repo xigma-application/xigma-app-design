@@ -43,6 +43,7 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
         aria-label="Rotate image"
         aria-pressed="false"
         class="_Button_b88d2e _Button--outline_b88d2e _Button--secondary_b88d2e _Button--small_b88d2e"
+        data-state="closed"
         style="padding: 0px;"
         type="button"
       >

@@ -246,7 +246,7 @@ describe('drawVectorFillPaints', () => {
 
   it('should draw an image layer through the image program, loading its texture from the given ref', () => {
     // mock
-    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', scaleMode: 'fill', type: 'image' };
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
     const texture = {} as WebGLTexture;
     const size = { height: 40, width: 40 };
 
@@ -290,15 +290,48 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      0,
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
     expect(drawVectorPatternFillMock).not.toHaveBeenCalled();
   });
 
+  it('should pass the image paint rotation through to the image fill drawer', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 180, scaleMode: 'fill', type: 'image' };
+    const texture = {} as WebGLTexture;
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][13]).toBe(180);
+  });
+
   it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
     // mock
-    const image: TImagePaint = { opacity: 40, ref: 'blob:asset-1', scaleMode: 'fill', type: 'image' };
+    const image: TImagePaint = { opacity: 40, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
     const texture = {} as WebGLTexture;
 
     getOrLoadTextureMock.mockReturnValue(texture);
@@ -330,7 +363,7 @@ describe('drawVectorFillPaints', () => {
 
   it('should skip loading a texture for an image layer with no source picked yet', () => {
     // mock
-    const image: TImagePaint = { opacity: 100, ref: '', scaleMode: 'fill', type: 'image' };
+    const image: TImagePaint = { opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' };
 
     // before
     drawVectorFillPaints(
@@ -369,6 +402,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      0,
     );
   });
 

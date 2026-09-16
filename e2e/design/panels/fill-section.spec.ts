@@ -10,6 +10,7 @@ type TReadablePaint = {
   end?: { x: number; y: number };
   opacity: number;
   ref?: string;
+  rotation?: number;
   scale?: number;
   scaleMode?: string;
   sourceNodeId?: string | null;
@@ -60,6 +61,31 @@ const createSolidColorPngBuffer = async (width: number, height: number, [r, g, b
     png.data[index * 4 + 1] = g;
     png.data[index * 4 + 2] = b;
     png.data[index * 4 + 3] = 255;
+  }
+
+  return PNG.sync.write(png);
+};
+
+// builds a tiny in-memory PNG split vertically into two solid colors, so a 90° image-fill rotation
+// (which swaps which screen edge the left/right halves land on) produces a detectable pixel change
+const createSplitColorPngBuffer = async (
+  size: number,
+  leftColor: [number, number, number],
+  rightColor: [number, number, number],
+): Promise<Buffer> => {
+  const { PNG } = await import('pngjs');
+  const png = new PNG({ height: size, width: size });
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const index = (y * size + x) * 4;
+      const [r, g, b] = x < size / 2 ? leftColor : rightColor;
+
+      png.data[index] = r;
+      png.data[index + 1] = g;
+      png.data[index + 2] = b;
+      png.data[index + 3] = 255;
+    }
   }
 
   return PNG.sync.write(png);
@@ -3040,5 +3066,71 @@ test.describe('Design panels — Fill section', () => {
     const [red] = await readPixelColor(page, 710, 210);
 
     expect(red).toBeLessThan(230);
+  });
+
+  test('the rotate button turns an image fill 90° per click, and each turn is its own undo/redo step', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-rotate-history');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a square shape so the square source image needs no cover-fit crop, keeping the halves exact
+    await designPage.drawRectangle(700, 200, 780, 280);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSplitColorPngBuffer(40, [255, 0, 0], [0, 0, 255]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // left half red, right half blue — the source image as uploaded, before any rotation
+    await expect.poll(async () => readPixelColor(page, 710, 240)).toEqual([255, 0, 0]);
+    await expect.poll(async () => readPixelColor(page, 770, 240)).toEqual([0, 0, 255]);
+
+    const rotateButton = page.getByRole('button', { name: 'Rotate image' });
+
+    // action — first click: a 90° turn moves the left (red) half to the top edge
+    await rotateButton.click();
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(90);
+    expect(await readPixelColor(page, 740, 210)).toEqual([255, 0, 0]);
+    expect(await readPixelColor(page, 740, 270)).toEqual([0, 0, 255]);
+
+    // action — second click: another 90° turn (180° total) moves red to the right edge
+    await rotateButton.click();
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(180);
+    expect(await readPixelColor(page, 770, 240)).toEqual([255, 0, 0]);
+    expect(await readPixelColor(page, 710, 240)).toEqual([0, 0, 255]);
+
+    // action — third click: 270° total, red now on the bottom edge
+    await rotateButton.click();
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(270);
+    expect(await readPixelColor(page, 740, 270)).toEqual([255, 0, 0]);
+    expect(await readPixelColor(page, 740, 210)).toEqual([0, 0, 255]);
+
+    // action — undo the last click alone: back to 180°, not all the way to the start
+    await page.keyboard.press('Control+z');
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(180);
+    expect(await readPixelColor(page, 770, 240)).toEqual([255, 0, 0]);
+
+    // action — undo again: back to the very first 90° turn
+    await page.keyboard.press('Control+z');
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(90);
+    expect(await readPixelColor(page, 740, 210)).toEqual([255, 0, 0]);
+
+    // action — redo: re-applies the 180° turn that was just undone
+    await page.keyboard.press('Control+Shift+z');
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(180);
+    expect(await readPixelColor(page, 770, 240)).toEqual([255, 0, 0]);
   });
 });

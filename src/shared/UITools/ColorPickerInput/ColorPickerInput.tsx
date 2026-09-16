@@ -48,6 +48,7 @@ export type TColorPickerInputProps = {
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
   onImageChange?: TFunc<[TImagePanelChange]>;
+  onImageRotate?: TFunc;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
@@ -84,6 +85,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onGradientChange,
   onGradientPanelStateChange,
   onImageChange,
+  onImageRotate,
   onOpenChange,
   onPatternChange,
   onPickerChange,
@@ -138,6 +140,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onGradientChange={onGradientChange}
                 onGradientPanelStateChange={onGradientPanelStateChange}
                 onImageChange={onImageChange}
+                onImageRotate={onImageRotate}
                 onImageUrlChange={setPickedImageUrl}
                 onOpenChange={onOpenChange}
                 onPatternChange={onPatternChange}

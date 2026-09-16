@@ -24,6 +24,6 @@ describe('useConvertToImagePaint', () => {
     result.current(CHANGE);
 
     // result
-    expect(onChange).toHaveBeenCalledWith({ ...CHANGE, blendMode: 'multiply', opacity: 80, type: 'image', visible: false });
+    expect(onChange).toHaveBeenCalledWith({ ...CHANGE, blendMode: 'multiply', opacity: 80, rotation: 0, type: 'image', visible: false });
   });
 });

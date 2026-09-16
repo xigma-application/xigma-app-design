@@ -3,7 +3,8 @@ import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
 // components
-import ImagePanel from './ImagePanel';
+import ImagePanel, { TImagePanelProps } from './ImagePanel';
+import { TooltipProvider } from 'shared';
 
 // hooks
 import { useImagePanel } from './hooks/useImagePanel';
@@ -11,16 +12,18 @@ import { useImagePanel } from './hooks/useImagePanel';
 // store
 import { store } from 'store';
 
-const ImagePanelWrapper = (): ReactNode => {
+const ImagePanelWrapper = ({ onRotate }: Pick<TImagePanelProps, 'onRotate'>): ReactNode => {
   const imagePanel = useImagePanel();
 
-  return <ImagePanel imagePanel={imagePanel} />;
+  return <ImagePanel imagePanel={imagePanel} onRotate={onRotate} />;
 };
 
-const renderImagePanel = (): ReturnType<typeof render> =>
+const renderImagePanel = (onRotate?: TFunc): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <ImagePanelWrapper />
+      <TooltipProvider>
+        <ImagePanelWrapper onRotate={onRotate} />
+      </TooltipProvider>
     </Provider>,
   );
 
@@ -55,6 +58,20 @@ describe('ImagePanel behaviors', () => {
 
     // result
     expect(screen.getByText('Tile')).toBeInTheDocument();
+  });
+
+  it('should call onRotate when the rotate button is clicked', () => {
+    // mock
+    const onRotate = vi.fn();
+
+    // before
+    renderImagePanel(onRotate);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate image' }));
+
+    // result
+    expect(onRotate).toHaveBeenCalled();
   });
 
   it('should update a slider value locally when dragged', () => {

@@ -108,7 +108,7 @@ describe('FillRow behaviors', () => {
 
   it('should render the same reopenable color picker input for an image fill, not a dead-end static preview', () => {
     // mock
-    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
 
     // before
     const { container } = renderFillRow({ paint: imagePaint });
@@ -116,6 +116,22 @@ describe('FillRow behaviors', () => {
     // result
     expect(container.querySelector('[class*="FillImagePreview"]')).toBeNull();
     expect(screen.getByDisplayValue('Image')).toBeInTheDocument();
+  });
+
+  it('should advance an image fill by 90° through onChange when the rotate button is clicked', () => {
+    // mock
+    const onChange = vi.fn();
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    renderFillRow({ onChange, paint: imagePaint });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate image' }));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...imagePaint, rotation: 90 });
   });
 
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {

@@ -4,6 +4,6 @@ import { TImagePanelChange } from 'shared/UITools/ColorPicker/Body/ImagePanel/ty
 
 export const useConvertToImagePaint = (paint: TPaint, onChange: TFunc<[TImagePaint]>): TFunc<[TImagePanelChange]> => {
   return (change: TImagePanelChange): void => {
-    onChange({ ...change, blendMode: paint.blendMode, opacity: paint.opacity, type: 'image', visible: paint.visible });
+    onChange({ ...change, blendMode: paint.blendMode, opacity: paint.opacity, rotation: 0, type: 'image', visible: paint.visible });
   };
 };

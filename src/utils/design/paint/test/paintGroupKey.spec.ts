@@ -43,7 +43,7 @@ describe('paintGroupKey', () => {
   });
 
   it('should key an image paint by ref and scale mode', () => {
-    const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
+    const image: TImagePaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
 
     expect(paintGroupKey([image])).not.toBe(paintGroupKey([{ ...image, scaleMode: 'tile' }]));
   });

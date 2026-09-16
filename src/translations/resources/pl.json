@@ -27,6 +27,7 @@
   "colorPicker.image.highlightsLabel": "Światła",
   "colorPicker.image.makeAnImageLabel": "Wygeneruj obraz",
   "colorPicker.image.rotateAriaLabel": "Obróć obraz",
+  "colorPicker.image.rotateTooltip": "Obróć o 90°",
   "colorPicker.image.saturationLabel": "Nasycenie",
   "colorPicker.image.shadowsLabel": "Cienie",
   "colorPicker.image.temperatureLabel": "Temperatura",

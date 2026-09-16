@@ -11,11 +11,11 @@ import { TUseImagePanelResult } from './hooks/useImagePanel';
 // styles
 import styles from './image-panel.module.scss';
 
-export type TImagePanelProps = { imagePanel: TUseImagePanelResult };
+export type TImagePanelProps = { imagePanel: TUseImagePanelResult; onRotate?: TFunc };
 
-export const ImagePanel: FC<TImagePanelProps> = ({ imagePanel }) => (
+export const ImagePanel: FC<TImagePanelProps> = ({ imagePanel, onRotate }) => (
   <div className={styles.ImagePanel}>
-    <ImageFillModeRow fillMode={imagePanel.fillMode} setFillMode={imagePanel.setFillMode} />
+    <ImageFillModeRow fillMode={imagePanel.fillMode} onRotate={onRotate} setFillMode={imagePanel.setFillMode} />
     <ImageSourcePreview imagePanel={imagePanel} />
     <ImageAdjustmentSliders imagePanel={imagePanel} />
   </div>

@@ -13,6 +13,7 @@ import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
 import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
+import { useRotateImagePaint } from './hooks/useRotateImagePaint';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
@@ -73,6 +74,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
   const handleImageChange = useConvertToImagePaint(paint, onChange);
+  const handleImageRotate = useRotateImagePaint(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isImage = paint.type === 'image';
@@ -122,6 +124,7 @@ export const FillRow: FC<TFillRowProps> = ({
           onGradientChange={handleGradientChange}
           onGradientPanelStateChange={setGradientPanelState}
           onImageChange={handleImageChange}
+          onImageRotate={handleImageRotate}
           onOpenChange={setIsPickerOpen}
           onPatternChange={handlePatternChange}
           onPickerChange={handleSolidChange}

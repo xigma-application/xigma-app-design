@@ -38,6 +38,7 @@ export type TGradientPaint = TPaintBase & {
 
 export type TImagePaint = TPaintBase & {
   ref: string;
+  rotation: number;
   scaleMode: TImageScaleMode;
   type: 'image';
 };

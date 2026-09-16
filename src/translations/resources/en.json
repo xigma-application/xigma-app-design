@@ -27,6 +27,7 @@
   "colorPicker.image.highlightsLabel": "Highlights",
   "colorPicker.image.makeAnImageLabel": "Make an image",
   "colorPicker.image.rotateAriaLabel": "Rotate image",
+  "colorPicker.image.rotateTooltip": "Rotate 90°",
   "colorPicker.image.saturationLabel": "Saturation",
   "colorPicker.image.shadowsLabel": "Shadows",
   "colorPicker.image.temperatureLabel": "Temperature",

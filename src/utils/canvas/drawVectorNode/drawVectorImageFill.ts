@@ -6,6 +6,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { getImageFillCoverUv } from './getImageFillCoverUv';
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
+import { getRotatedFillUvCorner } from './getRotatedFillUvCorner';
 import { getVectorFillBounds } from './getVectorFillBounds';
 
 const drawImageStencilMask = (
@@ -22,7 +23,7 @@ const drawImageStencilMask = (
   });
 };
 
-const getCoveringImageQuadVertices = (bounds: TDraftRect, uv: ReturnType<typeof getImageFillCoverUv>): number[] => {
+const getCoveringImageQuadVertices = (bounds: TDraftRect, uv: ReturnType<typeof getImageFillCoverUv>, rotation: number): number[] => {
   const { height, width, x, y } = bounds;
   const x1 = x;
   const y1 = y;
@@ -32,33 +33,12 @@ const getCoveringImageQuadVertices = (bounds: TDraftRect, uv: ReturnType<typeof 
   const y3 = y + height;
   const x4 = x;
   const y4 = y + height;
+  const tl = getRotatedFillUvCorner(uv.uMin, uv.vMin, rotation);
+  const tr = getRotatedFillUvCorner(uv.uMax, uv.vMin, rotation);
+  const br = getRotatedFillUvCorner(uv.uMax, uv.vMax, rotation);
+  const bl = getRotatedFillUvCorner(uv.uMin, uv.vMax, rotation);
 
-  return [
-    x1,
-    y1,
-    uv.uMin,
-    uv.vMin,
-    x2,
-    y2,
-    uv.uMax,
-    uv.vMin,
-    x3,
-    y3,
-    uv.uMax,
-    uv.vMax,
-    x1,
-    y1,
-    uv.uMin,
-    uv.vMin,
-    x3,
-    y3,
-    uv.uMax,
-    uv.vMax,
-    x4,
-    y4,
-    uv.uMin,
-    uv.vMax,
-  ];
+  return [x1, y1, tl.u, tl.v, x2, y2, tr.u, tr.v, x3, y3, br.u, br.v, x1, y1, tl.u, tl.v, x3, y3, br.u, br.v, x4, y4, bl.u, bl.v];
 };
 
 export const drawVectorImageFill = (
@@ -75,10 +55,14 @@ export const drawVectorImageFill = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha = 1,
+  rotation = 0,
 ): void => {
   if (faces.length !== 0 && texture) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
-    const uv = getImageFillCoverUv(bounds.width, bounds.height, imageSize?.width ?? 0, imageSize?.height ?? 0);
+    const isSideways = rotation === 90 || rotation === 270;
+    const effectiveImageWidth = (isSideways ? imageSize?.height : imageSize?.width) ?? 0;
+    const effectiveImageHeight = (isSideways ? imageSize?.width : imageSize?.height) ?? 0;
+    const uv = getImageFillCoverUv(bounds.width, bounds.height, effectiveImageWidth, effectiveImageHeight);
     const positionLocation = gl.getAttribLocation(program, 'a_position');
     const texCoordLocation = gl.getAttribLocation(program, 'a_texCoord');
     const textureLocation = gl.getUniformLocation(program, 'u_texture');
@@ -111,7 +95,7 @@ export const drawVectorImageFill = (
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getCoveringImageQuadVertices(bounds, uv)), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getCoveringImageQuadVertices(bounds, uv, rotation)), gl.STATIC_DRAW);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, stride, 0);
     gl.enableVertexAttribArray(texCoordLocation);
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);

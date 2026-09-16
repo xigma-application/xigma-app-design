@@ -29,7 +29,7 @@ describe('getFillRowHexDisplayValue', () => {
   });
 
   it('should return the translated image label for an image paint', () => {
-    expect(getFillRowHexDisplayValue({ opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' }, t)).toBe(
+    expect(getFillRowHexDisplayValue({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }, t)).toBe(
       'design.rightPanel.panelProperties.common.fillSection.imageLabel',
     );
   });

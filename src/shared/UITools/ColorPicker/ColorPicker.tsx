@@ -62,6 +62,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onGradientChange,
   onGradientPanelStateChange,
   onImageChange,
+  onImageRotate,
   onImageUrlChange,
   onOpenChange,
   onPatternChange,
@@ -141,6 +142,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onCloseSampler={colorSampler.close}
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
+            onImageRotate={onImageRotate}
             onOpenSampler={colorSampler.open}
             patternPanel={patternPanel}
             patternSourceNodeId={patternSourceNodeId}
