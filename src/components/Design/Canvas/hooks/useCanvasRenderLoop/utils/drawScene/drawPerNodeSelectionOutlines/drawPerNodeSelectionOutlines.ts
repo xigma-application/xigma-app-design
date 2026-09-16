@@ -45,7 +45,7 @@ export const drawPerNodeSelectionOutlines = (
         break;
       default:
         if (imageEditor?.nodeId === node.id) {
-          drawImageEditorSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+          drawImageEditorSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, imageEditor);
         } else {
           drawDefaultSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, nodesById);
         }

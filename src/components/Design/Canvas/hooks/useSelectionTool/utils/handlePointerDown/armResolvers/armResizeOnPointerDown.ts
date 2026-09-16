@@ -24,13 +24,16 @@ export const armResizeOnPointerDown = ({
 
   if (resizeHandleHit) {
     const imageEditor = selectImageEditor(store.getState());
+    const targetsSelectedNode = Boolean(imageEditor) && selectedNodes.some((node) => node.id === imageEditor?.nodeId);
 
-    if (imageEditor && imageEditor.mode !== 'crop' && selectedNodes.some((node) => node.id === imageEditor.nodeId)) {
-      dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
+    if (imageEditor?.mode !== 'crop' || imageEditor.selectedTarget !== 'image' || !targetsSelectedNode) {
+      if (imageEditor && imageEditor.mode !== 'crop' && targetsSelectedNode) {
+        dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
+      }
+
+      armResizeDrag(canvas, event, selectionRefs.resizeDragRef, selectedNodes, resizeHandleHit.handle, resizeHandleHit.bounds, canvasRefs);
+
+      return true;
     }
-
-    armResizeDrag(canvas, event, selectionRefs.resizeDragRef, selectedNodes, resizeHandleHit.handle, resizeHandleHit.bounds, canvasRefs);
-
-    return true;
   }
 };

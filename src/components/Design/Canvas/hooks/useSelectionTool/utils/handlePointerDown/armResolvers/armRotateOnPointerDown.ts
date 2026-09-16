@@ -1,3 +1,7 @@
+// store
+import { selectImageEditor } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { TArmContext } from '../types';
 
@@ -9,17 +13,25 @@ export const armRotateOnPointerDown = ({ canvas, canvasRefs, event, point, selec
   const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
 
   if (rotateHandleHit) {
-    armRotateDrag(
-      canvas,
-      event,
-      canvasRefs.transform.rotateDragRef,
-      selectedNodes,
-      rotateHandleHit.bounds,
-      rotateHandleHit.rotation,
-      point,
-      canvasRefs,
-    );
+    const imageEditor = selectImageEditor(store.getState());
 
-    return true;
+    if (
+      imageEditor?.mode !== 'crop' ||
+      imageEditor.selectedTarget !== 'image' ||
+      !selectedNodes.some((node) => node.id === imageEditor.nodeId)
+    ) {
+      armRotateDrag(
+        canvas,
+        event,
+        canvasRefs.transform.rotateDragRef,
+        selectedNodes,
+        rotateHandleHit.bounds,
+        rotateHandleHit.rotation,
+        point,
+        canvasRefs,
+      );
+
+      return true;
+    }
   }
 };

@@ -6,6 +6,7 @@ import { DesignPage } from '../model/DesignPage';
 type TReadablePaint = {
   alignmentIndex?: number;
   color?: string;
+  crop?: { height: number; rotation: number; width: number; x: number; y: number };
   direction?: string;
   end?: { x: number; y: number };
   opacity: number;
@@ -22,8 +23,8 @@ type TReadablePaint = {
   type: string;
   visible?: boolean;
 };
-type TReadableNode = { fills?: TReadablePaint[] };
-type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number } | null;
+type TReadableNode = { fills?: TReadablePaint[]; height?: number; width?: number; x?: number; y?: number };
+type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number; selectedTarget?: string } | null;
 
 const readFirstNodeId = (page: Page): Promise<string> =>
   page.evaluate(async () => {
@@ -3327,7 +3328,9 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
   });
 
-  test('resizing the shape while its Image position-editing mode is active also switches the fill mode dropdown to Crop', async ({ page }) => {
+  test('resizing the shape while its Image position-editing mode is active also switches the fill mode dropdown to Crop', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-image-editor-crop-dropdown-sync');
@@ -3353,7 +3356,9 @@ test.describe('Design panels — Fill section', () => {
     await expect(fillModeLabel).toHaveText('Crop');
   });
 
-  test('resizing the shape while the Image editor is not in crop mode yet leaves the fill mode dropdown untouched otherwise', async ({ page }) => {
+  test('resizing the shape while the Image editor is not in crop mode yet leaves the fill mode dropdown untouched otherwise', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-image-editor-non-crop-dropdown');
@@ -3374,6 +3379,83 @@ test.describe('Design panels — Fill section', () => {
 
     // result — the manual selection is untouched, no resize happened to force it to Crop
     await expect(fillModeLabel).toHaveText('Fit');
+  });
+
+  test('dragging inside the shape while in crop mode selects and moves the image independently of the frame', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-drag-image');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode by grabbing the frame's own nw resize handle
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    const frameBefore = await readNode(page, id);
+
+    // action — drag inside the shape body, away from any resize/rotate handle
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    // result — the click selected the image as the target, and the drag moved only its own crop rect
+    const imageEditor = await readImageEditor(page);
+
+    expect(imageEditor?.selectedTarget).toBe('image');
+
+    const frameAfter = await readNode(page, id);
+    const crop = frameAfter.fills?.[0].crop;
+
+    expect(crop).toEqual({
+      height: frameBefore.height,
+      rotation: 0,
+      width: frameBefore.width,
+      x: frameBefore.x! + 20,
+      y: frameBefore.y! + 20,
+    });
+
+    // result — the frame itself never moved, proving the two are not coupled
+    expect(frameAfter.x).toBe(frameBefore.x);
+    expect(frameAfter.y).toBe(frameBefore.y);
+  });
+
+  test('clicking the frame outside the moved image switches the selected target back to frame', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-reselect-frame');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+
+    // move the image well away from the frame's own top-left corner
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(850, 330);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    // action — click near the frame's own corner, now clear of the shifted image rect
+    await designPage.click(725, 225);
+
+    // result
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, selectedTarget: 'frame' });
   });
 
   test('pressing Escape first exits the Image editor mode, keeping the node selected and the panel open, and only a second Escape deselects', async ({

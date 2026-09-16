@@ -130,11 +130,13 @@ describe('drawPerNodeSelectionOutlines', () => {
       },
     );
 
-    // result: 4 corner handles + 4 edge-midpoint handles = 8 LINE_LOOP draws, no solid-rect LINE_LOOP
+    // result: 4 corners x 2 arms + 4 edge bars = 12 fill-only TRIANGLES draws (no stroke), plus the dashed outline
+    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
     const linesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
 
-    expect(lineLoopDraws).toHaveLength(8);
+    expect(trianglesDraws).toHaveLength(12);
+    expect(lineLoopDraws).toHaveLength(0);
     expect(linesDraws.length).toBeGreaterThan(0);
   });
 

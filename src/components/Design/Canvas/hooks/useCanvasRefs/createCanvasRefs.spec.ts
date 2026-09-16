@@ -71,6 +71,11 @@ describe('createCanvasRefs behaviors', () => {
         isSmartSelectionBoxHoveredRef: { current: false },
         rightPanelPaddingGuideRef: { current: null },
       },
+      imageCrop: {
+        imageCropMoveDragRef: { current: null },
+        imageCropResizeDragRef: { current: null },
+        imageCropRotateDragRef: { current: null },
+      },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
       layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },
       media: { armedRef: { current: null }, queueRef: { current: [] } },

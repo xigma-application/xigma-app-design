@@ -3,6 +3,7 @@ import {
   addNode,
   groupNodes,
   setActiveTool,
+  setImageEditor,
   setPaint,
   setPenActiveVertexId,
   setSelection,
@@ -27,6 +28,7 @@ import { armEllipseArcRotateOnPointerDown } from '../armEllipseArcRotateOnPointe
 import { armGroupBoundsOnPointerDown } from '../armGroupBoundsOnPointerDown';
 import { armGroupChildToggleOnPointerDown } from '../armGroupChildToggleOnPointerDown';
 import { armHitOnPointerDown } from '../armHitOnPointerDown';
+import { armImageCropOnPointerDown } from '../armImageCropOnPointerDown/armImageCropOnPointerDown';
 import { armLineEndpointOnPointerDown } from '../armLineEndpointOnPointerDown';
 import { armMarqueeOnPointerDown } from '../armMarqueeOnPointerDown';
 import { armPathOffsetOnPointerDown } from '../armPathOffsetOnPointerDown';
@@ -242,6 +244,19 @@ const rectangle: TRectangleNode = {
   y: 0,
 };
 
+const imageRectangle: TRectangleNode = {
+  fills: [{ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+  height: 100,
+  id: 'rect-image-1',
+  name: 'Rectangle',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.rectangle,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
 const line: TLineNode = {
   id: 'line-1',
   name: 'Line',
@@ -430,6 +445,150 @@ describe('armEllipseArcRatioOnPointerDown', () => {
     // result
     expect(armEllipseArcRatioOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.ellipseArc.ellipseArcRatioDragRef.current).toBeNull();
+  });
+});
+
+describe('armImageCropOnPointerDown', () => {
+  beforeEach(() => {
+    store.dispatch(setImageEditor(null));
+  });
+
+  afterEach(() => {
+    store.dispatch(setImageEditor(null));
+  });
+
+  it('should return undefined when there is no active image editor', () => {
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when the image editor is in position mode, not crop', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-image-1', paintIndex: 0 }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when the targeted node is not among the selected nodes', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'other-id', paintIndex: 0 }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when the targeted node is not an appearance node (rectangle/frame)', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'ellipse-1', paintIndex: 0 }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [ellipse] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when the paint at the targeted index is not an image paint', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rectangle-1', paintIndex: 0 }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [rectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should arm the crop resize drag and return true when a resize handle is hit while the image target is selected', () => {
+    // mock — the "nw" corner handle of the crop rect (0,0,100,100) sits at (0, 0)
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const ctx = createContext({ point: { x: 0, y: 0 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.imageCrop.imageCropResizeDragRef.current).toMatchObject({ handle: 'nw', nodeId: 'rect-image-1', paintIndex: 0 });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should arm the crop rotate drag and return true when the rotate ring is hit while the image target is selected', () => {
+    // mock — just outside the "nw" corner handle radius (6px), still inside the rotate ring (16px)
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const ctx = createContext({ point: { x: 0, y: -10 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.imageCrop.imageCropRotateDragRef.current).toMatchObject({ nodeId: 'rect-image-1', paintIndex: 0 });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should select the image target and arm a move drag when the click lands inside the crop rect with the frame still selected', () => {
+    // mock — no selectedTarget yet, defaults to 'frame'
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0 }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledWith(
+      setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }),
+    );
+    expect(ctx.canvasRefs.imageCrop.imageCropMoveDragRef.current).toMatchObject({ nodeId: 'rect-image-1', paintIndex: 0 });
+  });
+
+  it('should arm a move drag without re-dispatching when the image target is already selected', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+    expect(ctx.canvasRefs.imageCrop.imageCropMoveDragRef.current).toMatchObject({ nodeId: 'rect-image-1', paintIndex: 0 });
+  });
+
+  it('should deselect the image target back to the frame when a node is hit outside the crop rect', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const ctx = createContext({ hit: rectangle, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
+
+    // result — falls through so the actual click still gets resolved by a later resolver
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).toHaveBeenCalledWith(
+      setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'frame' }),
+    );
+  });
+
+  it('should not dispatch when nothing was hit outside the crop rect', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const ctx = createContext({ hit: null, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 });
 

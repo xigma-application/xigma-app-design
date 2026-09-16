@@ -16,6 +16,7 @@ import { armGridTrackValueEditOnPointerDown } from './armResolvers/armGridTrackV
 import { armGroupBoundsOnPointerDown } from './armResolvers/armGroupBoundsOnPointerDown';
 import { armGroupChildToggleOnPointerDown } from './armResolvers/armGroupChildToggleOnPointerDown';
 import { armHitOnPointerDown } from './armResolvers/armHitOnPointerDown';
+import { armImageCropOnPointerDown } from './armResolvers/armImageCropOnPointerDown/armImageCropOnPointerDown';
 import { armLineEndpointOnPointerDown } from './armResolvers/armLineEndpointOnPointerDown';
 import { armMarqueeOnPointerDown } from './armResolvers/armMarqueeOnPointerDown';
 import { armPathOffsetOnPointerDown } from './armResolvers/armPathOffsetOnPointerDown';
@@ -79,6 +80,7 @@ export const ARM_RESOLVERS = [
   armEllipseArcOnPointerDown,
   armEllipseArcRotateOnPointerDown,
   armEllipseArcRatioOnPointerDown,
+  armImageCropOnPointerDown,
   armResizeOnPointerDown,
   armCornerRadiusOnPointerDown,
   armPolygonCornerRadiusOnPointerDown,

@@ -58,7 +58,21 @@ describe('drawVectorImageFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, [], texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      [],
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -398,5 +412,79 @@ describe('drawVectorImageFill', () => {
 
     expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([0, 0]);
     expect(Array.from(uploadedVertices.slice(4, 6))).toEqual([40, 0]);
+  });
+
+  it('should draw the stored crop rect at full 0..1 UV, overriding scaleMode entirely once a crop is set', () => {
+    // mock — 'fit' would otherwise letterbox to a smaller rect; crop must win instead
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 80 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fit',
+      { height: 15, rotation: 0, width: 20, x: 10, y: 5 },
+    );
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the crop quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([10, 5]);
+    expect(Array.from(uploadedVertices.slice(2, 4))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(4, 6))).toEqual([30, 5]);
+    expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([1, 0]);
+  });
+
+  it("should rotate the crop quad's own geometry around its center when the crop has a rotation", () => {
+    // mock — a 40x40 crop rect rotated 90deg around its own center (20,20)
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fill',
+      { height: 40, rotation: 90, width: 40, x: 0, y: 0 },
+    );
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the crop quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    expect(uploadedVertices[0]).toBeCloseTo(40);
+    expect(uploadedVertices[1]).toBeCloseTo(0);
+    expect(uploadedVertices[4]).toBeCloseTo(40);
+    expect(uploadedVertices[5]).toBeCloseTo(40);
   });
 });

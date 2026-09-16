@@ -1,13 +1,14 @@
-// others
-import { DRAFT_FRAME_STROKE, IMAGE_EDITOR_OUTLINE_DASH_GAP_PX, IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX, SIZE_LABEL_FILL } from 'constant/canvas';
+// store
+import { TImageEditorState } from 'store/design/types';
 
 // types
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawDashedRectOutline } from 'utils/canvas/drawDashedRectOutline';
-import { drawImageEditorCornerHandles } from './drawImageEditorCornerHandles';
-import { drawImageEditorEdgeHandles } from './drawImageEditorEdgeHandles';
+import { drawImageEditorFrameOutline } from './drawImageEditorFrameOutline';
+import { drawImageEditorImageOutline } from './drawImageEditorImageOutline';
+import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
+import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
 export const drawImageEditorSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -17,22 +18,18 @@ export const drawImageEditorSelectionOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  imageEditor: TImageEditorState,
 ): void => {
-  const { height, rotation, width, x, y } = node;
+  const isImageSelected = imageEditor.mode === 'crop' && imageEditor.selectedTarget === 'image';
 
-  drawDashedRectOutline(
-    gl,
-    program,
-    buffer,
-    { height, width, x, y },
-    DRAFT_FRAME_STROKE,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    rotation,
-    IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX,
-    IMAGE_EDITOR_OUTLINE_DASH_GAP_PX,
-  );
-  drawImageEditorCornerHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
-  drawImageEditorEdgeHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
+  drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, !isImageSelected);
+
+  if (imageEditor.mode === 'crop' && isAppearanceNode(node)) {
+    const paint = node.fills[imageEditor.paintIndex];
+
+    if (paint?.type === 'image') {
+      const crop = getImageCropRect(node, paint);
+      drawImageEditorImageOutline(gl, program, buffer, crop, canvasWidth, canvasHeight, viewport, isImageSelected);
+    }
+  }
 };

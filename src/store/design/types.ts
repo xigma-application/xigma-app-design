@@ -38,7 +38,9 @@ export type TGradientEditorState = { nodeId: string; paintIndex: number; selecte
 
 export type TImageEditorMode = 'crop' | 'position';
 
-export type TImageEditorState = { mode: TImageEditorMode; nodeId: string; paintIndex: number };
+export type TImageEditorTarget = 'frame' | 'image';
+
+export type TImageEditorState = { mode: TImageEditorMode; nodeId: string; paintIndex: number; selectedTarget?: TImageEditorTarget };
 
 export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number };
 

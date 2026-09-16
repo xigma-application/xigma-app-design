@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 import { TAutoLayoutDropTarget } from 'store/design/utils/autoLayout/getAutoLayoutDropTarget/getAutoLayoutDropTarget';
-import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
+import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import { TDimensionHintGuides } from 'components/Design/Canvas/utils/getDimensionHintGuides/types';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
@@ -16,7 +16,7 @@ import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
-import { TPaint } from 'types/design/paint/types';
+import { TImageCrop, TPaint } from 'types/design/paint/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import {
@@ -135,6 +135,34 @@ export type TGradientEndpointMoveDragState = {
 
 export type TGradientEndpointMoveRefs = {
   gradientEndpointMoveDragRef: RefObject<TGradientEndpointMoveDragState | null>;
+};
+
+export type TImageCropMoveDragState = {
+  nodeId: string;
+  origin: TImageCrop;
+  paintIndex: number;
+  startPoint: TPoint;
+};
+
+export type TImageCropResizeDragState = {
+  handle: TResizeHandle;
+  nodeId: string;
+  origin: TImageCrop;
+  paintIndex: number;
+};
+
+export type TImageCropRotateDragState = {
+  nodeId: string;
+  origin: TImageCrop;
+  paintIndex: number;
+  pivot: TPoint;
+  startAngle: number;
+};
+
+export type TImageCropRefs = {
+  imageCropMoveDragRef: RefObject<TImageCropMoveDragState | null>;
+  imageCropResizeDragRef: RefObject<TImageCropResizeDragState | null>;
+  imageCropRotateDragRef: RefObject<TImageCropRotateDragState | null>;
 };
 
 export type TGradientRadiusDragState = {
@@ -627,6 +655,7 @@ export type TCanvasRefs = {
   gradientStop: TGradientStopRefs;
   guides: TGuideRefs;
   hover: THoverRefs;
+  imageCrop: TImageCropRefs;
   lassoMarquee: TLassoMarqueeRefs;
   layout: TLayoutRefs;
   media: TMediaRefs;

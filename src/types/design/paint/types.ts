@@ -36,7 +36,16 @@ export type TGradientPaint = TPaintBase & {
   type: 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial';
 };
 
+export type TImageCrop = {
+  height: number;
+  rotation: number;
+  width: number;
+  x: number;
+  y: number;
+};
+
 export type TImagePaint = TPaintBase & {
+  crop?: TImageCrop;
   ref: string;
   rotation: number;
   scaleMode: TImageScaleMode;

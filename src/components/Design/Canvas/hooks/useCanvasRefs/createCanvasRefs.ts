@@ -9,6 +9,7 @@ import { createGradientRotateRefs } from './hooks/useGradientRotateRefs/createGr
 import { createGradientStopRefs } from './hooks/useGradientStopRefs/createGradientStopRefs';
 import { createGuideRefs } from './hooks/useGuideRefs/createGuideRefs';
 import { createHoverRefs } from './hooks/useHoverRefs/createHoverRefs';
+import { createImageCropRefs } from './hooks/useImageCropRefs/createImageCropRefs';
 import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
 import { createLayoutRefs } from './hooks/useLayoutRefs/createLayoutRefs';
 import { createMediaRefs } from './hooks/useMediaRefs/createMediaRefs';
@@ -48,6 +49,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   gradientStop: createGradientStopRefs(overrides.gradientStop),
   guides: createGuideRefs(overrides.guides),
   hover: createHoverRefs(overrides.hover),
+  imageCrop: createImageCropRefs(overrides.imageCrop),
   lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
   layout: createLayoutRefs(overrides.layout),
   media: createMediaRefs(overrides.media),

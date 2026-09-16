@@ -84,6 +84,7 @@ export const drawVectorFillPaints = (
           alpha,
           paint.rotation,
           paint.scaleMode,
+          paint.crop,
         );
       } else {
         drawVectorGradientFill(

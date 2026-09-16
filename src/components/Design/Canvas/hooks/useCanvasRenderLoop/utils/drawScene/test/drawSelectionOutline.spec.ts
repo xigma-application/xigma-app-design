@@ -197,11 +197,13 @@ describe('drawSelectionOutline', () => {
     );
 
     // result — no solid-rect LINE_LOOP for the outline itself (the dashed outline draws via LINES
-    // instead), but 4 corner handles + 4 edge-midpoint handles still each draw their own LINE_LOOP
+    // instead), and the L-bracket corner arms + edge bars are fill-only (TRIANGLES, no stroke)
+    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
     const linesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
 
-    expect(lineLoopDraws).toHaveLength(8);
+    expect(trianglesDraws).toHaveLength(12);
+    expect(lineLoopDraws).toHaveLength(0);
     expect(linesDraws.length).toBeGreaterThan(0);
   });
 });

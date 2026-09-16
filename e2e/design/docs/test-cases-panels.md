@@ -224,6 +224,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 459 | Clicking the frame outside the moved image switches the selected target back to the frame                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -678,3 +680,16 @@ resizing the shape saw the canvas outline behave like a crop but the dropdown st
 a resize-handle drag. #457 is the guard on the other side: manually picking "Fit" from the dropdown
 while still in position mode (no resize) must not get silently overwritten back — confirmed by
 reverting the fix and seeing #456 fail with the dropdown stuck on "Fill" against the pre-fix code.
+
+#458/#459 extend crop mode with a second, independently-editable entity: once in `'crop'` mode, the
+image itself (not just the frame) can be selected, dragged, resized, and rotated on its own, stored as
+`TImagePaint.crop` (a world-space `{x,y,width,height,rotation}` rect, seeded from the frame's current
+bounds the first time it's touched). The frame keeps its dashed/L-bracket handles only while it is the
+selected target; once the image becomes selected it gets a plain solid outline with square corner
+handles instead, and the frame falls back to a plain dashed guide with no handles. #458 grabs the
+frame's resize handle to enter crop mode, then drags inside the shape body and asserts three things at
+once: `imageEditor.selectedTarget` flips to `'image'`, the paint's `crop` rect moves by exactly the
+drag delta, and the frame node's own `x`/`y` are completely untouched — proving the two entities never
+pull each other. #459 covers the reverse: after the image has been dragged away from part of the frame,
+clicking a point that is inside the frame but now outside the shifted image rect switches
+`selectedTarget` back to `'frame'`, matching the "image has click priority when overlapping" rule.

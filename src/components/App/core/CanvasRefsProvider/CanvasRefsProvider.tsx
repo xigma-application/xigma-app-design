@@ -18,6 +18,7 @@ import { useGradientRotateRefs } from 'components/Design/Canvas/hooks/useCanvasR
 import { useGradientStopRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientStopRefs/useGradientStopRefs';
 import { useGuideRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGuideRefs/useGuideRefs';
 import { useHoverRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useHoverRefs/useHoverRefs';
+import { useImageCropRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useImageCropRefs/useImageCropRefs';
 import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLassoMarqueeRefs/useLassoMarqueeRefs';
 import { useLayoutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/useLayoutRefs';
 import { useMediaRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useMediaRefs/useMediaRefs';
@@ -52,6 +53,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const gradientStopRefs = useGradientStopRefs();
   const guideRefs = useGuideRefs();
   const hoverRefs = useHoverRefs();
+  const imageCropRefs = useImageCropRefs();
   const lassoMarqueeRefs = useLassoMarqueeRefs();
   const layoutRefs = useLayoutRefs();
   const mediaRefs = useMediaRefs();
@@ -91,6 +93,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       gradientStop: gradientStopRefs,
       guides: guideRefs,
       hover: hoverRefs,
+      imageCrop: imageCropRefs,
       lassoMarquee: lassoMarqueeRefs,
       layout: layoutRefs,
       media: mediaRefs,
@@ -123,6 +126,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       gradientStopRefs,
       guideRefs,
       hoverRefs,
+      imageCropRefs,
       lassoMarqueeRefs,
       layoutRefs,
       mediaRefs,

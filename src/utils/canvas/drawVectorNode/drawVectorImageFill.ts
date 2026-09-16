@@ -1,6 +1,6 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TImageScaleMode } from 'types/design/paint/types';
+import { TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TTextureSize } from '../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
 
@@ -12,6 +12,7 @@ import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
 import { getRotatedFillUvCorner } from './getRotatedFillUvCorner';
 import { getVectorFillBounds } from './getVectorFillBounds';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 // constant
 import { IMAGE_FILL_PLACEHOLDER_COLOR_A, IMAGE_FILL_PLACEHOLDER_COLOR_B } from 'constant/canvas';
@@ -32,20 +33,17 @@ const drawImageStencilMask = (
   });
 };
 
-const getImageFillQuadVertices = (rect: TDraftRect, uv: TImageFillCoverUv, rotation: number): number[] => {
+const getImageFillQuadVertices = (rect: TDraftRect, uv: TImageFillCoverUv, uvRotation: number, quadRotation = 0): number[] => {
   const { height, width, x, y } = rect;
-  const x1 = x;
-  const y1 = y;
-  const x2 = x + width;
-  const y2 = y;
-  const x3 = x + width;
-  const y3 = y + height;
-  const x4 = x;
-  const y4 = y + height;
-  const tl = getRotatedFillUvCorner(uv.uMin, uv.vMin, rotation);
-  const tr = getRotatedFillUvCorner(uv.uMax, uv.vMin, rotation);
-  const br = getRotatedFillUvCorner(uv.uMax, uv.vMax, rotation);
-  const bl = getRotatedFillUvCorner(uv.uMin, uv.vMax, rotation);
+  const center: TPoint = { x: x + width / 2, y: y + height / 2 };
+  const { x: x1, y: y1 } = rotatePoint({ x, y }, center, quadRotation);
+  const { x: x2, y: y2 } = rotatePoint({ x: x + width, y }, center, quadRotation);
+  const { x: x3, y: y3 } = rotatePoint({ x: x + width, y: y + height }, center, quadRotation);
+  const { x: x4, y: y4 } = rotatePoint({ x, y: y + height }, center, quadRotation);
+  const tl = getRotatedFillUvCorner(uv.uMin, uv.vMin, uvRotation);
+  const tr = getRotatedFillUvCorner(uv.uMax, uv.vMin, uvRotation);
+  const br = getRotatedFillUvCorner(uv.uMax, uv.vMax, uvRotation);
+  const bl = getRotatedFillUvCorner(uv.uMin, uv.vMax, uvRotation);
 
   return [x1, y1, tl.u, tl.v, x2, y2, tr.u, tr.v, x3, y3, br.u, br.v, x1, y1, tl.u, tl.v, x3, y3, br.u, br.v, x4, y4, bl.u, bl.v];
 };
@@ -66,13 +64,14 @@ const drawImageTexture = (
   alpha: number,
   rotation: number,
   scaleMode: TImageScaleMode,
+  crop: TImageCrop | undefined,
 ): void => {
   const isSideways = rotation === 90 || rotation === 270;
   const effectiveImageWidth = (isSideways ? imageSize?.height : imageSize?.width) ?? 0;
   const effectiveImageHeight = (isSideways ? imageSize?.width : imageSize?.height) ?? 0;
   const isFit = scaleMode === 'fit';
-  const quadRect = isFit ? getImageFillContainRect(bounds, effectiveImageWidth, effectiveImageHeight) : bounds;
-  const uv = isFit ? FULL_IMAGE_UV : getImageFillCoverUv(bounds.width, bounds.height, effectiveImageWidth, effectiveImageHeight);
+  const quadRect = crop ?? (isFit ? getImageFillContainRect(bounds, effectiveImageWidth, effectiveImageHeight) : bounds);
+  const uv = crop || isFit ? FULL_IMAGE_UV : getImageFillCoverUv(bounds.width, bounds.height, effectiveImageWidth, effectiveImageHeight);
   const positionLocation = gl.getAttribLocation(imageProgram, 'a_position');
   const texCoordLocation = gl.getAttribLocation(imageProgram, 'a_texCoord');
   const textureLocation = gl.getUniformLocation(imageProgram, 'u_texture');
@@ -105,7 +104,7 @@ const drawImageTexture = (
   gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getImageFillQuadVertices(quadRect, uv, rotation)), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getImageFillQuadVertices(quadRect, uv, rotation, crop?.rotation)), gl.STATIC_DRAW);
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, stride, 0);
   gl.enableVertexAttribArray(texCoordLocation);
   gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);
@@ -183,6 +182,7 @@ export const drawVectorImageFill = (
   alpha = 1,
   rotation = 0,
   scaleMode: TImageScaleMode = 'fill',
+  crop?: TImageCrop,
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
@@ -204,6 +204,7 @@ export const drawVectorImageFill = (
         alpha,
         rotation,
         scaleMode,
+        crop,
       );
     } else {
       drawImagePlaceholder(gl, program, buffer, faceBufferCache, faces, bounds, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);

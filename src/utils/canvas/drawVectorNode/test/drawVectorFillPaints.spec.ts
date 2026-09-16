@@ -293,6 +293,7 @@ describe('drawVectorFillPaints', () => {
       1,
       0,
       'fill',
+      undefined,
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
@@ -361,6 +362,39 @@ describe('drawVectorFillPaints', () => {
 
     // result
     expect(drawVectorImageFillMock.mock.calls[0][15]).toBe('fit');
+  });
+
+  it('should pass the image paint crop through to the image fill drawer', () => {
+    // mock
+    const crop = { height: 15, rotation: 0, width: 20, x: 10, y: 5 };
+    const image: TImagePaint = { crop, opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const texture = {} as WebGLTexture;
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][16]).toBe(crop);
   });
 
   it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
@@ -439,6 +473,7 @@ describe('drawVectorFillPaints', () => {
       1,
       0,
       'fill',
+      undefined,
     );
   });
 
