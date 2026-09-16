@@ -12,6 +12,7 @@ import {
   selectGradientEditor,
   selectGridSectionHighlight,
   selectGridTrackSelection,
+  selectImageEditor,
   selectNodes,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
@@ -115,6 +116,7 @@ export const drawScene = (
   const editingTextBox = selectEditingTextBox(state);
   const gradientEditor = selectGradientEditor(state);
   const guideLines = selectAllGuideLines(state);
+  const imageEditor = selectImageEditor(state);
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const shapeBuilderPreviewFaces = getShapeBuilderPreviewFaces(refs);
@@ -157,7 +159,7 @@ export const drawScene = (
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
-  drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
+  drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, imageEditor, pathId);
   drawConstraintGuides(ctx, selectedNodes, nodesById);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);
   drawSmartSelectionHandles(ctx, smartSelectionNodes, refs, nodesById);

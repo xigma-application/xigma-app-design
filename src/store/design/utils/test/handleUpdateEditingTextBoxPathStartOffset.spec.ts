@@ -17,6 +17,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextBox: { flipX: false, flipY: false, height: 200, pathId: 'ellipse-1', pathStartOffset: 0, rotation: 0, width: 200, x: 0, y: 0 },
   editingTextContent: 'Hi',
   gradientEditor: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,

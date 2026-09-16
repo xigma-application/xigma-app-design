@@ -219,6 +219,9 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 450 | The rotate button turns an image fill 90° per click, and each turn is its own undo/redo step                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 451 | Switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 452 | Picking Image with no source yet renders a checkerboard placeholder on the shape                                  |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 453 | Picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 454 | Opening the Image tab enters a position-editing mode for the node, cleared again on Escape/deselect               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -643,3 +646,24 @@ asserts both that a real (empty-`ref`) image paint gets committed — not just a
 — and that the shape renders a visible checkerboard (two one-square-apart pixel samples differing),
 matching the light checkerboard already used elsewhere in the picker's own transparency preview
 rather than inventing a new visual language.
+
+#453 is a real, user-reported regression: picking Fit in the dropdown, _then_ uploading a file,
+rendered as Fill anyway — `useNotifyImagePanelState.ts` hardcoded `scaleMode: 'fill'` on every newly
+picked image regardless of the dropdown's own current selection. Unlike #451 (which always picks
+Fit _after_ an image already exists), this scenario picks Fit first and only then opens the file
+picker, so it fails against the old hardcoded-`'fill'` code specifically because that ordering is
+what exposed the bug — confirmed by re-running it against the reverted code before landing the fix.
+
+#454/#455 cover the new Image-tab "position/crop editing" mode (a dashed selection outline plus 8
+handles, replacing the normal solid/4-handle look while the Image tab is open on a node) by reading
+`store.getState().design.imageEditor` directly via `page.evaluate`, rather than trying to distinguish
+a dashed line from pixel samples. #454 opens the Image tab (before any source is even picked) and
+asserts the editor targets that node in `'position'` mode, then presses Escape and asserts it clears
+back to `null` while the node's own image paint is left untouched. #455 additionally drags the
+shape's own top-left resize handle while the tab is open and asserts the mode flips to `'crop'` — this
+one caught a real bug during development: a first implementation cleared `imageEditor` the instant the
+Fill picker's popover auto-closed (which a resize-handle pointerdown does, as an "outside click"),
+wiping the just-armed `'crop'` write a tick later. The fix (decoupling the sync effect's clearing from
+popover-open state, relying on the node's own deselection/unmount for the "click outside the element"
+exit instead) is verified the same way as every other bug fix here: this exact test failed with
+`imageEditor` ending up `null` against the pre-fix code, and passes against the fix.

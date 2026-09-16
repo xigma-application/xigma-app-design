@@ -7,6 +7,7 @@ import { drawSelectionOutline } from '../drawSelectionOutline';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
@@ -60,6 +61,7 @@ describe('drawSelectionOutline', () => {
       [],
       {},
       refs,
+      null,
     );
 
     // result
@@ -80,6 +82,7 @@ describe('drawSelectionOutline', () => {
       [],
       {},
       refs,
+      null,
     );
 
     // result
@@ -102,6 +105,7 @@ describe('drawSelectionOutline', () => {
       [],
       {},
       refs,
+      null,
     );
 
     // result
@@ -124,6 +128,7 @@ describe('drawSelectionOutline', () => {
       ['a', 'b'],
       {},
       refs,
+      null,
     );
 
     // result
@@ -144,6 +149,7 @@ describe('drawSelectionOutline', () => {
       [],
       {},
       { smartSelection: { swapDragRef: { current: {} } } } as never,
+      null,
     );
 
     // result
@@ -164,11 +170,38 @@ describe('drawSelectionOutline', () => {
       ['a'],
       {},
       refs,
+      null,
     );
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
 
     expect(lineLoopDraws).toHaveLength(5);
+  });
+
+  it('should draw the dashed image-editor outline and 8 handles instead of the default solid outline when the image editor targets the selected node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 })];
+
+    // before
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      [],
+      {},
+      refs,
+      { mode: 'position', nodeId: 'a', paintIndex: 0 },
+    );
+
+    // result — no solid-rect LINE_LOOP for the outline itself (the dashed outline draws via LINES
+    // instead), but 4 corner handles + 4 edge-midpoint handles still each draw their own LINE_LOOP
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+    const linesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineLoopDraws).toHaveLength(8);
+    expect(linesDraws.length).toBeGreaterThan(0);
   });
 });

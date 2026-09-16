@@ -16,7 +16,7 @@ export const useNotifyImagePanelState = (
 
     if (imagePanel.imageUrl && notifiedImageUrlRef.current !== imagePanel.imageUrl) {
       notifiedImageUrlRef.current = imagePanel.imageUrl;
-      onImageChange?.({ ref: imagePanel.imageUrl, scaleMode: 'fill' });
+      onImageChange?.({ ref: imagePanel.imageUrl, scaleMode: imagePanel.fillMode === 'fit' ? 'fit' : 'fill' });
     }
   }, [imagePanel.imageUrl, onImageChange, onImageUrlChange]);
 };

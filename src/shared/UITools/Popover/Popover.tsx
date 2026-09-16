@@ -12,6 +12,7 @@ import PopoverSeparator from './PopoverSeparator/PopoverSeparator';
 
 // hooks
 import { useFreezePositionOnGrow } from './hooks/useFreezePositionOnGrow';
+import { useIgnoreMiddleClickInteractOutside } from './hooks/useIgnoreMiddleClickInteractOutside';
 import { usePopoverDrag } from './hooks/usePopoverDrag';
 
 // styles
@@ -58,6 +59,7 @@ export const Popover: FC<TPopoverProps> = ({
 }) => {
   const { handleOpenChange, offset, onPointerDown, onPointerMove, onPointerUp } = usePopoverDrag(moveable, onOpenChange);
   const contentRef = useFreezePositionOnGrow(freezePositionOnGrow);
+  const handleInteractOutside = useIgnoreMiddleClickInteractOutside(onInteractOutside);
   const content = scrollable ? <PopoverScrollArea>{children}</PopoverScrollArea> : children;
 
   return (
@@ -74,7 +76,7 @@ export const Popover: FC<TPopoverProps> = ({
             avoidCollisions={avoidCollisions}
             className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
             collisionPadding={scrollable ? 10 : undefined}
-            onInteractOutside={onInteractOutside}
+            onInteractOutside={handleInteractOutside}
             onPointerDown={moveable ? onPointerDown : undefined}
             onPointerMove={moveable ? onPointerMove : undefined}
             onPointerUp={moveable ? onPointerUp : undefined}

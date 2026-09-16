@@ -20,6 +20,7 @@ import { useIgnorePatternSourcePickingInteractOutside } from './hooks/useIgnoreP
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
 import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
 import { useNotifyImagePanelState } from './hooks/useNotifyImagePanelState';
+import { useNotifyImageTabActiveState } from './hooks/useNotifyImageTabActiveState';
 import { useOpenSessionId } from './hooks/useOpenSessionId';
 import { usePatternSourcePicking } from './hooks/usePatternSourcePicking';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
@@ -64,6 +65,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onImageChange,
   onImageRotate,
   onImageScaleModeChange,
+  onImageTabActiveChange,
   onImageUrlChange,
   onOpenChange,
   onPatternChange,
@@ -117,6 +119,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   useResetActiveTabOnReopen(openSessionId, initialActiveTab, DEFAULT_ACTIVE_TAB, setActiveTab);
   useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
   useNotifyImagePanelState(imagePanel, onImageUrlChange, onImageChange);
+  useNotifyImageTabActiveState(activeTab, onImageTabActiveChange);
   useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
 
   return (

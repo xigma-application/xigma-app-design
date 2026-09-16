@@ -37,6 +37,7 @@ export type TColorPickerProps = {
   onImageChange?: TFunc<[TImagePanelChange]>;
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;
+  onImageTabActiveChange?: TFunc<[boolean]>;
   onImageUrlChange?: TFunc<[string | null]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;

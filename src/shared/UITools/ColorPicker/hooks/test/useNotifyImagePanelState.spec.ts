@@ -35,6 +35,17 @@ describe('useNotifyImagePanelState', () => {
     expect(onImageChange).toHaveBeenCalledWith({ ref: 'blob:asset-1', scaleMode: 'fill' });
   });
 
+  it('should report the current fill mode (Fit), not hardcode Fill, when a source is picked with Fit already selected', () => {
+    // mock
+    const onImageChange = vi.fn();
+
+    // before
+    renderHook(() => useNotifyImagePanelState(imagePanelFor({ fillMode: 'fit', imageUrl: 'blob:asset-1' }), undefined, onImageChange));
+
+    // result
+    expect(onImageChange).toHaveBeenCalledWith({ ref: 'blob:asset-1', scaleMode: 'fit' });
+  });
+
   it('should not report an image paint change while no source has been picked yet', () => {
     // mock
     const onImageChange = vi.fn();

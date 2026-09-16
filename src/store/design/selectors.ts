@@ -6,7 +6,14 @@ import { RootState } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
-import { TDesignPage, TDimensionHintField, TGradientEditorState, TPatternSourcePickTarget, TRevealedMinMax } from './types';
+import {
+  TDesignPage,
+  TDimensionHintField,
+  TGradientEditorState,
+  TImageEditorState,
+  TPatternSourcePickTarget,
+  TRevealedMinMax,
+} from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import {
   TGridSectionHighlight,
@@ -85,6 +92,8 @@ export const selectGridTrackValueEditRequest = (state: RootState): TGridTrackVal
   state.design.gridTrackValueEditRequest ?? null;
 
 export const selectPanelGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.panelGridTrackSelection ?? null;
+
+export const selectImageEditor = (state: RootState): TImageEditorState | null => state.design.imageEditor;
 
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
 

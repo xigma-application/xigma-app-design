@@ -34,6 +34,7 @@ const buildState = (nodes: Record<string, TSceneNode> = {}): TDesignState => ({
   editingTextBox: null,
   editingTextContent: '',
   gradientEditor: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,

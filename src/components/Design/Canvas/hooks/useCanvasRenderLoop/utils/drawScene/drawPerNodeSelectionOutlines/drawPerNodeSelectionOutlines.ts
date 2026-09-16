@@ -1,9 +1,11 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TImageEditorState } from 'store/design/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawDefaultSelectionOutline } from './drawDefaultSelectionOutline';
+import { drawImageEditorSelectionOutline } from './drawImageEditorSelectionOutline';
 import { drawLineSelectionOutline } from './drawLineSelectionOutline';
 import { drawVectorSelectionOutlineUnlessTextPathGuide } from './drawVectorSelectionOutlineUnlessTextPathGuide';
 
@@ -17,6 +19,7 @@ export const drawPerNodeSelectionOutlines = (
   viewport: TViewport,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
+  imageEditor: TImageEditorState | null,
   editingPathId?: string | null,
 ): void => {
   selectedNodes.forEach((node) => {
@@ -41,7 +44,11 @@ export const drawPerNodeSelectionOutlines = (
         );
         break;
       default:
-        drawDefaultSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, nodesById);
+        if (imageEditor?.nodeId === node.id) {
+          drawImageEditorSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        } else {
+          drawDefaultSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, nodesById);
+        }
     }
   });
 };

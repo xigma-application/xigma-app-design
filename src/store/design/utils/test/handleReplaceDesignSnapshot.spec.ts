@@ -49,6 +49,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextBox: null,
   editingTextContent: '',
   gradientEditor: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,

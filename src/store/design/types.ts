@@ -36,6 +36,10 @@ export type TMaskConnectorInfo = TMaskConnectorLine[];
 
 export type TGradientEditorState = { nodeId: string; paintIndex: number; selectedStopIndex: number | null };
 
+export type TImageEditorMode = 'crop' | 'position';
+
+export type TImageEditorState = { mode: TImageEditorMode; nodeId: string; paintIndex: number };
+
 export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number };
 
 export type TPreferences = {
@@ -72,6 +76,7 @@ export type TDesignState = {
   gridTrackSelection?: TGridTrackSelection | null;
   gridTrackValueEditRequest?: TGridTrackValueEditRequest | null;
   hoveredDimensionField?: TDimensionHintField | null;
+  imageEditor: TImageEditorState | null;
   isActionsPanelOpen: boolean;
   isGridSettingsPanelOpen?: boolean;
   isMediaToolArmed: boolean;

@@ -19,6 +19,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
   editingTextBox: null,
   editingTextContent: '',
   gradientEditor: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,

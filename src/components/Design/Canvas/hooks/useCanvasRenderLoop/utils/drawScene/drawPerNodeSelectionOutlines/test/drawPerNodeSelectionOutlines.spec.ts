@@ -66,7 +66,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     const nodes = [buildNode({ id: 'a', parentId: 'frame-a', x: 0, y: 0 }), buildNode({ id: 'b', parentId: 'frame-b', x: 40, y: 0 })];
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, [], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, [], {}, null);
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -92,7 +92,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [line], 100, 100, IDENTITY_VIEWPORT, [], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, [line], 100, 100, IDENTITY_VIEWPORT, [], {}, null);
 
     // result — 1 segment fill + 2 endpoint-handle fills = 3 TRIANGLES draws, 2 endpoint-handle
     const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
@@ -104,6 +104,70 @@ describe('drawPerNodeSelectionOutlines', () => {
 
   // the default-case rendering (bounding box, corner handles, path-text handle, font-size guide)
   // lives in drawDefaultSelectionOutline.ts — see its own spec for that behavior in detail.
+
+  it('should draw the dashed image-editor outline instead of the default outline when the image editor targets this node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 })];
+
+    // before
+    drawPerNodeSelectionOutlines(
+      gl,
+      program,
+      buffer,
+      nodes,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      [],
+      {},
+      {
+        mode: 'position',
+        nodeId: 'a',
+        paintIndex: 0,
+      },
+    );
+
+    // result: 4 corner handles + 4 edge-midpoint handles = 8 LINE_LOOP draws, no solid-rect LINE_LOOP
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+    const linesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineLoopDraws).toHaveLength(8);
+    expect(linesDraws.length).toBeGreaterThan(0);
+  });
+
+  it('should draw the default outline for a node not targeted by the image editor, even when one is active for a different node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 })];
+
+    // before
+    drawPerNodeSelectionOutlines(
+      gl,
+      program,
+      buffer,
+      nodes,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      [],
+      {},
+      {
+        mode: 'position',
+        nodeId: 'other-node',
+        paintIndex: 0,
+      },
+    );
+
+    // result — 1 solid outline + 4 corner handles = 5 LINE_LOOP draws, same as no image editor at all
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+
+    expect(lineLoopDraws).toHaveLength(5);
+  });
 
   it('should draw a bounding-box outline and 4 corner handles for a selected vector node, using its computed bounds', () => {
     // mock
@@ -131,7 +195,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {}, null);
 
     // result — 1 outline rect + 4 corner handles = 5 LINE_LOOP draws
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -168,7 +232,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {}, null);
 
     // result — 1 outline rect + 4 corner handles = 5 LINE_LOOP draws, unaffected by rotation
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -203,7 +267,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, ['a'], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, ['a'], {}, null);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -229,7 +293,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [path], 100, 100, IDENTITY_VIEWPORT, [], {});
+    drawPerNodeSelectionOutlines(gl, program, buffer, [path], 100, 100, IDENTITY_VIEWPORT, [], {}, null);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

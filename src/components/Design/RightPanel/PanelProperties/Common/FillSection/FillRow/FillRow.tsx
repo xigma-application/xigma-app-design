@@ -17,6 +17,7 @@ import { useRotateImagePaint } from './hooks/useRotateImagePaint';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
 import { useSetImagePaintScaleMode } from './hooks/useSetImagePaintScaleMode';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
+import { useSyncImageEditor } from './hooks/useSyncImageEditor';
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
 
 // others
@@ -27,11 +28,11 @@ import { translationNameSpace } from '../constants';
 import styles from './fill-row.module.scss';
 
 // types
-import { ColorPickerTab } from 'shared/UITools/ColorPicker/enums';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
 import { getFillRowHexDisplayValue } from './utils/getFillRowHexDisplayValue';
+import { getFillRowInitialActiveTab } from './utils/getFillRowInitialActiveTab';
 import { getFillRowSwatchHex } from './utils/getFillRowSwatchHex';
 import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
 
@@ -69,6 +70,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const { t } = useTranslation();
   const isVisible = paint.visible !== false;
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isImageTabActive, setIsImageTabActive] = useState(false);
   const [gradientPanelState, setGradientPanelState] = useState(DEFAULT_GRADIENT_PANEL_STATE);
   const handleClick = useSelectFillRow(onSelect);
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
@@ -86,6 +88,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
@@ -113,7 +116,7 @@ export const FillRow: FC<TFillRowProps> = ({
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageUrl={isImage ? paint.ref : undefined}
-          initialActiveTab={isGradient ? ColorPickerTab.gradient : isPattern ? ColorPickerTab.pattern : isImage ? ColorPickerTab.image : undefined}
+          initialActiveTab={getFillRowInitialActiveTab(paint)}
           initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
           initialPattern={getInitialPatternFromPaint(paint)}
           isPattern={isPattern}
@@ -128,6 +131,7 @@ export const FillRow: FC<TFillRowProps> = ({
           onImageChange={handleImageChange}
           onImageRotate={handleImageRotate}
           onImageScaleModeChange={handleImageScaleModeChange}
+          onImageTabActiveChange={setIsImageTabActive}
           onOpenChange={setIsPickerOpen}
           onPatternChange={handlePatternChange}
           onPickerChange={handleSolidChange}

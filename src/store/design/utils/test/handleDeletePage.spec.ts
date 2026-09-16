@@ -30,6 +30,7 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
   editingTextBox: null,
   editingTextContent: '',
   gradientEditor: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,

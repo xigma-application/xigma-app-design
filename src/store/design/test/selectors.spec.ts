@@ -21,6 +21,7 @@ import {
   selectEditingTextContent,
   selectFrameGuides,
   selectGridSectionHighlight,
+  selectImageEditor,
   selectIsActionsPanelOpen,
   selectIsGridSettingsPanelOpen,
   selectIsUiHidden,
@@ -82,6 +83,7 @@ const state = {
     editingSelectionStart: 3,
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
+    imageEditor: null,
     isActionsPanelOpen: true,
     isMediaToolArmed: false,
     isUiHidden: false,
@@ -239,6 +241,15 @@ describe('design selectors', () => {
     expect(selectGridSectionHighlight({ ...state, design: { ...state.design, gridSectionHighlight: highlight } } as typeof state)).toEqual(
       highlight,
     );
+  });
+
+  it('should select the image editor state, defaulting to null when unset', () => {
+    // result
+    expect(selectImageEditor(state)).toBeNull();
+
+    const editor = { mode: 'position' as const, nodeId: 'node-1', paintIndex: 0 };
+
+    expect(selectImageEditor({ ...state, design: { ...state.design, imageEditor: editor } } as typeof state)).toEqual(editor);
   });
 
   it('should select the minimized UI flag', () => {

@@ -29,6 +29,7 @@ import slice, {
   setGridSectionHighlight,
   setGridSettingsPanelOpen,
   setGridTrackSelection,
+  setImageEditor,
   setPaint,
   setPaintBlendMode,
   setPanelGridTrackSelection,
@@ -104,6 +105,7 @@ describe('design slice', () => {
       gridTrackSelection: null,
       gridTrackValueEditRequest: null,
       hoveredDimensionField: null,
+      imageEditor: null,
       isActionsPanelOpen: false,
       isGridSettingsPanelOpen: false,
       isMediaToolArmed: false,
@@ -707,6 +709,21 @@ describe('design slice', () => {
 
     // result
     expect(cleared.gridSectionHighlight).toBeNull();
+  });
+
+  it('should set and clear the image editor state', () => {
+    // action
+    const editor = { mode: 'position' as const, nodeId: 'node-1', paintIndex: 0 };
+    const set = slice(undefined, setImageEditor(editor));
+
+    // result
+    expect(set.imageEditor).toEqual(editor);
+
+    // action
+    const cleared = slice(set, setImageEditor(null));
+
+    // result
+    expect(cleared.imageEditor).toBeNull();
   });
 
   it('should set and clear the grid track selection', () => {

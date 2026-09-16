@@ -24,6 +24,7 @@ import {
   TDesignState,
   TDimensionHintField,
   TGradientEditorState,
+  TImageEditorState,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
   TPatternSourcePickTarget,
@@ -106,6 +107,7 @@ const initialState: TDesignState = {
   gridTrackSelection: null,
   gridTrackValueEditRequest: null,
   hoveredDimensionField: null,
+  imageEditor: null,
   isActionsPanelOpen: false,
   isGridSettingsPanelOpen: false,
   isMediaToolArmed: false,
@@ -228,6 +230,9 @@ const designSlice = createSlice({
     setHoveredDimensionField: (state, action: PayloadAction<TDimensionHintField | null>) => {
       state.hoveredDimensionField = action.payload;
     },
+    setImageEditor: (state, action: PayloadAction<TImageEditorState | null>) => {
+      state.imageEditor = action.payload;
+    },
     setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
       state.isMediaToolArmed = action.payload;
     },
@@ -340,6 +345,7 @@ export const {
   setGridTrackSelection,
   setGridTrackValueEditRequest,
   setHoveredDimensionField,
+  setImageEditor,
   setMediaToolArmed,
   setMinMaxRevealed,
   setPaint,

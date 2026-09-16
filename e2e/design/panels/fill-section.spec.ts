@@ -23,6 +23,7 @@ type TReadablePaint = {
   visible?: boolean;
 };
 type TReadableNode = { fills?: TReadablePaint[] };
+type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number } | null;
 
 const readFirstNodeId = (page: Page): Promise<string> =>
   page.evaluate(async () => {
@@ -39,6 +40,13 @@ const readNode = (page: Page, id: string): Promise<TReadableNode> =>
 
     return pages[activePageId].nodes[nodeId] as TReadableNode;
   }, id);
+
+const readImageEditor = (page: Page): Promise<TReadableImageEditor> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.imageEditor;
+  });
 
 // samples a single pixel's RGB out of a tiny clipped screenshot — same PNG-decode technique
 // mask.spec.ts / vector-edit.spec.ts use for pixel-level assertions
@@ -258,6 +266,25 @@ test.describe('Design panels — Fill section', () => {
       .click({ position: { x: 2, y: 2 } });
 
     await expect(dropdownPanel).toHaveCount(0);
+  });
+
+  test('panning with the middle mouse button does not dismiss an open fill color picker', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-picker-survives-middle-click-pan');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    await designPage.panBy(150, 90);
+
+    await expect(panel).toBeVisible();
   });
 
   test('docks a gradient stop color panel flush against the gradient panel, not floating over its own swatch', async ({ page }) => {
@@ -3176,6 +3203,40 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 800, 240)).toEqual([255, 0, 0]);
   });
 
+  test('picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-fit-before-upload');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a wide 200x80 rectangle, so Fill (cover) and Fit (contain) render visibly differently
+    await designPage.drawRectangle(700, 200, 900, 280);
+
+    const id = await readFirstNodeId(page);
+
+    // action — switch to Image and pick Fit *before* a file is ever uploaded
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Fit', { exact: true }).click();
+
+    // action — only now upload a square source
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // result — the paint commits as 'fit' straight away, not 'fill' with Fit only applying on a
+    // second, separate dropdown pick (the bug: picking a new image used to always hardcode 'fill')
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('fit');
+
+    // result — renders letterboxed immediately: the margins never show the fully-opaque source,
+    // and the centered band does — with no further dropdown interaction after the upload
+    await expect.poll(async () => readPixelColor(page, 710, 240)).not.toEqual([255, 0, 0]);
+    await expect.poll(async () => readPixelColor(page, 800, 240)).toEqual([255, 0, 0]);
+  });
+
   test('picking Image with no source yet renders a checkerboard placeholder on the shape', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -3203,5 +3264,58 @@ test.describe('Design panels — Fill section', () => {
         return JSON.stringify(colorA) !== JSON.stringify(colorB);
       })
       .toBe(true);
+  });
+
+  test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-position-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+
+    // result — no image editor yet on the solid-fill tab
+    expect(await readImageEditor(page)).toBeNull();
+
+    // action — switch to Image, without ever picking a source
+    await page.getByLabel('Image').click();
+
+    // result — switching tabs alone (even before a source is picked) enters position-editing mode
+    // for this exact node/paint
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    // action — close the picker
+    await page.keyboard.press('Escape');
+
+    // result — the image editor clears again, but the node's image paint itself is untouched
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect((await readNode(page, id)).fills?.[0]?.type).toBe('image');
+  });
+
+  test('resizing the shape while its Image position-editing mode is active switches it into crop mode', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    // action — the shape can still be resized exactly as before while the picker is open
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+
+    // result — starting that resize switches the image editor from position into crop mode
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
   });
 });

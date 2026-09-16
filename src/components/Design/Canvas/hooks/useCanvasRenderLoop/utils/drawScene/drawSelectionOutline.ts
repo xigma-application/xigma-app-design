@@ -1,6 +1,7 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from './types';
+import { TImageEditorState } from 'store/design/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -15,6 +16,7 @@ export const drawSelectionOutline = (
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
+  imageEditor: TImageEditorState | null,
   editingPathId?: string | null,
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
@@ -34,6 +36,7 @@ export const drawSelectionOutline = (
         viewport,
         vectorEditingNodeIds,
         nodesById,
+        imageEditor,
         editingPathId,
       );
     }

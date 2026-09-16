@@ -482,6 +482,20 @@ renamed once it stopped being cover-only). Rotation composes with `'fit'` the sa
 rotated via `getRotatedFillUvCorner.ts` — just applied to the full `0..1` range instead of a cropped
 one, since there's nothing to crop in contain mode.
 
+**A real bug: picking a new image while Fit was already selected used to commit it as `'fill'`
+anyway.** `useNotifyImagePanelState.ts` — the effect that fires once per newly-picked `imageUrl` —
+used to hardcode `onImageChange?.({ref, scaleMode: 'fill'})` regardless of what the fill-mode
+dropdown's own local state (`imagePanel.fillMode`) currently held, so switching to Fit *before*
+uploading a file silently reverted to cover-fit the moment the file actually landed (the dropdown
+kept showing "Fit" — only local state was ever wrong-free, the committed paint wasn't). Fixed by
+reading `imagePanel.fillMode` at commit time (`scaleMode: imagePanel.fillMode === 'fit' ? 'fit' :
+'fill'`) — 'crop'/'tile' still fall back to `'fill'`, matching every other path in this file where
+only Fill/Fit are real, committable scale modes. Regression-tested at both levels: a unit test
+seeding `imagePanelFor({fillMode: 'fit', ...})` and asserting the notify call, and an e2e test that
+picks Fit *before* ever opening the file picker, then uploads and asserts the paint commits `'fit'`
+immediately with no second dropdown interaction needed — confirmed to fail against the old
+hardcoded-`'fill'` code before the fix landed.
+
 **An `image` paint with no `ref` yet renders a checkerboard placeholder, not nothing** — mirroring
 `pattern`'s own no-source dot-grid placeholder above, but checkered rather than dotted, in
 `IMAGE_FILL_PLACEHOLDER_COLOR_A`/`_B` (`#ffffff`/`#e1e1e1`, `constant/canvas.ts`) at
@@ -546,6 +560,50 @@ drag-snapshot gesture (`drawVectorNodeDragSnapshot.ts` uses the same static, non
 `imageProgram` rather than a `u_translate`-capable variant like the drag-preview solid/gradient
 programs have — reappears correctly on drop); resize/rotate snapshots are unaffected, since those
 paths already pre-transform face points in JS before upload.
+
+**Opening the Image tab enters a transient "image editor" mode on canvas — a dashed selection
+outline plus 8 (4 corner + 4 edge-midpoint) cosmetic handles, replacing the normal solid
+outline/4-handle look for that one node, with resize/rotate hit-testing completely unchanged.** New
+transient (undo-excluded, like `gradientEditor`) slice field `design.imageEditor:
+{mode: 'position' | 'crop'; nodeId; paintIndex} | null` (`store/design/types.ts`/`slice.ts`/
+`selectors.ts`, `setImageEditor`/`selectImageEditor`), set by a new `FillRow.tsx` effect,
+`useSyncImageEditor.ts`, that mirrors `useSyncGradientEditor.ts`'s shape but **not** its
+dependency-clearing behavior — see the gotcha below. `drawScene.ts` reads `selectImageEditor` and
+threads it through `drawSelectionOutline` → `drawPerNodeSelectionOutlines` (new trailing param), whose
+`default:` case now branches: if `imageEditor?.nodeId === node.id`, calls the new
+`drawImageEditorSelectionOutline.ts` (dashed rect via the pre-existing `drawDashedRectOutline.ts`,
+reusing `DRAFT_FRAME_STROKE` and new `IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX`/`_GAP_PX` constants, plus
+`drawCornerHandles` **and** the new `drawEdgeMidpointHandles.ts`/`getRectEdgeMidpoints.ts` sibling
+pair for the 4 extra edge handles) instead of the normal `drawDefaultSelectionOutline`. The mode
+field doesn't currently change what's drawn — position and crop render identically — it only records
+that a resize has started, for a future crop-mechanics step to key off.
+
+**The mode flips `'position'` → `'crop'` the instant a resize starts on the targeted node** —
+`armResizeOnPointerDown.ts` (one of the `ARM_RESOLVERS` tried on every canvas pointer-down) reads
+`selectImageEditor(store.getState())` right where it already computes `getResizeHandleAtPoint`, and
+if the hit resize handle belongs to the image editor's own node, dispatches
+`setImageEditor({...imageEditor, mode: 'crop'})` before arming the drag as normal — the resize itself
+is completely untouched.
+
+**Gotcha, found via a real failing e2e test**: `useSyncImageEditor`'s sync effect must **not** clear
+`imageEditor` just because `isPickerOpen` turns false — clicking a resize handle on canvas is itself
+an "outside click" that closes the Radix popover (`isPickerOpen → false`) a tick after
+`armResizeOnPointerDown` has already flipped the mode to `'crop'`, and a naive
+`if (open && active) set() else clear()` effect (mirroring `useSyncGradientEditor` exactly) wipes
+that same-tick `'crop'` write straight back to `null`, since React re-runs the *previous* effect's
+cleanup on every dependency change, not only on unmount. Confirmed by first implementing the naive
+version, watching a new e2e test fail with `imageEditor` ending up `null` instead of `{mode: 'crop',
+...}`, then fixing it two ways at once: (1) the sync effect only clears when `!nodeId || !isImageTabActive`
+— closing the popover alone, while still parked on the Image tab, is a no-op that leaves whatever
+mode is currently stored untouched; (2) the actual "clear on go away" case (Escape, or selecting a
+different node) is handled for free by a **second**, `[dispatch]`-only effect whose cleanup fires
+solely on true unmount — since deselecting a node unmounts its `FillRow` entirely, this is exactly
+"Escape or click outside the element" from the feature's own spec, with no Radix-outside-interaction
+handling needed at all. (A first attempt tried exactly that — a `useIgnoreImageEditorResizeInteractOutside`
+hook mirroring the gradient-handle one — but it was racy: Radix's outside-detection fires deferred,
+after the drag's subsequent `pointermove`s have already resized the node, so re-testing the original
+down-point against the *already-moved* bounds never re-finds the same handle. Abandoned in favor of
+the dependency-array fix above, which needs no coordinate math at all.)
 
 **Picking a pattern source is wired end-to-end, including a live tiled render and a freeze-on-delete
 fallback.** `TPatternPaint.sourceNodeId?: string | null` gets written for real: clicking "Select
