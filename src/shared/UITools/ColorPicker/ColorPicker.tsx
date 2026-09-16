@@ -15,6 +15,7 @@ import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
 import { useHandleInteractOutside } from './hooks/useHandleInteractOutside';
 import { useHandleOpenChange } from './hooks/useHandleOpenChange';
+import { useIgnoreDismissWhileImageTabActive } from './hooks/useIgnoreDismissWhileImageTabActive';
 import { useIgnoreGradientCanvasInteractOutside } from './hooks/useIgnoreGradientCanvasInteractOutside';
 import { useIgnorePatternSourcePickingInteractOutside } from './hooks/useIgnorePatternSourcePickingInteractOutside';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
@@ -26,6 +27,7 @@ import { usePatternSourcePicking } from './hooks/usePatternSourcePicking';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
+import { useSyncFillModeWithImageEditorCrop } from './hooks/useSyncFillModeWithImageEditorCrop';
 import { useTrackIsDragging } from './hooks/useTrackIsDragging';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 import { useImagePanel } from './Body/ImagePanel/hooks/useImagePanel';
@@ -96,9 +98,12 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
   const ignoreGradientCanvasInteractOutside = useIgnoreGradientCanvasInteractOutside(isPointerOverGradientHandle);
   const ignorePatternSourcePickingInteractOutside = useIgnorePatternSourcePickingInteractOutside(patternSourcePicking.isActive);
+  const isImageTabActive = activeTab === ColorPickerTab.image;
+  const ignoreDismissWhileImageTabActive = useIgnoreDismissWhileImageTabActive(isImageTabActive);
   const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, patternSourcePicking.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
   const preview = getColorPickerPreview(activeTab, gradientPanel.stops, gradientPanel.type, gradientPanel.angle, value);
+
   const handleSetActiveTab = useSetActiveTab(
     activeTab,
     setActiveTab,
@@ -110,10 +115,12 @@ export const ColorPicker: FC<TColorPickerProps> = ({
     onPatternChange,
     onImageChange,
   );
+
   const handleInteractOutside = useHandleInteractOutside(
     ignoreSamplerInteractOutside,
     ignoreGradientCanvasInteractOutside,
     ignorePatternSourcePickingInteractOutside,
+    ignoreDismissWhileImageTabActive,
   );
 
   useResetActiveTabOnReopen(openSessionId, initialActiveTab, DEFAULT_ACTIVE_TAB, setActiveTab);
@@ -121,6 +128,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   useNotifyImagePanelState(imagePanel, onImageUrlChange, onImageChange);
   useNotifyImageTabActiveState(activeTab, onImageTabActiveChange);
   useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
+  useSyncFillModeWithImageEditorCrop(isImageTabActive, imagePanel.setFillMode);
 
   return (
     <Popover
@@ -129,6 +137,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
       className={styles.ColorPicker__popover}
       freezePositionOnGrow={freezePositionOnGrow}
       moveable={moveable}
+      onEscapeKeyDown={ignoreDismissWhileImageTabActive}
       onInteractOutside={handleInteractOutside}
       onOpenChange={handleOpenChange}
       side={side}

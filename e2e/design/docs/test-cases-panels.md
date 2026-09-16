@@ -222,6 +222,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 453 | Picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 454 | Opening the Image tab enters a position-editing mode for the node, cleared again on Escape/deselect               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -667,3 +669,12 @@ wiping the just-armed `'crop'` write a tick later. The fix (decoupling the sync 
 popover-open state, relying on the node's own deselection/unmount for the "click outside the element"
 exit instead) is verified the same way as every other bug fix here: this exact test failed with
 `imageEditor` ending up `null` against the pre-fix code, and passes against the fix.
+
+#456/#457 close a follow-up gap in #455: the internal `imageEditor.mode` flipping to `'crop'` on
+resize didn't used to touch the Image panel's own fill-mode dropdown (Fill/Fit/Crop/Tile), so a user
+resizing the shape saw the canvas outline behave like a crop but the dropdown still read "Fill" —
+`useSyncFillModeWithImageEditorCrop` now drives the dropdown's local state from the same Redux
+`imageEditor` value. #456 asserts the dropdown's rendered label text flips from "Fill" to "Crop" after
+a resize-handle drag. #457 is the guard on the other side: manually picking "Fit" from the dropdown
+while still in position mode (no resize) must not get silently overwritten back — confirmed by
+reverting the fix and seeing #456 fail with the dropdown stuck on "Fill" against the pre-fix code.

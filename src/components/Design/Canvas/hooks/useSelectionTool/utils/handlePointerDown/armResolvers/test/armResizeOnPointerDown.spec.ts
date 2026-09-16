@@ -8,6 +8,7 @@ import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { armResizeOnPointerDown } from '../armResizeOnPointerDown';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 const armResizeDragMock = vi.fn();
 
@@ -32,7 +33,6 @@ const rectangle: TRectangleNode = {
 
 const canvas = {} as HTMLCanvasElement;
 const event = {} as PointerEvent;
-const canvasRefs = {} as never;
 const resizeDragRef = { current: null };
 const selectionRefs = { resizeDragRef } as never;
 
@@ -45,6 +45,7 @@ describe('armResizeOnPointerDown', () => {
   it('should arm a resize drag when the point hits a corner handle', () => {
     // mock
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     const result = armResizeOnPointerDown({
@@ -74,6 +75,7 @@ describe('armResizeOnPointerDown', () => {
   it('should return undefined and arm nothing when the point is far from every handle', () => {
     // mock
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     const result = armResizeOnPointerDown({
@@ -96,6 +98,7 @@ describe('armResizeOnPointerDown', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-1', paintIndex: 0 }));
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armResizeOnPointerDown({
@@ -117,6 +120,7 @@ describe('armResizeOnPointerDown', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-1', paintIndex: 0 }));
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armResizeOnPointerDown({
@@ -138,6 +142,7 @@ describe('armResizeOnPointerDown', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'position', nodeId: 'other-node', paintIndex: 0 }));
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armResizeOnPointerDown({
@@ -158,6 +163,7 @@ describe('armResizeOnPointerDown', () => {
   it('should not dispatch when there is no active image editor', () => {
     // mock
     const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armResizeOnPointerDown({

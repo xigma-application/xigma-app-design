@@ -4,12 +4,13 @@ import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import designReducer, {
   addNode,
   setActiveTool,
+  setImageEditor,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,
   startCommentDraft,
 } from 'store/design/slice';
-import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectImageEditor, selectSelectedIds } from 'store/design/selectors';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
 
@@ -79,8 +80,10 @@ describe('handleLeave', () => {
   describe('branches driven by the real store singleton', () => {
     afterEach(() => {
       realStore.dispatch(setActiveTool(ToolName.default));
+      realStore.dispatch(setImageEditor(null));
       realStore.dispatch(setPenActiveVertexId(null));
       realStore.dispatch(setVectorEditingNodeIds([]));
+      realStore.dispatch(setSelection([]));
     });
 
     it('should clear the active pen vertex, without resetting the active tool, when one is set', () => {
@@ -173,6 +176,19 @@ describe('handleLeave', () => {
       // result
       expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
       expect(realStore.getState().design.activeTool).toBe(ToolName.default);
+    });
+
+    it('should only clear the image editor, keeping the node selected, when the Image tab is in position/crop mode', () => {
+      // mock
+      realStore.dispatch(setSelection(['node-1']));
+      realStore.dispatch(setImageEditor({ mode: 'crop', nodeId: 'node-1', paintIndex: 0 }));
+
+      // action
+      handleLeave(realStore.dispatch, createCanvasRefs());
+
+      // result
+      expect(selectImageEditor(realStore.getState())).toBeNull();
+      expect(selectSelectedIds(realStore.getState())).toEqual(['node-1']);
     });
   });
 });

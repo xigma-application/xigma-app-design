@@ -5,6 +5,7 @@ import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPo
 import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
+import { armExitImageEditorOnPointerDown } from './armResolvers/armExitImageEditorOnPointerDown';
 import { armAddGradientStopOnPointerDown } from './armResolvers/armAddGradientStopOnPointerDown';
 import { armGradientEndpointMoveOnPointerDown } from './armResolvers/armGradientEndpointMoveOnPointerDown';
 import { armGradientRadiusOnPointerDown } from './armResolvers/armGradientRadiusOnPointerDown';
@@ -97,5 +98,6 @@ export const ARM_RESOLVERS = [
   armSelectedTextBoundsOnPointerDown,
   armSelectedVectorBoundsOnPointerDown,
   armGroupBoundsOnPointerDown,
+  armExitImageEditorOnPointerDown,
   armMarqueeOnPointerDown,
 ];

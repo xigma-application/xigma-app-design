@@ -1,6 +1,6 @@
 // store
-import { cancelCommentDraft, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActiveTool, selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { cancelCommentDraft, setActiveTool, setImageEditor, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActiveTool, selectImageEditor, selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -14,6 +14,7 @@ import { handleEscapePenActiveVertex } from './handleEscapePenActiveVertex';
 export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
   const activeTool = selectActiveTool(state);
+  const imageEditor = selectImageEditor(state);
   const penActiveVertexId = selectPenActiveVertexId(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
@@ -28,6 +29,9 @@ export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
     case vectorEditingNodeIds.length > 0:
       dispatch(setActiveTool(ToolName.default));
       dispatch(setVectorEditingNodeIds([]));
+      break;
+    case imageEditor !== null:
+      dispatch(setImageEditor(null));
       break;
     default:
       dispatch(setActiveTool(ToolName.default));

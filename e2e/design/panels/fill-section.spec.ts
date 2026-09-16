@@ -48,6 +48,14 @@ const readImageEditor = (page: Page): Promise<TReadableImageEditor> =>
     return store.getState().design.imageEditor;
   });
 
+const readSelectedIds = (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].selectedIds;
+  });
+
 // samples a single pixel's RGB out of a tiny clipped screenshot — same PNG-decode technique
 // mask.spec.ts / vector-edit.spec.ts use for pixel-level assertions
 const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
@@ -3317,5 +3325,180 @@ test.describe('Design panels — Fill section', () => {
 
     // result — starting that resize switches the image editor from position into crop mode
     await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
+  });
+
+  test('resizing the shape while its Image position-editing mode is active also switches the fill mode dropdown to Crop', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-dropdown-sync');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const fillModeLabel = panel.locator('[class*="ImageFillModeRow__dropdown"] [class*="Dropdown__label"]');
+
+    // before — the dropdown starts on Fill
+    await expect(fillModeLabel).toHaveText('Fill');
+
+    // action — resizing the shape switches the editor into crop mode
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+
+    // result — the dropdown value follows the internal mode change
+    await expect(fillModeLabel).toHaveText('Crop');
+  });
+
+  test('resizing the shape while the Image editor is not in crop mode yet leaves the fill mode dropdown untouched otherwise', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-non-crop-dropdown');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const fillModeLabel = panel.locator('[class*="ImageFillModeRow__dropdown"] [class*="Dropdown__label"]');
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — manually pick Fit from the dropdown while still in the default (position) mode, without resizing
+    await dropdownTrigger.click();
+    await page.getByText('Fit', { exact: true }).click();
+
+    // result — the manual selection is untouched, no resize happened to force it to Crop
+    await expect(fillModeLabel).toHaveText('Fit');
+  });
+
+  test('pressing Escape first exits the Image editor mode, keeping the node selected and the panel open, and only a second Escape deselects', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-escape-two-stage');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — first Escape
+    await page.keyboard.press('Escape');
+
+    // result — the image editor mode exits, but the node stays selected and the panel stays open
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+    await expect(panel).toBeVisible();
+
+    // action — second Escape
+    await page.keyboard.press('Escape');
+
+    // result — now it behaves as before: the node gets deselected
+    await expect.poll(() => readSelectedIds(page)).toEqual([]);
+  });
+
+  test('clicking outside the element first exits the Image editor mode, keeping the node selected and the panel open, and only a second click deselects', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-click-outside-two-stage');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — first click on empty canvas, away from the shape
+    await designPage.click(1100, 500);
+
+    // result — the image editor mode exits, but the node stays selected and the panel stays open
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+    await expect(panel).toBeVisible();
+
+    // action — second click on empty canvas
+    await designPage.click(1100, 500);
+
+    // result — now it behaves as before: the node gets deselected
+    await expect.poll(() => readSelectedIds(page)).toEqual([]);
+  });
+
+  test('resizing the shape while the Image position-editing mode is active keeps the picker panel open', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-resize-keeps-panel-open');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — drag the shape's own top-left resize handle
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+
+    // result — the mode switches to crop, and the panel is not dismissed by the resize interaction
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
+    expect(await readSelectedIds(page)).toEqual([id]);
+    await expect(panel).toBeVisible();
+  });
+
+  test('clicking directly on the shape while the Image position-editing mode is active keeps the picker panel open', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-body-click-keeps-panel-open');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — a plain click on the shape's own body, dead center, clear of any resize handle
+    await designPage.click(800, 280);
+
+    // result — still selected, still in position mode, and the panel is not dismissed
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    expect(await readSelectedIds(page)).toEqual([id]);
+    await expect(panel).toBeVisible();
   });
 });
