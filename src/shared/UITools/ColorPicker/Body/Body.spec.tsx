@@ -65,6 +65,27 @@ const patternPanel = {
 
 const patternSourcePicking = { close: vi.fn(), isActive: false, open: vi.fn() };
 
+const imagePanel = {
+  contrast: 0,
+  exposure: 0,
+  fillMode: 'fill' as const,
+  highlights: 0,
+  imageUrl: null,
+  saturation: 0,
+  setContrast: vi.fn(),
+  setExposure: vi.fn(),
+  setFillMode: vi.fn(),
+  setHighlights: vi.fn(),
+  setImage: vi.fn(),
+  setSaturation: vi.fn(),
+  setShadows: vi.fn(),
+  setTemperature: vi.fn(),
+  setTint: vi.fn(),
+  shadows: 0,
+  temperature: 0,
+  tint: 0,
+};
+
 const renderBody = (activeTab: ColorPickerTab, patternSourceNodeId?: string | null): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
@@ -73,6 +94,7 @@ const renderBody = (activeTab: ColorPickerTab, patternSourceNodeId?: string | nu
         alpha={100}
         colorModel={colorModel}
         gradientPanel={gradientPanel}
+        imagePanel={imagePanel}
         patternPanel={patternPanel}
         patternSourceNodeId={patternSourceNodeId}
         patternSourcePicking={patternSourcePicking}

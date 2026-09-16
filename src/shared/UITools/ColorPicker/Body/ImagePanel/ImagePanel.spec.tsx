@@ -1,12 +1,33 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { ReactNode } from 'react';
+import { Provider } from 'react-redux';
 
 // components
 import ImagePanel from './ImagePanel';
 
+// hooks
+import { useImagePanel } from './hooks/useImagePanel';
+
+// store
+import { store } from 'store';
+
+const ImagePanelWrapper = (): ReactNode => {
+  const imagePanel = useImagePanel();
+
+  return <ImagePanel imagePanel={imagePanel} />;
+};
+
+const renderImagePanel = (): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <ImagePanelWrapper />
+    </Provider>,
+  );
+
 describe('ImagePanel snapshots', () => {
   it('should render ImagePanel', () => {
     // before
-    const { asFragment } = render(<ImagePanel />);
+    const { asFragment } = renderImagePanel();
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -16,7 +37,7 @@ describe('ImagePanel snapshots', () => {
 describe('ImagePanel behaviors', () => {
   it('should render the fill-mode dropdown, the source preview, and the adjustment sliders', () => {
     // before
-    render(<ImagePanel />);
+    renderImagePanel();
 
     // result
     expect(screen.getByText('Fill')).toBeInTheDocument();
@@ -26,7 +47,7 @@ describe('ImagePanel behaviors', () => {
 
   it('should switch the dropdown to the picked fill mode', () => {
     // before
-    render(<ImagePanel />);
+    renderImagePanel();
 
     // action
     fireEvent.click(screen.getByText('Fill'));
@@ -38,7 +59,7 @@ describe('ImagePanel behaviors', () => {
 
   it('should update a slider value locally when dragged', () => {
     // before
-    render(<ImagePanel />);
+    renderImagePanel();
     const track = screen.getByRole('slider', { name: 'Exposure' }) as HTMLDivElement;
 
     vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({ height: 24, left: 0, top: 0, width: 100 } as DOMRect);

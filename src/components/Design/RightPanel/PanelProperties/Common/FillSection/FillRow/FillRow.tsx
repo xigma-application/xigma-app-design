@@ -3,13 +3,13 @@ import { FC, PointerEvent as ReactPointerEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { FillImagePreview } from './FillImagePreview/FillImagePreview';
 import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
+import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
 import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
@@ -26,10 +26,11 @@ import styles from './fill-row.module.scss';
 
 // types
 import { ColorPickerTab } from 'shared/UITools/ColorPicker/enums';
-import { GRADIENT_TYPE_LABEL_KEY } from 'shared/UITools/ColorPicker/Body/GradientPanel/constants';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
+import { getFillRowHexDisplayValue } from './utils/getFillRowHexDisplayValue';
+import { getFillRowSwatchHex } from './utils/getFillRowSwatchHex';
 import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
 
 export type TFillRowProps = {
@@ -71,13 +72,14 @@ export const FillRow: FC<TFillRowProps> = ({
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
   const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
+  const handleImageChange = useConvertToImagePaint(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
+  const isImage = paint.type === 'image';
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern';
-  const hex = isGradient ? (paint.stops[0]?.color ?? '#000000') : isPattern ? '#ffffff' : paint.type === 'solid' ? paint.color : '#000000';
-  const value = { alpha: paint.opacity, hex };
-  const hexDisplayValue = isGradient ? t(GRADIENT_TYPE_LABEL_KEY[paint.type]) : isPattern ? 'Pattern' : undefined;
+  const value = { alpha: paint.opacity, hex: getFillRowSwatchHex(paint) };
+  const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
@@ -100,40 +102,38 @@ export const FillRow: FC<TFillRowProps> = ({
         <Icon color="neutral2" name="RowGrabber" size={7} />
       </button>
       <span data-no-select style={{ display: 'contents' }}>
-        {paint.type === 'image' ? (
-          <FillImagePreview isVisible={isVisible} onToggleVisible={onToggleVisible} paint={paint} />
-        ) : (
-          <UITools.ColorPickerInput
-            align="start"
-            alpha={value.alpha}
-            className={styles.FillRow__color}
-            hex={value.hex}
-            hexDisplayValue={hexDisplayValue}
-            initialActiveTab={isGradient ? ColorPickerTab.gradient : isPattern ? ColorPickerTab.pattern : undefined}
-            initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
-            initialPattern={getInitialPatternFromPaint(paint)}
-            isPattern={isPattern}
-            isPointerOverGradientHandle={isPointerOverGradientHandle}
-            isVisible={isVisible}
-            onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
-            onCommitHex={(hex): void => handleSolidChange({ alpha: value.alpha, hex })}
-            onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
-            onGradientChange={handleGradientChange}
-            onGradientPanelStateChange={setGradientPanelState}
-            onOpenChange={setIsPickerOpen}
-            onPatternChange={handlePatternChange}
-            onPickerChange={handleSolidChange}
-            onToggleVisibility={onToggleVisible}
-            paintTypeRow
-            patternSourceNodeId={isPattern ? paint.sourceNodeId : undefined}
-            side="right"
-            simple
-            toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
-            toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
-            triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
-          />
-        )}
+        <UITools.ColorPickerInput
+          align="start"
+          alpha={value.alpha}
+          className={styles.FillRow__color}
+          hex={value.hex}
+          hexDisplayValue={hexDisplayValue}
+          imageUrl={isImage ? paint.ref : undefined}
+          initialActiveTab={isGradient ? ColorPickerTab.gradient : isPattern ? ColorPickerTab.pattern : isImage ? ColorPickerTab.image : undefined}
+          initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
+          initialPattern={getInitialPatternFromPaint(paint)}
+          isPattern={isPattern}
+          isPointerOverGradientHandle={isPointerOverGradientHandle}
+          isVisible={isVisible}
+          onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
+          onCommitHex={(hex): void => handleSolidChange({ alpha: value.alpha, hex })}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          onGradientChange={handleGradientChange}
+          onGradientPanelStateChange={setGradientPanelState}
+          onImageChange={handleImageChange}
+          onOpenChange={setIsPickerOpen}
+          onPatternChange={handlePatternChange}
+          onPickerChange={handleSolidChange}
+          onToggleVisibility={onToggleVisible}
+          paintTypeRow
+          patternSourceNodeId={isPattern ? paint.sourceNodeId : undefined}
+          side="right"
+          simple
+          toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
+          toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
+          triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
+        />
       </span>
       <Tooltip content={t(`${translationNameSpace}.deleteTooltip`)}>
         <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.deleteAriaLabel`)} name="Minus" onClick={onRemove} />

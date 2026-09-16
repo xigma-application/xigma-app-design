@@ -197,7 +197,7 @@ plain-color row's own `dragSnapshotProgram` split (below), not a fully independe
 |---|---|---|---|---|
 | plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below) |
 | plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
-| image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
+| image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` (`u_opacity` uniform, `outColor = vec4(texColor.rgb, texColor.a * u_opacity)`) | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) and `drawVectorImageFill.ts` (`image`-type `TPaint`, below) — same program, no dedicated image-fill shader |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 | pixel grid | `gridVertexShaderSource.ts` (not world-space like the other three — see §10) | `gridFragmentShaderSource.ts` | — | `drawPixelGrid.ts` |
 | mask composite | `maskCompositeVertexShaderSource.ts` (passthrough clip-space quad + texcoords) | `maskCompositeFragmentShaderSource.ts` (`content.rgb, content.a * mask.a`) | — | `compositeMask.ts` (masks, §11) |
@@ -434,8 +434,51 @@ with an explicit override) caught by a live screenshot, not by the unit tests, s
 context doesn't distinguish "dot grid computed but empty" from "dot grid never attempted". None of
 `TPatternPaint`'s own fields are read yet — the panel's Scale/Spacing/Alignment/Direction controls
 don't affect this render at all until an actual pattern source picker lands; this placeholder only
-replaces the previous behavior of `pattern` silently drawing nothing (the same no-op `'image'`
-paints still get, since texture-fill compositing isn't wired up for either yet).
+replaces the previous behavior of `pattern` silently drawing nothing. `'image'`-type paints used to
+get the same no-op — see below, that's since been wired up for real.
+
+**`image`-type paints render a real, cover-fit texture, reusing the Media-node `imageProgram`
+instead of a dedicated shader.** `TImagePaint` (`ref`/`scaleMode`/`type: 'image'`) is the fourth
+sibling in `drawVectorFillPaints.ts`'s paint-type `if`/`else if` (alongside solid/pattern/gradient),
+routing to `drawVectorImageFill.ts` (`utils/canvas/drawVectorNode/`). Same stencil-clip technique as
+the pattern placeholder above — even-odd mask the faces into the stencil buffer, then draw one
+covering quad composited only where the mask passes — except the quad is textured, not a flat color:
+it's a single `TRIANGLE_FAN`/`TRIANGLES` covering-quad draw through the **existing** `imageProgram`/
+`imageVertexShaderSource`/`imageFragmentShaderSource` built for `drawImage.ts` (Media nodes), not a
+new program — deliberately, to keep the WebGL program count from growing for what's ultimately the
+same "sample a texture over a quad" operation. `getOrLoadTexture.ts` (already used for Media-node
+image sources) resolves `paint.ref` (a blob URL from the upload) to a `WebGLTexture`, now with an
+optional `sizeCache?: Map<string, TTextureSize>` param populated inside the image's own `onload`
+callback (`{height, width}` naturalHeight/Width) — `imageTextureSizeCache` on `TImageRenderContext`,
+one instance for the whole render loop — so the cover-fit math below has a synchronous natural-size
+lookup on every frame after the first, without a second `Image` load.
+
+**Cover-fit UV math (`getImageFillCoverUv.ts`)** is the standard CSS `object-fit: cover` algorithm,
+done in UV space instead of pixels: compare the fill bounds' aspect ratio to the image's own, and
+crop whichever axis the image is "too wide/tall" on to a centered `uMin..uMax`/`vMin..vMax` window,
+so the image fills the shape without ever stretching. Falls back to the full `0..1` UV range when
+the size cache hasn't resolved yet (first frame after picking) or either dimension is degenerate.
+**Only `scaleMode: 'fill'` (cover) is implemented** — `TImageScaleMode` is a 4-value union
+(`'fill' | 'fit' | 'stretch' | 'tile'`) but the Fill panel only ever writes `'fill'` today; the other
+three are unreached dead branches in the type, not implemented render paths. (This is also a known,
+unreconciled naming split from the UI's own `TImageFillMode = 'crop' | 'fill' | 'fit' | 'tile'` in
+`ColorPicker/Body/ImagePanel/types.ts` — same idea, different vocabulary, not unified yet.)
+
+**Opacity**: `imageFragmentShaderSource.ts` gained a `u_opacity` uniform (table above) so
+`drawVectorImageFill`'s `alpha` param — `paint.opacity / 100`, threaded through
+`drawVectorFillPaints.ts` exactly like the solid/gradient/pattern branches — actually dims the
+rendered image; before this the shader always output the texture's own alpha unmodified. `drawImage.ts`
+(the Media-node path, sharing the same shader) got the same optional `alpha = 1` param for the
+uniform to exist at all, but **is not fed a real value yet** — `drawLeafNode.ts` still calls
+`drawMediaLeafNode(context, node)` without the computed cascading opacity (§5's "Two known gaps, not
+fixed" paragraph above), so a Media node's own opacity slider remains a separate, pre-existing,
+still-unfixed bug; only the Fill-section image-paint path actually threads a live value through.
+
+**Known, accepted limitations**: an image fill doesn't visually translate during an active
+drag-snapshot gesture (`drawVectorNodeDragSnapshot.ts` uses the same static, non-translating
+`imageProgram` rather than a `u_translate`-capable variant like the drag-preview solid/gradient
+programs have — reappears correctly on drop); resize/rotate snapshots are unaffected, since those
+paths already pre-transform face points in JS before upload.
 
 **Picking a pattern source is wired end-to-end, including a live tiled render and a freeze-on-delete
 fallback.** `TPatternPaint.sourceNodeId?: string | null` gets written for real: clicking "Select

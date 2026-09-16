@@ -66,6 +66,11 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
     <div
       class="_ImageSourcePreview_b163e6"
     >
+      <input
+        accept="image/*"
+        hidden=""
+        type="file"
+      />
       <button
         aria-pressed="false"
         class="_Button_b88d2e _Button--primary_b88d2e _Button--small_b88d2e"

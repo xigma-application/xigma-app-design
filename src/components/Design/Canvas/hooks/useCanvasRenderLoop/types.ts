@@ -6,6 +6,7 @@ import { TVertexDotBufferCacheEntry } from './utils/drawScene/drawVectorEditHand
 // utils
 import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TTextGeometry } from 'utils/canvas/text/getOrBuildTextGeometry';
+import { TTextureSize } from 'utils/canvas/getOrLoadTexture';
 
 export type TImageRenderContext = {
   blendCompositeBuffer: WebGLBuffer;
@@ -23,6 +24,7 @@ export type TImageRenderContext = {
   gradientProgram: WebGLProgram;
   gridBuffer: WebGLBuffer;
   gridProgram: WebGLProgram;
+  imagePaintTextureSizeCache: Map<string, TTextureSize>;
   isAlphaWriteEnabled: boolean;
   maskCompositeBuffer: WebGLBuffer;
   maskCompositeProgram: WebGLProgram;

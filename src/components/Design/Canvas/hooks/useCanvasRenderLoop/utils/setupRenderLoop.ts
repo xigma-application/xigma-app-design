@@ -47,6 +47,7 @@ export const setupRenderLoop = (
     gradientProgram,
     gridBuffer,
     gridProgram,
+    imagePaintTextureSizeCache: new Map(),
     isAlphaWriteEnabled: false,
     maskCompositeBuffer,
     maskCompositeProgram,

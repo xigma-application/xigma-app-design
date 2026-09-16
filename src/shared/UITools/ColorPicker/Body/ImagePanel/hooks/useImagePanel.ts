@@ -1,16 +1,26 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // others
-import { DEFAULT_IMAGE_PANEL_STATE } from '../constants';
+import { DEFAULT_IMAGE_PANEL_STATE, translationNameSpace } from '../constants';
+
+// store
+import { setDesignHintLabelKey } from 'store/design/slice';
+import { useAppDispatch } from 'store';
 
 // types
 import { TImageFillMode, TImagePanelState } from '../types';
+
+// utils
+import { getFileExtension } from '../utils/getFileExtension';
+import { isSupportedImageFile } from '../utils/isSupportedImageFile';
 
 export type TUseImagePanelResult = TImagePanelState & {
   setContrast: TFunc<[number]>;
   setExposure: TFunc<[number]>;
   setFillMode: TFunc<[TImageFillMode]>;
   setHighlights: TFunc<[number]>;
+  setImage: TFunc<[File]>;
   setSaturation: TFunc<[number]>;
   setShadows: TFunc<[number]>;
   setTemperature: TFunc<[number]>;
@@ -18,7 +28,23 @@ export type TUseImagePanelResult = TImagePanelState & {
 };
 
 export const useImagePanel = (): TUseImagePanelResult => {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const [state, setState] = useState<TImagePanelState>(DEFAULT_IMAGE_PANEL_STATE);
+
+  const setImage = (file: File): void => {
+    if (isSupportedImageFile(file)) {
+      setState((previous) => {
+        if (previous.imageUrl) {
+          URL.revokeObjectURL(previous.imageUrl);
+        }
+
+        return { ...previous, imageUrl: URL.createObjectURL(file) };
+      });
+    } else {
+      dispatch(setDesignHintLabelKey(t(`${translationNameSpace}.unsupportedFileTypeError`, { extension: getFileExtension(file.name) })));
+    }
+  };
 
   return {
     ...state,
@@ -26,6 +52,7 @@ export const useImagePanel = (): TUseImagePanelResult => {
     setExposure: (exposure): void => setState((previous) => ({ ...previous, exposure })),
     setFillMode: (fillMode): void => setState((previous) => ({ ...previous, fillMode })),
     setHighlights: (highlights): void => setState((previous) => ({ ...previous, highlights })),
+    setImage,
     setSaturation: (saturation): void => setState((previous) => ({ ...previous, saturation })),
     setShadows: (shadows): void => setState((previous) => ({ ...previous, shadows })),
     setTemperature: (temperature): void => setState((previous) => ({ ...previous, temperature })),

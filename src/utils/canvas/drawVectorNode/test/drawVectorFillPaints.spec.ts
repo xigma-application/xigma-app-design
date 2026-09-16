@@ -6,7 +6,9 @@ import { drawVectorFillPaints } from '../drawVectorFillPaints';
 
 const drawVectorFillMock = vi.fn();
 const drawVectorGradientFillMock = vi.fn();
+const drawVectorImageFillMock = vi.fn();
 const drawVectorPatternFillMock = vi.fn();
+const getOrLoadTextureMock = vi.fn();
 
 vi.mock('../drawVectorFill', () => ({
   drawVectorFill: (...args: unknown[]): unknown => drawVectorFillMock(...args),
@@ -14,8 +16,14 @@ vi.mock('../drawVectorFill', () => ({
 vi.mock('../drawVectorGradientFill', () => ({
   drawVectorGradientFill: (...args: unknown[]): unknown => drawVectorGradientFillMock(...args),
 }));
+vi.mock('../drawVectorImageFill', () => ({
+  drawVectorImageFill: (...args: unknown[]): unknown => drawVectorImageFillMock(...args),
+}));
 vi.mock('../drawVectorPatternFill', () => ({
   drawVectorPatternFill: (...args: unknown[]): unknown => drawVectorPatternFillMock(...args),
+}));
+vi.mock('../../getOrLoadTexture', () => ({
+  getOrLoadTexture: (...args: unknown[]): unknown => getOrLoadTextureMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -23,6 +31,9 @@ const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const gradientProgram = {} as WebGLProgram;
 const patternTileProgram = {} as WebGLProgram;
+const imageProgram = {} as WebGLProgram;
+const imageTextureCache = new Map<string, WebGLTexture>();
+const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
 const buffer = {} as WebGLBuffer;
 const faces = [[{ x: 0, y: 0 }]];
 
@@ -30,7 +41,11 @@ describe('drawVectorFillPaints', () => {
   beforeEach(() => {
     drawVectorFillMock.mockReset();
     drawVectorGradientFillMock.mockReset();
+    drawVectorImageFillMock.mockReset();
     drawVectorPatternFillMock.mockReset();
+    getOrLoadTextureMock.mockReset();
+    imageTextureCache.clear();
+    imageTextureSizeCache.clear();
   });
 
   it('should draw a single opaque solid layer at full alpha', () => {
@@ -43,6 +58,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -83,6 +101,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -123,6 +144,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -151,6 +175,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -184,6 +211,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -214,9 +244,14 @@ describe('drawVectorFillPaints', () => {
     expect(drawVectorFillMock).not.toHaveBeenCalled();
   });
 
-  it('should skip image layers — not rendered until a later step', () => {
+  it('should draw an image layer through the image program, loading its texture from the given ref', () => {
     // mock
-    const image: TImagePaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', scaleMode: 'fill', type: 'image' };
+    const texture = {} as WebGLTexture;
+    const size = { height: 40, width: 40 };
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+    imageTextureSizeCache.set('blob:asset-1', size);
 
     // before
     drawVectorFillPaints(
@@ -224,6 +259,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,
@@ -237,9 +275,101 @@ describe('drawVectorFillPaints', () => {
     );
 
     // result
+    expect(getOrLoadTextureMock).toHaveBeenCalledWith(gl, imageTextureCache, 'blob:asset-1', imageTextureSizeCache);
+    expect(drawVectorImageFillMock).toHaveBeenCalledWith(
+      gl,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      size,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+    );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
     expect(drawVectorPatternFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
+    // mock
+    const image: TImagePaint = { opacity: 40, ref: 'blob:asset-1', scaleMode: 'fill', type: 'image' };
+    const texture = {} as WebGLTexture;
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][12]).toBe(0.4);
+  });
+
+  it('should skip loading a texture for an image layer with no source picked yet', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: '', scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(getOrLoadTextureMock).not.toHaveBeenCalled();
+    expect(drawVectorImageFillMock).toHaveBeenCalledWith(
+      gl,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      null,
+      undefined,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+    );
   });
 
   it('should draw a pattern layer as a placeholder through the solid program, not as a gradient', () => {
@@ -263,6 +393,9 @@ describe('drawVectorFillPaints', () => {
       program,
       gradientProgram,
       patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
       buffer,
       null,
       null,

@@ -16,6 +16,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     alpha,
     colorModel,
     gradientPanel,
+    imagePanel,
     onCloseSampler,
     onDragEnd,
     onDragStart,
@@ -39,7 +40,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
         />
       );
     case ColorPickerTab.image:
-      return <ImagePanel />;
+      return <ImagePanel imagePanel={imagePanel} />;
     default:
       return (
         <SolidPanel

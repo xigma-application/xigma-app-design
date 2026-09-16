@@ -19,6 +19,7 @@ import { useIgnoreGradientCanvasInteractOutside } from './hooks/useIgnoreGradien
 import { useIgnorePatternSourcePickingInteractOutside } from './hooks/useIgnorePatternSourcePickingInteractOutside';
 import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
 import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
+import { useNotifyImagePanelState } from './hooks/useNotifyImagePanelState';
 import { useOpenSessionId } from './hooks/useOpenSessionId';
 import { usePatternSourcePicking } from './hooks/usePatternSourcePicking';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
@@ -26,6 +27,7 @@ import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
 import { useTrackIsDragging } from './hooks/useTrackIsDragging';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
+import { useImagePanel } from './Body/ImagePanel/hooks/useImagePanel';
 import { usePatternPanel } from './Body/PatternPanel/hooks/usePatternPanel';
 
 // others
@@ -59,6 +61,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onDragStart,
   onGradientChange,
   onGradientPanelStateChange,
+  onImageChange,
+  onImageUrlChange,
   onOpenChange,
   onPatternChange,
   paintTypeRow = false,
@@ -81,6 +85,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const colorModel = useColorModel(value, onChange);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
+  const imagePanel = useImagePanel();
   const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
   const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, patternPanel, onGradientChange, onPatternChange);
   const colorSampler = useColorSampler(colorModel.setHex);
@@ -99,6 +104,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
 
   useResetActiveTabOnReopen(openSessionId, initialActiveTab, DEFAULT_ACTIVE_TAB, setActiveTab);
   useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
+  useNotifyImagePanelState(imagePanel, onImageUrlChange, onImageChange);
   useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
 
   return (
@@ -131,6 +137,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             alpha={value.alpha}
             colorModel={colorModel}
             gradientPanel={gradientPanel}
+            imagePanel={imagePanel}
             onCloseSampler={colorSampler.close}
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}

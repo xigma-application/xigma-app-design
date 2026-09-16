@@ -45,9 +45,8 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
         <button
           aria-label="Flip gradient"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg
@@ -71,9 +70,8 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
         <button
           aria-label="Rotate gradient"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg
@@ -141,9 +139,8 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
         <button
           aria-label="Add stop"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg
@@ -255,10 +252,9 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
         <button
           aria-label="Remove stop"
           aria-pressed="false"
-          class="_Button_b88d2e _Button--disabled_b88d2e _StopRow__remove_209440"
+          class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db _StopRow__remove_209440"
           data-state="closed"
           disabled=""
-          style="padding: 0px;"
           type="button"
         >
           <svg
@@ -370,10 +366,9 @@ exports[`GradientPanel snapshots > should render the default two-stop gradient 1
         <button
           aria-label="Remove stop"
           aria-pressed="false"
-          class="_Button_b88d2e _Button--disabled_b88d2e _StopRow__remove_209440"
+          class="_ButtonIcon_2062db _ButtonIcon--disabled_2062db _StopRow__remove_209440"
           data-state="closed"
           disabled=""
-          style="padding: 0px;"
           type="button"
         >
           <svg

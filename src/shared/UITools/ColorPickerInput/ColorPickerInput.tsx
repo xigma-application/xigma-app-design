@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, ReactNode, useRef } from 'react';
+import { FC, ReactNode, useRef, useState } from 'react';
 
 // @xigma
 import { ScrubbableInput, Tooltip } from '@xigma/components';
@@ -24,6 +24,7 @@ import { ColorPickerTab } from '../ColorPicker/enums';
 import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
+import { TImagePanelChange } from '../ColorPicker/Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
 
 export type TColorPickerInputProps = {
@@ -33,6 +34,7 @@ export type TColorPickerInputProps = {
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
+  imageUrl?: string;
   initialActiveTab?: ColorPickerTab;
   initialGradient?: TInitialGradient;
   initialPattern?: TInitialPattern;
@@ -45,6 +47,7 @@ export type TColorPickerInputProps = {
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
+  onImageChange?: TFunc<[TImagePanelChange]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
@@ -67,6 +70,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   e2eValue = '',
   hex,
   hexDisplayValue,
+  imageUrl,
   initialActiveTab,
   initialGradient,
   initialPattern,
@@ -79,6 +83,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onDragStart,
   onGradientChange,
   onGradientPanelStateChange,
+  onImageChange,
   onOpenChange,
   onPatternChange,
   onPickerChange,
@@ -97,7 +102,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   const onBlurHex = useHexCommit(hex, onCommitHex);
   const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
   const rounded = Math.round(alpha);
-  const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null);
+  const [pickedImageUrl, setPickedImageUrl] = useState<string | null>(null);
+  const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null) ?? pickedImageUrl ?? imageUrl;
 
   const handleHexFieldClick = (): void => {
     rootRef.current?.querySelector<HTMLButtonElement>(`.${styles.ColorPickerInput__trigger}`)?.click();
@@ -131,6 +137,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onDragStart={onDragStart}
                 onGradientChange={onGradientChange}
                 onGradientPanelStateChange={onGradientPanelStateChange}
+                onImageChange={onImageChange}
+                onImageUrlChange={setPickedImageUrl}
                 onOpenChange={onOpenChange}
                 onPatternChange={onPatternChange}
                 paintTypeRow={paintTypeRow}

@@ -1,7 +1,7 @@
 // utils
 import { getOrLoadTexture } from '../getOrLoadTexture';
 
-type TFakeImage = { onload: (() => void) | null; src: string };
+type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -21,12 +21,12 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const stubImageConstructor = (): { getLastImage: () => TFakeImage } => {
-  let lastImage: TFakeImage = { onload: null, src: '' };
+  let lastImage: TFakeImage = { naturalHeight: 20, naturalWidth: 10, onload: null, src: '' };
 
   vi.stubGlobal(
     'Image',
     vi.fn(function FakeImage() {
-      lastImage = { onload: null, src: '' };
+      lastImage = { naturalHeight: 20, naturalWidth: 10, onload: null, src: '' };
       return lastImage;
     }),
   );
@@ -85,6 +85,36 @@ describe('getOrLoadTexture', () => {
     // result
     expect(gl.texImage2D).toHaveBeenCalledWith(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, texture);
+  });
+
+  it('should record the loaded image natural size in the given size cache', () => {
+    // mock
+    const { getLastImage } = stubImageConstructor();
+    const gl = createGlMock();
+    const cache = new Map<string, WebGLTexture>();
+    const sizeCache = new Map<string, { height: number; width: number }>();
+
+    // before
+    getOrLoadTexture(gl, cache, 'image.png', sizeCache);
+
+    // action
+    getLastImage().onload?.();
+
+    // result
+    expect(sizeCache.get('image.png')).toEqual({ height: 20, width: 10 });
+  });
+
+  it('should not touch a size cache that was not given', () => {
+    // mock
+    const { getLastImage } = stubImageConstructor();
+    const gl = createGlMock();
+    const cache = new Map<string, WebGLTexture>();
+
+    // before / action / result
+    expect(() => {
+      getOrLoadTexture(gl, cache, 'image.png');
+      getLastImage().onload?.();
+    }).not.toThrow();
   });
 
   it('should return null when the context cannot create a texture', () => {

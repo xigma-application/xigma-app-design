@@ -1,0 +1,9 @@
+// types
+import { TImagePaint, TPaint } from 'types/design/paint/types';
+import { TImagePanelChange } from 'shared/UITools/ColorPicker/Body/ImagePanel/types';
+
+export const useConvertToImagePaint = (paint: TPaint, onChange: TFunc<[TImagePaint]>): TFunc<[TImagePanelChange]> => {
+  return (change: TImagePanelChange): void => {
+    onChange({ ...change, blendMode: paint.blendMode, opacity: paint.opacity, type: 'image', visible: paint.visible });
+  };
+};

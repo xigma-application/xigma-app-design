@@ -1,30 +1,38 @@
-import { FC } from 'react';
-import { useTranslation } from 'react-i18next';
+import { CSSProperties, FC } from 'react';
 
-// @xigma
-import { Icon } from '@xigma/components';
+// assets
+import blankMediaUrl from 'assets/images/blank-media.png';
 
 // components
-import { UITools } from 'shared';
+import ImageSourceButtons from './ImageSourceButtons/ImageSourceButtons';
 
-// others
-import { translationNameSpace } from '../constants';
+// hooks
+import { TUseImagePanelResult } from '../hooks/useImagePanel';
 
 // styles
 import styles from './image-source-preview.module.scss';
 
-export const ImageSourcePreview: FC = () => {
-  const { t } = useTranslation();
+export type TImageSourcePreviewProps = { imagePanel: TUseImagePanelResult };
+
+export const ImageSourcePreview: FC<TImageSourcePreviewProps> = ({ imagePanel }) => {
+  const { imageUrl, setImage } = imagePanel;
+  const sourceButtons = <ImageSourceButtons onSelectFile={setImage} />;
 
   return (
-    <div className={styles.ImageSourcePreview}>
-      <UITools.Button color="primary" size="small" variant="solid">
-        {t(`${translationNameSpace}.uploadFromComputerLabel`)}
-      </UITools.Button>
-      <UITools.Button color="secondary" size="small" variant="solid">
-        <Icon name="Image" size={24} />
-        {t(`${translationNameSpace}.makeAnImageLabel`)}
-      </UITools.Button>
+    <div
+      className={styles.ImageSourcePreview}
+      style={
+        imageUrl
+          ? ({
+              backgroundImage: `url("${imageUrl}"), url("${blankMediaUrl}")`,
+              backgroundPosition: 'center, center',
+              backgroundRepeat: 'no-repeat, repeat',
+              backgroundSize: 'contain, 208px 208px',
+            } as CSSProperties)
+          : undefined
+      }
+    >
+      {imageUrl ? <div className={styles.ImageSourcePreview__overlay}>{sourceButtons}</div> : sourceButtons}
     </div>
   );
 };

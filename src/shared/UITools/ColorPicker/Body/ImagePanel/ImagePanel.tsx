@@ -6,21 +6,19 @@ import ImageFillModeRow from './ImageFillModeRow/ImageFillModeRow';
 import ImageSourcePreview from './ImageSourcePreview/ImageSourcePreview';
 
 // hooks
-import { useImagePanel } from './hooks/useImagePanel';
+import { TUseImagePanelResult } from './hooks/useImagePanel';
 
 // styles
 import styles from './image-panel.module.scss';
 
-export const ImagePanel: FC = () => {
-  const imagePanel = useImagePanel();
+export type TImagePanelProps = { imagePanel: TUseImagePanelResult };
 
-  return (
-    <div className={styles.ImagePanel}>
-      <ImageFillModeRow fillMode={imagePanel.fillMode} setFillMode={imagePanel.setFillMode} />
-      <ImageSourcePreview />
-      <ImageAdjustmentSliders imagePanel={imagePanel} />
-    </div>
-  );
-};
+export const ImagePanel: FC<TImagePanelProps> = ({ imagePanel }) => (
+  <div className={styles.ImagePanel}>
+    <ImageFillModeRow fillMode={imagePanel.fillMode} setFillMode={imagePanel.setFillMode} />
+    <ImageSourcePreview imagePanel={imagePanel} />
+    <ImageAdjustmentSliders imagePanel={imagePanel} />
+  </div>
+);
 
 export default ImagePanel;

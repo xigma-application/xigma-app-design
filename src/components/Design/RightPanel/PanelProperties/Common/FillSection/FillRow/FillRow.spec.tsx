@@ -106,7 +106,7 @@ describe('FillRow behaviors', () => {
     expect(onChange).toHaveBeenCalledWith({ color: '#ff0000', opacity: 50, type: 'solid' });
   });
 
-  it('should render an image preview, with its own swatch and visibility toggle, for an image fill', () => {
+  it('should render the same reopenable color picker input for an image fill, not a dead-end static preview', () => {
     // mock
     const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', scaleMode: 'fill', type: 'image' };
 
@@ -114,7 +114,8 @@ describe('FillRow behaviors', () => {
     const { container } = renderFillRow({ paint: imagePaint });
 
     // result
-    expect(container.querySelector('[class*="FillImagePreview"]')).toBeInTheDocument();
+    expect(container.querySelector('[class*="FillImagePreview"]')).toBeNull();
+    expect(screen.getByDisplayValue('Image')).toBeInTheDocument();
   });
 
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {

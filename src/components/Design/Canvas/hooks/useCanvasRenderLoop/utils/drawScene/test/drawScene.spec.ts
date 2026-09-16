@@ -71,6 +71,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   gradientProgram: {} as WebGLProgram,
   gridBuffer: {} as WebGLBuffer,
   gridProgram: {} as WebGLProgram,
+  imagePaintTextureSizeCache: new Map(),
   isAlphaWriteEnabled: false,
   maskCompositeBuffer: {} as WebGLBuffer,
   maskCompositeProgram: {} as WebGLProgram,

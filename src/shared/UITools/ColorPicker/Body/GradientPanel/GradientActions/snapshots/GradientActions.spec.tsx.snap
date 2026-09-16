@@ -42,9 +42,8 @@ exports[`GradientActions snapshots > should render the type dropdown and the fli
       <button
         aria-label="Flip gradient"
         aria-pressed="false"
-        class="_Button_b88d2e"
+        class="_ButtonIcon_2062db"
         data-state="closed"
-        style="padding: 0px;"
         type="button"
       >
         <svg
@@ -68,9 +67,8 @@ exports[`GradientActions snapshots > should render the type dropdown and the fli
       <button
         aria-label="Rotate gradient"
         aria-pressed="false"
-        class="_Button_b88d2e"
+        class="_ButtonIcon_2062db"
         data-state="closed"
-        style="padding: 0px;"
         type="button"
       >
         <svg

@@ -1,14 +1,30 @@
-const loadTextureImage = (gl: WebGL2RenderingContext, texture: WebGLTexture, src: string): void => {
+export type TTextureSize = { height: number; width: number };
+
+const loadTextureImage = (
+  gl: WebGL2RenderingContext,
+  texture: WebGLTexture,
+  src: string,
+  sizeCache: Map<string, TTextureSize> | undefined,
+): void => {
   const image = new Image();
 
   image.onload = (): void => {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+    if (sizeCache) {
+      sizeCache.set(src, { height: image.naturalHeight, width: image.naturalWidth });
+    }
   };
   image.src = src;
 };
 
-export const getOrLoadTexture = (gl: WebGL2RenderingContext, cache: Map<string, WebGLTexture>, src: string): WebGLTexture | null => {
+export const getOrLoadTexture = (
+  gl: WebGL2RenderingContext,
+  cache: Map<string, WebGLTexture>,
+  src: string,
+  sizeCache?: Map<string, TTextureSize>,
+): WebGLTexture | null => {
   const cached = cache.get(src);
 
   if (!cached) {
@@ -22,7 +38,7 @@ export const getOrLoadTexture = (gl: WebGL2RenderingContext, cache: Map<string, 
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       cache.set(src, texture);
-      loadTextureImage(gl, texture, src);
+      loadTextureImage(gl, texture, src, sizeCache);
     }
 
     return texture;

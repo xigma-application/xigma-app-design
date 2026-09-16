@@ -27,6 +27,9 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const DRAG_GRADIENT_PROGRAM = {} as WebGLProgram;
 const PATTERN_TILE_PROGRAM = {} as WebGLProgram;
+const IMAGE_PROGRAM = {} as WebGLProgram;
+const IMAGE_TEXTURE_CACHE = new Map<string, WebGLTexture>();
+const IMAGE_PAINT_TEXTURE_SIZE_CACHE = new Map<string, { height: number; width: number }>();
 
 const buildContext = (
   gl: WebGL2RenderingContext,
@@ -40,12 +43,15 @@ const buildContext = (
   canvasWidth: 200,
   gl,
   imageContext: {
+    cache: IMAGE_TEXTURE_CACHE,
     dragGradientProgram: DRAG_GRADIENT_PROGRAM,
     dragSnapshotFaceBufferCache,
     dragSnapshotProgram,
     dragSnapshotStrokeBufferCache,
+    imagePaintTextureSizeCache: IMAGE_PAINT_TEXTURE_SIZE_CACHE,
     isAlphaWriteEnabled: false,
     patternTileProgram: PATTERN_TILE_PROGRAM,
+    program: IMAGE_PROGRAM,
   } as TDrawSceneContext['imageContext'],
   program: {} as WebGLProgram,
   viewport: IDENTITY_VIEWPORT,
@@ -114,6 +120,9 @@ describe('drawVectorNodeDragSnapshot', () => {
       program,
       DRAG_GRADIENT_PROGRAM,
       PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
       buffer,
       faceBufferCache,
       null,
@@ -131,6 +140,9 @@ describe('drawVectorNodeDragSnapshot', () => {
       program,
       DRAG_GRADIENT_PROGRAM,
       PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
       buffer,
       faceBufferCache,
       null,

@@ -9,7 +9,9 @@ type TReadablePaint = {
   direction?: string;
   end?: { x: number; y: number };
   opacity: number;
+  ref?: string;
   scale?: number;
+  scaleMode?: string;
   sourceNodeId?: string | null;
   spacingX?: number;
   spacingY?: number;
@@ -45,6 +47,22 @@ const readPixelColor = async (page: Page, x: number, y: number): Promise<[number
   const png = PNG.sync.read(screenshot);
 
   return [png.data[0], png.data[1], png.data[2]];
+};
+
+// builds a tiny in-memory PNG of a single solid color, so image-fill tests can upload a real,
+// known-color file without committing a binary fixture to the repo
+const createSolidColorPngBuffer = async (width: number, height: number, [r, g, b]: [number, number, number]): Promise<Buffer> => {
+  const { PNG } = await import('pngjs');
+  const png = new PNG({ height, width });
+
+  for (let index = 0; index < width * height; index += 1) {
+    png.data[index * 4] = r;
+    png.data[index * 4 + 1] = g;
+    png.data[index * 4 + 2] = b;
+    png.data[index * 4 + 3] = 255;
+  }
+
+  return PNG.sync.write(png);
 };
 
 test.describe('Design panels — Fill section', () => {
@@ -2948,5 +2966,79 @@ test.describe('Design panels — Fill section', () => {
     const node = await readNode(page, id);
 
     expect(node.fills![0].direction).toBe('vertical');
+  });
+
+  test('uploading an image commits a real image paint and renders it, filling the shape while preserving its proportions', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-upload-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a wide 200x80 rectangle, so a square source image must be cropped (not stretched) to cover it
+    await designPage.drawRectangle(700, 200, 900, 280);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // action
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // result — a real image paint, pointing at the picked file
+    await expect
+      .poll(async () => {
+        const node = await readNode(page, id);
+
+        return node.fills![0];
+      })
+      .toMatchObject({ scaleMode: 'fill', type: 'image' });
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].ref).toMatch(/^blob:/);
+
+    // result — the shape actually renders the picked (pure red) image, cover-cropped to fill the
+    // whole wide rectangle, not just a stretched/letterboxed portion of it
+    await expect.poll(async () => readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
+    await expect.poll(async () => readPixelColor(page, 890, 270)).toEqual([255, 0, 0]);
+  });
+
+  test("the fill's alpha field changes the rendered image's opacity, not just the paint's stored value", async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-opacity-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // wait for the fully-opaque render before changing opacity, so the two reads are comparable
+    await expect.poll(async () => readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
+
+    // action — halve the fill's opacity
+    const alphaField = page.locator('[class*="ColorPickerInput__alpha"] input');
+
+    await alphaField.fill('50');
+    await alphaField.blur();
+
+    // result — blended with the backdrop behind the shape, the red channel drops well below 255
+    const [red] = await readPixelColor(page, 710, 210);
+
+    expect(red).toBeLessThan(230);
   });
 });

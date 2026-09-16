@@ -214,6 +214,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 446 | Hovering an eligible node while picking a pattern source shows a live highlight, like the default tool            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 447 | Hovering a node that already has a pattern fill while picking a source shows no highlight                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions   |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 449 | The fill's alpha field changes the rendered image's opacity, not just the paint's stored value                    |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -601,3 +603,17 @@ hit when it passes the same `doesNodeHavePatternInSubtree` eligibility check `ha
 already enforces at click-time — so a node that would be refused as a source (#443) never lights up as
 if it could be picked. #446 verifies the eligible case shows a highlight; #447 verifies an
 already-pattern-holding node stays unhighlighted.
+
+#448/#449 close a real coverage gap: the `image` paint type (a fifth `TPaint` variant, alongside
+solid/gradient/pattern) shipped with full unit coverage for its pieces (`getOrLoadTexture`'s size
+cache, `getImageFillCoverUv`'s cover-fit math, `drawVectorImageFill`'s stencil+composite draw calls,
+`useConvertToImagePaint`'s commit shape) but no e2e test ever drove the real upload → paint → render
+path end to end, unlike every other paint type on this page. #448 uploads a synthesized solid-color
+PNG (`createSolidColorPngBuffer`, built at test time via `pngjs` rather than committing a binary
+fixture) onto a non-square rectangle and asserts both the committed `fills[0]` shape
+(`{type: 'image', scaleMode: 'fill'}`, `ref` a `blob:` URL) and the actual rendered pixels at two
+opposite corners of the shape, proving the cover-fit crop fills the whole frame without letterboxing
+or squashing. #449 reuses the same upload flow, then drags the fill row's alpha field to 50 and
+asserts the sampled pixel's red channel drops accordingly — the same opacity fix described in
+`.claude/docs/canvas-rendering-pipeline.md`'s image-fill section, verified here as a real rendered
+effect instead of only a unit assertion on the shader-uniform call.

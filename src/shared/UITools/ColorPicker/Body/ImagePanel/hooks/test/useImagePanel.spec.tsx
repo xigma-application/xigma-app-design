@@ -1,11 +1,24 @@
 import { act, renderHook, RenderHookResult } from '@testing-library/react';
+import { ReactNode } from 'react';
+import { Provider } from 'react-redux';
 
 // hooks
 import { TUseImagePanelResult, useImagePanel } from '../useImagePanel';
 
-const renderImagePanel = (): RenderHookResult<TUseImagePanelResult, unknown> => renderHook(() => useImagePanel());
+// store
+import { selectDesignHintLabelKey } from 'store/design/selectors';
+import { setDesignHintLabelKey } from 'store/design/slice';
+import { store } from 'store';
+
+const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
+
+const renderImagePanel = (): RenderHookResult<TUseImagePanelResult, unknown> => renderHook(() => useImagePanel(), { wrapper });
 
 describe('useImagePanel behaviors', () => {
+  afterEach(() => {
+    store.dispatch(setDesignHintLabelKey(null));
+  });
+
   it('should default to the zeroed adjustment state with fill mode', () => {
     // before
     const { result } = renderImagePanel();
@@ -117,5 +130,78 @@ describe('useImagePanel behaviors', () => {
     // result
     expect(result.current.shadows).toBe(-30);
     expect(result.current.fillMode).toBe('fill');
+  });
+
+  it('should default imageUrl to null', () => {
+    // before
+    const { result } = renderImagePanel();
+
+    // result
+    expect(result.current.imageUrl).toBeNull();
+  });
+
+  it('should set imageUrl from a supported image file', () => {
+    // mock
+    URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+
+    // before
+    const { result } = renderImagePanel();
+    const file = new File(['content'], 'photo.png', { type: 'image/png' });
+
+    // action
+    act(() => result.current.setImage(file));
+
+    // result
+    expect(URL.createObjectURL).toHaveBeenCalledWith(file);
+    expect(result.current.imageUrl).toBe('blob:mock-url');
+    expect(selectDesignHintLabelKey(store.getState())).toBeNull();
+  });
+
+  it('should revoke the previous object URL when a new image replaces it', () => {
+    // mock
+    URL.createObjectURL = vi.fn().mockReturnValueOnce('blob:first').mockReturnValueOnce('blob:second');
+    URL.revokeObjectURL = vi.fn();
+
+    // before
+    const { result } = renderImagePanel();
+
+    act(() => result.current.setImage(new File(['content'], 'first.png', { type: 'image/png' })));
+
+    // action
+    act(() => result.current.setImage(new File(['content'], 'second.png', { type: 'image/png' })));
+
+    // result
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:first');
+    expect(result.current.imageUrl).toBe('blob:second');
+  });
+
+  it('should dispatch a design hint naming the extension of an unsupported file, without setting imageUrl', () => {
+    // before
+    const { result } = renderImagePanel();
+    const file = new File(['content'], 'icon.svg', { type: 'image/svg+xml' });
+
+    // action
+    act(() => result.current.setImage(file));
+
+    // result
+    expect(selectDesignHintLabelKey(store.getState())).toBe("This file type (.svg) can't be used as image fill");
+    expect(result.current.imageUrl).toBeNull();
+  });
+
+  it('should not touch imageUrl when a later valid file follows an unsupported one', () => {
+    // mock
+    URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+
+    // before
+    const { result } = renderImagePanel();
+
+    act(() => result.current.setImage(new File(['content'], 'icon.svg', { type: 'image/svg+xml' })));
+    expect(selectDesignHintLabelKey(store.getState())).not.toBeNull();
+
+    // action
+    act(() => result.current.setImage(new File(['content'], 'photo.png', { type: 'image/png' })));
+
+    // result
+    expect(result.current.imageUrl).toBe('blob:mock-url');
   });
 });

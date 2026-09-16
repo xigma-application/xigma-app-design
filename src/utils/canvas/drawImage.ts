@@ -17,11 +17,13 @@ export const drawImage = (
   flipX: boolean,
   flipY: boolean,
   rotation: number,
+  alpha = 1,
 ): void => {
   if (texture) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
     const texCoordLocation = gl.getAttribLocation(program, 'a_texCoord');
     const textureLocation = gl.getUniformLocation(program, 'u_texture');
+    const opacityLocation = gl.getUniformLocation(program, 'u_opacity');
     const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
     const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
@@ -77,6 +79,7 @@ export const drawImage = (
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(textureLocation, 0);
+    gl.uniform1f(opacityLocation, alpha);
     gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
     gl.uniform1f(zoomLocation, viewport.zoom);
     gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);

@@ -6,7 +6,9 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorGradientFill } from './drawVectorGradientFill';
+import { drawVectorImageFill } from './drawVectorImageFill';
 import { drawVectorPatternFill } from './drawVectorPatternFill';
+import { getOrLoadTexture, TTextureSize } from '../getOrLoadTexture';
 import { TPatternSourceTile } from './drawVectorPatternSourceTile';
 
 export const drawVectorFillPaints = (
@@ -14,6 +16,9 @@ export const drawVectorFillPaints = (
   program: WebGLProgram,
   gradientProgram: WebGLProgram,
   patternTileProgram: WebGLProgram,
+  imageProgram: WebGLProgram,
+  imageTextureCache: Map<string, WebGLTexture>,
+  imageTextureSizeCache: Map<string, TTextureSize>,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
   nodeBounds: TDraftRect | null,
@@ -61,7 +66,23 @@ export const drawVectorFillPaints = (
           isAlphaWriteEnabled,
           alpha,
         );
-      } else if (paint.type !== 'image') {
+      } else if (paint.type === 'image') {
+        drawVectorImageFill(
+          gl,
+          imageProgram,
+          buffer,
+          faceBufferCache,
+          nodeBounds,
+          faces,
+          paint.ref ? getOrLoadTexture(gl, imageTextureCache, paint.ref, imageTextureSizeCache) : null,
+          imageTextureSizeCache.get(paint.ref),
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          isAlphaWriteEnabled,
+          alpha,
+        );
+      } else {
         drawVectorGradientFill(
           gl,
           gradientProgram,

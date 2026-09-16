@@ -59,6 +59,9 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const GRADIENT_PROGRAM = {} as WebGLProgram;
 const PATTERN_TILE_PROGRAM = {} as WebGLProgram;
+const IMAGE_PROGRAM = {} as WebGLProgram;
+const IMAGE_TEXTURE_CACHE = new Map<string, WebGLTexture>();
+const IMAGE_PAINT_TEXTURE_SIZE_CACHE = new Map<string, { height: number; width: number }>();
 
 const createContext = (gl: WebGL2RenderingContext, pool: TRenderTargetPool): TDrawSceneContext =>
   ({
@@ -67,9 +70,12 @@ const createContext = (gl: WebGL2RenderingContext, pool: TRenderTargetPool): TDr
     canvasWidth: 200,
     gl,
     imageContext: {
+      cache: IMAGE_TEXTURE_CACHE,
       gradientProgram: GRADIENT_PROGRAM,
+      imagePaintTextureSizeCache: IMAGE_PAINT_TEXTURE_SIZE_CACHE,
       isAlphaWriteEnabled: false,
       patternTileProgram: PATTERN_TILE_PROGRAM,
+      program: IMAGE_PROGRAM,
       renderTargetPool: pool,
     } as unknown as TImageRenderContext,
     program: {} as WebGLProgram,
@@ -98,6 +104,9 @@ describe('drawVectorFillGroup', () => {
       context.program,
       GRADIENT_PROGRAM,
       PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
       context.buffer,
       null,
       null,
@@ -146,6 +155,9 @@ describe('drawVectorFillGroup', () => {
       context.program,
       GRADIENT_PROGRAM,
       PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
       context.buffer,
       null,
       null,

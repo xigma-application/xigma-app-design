@@ -6,6 +6,7 @@ import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 // types
 import { ColorPickerTab } from './enums';
 import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/types';
+import { TImagePanelChange } from './Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from './Body/PatternPanel/types';
 
 export type TColorPickerValue = { alpha: number; hex: string };
@@ -33,6 +34,8 @@ export type TColorPickerProps = {
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
+  onImageChange?: TFunc<[TImagePanelChange]>;
+  onImageUrlChange?: TFunc<[string | null]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
   paintTypeRow?: boolean;

@@ -128,4 +128,42 @@ describe('drawImage', () => {
     expect(vertices[2]).toBe(0);
     expect(vertices[3]).toBe(0);
   });
+
+  it('should default to fully opaque when no alpha is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const opacityLocation = { tag: 'opacity' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_opacity' ? opacityLocation : {},
+    );
+
+    // before
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 1);
+  });
+
+  it('should upload the given alpha as the opacity uniform', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const opacityLocation = { tag: 'opacity' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_opacity' ? opacityLocation : {},
+    );
+
+    // before
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false, 0, 0.4);
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 0.4);
+  });
 });
