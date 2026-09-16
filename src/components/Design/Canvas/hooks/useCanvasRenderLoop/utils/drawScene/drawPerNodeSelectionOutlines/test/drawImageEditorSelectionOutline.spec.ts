@@ -73,12 +73,12 @@ describe('drawImageEditorSelectionOutline', () => {
     // before
     draw(gl, { mode: 'crop', nodeId: 'frame-1', paintIndex: 0, selectedTarget: 'frame' });
 
-    // result — frame active (12 TRIANGLES) + plain image outline (1 LINE_LOOP, no handle TRIANGLES)
+    // result — frame active (12 TRIANGLES) + two-tone guide outline (2 LINE_LOOP, no handle TRIANGLES)
     const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
 
     expect(trianglesDraws).toHaveLength(12);
-    expect(lineLoopDraws).toHaveLength(1);
+    expect(lineLoopDraws).toHaveLength(2);
   });
 
   it('should draw the frame inactive (guide only) and an active image outline when the image is the selected target', () => {
