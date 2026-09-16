@@ -33,7 +33,7 @@ describe('useSetActiveTab', () => {
     const setActiveTab = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(setActiveTab, vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.solid, setActiveTab, vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
 
     // action
     result.current(ColorPickerTab.gradient);
@@ -47,7 +47,7 @@ describe('useSetActiveTab', () => {
     const setActiveTab = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(setActiveTab, vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.solid, setActiveTab, vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
 
     // action
     result.current('unknown');
@@ -61,7 +61,9 @@ describe('useSetActiveTab', () => {
     const onGradientChange = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL, onGradientChange));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL, onGradientChange),
+    );
 
     // action
     result.current(ColorPickerTab.gradient);
@@ -72,7 +74,7 @@ describe('useSetActiveTab', () => {
 
   it('should not throw when switching to Gradient without an onGradientChange callback', () => {
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
 
     // result
     expect(() => result.current(ColorPickerTab.gradient)).not.toThrow();
@@ -83,7 +85,9 @@ describe('useSetActiveTab', () => {
     const reset = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, { ...PATTERN_PANEL, reset }));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, { ...PATTERN_PANEL, reset }),
+    );
 
     // action
     result.current(ColorPickerTab.gradient);
@@ -97,7 +101,9 @@ describe('useSetActiveTab', () => {
     const onChange = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.gradient, vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL),
+    );
 
     // action
     result.current(ColorPickerTab.solid);
@@ -113,7 +119,14 @@ describe('useSetActiveTab', () => {
 
     // before
     const { result } = renderHook(() =>
-      useSetActiveTab(vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset: gradientReset }, { ...PATTERN_PANEL, reset: patternReset }),
+      useSetActiveTab(
+        ColorPickerTab.gradient,
+        vi.fn(),
+        vi.fn(),
+        VALUE,
+        { ...GRADIENT_PANEL, reset: gradientReset },
+        { ...PATTERN_PANEL, reset: patternReset },
+      ),
     );
 
     // action
@@ -129,7 +142,9 @@ describe('useSetActiveTab', () => {
     const reset = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }, PATTERN_PANEL));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }, PATTERN_PANEL),
+    );
 
     // action
     result.current(ColorPickerTab.gradient);
@@ -144,7 +159,7 @@ describe('useSetActiveTab', () => {
 
     // before
     const { result } = renderHook(() =>
-      useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL, undefined, onPatternChange),
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL, undefined, onPatternChange),
     );
 
     // action
@@ -166,7 +181,9 @@ describe('useSetActiveTab', () => {
     const reset = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }, PATTERN_PANEL));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, { ...GRADIENT_PANEL, reset }, PATTERN_PANEL),
+    );
 
     // action
     result.current(ColorPickerTab.pattern);
@@ -180,7 +197,9 @@ describe('useSetActiveTab', () => {
     const reset = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, { ...PATTERN_PANEL, reset }));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, { ...PATTERN_PANEL, reset }),
+    );
 
     // action
     result.current(ColorPickerTab.pattern);
@@ -191,10 +210,59 @@ describe('useSetActiveTab', () => {
 
   it('should not throw when switching to Pattern without an onPatternChange callback', () => {
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
 
     // result
     expect(() => result.current(ColorPickerTab.pattern)).not.toThrow();
+  });
+
+  it('should commit an empty-ref image paint through onImageChange when switching to Image', () => {
+    // mock
+    const onImageChange = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL, undefined, undefined, onImageChange),
+    );
+
+    // action
+    result.current(ColorPickerTab.image);
+
+    // result — no ref picked yet, so the canvas can show the placeholder texture immediately
+    expect(onImageChange).toHaveBeenCalledWith({ ref: '', scaleMode: 'fill' });
+  });
+
+  it('should reset both the gradient and pattern panel state when switching to Image', () => {
+    // mock
+    const gradientReset = vi.fn();
+    const patternReset = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useSetActiveTab(
+        ColorPickerTab.solid,
+        vi.fn(),
+        vi.fn(),
+        VALUE,
+        { ...GRADIENT_PANEL, reset: gradientReset },
+        { ...PATTERN_PANEL, reset: patternReset },
+      ),
+    );
+
+    // action
+    result.current(ColorPickerTab.image);
+
+    // result
+    expect(gradientReset).toHaveBeenCalled();
+    expect(patternReset).toHaveBeenCalled();
+  });
+
+  it('should not throw when switching to Image without an onImageChange callback', () => {
+    // before
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.solid, vi.fn(), vi.fn(), VALUE, GRADIENT_PANEL, PATTERN_PANEL));
+
+    // result
+    expect(() => result.current(ColorPickerTab.image)).not.toThrow();
   });
 
   it('should not commit anything when the tab name is unknown', () => {
@@ -203,7 +271,9 @@ describe('useSetActiveTab', () => {
     const onGradientChange = vi.fn();
 
     // before
-    const { result } = renderHook(() => useSetActiveTab(vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL, onGradientChange));
+    const { result } = renderHook(() =>
+      useSetActiveTab(ColorPickerTab.solid, vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL, onGradientChange),
+    );
 
     // action
     result.current('unknown');
@@ -211,5 +281,39 @@ describe('useSetActiveTab', () => {
     // result
     expect(onChange).not.toHaveBeenCalled();
     expect(onGradientChange).not.toHaveBeenCalled();
+  });
+
+  it('should not recommit or reset anything when re-selecting the tab that is already active, so it never wipes an already-picked image', () => {
+    // mock — this guards a real destructive bug: re-clicking the active Image tab used to be able to
+    // wipe an already-picked image back to an empty placeholder, since committing an image paint has
+    // no "already this value" check of its own the way solid/gradient/pattern implicitly do
+    const onImageChange = vi.fn();
+    const gradientReset = vi.fn();
+    const patternReset = vi.fn();
+    const setActiveTab = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useSetActiveTab(
+        ColorPickerTab.image,
+        setActiveTab,
+        vi.fn(),
+        VALUE,
+        { ...GRADIENT_PANEL, reset: gradientReset },
+        { ...PATTERN_PANEL, reset: patternReset },
+        undefined,
+        undefined,
+        onImageChange,
+      ),
+    );
+
+    // action
+    result.current(ColorPickerTab.image);
+
+    // result — the tab state itself still syncs, but no side effect re-fires
+    expect(setActiveTab).toHaveBeenCalledWith(ColorPickerTab.image);
+    expect(onImageChange).not.toHaveBeenCalled();
+    expect(gradientReset).not.toHaveBeenCalled();
+    expect(patternReset).not.toHaveBeenCalled();
   });
 });

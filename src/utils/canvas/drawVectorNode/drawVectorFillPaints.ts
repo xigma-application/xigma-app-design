@@ -69,6 +69,7 @@ export const drawVectorFillPaints = (
       } else if (paint.type === 'image') {
         drawVectorImageFill(
           gl,
+          program,
           imageProgram,
           buffer,
           faceBufferCache,
@@ -82,6 +83,7 @@ export const drawVectorFillPaints = (
           isAlphaWriteEnabled,
           alpha,
           paint.rotation,
+          paint.scaleMode,
         );
       } else {
         drawVectorGradientFill(

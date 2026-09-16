@@ -134,6 +134,38 @@ describe('FillRow behaviors', () => {
     expect(onChange).toHaveBeenCalledWith({ ...imagePaint, rotation: 90 });
   });
 
+  it('should commit an empty-ref image paint (so the canvas can show a placeholder) when switching a solid fill to Image', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderFillRow({ onChange, paint: SOLID_PAINT });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByLabelText('Image'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ opacity: 80, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' });
+  });
+
+  it("should commit scaleMode 'fit' through onChange when Fit is picked from the fill-mode dropdown", () => {
+    // mock
+    const onChange = vi.fn();
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    renderFillRow({ onChange, paint: imagePaint });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByText('Fill'));
+    fireEvent.click(screen.getByText('Fit'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...imagePaint, scaleMode: 'fit' });
+  });
+
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {
     // mock
     const onChange = vi.fn();

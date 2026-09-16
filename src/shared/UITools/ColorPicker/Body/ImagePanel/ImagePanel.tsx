@@ -7,18 +7,26 @@ import ImageSourcePreview from './ImageSourcePreview/ImageSourcePreview';
 
 // hooks
 import { TUseImagePanelResult } from './hooks/useImagePanel';
+import { useHandleFillModeChange } from './hooks/useHandleFillModeChange';
 
 // styles
 import styles from './image-panel.module.scss';
 
-export type TImagePanelProps = { imagePanel: TUseImagePanelResult; onRotate?: TFunc };
+// types
+import { TImageFillMode } from './types';
 
-export const ImagePanel: FC<TImagePanelProps> = ({ imagePanel, onRotate }) => (
-  <div className={styles.ImagePanel}>
-    <ImageFillModeRow fillMode={imagePanel.fillMode} onRotate={onRotate} setFillMode={imagePanel.setFillMode} />
-    <ImageSourcePreview imagePanel={imagePanel} />
-    <ImageAdjustmentSliders imagePanel={imagePanel} />
-  </div>
-);
+export type TImagePanelProps = { imagePanel: TUseImagePanelResult; onRotate?: TFunc; onScaleModeChange?: TFunc<[TImageFillMode]> };
+
+export const ImagePanel: FC<TImagePanelProps> = ({ imagePanel, onRotate, onScaleModeChange }) => {
+  const handleFillModeChange = useHandleFillModeChange(imagePanel.setFillMode, onScaleModeChange);
+
+  return (
+    <div className={styles.ImagePanel}>
+      <ImageFillModeRow fillMode={imagePanel.fillMode} onRotate={onRotate} setFillMode={handleFillModeChange} />
+      <ImageSourcePreview imagePanel={imagePanel} />
+      <ImageAdjustmentSliders imagePanel={imagePanel} />
+    </div>
+  );
+};
 
 export default ImagePanel;

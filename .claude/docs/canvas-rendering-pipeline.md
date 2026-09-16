@@ -195,7 +195,7 @@ plain-color row's own `dragSnapshotProgram` split (below), not a fully independe
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below) |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below), `drawVectorImageFill.ts` (the `image`-paint placeholder — a batched checkerboard, two draw calls, one per alternating color — used only when no texture has resolved yet; the real textured path uses the image/texture program instead, see below) |
 | plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` (`u_opacity` uniform, `outColor = vec4(texColor.rgb, texColor.a * u_opacity)`) | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) and `drawVectorImageFill.ts` (`image`-type `TPaint`, below) — same program, no dedicated image-fill shader |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
@@ -458,11 +458,60 @@ done in UV space instead of pixels: compare the fill bounds' aspect ratio to the
 crop whichever axis the image is "too wide/tall" on to a centered `uMin..uMax`/`vMin..vMax` window,
 so the image fills the shape without ever stretching. Falls back to the full `0..1` UV range when
 the size cache hasn't resolved yet (first frame after picking) or either dimension is degenerate.
-**Only `scaleMode: 'fill'` (cover) is implemented** — `TImageScaleMode` is a 4-value union
-(`'fill' | 'fit' | 'stretch' | 'tile'`) but the Fill panel only ever writes `'fill'` today; the other
-three are unreached dead branches in the type, not implemented render paths. (This is also a known,
-unreconciled naming split from the UI's own `TImageFillMode = 'crop' | 'fill' | 'fit' | 'tile'` in
-`ColorPicker/Body/ImagePanel/types.ts` — same idea, different vocabulary, not unified yet.)
+**`scaleMode: 'fill'` (cover) and `'fit'` (contain) are both implemented; `'stretch'`/`'tile'` are
+not.** `TImageScaleMode` is a 4-value union (`'fill' | 'fit' | 'stretch' | 'tile'`), but only the
+first two are reachable from the Fill panel's dropdown (`useSetImagePaintScaleMode.ts` only commits
+`'fill'`/`'fit'` onto the paint — picking Crop/Tile still only updates the dropdown's own local
+display, matching the UI's own `TImageFillMode = 'crop' | 'fill' | 'fit' | 'tile'`, a known,
+unreconciled naming split from `TImageScaleMode` that predates this change and still isn't unified).
+Any `scaleMode` other than `'fit'` falls through to the cover-fit branch in
+`drawVectorImageFill.ts`, so `'stretch'`/`'tile'` currently render identically to `'fill'` rather
+than doing anything distinct — a silent, deliberately-accepted fallback rather than a dead branch,
+since neither is reachable from the UI yet anyway.
+
+**`'fit' (contain)` shrinks the drawn quad to letterbox inside the shape, instead of cropping the
+UV to cover it — `getImageFillContainRect.ts`** computes that smaller, centered rect (the mirror
+image of `getImageFillCoverUv`'s crop math: whichever axis the image is "too narrow" on gets
+letterboxed/pillarboxed, aspect ratio preserved) and the image's *full* `0..1` UV range is used
+un-cropped. `drawVectorImageFill.ts` picks between the two — full-bounds quad + cropped UV for
+`'fill'`, shrunk quad + full UV for `'fit'` — via one `isFit` branch, sharing the exact same
+`getImageFillQuadVertices`/stencil-mask machinery either way (a "rect" and a "uv" is all that
+differs, so the private vertex-builder that used to be named `getCoveringImageQuadVertices` was
+renamed once it stopped being cover-only). Rotation composes with `'fit'` the same way it does with
+`'fill'`: the effective image width/height still swaps for 90°/270°, and the UV corners are still
+rotated via `getRotatedFillUvCorner.ts` — just applied to the full `0..1` range instead of a cropped
+one, since there's nothing to crop in contain mode.
+
+**An `image` paint with no `ref` yet renders a checkerboard placeholder, not nothing** — mirroring
+`pattern`'s own no-source dot-grid placeholder above, but checkered rather than dotted, in
+`IMAGE_FILL_PLACEHOLDER_COLOR_A`/`_B` (`#ffffff`/`#e1e1e1`, `constant/canvas.ts`) at
+`CHECKERBOARD_SQUARE_SIZE_PX` (10px squares). These are deliberately **not** the same colors as the
+canvas's own dark transparency-indicator checkerboard (`CHECKERBOARD_COLOR_A`/`_B`,
+`#3a3a3a`/`#484848`, §2's background section) — they instead match the light checkerboard already
+used behind a transparent color's preview swatch (`Color__picker-alpha` in `color.module.scss`,
+light-theme values), since that's the "this is empty/no source yet" visual language the rest of the
+app already established, not the canvas-background one. `getImageFillPlaceholderVertices.ts` builds
+two flat triangle lists (one per alternating color, since the plain-color program's `u_color` is a
+single uniform, so each color needs its own `bufferData`/`drawArrays` call) tiling the fill bounds,
+clipping the last row/column to the bounds edge exactly like the pattern dot grid clips to its
+spacing grid. `drawVectorImageFill.ts` now takes **two** programs — the existing `imageProgram` for
+the real textured path, plus the plain-color `program` (already threaded through
+`drawVectorFillPaints.ts` for solid/pattern) for this placeholder path — branching on whether
+`texture` resolved, exactly one level up from where the pattern fill branches on `sourceTile`.
+
+**Switching the Fill panel to the Image tab commits a real (empty-`ref`) `TImagePaint` immediately**,
+the same way switching to Gradient/Pattern already immediately committed their own default paint —
+`useSetActiveTab.ts`'s `case ColorPickerTab.image` now calls `onImageChange?.({ref: '', scaleMode:
+'fill'})` instead of doing nothing, which is what makes the checkerboard placeholder above actually
+reachable without uploading a file first. This surfaced a real correctness gap while wiring it:
+gradient/pattern's local panel state is seeded from the *current* paint on open (`initialGradient`/
+`initialPattern` props), so re-committing their current values on a redundant same-tab re-click is a
+harmless no-op — but the Image panel's local state is never seeded from the paint at all, so
+committing unconditionally on every tab selection would silently wipe an already-picked image back
+to empty if a user ever re-clicked the already-active Image tab. Fixed by gating the whole
+tab-switch side-effect (all four cases, not just Image) on `tabName !== activeTab`, so it only ever
+fires on an actual switch into a tab, never a redundant re-click — a `useSetActiveTab.spec.tsx`
+regression test asserts no side effect fires on a same-tab re-selection.
 
 **Opacity**: `imageFragmentShaderSource.ts` gained a `u_opacity` uniform (table above) so
 `drawVectorImageFill`'s `alpha` param — `paint.opacity / 100`, threaded through

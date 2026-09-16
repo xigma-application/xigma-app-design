@@ -217,6 +217,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions    |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 449 | The fill's alpha field changes the rendered image's opacity, not just the paint's stored value                    |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 450 | The rotate button turns an image fill 90° per click, and each turn is its own undo/redo step                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 451 | Switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 452 | Picking Image with no source yet renders a checkerboard placeholder on the shape                                  |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -628,3 +630,16 @@ asserted individually (90°/180°/270°, each with both the stored value and the
 two undos step back one turn at a time (not straight to the start, proving each click is its own
 history entry rather than one coalesced edit) and a redo re-applies the most recently undone turn —
 the "different cases" (multiple turns, undo, redo) the rotate button needed to be equipped with.
+
+#451/#452 close out the fill-mode dropdown, whose Fit option previously did nothing beyond a local
+display change. #451 uploads a square image onto a wide rectangle, switches the dropdown from Fill
+to Fit, and asserts both the committed `scaleMode` and that the image's left/right margins (outside
+the centered, aspect-preserved band Fit produces) no longer show the fully-opaque source color —
+proving the shape actually letterboxes instead of stretching/cropping to cover. #452 covers a
+related, previously-unreachable gap: switching a fill to the Image paint type used to leave the
+canvas showing nothing at all until a file was uploaded, unlike every other paint type which
+previews something immediately. It switches to Image without ever opening the file picker, and
+asserts both that a real (empty-`ref`) image paint gets committed — not just a local UI state change
+— and that the shape renders a visible checkerboard (two one-square-apart pixel samples differing),
+matching the light checkerboard already used elsewhere in the picker's own transparency preview
+rather than inventing a new visual language.

@@ -33,6 +33,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     uniform1f: vi.fn(),
     uniform1i: vi.fn(),
     uniform2f: vi.fn(),
+    uniform4fv: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
@@ -53,38 +54,59 @@ describe('drawVectorImageFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, [], texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, [], texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
-  it('should skip every GL call when no texture has been loaded yet', () => {
+  it('should draw a checkerboard placeholder, not the texture program, when no source has been picked yet', () => {
     // mock
     const gl = createGlMock();
-    const program = {} as WebGLProgram;
+    const program = { tag: 'plain-color' } as unknown as WebGLProgram;
+    const imageProgram = { tag: 'image' } as unknown as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, null, undefined, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, faces, null, undefined, 100, 100, IDENTITY_VIEWPORT, false);
 
-    // result
-    expect(gl.clear).not.toHaveBeenCalled();
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    // result — stencil mask (1 call) + two alternating-color square batches (2 calls)
+    expect(gl.useProgram).toHaveBeenCalledWith(program);
+    expect(gl.useProgram).not.toHaveBeenCalledWith(imageProgram);
+    expect(gl.activeTexture).not.toHaveBeenCalled();
+    expect(gl.bindTexture).not.toHaveBeenCalled();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    expect(gl.uniform4fv).toHaveBeenCalledTimes(2);
   });
 
   it('should bind the resolved texture to texture unit 0', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(gl.activeTexture).toHaveBeenCalledWith(gl.TEXTURE0);
@@ -95,10 +117,25 @@ describe('drawVectorImageFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result
     expect(gl.enable).toHaveBeenCalledWith(gl.STENCIL_TEST);
@@ -112,10 +149,25 @@ describe('drawVectorImageFill', () => {
     // mock — 40x40 (1:1) bounds, 80x40 (2:1) image: only the centered horizontal 50% band of the image is used
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 80 }, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 80 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
     const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
@@ -128,10 +180,11 @@ describe('drawVectorImageFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, undefined, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, faces, texture, undefined, 100, 100, IDENTITY_VIEWPORT, false);
 
     // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
     const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
@@ -144,10 +197,27 @@ describe('drawVectorImageFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false, 1, 90);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      90,
+    );
 
     // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
     const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
@@ -163,10 +233,27 @@ describe('drawVectorImageFill', () => {
     // mock — 40x40 (1:1) bounds, a physically 80x40 (2:1) image rotated 90° behaves like a 40x80 (0.5:1) source
     const gl = createGlMock();
     const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 80 }, 100, 100, IDENTITY_VIEWPORT, false, 1, 90);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 80 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      90,
+    );
 
     // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
     const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
@@ -179,24 +266,7 @@ describe('drawVectorImageFill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const opacityLocation = { tag: 'opacity' };
-
-    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
-      name === 'u_opacity' ? opacityLocation : {},
-    );
-
-    // before
-    drawVectorImageFill(gl, program, buffer, null, null, faces, texture, { height: 40, width: 40 }, 100, 100, IDENTITY_VIEWPORT, false);
-
-    // result
-    expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 1);
-  });
-
-  it('should upload the given alpha as the opacity uniform', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const opacityLocation = { tag: 'opacity' };
 
@@ -208,6 +278,40 @@ describe('drawVectorImageFill', () => {
     drawVectorImageFill(
       gl,
       program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 1);
+  });
+
+  it('should upload the given alpha as the opacity uniform', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const opacityLocation = { tag: 'opacity' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_opacity' ? opacityLocation : {},
+    );
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
       buffer,
       null,
       null,
@@ -223,5 +327,76 @@ describe('drawVectorImageFill', () => {
 
     // result
     expect(gl.uniform1f).toHaveBeenCalledWith(opacityLocation, 0.4);
+  });
+
+  it("should shrink the quad to a letterboxed rect and keep the full 0..1 UV range for scaleMode 'fit'", () => {
+    // mock — 40x40 (1:1) bounds, an 80x40 (2:1) image: fit shrinks the quad to 40x20, centered vertically
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 80 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fit',
+    );
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the fitted quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    // top-left corner of the fitted quad sits inset from the shape's own (0,0) corner, letterboxed
+    expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([0, 10]);
+    // the whole (uncropped) image is used, not a cover-cropped band of it
+    expect(Array.from(uploadedVertices.slice(2, 4))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([1, 0]);
+  });
+
+  it("should draw the full node bounds for scaleMode 'fill' even when a 'fit' image size would otherwise letterbox", () => {
+    // mock — same 40x40 bounds / 80x40 image as the fit case above, but requesting 'fill' explicitly
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 80 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fill',
+    );
+
+    // result — the quad covers the full 40x40 bounds, not a letterboxed sub-rect
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(4, 6))).toEqual([40, 0]);
   });
 });

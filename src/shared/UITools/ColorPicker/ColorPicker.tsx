@@ -63,6 +63,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onGradientPanelStateChange,
   onImageChange,
   onImageRotate,
+  onImageScaleModeChange,
   onImageUrlChange,
   onOpenChange,
   onPatternChange,
@@ -88,7 +89,6 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
   const imagePanel = useImagePanel();
   const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
-  const handleSetActiveTab = useSetActiveTab(setActiveTab, onChange, value, gradientPanel, patternPanel, onGradientChange, onPatternChange);
   const colorSampler = useColorSampler(colorModel.setHex);
   const patternSourcePicking = usePatternSourcePicking();
   const ignoreSamplerInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
@@ -97,6 +97,17 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, patternSourcePicking.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
   const preview = getColorPickerPreview(activeTab, gradientPanel.stops, gradientPanel.type, gradientPanel.angle, value);
+  const handleSetActiveTab = useSetActiveTab(
+    activeTab,
+    setActiveTab,
+    onChange,
+    value,
+    gradientPanel,
+    patternPanel,
+    onGradientChange,
+    onPatternChange,
+    onImageChange,
+  );
   const handleInteractOutside = useHandleInteractOutside(
     ignoreSamplerInteractOutside,
     ignoreGradientCanvasInteractOutside,
@@ -143,6 +154,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
             onImageRotate={onImageRotate}
+            onImageScaleModeChange={onImageScaleModeChange}
             onOpenSampler={colorSampler.open}
             patternPanel={patternPanel}
             patternSourceNodeId={patternSourceNodeId}

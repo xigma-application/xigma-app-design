@@ -12,17 +12,17 @@ import { useImagePanel } from './hooks/useImagePanel';
 // store
 import { store } from 'store';
 
-const ImagePanelWrapper = ({ onRotate }: Pick<TImagePanelProps, 'onRotate'>): ReactNode => {
+const ImagePanelWrapper = ({ onRotate, onScaleModeChange }: Pick<TImagePanelProps, 'onRotate' | 'onScaleModeChange'>): ReactNode => {
   const imagePanel = useImagePanel();
 
-  return <ImagePanel imagePanel={imagePanel} onRotate={onRotate} />;
+  return <ImagePanel imagePanel={imagePanel} onRotate={onRotate} onScaleModeChange={onScaleModeChange} />;
 };
 
-const renderImagePanel = (onRotate?: TFunc): ReturnType<typeof render> =>
+const renderImagePanel = (onRotate?: TFunc, onScaleModeChange?: TImagePanelProps['onScaleModeChange']): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <TooltipProvider>
-        <ImagePanelWrapper onRotate={onRotate} />
+        <ImagePanelWrapper onRotate={onRotate} onScaleModeChange={onScaleModeChange} />
       </TooltipProvider>
     </Provider>,
   );
@@ -58,6 +58,21 @@ describe('ImagePanel behaviors', () => {
 
     // result
     expect(screen.getByText('Tile')).toBeInTheDocument();
+  });
+
+  it('should commit a real render-affecting scale mode (Fit) through onScaleModeChange', () => {
+    // mock
+    const onScaleModeChange = vi.fn();
+
+    // before
+    renderImagePanel(undefined, onScaleModeChange);
+
+    // action
+    fireEvent.click(screen.getByText('Fill'));
+    fireEvent.click(screen.getByText('Fit'));
+
+    // result
+    expect(onScaleModeChange).toHaveBeenCalledWith('fit');
   });
 
   it('should call onRotate when the rotate button is clicked', () => {

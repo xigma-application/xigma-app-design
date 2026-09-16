@@ -21,6 +21,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     onDragEnd,
     onDragStart,
     onImageRotate,
+    onImageScaleModeChange,
     onOpenSampler,
     patternPanel,
     patternSourceNodeId,
@@ -41,7 +42,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
         />
       );
     case ColorPickerTab.image:
-      return <ImagePanel imagePanel={imagePanel} onRotate={onImageRotate} />;
+      return <ImagePanel imagePanel={imagePanel} onRotate={onImageRotate} onScaleModeChange={onImageScaleModeChange} />;
     default:
       return (
         <SolidPanel

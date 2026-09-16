@@ -278,6 +278,7 @@ describe('drawVectorFillPaints', () => {
     expect(getOrLoadTextureMock).toHaveBeenCalledWith(gl, imageTextureCache, 'blob:asset-1', imageTextureSizeCache);
     expect(drawVectorImageFillMock).toHaveBeenCalledWith(
       gl,
+      program,
       imageProgram,
       buffer,
       null,
@@ -291,6 +292,7 @@ describe('drawVectorFillPaints', () => {
       false,
       1,
       0,
+      'fill',
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
@@ -326,7 +328,39 @@ describe('drawVectorFillPaints', () => {
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][13]).toBe(180);
+    expect(drawVectorImageFillMock.mock.calls[0][14]).toBe(180);
+  });
+
+  it('should pass the image paint scale mode through to the image fill drawer', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fit', type: 'image' };
+    const texture = {} as WebGLTexture;
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][15]).toBe('fit');
   });
 
   it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
@@ -358,7 +392,7 @@ describe('drawVectorFillPaints', () => {
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][12]).toBe(0.4);
+    expect(drawVectorImageFillMock.mock.calls[0][13]).toBe(0.4);
   });
 
   it('should skip loading a texture for an image layer with no source picked yet', () => {
@@ -390,6 +424,7 @@ describe('drawVectorFillPaints', () => {
     expect(getOrLoadTextureMock).not.toHaveBeenCalled();
     expect(drawVectorImageFillMock).toHaveBeenCalledWith(
       gl,
+      program,
       imageProgram,
       buffer,
       null,
@@ -403,6 +438,7 @@ describe('drawVectorFillPaints', () => {
       false,
       1,
       0,
+      'fill',
     );
   });
 

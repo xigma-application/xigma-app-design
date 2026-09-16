@@ -3133,4 +3133,75 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(180);
     expect(await readPixelColor(page, 770, 240)).toEqual([255, 0, 0]);
   });
+
+  test('switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-fit-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a wide 200x80 rectangle, so a square source image only fits fully inside it once letterboxed
+    await designPage.drawRectangle(700, 200, 900, 280);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // wait for the default cover-fit render before switching modes, so the two reads are comparable
+    await expect.poll(async () => readPixelColor(page, 710, 240)).toEqual([255, 0, 0]);
+
+    // action — switch the fill mode from Fill (cover) to Fit (contain)
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Fit', { exact: true }).click();
+
+    // result — the paint's own scaleMode is committed for real, not just previewed locally
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('fit');
+
+    // result — a square image fit into a 200x80 shape only covers an 80x80 centered band; the
+    // left/right margins fall outside that band and must no longer show the (fully opaque) red
+    const [outsideLeft] = await readPixelColor(page, 710, 240);
+    const [outsideRight] = await readPixelColor(page, 890, 240);
+
+    expect(outsideLeft).not.toBe(255);
+    expect(outsideRight).not.toBe(255);
+
+    // result — the centered band itself still shows the image
+    expect(await readPixelColor(page, 800, 240)).toEqual([255, 0, 0]);
+  });
+
+  test('picking Image with no source yet renders a checkerboard placeholder on the shape', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-placeholder');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // action — switch to the Image paint type without ever picking a file
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // result — a real (empty-ref) image paint is committed, not just a local UI preview
+    await expect.poll(async () => (await readNode(page, id)).fills![0]).toMatchObject({ ref: '', type: 'image' });
+
+    // result — the shape renders a checkerboard, not a flat/empty fill: two samples one square
+    // apart (10px, the placeholder's own square size) always land in adjacent, differently-colored
+    // squares regardless of the grid's exact phase
+    await expect
+      .poll(async () => {
+        const [colorA, colorB] = await Promise.all([readPixelColor(page, 715, 215), readPixelColor(page, 725, 215)]);
+
+        return JSON.stringify(colorA) !== JSON.stringify(colorB);
+      })
+      .toBe(true);
+  });
 });
