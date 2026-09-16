@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // others
@@ -46,11 +46,13 @@ export const useImagePanel = (): TUseImagePanelResult => {
     }
   };
 
+  const setFillMode = useCallback<TFunc<[TImageFillMode]>>((fillMode) => setState((previous) => ({ ...previous, fillMode })), []);
+
   return {
     ...state,
     setContrast: (contrast): void => setState((previous) => ({ ...previous, contrast })),
     setExposure: (exposure): void => setState((previous) => ({ ...previous, exposure })),
-    setFillMode: (fillMode): void => setState((previous) => ({ ...previous, fillMode })),
+    setFillMode,
     setHighlights: (highlights): void => setState((previous) => ({ ...previous, highlights })),
     setImage,
     setSaturation: (saturation): void => setState((previous) => ({ ...previous, saturation })),

@@ -188,6 +188,19 @@ describe('useImagePanel behaviors', () => {
     expect(result.current.imageUrl).toBeNull();
   });
 
+  it('should keep setFillMode referentially stable across re-renders, so consumers can safely depend on it in a useEffect', () => {
+    // before
+    const { rerender, result } = renderImagePanel();
+    const firstSetFillMode = result.current.setFillMode;
+
+    // action
+    act(() => result.current.setExposure(1));
+    rerender();
+
+    // result — an unstable reference here would re-fire any effect keyed on it every render
+    expect(result.current.setFillMode).toBe(firstSetFillMode);
+  });
+
   it('should not touch imageUrl when a later valid file follows an unsupported one', () => {
     // mock
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');

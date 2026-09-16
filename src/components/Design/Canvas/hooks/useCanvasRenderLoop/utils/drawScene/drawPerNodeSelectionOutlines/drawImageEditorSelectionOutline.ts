@@ -1,13 +1,13 @@
 // others
-import { DRAFT_FRAME_STROKE, IMAGE_EDITOR_OUTLINE_DASH_GAP_PX, IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, IMAGE_EDITOR_OUTLINE_DASH_GAP_PX, IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX, SIZE_LABEL_FILL } from 'constant/canvas';
 
 // types
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawDashedRectOutline } from 'utils/canvas/drawDashedRectOutline';
-import { drawEdgeMidpointHandles } from 'utils/canvas/drawEdgeMidpointHandles';
+import { drawImageEditorCornerHandles } from './drawImageEditorCornerHandles';
+import { drawImageEditorEdgeHandles } from './drawImageEditorEdgeHandles';
 
 export const drawImageEditorSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -33,6 +33,6 @@ export const drawImageEditorSelectionOutline = (
     IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX,
     IMAGE_EDITOR_OUTLINE_DASH_GAP_PX,
   );
-  drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
-  drawEdgeMidpointHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
+  drawImageEditorCornerHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
+  drawImageEditorEdgeHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
 };

@@ -50,7 +50,7 @@ export const Dropdown = <TValue extends string>({
       disabled={disabled}
     >
       <span className={styles.Dropdown__label}>{selectedOption?.triggerLabel ?? selectedOption?.label}</span>
-      <Icon name="ChevronDown" size={12} />
+      <Icon name="ChevronDown" size={24} />
     </PopoverPrimitive.Trigger>
   );
 
