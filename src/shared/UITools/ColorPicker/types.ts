@@ -6,6 +6,7 @@ import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 // types
 import { ColorPickerTab } from './enums';
 import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/types';
+import { TImageAdjustments } from 'types/design/paint/types';
 import { TImageFillMode, TImagePanelChange } from './Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from './Body/PatternPanel/types';
 
@@ -24,6 +25,7 @@ export type TColorPickerProps = {
   className?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
+  imageAdjustments?: TImageAdjustments;
   imageTileScale?: number;
   initialActiveTab?: ColorPickerTab;
   initialFillMode?: TImageFillMode;
@@ -38,6 +40,7 @@ export type TColorPickerProps = {
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
+  onImageAdjustmentChange?: TFunc<[keyof TImageAdjustments, number]>;
   onImageChange?: TFunc<[TImagePanelChange]>;
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;

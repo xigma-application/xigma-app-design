@@ -1,11 +1,11 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TImageCrop, TImageScaleMode } from 'types/design/paint/types';
+import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TTextureSize } from '../../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
 
 // others
-import { IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
+import { DEFAULT_IMAGE_ADJUSTMENTS, IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
 
 // utils
 import { drawImageStencilMask } from './drawImageStencilMask';
@@ -74,6 +74,7 @@ export const drawImageTexture = (
   flipY: boolean,
   boxRotation?: TBoxFillRotation,
   scale = IMAGE_FILL_DEFAULT_TILE_SCALE,
+  adjustments: TImageAdjustments = DEFAULT_IMAGE_ADJUSTMENTS,
 ): void => {
   const isSideways = rotation === 90 || rotation === 270;
   const effectiveImageWidth = (isSideways ? imageSize?.height : imageSize?.width) ?? 0;
@@ -93,6 +94,13 @@ export const drawImageTexture = (
   const viewportOffsetLocation = gl.getUniformLocation(imageProgram, 'u_viewportOffset');
   const zoomLocation = gl.getUniformLocation(imageProgram, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(imageProgram, 'u_resolution');
+  const exposureLocation = gl.getUniformLocation(imageProgram, 'u_exposure');
+  const contrastLocation = gl.getUniformLocation(imageProgram, 'u_contrast');
+  const saturationLocation = gl.getUniformLocation(imageProgram, 'u_saturation');
+  const temperatureLocation = gl.getUniformLocation(imageProgram, 'u_temperature');
+  const tintLocation = gl.getUniformLocation(imageProgram, 'u_tint');
+  const highlightsLocation = gl.getUniformLocation(imageProgram, 'u_highlights');
+  const shadowsLocation = gl.getUniformLocation(imageProgram, 'u_shadows');
   const stride = 4 * Float32Array.BYTES_PER_ELEMENT;
 
   gl.useProgram(imageProgram);
@@ -105,6 +113,13 @@ export const drawImageTexture = (
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
   gl.uniform1f(zoomLocation, viewport.zoom);
   gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);
+  gl.uniform1f(exposureLocation, adjustments.exposure);
+  gl.uniform1f(contrastLocation, adjustments.contrast);
+  gl.uniform1f(saturationLocation, adjustments.saturation);
+  gl.uniform1f(temperatureLocation, adjustments.temperature);
+  gl.uniform1f(tintLocation, adjustments.tint);
+  gl.uniform1f(highlightsLocation, adjustments.highlights);
+  gl.uniform1f(shadowsLocation, adjustments.shadows);
   gl.enableVertexAttribArray(positionLocation);
   gl.disableVertexAttribArray(texCoordLocation);
 

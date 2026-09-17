@@ -44,7 +44,18 @@ export type TImageCrop = {
   y: number;
 };
 
+export type TImageAdjustments = {
+  contrast: number;
+  exposure: number;
+  highlights: number;
+  saturation: number;
+  shadows: number;
+  temperature: number;
+  tint: number;
+};
+
 export type TImagePaint = TPaintBase & {
+  adjustments?: TImageAdjustments;
   crop?: TImageCrop;
   flipX?: boolean;
   flipY?: boolean;

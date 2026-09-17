@@ -16,15 +16,8 @@ import { getFileExtension } from '../utils/getFileExtension';
 import { isSupportedImageFile } from '../utils/isSupportedImageFile';
 
 export type TUseImagePanelResult = TImagePanelState & {
-  setContrast: TFunc<[number]>;
-  setExposure: TFunc<[number]>;
   setFillMode: TFunc<[TImageFillMode]>;
-  setHighlights: TFunc<[number]>;
   setImage: TFunc<[File]>;
-  setSaturation: TFunc<[number]>;
-  setShadows: TFunc<[number]>;
-  setTemperature: TFunc<[number]>;
-  setTint: TFunc<[number]>;
 };
 
 export const useImagePanel = (initialImageUrl?: string, initialFillMode?: TImageFillMode): TUseImagePanelResult => {
@@ -54,14 +47,7 @@ export const useImagePanel = (initialImageUrl?: string, initialFillMode?: TImage
 
   return {
     ...state,
-    setContrast: (contrast): void => setState((previous) => ({ ...previous, contrast })),
-    setExposure: (exposure): void => setState((previous) => ({ ...previous, exposure })),
     setFillMode,
-    setHighlights: (highlights): void => setState((previous) => ({ ...previous, highlights })),
     setImage,
-    setSaturation: (saturation): void => setState((previous) => ({ ...previous, saturation })),
-    setShadows: (shadows): void => setState((previous) => ({ ...previous, shadows })),
-    setTemperature: (temperature): void => setState((previous) => ({ ...previous, temperature })),
-    setTint: (tint): void => setState((previous) => ({ ...previous, tint })),
   };
 };

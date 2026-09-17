@@ -24,6 +24,7 @@ import { ColorPickerTab } from '../ColorPicker/enums';
 import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
+import { TImageAdjustments } from 'types/design/paint/types';
 import { TImageFillMode, TImagePanelChange } from '../ColorPicker/Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
 
@@ -34,6 +35,7 @@ export type TColorPickerInputProps = {
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
+  imageAdjustments?: TImageAdjustments;
   imageTileScale?: number;
   imageUrl?: string;
   initialActiveTab?: ColorPickerTab;
@@ -50,6 +52,7 @@ export type TColorPickerInputProps = {
   onDragStart?: TFunc;
   onGradientChange?: TFunc<[TGradientPanelChange]>;
   onGradientPanelStateChange?: TFunc<[TGradientPanelState]>;
+  onImageAdjustmentChange?: TFunc<[keyof TImageAdjustments, number]>;
   onImageChange?: TFunc<[TImagePanelChange]>;
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;
@@ -77,6 +80,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   e2eValue = '',
   hex,
   hexDisplayValue,
+  imageAdjustments,
   imageTileScale,
   imageUrl,
   initialActiveTab,
@@ -93,6 +97,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onDragStart,
   onGradientChange,
   onGradientPanelStateChange,
+  onImageAdjustmentChange,
   onImageChange,
   onImageRotate,
   onImageScaleModeChange,
@@ -141,6 +146,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                imageAdjustments={imageAdjustments}
                 imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}
                 initialFillMode={initialFillMode}
@@ -155,6 +161,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onDragStart={onDragStart}
                 onGradientChange={onGradientChange}
                 onGradientPanelStateChange={onGradientPanelStateChange}
+                onImageAdjustmentChange={onImageAdjustmentChange}
                 onImageChange={onImageChange}
                 onImageRotate={onImageRotate}
                 onImageScaleModeChange={onImageScaleModeChange}

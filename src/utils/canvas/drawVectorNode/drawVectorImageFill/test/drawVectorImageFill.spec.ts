@@ -783,4 +783,107 @@ describe('drawVectorImageFill', () => {
     expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
   });
+
+  it('should upload every adjustment as its own uniform, defaulting to the all-zero identity when none is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const locations = {
+      u_contrast: { tag: 'contrast' },
+      u_exposure: { tag: 'exposure' },
+      u_highlights: { tag: 'highlights' },
+      u_saturation: { tag: 'saturation' },
+      u_shadows: { tag: 'shadows' },
+      u_temperature: { tag: 'temperature' },
+      u_tint: { tag: 'tint' },
+    };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation(
+      (_program, name: string) => locations[name as keyof typeof locations] ?? {},
+    );
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_exposure, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_contrast, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_saturation, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_temperature, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_tint, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_highlights, 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_shadows, 0);
+  });
+
+  it('should upload the paint’s own stored adjustment values as their uniforms', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const locations = {
+      u_contrast: { tag: 'contrast' },
+      u_exposure: { tag: 'exposure' },
+      u_highlights: { tag: 'highlights' },
+      u_saturation: { tag: 'saturation' },
+      u_shadows: { tag: 'shadows' },
+      u_temperature: { tag: 'temperature' },
+      u_tint: { tag: 'tint' },
+    };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation(
+      (_program, name: string) => locations[name as keyof typeof locations] ?? {},
+    );
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fill',
+      undefined,
+      false,
+      false,
+      undefined,
+      undefined,
+      { contrast: -10, exposure: 42, highlights: 30, saturation: 20, shadows: -30, temperature: -20, tint: 15 },
+    );
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_exposure, 42);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_contrast, -10);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_saturation, 20);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_temperature, -20);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_tint, 15);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_highlights, 30);
+    expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_shadows, -30);
+  });
 });

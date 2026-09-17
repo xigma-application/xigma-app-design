@@ -54,6 +54,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   freezePositionOnGrow,
   headerExtra,
+  imageAdjustments,
   imageTileScale,
   initialActiveTab,
   initialFillMode,
@@ -68,6 +69,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onDragStart,
   onGradientChange,
   onGradientPanelStateChange,
+  onImageAdjustmentChange,
   onImageChange,
   onImageRotate,
   onImageScaleModeChange,
@@ -167,11 +169,13 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             alpha={value.alpha}
             colorModel={colorModel}
             gradientPanel={gradientPanel}
+            imageAdjustments={imageAdjustments}
             imagePanel={imagePanel}
             imageTileScale={imageTileScale}
             onCloseSampler={colorSampler.close}
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
+            onImageAdjustmentChange={onImageAdjustmentChange}
             onImageRotate={onImageRotate}
             onImageScaleModeChange={onImageScaleModeChange}
             onImageTileScaleChange={onImageTileScaleChange}

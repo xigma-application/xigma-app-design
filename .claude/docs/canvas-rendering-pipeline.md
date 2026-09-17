@@ -1458,6 +1458,31 @@ need.
   mirrors crop's own `drawImageEditorCropOverflowPreview.ts` (both now share their GL draw body via
   `drawImageEditorOverflowQuad.ts`) to dim-preview the tile rect unclipped when it extends past the
   frame's own edge.
+- Image fill color adjustments (Exposure/Contrast/Saturation/Temperature/Tint/Highlights/Shadows,
+  the sliders in the Fill picker's Image tab): pure shader-side, no CPU/JS recompute per frame.
+  `TImagePaint.adjustments?: TImageAdjustments` (7 numbers, range -100..100, all-zero identity when
+  unset — read via `utils/design/paint/getImagePaintAdjustments.ts`, backed by
+  `constant/canvas.ts`'s `DEFAULT_IMAGE_ADJUSTMENTS`) is threaded as a trailing param through
+  `drawVectorFillPaints.ts` → `drawVectorImageFill.ts` → `drawImageTexture.ts`, which sets 7 new
+  `uniform float` uniforms (`u_exposure`/`u_contrast`/`u_saturation`/`u_temperature`/`u_tint`/
+  `u_highlights`/`u_shadows`) right beside the existing `u_opacity` one — same
+  `getUniformLocation`+`uniform1f` pattern, one extra call each, negligible cost since a redraw
+  already happens on every render regardless. All the actual color math lives in
+  `imageFragmentShaderSource.ts`'s `applyImageAdjustments()`, applied to `texColor.rgb` before the
+  opacity multiply: exposure as `exp2(value/100*2)` (±2 stops), contrast as `(color-0.5)*(1+value/100)+0.5`,
+  saturation as `mix(luma, color, 1+value/100)` (luma via Rec.709 weights, computed *after*
+  exposure/contrast so the desaturation target reflects the graded color), temperature/tint as small
+  opposing R/B and G channel shifts, highlights/shadows as `smoothstep`-masked additive pushes keyed
+  off that same luma. Bypasses `useImagePanel`'s local React state entirely — the 7 sliders in
+  `ImageAdjustmentSliders.tsx` are now a plain controlled `adjustments`/`onAdjustmentChange` prop
+  pair (mirroring the earlier `tileScale`/`onTileScaleChange` pattern), threaded through
+  `FillRow.tsx` → `ColorPickerInput` → `ColorPicker` → `Body` → `ImagePanel`, sourced from and
+  written straight back to `paint.adjustments` via `useSetImagePaintAdjustment.ts` (one hook, not
+  seven — takes a `keyof TImageAdjustments` field name plus the new value and merges it onto the
+  existing adjustments object). `useImagePanel`'s old per-field local state
+  (`contrast`/`exposure`/etc. + their setters) was dead code — it updated the slider UI but never
+  reached the paint or the canvas — and was deleted outright rather than left alongside the new prop
+  path.
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;

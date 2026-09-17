@@ -465,15 +465,28 @@ describe('armImageCropOnPointerDown', () => {
     expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
   });
 
-  it('should return undefined when the image editor is in position mode, not crop', () => {
+  it('should fall through when the click actually lands on the position-mode node itself (its own hit, or one of its own handles)', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-image-1', paintIndex: 0 }));
 
-    // before
-    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+    // before — hit is the same node the editor is targeting
+    const ctx = createContext({ hit: imageRectangle, point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
 
     // result
     expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should exit position mode entirely and claim the event on a genuine miss (regression: 0da2c2ba added this exit-on-miss branch for position mode too, but never updated this test, which still asserted the old pre-fix fall-through)', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-image-1', paintIndex: 0 }));
+
+    // before — nothing was hit, and the point isn't on one of the node's own handles either
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [imageRectangle] });
+
+    // result
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledWith(setImageEditor(null));
   });
 
   it('should return undefined when the targeted node is not among the selected nodes', () => {
@@ -565,12 +578,12 @@ describe('armImageCropOnPointerDown', () => {
     expect(ctx.canvasRefs.imageCrop.imageCropMoveDragRef.current).toMatchObject({ nodeId: 'rect-image-1', paintIndex: 0 });
   });
 
-  it('should deselect the image target back to the frame when a node is hit outside the crop rect', () => {
+  it('should deselect the image target back to the frame and fall through when the frame itself is hit again outside the crop rect', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
 
-    // before
-    const ctx = createContext({ hit: rectangle, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
+    // before — hit is the same node as the editor's own frame, just outside its own crop rect
+    const ctx = createContext({ hit: imageRectangle, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
 
     // result — falls through so the actual click still gets resolved by a later resolver
     expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
@@ -579,7 +592,19 @@ describe('armImageCropOnPointerDown', () => {
     );
   });
 
-  it('should not dispatch when nothing was hit outside the crop rect', () => {
+  it('should exit crop mode entirely and claim the event when a completely different node is hit outside the crop rect (regression: 0da2c2ba added this exit-on-miss branch but never updated this test, which still asserted the old pre-fix fall-through behavior)', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
+
+    // before — hit is a different node entirely, not the editor's own frame
+    const ctx = createContext({ hit: rectangle, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
+
+    // result — exits without selecting or dragging whatever else got hit
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledWith(setImageEditor(null));
+  });
+
+  it('should exit crop mode entirely and claim the event when nothing was hit outside the crop rect (regression: same as above, but for a true miss)', () => {
     // mock
     store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-image-1', paintIndex: 0, selectedTarget: 'image' }));
 
@@ -587,8 +612,8 @@ describe('armImageCropOnPointerDown', () => {
     const ctx = createContext({ hit: null, point: { x: 900, y: 900 }, selectedNodes: [imageRectangle] });
 
     // result
-    expect(armImageCropOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.dispatch).not.toHaveBeenCalled();
+    expect(armImageCropOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledWith(setImageEditor(null));
   });
 });
 

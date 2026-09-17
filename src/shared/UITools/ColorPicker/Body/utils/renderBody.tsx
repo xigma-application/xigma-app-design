@@ -16,11 +16,13 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     alpha,
     colorModel,
     gradientPanel,
+    imageAdjustments,
     imagePanel,
     imageTileScale,
     onCloseSampler,
     onDragEnd,
     onDragStart,
+    onImageAdjustmentChange,
     onImageRotate,
     onImageScaleModeChange,
     onImageTileScaleChange,
@@ -46,7 +48,9 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     case ColorPickerTab.image:
       return (
         <ImagePanel
+          adjustments={imageAdjustments}
           imagePanel={imagePanel}
+          onAdjustmentChange={onImageAdjustmentChange}
           onRotate={onImageRotate}
           onScaleModeChange={onImageScaleModeChange}
           onTileScaleChange={onImageTileScaleChange}

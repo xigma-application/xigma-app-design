@@ -22,10 +22,10 @@ exports[`ColorValueInput snapshots > should render ColorValueInput defaulting to
         class="Icon"
         data-fpl-icon-size="24"
         fill="none"
-        height="12"
+        height="24"
         style="color: var(--color-neutral-1);"
         viewBox="0 0 24 24"
-        width="12"
+        width="24"
       >
         <path
           clip-rule="evenodd"

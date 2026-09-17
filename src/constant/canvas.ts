@@ -1,3 +1,6 @@
+// types
+import { TImageAdjustments } from 'types/design/paint/types';
+
 // assets
 import defaultCursorUrl from 'assets/icons/cursors/default.png';
 
@@ -140,6 +143,15 @@ export const IMAGE_EDITOR_GUIDE_OUTLINE_OUTER = '#252525';
 export const IMAGE_EDITOR_HANDLE_THICKNESS = 4;
 export const IMAGE_EDITOR_OUTLINE_DASH_GAP_PX = 4;
 export const IMAGE_EDITOR_OUTLINE_DASH_LENGTH_PX = 2;
+export const DEFAULT_IMAGE_ADJUSTMENTS: TImageAdjustments = {
+  contrast: 0,
+  exposure: 0,
+  highlights: 0,
+  saturation: 0,
+  shadows: 0,
+  temperature: 0,
+  tint: 0,
+};
 export const IMAGE_FILL_DEFAULT_TILE_SCALE = 0.5;
 export const IMAGE_FILL_MAX_TILE_SCALE = 10;
 export const IMAGE_FILL_MIN_TILE_SCALE = 0.01;

@@ -12,17 +12,27 @@ import { useImagePanel } from './hooks/useImagePanel';
 // store
 import { store } from 'store';
 
-const ImagePanelWrapper = ({ onRotate, onScaleModeChange }: Pick<TImagePanelProps, 'onRotate' | 'onScaleModeChange'>): ReactNode => {
+const ImagePanelWrapper = ({
+  onAdjustmentChange,
+  onRotate,
+  onScaleModeChange,
+}: Pick<TImagePanelProps, 'onAdjustmentChange' | 'onRotate' | 'onScaleModeChange'>): ReactNode => {
   const imagePanel = useImagePanel();
 
-  return <ImagePanel imagePanel={imagePanel} onRotate={onRotate} onScaleModeChange={onScaleModeChange} />;
+  return (
+    <ImagePanel imagePanel={imagePanel} onAdjustmentChange={onAdjustmentChange} onRotate={onRotate} onScaleModeChange={onScaleModeChange} />
+  );
 };
 
-const renderImagePanel = (onRotate?: TFunc, onScaleModeChange?: TImagePanelProps['onScaleModeChange']): ReturnType<typeof render> =>
+const renderImagePanel = (
+  onRotate?: TFunc,
+  onScaleModeChange?: TImagePanelProps['onScaleModeChange'],
+  onAdjustmentChange?: TImagePanelProps['onAdjustmentChange'],
+): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <TooltipProvider>
-        <ImagePanelWrapper onRotate={onRotate} onScaleModeChange={onScaleModeChange} />
+        <ImagePanelWrapper onAdjustmentChange={onAdjustmentChange} onRotate={onRotate} onScaleModeChange={onScaleModeChange} />
       </TooltipProvider>
     </Provider>,
   );
@@ -89,9 +99,12 @@ describe('ImagePanel behaviors', () => {
     expect(onRotate).toHaveBeenCalled();
   });
 
-  it('should update a slider value locally when dragged', () => {
+  it('should call onAdjustmentChange with the field and new value when a slider is dragged', () => {
+    // mock
+    const onAdjustmentChange = vi.fn();
+
     // before
-    renderImagePanel();
+    renderImagePanel(undefined, undefined, onAdjustmentChange);
     const track = screen.getByRole('slider', { name: 'Exposure' }) as HTMLDivElement;
 
     vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({ height: 24, left: 0, top: 0, width: 100 } as DOMRect);
@@ -102,6 +115,6 @@ describe('ImagePanel behaviors', () => {
     });
 
     // result
-    expect(track).toHaveAttribute('aria-valuenow', '-50');
+    expect(onAdjustmentChange).toHaveBeenCalledWith('exposure', -50);
   });
 });

@@ -91,6 +91,7 @@ export const drawVectorFillPaints = (
           paint.flipY,
           boxRotation,
           paint.scale,
+          paint.adjustments,
         );
       } else {
         drawVectorGradientFill(

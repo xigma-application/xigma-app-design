@@ -4,43 +4,34 @@ import { useTranslation } from 'react-i18next';
 // components
 import { UITools } from 'shared';
 
-// hooks
-import { TUseImagePanelResult } from '../hooks/useImagePanel';
-
 // others
 import { ADJUSTMENT_SLIDER_MAX, ADJUSTMENT_SLIDER_MIN, translationNameSpace } from '../constants';
+import { DEFAULT_IMAGE_ADJUSTMENTS } from 'constant/canvas';
 
 // styles
 import styles from './image-adjustment-sliders.module.scss';
 
-export type TImageAdjustmentSlidersProps = { imagePanel: TUseImagePanelResult };
+// types
+import { TImageAdjustments } from 'types/design/paint/types';
 
-export const ImageAdjustmentSliders: FC<TImageAdjustmentSlidersProps> = ({ imagePanel }) => {
+export type TImageAdjustmentSlidersProps = {
+  adjustments?: TImageAdjustments;
+  onAdjustmentChange?: TFunc<[keyof TImageAdjustments, number]>;
+};
+
+export const ImageAdjustmentSliders: FC<TImageAdjustmentSlidersProps> = ({
+  adjustments = DEFAULT_IMAGE_ADJUSTMENTS,
+  onAdjustmentChange,
+}) => {
   const { t } = useTranslation();
-  const {
-    contrast,
-    exposure,
-    highlights,
-    saturation,
-    setContrast,
-    setExposure,
-    setHighlights,
-    setSaturation,
-    setShadows,
-    setTemperature,
-    setTint,
-    shadows,
-    temperature,
-    tint,
-  } = imagePanel;
-  const rows: { id: string; label: string; onChange: TFunc<[number]>; value: number }[] = [
-    { id: 'exposure', label: t(`${translationNameSpace}.exposureLabel`), onChange: setExposure, value: exposure },
-    { id: 'contrast', label: t(`${translationNameSpace}.contrastLabel`), onChange: setContrast, value: contrast },
-    { id: 'saturation', label: t(`${translationNameSpace}.saturationLabel`), onChange: setSaturation, value: saturation },
-    { id: 'temperature', label: t(`${translationNameSpace}.temperatureLabel`), onChange: setTemperature, value: temperature },
-    { id: 'tint', label: t(`${translationNameSpace}.tintLabel`), onChange: setTint, value: tint },
-    { id: 'highlights', label: t(`${translationNameSpace}.highlightsLabel`), onChange: setHighlights, value: highlights },
-    { id: 'shadows', label: t(`${translationNameSpace}.shadowsLabel`), onChange: setShadows, value: shadows },
+  const rows: { id: keyof TImageAdjustments; label: string }[] = [
+    { id: 'exposure', label: t(`${translationNameSpace}.exposureLabel`) },
+    { id: 'contrast', label: t(`${translationNameSpace}.contrastLabel`) },
+    { id: 'saturation', label: t(`${translationNameSpace}.saturationLabel`) },
+    { id: 'temperature', label: t(`${translationNameSpace}.temperatureLabel`) },
+    { id: 'tint', label: t(`${translationNameSpace}.tintLabel`) },
+    { id: 'highlights', label: t(`${translationNameSpace}.highlightsLabel`) },
+    { id: 'shadows', label: t(`${translationNameSpace}.shadowsLabel`) },
   ];
 
   return (
@@ -53,8 +44,8 @@ export const ImageAdjustmentSliders: FC<TImageAdjustmentSlidersProps> = ({ image
             baseValue={0}
             max={ADJUSTMENT_SLIDER_MAX}
             min={ADJUSTMENT_SLIDER_MIN}
-            onChange={row.onChange}
-            value={row.value}
+            onChange={(value): void => onAdjustmentChange?.(row.id, value)}
+            value={adjustments[row.id]}
           />
         </div>
       ))}

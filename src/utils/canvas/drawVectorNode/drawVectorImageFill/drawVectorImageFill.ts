@@ -1,6 +1,6 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TImageCrop, TImageScaleMode } from 'types/design/paint/types';
+import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TTextureSize } from '../../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
 
@@ -32,6 +32,7 @@ export const drawVectorImageFill = (
   flipY = false,
   boxRotation?: TBoxFillRotation,
   scale?: number,
+  adjustments?: TImageAdjustments,
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
@@ -58,6 +59,7 @@ export const drawVectorImageFill = (
         flipY,
         boxRotation,
         scale,
+        adjustments,
       );
     } else {
       drawImagePlaceholder(gl, program, buffer, faceBufferCache, faces, bounds, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);

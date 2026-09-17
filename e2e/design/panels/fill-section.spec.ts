@@ -4,6 +4,15 @@ import { test, expect, Page } from '@playwright/test';
 import { DesignPage } from '../model/DesignPage';
 
 type TReadablePaint = {
+  adjustments?: {
+    contrast: number;
+    exposure: number;
+    highlights: number;
+    saturation: number;
+    shadows: number;
+    temperature: number;
+    tint: number;
+  };
   alignmentIndex?: number;
   color?: string;
   crop?: { height: number; rotation: number; width: number; x: number; y: number };
@@ -3170,6 +3179,46 @@ test.describe('Design panels — Fill section', () => {
 
     await expect.poll(async () => (await readNode(page, id)).fills![0].rotation).toBe(180);
     expect(await readPixelColor(page, 770, 240)).toEqual([255, 0, 0]);
+  });
+
+  test('dragging the Saturation slider all the way down actually desaturates the rendered image, not just the stored paint', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-saturation-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 780, 280);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // wait for the fully-saturated pure red render before touching the slider, so the two reads are comparable
+    await expect.poll(async () => readPixelColor(page, 740, 240)).toEqual([255, 0, 0]);
+
+    // action — drag Saturation all the way to its minimum (-100), a full desaturation
+    const saturationSlider = page.getByRole('slider', { name: 'Saturation' });
+    const box = await saturationSlider.boundingBox();
+
+    await page.mouse.click(box!.x + 1, box!.y + box!.height / 2);
+
+    // result — the paint stores the new value, and the rendered pixel is desaturated to gray
+    // (equal R/G/B), no longer the pure red it was before
+    await expect.poll(async () => (await readNode(page, id)).fills![0].adjustments?.saturation).toBeLessThan(-90);
+
+    const [red, green, blue] = await readPixelColor(page, 740, 240);
+
+    expect(Math.abs(red - green)).toBeLessThan(10);
+    expect(Math.abs(green - blue)).toBeLessThan(10);
   });
 
   test('switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover', async ({ page }) => {
