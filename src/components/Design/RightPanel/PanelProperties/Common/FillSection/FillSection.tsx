@@ -29,10 +29,12 @@ export const FillSection: FC = () => {
     onChange,
     onDragEnd,
     onDragStart,
+    onPickerOpenChange,
     onRemove,
     onSelectRow,
     onStartDrag,
     onToggleVisible,
+    openPickerIndex,
     registerRow,
   } = useFillSection();
 
@@ -57,10 +59,12 @@ export const FillSection: FC = () => {
             onChange={(paint): void => onChange(index, paint)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
+            onPickerOpenChange={(isOpen): void => onPickerOpenChange(index, isOpen)}
             onRemove={(): void => onRemove(index)}
             onSelect={(modifiers): void => onSelectRow(index, modifiers)}
             onStartDrag={(event): void => onStartDrag(index, event)}
             onToggleVisible={(): void => onToggleVisible(index)}
+            openPickerIndex={openPickerIndex}
             paint={paint}
             paintIndex={index}
             registerRow={registerRow(index)}

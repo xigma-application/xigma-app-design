@@ -3458,6 +3458,48 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.locator('[class*="FillRow_"]').first()).toHaveClass(/FillRow--selected/);
   });
 
+  test("clicking Crop targets the fill row selected in the panel, even though clicking the toolbar button would otherwise clear that selection (regression: the click-outside-clears-selection handler fired on mousedown before Crop's own click handler read the selection, so it always fell back to fill 0)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-crop-preserves-selected-fill');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // first fill: switch to image
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image', { exact: true }).click();
+
+    // add a second fill and switch it to image too
+    await page.getByLabel('Add fill').click();
+    await page.getByLabel('Hex color').nth(1).click();
+    await page.getByLabel('Image', { exact: true }).last().click();
+
+    // close the still-open picker popover via its own trigger (clicking the canvas doesn't dismiss
+    // it while on the Image tab — that's the intentional guard letting canvas interactions continue)
+    await page.getByLabel('Hex color').nth(1).click();
+
+    const rows = page.locator('[class*="FillRow_"]:not([class*="FillRow__"])');
+
+    await expect(rows.nth(1)).not.toHaveClass(/FillRow--pickerOpen/);
+
+    // select the second fill row (index 1) via its own row strip, not its picker trigger
+    const secondRowBox = (await rows.nth(1).boundingBox())!;
+
+    await page.mouse.click(secondRowBox.x + 2, secondRowBox.y + secondRowBox.height / 2);
+    await expect(rows.nth(1)).toHaveClass(/FillRow--selected/);
+
+    // action — click Crop in the canvas-side Image edit toolbar
+    await page.getByRole('button', { name: 'Crop' }).click();
+
+    // result — targets the fill that was genuinely selected (index 1), not the fallback (index 0)
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
+  });
+
   test('the Image edit toolbar hides once crop mode is entered, and comes back once it exits', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -4341,6 +4383,34 @@ test.describe('Design panels — Fill section', () => {
     expect(paint.scaleMode).toBe('fill');
     expect(paint.scale).toBeUndefined();
     expect(paint.crop).toBeTruthy();
+  });
+
+  test("switching to a different fill row clears the global image editor state left by a Tile-mode fill (regression: the previous fill's isImageTabActive stayed frozen true after its picker unmounted, so imageEditor never cleared and stayed stuck on Tile)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-tile-clears-on-fill-switch');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image', { exact: true }).click();
+
+    const panel = page.locator('[class*="ColorPicker_"]:not([class*="ColorPicker__"])').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Tile' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'tile' });
+
+    // action — add a plain solid fill and switch the picker to it
+    await page.getByLabel('Add fill').click();
+    await page.getByLabel('Hex color').nth(1).click();
+
+    // result — the global image editor state is gone, not stuck showing the previous fill's Tile mode
+    await expect.poll(() => readImageEditor(page)).toBeNull();
   });
 
   test('reselecting a node after a crop was committed does not silently rewrite the paint (regression: seeding the panel from the existing paint made it look like a brand new file was just picked, wiping the crop and rotation)', async ({

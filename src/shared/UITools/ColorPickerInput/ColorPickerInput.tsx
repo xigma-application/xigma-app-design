@@ -33,7 +33,6 @@ export type TColorPickerInputProps = {
   alpha: number;
   className?: string;
   e2eValue?: TE2EValue;
-  forceCloseSignal?: number;
   hex: string;
   hexDisplayValue?: string;
   imageAdjustments?: TImageAdjustments;
@@ -79,7 +78,6 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   alpha,
   className = '',
   e2eValue = '',
-  forceCloseSignal,
   hex,
   hexDisplayValue,
   imageAdjustments,
@@ -148,7 +146,6 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
-                forceCloseSignal={forceCloseSignal}
                 imageAdjustments={imageAdjustments}
                 imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}

@@ -23,7 +23,6 @@ export type TColorPickerProps = {
   align?: TPopoverProps['align'];
   avoidCollisions?: TPopoverProps['avoidCollisions'];
   className?: string;
-  forceCloseSignal?: number;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
   imageAdjustments?: TImageAdjustments;

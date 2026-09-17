@@ -13,7 +13,6 @@ import Popover from 'shared/UITools/Popover/Popover';
 import { useClosePatternSourcePickingOnEscape } from './hooks/useClosePatternSourcePickingOnEscape';
 import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
-import { useForceClosePicker } from './hooks/useForceClosePicker';
 import { useHandleInteractOutside } from './hooks/useHandleInteractOutside';
 import { useHandleOpenChange } from './hooks/useHandleOpenChange';
 import { useIgnoreDismissWhileImageTabActive } from './hooks/useIgnoreDismissWhileImageTabActive';
@@ -53,7 +52,6 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   align,
   avoidCollisions,
   className = '',
-  forceCloseSignal,
   freezePositionOnGrow,
   headerExtra,
   imageAdjustments,
@@ -138,7 +136,6 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   useNotifyImageTabActiveState(activeTab, onImageTabActiveChange);
   useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
   useSyncFillModeWithImageEditorCrop(isImageTabActive, imagePanel.setFillMode);
-  useForceClosePicker(forceCloseSignal, handleOpenChange);
 
   return (
     <Popover

@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, Fragment } from 'react';
+import { FC, Fragment, MouseEvent } from 'react';
 
 // @xigma
 import { TIconProps } from '@xigma/components';
@@ -17,11 +17,12 @@ export type TToolbarButtonProps = {
   isActive: boolean;
   label?: string;
   onClick?: TFunc;
+  onMouseDown?: TFunc<[MouseEvent]>;
   shortcut?: string;
   tooltip: string;
 };
 
-const ToolbarButton: FC<TToolbarButtonProps> = ({ icon, isActive, label, onClick, shortcut, tooltip }) => (
+const ToolbarButton: FC<TToolbarButtonProps> = ({ icon, isActive, label, onClick, onMouseDown, shortcut, tooltip }) => (
   <Tooltip
     content={
       <Fragment>
@@ -35,6 +36,7 @@ const ToolbarButton: FC<TToolbarButtonProps> = ({ icon, isActive, label, onClick
       ariaLabel={tooltip}
       className={cx(styles.ToolbarButton, { [styles['ToolbarButton--active']]: isActive })}
       onClick={onClick}
+      onMouseDown={onMouseDown}
       variant="link"
     >
       <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={icon} size={ICON_SIZE} />

@@ -8,6 +8,7 @@ import ToolbarButton from '../ToolbarButton/ToolbarButton';
 // hooks
 import { useHandleCropClick } from './hooks/useHandleCropClick';
 import { useImageEditToolbar } from './hooks/useImageEditToolbar';
+import { useStopCropMouseDownPropagation } from './hooks/useStopCropMouseDownPropagation';
 
 // others
 import { SELECT_AREA_SHORTCUT, translationNameSpace } from './constants';
@@ -19,6 +20,7 @@ const ImageEditToolbar: FC = () => {
   const { t } = useTranslation();
   const { handleToggleSelectArea, isSelectAreaActive, isVisible } = useImageEditToolbar();
   const handleCropClick = useHandleCropClick();
+  const stopCropMouseDownPropagation = useStopCropMouseDownPropagation();
 
   if (!isVisible) {
     return null;
@@ -31,7 +33,14 @@ const ImageEditToolbar: FC = () => {
 
   return (
     <div className={styles.ImageEditToolbar}>
-      <ToolbarButton icon="Crop" isActive={false} label={cropLabel} onClick={handleCropClick} tooltip={cropLabel} />
+      <ToolbarButton
+        icon="Crop"
+        isActive={false}
+        label={cropLabel}
+        onClick={handleCropClick}
+        onMouseDown={stopCropMouseDownPropagation}
+        tooltip={cropLabel}
+      />
       <ToolbarButton
         icon="LassoTool"
         isActive={isSelectAreaActive}

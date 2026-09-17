@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { DEFAULT_VECTOR_PAINT_COLOR } from 'store/design/constants';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectImageFillPickerFocus, selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -20,6 +20,7 @@ import { toggleFillVisibility } from './utils/toggleFillVisibility';
 import { useClearFillSelectionOnOutsideClick } from './hooks/useClearFillSelectionOnOutsideClick/useClearFillSelectionOnOutsideClick';
 import { useFillReorderDrag } from './hooks/useFillReorderDrag/useFillReorderDrag';
 import { useFillSelection } from './hooks/useFillSelection/useFillSelection';
+import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerIndex';
 
 export const useFillSection = (): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
@@ -31,6 +32,9 @@ export const useFillSection = (): TUseFillSectionResult => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { clearSelection, onSelectRow, selectedIndices, setSelection } = useFillSelection(fills.length);
   const { beginDrag, dragState, registerRow } = useFillReorderDrag(fills, commit, setSelection, containerRef);
+  const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
+  const initialOpenPickerIndex = imageFillPickerFocus && imageFillPickerFocus.nodeId === nodeId ? imageFillPickerFocus.paintIndex : null;
+  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialOpenPickerIndex);
 
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, clearSelection);
 
@@ -45,10 +49,12 @@ export const useFillSection = (): TUseFillSectionResult => {
     onChange: (index, paint): void => commit(fills.map((fill, fillIndex) => (fillIndex === index ? paint : fill))),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
+    onPickerOpenChange,
     onRemove: (index): void => commit(fills.filter((_fill, fillIndex) => fillIndex !== index)),
     onSelectRow,
     onStartDrag: (index, event): void => beginDrag(resolveFillDragIndices(selectedIndices, setSelection, index), index, event),
     onToggleVisible: (index): void => commit(toggleFillVisibility(fills, index)),
+    openPickerIndex,
     registerRow,
   };
 };

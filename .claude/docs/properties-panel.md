@@ -978,25 +978,40 @@ that renders the hook inside an explicit `<StrictMode>` wrapper (`useSyncImageEd
 this can't regress silently again, plus two e2e cases in `fill-section.spec.ts` (frame-refocus and
 Escape) that this exact bug's first fix attempt failed.
 
-**Follow-up bug: two image fills on one node, second one's edits landing on the first.** Despite
-the controlled-`open` conversion above, `ColorPicker`'s `isOpen` still only ever *seeds* once from
-`initialOpen` — nothing outside it can tell an already-open popover to close later. With two image
-fills, opening the second fill's Image tab left the first fill's popover genuinely still open in the
-DOM (confirmed live: two "Image" tab buttons existed at once), and whichever row's
-`useSyncImageEditor` effect fired last won the shared `imageEditor`/`imageFillPickerFocus` state.
-Fixed with a real, opt-in close channel: `ColorPicker`/`ColorPickerInput` gained
-`forceCloseSignal?: number` (`ColorPicker/hooks/useForceClosePicker.ts`) — changing it closes the
-picker through the same `handleOpenChange` path a real outside-click would use; it's `undefined` and
-a no-op for every other caller. `FillRow`'s new `useClosePickerWhenFocusMovesAway.ts` computes that
-signal by watching `imageFillPickerFocus` and bumping it when focus moves to a *different* fill
-while this row still believes it's open on the Image tab — gated by a `hadFocusRef` so a fill can
-only be force-closed once it has *previously* been confirmed to genuinely hold focus, never on the
-same render where it's still in the middle of claiming that focus for the first time (the
-`useSyncImageEditor` dispatch that claims it lands one render later, so a naive same-render check
-made a freshly-opening fill instantly close itself). A `key`-based forced-remount was tried first and
-discarded: it raced with React 18 StrictMode's double-invoked effects and Radix's own
-dismissable-layer/outside-click handling, closing both fills' popovers instead of just the stale one
-— see `test-cases-panels.md` #487 for the full blow-by-blow.
+**Follow-up bug, much bigger than it first looked: no two fill-row popovers ever had real mutual
+exclusion.** `ColorPicker`'s `isOpen` only ever *seeds* once from `initialOpen` — nothing outside it
+can tell an already-open popover to close later, and `ignoreDismissWhileImageTabActive` additionally
+blocks Radix's own outside-click dismissal while a row is on the Image tab (intentionally — canvas
+interactions like a crop drag must survive it). Two attempted fixes made this *worse* before landing
+on the real one: a `key`-based forced-remount raced React 18 StrictMode's double-invoked effects and
+Radix's own dismissable-layer handling, closing both fills' popovers at once instead of just the
+stale one; a `forceCloseSignal` prop toggling Radix's `open` state fixed that race but depended on an
+unmemoized `handleOpenChange` in its effect deps, so once a fill was force-closed once it could never
+reopen again (the effect re-fired on every unrelated render forever, snapping it shut).
+
+The actual fix, after the user explicitly asked for "kill the instance, not signals": `FillSection`
+owns one `openPickerIndex: number | null` (`hooks/useFillSection/hooks/useOpenPickerIndex/`), seeded
+at mount from `imageFillPickerFocus` so the resuming-after-ImageCrop-swap case still works. Each
+`FillRow` computes `isPickerOpen = paintIndex === openPickerIndex` — a **derived** value, not local
+state, so at most one row can ever satisfy it. The genuinely new piece: `ColorPickerInput` already had
+an `onTriggerClick` escape hatch (used by `StopRow.tsx` to swap its own popover for one docked
+elsewhere) that renders a plain, static swatch button instead of mounting `ColorPicker`/`Popover` at
+all. `FillRow` passes `onTriggerClick={isPickerOpen ? undefined : () => onPickerOpenChange(true)}` —
+a closed row renders *no* `ColorPicker` component whatsoever (unmounted, not merely hidden); the row
+that owns `openPickerIndex` renders the real thing, freshly mounted with `initialOpen={isPickerOpen}`
+(always true at that point). Switching fills is therefore a plain unmount-of-old/mount-of-new via
+React's own reconciliation (different element types in the same JSX slot) — no `key`, no signal, no
+custom close mechanism, and no possible way for two instances to coexist.
+
+One more bug this surfaced: `FillRow`'s own `isImageTabActive` is local state, fed by
+`onImageTabActiveChange` from the (now sometimes-unmounted) `ColorPicker` — once a row's picker
+unmounts because another one took over, that callback stops firing and `isImageTabActive` stays
+frozen at whatever it last was. If the row was on the Image tab (e.g. Tile mode), `useSyncImageEditor`
+never sees `isImageTabActive` go false, so its deactivate branch never fires and the global
+`imageEditor` state stays stuck showing the fill that's no longer even open. Fixed with a small
+`useDeactivateImageTabOnPickerClose.ts`: resets `isImageTabActive` to `false` the moment
+`isPickerOpen` goes false. See `test-cases-panels.md` #487/#488 for the full history, including the
+two discarded intermediate attempts.
 
 ## Adding a panel for another node type
 

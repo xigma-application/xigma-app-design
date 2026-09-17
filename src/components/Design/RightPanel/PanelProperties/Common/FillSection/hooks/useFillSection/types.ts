@@ -15,9 +15,11 @@ export type TUseFillSectionResult = {
   onChange: (index: number, paint: TPaint) => void;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onPickerOpenChange: (index: number, isOpen: boolean) => void;
   onRemove: (index: number) => void;
   onSelectRow: (index: number, modifiers: TFillSelectModifiers) => void;
   onStartDrag: (index: number, event: ReactPointerEvent) => void;
   onToggleVisible: (index: number) => void;
+  openPickerIndex: number | null;
   registerRow: (index: number) => (element: HTMLElement | null) => void;
 };

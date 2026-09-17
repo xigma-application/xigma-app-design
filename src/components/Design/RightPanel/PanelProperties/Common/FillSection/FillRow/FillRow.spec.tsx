@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { ReactNode, useState } from 'react';
 
 // components
-import FillRow from './FillRow';
+import FillRow, { TFillRowProps } from './FillRow';
 import { TooltipProvider } from 'shared';
 
 // core
@@ -36,21 +36,40 @@ const TestProviders = ({ children }: { children: ReactNode }): ReactNode => (
 
 const SOLID_PAINT: TPaint = { color: '#ff0000', opacity: 80, type: 'solid' };
 
+// mirrors the real parent (FillSection): tracks which row owns the open picker and feeds it back
+// down as a controlled prop, since FillRow itself no longer manages that state locally
+const FillRowHarness = ({
+  onPickerOpenChange,
+  openPickerIndex: initialOpenPickerIndex = null,
+  ...rest
+}: TFillRowProps): ReturnType<typeof FillRow> => {
+  const [openPickerIndex, setOpenPickerIndex] = useState(initialOpenPickerIndex);
+
+  const handlePickerOpenChange = (isOpen: boolean): void => {
+    onPickerOpenChange(isOpen);
+    setOpenPickerIndex(isOpen ? rest.paintIndex : null);
+  };
+
+  return <FillRow {...rest} onPickerOpenChange={handlePickerOpenChange} openPickerIndex={openPickerIndex} />;
+};
+
 const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnType<typeof FillRow> => {
   const [paint, setPaint] = useState(initialPaint);
 
   return (
-    <FillRow
+    <FillRowHarness
       isDragging={false}
       isSelected={false}
       nodeId="node-1"
       onChange={setPaint}
       onDragEnd={vi.fn()}
       onDragStart={vi.fn()}
+      onPickerOpenChange={vi.fn()}
       onRemove={vi.fn()}
       onSelect={vi.fn()}
       onStartDrag={vi.fn()}
       onToggleVisible={vi.fn()}
+      openPickerIndex={null}
       paint={paint}
       paintIndex={0}
       registerRow={vi.fn()}
@@ -58,20 +77,22 @@ const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnTy
   );
 };
 
-const renderFillRow = (overrides: Partial<Parameters<typeof FillRow>[0]> = {}): ReturnType<typeof render> =>
+const renderFillRow = (overrides: Partial<TFillRowProps> = {}): ReturnType<typeof render> =>
   render(
     <TestProviders>
-      <FillRow
+      <FillRowHarness
         isDragging={false}
         isSelected={false}
         nodeId="node-1"
         onChange={vi.fn()}
         onDragEnd={vi.fn()}
         onDragStart={vi.fn()}
+        onPickerOpenChange={vi.fn()}
         onRemove={vi.fn()}
         onSelect={vi.fn()}
         onStartDrag={vi.fn()}
         onToggleVisible={vi.fn()}
+        openPickerIndex={null}
         paint={SOLID_PAINT}
         paintIndex={0}
         registerRow={vi.fn()}
@@ -148,7 +169,7 @@ describe('FillRow behaviors', () => {
     store.dispatch(setImageFillPickerFocus({ nodeId: 'node-1', paintIndex: 0 }));
 
     // before — no click on the swatch, yet the picker content shows up already
-    renderFillRow({ paint: imagePaint });
+    renderFillRow({ openPickerIndex: 0, paint: imagePaint });
 
     // result
     expect(screen.getByRole('button', { name: 'Rotate image' })).toBeInTheDocument();
@@ -174,7 +195,7 @@ describe('FillRow behaviors', () => {
     store.dispatch(setImageFillPickerFocus({ nodeId: 'node-1', paintIndex: 0 }));
 
     // before
-    renderFillRow({ paint: imagePaint });
+    renderFillRow({ openPickerIndex: 0, paint: imagePaint });
 
     // result — no canvas-facing crop/position session got (re)armed just from the picker reappearing
     expect(selectImageEditor(store.getState())).toBeNull();
