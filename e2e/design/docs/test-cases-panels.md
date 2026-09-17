@@ -250,6 +250,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More) |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 484 | Picking Crop right after Tile (via the dropdown, or via a resize that auto-enters crop) clears the stale tile scaleMode/scale |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -846,3 +847,18 @@ no real selection behavior) — wiring real functionality for each is a separate
 one more guard: `useImageEditToolbar` also reads `selectImageEditor` and hides while
 `imageEditor?.mode === 'crop'`, since that's when the dedicated `ImageCrop` panel/crop handles take
 over the same on-canvas area — position and tile mode leave it visible, only crop mode hides it.
+
+#484 is a related but separate bug: tile and crop are mutually exclusive concepts on a
+`TImagePaint` (tile wraps the texture via `scaleMode: 'tile'` + `scale`; crop draws a fixed
+`crop` rect), but nothing enforced that — picking Crop right after Tile (or resizing a
+tile-mode shape, which auto-enters crop via `disarmResizeDrag.ts`'s
+`commitImageEditorCropModeTransition`) left the paint with `scaleMode: 'tile'` **and** a freshly
+seeded `crop` at the same time, so `drawImageTexture.ts` applied tile UV-wrapping *inside* the
+crop quad — a visible "double-exposure" ghosting artifact, confirmed live. Root cause:
+`seedImageCropIfNeeded.ts` (the single function both the dropdown's `enterImageCropMode` and the
+resize-handle's `armResizeOnPointerDown.ts` call to seed a crop rect) only ever wrote `crop`,
+never touching `scaleMode`/`scale`. Fixed there once, covering both entry paths: when seeding a
+crop for a paint whose `scaleMode` is still `'tile'`, it now also resets `scaleMode` to `'fill'`
+and clears `scale` in the same dispatch, and uses the corrected paint when computing the seeded
+crop rect itself (so it gets the natural-image cover-sizing logic instead of tile's frame-sized
+fallback).

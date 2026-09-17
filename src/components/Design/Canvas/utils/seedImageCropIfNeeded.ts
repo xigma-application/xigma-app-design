@@ -14,8 +14,10 @@ export const seedImageCropIfNeeded = (dispatch: AppDispatch, node: TSceneNode | 
     const paint = node.fills[paintIndex];
 
     if (paint?.type === 'image' && !paint.crop) {
-      const crop = getImageCropRect(node, paint);
-      const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, crop } : fill));
+      const isLeavingTile = paint.scaleMode === 'tile';
+      const paintForCrop = isLeavingTile ? { ...paint, scale: undefined, scaleMode: 'fill' as const } : paint;
+      const crop = getImageCropRect(node, paintForCrop);
+      const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paintForCrop, crop } : fill));
 
       dispatch(updateNode({ changes: { fills }, id: node.id }));
     }

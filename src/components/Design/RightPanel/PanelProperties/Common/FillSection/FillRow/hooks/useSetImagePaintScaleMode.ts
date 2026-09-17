@@ -75,7 +75,7 @@ export const useSetImagePaintScaleMode = (
   return (fillMode): void => {
     if (paint.type === 'image' && (fillMode === 'fill' || fillMode === 'fit')) {
       applyImageFillModeChange(dispatch, paint, onChange, imageEditor, nodeId, paintIndex, fillMode);
-    } else if (fillMode === 'crop') {
+    } else if (paint.type === 'image' && fillMode === 'crop') {
       enterImageCropMode(dispatch, imageEditor, nodeId, paintIndex);
     } else if (paint.type === 'image' && fillMode === 'tile') {
       enterImageTileMode(dispatch, paint, onChange, imageEditor, nodeId, paintIndex);

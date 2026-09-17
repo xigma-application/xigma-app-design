@@ -4086,6 +4086,92 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
   });
 
+  test('picking Crop right after Tile clears the stale tile scaleMode, so the two modes never coexist on the paint', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-tile-then-crop');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+    const fillModeLabel = panel.locator('[class*="ImageFillModeRow__dropdown"] [class*="Dropdown__label"]');
+
+    // action — switch to Tile first
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Tile' }).click();
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('tile');
+
+    // action — then switch straight to Crop, without ever going back to Fill/Fit first
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // result — the paint no longer carries the stale tile scaleMode alongside the new crop rect
+    const paint = (await readNode(page, id)).fills![0];
+
+    expect(paint.scaleMode).toBe('fill');
+    expect(paint.crop).toBeTruthy();
+
+    // result — surviving a full deselect/reselect/reopen round trip, both stay consistent
+    await designPage.click(1100, 500);
+    await designPage.click(1100, 500);
+    await designPage.click(800, 280);
+    await page.getByLabel('Hex color').click();
+
+    await expect(fillModeLabel).toHaveText('Crop');
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    const paintAfterReopen = (await readNode(page, id)).fills![0];
+
+    expect(paintAfterReopen.scaleMode).toBe('fill');
+    expect(paintAfterReopen.crop).toBeTruthy();
+  });
+
+  test('resizing the shape while in Tile mode also clears the stale tile scaleMode when it auto-switches to crop (regression: only the dropdown-driven Crop pick was fixed, the resize-handle auto-transition still left scaleMode as tile)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-tile-then-resize-to-crop');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — switch to Tile first
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Tile' }).click();
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('tile');
+
+    // action — resizing the frame auto-switches the editor into crop mode, without ever touching
+    // the fill mode dropdown directly
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // result — the paint no longer carries the stale tile scaleMode alongside the new crop rect
+    const paint = (await readNode(page, id)).fills![0];
+
+    expect(paint.scaleMode).toBe('fill');
+    expect(paint.scale).toBeUndefined();
+    expect(paint.crop).toBeTruthy();
+  });
+
   test('reselecting a node after a crop was committed does not silently rewrite the paint (regression: seeding the panel from the existing paint made it look like a brand new file was just picked, wiping the crop and rotation)', async ({
     page,
   }) => {

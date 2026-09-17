@@ -129,6 +129,42 @@ describe('useSetImagePaintScaleMode behaviors', () => {
     expect((node.fills[0] as TImagePaint).crop).toEqual({ height: 100, rotation: 0, width: 150, x: 10, y: 20 });
   });
 
+  it('should reset a stale tile scaleMode/scale on the store paint when switching from tile to crop, so the two modes never coexist on the same paint', () => {
+    // mock — the node's own paint is still carrying scaleMode: 'tile' from a previous Tile pick
+    store.dispatch(
+      addNode({
+        fills: [{ ...imagePaint, scale: 1.5, scaleMode: 'tile' }],
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 150,
+        x: 10,
+        y: 20,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const nodeId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setImageEditor({ mode: 'tile', nodeId, paintIndex: 0 }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, nodeId, 0), { wrapper });
+
+    // action
+    act(() => result.current('crop'));
+
+    // result — scaleMode/scale no longer disagree with the newly-seeded crop rect
+    const node = selectActivePage(store.getState()).nodes[nodeId] as TRectangleNode;
+    const paint = node.fills[0] as TImagePaint;
+
+    expect(paint.scaleMode).toBe('fill');
+    expect(paint.scale).toBeUndefined();
+    expect(paint.crop).toBeTruthy();
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId, paintIndex: 0 });
+  });
+
   it('should do nothing for crop when there is no active image editor for this node', () => {
     // before
     const onChange = vi.fn();

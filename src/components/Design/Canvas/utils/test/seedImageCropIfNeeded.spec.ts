@@ -87,6 +87,32 @@ describe('seedImageCropIfNeeded behaviors', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it('should drop a stale tile scaleMode/scale when seeding a crop, so the two modes never coexist on the paint', () => {
+    // mock — the paint is still carrying scaleMode: 'tile' from a previous Tile pick, with no crop
+    const dispatch = vi.fn();
+    const tiledRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ ...rectangle.fills[0], scale: 1.5, scaleMode: 'tile' } as TRectangleNode['fills'][number]],
+    };
+
+    // before
+    seedImageCropIfNeeded(dispatch, tiledRectangle, 0);
+
+    // result — scaleMode/scale no longer disagree with the newly-seeded crop rect
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          changes: {
+            fills: [
+              { ...rectangle.fills[0], crop: { height: 100, rotation: 0, width: 150, x: 10, y: 20 }, scale: undefined, scaleMode: 'fill' },
+            ],
+          },
+          id: 'rect-1',
+        },
+      }),
+    );
+  });
+
   it('should only touch the fill at the given paintIndex, leaving earlier fills untouched', () => {
     // mock
     const dispatch = vi.fn();
