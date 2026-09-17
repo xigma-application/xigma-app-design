@@ -247,6 +247,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 478 | A pattern keeps rendering correctly on its consumer after zooming in heavily, even with its source far away and off-screen |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 479 | Dragging crop on an Image fill with no asset picked yet pans the checker placeholder itself, not just the crop outline     |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 480 | Cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed             |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as

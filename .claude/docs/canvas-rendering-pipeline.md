@@ -546,6 +546,22 @@ previewing at all). `drawImageEditorTileOverflowPreview.ts`'s tile-mode equivale
 which is never populated for an empty ref, so extending it needs its own follow-up rather than reusing
 this fix as-is.
 
+**Picking a real file no longer wipes whatever crop/rotation/flip/adjustments the placeholder already
+had.** `useConvertToImagePaint.ts` (`FillRow`'s single `onImageChange` handler, wired unconditionally
+regardless of the current paint's type) used to always build a brand-new `TImagePaint` from scratch —
+`{ ...change, blendMode, opacity, rotation: 0, type: 'image', visible }`, where `change` is just
+`{ref, scaleMode}` — discarding `crop`/`flipX`/`flipY`/`adjustments`/`scale` unconditionally. That was
+correct for its original purpose (converting a solid/gradient/pattern paint into an image paint for
+the first time) but wrong for the now-common case of picking a file *after* the empty-`ref`
+placeholder had already been panned/cropped: the user would drag the placeholder into position, pick
+a photo, and watch it snap back to a fresh centered crop, since the hook never looked at what was
+already there. Fixed by branching on `paint.type === 'image'`: when the paint being replaced was
+already an image, `{ ...paint, ...change }` carries every existing field forward and only `ref`/
+`scaleMode` come from the fresh pick; the from-scratch conversion path (any other paint type) is
+untouched. Regression-tested at both levels — a unit test asserting the merged-paint shape, and an
+e2e test that pans an empty-`ref` placeholder's crop, uploads a real file, and asserts the exact same
+crop rect survives (confirmed to fail — crop coming back `undefined` — against the old code).
+
 **Switching the Fill panel to the Image tab commits a real (empty-`ref`) `TImagePaint` immediately**,
 the same way switching to Gradient/Pattern already immediately committed their own default paint —
 `useSetActiveTab.ts`'s `case ColorPickerTab.image` now calls `onImageChange?.({ref: '', scaleMode:

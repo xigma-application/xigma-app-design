@@ -3767,6 +3767,68 @@ test.describe('Design panels — Fill section', () => {
     expect(afterCrop).not.toEqual(beforeAnyFill);
   });
 
+  test('picking a real file over a placeholder that was already cropped/panned keeps that same crop, instead of resetting it back to a fresh centered one (regression: useConvertToImagePaint always built a brand-new paint from scratch, dropping crop/rotation/flip/adjustments whenever a file was picked, even when the previous paint was already an image being cropped)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-placeholder-crop-survives-upload');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    // enter crop mode via the frame's own nw resize handle — frame/crop become (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // action — pan the empty-ref placeholder well clear of the frame, before ever picking a file
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(850, 330);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    const cropBeforeUpload = (await readNode(page, id)).fills?.[0].crop;
+
+    expect(cropBeforeUpload).toEqual({ height: 140, rotation: 0, width: 180, x: 770, y: 270 });
+
+    // action — the fill picker panel is hidden while the image is focused (dedicated ImageCrop panel
+    // takes over instead); click back near the frame's own corner, clear of the shifted crop rect, to
+    // refocus the frame and bring the picker (and its file input) back
+    await expect(panel).not.toBeVisible();
+    await designPage.click(725, 225);
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, selectedTarget: 'frame' });
+    await expect(panel).toBeVisible();
+
+    // action — now actually pick a real file over that already-cropped placeholder
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [0, 0, 255]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => (await readNode(page, id)).fills?.[0].ref).toMatch(/^blob:/);
+
+    // result — the crop is untouched by the upload, not reset back to the frame's own bounds
+    const nodeAfterUpload = await readNode(page, id);
+
+    expect(nodeAfterUpload.fills?.[0].crop).toEqual(cropBeforeUpload);
+
+    // result — the picked photo actually renders through that preserved (shifted) crop: a point inside
+    // the frame but outside the shifted crop rect stays empty, while a point inside both shows the
+    // picked (pure blue) photo
+    expect(await readPixelColor(page, 725, 225)).not.toEqual([0, 0, 255]);
+    await expect.poll(async () => readPixelColor(page, 800, 300)).toEqual([0, 0, 255]);
+  });
+
   test('dragging the image within its frame snaps to center/edge alignment with the frame, like a smart guide', async ({ page }) => {
     const designPage = new DesignPage(page);
 
