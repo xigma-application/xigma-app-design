@@ -1,0 +1,24 @@
+.ImageEditToolbar {
+  align-items: center;
+  background-color: var(--color-neutral-5);
+  border-radius: var(--radius-large);
+  bottom: calc(100% + 10px);
+  box-shadow: var(--elevation-200-canvas);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacer-2);
+  height: 40px;
+  left: 50%;
+  overflow: hidden;
+  padding: var(--spacer-2);
+  position: absolute;
+  touch-action: manipulation;
+  transform: translateX(-50%);
+
+  &__separator {
+    background-color: var(--color-neutral-3);
+    height: calc(100% + var(--spacer-2) * 2);
+    width: 1px;
+  }
+}

@@ -3390,6 +3390,40 @@ test.describe('Design panels — Fill section', () => {
       .toBe(true);
   });
 
+  test('selecting a shape with an image fill shows the Image edit toolbar above the canvas toolbar', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-edit-toolbar');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    // action — switch to the Image paint type without ever picking a file
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // result — every action shows up with both its icon and a visible text label
+    await expect(page.getByRole('button', { name: 'Crop' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Select area' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Remove background' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit with prompt' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'More' })).toBeVisible();
+
+    // action — Select area only toggles its own pressed state, it has no real function yet
+    await page.getByRole('button', { name: 'Select area' }).click();
+
+    // result
+    await expect(page.getByRole('button', { name: 'Select area' })).toHaveAttribute('aria-pressed', 'true');
+
+    // action — the More dropdown lists the remaining AI actions
+    await page.getByRole('button', { name: 'More' }).click();
+
+    // result
+    await expect(page.getByText('Expand')).toBeVisible();
+    await expect(page.getByText('Boost resolution')).toBeVisible();
+    await expect(page.getByText('Vectorize')).toBeVisible();
+  });
+
   test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {
     const designPage = new DesignPage(page);
 

@@ -248,6 +248,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 479 | Dragging crop on an Image fill with no asset picked yet pans the checker placeholder itself, not just the crop outline     |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 480 | Cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed             |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More) |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -833,3 +834,11 @@ the image was selected. Fixed by making the cleanup check whether the node is st
 (`selectSelectedNodes`) before clearing, and by tracking "did this hook instance ever actually
 activate the editor" (`wasActiveRef`) so a fresh mount that lands on an already-active `imageEditor`
 doesn't immediately clear it either.
+
+#482's `ImageEditToolbar` (`Toolbar/ImageEditToolbar/`) is a shell only — it shows above the canvas
+toolbar (same offset as `VectorEditToolbar`, reusing the generic `ToolbarButton`/`ToolbarDropdown`)
+whenever the selected node has at least one fill of type `image` (`useImageEditToolbar`, guarded by
+`vectorEditingNodeIds.length === 0` so it never overlaps `VectorEditToolbar`). Crop/Remove
+background/Edit with prompt and the More dropdown's Expand/Boost resolution/Vectorize are all
+no-ops for now; Select area only toggles its own local `isSelectAreaActive` state (no store write,
+no real selection behavior) — wiring real functionality for each is a separate follow-up.
