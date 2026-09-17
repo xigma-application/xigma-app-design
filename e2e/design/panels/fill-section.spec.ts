@@ -3424,6 +3424,45 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.getByText('Vectorize')).toBeVisible();
   });
 
+  test('the Image edit toolbar hides once crop mode is entered, and comes back once it exits', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-edit-toolbar-crop-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    // the toolbar's own Crop button, scoped away from the fill-mode dropdown trigger (which also
+    // reads "Crop" once that value is selected)
+    const cropButton = page.locator('[class*="ImageEditToolbar_"]').first().getByRole('button', { name: 'Crop' });
+
+    // result — still in position mode, the toolbar shows
+    await expect(cropButton).toBeVisible();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — switch into crop mode
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // result — the toolbar is gone while crop mode is active
+    await expect(cropButton).not.toBeVisible();
+
+    // action — leave crop mode by switching the fill mode back to Fill
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Fill' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    // result — the toolbar reappears
+    await expect(cropButton).toBeVisible();
+  });
+
   test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -3549,7 +3588,7 @@ test.describe('Design panels — Fill section', () => {
 
     // action — pick Crop from the dropdown directly, with no resize at all
     await dropdownTrigger.click();
-    await page.getByText('Crop', { exact: true }).click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
 
     // result — the underlying editor actually switched to crop mode, not just the dropdown label
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
@@ -3740,7 +3779,7 @@ test.describe('Design panels — Fill section', () => {
 
     // enter crop mode with no resize, so the frame/crop stay exactly 160x160
     await dropdownTrigger.click();
-    await page.getByText('Crop', { exact: true }).click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
 
     // establish an explicit crop rect first, same as every other crop-drag test does
@@ -3784,7 +3823,7 @@ test.describe('Design panels — Fill section', () => {
     const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
 
     await dropdownTrigger.click();
-    await page.getByText('Crop', { exact: true }).click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
 
     // action — shift the crop rect right/down by 20px, so it now overhangs the frame's own right and

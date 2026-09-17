@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useImageEditToolbar } from '../useImageEditToolbar';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, setImageEditor, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -43,6 +43,7 @@ describe('useImageEditToolbar', () => {
   afterEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should stay hidden when nothing is selected', () => {
@@ -75,6 +76,27 @@ describe('useImageEditToolbar', () => {
     store.dispatch(setVectorEditingNodeIds([id]));
 
     expect(renderUseImageEditToolbar().result.current.isVisible).toBe(false);
+  });
+
+  it('should stay hidden while crop mode is active, even with an image fill selected', () => {
+    const id = addRectangle([{ opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' }]);
+
+    store.dispatch(setSelection([id]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: id, paintIndex: 0 }));
+
+    expect(renderUseImageEditToolbar().result.current.isVisible).toBe(false);
+  });
+
+  it('should stay visible while position or tile mode is active, unlike crop mode', () => {
+    const id = addRectangle([{ opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' }]);
+
+    store.dispatch(setSelection([id]));
+
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: id, paintIndex: 0 }));
+    expect(renderUseImageEditToolbar().result.current.isVisible).toBe(true);
+
+    store.dispatch(setImageEditor({ mode: 'tile', nodeId: id, paintIndex: 0 }));
+    expect(renderUseImageEditToolbar().result.current.isVisible).toBe(true);
   });
 
   it('should toggle the Select area button locally, with no store side effect', () => {

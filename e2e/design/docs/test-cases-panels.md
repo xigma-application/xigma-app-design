@@ -249,6 +249,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 480 | Cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed             |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More) |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -841,4 +842,7 @@ whenever the selected node has at least one fill of type `image` (`useImageEditT
 `vectorEditingNodeIds.length === 0` so it never overlaps `VectorEditToolbar`). Crop/Remove
 background/Edit with prompt and the More dropdown's Expand/Boost resolution/Vectorize are all
 no-ops for now; Select area only toggles its own local `isSelectAreaActive` state (no store write,
-no real selection behavior) — wiring real functionality for each is a separate follow-up.
+no real selection behavior) — wiring real functionality for each is a separate follow-up. #483 adds
+one more guard: `useImageEditToolbar` also reads `selectImageEditor` and hides while
+`imageEditor?.mode === 'crop'`, since that's when the dedicated `ImageCrop` panel/crop handles take
+over the same on-canvas area — position and tile mode leave it visible, only crop mode hides it.
