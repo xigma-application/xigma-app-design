@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, PointerEvent as ReactPointerEvent, useState } from 'react';
+import { FC, PointerEvent as ReactPointerEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -20,6 +20,10 @@ import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 import { useSyncImageEditor } from './hooks/useSyncImageEditor';
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
 
+// store
+import { selectImageFillPickerFocus } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
 import { translationNameSpace } from '../constants';
@@ -33,6 +37,7 @@ import { TPaint } from 'types/design/paint/types';
 // utils
 import { getFillRowHexDisplayValue } from './utils/getFillRowHexDisplayValue';
 import { getFillRowInitialActiveTab } from './utils/getFillRowInitialActiveTab';
+import { getInitialImageFillModeFromPaint } from './utils/getInitialImageFillModeFromPaint';
 import { getFillRowSwatchHex } from './utils/getFillRowSwatchHex';
 import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
 
@@ -69,8 +74,12 @@ export const FillRow: FC<TFillRowProps> = ({
 }) => {
   const { t } = useTranslation();
   const isVisible = paint.visible !== false;
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [isImageTabActive, setIsImageTabActive] = useState(false);
+  const isImage = paint.type === 'image';
+  const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
+  const isResumingImageFocus = isImage && imageFillPickerFocus?.nodeId === nodeId && imageFillPickerFocus?.paintIndex === paintIndex;
+  const [isPickerOpen, setIsPickerOpen] = useState(isResumingImageFocus);
+  const [isImageTabActive, setIsImageTabActive] = useState(isResumingImageFocus);
+  const skipInitialImageEditorArmRef = useRef(isResumingImageFocus);
   const [gradientPanelState, setGradientPanelState] = useState(DEFAULT_GRADIENT_PANEL_STATE);
   const handleClick = useSelectFillRow(onSelect);
   const handlePointerDown = useBeginFillHandleDrag(onSelect, onStartDrag);
@@ -81,14 +90,14 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
-  const isImage = paint.type === 'image';
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern';
   const value = { alpha: paint.opacity, hex: getFillRowSwatchHex(paint) };
   const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
+  const hasStoredCrop = paint.type === 'image' && Boolean(paint.crop);
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, paint.type === 'image' && Boolean(paint.crop));
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, hasStoredCrop, skipInitialImageEditorArmRef.current);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
@@ -117,7 +126,9 @@ export const FillRow: FC<TFillRowProps> = ({
           hexDisplayValue={hexDisplayValue}
           imageUrl={isImage ? paint.ref : undefined}
           initialActiveTab={getFillRowInitialActiveTab(paint)}
+          initialFillMode={getInitialImageFillModeFromPaint(paint)}
           initialGradient={isGradient ? { end: paint.end, start: paint.start, stops: paint.stops, type: paint.type } : undefined}
+          initialOpen={isResumingImageFocus}
           initialPattern={getInitialPatternFromPaint(paint)}
           isPattern={isPattern}
           isPointerOverGradientHandle={isPointerOverGradientHandle}

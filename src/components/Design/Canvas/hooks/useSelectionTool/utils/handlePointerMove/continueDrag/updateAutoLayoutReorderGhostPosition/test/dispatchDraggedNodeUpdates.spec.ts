@@ -1,11 +1,12 @@
 // store
-import { addNode, deleteNode, moveNodes } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setImageEditor } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
+import { TRectangleNode } from 'types/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
@@ -16,6 +17,26 @@ const addRect = (x: number, y: number): string => {
   store.dispatch(
     addNode({
       fills: [{ color: '#000', opacity: 100, type: 'solid' }],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addImageRect = (x: number, y: number, crop: { height: number; rotation: number; width: number; x: number; y: number }): string => {
+  store.dispatch(
+    addNode({
+      fills: [{ crop, opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
       height: 20,
       name: 'Rectangle',
       parentId: null,
@@ -71,6 +92,7 @@ const dragState = (nodeOrigins: TDragState['nodeOrigins']): TDragState =>
 describe('dispatchDraggedNodeUpdates', () => {
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should dispatch the delta onto every non-snapshotted dragged node once the frame flushes', () => {
@@ -84,6 +106,61 @@ describe('dispatchDraggedNodeUpdates', () => {
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 110, y: 120 });
+  });
+
+  it('should carry an image fill’s crop rect along live, for a plain (non-snapshotted) node dragging through direct dispatch', () => {
+    // mock — a crop rect exactly matching the node's own bounds
+    const id = addImageRect(100, 100, { height: 20, rotation: 0, width: 20, x: 100, y: 100 });
+    const state = dragState({ [id]: { x: 100, y: 100 } });
+
+    // action
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 10, 20);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node).toMatchObject({ x: 110, y: 120 });
+    expect(crop).toMatchObject({ x: 110, y: 120 });
+  });
+
+  it('should not compound the crop translation across repeated throttled flushes of the same drag (regression: re-reading the already-translated live fills every flush stacked the offset on top of itself)', () => {
+    // mock — the drag continues across two separate throttled flushes: first to a total delta of
+    // (10, 0) from the drag's own start, then to a total delta of (20, 0)
+    const id = addImageRect(100, 100, { height: 20, rotation: 0, width: 20, x: 100, y: 100 });
+    const state = dragState({ [id]: { x: 100, y: 100 } });
+
+    // action — two separate flushes of the same drag
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 10, 0);
+    flushThrottledDispatch(state.dispatchThrottle);
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 20, 0);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result — the crop lands on the final total offset (120), not 100+10+20=130 from compounding
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node.x).toBe(120);
+    expect(crop?.x).toBe(120);
+  });
+
+  it("should leave the image editor's crop in place when the frame it belongs to is dragged while that node's image editor is active (regression: moving the frame while its crop mode is armed dragged the crop along with it)", () => {
+    // mock — image editor is actively editing this node's paint 0
+    const id = addImageRect(100, 100, { height: 20, rotation: 0, width: 20, x: 100, y: 100 });
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: id, paintIndex: 0 }));
+    const state = dragState({ [id]: { x: 100, y: 100 } });
+
+    // action
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 10, 20);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result — the frame moved, but the crop stayed put
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node).toMatchObject({ x: 110, y: 120 });
+    expect(crop).toMatchObject({ x: 100, y: 100 });
   });
 
   it('should reflow the auto-layout frame LIVE, on this very flush, when the dragged node is a child of a group nested in it', () => {

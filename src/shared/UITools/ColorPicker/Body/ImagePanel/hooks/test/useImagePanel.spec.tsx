@@ -14,6 +14,11 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 
 const renderImagePanel = (): RenderHookResult<TUseImagePanelResult, unknown> => renderHook(() => useImagePanel(), { wrapper });
 
+const renderImagePanelWithInitial = (
+  initialImageUrl?: string,
+  initialFillMode?: TUseImagePanelResult['fillMode'],
+): RenderHookResult<TUseImagePanelResult, unknown> => renderHook(() => useImagePanel(initialImageUrl, initialFillMode), { wrapper });
+
 describe('useImagePanel behaviors', () => {
   afterEach(() => {
     store.dispatch(setDesignHintLabelKey(null));
@@ -199,6 +204,24 @@ describe('useImagePanel behaviors', () => {
 
     // result — an unstable reference here would re-fire any effect keyed on it every render
     expect(result.current.setFillMode).toBe(firstSetFillMode);
+  });
+
+  it('should seed imageUrl and fillMode from the existing paint on mount, so reselecting the same node shows its real state', () => {
+    // before — mirrors what a node reselect (full remount) hands in from `paint.ref`/`paint.scaleMode`
+    const { result } = renderImagePanelWithInitial('image-1', 'fit');
+
+    // result
+    expect(result.current.imageUrl).toBe('image-1');
+    expect(result.current.fillMode).toBe('fit');
+  });
+
+  it('should still default to null/fill when no initial values are given', () => {
+    // before
+    const { result } = renderImagePanelWithInitial(undefined, undefined);
+
+    // result
+    expect(result.current.imageUrl).toBeNull();
+    expect(result.current.fillMode).toBe('fill');
   });
 
   it('should not touch imageUrl when a later valid file follows an unsupported one', () => {

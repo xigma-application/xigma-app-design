@@ -27,10 +27,14 @@ export type TUseImagePanelResult = TImagePanelState & {
   setTint: TFunc<[number]>;
 };
 
-export const useImagePanel = (): TUseImagePanelResult => {
+export const useImagePanel = (initialImageUrl?: string, initialFillMode?: TImageFillMode): TUseImagePanelResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [state, setState] = useState<TImagePanelState>(DEFAULT_IMAGE_PANEL_STATE);
+  const [state, setState] = useState<TImagePanelState>({
+    ...DEFAULT_IMAGE_PANEL_STATE,
+    fillMode: initialFillMode ?? DEFAULT_IMAGE_PANEL_STATE.fillMode,
+    imageUrl: initialImageUrl ?? DEFAULT_IMAGE_PANEL_STATE.imageUrl,
+  });
 
   const setImage = (file: File): void => {
     if (isSupportedImageFile(file)) {

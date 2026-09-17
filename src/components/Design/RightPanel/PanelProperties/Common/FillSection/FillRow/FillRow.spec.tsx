@@ -13,6 +13,8 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // store
+import { selectImageEditor } from 'store/design/selectors';
+import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -83,6 +85,11 @@ describe('FillRow behaviors', () => {
     usePatternThumbnailMock.mockClear();
   });
 
+  afterEach(() => {
+    store.dispatch(setImageEditor(null));
+    store.dispatch(setImageFillPickerFocus(null));
+  });
+
   it('should show the hex and opacity for a solid fill', () => {
     // before
     renderFillRow();
@@ -132,6 +139,45 @@ describe('FillRow behaviors', () => {
 
     // result
     expect(onChange).toHaveBeenCalledWith({ ...imagePaint, rotation: 90 });
+  });
+
+  it('should render the picker already open when the fill-picker focus marker points at this exact row (restoring a picker hidden by the ImageCrop panel swap)', () => {
+    // mock
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setImageFillPickerFocus({ nodeId: 'node-1', paintIndex: 0 }));
+
+    // before — no click on the swatch, yet the picker content shows up already
+    renderFillRow({ paint: imagePaint });
+
+    // result
+    expect(screen.getByRole('button', { name: 'Rotate image' })).toBeInTheDocument();
+  });
+
+  it('should not restore the picker for a row whose node/paintIndex does not match the focus marker', () => {
+    // mock
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setImageFillPickerFocus({ nodeId: 'node-1', paintIndex: 1 }));
+
+    // before
+    renderFillRow({ paint: imagePaint, paintIndex: 0 });
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Rotate image' })).not.toBeInTheDocument();
+  });
+
+  it('should not re-arm the image editor purely from restoring the picker on mount, leaving it as the external close left it', () => {
+    // mock
+    const imagePaint: TPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setImageFillPickerFocus({ nodeId: 'node-1', paintIndex: 0 }));
+
+    // before
+    renderFillRow({ paint: imagePaint });
+
+    // result — no canvas-facing crop/position session got (re)armed just from the picker reappearing
+    expect(selectImageEditor(store.getState())).toBeNull();
   });
 
   it('should commit an empty-ref image paint (so the canvas can show a placeholder) when switching a solid fill to Image', () => {

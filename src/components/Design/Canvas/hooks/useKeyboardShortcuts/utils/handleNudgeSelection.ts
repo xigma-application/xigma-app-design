@@ -15,8 +15,19 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { collectNudgeSubtreeNodes } from './collectNudgeSubtreeNodes';
 import { handleNudgeVectorEdit } from './handleNudgeVectorEdit';
+import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isNudgeableNode } from './isNudgeableNode';
+import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
 import { updateNudgeDistanceGuide } from './updateNudgeDistanceGuide';
+
+const nudgeSubtreeNodes = (dispatch: AppDispatch, subtreeNodes: TSceneNode[], deltaX: number, deltaY: number): void => {
+  subtreeNodes.forEach((node) => {
+    const geometryChanges = getGeometryDeltaChanges(node, deltaX, deltaY);
+    const fills = isAppearanceNode(node) ? translateFillsCrop(node.fills, deltaX, deltaY) : undefined;
+
+    dispatch(updateNode({ changes: fills ? { ...geometryChanges, fills } : geometryChanges, id: node.id }));
+  });
+};
 
 export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, deltaX: number, deltaY: number, altKey = false): void => {
   const state = store.getState();
@@ -35,7 +46,7 @@ export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, d
       const subtreeNodes = collectNudgeSubtreeNodes(nodesToMove, nodes);
 
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-      subtreeNodes.forEach((node) => dispatch(updateNode({ changes: getGeometryDeltaChanges(node, deltaX, deltaY), id: node.id })));
+      nudgeSubtreeNodes(dispatch, subtreeNodes, deltaX, deltaY);
       dispatch(endHistoryGesture());
       updateNudgeDistanceGuide(store.getState(), refs, altKey);
     }

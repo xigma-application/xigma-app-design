@@ -673,6 +673,7 @@
   "design.rightPanel.panelProperties.gridSettings.rows.label": "Rows",
   "design.rightPanel.panelProperties.gridSettings.title": "Grid",
   "design.rightPanel.panelProperties.gridSettings.trackValueAriaLabel": "Track size value",
+  "design.rightPanel.panelProperties.imageCrop.imageCropHeader.label": "Image",
   "design.rightPanel.panelProperties.mcp.addAriaLabel": "Add MCP connection",
   "design.rightPanel.panelProperties.mcp.addTooltip": "Set up agents for Figma MCP",
   "design.rightPanel.panelProperties.mcp.noConnections": "No connections",

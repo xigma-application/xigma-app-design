@@ -9,7 +9,7 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setActiveTool, setGridSettingsPanelOpen, setSelection, updateNode } from 'store/design/slice';
+import { addNode, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -49,6 +49,37 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addFrameNodeWithImageFill = (): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fills: [
+        {
+          crop: { height: 20, rotation: 0, width: 20, x: 0, y: 0 },
+          opacity: 100,
+          ref: 'asset-1',
+          rotation: 0,
+          scaleMode: 'fill',
+          type: 'image',
+        },
+      ],
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addRectangleNode = (): string => {
   store.dispatch(
     addNode({
@@ -72,6 +103,7 @@ const addRectangleNode = (): string => {
 describe('PanelProperties behaviors', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should show the Design, Styles, Export, and MCP sections while nothing is selected', () => {
@@ -240,6 +272,65 @@ describe('PanelProperties behaviors', () => {
 
     // cleanup
     store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setSelection([]));
+  });
+
+  it("should swap in the dedicated ImageCrop panel, without Alignment, while a frame's image content is the selected crop-mode target", () => {
+    // mock
+    const frameId = addFrameNodeWithImageFill();
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    renderPanelProperties();
+
+    // result — the dedicated Image panel replaces Frame's own, and drops Alignment
+    expect(screen.getByText('Image')).toBeInTheDocument();
+    expect(screen.queryByText('Frame')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Position').length).toBeGreaterThan(0);
+    expect(screen.getByText('Rotation')).toBeInTheDocument();
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
+    expect(screen.queryByText('Alignment')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setImageEditor(null));
+    store.dispatch(setSelection([]));
+  });
+
+  it('should fall back to the normal Frame panel once the crop-mode target switches back to the frame itself (regression: leaving the image focus must close the dedicated ImageCrop panel again)', () => {
+    // mock
+    const frameId = addFrameNodeWithImageFill();
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const { rerender } = renderPanelProperties();
+
+    expect(screen.getByText('Image')).toBeInTheDocument();
+
+    // action — the user clicks back onto the frame itself
+    act(() => {
+      store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'frame' }));
+    });
+    rerender(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <PanelProperties />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // result — back to the ordinary Frame panel, Alignment included again
+    expect(screen.getByText('Frame')).toBeInTheDocument();
+    expect(screen.queryByText('Image')).not.toBeInTheDocument();
+    expect(screen.getByText('Alignment')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setImageEditor(null));
     store.dispatch(setSelection([]));
   });
 });

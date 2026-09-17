@@ -46,6 +46,8 @@ export type TImageCrop = {
 
 export type TImagePaint = TPaintBase & {
   crop?: TImageCrop;
+  flipX?: boolean;
+  flipY?: boolean;
   ref: string;
   rotation: number;
   scaleMode: TImageScaleMode;
@@ -55,6 +57,8 @@ export type TImagePaint = TPaintBase & {
 export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
   direction: TPatternDirection;
+  flipX?: boolean;
+  flipY?: boolean;
   frozenSourceSnapshot?: TSceneNode[] | null;
   offsetX: number;
   offsetY: number;

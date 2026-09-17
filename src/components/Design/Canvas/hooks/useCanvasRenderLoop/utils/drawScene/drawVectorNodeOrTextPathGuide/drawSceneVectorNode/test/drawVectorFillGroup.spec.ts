@@ -117,9 +117,45 @@ describe('drawVectorFillGroup', () => {
       200,
       context.viewport,
       false,
+      undefined,
     );
     expect(pool.acquire).not.toHaveBeenCalled();
     expect(compositeBlend).not.toHaveBeenCalled();
+  });
+
+  it('should forward boxRotation through to drawVectorFillPaints when drawing directly, with no isolation', () => {
+    // mock
+    const gl = createGlMock();
+    const pool = { acquire: vi.fn(), release: vi.fn() } as unknown as TRenderTargetPool;
+    const context = createContext(gl, pool);
+    const paint = [makeSolidPaint('#ff0000')];
+    const polygons = [[{ x: 0, y: 0 }]];
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // action
+    drawVectorFillGroup(context, null, null, polygons, paint, [], boxRotation);
+
+    // result
+    expect(drawVectorFillPaints).toHaveBeenCalledWith(
+      gl,
+      context.program,
+      GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
+      context.buffer,
+      null,
+      null,
+      polygons,
+      paint,
+      [],
+      200,
+      200,
+      context.viewport,
+      false,
+      boxRotation,
+    );
   });
 
   it('should isolate the group, capture the backdrop, and composite it with the blend mode when a real blend mode is set', () => {
@@ -168,6 +204,7 @@ describe('drawVectorFillGroup', () => {
       200,
       context.viewport,
       true,
+      undefined,
     );
 
     // result — the previous framebuffer/viewport/blend func/alpha-write state is restored before compositing
@@ -179,6 +216,52 @@ describe('drawVectorFillGroup', () => {
     expect(compositeBlend).toHaveBeenCalledWith(context, contentTarget.texture, backdrop.texture, BlendMode.multiply);
     expect(pool.release).toHaveBeenCalledWith(contentTarget);
     expect(pool.release).toHaveBeenCalledWith(backdrop);
+  });
+
+  it('should forward boxRotation through to drawVectorFillPaints when isolating the group for a blend mode', () => {
+    // mock
+    const gl = createGlMock();
+    const backdrop = { tag: 'backdrop', texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
+    const contentTarget = {
+      framebuffer: { tag: 'fbo' },
+      height: 200,
+      tag: 'content',
+      texture: { tag: 'content-texture' },
+      width: 200,
+    } as unknown as TRenderTarget;
+    const pool = {
+      acquire: vi.fn().mockReturnValueOnce(backdrop).mockReturnValueOnce(contentTarget),
+      release: vi.fn(),
+    } as unknown as TRenderTargetPool;
+    const context = createContext(gl, pool);
+    const paint = [{ ...makeSolidPaint('#ff0000'), blendMode: BlendMode.multiply }];
+    const polygons = [[{ x: 0, y: 0 }]];
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // action
+    drawVectorFillGroup(context, null, null, polygons, paint, [], boxRotation);
+
+    // result
+    expect(drawVectorFillPaints).toHaveBeenCalledWith(
+      gl,
+      context.program,
+      GRADIENT_PROGRAM,
+      PATTERN_TILE_PROGRAM,
+      IMAGE_PROGRAM,
+      IMAGE_TEXTURE_CACHE,
+      IMAGE_PAINT_TEXTURE_SIZE_CACHE,
+      context.buffer,
+      null,
+      null,
+      polygons,
+      paint,
+      [],
+      200,
+      200,
+      context.viewport,
+      true,
+      boxRotation,
+    );
   });
 
   it("should enable alpha writes on the content target before clearing it, not after, so a recycled target's stale alpha is actually reset", () => {

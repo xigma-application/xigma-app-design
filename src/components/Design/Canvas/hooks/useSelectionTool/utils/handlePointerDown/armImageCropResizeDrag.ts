@@ -13,7 +13,9 @@ export const armImageCropResizeDrag = (
   paintIndex: number,
   origin: TImageCrop,
   handle: TResizeHandle,
+  originalFlipX?: boolean,
+  originalFlipY?: boolean,
 ): void => {
-  imageCropResizeDragRef.current = { handle, nodeId, origin, paintIndex };
+  imageCropResizeDragRef.current = { handle, nodeId, origin, originalFlipX, originalFlipY, paintIndex };
   canvas.setPointerCapture(event.pointerId);
 };

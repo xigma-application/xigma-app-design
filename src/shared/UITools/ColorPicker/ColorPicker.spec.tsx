@@ -389,6 +389,47 @@ describe('ColorPicker behaviors', () => {
     expect(screen.queryByText('Gradient')).not.toBeInTheDocument();
   });
 
+  it('should render the panel already open when initialOpen is set, without needing a trigger click', () => {
+    // before
+    renderColorPicker({
+      initialOpen: true,
+      onChange: vi.fn(),
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // result
+    expect(screen.getByText('Solid')).toBeInTheDocument();
+  });
+
+  it('should still close normally via a real interaction after being seeded open by initialOpen', () => {
+    // mock
+    const onOpenChange = vi.fn();
+
+    // before
+    renderColorPicker({
+      initialOpen: true,
+      onChange: vi.fn(),
+      onOpenChange,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action — clicking the trigger again toggles an already-open popover closed, like any other open picker
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('should default to closed when initialOpen is not set', () => {
+    // before
+    renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });
+
+    // result
+    expect(screen.queryByText('Solid')).not.toBeInTheDocument();
+  });
+
   it('should report onDragStart/onDragEnd when dragging a slider inside the popover', () => {
     // mock
     const onDragEnd = vi.fn();

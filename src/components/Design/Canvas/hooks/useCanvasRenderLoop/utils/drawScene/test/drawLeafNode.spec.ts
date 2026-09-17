@@ -69,6 +69,8 @@ const imageContext = {} as unknown as TImageRenderContext;
 
 const context: TDrawSceneContext = { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT };
 
+const DEFAULT_BOX_ROTATION = { center: { x: 10, y: 10 }, degrees: 0, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
 const rect = (overrides: Record<string, unknown> = {}): TSceneNode =>
   ({
     fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
@@ -105,6 +107,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
+      DEFAULT_BOX_ROTATION,
     );
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
@@ -132,6 +135,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.5),
       [null],
+      DEFAULT_BOX_ROTATION,
     );
     expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined, 0.5);
   });
@@ -156,6 +160,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(previewNode)],
       getScaledFillPaints(previewNode.fills, 1),
       [null],
+      { center: { x: 50, y: 70 }, degrees: 0, localBounds: { height: 20, width: 20, x: 40, y: 60 } },
     );
   });
 
@@ -175,6 +180,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
+      DEFAULT_BOX_ROTATION,
     );
   });
 
@@ -201,6 +207,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
+      DEFAULT_BOX_ROTATION,
     );
   });
 
@@ -235,6 +242,7 @@ describe('drawLeafNode', () => {
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.25),
       [null],
+      DEFAULT_BOX_ROTATION,
     );
   });
 

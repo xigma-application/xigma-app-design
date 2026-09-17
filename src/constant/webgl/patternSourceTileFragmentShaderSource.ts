@@ -9,6 +9,8 @@ uniform vec2 u_tileOriginUV;
 uniform vec2 u_tileSizeUV;
 uniform float u_opacity;
 uniform int u_hexOffsetAxis;
+uniform bool u_flipX;
+uniform bool u_flipY;
 
 in vec2 v_localPosition;
 out vec4 outColor;
@@ -34,6 +36,15 @@ void main() {
     outColor = vec4(0.0, 0.0, 0.0, 0.0);
   } else {
     vec2 tileUV = cell / u_tileFrac;
+
+    if (u_flipX) {
+      tileUV.x = 1.0 - tileUV.x;
+    }
+
+    if (u_flipY) {
+      tileUV.y = 1.0 - tileUV.y;
+    }
+
     vec2 sampleUV = u_tileOriginUV + tileUV * u_tileSizeUV;
     vec4 color = texture(u_texture, sampleUV);
 

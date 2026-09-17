@@ -55,7 +55,10 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   freezePositionOnGrow,
   headerExtra,
   initialActiveTab,
+  initialFillMode,
   initialGradient,
+  initialImageUrl,
+  initialOpen = false,
   initialPattern,
   isPointerOverGradientHandle,
   moveable = false,
@@ -86,12 +89,12 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [activeTab, setActiveTab] = useState(initialActiveTab ?? DEFAULT_ACTIVE_TAB);
   const [libraryTab, setLibraryTab] = useState(DEFAULT_LIBRARY_TAB);
   const [dockedPanel, setDockedPanel] = useState<ReactNode>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
-  const imagePanel = useImagePanel();
+  const imagePanel = useImagePanel(initialImageUrl, initialFillMode);
   const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
   const colorSampler = useColorSampler(colorModel.setHex);
   const patternSourcePicking = usePatternSourcePicking();
@@ -140,6 +143,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
       onEscapeKeyDown={ignoreDismissWhileImageTabActive}
       onInteractOutside={handleInteractOutside}
       onOpenChange={handleOpenChange}
+      open={isOpen}
       side={side}
       sideOffset={sideOffset}
       trigger={typeof trigger === 'function' ? trigger(preview) : trigger}

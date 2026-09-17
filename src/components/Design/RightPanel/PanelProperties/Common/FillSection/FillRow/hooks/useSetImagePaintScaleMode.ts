@@ -1,11 +1,49 @@
 // store
-import { selectImageEditor } from 'store/design/selectors';
+import { AppDispatch, store, useAppDispatch, useAppSelector } from 'store';
+import { selectImageEditor, selectNodes } from 'store/design/selectors';
 import { setImageEditor } from 'store/design/slice';
-import { useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TImageEditorState } from 'store/design/types';
 import { TImageFillMode } from 'shared/UITools/ColorPicker/Body/ImagePanel/types';
-import { TPaint } from 'types/design/paint/types';
+import { TImagePaint, TPaint } from 'types/design/paint/types';
+
+// utils
+import { seedImageCropIfNeeded } from 'components/Design/Canvas/utils/seedImageCropIfNeeded';
+
+const isImageEditorTargeting = (
+  imageEditor: TImageEditorState | null,
+  nodeId: string | undefined,
+  paintIndex: number,
+): imageEditor is TImageEditorState => imageEditor !== null && imageEditor.nodeId === nodeId && imageEditor.paintIndex === paintIndex;
+
+const applyImageFillModeChange = (
+  dispatch: AppDispatch,
+  paint: TImagePaint,
+  onChange: TFunc<[TPaint]>,
+  imageEditor: TImageEditorState | null,
+  nodeId: string | undefined,
+  paintIndex: number,
+  fillMode: 'fill' | 'fit',
+): void => {
+  onChange({ ...paint, crop: undefined, scaleMode: fillMode });
+
+  if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode === 'crop') {
+    dispatch(setImageEditor({ ...imageEditor, mode: 'position' }));
+  }
+};
+
+const enterImageCropMode = (
+  dispatch: AppDispatch,
+  imageEditor: TImageEditorState | null,
+  nodeId: string | undefined,
+  paintIndex: number,
+): void => {
+  if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode !== 'crop') {
+    dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
+    seedImageCropIfNeeded(dispatch, selectNodes(store.getState())[imageEditor.nodeId], imageEditor.paintIndex);
+  }
+};
 
 export const useSetImagePaintScaleMode = (
   paint: TPaint,
@@ -18,15 +56,9 @@ export const useSetImagePaintScaleMode = (
 
   return (fillMode): void => {
     if (paint.type === 'image' && (fillMode === 'fill' || fillMode === 'fit')) {
-      onChange({ ...paint, scaleMode: fillMode });
-    } else if (
-      fillMode === 'crop' &&
-      imageEditor &&
-      imageEditor.nodeId === nodeId &&
-      imageEditor.paintIndex === paintIndex &&
-      imageEditor.mode !== 'crop'
-    ) {
-      dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
+      applyImageFillModeChange(dispatch, paint, onChange, imageEditor, nodeId, paintIndex, fillMode);
+    } else if (fillMode === 'crop') {
+      enterImageCropMode(dispatch, imageEditor, nodeId, paintIndex);
     }
   };
 };

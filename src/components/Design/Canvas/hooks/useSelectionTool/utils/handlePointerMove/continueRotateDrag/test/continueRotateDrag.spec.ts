@@ -1,12 +1,13 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, groupNodes, setSelection } from 'store/design/slice';
+import { addNode, groupNodes, setImageEditor, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TRectangleNode } from 'types/design/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
@@ -50,6 +51,32 @@ const addFrameNode = (x: number, y: number, width: number, height: number, rotat
   return rootOrder[rootOrder.length - 1];
 };
 
+const addImageRectangleNode = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  crop: { height: number; rotation: number; width: number; x: number; y: number },
+): string => {
+  store.dispatch(
+    addNode({
+      fills: [{ crop, opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
@@ -61,6 +88,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: s
 describe('continueRotateDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should do nothing when no rotate drag is in progress', () => {
@@ -114,6 +142,80 @@ describe('continueRotateDrag', () => {
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ rotation: 120 });
+  });
+
+  it('should carry an image fill’s crop rect along live, for a plain (non-snapshotted) node rotating through direct dispatch', () => {
+    // mock — a 100x100 node with a crop rect exactly matching its own bounds, pivoting 90° around
+    // its own center (50,50)
+    const idA = addImageRectangleNode(0, 0, 100, 100, { height: 100, rotation: 0, width: 100, x: 0, y: 0 });
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef({
+      cursorAngle: 0,
+      nodeOrigins: { [idA]: { height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
+      pivot: { x: 50, y: 50 },
+      startAngle: 0,
+    });
+
+    // before
+    continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, createCanvasRefs());
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node.rotation).toBe(90);
+    expect(crop?.rotation).toBe(90);
+    expect(crop?.x).toBeCloseTo(0);
+    expect(crop?.y).toBeCloseTo(0);
+  });
+
+  it('should not compound the crop rotation across repeated pointermove frames of the same drag (regression: re-reading the already-rotated live fills every frame stacked the rotation on top of itself)', () => {
+    // mock — same node as above, but the drag continues across two separate pointermove frames:
+    // first to a 90° total delta, then to a 180° total delta
+    const idA = addImageRectangleNode(0, 0, 100, 100, { height: 100, rotation: 0, width: 100, x: 0, y: 0 });
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef({
+      cursorAngle: 0,
+      nodeOrigins: { [idA]: { height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
+      pivot: { x: 50, y: 50 },
+      startAngle: 0,
+    });
+
+    // before — two frames of the same live drag
+    continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, createCanvasRefs());
+    continueRotateDrag(canvas, pointerEvent(-50, 50), store.dispatch, rotateDragRef, createCanvasRefs());
+
+    // result — the crop must land on the final 180° total, not 90+180=270 from compounding
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node.rotation).toBe(180);
+    expect(crop?.rotation).toBe(180);
+  });
+
+  it("should leave the image editor's crop in place when its frame is rotated while that node's image editor is active in crop mode (regression: rotating the frame dragged the crop's own rotation/position along with it)", () => {
+    // mock
+    const idA = addImageRectangleNode(0, 0, 100, 100, { height: 100, rotation: 0, width: 100, x: 0, y: 0 });
+
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: idA, paintIndex: 0 }));
+
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef({
+      cursorAngle: 0,
+      nodeOrigins: { [idA]: { height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
+      pivot: { x: 50, y: 50 },
+      startAngle: 0,
+    });
+
+    // before — a 90deg delta on the frame
+    continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, createCanvasRefs());
+
+    // result — the frame rotated, but the crop stayed exactly as it was
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode;
+    const crop = node.fills[0].type === 'image' ? node.fills[0].crop : undefined;
+
+    expect(node.rotation).toBe(90);
+    expect(crop).toEqual({ height: 100, rotation: 0, width: 100, x: 0, y: 0 });
   });
 
   it('should orbit each member of a group around the shared pivot, spinning each individually', () => {

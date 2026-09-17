@@ -13,6 +13,7 @@ import { store } from 'store';
 // types
 import { NodeType, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
+import { TImagePaint } from 'types/design/paint/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -131,5 +132,32 @@ describe('useCommitColumnDimensions', () => {
 
     // result
     expect(readNode(frameId)).toMatchObject({ height: 80, width: 100, widthSizingMode: SizingMode.hug });
+  });
+
+  it('should scale a stored image fill’s crop proportionally when committing a new width from the panel, not just via canvas resize', () => {
+    // mock — a frame whose crop is centred exactly on its own centre
+    const frameId = addFrameNode(100, 50);
+    const paint: TImagePaint = {
+      crop: { height: 25, rotation: 0, width: 50, x: 25, y: 12.5 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+
+    store.dispatch(updateNode({ changes: { fills: [paint] }, id: frameId }));
+
+    const frameNode = readNode(frameId);
+    const { result } = renderHook(() => useCommitColumnDimensions(frameId, frameNode, 100, 50, false), { wrapper });
+
+    // action
+    act(() => result.current.commitWidth(200));
+
+    // result — the crop doubled in width along with the frame, staying centred
+    const updated = readNode(frameId);
+
+    expect(updated.width).toBe(200);
+    expect((updated.fills[0] as TImagePaint).crop).toEqual({ height: 25, rotation: 0, width: 100, x: 50, y: 12.5 });
   });
 });

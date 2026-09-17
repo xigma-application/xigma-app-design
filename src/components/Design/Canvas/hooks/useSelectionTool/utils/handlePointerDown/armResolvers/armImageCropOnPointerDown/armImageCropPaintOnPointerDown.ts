@@ -14,6 +14,8 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { armImageCropHandleOnPointerDown } from './armImageCropHandleOnPointerDown';
 import { armImageCropMoveOnPointerDown } from './armImageCropMoveOnPointerDown';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
+import { getResizeHandleAtPoint } from 'components/Design/Canvas/utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { getRotateHandleAtPoint } from 'components/Design/Canvas/utils/getRotateHandleAtPoint';
 import { isPointInImageCropRect } from 'components/Design/Canvas/utils/isPointInImageCropRect';
 
 export const armImageCropPaintOnPointerDown = (
@@ -32,7 +34,18 @@ export const armImageCropPaintOnPointerDown = (
   const selectedTarget = imageEditor.selectedTarget ?? 'frame';
 
   if (selectedTarget === 'image') {
-    const handled = armImageCropHandleOnPointerDown(canvas, canvasRefs, event, node.id, imageEditor.paintIndex, crop, point, viewport);
+    const handled = armImageCropHandleOnPointerDown(
+      canvas,
+      canvasRefs,
+      event,
+      node.id,
+      imageEditor.paintIndex,
+      crop,
+      point,
+      viewport,
+      paint.flipX,
+      paint.flipY,
+    );
 
     if (handled) {
       return true;
@@ -44,7 +57,19 @@ export const armImageCropPaintOnPointerDown = (
     return true;
   }
 
-  if (selectedTarget === 'image' && hit) {
-    dispatch(setImageEditor({ ...imageEditor, selectedTarget: 'frame' }));
+  if (hit?.id === node.id) {
+    if (selectedTarget === 'image') {
+      dispatch(setImageEditor({ ...imageEditor, selectedTarget: 'frame' }));
+    }
+
+    return;
   }
+
+  if (getResizeHandleAtPoint(point, [node], viewport) || getRotateHandleAtPoint(point, [node], viewport)) {
+    return;
+  }
+
+  dispatch(setImageEditor(null));
+
+  return true;
 };

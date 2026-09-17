@@ -1,5 +1,7 @@
 export type TTextureSize = { height: number; width: number };
 
+export const imagePaintTextureSizeCache = new Map<string, TTextureSize>();
+
 const loadTextureImage = (
   gl: WebGL2RenderingContext,
   texture: WebGLTexture,

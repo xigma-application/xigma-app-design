@@ -222,13 +222,25 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 453 | Picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 454 | Opening the Image tab enters a position-editing mode for the node, cleared again on Escape/deselect               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 459 | Clicking the frame outside the moved image switches the selected target back to the frame                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 460 | Manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 461 | Reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 462 | Hovering the image crop rect's own handles while it is the selected target shows resize/rotate cursors           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 459 | Clicking the frame outside the moved image switches the selected target back to the frame                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 460 | Manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 461 | Reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 462 | Hovering the image crop rect's own handles while it is the selected target shows resize/rotate cursors            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 463 | Dragging a resize handle past the opposite anchor mirrors an image fill, and dragging back un-mirrors it          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 464 | A second image-filled shape renders correctly alongside the first, and both survive deselecting                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 465 | Dragging a resize handle past the opposite anchor mirrors a pattern fill too, and dragging back un-mirrors it     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 466 | Clicking a completely different shape while the Image editor's position mode is active exits it, unselected       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 467 | Clicking a completely different shape while crop mode is active exits the editor, without selecting that shape    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 468 | Rotating the frame on canvas while its image editor is active in crop mode leaves the crop untouched              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 469 | Resizing the frame again on canvas while already in crop mode leaves the crop untouched                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 470 | Rotating via the panel's own rotate button still carries the crop along, unlike a canvas rotate-handle drag       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 471 | The ImageCrop panel's Dimensions row locks aspect ratio permanently, scaling the other axis to match              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 472 | Clicking Flip horizontal in the ImageCrop panel flips the image's own paint, not the frame                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 473 | Clicking the frame after focusing the image reopens the fill picker panel on its own, without a swatch click      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 474 | Escape while the image is focused fully exits the editor but still reopens the fill picker panel                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -717,3 +729,100 @@ onto a cursor kind that hasn't been requested yet in the session can resolve to 
 image finishes loading — real continuous mouse movement papers over this by re-triggering hover
 resolution many times per second, but a scripted instant jump does not, so the test nudges the pointer
 again after a short wait, the same way organic mouse movement would.
+
+#463/#465 close the same gap for the two fill types that support a mirror-resize crossing: dragging
+a Rectangle or Frame's resize handle past the anchor on either axis toggles `flipX`/`flipY` on the
+fill's own paint (`getMirroredFills` in `resizeBoxNode.ts`), since neither node type carries a native
+flip field of its own (`isFlippableNode` only lists Ellipse/Media/Polygon/Star/Text). #463 is a real,
+reported regression: the mirror computed the flipped value once per drag from a per-drag "original
+fills" cache, but skipped re-dispatching it whenever the freshly-computed value happened to equal the
+cached original — correct on the way out, but on the way back in (crossing the anchor a second time
+within the same drag), the live store's flip had already diverged from that cached original, so the
+skip left a stale `flipX: true` in place forever ("Zrobię -x albo -y i jest git ale gdy odbijam
+spowrotem to się jebie"). Fixed by making the fills computation always reassert its computed value
+instead of ever skipping the dispatch. #465 extends the identical mechanism to `TPatternPaint`
+(previously no flip support at any level — no field, no shader uniform), adding `flipX`/`flipY` to
+the paint type, a `u_flipX`/`u_flipY` uniform mirroring the tile UV in
+`patternSourceTileFragmentShaderSource.ts`, and widening `resizeBoxNode.ts`'s mirror check to cover
+both fill types.
+
+#464 is a genuine rendering bug found by asking the user (already live-testing #463) to check the
+browser console: two shapes with image fills, only the first one showing, the second staying blank.
+Root cause was global WebGL state, not a data/Redux issue — `enableVertexAttribArray`/
+`disableVertexAttribArray` persist across draw calls and shader programs until explicitly changed, so
+`drawImageTexture.ts`'s stencil-mask pass (using only `a_position`, a small buffer) failed its
+buffer-size validation (`GL_INVALID_OPERATION`) whenever `a_texCoord` (used only by the later
+content-quad pass, a larger interleaved buffer) had been left enabled by a previous image draw
+anywhere in the scene. Fixed with a single `gl.disableVertexAttribArray(texCoordLocation)` before the
+stencil-mask pass.
+
+#466/#467 close a click-routing gap opened by crop mode's own move/resize distinction (#458/#459
+above): clicking a different node entirely while the Image editor was open used to fall straight
+through to the normal selection resolvers, since neither `armImageCropOnPointerDown` (gated to
+`mode === 'crop'` only) nor the empty-canvas-only `armExitImageEditorOnPointerDown` had ever covered
+"hit something, but not our own node." #467 covers crop mode: the resolver now exits the editor and
+claims the pointerdown itself whenever the click isn't on the crop node's own body or one of its
+resize/rotate handles — the handle carve-out is the interesting part, caught by a follow-up
+regression before it shipped: the rotate ring sits 6-16px outside a node's own bounding box by
+design, so an early version of this fix mistook grabbing the frame's own rotate handle for "clicked
+elsewhere" and exited crop mode before the rotation could even start. #466 widens the identical guard
+to the simpler `'position'` mode (Image tab open, no crop yet), which had no exit-on-miss logic at
+all before this.
+
+#468/#469 extend crop mode's frame/image independence (#458 above, "the two entities never pull each
+other") from move drags to rotate and resize: rotating or resizing the frame on canvas while its own
+image editor is active in `'crop'` mode must leave the crop rect's position/size/rotation exactly as
+it was, the same way moving the frame already did. `rotateNodesRigidly`'s per-tick crop-rotation and
+`resizeBoxNode`'s per-tick crop-scaling both gained a check against `state.design.imageEditor` (skip
+touching the fill at `imageEditor.paintIndex` whenever `imageEditor.nodeId === id`). #469's title says
+"again" deliberately: the very first resize that transitions an image from `'position'` to `'crop'`
+mode must still scale the newly-seeded crop to match the frame (that's what establishes the crop in
+the first place, per #455 above) — only a subsequent, separate resize while already in crop mode
+should decouple. This surfaced a real ordering bug during development: `armResizeOnPointerDown` used
+to flip `imageEditor.mode` to `'crop'` at arm time (pointerdown, before the drag even runs), so by
+the time the transition drag's own `resizeBoxNode` ticks ran, the mode had already flipped and the
+new skip-guard suppressed the very scaling that transition needed — fixed by moving the mode flip to
+`disarmResizeDrag` (pointerup, once the resize is actually done) instead.
+
+#470 is the deliberate exception to #468: the right panel's own "Rotate 90°" button
+(`rotateNodesRigidly`, shared between the button and the keyboard shortcut) is explicitly not given
+the #468 guard, since panel-driven transform fields are expected to keep the crop in lockstep with
+the frame the same way the panel's X/Y and Dimensions fields already do ("tak też działa to w
+Figmie") — only a canvas rotate-handle drag (`continueRotateDrag.ts`, a distinct call path) decouples
+them. Confirmed by the user hitting the opposite of #468: clicking the panel's rotate button left the
+crop behind, which turned out to be #468's own crop-decoupling guard incorrectly applying to a call
+site it was never meant to cover.
+
+#471 wires the ImageCrop panel's Dimensions row (`ColumnDimensions`, reused as-is from the
+Frame/Rectangle panel) to force `locked: true` and disable the toggle whenever an image crop is being
+edited (`useColumnDimensions`), since a crop's own aspect ratio should always stay fixed when resized
+from the panel, unlike a node's optional lock. This exposed a dead code path: `commitColumnWidth`/
+`commitColumnHeight`'s image-crop branch (`commitImageCropDimensions`) had never actually read a
+`locked` flag at all — editing width while an image crop was active always left height untouched
+regardless. Fixed by running the crop's own width/height through the same
+`getLockedDimensionsChanges` ratio math the node path already used, with `locked` hardcoded `true`
+for this branch.
+
+#472 closes the last of the panel's shared Rotation-row controls: the Flip horizontal/vertical
+buttons (`buildRotationButtons.tsx`) had already been made crop-aware for Rotate (#470's
+`rotateImageCropRigidly`) but not for Flip, so clicking them while editing an image crop still
+flipped the frame via `handleFlipSelection`, and the buttons were disabled or enabled based purely on
+the frame's own layout state (`isLayoutContainerNode`), unrelated to whether an image crop was even
+being edited. Fixed with a new `flipImageCropRigidly.ts` (the flip counterpart to the existing
+`rotateImageCropRigidly.ts`), toggling the paint's own `flipX`/`flipY` directly, and re-enabling the
+buttons unconditionally whenever an image crop is being edited.
+
+The dedicated `ImageCrop` panel component itself (`PanelProperties/ImageCrop/`, swapped in by
+`PanelProperties.tsx` whenever `selectSelectedImageCrop` returns a value, i.e.
+`imageEditor.selectedTarget === 'image'`) has no scenario number of its own — it's a pure
+presentational reshuffle (a plain "Image" header instead of the Frame/Rectangle dropdown, the shared
+`ColumnPosition`/`ColumnRotation` without `ColumnAlignment`, plus the Dimensions row from #471) with
+no new interaction logic beyond #466-#472 above, covered by `PanelProperties.spec.tsx`'s own render
+assertions rather than a numbered e2e scenario. Building it surfaced one real bug worth recording
+without a number: swapping the top-level panel component on every `selectedTarget` change unmounted
+and remounted `FillRow` (the sole owner of `useSyncImageEditor`), whose unconditional
+clear-`imageEditor`-on-unmount cleanup fired on that remount and silently exited crop mode the instant
+the image was selected. Fixed by making the cleanup check whether the node is still selected
+(`selectSelectedNodes`) before clearing, and by tracking "did this hook instance ever actually
+activate the editor" (`wasActiveRef`) so a fresh mount that lands on an already-active `imageEditor`
+doesn't immediately clear it either.

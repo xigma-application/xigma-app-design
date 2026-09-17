@@ -19,6 +19,8 @@ export type TPatternSourceTile = {
   y: number;
 };
 
+export type TBoxFillRotation = { center: TPoint; degrees: number; localBounds: TDraftRect };
+
 export const drawVectorPatternSourceTile = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -33,9 +35,10 @@ export const drawVectorPatternSourceTile = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha = 1,
+  boxRotation?: TBoxFillRotation,
 ): void => {
   if (faces.length !== 0) {
-    const bounds = getVectorFillBounds(faces, nodeBounds);
+    const bounds = boxRotation ? boxRotation.localBounds : getVectorFillBounds(faces, nodeBounds);
     const tileWorldWidth = Math.max(sourceTile.width * (paint.scale / 100), 1);
     const tileWorldHeight = Math.max(sourceTile.height * (paint.scale / 100), 1);
     const { alignFrac, periodFrac, tileFrac } = getPatternTileGridFractions(bounds, tileWorldWidth, tileWorldHeight, paint);
@@ -58,6 +61,10 @@ export const drawVectorPatternSourceTile = (
     const tileSizeUVLocation = gl.getUniformLocation(program, 'u_tileSizeUV');
     const opacityLocation = gl.getUniformLocation(program, 'u_opacity');
     const hexOffsetAxisLocation = gl.getUniformLocation(program, 'u_hexOffsetAxis');
+    const rotationLocation = gl.getUniformLocation(program, 'u_rotation');
+    const rotationCenterLocation = gl.getUniformLocation(program, 'u_rotationCenter');
+    const flipXLocation = gl.getUniformLocation(program, 'u_flipX');
+    const flipYLocation = gl.getUniformLocation(program, 'u_flipY');
 
     gl.useProgram(program);
     gl.activeTexture(gl.TEXTURE0);
@@ -69,6 +76,8 @@ export const drawVectorPatternSourceTile = (
     gl.uniform2f(translateLocation, 0, 0);
     gl.uniform2f(boundsOriginLocation, bounds.x, bounds.y);
     gl.uniform2f(boundsSizeLocation, bounds.width, bounds.height);
+    gl.uniform1f(rotationLocation, boxRotation ? (boxRotation.degrees * Math.PI) / 180 : 0);
+    gl.uniform2f(rotationCenterLocation, boxRotation?.center.x ?? 0, boxRotation?.center.y ?? 0);
     gl.uniform2f(periodFracLocation, periodFrac.x, periodFrac.y);
     gl.uniform2f(tileFracLocation, tileFrac.x, tileFrac.y);
     gl.uniform2f(alignFracLocation, alignFrac.x, alignFrac.y);
@@ -76,6 +85,8 @@ export const drawVectorPatternSourceTile = (
     gl.uniform2f(tileSizeUVLocation, bottomRightUV.x - topLeftUV.x, bottomRightUV.y - topLeftUV.y);
     gl.uniform1f(opacityLocation, alpha);
     gl.uniform1i(hexOffsetAxisLocation, hexOffsetAxis);
+    gl.uniform1i(flipXLocation, paint.flipX ? 1 : 0);
+    gl.uniform1i(flipYLocation, paint.flipY ? 1 : 0);
     gl.enableVertexAttribArray(positionLocation);
 
     gl.clear(gl.STENCIL_BUFFER_BIT);

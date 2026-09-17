@@ -9,13 +9,49 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TPoint } from 'types/canvas';
+import { TSceneNode } from 'types/design/types';
 
 // utils
+import { clearResizeOriginalFills } from '../../useSelectionTool/utils/handlePointerMove/continueResizeDrag/resizeNode/resizeOriginalFillsCache';
 import { getGroupLeafNodes } from 'store/design/utils/nodeHierarchy/getGroupLeafNodes';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
 import { getResizeNodeOrigin } from '../../useSelectionTool/utils/handlePointerDown/armResizeDrag/getResizeNodeOrigin';
 import { isLayoutContainerNode } from 'utils/canvas/signals/isLayoutContainerNode';
 import { resizeNode } from '../../useSelectionTool/utils/handlePointerMove/continueResizeDrag/resizeNode/resizeNode';
+
+const normalizeFlippedLeafRotation = (dispatch: AppDispatch, leaf: TSceneNode): void => {
+  if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
+    dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
+  }
+};
+
+const flipLeafNode = (
+  dispatch: AppDispatch,
+  leaf: TSceneNode,
+  anchors: TPoint,
+  scaleX: number,
+  scaleY: number,
+  isSingleBoxOrigin: boolean,
+): void => {
+  const origin = getResizeNodeOrigin(leaf);
+
+  clearResizeOriginalFills(leaf.id);
+  resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
+  clearResizeOriginalFills(leaf.id);
+  normalizeFlippedLeafRotation(dispatch, leaf);
+};
+
+const flipLeaves = (
+  dispatch: AppDispatch,
+  leaves: TSceneNode[],
+  anchors: TPoint,
+  scaleX: number,
+  scaleY: number,
+  isSingleBoxOrigin: boolean,
+): void => {
+  leaves.forEach((leaf) => flipLeafNode(dispatch, leaf, anchors, scaleX, scaleY, isSingleBoxOrigin));
+};
 
 export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 'vertical'): void => {
   const state = store.getState();
@@ -34,15 +70,7 @@ export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 
 
     if (leaves.length !== 0) {
       dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-      leaves.forEach((leaf) => {
-        const origin = getResizeNodeOrigin(leaf);
-
-        resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
-
-        if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
-          dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
-        }
-      });
+      flipLeaves(dispatch, leaves, anchors, scaleX, scaleY, isSingleBoxOrigin);
       dispatch(endHistoryGesture());
     }
   }

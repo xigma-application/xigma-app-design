@@ -11,6 +11,7 @@ import {
   TDimensionHintField,
   TGradientEditorState,
   TImageEditorState,
+  TImageFillPickerFocus,
   TPatternSourcePickTarget,
   TRevealedMinMax,
 } from './types';
@@ -94,6 +95,8 @@ export const selectGridTrackValueEditRequest = (state: RootState): TGridTrackVal
 export const selectPanelGridTrackSelection = (state: RootState): TGridTrackSelection | null => state.design.panelGridTrackSelection ?? null;
 
 export const selectImageEditor = (state: RootState): TImageEditorState | null => state.design.imageEditor;
+
+export const selectImageFillPickerFocus = (state: RootState): TImageFillPickerFocus | null => state.design.imageFillPickerFocus ?? null;
 
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
 

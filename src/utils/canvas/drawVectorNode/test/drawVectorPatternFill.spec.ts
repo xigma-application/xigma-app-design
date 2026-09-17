@@ -109,8 +109,56 @@ describe('drawVectorPatternFill', () => {
       IDENTITY_VIEWPORT,
       false,
       0.5,
+      undefined,
     );
     expect(gl.enable).not.toHaveBeenCalled();
+  });
+
+  it('should forward boxRotation through to drawVectorPatternSourceTile when provided', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const patternTileProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const sourceTile = { height: 10, texture: {} as WebGLTexture, width: 10, x: 0, y: 0 };
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // before
+    drawVectorPatternFill(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      pattern,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+      boxRotation,
+    );
+
+    // result
+    expect(drawVectorPatternSourceTileMock).toHaveBeenCalledWith(
+      gl,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      pattern,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      0.5,
+      boxRotation,
+    );
   });
 
   it('should skip every GL call when there are no faces to fill', () => {

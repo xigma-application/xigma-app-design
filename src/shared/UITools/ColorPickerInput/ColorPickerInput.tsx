@@ -36,7 +36,9 @@ export type TColorPickerInputProps = {
   hexDisplayValue?: string;
   imageUrl?: string;
   initialActiveTab?: ColorPickerTab;
+  initialFillMode?: TImageFillMode;
   initialGradient?: TInitialGradient;
+  initialOpen?: boolean;
   initialPattern?: TInitialPattern;
   isPattern?: boolean;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
@@ -75,7 +77,9 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   hexDisplayValue,
   imageUrl,
   initialActiveTab,
+  initialFillMode,
   initialGradient,
+  initialOpen,
   initialPattern,
   isPattern = false,
   isPointerOverGradientHandle,
@@ -134,7 +138,10 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
               <ColorPicker
                 align={align}
                 initialActiveTab={initialActiveTab}
+                initialFillMode={initialFillMode}
                 initialGradient={initialGradient}
+                initialImageUrl={imageUrl}
+                initialOpen={initialOpen}
                 initialPattern={initialPattern}
                 isPointerOverGradientHandle={isPointerOverGradientHandle}
                 moveable

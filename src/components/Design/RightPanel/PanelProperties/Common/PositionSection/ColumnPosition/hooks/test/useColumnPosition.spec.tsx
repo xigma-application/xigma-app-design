@@ -6,13 +6,14 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnPosition } from '../useColumnPosition';
 
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
 import { AlignmentHorizontal, LayoutMode, NodeType } from 'types/design/enums';
+import { TImagePaint } from 'types/design/paint/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -51,9 +52,38 @@ const nestFrame = (childId: string, parentId: string): void => {
   store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
 };
 
+const addImageFrameNode = (x: number, y: number, paint: TImagePaint): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fills: [paint],
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const readCrop = (id: string): TImagePaint['crop'] => {
+  const node = selectActivePage(store.getState()).nodes[id] as { fills: TImagePaint[] };
+
+  return node.fills[0].crop;
+};
+
 describe('useColumnPosition', () => {
   afterEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should expose the selected frame x and y', () => {
@@ -319,5 +349,53 @@ describe('useColumnPosition', () => {
 
     // result
     expect(readNode(frameId).x).toBe(10);
+  });
+
+  it('should expose the image crop’s own x/y instead of the frame’s, when the image is the selected crop target', () => {
+    // mock — the frame sits at (0,0), but its image crop was dragged to (5,6)
+    const paint: TImagePaint = {
+      crop: { height: 15, rotation: 0, width: 15, x: 5, y: 6 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const frameId = addImageFrameNode(0, 0, paint);
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // result
+    expect(result.current).toMatchObject({ disabledX: false, disabledY: false, x: 5, y: 6 });
+  });
+
+  it('should commit a scrubbed position to the crop, leaving the frame’s own x/y untouched', () => {
+    // mock
+    const paint: TImagePaint = {
+      crop: { height: 15, rotation: 0, width: 15, x: 5, y: 6 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const frameId = addImageFrameNode(0, 0, paint);
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const { result } = renderUseColumnPosition();
+
+    // action
+    act(() => result.current.onScrubX(40));
+
+    // result
+    expect(readCrop(frameId)).toEqual({ height: 15, rotation: 0, width: 15, x: 40, y: 6 });
+    expect(readNode(frameId)).toEqual({ x: 0, y: 0 });
   });
 });

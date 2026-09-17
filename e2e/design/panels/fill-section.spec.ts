@@ -9,6 +9,8 @@ type TReadablePaint = {
   crop?: { height: number; rotation: number; width: number; x: number; y: number };
   direction?: string;
   end?: { x: number; y: number };
+  flipX?: boolean;
+  flipY?: boolean;
   opacity: number;
   ref?: string;
   rotation?: number;
@@ -3492,6 +3494,89 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, selectedTarget: 'frame' });
   });
 
+  test('clicking the frame after focusing the image reopens the fill picker panel (regression: swapping to the dedicated ImageCrop panel while the image was focused unmounted FillRow, dropping its open picker state so it stayed closed after switching back)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-refocus-frame-reopens-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — focus the image and move it away from the frame's own corner, swapping the right
+    // panel to the dedicated ImageCrop view (a plain click would still land inside the crop rect,
+    // which still exactly overlaps the frame at this point, and re-arm a move instead of switching back)
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(850, 330);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    // result — the fill picker panel is gone while the image is focused, as expected
+    await expect(panel).not.toBeVisible();
+
+    // action — click near the frame's own corner, now clear of the shifted image rect
+    await designPage.click(725, 225);
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, selectedTarget: 'frame' });
+
+    // result — the picker panel reappears on its own, still on the Image tab, without a swatch click
+    await expect(panel).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Rotate image' })).toBeVisible();
+  });
+
+  test('pressing Escape while the image is focused fully exits the editor but still reopens the fill picker panel (regression: same FillRow-unmount issue as the frame-refocus case, but for a true exit — the crop handles must stay gone while only the panel comes back)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-escape-while-focused-reopens-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode and focus the image
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).not.toBeVisible();
+
+    // action
+    await page.keyboard.press('Escape');
+
+    // result — a true exit: the editor is fully null, no crop UI armed on canvas, node stays selected
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+
+    // result — yet the fill picker panel still comes back on its own
+    await expect(panel).toBeVisible();
+  });
+
   test('reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -3527,6 +3612,56 @@ test.describe('Design panels — Fill section', () => {
     // result — the dropdown reflects the persisted crop immediately, without needing another resize
     await expect(fillModeLabel).toHaveText('Crop');
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+  });
+
+  test('reselecting a node after a crop was committed does not silently rewrite the paint (regression: seeding the panel from the existing paint made it look like a brand new file was just picked, wiping the crop and rotation)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-reselect-no-rewrite');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // enter crop mode, then commit an actual crop by dragging the image
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    const cropBefore = (await readNode(page, id)).fills![0].crop;
+
+    expect(cropBefore).toBeDefined();
+
+    // fully close the panel: first Escape exits the editor, second deselects the node
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+
+    // action — reselect the shape and reopen the picker, exactly as a user checking their work would
+    await designPage.click(800, 280);
+    await page.getByLabel('Hex color').click();
+
+    // result — merely reselecting/reopening must not re-run the "just picked a new file" paint
+    // conversion: the crop rect and scaleMode must survive untouched
+    const paintAfter = (await readNode(page, id)).fills![0];
+
+    expect(paintAfter.crop).toEqual(cropBefore);
+    expect(paintAfter.scaleMode).toBe('fill');
   });
 
   test('hovering the image crop rect handles while the image is the selected target shows resize/rotate cursors', async ({ page }) => {
@@ -3707,5 +3842,445 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
     expect(await readSelectedIds(page)).toEqual([id]);
     await expect(panel).toBeVisible();
+  });
+
+  test('dragging a resize handle past the opposite anchor mirrors the image, and dragging it back un-mirrors it (regression: the mirror stuck on when the drag returned, because the code skipped re-dispatching fills whenever the freshly computed value happened to match the original)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-mirror-resize-round-trip');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSplitColorPngBuffer(40, [255, 0, 0], [0, 0, 255]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect
+      .poll(async () => {
+        const node = await readNode(page, id);
+
+        return node.fills?.[0];
+      })
+      .toMatchObject({ type: 'image' });
+
+    // exit the Image editor's position-editing mode first — otherwise the very next resize-handle
+    // drag would auto-enter crop mode instead of resizing the frame, a separate, already-known gap
+    await page.keyboard.press('Escape');
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+
+    // action — drag the east handle (x=800) past the west anchor (x=700), to x=650: a "mirror" resize
+    await designPage.pointerDown(800, 250);
+    await designPage.pointerMove(650, 250);
+    await designPage.pointerUp();
+
+    // result — the image content actually mirrored, not just the box geometry
+    expect((await readNode(page, id)).fills?.[0].flipX).toBe(true);
+
+    // action — drag the same (now west) handle back out past the anchor again, restoring the box
+    await designPage.pointerDown(650, 250);
+    await designPage.pointerMove(800, 250);
+    await designPage.pointerUp();
+
+    // result — the mirror is fully undone, not stuck on from the first drag
+    const node = await readNode(page, id);
+
+    expect(node).toMatchObject({ width: 100, x: 700 });
+    expect(node.fills?.[0].flipX).toBeFalsy();
+  });
+
+  test('a second image-filled shape renders correctly alongside the first, and both survive deselecting (regression: a_texCoord was left enabled after the first image’s draw, so the second image’s stencil mask failed validation and never painted, leaving its fill invisible)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-two-image-fills-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    // shape A, red image fill
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const idA = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(20, 20, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'red.png',
+    });
+
+    await expect.poll(async () => (await readNode(page, idA)).fills?.[0]).toMatchObject({ type: 'image' });
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+
+    // shape B, blue image fill — drawing it deselects A and selects B instead
+    await designPage.drawRectangle(850, 200, 950, 300);
+
+    const [idB] = await readSelectedIds(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(20, 20, [0, 0, 255]),
+      mimeType: 'image/png',
+      name: 'blue.png',
+    });
+
+    await expect.poll(async () => (await readNode(page, idB)).fills?.[0]).toMatchObject({ type: 'image' });
+
+    // result — both shapes render their own image correctly, at the same time, while B is selected
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+    await expect.poll(async () => readPixelColor(page, 900, 250)).toEqual([0, 0, 255]);
+
+    // action — deselect everything (Escape exits the image editor first, a second click on empty
+    // canvas then clears the selection)
+    await page.keyboard.press('Escape');
+    await designPage.click(500, 500);
+    await expect.poll(() => readSelectedIds(page)).toEqual([]);
+
+    // result — neither fill disappeared after deselecting
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+    await expect.poll(async () => readPixelColor(page, 900, 250)).toEqual([0, 0, 255]);
+  });
+
+  test('dragging a resize handle past the opposite anchor mirrors a pattern fill too, and dragging it back un-mirrors it', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-mirror-resize-round-trip');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const targetId = await readFirstNodeId(page);
+
+    // a small green source rectangle to tile
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // reselect the target rectangle, then pick the green rectangle as its pattern source
+    await designPage.canvas.click({ position: { x: 750, y: 250 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    await expect
+      .poll(async () => (await readNode(page, targetId)).fills?.[0])
+      .toMatchObject({ sourceNodeId: expect.any(String), type: 'pattern' });
+    await expect.poll(() => readSelectedIds(page)).toEqual([targetId]);
+
+    // action — drag the east handle (x=800) past the west anchor (x=700), to x=650: a "mirror" resize
+    await designPage.pointerDown(800, 250);
+    await designPage.pointerMove(650, 250);
+    await designPage.pointerUp();
+
+    // result — the pattern paint actually mirrored, not just the box geometry
+    expect((await readNode(page, targetId)).fills?.[0].flipX).toBe(true);
+
+    // action — drag it back out past the anchor again, restoring the box
+    await designPage.pointerDown(650, 250);
+    await designPage.pointerMove(800, 250);
+    await designPage.pointerUp();
+
+    // result — the mirror is fully undone, not stuck on from the first drag
+    const node = await readNode(page, targetId);
+
+    expect(node).toMatchObject({ width: 100, x: 700 });
+    expect(node.fills?.[0].flipX).toBeFalsy();
+  });
+
+  test("clicking a completely different shape while the Image editor's position mode is active exits the editor without selecting that other shape (regression: the fix originally only covered crop mode — position mode had no such guard at all, so the click fell through to the normal selection resolvers and selected the other shape instead)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-position-click-other-shape');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // a second, unrelated shape elsewhere on the canvas
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+
+    // reselect the first shape, then open its Image editor — no resize, so it stays in 'position' mode
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position', nodeId: id });
+
+    // action — click squarely on the other shape's own body
+    await designPage.pointerDown(1050, 250);
+    await designPage.pointerUp();
+
+    // result — the editor closes, but selection never moved to the other shape
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+  });
+
+  test('clicking a completely different shape while crop mode is active exits the editor without selecting that other shape', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-click-other-shape');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // a second, unrelated shape elsewhere on the canvas
+    await designPage.drawRectangle(1000, 200, 1100, 300);
+
+    // reselect the first shape, then enter its Image editor's crop mode
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // action — click squarely on the other shape's own body
+    await designPage.pointerDown(1050, 250);
+    await designPage.pointerUp();
+
+    // result — the editor closes, but selection never moved to the other shape
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+  });
+
+  test("rotating the frame while its image editor is active in crop mode leaves the crop untouched (regression: rotating the frame dragged the crop's own rotation/position along with it)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-rotate-frame');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle — the frame becomes (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    const cropBefore = (await readNode(page, id)).fills![0].crop!;
+
+    // action — grab the frame's own rotate handle (just outside its nw corner, 10px diagonally),
+    // and spin it exactly 90deg around the frame's own center (810,290) — (890,190) is (710,210)
+    // rotated 90deg around that same pivot
+    await designPage.pointerDown(710, 210);
+    await designPage.pointerMove(890, 190);
+    await designPage.pointerUp();
+
+    // result — the frame actually rotated (proving the gesture engaged), but the crop stayed
+    // exactly as it was
+    const node = await readNode(page, id);
+
+    expect(node.rotation).not.toBeCloseTo(0);
+    expect(node.fills?.[0].crop).toEqual(cropBefore);
+  });
+
+  test('resizing the frame again while its image editor is already in crop mode leaves the crop untouched (regression: resizing the frame scaled the crop along with it, even though the image was supposed to stay fixed once crop mode was active)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-resize-frame-again');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle — the frame (and seeded crop) become
+    // (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // select the image as the target with a plain click, then shrink the crop via its own se
+    // handle (which starts out coincident with the frame's own se corner) down to half size —
+    // this pulls the crop's own corner away from the frame's, so the next click on the frame's
+    // real corner can't be mistaken for a click inside the (now smaller) crop rect
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await designPage.pointerDown(900, 360);
+    await designPage.pointerMove(810, 290);
+    await designPage.pointerUp();
+
+    const cropBefore = (await readNode(page, id)).fills![0].crop!;
+
+    expect(cropBefore).toEqual({ height: 70, rotation: 0, width: 90, x: 720, y: 220 });
+
+    // reselect the frame as the target via a click on its own body, clear of the shrunken crop
+    await designPage.pointerDown(850, 330);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'frame' });
+
+    // action — resize the frame itself from its own (now crop-clear) se corner
+    await designPage.pointerDown(900, 360);
+    await designPage.pointerMove(950, 400);
+    await designPage.pointerUp();
+
+    // result — the frame grew, but the crop stayed exactly as it was
+    const node = await readNode(page, id);
+
+    expect(node).toMatchObject({ height: 180, width: 230, x: 720, y: 220 });
+    expect(node.fills?.[0].crop).toEqual(cropBefore);
+  });
+
+  test("rotating the frame via the right panel's rotation button while its image editor is active in crop mode still carries the crop along, matching how the panel's X/Y and resize fields already stay in lockstep with the frame (only a canvas rotate-handle drag decouples them)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-panel-rotate');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle — the frame (and seeded crop) become
+    // (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    const editorBeforeRotate = await readImageEditor(page);
+
+    expect(editorBeforeRotate?.selectedTarget).not.toBe('image');
+
+    // action — rotate the frame 90° via the panel's own rotate button, not a canvas drag
+    await page.getByLabel('Rotate 90° right').click();
+
+    // result — the crop rotated right along with the frame, unlike a canvas drag
+    const node = await readNode(page, id);
+
+    expect(node.rotation).toBe(90);
+    expect(node.fills?.[0].crop).toMatchObject({ height: 140, rotation: 90, width: 180 });
+  });
+
+  test("the ImageCrop panel's Dimensions row shows the aspect-ratio lock permanently on and disabled, and editing width scales height to match", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-dimensions-lock');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle — the frame (and seeded crop) become
+    // (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // select the image as the target so the panel swaps to the dedicated ImageCrop view
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    // result — the lock is on and can't be turned off
+    const lockButton = page.getByLabel('Unlock aspect ratio');
+
+    await expect(lockButton).toBeVisible();
+    await expect(lockButton).toBeDisabled();
+
+    // action — halving the width from the panel
+    const widthInput = page.locator('[data-test-text-field-input="width"]');
+
+    await widthInput.click();
+    await widthInput.fill('90');
+    await widthInput.press('Enter');
+
+    // result — height scaled down to match the same 180:140 ratio
+    const node = await readNode(page, id);
+
+    expect(node.fills?.[0].crop).toMatchObject({ height: 70, width: 90 });
+  });
+
+  test("clicking Flip horizontal in the ImageCrop panel flips the image's own paint, not the frame (regression: the flip buttons stayed wired to the frame even while editing its image)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-flip-button');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // select the image as the target so the panel swaps to the dedicated ImageCrop view
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    const frameBefore = await readNode(page, id);
+
+    // action
+    await page.getByLabel('Flip horizontal').click();
+
+    // result — the paint flipped, the frame's own geometry and rotation stayed exactly as they were
+    const node = await readNode(page, id);
+
+    expect(node.fills?.[0].flipX).toBe(true);
+    expect(node).toMatchObject({ height: frameBefore.height, width: frameBefore.width, x: frameBefore.x, y: frameBefore.y });
   });
 });

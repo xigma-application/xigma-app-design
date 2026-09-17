@@ -19,11 +19,23 @@ export const armImageCropHandleOnPointerDown = (
   crop: TImageCrop,
   point: TPoint,
   viewport: TViewport,
+  flipX?: boolean,
+  flipY?: boolean,
 ): true | undefined => {
   const resizeHandle = getImageCropResizeHandleAtPoint(point, crop, viewport);
 
   if (resizeHandle) {
-    armImageCropResizeDrag(canvas, event, canvasRefs.imageCrop.imageCropResizeDragRef, nodeId, paintIndex, crop, resizeHandle);
+    armImageCropResizeDrag(
+      canvas,
+      event,
+      canvasRefs.imageCrop.imageCropResizeDragRef,
+      nodeId,
+      paintIndex,
+      crop,
+      resizeHandle,
+      flipX,
+      flipY,
+    );
     return true;
   }
 

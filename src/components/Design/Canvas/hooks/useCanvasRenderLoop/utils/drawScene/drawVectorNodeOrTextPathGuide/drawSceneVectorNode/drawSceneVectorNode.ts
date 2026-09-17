@@ -6,8 +6,8 @@ import { TVectorSnapshotsRefs } from 'types/design/canvas/types';
 // utils
 import { drawVectorNode } from './drawVectorNode';
 import { drawVectorNodeDragSnapshot } from './drawVectorNodeDragSnapshot';
-import { drawVectorNodeResizeSnapshot } from './drawVectorNodeResizeSnapshot';
-import { drawVectorNodeRotateSnapshot } from './drawVectorNodeRotateSnapshot';
+import { drawVectorNodeResizeSnapshot } from './drawVectorNodeResizeSnapshot/drawVectorNodeResizeSnapshot';
+import { drawVectorNodeRotateSnapshot } from './drawVectorNodeRotateSnapshot/drawVectorNodeRotateSnapshot';
 
 export const drawSceneVectorNode = (context: TDrawSceneContext, node: TVectorNode, vectorSnapshots: TVectorSnapshotsRefs): void => {
   const dragSnapshot = vectorSnapshots.draggedVectorNodeSnapshotsRef.current?.get(node.id);

@@ -20,6 +20,24 @@ describe('armImageCropHandleOnPointerDown', () => {
     expect(canvasRefs.imageCrop.imageCropResizeDragRef.current).toEqual({ handle: 'nw', nodeId: 'node-a', origin: crop, paintIndex: 0 });
   });
 
+  it("should forward the paint's flipX/flipY into the armed resize drag state", () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+
+    // before — top-left corner
+    armImageCropHandleOnPointerDown(canvas, canvasRefs, event, 'node-a', 0, crop, { x: 0, y: 0 }, viewport, true, true);
+
+    // result
+    expect(canvasRefs.imageCrop.imageCropResizeDragRef.current).toEqual({
+      handle: 'nw',
+      nodeId: 'node-a',
+      origin: crop,
+      originalFlipX: true,
+      originalFlipY: true,
+      paintIndex: 0,
+    });
+  });
+
   it('should arm a rotate drag and claim the event when just outside a corner', () => {
     // mock
     const canvasRefs = createCanvasRefs();

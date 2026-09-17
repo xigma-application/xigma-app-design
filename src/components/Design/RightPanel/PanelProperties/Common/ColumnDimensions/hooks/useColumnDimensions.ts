@@ -17,8 +17,11 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 
 // utils
+import { commitColumnHeight } from './utils/commitColumnHeight';
+import { commitColumnWidth } from './utils/commitColumnWidth';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
+import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 export type TUseColumnDimensionsResult = {
   canFillHeight: boolean;
@@ -30,6 +33,7 @@ export type TUseColumnDimensionsResult = {
   hasMinWidthValue: boolean;
   height: number;
   heightSizingMode: SizingMode;
+  lockDisabled: boolean;
   locked: boolean;
   maxHeightShown: boolean;
   maxHeightValue: number | undefined;
@@ -63,45 +67,50 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const nodes = useAppSelector(selectNodes);
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const parentNode = useAppSelector(selectSelectedParentNode);
+  const imageCrop = useAppSelector(selectSelectedImageCrop);
   const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
   const frameNode = node?.type === NodeType.frame ? node : undefined;
   const id = node?.id ?? '';
-  const width = node?.width ?? 0;
-  const height = node?.height ?? 0;
-  const locked = node?.lockedAspectRatio ?? false;
+  const width = imageCrop ? imageCrop.crop.width : (node?.width ?? 0);
+  const height = imageCrop ? imageCrop.crop.height : (node?.height ?? 0);
+  const locked = imageCrop ? true : (node?.lockedAspectRatio ?? false);
   const layoutMode = frameNode?.layoutMode;
-  const canHug = layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical;
+  const canHug = !imageCrop && (layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical);
   const parentFrame = parentNode?.type === NodeType.frame ? parentNode : undefined;
   const parentIsAutoLayout = isManagedLayoutFrame(parentFrame);
   const parentWidthMode = parentFrame?.widthSizingMode ?? SizingMode.fixed;
   const parentHeightMode = parentFrame?.heightSizingMode ?? SizingMode.fixed;
-  const canFillWidth = parentIsAutoLayout && parentWidthMode !== SizingMode.hug;
-  const canFillHeight = parentIsAutoLayout && parentHeightMode !== SizingMode.hug;
+  const canFillWidth = !imageCrop && parentIsAutoLayout && parentWidthMode !== SizingMode.hug;
+  const canFillHeight = !imageCrop && parentIsAutoLayout && parentHeightMode !== SizingMode.hug;
   const widthSizingMode = node?.widthSizingMode ?? SizingMode.fixed;
   const heightSizingMode = node?.heightSizingMode ?? SizingMode.fixed;
-  const { commitHeight, commitWidth } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
+  const { commitHeight: _ch, commitWidth: _cW } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
   const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(id, frameNode, nodes, locked);
   const toggleLock = useToggleColumnLock(id, locked, widthSizingMode, heightSizingMode);
   const minMax = useToggleColumnMinMax(id, frameNode);
+
+  const commitWidth = (nextWidth: number): void => commitColumnWidth(dispatch, imageCrop, height, _cW, nextWidth);
+  const commitHeight = (nextHeight: number): void => commitColumnHeight(dispatch, imageCrop, width, _ch, nextHeight);
 
   return {
     canFillHeight,
     canFillWidth,
     canHug,
-    hasMaxHeightValue: minMax.hasMaxHeightValue,
-    hasMaxWidthValue: minMax.hasMaxWidthValue,
-    hasMinHeightValue: minMax.hasMinHeightValue,
-    hasMinWidthValue: minMax.hasMinWidthValue,
+    hasMaxHeightValue: !imageCrop && minMax.hasMaxHeightValue,
+    hasMaxWidthValue: !imageCrop && minMax.hasMaxWidthValue,
+    hasMinHeightValue: !imageCrop && minMax.hasMinHeightValue,
+    hasMinWidthValue: !imageCrop && minMax.hasMinWidthValue,
     height,
     heightSizingMode,
+    lockDisabled: Boolean(imageCrop),
     locked,
-    maxHeightShown: minMax.maxHeightShown,
+    maxHeightShown: !imageCrop && minMax.maxHeightShown,
     maxHeightValue: minMax.maxHeightValue,
-    maxWidthShown: minMax.maxWidthShown,
+    maxWidthShown: !imageCrop && minMax.maxWidthShown,
     maxWidthValue: minMax.maxWidthValue,
-    minHeightShown: minMax.minHeightShown,
+    minHeightShown: !imageCrop && minMax.minHeightShown,
     minHeightValue: minMax.minHeightValue,
-    minWidthShown: minMax.minWidthShown,
+    minWidthShown: !imageCrop && minMax.minWidthShown,
     minWidthValue: minMax.minWidthValue,
     onBlurHeight: useDimensionsCommit(height, commitHeight),
     onBlurWidth: useDimensionsCommit(width, commitWidth),

@@ -6,6 +6,7 @@ import { TRotateDragState } from 'types/design/selectionTool/types';
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { disarmRotateDrag } from '../disarmRotateDrag';
+import { getRotateOriginalFills } from '../../handlePointerMove/continueRotateDrag/rotateOriginalFillsCache';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -49,6 +50,28 @@ describe('disarmRotateDrag', () => {
     // result
     expect(rotateDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+  });
+
+  it('should clear the rotate-original-fills cache for every rotated node id, so the next drag starts fresh instead of rotating from a stale origin', () => {
+    // mock — seed the cache as if a rotate drag had already rotated this node's fills once
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef({
+      cursorAngle: 0,
+      nodeOrigins: { 'rect-1': { height: 10, rotation: 0, width: 10, x: 0, y: 0 } },
+      pivot: { x: 5, y: 5 },
+      startAngle: 0,
+    });
+    const originalFills = [{ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+
+    getRotateOriginalFills('rect-1', originalFills);
+
+    // before
+    disarmRotateDrag(canvas, pointerEvent(), vi.fn(), rotateDragRef, createCanvasRefs());
+
+    // result — a fresh drag on the same id now seeds from whatever is passed in, not the stale value
+    const freshFills = [{ opacity: 100, ref: 'asset-2', rotation: 0, scaleMode: 'fit' as const, type: 'image' as const }];
+
+    expect(getRotateOriginalFills('rect-1', freshFills)).toBe(freshFills);
   });
 
   it('should commit the snapshotted vector node’s final rotation, computed from its frozen origin and the snapshot’s final delta', () => {

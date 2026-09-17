@@ -7,6 +7,7 @@ import { undo } from 'store/history/actions';
 // types
 import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
+import { TImagePaint } from 'types/design/paint/types';
 
 // utils
 import { handleFlipSelection } from '../handleFlipSelection';
@@ -309,5 +310,104 @@ describe('handleFlipSelection', () => {
     const nodes = selectNodes(store.getState());
     expect(nodes[frameId]).toEqual(frameBefore);
     expect((nodes[rectId] as TRectangleNode).x).not.toBe(80);
+  });
+
+  it('should round-trip an image fill’s crop correctly across two consecutive flips, instead of reverting it to a stale pre-flip snapshot', () => {
+    // mock — two rectangles sharing a bbox of x:0-100 (center 50); A carries an image fill whose
+    // crop starts flush with its own bounds. Flip is a single-shot resize (no arm/disarm drag
+    // lifecycle), so it must never rely on a cache left over from a previous flip
+    const paint: TImagePaint = {
+      crop: { height: 20, rotation: 0, width: 20, x: 0, y: 0 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const idA = addRectangleNode({ fills: [paint], x: 0, y: 0 });
+    const idB = addRectangleNode({ x: 80, y: 0 });
+
+    store.dispatch(setSelection([idA, idB]));
+
+    // action — flip once: A moves to x:80, its crop follows to x:80
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    const afterFirstFlip = selectNodes(store.getState())[idA] as TRectangleNode;
+
+    expect(afterFirstFlip.x).toBe(80);
+    expect((afterFirstFlip.fills[0] as TImagePaint).crop).toEqual({ height: 20, rotation: 0, width: 20, x: 80, y: 0 });
+
+    // action — flip again: A moves back to x:0; a stale cache would instead drag the crop off
+    // to a bogus position computed from the pre-first-flip origin
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    const afterSecondFlip = selectNodes(store.getState())[idA] as TRectangleNode;
+
+    // result — the crop round-trips back to its original position, exactly mirroring the node
+    expect(afterSecondFlip.x).toBe(0);
+    expect((afterSecondFlip.fills[0] as TImagePaint).crop).toEqual({ height: 20, rotation: 0, width: 20, x: 0, y: 0 });
+  });
+
+  it('should toggle flipX on a rectangle’s image fill when flipping horizontally, actually mirroring the picture', () => {
+    // mock — a plain rectangle mirroring on its own is a geometric no-op, but an image fill has
+    // content that must actually flip, which the paint model can only express via flipX/flipY
+    const paint: TImagePaint = { opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const id = addRectangleNode({ fills: [paint] });
+
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result
+    const node = selectNodes(store.getState())[id] as TRectangleNode;
+    expect((node.fills[0] as TImagePaint).flipX).toBe(true);
+    expect((node.fills[0] as TImagePaint).flipY).toBeUndefined();
+  });
+
+  it('should toggle flipY on a rectangle’s image fill when flipping vertically', () => {
+    // mock
+    const paint: TImagePaint = { opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const id = addRectangleNode({ fills: [paint] });
+
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'vertical');
+
+    // result
+    const node = selectNodes(store.getState())[id] as TRectangleNode;
+    expect((node.fills[0] as TImagePaint).flipX).toBeUndefined();
+    expect((node.fills[0] as TImagePaint).flipY).toBe(true);
+  });
+
+  it('should flip flipX back off on a second horizontal flip of the same rectangle', () => {
+    // mock
+    const paint: TImagePaint = { opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const id = addRectangleNode({ fills: [paint] });
+
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result
+    const node = selectNodes(store.getState())[id] as TRectangleNode;
+    expect((node.fills[0] as TImagePaint).flipX).toBe(false);
+  });
+
+  it('should leave a solid fill untouched (no flipX/flipY added) when flipping', () => {
+    // mock
+    const id = addRectangleNode({});
+
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result
+    const node = selectNodes(store.getState())[id] as TRectangleNode;
+    expect(node.fills[0]).not.toHaveProperty('flipX');
   });
 });

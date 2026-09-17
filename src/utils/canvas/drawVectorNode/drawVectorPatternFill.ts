@@ -7,7 +7,7 @@ import { TPatternPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawVectorPatternSourceTile, TPatternSourceTile } from './drawVectorPatternSourceTile';
+import { drawVectorPatternSourceTile, TBoxFillRotation, TPatternSourceTile } from './drawVectorPatternSourceTile';
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
 import { getPatternPlaceholderDotVertices } from './getPatternPlaceholderDotVertices';
 import { getVectorFillBounds } from './getVectorFillBounds';
@@ -59,6 +59,7 @@ export const drawVectorPatternFill = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha = 1,
+  boxRotation?: TBoxFillRotation,
 ): void => {
   if (faces.length !== 0) {
     if (sourceTile) {
@@ -76,6 +77,7 @@ export const drawVectorPatternFill = (
         viewport,
         isAlphaWriteEnabled,
         alpha,
+        boxRotation,
       );
     } else {
       const positionLocation = gl.getAttribLocation(program, 'a_position');

@@ -5,6 +5,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TImagePaint } from 'types/design/paint/types';
 
 // utils
 import { commitColumnPosition } from '../commitColumnPosition';
@@ -64,5 +65,45 @@ describe('commitColumnPosition', () => {
     commitColumnPosition(store.dispatch, childId, parent, 10, 20);
 
     expect(readNode(childId)).toEqual({ x: 110, y: 70 });
+  });
+
+  it('should carry a stored image crop along by the same delta, instead of leaving it behind', () => {
+    // mock — a frame at (0,0) whose image crop starts flush with its own bounds
+    const paint: TImagePaint = {
+      crop: { height: 20, rotation: 0, width: 20, x: 0, y: 0 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [paint],
+        height: 20,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+
+    // before
+    commitColumnPosition(store.dispatch, id, undefined, 30, 40);
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[id] as { fills: TImagePaint[]; x: number; y: number };
+
+    expect(node).toMatchObject({ x: 30, y: 40 });
+    expect(node.fills[0].crop).toEqual({ height: 20, rotation: 0, width: 20, x: 30, y: 40 });
   });
 });

@@ -8,6 +8,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { clearRotateOriginalFills } from '../handlePointerMove/continueRotateDrag/rotateOriginalFillsCache';
 import { commitRotatedVectorNodeSnapshots } from './commitRotatedVectorNodeSnapshots';
 
 export const disarmRotateDrag = (
@@ -21,6 +22,7 @@ export const disarmRotateDrag = (
 
   if (rotateDragState) {
     commitRotatedVectorNodeSnapshots(dispatch, rotateDragState, canvasRefs);
+    Object.keys(rotateDragState.nodeOrigins).forEach(clearRotateOriginalFills);
     canvasRefs.transform.rotatedNodeIdsRef.current = null;
     rotateDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);

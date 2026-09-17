@@ -1,15 +1,38 @@
 // store
+import { selectImageEditor, selectNodes } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
-import { AppDispatch } from 'store';
+import { AppDispatch, store } from 'store';
 
 // types
 import { TDragState, TNodeOrigin } from 'types/design/selectionTool/types';
+import { TSceneNode } from 'types/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getDragOriginalFills } from '../dragOriginalFillsCache';
 import { getGeometryDeltaChanges } from '../../../../../../utils/getGeometryDeltaChanges';
+import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { resyncGroupAutoLayoutAncestors } from '../../../handlePointerUp/resyncGroupAutoLayoutAncestors';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
+import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
+
+const updateDraggedNodeOrigin = (
+  dispatch: AppDispatch,
+  nodes: Record<string, TSceneNode>,
+  id: string,
+  origin: TNodeOrigin,
+  deltaX: number,
+  deltaY: number,
+): void => {
+  const node = nodes[id];
+  const geometryChanges = getGeometryDeltaChanges(origin, deltaX, deltaY);
+  const imageEditor = selectImageEditor(store.getState());
+  const editedPaintIndex = imageEditor?.nodeId === id ? imageEditor.paintIndex : null;
+  const fills =
+    node && isAppearanceNode(node) ? translateFillsCrop(getDragOriginalFills(id, node.fills), deltaX, deltaY, editedPaintIndex) : undefined;
+
+  dispatch(updateNode({ changes: fills ? { ...geometryChanges, fills } : geometryChanges, id }));
+};
 
 const dispatchNodeOriginUpdates = (
   dispatch: AppDispatch,
@@ -18,9 +41,11 @@ const dispatchNodeOriginUpdates = (
   deltaX: number,
   deltaY: number,
 ): void => {
+  const nodes = selectNodes(store.getState());
+
   Object.entries(nodeOrigins).forEach(([id, origin]) => {
     if (!snapshots?.has(id)) {
-      dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, deltaX, deltaY), id }));
+      updateDraggedNodeOrigin(dispatch, nodes, id, origin, deltaX, deltaY);
     }
   });
 };

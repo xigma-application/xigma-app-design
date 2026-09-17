@@ -1,12 +1,36 @@
 // store
-import { updateNode } from 'store/design/slice';
+import { addNode, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
+import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { commitDraggedVectorNodeSnapshots } from '../commitDraggedVectorNodeSnapshots';
+
+const addImageRectangle = (crop?: { height: number; rotation: number; width: number; x: number; y: number }): string => {
+  store.dispatch(
+    addNode({
+      fills: [{ crop, opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
 
 const buildCanvasRefs = (): TCanvasRefs =>
   ({ vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } } }) as unknown as TCanvasRefs;
@@ -72,6 +96,45 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     // result
     expect(dispatch).not.toHaveBeenCalled();
     expect(canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current).toBeNull();
+  });
+
+  it('should carry an image fill’s crop rect along with the node when the node moves, so it stays put relative to the frame', () => {
+    // mock — moving the frame used to leave the crop rect behind at its old absolute position
+    const id = addImageRectangle({ height: 40, rotation: 0, width: 40, x: 5, y: 5 });
+    const canvasRefs = buildCanvasRefs();
+    const dragState = buildDragState({ [id]: { x: 0, y: 0 } });
+
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
+      [id, { deltaX: 10, deltaY: -5, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] }],
+    ]);
+
+    // before
+    commitDraggedVectorNodeSnapshots(store.dispatch, dragState, canvasRefs);
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node).toMatchObject({ x: 10, y: -5 });
+    expect(node.fills[0]).toMatchObject({ crop: { height: 40, rotation: 0, width: 40, x: 15, y: 0 } });
+  });
+
+  it('should not touch fills when the node has no image crop to carry along', () => {
+    // mock
+    const id = addImageRectangle();
+    const canvasRefs = buildCanvasRefs();
+    const dragState = buildDragState({ [id]: { x: 0, y: 0 } });
+
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
+      [id, { deltaX: 10, deltaY: -5, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] }],
+    ]);
+
+    // before
+    commitDraggedVectorNodeSnapshots(store.dispatch, dragState, canvasRefs);
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node.fills[0]).toMatchObject({ crop: undefined });
   });
 
   it('should skip a snapshotted node whose origin was never captured, without dispatching or throwing', () => {

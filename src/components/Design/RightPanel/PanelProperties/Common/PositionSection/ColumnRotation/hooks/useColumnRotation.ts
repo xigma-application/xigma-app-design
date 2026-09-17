@@ -19,6 +19,8 @@ import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 // utils
 import { buildRotationButtons } from '../utils/buildRotationButtons';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { rotateImageCropRigidly } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerMove/continueRotateDrag/rotateImageCropRigidly';
+import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 export type TUseColumnRotationResult = {
   buttons: TButtonGroup[];
@@ -33,11 +35,14 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const imageCrop = useAppSelector(selectSelectedImageCrop);
   const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
-  const rotation = node?.rotation ?? 0;
+  const rotation = imageCrop ? imageCrop.crop.rotation : (node?.rotation ?? 0);
 
   const commitRotation = (nextRotation: number): void => {
-    if (node) {
+    if (imageCrop) {
+      rotateImageCropRigidly(dispatch, imageCrop, nextRotation);
+    } else if (node) {
       rotateNodesRigidly(dispatch, node, nextRotation);
     }
   };
@@ -49,7 +54,7 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
   };
 
   return {
-    buttons: buildRotationButtons(node, dispatch, t),
+    buttons: buildRotationButtons(node, dispatch, t, imageCrop),
     onBlur: useRotationCommit(rotation, commitRotationOnBlur),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),

@@ -20,10 +20,10 @@ vi.mock('../drawVectorNode', () => ({
 vi.mock('../drawVectorNodeDragSnapshot', () => ({
   drawVectorNodeDragSnapshot: (...args: unknown[]): void => drawVectorNodeDragSnapshotMock(...args),
 }));
-vi.mock('../drawVectorNodeResizeSnapshot', () => ({
+vi.mock('../drawVectorNodeResizeSnapshot/drawVectorNodeResizeSnapshot', () => ({
   drawVectorNodeResizeSnapshot: (...args: unknown[]): void => drawVectorNodeResizeSnapshotMock(...args),
 }));
-vi.mock('../drawVectorNodeRotateSnapshot', () => ({
+vi.mock('../drawVectorNodeRotateSnapshot/drawVectorNodeRotateSnapshot', () => ({
   drawVectorNodeRotateSnapshot: (...args: unknown[]): void => drawVectorNodeRotateSnapshotMock(...args),
 }));
 

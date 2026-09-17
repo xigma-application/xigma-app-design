@@ -4,6 +4,7 @@ import { TImageRenderContext } from '../types';
 
 // utils
 import { createRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/createRenderTargetPool';
+import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 import { startRenderLoop } from './startRenderLoop';
 
 export const setupRenderLoop = (
@@ -47,7 +48,7 @@ export const setupRenderLoop = (
     gradientProgram,
     gridBuffer,
     gridProgram,
-    imagePaintTextureSizeCache: new Map(),
+    imagePaintTextureSizeCache,
     isAlphaWriteEnabled: false,
     maskCompositeBuffer,
     maskCompositeProgram,

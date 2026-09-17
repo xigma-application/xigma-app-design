@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { renderHook } from '@testing-library/react';
 
@@ -6,28 +6,43 @@ import { renderHook } from '@testing-library/react';
 import { useSyncImageEditor } from '../useSyncImageEditor';
 
 // store
-import { selectImageEditor } from 'store/design/selectors';
-import { setImageEditor } from 'store/design/slice';
+import { selectImageEditor, selectImageFillPickerFocus } from 'store/design/selectors';
+import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
 import { store } from 'store';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
+const strictModeWrapper = ({ children }: { children: ReactNode }): ReactNode => (
+  <StrictMode>
+    <Provider store={store}>{children}</Provider>
+  </StrictMode>
+);
+
 describe('useSyncImageEditor', () => {
   afterEach(() => {
     store.dispatch(setImageEditor(null));
+    store.dispatch(setImageFillPickerFocus(null));
   });
 
   it('should set the image editor to position mode when the picker is open on the image tab with a nodeId', () => {
     // before
-    renderHook(() => useSyncImageEditor('node-1', 2, true, true, false), { wrapper });
+    renderHook(() => useSyncImageEditor('node-1', 2, true, true, false, false), { wrapper });
 
     // result
     expect(selectImageEditor(store.getState())).toEqual({ mode: 'position', nodeId: 'node-1', paintIndex: 2 });
   });
 
+  it('should record the fill-picker focus alongside the image editor, so it can be restored after an external close', () => {
+    // before
+    renderHook(() => useSyncImageEditor('node-1', 2, true, true, false, false), { wrapper });
+
+    // result
+    expect(selectImageFillPickerFocus(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 2 });
+  });
+
   it('should not clear the image editor when only the picker closes while still on the Image tab (e.g. starting a canvas resize)', () => {
     // before — mount with the picker open, which seeds position mode
-    const { rerender } = renderHook(({ isPickerOpen }) => useSyncImageEditor('node-1', 0, isPickerOpen, true, false), {
+    const { rerender } = renderHook(({ isPickerOpen }) => useSyncImageEditor('node-1', 0, isPickerOpen, true, false, false), {
       initialProps: { isPickerOpen: true },
       wrapper,
     });
@@ -44,7 +59,7 @@ describe('useSyncImageEditor', () => {
 
   it('should clear the image editor when the image tab is not active', () => {
     // before
-    renderHook(() => useSyncImageEditor('node-1', 0, true, false, false), { wrapper });
+    renderHook(() => useSyncImageEditor('node-1', 0, true, false, false, false), { wrapper });
 
     // result
     expect(selectImageEditor(store.getState())).toBeNull();
@@ -52,7 +67,7 @@ describe('useSyncImageEditor', () => {
 
   it('should clear the image editor when there is no nodeId', () => {
     // before
-    renderHook(() => useSyncImageEditor(undefined, 0, true, true, false), { wrapper });
+    renderHook(() => useSyncImageEditor(undefined, 0, true, true, false, false), { wrapper });
 
     // result
     expect(selectImageEditor(store.getState())).toBeNull();
@@ -60,7 +75,7 @@ describe('useSyncImageEditor', () => {
 
   it('should clear the image editor on unmount', () => {
     // before
-    const { unmount } = renderHook(() => useSyncImageEditor('node-1', 0, true, true, false), { wrapper });
+    const { unmount } = renderHook(() => useSyncImageEditor('node-1', 0, true, true, false, false), { wrapper });
 
     // action
     unmount();
@@ -69,9 +84,34 @@ describe('useSyncImageEditor', () => {
     expect(selectImageEditor(store.getState())).toBeNull();
   });
 
+  it('should clear the fill-picker focus when the picker genuinely closes (leaves the Image tab)', () => {
+    // before
+    const { rerender } = renderHook(({ isImageTabActive }) => useSyncImageEditor('node-1', 0, true, isImageTabActive, false, false), {
+      initialProps: { isImageTabActive: true },
+      wrapper,
+    });
+
+    // action
+    rerender({ isImageTabActive: false });
+
+    // result
+    expect(selectImageFillPickerFocus(store.getState())).toBeNull();
+  });
+
+  it('should clear the fill-picker focus on unmount when the node is no longer selected', () => {
+    // before
+    const { unmount } = renderHook(() => useSyncImageEditor('node-1', 0, true, true, false, false), { wrapper });
+
+    // action
+    unmount();
+
+    // result
+    expect(selectImageFillPickerFocus(store.getState())).toBeNull();
+  });
+
   it('should re-enter crop mode immediately when reopening the picker on an image that already has a stored crop', () => {
     // before
-    renderHook(() => useSyncImageEditor('node-1', 0, true, true, true), { wrapper });
+    renderHook(() => useSyncImageEditor('node-1', 0, true, true, true, false), { wrapper });
 
     // result
     expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 0 });
@@ -79,7 +119,7 @@ describe('useSyncImageEditor', () => {
 
   it('should not re-dispatch position mode when a crop is committed mid-drag while the picker stays open', () => {
     // before — mount already in crop mode (as if a resize/drag already started it)
-    const { rerender } = renderHook(({ hasStoredCrop }) => useSyncImageEditor('node-1', 0, true, true, hasStoredCrop), {
+    const { rerender } = renderHook(({ hasStoredCrop }) => useSyncImageEditor('node-1', 0, true, true, hasStoredCrop, false), {
       initialProps: { hasStoredCrop: false },
       wrapper,
     });
@@ -91,5 +131,41 @@ describe('useSyncImageEditor', () => {
 
     // result — selectedTarget survives; the effect did not re-fire and overwrite it
     expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 0, selectedTarget: 'image' });
+  });
+
+  it('should skip arming the image editor on mount when skipInitialArm is set, while still recording the fill-picker focus (restoring a picker that was visually reopened after the editor was closed externally, without re-arming crop mode on canvas)', () => {
+    // before — mounts already open+image-tab-active, as when a restored FillRow seeds its own state from the focus marker
+    renderHook(() => useSyncImageEditor('node-1', 0, true, true, false, true), { wrapper });
+
+    // result — the editor itself stays untouched (still null, as left by whatever closed it), but the focus marker is (re)recorded
+    expect(selectImageEditor(store.getState())).toBeNull();
+    expect(selectImageFillPickerFocus(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0 });
+  });
+
+  it('should only skip arming while the restored session stays open: a later genuine close-then-reopen re-arms normally', () => {
+    // before
+    const { rerender } = renderHook(({ isImageTabActive }) => useSyncImageEditor('node-1', 0, true, isImageTabActive, false, true), {
+      initialProps: { isImageTabActive: true },
+      wrapper,
+    });
+
+    expect(selectImageEditor(store.getState())).toBeNull();
+
+    // action — user leaves the Image tab (a genuine close), then comes back to it
+    rerender({ isImageTabActive: false });
+    rerender({ isImageTabActive: true });
+
+    // result — this second open is a real transition, so the skip window (closed by the real close) no longer applies
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'position', nodeId: 'node-1', paintIndex: 0 });
+  });
+
+  it('should still skip arming under StrictMode’s dev-mode mount→cleanup→remount replay (regression: a plain one-shot ref got silently spent by the phantom first pass, so the real, kept effect run armed anyway)', () => {
+    // before — StrictMode double-invokes effects on mount; a naive "consume the skip flag" ref
+    // would have it already spent by the phantom pass before the real one ever runs
+    renderHook(() => useSyncImageEditor('node-1', 0, true, true, false, true), { wrapper: strictModeWrapper });
+
+    // result — still never armed
+    expect(selectImageEditor(store.getState())).toBeNull();
+    expect(selectImageFillPickerFocus(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0 });
   });
 });

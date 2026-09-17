@@ -127,6 +127,14 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByLabelText('Background color')).toBeInTheDocument();
   });
 
+  it('should forward initialOpen so the picker popover renders already open, without a trigger click', () => {
+    // before
+    renderColorPickerInput({ initialOpen: true, triggerAriaLabel: 'Background color' });
+
+    // result
+    expect(screen.getByText('Solid')).toBeInTheDocument();
+  });
+
   it('should report when the picker popover opens', () => {
     // mock
     const onOpenChange = vi.fn();

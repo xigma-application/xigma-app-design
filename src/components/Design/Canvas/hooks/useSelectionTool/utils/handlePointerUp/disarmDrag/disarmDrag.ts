@@ -9,6 +9,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { applyPendingDragClickAction } from './applyPendingDragClickAction';
+import { clearDraggedNodesOriginalFills } from './clearDraggedNodesOriginalFills';
 import { commitDraggedVectorNodeSnapshots } from './commitDraggedVectorNodeSnapshots';
 import { commitDropIntoFrame } from './commitDropIntoFrame';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
@@ -27,6 +28,7 @@ export const disarmDrag = (
 
   if (dragState) {
     flushThrottledDispatch(dragState.dispatchThrottle);
+    clearDraggedNodesOriginalFills(dragState.nodeOrigins);
     commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
     resyncRotatedGroupBounds(dispatch, dragState);
     resyncGroupAutoLayoutAncestors(dispatch, Object.keys(dragState.nodeOrigins));

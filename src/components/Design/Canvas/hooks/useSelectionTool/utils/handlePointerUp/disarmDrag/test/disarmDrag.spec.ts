@@ -12,6 +12,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { disarmDrag } from '../disarmDrag';
+import { getDragOriginalFills } from '../../../handlePointerMove/continueDrag/dragOriginalFillsCache';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -151,6 +152,31 @@ describe('disarmDrag', () => {
     expect(dragStateRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should clear the drag-original-fills cache for every dragged node id, so the next drag starts fresh instead of translating from a stale origin', () => {
+    // mock — seed the cache as if a drag had already translated this node's fills once
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef({
+      candidateShapes: [],
+      ctrlMarqueeFallback: null,
+      dispatchThrottle: { frameId: null, run: null },
+      hasMoved: true,
+      nodeOrigins: { 'rect-1': { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+    const originalFills = [{ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+
+    getDragOriginalFills('rect-1', originalFills);
+
+    // before
+    disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef, createCanvasRefs(), setClassName);
+
+    // result — a fresh drag on the same id now seeds from whatever is passed in, not the stale value
+    const freshFills = [{ opacity: 100, ref: 'asset-2', rotation: 0, scaleMode: 'fit' as const, type: 'image' as const }];
+
+    expect(getDragOriginalFills('rect-1', freshFills)).toBe(freshFills);
   });
 
   it('should clear the selection on an unmoved deselect click', () => {

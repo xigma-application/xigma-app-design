@@ -8,7 +8,7 @@ import { invalidateVectorWidthProfile } from './invalidateVectorWidthProfile';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncBoundNode } from './syncBoundNode';
-import { syncConstrainedFrameChildren } from './syncConstrainedFrameChildren';
+import { syncConstrainedFrameChildren } from './syncConstrainedFrameChildren/syncConstrainedFrameChildren';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const handleUpdateNode = (state: TDesignState, payload: { changes: TSceneNodeChanges; id: string }): void => {

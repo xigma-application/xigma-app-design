@@ -16,7 +16,7 @@ vi.mock('../drawVectorFill', () => ({
 vi.mock('../drawVectorGradientFill', () => ({
   drawVectorGradientFill: (...args: unknown[]): unknown => drawVectorGradientFillMock(...args),
 }));
-vi.mock('../drawVectorImageFill', () => ({
+vi.mock('../drawVectorImageFill/drawVectorImageFill', () => ({
   drawVectorImageFill: (...args: unknown[]): unknown => drawVectorImageFillMock(...args),
 }));
 vi.mock('../drawVectorPatternFill', () => ({
@@ -294,10 +294,70 @@ describe('drawVectorFillPaints', () => {
       0,
       'fill',
       undefined,
+      undefined,
+      undefined,
+      undefined,
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
     expect(drawVectorPatternFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should forward boxRotation to the image branch too, so a rotated plain image fill stays rigid with the shape', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const texture = {} as WebGLTexture;
+    const size = { height: 40, width: 40 };
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+    imageTextureSizeCache.set('blob:asset-1', size);
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      boxRotation,
+    );
+
+    // result
+    expect(drawVectorImageFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      size,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fill',
+      undefined,
+      undefined,
+      undefined,
+      boxRotation,
+    );
   });
 
   it('should pass the image paint rotation through to the image fill drawer', () => {
@@ -474,6 +534,9 @@ describe('drawVectorFillPaints', () => {
       0,
       'fill',
       undefined,
+      undefined,
+      undefined,
+      undefined,
     );
   });
 
@@ -529,8 +592,67 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      undefined,
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should forward boxRotation to the pattern branch only, leaving solid/gradient/image branches untouched', () => {
+    // mock
+    const pattern: TPatternPaint = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      offsetX: 0,
+      offsetY: 0,
+      opacity: 100,
+      scale: 100,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [pattern],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      boxRotation,
+    );
+
+    // result
+    expect(drawVectorPatternFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      patternTileProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      null,
+      pattern,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      boxRotation,
+    );
   });
 });

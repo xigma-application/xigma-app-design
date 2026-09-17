@@ -148,6 +148,8 @@ export type TImageCropResizeDragState = {
   handle: TResizeHandle;
   nodeId: string;
   origin: TImageCrop;
+  originalFlipX?: boolean;
+  originalFlipY?: boolean;
   paintIndex: number;
 };
 

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setImageEditor, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -15,6 +15,7 @@ import { captureResizedVectorNodeSnapshots } from '../../handlePointerDown/captu
 import { continueResizeDrag } from '../../handlePointerMove/continueResizeDrag/continueResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { disarmResizeDrag } from '../disarmResizeDrag';
+import { getResizeOriginalFills } from '../../handlePointerMove/continueResizeDrag/resizeNode/resizeOriginalFillsCache';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -31,6 +32,70 @@ const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): R
 });
 
 describe('disarmResizeDrag', () => {
+  beforeEach(() => {
+    store.dispatch(setImageEditor(null));
+  });
+
+  it("should switch the image editor from position to crop mode once the resize that targeted it finishes (regression: this used to fire on arm, before the resize even ran, so resizeBoxNode saw 'crop' already active mid-drag and skipped scaling the very crop rect the resize was meant to establish)", () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
+      handle: 'se',
+      nodeOrigins: { 'rect-1': { flip: null, height: 10, rotation: 0, width: 10, x: 0, y: 0 } },
+    });
+
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-1', paintIndex: 0 }));
+
+    // before
+    disarmResizeDrag(canvas, pointerEvent(), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result
+    expect(store.getState().design.imageEditor).toEqual({ mode: 'crop', nodeId: 'rect-1', paintIndex: 0 });
+  });
+
+  it("should leave the image editor untouched when the resized node isn't the one it targets", () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
+      handle: 'se',
+      nodeOrigins: { 'other-node': { flip: null, height: 10, rotation: 0, width: 10, x: 0, y: 0 } },
+    });
+
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'rect-1', paintIndex: 0 }));
+
+    // before
+    disarmResizeDrag(canvas, pointerEvent(), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result
+    expect(store.getState().design.imageEditor).toEqual({ mode: 'position', nodeId: 'rect-1', paintIndex: 0 });
+  });
+
+  it('should leave the image editor untouched when it is already in crop mode', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
+      handle: 'se',
+      nodeOrigins: { 'rect-1': { flip: null, height: 10, rotation: 0, width: 10, x: 0, y: 0 } },
+    });
+
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: 'rect-1', paintIndex: 0, selectedTarget: 'frame' }));
+
+    // before
+    disarmResizeDrag(canvas, pointerEvent(), store.dispatch, resizeDragRef, createCanvasRefs());
+
+    // result — unchanged, including its own selectedTarget
+    expect(store.getState().design.imageEditor).toEqual({ mode: 'crop', nodeId: 'rect-1', paintIndex: 0, selectedTarget: 'frame' });
+  });
+
   it('should do nothing when no resize drag is in progress', () => {
     // mock
     const canvas = createCanvas();
@@ -59,6 +124,29 @@ describe('disarmResizeDrag', () => {
     // result
     expect(resizeDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+  });
+
+  it('should clear the resize-original-fills cache for every resized node id, so the next drag starts fresh instead of scaling from a stale origin', () => {
+    // mock — seed the cache as if a resize drag had already scaled this node's fills once
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
+      handle: 'se',
+      nodeOrigins: { 'rect-1': { flip: null, height: 10, rotation: 0, width: 10, x: 0, y: 0 } },
+    });
+    const originalFills = [{ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill' as const, type: 'image' as const }];
+
+    getResizeOriginalFills('rect-1', originalFills);
+
+    // before
+    disarmResizeDrag(canvas, pointerEvent(), vi.fn(), resizeDragRef, createCanvasRefs());
+
+    // result — a fresh drag on the same id now seeds from whatever is passed in, not the stale value
+    const freshFills = [{ opacity: 100, ref: 'asset-2', rotation: 0, scaleMode: 'fit' as const, type: 'image' as const }];
+
+    expect(getResizeOriginalFills('rect-1', freshFills)).toBe(freshFills);
   });
 
   it('should commit every resize-snapshotted vector node’s final geometry, computed from its frozen origin and the snapshot’s final scale/anchor', () => {

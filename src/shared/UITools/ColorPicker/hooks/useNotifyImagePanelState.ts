@@ -9,7 +9,7 @@ export const useNotifyImagePanelState = (
   onImageUrlChange?: TFunc<[string | null]>,
   onImageChange?: TFunc<[TImagePanelChange]>,
 ): void => {
-  const notifiedImageUrlRef = useRef<string | null>(null);
+  const notifiedImageUrlRef = useRef<string | null>(imagePanel.imageUrl);
 
   useEffect(() => {
     onImageUrlChange?.(imagePanel.imageUrl);

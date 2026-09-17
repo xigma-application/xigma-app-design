@@ -42,6 +42,8 @@ export type TImageEditorTarget = 'frame' | 'image';
 
 export type TImageEditorState = { mode: TImageEditorMode; nodeId: string; paintIndex: number; selectedTarget?: TImageEditorTarget };
 
+export type TImageFillPickerFocus = { nodeId: string; paintIndex: number };
+
 export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number };
 
 export type TPreferences = {
@@ -79,6 +81,7 @@ export type TDesignState = {
   gridTrackValueEditRequest?: TGridTrackValueEditRequest | null;
   hoveredDimensionField?: TDimensionHintField | null;
   imageEditor: TImageEditorState | null;
+  imageFillPickerFocus?: TImageFillPickerFocus | null;
   isActionsPanelOpen: boolean;
   isGridSettingsPanelOpen?: boolean;
   isMediaToolArmed: boolean;

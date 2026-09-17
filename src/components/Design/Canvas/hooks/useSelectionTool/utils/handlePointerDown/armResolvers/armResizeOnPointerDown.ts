@@ -1,6 +1,5 @@
 // store
 import { selectImageEditor } from 'store/design/selectors';
-import { setImageEditor } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -9,6 +8,7 @@ import { TArmContext } from '../types';
 // utils
 import { armResizeDrag } from '../armResizeDrag/armResizeDrag';
 import { getResizeHandleAtPoint } from '../../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { seedImageCropIfNeeded } from 'components/Design/Canvas/utils/seedImageCropIfNeeded';
 
 export const armResizeOnPointerDown = ({
   canvas,
@@ -28,7 +28,11 @@ export const armResizeOnPointerDown = ({
 
     if (imageEditor?.mode !== 'crop' || imageEditor.selectedTarget !== 'image' || !targetsSelectedNode) {
       if (imageEditor && imageEditor.mode !== 'crop' && targetsSelectedNode) {
-        dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
+        seedImageCropIfNeeded(
+          dispatch,
+          selectedNodes.find((node) => node.id === imageEditor.nodeId),
+          imageEditor.paintIndex,
+        );
       }
 
       armResizeDrag(canvas, event, selectionRefs.resizeDragRef, selectedNodes, resizeHandleHit.handle, resizeHandleHit.bounds, canvasRefs);

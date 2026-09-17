@@ -864,6 +864,120 @@ component button, no dropdown) → `Common/PositionSection` → a bare `UITools.
 "Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan` → `Common/AppearanceSection`
 → `Common/FillSection`. No auto-layout rows.
 
+## `ImageCrop/`
+
+**Routed ahead of every node-type panel, not by node type at all.** `PanelProperties.tsx`'s switch
+checks `useIsEditingImageCrop()` (`Boolean(selectSelectedImageCrop(state))`, i.e.
+`imageEditor?.selectedTarget === 'image'`) before its `NodeType.frame`/`NodeType.rectangle` cases, so
+whichever node actually owns the image — Frame or Rectangle today, any future `isAppearanceNode` type
+later, per the "będzie potem używane przez wiele innych" ask that drove this — gets swapped out for
+`ImageCrop.tsx` the instant the user selects the image itself (as opposed to the frame) inside crop
+mode (`canvas-rendering-pipeline.md`'s "second independently-editable entity" section). Clicking the
+frame again flips `selectedTarget` back to `'frame'` and the panel reverts automatically, with no
+`ImageCrop`-specific logic needed for that direction — it's just the same `PanelProperties` switch
+re-evaluating.
+
+**Deliberately minimal composition, built as a genuinely separate panel rather than a conditional
+branch inside `Frame`/`Rectangle`** (an explicit ask, so the two stay untouched and any future panel
+can route into `ImageCrop` the same way): `ImageCropHeader` (a plain "Image" label, no dropdown, no
+buttons — `PanelHeader` with `menu` and `buttons` both omitted/`null`) → `ImageCropPositionSection`
+(`Common/PositionSection/ColumnPosition` + `ColumnRotation` directly, deliberately **not**
+`Common/PositionSection` itself, so `ColumnAlignment` never renders — alignment is meaningless for a
+crop rect) → `ImageCropDimensionsSection` (a bare `UITools.Section` labelled "Layout", wrapping
+`Common/ColumnDimensions` unmodified). Every one of those reused `Column*` components already reads
+`selectSelectedImageCrop` itself and switches its own value/commit path when it resolves — this panel
+supplies no new field-level logic, only the assembly and the header swap.
+
+**Dimensions gained two new imageCrop-aware behaviors this session, on top of `useColumnDimensions`'s
+pre-existing `imageCrop ? imageCrop.crop.width : node.width` value switch**: the aspect-ratio lock
+(`ColumnDimensionsButtonIcons`' `AspectRatio` toggle) is now forced `locked: true` and `disabled` via
+a new `lockDisabled` field whenever an image crop is being edited — a crop's own proportions should
+always stay fixed when resized from the panel, unlike a node's optional lock. This exposed a real
+dead branch: `commitColumnWidth`/`commitColumnHeight`'s `imageCrop` path
+(`commitImageCropDimensions`) had never read any `locked` flag at all, so editing width while a crop
+was active always left height untouched regardless of the (until-now-always-`false`) lock state.
+Fixed by running the crop's width/height through the same `getLockedDimensionsChanges` ratio math the
+node path already uses, with `locked` hardcoded `true` for this branch only.
+
+**The Rotation row's Flip buttons only became imageCrop-aware this session — Rotate already was.**
+`buildRotationButtons.tsx` had `rotateImageCropRigidly` wired for the "Rotate 90°" button from
+earlier work, but Flip horizontal/vertical still unconditionally called `handleFlipSelection`
+(flipping the underlying node) and were disabled/enabled purely off the frame's own
+`isLayoutContainerNode` check — so clicking Flip while editing an image crop silently flipped the
+wrong target. Fixed with a new `flipImageCropRigidly.ts` (the flip counterpart to
+`rotateImageCropRigidly.ts`, toggling the paint's own `flipX`/`flipY` directly rather than touching
+crop geometry) and `isFlipDisabled = imageCrop ? false : (!node || isLayoutContainerNode(node))`, so
+the buttons are unconditionally enabled and crop-targeted whenever an image crop is open, regardless
+of what the underlying frame's own layout state would otherwise say.
+
+**Panel-driven transforms deliberately stay coupled to the frame; only a canvas drag decouples
+them** — the opposite default from what you'd guess given the canvas-side work. Editing X/Y or
+Dimensions from this panel, or clicking the Rotate 90° button, moves/resizes/rotates the crop
+*together with* the frame (`rotateNodesRigidly`/the node-geometry commit paths have no
+`imageEditor`-skip guard), matching Figma and confirmed directly by the user ("tak też działa to w
+Figmie") — only a canvas rotate-handle or resize-handle *drag* on the frame itself decouples the crop
+(`canvas-rendering-pipeline.md`'s frame/image independence section). This was a real regression
+caught live: an early pass made `rotateNodesRigidly` skip the crop unconditionally whenever
+`imageEditor.mode === 'crop'`, since that function is also the canvas-rotate-drag's own dispatch path
+— but it turned out to be **only** the panel's call path, the canvas drag uses a separate
+`continueRotateDrag.ts` function entirely, so the guard was reverted here and kept solely on the
+canvas-drag side.
+
+**Gotcha, found live right after `ImageCrop.tsx` shipped**: swapping the whole top-level panel
+component on every `selectedTarget` change unmounts and remounts `FillRow` (the Frame/Rectangle
+panel's own, via `Common/FillSection`) — and `FillRow` is the sole owner of `useSyncImageEditor`,
+whose cleanup effect used to clear `imageEditor` unconditionally on unmount. Selecting the image
+(swap *into* `ImageCrop`, unmounting `FillRow`) or clicking back to the frame (swap *out of*
+`ImageCrop`, remounting a *fresh* `FillRow` whose local `isPickerOpen`/`isImageTabActive` state starts
+at `false`) both looked, to that hook, exactly like "the picker closed for real" — silently exiting
+crop mode on every single target switch. Fixed two ways at once: the unmount cleanup now checks
+`selectSelectedNodes(store.getState())` and only clears when the node is genuinely no longer selected
+(not just displayed via a different panel), and a `wasActiveRef` flag tracks whether *this specific
+hook instance* ever actually activated the editor, so a fresh mount that lands on an
+already-`imageEditor`-active node doesn't immediately clear it just because its own local toggle state
+hasn't caught up yet.
+
+**Follow-up bug, found live after the gotcha above was fixed**: `imageEditor` itself no longer got
+wrongly cleared, but the fill *picker popover* (`FillRow`'s `ColorPickerInput`) still came back
+**closed** every time `selectedTarget` left `'image'` — whether by clicking the frame again or by
+fully exiting crop mode via Escape/click-outside — because `isPickerOpen`/`isImageTabActive` are
+`FillRow`'s own local `useState`, and a fresh mount always starts them at `false`, same root cause as
+the gotcha above, one layer further out (the *hook's* state survived the swap; the *component's* own
+UI-open state didn't). Fixed by a new redux marker, `imageFillPickerFocus: {nodeId, paintIndex} |
+null` (`store/design/types.ts`/`slice.ts`/`selectors.ts`, plain reducer, excluded from
+`TDesignSnapshot` the same way `imageEditor` is), set/cleared by `useSyncImageEditor` in the exact
+same branches it already sets/clears `imageEditor` — but critically **not** touched by the
+canvas/Escape exit call sites (`armImageCropOnPointerDown.ts`, `armImageCropPaintOnPointerDown.ts`,
+`handleLeave.ts`), so it survives every one of those. `FillRow` seeds its own `isPickerOpen`/
+`isImageTabActive` from a match against this marker at mount, and threads a new `initialOpen` prop
+down through `ColorPickerInput` into `ColorPicker`, which now seeds its own `isOpen` from it and
+passes `open={isOpen}` to `Popover` — converting that `Popover` from Radix-uncontrolled to
+explicitly React-controlled (behavior-preserving for every other caller, since `isOpen` already
+mirrored every real open/close via `handleOpenChange` beforehand, just wasn't fed back in).
+
+Explicitly decided with the user (not inferred): reopening the picker this way must **not** re-arm
+`imageEditor` when the exit was a true close (Escape/click-outside) — the crop handles should stay
+gone from canvas, only the picker's own visibility comes back showing the last state. Clicking the
+frame is the one exception where re-arming is harmless/correct, since `imageEditor` was never nulled
+there in the first place (only `selectedTarget` changed) — restoring the picker for that case is a
+no-op re-dispatch of the same state. Implemented via a `skipInitialArm` param on `useSyncImageEditor`,
+computed once per `FillRow` mount as the same boolean used to seed `isPickerOpen`.
+
+**Real regression caught only by e2e, not by `renderHook`**: the first implementation stored the skip
+as a "consume on first use" ref (`if (skip) { skip = false } else { arm }`), which passed every unit
+test — `renderHook` doesn't wrap in `StrictMode` by default — but failed in the actual (StrictMode
+-wrapped, `main.tsx`) app: React 18 dev mode double-invokes a fresh mount's effects
+(mount → cleanup → mount again) to surface missing-cleanup bugs, and since refs (unlike state)
+survive that phantom cycle, the *fake* first pass silently spent the one-shot skip, so the *real*,
+kept effect run armed anyway — reopening the picker after Escape immediately re-armed crop mode,
+undoing the exit. Fixed by making the skip a **window** that only closes on a genuine close
+transition (the same branch that already nulls `imageEditor`/the marker for real), rather than being
+spent by merely being read once — so any number of repeated invocations with the same still-open
+props (StrictMode's replay or otherwise) keep skipping consistently. Covered by a dedicated unit test
+that renders the hook inside an explicit `<StrictMode>` wrapper (`useSyncImageEditor.spec.tsx`) so
+this can't regress silently again, plus two e2e cases in `fill-section.spec.ts` (frame-refocus and
+Escape) that this exact bug's first fix attempt failed.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

@@ -40,6 +40,8 @@ const pathOutlineStyles = new Map();
 const refs = createCanvasRefs();
 const editingPathId = null;
 
+const DEFAULT_BOX_ROTATION = { center: { x: 10, y: 10 }, degrees: 0, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
 const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
   fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 20,
@@ -93,6 +95,7 @@ describe('drawBoxLeafNode', () => {
       [[{ x: 0, y: 0 }]],
       [{ color: '#fff', opacity: 25, type: 'solid' }],
       [null],
+      DEFAULT_BOX_ROTATION,
     );
     expect(drawRectMock).not.toHaveBeenCalled();
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
@@ -121,6 +124,7 @@ describe('drawBoxLeafNode', () => {
         { color: '#111111', opacity: 100, type: 'solid' },
       ],
       [null, null],
+      DEFAULT_BOX_ROTATION,
     );
   });
 
@@ -150,7 +154,15 @@ describe('drawBoxLeafNode', () => {
 
     // result
     expect(resolvePatternSourceTileMock).toHaveBeenCalledWith(context, 'source-1', nodesById, pathOutlineStyles, refs, editingPathId, 0);
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [resolvedTile.tile]);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [pattern],
+      [resolvedTile.tile],
+      DEFAULT_BOX_ROTATION,
+    );
     expect(resolvedTile.release).toHaveBeenCalled();
   });
 
@@ -189,7 +201,15 @@ describe('drawBoxLeafNode', () => {
       editingPathId,
       0,
     );
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [resolvedTile.tile]);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [pattern],
+      [resolvedTile.tile],
+      DEFAULT_BOX_ROTATION,
+    );
     expect(resolvedTile.release).toHaveBeenCalled();
   });
 
@@ -241,7 +261,35 @@ describe('drawBoxLeafNode', () => {
 
     // result
     expect(resolvePatternSourceTileMock).not.toHaveBeenCalled();
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [null]);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [pattern],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
+  });
+
+  it('should pass the node’s own rotation, center, and unrotated local bounds through as boxRotation, so a rotated pattern fill can stay attached to the shape', () => {
+    // mock — a non-square, non-origin, rotated node: center and localBounds must reflect ITS
+    // own x/y/width/height, not the shared square fixture's defaults
+    const node = rect({ height: 40, rotation: 30, width: 100, x: 10, y: 20 });
+
+    // action
+    drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
+
+    // result
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [{ color: '#fff', opacity: 100, type: 'solid' }],
+      [null],
+      { center: { x: 60, y: 40 }, degrees: 30, localBounds: { height: 40, width: 100, x: 10, y: 20 } },
+    );
   });
 
   it('should draw a section fill via the plain-color drawRect path, since sections still use a single hex fill', () => {

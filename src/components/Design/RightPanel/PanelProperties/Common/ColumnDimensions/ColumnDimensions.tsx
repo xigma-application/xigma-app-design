@@ -25,6 +25,7 @@ const ColumnDimensions: FC = () => {
     hasMinWidthValue,
     height,
     heightSizingMode,
+    lockDisabled,
     locked,
     maxHeightShown,
     maxHeightValue,
@@ -59,7 +60,7 @@ const ColumnDimensions: FC = () => {
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={ColumnDimensionsButtonIcons(locked, onToggleLock, t)}
+      buttonsIcon={ColumnDimensionsButtonIcons(locked, lockDisabled, onToggleLock, t)}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin

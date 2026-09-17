@@ -10,7 +10,7 @@ const t = i18n.t;
 describe('ColumnDimensionsButtonIcons', () => {
   it('should return the lock aspect ratio button', () => {
     // action
-    const buttonsIcon = ColumnDimensionsButtonIcons(false, vi.fn(), t);
+    const buttonsIcon = ColumnDimensionsButtonIcons(false, false, vi.fn(), t);
 
     // result
     expect(buttonsIcon).toHaveLength(1);
@@ -18,7 +18,7 @@ describe('ColumnDimensionsButtonIcons', () => {
 
   it('should mark the button as selected when locked is true', () => {
     // before
-    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, vi.fn(), t)}</TooltipProvider>);
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, false, vi.fn(), t)}</TooltipProvider>);
 
     // result
     expect(screen.getByLabelText('Unlock aspect ratio')).toHaveAttribute('aria-pressed', 'true');
@@ -26,7 +26,7 @@ describe('ColumnDimensionsButtonIcons', () => {
 
   it('should use the "unlock" aria-label when locked is true', () => {
     // before
-    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, vi.fn(), t)}</TooltipProvider>);
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, false, vi.fn(), t)}</TooltipProvider>);
 
     // result
     expect(screen.getByLabelText('Unlock aspect ratio')).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('ColumnDimensionsButtonIcons', () => {
 
   it('should not mark the button as selected when locked is false', () => {
     // before
-    render(<TooltipProvider>{ColumnDimensionsButtonIcons(false, vi.fn(), t)}</TooltipProvider>);
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(false, false, vi.fn(), t)}</TooltipProvider>);
 
     // result
     expect(screen.getByLabelText('Lock aspect ratio')).toHaveAttribute('aria-pressed', 'false');
@@ -45,12 +45,28 @@ describe('ColumnDimensionsButtonIcons', () => {
     const onToggleLock = vi.fn();
 
     // before
-    render(<TooltipProvider>{ColumnDimensionsButtonIcons(false, onToggleLock, t)}</TooltipProvider>);
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(false, false, onToggleLock, t)}</TooltipProvider>);
 
     // action
     fireEvent.click(screen.getByLabelText('Lock aspect ratio'));
 
     // result
     expect(onToggleLock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable the button when lockDisabled is true, so it cannot be toggled off (e.g. while editing an image crop, which is always locked)', () => {
+    // mock
+    const onToggleLock = vi.fn();
+
+    // before
+    render(<TooltipProvider>{ColumnDimensionsButtonIcons(true, true, onToggleLock, t)}</TooltipProvider>);
+
+    // result
+    const button = screen.getByLabelText('Unlock aspect ratio');
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(onToggleLock).not.toHaveBeenCalled();
   });
 });

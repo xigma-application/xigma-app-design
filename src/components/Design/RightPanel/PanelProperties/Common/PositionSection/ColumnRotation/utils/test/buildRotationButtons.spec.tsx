@@ -9,6 +9,8 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TImagePaint } from 'types/design/paint/types';
+import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 // utils
 import { buildRotationButtons } from '../buildRotationButtons';
@@ -208,5 +210,76 @@ describe('buildRotationButtons', () => {
 
     // result
     expect((selectNodes(store.getState())[id] as TEllipseNode).flipY).toBe(true);
+  });
+
+  it('should keep both flip buttons enabled while an image crop is being edited, even with no node selected', () => {
+    // action
+    const buttons = buildRotationButtons(undefined, store.dispatch, t, {} as TSelectedImageCrop);
+
+    // result
+    expect(buttons.find((button) => button.name === 'FlipHorizontal')?.disabled).toBe(false);
+    expect(buttons.find((button) => button.name === 'FlipVertical')?.disabled).toBe(false);
+  });
+
+  it('should flip the image crop’s own flipX, not the frame’s, when an image crop is being edited (regression: the flip buttons stayed wired to the frame even while editing its image)', () => {
+    // mock
+    const frame = addFrameNode(0);
+    const crop = { height: 20, rotation: 0, width: 20, x: 0, y: 0 };
+    const paint: TImagePaint = { crop, opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setSelection([frame.id]));
+
+    const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
+
+    // action
+    const [, flipHorizontalButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    flipHorizontalButton?.onClick();
+
+    // result — the paint's own flipX flipped, the frame's own geometry and flip state untouched
+    const updatedFrame = selectNodes(store.getState())[frame.id] as TFrameNode;
+
+    expect((updatedFrame.fills[0] as TImagePaint).flipX).toBe(true);
+    expect(updatedFrame).toMatchObject({ rotation: 0, x: 0, y: 0 });
+  });
+
+  it('should flip the image crop’s own flipY, not the frame’s, when an image crop is being edited', () => {
+    // mock
+    const frame = addFrameNode(0);
+    const crop = { height: 20, rotation: 0, width: 20, x: 0, y: 0 };
+    const paint: TImagePaint = { crop, opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setSelection([frame.id]));
+
+    const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
+
+    // action
+    const [, , flipVerticalButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    flipVerticalButton?.onClick();
+
+    // result
+    const updatedFrame = selectNodes(store.getState())[frame.id] as TFrameNode;
+
+    expect((updatedFrame.fills[0] as TImagePaint).flipY).toBe(true);
+  });
+
+  it('should rotate the image crop, not the frame, when an image crop is being edited', () => {
+    // mock — a frame holding an image fill whose crop is rotated independently of the frame
+    const frame = addFrameNode(0);
+    const crop = { height: 20, rotation: 20, width: 20, x: 0, y: 0 };
+    const paint: TImagePaint = { crop, opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    store.dispatch(setSelection([frame.id]));
+
+    const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
+
+    // action
+    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    rotateButton?.onClick();
+
+    // result — the crop rotated to 110° (20 + 90, wrapped like the frame's own rotate button), the frame itself untouched
+    const updatedFrame = selectNodes(store.getState())[frame.id] as TFrameNode;
+
+    expect((updatedFrame.fills[0] as TImagePaint).crop?.rotation).toBe(110);
+    expect(updatedFrame.rotation).toBe(0);
   });
 });

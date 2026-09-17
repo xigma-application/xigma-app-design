@@ -56,6 +56,7 @@ import { drawGridSlots } from './drawGridSlots/drawGridSlots';
 import { drawGridTrackAffordance } from './drawGridTrackAffordance/drawGridTrackAffordance';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
+import { drawImageEditorCropOverflowPreview } from './drawImageEditorCropOverflowPreview';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawMaskOutlines } from './drawMaskOutlines';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';
@@ -126,7 +127,7 @@ export const drawScene = (
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
   const allSelectedNodes = selectSelectedNodes(state);
-  const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
+  const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs, imageEditor);
   const smartSelectionNodes = selectSmartSelectionNodes(state);
   const gridSectionHighlight = selectGridSectionHighlight(state);
   const gridTrackSelection = selectGridTrackSelection(state);
@@ -156,6 +157,7 @@ export const drawScene = (
   drawSceneBackground(gl, imageContext, clientWidth, clientHeight, viewport);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
+  drawImageEditorCropOverflowPreview(ctx, nodesById, imageEditor);
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);

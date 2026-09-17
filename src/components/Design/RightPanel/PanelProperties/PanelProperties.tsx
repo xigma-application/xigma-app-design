@@ -4,11 +4,13 @@ import { FC } from 'react';
 import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
+import ImageCrop from './ImageCrop/ImageCrop';
 import NoSelection from './NoSelection/NoSelection';
 import Rectangle from './Rectangle/Rectangle';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
+import { useIsEditingImageCrop } from './Common/hooks/useIsEditingImageCrop';
 import { useIsNoSelection } from '../hooks/useIsNoSelection';
 
 // store
@@ -25,6 +27,7 @@ const PanelProperties: FC = () => {
   const isNoSelection = useIsNoSelection();
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
   const isGridFrameSelected = selectedNode?.type === NodeType.frame && selectedNode.layoutMode === LayoutMode.grid;
+  const isEditingImageCrop = useIsEditingImageCrop();
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
 
@@ -33,6 +36,8 @@ const PanelProperties: FC = () => {
       return <FrameTool />;
     case isNoSelection:
       return <NoSelection />;
+    case isEditingImageCrop:
+      return <ImageCrop />;
     case isGridFrameSelected && isGridSettingsPanelOpen:
       return <GridSettings />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.frame:

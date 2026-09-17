@@ -1,10 +1,12 @@
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { AlignmentLayout, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { TImagePaint, TPatternPaint } from 'types/design/paint/types';
+import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { getRotatedAnchorSolver } from '../../getRotatedAnchorSolver';
@@ -78,6 +80,79 @@ const addRectNode = (width: number, height: number): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addImageRectangle = (crop: { height: number; rotation: number; width: number; x: number; y: number }): string => {
+  store.dispatch(
+    addNode({
+      fills: [{ crop, opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addImageRectangleNoCrop = (): string => {
+  store.dispatch(
+    addNode({
+      fills: [{ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addPatternRectangle = (): string => {
+  store.dispatch(
+    addNode({
+      fills: [
+        {
+          alignmentIndex: 0,
+          direction: 'horizontal',
+          offsetX: 0,
+          offsetY: 0,
+          opacity: 100,
+          scale: 100,
+          spacingX: 0,
+          spacingY: 0,
+          tileType: 'rectangular',
+          type: 'pattern',
+        },
+      ],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addMediaNode = (): string => {
   store.dispatch(
     addNode({
@@ -103,6 +178,7 @@ const addMediaNode = (): string => {
 describe('resizeBoxNode', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should resize a single unrotated node using the plain (non-solver) position formula', () => {
@@ -314,6 +390,201 @@ describe('resizeBoxNode', () => {
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ height: 90 });
+  });
+
+  it('should scale an image fill’s crop rect along with the node, so it stays attached instead of resetting', () => {
+    // mock — a 100x100 node doubling in width only, anchored at its own top-left corner; the crop
+    // rect sits at the node's own top-left quadrant and must scale on the x axis to match
+    const id = addImageRectangle({ height: 20, rotation: 0, width: 20, x: 10, y: 10 });
+
+    // before
+    resizeBoxNode(id, { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 2, 1, true, null);
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node).toMatchObject({ width: 200 });
+    expect(node.fills[0]).toMatchObject({ crop: { height: 20, width: 40, x: 20, y: 10 } });
+  });
+
+  it("should leave the image editor's crop and flip untouched when the frame is resized while that node's image editor is active in crop mode (regression: resizing the frame scaled/mirrored the crop along with it)", () => {
+    // mock
+    const id = addImageRectangle({ height: 20, rotation: 0, width: 20, x: 10, y: 10 });
+
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: id, paintIndex: 0 }));
+
+    // before — double the width and mirror on X, same as the two tests above combined
+    resizeBoxNode(id, { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, -2, 1, true, null);
+
+    // result — the frame resized, but the crop rect and flip stayed exactly as they were
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node).toMatchObject({ width: 200 });
+    expect(node.fills[0]).toMatchObject({ crop: { height: 20, width: 20, x: 10, y: 10 } });
+    expect((node.fills[0] as TImagePaint).flipX).toBeFalsy();
+  });
+
+  it('should mirror an image fill’s content when a Rectangle resize crosses the anchor, since a rectangle has no flip field of its own', () => {
+    // mock — a rectangle has no flip field (isFlippableNode excludes it), so a mirror-crossing
+    // resize must carry the mirror via the image PAINT's own flipX/flipY instead
+    const id = addImageRectangleNoCrop();
+
+    // before — dragging the east handle past the west anchor (x=0) is a "mirror" resize
+    resizeBoxNode(
+      id,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      -0.5,
+      1,
+      true,
+      null,
+    );
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node).toMatchObject({ width: 50, x: -50 });
+    expect((node.fills[0] as TImagePaint).flipX).toBe(true);
+  });
+
+  it('should un-mirror the image fill when the drag is pulled back past the anchor again, on either axis (regression: the fill dispatch used to be skipped whenever it happened to equal the original, leaving a stale flip from an earlier tick in place forever)', () => {
+    // mock — cross the anchor on X, then cross back within the same drag (same cached original)
+    const idX = addImageRectangleNoCrop();
+
+    resizeBoxNode(
+      idX,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      -0.5,
+      1,
+      true,
+      null,
+    );
+
+    const midX = selectActivePage(store.getState()).nodes[idX] as TRectangleNode;
+
+    expect((midX.fills[0] as TImagePaint).flipX).toBe(true);
+
+    resizeBoxNode(
+      idX,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      0.5,
+      1,
+      true,
+      null,
+    );
+
+    const afterX = selectActivePage(store.getState()).nodes[idX] as TRectangleNode;
+
+    expect(afterX).toMatchObject({ width: 50, x: 0 });
+    expect((afterX.fills[0] as TImagePaint).flipX).toBeUndefined();
+
+    // mock — same thing on Y, via the north handle
+    const idY = addImageRectangleNoCrop();
+
+    resizeBoxNode(
+      idY,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: null, y: 0 },
+      1,
+      -0.5,
+      true,
+      null,
+    );
+
+    const midY = selectActivePage(store.getState()).nodes[idY] as TRectangleNode;
+
+    expect((midY.fills[0] as TImagePaint).flipY).toBe(true);
+
+    resizeBoxNode(
+      idY,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: null, y: 0 },
+      1,
+      0.5,
+      true,
+      null,
+    );
+
+    const afterY = selectActivePage(store.getState()).nodes[idY] as TRectangleNode;
+
+    expect(afterY).toMatchObject({ height: 50, y: 0 });
+    expect((afterY.fills[0] as TImagePaint).flipY).toBeUndefined();
+  });
+
+  it('should keep carrying a stored crop correctly across a mirror-and-back round trip too', () => {
+    // mock — same round trip as above, but with an actual stored crop to prove the crop-scale and
+    // the flip-mirror compose correctly together, not just in isolation
+    const id = addImageRectangle({ height: 100, rotation: 0, width: 100, x: 0, y: 0 });
+
+    resizeBoxNode(
+      id,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      -0.5,
+      1,
+      true,
+      null,
+    );
+    resizeBoxNode(id, { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 0.5, 1, true, null);
+
+    // result — geometry, crop, and flip all fully restored
+    const node = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(node).toMatchObject({ width: 50, x: 0 });
+    expect((node.fills[0] as TImagePaint).crop).toEqual({ height: 100, rotation: 0, width: 50, x: 0, y: 0 });
+    expect((node.fills[0] as TImagePaint).flipX).toBeUndefined();
+  });
+
+  it('should mirror a pattern fill’s content the same way as an image, and restore it when the drag crosses back', () => {
+    // mock — a pattern paint has no crop concept, only flipX/flipY, so this exercises the branch of
+    // getResizedBoxFills that skips scaleFillsCrop entirely (no image fill present)
+    const id = addPatternRectangle();
+
+    // before — cross the anchor
+    resizeBoxNode(
+      id,
+      { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+      store.dispatch,
+      { x: 0, y: 0 },
+      -0.5,
+      1,
+      true,
+      null,
+    );
+
+    const mid = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(mid).toMatchObject({ width: 50, x: -50 });
+    expect((mid.fills[0] as TPatternPaint).flipX).toBe(true);
+
+    // before — cross back
+    resizeBoxNode(id, { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 0.5, 1, true, null);
+
+    const after = selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    expect(after).toMatchObject({ width: 50, x: 0 });
+    expect((after.fills[0] as TPatternPaint).flipX).toBeUndefined();
+  });
+
+  it('should not touch fills when resizing a node with no image crop to carry along', () => {
+    // mock
+    const idA = addFrameNode();
+
+    // before
+    resizeBoxNode(idA, { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 }, store.dispatch, { x: 0, y: 0 }, 2, 1, true, null);
+
+    // result — the frame's plain solid fill is dispatched unchanged, not rewritten
+    const page = selectActivePage(store.getState());
+
+    expect(page.nodes[idA]).toMatchObject({ fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
   });
 
   it('should do nothing when the resized node can no longer be found in the store', () => {

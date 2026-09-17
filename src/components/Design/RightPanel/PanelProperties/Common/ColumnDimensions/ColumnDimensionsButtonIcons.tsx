@@ -7,10 +7,11 @@ import { Tooltip, UITools } from 'shared';
 // others
 import { translationNameSpace } from './constants';
 
-export const ColumnDimensionsButtonIcons = (locked: boolean, onToggleLock: TFunc, t: TFunction): ReactNode[] => [
+export const ColumnDimensionsButtonIcons = (locked: boolean, lockDisabled: boolean, onToggleLock: TFunc, t: TFunction): ReactNode[] => [
   <Tooltip content={t(`${translationNameSpace}.${locked ? 'unlockTooltip' : 'lockTooltip'}`)} key="lock-aspect-ratio">
     <UITools.ButtonIcon
       ariaLabel={t(`${translationNameSpace}.${locked ? 'unlockAriaLabel' : 'lockAriaLabel'}`)}
+      disabled={lockDisabled}
       name="AspectRatio"
       onClick={onToggleLock}
       selected={locked}

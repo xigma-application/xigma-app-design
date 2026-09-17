@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnDimensions } from '../useColumnDimensions';
 
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, moveNodes, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
@@ -14,6 +14,7 @@ import { undo } from 'store/history/actions';
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
+import { TImagePaint } from 'types/design/paint/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -80,9 +81,34 @@ const moveIntoParent = (childId: string, parentId: string): void => {
   store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: parentId }));
 };
 
+const addImageFrameNode = (paint: TImagePaint): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fills: [paint],
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const readCrop = (id: string): TImagePaint['crop'] => (readNode(id).fills[0] as TImagePaint).crop;
+
 describe('useColumnDimensions', () => {
   afterEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should expose the selected frame width, height and lock state', () => {
@@ -550,5 +576,63 @@ describe('useColumnDimensions', () => {
     // result
     expect(readNode(parentId).widthSizingMode).toBe(SizingMode.hug);
     expect(readNode(childId).widthSizingMode).toBe(SizingMode.fixed);
+  });
+
+  it('should expose the image crop’s own width/height, with hug/fill/min-max all inert but the aspect-ratio lock forced on and disabled, when the image is the selected crop target', () => {
+    // mock
+    const paint: TImagePaint = {
+      crop: { height: 15, rotation: 0, width: 12, x: 0, y: 0 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const frameId = addImageFrameNode(paint);
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // result — locked is always on for a crop, and the toggle itself is disabled so it can't be turned off
+    expect(result.current).toMatchObject({
+      canFillHeight: false,
+      canFillWidth: false,
+      canHug: false,
+      height: 15,
+      lockDisabled: true,
+      locked: true,
+      width: 12,
+    });
+  });
+
+  it('should commit a scrubbed width/height to the crop keeping its own aspect ratio locked, and leave the frame untouched (regression: editing the crop’s W/H used to ignore aspect ratio entirely)', () => {
+    // mock — a 12x15 crop (4:5 aspect ratio)
+    const paint: TImagePaint = {
+      crop: { height: 15, rotation: 0, width: 12, x: 3, y: 4 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const frameId = addImageFrameNode(paint);
+
+    store.dispatch(setSelection([frameId]));
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId: frameId, paintIndex: 0, selectedTarget: 'image' }));
+
+    // before
+    const { result } = renderUseColumnDimensions();
+
+    // action — scrubbing width to 60 keeps the 4:5 ratio, growing height to 75 along with it;
+    // scrubbing height back down to 45 then shrinks width to 36 to keep that same ratio
+    act(() => result.current.onScrubWidth(60));
+    act(() => result.current.onScrubHeight(45));
+
+    // result
+    expect(readCrop(frameId)).toEqual({ height: 45, rotation: 0, width: 36, x: 3, y: 4 });
+    expect(readNode(frameId)).toMatchObject({ height: 20, width: 20 });
   });
 });

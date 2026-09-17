@@ -68,6 +68,11 @@ const drawBoxLeafNodeFill = (
       [getBoxFillPolygon(node)],
       paints,
       resolvedTiles.map((resolved) => resolved?.tile ?? null),
+      {
+        center: { x: node.x + node.width / 2, y: node.y + node.height / 2 },
+        degrees: node.rotation,
+        localBounds: { height: node.height, width: node.width, x: node.x, y: node.y },
+      },
     );
     resolvedTiles.forEach((resolved) => resolved?.release());
   } else {

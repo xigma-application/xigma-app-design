@@ -605,6 +605,106 @@ after the drag's subsequent `pointermove`s have already resized the node, so re-
 down-point against the *already-moved* bounds never re-finds the same handle. Abandoned in favor of
 the dependency-array fix above, which needs no coordinate math at all.)
 
+**Crop mode makes the image a second, independently-selectable/movable/resizable/rotatable entity
+inside its own frame — stored as `TImagePaint.crop: {x, y, width, height, rotation}`, a world-space
+rect seeded from the frame's own bounds the first time it's touched** (`seedImageCropIfNeeded.ts`,
+called both by `armResizeOnPointerDown.ts` on the transition-into-crop resize and by
+`useSetImagePaintScaleMode`'s Crop-dropdown pick, so either entry path seeds identically).
+`imageEditor` gained a `selectedTarget?: 'frame' | 'image'` field for this: while `mode === 'crop'`,
+clicking inside the crop rect (`isPointInImageCropRect`/`armImageCropMoveOnPointerDown`) flips
+`selectedTarget` to `'image'` and arms a move/resize/rotate drag against the crop rect itself
+(`armImageCropHandleOnPointerDown` → `continueImageCropResizeDrag`/`continueImageCropRotateDrag`,
+mirroring the frame's own arm/continue/disarm shape but writing `paint.crop` instead of node
+geometry) rather than the frame; clicking the frame's own body outside the (possibly now-offset) crop
+rect flips it back to `'frame'`. The frame keeps its dashed/L-bracket handles only while it is the
+selected target (`drawImageEditorSelectionOutline.ts`'s `isImageSelected` branch); once the image
+becomes selected it gets a plain solid outline with square corner handles instead, and the frame
+falls back to a plain dashed guide with no handles of its own. **Crop-mode resize always keeps the
+crop rect's own aspect ratio locked** — `continueImageCropResizeDrag.ts` uses `getScaleFactors` (the
+same aspect-preserving math the frame's own shift-locked resize uses) unconditionally, not just when
+a modifier is held, since there is no discrete "unlock" affordance for a crop the way there is for a
+node.
+
+**An overflow preview shows the rest of the image bleeding outside the frame's clip boundary while
+crop mode is active**, dimmed to `IMAGE_EDITOR_CROP_OVERFLOW_ALPHA` (`drawImageEditorCropOverflowPreview.ts`,
+called once per frame from `drawScene.ts` whenever `imageEditor.mode === 'crop'`) — it draws the
+*entire* source texture (`FULL_IMAGE_UV`, unclipped) positioned/sized exactly at `paint.crop`, so it
+lines up pixel-for-pixel with the real, clipped render wherever the two overlap (inside the frame) and
+is the *only* thing visible wherever they don't (outside it). A real, reported regression: this
+preview never read `paint.flipX`/`flipY` at all, so mirroring the image (below) made the always-
+unflipped preview visibly mismatch the now-flipped real render everywhere they overlapped inside the
+frame, producing a ghosted double-exposure look. Fixed by extracting the real render's own
+`getFlippedImageFillUv.ts` (previously private to `drawImageTexture.ts`) into a shared
+`utils/canvas/drawVectorNode/` file and applying it to the preview's UV the same way.
+
+**Dragging a resize handle past its opposite anchor mirrors an image or pattern fill's own content,
+not just the box** — Rectangle and Frame have no native flip field (`isFlippableNode` only lists
+Ellipse/Media/Polygon/Star/Text), so `resizeBoxNode.ts`'s `getMirroredFills` instead toggles
+`flipX`/`flipY` directly on the fill's own paint whenever a resize's `scaleX`/`scaleY` goes negative.
+A real, reported regression here: the mirror was computed once per drag against a per-drag "original
+fills" cache (`resizeOriginalFillsCache.ts`, seeded once per drag id to avoid compounding across
+pointermove ticks) but the dispatch was skipped whenever the freshly-computed flip happened to equal
+that cached original — correct crossing the anchor outward, but crossing back *inward* within the
+same drag compares against the session-start original rather than the just-dispatched live value, so
+the skip left a stale `flipX: true` in the store forever ("Zrobię -x albo -y i jest git ale gdy
+odbijam spowrotem to się jebie"). Fixed by never skipping the dispatch when a mirrorable fill is
+present — always reassert the freshly-computed value. `TPatternPaint` gained the identical
+`flipX`/`flipY` fields and a `u_flipX`/`u_flipY` uniform in
+`patternSourceTileFragmentShaderSource.ts` (mirroring the tile UV, `tileUV.x = 1.0 - tileUV.x`) to
+extend the same mechanism to pattern fills, which previously had no flip support at any level.
+
+**A genuine WebGL global-state bug could make a second image fill disappear entirely, independent of
+any of the above**: `gl.enableVertexAttribArray`/`disableVertexAttribArray` are *program- and
+draw-call-independent* — once enabled, an attribute location stays enabled across every subsequent
+draw call, any shader program, until explicitly disabled. `drawImageTexture.ts`'s two-pass
+stencil-mask-then-content-quad structure uses `a_position` for both passes but `a_texCoord` only for
+the second (content) pass; if a *previous* `drawImageTexture` call anywhere in the scene (including
+the same shape's own previous frame) left `a_texCoord` enabled, the stencil-mask pass's smaller
+`a_position`-only buffer failed WebGL's per-draw buffer-size validation
+(`GL_INVALID_OPERATION: glDrawArrays: Vertex buffer is not big enough for the draw call`) and silently
+drew nothing — found by asking the user, already live-testing, to check the browser console for
+exactly this native error. Fixed with a single `gl.disableVertexAttribArray(texCoordLocation)`
+immediately before the stencil-mask pass. `drawVectorPatternSourceTile.ts` never had this bug — its
+UV is uniform-driven (`u_tileOriginUV`/`u_tileSizeUV`), not a per-vertex `a_texCoord` attribute at
+all.
+
+**Clicking anywhere that isn't the crop-mode node's own body or one of its resize/rotate handles now
+exits the editor and consumes the click, instead of falling through to normal selection.** Neither
+`armImageCropOnPointerDown` (gated to `imageEditor.mode === 'crop'` only) nor the pre-existing,
+empty-canvas-only `armExitImageEditorOnPointerDown` used to cover "hit something, but not our own
+node" — clicking a completely different shape while crop mode (or even the simpler `'position'` mode)
+was active fell straight through to the ordinary selection resolvers and selected/dragged that other
+shape instead, leaving `imageEditor` pointed at a node that was no longer even selected. Fixed by
+having `armImageCropPaintOnPointerDown`/`armImageCropOnPointerDown` dispatch `setImageEditor(null)`
+and return `true` (claiming the pointerdown) whenever the hit target doesn't match the editor's own
+node. The one real trap building this: the rotate ring sits 6-16px *outside* a node's own bounding
+box by design (`isInRotateRing`), so an early version of this exit-guard mistook grabbing the frame's
+own rotate handle — or a corner resize handle, similarly just outside the exact body bounds — for
+"clicked elsewhere" and exited crop mode before the transform could even start. Fixed by checking
+`getResizeHandleAtPoint`/`getRotateHandleAtPoint` against the editor's own node *before* deciding the
+click missed, deferring to the normal `armResizeOnPointerDown`/`armRotateOnPointerDown` resolvers
+(further down the same `ARM_RESOLVERS` chain) whenever it's actually a handle grab.
+
+**Transforming the frame on canvas while its own crop mode is active leaves the crop's position,
+size, and rotation completely untouched — the two entities never pull each other, for move, rotate,
+*and* resize alike.** Move was already decoupled (`translateFillsCrop.ts` gained a `skipPaintIndex`
+param, checked against `state.design.imageEditor` in `dispatchDraggedNodeUpdates.ts`); this session
+extended the identical pattern to `rotateFillsCrop.ts`/`scaleFillsCrop.ts` (also gaining
+`skipPaintIndex`), checked in `continueRotateDrag.ts`, `rotateNodesRigidly.ts`, and
+`resizeBoxNode.ts`'s per-tick fills computation. The one genuine subtlety: the *very first* resize
+that transitions an image from `'position'` to `'crop'` mode must still scale the newly-seeded crop
+to match the frame — that's what establishes the crop's initial size in the first place — only a
+*separate*, subsequent resize while already in crop mode should skip it. This surfaced a real
+ordering bug: `armResizeOnPointerDown` used to flip `imageEditor.mode` to `'crop'` at arm time
+(pointerdown, before the drag runs), so by the time that same transition drag's own `resizeBoxNode`
+ticks executed, the mode had already flipped and the new skip-guard suppressed the very scaling the
+transition needed. Fixed by moving the mode flip to `disarmResizeDrag.ts` (pointerup, once the resize
+is actually finished) instead of arm time — `seedImageCropIfNeeded` still runs at arm time as before,
+since the crop needs to exist from the drag's first tick to scale live throughout it.
+`properties-panel.md`'s `ImageCrop/` section covers the deliberate opposite behavior for
+panel-driven transforms (X/Y, Dimensions, the Rotate 90° button), which stay coupled to the frame on
+purpose.
+
 **Picking a pattern source is wired end-to-end, including a live tiled render and a freeze-on-delete
 fallback.** `TPatternPaint.sourceNodeId?: string | null` gets written for real: clicking "Select
 source..." (`PatternSourcePreview.tsx`) arms `design.isPatternSourcePicking`, while
@@ -1284,6 +1384,26 @@ need.
   {drawVectorGradientFill,getGradientStopUniformArrays,getGradientTypeIndex,getVectorFillBounds}.ts`
 - Box node fill via the vector paint-stack pipeline (§5, `properties-panel.md`'s Fill section):
   `.../drawScene/{drawBoxLeafNode,getBoxFillPolygon,getScaledFillPaints}.ts`
+- Image editor / crop mode (§5, `properties-panel.md`'s `ImageCrop/` section): `store/design`
+  `imageEditor`/`setImageEditor`/`selectImageEditor`, seeding
+  `Canvas/utils/{seedImageCropIfNeeded,getImageCropRect}.ts`; arm/continue/disarm for the crop rect's
+  own drags: `useSelectionTool/utils/handlePointerDown/armResolvers/armImageCropOnPointerDown/
+  {armImageCropOnPointerDown,armImageCropPaintOnPointerDown,armImageCropHandleOnPointerDown,
+  armImageCropMoveOnPointerDown}.ts`, `.../armImageCropResizeDrag.ts`, `.../armImageCropRotateDrag.ts`,
+  `handlePointerMove/{continueImageCropResizeDrag,continueImageCropRotateDrag}.ts`,
+  `handlePointerUp/{disarmImageCropResizeDrag,disarmImageCropRotateDrag,disarmImageCropMoveDrag}.ts`;
+  frame/image decoupling utilities `Canvas/utils/{translateFillsCrop,rotateFillsCrop,
+  scaleFillsCrop}.ts` (each with a `skipPaintIndex` param) plus the call-site guards in
+  `dispatchDraggedNodeUpdates.ts`, `continueRotateDrag.ts`/`rotateNodesRigidly.ts`, and
+  `resizeBoxNode.ts`; mirror/flip `getMirroredFills` in `resizeBoxNode.ts`,
+  `getFlippedImageFillUv.ts` (shared by `drawImageTexture.ts` and
+  `drawImageEditorCropOverflowPreview.ts`), `flipImageCropRigidly.ts`/`rotateImageCropRigidly.ts`;
+  rendering `.../drawScene/{drawImageEditorCropOverflowPreview,
+  drawPerNodeSelectionOutlines/drawImageEditorSelectionOutline,
+  drawPerNodeSelectionOutlines/drawImageEditorFrameOutline,
+  drawPerNodeSelectionOutlines/drawImageEditorImageOutline,isCropModeFrameOnlyBeingDragged,
+  getVisibleSelectedNodes}.ts`; the WebGL vertex-attrib-array fix
+  `drawVectorImageFill/drawImageTexture.ts`
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;

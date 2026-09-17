@@ -1,13 +1,20 @@
 // store
 import { selectImageEditor } from 'store/design/selectors';
+import { setImageEditor } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { TArmContext } from '../../types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { armImageCropPaintOnPointerDown } from './armImageCropPaintOnPointerDown';
+import { getResizeHandleAtPoint } from 'components/Design/Canvas/utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { getRotateHandleAtPoint } from 'components/Design/Canvas/utils/getRotateHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+
+const isOwnHandleAtPoint = (point: TArmContext['point'], node: TSceneNode, viewport: TArmContext['viewport']): boolean =>
+  Boolean(getResizeHandleAtPoint(point, [node], viewport) || getRotateHandleAtPoint(point, [node], viewport));
 
 export const armImageCropOnPointerDown = ({
   canvas,
@@ -20,16 +27,23 @@ export const armImageCropOnPointerDown = ({
   viewport,
 }: TArmContext): true | undefined => {
   const imageEditor = selectImageEditor(store.getState());
+  const editorNode = imageEditor ? selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId) : undefined;
 
-  if (imageEditor?.mode === 'crop') {
-    const node = selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId);
+  if (
+    imageEditor &&
+    imageEditor.mode !== 'crop' &&
+    hit?.id !== imageEditor.nodeId &&
+    !(editorNode && isOwnHandleAtPoint(point, editorNode, viewport))
+  ) {
+    dispatch(setImageEditor(null));
+    return true;
+  }
 
-    if (node && isAppearanceNode(node)) {
-      const paint = node.fills[imageEditor.paintIndex];
+  if (imageEditor?.mode === 'crop' && editorNode && isAppearanceNode(editorNode)) {
+    const paint = editorNode.fills[imageEditor.paintIndex];
 
-      if (paint?.type === 'image') {
-        return armImageCropPaintOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, node, paint);
-      }
+    if (paint?.type === 'image') {
+      return armImageCropPaintOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
     }
   }
 };

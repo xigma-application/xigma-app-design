@@ -318,6 +318,151 @@ describe('drawVectorPatternSourceTile', () => {
     expect(gl.uniform1i).toHaveBeenCalledWith(hexOffsetAxisLocation, 2);
   });
 
+  it('should default u_rotation to 0 and u_rotationCenter to the origin when no boxRotation is given, so the shared shader behaves exactly as before', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const rotationLocation = { tag: 'rotation' };
+    const rotationCenterLocation = { tag: 'rotationCenter' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) => {
+      if (name === 'u_rotation') {
+        return rotationLocation;
+      }
+
+      return name === 'u_rotationCenter' ? rotationCenterLocation : {};
+    });
+
+    // before
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(gl.uniform1f).toHaveBeenCalledWith(rotationLocation, 0);
+    expect(gl.uniform2f).toHaveBeenCalledWith(rotationCenterLocation, 0, 0);
+  });
+
+  it('should pass the box rotation (converted to radians) and its center when boxRotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const rotationLocation = { tag: 'rotation' };
+    const rotationCenterLocation = { tag: 'rotationCenter' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) => {
+      if (name === 'u_rotation') {
+        return rotationLocation;
+      }
+
+      return name === 'u_rotationCenter' ? rotationCenterLocation : {};
+    });
+
+    const boxRotation = { center: { x: 15, y: 25 }, degrees: 90, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint(),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      boxRotation,
+    );
+
+    // result — 90 degrees converted to its exact radian equivalent (pi/2)
+    expect(gl.uniform1f).toHaveBeenCalledWith(rotationLocation, Math.PI / 2);
+    expect(gl.uniform2f).toHaveBeenCalledWith(rotationCenterLocation, 15, 25);
+  });
+
+  it('should size the tile grid against boxRotation.localBounds instead of the rotated face polygon’s bounding box, so a rotated shape’s tile scale stays true to its own dimensions', () => {
+    // mock — the faces AABB is 40x40, but the shape's own unrotated local bounds are 20x20; the
+    // tile fraction must be computed from the 20x20 local bounds (10/20 = 0.5), not 40x40 (10/40 = 0.25)
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const tileFracLocation = { tag: 'tileFrac' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
+      name === 'u_tileFrac' ? tileFracLocation : {},
+    );
+
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 45, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // before
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint(),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      boxRotation,
+    );
+
+    // result
+    expect(gl.uniform2f).toHaveBeenCalledWith(tileFracLocation, 0.5, 0.5);
+  });
+
+  it('should pass flipX/flipY as 0 by default and 1 when the paint has them set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const flipXLocation = { tag: 'flipX' };
+    const flipYLocation = { tag: 'flipY' };
+
+    (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) => {
+      if (name === 'u_flipX') {
+        return flipXLocation;
+      }
+
+      return name === 'u_flipY' ? flipYLocation : {};
+    });
+
+    // before — default paint, no flip
+    drawVectorPatternSourceTile(gl, program, buffer, null, null, faces, sourceTile, buildPaint(), 100, 100, IDENTITY_VIEWPORT, false);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith(flipXLocation, 0);
+    expect(gl.uniform1i).toHaveBeenCalledWith(flipYLocation, 0);
+
+    // before — flipped paint
+    drawVectorPatternSourceTile(
+      gl,
+      program,
+      buffer,
+      null,
+      null,
+      faces,
+      sourceTile,
+      buildPaint({ flipX: true, flipY: true }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith(flipXLocation, 1);
+    expect(gl.uniform1i).toHaveBeenCalledWith(flipYLocation, 1);
+  });
+
   it('should composite at the given opacity', () => {
     // mock
     const gl = createGlMock();

@@ -6,10 +6,10 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorGradientFill } from './drawVectorGradientFill';
-import { drawVectorImageFill } from './drawVectorImageFill';
+import { drawVectorImageFill } from './drawVectorImageFill/drawVectorImageFill';
 import { drawVectorPatternFill } from './drawVectorPatternFill';
 import { getOrLoadTexture, TTextureSize } from '../getOrLoadTexture';
-import { TPatternSourceTile } from './drawVectorPatternSourceTile';
+import { TBoxFillRotation, TPatternSourceTile } from './drawVectorPatternSourceTile';
 
 export const drawVectorFillPaints = (
   gl: WebGL2RenderingContext,
@@ -29,6 +29,7 @@ export const drawVectorFillPaints = (
   canvasHeight: number,
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
+  boxRotation?: TBoxFillRotation,
 ): void => {
   paints.forEach((paint, index) => {
     if (paint.visible !== false) {
@@ -65,6 +66,7 @@ export const drawVectorFillPaints = (
           viewport,
           isAlphaWriteEnabled,
           alpha,
+          boxRotation,
         );
       } else if (paint.type === 'image') {
         drawVectorImageFill(
@@ -85,6 +87,9 @@ export const drawVectorFillPaints = (
           paint.rotation,
           paint.scaleMode,
           paint.crop,
+          paint.flipX,
+          paint.flipY,
+          boxRotation,
         );
       } else {
         drawVectorGradientFill(
