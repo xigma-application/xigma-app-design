@@ -3686,6 +3686,87 @@ test.describe('Design panels — Fill section', () => {
     expect(frameAfter.y).toBe(frameBefore.y);
   });
 
+  test('dragging crop on an Image fill with no asset picked yet visibly pans the checker placeholder, not just an empty outline (regression: the placeholder used to be a static checkerboard glued to the shape bounds, completely ignoring paint.crop, so only the crop-rect outline moved while nothing visibly shifted underneath it)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-placeholder-crop-drag');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a 160x160 square so the crop rect's 8x8 checker squares land on a clean 20px grid
+    await designPage.drawRectangle(700, 200, 860, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // enter crop mode with no resize, so the frame/crop stay exactly 160x160
+    await dropdownTrigger.click();
+    await page.getByText('Crop', { exact: true }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // establish an explicit crop rect first, same as every other crop-drag test does
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    const before = await readPixelColor(page, 810, 310);
+
+    // action — drag the placeholder "image" a further 20px (one full checker square at this crop
+    // rect's 160/8 square size), away from any resize/rotate handle
+    await designPage.pointerDown(810, 310);
+    await designPage.pointerMove(790, 310);
+    await designPage.pointerUp();
+
+    const after = await readPixelColor(page, 810, 310);
+
+    // result — the same screen point now samples a different checker square, proving the placeholder
+    // actually panned with the crop instead of staying glued to the shape's own bounds
+    expect(after).not.toEqual(before);
+  });
+
+  test('cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed, just like a real image would', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-placeholder-crop-overflow-preview');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 860, 360);
+
+    // baseline — a point just outside the frame's own right edge, before any fill/crop exists
+    const beforeAnyFill = await readPixelColor(page, 870, 280);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    await dropdownTrigger.click();
+    await page.getByText('Crop', { exact: true }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // action — shift the crop rect right/down by 20px, so it now overhangs the frame's own right and
+    // bottom edges by 20px (crop stays 160x160, same size as the frame, just offset)
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(820, 300);
+    await designPage.pointerUp();
+
+    // result — (870, 280) sits outside the frame's own face (x > 860, so the real, opaque, stencil-
+    // masked fill never reaches it) but inside the crop rect's overhanging extent (x < 880), so the
+    // only thing that can paint it is the dimmed, unclipped overflow-preview quad
+    const afterCrop = await readPixelColor(page, 870, 280);
+
+    expect(afterCrop).not.toEqual(beforeAnyFill);
+  });
+
   test('dragging the image within its frame snaps to center/edge alignment with the frame, like a smart guide', async ({ page }) => {
     const designPage = new DesignPage(page);
 

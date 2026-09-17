@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawImageEditorOverflowQuad } from './drawImageEditorOverflowQuad';
+import { getOrCreateImagePlaceholderTexture } from 'utils/canvas/drawVectorNode/drawVectorImageFill/getOrCreateImagePlaceholderTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 
@@ -16,10 +17,15 @@ const getImageEditorPreviewTexture = (
   gl: WebGL2RenderingContext,
   imageContext: TImageRenderContext,
   paint: TPaint | undefined,
-): WebGLTexture | null | undefined =>
-  paint?.type === 'image' && paint.ref
-    ? getOrLoadTexture(gl, imageContext.cache, paint.ref, imageContext.imagePaintTextureSizeCache)
-    : undefined;
+): WebGLTexture | null | undefined => {
+  if (paint?.type === 'image') {
+    return paint.ref
+      ? getOrLoadTexture(gl, imageContext.cache, paint.ref, imageContext.imagePaintTextureSizeCache)
+      : getOrCreateImagePlaceholderTexture(gl, imageContext.cache);
+  }
+
+  return undefined;
+};
 
 export const drawImageEditorCropOverflowPreview = (
   context: TDrawSceneContext,
@@ -31,7 +37,7 @@ export const drawImageEditorCropOverflowPreview = (
   const paint = appearanceNode && imageEditor ? appearanceNode.fills[imageEditor.paintIndex] : undefined;
   const texture = getImageEditorPreviewTexture(context.gl, context.imageContext, paint);
 
-  if (appearanceNode && paint?.type === 'image' && paint.ref && paint.crop && texture) {
+  if (appearanceNode && paint?.type === 'image' && paint.crop && texture) {
     drawImageEditorOverflowQuad(context, paint.crop, paint, texture);
   }
 };

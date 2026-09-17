@@ -8,7 +8,7 @@ import { drawVectorFill } from './drawVectorFill';
 import { drawVectorGradientFill } from './drawVectorGradientFill';
 import { drawVectorImageFill } from './drawVectorImageFill/drawVectorImageFill';
 import { drawVectorPatternFill } from './drawVectorPatternFill';
-import { getOrLoadTexture, TTextureSize } from '../getOrLoadTexture';
+import { TTextureSize } from '../getOrLoadTexture';
 import { TBoxFillRotation, TPatternSourceTile } from './drawVectorPatternSourceTile';
 
 export const drawVectorFillPaints = (
@@ -77,8 +77,9 @@ export const drawVectorFillPaints = (
           faceBufferCache,
           nodeBounds,
           faces,
-          paint.ref ? getOrLoadTexture(gl, imageTextureCache, paint.ref, imageTextureSizeCache) : null,
-          imageTextureSizeCache.get(paint.ref),
+          paint.ref,
+          imageTextureCache,
+          imageTextureSizeCache,
           canvasWidth,
           canvasHeight,
           viewport,

@@ -1,6 +1,16 @@
 // utils
 import { drawVectorImageFill } from '../drawVectorImageFill';
 
+const getOrLoadTextureMock = vi.fn();
+const getOrCreateImagePlaceholderTextureMock = vi.fn();
+
+vi.mock('../../../getOrLoadTexture', () => ({
+  getOrLoadTexture: (...args: unknown[]): unknown => getOrLoadTextureMock(...args),
+}));
+vi.mock('../getOrCreateImagePlaceholderTexture', () => ({
+  getOrCreateImagePlaceholderTexture: (...args: unknown[]): unknown => getOrCreateImagePlaceholderTextureMock(...args),
+}));
+
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
@@ -54,14 +64,25 @@ const faces = [
   ],
 ];
 const texture = {} as WebGLTexture;
+const REF = 'blob:asset-1';
 
 describe('drawVectorImageFill', () => {
+  beforeEach(() => {
+    getOrLoadTextureMock.mockReset();
+    getOrCreateImagePlaceholderTextureMock.mockReset();
+  });
+
   it('should skip every GL call when there are no faces to fill', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+    imageTextureSizeCache.set(REF, { height: 40, width: 40 });
 
     // before
     drawVectorImageFill(
@@ -72,8 +93,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       [],
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -85,31 +107,16 @@ describe('drawVectorImageFill', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
-  it('should draw a checkerboard placeholder, not the texture program, when no source has been picked yet', () => {
-    // mock
+  it('should draw a checkerboard placeholder, not the texture program, when no source has been picked yet and the placeholder texture itself fails to resolve', () => {
+    // mock — the near-impossible case where even gl.createTexture() fails
     const gl = createGlMock();
     const program = { tag: 'plain-color' } as unknown as WebGLProgram;
     const imageProgram = { tag: 'image' } as unknown as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
 
-    // before
-    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, faces, null, undefined, 100, 100, IDENTITY_VIEWPORT, false);
-
-    // result — stencil mask (1 call) + two alternating-color square batches (2 calls)
-    expect(gl.useProgram).toHaveBeenCalledWith(program);
-    expect(gl.useProgram).not.toHaveBeenCalledWith(imageProgram);
-    expect(gl.activeTexture).not.toHaveBeenCalled();
-    expect(gl.bindTexture).not.toHaveBeenCalled();
-    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
-    expect(gl.uniform4fv).toHaveBeenCalledTimes(2);
-  });
-
-  it('should bind the resolved texture to texture unit 0', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const imageProgram = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
+    getOrCreateImagePlaceholderTextureMock.mockReturnValue(null);
 
     // before
     drawVectorImageFill(
@@ -120,8 +127,84 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      '',
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result — stencil mask (1 call) + two alternating-color square batches (2 calls)
+    expect(getOrLoadTextureMock).not.toHaveBeenCalled();
+    expect(getOrCreateImagePlaceholderTextureMock).toHaveBeenCalledWith(gl, imageTextureCache);
+    expect(gl.useProgram).toHaveBeenCalledWith(program);
+    expect(gl.useProgram).not.toHaveBeenCalledWith(imageProgram);
+    expect(gl.activeTexture).not.toHaveBeenCalled();
+    expect(gl.bindTexture).not.toHaveBeenCalled();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    expect(gl.uniform4fv).toHaveBeenCalledTimes(2);
+  });
+
+  it('should draw the resolved placeholder texture through the real texture program when no source has been picked yet', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+    const placeholderTexture = {} as WebGLTexture;
+
+    getOrCreateImagePlaceholderTextureMock.mockReturnValue(placeholderTexture);
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      '',
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result — the placeholder is drawn exactly like a real image, not through the plain-color placeholder drawer
+    expect(gl.activeTexture).toHaveBeenCalledWith(gl.TEXTURE0);
+    expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, placeholderTexture);
+  });
+
+  it('should bind the resolved texture to texture unit 0', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -129,6 +212,7 @@ describe('drawVectorImageFill', () => {
     );
 
     // result
+    expect(getOrLoadTextureMock).toHaveBeenCalledWith(gl, imageTextureCache, REF, imageTextureSizeCache);
     expect(gl.activeTexture).toHaveBeenCalledWith(gl.TEXTURE0);
     expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, texture);
   });
@@ -139,6 +223,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -149,8 +237,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -171,7 +260,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
 
+    getOrLoadTextureMock.mockReturnValue(texture);
     (gl.getAttribLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) => (name === 'a_texCoord' ? 1 : 0));
 
     // before
@@ -183,8 +275,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -210,6 +303,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 80 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -220,8 +317,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 80 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -241,9 +339,28 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
-    drawVectorImageFill(gl, program, imageProgram, buffer, null, null, faces, texture, undefined, 100, 100, IDENTITY_VIEWPORT, false);
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
 
     // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
     const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
@@ -258,6 +375,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -268,8 +389,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      undefined,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -297,6 +419,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -307,8 +433,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      undefined,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -334,6 +461,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -344,8 +475,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -370,6 +502,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 80 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -380,8 +516,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 80 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -403,8 +540,11 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const opacityLocation = { tag: 'opacity' };
 
+    getOrLoadTextureMock.mockReturnValue(texture);
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
       name === 'u_opacity' ? opacityLocation : {},
     );
@@ -418,8 +558,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -436,8 +577,11 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const opacityLocation = { tag: 'opacity' };
 
+    getOrLoadTextureMock.mockReturnValue(texture);
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation((_program, name: string) =>
       name === 'u_opacity' ? opacityLocation : {},
     );
@@ -451,8 +595,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -470,6 +615,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 80 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -480,8 +629,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 80 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -507,6 +657,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 80 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -517,8 +671,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 80 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -541,6 +696,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 80 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -551,8 +710,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 80 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -578,6 +738,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -588,8 +752,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -616,7 +781,11 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const boxRotation = { center: { x: 20, y: 20 }, degrees: 90, localBounds: { height: 40, width: 40, x: 0, y: 0 } };
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -627,8 +796,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -656,7 +826,11 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const boxRotation = { center: { x: 20, y: 20 }, degrees: 45, localBounds: { height: 40, width: 40, x: 0, y: 0 } };
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -667,8 +841,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -697,6 +872,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 20, width: 20 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before
     drawVectorImageFill(
@@ -707,8 +886,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 20, width: 20 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -737,6 +917,10 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
+
+    getOrLoadTextureMock.mockReturnValue(texture);
 
     // before — a plain 'fill' draw first
     drawVectorImageFill(
@@ -747,8 +931,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -768,8 +953,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -790,6 +976,8 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const locations = {
       u_contrast: { tag: 'contrast' },
       u_exposure: { tag: 'exposure' },
@@ -800,6 +988,7 @@ describe('drawVectorImageFill', () => {
       u_tint: { tag: 'tint' },
     };
 
+    getOrLoadTextureMock.mockReturnValue(texture);
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation(
       (_program, name: string) => locations[name as keyof typeof locations] ?? {},
     );
@@ -813,8 +1002,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -837,6 +1027,8 @@ describe('drawVectorImageFill', () => {
     const program = {} as WebGLProgram;
     const imageProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>([[REF, { height: 40, width: 40 }]]);
     const locations = {
       u_contrast: { tag: 'contrast' },
       u_exposure: { tag: 'exposure' },
@@ -847,6 +1039,7 @@ describe('drawVectorImageFill', () => {
       u_tint: { tag: 'tint' },
     };
 
+    getOrLoadTextureMock.mockReturnValue(texture);
     (gl.getUniformLocation as ReturnType<typeof vi.fn>).mockImplementation(
       (_program, name: string) => locations[name as keyof typeof locations] ?? {},
     );
@@ -860,8 +1053,9 @@ describe('drawVectorImageFill', () => {
       null,
       null,
       faces,
-      texture,
-      { height: 40, width: 40 },
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,

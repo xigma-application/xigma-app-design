@@ -1,14 +1,23 @@
+// constant
+import { IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX } from 'constant/canvas';
+
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
-import { TTextureSize } from '../../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { drawImagePlaceholder } from './drawImagePlaceholder';
 import { drawImageTexture } from './drawImageTexture';
+import { getOrCreateImagePlaceholderTexture } from './getOrCreateImagePlaceholderTexture';
+import { getOrLoadTexture, TTextureSize } from '../../getOrLoadTexture';
 import { getVectorFillBounds } from '../getVectorFillBounds';
 import { TBoxFillRotation } from '../drawVectorPatternSourceTile';
+
+const IMAGE_PLACEHOLDER_TEXTURE_SIZE: TTextureSize = {
+  height: IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX,
+  width: IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX,
+};
 
 export const drawVectorImageFill = (
   gl: WebGL2RenderingContext,
@@ -18,8 +27,9 @@ export const drawVectorImageFill = (
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
   nodeBounds: TDraftRect | null,
   faces: TPoint[][],
-  texture: WebGLTexture | null,
-  imageSize: TTextureSize | undefined,
+  ref: string,
+  imageTextureCache: Map<string, WebGLTexture>,
+  imageTextureSizeCache: Map<string, TTextureSize>,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -36,6 +46,10 @@ export const drawVectorImageFill = (
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
+    const imageSize = ref ? imageTextureSizeCache.get(ref) : IMAGE_PLACEHOLDER_TEXTURE_SIZE;
+    const texture = ref
+      ? getOrLoadTexture(gl, imageTextureCache, ref, imageTextureSizeCache)
+      : getOrCreateImagePlaceholderTexture(gl, imageTextureCache);
 
     if (texture) {
       drawImageTexture(

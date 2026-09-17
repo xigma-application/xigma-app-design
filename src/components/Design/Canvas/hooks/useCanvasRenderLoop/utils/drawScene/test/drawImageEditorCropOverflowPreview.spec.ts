@@ -11,6 +11,12 @@ import { drawImageEditorCropOverflowPreview } from '../drawImageEditorCropOverfl
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const texture = {} as WebGLTexture;
+const placeholderTexture = {} as WebGLTexture;
+const getOrCreateImagePlaceholderTextureMock = vi.fn(() => placeholderTexture);
+
+vi.mock('utils/canvas/drawVectorNode/drawVectorImageFill/getOrCreateImagePlaceholderTexture', () => ({
+  getOrCreateImagePlaceholderTexture: (...args: unknown[]): unknown => getOrCreateImagePlaceholderTextureMock(...args),
+}));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -186,5 +192,26 @@ describe('drawImageEditorCropOverflowPreview', () => {
     const vertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[0][1] as Float32Array;
 
     expect(Array.from(vertices.slice(2, 4))).toEqual([1, 0]);
+  });
+
+  it('should preview the checker placeholder, dimmed at the overflow alpha, for an image with no asset picked yet', () => {
+    // mock
+    const gl = createGlMock();
+    const croppedPlaceholderRectangle: TRectangleNode = {
+      ...rectangle,
+      fills: [{ crop: { height: 40, rotation: 0, width: 40, x: 10, y: 5 }, opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' }],
+    };
+
+    // before
+    drawImageEditorCropOverflowPreview(
+      createContext(gl),
+      { 'rect-1': croppedPlaceholderRectangle },
+      { mode: 'crop', nodeId: 'rect-1', paintIndex: 0 },
+    );
+
+    // result
+    expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, placeholderTexture);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), IMAGE_EDITOR_CROP_OVERFLOW_ALPHA);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
   });
 });

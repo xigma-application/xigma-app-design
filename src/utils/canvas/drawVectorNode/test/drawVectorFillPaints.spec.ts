@@ -8,7 +8,6 @@ const drawVectorFillMock = vi.fn();
 const drawVectorGradientFillMock = vi.fn();
 const drawVectorImageFillMock = vi.fn();
 const drawVectorPatternFillMock = vi.fn();
-const getOrLoadTextureMock = vi.fn();
 
 vi.mock('../drawVectorFill', () => ({
   drawVectorFill: (...args: unknown[]): unknown => drawVectorFillMock(...args),
@@ -21,9 +20,6 @@ vi.mock('../drawVectorImageFill/drawVectorImageFill', () => ({
 }));
 vi.mock('../drawVectorPatternFill', () => ({
   drawVectorPatternFill: (...args: unknown[]): unknown => drawVectorPatternFillMock(...args),
-}));
-vi.mock('../../getOrLoadTexture', () => ({
-  getOrLoadTexture: (...args: unknown[]): unknown => getOrLoadTextureMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -43,7 +39,6 @@ describe('drawVectorFillPaints', () => {
     drawVectorGradientFillMock.mockReset();
     drawVectorImageFillMock.mockReset();
     drawVectorPatternFillMock.mockReset();
-    getOrLoadTextureMock.mockReset();
     imageTextureCache.clear();
     imageTextureSizeCache.clear();
   });
@@ -244,14 +239,9 @@ describe('drawVectorFillPaints', () => {
     expect(drawVectorFillMock).not.toHaveBeenCalled();
   });
 
-  it('should draw an image layer through the image program, loading its texture from the given ref', () => {
+  it('should draw an image layer through the image program, forwarding its ref and the shared texture caches straight through', () => {
     // mock
     const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-    const size = { height: 40, width: 40 };
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-    imageTextureSizeCache.set('blob:asset-1', size);
 
     // before
     drawVectorFillPaints(
@@ -274,8 +264,8 @@ describe('drawVectorFillPaints', () => {
       false,
     );
 
-    // result
-    expect(getOrLoadTextureMock).toHaveBeenCalledWith(gl, imageTextureCache, 'blob:asset-1', imageTextureSizeCache);
+    // result — the actual real-vs-placeholder texture resolution now lives inside drawVectorImageFill
+    // itself, so this caller only ever forwards the ref and the raw caches, never resolves anything
     expect(drawVectorImageFillMock).toHaveBeenCalledWith(
       gl,
       program,
@@ -284,8 +274,9 @@ describe('drawVectorFillPaints', () => {
       null,
       null,
       faces,
-      texture,
-      size,
+      'blob:asset-1',
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -305,228 +296,7 @@ describe('drawVectorFillPaints', () => {
     expect(drawVectorPatternFillMock).not.toHaveBeenCalled();
   });
 
-  it('should forward boxRotation to the image branch too, so a rotated plain image fill stays rigid with the shape', () => {
-    // mock
-    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-    const size = { height: 40, width: 40 };
-    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-    imageTextureSizeCache.set('blob:asset-1', size);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-      boxRotation,
-    );
-
-    // result
-    expect(drawVectorImageFillMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      imageProgram,
-      buffer,
-      null,
-      null,
-      faces,
-      texture,
-      size,
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-      1,
-      0,
-      'fill',
-      undefined,
-      undefined,
-      undefined,
-      boxRotation,
-      undefined,
-      undefined,
-    );
-  });
-
-  it('should pass the image paint rotation through to the image fill drawer', () => {
-    // mock
-    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 180, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-    );
-
-    // result
-    expect(drawVectorImageFillMock.mock.calls[0][14]).toBe(180);
-  });
-
-  it('should pass the image paint scale mode through to the image fill drawer', () => {
-    // mock
-    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fit', type: 'image' };
-    const texture = {} as WebGLTexture;
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-    );
-
-    // result
-    expect(drawVectorImageFillMock.mock.calls[0][15]).toBe('fit');
-  });
-
-  it('should pass the image paint crop through to the image fill drawer', () => {
-    // mock
-    const crop = { height: 15, rotation: 0, width: 20, x: 10, y: 5 };
-    const image: TImagePaint = { crop, opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-    );
-
-    // result
-    expect(drawVectorImageFillMock.mock.calls[0][16]).toBe(crop);
-  });
-
-  it('should pass the image paint adjustments through to the image fill drawer', () => {
-    // mock
-    const adjustments = { contrast: -10, exposure: 42, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 };
-    const image: TImagePaint = { adjustments, opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-    );
-
-    // result
-    expect(drawVectorImageFillMock.mock.calls[0][21]).toBe(adjustments);
-  });
-
-  it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
-    // mock
-    const image: TImagePaint = { opacity: 40, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
-    const texture = {} as WebGLTexture;
-
-    getOrLoadTextureMock.mockReturnValue(texture);
-
-    // before
-    drawVectorFillPaints(
-      gl,
-      program,
-      gradientProgram,
-      patternTileProgram,
-      imageProgram,
-      imageTextureCache,
-      imageTextureSizeCache,
-      buffer,
-      null,
-      null,
-      faces,
-      [image],
-      [],
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-    );
-
-    // result
-    expect(drawVectorImageFillMock.mock.calls[0][13]).toBe(0.4);
-  });
-
-  it('should skip loading a texture for an image layer with no source picked yet', () => {
+  it('should forward an empty ref the same way as a real one, leaving the placeholder decision to drawVectorImageFill', () => {
     // mock
     const image: TImagePaint = { opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' };
 
@@ -552,7 +322,39 @@ describe('drawVectorFillPaints', () => {
     );
 
     // result
-    expect(getOrLoadTextureMock).not.toHaveBeenCalled();
+    expect(drawVectorImageFillMock.mock.calls[0][7]).toBe('');
+    expect(drawVectorImageFillMock.mock.calls[0][8]).toBe(imageTextureCache);
+    expect(drawVectorImageFillMock.mock.calls[0][9]).toBe(imageTextureSizeCache);
+  });
+
+  it('should forward boxRotation to the image branch too, so a rotated plain image fill stays rigid with the shape', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      boxRotation,
+    );
+
+    // result
     expect(drawVectorImageFillMock).toHaveBeenCalledWith(
       gl,
       program,
@@ -561,8 +363,9 @@ describe('drawVectorFillPaints', () => {
       null,
       null,
       faces,
-      null,
-      undefined,
+      'blob:asset-1',
+      imageTextureCache,
+      imageTextureSizeCache,
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -573,10 +376,157 @@ describe('drawVectorFillPaints', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      boxRotation,
       undefined,
       undefined,
     );
+  });
+
+  it('should pass the image paint rotation through to the image fill drawer', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 180, scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][15]).toBe(180);
+  });
+
+  it('should pass the image paint scale mode through to the image fill drawer', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fit', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][16]).toBe('fit');
+  });
+
+  it('should pass the image paint crop through to the image fill drawer', () => {
+    // mock
+    const crop = { height: 15, rotation: 0, width: 20, x: 10, y: 5 };
+    const image: TImagePaint = { crop, opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][17]).toBe(crop);
+  });
+
+  it('should pass the image paint adjustments through to the image fill drawer', () => {
+    // mock
+    const adjustments = { contrast: -10, exposure: 42, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 };
+    const image: TImagePaint = { adjustments, opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][22]).toBe(adjustments);
+  });
+
+  it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
+    // mock
+    const image: TImagePaint = { opacity: 40, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][14]).toBe(0.4);
   });
 
   it('should draw a pattern layer as a placeholder through the solid program, not as a gradient', () => {

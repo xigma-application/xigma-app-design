@@ -498,20 +498,53 @@ hardcoded-`'fill'` code before the fix landed.
 
 **An `image` paint with no `ref` yet renders a checkerboard placeholder, not nothing** — mirroring
 `pattern`'s own no-source dot-grid placeholder above, but checkered rather than dotted, in
-`IMAGE_FILL_PLACEHOLDER_COLOR_A`/`_B` (`#ffffff`/`#e1e1e1`, `constant/canvas.ts`) at
-`CHECKERBOARD_SQUARE_SIZE_PX` (10px squares). These are deliberately **not** the same colors as the
-canvas's own dark transparency-indicator checkerboard (`CHECKERBOARD_COLOR_A`/`_B`,
-`#3a3a3a`/`#484848`, §2's background section) — they instead match the light checkerboard already
-used behind a transparent color's preview swatch (`Color__picker-alpha` in `color.module.scss`,
-light-theme values), since that's the "this is empty/no source yet" visual language the rest of the
-app already established, not the canvas-background one. `getImageFillPlaceholderVertices.ts` builds
-two flat triangle lists (one per alternating color, since the plain-color program's `u_color` is a
-single uniform, so each color needs its own `bufferData`/`drawArrays` call) tiling the fill bounds,
-clipping the last row/column to the bounds edge exactly like the pattern dot grid clips to its
-spacing grid. `drawVectorImageFill.ts` now takes **two** programs — the existing `imageProgram` for
-the real textured path, plus the plain-color `program` (already threaded through
-`drawVectorFillPaints.ts` for solid/pattern) for this placeholder path — branching on whether
-`texture` resolved, exactly one level up from where the pattern fill branches on `sourceTile`.
+`IMAGE_FILL_PLACEHOLDER_COLOR_A`/`_B` (`#ffffff`/`#e1e1e1`, `constant/canvas.ts`). These are
+deliberately **not** the same colors as the canvas's own dark transparency-indicator checkerboard
+(`CHECKERBOARD_COLOR_A`/`_B`, `#3a3a3a`/`#484848`, §2's background section) — they instead match the
+light checkerboard already used behind a transparent color's preview swatch (`Color__picker-alpha`
+in `color.module.scss`, light-theme values), since that's the "this is empty/no source yet" visual
+language the rest of the app already established, not the canvas-background one.
+
+**The placeholder is a real (procedurally generated) texture drawn through the exact same
+`drawImageTexture.ts` path as a real photo, not a separate static drawer** — this replaced an earlier
+version (`drawImagePlaceholder.ts`/`getImageFillPlaceholderVertices.ts`, still present as a defensive
+fallback for the near-impossible case where `gl.createTexture()` itself fails, e.g. a lost context)
+that drew two flat triangle lists tiled to the *shape's own bounds*, completely ignoring
+`crop`/`scaleMode`/`rotation`/`flipX`/`flipY`. That static version looked fine at rest but was a real,
+user-reported bug once the Image editor's crop mode (§ above) became draggable on an empty-`ref`
+paint: dragging "the image" only moved the on-canvas crop-rect outline (`paint.crop`, driven purely
+by node/paint geometry, no texture involved) while the checkerboard itself never visibly moved,
+since nothing connected it to `paint.crop` at all — confusing, since the drag looked like a no-op.
+Fixed by giving the placeholder an actual `WebGLTexture`: `createImagePlaceholderPixels.ts` builds a
+`Uint8Array` 8×8 checker (`IMAGE_PLACEHOLDER_CHECKER_SQUARES`) baked into a
+`IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX` (256×256) square, and `getOrCreateImagePlaceholderTexture.ts`
+uploads/caches it once per `gl` context (`NEAREST` filtering, for crisp squares) under a reserved key
+(`IMAGE_PLACEHOLDER_TEXTURE_CACHE_KEY`) in the same `imageTextureCache` map real image refs use —
+there's no async load step, so it's ready synchronously, unlike a real image's `getOrLoadTexture.ts`.
+**The real-vs-placeholder texture resolution itself lives inside `drawVectorImageFill.ts`**, not its
+caller: it now takes `ref`/`imageTextureCache`/`imageTextureSizeCache` instead of a pre-resolved
+`texture`/`imageSize` pair, and decides internally (`ref ? getOrLoadTexture(...) :
+getOrCreateImagePlaceholderTexture(...)`) — `drawVectorFillPaints.ts`'s image branch is a pure
+forwarder again, just like every other paint-type branch, with no texture-resolution logic of its
+own. Either way, `drawImageTexture.ts` runs its full crop/scale-mode/rotation/flip UV math against
+whichever texture it got exactly as it would a real photo — dragging the crop rect now visibly pans
+the checker pattern underneath it, and picking a real image later behaves identically to how it
+always did. Regression-tested with an e2e test that establishes a crop rect on an empty-`ref` paint,
+drags it by one full checker square, and asserts the sampled pixel at a fixed screen point changes —
+confirmed to fail (same pixel both times) against the old static-placeholder code before this fix.
+
+**The Image editor's crop-overflow preview (§ above, `drawImageEditorCropOverflowPreview.ts`) also
+needed the same real-vs-placeholder awareness**, for the same reason: it used to hard-require
+`paint.ref` before drawing anything, so once the placeholder itself became crop-aware, a user cropping
+an empty-`ref` paint so the crop rect overhangs the frame saw nothing beyond the frame edge at all —
+no dimmed preview of the part being cropped away, unlike a real image. Fixed the same way: its
+`getImageEditorPreviewTexture` helper now resolves `getOrCreateImagePlaceholderTexture` when `paint.ref`
+is empty (instead of returning `undefined`), and the caller's firing condition dropped its
+`paint.ref &&` check, keeping only `paint.crop` (the actual signal that there's a crop rect worth
+previewing at all). `drawImageEditorTileOverflowPreview.ts`'s tile-mode equivalent was deliberately
+**not** touched — it derives its "natural size" from `imagePaintTextureSizeCache.get(paint.ref)`,
+which is never populated for an empty ref, so extending it needs its own follow-up rather than reusing
+this fix as-is.
 
 **Switching the Fill panel to the Image tab commits a real (empty-`ref`) `TImagePaint` immediately**,
 the same way switching to Gradient/Pattern already immediately committed their own default paint —
