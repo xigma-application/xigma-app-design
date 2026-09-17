@@ -32,10 +32,10 @@ const PagesHeaderActions: FC<TPagesHeaderActionsProps> = ({ onAddPage, onStopPro
           </>
         }
       >
-        <UITools.ButtonIcon aria-label={searchLabel} name="Search" />
+        <UITools.ButtonIcon ariaLabel={searchLabel} name="Search" />
       </Tooltip>
       <Tooltip content={addLabel}>
-        <UITools.ButtonIcon aria-label={addLabel} name="Plus" onClick={onAddPage} />
+        <UITools.ButtonIcon ariaLabel={addLabel} name="Plus" onClick={onAddPage} />
       </Tooltip>
     </div>
   );
