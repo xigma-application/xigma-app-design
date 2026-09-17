@@ -12,6 +12,7 @@ import { resolveGridTrackAffordanceHandleHover } from './hoverResolvers/resolveG
 import { resolveGridTrackAffordanceHover } from './hoverResolvers/resolveGridTrackAffordanceHover';
 import { resolveImageCropResizeHover } from './hoverResolvers/resolveImageCropResizeHover';
 import { resolveImageCropRotateHover } from './hoverResolvers/resolveImageCropRotateHover';
+import { resolveImageTileScaleHover } from './hoverResolvers/resolveImageTileScaleHover';
 import { resolveLineEndpointHover } from './hoverResolvers/resolveLineEndpointHover';
 import { resolvePathOffsetHover } from './hoverResolvers/resolvePathOffsetHover';
 import { resolvePlainNodeHover } from './hoverResolvers/resolvePlainNodeHover';
@@ -44,6 +45,7 @@ export const HOVER_RESOLVERS = [
   resolveEllipseArcHover,
   resolveImageCropResizeHover,
   resolveImageCropRotateHover,
+  resolveImageTileScaleHover,
   resolveResizeHover,
   resolveCornerRadiusHover,
   resolveRotateHover,

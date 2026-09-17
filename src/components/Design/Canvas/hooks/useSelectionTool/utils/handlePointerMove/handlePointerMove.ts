@@ -22,6 +22,7 @@ import { continueGridTrackAffordanceDrag } from './continueGridTrackAffordanceDr
 import { continueImageCropMoveDrag } from './continueImageCropMoveDrag/continueImageCropMoveDrag';
 import { continueImageCropResizeDrag } from './continueImageCropResizeDrag';
 import { continueImageCropRotateDrag } from './continueImageCropRotateDrag';
+import { continueImageTileScaleDrag } from './continueImageTileScaleDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
 import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
@@ -88,6 +89,7 @@ export const handlePointerMove = (
   continueImageCropMoveDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropMoveDragRef, canvasRefs);
   continueImageCropResizeDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropResizeDragRef);
   continueImageCropRotateDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropRotateDragRef);
+  continueImageTileScaleDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageTileScaleDragRef);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);
   continueVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);

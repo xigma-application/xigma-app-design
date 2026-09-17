@@ -5,19 +5,22 @@ import { selectSelectedNodes } from 'store/design/selectors';
 import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
 import { store, useAppDispatch } from 'store';
 
+// types
+import { TImageEditorMode } from 'store/design/types';
+
 export const useSyncImageEditor = (
   nodeId: string | undefined,
   paintIndex: number,
   isPickerOpen: boolean,
   isImageTabActive: boolean,
-  hasStoredCrop: boolean,
+  initialMode: TImageEditorMode,
   skipInitialArm: boolean,
 ): void => {
   const dispatch = useAppDispatch();
-  const hasStoredCropRef = useRef(hasStoredCrop);
+  const initialModeRef = useRef(initialMode);
   const wasActiveRef = useRef(false);
   const isArmSkippedRef = useRef(skipInitialArm);
-  hasStoredCropRef.current = hasStoredCrop;
+  initialModeRef.current = initialMode;
 
   useEffect(() => {
     if (nodeId && isPickerOpen && isImageTabActive) {
@@ -25,7 +28,7 @@ export const useSyncImageEditor = (
       dispatch(setImageFillPickerFocus({ nodeId, paintIndex }));
 
       if (!isArmSkippedRef.current) {
-        dispatch(setImageEditor({ mode: hasStoredCropRef.current ? 'crop' : 'position', nodeId, paintIndex }));
+        dispatch(setImageEditor({ mode: initialModeRef.current, nodeId, paintIndex }));
       }
     } else if (wasActiveRef.current && (!nodeId || !isImageTabActive)) {
       wasActiveRef.current = false;

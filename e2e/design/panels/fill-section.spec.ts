@@ -3417,6 +3417,115 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills?.[0].crop).toEqual({ height: node.height, rotation: 0, width: node.width, x: node.x! + 20, y: node.y! + 20 });
   });
 
+  test('picking Tile from the dropdown enters tile mode with a 50% default scale, and dragging a corner scales the tile without moving or rotating it', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-tile-scale');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a 200x160 rectangle so the corner-drag math below is easy to reason about
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — pick Tile from the dropdown
+    await dropdownTrigger.click();
+    await page.getByText('Tile', { exact: true }).click();
+
+    // result — the paint commits scaleMode: 'tile' with a default 50% scale, and the editor arms tile mode
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('tile');
+    expect((await readNode(page, id)).fills![0].scale).toBe(0.5);
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'tile', nodeId: id });
+
+    // result — the panel's own percent field reflects the same 50%
+    await expect(page.getByLabel('Tile scale')).toHaveValue('50%');
+
+    // action — drag the tile rect's own se corner (the 40x40 source at 50% scale is a 20x20 tile
+    // anchored at the shape's own (700,200) origin, so its se corner sits at (720,220)) outward,
+    // away from the opposite (nw) anchor — NOT the frame's own (much larger) corner
+    await designPage.pointerDown(720, 220);
+    await designPage.pointerMove(760, 260);
+    await designPage.pointerUp();
+
+    // result — the scale grew (corner moved farther from the nw anchor), while position/rotation/size
+    // of the frame itself and the crop rect stayed untouched (no move, no rotate — scale only)
+    const draggedNode = await readNode(page, id);
+
+    expect(draggedNode.fills?.[0].scale).toBeGreaterThan(0.5);
+    expect(draggedNode.fills?.[0].crop).toBeUndefined();
+    expect(draggedNode.x).toBe(700);
+    expect(draggedNode.y).toBe(200);
+    expect(draggedNode.width).toBe(200);
+    expect(draggedNode.height).toBe(160);
+  });
+
+  test('reselecting a tile-scaled shape from a plain canvas click does NOT re-arm tile mode, same as crop mode requires the picker to be reopened', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-tile-scale-reselect');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // one-time setup through the picker: pick an image and switch it to Tile
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Tile', { exact: true }).click();
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('tile');
+
+    // action — deselect, then reselect with a plain click on the shape, never reopening the fill
+    // picker. The first empty-space click only exits the still-armed tile editor (claiming that
+    // click, same as crop mode does); a second click actually deselects.
+    await designPage.click(950, 500);
+    await designPage.click(950, 500);
+    expect(await readSelectedIds(page)).toEqual([]);
+
+    await designPage.click(800, 280);
+    expect(await readSelectedIds(page)).toEqual([id]);
+
+    // result — tile mode stays off; a plain selection alone does not arm the scale handles
+    expect(await readImageEditor(page)).toBeNull();
+
+    // action — dragging where the tile rect's corner would be (a 40x40 source at 50% scale is a
+    // 20x20 tile anchored at (700,200), so its se corner sits at (720,220)) just moves the frame,
+    // since no scale-drag is armed without the picker
+    await designPage.pointerDown(720, 220);
+    await designPage.pointerMove(760, 260);
+    await designPage.pointerUp();
+
+    // result — the paint's own scale is untouched; the drag moved the frame instead
+    const draggedNode = await readNode(page, id);
+
+    expect(draggedNode.fills?.[0].scale).toBe(0.5);
+    expect(draggedNode.x).not.toBe(700);
+  });
+
   test('dragging inside the shape while in crop mode selects and moves the image independently of the frame', async ({ page }) => {
     const designPage = new DesignPage(page);
 

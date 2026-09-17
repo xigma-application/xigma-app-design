@@ -34,6 +34,7 @@ export type TColorPickerInputProps = {
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
+  imageTileScale?: number;
   imageUrl?: string;
   initialActiveTab?: ColorPickerTab;
   initialFillMode?: TImageFillMode;
@@ -53,6 +54,7 @@ export type TColorPickerInputProps = {
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;
   onImageTabActiveChange?: TFunc<[boolean]>;
+  onImageTileScaleChange?: TFunc<[number]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
   onPickerChange: TFunc<[TColorPickerValue]>;
@@ -75,6 +77,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   e2eValue = '',
   hex,
   hexDisplayValue,
+  imageTileScale,
   imageUrl,
   initialActiveTab,
   initialFillMode,
@@ -94,6 +97,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onImageRotate,
   onImageScaleModeChange,
   onImageTabActiveChange,
+  onImageTileScaleChange,
   onOpenChange,
   onPatternChange,
   onPickerChange,
@@ -137,6 +141,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}
                 initialFillMode={initialFillMode}
                 initialGradient={initialGradient}
@@ -154,6 +159,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onImageRotate={onImageRotate}
                 onImageScaleModeChange={onImageScaleModeChange}
                 onImageTabActiveChange={onImageTabActiveChange}
+                onImageTileScaleChange={onImageTileScaleChange}
                 onImageUrlChange={setPickedImageUrl}
                 onOpenChange={onOpenChange}
                 onPatternChange={onPatternChange}

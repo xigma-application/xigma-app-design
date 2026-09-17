@@ -1425,7 +1425,39 @@ need.
   `handlePointerMove/continueImageCropMoveDrag/{continueImageCropMoveDrag,
   getImageCropMoveAlignmentSnap}.ts`, reusing `Canvas/utils/{getShapeSnapPoints,
   getGroupAlignmentGuide,getDragAlignmentSnap/extendGuideToFullElement,getNodeBounds}.ts` and the
-  shared `canvasRefs.transform.alignmentGuideRef`/`drawTransformAlignmentGuide.ts`
+  shared `canvasRefs.transform.alignmentGuideRef`/`drawTransformAlignmentGuide.ts`; the image fill's
+  Tile scale mode (a separate `imageEditor.mode: 'tile'`, distinct from `'crop'`/`'position'`, gated
+  behind the fill picker being open on the Image tab exactly like crop — no auto-arm from selection
+  alone) has no crop rect or move/rotate of its own — only a `paint.scale` ratio (`TImagePaint.scale`,
+  default `IMAGE_FILL_DEFAULT_TILE_SCALE = 0.5`) edited by dragging one of a dedicated **tile rect**'s
+  own 8 handles, or by the panel's percent field (`ImageFillModeRow`/`useCommitTileScalePercent.ts`).
+  The tile rect (`Canvas/utils/getImageTileRect.ts`) is `{x: node.x, y: node.y, width:
+  naturalImageWidth * scale, height: naturalImageHeight * scale, rotation: 0}` — anchored to the
+  node's own origin, deliberately independent of the node's own size, since one tile can be far
+  smaller (or larger) than the frame it repeats across. Hit-testing reuses
+  `getImageCropResizeHandleAtPoint` (the same arbitrary-rect hit-test crop's own handles use) against
+  this tile rect instead of the node's bounds, so a normal corner-drag on the *frame itself* still
+  falls through to `armResizeOnPointerDown` untouched. All 8 handles (corners **and** edges) arm the
+  same single scalar: `armImageCropOnPointerDown/armImageTileScaleOnPointerDown.ts`'s
+  `getScaleAnchorPoint` returns the opposite *corner* for a corner grab or the opposite *edge's own
+  midpoint* for an edge grab, and `handlePointerMove/continueImageTileScaleDrag.ts` applies the same
+  distance-from-anchor ratio either way (`scale' = scale * (currentDistance/startDistance)`, Euclidean
+  distance so crossing the anchor never flips/mirrors — it just shrinks toward 0 then grows again);
+  disarms in `handlePointerUp/disarmImageTileScaleDrag.ts`. The generic `resolveResizeHover` cursor
+  no longer applies once handles moved off the node's own corners, so a dedicated
+  `resolveImageTileScaleHover.ts` hit-tests the same tile rect for cursor feedback (`node.rotation
+  === 0` required throughout — v1 scope). Rendering repeats the texture for real:
+  `getImageFillTileUv.ts` produces UVs above 1 (repeat count = bounds/(imageSize*scale) per axis) and
+  `drawImageTexture.ts` switches `TEXTURE_WRAP_S/T` to `gl.REPEAT` (vs. `CLAMP_TO_EDGE` for every
+  other scale mode) on every draw call, since the same cached texture may be reused elsewhere with a
+  different scale mode. The outline draws the frame's own outline inactive (dashed, no handles, for
+  context) plus the tile rect's outline *active* via the same `drawImageEditorFrameOutline.ts` (its
+  param type was relaxed from a full scene node to a plain `TImageCrop`-shaped rect specifically so
+  the tile rect could reuse it directly) — the L-bracket-corner-plus-edge-bar style crop mode uses
+  for an active frame, just sized to the tile instead of the node. A `drawImageEditorTileOverflowPreview.ts`
+  mirrors crop's own `drawImageEditorCropOverflowPreview.ts` (both now share their GL draw body via
+  `drawImageEditorOverflowQuad.ts`) to dim-preview the tile rect unclipped when it extends past the
+  frame's own edge.
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;

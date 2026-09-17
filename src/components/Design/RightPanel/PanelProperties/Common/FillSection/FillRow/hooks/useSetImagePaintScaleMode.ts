@@ -1,3 +1,6 @@
+// others
+import { IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
+
 // store
 import { AppDispatch, store, useAppDispatch, useAppSelector } from 'store';
 import { selectImageEditor, selectNodes } from 'store/design/selectors';
@@ -28,7 +31,7 @@ const applyImageFillModeChange = (
 ): void => {
   onChange({ ...paint, crop: undefined, scaleMode: fillMode });
 
-  if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode === 'crop') {
+  if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode !== 'position') {
     dispatch(setImageEditor({ ...imageEditor, mode: 'position' }));
   }
 };
@@ -42,6 +45,21 @@ const enterImageCropMode = (
   if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode !== 'crop') {
     dispatch(setImageEditor({ ...imageEditor, mode: 'crop' }));
     seedImageCropIfNeeded(dispatch, selectNodes(store.getState())[imageEditor.nodeId], imageEditor.paintIndex);
+  }
+};
+
+const enterImageTileMode = (
+  dispatch: AppDispatch,
+  paint: TImagePaint,
+  onChange: TFunc<[TPaint]>,
+  imageEditor: TImageEditorState | null,
+  nodeId: string | undefined,
+  paintIndex: number,
+): void => {
+  onChange({ ...paint, crop: undefined, scale: paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE, scaleMode: 'tile' });
+
+  if (isImageEditorTargeting(imageEditor, nodeId, paintIndex) && imageEditor.mode !== 'tile') {
+    dispatch(setImageEditor({ ...imageEditor, mode: 'tile' }));
   }
 };
 
@@ -59,6 +77,8 @@ export const useSetImagePaintScaleMode = (
       applyImageFillModeChange(dispatch, paint, onChange, imageEditor, nodeId, paintIndex, fillMode);
     } else if (fillMode === 'crop') {
       enterImageCropMode(dispatch, imageEditor, nodeId, paintIndex);
+    } else if (paint.type === 'image' && fillMode === 'tile') {
+      enterImageTileMode(dispatch, paint, onChange, imageEditor, nodeId, paintIndex);
     }
   };
 };

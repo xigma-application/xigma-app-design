@@ -16,6 +16,7 @@ import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradient
 import { useRotateImagePaint } from './hooks/useRotateImagePaint';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
 import { useSetImagePaintScaleMode } from './hooks/useSetImagePaintScaleMode';
+import { useSetImagePaintTileScale } from './hooks/useSetImagePaintTileScale';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
 import { useSyncImageEditor } from './hooks/useSyncImageEditor';
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
@@ -26,6 +27,7 @@ import { useAppSelector } from 'store';
 
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
+import { IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
 import { translationNameSpace } from '../constants';
 
 // styles
@@ -37,6 +39,7 @@ import { TPaint } from 'types/design/paint/types';
 // utils
 import { getFillRowHexDisplayValue } from './utils/getFillRowHexDisplayValue';
 import { getFillRowInitialActiveTab } from './utils/getFillRowInitialActiveTab';
+import { getInitialImageEditorModeFromPaint } from './utils/getInitialImageEditorModeFromPaint';
 import { getInitialImageFillModeFromPaint } from './utils/getInitialImageFillModeFromPaint';
 import { getFillRowSwatchHex } from './utils/getFillRowSwatchHex';
 import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
@@ -88,16 +91,18 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleImageChange = useConvertToImagePaint(paint, onChange);
   const handleImageRotate = useRotateImagePaint(paint, onChange);
   const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
+  const handleImageTileScaleChange = useSetImagePaintTileScale(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern';
   const value = { alpha: paint.opacity, hex: getFillRowSwatchHex(paint) };
   const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
-  const hasStoredCrop = paint.type === 'image' && Boolean(paint.crop);
+  const imageTileScale = paint.type === 'image' ? (paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE) : IMAGE_FILL_DEFAULT_TILE_SCALE;
+  const initialMode = getInitialImageEditorModeFromPaint(paint);
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, hasStoredCrop, skipInitialImageEditorArmRef.current);
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, initialMode, skipInitialImageEditorArmRef.current);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
@@ -124,6 +129,7 @@ export const FillRow: FC<TFillRowProps> = ({
           className={styles.FillRow__color}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
+          imageTileScale={imageTileScale}
           imageUrl={isImage ? paint.ref : undefined}
           initialActiveTab={getFillRowInitialActiveTab(paint)}
           initialFillMode={getInitialImageFillModeFromPaint(paint)}
@@ -143,6 +149,7 @@ export const FillRow: FC<TFillRowProps> = ({
           onImageRotate={handleImageRotate}
           onImageScaleModeChange={handleImageScaleModeChange}
           onImageTabActiveChange={setIsImageTabActive}
+          onImageTileScaleChange={handleImageTileScaleChange}
           onOpenChange={setIsPickerOpen}
           onPatternChange={handlePatternChange}
           onPickerChange={handleSolidChange}

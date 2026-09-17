@@ -57,6 +57,7 @@ import { drawGridTrackAffordance } from './drawGridTrackAffordance/drawGridTrack
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawImageEditorCropOverflowPreview } from './drawImageEditorCropOverflowPreview';
+import { drawImageEditorTileOverflowPreview } from './drawImageEditorTileOverflowPreview';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawMaskOutlines } from './drawMaskOutlines';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';
@@ -158,6 +159,7 @@ export const drawScene = (
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
   drawImageEditorCropOverflowPreview(ctx, nodesById, imageEditor);
+  drawImageEditorTileOverflowPreview(ctx, nodesById, imageEditor);
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);

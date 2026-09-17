@@ -5,10 +5,35 @@ import { TImageEditorState } from 'store/design/types';
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
+import { drawImageEditorCropImageOutline } from './drawImageEditorCropImageOutline';
 import { drawImageEditorFrameOutline } from './drawImageEditorFrameOutline';
-import { drawImageEditorImageOutline } from './drawImageEditorImageOutline';
-import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
+import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+
+const drawImageEditorTileOutline = (
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  buffer: WebGLBuffer,
+  node: Exclude<TBoxSceneNode, TPathNode>,
+  canvasWidth: number,
+  canvasHeight: number,
+  viewport: TViewport,
+  imageEditor: TImageEditorState,
+): void => {
+  drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, false);
+
+  if (isAppearanceNode(node)) {
+    const paint = node.fills[imageEditor.paintIndex];
+
+    if (paint?.type === 'image') {
+      const tileRect = getImageTileRect(node, paint);
+
+      if (tileRect) {
+        drawImageEditorFrameOutline(gl, program, buffer, tileRect, canvasWidth, canvasHeight, viewport, true);
+      }
+    }
+  }
+};
 
 export const drawImageEditorSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -20,16 +45,12 @@ export const drawImageEditorSelectionOutline = (
   viewport: TViewport,
   imageEditor: TImageEditorState,
 ): void => {
-  const isImageSelected = imageEditor.mode === 'crop' && imageEditor.selectedTarget === 'image';
+  if (imageEditor.mode === 'tile') {
+    drawImageEditorTileOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, imageEditor);
+  } else {
+    const isImageSelected = imageEditor.mode === 'crop' && imageEditor.selectedTarget === 'image';
 
-  drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, !isImageSelected);
-
-  if (imageEditor.mode === 'crop' && isAppearanceNode(node)) {
-    const paint = node.fills[imageEditor.paintIndex];
-
-    if (paint?.type === 'image') {
-      const crop = getImageCropRect(node, paint);
-      drawImageEditorImageOutline(gl, program, buffer, crop, canvasWidth, canvasHeight, viewport, isImageSelected);
-    }
+    drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, !isImageSelected);
+    drawImageEditorCropImageOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, imageEditor, isImageSelected);
   }
 };

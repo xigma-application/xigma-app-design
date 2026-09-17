@@ -11,6 +11,7 @@ describe('createImageCropRefs behaviors', () => {
       imageCropMoveDragRef: { current: null },
       imageCropResizeDragRef: { current: null },
       imageCropRotateDragRef: { current: null },
+      imageTileScaleDragRef: { current: null },
     });
   });
 

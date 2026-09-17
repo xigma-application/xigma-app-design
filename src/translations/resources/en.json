@@ -31,6 +31,7 @@
   "colorPicker.image.saturationLabel": "Saturation",
   "colorPicker.image.shadowsLabel": "Shadows",
   "colorPicker.image.temperatureLabel": "Temperature",
+  "colorPicker.image.tileScaleAriaLabel": "Tile scale",
   "colorPicker.image.tintLabel": "Tint",
   "colorPicker.image.unsupportedFileTypeError": "This file type ({{extension}}) can't be used as image fill",
   "colorPicker.image.uploadFromComputerLabel": "Upload from computer",

@@ -5,6 +5,7 @@ import { TImageEditorState } from 'store/design/types';
 
 // utils
 import { drawImageEditorSelectionOutline } from '../drawImageEditorSelectionOutline';
+import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -51,6 +52,10 @@ const draw = (gl: WebGL2RenderingContext, imageEditor: TImageEditorState): void 
 };
 
 describe('drawImageEditorSelectionOutline', () => {
+  afterEach(() => {
+    imagePaintTextureSizeCache.clear();
+  });
+
   it('should draw the frame active (with handles) and no image outline while in position mode', () => {
     // mock
     const gl = createGlMock();
@@ -94,5 +99,22 @@ describe('drawImageEditorSelectionOutline', () => {
 
     expect(trianglesDraws).toHaveLength(4);
     expect(lineLoopDraws).toHaveLength(5);
+  });
+
+  it('should draw the frame inactive (dashed, no handles) and an active tile-rect outline (same L-bracket/edge-bar style as an active frame), sized to the tile, not the frame', () => {
+    // mock — a 20x20 source with no stored scale (defaults to 50%) makes a 10x10 tile, far smaller than the 40x40 frame
+    imagePaintTextureSizeCache.set('image-1', { height: 20, width: 20 });
+    const gl = createGlMock();
+
+    // before
+    draw(gl, { mode: 'tile', nodeId: 'frame-1', paintIndex: 0 });
+
+    // result — frame inactive (dashed only, 0 handle TRIANGLES) + active tile outline reusing the
+    // same 12 corner/edge-handle TRIANGLES as an active frame
+    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+
+    expect(trianglesDraws).toHaveLength(12);
+    expect(lineLoopDraws).toHaveLength(0);
   });
 });

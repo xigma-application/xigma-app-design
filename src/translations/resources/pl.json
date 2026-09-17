@@ -31,6 +31,7 @@
   "colorPicker.image.saturationLabel": "Nasycenie",
   "colorPicker.image.shadowsLabel": "Cienie",
   "colorPicker.image.temperatureLabel": "Temperatura",
+  "colorPicker.image.tileScaleAriaLabel": "Skala kafelka",
   "colorPicker.image.tintLabel": "Odcień",
   "colorPicker.image.unsupportedFileTypeError": "Ten typ pliku ({{extension}}) nie może być użyty jako wypełnienie obrazem",
   "colorPicker.image.uploadFromComputerLabel": "Prześlij z komputera",

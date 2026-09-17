@@ -36,7 +36,7 @@ export type TMaskConnectorInfo = TMaskConnectorLine[];
 
 export type TGradientEditorState = { nodeId: string; paintIndex: number; selectedStopIndex: number | null };
 
-export type TImageEditorMode = 'crop' | 'position';
+export type TImageEditorMode = 'crop' | 'position' | 'tile';
 
 export type TImageEditorTarget = 'frame' | 'image';
 

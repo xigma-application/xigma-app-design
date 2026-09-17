@@ -12,6 +12,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 
 const armImageCropHandleOnPointerDownMock = vi.fn();
 const armImageCropMoveOnPointerDownMock = vi.fn();
+const armImageTileScaleOnPointerDownMock = vi.fn();
 
 vi.mock('../armImageCropHandleOnPointerDown', () => ({
   armImageCropHandleOnPointerDown: (...args: unknown[]): unknown => armImageCropHandleOnPointerDownMock(...args),
@@ -19,6 +20,10 @@ vi.mock('../armImageCropHandleOnPointerDown', () => ({
 
 vi.mock('../armImageCropMoveOnPointerDown', () => ({
   armImageCropMoveOnPointerDown: (...args: unknown[]): unknown => armImageCropMoveOnPointerDownMock(...args),
+}));
+
+vi.mock('../armImageTileScaleOnPointerDown', () => ({
+  armImageTileScaleOnPointerDown: (...args: unknown[]): unknown => armImageTileScaleOnPointerDownMock(...args),
 }));
 
 const rectangle: TRectangleNode = {
@@ -42,6 +47,7 @@ describe('armImageCropOnPointerDown', () => {
   beforeEach(() => {
     armImageCropHandleOnPointerDownMock.mockReset();
     armImageCropMoveOnPointerDownMock.mockReset();
+    armImageTileScaleOnPointerDownMock.mockReset();
     store.dispatch(setImageEditor(null));
   });
 
@@ -347,5 +353,64 @@ describe('armImageCropOnPointerDown', () => {
     expect(result).toBe(true);
     expect(dispatch).toHaveBeenCalledWith(setImageEditor(null));
     expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ payload: expect.objectContaining({ selectedTarget: 'frame' }) }));
+  });
+
+  it('should delegate to the tile-scale resolver while in tile mode', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'tile', nodeId: 'rect-1', paintIndex: 0 }));
+    armImageTileScaleOnPointerDownMock.mockReturnValue(true);
+    const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const result = armImageCropOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      hit: null,
+      point: { x: 40, y: 40 },
+      selectedNodes: [rectangle],
+      viewport,
+    } as never);
+
+    // result
+    expect(result).toBe(true);
+    expect(armImageTileScaleOnPointerDownMock).toHaveBeenCalledWith(
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      null,
+      { x: 40, y: 40 },
+      viewport,
+      expect.objectContaining({ mode: 'tile', nodeId: 'rect-1' }),
+      rectangle,
+      rectangle.fills[0],
+    );
+  });
+
+  it("should let a click/drag on the editor's own node proceed normally while in tile mode when no handle was hit", () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'tile', nodeId: 'rect-1', paintIndex: 0 }));
+    armImageTileScaleOnPointerDownMock.mockReturnValue(undefined);
+    const dispatch = vi.fn();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const result = armImageCropOnPointerDown({
+      canvas,
+      canvasRefs,
+      dispatch,
+      event,
+      hit: rectangle,
+      point: { x: 20, y: 20 },
+      selectedNodes: [rectangle],
+      viewport,
+    } as never);
+
+    // result — falls through so the normal resize/select resolvers can handle it
+    expect(result).toBeUndefined();
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });

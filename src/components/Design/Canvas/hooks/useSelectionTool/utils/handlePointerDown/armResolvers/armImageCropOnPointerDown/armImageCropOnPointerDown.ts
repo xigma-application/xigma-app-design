@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { armImageCropPaintOnPointerDown } from './armImageCropPaintOnPointerDown';
+import { armImageTileScaleOnPointerDown } from './armImageTileScaleOnPointerDown';
 import { getResizeHandleAtPoint } from 'components/Design/Canvas/utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getRotateHandleAtPoint } from 'components/Design/Canvas/utils/getRotateHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -32,6 +33,7 @@ export const armImageCropOnPointerDown = ({
   if (
     imageEditor &&
     imageEditor.mode !== 'crop' &&
+    imageEditor.mode !== 'tile' &&
     hit?.id !== imageEditor.nodeId &&
     !(editorNode && isOwnHandleAtPoint(point, editorNode, viewport))
   ) {
@@ -44,6 +46,14 @@ export const armImageCropOnPointerDown = ({
 
     if (paint?.type === 'image') {
       return armImageCropPaintOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
+    }
+  }
+
+  if (imageEditor?.mode === 'tile' && editorNode && isAppearanceNode(editorNode)) {
+    const paint = editorNode.fills[imageEditor.paintIndex];
+
+    if (paint?.type === 'image') {
+      return armImageTileScaleOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
     }
   }
 };

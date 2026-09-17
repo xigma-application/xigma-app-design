@@ -5,15 +5,19 @@ const createGlMock = (): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
     ARRAY_BUFFER: 34962,
+    CLAMP_TO_EDGE: 33071,
     FLOAT: 5126,
     INVERT: 5386,
     KEEP: 7680,
     NOTEQUAL: 517,
+    REPEAT: 10497,
     STATIC_DRAW: 35044,
     STENCIL_BUFFER_BIT: 1024,
     STENCIL_TEST: 2960,
     TEXTURE0: 33984,
     TEXTURE_2D: 3553,
+    TEXTURE_WRAP_S: 10242,
+    TEXTURE_WRAP_T: 10243,
     TRIANGLES: 4,
     TRIANGLE_FAN: 6,
     activeTexture: vi.fn(),
@@ -31,6 +35,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),
+    texParameteri: vi.fn(),
     uniform1f: vi.fn(),
     uniform1i: vi.fn(),
     uniform2f: vi.fn(),
@@ -684,5 +689,98 @@ describe('drawVectorImageFill', () => {
     expect(uploadedVertices[1]).toBeCloseTo(0);
     expect(uploadedVertices[4]).toBeCloseTo(40);
     expect(uploadedVertices[5]).toBeCloseTo(40);
+  });
+
+  it("should repeat the image's UVs beyond 0..1 for scaleMode 'tile', instead of cropping to a single band", () => {
+    // mock — 40x40 bounds, a 20x20 image at 50% scale (10x10 tiles): 4 repeats per axis
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 20, width: 20 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'tile',
+      undefined,
+      false,
+      false,
+      undefined,
+      0.5,
+    );
+
+    // result — call 0 is the stencil-mask face upload, call 1 is the covering quad (position + UV interleaved)
+    const uploadedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1] as Float32Array;
+
+    expect(Array.from(uploadedVertices.slice(0, 2))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(2, 4))).toEqual([0, 0]);
+    expect(Array.from(uploadedVertices.slice(6, 8))).toEqual([4, 0]);
+  });
+
+  it("should switch the texture wrap mode to REPEAT only for scaleMode 'tile'", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — a plain 'fill' draw first
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // before — then a 'tile' draw on the same (shared) texture
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      texture,
+      { height: 40, width: 40 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'tile',
+    );
+
+    // result
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
   });
 });

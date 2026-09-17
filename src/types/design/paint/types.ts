@@ -50,6 +50,7 @@ export type TImagePaint = TPaintBase & {
   flipY?: boolean;
   ref: string;
   rotation: number;
+  scale?: number;
   scaleMode: TImageScaleMode;
   type: 'image';
 };

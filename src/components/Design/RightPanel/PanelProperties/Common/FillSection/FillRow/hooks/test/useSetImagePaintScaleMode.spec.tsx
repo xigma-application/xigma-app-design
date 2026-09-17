@@ -168,6 +168,57 @@ describe('useSetImagePaintScaleMode behaviors', () => {
     expect(selectImageEditor(store.getState())).toEqual({ mode: 'position', nodeId: 'other-node', paintIndex: 0 });
   });
 
+  it('should switch scaleMode to tile, clear any stored crop, and seed a default 50% scale', () => {
+    // before
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('tile'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...imagePaint, crop: undefined, scale: 0.5, scaleMode: 'tile' });
+  });
+
+  it('should keep an already-set tile scale instead of overwriting it with the default', () => {
+    // mock
+    const scaledPaint: TImagePaint = { ...imagePaint, scale: 1.5, scaleMode: 'tile' };
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(scaledPaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('tile'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...scaledPaint, crop: undefined, scale: 1.5, scaleMode: 'tile' });
+  });
+
+  it('should flip the active image editor into tile mode when switching to tile', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'position', nodeId: 'node-1', paintIndex: 0 }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('tile'));
+
+    // result
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'tile', nodeId: 'node-1', paintIndex: 0 });
+  });
+
+  it('should drop the image editor back to position mode when switching away from tile to fill or fit', () => {
+    // mock
+    store.dispatch(setImageEditor({ mode: 'tile', nodeId: 'node-1', paintIndex: 0 }));
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useSetImagePaintScaleMode(imagePaint, onChange, 'node-1', 0), { wrapper });
+
+    // action
+    act(() => result.current('fill'));
+
+    // result
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'position', nodeId: 'node-1', paintIndex: 0 });
+  });
+
   it('should do nothing for a non-image paint', () => {
     // before
     const onChange = vi.fn();

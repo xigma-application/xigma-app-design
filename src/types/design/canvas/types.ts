@@ -161,10 +161,19 @@ export type TImageCropRotateDragState = {
   startAngle: number;
 };
 
+export type TImageTileScaleDragState = {
+  anchor: TPoint;
+  nodeId: string;
+  paintIndex: number;
+  startDistance: number;
+  startScale: number;
+};
+
 export type TImageCropRefs = {
   imageCropMoveDragRef: RefObject<TImageCropMoveDragState | null>;
   imageCropResizeDragRef: RefObject<TImageCropResizeDragState | null>;
   imageCropRotateDragRef: RefObject<TImageCropRotateDragState | null>;
+  imageTileScaleDragRef: RefObject<TImageTileScaleDragState | null>;
 };
 
 export type TGradientRadiusDragState = {

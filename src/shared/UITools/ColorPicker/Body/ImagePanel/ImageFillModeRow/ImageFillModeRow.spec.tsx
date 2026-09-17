@@ -77,4 +77,35 @@ describe('ImageFillModeRow behaviors', () => {
     // result
     expect(await screen.findAllByText('Rotate 90°', {}, { timeout: 2000 })).not.toHaveLength(0);
   });
+
+  it('should not render the tile scale field for a non-tile fill mode', () => {
+    // before
+    renderImageFillModeRow({ fillMode: 'fill' });
+
+    // result
+    expect(screen.queryByLabelText('Tile scale')).not.toBeInTheDocument();
+  });
+
+  it('should render the tile scale field as a rounded percent when the fill mode is tile', () => {
+    // before
+    renderImageFillModeRow({ fillMode: 'tile', tileScale: 0.4551 });
+
+    // result
+    expect(screen.getByLabelText('Tile scale')).toHaveValue('46%');
+  });
+
+  it('should commit a typed percent as a ratio through onTileScaleChange', () => {
+    // mock
+    const onTileScaleChange = vi.fn();
+
+    // before
+    renderImageFillModeRow({ fillMode: 'tile', onTileScaleChange, tileScale: 0.5 });
+
+    // action
+    fireEvent.change(screen.getByLabelText('Tile scale'), { target: { value: '150' } });
+    fireEvent.blur(screen.getByLabelText('Tile scale'));
+
+    // result
+    expect(onTileScaleChange).toHaveBeenCalledWith(1.5);
+  });
 });

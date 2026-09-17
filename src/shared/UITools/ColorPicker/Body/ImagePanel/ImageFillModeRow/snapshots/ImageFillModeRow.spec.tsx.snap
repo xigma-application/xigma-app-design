@@ -5,37 +5,41 @@ exports[`ImageFillModeRow snapshots > should render ImageFillModeRow 1`] = `
   <div
     class="_ImageFillModeRow_f1f306"
   >
-    <button
-      aria-expanded="false"
-      aria-haspopup="dialog"
-      class="_Dropdown_cc217a _Dropdown--outline_cc217a _ImageFillModeRow__dropdown_f1f306"
-      data-state="closed"
-      data-test-bypass-global-shortcuts="true"
-      type="button"
+    <div
+      class="_ImageFillModeRow__fields_f1f306"
     >
-      <span
-        class="_Dropdown__label_cc217a"
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        class="_Dropdown_cc217a _Dropdown--outline_cc217a _ImageFillModeRow__dropdown_f1f306"
+        data-state="closed"
+        data-test-bypass-global-shortcuts="true"
+        type="button"
       >
-        Fill
-      </span>
-      <svg
-        class="Icon"
-        data-fpl-icon-size="24"
-        fill="none"
-        height="12"
-        style="color: var(--color-neutral-1);"
-        viewBox="0 0 24 24"
-        width="12"
-      >
-        <path
-          clip-rule="evenodd"
-          d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
-          data-svg-property="fill"
-          fill="white"
-          fill-rule="evenodd"
-        />
-      </svg>
-    </button>
+        <span
+          class="_Dropdown__label_cc217a"
+        >
+          Fill
+        </span>
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24"
+          fill="none"
+          height="24"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M9.646 11.146a.5.5 0 0 1 .708 0L12 12.793l1.646-1.647a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 0-.708"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
     <button
       aria-label="Rotate image"
       aria-pressed="false"

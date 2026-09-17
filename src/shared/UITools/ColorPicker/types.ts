@@ -24,6 +24,7 @@ export type TColorPickerProps = {
   className?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
+  imageTileScale?: number;
   initialActiveTab?: ColorPickerTab;
   initialFillMode?: TImageFillMode;
   initialGradient?: TInitialGradient;
@@ -41,6 +42,7 @@ export type TColorPickerProps = {
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;
   onImageTabActiveChange?: TFunc<[boolean]>;
+  onImageTileScaleChange?: TFunc<[number]>;
   onImageUrlChange?: TFunc<[string | null]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;

@@ -23,6 +23,7 @@ import { disarmGridTrackAffordanceDrag } from './disarmGridTrackAffordanceDrag';
 import { disarmImageCropMoveDrag } from './disarmImageCropMoveDrag';
 import { disarmImageCropResizeDrag } from './disarmImageCropResizeDrag';
 import { disarmImageCropRotateDrag } from './disarmImageCropRotateDrag';
+import { disarmImageTileScaleDrag } from './disarmImageTileScaleDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
 import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
@@ -84,6 +85,7 @@ export const handlePointerUp = (
   disarmImageCropMoveDrag(canvas, event, canvasRefs.imageCrop.imageCropMoveDragRef, canvasRefs);
   disarmImageCropResizeDrag(canvas, event, canvasRefs.imageCrop.imageCropResizeDragRef);
   disarmImageCropRotateDrag(canvas, event, canvasRefs.imageCrop.imageCropRotateDragRef);
+  disarmImageTileScaleDrag(canvas, event, canvasRefs.imageCrop.imageTileScaleDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);
   disarmVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);

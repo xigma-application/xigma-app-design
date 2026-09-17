@@ -7,7 +7,8 @@ import {
 } from 'constant/canvas';
 
 // types
-import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
+import { TImageCrop } from 'types/design/paint/types';
+import { TViewport } from 'types/design/types';
 
 // utils
 import { drawDashedRectOutline } from 'utils/canvas/drawDashedRectOutline';
@@ -18,13 +19,13 @@ export const drawImageEditorFrameOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  node: Exclude<TBoxSceneNode, TPathNode>,
+  rect: TImageCrop,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
   isActive: boolean,
 ): void => {
-  const { height, rotation, width, x, y } = node;
+  const { height, rotation, width, x, y } = rect;
 
   drawDashedRectOutline(
     gl,
@@ -41,7 +42,7 @@ export const drawImageEditorFrameOutline = (
   );
 
   if (isActive) {
-    drawImageEditorCornerHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
-    drawImageEditorEdgeHandles(gl, program, buffer, node, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
+    drawImageEditorCornerHandles(gl, program, buffer, rect, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
+    drawImageEditorEdgeHandles(gl, program, buffer, rect, SIZE_LABEL_FILL, canvasWidth, canvasHeight, viewport, rotation);
   }
 };

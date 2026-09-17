@@ -6,7 +6,19 @@
   justify-content: space-between;
   padding: 0 16px;
 
+  &__fields {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+  }
+
   &__dropdown {
     width: 96px;
+  }
+
+  &__scale {
+    flex: none;
+    width: 56px;
   }
 }

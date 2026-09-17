@@ -11,8 +11,10 @@ export type TBodyProps = TSolidPanelProps & {
   activeTab: ColorPickerTab;
   gradientPanel: TUseGradientPanelResult;
   imagePanel: TUseImagePanelResult;
+  imageTileScale?: number;
   onImageRotate?: TFunc;
   onImageScaleModeChange?: TFunc<[TImageFillMode]>;
+  onImageTileScaleChange?: TFunc<[number]>;
   patternPanel: TUsePatternPanelResult;
   patternSourceNodeId?: string | null;
   patternSourcePicking: TUsePatternSourcePickingResult;

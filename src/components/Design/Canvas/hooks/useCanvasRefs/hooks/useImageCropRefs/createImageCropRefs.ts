@@ -5,5 +5,6 @@ export const createImageCropRefs = (overrides: Partial<TImageCropRefs> = {}): TI
   imageCropMoveDragRef: { current: null },
   imageCropResizeDragRef: { current: null },
   imageCropRotateDragRef: { current: null },
+  imageTileScaleDragRef: { current: null },
   ...overrides,
 });

@@ -31,6 +31,7 @@ export const drawVectorImageFill = (
   flipX = false,
   flipY = false,
   boxRotation?: TBoxFillRotation,
+  scale?: number,
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
@@ -56,6 +57,7 @@ export const drawVectorImageFill = (
         flipX,
         flipY,
         boxRotation,
+        scale,
       );
     } else {
       drawImagePlaceholder(gl, program, buffer, faceBufferCache, faces, bounds, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
