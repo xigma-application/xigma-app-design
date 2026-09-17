@@ -228,6 +228,48 @@ describe('SliderTrack behaviors', () => {
     expect(track).toHaveAttribute('aria-valuenow', '30');
   });
 
+  it('should not apply the compact modifier by default', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={0}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={0}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack--compact"]')).toBeNull();
+  });
+
+  it('should apply the compact modifier and use the smaller thumb radius when variant is compact', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={0}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={50}
+        variant="compact"
+      />,
+    );
+    const thumb = container.querySelector('[class*="SliderTrack__thumb"]') as HTMLElement;
+
+    // result — the compact class is present, and the thumb offset uses the 6px compact radius
+    // (getThumbOffset(0.5, 6) === "calc(6px + 0.5 * (100% - 12px))"), not the default 8px radius
+    expect(container.querySelector('[class*="SliderTrack--compact"]')).not.toBeNull();
+    expect(thumb.style.left).toBe('calc(6px + 0.5 * (100% - 12px))');
+  });
+
   it('should call the given pointer handlers', () => {
     // mock
     const onPointerDown = vi.fn();

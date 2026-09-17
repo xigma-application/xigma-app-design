@@ -2,13 +2,13 @@ import cx from 'classnames';
 import { FC, PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 // others
-import { SLIDER_THUMB_RADIUS } from '../constants';
+import { SLIDER_COMPACT_THUMB_RADIUS, SLIDER_THUMB_RADIUS } from '../constants';
 
 // styles
 import styles from './slider-track.module.scss';
 
 // types
-import { TSliderMark } from '../types';
+import { TSliderMark, TSliderVariant } from '../types';
 
 // utils
 import { getMarkOffset } from '../utils/getMarkOffset';
@@ -25,6 +25,7 @@ export type TSliderTrackProps = {
   onPointerUp: TFunc<[ReactPointerEvent<HTMLDivElement>]>;
   trackRef: RefObject<HTMLDivElement | null>;
   value: number;
+  variant?: TSliderVariant;
 };
 
 export const SliderTrack: FC<TSliderTrackProps> = ({
@@ -38,9 +39,11 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
   onPointerUp,
   trackRef,
   value,
+  variant = 'default',
 }) => {
   const fraction = (value - min) / (max - min);
-  const thumbOffset = getThumbOffset(fraction, SLIDER_THUMB_RADIUS);
+  const thumbRadius = variant === 'compact' ? SLIDER_COMPACT_THUMB_RADIUS : SLIDER_THUMB_RADIUS;
+  const thumbOffset = getThumbOffset(fraction, thumbRadius);
   const effectiveBaseValue = baseValue ?? min;
   const baseOffset = getMarkOffset(effectiveBaseValue, min, max);
   const hasValue = value !== effectiveBaseValue;
@@ -57,7 +60,7 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
       aria-valuemax={max}
       aria-valuemin={min}
       aria-valuenow={value}
-      className={styles.SliderTrack}
+      className={cx(styles.SliderTrack, { [styles['SliderTrack--compact']]: variant === 'compact' })}
       data-no-drag
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

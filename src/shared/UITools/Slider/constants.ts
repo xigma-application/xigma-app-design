@@ -1,2 +1,3 @@
 export const SLIDER_THUMB_RADIUS = 8;
+export const SLIDER_COMPACT_THUMB_RADIUS = 6;
 export const SLIDER_SNAP_THRESHOLD_PX = 6;

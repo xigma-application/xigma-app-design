@@ -12,9 +12,9 @@ import { useSliderDrag } from './hooks/useSliderDrag';
 import styles from './slider.module.scss';
 
 // types
-import { TSliderMark } from './types';
+import { TSliderMark, TSliderVariant } from './types';
 
-export type { TSliderMark } from './types';
+export type { TSliderMark, TSliderVariant } from './types';
 
 export type TSliderProps = {
   ariaLabel?: string;
@@ -27,6 +27,7 @@ export type TSliderProps = {
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
   value: number;
+  variant?: TSliderVariant;
 };
 
 export const Slider: FC<TSliderProps> = ({
@@ -40,6 +41,7 @@ export const Slider: FC<TSliderProps> = ({
   onDragEnd,
   onDragStart,
   value,
+  variant = 'default',
 }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = useSliderDrag({ baseValue, max, min, onChange, onDragEnd, onDragStart });
 
@@ -56,6 +58,7 @@ export const Slider: FC<TSliderProps> = ({
         onPointerUp={onPointerUp}
         trackRef={trackRef}
         value={value}
+        variant={variant}
       />
       {marks.some((mark) => mark.label) && <SliderLegends marks={marks} max={max} min={min} />}
     </div>

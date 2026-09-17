@@ -6,6 +6,23 @@
   touch-action: none;
   width: 100%;
 
+  &--compact {
+    height: 12px;
+
+    .SliderTrack__rail {
+      background-color: var(--color-neutral-3);
+      border: none;
+      height: 6px;
+    }
+
+    .SliderTrack__thumb {
+      background-color: var(--color-on-blue-1);
+      border-width: 0;
+      height: 12px;
+      width: 12px;
+    }
+  }
+
   &__rail {
     background-color: var(--color-surface);
     border: 1px solid var(--color-ramp-300);

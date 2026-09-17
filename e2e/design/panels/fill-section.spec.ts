@@ -3463,6 +3463,52 @@ test.describe('Design panels — Fill section', () => {
     await expect(cropButton).toBeVisible();
   });
 
+  test('the Image crop toolbar shows exactly when the Image edit toolbar hides, and vice versa', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-toolbar');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    const editToolbarCropButton = page.locator('[class*="ImageEditToolbar_"]').first().getByRole('button', { name: 'Crop' });
+    const cropToolbar = page.locator('[class*="ImageCropToolbar_"]').first();
+
+    // result — in position mode, only the Image edit toolbar shows
+    await expect(editToolbarCropButton).toBeVisible();
+    await expect(cropToolbar).not.toBeVisible();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — enter crop mode
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // result — the crop toolbar takes over, with its own controls, while the edit toolbar is gone
+    await expect(editToolbarCropButton).not.toBeVisible();
+    await expect(cropToolbar).toBeVisible();
+    await expect(cropToolbar.getByText('Crop')).toBeVisible();
+    await expect(cropToolbar.getByRole('slider')).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Fit' })).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Cancel' })).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Confirm' })).toBeVisible();
+
+    // action — leave crop mode
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Fill' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'position' });
+
+    // result — back to the edit toolbar, crop toolbar gone again
+    await expect(editToolbarCropButton).toBeVisible();
+    await expect(cropToolbar).not.toBeVisible();
+  });
+
   test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {
     const designPage = new DesignPage(page);
 

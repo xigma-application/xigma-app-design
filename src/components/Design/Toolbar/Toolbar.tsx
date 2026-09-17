@@ -5,6 +5,7 @@ import { FC } from 'react';
 import ActionsButton from './ActionsButton/ActionsButton';
 import ActionsPanel from './ActionsButton/ActionsPanel/ActionsPanel';
 import DesignHint from './DesignHint/DesignHint';
+import ImageCropToolbar from './ImageCropToolbar/ImageCropToolbar';
 import ImageEditToolbar from './ImageEditToolbar/ImageEditToolbar';
 import MediaToolHint from './MediaToolHint/MediaToolHint';
 import MouseModes from './MouseModes/MouseModes';
@@ -39,6 +40,7 @@ const Toolbar: FC = () => {
           <ActionsButton />
           <VectorEditToolbar />
           <ImageEditToolbar />
+          <ImageCropToolbar />
           <MediaToolHint />
           <DesignHint />
         </div>
