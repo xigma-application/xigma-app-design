@@ -3603,6 +3603,97 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills?.[0].crop).toEqual({ height: node.height, rotation: 0, width: node.width, x: node.x! + 20, y: node.y! + 20 });
   });
 
+  test("entering crop mode shows an Expand button sitting just past the frame's bottom-right corner, and it disappears when crop mode exits", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-expand-button');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const expandButton = page.getByRole('button', { name: 'Expand' });
+
+    // result — not shown yet in plain position mode
+    await expect(expandButton).not.toBeVisible();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    // action — enter crop mode
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    // result — the button shows up inset from the frame's own (900, 360) bottom-right corner edges
+    await expect(expandButton).toBeVisible();
+
+    const box = await expandButton.boundingBox();
+
+    expect(box).not.toBeNull();
+    expect(box!.x + box!.width).toBeLessThan(900);
+    expect(box!.y + box!.height).toBeLessThan(360);
+    expect(box!.width).toBeCloseTo(24, 0);
+    expect(box!.height).toBeCloseTo(24, 0);
+
+    // action — leave crop mode
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Fill' }).click();
+
+    // result — the button is gone again
+    await expect(expandButton).not.toBeVisible();
+  });
+
+  test('the Expand button stays click-through, so it never steals a drag meant for the crop/resize handle underneath it (no real action is wired up yet)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-expand-button-click-through');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+    const dropdownTrigger = panel.locator('[class*="ImageFillModeRow__dropdown"]');
+
+    await dropdownTrigger.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop' });
+
+    const expandButton = page.getByRole('button', { name: 'Expand' });
+
+    await expect(expandButton).toBeVisible();
+
+    // action — click exactly where the button itself is rendered, well inside the frame body near
+    // its corner; a real click there normally focuses the image as the crop's selected target
+    const box = (await expandButton.boundingBox())!;
+
+    await designPage.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
+
+    // result — the click reached the canvas underneath and was handled normally, proving it wasn't
+    // swallowed by the button sitting on top of it
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', selectedTarget: 'image' });
+
+    const cropBefore = (await readNode(page, id)).fills![0].crop;
+
+    // action — a drag from the same spot likewise reaches the crop handle/rect underneath
+    await designPage.pointerDown(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
+    await designPage.pointerMove(Math.round(box.x + box.width / 2) + 30, Math.round(box.y + box.height / 2) + 30);
+    await designPage.pointerUp();
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].crop).not.toEqual(cropBefore);
+  });
+
   test('picking Tile from the dropdown enters tile mode with a 50% default scale, and dragging a corner scales the tile without moving or rotating it', async ({
     page,
   }) => {

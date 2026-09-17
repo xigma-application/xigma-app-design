@@ -251,6 +251,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More) |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 484 | Picking Crop right after Tile (via the dropdown, or via a resize that auto-enters crop) clears the stale tile scaleMode/scale |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 485 | Entering crop mode shows an Expand button inset near the frame's bottom-right corner, click-through so it never steals the resize handle |  —   |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -862,3 +863,18 @@ crop for a paint whose `scaleMode` is still `'tile'`, it now also resets `scaleM
 and clears `scale` in the same dispatch, and uses the corrected paint when computing the seeded
 crop rect itself (so it gets the natural-image cover-sizing logic instead of tile's frame-sized
 fallback).
+
+#485's `ImageCropExpandButtonOverlay` (`Canvas/ImageCropExpandButtonOverlay/`) is a plain HTML
+overlay (a `UITools.Button`, not a canvas draw call) shown only while `imageEditor?.mode ===
+'crop'`, positioned via `getImageCropExpandButtonPosition.ts` — the frame's own bounds/rotation
+converted to a screen point inset from its bottom-right corner (`worldToScreen` + `rotatePoint`
+around the bounds center, same pattern as `getEllipseArcValueLabelAnchor.ts`), so it tracks
+rotation and stays a constant screen-space inset regardless of zoom. It has no real action wired
+up yet. Building it surfaced a real conflict worth recording: the button's own hit area visually
+sits right where the frame/crop resize handle is grabbed from, and an early version (centered
+exactly on the corner) made an existing resize-at-that-corner e2e test start failing, because the
+real HTML button now intercepted the pointerdown before it ever reached the canvas. Fixed by
+giving the overlay `pointer-events: none` — it stays purely decorative until Expand gets a real
+handler, at which point this will need a proper resolution (e.g. shrinking/relocating the resize
+handle's own hit zone near that corner, or making the button itself part of the hit-test
+resolution order).

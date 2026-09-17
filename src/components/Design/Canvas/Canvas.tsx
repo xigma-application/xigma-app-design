@@ -9,6 +9,7 @@ import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabe
 import GridTrackModeMenuOverlay from './GridTrackModeMenuOverlay/GridTrackModeMenuOverlay';
 import GridTrackValueLabelEditOverlay from './GridTrackValueLabelEditOverlay/GridTrackValueLabelEditOverlay';
 import GuideContextMenuPanel from './GuideContextMenuPanel/GuideContextMenuPanel';
+import ImageCropExpandButtonOverlay from './ImageCropExpandButtonOverlay/ImageCropExpandButtonOverlay';
 import RulersLayer from './RulersLayer/RulersLayer';
 import ScrollbarsLayer from './ScrollbarsLayer/ScrollbarsLayer';
 import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
@@ -118,6 +119,7 @@ const Canvas: FC = () => {
       <GridTrackModeMenuOverlay />
       <SectionNameLabelEditOverlay />
       <AutoLayoutPaddingEditOverlay />
+      <ImageCropExpandButtonOverlay />
       <Comment />
     </CanvasContextMenuPanel>
   );
