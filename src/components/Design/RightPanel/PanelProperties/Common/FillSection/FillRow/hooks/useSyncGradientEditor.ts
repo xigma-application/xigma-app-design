@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 
 // store
+import { selectGradientEditor } from 'store/design/selectors';
 import { setGradientEditor } from 'store/design/slice';
-import { useAppDispatch } from 'store';
+import { store, useAppDispatch } from 'store';
 
 export const useSyncGradientEditor = (
   nodeId: string | undefined,
@@ -16,12 +17,14 @@ export const useSyncGradientEditor = (
   useEffect(() => {
     if (nodeId && isPickerOpen && isGradientTabActive) {
       dispatch(setGradientEditor({ nodeId, paintIndex, selectedStopIndex }));
-    } else {
-      dispatch(setGradientEditor(null));
     }
 
     return (): void => {
-      dispatch(setGradientEditor(null));
+      const current = selectGradientEditor(store.getState());
+
+      if (current && current.nodeId === nodeId && current.paintIndex === paintIndex) {
+        dispatch(setGradientEditor(null));
+      }
     };
   }, [dispatch, isGradientTabActive, isPickerOpen, nodeId, paintIndex, selectedStopIndex]);
 };

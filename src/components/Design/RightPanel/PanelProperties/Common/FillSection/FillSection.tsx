@@ -54,7 +54,7 @@ export const FillSection: FC = () => {
           <FillRow
             isDragging={isRowDragging(index)}
             isSelected={isRowSelected(index)}
-            key={index}
+            key={`${nodeId}-${index}`}
             nodeId={nodeId}
             onChange={(paint): void => onChange(index, paint)}
             onDragEnd={onDragEnd}

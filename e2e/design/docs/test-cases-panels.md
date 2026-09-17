@@ -256,6 +256,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 487 | Opening a second image fill's picker closes a stale one left open from a previous image-focus session, instead of both staying open and racing over which fill gets edited |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 488 | Clicking Crop preserves whichever fill row was genuinely selected in the panel, instead of the toolbar's own click always falling back to fill 0 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 489 | Switching the picker to a different fill row clears the global image editor state left by the previous fill (e.g. Tile mode), instead of staying stuck showing it |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 490 | Clicking anywhere else in the right panel exits the Image editor mode, the same as clicking the canvas already does |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 491 | Cycling through several image fills that each already have a committed crop (0→1→2→0→1) always enters crop mode on whichever fill was just clicked, never landing on null |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -975,3 +977,70 @@ false — safe under the new architecture specifically because the one scenario 
 by toggling `isPickerOpen` on a still-mounted `FillRow` at all; it works by swapping the whole
 `FillSection` out for the dedicated `ImageCrop` panel view, which unmounts everything and reseeds
 `openPickerIndex` from `imageFillPickerFocus` on the way back.
+
+#490 is a feature-parity request, not a bug in shipped behavior: clicking the canvas while the Image
+editor is active already exits it (`armExitImageEditorOnPointerDown.ts`, a canvas-pointerdown
+resolver), but clicking elsewhere in the right panel (e.g. the Position/Opacity fields) did nothing —
+`imageEditor` stayed active with nothing on canvas to show for it. Fixed with a new hook,
+`useExitImageEditorOnPanelClick.ts`, added alongside the existing
+`useClearFillSelectionOnOutsideClick.ts` in `useFillSection`'s hook set and following the exact same
+shape (a `window` `mousedown` listener, gated on `isImageEditorActive` the way the sibling hook gates
+on `hasSelection`). It dispatches `setImageEditor(null)` when a click lands outside the fill list
+container but *inside* the right panel — checked via `event.target.closest('[class*="RightPanel_"]')`
+(the CSS-module-generated root class), which is the deciding condition: without it, this would also
+fire on every canvas click (canvas is likewise "outside the fill list"), redundantly racing the
+canvas's own resolver and risking exiting the editor on clicks meant to interact with the crop/resize
+handles themselves. The scoping bug that shipped for the first e2e run (`RightPanel_RightPanel`,
+assuming the same doubled-name convention as `ColorPicker__popover`'s independently-hashed BEM
+classes) rather than the project's actual flat `_RightPanel_<hash>_<n>` module-class format — caught
+immediately by the new e2e test, not a live report.
+
+A follow-up gap the user caught live right after: the hook only handled the editor-exit half of
+canvas parity, not the second stage. On canvas, a first click outside exits the editor but keeps the
+picker panel open (the pre-existing "two-stage" test), and a second click goes further; on the right
+panel, a second click did nothing once `imageEditor` was already `null` — the picker stayed stuck
+open with no way to close it from the panel. Fixed by widening `useExitImageEditorOnPanelClick` to
+take both `isImageEditorActive` and `isPickerOpen` (`openPickerIndex !== null`) and perform at most
+one action per click — `onExitImageEditor` takes priority, `onClosePicker` only fires once the editor
+is already inactive — so exiting the editor and closing the picker are always two separate clicks,
+never collapsed into one.
+
+#491 is the largest, most consequential bug found this round, reported live with an exact repro:
+three image fills, each already carrying its own committed crop. Clicking through 0 → 1 → 2 each
+correctly enters crop mode, but clicking back to 0 or 1 afterward lands on `imageEditor: null` —
+crop mode stops working entirely for that fill, even though its `paint.crop` is untouched. The
+user's own diagnosis nailed the mechanism before the fix was even written: "jakby wyższy fill
+rozpieprza niższy" (as if the higher fill wrecks the lower one).
+
+Root cause: `useSyncImageEditor`, `useSyncGradientEditor`, and `useSyncPatternSourcePickTarget` each
+run once per `FillRow`, syncing that row's local open/active state into shared global Redux state
+(`imageEditor`/`imageFillPickerFocus`, `gradientEditor`, `patternSourcePickTarget`). All three had
+the identical flaw: their deactivate branch (and unmount cleanup) unconditionally dispatched `null`
+whenever *this* row's own state went inactive, without checking whether the shared state still
+actually belonged to this row. Since every `FillRow`'s `isPickerOpen` is derived from one shared
+`openPickerIndex` (see #487), switching from fill 1 to fill 0 flips *both* rows' `isPickerOpen` in
+the *same* render commit. React runs effects in tree order: fill 0 (lower index, rendered first)
+activates and correctly claims the state — then fill 1's deactivation fires immediately after, in
+the same flush, and unconditionally nulls whatever is there, clobbering fill 0's fresh claim a
+moment after it was set.
+
+Fixed identically in all three hooks: before dispatching `null`, read the current value back via
+`store.getState()` and only clear it if it still matches *this* row's own `(nodeId, paintIndex)`.
+`useSyncImageEditor`'s version of the check appeared twice (deactivate branch and unmount cleanup)
+and was pulled into `useSyncImageEditor/utils/clearOwnedImageEditorState.ts` — the user caught the
+duplication directly ("ta logika się powtarza zrób na to funkcje") — which also prompted promoting
+`useSyncImageEditor.ts` out of the flat `FillRow/hooks/` folder into its own `useSyncImageEditor/`
+folder, per the established "a hook with its own utils gets its own folder" convention.
+
+A real trap surfaced while writing the regression tests: a `renderHook` test that mounts fill 1,
+*separately* mounts fill 0, then reruns fill 1's own `rerender` does **not** reproduce the race —
+each of those calls is its own sequential `act()` flush, not an interleaved same-commit update, so a
+test built that way can pass against both the buggy and the fixed code. The only test shape that
+actually exercises the real ordering is a single composite hook calling *both* rows' sync hook
+unconditionally (mirroring how `FillSection` renders every `FillRow` on every render) and changing
+which one is active via one shared prop in one `rerender` call — see the last test in each of
+`useSyncImageEditor.spec.tsx`/`useSyncGradientEditor.spec.tsx`/`useSyncPatternSourcePickTarget.spec.tsx`
+for the pattern. Confirmed via the standard stash/pop check: reverting just the ownership-check
+addition makes all three regression tests — and the live e2e reproduction of the exact repro,
+cycling 0→1→2→0→1 — fail exactly as described, with every other pre-existing test in each file
+still passing.

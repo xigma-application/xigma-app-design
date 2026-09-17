@@ -21,7 +21,7 @@ import { useSetImagePaintAdjustment } from './hooks/useSetImagePaintAdjustment';
 import { useSetImagePaintScaleMode } from './hooks/useSetImagePaintScaleMode';
 import { useSetImagePaintTileScale } from './hooks/useSetImagePaintTileScale';
 import { useSyncGradientEditor } from './hooks/useSyncGradientEditor';
-import { useSyncImageEditor } from './hooks/useSyncImageEditor';
+import { useSyncImageEditor } from './hooks/useSyncImageEditor/useSyncImageEditor';
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
 
 // store

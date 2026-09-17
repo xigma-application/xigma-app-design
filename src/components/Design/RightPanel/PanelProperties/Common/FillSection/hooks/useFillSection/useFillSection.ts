@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { DEFAULT_VECTOR_PAINT_COLOR } from 'store/design/constants';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectImageFillPickerFocus, selectSelectedNodes } from 'store/design/selectors';
+import { selectImageEditor, selectImageFillPickerFocus, selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -18,8 +18,11 @@ import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { resolveFillDragIndices } from './utils/resolveFillDragIndices';
 import { toggleFillVisibility } from './utils/toggleFillVisibility';
 import { useClearFillSelectionOnOutsideClick } from './hooks/useClearFillSelectionOnOutsideClick/useClearFillSelectionOnOutsideClick';
+import { useExitImageEditorOnPanelClick } from './hooks/useExitImageEditorOnPanelClick/useExitImageEditorOnPanelClick';
 import { useFillReorderDrag } from './hooks/useFillReorderDrag/useFillReorderDrag';
 import { useFillSelection } from './hooks/useFillSelection/useFillSelection';
+import { useHandleClosePicker } from './hooks/useHandleClosePicker/useHandleClosePicker';
+import { useHandleExitImageEditor } from './hooks/useHandleExitImageEditor/useHandleExitImageEditor';
 import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerIndex';
 
 export const useFillSection = (): TUseFillSectionResult => {
@@ -35,8 +38,12 @@ export const useFillSection = (): TUseFillSectionResult => {
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
   const initialOpenPickerIndex = imageFillPickerFocus && imageFillPickerFocus.nodeId === nodeId ? imageFillPickerFocus.paintIndex : null;
   const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialOpenPickerIndex);
+  const isImageEditorActive = useAppSelector(selectImageEditor) !== null;
+  const handleExitImageEditor = useHandleExitImageEditor();
+  const handleClosePicker = useHandleClosePicker(openPickerIndex, onPickerOpenChange);
 
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, clearSelection);
+  useExitImageEditorOnPanelClick(containerRef, isImageEditorActive, openPickerIndex !== null, handleExitImageEditor, handleClosePicker);
 
   return {
     containerRef,

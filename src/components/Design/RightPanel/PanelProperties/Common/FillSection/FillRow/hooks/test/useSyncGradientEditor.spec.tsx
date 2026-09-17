@@ -7,11 +7,16 @@ import { useSyncGradientEditor } from '../useSyncGradientEditor';
 
 // store
 import { selectGradientEditor } from 'store/design/selectors';
+import { setGradientEditor } from 'store/design/slice';
 import { store } from 'store';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 describe('useSyncGradientEditor', () => {
+  afterEach(() => {
+    store.dispatch(setGradientEditor(null));
+  });
+
   it('should set the gradient editor when the picker is open on the gradient tab with a nodeId', () => {
     // before
     renderHook(() => useSyncGradientEditor('node-1', 2, true, true, 1), { wrapper });
@@ -20,7 +25,7 @@ describe('useSyncGradientEditor', () => {
     expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 2, selectedStopIndex: 1 });
   });
 
-  it('should clear the gradient editor when the picker is closed', () => {
+  it('should not touch the gradient editor on mount when the picker is closed', () => {
     // before
     renderHook(() => useSyncGradientEditor('node-1', 0, false, true, null), { wrapper });
 
@@ -28,9 +33,17 @@ describe('useSyncGradientEditor', () => {
     expect(selectGradientEditor(store.getState())).toBeNull();
   });
 
-  it('should clear the gradient editor when the gradient tab is not active', () => {
+  it('should clear the gradient editor once it was set and the picker then closes', () => {
     // before
-    renderHook(() => useSyncGradientEditor('node-1', 0, true, false, null), { wrapper });
+    const { rerender } = renderHook(({ isPickerOpen }) => useSyncGradientEditor('node-1', 0, isPickerOpen, true, null), {
+      initialProps: { isPickerOpen: true },
+      wrapper,
+    });
+
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, selectedStopIndex: null });
+
+    // action
+    rerender({ isPickerOpen: false });
 
     // result
     expect(selectGradientEditor(store.getState())).toBeNull();
@@ -38,7 +51,13 @@ describe('useSyncGradientEditor', () => {
 
   it('should clear the gradient editor when there is no nodeId', () => {
     // before
-    renderHook(() => useSyncGradientEditor(undefined, 0, true, true, null), { wrapper });
+    const { rerender } = renderHook(({ nodeId }) => useSyncGradientEditor(nodeId, 0, true, true, null), {
+      initialProps: { nodeId: 'node-1' as string | undefined },
+      wrapper,
+    });
+
+    // action
+    rerender({ nodeId: undefined });
 
     // result
     expect(selectGradientEditor(store.getState())).toBeNull();
@@ -53,5 +72,28 @@ describe('useSyncGradientEditor', () => {
 
     // result
     expect(selectGradientEditor(store.getState())).toBeNull();
+  });
+
+  it("should not clear a sibling fill's gradient editor state (regression: switching from a higher-index gradient fill back to a lower-index one wiped it back to null, because the higher-index row's own cleanup ran after the lower-index row's activation and unconditionally cleared whatever was there)", () => {
+    // before — two rows rendered together, exactly like sibling FillRows under the same FillSection;
+    // fill 1 (called second, matching its higher index) currently owns the editor
+    const useTwoRows = (activeIndex: number | null): void => {
+      useSyncGradientEditor('node-1', 0, activeIndex === 0, activeIndex === 0, null);
+      useSyncGradientEditor('node-1', 1, activeIndex === 1, activeIndex === 1, null);
+    };
+
+    const { rerender } = renderHook(({ activeIndex }) => useTwoRows(activeIndex), {
+      initialProps: { activeIndex: 1 as number | null },
+      wrapper,
+    });
+
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 1, selectedStopIndex: null });
+
+    // action — a single render transition: fill 0 activates and fill 1 deactivates together, the
+    // same way both derive from one shared openPickerIndex changing in the real app
+    rerender({ activeIndex: 0 });
+
+    // result — fill 0's claim survives; fill 1's own cleanup must not have clobbered it back to null
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, selectedStopIndex: null });
   });
 });

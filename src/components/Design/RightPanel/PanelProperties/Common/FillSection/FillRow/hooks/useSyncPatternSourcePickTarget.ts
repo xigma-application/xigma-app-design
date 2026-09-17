@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 
 // store
+import { selectPatternSourcePickTarget } from 'store/design/selectors';
 import { setPatternSourcePickTarget } from 'store/design/slice';
-import { useAppDispatch } from 'store';
+import { store, useAppDispatch } from 'store';
 
 export const useSyncPatternSourcePickTarget = (
   nodeId: string | undefined,
@@ -15,12 +16,14 @@ export const useSyncPatternSourcePickTarget = (
   useEffect(() => {
     if (nodeId && isPickerOpen && isPattern) {
       dispatch(setPatternSourcePickTarget({ nodeId, paintIndex }));
-    } else {
-      dispatch(setPatternSourcePickTarget(null));
     }
 
     return (): void => {
-      dispatch(setPatternSourcePickTarget(null));
+      const current = selectPatternSourcePickTarget(store.getState());
+
+      if (current && current.nodeId === nodeId && current.paintIndex === paintIndex) {
+        dispatch(setPatternSourcePickTarget(null));
+      }
     };
   }, [dispatch, isPattern, isPickerOpen, nodeId, paintIndex]);
 };

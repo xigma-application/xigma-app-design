@@ -4587,6 +4587,45 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readSelectedIds(page)).toEqual([]);
   });
 
+  test('clicking elsewhere in the right panel exits the Image editor mode the same way clicking the canvas does, without touching the fill selection', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-exit-on-right-panel-click');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await expect(panel).toBeVisible();
+
+    // action — click a completely unrelated field elsewhere in the right panel, not the canvas
+    await page.getByText('Opacity').first().click();
+
+    // result — the image editor exits, same as a canvas click would, but the node stays selected
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    expect(await readSelectedIds(page)).toEqual([id]);
+
+    // result — the fill picker itself is untouched by that first click, matching the canvas's own
+    // two-stage behavior (first click only exits the editor, the panel stays open)
+    await expect(panel).toBeVisible();
+
+    // action — a second click elsewhere in the right panel, now that the editor is already inactive
+    await page.getByText('Opacity').first().click();
+
+    // result — this time the still-open picker itself closes (regression: a follow-up right-panel
+    // click never did anything once the editor was already null, leaving the picker stuck open)
+    await expect(panel).not.toBeVisible();
+  });
+
   test('resizing the shape while the Image position-editing mode is active keeps the picker panel open', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -5130,5 +5169,41 @@ test.describe('Design panels — Fill section', () => {
     // result — global focus now genuinely belongs to the second fill, not left stuck on the first
     await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 1 });
     await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
+  });
+
+  test("cycling through three already-cropped image fills (0 → 1 → 2 → 0 → 1) always enters crop mode on whichever fill was just clicked, never landing on null (regression: a higher-index fill's own deactivation ran after a lower-index fill's activation in the same render commit, unconditionally nulling the image editor state that fill had just claimed)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-cycle-three-cropped-fills');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // seed three image fills, each already carrying its own distinct crop
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const fills = [0, 1, 2].map((index) => ({
+        crop: { height: 100 + index * 10, rotation: 0, width: 100 + index * 10, x: 10 + index, y: 10 + index },
+        opacity: 100,
+        ref: '',
+        rotation: 0,
+        scaleMode: 'fill',
+        type: 'image',
+      }));
+
+      store.dispatch(updateNode({ changes: { fills }, id: nodeId }));
+    }, id);
+
+    // action/result — clicking through 0, 1, 2, then back to 0 and 1 must each land squarely on
+    // the fill that was just clicked, in crop mode, never null
+    for (const index of [0, 1, 2, 0, 1]) {
+      await page.getByLabel('Hex color').nth(index).click();
+      await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: index });
+    }
   });
 });

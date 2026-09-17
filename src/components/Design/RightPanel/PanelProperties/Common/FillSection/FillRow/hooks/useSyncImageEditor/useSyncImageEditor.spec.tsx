@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { renderHook } from '@testing-library/react';
 
 // hooks
-import { useSyncImageEditor } from '../useSyncImageEditor';
+import { useSyncImageEditor } from './useSyncImageEditor';
 
 // store
 import { selectImageEditor, selectImageFillPickerFocus } from 'store/design/selectors';
@@ -194,6 +194,30 @@ describe('useSyncImageEditor', () => {
 
     // result — still never armed
     expect(selectImageEditor(store.getState())).toBeNull();
+    expect(selectImageFillPickerFocus(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0 });
+  });
+
+  it("should not clobber a sibling fill's freshly-armed image editor when both transition in the same render commit (regression: cycling through three cropped image fills 0→1→2→0 left the editor null on fill 0's second visit, because fill 1's own deactivation ran after fill 0's activation in the same commit and unconditionally nulled whatever was there)", () => {
+    // before — two rows rendered together, exactly like sibling FillRows under the same FillSection;
+    // fill 1 (called second, matching its higher index) currently owns the editor
+    const useTwoRows = (activeIndex: number | null): void => {
+      useSyncImageEditor('node-1', 0, activeIndex === 0, activeIndex === 0, 'crop', false);
+      useSyncImageEditor('node-1', 1, activeIndex === 1, activeIndex === 1, 'crop', false);
+    };
+
+    const { rerender } = renderHook(({ activeIndex }) => useTwoRows(activeIndex), {
+      initialProps: { activeIndex: 1 as number | null },
+      wrapper,
+    });
+
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 1 });
+
+    // action — a single render transition: fill 0 activates and fill 1 deactivates together, the
+    // same way both derive from one shared openPickerIndex changing in the real app
+    rerender({ activeIndex: 0 });
+
+    // result — fill 0's claim survives; fill 1's own deactivation must not clobber it back to null
+    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId: 'node-1', paintIndex: 0 });
     expect(selectImageFillPickerFocus(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0 });
   });
 });

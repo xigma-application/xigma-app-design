@@ -8,6 +8,9 @@ import { store, useAppDispatch } from 'store';
 // types
 import { TImageEditorMode } from 'store/design/types';
 
+// utils
+import { clearOwnedImageEditorState } from './utils/clearOwnedImageEditorState';
+
 export const useSyncImageEditor = (
   nodeId: string | undefined,
   paintIndex: number,
@@ -33,8 +36,7 @@ export const useSyncImageEditor = (
     } else if (wasActiveRef.current && (!nodeId || !isImageTabActive)) {
       wasActiveRef.current = false;
       isArmSkippedRef.current = false;
-      dispatch(setImageEditor(null));
-      dispatch(setImageFillPickerFocus(null));
+      clearOwnedImageEditorState(dispatch, nodeId, paintIndex);
     }
   }, [dispatch, isImageTabActive, isPickerOpen, nodeId, paintIndex]);
 
@@ -43,9 +45,8 @@ export const useSyncImageEditor = (
       const isNodeStillSelected = Boolean(nodeId) && selectSelectedNodes(store.getState()).some((node) => node.id === nodeId);
 
       if (wasActiveRef.current && !isNodeStillSelected) {
-        dispatch(setImageEditor(null));
-        dispatch(setImageFillPickerFocus(null));
+        clearOwnedImageEditorState(dispatch, nodeId, paintIndex);
       }
     };
-  }, [dispatch, nodeId]);
+  }, [dispatch, nodeId, paintIndex]);
 };
