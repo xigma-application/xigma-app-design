@@ -2602,6 +2602,70 @@ test.describe('Design panels — Fill section', () => {
     expect(await readPixelColor(page, 710, 210)).toEqual([255, 0, 0]);
   });
 
+  test('a pattern keeps rendering correctly on its consumer after zooming in heavily, even though the source sits far away and is pushed off-screen (regression: the source used to be captured through the live/ambient viewport, so a distant source landed outside the capturable buffer once zooming into the consumer pushed it off-screen)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-distant-source-zoom');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const targetId = await readFirstNodeId(page);
+
+    // a small 20x20 source rectangle, filled pure green, far from the consumer
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    const sourceId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }, id }));
+
+      return id;
+    });
+
+    await designPage.canvas.click({ position: { x: 800, y: 280 } });
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Pattern').click();
+    await page.getByRole('button', { name: 'Select source...' }).click();
+    await designPage.canvas.click({ position: { x: 1010, y: 210 } });
+
+    const node = await readNode(page, targetId);
+
+    expect(node.fills![0].sourceNodeId).toBe(sourceId);
+
+    // action — zoom in heavily, anchored on the consumer's own first tile cell, so that world
+    // point stays fixed on screen while the (still world-distant) source is pushed thousands of
+    // pixels outside the rendered canvas; dispatched directly rather than via a real wheel
+    // gesture, so the resulting viewport is an exact, deterministic value this test can reason
+    // about pixel-for-pixel
+    const zoom = 30;
+    const anchorWorld = { x: 710, y: 210 };
+    const anchorScreen = { x: 710, y: 210 };
+
+    await page.evaluate(
+      async ({ anchorScreen, anchorWorld, zoom }) => {
+        const { store } = await import('/src/store/index.ts');
+        const { setViewport } = await import('/src/store/design/slice.ts');
+
+        store.dispatch(setViewport({ x: anchorScreen.x - anchorWorld.x * zoom, y: anchorScreen.y - anchorWorld.y * zoom, zoom }));
+      },
+      { anchorScreen, anchorWorld, zoom },
+    );
+
+    // result — the anchor cell is still green at its fixed screen position...
+    await expect.poll(async () => readPixelColor(page, anchorScreen.x, anchorScreen.y)).toEqual([0, 255, 0]);
+
+    // ...and one tile width over (world x 720-740, scaled by the new zoom) is green too, proving
+    // the pattern still repeats correctly instead of the distant source's now off-screen capture
+    // breaking it
+    expect(await readPixelColor(page, anchorScreen.x + 20 * zoom, anchorScreen.y)).toEqual([0, 255, 0]);
+  });
+
   test("shrinking a pattern source's text content does not leave a black shadow of the old glyphs", async ({ page }) => {
     const designPage = new DesignPage(page);
 

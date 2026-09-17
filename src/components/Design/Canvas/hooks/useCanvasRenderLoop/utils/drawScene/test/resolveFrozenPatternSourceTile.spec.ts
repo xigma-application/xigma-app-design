@@ -121,28 +121,42 @@ describe('resolveFrozenPatternSourceTile', () => {
     expect(resolved).toBeNull();
   });
 
-  it('should render every frozen node into an acquired render target and return the tile', () => {
+  it('should render every frozen node into an acquired render target and return the tile, using a capture viewport anchored to the root’s own bounds instead of the live one', () => {
     // mock
     const gl = createGlMock();
     const target = { framebuffer: {}, height: 200, texture: { tag: 'tile-texture' }, width: 200 } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => target), release: vi.fn() } as unknown as TRenderTargetPool;
+    const liveViewport = { x: 40, y: 40, zoom: 4 };
     const context = {
+      canvasHeight: 200,
+      canvasWidth: 200,
       gl,
       imageContext: { isAlphaWriteEnabled: false, renderTargetPool: pool },
+      viewport: liveViewport,
     } as unknown as TDrawSceneContext;
     const root = rect('r1', { height: 30, width: 30, x: 5, y: 10 });
     const child = rect('c1');
     const snapshot = [root, child];
+    const viewportsDuringDraw: unknown[] = [];
+
+    drawLeafNodeMock.mockImplementation((ctx: TDrawSceneContext) => {
+      viewportsDuringDraw.push({ ...ctx.viewport });
+    });
 
     // before
     const resolved = resolveFrozenPatternSourceTile(context, snapshot, pathOutlineStyles, refs, 'editing-id', 1);
+    const captureViewport = { x: -5 * (200 / 30), y: -10 * (200 / 30), zoom: 200 / 30 };
 
-    // result — every node in the frozen snapshot is drawn, using a nodesById built from the snapshot itself
+    // result — every node in the frozen snapshot is drawn, using a nodesById built from the
+    // snapshot itself, while the shared context's viewport was temporarily swapped to a capture
+    // viewport anchored to the root's own bounds
     expect(drawLeafNodeMock).toHaveBeenCalledTimes(2);
     expect(drawLeafNodeMock).toHaveBeenNthCalledWith(1, context, root, pathOutlineStyles, refs, { c1: child, r1: root }, 'editing-id', 2);
     expect(drawLeafNodeMock).toHaveBeenNthCalledWith(2, context, child, pathOutlineStyles, refs, { c1: child, r1: root }, 'editing-id', 2);
+    expect(viewportsDuringDraw).toEqual([captureViewport, captureViewport]);
+    expect(context.viewport).toBe(liveViewport);
 
-    expect(resolved?.tile).toEqual({ height: 30, texture: target.texture, width: 30, x: 5, y: 10 });
+    expect(resolved?.tile).toEqual({ height: 30, texture: target.texture, viewport: captureViewport, width: 30, x: 5, y: 10 });
 
     // action
     resolved?.release();

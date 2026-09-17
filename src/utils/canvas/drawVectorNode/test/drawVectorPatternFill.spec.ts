@@ -74,7 +74,7 @@ describe('drawVectorPatternFill', () => {
     const program = {} as WebGLProgram;
     const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const sourceTile = { height: 10, texture: {} as WebGLTexture, width: 10, x: 0, y: 0 };
+    const sourceTile = { height: 10, texture: {} as WebGLTexture, viewport: IDENTITY_VIEWPORT, width: 10, x: 0, y: 0 };
 
     // before
     drawVectorPatternFill(
@@ -120,7 +120,7 @@ describe('drawVectorPatternFill', () => {
     const program = {} as WebGLProgram;
     const patternTileProgram = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const sourceTile = { height: 10, texture: {} as WebGLTexture, width: 10, x: 0, y: 0 };
+    const sourceTile = { height: 10, texture: {} as WebGLTexture, viewport: IDENTITY_VIEWPORT, width: 10, x: 0, y: 0 };
     const boxRotation = { center: { x: 10, y: 10 }, degrees: 30, localBounds: { height: 20, width: 20, x: 0, y: 0 } };
 
     // before

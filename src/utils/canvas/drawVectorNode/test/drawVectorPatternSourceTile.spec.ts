@@ -48,7 +48,7 @@ const faces = [
   ],
 ];
 const texture = {} as WebGLTexture;
-const sourceTile = { height: 10, texture, width: 10, x: 0, y: 0 };
+const sourceTile = { height: 10, texture, viewport: IDENTITY_VIEWPORT, width: 10, x: 0, y: 0 };
 const buildPaint = (overrides: Partial<TPatternPaint> = {}): TPatternPaint => ({
   alignmentIndex: 0,
   direction: 'horizontal',

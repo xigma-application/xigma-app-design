@@ -14,6 +14,7 @@ import { worldPointToTextureUV } from '../worldPointToTextureUV';
 export type TPatternSourceTile = {
   height: number;
   texture: WebGLTexture;
+  viewport: TViewport;
   width: number;
   x: number;
   y: number;
@@ -43,9 +44,9 @@ export const drawVectorPatternSourceTile = (
     const tileWorldHeight = Math.max(sourceTile.height * (paint.scale / 100), 1);
     const { alignFrac, periodFrac, tileFrac } = getPatternTileGridFractions(bounds, tileWorldWidth, tileWorldHeight, paint);
     const hexOffsetAxis = getPatternHexOffsetAxis(paint);
-    const topLeftUV = worldPointToTextureUV({ x: sourceTile.x, y: sourceTile.y }, viewport, canvasWidth, canvasHeight);
+    const topLeftUV = worldPointToTextureUV({ x: sourceTile.x, y: sourceTile.y }, sourceTile.viewport, canvasWidth, canvasHeight);
     const point = { x: sourceTile.x + sourceTile.width, y: sourceTile.y + sourceTile.height };
-    const bottomRightUV = worldPointToTextureUV(point, viewport, canvasWidth, canvasHeight);
+    const bottomRightUV = worldPointToTextureUV(point, sourceTile.viewport, canvasWidth, canvasHeight);
     const positionLocation = gl.getAttribLocation(program, 'a_position');
     const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
     const zoomLocation = gl.getUniformLocation(program, 'u_zoom');

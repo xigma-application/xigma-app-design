@@ -801,6 +801,35 @@ so the clear actually resets alpha too. Regression-tested at two levels: a mocke
 each function's own spec asserting the alpha-enable call's `mock.invocationCallOrder` precedes
 `clear()`'s (verified to fail on the old ordering), and a real-browser e2e case in
 `fill-section.spec.ts` reproducing the exact text-shrink scenario.
+
+**A second real, user-reported bug lived in what viewport the source subtree was captured with.**
+`renderNodeListToPatternSourceTile.ts` used to draw the source subtree (`drawLeafNode(context, ...)`
+for each node) without ever touching `context.viewport` — so the capture pass reused the exact
+live/ambient viewport the main scene was already using. That viewport encodes the CURRENT user
+pan/zoom, so the source's rendered position inside the offscreen (canvas-sized) target was wherever
+it happened to project on the CURRENT screen. Reported symptom: a pattern rendered fine while its
+consumer sat near the source on screen, but zooming into a consumer far from its source (in world
+space) sheared the tiles into torn/skewed slivers instead of clean repeats. Root cause: zooming into
+a distant consumer pushes the source's on-screen projection far outside the capturable buffer, so
+the offscreen capture ends up with little or none of the source's actual content where
+`worldPointToTextureUV.ts` (computed with that same live viewport) expected to find it. Fixed by
+giving the capture its own viewport, `getPatternSourceCaptureViewport()` (private to
+`renderNodeListToPatternSourceTile.ts`): `zoom = min(context.canvasWidth/bounds.width,
+context.canvasHeight/bounds.height)` (letterboxed to fit the source's own bounds fully into the
+target, without distortion), anchored so `(bounds.x, bounds.y)` maps to `(0, 0)`. `context.viewport`
+is swapped to this capture viewport only for the duration of the subtree draw, then restored — same
+save/mutate/restore shape already used here for the framebuffer/GL-viewport/blend-func. This capture
+viewport is carried on the returned `TPatternSourceTile.viewport` field, and `drawVectorPatternSourceTile.ts`'s
+two `worldPointToTextureUV()` calls (converting the source's own world bounds into UV space inside
+the captured texture) now use `sourceTile.viewport` instead of the consumer's live viewport — the
+two only coincided by accident when the source was already on-screen, which is exactly why the bug
+only ever showed up once zoomed in on a distant consumer. Regression-tested with a mocked-GL unit
+test asserting the viewport in effect during each `drawLeafNode` call (captured via a
+`mockImplementation`, since `context.viewport` is a single mutable field restored again before
+assertions run) plus a real-browser e2e case in `fill-section.spec.ts` that dispatches an exact,
+heavily-zoomed `setViewport` anchored on the consumer and confirms the pattern still repeats
+correctly instead of the distant source's capture breaking it.
+
 `drawVectorPatternSourceTile.ts` then tiles that one texture across the consumer's clipped face with
 a dedicated fragment shader (`patternSourceTileFragmentShaderSource.ts`, paired with the existing
 gradient-fill vertex shader for its `v_localPosition`/`u_boundsOrigin`/`u_boundsSize` normalization —
