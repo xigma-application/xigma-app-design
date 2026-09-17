@@ -8,6 +8,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
+import { useClosePickerWhenFocusMovesAway } from './hooks/useClosePickerWhenFocusMovesAway';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
 import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
@@ -104,6 +105,14 @@ export const FillRow: FC<TFillRowProps> = ({
   const imageTileScale = paint.type === 'image' ? (paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE) : IMAGE_FILL_DEFAULT_TILE_SCALE;
   const imageAdjustments = paint.type === 'image' ? getImagePaintAdjustments(paint) : DEFAULT_IMAGE_ADJUSTMENTS;
   const initialMode = getInitialImageEditorModeFromPaint(paint);
+  const pickerForceCloseSignal = useClosePickerWhenFocusMovesAway(
+    isImage,
+    nodeId,
+    paintIndex,
+    isPickerOpen,
+    isImageTabActive,
+    imageFillPickerFocus,
+  );
 
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
   useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, initialMode, skipInitialImageEditorArmRef.current);
@@ -131,6 +140,7 @@ export const FillRow: FC<TFillRowProps> = ({
           align="start"
           alpha={value.alpha}
           className={styles.FillRow__color}
+          forceCloseSignal={pickerForceCloseSignal}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}

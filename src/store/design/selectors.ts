@@ -156,6 +156,8 @@ export const selectTopLevelFrameNodes = createSelector([selectRenderOrderedNodes
 
 export const selectMaskConnectorRoleById = createSelector([selectNodes], (nodes) => resolveMaskConnectorRoles(nodes));
 
+export const selectSelectedFillIndices = createSelector([selectActivePage], (page): number[] => page.selectedFillIndices ?? []);
+
 export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>

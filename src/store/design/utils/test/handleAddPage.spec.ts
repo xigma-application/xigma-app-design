@@ -73,6 +73,7 @@ describe('handleAddPage', () => {
       nodes: {},
       paint: { color: '#D9D9D9', opacity: 100, type: 'solid' },
       rootOrder: [],
+      selectedFillIndices: [],
       selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     });

@@ -978,6 +978,26 @@ that renders the hook inside an explicit `<StrictMode>` wrapper (`useSyncImageEd
 this can't regress silently again, plus two e2e cases in `fill-section.spec.ts` (frame-refocus and
 Escape) that this exact bug's first fix attempt failed.
 
+**Follow-up bug: two image fills on one node, second one's edits landing on the first.** Despite
+the controlled-`open` conversion above, `ColorPicker`'s `isOpen` still only ever *seeds* once from
+`initialOpen` — nothing outside it can tell an already-open popover to close later. With two image
+fills, opening the second fill's Image tab left the first fill's popover genuinely still open in the
+DOM (confirmed live: two "Image" tab buttons existed at once), and whichever row's
+`useSyncImageEditor` effect fired last won the shared `imageEditor`/`imageFillPickerFocus` state.
+Fixed with a real, opt-in close channel: `ColorPicker`/`ColorPickerInput` gained
+`forceCloseSignal?: number` (`ColorPicker/hooks/useForceClosePicker.ts`) — changing it closes the
+picker through the same `handleOpenChange` path a real outside-click would use; it's `undefined` and
+a no-op for every other caller. `FillRow`'s new `useClosePickerWhenFocusMovesAway.ts` computes that
+signal by watching `imageFillPickerFocus` and bumping it when focus moves to a *different* fill
+while this row still believes it's open on the Image tab — gated by a `hadFocusRef` so a fill can
+only be force-closed once it has *previously* been confirmed to genuinely hold focus, never on the
+same render where it's still in the middle of claiming that focus for the first time (the
+`useSyncImageEditor` dispatch that claims it lands one render later, so a naive same-render check
+made a freshly-opening fill instantly close itself). A `key`-based forced-remount was tried first and
+discarded: it raced with React 18 StrictMode's double-invoked effects and Radix's own
+dismissable-layer/outside-click handling, closing both fills' popovers instead of just the stale one
+— see `test-cases-panels.md` #487 for the full blow-by-blow.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

@@ -68,6 +68,13 @@ const readSelectedIds = (page: Page): Promise<string[]> =>
     return pages[activePageId].selectedIds;
   });
 
+const readImageFillPickerFocus = (page: Page): Promise<{ nodeId: string; paintIndex: number } | null> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.imageFillPickerFocus ?? null;
+  });
+
 // samples a single pixel's RGB out of a tiny clipped screenshot — same PNG-decode technique
 // mask.spec.ts / vector-edit.spec.ts use for pixel-level assertions
 const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
@@ -3424,6 +3431,33 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.getByText('Vectorize')).toBeVisible();
   });
 
+  test('clicking Crop in the Image edit toolbar enters crop mode on the image fill, seeding a crop rect', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-edit-toolbar-crop-click');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // action — click Crop in the Image edit toolbar, not the fill mode dropdown
+    await page.getByRole('button', { name: 'Crop' }).click();
+
+    // result — the editor enters crop mode targeting this image fill, with a crop rect seeded
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].crop).toBeTruthy();
+
+    // result — the targeted fill row is also selected in the panel, matching the crop target
+    await expect(page.locator('[class*="FillRow_"]').first()).toHaveClass(/FillRow--selected/);
+  });
+
   test('the Image edit toolbar hides once crop mode is entered, and comes back once it exits', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -4977,5 +5011,54 @@ test.describe('Design panels — Fill section', () => {
 
     expect(node.fills?.[0].flipX).toBe(true);
     expect(node).toMatchObject({ height: frameBefore.height, width: frameBefore.width, x: frameBefore.x, y: frameBefore.y });
+  });
+
+  test("opening a second image fill's Image tab closes a stale picker left open from a previous image-focus session, so edits target the right fill (regression: a leftover open popover from fill 1 raced with fill 2 claiming focus, letting edits bleed into fill 1)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-focus-fill-switch');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // first fill: switch to image and enter crop/image-focus mode
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image', { exact: true }).click();
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 0, selectedTarget: 'image' });
+
+    // exit back to the fill list panel — the first fill's own popover never actually closes, it
+    // just gets hidden behind the full-screen crop overlay while it's up
+    await page.keyboard.press('Escape');
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 0 });
+
+    // add a second fill and open its own picker
+    await page.getByLabel('Add fill').click();
+
+    const secondHexTrigger = page.getByLabel('Hex color').nth(1);
+
+    await secondHexTrigger.click();
+
+    // action — switch the second fill to Image too, while the first fill's stale popover is still
+    // sitting open in the DOM (this is what threw a Playwright strict-mode violation while
+    // debugging the original bug: two "Image" tab buttons existed at once)
+    await page.getByLabel('Image', { exact: true }).last().click();
+
+    // result — only the second fill's own picker panel remains open; the stale first one got
+    // force-closed rather than continuing to shadow it
+    await expect(page.locator('[class*="ColorPicker_"]:not([class*="ColorPicker__"])')).toHaveCount(1);
+
+    // result — global focus now genuinely belongs to the second fill, not left stuck on the first
+    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 1 });
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
   });
 });

@@ -21,6 +21,7 @@ export type TDesignPage = {
   nodes: Record<string, TSceneNode>;
   paint: TPaint;
   rootOrder: string[];
+  selectedFillIndices?: number[];
   selectedIds: string[];
   viewport: TViewport;
 };

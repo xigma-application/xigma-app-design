@@ -252,6 +252,8 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits |  —   |                  ✅ `fill-section.spec.ts`                   |
 | 484 | Picking Crop right after Tile (via the dropdown, or via a resize that auto-enters crop) clears the stale tile scaleMode/scale |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 485 | Entering crop mode shows an Expand button inset near the frame's bottom-right corner, click-through so it never steals the resize handle |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 486 | Clicking Crop in the Image edit toolbar enters crop mode on the target image fill, seeding a crop rect if none existed yet |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 487 | Opening a second image fill's picker closes a stale one left open from a previous image-focus session, instead of both staying open and racing over which fill gets edited |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -878,3 +880,67 @@ giving the overlay `pointer-events: none` — it stays purely decorative until E
 handler, at which point this will need a proper resolution (e.g. shrinking/relocating the resize
 handle's own hit zone near that corner, or making the button itself part of the hit-test
 resolution order).
+
+#486 is the Image edit toolbar's own Crop button gaining a real handler
+(`useHandleCropClick.ts`), following a three-rule priority for *which* fill it targets, decided
+with the user up front: (a) with no fill row selected in the right panel, target the first (topmost)
+fill that is an image; (b) with one or more fill rows selected, target the selected one that is an
+image; (c) if a fill row is selected but none of the selected rows is an image, fall back to (a).
+The branching itself is a pure function, `getCropTargetPaintIndex.ts` (`fills`, `selectedIndices`)
+→ index, fully covered by unit tests — the e2e scenario only proves the real click reaches it.
+Once the target index is resolved, it reuses the exact same `setImageEditor` +
+`seedImageCropIfNeeded` pairing #482–#485 already established, so an existing crop's position is
+never reset, only entered for editing.
+
+This surfaced a real architecture gap: `FillRow`'s own selection highlight (`selectedIndices` from
+`useFillSelection`) used to be pure local `useState` inside `FillSection` (`RightPanel`), with no
+way for a Canvas-side component (`ImageEditToolbar`) to read it. Fixed by lifting it into Redux as
+`TDesignPage.selectedFillIndices` (per-page, alongside `selectedIds`) — `useFillSelection` now
+reads/writes it directly via `useAppSelector`/`dispatch` instead of local state, keeping its exact
+same external hook API so no caller needed to change. The field is optional on `TDesignPage`
+(`selectedFillIndices?: number[]`, defaulted to `[]` by the selector) specifically to avoid a
+mass update across the dozens of test fixtures across the codebase that construct a `TDesignPage`
+by hand — the same technique already used for `imageFillPickerFocus` and other transient fields on
+`TDesignState` itself. Like `vectorEditingNodeIds`/`imageEditor`, it's excluded from undo/redo
+snapshots (`handleReplaceDesignSnapshot.ts` never touches it), since it's transient UI selection,
+not document content.
+
+#487 is a real, pre-existing bug reported live by the user, unrelated to the #486 work above:
+with two image fills on the same node, entering crop/image-focus mode on the first, exiting back to
+the fill list, then opening the second fill's Image tab could leave edits landing on the first fill
+instead. Root cause: `ColorPicker`'s `isOpen` only ever seeds once from `initialOpen` at mount — it
+is not genuinely controlled from outside — so a fill row's popover that was opened once has no way
+to be told to close by a sibling row claiming focus later. Confirmed live via a throwaway Playwright
+script reading `store.getState()`: after opening a second fill's Image tab, **two** "Image" tab
+buttons existed in the DOM at once (one still `aria-pressed="true"` from the first fill's own,
+never-actually-closed popover). Whichever row's `useSyncImageEditor` effect fired last then "won"
+the shared `imageEditor`/`imageFillPickerFocus` state, causing the confusing revert.
+
+Fixed two ways at once, priority explicitly given to "new click wins" per the user's direction:
+1. `ColorPicker`/`ColorPickerInput` gained a new optional `forceCloseSignal?: number` prop
+   (`ColorPicker/hooks/useForceClosePicker.ts`) — when it changes to a defined value, the picker
+   closes itself through the exact same `handleOpenChange` path a real outside-click/Escape would
+   use. It defaults to `undefined` and is a no-op unless a caller passes it, so every one of the
+   ~40 other `ColorPicker`/`ColorPickerInput` call sites is untouched.
+2. `FillRow` computes that signal via a new hook, `useClosePickerWhenFocusMovesAway.ts`: it watches
+   `imageFillPickerFocus` (already read for the resume-on-remount logic) and bumps the signal when
+   focus moves to a *different* fill while this row still believes it's open on the Image tab.
+
+The first implementation attempt used a `key`-based forced remount instead of a real close signal,
+and separately missed gating on `isImageTabActive` — both surfaced as genuine regressions (the user
+caught them live: "jest jeszcze gorzej") before landing on the version above. The remount attempt
+specifically failed because of a React 18 StrictMode interaction (the same class of hazard already
+documented for `skipInitialArm` above): forcing a full unmount/remount mid-click raced against
+Radix's own dismissable-layer/outside-click handling, closing *both* fills' popovers instead of just
+the stale one. The `isImageTabActive` gap meant a row that was merely open on a non-Image tab (e.g.
+still on Solid) could be wrongly force-closed just because some other, unrelated fill happened to
+hold image focus elsewhere.
+
+A second, subtler race had to be guarded against even in the final version: on the very render where
+a fill's own `isPickerOpen`/`isImageTabActive` first become `true`, the `imageFillPickerFocus` value
+read from the store is still the *previous* fill's — `useSyncImageEditor`'s dispatch to claim it for
+the new fill lands a render later. Naively closing "whenever focus doesn't match me" would make a
+freshly-opening fill instantly close itself. Fixed with a `hadFocusRef` in
+`useClosePickerWhenFocusMovesAway`: a fill only force-closes once it has *previously* been confirmed
+(via a prior render where the store agreed) to genuinely hold focus, never on the render where it's
+still in the middle of claiming it for the first time.

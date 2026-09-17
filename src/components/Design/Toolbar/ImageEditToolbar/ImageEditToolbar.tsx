@@ -6,6 +6,7 @@ import ImageEditMoreDropdown from './ImageEditMoreDropdown/ImageEditMoreDropdown
 import ToolbarButton from '../ToolbarButton/ToolbarButton';
 
 // hooks
+import { useHandleCropClick } from './hooks/useHandleCropClick';
 import { useImageEditToolbar } from './hooks/useImageEditToolbar';
 
 // others
@@ -17,6 +18,7 @@ import styles from './image-edit-toolbar.module.scss';
 const ImageEditToolbar: FC = () => {
   const { t } = useTranslation();
   const { handleToggleSelectArea, isSelectAreaActive, isVisible } = useImageEditToolbar();
+  const handleCropClick = useHandleCropClick();
 
   if (!isVisible) {
     return null;
@@ -29,7 +31,7 @@ const ImageEditToolbar: FC = () => {
 
   return (
     <div className={styles.ImageEditToolbar}>
-      <ToolbarButton icon="Crop" isActive={false} label={cropLabel} tooltip={cropLabel} />
+      <ToolbarButton icon="Crop" isActive={false} label={cropLabel} onClick={handleCropClick} tooltip={cropLabel} />
       <ToolbarButton
         icon="LassoTool"
         isActive={isSelectAreaActive}

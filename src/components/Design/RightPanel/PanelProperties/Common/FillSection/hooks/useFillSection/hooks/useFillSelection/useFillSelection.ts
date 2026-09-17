@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+
+// store
+import { selectSelectedFillIndices } from 'store/design/selectors';
+import { setSelectedFillIndices } from 'store/design/slice';
+import { useAppDispatch, useAppSelector } from 'store';
 
 // utils
 import { getFillRangeIndices } from './utils/getFillRangeIndices';
@@ -14,38 +19,46 @@ export type TUseFillSelectionResult = {
 };
 
 export const useFillSelection = (fillCount: number): TUseFillSelectionResult => {
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const dispatch = useAppDispatch();
+  const selectedIndices = useAppSelector(selectSelectedFillIndices);
   const anchorRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setSelectedIndices((current) => current.filter((index) => index < fillCount));
-  }, [fillCount]);
+    const trimmed = selectedIndices.filter((index) => index < fillCount);
+
+    if (trimmed.length !== selectedIndices.length) {
+      dispatch(setSelectedFillIndices(trimmed));
+    }
+  }, [dispatch, fillCount, selectedIndices]);
 
   const onSelectRow = (index: number, modifiers: TFillSelectModifiers): void => {
     switch (true) {
       case modifiers.shift && anchorRef.current !== null:
-        setSelectedIndices(getFillRangeIndices(anchorRef.current!, index));
+        dispatch(setSelectedFillIndices(getFillRangeIndices(anchorRef.current!, index)));
         break;
       case modifiers.meta:
-        setSelectedIndices((current) => getFillToggledIndices(current, index));
+        dispatch(setSelectedFillIndices(getFillToggledIndices(selectedIndices, index)));
         anchorRef.current = index;
         break;
       default:
-        setSelectedIndices([index]);
+        dispatch(setSelectedFillIndices([index]));
         anchorRef.current = index;
         break;
     }
   };
 
   const clearSelection = useCallback((): void => {
-    setSelectedIndices((current) => (current.length === 0 ? current : []));
+    dispatch(setSelectedFillIndices([]));
     anchorRef.current = null;
-  }, []);
+  }, [dispatch]);
 
-  const setSelection = useCallback((indices: number[]): void => {
-    setSelectedIndices(indices);
-    anchorRef.current = indices.length > 0 ? indices[indices.length - 1] : null;
-  }, []);
+  const setSelection = useCallback(
+    (indices: number[]): void => {
+      dispatch(setSelectedFillIndices(indices));
+      anchorRef.current = indices.length > 0 ? indices[indices.length - 1] : null;
+    },
+    [dispatch],
+  );
 
   return { clearSelection, onSelectRow, selectedIndices, setSelection };
 };

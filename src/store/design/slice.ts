@@ -132,6 +132,7 @@ const initialState: TDesignState = {
       nodes: {},
       paint: DEFAULT_VECTOR_PAINT,
       rootOrder: [],
+      selectedFillIndices: [],
       selectedIds: [],
       viewport: DEFAULT_VIEWPORT,
     },
@@ -262,6 +263,9 @@ const designSlice = createSlice({
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
     },
+    setSelectedFillIndices: (state, action: PayloadAction<number[]>) => {
+      getActivePage(state).selectedFillIndices = action.payload;
+    },
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
     setTemporaryActiveTool: (state, action: PayloadAction<ToolName>) => {
       state.activeTool = action.payload;
@@ -360,6 +364,7 @@ export const {
   setPatternSourcePickTarget,
   setPatternSourcePicking,
   setPenActiveVertexId,
+  setSelectedFillIndices,
   setSelection,
   setTemporaryActiveTool,
   setVectorEditingNodeIds,

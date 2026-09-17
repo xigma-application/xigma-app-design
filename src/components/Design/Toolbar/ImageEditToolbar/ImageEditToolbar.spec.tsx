@@ -7,8 +7,8 @@ import ImageEditToolbar from './ImageEditToolbar';
 import { TooltipProvider } from 'shared';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { addNode, setImageEditor, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage, selectImageEditor } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -43,6 +43,7 @@ describe('ImageEditToolbar', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setImageEditor(null));
   });
 
   it('should render nothing when the selected node has no image fill', () => {
@@ -71,6 +72,19 @@ describe('ImageEditToolbar', () => {
     expect(screen.getByText('Remove background')).toBeInTheDocument();
     expect(screen.getByText('Edit with prompt')).toBeInTheDocument();
     expect(screen.getByText('More')).toBeInTheDocument();
+  });
+
+  it('should enter crop mode on the image fill when Crop is clicked', () => {
+    // before
+    const id = selectRectangleWithFills([IMAGE_FILL]);
+
+    renderImageEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Crop' }));
+
+    // result
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
   });
 
   it('should toggle the Select area button as active on click, with no other effect', () => {
