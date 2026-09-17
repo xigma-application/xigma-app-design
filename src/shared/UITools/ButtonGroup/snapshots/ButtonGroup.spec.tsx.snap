@@ -9,7 +9,7 @@ exports[`ButtonGroup snapshots > should render one button per entry 1`] = `
     <button
       aria-label="Align left"
       aria-pressed="false"
-      class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+      class="_Button_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
       type="button"
     >
       <svg
@@ -40,7 +40,7 @@ exports[`ButtonGroup snapshots > should render one button per entry 1`] = `
     <button
       aria-label="Align center"
       aria-pressed="false"
-      class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+      class="_Button_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
       type="button"
     >
       <svg

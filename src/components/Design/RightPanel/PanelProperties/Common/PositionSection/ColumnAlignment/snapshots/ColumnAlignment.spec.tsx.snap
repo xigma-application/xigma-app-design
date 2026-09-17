@@ -31,7 +31,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align left"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"
@@ -64,7 +64,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align horizontal centers"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"
@@ -99,7 +99,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align right"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"
@@ -137,7 +137,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align top"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"
@@ -170,7 +170,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align vertical centers"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"
@@ -205,7 +205,7 @@ exports[`ColumnAlignment snapshots > should render the horizontal and vertical a
           <button
             aria-label="Align bottom"
             aria-pressed="false"
-            class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+            class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
             data-state="closed"
             disabled=""
             type="button"

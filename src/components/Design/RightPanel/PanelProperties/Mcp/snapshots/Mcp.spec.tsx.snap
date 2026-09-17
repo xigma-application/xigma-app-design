@@ -25,9 +25,8 @@ exports[`Mcp snapshots > should render the MCP section with its "No connections"
         <button
           aria-label="Add MCP connection"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg

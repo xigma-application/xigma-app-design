@@ -7,19 +7,18 @@ exports[`CornerSmoothingButton snapshots > should render the trigger with the po
     aria-haspopup="dialog"
     aria-label="Corner smoothing"
     aria-pressed="false"
-    class="_Button_b88d2e"
+    class="_ButtonIcon_2062db"
     data-state="closed"
-    style="padding: 6px;"
     type="button"
   >
     <svg
       class="Icon"
       data-fpl-icon-size="24"
       fill="none"
-      height="12"
+      height="24"
       style="color: var(--color-neutral-1);"
       viewBox="0 0 24 24"
-      width="12"
+      width="24"
     >
       <path
         d="M8.5 18a.5.5 0 0 0 .5-.5v-1.55a2.5 2.5 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v4.55a2.501 2.501 0 0 0 0 4.9v1.55a.5.5 0 0 0 .5.5m7 0a.5.5 0 0 0 .5-.5v-4.55a2.501 2.501 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v1.55a2.5 2.5 0 0 0 0 4.9v4.55a.5.5 0 0 0 .5.5m0-6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m-7 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"

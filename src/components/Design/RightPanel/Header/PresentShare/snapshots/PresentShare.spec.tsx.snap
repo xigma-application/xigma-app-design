@@ -11,7 +11,7 @@ exports[`PresentShare snapshots > should render PresentShare 1`] = `
       <button
         aria-label="Present"
         aria-pressed="false"
-        class="_Button_b88d2e _PresentShare__present_ba683c"
+        class="_ButtonIcon_2062db _PresentShare__present_ba683c"
         data-state="closed"
         type="button"
       >
@@ -62,7 +62,7 @@ exports[`PresentShare snapshots > should render PresentShare 1`] = `
     </div>
     <button
       aria-pressed="true"
-      class="_Button_b88d2e _Button--active_b88d2e _Button--large_b88d2e _PresentShare__share_ba683c"
+      class="_Button_b88d2e _Button--active_b88d2e _Button--large_b88d2e _Button--primary_b88d2e _PresentShare__share_ba683c"
       type="button"
     >
       Share

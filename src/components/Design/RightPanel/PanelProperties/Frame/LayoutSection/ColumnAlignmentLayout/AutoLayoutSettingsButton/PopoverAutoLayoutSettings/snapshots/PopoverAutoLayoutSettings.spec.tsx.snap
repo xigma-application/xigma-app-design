@@ -16,19 +16,18 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
       <button
         aria-label="Close"
         aria-pressed="false"
-        class="_Button_b88d2e _PopoverAutoLayoutSettingsHeader__close_51fba3"
+        class="_ButtonIcon_2062db _PopoverAutoLayoutSettingsHeader__close_51fba3"
         data-state="closed"
-        style="padding: 0px;"
         type="button"
       >
         <svg
           class="Icon"
           data-fpl-icon-size="24L"
           fill="none"
-          height="22"
+          height="24"
           style="color: var(--color-neutral-1);"
           viewBox="0 0 24 24"
-          width="22"
+          width="24"
         >
           <path
             clip-rule="evenodd"
@@ -80,10 +79,10 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
               class="Icon"
               data-fpl-icon-size="24"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -124,10 +123,10 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
               class="Icon"
               data-fpl-icon-size="24"
               fill="none"
-              height="12"
+              height="24"
               style="color: var(--color-neutral-1);"
               viewBox="0 0 24 24"
-              width="12"
+              width="24"
             >
               <path
                 clip-rule="evenodd"
@@ -238,10 +237,10 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -302,10 +301,10 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"

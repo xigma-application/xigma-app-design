@@ -4,7 +4,7 @@ exports[`ButtonIcon snapshots > should render ButtonIcon in its active state 1`]
 <DocumentFragment>
   <button
     aria-label="Align left"
-    aria-pressed="false"
+    aria-pressed="true"
     class="_ButtonIcon_2062db _ButtonIcon--active_2062db"
     type="button"
   >

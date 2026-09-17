@@ -20,9 +20,8 @@ exports[`Export snapshots > should render the Export section with its add button
         <button
           aria-label="Add export setting"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg

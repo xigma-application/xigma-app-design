@@ -62,9 +62,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Add column"
             aria-pressed="false"
-            class="_Button_b88d2e"
+            class="_ButtonIcon_2062db"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -141,10 +140,10 @@ exports[`GridSettings > should match the snapshot 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -209,9 +208,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
-            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            class="_ButtonIcon_2062db _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -284,10 +282,10 @@ exports[`GridSettings > should match the snapshot 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -352,9 +350,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
-            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            class="_ButtonIcon_2062db _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -427,10 +424,10 @@ exports[`GridSettings > should match the snapshot 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -495,9 +492,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
-            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            class="_ButtonIcon_2062db _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -539,9 +535,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Add row"
             aria-pressed="false"
-            class="_Button_b88d2e"
+            class="_ButtonIcon_2062db"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -618,10 +613,10 @@ exports[`GridSettings > should match the snapshot 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -686,9 +681,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
-            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            class="_ButtonIcon_2062db _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg
@@ -761,10 +755,10 @@ exports[`GridSettings > should match the snapshot 1`] = `
                 class="Icon"
                 data-fpl-icon-size="24"
                 fill="none"
-                height="12"
+                height="24"
                 style="color: var(--color-neutral-1);"
                 viewBox="0 0 24 24"
-                width="12"
+                width="24"
               >
                 <path
                   clip-rule="evenodd"
@@ -829,9 +823,8 @@ exports[`GridSettings > should match the snapshot 1`] = `
           <button
             aria-label="Delete selected tracks"
             aria-pressed="false"
-            class="_Button_b88d2e _GridTrackRow__delete_bdfaf0"
+            class="_ButtonIcon_2062db _GridTrackRow__delete_bdfaf0"
             data-state="closed"
-            style="padding: 0px;"
             type="button"
           >
             <svg

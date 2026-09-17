@@ -24,7 +24,7 @@ exports[`AccountMenu snapshots > should render AccountMenu 1`] = `
     >
       <button
         aria-pressed="false"
-        class="_Button_b88d2e _AccountMenu__spotlight_49dc62"
+        class="_Button_b88d2e _Button--primary_b88d2e _AccountMenu__spotlight_49dc62"
         type="button"
       >
         Spotlight me
@@ -32,7 +32,7 @@ exports[`AccountMenu snapshots > should render AccountMenu 1`] = `
       <button
         aria-label="Start audio chat"
         aria-pressed="false"
-        class="_Button_b88d2e"
+        class="_Button_b88d2e _Button--primary_b88d2e"
         type="button"
       >
         <svg

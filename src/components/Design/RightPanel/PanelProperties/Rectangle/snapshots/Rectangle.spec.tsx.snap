@@ -90,7 +90,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align left"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -123,7 +123,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align horizontal centers"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -158,7 +158,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align right"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -196,7 +196,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align top"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -229,7 +229,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align vertical centers"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -264,7 +264,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Align bottom"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -467,7 +467,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Rotate 90° right"
               aria-pressed="false"
-              class="_Button_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               type="button"
             >
@@ -490,7 +490,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Flip horizontal"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -516,7 +516,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Flip vertical"
               aria-pressed="false"
-              class="_Button_b88d2e _Button--disabled_b88d2e _ButtonGroup__button_f86a5c"
+              class="_Button_b88d2e _Button--disabled_b88d2e _Button--primary_b88d2e _ButtonGroup__button_f86a5c"
               data-state="closed"
               disabled=""
               type="button"
@@ -862,9 +862,8 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
             <button
               aria-label="Individual corner radius"
               aria-pressed="false"
-              class="_Button_b88d2e"
+              class="_ButtonIcon_2062db"
               data-state="closed"
-              style="padding: 0px;"
               type="button"
             >
               <svg
@@ -906,9 +905,8 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
         <button
           aria-label="Apply styles and variables"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg
@@ -932,9 +930,8 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
         <button
           aria-label="Add fill"
           aria-pressed="false"
-          class="_Button_b88d2e"
+          class="_ButtonIcon_2062db"
           data-state="closed"
-          style="padding: 0px;"
           type="button"
         >
           <svg

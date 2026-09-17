@@ -421,8 +421,8 @@ exports[`App snapshots > should render App 1`] = `
                   class="_PagesHeaderActions_4396dd"
                 >
                   <button
-                    aria-label="Find"
-                    class="_PagesHeaderActions__action_4396dd"
+                    aria-pressed="false"
+                    class="_ButtonIcon_2062db"
                     data-state="closed"
                     type="button"
                   >
@@ -443,8 +443,8 @@ exports[`App snapshots > should render App 1`] = `
                     </svg>
                   </button>
                   <button
-                    aria-label="Add new page"
-                    class="_PagesHeaderActions__action_4396dd"
+                    aria-pressed="false"
+                    class="_ButtonIcon_2062db"
                     data-state="closed"
                     type="button"
                   >
@@ -625,7 +625,7 @@ exports[`App snapshots > should render App 1`] = `
                 <button
                   aria-label="Present"
                   aria-pressed="false"
-                  class="_Button_b88d2e _PresentShare__present_ba683c"
+                  class="_ButtonIcon_2062db _PresentShare__present_ba683c"
                   data-state="closed"
                   type="button"
                 >
@@ -676,7 +676,7 @@ exports[`App snapshots > should render App 1`] = `
               </div>
               <button
                 aria-pressed="true"
-                class="_Button_b88d2e _Button--active_b88d2e _Button--large_b88d2e _PresentShare__share_ba683c"
+                class="_Button_b88d2e _Button--active_b88d2e _Button--large_b88d2e _Button--primary_b88d2e _PresentShare__share_ba683c"
                 type="button"
               >
                 Share
@@ -874,9 +874,8 @@ exports[`App snapshots > should render App 1`] = `
               <button
                 aria-label="Add style"
                 aria-pressed="false"
-                class="_Button_b88d2e"
+                class="_ButtonIcon_2062db"
                 data-state="closed"
-                style="padding: 0px;"
                 type="button"
               >
                 <svg
@@ -918,9 +917,8 @@ exports[`App snapshots > should render App 1`] = `
               <button
                 aria-label="Add export setting"
                 aria-pressed="false"
-                class="_Button_b88d2e"
+                class="_ButtonIcon_2062db"
                 data-state="closed"
-                style="padding: 0px;"
                 type="button"
               >
                 <svg
@@ -967,9 +965,8 @@ exports[`App snapshots > should render App 1`] = `
               <button
                 aria-label="Add MCP connection"
                 aria-pressed="false"
-                class="_Button_b88d2e"
+                class="_ButtonIcon_2062db"
                 data-state="closed"
-                style="padding: 0px;"
                 type="button"
               >
                 <svg
