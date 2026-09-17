@@ -1,5 +1,8 @@
 import { RefObject } from 'react';
 
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
 // types
 import { TImageCropMoveDragState } from 'types/design/canvas/types';
 
@@ -41,7 +44,7 @@ describe('disarmImageCropMoveDrag', () => {
     const canvas = createCanvas();
 
     // before
-    disarmImageCropMoveDrag(canvas, pointerEvent(), createRef());
+    disarmImageCropMoveDrag(canvas, pointerEvent(), createRef(), createCanvasRefs());
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
@@ -53,7 +56,7 @@ describe('disarmImageCropMoveDrag', () => {
     const imageCropMoveDragRef = createRef(DRAG_STATE);
 
     // before
-    disarmImageCropMoveDrag(canvas, pointerEvent(2), imageCropMoveDragRef);
+    disarmImageCropMoveDrag(canvas, pointerEvent(2), imageCropMoveDragRef, createCanvasRefs());
 
     // result
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
@@ -65,11 +68,44 @@ describe('disarmImageCropMoveDrag', () => {
     const imageCropMoveDragRef = createRef(DRAG_STATE);
 
     // before
-    disarmImageCropMoveDrag(canvas, pointerEvent(2), imageCropMoveDragRef);
+    disarmImageCropMoveDrag(canvas, pointerEvent(2), imageCropMoveDragRef, createCanvasRefs());
 
     // result
     expect(imageCropMoveDragRef.current).not.toBeNull();
     vi.runAllTimers();
     expect(imageCropMoveDragRef.current).toBeNull();
+  });
+
+  it('should clear a leftover alignment guide immediately when the drag ends', () => {
+    // mock
+    const canvas = createCanvas();
+    const imageCropMoveDragRef = createRef(DRAG_STATE);
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.transform.alignmentGuideRef.current = {
+      horizontal: null,
+      vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 100 } },
+    };
+
+    // before
+    disarmImageCropMoveDrag(canvas, pointerEvent(2), imageCropMoveDragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
+  it('should leave the alignment guide untouched when no drag is in progress', () => {
+    // mock
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const guide = { horizontal: null, vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 100 } } };
+
+    canvasRefs.transform.alignmentGuideRef.current = guide;
+
+    // before
+    disarmImageCropMoveDrag(canvas, pointerEvent(), createRef(), canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBe(guide);
   });
 });

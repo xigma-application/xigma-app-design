@@ -3464,6 +3464,40 @@ test.describe('Design panels — Fill section', () => {
     expect(frameAfter.y).toBe(frameBefore.y);
   });
 
+  test('dragging the image within its frame snaps to center/edge alignment with the frame, like a smart guide', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-editor-crop-move-smart-guides');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // enter crop mode via the frame's own nw resize handle — frame/crop become (720,220,180,140)
+    await designPage.pointerDown(700, 200);
+    await designPage.pointerMove(720, 220);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    // shift the image well clear of the frame first, so nothing starts already aligned
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerMove(850, 330);
+    await designPage.pointerUp();
+    expect((await readNode(page, id)).fills?.[0].crop).toEqual({ height: 140, rotation: 0, width: 180, x: 770, y: 270 });
+
+    // action — drag it back to within 2px of fully overlapping the frame again on both axes
+    await designPage.pointerDown(850, 330);
+    await designPage.pointerMove(798, 278);
+    await designPage.pointerUp();
+
+    // result — snapped flush with the frame (same size, so every edge and the center all coincide at once)
+    expect((await readNode(page, id)).fills?.[0].crop).toEqual({ height: 140, rotation: 0, width: 180, x: 720, y: 220 });
+  });
+
   test('clicking the frame outside the moved image switches the selected target back to frame', async ({ page }) => {
     const designPage = new DesignPage(page);
 

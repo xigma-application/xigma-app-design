@@ -19,7 +19,7 @@ import { continueGradientRadiusDrag } from './continueGradientRadiusDrag';
 import { continueGradientRotateDrag } from './continueGradientRotateDrag';
 import { continueGradientStopDrag } from './continueGradientStopDrag';
 import { continueGridTrackAffordanceDrag } from './continueGridTrackAffordanceDrag';
-import { continueImageCropMoveDrag } from './continueImageCropMoveDrag';
+import { continueImageCropMoveDrag } from './continueImageCropMoveDrag/continueImageCropMoveDrag';
 import { continueImageCropResizeDrag } from './continueImageCropResizeDrag';
 import { continueImageCropRotateDrag } from './continueImageCropRotateDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
@@ -85,7 +85,7 @@ export const handlePointerMove = (
   continueGradientEndpointMoveDrag(canvas, event, dispatch, canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef, canvasRefs);
   continueGradientRadiusDrag(canvas, event, dispatch, canvasRefs.gradientRadius.gradientRadiusDragRef);
   continueGradientRotateDrag(canvas, event, dispatch, canvasRefs.gradientRotate.gradientRotateDragRef, canvasRefs);
-  continueImageCropMoveDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropMoveDragRef);
+  continueImageCropMoveDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropMoveDragRef, canvasRefs);
   continueImageCropResizeDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropResizeDragRef);
   continueImageCropRotateDrag(canvas, event, dispatch, canvasRefs.imageCrop.imageCropRotateDragRef);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);

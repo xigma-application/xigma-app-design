@@ -241,6 +241,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 472 | Clicking Flip horizontal in the ImageCrop panel flips the image's own paint, not the frame                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 473 | Clicking the frame after focusing the image reopens the fill picker panel on its own, without a swatch click      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 474 | Escape while the image is focused fully exits the editor but still reopens the fill picker panel                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 475 | Dragging the image within its frame snaps to center/edge alignment with the frame, drawing a smart guide          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as

@@ -81,7 +81,7 @@ export const handlePointerUp = (
   disarmGradientEndpointMoveDrag(canvas, event, canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef, canvasRefs);
   disarmGradientRadiusDrag(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef);
   disarmGradientRotateDrag(canvas, event, canvasRefs.gradientRotate.gradientRotateDragRef, canvasRefs);
-  disarmImageCropMoveDrag(canvas, event, canvasRefs.imageCrop.imageCropMoveDragRef);
+  disarmImageCropMoveDrag(canvas, event, canvasRefs.imageCrop.imageCropMoveDragRef, canvasRefs);
   disarmImageCropResizeDrag(canvas, event, canvasRefs.imageCrop.imageCropResizeDragRef);
   disarmImageCropRotateDrag(canvas, event, canvasRefs.imageCrop.imageCropRotateDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);

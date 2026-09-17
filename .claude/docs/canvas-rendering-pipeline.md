@@ -625,6 +625,24 @@ same aspect-preserving math the frame's own shift-locked resize uses) unconditio
 a modifier is held, since there is no discrete "unlock" affordance for a crop the way there is for a
 node.
 
+**Moving the crop rect inside its frame reuses the exact same smart-guide system as a normal
+shape-vs-sibling drag, just with the frame standing in as the sole "candidate shape"** —
+`continueImageCropMoveDrag/getImageCropMoveAlignmentSnap.ts` calls the same pure primitives
+`continueDrag.ts` does (`getShapeSnapPoints` → `getGroupAlignmentGuide` →
+`extendGuideToFullElement`), just skipping the store-coupled sibling-gathering layer
+(`getCandidateShapes.ts`/`getDragAlignmentSnap.ts`) entirely, since there's only ever one candidate:
+`getNodeBounds(node)` (the frame's own local-space rect). `getShapeSnapPoints`' 9-point set (4
+corners, 4 edge-midpoints, 1 center) is what gives center-to-center and edge-to-edge snapping "for
+free" from a single comparison — no separate center-only code path exists. The result writes into
+the same `canvasRefs.transform.alignmentGuideRef` the sibling-drag system uses, so
+`drawTransformAlignmentGuide.ts` renders it with zero new draw-layer code; `disarmImageCropMoveDrag.ts`
+clears it on pointerup, mirroring how the sibling-drag path's own disarm clears it. **Scoped to the
+unrotated case only** — snapping (and the guide) is skipped outright whenever either the frame
+(`node.rotation`) or the crop's own independent rotation (`paint.crop.rotation`) is non-zero, since
+`getNodeBounds`/the crop rect are both compared in local, un-rotated space; a rotated comparison would
+need `getRotatedNodeBounds`-style handling on both sides, deferred as a follow-up rather than guessed
+at up front.
+
 **An overflow preview shows the rest of the image bleeding outside the frame's clip boundary while
 crop mode is active**, dimmed to `IMAGE_EDITOR_CROP_OVERFLOW_ALPHA` (`drawImageEditorCropOverflowPreview.ts`,
 called once per frame from `drawScene.ts` whenever `imageEditor.mode === 'crop'`) — it draws the
@@ -1403,7 +1421,11 @@ need.
   drawPerNodeSelectionOutlines/drawImageEditorFrameOutline,
   drawPerNodeSelectionOutlines/drawImageEditorImageOutline,isCropModeFrameOnlyBeingDragged,
   getVisibleSelectedNodes}.ts`; the WebGL vertex-attrib-array fix
-  `drawVectorImageFill/drawImageTexture.ts`
+  `drawVectorImageFill/drawImageTexture.ts`; smart guides for the crop-move drag
+  `handlePointerMove/continueImageCropMoveDrag/{continueImageCropMoveDrag,
+  getImageCropMoveAlignmentSnap}.ts`, reusing `Canvas/utils/{getShapeSnapPoints,
+  getGroupAlignmentGuide,getDragAlignmentSnap/extendGuideToFullElement,getNodeBounds}.ts` and the
+  shared `canvasRefs.transform.alignmentGuideRef`/`drawTransformAlignmentGuide.ts`
 - Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;
