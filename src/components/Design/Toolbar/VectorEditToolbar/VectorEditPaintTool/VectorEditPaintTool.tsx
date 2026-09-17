@@ -4,17 +4,18 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import FaceBlendModeButton from './FaceBlendModeButton/FaceBlendModeButton';
-import { Icon, Tooltip, UITools } from 'shared';
+import ToolbarButton from '../../ToolbarButton/ToolbarButton';
+import { UITools } from 'shared';
 
 // hooks
 import { usePaintColorPickerValue } from './hooks/usePaintColorPickerValue';
 import { useSelectVectorEditTool } from '../VectorEditToolButton/hooks/useSelectVectorEditTool';
 
 // others
-import { ICON_SIZE, TVectorEditTool } from '../constants';
+import { TVectorEditTool } from '../constants';
 
 // styles
-import toolbarStyles from '../vector-edit-toolbar.module.scss';
+import toolbarButtonStyles from '../../ToolbarButton/toolbar-button.module.scss';
 import styles from './vector-edit-paint-tool.module.scss';
 
 export type TVectorEditPaintToolProps = {
@@ -47,7 +48,9 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
                 <UITools.Color alpha={preview.value.alpha} className={styles.VectorEditPaintTool__swatch} color={preview.value.hex} />
               )}
             </div>
-            <span className={cx(toolbarStyles.VectorEditToolbar__label, toolbarStyles['VectorEditToolbar__label--active'])}>{label}</span>
+            <span className={cx(toolbarButtonStyles.ToolbarButton__label, toolbarButtonStyles['ToolbarButton__label--active'])}>
+              {label}
+            </span>
           </>
         )}
         triggerAriaLabel={label}
@@ -58,19 +61,14 @@ const VectorEditPaintTool: FC<TVectorEditPaintToolProps> = ({ isActive, tool }) 
   }
 
   return (
-    <Tooltip
-      content={
-        <>
-          {label}
-          {tool.shortcut && <span className={toolbarStyles.VectorEditToolbar__shortcut}>{tool.shortcut.join('')}</span>}
-        </>
-      }
-    >
-      <UITools.Button active={false} className={toolbarStyles['VectorEditToolbar__tool-button']} onClick={handleSelect} variant="link">
-        <Icon color="neutral1" name={tool.icon} size={ICON_SIZE} />
-        <span className={toolbarStyles.VectorEditToolbar__label}>{label}</span>
-      </UITools.Button>
-    </Tooltip>
+    <ToolbarButton
+      icon={tool.icon}
+      isActive={false}
+      label={label}
+      onClick={handleSelect}
+      shortcut={tool.shortcut?.join('')}
+      tooltip={label}
+    />
   );
 };
 

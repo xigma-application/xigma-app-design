@@ -1,0 +1,30 @@
+.ToolbarDropdown {
+  &__trigger {
+    height: 100%;
+  }
+
+  &__placeholder {
+    align-items: center;
+    display: flex;
+    margin-left: var(--spacer-2);
+    margin-right: var(--spacer-1);
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  &__group {
+    align-items: center;
+    display: flex;
+    height: 100%;
+  }
+
+  &__chevron {
+    height: 100%;
+    justify-content: center;
+    width: 16px;
+  }
+}

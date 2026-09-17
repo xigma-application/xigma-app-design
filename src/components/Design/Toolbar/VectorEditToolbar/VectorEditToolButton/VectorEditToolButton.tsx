@@ -1,18 +1,14 @@
-import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon, Tooltip, UITools } from 'shared';
+import ToolbarButton from '../../ToolbarButton/ToolbarButton';
 
 // hooks
 import { useSelectVectorEditTool } from './hooks/useSelectVectorEditTool';
 
 // others
-import { ICON_SIZE, TVectorEditTool } from '../constants';
-
-// styles
-import styles from '../vector-edit-toolbar.module.scss';
+import { TVectorEditTool } from '../constants';
 
 export type TVectorEditToolButtonProps = {
   isActive: boolean;
@@ -22,28 +18,17 @@ export type TVectorEditToolButtonProps = {
 const VectorEditToolButton: FC<TVectorEditToolButtonProps> = ({ isActive, tool }) => {
   const { t } = useTranslation();
   const handleClick = useSelectVectorEditTool(tool.toolName);
+  const label = t(tool.labelKey);
 
   return (
-    <Tooltip
-      content={
-        <>
-          {t(tool.labelKey)}
-          {tool.shortcut && <span className={styles.VectorEditToolbar__shortcut}>{tool.shortcut.join('')}</span>}
-        </>
-      }
-    >
-      <UITools.Button
-        active={isActive}
-        className={cx(styles['VectorEditToolbar__tool-button'], { [styles['VectorEditToolbar__tool-button--active']]: isActive })}
-        onClick={handleClick}
-        variant="link"
-      >
-        <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
-        <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
-          {t(tool.labelKey)}
-        </span>
-      </UITools.Button>
-    </Tooltip>
+    <ToolbarButton
+      icon={tool.icon}
+      isActive={isActive}
+      label={label}
+      onClick={handleClick}
+      shortcut={tool.shortcut?.join('')}
+      tooltip={label}
+    />
   );
 };
 
