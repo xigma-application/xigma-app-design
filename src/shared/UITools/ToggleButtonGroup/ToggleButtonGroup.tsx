@@ -34,7 +34,7 @@ export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
 }) => (
   <E2EDataAttribute type={E2EAttribute.toggleButtonGroup} value={e2eValue}>
     <div className={cx(styles.ToggleButtonGroup, className)}>
-      {toggleButtons.map(({ ariaLabel, icon, tooltip, value: buttonValue }) => (
+      {toggleButtons.map(({ ariaLabel, icon, label, tooltip, value: buttonValue }) => (
         <Tooltip content={tooltip} key={buttonValue}>
           <button
             aria-label={ariaLabel}
@@ -45,7 +45,8 @@ export const ToggleButtonGroup: FC<TToggleButtonGroupProps> = ({
             onMouseLeave={() => onHoverOption?.(null)}
             type="button"
           >
-            <Icon name={icon} size={24} />
+            {icon && <Icon name={icon} size={24} />}
+            {label && <span className={styles.ToggleButtonGroup__label}>{label}</span>}
           </button>
         </Tooltip>
       ))}

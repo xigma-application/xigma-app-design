@@ -200,6 +200,50 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByLabel('Stroke weight')).toHaveValue('9');
   });
 
+  test('the advanced stroke settings button opens a panel with three tabs and Basic rows that are 32px high', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-settings-panel');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    // action
+    await page.getByLabel('Advanced stroke settings').click();
+
+    // result
+    await expect(page.getByText('Stroke settings')).toBeVisible();
+    await expect(page.getByText('Dynamic')).toBeVisible();
+    await expect(page.getByText('Brush')).toBeVisible();
+
+    const rows = page.locator('[class*="StrokeSettingsBasicTab__row"]');
+
+    await expect(rows).toHaveCount(4);
+
+    for (const box of await Promise.all([0, 1, 2, 3].map((index) => rows.nth(index).boundingBox()))) {
+      expect(box?.height).toBe(32);
+    }
+
+    const panelBox = await page.locator('[class*="StrokeSettingsPanel__body"]').boundingBox();
+    const inputBoxes = await Promise.all(
+      [0, 1, 2, 3].map((index) => rows.nth(index).locator('[class*="StrokeSettingsBasicTab__control"]').boundingBox()),
+    );
+
+    for (const box of inputBoxes) {
+      expect(box?.width).toBe(128);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual((panelBox?.x ?? 0) + (panelBox?.width ?? 0) - 16);
+    }
+
+    await expect(page.getByLabel('Flip width profile')).toBeDisabled();
+
+    // action
+    await page.getByText('Brush').click();
+
+    // result
+    await expect(page.getByText('Width profile')).toHaveCount(0);
+  });
+
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
     const designPage = new DesignPage(page);
     const id = await pickStrokeImageMode(page, designPage, 'e2e-test-stroke-section-image-tile', 'Tile');

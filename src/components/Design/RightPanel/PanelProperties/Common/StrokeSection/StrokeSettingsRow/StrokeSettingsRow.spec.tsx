@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import StrokeSettingsRow from './StrokeSettingsRow';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -41,9 +44,11 @@ describe('StrokeSettingsRow', () => {
     // action
     render(
       <Provider store={store}>
-        <TooltipProvider>
-          <StrokeSettingsRow />
-        </TooltipProvider>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <StrokeSettingsRow />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 
@@ -83,9 +88,11 @@ describe('StrokeSettingsRow', () => {
     // action
     render(
       <Provider store={store}>
-        <TooltipProvider>
-          <StrokeSettingsRow />
-        </TooltipProvider>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <StrokeSettingsRow />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 

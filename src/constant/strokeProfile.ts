@@ -19,6 +19,8 @@ export const STROKE_PROFILE_ORDER: StrokeProfile[] = [
   StrokeProfile.mirroredTaper,
 ];
 
+export const STROKE_PROFILES_FLIPPABLE: StrokeProfile[] = [StrokeProfile.wedge, StrokeProfile.taper];
+
 export const STROKE_PROFILE_IMAGES: Record<Exclude<StrokeProfile, StrokeProfile.uniform>, string> = {
   [StrokeProfile.eye]: eyeImage,
   [StrokeProfile.mirroredTaper]: mirroredTaperImage,

@@ -1,10 +1,8 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// @xigma
-import { Tooltip } from '@xigma/components';
-
 // components
+import StrokeSettingsButton from './StrokeSettingsButton/StrokeSettingsButton';
 import StrokeSideFields from './StrokeSideFields/StrokeSideFields';
 import StrokeSidesMenu from './StrokeSidesMenu/StrokeSidesMenu';
 import StrokeWeightField from './StrokeWeightField/StrokeWeightField';
@@ -41,12 +39,7 @@ const StrokeSettingsRow: FC = () => {
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={[
-        <Tooltip align="end" content={t(`${translationNameSpace}.advancedSettingsTooltip`)} key="advanced">
-          <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.advancedSettingsAriaLabel`)} name="Properties" />
-        </Tooltip>,
-        <StrokeSidesMenu key="individual" onSelect={onSidesSelect} sides={sides} />,
-      ]}
+      buttonsIcon={[<StrokeSettingsButton key="advanced" />, <StrokeSidesMenu key="individual" onSelect={onSidesSelect} sides={sides} />]}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.position.label`), t(`${translationNameSpace}.weight.label`)]}
       withTopAlignedButtons

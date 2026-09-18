@@ -28,6 +28,24 @@ describe('ToggleButtonGroup snapshots', () => {
   });
 });
 
+describe('ToggleButtonGroup labels', () => {
+  it('should render a text label instead of an icon when the entry has a label', () => {
+    // before
+    renderToggleButtonGroup({
+      onChange: vi.fn(),
+      toggleButtons: [
+        { label: 'Basic', value: 'basic' },
+        { label: 'Brush', value: 'brush' },
+      ],
+      value: 'basic',
+    });
+
+    // result
+    expect(screen.getByText('Basic')).toBeInTheDocument();
+    expect(screen.getByText('Brush')).toBeInTheDocument();
+  });
+});
+
 describe('ToggleButtonGroup behaviors', () => {
   it('should mark the button matching the current value as selected', () => {
     // before
