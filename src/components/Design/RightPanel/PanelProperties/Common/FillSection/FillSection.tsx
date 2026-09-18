@@ -46,6 +46,7 @@ export const FillSection: FC = () => {
       e2eValue="fill"
       hasContent={fills.length > 0}
       label={t(`${translationNameSpace}.label`)}
+      mutedWhenEmpty
       onAdd={onAdd}
     >
       <div className={styles.FillSection__rows} ref={containerRef}>

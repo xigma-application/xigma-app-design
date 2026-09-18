@@ -421,6 +421,7 @@ exports[`App snapshots > should render App 1`] = `
                   class="_PagesHeaderActions_4396dd"
                 >
                   <button
+                    aria-label="Find"
                     aria-pressed="false"
                     class="_ButtonIcon_2062db"
                     data-state="closed"
@@ -443,6 +444,7 @@ exports[`App snapshots > should render App 1`] = `
                     </svg>
                   </button>
                   <button
+                    aria-label="Add new page"
                     aria-pressed="false"
                     class="_ButtonIcon_2062db"
                     data-state="closed"
@@ -900,7 +902,7 @@ exports[`App snapshots > should render App 1`] = `
           </div>
         </div>
         <div
-          class="_Section_5940d2 _Section--empty_5940d2"
+          class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
           data-test-section="export"
         >
           <div

@@ -6090,4 +6090,48 @@ test.describe('Design panels — Fill section', () => {
       await expect(page.getByText('Mixed background')).toBeVisible();
     });
   });
+
+  test('an empty Fill section is muted with its styles icon hidden until hovered, and returns to normal once it has fills', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-muted-when-empty');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const setFills = (fills: unknown[]): Promise<void> =>
+      page.evaluate(
+        async ({ nodeId, nextFills }) => {
+          const { store } = await import('/src/store/index.ts');
+          const { updateNode } = await import('/src/store/design/slice.ts');
+
+          store.dispatch(updateNode({ changes: { fills: nextFills }, id: nodeId }));
+        },
+        { nextFills: fills, nodeId: id },
+      );
+    const stylesIcon = page.locator('[data-section-idle-hidden]').first();
+
+    // action — remove every fill and move the pointer away from the panel
+    await setFills([]);
+    await page.mouse.move(10, 10);
+
+    // result — the styles icon is invisible while the empty section is idle
+    await expect(stylesIcon).toHaveCSS('opacity', '0');
+
+    // action — hover the empty section
+    await stylesIcon.hover({ force: true });
+
+    // result — it fades back in
+    await expect(stylesIcon).toHaveCSS('opacity', '1');
+
+    // action — give the section a fill and leave the panel
+    await setFills([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
+    await page.mouse.move(10, 10);
+
+    // result — with content it stays visible without hover
+    await expect(stylesIcon).toHaveCSS('opacity', '1');
+  });
 });

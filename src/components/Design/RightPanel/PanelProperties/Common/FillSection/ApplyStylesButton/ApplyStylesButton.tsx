@@ -12,7 +12,11 @@ export const ApplyStylesButton: FC = () => {
 
   return (
     <Tooltip align="end" content={t(`${translationNameSpace}.applyStylesTooltip`)}>
-      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)} name="StylesAndVariables" />
+      <UITools.ButtonIcon
+        ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)}
+        data-section-idle-hidden
+        name="StylesAndVariables"
+      />
     </Tooltip>
   );
 };

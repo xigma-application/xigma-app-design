@@ -160,7 +160,7 @@ exports[`NoSelection snapshots > should render the Design, Styles, Export, and M
     </div>
   </div>
   <div
-    class="_Section_5940d2 _Section--empty_5940d2"
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
     data-test-section="export"
   >
     <div

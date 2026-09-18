@@ -1410,6 +1410,14 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
+### Muted empty sections (`Section` `mutedWhenEmpty`)
+
+Opt-in per section (Export and Fill today): while the section has no content (`hasContent`) and isn't
+hovered, `Section--muted` turns the label and the header icons (`svg-color` on `Section__component`)
+`neutral-2`, and hides anything tagged `data-section-idle-hidden` (Fill's `StylesAndVariables` button,
+`opacity: 0`); hover or any content restores `neutral-1` / full opacity. All of it transitions
+`0.1s ease-out` (color, fill, stroke, opacity). e2e #514 in `fill-section.spec.ts`.
+
 ### Appearance: Blend mode row
 
 `Common/AppearanceSection/BlendModeRow/` renders under the Opacity / Corner radius rows only while the

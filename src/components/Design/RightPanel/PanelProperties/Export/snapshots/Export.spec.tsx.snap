@@ -3,7 +3,7 @@
 exports[`Export snapshots > should render the Export section with its add button 1`] = `
 <DocumentFragment>
   <div
-    class="_Section_5940d2 _Section--empty_5940d2"
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
     data-test-section="export"
   >
     <div

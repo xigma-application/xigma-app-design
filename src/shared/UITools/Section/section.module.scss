@@ -1,3 +1,5 @@
+@use '@xigma/scss/mixins/svg-color';
+
 .Section {
   border-bottom: 1px solid var(--color-neutral-3);
   padding-bottom: 12px;
@@ -8,6 +10,20 @@
 
   &--noSeparator {
     border-bottom: none;
+  }
+
+  &--muted:not(:hover) {
+    .Section__label {
+      color: var(--color-neutral-2);
+    }
+
+    .Section__component {
+      @include svg-color.svg-color(var(--color-neutral-2));
+    }
+
+    :global([data-section-idle-hidden]) {
+      opacity: 0;
+    }
   }
 
   &__header {
@@ -25,6 +41,7 @@
     column-gap: 6px;
     display: flex;
     font-size: 11px;
+    transition: color 0.1s ease-out;
     user-select: none;
   }
 
@@ -32,5 +49,17 @@
     align-items: center;
     column-gap: 4px;
     display: flex;
+
+    :global([data-svg-property='fill']) {
+      transition: fill 0.1s ease-out;
+    }
+
+    :global([data-svg-property='stroke']) {
+      transition: stroke 0.1s ease-out;
+    }
+
+    :global([data-section-idle-hidden]) {
+      transition: opacity 0.1s ease-out;
+    }
   }
 }

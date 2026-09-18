@@ -16,6 +16,7 @@ const Export: FC = () => {
       addTooltip={t(`${translationNameSpace}.addTooltip`)}
       e2eValue="export"
       label={t(`${translationNameSpace}.section.label`)}
+      mutedWhenEmpty
       onAdd={() => {}}
     />
   );

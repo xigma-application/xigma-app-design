@@ -888,7 +888,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
     </div>
   </div>
   <div
-    class="_Section_5940d2 _Section--empty_5940d2"
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
     data-test-section="fill"
   >
     <div
@@ -906,6 +906,7 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
           aria-label="Apply styles and variables"
           aria-pressed="false"
           class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
           data-state="closed"
           type="button"
         >

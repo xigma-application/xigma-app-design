@@ -22,6 +22,35 @@ describe('Section snapshots', () => {
 });
 
 describe('Section behaviors', () => {
+  it('should mute an empty section only when mutedWhenEmpty is set', () => {
+    // before
+    const { container, rerender } = renderSection(<Section label="Export" />);
+
+    expect(container.querySelector('[class*="Section--muted"]')).toBeNull();
+
+    // action
+    rerender(
+      <TooltipProvider>
+        <Section label="Export" mutedWhenEmpty />
+      </TooltipProvider>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--muted"]')).not.toBeNull();
+  });
+
+  it('should not mute a section that has content, even with mutedWhenEmpty', () => {
+    // before
+    const { container } = renderSection(
+      <Section label="Fill" mutedWhenEmpty>
+        <span>row</span>
+      </Section>,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Section--muted"]')).toBeNull();
+  });
+
   it('should render the label when one is given', () => {
     // before
     renderSection(
