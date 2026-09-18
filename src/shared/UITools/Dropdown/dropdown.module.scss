@@ -30,5 +30,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &--no-truncate {
+      overflow: visible;
+      text-overflow: clip;
+    }
   }
 }

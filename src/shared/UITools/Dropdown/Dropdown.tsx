@@ -25,6 +25,7 @@ export type TDropdownProps<TValue extends string> = {
   onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
+  truncate?: boolean;
   value: TValue;
   variant?: TDropdownVariant;
 };
@@ -36,6 +37,7 @@ export const Dropdown = <TValue extends string>({
   onHoverOption,
   onSelect,
   options,
+  truncate = true,
   value,
   variant = 'filled',
 }: TDropdownProps<TValue>): ReactElement => {
@@ -49,7 +51,9 @@ export const Dropdown = <TValue extends string>({
       className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
       disabled={disabled}
     >
-      <span className={styles.Dropdown__label}>{selectedOption?.triggerLabel ?? selectedOption?.label}</span>
+      <span className={cx(styles.Dropdown__label, { [styles['Dropdown__label--no-truncate']]: !truncate })}>
+        {selectedOption?.triggerLabel ?? selectedOption?.label}
+      </span>
       <Icon name="ChevronDown" size={24} />
     </PopoverPrimitive.Trigger>
   );

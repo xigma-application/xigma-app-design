@@ -116,3 +116,28 @@ describe('ButtonIcon behaviors', () => {
     expect(icon).toHaveStyle({ color: 'var(--color-on-blue-1)' });
   });
 });
+
+describe('ButtonIcon adornments', () => {
+  it('should render the start and end adornments around the icon', () => {
+    // before
+    render(<ButtonIcon ariaLabel="Level" endAdornment="AA" name="Check" startAdornment="Lv" />);
+
+    // result
+    expect(screen.getByText('Lv')).toBeInTheDocument();
+    expect(screen.getByText('AA')).toBeInTheDocument();
+  });
+
+  it('should widen the button only when an adornment is given', () => {
+    // before
+    render(
+      <div>
+        <ButtonIcon ariaLabel="Plain" name="Check" />
+        <ButtonIcon ariaLabel="Adorned" endAdornment="AA" name="Check" />
+      </div>,
+    );
+
+    // result
+    expect(screen.getByLabelText('Plain').className).not.toContain('ButtonIcon--with-adornment');
+    expect(screen.getByLabelText('Adorned').className).toContain('ButtonIcon--with-adornment');
+  });
+});

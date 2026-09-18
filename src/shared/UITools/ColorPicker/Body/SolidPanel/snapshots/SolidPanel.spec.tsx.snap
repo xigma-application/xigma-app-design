@@ -94,7 +94,7 @@ exports[`SolidPanel snapshots > should render SolidPanel 1`] = `
           type="button"
         >
           <span
-            class="_Dropdown__label_cc217a"
+            class="_Dropdown__label_cc217a _Dropdown__label--no-truncate_cc217a"
           >
             Hex
           </span>

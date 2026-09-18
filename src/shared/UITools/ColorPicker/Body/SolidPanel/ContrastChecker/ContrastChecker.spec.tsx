@@ -52,20 +52,12 @@ describe('ContrastChecker', () => {
     expect(screen.queryByText('AA')).not.toBeInTheDocument();
   });
 
-  it('should disable the auto-correct control when already passing', () => {
+  it('should disable pointer events on the auto-correct control when already passing', () => {
     // before
     renderContrastChecker({ passes: true });
 
     // result
-    expect(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' })).toBeDisabled();
-  });
-
-  it('should enable the auto-correct control when failing', () => {
-    // before
-    renderContrastChecker({ passes: false });
-
-    // result
-    expect(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' }).className).toContain('ContrastChecker__badge--passing');
   });
 
   it('should call onAutoCorrect when the ratio control is clicked while failing', () => {

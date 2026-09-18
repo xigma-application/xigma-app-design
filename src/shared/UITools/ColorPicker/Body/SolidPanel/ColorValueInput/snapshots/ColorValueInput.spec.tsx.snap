@@ -14,7 +14,7 @@ exports[`ColorValueInput snapshots > should render ColorValueInput defaulting to
       type="button"
     >
       <span
-        class="_Dropdown__label_cc217a"
+        class="_Dropdown__label_cc217a _Dropdown__label--no-truncate_cc217a"
       >
         Hex
       </span>

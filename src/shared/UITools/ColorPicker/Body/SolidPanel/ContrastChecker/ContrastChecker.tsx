@@ -1,11 +1,11 @@
+import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import ContrastBadge from './ContrastBadge/ContrastBadge';
 import ContrastSettingsMenu from './ContrastSettingsMenu/ContrastSettingsMenu';
 import ContrastValuesButton from './ContrastValuesButton/ContrastValuesButton';
-import { UITools } from 'shared';
+import { Tooltip, UITools } from 'shared';
 
 // hooks
 import { useContrastSettingsMenu } from './hooks/useContrastSettingsMenu';
@@ -46,6 +46,7 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
 }) => {
   const { t } = useTranslation();
   const { onOpenChange, open } = useContrastSettingsMenu();
+  const levelLabel = t(`${translationNameSpace}.level.${level}`);
 
   return (
     <div className={styles.ContrastChecker}>
@@ -56,15 +57,16 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
       )}
       <div className={styles.ContrastChecker__actions}>
         {ratio !== null && (
-          <button
-            aria-label={t(`${translationNameSpace}.autoCorrectAriaLabel`)}
-            className={styles.ContrastChecker__badge}
-            disabled={passes}
-            onClick={onAutoCorrect}
-            type="button"
-          >
-            <ContrastBadge label={t(`${translationNameSpace}.level.${level}`)} passes={passes} />
-          </button>
+          <Tooltip content={passes ? '' : t(`${translationNameSpace}.badge.notMetTooltip`, { level: levelLabel })}>
+            <UITools.ButtonIcon
+              ariaLabel={t(`${translationNameSpace}.autoCorrectAriaLabel`)}
+              className={cx({ [styles['ContrastChecker__badge--passing']]: passes })}
+              endAdornment={levelLabel}
+              name={passes ? 'Check' : 'NotAllowed'}
+              onClick={onAutoCorrect}
+              size={12}
+            />
+          </Tooltip>
         )}
         <UITools.Popover
           align="end"
@@ -74,6 +76,7 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
           trigger={
             <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.settingsAriaLabel`)} name="Properties" selected={open} size={24} />
           }
+          triggerTooltip={t(`${translationNameSpace}.settingsTooltip`)}
         >
           <ContrastSettingsMenu
             canShowAAA={canShowAAA}

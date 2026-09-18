@@ -33,6 +33,7 @@ export const ColorValueInput: FC<TColorValueInputProps> = ({ alpha, colorModel }
         className={styles.ColorValueInput__formatTrigger}
         onSelect={setFormat}
         options={formatOptions}
+        truncate={false}
         value={format}
         variant="outline"
       />

@@ -9,16 +9,8 @@
     font-size: 12px;
   }
 
-  &__badge {
-    background: none;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    padding: 0;
-
-    &:disabled {
-      cursor: default;
-    }
+  &__badge--passing {
+    pointer-events: none;
   }
 
   &__actions {

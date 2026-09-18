@@ -14,6 +14,9 @@
   &__thumb {
     border: 4px solid #ffffff;
     border-radius: 50%;
+    box-shadow:
+      var(--elevation-300),
+      inset 0 0 0 1px rgb(0, 0, 0, 20%);
     height: 16px;
     left: 0;
     pointer-events: none;
