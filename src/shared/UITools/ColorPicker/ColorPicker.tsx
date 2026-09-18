@@ -45,6 +45,7 @@ import { DockedPanelContext } from './DockedPanelContext';
 import styles from './color-picker.module.scss';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from './enums';
 import { TColorPickerProps } from './types';
 
@@ -54,6 +55,7 @@ import { getColorPickerPreview } from './utils/getColorPickerPreview';
 export const ColorPicker: FC<TColorPickerProps> = ({
   align,
   avoidCollisions,
+  blendMode = BlendMode.normal,
   className = '',
   freezePositionOnGrow,
   headerExtra,
@@ -68,6 +70,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   initialVideoUrl,
   isPointerOverGradientHandle,
   moveable = false,
+  onBlendModeChange,
   onChange,
   onDragEnd,
   onDragStart,
@@ -179,7 +182,14 @@ export const ColorPicker: FC<TColorPickerProps> = ({
           tabs={simple ? CUSTOM_LIBRARY_TABS : undefined}
           title={title}
         />
-        {paintTypeRow && <PaintTypeRow activeTab={activeTab} onSelectTab={handleSetActiveTab} />}
+        {paintTypeRow && (
+          <PaintTypeRow
+            activeTab={activeTab}
+            blendMode={blendMode}
+            onBlendModeChange={onBlendModeChange}
+            onSelectTab={handleSetActiveTab}
+          />
+        )}
         <DockedPanelContext.Provider value={setDockedPanel}>
           <Body
             activeTab={activeTab}

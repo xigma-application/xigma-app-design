@@ -229,6 +229,22 @@ describe('ColorPickerInput behaviors', () => {
     expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
   });
 
+  it('should forward blendMode and onBlendModeChange to the underlying color picker', () => {
+    // mock
+    const onBlendModeChange = vi.fn();
+
+    // before
+    renderColorPickerInput({ onBlendModeChange, paintTypeRow: true, triggerAriaLabel: 'Background color' });
+    fireEvent.click(screen.getByLabelText('Background color'));
+
+    // action
+    fireEvent.click(screen.getByLabelText('Apply blend mode to fill'));
+    fireEvent.click(screen.getByText('Multiply', { exact: true }));
+
+    // result
+    expect(onBlendModeChange).toHaveBeenCalledWith('multiply');
+  });
+
   it('should show hexDisplayValue instead of the raw hex, as a read-only field, when given', () => {
     // before
     renderColorPickerInput({ hex: '#abcdef', hexDisplayValue: 'Linear' });

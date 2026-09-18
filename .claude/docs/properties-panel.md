@@ -1343,6 +1343,73 @@ noting here only because it's the same class of mistake this Shader tab could in
 placeholder icon is for a tab/section that has no real content yet, not a substitute for showing real
 content a feature actually has available.
 
+### Fill paint blend mode (trailing icon in the paint-type row)
+
+A fill's own blend mode (Multiply, Screen, etc. — applied where the fill composites against
+whatever is behind the shape) is set from a `BlendModeButton` living at the trailing end of the
+picker's `PaintTypeRow` (`shared/UITools/ColorPicker/PaintTypeRow/BlendModeButton/`), not from a
+new tab. Per the user: "Blend można użyć dla wszystkiego: solid gradient, image, video, to jest
+akurat stan który zostaje nawet jeśli zmieni z solid na gradient" (blend mode applies to every paint
+type and survives a paint-type switch), and "ta ikona pojawi się na końcu z prawej więc musisz
+owrapować tą ikonę w wrapper i dać margin left auto. Wrapper przyda się bo dojdzie obok niej inna
+ikona" (wrap it so it's pushed to the right, with room for another icon to land next to it later).
+
+- **Placement**: `PaintTypeRow.tsx` renders the six paint-type `ButtonIcon`s as before, then a
+  trailing `<div className={styles['PaintTypeRow__extra']}>` (`margin-left: auto`, its own `gap`)
+  wrapping just `BlendModeButton` — an empty wrapper reserved for a future second icon, not a
+  one-off style on the button itself.
+- **Component shape mirrors the vector tool's own paint blend button almost exactly**
+  (`Toolbar/VectorEditToolbar/VectorEditPaintTool/FaceBlendModeButton/`) — `useBlendModeButton(value,
+  onChange)` picks `DropEmpty`/`DropFilled` based on `value === BlendMode.normal`, a `BlendModeMenu`
+  lists `FACE_BLEND_MODE_GROUPS` (the pass-through-free grouping already shared with the vector
+  tool). The difference: the vector version reads/writes a global "paint currently being edited by
+  the vector tool" Redux slice (`selectPaint`/`setPaintBlendMode`), while this one is fully
+  props-driven (`value: BlendMode`, `onChange?: TFunc<[BlendMode]>`) like the rest of `ColorPicker`
+  — it doesn't know about a specific fill or Redux at all.
+- **Threading**: `blendMode`/`onBlendModeChange` were added as optional props all the way down
+  `ColorPicker` → `PaintTypeRow`, and all the way up `FillRow` → `ColorPickerInput` → `ColorPicker`,
+  the same shape as `onImageChange`/`onVideoChange` etc. already used. `FillRow.tsx` wires
+  `blendMode={paint.blendMode ?? BlendMode.normal}` and a new one-liner hook,
+  `FillRow/hooks/useSetFillBlendMode.ts` (`onChange({ ...paint, blendMode })`), for the commit —
+  same shape as the existing `useRotateImagePaint.ts`.
+- **Persistence across paint-type switches needed no new work.** `blendMode?: BlendMode` already
+  lived on `TPaintBase` (shared by every paint type), and every `useConvertTo*Paint`/
+  `useHandleSolidPaintChange` hook in `FillRow/hooks/` was already carrying `blendMode:
+  paint.blendMode` through when building the new paint object — scaffolding that predates this
+  feature and had no UI to exercise it until now.
+- **Canvas rendering needed zero changes.** `drawBoxLeafNode.ts` (the drawer for
+  `TFrameNode | TRectangleNode | TSectionNode`, i.e. every node type `FillSection` is used on)
+  already calls the exact same `drawVectorFillGroup(...)` used for vector-node face fills, passing
+  `node.fills` straight through as the `paint: TPaint[]` argument. That function already does
+  `getFaceGroupBlendMode(paints)` (first paint in the array with a non-normal, non-pass-through
+  `blendMode` wins) and isolates+composites the whole fill stack with `compositeBlend` when one is
+  found. So wiring the UI to write `paint.blendMode` was the entire feature — the WebGL side had
+  been rendering it correctly all along, just with nothing in the picker ever setting it.
+- **Real bug caught before shipping, not by the user**: the English/Polish label
+  `"Apply blend mode"` was reused verbatim from the vector tool's (`"Apply blend mode to face"`,
+  genericized) without noticing the RightPanel's node-level **Appearance** section already has its
+  own button with that exact same accessible name
+  (`design.rightPanel.panelProperties.common.appearanceSection.blendMode.ariaLabel`). Both buttons
+  end up in the DOM simultaneously whenever a shape is selected with its fill picker open (the
+  Appearance section's button lives in the always-visible properties panel, not inside the picker
+  popover), so `getByLabel('Apply blend mode')` in the new e2e test resolved to two elements and
+  failed with a Playwright strict-mode violation — caught immediately by running the new e2e test,
+  before it ever reached the user. Fixed by renaming this button's label to
+  `colorPicker.blendMode.ariaLabel = "Apply blend mode to fill"`. **Any new aria-label added near an
+  existing RightPanel section should be checked against sibling sections' labels, not just against
+  other components in the same file** — accessible names are a page-wide namespace, not a
+  per-component one.
+- **Circular-import gotcha**: `BlendModeMenu.tsx` destructuring `UITools.PopoverCompound` at module
+  top level (copied from `FaceBlendModeMenu.tsx`, which does the same thing safely) broke every test
+  that imports `FillRow` — `TypeError: Cannot read properties of undefined (reading
+  'PopoverCompound')` — because `BlendModeMenu` sits inside `ColorPicker`'s own module tree, which
+  the `shared` barrel re-exports; destructuring off the barrel at import time raced its own
+  initialization. Every other `UITools.Foo` access inside `ColorPicker/**` either happens lazily
+  inside a component's render body (already-resolved by then) or imports the concrete component by
+  its full path instead of through the barrel (`ColorPicker.tsx` itself does `import Popover from
+  'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
+  now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

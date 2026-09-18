@@ -9,6 +9,9 @@ import { TooltipProvider } from 'shared';
 // store
 import { store } from 'store';
 
+// types
+import { BlendMode } from 'types/design/enums';
+
 // utils
 import { registerColorPixelSampler } from 'utils/canvas/colorPixelSampler/colorPixelSamplerRegistry';
 
@@ -368,6 +371,57 @@ describe('ColorPicker behaviors', () => {
     // result
     expect(screen.queryByText('Stops')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Solid' }).className).toMatch(/active/);
+  });
+
+  it('should call onBlendModeChange with the picked blend mode from the paint type row', () => {
+    // mock
+    const onBlendModeChange = vi.fn();
+
+    // before
+    renderColorPicker({
+      onBlendModeChange,
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByLabelText('Apply blend mode to fill'));
+    fireEvent.click(screen.getByText('Multiply', { exact: true }));
+
+    // result
+    expect(onBlendModeChange).toHaveBeenCalledWith(BlendMode.multiply);
+  });
+
+  it('should reflect a non-default blend mode in the paint type row trigger icon', () => {
+    // before
+    const defaultRender = renderColorPicker({
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    fireEvent.click(defaultRender.getByText('Open'));
+    const defaultIcon = defaultRender.getByLabelText('Apply blend mode to fill').querySelector('svg')?.outerHTML;
+
+    defaultRender.unmount();
+
+    const multiplyRender = renderColorPicker({
+      blendMode: BlendMode.multiply,
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    fireEvent.click(multiplyRender.getByText('Open'));
+    const multiplyIcon = multiplyRender.getByLabelText('Apply blend mode to fill').querySelector('svg')?.outerHTML;
+
+    // result
+    expect(multiplyIcon).not.toBe(defaultIcon);
   });
 
   it('should show a plain title label instead of any tabs when title is set', () => {

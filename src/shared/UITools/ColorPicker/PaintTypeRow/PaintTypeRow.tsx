@@ -2,17 +2,24 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import BlendModeButton from './BlendModeButton/BlendModeButton';
 import { Tooltip, UITools } from 'shared';
 
 // styles
 import styles from './paint-type-row.module.scss';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from '../enums';
 
-export type TPaintTypeRowProps = { activeTab: ColorPickerTab; onSelectTab: TFunc<[ColorPickerTab]> };
+export type TPaintTypeRowProps = {
+  activeTab: ColorPickerTab;
+  blendMode: BlendMode;
+  onBlendModeChange?: TFunc<[BlendMode]>;
+  onSelectTab: TFunc<[ColorPickerTab]>;
+};
 
-export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, onSelectTab }) => {
+export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, blendMode, onBlendModeChange, onSelectTab }) => {
   const { t } = useTranslation();
 
   return (
@@ -65,6 +72,9 @@ export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, onSelectTab })
           onClick={(): void => onSelectTab(ColorPickerTab.shader)}
         />
       </Tooltip>
+      <div className={styles.PaintTypeRow__extra}>
+        <BlendModeButton onChange={onBlendModeChange} value={blendMode} />
+      </div>
     </div>
   );
 };

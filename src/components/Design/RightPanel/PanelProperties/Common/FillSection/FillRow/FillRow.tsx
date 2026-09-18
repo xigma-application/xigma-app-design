@@ -18,6 +18,7 @@ import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradient
 import { useOpenThisPicker } from './hooks/useOpenThisPicker';
 import { useRotateImagePaint } from './hooks/useRotateImagePaint';
 import { useSelectFillRow } from './hooks/useSelectFillRow';
+import { useSetFillBlendMode } from './hooks/useSetFillBlendMode';
 import { useSetImagePaintAdjustment } from './hooks/useSetImagePaintAdjustment';
 import { useSetImagePaintScaleMode } from './hooks/useSetImagePaintScaleMode';
 import { useSetImagePaintTileScale } from './hooks/useSetImagePaintTileScale';
@@ -38,6 +39,7 @@ import { translationNameSpace } from '../constants';
 import styles from './fill-row.module.scss';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
@@ -107,6 +109,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
   const handleImageTileScaleChange = useSetImagePaintTileScale(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
+  const handleBlendModeChange = useSetFillBlendMode(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern' && paint.type !== 'video';
@@ -143,6 +146,7 @@ export const FillRow: FC<TFillRowProps> = ({
         <UITools.ColorPickerInput
           align="start"
           alpha={value.alpha}
+          blendMode={paint.blendMode ?? BlendMode.normal}
           className={styles.FillRow__color}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
@@ -157,6 +161,7 @@ export const FillRow: FC<TFillRowProps> = ({
           isPattern={isPattern}
           isPointerOverGradientHandle={isPointerOverGradientHandle}
           isVisible={isVisible}
+          onBlendModeChange={handleBlendModeChange}
           onCommitAlpha={(opacity): void => onChange({ ...paint, opacity })}
           onCommitHex={(hex): void => handleSolidChange({ alpha: value.alpha, hex })}
           onDragEnd={onDragEnd}

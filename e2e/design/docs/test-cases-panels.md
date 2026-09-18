@@ -258,6 +258,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 489 | Switching the picker to a different fill row clears the global image editor state left by the previous fill (e.g. Tile mode), instead of staying stuck showing it          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 490 | Clicking anywhere else in the right panel exits the Image editor mode, the same as clicking the canvas already does                                                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 491 | Cycling through several image fills that each already have a committed crop (0→1→2→0→1) always enters crop mode on whichever fill was just clicked, never landing on null  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 502 | A blend mode picked from the paint-type row's trailing icon commits onto the fill and survives a paint-type switch (solid → image)                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -1325,3 +1326,20 @@ dropped). Both fixes are unit-tested only (`ColorPickerInput.spec.tsx`, `useVide
 the same non-constructible-video-fixture reason as everything else on this list — the underlying
 mechanism (an extracted frame URL, a raw file blob URL) can't be produced from a fake e2e file either
 way. Both confirmed to genuinely fail against their pre-fix versions via backup-file round-trips.
+
+#502 adds a `BlendModeButton` to the trailing end of the fill picker's `PaintTypeRow` — Multiply,
+Screen, etc. applied to a fill, "to samo zachowanie jak dla wektora" (the same behavior as the vector
+tool's own per-face blend button), persisting across a paint-type switch since `blendMode` already
+lived on every paint type's shared base and every `useConvertTo*Paint` hook already carried it
+through. Canvas rendering needed no changes at all: `drawBoxLeafNode.ts` already draws a shape's
+`fills` through the exact same `drawVectorFillGroup`/`getFaceGroupBlendMode`/`compositeBlend` path the
+vector tool's own faces use, so the WebGL side had been correctly honoring `paint.blendMode` all
+along — the picker simply had no control that ever set it before this. Full e2e coverage: applying
+Multiply from the picker commits `fills[0].blendMode`, and switching the same fill from Solid to
+Image afterward confirms it's still there. Caught before shipping, by the new e2e test itself: the
+label `"Apply blend mode"` (copied and genericized from the vector tool's `"Apply blend mode to
+face"`) collided with the RightPanel's pre-existing, unrelated node-level Appearance-section blend
+button, which already used that exact accessible name — `getByLabel('Apply blend mode')` resolved to
+two elements. Renamed to `"Apply blend mode to fill"` to disambiguate; see
+`.claude/docs/properties-panel.md` for the fuller writeup, including a separate circular-import
+gotcha the same change hit.

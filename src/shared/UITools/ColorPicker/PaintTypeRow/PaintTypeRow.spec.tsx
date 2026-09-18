@@ -5,15 +5,18 @@ import PaintTypeRow from './PaintTypeRow';
 import { TooltipProvider } from 'shared';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from '../enums';
 
 const renderPaintTypeRow = (
   activeTab: ColorPickerTab = ColorPickerTab.solid,
   onSelectTab: TFunc<[ColorPickerTab]> = vi.fn(),
+  blendMode: BlendMode = BlendMode.normal,
+  onBlendModeChange: TFunc<[BlendMode]> = vi.fn(),
 ): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <PaintTypeRow activeTab={activeTab} onSelectTab={onSelectTab} />
+      <PaintTypeRow activeTab={activeTab} blendMode={blendMode} onBlendModeChange={onBlendModeChange} onSelectTab={onSelectTab} />
     </TooltipProvider>,
   );
 
@@ -182,5 +185,50 @@ describe('PaintTypeRow behaviors', () => {
 
     // result
     expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.shader);
+  });
+
+  it('should show the blend mode button as the last icon, wrapped so it can be pushed to the right', () => {
+    // before
+    const { container } = renderPaintTypeRow();
+    const wrapper = container.querySelector('[class*="PaintTypeRow__extra"]');
+
+    // result — the blend button lives in its own trailing wrapper, not as a sibling paint-type icon
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper?.querySelector('[aria-label="Apply blend mode to fill"]')).toBeInTheDocument();
+    expect(container.querySelector('[class*="PaintTypeRow_"]')?.lastElementChild).toBe(wrapper);
+  });
+
+  it('should not mark the blend mode button as active alongside a selected paint type tab', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.solid);
+
+    // result — only the active tab icon should be marked, not the (closed) blend mode trigger
+    expect(container.querySelectorAll('[class*="ButtonIcon--active"]')).toHaveLength(1);
+  });
+
+  it('should open the blend mode menu when its button is clicked', () => {
+    // before
+    renderPaintTypeRow();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Apply blend mode to fill'));
+
+    // result
+    expect(screen.getByText('Multiply')).toBeInTheDocument();
+  });
+
+  it('should call onBlendModeChange with the picked blend mode', () => {
+    // mock
+    const onBlendModeChange = vi.fn();
+
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, onBlendModeChange);
+    fireEvent.click(screen.getByLabelText('Apply blend mode to fill'));
+
+    // action
+    fireEvent.click(screen.getByText('Multiply', { exact: true }));
+
+    // result
+    expect(onBlendModeChange).toHaveBeenCalledWith(BlendMode.multiply);
   });
 });

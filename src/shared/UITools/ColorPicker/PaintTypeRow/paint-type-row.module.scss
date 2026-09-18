@@ -6,4 +6,11 @@
   gap: 4px;
   min-height: 40px;
   padding: 0 8px;
+
+  &__extra {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
 }

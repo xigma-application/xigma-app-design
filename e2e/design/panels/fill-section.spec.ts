@@ -14,6 +14,7 @@ type TReadablePaint = {
     tint: number;
   };
   alignmentIndex?: number;
+  blendMode?: string;
   color?: string;
   crop?: { height: number; rotation: number; width: number; x: number; y: number };
   direction?: string;
@@ -5819,5 +5820,34 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
     await expect(page.getByRole('slider', { name: 'Seek' })).toBeVisible();
     await expect(page.getByText('00:00')).toBeVisible();
+  });
+
+  test('applies a paint blend mode from the trailing icon in the picker, and carries it across a paint type switch', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-blend-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+
+    // result — defaults to Normal (no visible tint on the trigger's own state)
+    await expect(page.getByLabel('Apply blend mode to fill')).toBeVisible();
+
+    // action
+    await page.getByLabel('Apply blend mode to fill').click();
+    await page.getByText('Multiply', { exact: true }).click();
+
+    // result
+    expect((await readNode(page, id)).fills![0].blendMode).toBe('multiply');
+
+    // action — switching paint type must not drop the blend mode
+    await page.getByLabel('Image', { exact: true }).click();
+
+    // result
+    expect((await readNode(page, id)).fills![0].blendMode).toBe('multiply');
   });
 });

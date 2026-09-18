@@ -18,6 +18,7 @@ import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
 import { store } from 'store';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { TPaint } from 'types/design/paint/types';
 
 const usePatternThumbnailMock = vi.fn();
@@ -231,6 +232,44 @@ describe('FillRow behaviors', () => {
 
     // result
     expect(onChange).toHaveBeenCalledWith({ ...imagePaint, scaleMode: 'fit' });
+  });
+
+  it('should commit a blend mode change through onChange, preserving the rest of the paint, when a blend mode is picked from the picker', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderFillRow({ onChange });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByLabelText('Apply blend mode to fill'));
+    fireEvent.click(screen.getByText('Multiply', { exact: true }));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({ ...SOLID_PAINT, blendMode: BlendMode.multiply });
+  });
+
+  it("should carry a fill's blend mode across a paint type switch, from solid to image", () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before
+    renderFillRow({ onChange, paint: { ...SOLID_PAINT, blendMode: BlendMode.multiply } });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByLabelText('Image'));
+
+    // result
+    expect(onChange).toHaveBeenCalledWith({
+      blendMode: BlendMode.multiply,
+      opacity: 80,
+      ref: '',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    });
   });
 
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {

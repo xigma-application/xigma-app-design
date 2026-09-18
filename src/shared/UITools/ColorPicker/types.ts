@@ -4,6 +4,7 @@ import { CSSProperties, ReactNode } from 'react';
 import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from './enums';
 import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/types';
 import { TImageAdjustments } from 'types/design/paint/types';
@@ -23,6 +24,7 @@ export type TGradientPanelState = { isGradientTabActive: boolean; selectedStopIn
 export type TColorPickerProps = {
   align?: TPopoverProps['align'];
   avoidCollisions?: TPopoverProps['avoidCollisions'];
+  blendMode?: BlendMode;
   className?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
@@ -37,6 +39,7 @@ export type TColorPickerProps = {
   initialVideoUrl?: string;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
   moveable?: boolean;
+  onBlendModeChange?: TFunc<[BlendMode]>;
   onChange: TFunc<[TColorPickerValue]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;

@@ -20,6 +20,7 @@ import { usePatternThumbnail } from '../ColorPicker/Body/PatternPanel/PatternSou
 import styles from './color-picker-input.module.scss';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from '../ColorPicker/enums';
 import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
@@ -32,6 +33,7 @@ import { TVideoPanelChange } from '../ColorPicker/Body/VideoPanel/types';
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
   alpha: number;
+  blendMode?: BlendMode;
   className?: string;
   e2eValue?: TE2EValue;
   hex: string;
@@ -47,6 +49,7 @@ export type TColorPickerInputProps = {
   isPattern?: boolean;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
   isVisible?: boolean;
+  onBlendModeChange?: TFunc<[BlendMode]>;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
   onDragEnd?: TFunc;
@@ -84,6 +87,7 @@ export type TColorPickerInputProps = {
 export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   align = 'end',
   alpha,
+  blendMode,
   className = '',
   e2eValue = '',
   hex,
@@ -99,6 +103,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   isPattern = false,
   isPointerOverGradientHandle,
   isVisible = true,
+  onBlendModeChange,
   onCommitAlpha,
   onCommitHex,
   onDragEnd,
@@ -161,6 +166,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                blendMode={blendMode}
                 imageAdjustments={imageAdjustments}
                 imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}
@@ -172,6 +178,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 initialVideoUrl={videoUrl}
                 isPointerOverGradientHandle={isPointerOverGradientHandle}
                 moveable
+                onBlendModeChange={onBlendModeChange}
                 onChange={onPickerChange}
                 onDragEnd={onDragEnd}
                 onDragStart={onDragStart}
