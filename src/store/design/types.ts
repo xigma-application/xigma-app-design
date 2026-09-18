@@ -41,7 +41,15 @@ export type TImageEditorMode = 'crop' | 'position' | 'tile';
 
 export type TImageEditorTarget = 'frame' | 'image';
 
-export type TImageEditorState = { mode: TImageEditorMode; nodeId: string; paintIndex: number; selectedTarget?: TImageEditorTarget };
+export type TCropCancelSnapshot = { cornerRadius?: number; fills: TPaint[]; height: number; rotation: number; width: number; x: number; y: number };
+
+export type TImageEditorState = {
+  cropCancelSnapshot?: TCropCancelSnapshot;
+  mode: TImageEditorMode;
+  nodeId: string;
+  paintIndex: number;
+  selectedTarget?: TImageEditorTarget;
+};
 
 export type TImageFillPickerFocus = { nodeId: string; paintIndex: number };
 

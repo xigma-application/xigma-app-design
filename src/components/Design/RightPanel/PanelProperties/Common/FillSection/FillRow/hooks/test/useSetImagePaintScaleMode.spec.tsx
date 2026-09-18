@@ -162,7 +162,7 @@ describe('useSetImagePaintScaleMode behaviors', () => {
     expect(paint.scaleMode).toBe('fill');
     expect(paint.scale).toBeUndefined();
     expect(paint.crop).toBeTruthy();
-    expect(selectImageEditor(store.getState())).toEqual({ mode: 'crop', nodeId, paintIndex: 0 });
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId, paintIndex: 0 });
   });
 
   it('should do nothing for crop when there is no active image editor for this node', () => {

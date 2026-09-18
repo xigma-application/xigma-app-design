@@ -1275,6 +1275,46 @@ Covered by a new e2e test in `fill-section.spec.ts`: enters crop mode, clicks Co
 button again — confirmed to genuinely fail (editor stays in crop mode) against the pre-wiring shell via
 a backup-file round-trip.
 
+**The `ImageCropToolbar`'s Cancel button discards every change made during the crop session**,
+restoring the node to exactly how it looked the moment Crop was first clicked — Figma's own behavior,
+per the user's framing ("Figma robi tak że cofa poprzedni ruch wykonany cropa"). The obvious first idea
+— reuse the app's undo/redo stack (`store/history/`) directly — was explicitly rejected: popping
+`historyStack.undo()` N times would also unwind any unrelated action that happened to land on the stack
+in between, and there's no clean way to know how many steps to pop. What IS reused is the *shape* of
+undo/redo's own mechanism (`getDesignSnapshot`/`replaceDesignSnapshot`'s "snapshot now, restore later"
+pattern) — but scoped down to just the one node being cropped, not the whole `pages` tree, since every
+crop-session mutation (`commitImageCropZoom`, `commitAspectRatioPreset`, `commitFitNodeToImage`, and
+every canvas-drag resolver under `armImageCropOnPointerDown/`) only ever touches that single node's
+`fills`/`x`/`y`/`width`/`height`/`cornerRadius` via `updateNode`.
+
+The harder problem the user pushed on before agreeing to this approach: crop mode can be *entered* from
+five-plus different call sites (`useHandleCropClick`, `useSetImagePaintScaleMode`, `disarmResizeDrag`,
+`useSyncImageEditor`, the fill-mode dropdown's Crop option), and the *target* (`nodeId`+`paintIndex`)
+can also change mid-session (e.g. opening a different fill row's picker while still in crop mode) — so
+capturing the "before" snapshot at any one of those call sites individually would be exactly the kind of
+scattered, easy-to-miss-a-case logic the user flagged as unscalable ("nieskalowalny kod"). The fix:
+capture it centrally, inside the `setImageEditor` **reducer** itself
+(`store/design/utils/handleSetImageEditor.ts`), not at any dispatch site. The reducer sees both the
+previous and next `imageEditor` value on every call, so it can decide in one place whether this
+transition is "entering crop for a new target" (previous mode wasn't `'crop'`, or the `nodeId`/
+`paintIndex` changed) — and if so, read the target node's current appearance straight off `state.pages`
+and stash it as `imageEditor.cropCancelSnapshot`. Every other transition (same target re-dispatched with
+a different `selectedTarget`, leaving crop entirely, or leaving the editor altogether) either carries the
+existing snapshot forward untouched or drops it — none of the five-plus call sites needed to change at
+all, or even know this field exists. `useHandleCancelClick.ts` is the only consumer: if
+`cropCancelSnapshot` is present, dispatch `updateNode({ changes: cropCancelSnapshot, id: nodeId })`
+before `setImageEditor(null)`; if absent (mode never actually reached `'crop'`, or the node vanished),
+just exit.
+
+Covered by a new unit test file (`handleSetImageEditor.spec.ts`, 6 cases: null payload, entering a
+non-crop mode, entering crop fresh, re-dispatching the same crop target, switching crop target mid-
+session, and a missing node) plus a new e2e test in `fill-section.spec.ts`: enters crop mode, picks
+Circle from the aspect ratio menu (a real width/height/cornerRadius change), clicks Cancel, and asserts
+the node is back to its exact pre-crop `x/y/width/height/cornerRadius` — confirmed to genuinely fail
+two different ways via backup-file round-trips: once with the Cancel button unwired (nothing happens,
+editor stays open), and once with the reducer's snapshot-capture reverted to a plain assignment (Cancel
+exits the editor but the node keeps its post-Circle geometry, since there's nothing to restore from).
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

@@ -10,6 +10,7 @@ import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import { UITools } from 'shared';
 
 // hooks
+import { useHandleCancelClick } from './hooks/useHandleCancelClick';
 import { useHandleConfirmClick } from './hooks/useHandleConfirmClick';
 import { useHandleFitClick } from './hooks/useHandleFitClick';
 import { useImageCropToolbar } from './hooks/useImageCropToolbar';
@@ -25,6 +26,7 @@ const ImageCropToolbar: FC = () => {
   const { isVisible, onZoomChange, zoom } = useImageCropToolbar();
   const handleFitClick = useHandleFitClick();
   const handleConfirmClick = useHandleConfirmClick();
+  const handleCancelClick = useHandleCancelClick();
 
   if (!isVisible) {
     return null;
@@ -49,7 +51,7 @@ const ImageCropToolbar: FC = () => {
       <ImageCropAspectRatioMenu />
       <ToolbarButton icon="FitLayout" isActive={false} onClick={handleFitClick} tooltip={t(`${translationNameSpace}.fit`)} />
       <div className={styles.ImageCropToolbar__separator} />
-      <UITools.Button color="secondary" size="small" variant="outline">
+      <UITools.Button color="secondary" onClick={handleCancelClick} size="small" variant="outline">
         {t('common.cancel')}
       </UITools.Button>
       <UITools.Button ariaLabel={t(`${translationNameSpace}.confirm`)} onClick={handleConfirmClick} size="small">

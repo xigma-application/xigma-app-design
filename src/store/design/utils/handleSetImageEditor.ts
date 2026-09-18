@@ -1,0 +1,43 @@
+// types
+import { TDesignState, TImageEditorState } from '../types';
+
+// utils
+import { getActivePage } from './getActivePage';
+import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+
+export const handleSetImageEditor = (state: TDesignState, payload: TImageEditorState | null): void => {
+  if (!payload) {
+    state.imageEditor = null;
+  } else {
+    const previous = state.imageEditor;
+    const isSameCropTarget = previous?.mode === 'crop' && previous.nodeId === payload.nodeId && previous.paintIndex === payload.paintIndex;
+
+    switch (true) {
+      case payload.mode !== 'crop':
+        state.imageEditor = payload;
+        break;
+      case isSameCropTarget:
+        state.imageEditor = { ...payload, cropCancelSnapshot: previous?.cropCancelSnapshot };
+        break;
+      default: {
+        const node = getActivePage(state).nodes[payload.nodeId];
+
+        state.imageEditor = {
+          ...payload,
+          cropCancelSnapshot: isAppearanceNode(node)
+            ? {
+                cornerRadius: node.cornerRadius,
+                fills: node.fills,
+                height: node.height,
+                rotation: node.rotation,
+                width: node.width,
+                x: node.x,
+                y: node.y,
+              }
+            : undefined,
+        };
+        break;
+      }
+    }
+  }
+};

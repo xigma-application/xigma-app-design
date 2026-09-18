@@ -70,6 +70,7 @@ import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSendSelectionToBack } from './utils/handleSendSelectionToBack';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetGridSettingsPanelOpen } from './utils/handleSetGridSettingsPanelOpen';
+import { handleSetImageEditor } from './utils/handleSetImageEditor';
 import { handleSetSelection } from './utils/handleSetSelection/handleSetSelection';
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
 import { handleSetViewport } from './utils/handleSetViewport';
@@ -233,9 +234,7 @@ const designSlice = createSlice({
     setHoveredDimensionField: (state, action: PayloadAction<TDimensionHintField | null>) => {
       state.hoveredDimensionField = action.payload;
     },
-    setImageEditor: (state, action: PayloadAction<TImageEditorState | null>) => {
-      state.imageEditor = action.payload;
-    },
+    setImageEditor: (state, action: PayloadAction<TImageEditorState | null>) => handleSetImageEditor(state, action.payload),
     setImageFillPickerFocus: (state, action: PayloadAction<TImageFillPickerFocus | null>) => {
       state.imageFillPickerFocus = action.payload;
     },

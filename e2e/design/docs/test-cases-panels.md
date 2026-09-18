@@ -1161,3 +1161,37 @@ The Cancel button beside it stays unwired — out of scope for this fix.
 e2e coverage: enters crop mode, clicks Confirm, and asserts `imageEditor` becomes `null` and the crop
 toolbar is replaced by the Image edit toolbar's own Crop button again — confirmed to genuinely fail
 (editor stays in crop mode) against the pre-wiring shell via a backup-file round-trip.
+
+#497 wires up the `ImageCropToolbar`'s Cancel button, matching Figma: it discards every change made
+during the crop session, restoring the node to exactly how it looked before Crop was ever clicked
+("Figma robi tak że cofa poprzedni ruch wykonany cropa"). The user's first idea (reuse the app's own
+undo/redo stack, `store/history/`) was walked back once we reasoned through it together: popping
+`historyStack.undo()` N times would also unwind any unrelated action that landed on the stack in
+between, with no reliable way to know how many steps to pop. Instead, the fix reuses only the *shape*
+of undo/redo's mechanism (snapshot now, restore later) but scoped to the single node being cropped,
+since every crop-session mutation — the zoom slider, aspect-ratio presets, Fit, and every canvas-drag
+resolver — only ever touches that one node's `fills`/`x`/`y`/`width`/`height`/`cornerRadius`.
+
+The user then pressure-tested the design before agreeing to it, asking directly: what about switching
+to a different image mid-crop, exiting the editor some other way, or a sudden dropdown change — "Czy
+przewidziałeś to?" The switching-image case turned out to be a non-issue (a whole-node snapshot reverts
+that too, for free); the other two are non-issues by design (only the Cancel button itself triggers a
+restore — every other exit path keeps behaving as an implicit confirm, unchanged). But the user's
+underlying complaint was sharper than any single case: crop mode can be entered from five-plus different
+call sites (`useHandleCropClick`, `useSetImagePaintScaleMode`, `disarmResizeDrag`, `useSyncImageEditor`,
+the fill-mode dropdown), and the crop *target* can change mid-session too (switching which fill row's
+picker is open while still in crop mode) — capturing the snapshot at any one call site would be exactly
+the scattered, easy-to-miss-a-spot code the user called out ("kurwa syf jest w twoim kodzie... to jest
+nieskalowalny kod"). The fix: capture it centrally, inside the `setImageEditor` reducer itself
+(`store/design/utils/handleSetImageEditor.ts`), which sees both the previous and next `imageEditor`
+value on every dispatch and decides in one place whether this is "entering crop for a new target" — none
+of the five-plus call sites needed to change or even know the field exists. See `properties-panel.md`'s
+Cancel-button section for the full mechanics.
+
+e2e coverage: enters crop mode, picks Circle from the aspect ratio menu (a real geometry change), clicks
+Cancel, and asserts the node is back to its exact pre-crop `x/y/width/height/cornerRadius` — confirmed
+to genuinely fail two different ways via backup-file round-trips: with the Cancel button unwired
+(nothing happens), and separately with the reducer's snapshot capture reverted to a plain assignment
+(Cancel exits but the node keeps its post-edit geometry). Also required loosening two pre-existing e2e
+assertions (`toEqual` → `toMatchObject` on `imageEditor`) that predated this feature and didn't expect
+the new `cropCancelSnapshot` field to be present once a real node is targeted.

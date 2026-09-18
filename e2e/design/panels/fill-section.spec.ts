@@ -3986,6 +3986,62 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.locator('[class*="ImageEditToolbar_"]').first().getByRole('button', { name: 'Crop' })).toBeVisible();
   });
 
+  test('clicking the Cancel button discards every change made during the crop session, restoring the node to how it looked before entering crop mode', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-cancel-button');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 800, 250)).toEqual([255, 0, 0]);
+
+    const nodeBeforeCrop = await readNode(page, id);
+
+    // action — enter crop mode, then make several real changes: pick Circle (resizes + rounds the
+    // node), then drag the image itself around inside it
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    await page.getByLabel('Aspect ratio', { exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Circle (1:1)' }).click();
+
+    const nodeAfterCircle = await readNode(page, id);
+
+    expect(nodeAfterCircle.cornerRadius).toBeGreaterThan(0);
+    expect(nodeAfterCircle.height).not.toBeCloseTo(nodeBeforeCrop.height!, 1);
+
+    const cropToolbar = page.locator('[class*="ImageCropToolbar_"]').first();
+
+    // action — click Cancel instead of Confirm
+    await cropToolbar.getByRole('button', { name: 'Cancel', exact: true }).click();
+
+    // result — crop mode is exited, and the node is back to exactly how it looked before Crop was
+    // ever clicked, not just before the last change
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+
+    const nodeAfterCancel = await readNode(page, id);
+
+    expect(nodeAfterCancel.width).toBeCloseTo(nodeBeforeCrop.width!, 1);
+    expect(nodeAfterCancel.height).toBeCloseTo(nodeBeforeCrop.height!, 1);
+    expect(nodeAfterCancel.x).toBeCloseTo(nodeBeforeCrop.x!, 1);
+    expect(nodeAfterCancel.y).toBeCloseTo(nodeBeforeCrop.y!, 1);
+    expect(nodeAfterCancel.cornerRadius ?? 0).toBe(nodeBeforeCrop.cornerRadius ?? 0);
+  });
+
   test("picking Original from the aspect ratio menu resizes the node to the source file's real pixel dimensions", async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -4072,7 +4128,7 @@ test.describe('Design panels — Fill section', () => {
     await designPage.pointerUp();
 
     // result — starting that resize switches the image editor from position into crop mode
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
   });
 
   test('resizing the shape while its Image position-editing mode is active also switches the fill mode dropdown to Crop', async ({
@@ -5087,7 +5143,7 @@ test.describe('Design panels — Fill section', () => {
     await designPage.pointerUp();
 
     // result — the mode switches to crop, and the panel is not dismissed by the resize interaction
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'crop', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
     expect(await readSelectedIds(page)).toEqual([id]);
     await expect(panel).toBeVisible();
   });
