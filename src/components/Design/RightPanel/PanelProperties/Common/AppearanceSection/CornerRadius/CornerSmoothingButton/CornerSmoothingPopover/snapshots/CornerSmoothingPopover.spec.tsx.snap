@@ -60,16 +60,16 @@ exports[`CornerSmoothingPopover snapshots > should render the header, slider, va
           >
             <div
               class="_SliderTrack__fill_5e04e4"
-              style="width: calc(8px + 0 * (100% - 16px));"
+              style="width: calc(7px + 0 * (100% - 14px));"
             />
             <div
               class="_SliderTrack__mark_5e04e4"
-              style="left: calc(8px + 0.6 * (100% - 16px));"
+              style="left: calc(7px + 0.6 * (100% - 14px));"
             />
           </div>
           <div
             class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(8px + 0 * (100% - 16px));"
+            style="left: calc(7px + 0 * (100% - 14px));"
           />
         </div>
         <div
@@ -77,7 +77,7 @@ exports[`CornerSmoothingPopover snapshots > should render the header, slider, va
         >
           <span
             class="_SliderLegends__legend_7bcef1"
-            style="left: calc(8px + 0.6 * (100% - 16px));"
+            style="left: calc(7px + 0.6 * (100% - 14px));"
           >
             iOS
           </span>

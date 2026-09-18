@@ -2,7 +2,7 @@ import cx from 'classnames';
 import { FC, PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 // others
-import { SLIDER_COMPACT_THUMB_RADIUS, SLIDER_THUMB_RADIUS } from '../constants';
+import { SLIDER_COMPACT_THUMB_RADIUS, SLIDER_THUMB_RADIUS, SLIDER_VIDEO_THUMB_RADIUS } from '../constants';
 
 // styles
 import styles from './slider-track.module.scss';
@@ -13,6 +13,12 @@ import { TSliderMark, TSliderVariant } from '../types';
 // utils
 import { getMarkOffset } from '../utils/getMarkOffset';
 import { getThumbOffset } from '../utils/getThumbOffset';
+
+const THUMB_RADIUS_BY_VARIANT: Record<TSliderVariant, number> = {
+  compact: SLIDER_COMPACT_THUMB_RADIUS,
+  default: SLIDER_THUMB_RADIUS,
+  video: SLIDER_VIDEO_THUMB_RADIUS,
+};
 
 export type TSliderTrackProps = {
   ariaLabel?: string;
@@ -42,11 +48,11 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
   variant = 'default',
 }) => {
   const fraction = (value - min) / (max - min);
-  const thumbRadius = variant === 'compact' ? SLIDER_COMPACT_THUMB_RADIUS : SLIDER_THUMB_RADIUS;
-  const thumbOffset = getThumbOffset(fraction, thumbRadius);
+  const thumbOffset = getThumbOffset(fraction, THUMB_RADIUS_BY_VARIANT[variant]);
   const effectiveBaseValue = baseValue ?? min;
   const baseOffset = getMarkOffset(effectiveBaseValue, min, max);
   const hasValue = value !== effectiveBaseValue;
+  const showsProgressFill = variant !== 'video';
   const fillStyle =
     effectiveBaseValue === min
       ? { width: thumbOffset }
@@ -60,7 +66,10 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
       aria-valuemax={max}
       aria-valuemin={min}
       aria-valuenow={value}
-      className={cx(styles.SliderTrack, { [styles['SliderTrack--compact']]: variant === 'compact' })}
+      className={cx(styles.SliderTrack, {
+        [styles['SliderTrack--compact']]: variant === 'compact',
+        [styles['SliderTrack--video']]: variant === 'video',
+      })}
       data-no-drag
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -70,13 +79,16 @@ export const SliderTrack: FC<TSliderTrackProps> = ({
       tabIndex={0}
     >
       <div className={styles.SliderTrack__rail}>
-        <div className={styles.SliderTrack__fill} style={fillStyle} />
+        {showsProgressFill && <div className={styles.SliderTrack__fill} style={fillStyle} />}
         {effectiveBaseValue !== min && <div className={styles.SliderTrack__baseDot} style={{ left: baseOffset }} />}
         {marks.map((mark) => (
           <div className={styles.SliderTrack__mark} key={mark.value} style={{ left: getMarkOffset(mark.value, min, max) }} />
         ))}
       </div>
-      <div className={cx(styles.SliderTrack__thumb, { [styles['SliderTrack__thumb--active']]: hasValue })} style={{ left: thumbOffset }} />
+      <div
+        className={cx(styles.SliderTrack__thumb, { [styles['SliderTrack__thumb--active']]: hasValue && showsProgressFill })}
+        style={{ left: thumbOffset }}
+      />
     </div>
   );
 };

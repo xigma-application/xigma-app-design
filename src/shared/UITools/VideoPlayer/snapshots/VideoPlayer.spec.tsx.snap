@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VideoPlayer snapshots > should render VideoPlayer 1`] = `
+<DocumentFragment>
+  <div
+    class="_VideoPlayer_7e8415"
+  >
+    <button
+      aria-label="Play"
+      aria-pressed="false"
+      class="_ButtonIcon_2062db"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        data-fpl-icon-size="24L"
+        fill="none"
+        height="16"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="16"
+      >
+        <path
+          clip-rule="evenodd"
+          d="M6 5.903C6 4.43 7.604 3.517 8.87 4.269l10.15 6.028c1.307.776 1.305 2.669-.003 3.442l-10.15 5.995c-1.228.724-2.768-.11-2.863-1.5L6 18.098zm1 12.195a.9.9 0 0 0 1.357.774l10.152-5.995a1 1 0 0 0 .002-1.72L8.359 5.129A.9.9 0 0 0 7 5.903z"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </button>
+    <div
+      class="_Slider_8f9d96 _VideoPlayer__slider_7e8415"
+    >
+      <div
+        aria-label="Seek"
+        aria-valuemax="60"
+        aria-valuemin="0"
+        aria-valuenow="0"
+        class="_SliderTrack_5e04e4 _SliderTrack--video_5e04e4"
+        data-no-drag="true"
+        role="slider"
+        tabindex="0"
+      >
+        <div
+          class="_SliderTrack__rail_5e04e4"
+        />
+        <div
+          class="_SliderTrack__thumb_5e04e4"
+          style="left: calc(7px + 0 * (100% - 14px));"
+        />
+      </div>
+    </div>
+    <span
+      class="_VideoPlayer__timer_7e8415"
+    >
+      00:00
+    </span>
+  </div>
+</DocumentFragment>
+`;

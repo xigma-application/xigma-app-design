@@ -19,16 +19,16 @@ exports[`Slider snapshots > should render the legends row below the track when a
       >
         <div
           class="_SliderTrack__fill_5e04e4"
-          style="width: calc(8px + 0 * (100% - 16px));"
+          style="width: calc(7px + 0 * (100% - 14px));"
         />
         <div
           class="_SliderTrack__mark_5e04e4"
-          style="left: calc(8px + 0.6 * (100% - 16px));"
+          style="left: calc(7px + 0.6 * (100% - 14px));"
         />
       </div>
       <div
         class="_SliderTrack__thumb_5e04e4"
-        style="left: calc(8px + 0 * (100% - 16px));"
+        style="left: calc(7px + 0 * (100% - 14px));"
       />
     </div>
     <div
@@ -36,7 +36,7 @@ exports[`Slider snapshots > should render the legends row below the track when a
     >
       <span
         class="_SliderLegends__legend_7bcef1"
-        style="left: calc(8px + 0.6 * (100% - 16px));"
+        style="left: calc(7px + 0.6 * (100% - 14px));"
       >
         iOS
       </span>
@@ -64,12 +64,12 @@ exports[`Slider snapshots > should render the track positioned from value 1`] = 
       >
         <div
           class="_SliderTrack__fill_5e04e4"
-          style="width: calc(8px + 0.5 * (100% - 16px));"
+          style="width: calc(7px + 0.5 * (100% - 14px));"
         />
       </div>
       <div
         class="_SliderTrack__thumb_5e04e4 _SliderTrack__thumb--active_5e04e4"
-        style="left: calc(8px + 0.5 * (100% - 16px));"
+        style="left: calc(7px + 0.5 * (100% - 14px));"
       />
     </div>
   </div>

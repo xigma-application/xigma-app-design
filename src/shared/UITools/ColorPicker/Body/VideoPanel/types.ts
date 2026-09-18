@@ -6,5 +6,6 @@ export type TVideoPanelChange = { ref: string; scaleMode: TImageScaleMode };
 
 export type TVideoPanelState = {
   fillMode: TImageFillMode;
+  videoSrcUrl: string | null;
   videoUrl: string | null;
 };

@@ -137,7 +137,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
   const rounded = Math.round(alpha);
   const [pickedImageUrl, setPickedImageUrl] = useState<string | null>(null);
-  const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null) ?? pickedImageUrl ?? imageUrl;
+  const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null) ?? pickedImageUrl ?? imageUrl ?? videoUrl;
 
   const handleHexFieldClick = (): void => {
     rootRef.current?.querySelector<HTMLButtonElement>(`.${styles.ColorPickerInput__trigger}`)?.click();

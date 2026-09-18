@@ -5790,4 +5790,34 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.getByText('Video', { exact: true })).toBeVisible();
     await expect(page.getByText('Image', { exact: true })).not.toBeVisible();
   });
+
+  test('picking a video file shows the VideoPlayer controls (play button, seek slider, elapsed-time timer) in the picker panel', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-video-player-controls');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Video', { exact: true }).click();
+
+    // result — no playback controls exist yet, before any file is picked
+    await expect(page.getByRole('button', { name: 'Play' })).not.toBeVisible();
+
+    // action
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: Buffer.from('fake video bytes'),
+      mimeType: 'video/mp4',
+      name: 'clip.mp4',
+    });
+
+    // result — the VideoPlayer controls appear as soon as a file is picked, independent of whether
+    // the browser can actually decode this particular (fake) file
+    await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+    await expect(page.getByRole('slider', { name: 'Seek' })).toBeVisible();
+    await expect(page.getByText('00:00')).toBeVisible();
+  });
 });

@@ -10,6 +10,9 @@ import { selectDesignHintLabelKey } from 'store/design/selectors';
 import { setDesignHintLabelKey } from 'store/design/slice';
 import { store } from 'store';
 
+// utils
+import { videoSrcUrlCache } from '../../utils/videoSrcUrlCache';
+
 const extractVideoFrameMock = vi.fn();
 
 vi.mock('utils/canvas/extractVideoFrame', () => ({
@@ -28,6 +31,7 @@ const renderVideoPanelWithInitial = (
 describe('useVideoPanel behaviors', () => {
   beforeEach(() => {
     extractVideoFrameMock.mockReset();
+    videoSrcUrlCache.clear();
   });
 
   afterEach(() => {
@@ -64,6 +68,7 @@ describe('useVideoPanel behaviors', () => {
   it('should set videoUrl to the extracted still frame of a supported video file, not the raw video itself', () => {
     // mock
     extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 180, naturalWidth: 320, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
 
     // before
     const { result } = renderVideoPanel();
@@ -78,11 +83,67 @@ describe('useVideoPanel behaviors', () => {
     expect(selectDesignHintLabelKey(store.getState())).toBeNull();
   });
 
+  it('should default videoSrcUrl to null', () => {
+    // before
+    const { result } = renderVideoPanel();
+
+    // result
+    expect(result.current.videoSrcUrl).toBeNull();
+  });
+
+  it('should set videoSrcUrl to a fresh object URL of the raw file, so the panel can actually play it back', () => {
+    // mock
+    extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
+
+    // before
+    const { result } = renderVideoPanel();
+    const file = new File(['content'], 'clip.mp4', { type: 'video/mp4' });
+
+    // action
+    act(() => result.current.setVideo(file));
+
+    // result
+    expect(URL.createObjectURL).toHaveBeenCalledWith(file);
+    expect(result.current.videoSrcUrl).toBe('blob:raw-video-url');
+  });
+
+  it('should revoke the previous raw video URL when a new video replaces it', () => {
+    // mock
+    extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn().mockReturnValueOnce('blob:raw-first').mockReturnValueOnce('blob:raw-second');
+    URL.revokeObjectURL = vi.fn();
+
+    // before
+    const { result } = renderVideoPanel();
+
+    act(() => result.current.setVideo(new File(['content'], 'first.mp4', { type: 'video/mp4' })));
+
+    // action
+    act(() => result.current.setVideo(new File(['content'], 'second.mp4', { type: 'video/mp4' })));
+
+    // result
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:raw-first');
+    expect(result.current.videoSrcUrl).toBe('blob:raw-second');
+  });
+
+  it('should not touch videoSrcUrl when an unsupported file is picked', () => {
+    // before
+    const { result } = renderVideoPanel();
+
+    // action
+    act(() => result.current.setVideo(new File(['content'], 'photo.png', { type: 'image/png' })));
+
+    // result
+    expect(result.current.videoSrcUrl).toBeNull();
+  });
+
   it('should revoke the previous frame URL when a new video replaces it', () => {
     // mock
     extractVideoFrameMock
       .mockImplementationOnce((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:first' }))
       .mockImplementationOnce((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:second' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
     URL.revokeObjectURL = vi.fn();
 
     // before
@@ -133,6 +194,31 @@ describe('useVideoPanel behaviors', () => {
     expect(result.current.fillMode).toBe('fit');
   });
 
+  it('should restore videoSrcUrl from the session cache when reopened with the same frame url, so the player survives a close+reopen or a deselect/reselect', () => {
+    // mock — pick a file once, in an earlier mount (e.g. before the picker was closed)
+    extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
+
+    const { result: firstMount } = renderVideoPanel();
+
+    act(() => firstMount.current.setVideo(new File(['content'], 'clip.mp4', { type: 'video/mp4' })));
+
+    // action — a fresh mount, seeded only from the persisted paint.ref (the frame url), mirrors
+    // reopening the picker or reselecting the node
+    const { result: secondMount } = renderVideoPanelWithInitial('blob:frame-url');
+
+    // result — the raw, playable source is recovered from the cache, not lost
+    expect(secondMount.current.videoSrcUrl).toBe('blob:raw-video-url');
+  });
+
+  it('should leave videoSrcUrl null when reopened with a frame url that was never picked in this session', () => {
+    // before — mirrors reselecting a node whose video was picked in an earlier browser session
+    const { result } = renderVideoPanelWithInitial('blob:never-cached-url');
+
+    // result
+    expect(result.current.videoSrcUrl).toBeNull();
+  });
+
   it('should still default to null/fill when no initial values are given', () => {
     // before
     const { result } = renderVideoPanelWithInitial(undefined, undefined);
@@ -145,6 +231,7 @@ describe('useVideoPanel behaviors', () => {
   it('should not touch videoUrl when a later valid file follows an unsupported one', () => {
     // mock
     extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 1, naturalWidth: 1, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
 
     // before
     const { result } = renderVideoPanel();

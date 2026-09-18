@@ -3,4 +3,4 @@ export type TSliderMark = {
   value: number;
 };
 
-export type TSliderVariant = 'compact' | 'default';
+export type TSliderVariant = 'compact' | 'default' | 'video';

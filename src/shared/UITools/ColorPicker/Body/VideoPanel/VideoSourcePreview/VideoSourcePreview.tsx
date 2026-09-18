@@ -1,7 +1,4 @@
-import { CSSProperties, FC } from 'react';
-
-// assets
-import blankMediaUrl from 'assets/images/blank-media.png';
+import { FC, RefObject } from 'react';
 
 // components
 import VideoSourceButtons from './VideoSourceButtons/VideoSourceButtons';
@@ -12,26 +9,23 @@ import { TUseVideoPanelResult } from '../hooks/useVideoPanel';
 // styles
 import styles from './video-source-preview.module.scss';
 
-export type TVideoSourcePreviewProps = { videoPanel: TUseVideoPanelResult };
+export type TVideoSourcePreviewProps = { videoPanel: TUseVideoPanelResult; videoRef: RefObject<HTMLVideoElement | null> };
 
-export const VideoSourcePreview: FC<TVideoSourcePreviewProps> = ({ videoPanel }) => {
-  const { setVideo, videoUrl } = videoPanel;
+export const VideoSourcePreview: FC<TVideoSourcePreviewProps> = ({ videoPanel, videoRef }) => {
+  const { setVideo, videoSrcUrl, videoUrl } = videoPanel;
   const sourceButtons = <VideoSourceButtons onSelectFile={setVideo} />;
 
   return (
-    <div
-      className={styles.VideoSourcePreview}
-      style={
-        videoUrl
-          ? ({
-              backgroundImage: `url("${videoUrl}"), url("${blankMediaUrl}")`,
-              backgroundPosition: 'center, center',
-              backgroundRepeat: 'no-repeat, repeat',
-              backgroundSize: 'contain, 208px 208px',
-            } as CSSProperties)
-          : undefined
-      }
-    >
+    <div className={styles.VideoSourcePreview}>
+      <video
+        className={styles.VideoSourcePreview__video}
+        hidden={!videoUrl}
+        muted
+        playsInline
+        poster={videoUrl ?? undefined}
+        ref={videoRef}
+        src={videoSrcUrl ?? undefined}
+      />
       {videoUrl ? <div className={styles.VideoSourcePreview__overlay}>{sourceButtons}</div> : sourceButtons}
     </div>
   );

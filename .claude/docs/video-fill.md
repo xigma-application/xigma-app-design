@@ -196,12 +196,128 @@ Reused directly for video (no new hook needed, since the widening above already 
 passed to *both* `onImageRotate`/`onVideoRotate` etc. on `ColorPickerInput`, since the same function
 instance already branches internally on `paint.type`.
 
+## Real playback in the picker: `VideoPlayer`
+
+A follow-up feature, scoped strictly to the picker panel: **"Odpalenie wideo tylko w tym panelu, canvas
+nic się nie dzieje"** (playback only happens in this panel; nothing happens on canvas) — the paint's
+`ref` (the extracted still frame, see above) is completely untouched by this; canvas rendering is
+unaffected either way.
+
+New generic component, `shared/UITools/VideoPlayer/`:
+- `VideoPlayer.tsx` — purely presentational: a play/pause `ButtonIcon` (icon flips between `Play`/
+  `Pause` based on an `isPlaying` prop), a seek `Slider`, and an elapsed-time timer
+  (`utils/formatElapsedTime.ts`, `currentTime` as `mm:ss`, clamped to `00:00` for a not-yet-known/
+  `NaN` value — corrected from an initial remaining-time/`duration - currentTime` design after the
+  user asked for elapsed instead: "ten timer powinien pokazywać ile już wideo minęło a nie
+  pozostało"). All playback state and handlers arrive as props — it owns no state and no `<video>`
+  element itself, so it stays reusable wherever a caller already has its own video element under
+  control. The timer renders in a fixed 24px-tall box with horizontal-only 4px padding, matching the
+  same `--color-surface`/`--radius-medium` "value box" convention already used by
+  `ImageCropToolbar`'s own `__sliderBox` (also 24px tall) — not a bespoke look invented for this.
+- `hooks/useVideoPlayer.ts` — the actual playback engine: owns `videoRef`, and derives
+  `isPlaying`/`currentTime`/`duration` from the video element's own native `play`/`pause`/`ended`/
+  `loadedmetadata`/`timeupdate` events (not from the click handler alone) — clicking the button just
+  calls `video.play()`/`video.pause()`; the displayed state always reflects what the element actually
+  did. `onSeek(value)` sets `video.currentTime` and mirrors it into state immediately (no waiting for
+  the next `timeupdate`); `onSeekStart`/`onSeekEnd` (wired to the `Slider`'s existing `onDragStart`/
+  `onDragEnd`) suppress `timeupdate`-driven updates mid-drag so a stale native tick can't overwrite the
+  value the user is actively dragging to.
+
+**Slider gained a third variant, `'video'`** (`TSliderVariant = 'compact' | 'default' | 'video'`):
+"slider który na swojej ścieżce ma te samo tło więc niebieskiego nie ma" (a slider whose track keeps
+one uniform background, so there's no blue) — `SliderTrack.tsx` skips rendering the progress-fill div
+entirely for this variant and never applies the thumb's `--active` (blue) modifier, so only the thumb's
+own position communicates progress, matching a plain video scrubber. Per a direct follow-up
+correction ("to ma być ten slider gdzie thumb jest w środku" — the thumb has to sit inside the track),
+the rail and thumb are sized equal so the thumb sits flush inside the bar instead of protruding
+above/below it like `'compact'`'s bigger floating knob does; the interactive touch target
+(`.SliderTrack--video`) stays taller (20px) than the visible bar/thumb (14px, `SLIDER_VIDEO_THUMB_RADIUS
+= 7`) so it's comfortable to grab without looking chunky. This same pass also corrected the
+**default** variant to match: its rail/thumb were already equal-sized (flush) but at 16px — user
+feedback shrank that pairing to 14px too (`SLIDER_THUMB_RADIUS = 8` → `7`), so every plain `Slider`
+in the app (e.g. `ImageAdjustmentSliders`' contrast/exposure/etc. rows) got slightly slimmer, not
+just the video one.
+
+**Wiring, in `VideoPanel.tsx`**: it calls `useVideoPlayer()` itself (the single source of truth for
+this mount), passes `player.videoRef` down into `VideoSourcePreview`, and renders `UITools.VideoPlayer`
+(the controls row) below it — but only once `videoPanel.videoSrcUrl` exists (see below), matching how
+the picker shows no adjustment sliders/controls until there's something to control.
+
+**`VideoSourcePreview.tsx` now renders a real, always-mounted `<video>` tag** instead of the previous
+`background-image`-of-the-extracted-still-frame CSS trick — showing genuinely live, moving video during
+playback (confirmed with the user before implementing, since the literal 3-piece description of
+`VideoPlayer` — button/slider/timer — doesn't by itself say whether the preview picture should move).
+The `<video>` element is always in the DOM (hidden via the `hidden` attribute when there's no picture
+yet, not conditionally rendered) — this is load-bearing, not cosmetic: a React `ref` isn't reactive, so
+if the `<video>` tag only mounted once a source became truthy, `useVideoPlayer`'s listener-attaching
+`useEffect` (which runs once, keyed on stable `useCallback` handlers) would already have run and bound
+its listeners to `null`, and nothing would re-run it once the real node showed up later.
+
+**New state field**: `useVideoPanel`'s `videoSrcUrl` (`TVideoPanelState`), a real playable
+`URL.createObjectURL(file)` of the raw picked file — set alongside (not instead of) the existing
+`videoUrl` (the extracted still frame, still the paint's `ref`) — revoked on replacement, same pattern
+as `useImagePanel`'s pre-existing `imageUrl`. This only ever holds a value for a file picked in the
+current session: reopening the picker for an already-committed video paint has no raw file to recover
+(only the extracted PNG persists in the paint), so `videoSrcUrl` stays `null` then and the VideoPlayer
+controls simply don't render. This is an accepted structural limitation of the "`ref` = extracted
+frame, not the raw video" design above, not a bug — the raw video genuinely cannot be recovered once
+the FillRow unmounts.
+
+**Regression, caught and fixed the same day**: the first version of `VideoSourcePreview.tsx` keyed
+`hidden`/the replace-button overlay off `videoSrcUrl` alone and dropped `videoUrl` entirely, which broke
+two things the user reported directly: 1) "Input Picker nie pokazuje obrazka z wideo" — right after
+picking a file, the preview showed nothing, because a bare `<video src>` with no `poster` stays blank
+until it actually decodes/plays (unlike the old CSS-background trick, which guaranteed a picture); 2)
+"Kiedy zamknę picker i odznaczę element i wrócę do panelu to nie ma załadowanego video" — reselecting an
+already-committed video node showed nothing at all, since `videoSrcUrl` is correctly `null` then (see
+above) and there was no fallback. Fix: the `<video>` tag's `hidden` attribute and the overlay both key
+off `videoUrl` again (the one field that's always reliably seeded, first async after a fresh pick, then
+synchronously from `paint.ref` on reselect), and `videoUrl` is passed as the `poster` attribute — so the
+still frame always shows as the poster image once available, with the live, playable `src` layered on
+top only when `videoSrcUrl` also exists. Reselecting a committed video paint now correctly shows its
+still frame again (via poster), just without working playback controls (no raw source to play).
+
+## The right-panel swatch shows the video's own still-frame picture, not a generic icon
+
+`ColorPickerInput.tsx`'s small trigger swatch (the `<Color>` circle next to the hex field in the right
+panel) computes `thumbnailUrl = usePatternThumbnail(...) ?? pickedImageUrl ?? imageUrl ?? videoUrl` —
+`videoUrl` (the `videoUrl` prop threaded in from `FillRow.tsx`'s `videoUrl={isVideo ? paint.ref :
+undefined}`, i.e. the extracted still frame) is now one more fallback in the same chain `imageUrl`
+already sat in, so a video fill's swatch shows its actual picture, exactly like an image fill's does.
+
+**A first attempt at this went the wrong direction and was corrected immediately**: it added a new
+`icon` prop to `Color.tsx` and rendered a generic "Video" glyph (`@xigma/components`'s `Icon`) in the
+swatch instead of a real picture. The user's own words made the intent unambiguous once corrected —
+"Czy ja mówiłem o ikonie video?" (did I say anything about a video icon?), "Czy image z 1 klatki?" (is
+it the 1-frame image?), "Analogicznie miało być" (it was supposed to be analogous [to image]) — they
+wanted the exact same mechanism `imageUrl` already uses, not a new one. The `icon` prop was removed
+from `Color.tsx` entirely (it was never asked for elsewhere either) rather than left in unused.
+
+## The live playable video survives closing/reopening the picker or deselecting/reselecting the node
+
+Reported directly: "Kiedy zamknę picker i odznaczę element i wrócę do panelu to nie ma załadowanego
+video" (when I close the picker, deselect the element, and come back, the video isn't loaded). Root
+cause: `videoSrcUrl` (the raw playable `URL.createObjectURL(file)`, see above) lived only in
+`useVideoPanel`'s React state, which is discarded whenever `FillRow`/`VideoPanel` unmounts — on every
+picker close, not only on a full deselect/reselect, since a `ColorPicker` popover's content unmounts
+between opens.
+
+Fix: `utils/videoSrcUrlCache.ts` — a plain module-level `Map<string, string>` (the same shape as the
+pre-existing `imagePaintTextureSizeCache` in `utils/canvas/getOrLoadTexture.ts`: a bare exported `Map`,
+read/written directly by callers, no wrapper functions), keyed by the extracted-frame URL (`videoUrl`,
+i.e. `paint.ref` — the one value that's always available again on remount, straight from the persisted
+paint) and mapping to the raw playable source. `setVideo` writes to it once extraction resolves (inside
+the same `extractVideoFrame` callback that sets `videoUrl`); `useVideoPanel`'s initial state reads from
+it via `initialVideoUrl`. Since the underlying blob itself is never revoked except on an explicit
+replacement, and a blob URL string is valid for as long as the tab lives regardless of which React
+component currently references it, this cache purely restores a reference that was still perfectly
+valid — it isn't reviving anything that had actually died. This only ever helps within the same browser
+tab/session, matching every other blob-URL-based mechanism in this feature (`videoUrl`/`ref` included)
+— a page reload always drops all of it alike, which is a pre-existing, accepted characteristic of the
+whole picker system, not something this cache changes.
+
 ## Known rough edges (accepted, not fixed)
 
 - `ImageFillModeRow`'s rotate button aria-label/tooltip text says "Rotate image" even when editing a
   video paint (`colorPicker.image.rotateAriaLabel`/`rotateTooltip`) — the component is reused as-is,
   not parametrized with a translation namespace. Cosmetic only.
-- `useConvertToVideoPaint`'s "picked video URL echoed into the trigger swatch before the Redux
-  round-trip" (`ColorPickerInput`'s `pickedImageUrl` local-state pattern) was **not** mirrored for
-  video — the swatch always renders white for a video fill (`getFillRowSwatchHex`) regardless, so
-  there's nothing for a live thumbnail echo to improve yet.

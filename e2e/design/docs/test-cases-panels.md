@@ -1255,3 +1255,73 @@ e2e coverage: a new test confirms the Crop header shows "Video" (not "Image") wh
 video fill; the pre-existing aspect-ratio-lock e2e test was updated from asserting the button is
 "visible and disabled" to asserting neither the locked nor unlocked button variant is visible at all.
 Both confirmed to genuinely fail against their pre-fix versions via backup-file round-trips.
+
+#501 adds a new, generic `VideoPlayer` component (`shared/UITools/VideoPlayer/`) — a ButtonIcon
+(Play/Pause, toggling on click) + a seek `Slider` + an elapsed-time timer (corrected from an initial
+remaining-time design per direct feedback) — and wires it into the
+Video panel's picker (`VideoPanel`), below the existing `VideoSourcePreview` thumbnail card. Per the
+user's own instruction, this only affects the picker: "Odpalenie wideo tylko w tym panelu, canvas nic
+się nie dzieje" (playback only happens in this panel; nothing happens on canvas) — the paint's `ref`
+(the extracted still frame from #499) is untouched, so canvas rendering is completely unaffected.
+Audio is explicitly skipped (`muted`).
+
+The Slider gained a third variant, `'video'`, alongside `'compact'`/`'default'`: it renders no colored
+progress-fill and never marks the thumb "active" (blue) — "slider który na swojej ścieżce ma te samo
+tło więc niebieskiego nie ma" (a slider whose track keeps one uniform background, so there's no blue) —
+only the thumb's position communicates playback progress, matching how a plain video scrubber looks.
+
+The architecture keeps `VideoPlayer` itself purely presentational (all playback state/handlers passed
+in as props), so it stays reusable outside this one picker. The actual `<video>` element and its
+`useVideoPlayer` hook (owning `videoRef`/`isPlaying`/`currentTime`/`duration`/seek handlers, driven by
+native `play`/`pause`/`ended`/`loadedmetadata`/`timeupdate` listeners, not by the click handler alone)
+live one level up, in `VideoPanel`, and the ref is shared down into `VideoSourcePreview`, which now
+renders a real, always-mounted (but `hidden` until a source exists) `<video>` tag instead of the old
+`background-image`-of-a-still-frame trick — showing live, moving video during playback, per explicit
+user confirmation. Keeping the `<video>` node always-mounted (rather than conditionally rendered) is
+required, not cosmetic: a `ref` isn't reactive, so mounting the node later would leave `useVideoPlayer`'s
+listener-attaching effect bound to a `null` element from its first (and only) run.
+
+This required a second, until-now-unneeded field: `useVideoPanel`'s `videoSrcUrl` (a real, playable
+`URL.createObjectURL(file)` of the raw picked file, revoked on replacement — same pattern as
+`useImagePanel`'s `imageUrl`), alongside the pre-existing `videoUrl` (the extracted still frame, which
+remains the paint's `ref`). `videoSrcUrl` only exists client-side for the file just picked in this
+session — reopening the picker for an already-committed video paint has no raw source to restore
+(only the extracted-frame PNG persists), so the VideoPlayer controls simply don't render then. This is
+an accepted, structural limitation, not a bug — the raw video file cannot be recovered once the
+FillRow unmounts.
+
+**Regression, reported by the user right after landing and fixed the same day**: the first version of
+`VideoSourcePreview.tsx` keyed the `<video>` tag's visibility and the replace-button overlay off
+`videoSrcUrl` alone, dropping `videoUrl` entirely. Two real, reported symptoms: 1) right after picking a
+file, the preview showed nothing (a bare `<video src>` with no `poster` stays blank until it actually
+decodes/plays, unlike the old CSS-background trick which guaranteed a picture); 2) reselecting an
+already-committed video node showed nothing at all, since `videoSrcUrl` is correctly `null` on reselect
+and there was no fallback path. Fix: `hidden`/the overlay key off `videoUrl` again, and `videoUrl` is
+also passed as the `<video>` tag's `poster` attribute, so the still frame always shows once available,
+with the live playable `src` layered on top only when `videoSrcUrl` also exists.
+
+e2e coverage: one deterministic test confirms the VideoPlayer controls (Play button, seek slider,
+"00:00" timer) appear as soon as a video file is picked, and are absent before. Real playback
+(clicking Play, scrubbing, watching time count up) and the poster-image regression above are unit-
+tested only — through mocked `play`/`pause`/`ended`/`loadedmetadata`/`timeupdate` events and asserting
+the `poster`/`src`/`hidden` attributes directly — for the same non-constructible-video-fixture reason as
+#498/#499 above: a real browser can't decode the fake byte buffer this suite uses as a "video" file, so
+anything depending on actual decode (metadata loading, real play/pause transitions, a real extracted
+frame) isn't observable in e2e. Confirmed to genuinely fail (Play button never appears; poster/hidden
+assertions fail against the pre-fix version) via backup-file round-trips.
+
+Two more direct follow-ups landed the same day. First, the right-panel swatch (`ColorPickerInput`'s
+`<Color>` trigger) now shows the video's own extracted-frame picture via `thumbnailUrl`, exactly like
+an image fill's swatch already did — a first attempt used a generic "Video" icon glyph instead, which
+the user rejected outright ("Czy ja mówiłem o ikonie video?" / "Analogicznie miało być" — did I say
+anything about a video icon? it was supposed to be analogous [to image]); the icon prop was removed
+from `Color.tsx`, not left in unused. Second, the live playable video (`videoSrcUrl`) now survives
+closing/reopening the picker or deselecting/reselecting the node within the same browser tab, via a new
+session-scoped `videoSrcUrlCache` (`Map<string, string>`, same bare-Map shape as the pre-existing
+`imagePaintTextureSizeCache`) keyed by the extracted-frame url and written/read across mounts — see
+`.claude/docs/video-fill.md` for the full reasoning on why this doesn't extend any lifetime that wasn't
+already valid (the blob itself was never revoked; only the React state reference to it was being
+dropped). Both fixes are unit-tested only (`ColorPickerInput.spec.tsx`, `useVideoPanel.spec.tsx`), for
+the same non-constructible-video-fixture reason as everything else on this list — the underlying
+mechanism (an extracted frame URL, a raw file blob URL) can't be produced from a fake e2e file either
+way. Both confirmed to genuinely fail against their pre-fix versions via backup-file round-trips.

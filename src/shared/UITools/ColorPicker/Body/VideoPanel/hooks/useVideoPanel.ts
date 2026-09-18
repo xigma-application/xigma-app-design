@@ -16,6 +16,7 @@ import { TVideoPanelState } from '../types';
 import { extractVideoFrame } from 'utils/canvas/extractVideoFrame';
 import { getFileExtension } from '../utils/getFileExtension';
 import { isSupportedVideoFile } from '../utils/isSupportedVideoFile';
+import { videoSrcUrlCache } from '../utils/videoSrcUrlCache';
 
 export type TUseVideoPanelResult = TVideoPanelState & {
   setFillMode: TFunc<[TImageFillMode]>;
@@ -28,12 +29,17 @@ export const useVideoPanel = (initialVideoUrl?: string, initialFillMode?: TImage
   const [state, setState] = useState<TVideoPanelState>({
     ...DEFAULT_VIDEO_PANEL_STATE,
     fillMode: initialFillMode ?? DEFAULT_VIDEO_PANEL_STATE.fillMode,
+    videoSrcUrl: (initialVideoUrl && videoSrcUrlCache.get(initialVideoUrl)) ?? DEFAULT_VIDEO_PANEL_STATE.videoSrcUrl,
     videoUrl: initialVideoUrl ?? DEFAULT_VIDEO_PANEL_STATE.videoUrl,
   });
 
   const setVideo = (file: File): void => {
     if (isSupportedVideoFile(file)) {
+      const rawSrcUrl = URL.createObjectURL(file);
+
       extractVideoFrame(file, ({ src }) => {
+        videoSrcUrlCache.set(src, rawSrcUrl);
+
         setState((previous) => {
           if (previous.videoUrl) {
             URL.revokeObjectURL(previous.videoUrl);
@@ -41,6 +47,14 @@ export const useVideoPanel = (initialVideoUrl?: string, initialFillMode?: TImage
 
           return { ...previous, videoUrl: src };
         });
+      });
+
+      setState((previous) => {
+        if (previous.videoSrcUrl) {
+          URL.revokeObjectURL(previous.videoSrcUrl);
+        }
+
+        return { ...previous, videoSrcUrl: rawSrcUrl };
       });
     } else {
       dispatch(setDesignHintLabelKey(t(`${translationNameSpace}.unsupportedFileTypeError`, { extension: getFileExtension(file.name) })));

@@ -270,6 +270,68 @@ describe('SliderTrack behaviors', () => {
     expect(thumb.style.left).toBe('calc(6px + 0.5 * (100% - 12px))');
   });
 
+  it('should apply the video modifier and use the video thumb radius, so the thumb sits flush inside the rail', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={0}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={50}
+        variant="video"
+      />,
+    );
+    const thumb = container.querySelector('[class*="SliderTrack__thumb"]') as HTMLElement;
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack--video"]')).not.toBeNull();
+    expect(thumb.style.left).toBe('calc(7px + 0.5 * (100% - 14px))');
+  });
+
+  it('should render no progress fill for the video variant, so the whole track keeps one uniform background', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={0}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={50}
+        variant="video"
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__fill"]')).toBeNull();
+  });
+
+  it('should never mark the video-variant thumb active, even off its minimum, since there is no progress color to match', () => {
+    // before
+    const { container } = render(
+      <SliderTrack
+        marks={[]}
+        max={100}
+        min={0}
+        onPointerDown={noop}
+        onPointerMove={noop}
+        onPointerUp={noop}
+        trackRef={{ current: null }}
+        value={50}
+        variant="video"
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="SliderTrack__thumb--active"]')).toBeNull();
+  });
+
   it('should call the given pointer handlers', () => {
     // mock
     const onPointerDown = vi.fn();

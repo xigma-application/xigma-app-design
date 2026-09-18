@@ -90,6 +90,7 @@ const videoPanel = {
   fillMode: 'fill' as const,
   setFillMode: vi.fn(),
   setVideo: vi.fn(),
+  videoSrcUrl: null,
   videoUrl: null,
 };
 

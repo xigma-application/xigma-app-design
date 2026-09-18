@@ -7,7 +7,7 @@ exports[`SliderLegends snapshots > should render a legend positioned from its ma
   >
     <span
       class="_SliderLegends__legend_7bcef1"
-      style="left: calc(8px + 0.6 * (100% - 16px));"
+      style="left: calc(7px + 0.6 * (100% - 14px));"
     >
       iOS
     </span>

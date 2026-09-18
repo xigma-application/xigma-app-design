@@ -62,6 +62,24 @@ describe('ColorPickerInput behaviors', () => {
     expect(container.querySelector('[class*="Color__dot"]')).not.toBeNull();
   });
 
+  it('should show the video’s extracted-frame picture on the swatch when videoUrl is given, same as an image fill', () => {
+    // before
+    const { container } = renderColorPickerInput({ videoUrl: 'blob:frame-url' });
+    const thumbnail = container.querySelector('[class*="Color__thumbnail"]') as HTMLElement;
+
+    // result
+    expect(thumbnail).not.toBeNull();
+    expect(thumbnail.style.backgroundImage).toContain('url("blob:frame-url")');
+  });
+
+  it('should not show a thumbnail on the swatch when neither imageUrl nor videoUrl is given', () => {
+    // before
+    const { container } = renderColorPickerInput();
+
+    // result
+    expect(container.querySelector('[class*="Color__thumbnail"]')).toBeNull();
+  });
+
   it('should render a plain trigger button calling onTriggerClick instead of opening the picker, when given', () => {
     // mock
     const onTriggerClick = vi.fn();

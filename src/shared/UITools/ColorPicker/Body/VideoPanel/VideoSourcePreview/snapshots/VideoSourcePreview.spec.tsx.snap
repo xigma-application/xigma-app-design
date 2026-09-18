@@ -5,6 +5,11 @@ exports[`VideoSourcePreview snapshots > should render VideoSourcePreview 1`] = `
   <div
     class="_VideoSourcePreview_a906d1"
   >
+    <video
+      class="_VideoSourcePreview__video_a906d1"
+      hidden=""
+      playsinline=""
+    />
     <input
       accept="video/*"
       hidden=""

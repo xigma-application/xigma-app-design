@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { Provider } from 'react-redux';
 
 // components
@@ -19,16 +19,17 @@ vi.mock('utils/canvas/extractVideoFrame', () => ({
   extractVideoFrame: (...args: unknown[]): unknown => extractVideoFrameMock(...args),
 }));
 
-const VideoSourcePreviewWrapper = (): ReactNode => {
-  const videoPanel = useVideoPanel();
+const VideoSourcePreviewWrapper = ({ initialVideoUrl }: { initialVideoUrl?: string }): ReactNode => {
+  const videoPanel = useVideoPanel(initialVideoUrl);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  return <VideoSourcePreview videoPanel={videoPanel} />;
+  return <VideoSourcePreview videoPanel={videoPanel} videoRef={videoRef} />;
 };
 
-const renderVideoSourcePreview = (): ReturnType<typeof render> =>
+const renderVideoSourcePreview = (initialVideoUrl?: string): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <VideoSourcePreviewWrapper />
+      <VideoSourcePreviewWrapper initialVideoUrl={initialVideoUrl} />
     </Provider>,
   );
 
@@ -59,18 +60,19 @@ describe('VideoSourcePreview behaviors', () => {
     expect(screen.getByRole('button', { name: 'Upload from computer' })).toBeInTheDocument();
   });
 
-  it('should show no background image and no overlay before a file is picked', () => {
+  it('should render a hidden video element with no overlay before a file is picked', () => {
     // before
     const { container } = renderVideoSourcePreview();
 
     // result
-    expect(container.querySelector('[class*="VideoSourcePreview"]')).toHaveStyle({ backgroundImage: 'none' });
+    expect(container.querySelector('video')).toHaveAttribute('hidden');
     expect(container.querySelector('[class*="VideoSourcePreview__overlay"]')).toBeNull();
   });
 
-  it("should show the video's extracted still frame as the background and wrap the buttons in the hover overlay", () => {
+  it('should show a live, playable video element with the raw file and wrap the buttons in the hover overlay', () => {
     // mock
     extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 180, naturalWidth: 320, src: 'blob:frame-url' }));
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
 
     // before
     const { container } = renderVideoSourcePreview();
@@ -84,11 +86,28 @@ describe('VideoSourcePreview behaviors', () => {
 
     // result
     const overlay = container.querySelector('[class*="VideoSourcePreview__overlay"]');
-    const preview = container.querySelector('[class*="VideoSourcePreview"]') as HTMLElement;
+    const video = container.querySelector('video') as HTMLVideoElement;
 
-    expect(preview.style.backgroundImage).toContain('url("blob:frame-url")');
+    expect(video).not.toHaveAttribute('hidden');
+    expect(video.muted).toBe(true);
+    expect(video).toHaveAttribute('src', 'blob:raw-video-url');
+    expect(video).toHaveAttribute('poster', 'blob:frame-url');
     expect(overlay).not.toBeNull();
     expect(overlay).toContainElement(screen.getByRole('button', { name: 'Upload from computer' }));
+  });
+
+  it('should still show the extracted-frame picture (as a poster, with no playable src) when reopened for an already-committed video paint, since the raw file is never persisted', () => {
+    // before — mirrors reselecting a node after closing the picker: only `paint.ref` (the extracted
+    // frame) survives, the raw file/blob from the original pick is gone
+    const { container } = renderVideoSourcePreview('blob:persisted-frame-url');
+
+    // result
+    const video = container.querySelector('video') as HTMLVideoElement;
+
+    expect(video).not.toHaveAttribute('hidden');
+    expect(video).toHaveAttribute('poster', 'blob:persisted-frame-url');
+    expect(video).not.toHaveAttribute('src');
+    expect(container.querySelector('[class*="VideoSourcePreview__overlay"]')).not.toBeNull();
   });
 
   it('should dispatch a design hint naming the extension when an unsupported file is picked, without extracting a frame', () => {

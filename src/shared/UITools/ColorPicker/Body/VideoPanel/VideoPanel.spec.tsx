@@ -12,6 +12,12 @@ import { useVideoPanel } from './hooks/useVideoPanel';
 // store
 import { store } from 'store';
 
+const extractVideoFrameMock = vi.fn();
+
+vi.mock('utils/canvas/extractVideoFrame', () => ({
+  extractVideoFrame: (...args: unknown[]): unknown => extractVideoFrameMock(...args),
+}));
+
 const VideoPanelWrapper = ({
   onRotate,
   onScaleModeChange,
@@ -90,5 +96,31 @@ describe('VideoPanel behaviors', () => {
 
     // result
     expect(onRotate).toHaveBeenCalled();
+  });
+
+  it('should not render the VideoPlayer controls before a video file has been picked', () => {
+    // before
+    renderVideoPanel();
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('slider', { name: 'Seek' })).not.toBeInTheDocument();
+  });
+
+  it('should render the VideoPlayer controls once a supported video file is picked', () => {
+    // mock
+    URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
+
+    // before
+    const { container } = renderVideoPanel();
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['content'], 'clip.mp4', { type: 'video/mp4' });
+
+    // action
+    fireEvent.change(input, { target: { files: [file] } });
+
+    // result
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Seek' })).toBeInTheDocument();
   });
 });

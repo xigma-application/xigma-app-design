@@ -136,16 +136,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -176,16 +176,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -216,16 +216,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -256,16 +256,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -296,16 +296,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -336,16 +336,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>
@@ -376,16 +376,16 @@ exports[`ImagePanel snapshots > should render ImagePanel 1`] = `
             >
               <div
                 class="_SliderTrack__fill_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px)); right: calc(100% - calc(8px + 0.5 * (100% - 16px)));"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
               />
               <div
                 class="_SliderTrack__baseDot_5e04e4"
-                style="left: calc(8px + 0.5 * (100% - 16px));"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
               />
             </div>
             <div
               class="_SliderTrack__thumb_5e04e4"
-              style="left: calc(8px + 0.5 * (100% - 16px));"
+              style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
         </div>

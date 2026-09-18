@@ -22,6 +22,7 @@ import Slider from './Slider/Slider';
 import Tabs from './Tabs/Tabs';
 import TextField from './TextField/TextField';
 import ToggleButtonGroup from './ToggleButtonGroup/ToggleButtonGroup';
+import VideoPlayer from './VideoPlayer/VideoPlayer';
 import { GridColumnType } from './SectionColumn/enums';
 
 export const UITools = {
@@ -50,4 +51,5 @@ export const UITools = {
   Tabs,
   TextField,
   ToggleButtonGroup,
+  VideoPlayer,
 };
