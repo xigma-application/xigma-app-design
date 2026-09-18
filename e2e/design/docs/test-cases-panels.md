@@ -149,115 +149,115 @@ Redux slice), which drives a Figma-style on-canvas overlay (`drawGradientHandleL
 start→end guide line, endpoint dots, and one swatch handle per stop, each independently draggable
 directly on the canvas (not just via the docked panel's own `GradientBar`).
 
-| #   | Scenario                                                                                                                   | Unit |                             E2E                              |
-| --- | -------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------------------------------: |
-| 385 | Adding a fill stacks a second solid layer on top and changes the render                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 386 | Deleting every fill leaves the shape with none and clears the render                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 387 | Typing a hex value commits it onto the fill and changes the render                                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 388 | Hiding a fill via the eye toggle stops it from rendering without removing it                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 389 | Dragging a fill row past another reorders the stack, showing a drop indicator and a selected handle mid-drag               |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 390 | Clicking a fill row selects it, and clicking outside the fill list clears the selection                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 391 | Closes the format dropdown when clicking a plain area of the fill color picker                                             |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 392 | Docks a gradient stop's own color panel flush against the gradient panel, not floating over its own swatch                 |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 393 | Rotating a shape's gradient fill (panel button) updates its stored start/end and the rendered canvas                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 394 | Switching a solid fill to Gradient via the paint-type row actually converts and commits it, not just previews it           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 395 | A gradient stop clamps to its own color past its own position, instead of falling back to the first stop's color           |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release          |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 399 | Clicking the gradient guide line on the canvas adds a new stop there, at the interpolated color, and selects it            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 403 | Rotating a gradient whose endpoints don't touch the shape edge pivots around the line's own center, not the box            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 404 | Rotating a gradient snaps to exactly horizontal/vertical when the angle is close to it, with a guide                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 405 | Grabbing right on a gradient endpoint moves it freely, leaving the other endpoint untouched                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 406 | Dragging a gradient endpoint freely snaps onto a shape corner (edge/center landmarks)                                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 410 | Moving a radial gradient's center point on the canvas moves only that point (start/end handles reused)                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 411 | Dragging a radial gradient's perpendicular radius handle reshapes it into an ellipse                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 412 | Switching a gradient's type via the panel resets its points to that type's own default (e.g. radial: centered)             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 416 | Switching a gradient's type to Angular resets its points to a centered default, same as radial                             |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 417 | Dragging an angular gradient's perpendicular radius handle reshapes its ellipse, same as radial's                          |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear                          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 421 | Switching a gradient's type to Diamond resets its points to a centered default, same as radial/angular                     |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                               |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's                  |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 428 | Rotating a gradient on the canvas, then dragging a stop in the popover, keeps the canvas rotation                          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 429 | Moving a gradient stop on the canvas updates its position live in the open popover                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 430 | Switching a solid fill to Pattern commits a real pattern paint and shows the Pattern panel                                 |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 431 | A pattern fill with no source renders a placeholder dot grid instead of nothing                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 432 | Editing the Pattern panel's tile type and scale commits them onto the pattern paint                                        |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 433 | Switching away from Pattern and back resets the panel instead of resurfacing the old values                                |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 434 | The Direction row only shows for the Hexagonal tile type                                                                   |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 435 | Picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 436 | A picked pattern source renders live and repeats as tiles, not a single stretched copy                                     |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 437 | Deleting a pattern's source freezes the consumer's last appearance instead of reverting to the placeholder                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 438 | Increasing pattern spacing opens a visible transparent gap between tiles instead of leaving them flush                     |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 439 | Changing pattern alignment shifts which part of the tile grid sits flush with the shape                                    |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 440 | Editing a Pattern panel setting after picking a source preserves the live sourceNodeId instead of dropping it              |  ✅  | ✅ `fill-section.spec.ts` (spacing test also exercises this) |
-| 441 | Hexagonal tiling with Horizontal direction offsets alternate rows, creating a brick pattern                                |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                               |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 444 | A numeric pattern offset (X/Y, in px) nudges the tile grid independently of the alignment point                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 446 | Hovering an eligible node while picking a pattern source shows a live highlight, like the default tool                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 447 | Hovering a node that already has a pattern fill while picking a source shows no highlight                                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions             |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 449 | The fill's alpha field changes the rendered image's opacity, not just the paint's stored value                             |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 450 | The rotate button turns an image fill 90° per click, and each turn is its own undo/redo step                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 451 | Switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 452 | Picking Image with no source yet renders a checkerboard placeholder on the shape                                           |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 453 | Picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 454 | Opening the Image tab enters a position-editing mode for the node, cleared again on Escape/deselect                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 459 | Clicking the frame outside the moved image switches the selected target back to the frame                                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 460 | Manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 461 | Reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 462 | Hovering the image crop rect's own handles while it is the selected target shows resize/rotate cursors                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 463 | Dragging a resize handle past the opposite anchor mirrors an image fill, and dragging back un-mirrors it                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 464 | A second image-filled shape renders correctly alongside the first, and both survive deselecting                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 465 | Dragging a resize handle past the opposite anchor mirrors a pattern fill too, and dragging back un-mirrors it              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 466 | Clicking a completely different shape while the Image editor's position mode is active exits it, unselected                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 467 | Clicking a completely different shape while crop mode is active exits the editor, without selecting that shape             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 468 | Rotating the frame on canvas while its image editor is active in crop mode leaves the crop untouched                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 469 | Resizing the frame again on canvas while already in crop mode leaves the crop untouched                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 470 | Rotating via the panel's own rotate button still carries the crop along, unlike a canvas rotate-handle drag                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 471 | The ImageCrop panel's Dimensions row locks aspect ratio permanently, scaling the other axis to match                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 472 | Clicking Flip horizontal in the ImageCrop panel flips the image's own paint, not the frame                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 473 | Clicking the frame after focusing the image reopens the fill picker panel on its own, without a swatch click               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 474 | Escape while the image is focused fully exits the editor but still reopens the fill picker panel                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 475 | Dragging the image within its frame snaps to center/edge alignment with the frame, drawing a smart guide                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 476 | Picking Tile enters tile mode with a 50% default scale, and dragging a corner scales the tile only (no move/rotate)        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 477 | Dragging the Saturation adjustment slider to its minimum actually desaturates the rendered image, not just the paint       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 478 | A pattern keeps rendering correctly on its consumer after zooming in heavily, even with its source far away and off-screen |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 479 | Dragging crop on an Image fill with no asset picked yet pans the checker placeholder itself, not just the crop outline     |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 480 | Cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed             |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More) |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 484 | Picking Crop right after Tile (via the dropdown, or via a resize that auto-enters crop) clears the stale tile scaleMode/scale |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 485 | Entering crop mode shows an Expand button inset near the frame's bottom-right corner, click-through so it never steals the resize handle |  —   |                  ✅ `fill-section.spec.ts`                   |
-| 486 | Clicking Crop in the Image edit toolbar enters crop mode on the target image fill, seeding a crop rect if none existed yet |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| #   | Scenario                                                                                                                                                                   | Unit |                             E2E                              |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------------------------------: |
+| 385 | Adding a fill stacks a second solid layer on top and changes the render                                                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 386 | Deleting every fill leaves the shape with none and clears the render                                                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 387 | Typing a hex value commits it onto the fill and changes the render                                                                                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 388 | Hiding a fill via the eye toggle stops it from rendering without removing it                                                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 389 | Dragging a fill row past another reorders the stack, showing a drop indicator and a selected handle mid-drag                                                               |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 390 | Clicking a fill row selects it, and clicking outside the fill list clears the selection                                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 391 | Closes the format dropdown when clicking a plain area of the fill color picker                                                                                             |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 392 | Docks a gradient stop's own color panel flush against the gradient panel, not floating over its own swatch                                                                 |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 393 | Rotating a shape's gradient fill (panel button) updates its stored start/end and the rendered canvas                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 394 | Switching a solid fill to Gradient via the paint-type row actually converts and commits it, not just previews it                                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 395 | A gradient stop clamps to its own color past its own position, instead of falling back to the first stop's color                                                           |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 396 | Dragging a gradient stop (in the docked panel's bar) past another stop doesn't disturb the crossed stop                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 397 | Dragging a gradient stop directly on the canvas overlay moves it along the guide                                                                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 398 | The fill picker stays open after dragging a canvas gradient stop, even if the cursor strays off it before release                                                          |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 399 | Clicking the gradient guide line on the canvas adds a new stop there, at the interpolated color, and selects it                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 400 | Clicking on/near an existing stop does not add a new one — stops take priority over the line                                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 401 | Dragging a gradient endpoint on the canvas rotates the whole line around the shape's center                                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 402 | Clicking (not dragging) right on a gradient endpoint doesn't add a stop there — rotating takes priority                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 403 | Rotating a gradient whose endpoints don't touch the shape edge pivots around the line's own center, not the box                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 404 | Rotating a gradient snaps to exactly horizontal/vertical when the angle is close to it, with a guide                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 405 | Grabbing right on a gradient endpoint moves it freely, leaving the other endpoint untouched                                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 406 | Dragging a gradient endpoint freely snaps onto a shape corner (edge/center landmarks)                                                                                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 407 | Both endpoints on the same single wall (not two distinct ones) also pivots around the line, not the box                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 408 | A gentle rotation of a box-attached, off-center gradient (e.g. corner-to-corner along one edge) doesn't jump                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 409 | Dragging a gradient endpoint past the shape's edge lets it travel outside the shape, unclamped, like Figma                                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 410 | Moving a radial gradient's center point on the canvas moves only that point (start/end handles reused)                                                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 411 | Dragging a radial gradient's perpendicular radius handle reshapes it into an ellipse                                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 412 | Switching a gradient's type via the panel resets its points to that type's own default (e.g. radial: centered)                                                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 413 | Dragging the outer ring around a radial gradient's center rotates the whole ellipse around it, fixed radius                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 414 | Dragging the outer ring around a radial gradient's edge point also rotates around the center, not the edge                                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 415 | Dragging a radial gradient's radius handle shows a temporary orange guide from the center, only while dragging                                                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 416 | Switching a gradient's type to Angular resets its points to a centered default, same as radial                                                                             |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 417 | Dragging an angular gradient's perpendicular radius handle reshapes its ellipse, same as radial's                                                                          |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 418 | Dragging an angular gradient stop moves it by angle around the ellipse, not by linear position along the line                                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 419 | Clicking the ellipse guide on an angular gradient adds a new stop there and selects it                                                                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 420 | Opening the picker on an existing angular gradient shows Angular in the type dropdown, not Linear                                                                          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 421 | Switching a gradient's type to Diamond resets its points to a centered default, same as radial/angular                                                                     |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 422 | A diamond gradient actually renders as a diamond shape instead of an almost-solid flat fill                                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 423 | Dragging a diamond gradient's perpendicular radius handle reshapes it, exactly like radial's                                                                               |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 424 | Dragging the outer ring around a diamond gradient's center rotates the whole shape, exactly like radial's                                                                  |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 425 | Switching a gradient fill to Solid resets the gradient panel, so switching back to Gradient starts fresh                                                                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 426 | Undoing a gradient edit updates the open panel's own controls (type dropdown included), not just the render                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 427 | Dragging on the saturation map / a gradient stop coalesces into a single undo step, not one per pixel                                                                      |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 428 | Rotating a gradient on the canvas, then dragging a stop in the popover, keeps the canvas rotation                                                                          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 429 | Moving a gradient stop on the canvas updates its position live in the open popover                                                                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 430 | Switching a solid fill to Pattern commits a real pattern paint and shows the Pattern panel                                                                                 |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 431 | A pattern fill with no source renders a placeholder dot grid instead of nothing                                                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 432 | Editing the Pattern panel's tile type and scale commits them onto the pattern paint                                                                                        |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 433 | Switching away from Pattern and back resets the panel instead of resurfacing the old values                                                                                |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 434 | The Direction row only shows for the Hexagonal tile type                                                                                                                   |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 435 | Picking a shape as the pattern source on canvas writes its id onto the paint and disarms picking                                                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 436 | A picked pattern source renders live and repeats as tiles, not a single stretched copy                                                                                     |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 437 | Deleting a pattern's source freezes the consumer's last appearance instead of reverting to the placeholder                                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 438 | Increasing pattern spacing opens a visible transparent gap between tiles instead of leaving them flush                                                                     |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 439 | Changing pattern alignment shifts which part of the tile grid sits flush with the shape                                                                                    |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 440 | Editing a Pattern panel setting after picking a source preserves the live sourceNodeId instead of dropping it                                                              |  ✅  | ✅ `fill-section.spec.ts` (spacing test also exercises this) |
+| 441 | Hexagonal tiling with Horizontal direction offsets alternate rows, creating a brick pattern                                                                                |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 442 | Hexagonal tiling with Vertical direction offsets alternate columns, creating a brick pattern                                                                               |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 443 | Picking a node that itself has a pattern fill as a source is refused, preventing A<-B<-C chains                                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 444 | A numeric pattern offset (X/Y, in px) nudges the tile grid independently of the alignment point                                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 445 | Shrinking a pattern source's text content does not leave a black shadow of the removed glyphs                                                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 446 | Hovering an eligible node while picking a pattern source shows a live highlight, like the default tool                                                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 447 | Hovering a node that already has a pattern fill while picking a source shows no highlight                                                                                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 448 | Uploading an image commits a real image paint and renders it, filling the shape without distorting proportions                                                             |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 449 | The fill's alpha field changes the rendered image's opacity, not just the paint's stored value                                                                             |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 450 | The rotate button turns an image fill 90° per click, and each turn is its own undo/redo step                                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 451 | Switching the fill mode to Fit contains the image inside the shape instead of cropping it to cover                                                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 452 | Picking Image with no source yet renders a checkerboard placeholder on the shape                                                                                           |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 453 | Picking a new image while Fit is already selected in the dropdown renders it as Fit, not Fill                                                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 454 | Opening the Image tab enters a position-editing mode for the node, cleared again on Escape/deselect                                                                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 455 | Resizing the shape while its Image position-editing mode is active switches it into crop mode                                                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 456 | Resizing the shape into crop mode also switches the panel's fill mode dropdown to Crop                                                                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 457 | Resizing the shape while still in position mode leaves a manually-picked fill mode dropdown value untouched                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 458 | Dragging inside the shape while in crop mode selects the image and moves only its own crop rect, not the frame                                                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 459 | Clicking the frame outside the moved image switches the selected target back to the frame                                                                                  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 460 | Manually picking Crop from the dropdown enters crop mode immediately, without needing a resize first                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 461 | Reopening the Image tab after a crop was already committed re-enters crop mode immediately, not position                                                                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 462 | Hovering the image crop rect's own handles while it is the selected target shows resize/rotate cursors                                                                     |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 463 | Dragging a resize handle past the opposite anchor mirrors an image fill, and dragging back un-mirrors it                                                                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 464 | A second image-filled shape renders correctly alongside the first, and both survive deselecting                                                                            |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 465 | Dragging a resize handle past the opposite anchor mirrors a pattern fill too, and dragging back un-mirrors it                                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 466 | Clicking a completely different shape while the Image editor's position mode is active exits it, unselected                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 467 | Clicking a completely different shape while crop mode is active exits the editor, without selecting that shape                                                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 468 | Rotating the frame on canvas while its image editor is active in crop mode leaves the crop untouched                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 469 | Resizing the frame again on canvas while already in crop mode leaves the crop untouched                                                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 470 | Rotating via the panel's own rotate button still carries the crop along, unlike a canvas rotate-handle drag                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 471 | The ImageCrop panel's Dimensions row locks aspect ratio permanently, scaling the other axis to match                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 472 | Clicking Flip horizontal in the ImageCrop panel flips the image's own paint, not the frame                                                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 473 | Clicking the frame after focusing the image reopens the fill picker panel on its own, without a swatch click                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 474 | Escape while the image is focused fully exits the editor but still reopens the fill picker panel                                                                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 475 | Dragging the image within its frame snaps to center/edge alignment with the frame, drawing a smart guide                                                                   |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 476 | Picking Tile enters tile mode with a 50% default scale, and dragging a corner scales the tile only (no move/rotate)                                                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 477 | Dragging the Saturation adjustment slider to its minimum actually desaturates the rendered image, not just the paint                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 478 | A pattern keeps rendering correctly on its consumer after zooming in heavily, even with its source far away and off-screen                                                 |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 479 | Dragging crop on an Image fill with no asset picked yet pans the checker placeholder itself, not just the crop outline                                                     |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 480 | Cropping an Image fill with no asset picked yet still previews the checker placeholder beyond the frame, dimmed                                                            |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 481 | Picking a real file over a placeholder already cropped/panned keeps that same crop, instead of resetting to a fresh one                                                    |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 482 | Selecting a shape with an image fill shows the Image edit toolbar (Crop/Select area/Remove background/Edit with prompt/More)                                               |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 483 | The Image edit toolbar hides once crop mode is entered (it would otherwise overlap the crop UI), reappearing once crop mode exits                                          |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 484 | Picking Crop right after Tile (via the dropdown, or via a resize that auto-enters crop) clears the stale tile scaleMode/scale                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 485 | Entering crop mode shows an Expand button inset near the frame's bottom-right corner, click-through so it never steals the resize handle                                   |  —   |                  ✅ `fill-section.spec.ts`                   |
+| 486 | Clicking Crop in the Image edit toolbar enters crop mode on the target image fill, seeding a crop rect if none existed yet                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 487 | Opening a second image fill's picker closes a stale one left open from a previous image-focus session, instead of both staying open and racing over which fill gets edited |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 488 | Clicking Crop preserves whichever fill row was genuinely selected in the panel, instead of the toolbar's own click always falling back to fill 0 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 489 | Switching the picker to a different fill row clears the global image editor state left by the previous fill (e.g. Tile mode), instead of staying stuck showing it |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 490 | Clicking anywhere else in the right panel exits the Image editor mode, the same as clicking the canvas already does |  ✅  |                  ✅ `fill-section.spec.ts`                   |
-| 491 | Cycling through several image fills that each already have a committed crop (0→1→2→0→1) always enters crop mode on whichever fill was just clicked, never landing on null |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 488 | Clicking Crop preserves whichever fill row was genuinely selected in the panel, instead of the toolbar's own click always falling back to fill 0                           |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 489 | Switching the picker to a different fill row clears the global image editor state left by the previous fill (e.g. Tile mode), instead of staying stuck showing it          |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 490 | Clicking anywhere else in the right panel exits the Image editor mode, the same as clicking the canvas already does                                                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 491 | Cycling through several image fills that each already have a committed crop (0→1→2→0→1) always enters crop mode on whichever fill was just clicked, never landing on null  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -860,7 +860,7 @@ over the same on-canvas area — position and tile mode leave it visible, only c
 `crop` rect), but nothing enforced that — picking Crop right after Tile (or resizing a
 tile-mode shape, which auto-enters crop via `disarmResizeDrag.ts`'s
 `commitImageEditorCropModeTransition`) left the paint with `scaleMode: 'tile'` **and** a freshly
-seeded `crop` at the same time, so `drawImageTexture.ts` applied tile UV-wrapping *inside* the
+seeded `crop` at the same time, so `drawImageTexture.ts` applied tile UV-wrapping _inside_ the
 crop quad — a visible "double-exposure" ghosting artifact, confirmed live. Root cause:
 `seedImageCropIfNeeded.ts` (the single function both the dropdown's `enterImageCropMode` and the
 resize-handle's `armResizeOnPointerDown.ts` call to seed a crop rect) only ever wrote `crop`,
@@ -886,7 +886,7 @@ handle's own hit zone near that corner, or making the button itself part of the 
 resolution order).
 
 #486 is the Image edit toolbar's own Crop button gaining a real handler
-(`useHandleCropClick.ts`), following a three-rule priority for *which* fill it targets, decided
+(`useHandleCropClick.ts`), following a three-rule priority for _which_ fill it targets, decided
 with the user up front: (a) with no fill row selected in the right panel, target the first (topmost)
 fill that is an image; (b) with one or more fill rows selected, target the selected one that is an
 image; (c) if a fill row is selected but none of the selected rows is an image, fall back to (a).
@@ -919,10 +919,11 @@ DOM at once (one still `aria-pressed="true"` from a never-actually-closed siblin
 
 Two intermediate fixes were tried and discarded before the real one landed, each one a genuine
 regression the user caught live ("jest jeszcze gorzej" / "dalej są widoczne 2 panele"):
+
 1. A `key`-based forced remount, scoped to `imageFillPickerFocus` only. Failed from a React 18
    StrictMode interaction (the same hazard class already documented for `skipInitialArm` above):
    forcing an unmount/remount mid-click raced Radix's own dismissable-layer/outside-click handling,
-   closing *both* fills' popovers instead of just the stale one.
+   closing _both_ fills' popovers instead of just the stale one.
 2. A `forceCloseSignal?: number` prop toggling `ColorPicker`'s controlled `open` via
    `handleOpenChange`. This avoided the remount race, but its consuming effect depended on
    `handleOpenChange` in its dependency array — an unmemoized closure recreated on every render — so
@@ -931,17 +932,18 @@ regression the user caught live ("jest jeszcze gorzej" / "dalej są widoczne 2 p
    reopened again for the rest of the session.
 
 The user's own diagnosis, after both attempts failed, was the fix: stop trying to reactively
-*signal* a close and instead make it structurally impossible for two popovers to coexist. The final
+_signal_ a close and instead make it structurally impossible for two popovers to coexist. The final
 design, in `FillSection`/`FillRow`:
+
 - `FillSection` owns one `openPickerIndex: number | null`
   (`hooks/useFillSection/hooks/useOpenPickerIndex/`), seeded at mount from `imageFillPickerFocus` so
-  the resume-after-ImageCrop-swap case still works, generalized to *every* fill type (not just
+  the resume-after-ImageCrop-swap case still works, generalized to _every_ fill type (not just
   images) since the coexistence bug was never image-specific.
 - Each `FillRow` computes `isPickerOpen = paintIndex === openPickerIndex` — a **derived** value.
   A single number literally cannot equal two different indices, so at most one row can ever be open.
 - `ColorPickerInput` already had an unused-by-`FillRow` escape hatch, `onTriggerClick` (used by
   `StopRow.tsx` for its own docked-panel pattern), which renders a plain static swatch button and
-  mounts *no* `ColorPicker`/`Popover` at all. `FillRow` now passes
+  mounts _no_ `ColorPicker`/`Popover` at all. `FillRow` now passes
   `onTriggerClick={isPickerOpen ? undefined : () => onPickerOpenChange(true)}` — a closed row
   genuinely has no `ColorPicker` component instance in the tree; the owning row mounts a fresh one
   with `initialOpen={true}`. Switching fills is an ordinary unmount-of-old/mount-of-new via React's
@@ -954,7 +956,7 @@ race-guard and `useForceClosePicker` — deleted along with the `forceCloseSigna
 #488 surfaced while re-verifying the Crop button (#486) against the new architecture: with fill row 1
 genuinely selected in the panel, clicking Crop still targeted fill 0. Root cause:
 `useClearFillSelectionOnOutsideClick`'s window `mousedown` listener (used to deselect a fill row when
-clicking away from the panel) fired *before* the Crop button's own `click` handler ever read
+clicking away from the panel) fired _before_ the Crop button's own `click` handler ever read
 `selectedFillIndices`, since `mousedown` always precedes `click` in the same interaction — by the
 time the crop handler ran, the selection it wanted to read had already been cleared. Fixed narrowly:
 `ImageEditToolbar`'s Crop button gained an `onMouseDown` (`useStopCropMouseDownPropagation.ts`,
@@ -973,7 +975,7 @@ deactivate branch requires `isImageTabActive` to go `false` to clear `imageEdito
 `true` forever blocked it. Fixed with `useDeactivateImageTabOnPickerClose.ts`: resets
 `isImageTabActive` to `false` the instant `isPickerOpen` (now derived from `openPickerIndex`) goes
 false — safe under the new architecture specifically because the one scenario that used to need
-`isImageTabActive` to *survive* a momentary close (continuing a canvas resize-drag) no longer works
+`isImageTabActive` to _survive_ a momentary close (continuing a canvas resize-drag) no longer works
 by toggling `isPickerOpen` on a still-mounted `FillRow` at all; it works by swapping the whole
 `FillSection` out for the dedicated `ImageCrop` panel view, which unmounts everything and reseeds
 `openPickerIndex` from `imageFillPickerFocus` on the way back.
@@ -986,7 +988,7 @@ resolver), but clicking elsewhere in the right panel (e.g. the Position/Opacity 
 `useClearFillSelectionOnOutsideClick.ts` in `useFillSection`'s hook set and following the exact same
 shape (a `window` `mousedown` listener, gated on `isImageEditorActive` the way the sibling hook gates
 on `hasSelection`). It dispatches `setImageEditor(null)` when a click lands outside the fill list
-container but *inside* the right panel — checked via `event.target.closest('[class*="RightPanel_"]')`
+container but _inside_ the right panel — checked via `event.target.closest('[class*="RightPanel_"]')`
 (the CSS-module-generated root class), which is the deciding condition: without it, this would also
 fire on every canvas click (canvas is likewise "outside the fill list"), redundantly racing the
 canvas's own resolver and risking exiting the editor on clicks meant to interact with the crop/resize
@@ -1016,16 +1018,16 @@ Root cause: `useSyncImageEditor`, `useSyncGradientEditor`, and `useSyncPatternSo
 run once per `FillRow`, syncing that row's local open/active state into shared global Redux state
 (`imageEditor`/`imageFillPickerFocus`, `gradientEditor`, `patternSourcePickTarget`). All three had
 the identical flaw: their deactivate branch (and unmount cleanup) unconditionally dispatched `null`
-whenever *this* row's own state went inactive, without checking whether the shared state still
+whenever _this_ row's own state went inactive, without checking whether the shared state still
 actually belonged to this row. Since every `FillRow`'s `isPickerOpen` is derived from one shared
-`openPickerIndex` (see #487), switching from fill 1 to fill 0 flips *both* rows' `isPickerOpen` in
-the *same* render commit. React runs effects in tree order: fill 0 (lower index, rendered first)
+`openPickerIndex` (see #487), switching from fill 1 to fill 0 flips _both_ rows' `isPickerOpen` in
+the _same_ render commit. React runs effects in tree order: fill 0 (lower index, rendered first)
 activates and correctly claims the state — then fill 1's deactivation fires immediately after, in
 the same flush, and unconditionally nulls whatever is there, clobbering fill 0's fresh claim a
 moment after it was set.
 
 Fixed identically in all three hooks: before dispatching `null`, read the current value back via
-`store.getState()` and only clear it if it still matches *this* row's own `(nodeId, paintIndex)`.
+`store.getState()` and only clear it if it still matches _this_ row's own `(nodeId, paintIndex)`.
 `useSyncImageEditor`'s version of the check appeared twice (deactivate branch and unmount cleanup)
 and was pulled into `useSyncImageEditor/utils/clearOwnedImageEditorState.ts` — the user caught the
 duplication directly ("ta logika się powtarza zrób na to funkcje") — which also prompted promoting
@@ -1033,10 +1035,10 @@ duplication directly ("ta logika się powtarza zrób na to funkcje") — which a
 folder, per the established "a hook with its own utils gets its own folder" convention.
 
 A real trap surfaced while writing the regression tests: a `renderHook` test that mounts fill 1,
-*separately* mounts fill 0, then reruns fill 1's own `rerender` does **not** reproduce the race —
+_separately_ mounts fill 0, then reruns fill 1's own `rerender` does **not** reproduce the race —
 each of those calls is its own sequential `act()` flush, not an interleaved same-commit update, so a
 test built that way can pass against both the buggy and the fixed code. The only test shape that
-actually exercises the real ordering is a single composite hook calling *both* rows' sync hook
+actually exercises the real ordering is a single composite hook calling _both_ rows' sync hook
 unconditionally (mirroring how `FillSection` renders every `FillRow` on every render) and changing
 which one is active via one shared prop in one `rerender` call — see the last test in each of
 `useSyncImageEditor.spec.tsx`/`useSyncGradientEditor.spec.tsx`/`useSyncPatternSourcePickTarget.spec.tsx`
@@ -1044,3 +1046,39 @@ for the pattern. Confirmed via the standard stash/pop check: reverting just the 
 addition makes all three regression tests — and the live e2e reproduction of the exact repro,
 cycling 0→1→2→0→1 — fail exactly as described, with every other pre-existing test in each file
 still passing.
+
+#492 is a new feature, not a bug fix — but it took three rounds of live correction against the first
+implementation to land on the real spec, so those corrections are recorded here alongside it.
+`ImageCropToolbar`'s "Crop" label + slider (canvas toolbar, shown while `imageEditor.mode === 'crop'`)
+previously had no real geometry behind it — a local `useState` shell with no store read/write. Figma's
+own docs don't document the slider's mechanics, so the user supplied the spec directly. The first
+version (locked via `AskUserQuestion`) used 0% = Fill/**cover** size, anchored on the frame's own
+center — tested only against a square node + square image, where cover and contain are numerically
+identical, which hid the mistake. The user then supplied a screenshot of Figma's own crop UI on a
+portrait photo and pushed back: cover's defining trait (the non-locked axis overflowing) is exactly
+what the screenshot showed, and that's what was wrong. After a rejected intermediate attempt that
+branched on `paint.scaleMode === 'fit'` (plausible, matched `getImageCropRect.ts`'s own existing seed
+branch, but still overflowed for the common default `scaleMode: 'fill'` case — the user's exact
+words: "dalej nie działa"), the fix landed: 0% is **unconditionally** the Fit/**contain** size, and
+this toolbar always reasons in Fit terms regardless of the paint's own Fill/Fit choice elsewhere.
+Separately, the user caught the anchor snapping the image back to the frame's center even after they'd
+manually dragged it off-center — fixed by anchoring on the crop's own current center instead of the
+frame's. See `properties-panel.md`'s `ImageCropToolbar` section for the full narrative and the new
+pure utils (`getEffectiveImageSize`, `getImageCropZoomPercent`, `computeImageCropZoomRect`,
+`commitImageCropZoom`, `selectImageCropTarget`).
+
+The Fit/contain correction also exposed a bug one level upstream: `seedImageCropIfNeeded.ts` (used by
+every crop-mode-entry path, not just this toolbar) was still seeding the pre-existing, deliberately
+cover-based value for a default Fill-mode paint, so a crop could start overflowing before the slider
+was ever touched. Fixed by giving it its own unconditional Fit/contain seed computation, without
+touching `getImageCropRect.ts`'s own scaleMode-aware branch (still correct and tested for its other,
+untouched callers).
+
+e2e coverage, three tests: (1) the basic 0→100%→0 sweep on a square node + square image; (2) the
+never-overflow guarantee on a mismatched-aspect node/image pair with the paint left at its default
+`scaleMode: 'fill'` — this is the test that caught the `seedImageCropIfNeeded` bug above, failing with
+the seeded crop's height at the old overflowing cover value until that fix landed; (3) dragging the
+image off-center via a canvas pointer-drag before ever touching the slider, then confirming the zoomed
+crop stays centered on that dragged position rather than snapping back to the frame's center. All
+three confirmed to genuinely fail against their respective pre-fix implementations via backup-file
+round-trips (edit → rerun → confirm failure → restore).

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
+import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 import { seedImageCropIfNeeded } from '../seedImageCropIfNeeded';
 
 const rectangle: TRectangleNode = {
@@ -19,6 +20,32 @@ const rectangle: TRectangleNode = {
 };
 
 describe('seedImageCropIfNeeded behaviors', () => {
+  afterEach(() => {
+    imagePaintTextureSizeCache.clear();
+  });
+
+  it('should seed the Fit/contain rect once the image size has loaded, even for a Fill-mode paint, so a crop never starts by overflowing the node', () => {
+    // mock — a 150x100 (1.5:1) node with a 400x400 (1:1) native image: fitting it locks height to
+    // the node's own 100 and leaves gaps on width (100, not 150) — never the overflowing 150x150
+    // cover rect a Fill-mode paint would have seeded before this fix
+    const dispatch = vi.fn();
+
+    imagePaintTextureSizeCache.set('image-1', { height: 400, width: 400 });
+
+    // before
+    seedImageCropIfNeeded(dispatch, rectangle, 0);
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: {
+          changes: { fills: [{ ...rectangle.fills[0], crop: { height: 100, rotation: 0, width: 100, x: 35, y: 20 } }] },
+          id: 'rect-1',
+        },
+      }),
+    );
+  });
+
   it('should seed and dispatch a crop rect matching the node bounds when the image has none yet', () => {
     // mock
     const dispatch = vi.fn();

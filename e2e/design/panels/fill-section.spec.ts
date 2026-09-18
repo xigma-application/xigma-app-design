@@ -3585,6 +3585,201 @@ test.describe('Design panels — Fill section', () => {
     await expect(cropToolbar).not.toBeVisible();
   });
 
+  test('the Image crop toolbar slider scales the image around its current position, from its Fit/contain size up to its native size', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-toolbar-slider');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a square node so a square source image's Fit/contain rect exactly matches the node bounds
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // a source image 4x the node's size, so the native size clearly extends past the frame
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(400, 400, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // wait for the real texture to finish loading before entering crop mode, so the crop rect is
+    // seeded from the actual native size instead of falling back to the node's own bounds
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+
+    const node = await readNode(page, id);
+
+    // action — enter crop mode
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    // result — 0% (the initial seed) is the Fit/contain size, which for a matching-aspect image is
+    // exactly the node's own bounds, centered on the frame since that is where the seed itself starts
+    const seededCrop = (await readNode(page, id)).fills![0].crop;
+
+    expect(seededCrop).toEqual({ height: node.height, rotation: 0, width: node.width, x: node.x, y: node.y });
+
+    const slider = page.locator('[class*="ImageCropToolbar_"]').first().getByRole('slider');
+    const box = (await slider.boundingBox())!;
+
+    // action — drag to the far right end of the slider (100%)
+    await page.mouse.click(box.x + box.width - 1, box.y + box.height / 2);
+
+    // result — close to the native 400x400 size, still centered on the same point the crop started at
+    const nativeCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(nativeCrop.width).toBeGreaterThan(390);
+    expect(nativeCrop.height).toBeGreaterThan(390);
+    expect(nativeCrop.x + nativeCrop.width / 2).toBeCloseTo(node.x! + node.width! / 2, 1);
+    expect(nativeCrop.y + nativeCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
+
+    // action — drag back to the far left end of the slider (0%)
+    await page.mouse.click(box.x + 1, box.y + box.height / 2);
+
+    // result — back down close to the Fit/contain size, still centered on the same point
+    const coverCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(coverCrop.width).toBeLessThan(110);
+    expect(coverCrop.height).toBeLessThan(110);
+    expect(coverCrop.x + coverCrop.width / 2).toBeCloseTo(node.x! + node.width! / 2, 1);
+    expect(coverCrop.y + coverCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
+  });
+
+  test('the Image crop toolbar slider never overflows the frame at 0%, leaving gaps on the unlocked axis instead — even for a Fill-mode paint', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-toolbar-slider-fit');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a wide 200x80 rectangle with a square source image — the crop toolbar must letterbox it,
+    // never overflow either axis, regardless of the paint's own (default, untouched) Fill scaleMode
+    await designPage.drawRectangle(700, 200, 900, 280);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // a source image much bigger than the node in both axes, so 100% clearly grows past the frame
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(800, 800, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    // wait for the real texture to finish loading before entering crop mode
+    await expect.poll(async () => readPixelColor(page, 800, 240)).toEqual([255, 0, 0]);
+
+    const node = await readNode(page, id);
+
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('fill');
+
+    // action — enter crop mode
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    // result — 0% (the initial seed) is the Fit/contain size: height locks exactly to the node
+    // (the constraining axis for a square image on a wide node), width gaps in well short of it —
+    // and, critically, neither axis ever exceeds the node's own bounds
+    const seededCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(seededCrop.height).toBe(node.height);
+    expect(seededCrop.width).toBeLessThan(node.width!);
+    expect(seededCrop.width).toBeLessThanOrEqual(node.width!);
+    expect(seededCrop.height).toBeLessThanOrEqual(node.height!);
+    expect(seededCrop.x + seededCrop.width / 2).toBeCloseTo(node.x! + node.width! / 2, 1);
+    expect(seededCrop.y + seededCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
+
+    const slider = page.locator('[class*="ImageCropToolbar_"]').first().getByRole('slider');
+    const box = (await slider.boundingBox())!;
+
+    // action — drag to the far right end of the slider (100%) — at high zoom, growing past the
+    // frame is expected; the "never overflow" guarantee is only about the 0% baseline above
+    await page.mouse.click(box.x + box.width - 1, box.y + box.height / 2);
+
+    const nativeCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(nativeCrop.width).toBeGreaterThan(700);
+    expect(nativeCrop.height).toBeGreaterThan(700);
+
+    // action — drag back to the far left end of the slider (0%)
+    await page.mouse.click(box.x + 1, box.y + box.height / 2);
+
+    // result — back down close to the Fit/contain size, still never overflowing the node
+    const containCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(containCrop.width).toBeLessThan(100);
+    expect(containCrop.height).toBeLessThan(100);
+    expect(containCrop.x + containCrop.width / 2).toBeCloseTo(node.x! + node.width! / 2, 1);
+    expect(containCrop.y + containCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
+  });
+
+  test('the Image crop toolbar slider zooms around wherever the image was manually positioned, without snapping it back to the frame center', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-toolbar-slider-anchor');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a square node so the seeded Fit/contain rect starts out exactly matching the node bounds
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // a source image 4x the node's size, so there is real room to zoom
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(400, 400, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+
+    // action — enter crop mode
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    // action — manually drag the image itself off the frame's own center, by dragging inside the
+    // shape body while in crop mode (this moves only the image, not the frame)
+    await designPage.pointerDown(750, 250);
+    await designPage.pointerMove(770, 270);
+    await designPage.pointerUp();
+
+    const croppedNode = await readNode(page, id);
+    const cropAfterDrag = croppedNode.fills![0].crop!;
+    const draggedCenterX = cropAfterDrag.x + cropAfterDrag.width / 2;
+    const draggedCenterY = cropAfterDrag.y + cropAfterDrag.height / 2;
+
+    // sanity check — the drag actually moved the image away from the frame's own center
+    expect(draggedCenterX).not.toBeCloseTo(croppedNode.x! + croppedNode.width! / 2, 1);
+    expect(draggedCenterY).not.toBeCloseTo(croppedNode.y! + croppedNode.height! / 2, 1);
+
+    // action — drag the zoom slider to a new value
+    const slider = page.locator('[class*="ImageCropToolbar_"]').first().getByRole('slider');
+    const box = (await slider.boundingBox())!;
+
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+    // result — the crop grew, but stayed centered on the exact point the user dragged it to, not
+    // the frame's own center
+    const zoomedCrop = (await readNode(page, id)).fills![0].crop!;
+
+    expect(zoomedCrop.width).toBeGreaterThan(cropAfterDrag.width);
+    expect(zoomedCrop.x + zoomedCrop.width / 2).toBeCloseTo(draggedCenterX, 1);
+    expect(zoomedCrop.y + zoomedCrop.height / 2).toBeCloseTo(draggedCenterY, 1);
+  });
+
   test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {
     const designPage = new DesignPage(page);
 

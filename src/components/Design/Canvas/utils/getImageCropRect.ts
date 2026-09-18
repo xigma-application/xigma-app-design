@@ -4,23 +4,9 @@ import { TDraftRect } from 'types/canvas';
 import { TImageCrop, TImagePaint } from 'types/design/paint/types';
 
 // utils
+import { getEffectiveImageSize } from './getEffectiveImageSize';
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 import { getImageFillCoverRect } from 'utils/canvas/drawVectorNode/getImageFillCoverRect';
-import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
-
-const getEffectiveImageSize = (paint: TImagePaint): { height: number; width: number } | undefined => {
-  const imageSize = imagePaintTextureSizeCache.get(paint.ref);
-
-  if (imageSize) {
-    const isSideways = paint.rotation === 90 || paint.rotation === 270;
-    return {
-      height: isSideways ? imageSize.width : imageSize.height,
-      width: isSideways ? imageSize.height : imageSize.width,
-    };
-  }
-
-  return undefined;
-};
 
 const seedFromNaturalSize = (bounds: TDraftRect, node: TAppearanceNode, paint: TImagePaint): TImageCrop | undefined => {
   const effectiveSize = getEffectiveImageSize(paint);

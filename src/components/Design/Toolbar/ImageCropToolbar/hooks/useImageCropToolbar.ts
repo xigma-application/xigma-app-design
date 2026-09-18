@@ -1,11 +1,13 @@
-import { useState } from 'react';
-
 // store
 import { selectImageEditor } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
-// others
-import { ZOOM_SLIDER_DEFAULT } from '../constants';
+// hooks
+import { useHandleZoomChange } from './useHandleZoomChange';
+
+// utils
+import { getImageCropZoomPercent } from '../utils/getImageCropZoomPercent';
+import { selectImageCropTarget } from '../utils/selectImageCropTarget';
 
 export type TUseImageCropToolbarResult = {
   isVisible: boolean;
@@ -15,7 +17,12 @@ export type TUseImageCropToolbarResult = {
 
 export const useImageCropToolbar = (): TUseImageCropToolbarResult => {
   const imageEditor = useAppSelector(selectImageEditor);
-  const [zoom, setZoom] = useState(ZOOM_SLIDER_DEFAULT);
+  const target = useAppSelector(selectImageCropTarget);
+  const onZoomChange = useHandleZoomChange(target?.node, target?.paint, target?.paintIndex);
 
-  return { isVisible: imageEditor?.mode === 'crop', onZoomChange: setZoom, zoom };
+  return {
+    isVisible: imageEditor?.mode === 'crop',
+    onZoomChange,
+    zoom: target ? getImageCropZoomPercent(target.node, target.paint) : 0,
+  };
 };

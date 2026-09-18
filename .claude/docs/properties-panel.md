@@ -1072,6 +1072,96 @@ see `useSyncImageEditor.spec.tsx`'s last test for the pattern. The first attempt
 sequential/separate-`renderHook` shape and passed against both the buggy and fixed code, which would
 have shipped as coverage that could never catch a regression.
 
+**The `ImageCropToolbar` zoom slider (canvas toolbar, not this panel — documented here because it
+shares `ImageCrop`'s crop-geometry vocabulary).** `ImageCropToolbar.tsx` already rendered a "Crop"
+label + compact `Slider`, but it was a pure UI shell — local `useState`, no store read/write. Figma's
+own docs don't document the slider's mechanics (only an inaccessible community feature-request
+thread), so the user supplied the spec directly — and it took three live corrections after the first
+`AskUserQuestion`-locked version to land on the real one:
+
+1. First locked (via `AskUserQuestion`): 0% = the paint's Fill/**cover** size, anchor = the frame's
+   own geometric center. Implemented and tested against a square node + square image, where cover and
+   contain are numerically identical — which hid the mistake.
+2. The user then supplied a real screenshot of Figma's own crop UI on a portrait photo and pushed back
+   ("Nie potwierdza... szerokość jest git ale wysokość ma tu przewagę" — width's fine but height
+   dominates) — cover's defining trait is that the non-locked axis *overflows*, and that's exactly what
+   the screenshot showed, which is what the user was objecting to. After several rounds of the user
+   restating it more bluntly each time ("Wysokość powinna być spasowana do frame... żeby nie wychodziło
+   w żaden sposób poza frame", "Zdjęcia ma się wpasować w frame jak fit") the fix landed: 0% is
+   **always** the Fit/**contain** size (`getImageFillContainRect` — the largest rect matching the
+   image's own aspect ratio that fits fully inside the frame, gaps allowed on the unlocked axis),
+   regardless of the paint's own `scaleMode`. An intermediate attempt tried branching on
+   `paint.scaleMode === 'fit'` (respecting the existing Fill/Fit choice) — plausible in isolation, and
+   it matched `getImageCropRect.ts`'s own existing seed branch, but the user rejected it directly
+   ("dalej nie działa") because the common case (`scaleMode: 'fill'`, the default) still overflowed.
+   The rule is unconditional: **this toolbar always reasons in Fit terms**, independent of whatever
+   Fill/Fit was picked for the paint's static (non-crop) rendering.
+3. Once 0%/100% were right, the user caught one more thing live: zooming was re-centering the image
+   back onto the frame's own center even when the user had manually dragged the image off-center first
+   ("nie zmieniaj pozycji obrazka na center... ma zostać w swoim miejscu gdzie był" — don't move it to
+   center, it should stay where it was). The anchor was changed from the frame's geometric center to
+   the **crop's own current center** (`getImageCropRect(node, paint)`'s existing `x/y/width/height`,
+   read fresh on every call) — since the newly-computed rect is always built to share that exact
+   center, repeated slider drags keep resolving to the same anchor, so a zoom session never drifts.
+   For a fresh/never-touched crop this still visually lands on the frame's center, only because the
+   *seed itself* starts there (see below) — not because of anything the toolbar forces.
+
+Deliberately does **not** reuse `selectSelectedImageCrop` — that selector is gated on
+`imageEditor?.selectedTarget === 'image'` (only true once the user has clicked *into* the image inside
+crop mode, per the `ImageCrop/` routing above) and has 13 established consumers across Position/
+Dimensions/Rotation/canvas rotate-flip that all depend on that gate staying exactly as-is. The
+toolbar's own visibility only ever depended on `imageEditor?.mode === 'crop'`, so a new selector,
+`ImageCropToolbar/utils/selectImageCropTarget.ts`, mirrors `selectSelectedImageCrop`'s shape
+(`createSelector([selectImageEditor, selectNodes], ...)`, same `isAppearanceNode`/`paint.type ===
+'image'` guards) but gates on `mode === 'crop'` alone — resolving as soon as crop mode starts, before
+`selectedTarget` ever flips to `'image'`.
+
+Pure math lives in three new files under `ImageCropToolbar/utils/`: `getEffectiveImageSize.ts` (moved
+out of `getImageCropRect.ts`, where it was a private function — now shared by both, reads the loaded
+texture's actual pixel dimensions from `imagePaintTextureSizeCache`, swapping width/height for a 90°/
+270° rotated image), `getImageCropZoomPercent.ts` (crop width → 0–100 against the Fit/contain-to-native
+range, clamped both ends), and `computeImageCropZoomRect.ts` (percent → a full `TImageCrop`,
+interpolating linearly between the contain rect and the native size per axis, then centering the
+result on the *current* crop's own center rather than the frame's). `commitImageCropZoom.ts` dispatches
+the result onto the targeted paint index only (modeled directly on the existing
+`commitImageCropDimensions.ts`), and `useHandleZoomChange.ts` is the click-handler hook wrapping it
+per the handlers-live-in-hooks convention. `useImageCropToolbar.ts` composes all of it: `isVisible`
+still reads `selectImageEditor` directly (kept independent of the new selector so the toolbar still
+shows even before a node/paint resolves — matters for existing tests that set `imageEditor` without a
+real node in the store), while `zoom`/`onZoomChange` come from `selectImageCropTarget` +
+`getImageCropZoomPercent`/`useHandleZoomChange`, falling back to a plain `0` when no target resolves
+yet (texture not loaded, or crop mode just barely activated) instead of the old shell's arbitrary
+`ZOOM_SLIDER_DEFAULT = 50` (removed — no longer meaningful once the value is always real).
+
+**The initial seed (`seedImageCropIfNeeded.ts`) needed the exact same "always Fit/contain" fix.**
+This function — called from every crop-mode-entry path (`useHandleCropClick.ts`'s toolbar button, the
+dropdown's "Crop" option, and the resize-triggered auto-switch in `armResizeOnPointerDown.ts`) — used
+to delegate its size computation to `getImageCropRect.ts`'s own `seedFromNaturalSize`, which branches
+on `paint.scaleMode` (`'fit'` → contain, `'fill'`/default → cover) and is a **pre-existing, deliberately
+tested** behavior (`getImageCropRect.spec.ts`'s "should seed the cover rect for fill... extending past
+the node bounds" case, predating this session). Left alone, a default Fill-mode paint would still seed
+an overflowing crop the instant crop mode opens — before the slider is ever touched — which is exactly
+the bug the user's screenshot and follow-up messages were describing, just one step upstream of the
+toolbar itself. Fixed by giving `seedImageCropIfNeeded.ts` its own local `seedInitialCropRect` (reads
+`getEffectiveImageSize` + `getImageFillContainRect` directly, unconditionally) instead of calling
+`getImageCropRect`, so entering crop mode always starts non-overflowing regardless of scaleMode —
+without touching `getImageCropRect.ts` itself, since that function's *other* callers (hover-cursor
+resolvers, the crop-image canvas outline, `selectSelectedImageCrop`) still need its scaleMode-aware
+fallback for paints that already carry a `.crop` or whose seed hasn't committed yet. Confirmed safe: all
+7 pre-existing `seedImageCropIfNeeded.spec.ts` tests never actually exercised the branch difference
+(none of them mock a loaded texture), so none needed to change — only a new 8th test was added, using
+an asymmetric node/image pair to prove the seed now differs from the old cover-based value.
+
+Covered by three e2e tests in `fill-section.spec.ts`: one for the basic 0→100%→0 sweep on a
+matching-aspect (square node, square image) pair; one specifically for the never-overflow guarantee on
+a mismatched-aspect pair with the paint left at its default `scaleMode: 'fill'` (this is the one that
+caught the seed bug above — it failed with `seededCrop.height` at the overflowing cover value until the
+seed fix landed); and one proving the anchor stays wherever the user last dragged the image via a
+canvas pointer-drag inside the shape (`designPage.pointerDown`/`pointerMove`/`pointerUp`) before ever
+touching the slider, rather than snapping back to the frame's own center. All three were confirmed to
+genuinely fail against each of their corresponding pre-fix implementations via git-stash/backup-file
+round-trips.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.
