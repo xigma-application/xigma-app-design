@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import ApplyStylesButton from './ApplyStylesButton/ApplyStylesButton';
+import ApplyStylesButton from '../ApplyStylesButton/ApplyStylesButton';
 import FillDropIndicator from './FillDropIndicator/FillDropIndicator';
 import FillRow from './FillRow/FillRow';
 import { UITools } from 'shared';
@@ -42,7 +42,12 @@ export const FillSection: FC = () => {
     <UITools.Section
       addAriaLabel={t(`${translationNameSpace}.addAriaLabel`)}
       addTooltip={t(`${translationNameSpace}.addTooltip`)}
-      component={<ApplyStylesButton />}
+      component={
+        <ApplyStylesButton
+          ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)}
+          tooltip={t(`${translationNameSpace}.applyStylesTooltip`)}
+        />
+      }
       e2eValue="fill"
       hasContent={fills.length > 0}
       label={t(`${translationNameSpace}.label`)}

@@ -1421,11 +1421,13 @@ can't be squeezed differently at the top when rulers show. e2e #515 in `fill-sec
 
 ### Muted empty sections (`Section` `mutedWhenEmpty`)
 
-Opt-in per section (Export and Fill today): while the section has no content (`hasContent`) and isn't
+Opt-in per section (Export, Fill and Stroke today): while the section has no content (`hasContent`) and isn't
 hovered, `Section--muted` turns the label and the header icons (`svg-color` on `Section__component`)
-`neutral-2`, and hides anything tagged `data-section-idle-hidden` (Fill's `StylesAndVariables` button,
+`neutral-2`, and hides anything tagged `data-section-idle-hidden` (the shared `Common/ApplyStylesButton` — `StylesAndVariables` icon, used by Fill and Stroke —
 `opacity: 0`); hover or any content restores `neutral-1` / full opacity. All of it transitions
-`0.1s ease-out` (color, fill, stroke, opacity). e2e #514 in `fill-section.spec.ts`.
+`0.1s ease-out` (color, fill, stroke, opacity). `Common/StrokeSection` is an empty placeholder (no
+stroke model yet: add/styles buttons do nothing) shown after Fill on Frame and Rectangle. e2e #514 in
+`fill-section.spec.ts` covers Fill.
 
 ### Appearance: Blend mode row
 

@@ -7,6 +7,7 @@ import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
+import StrokeSection from '../Common/StrokeSection/StrokeSection';
 import RectangleHeader from './RectangleHeader/RectangleHeader';
 import { UITools } from 'shared';
 
@@ -26,6 +27,7 @@ const Rectangle: FC = () => {
       </UITools.Section>
       <AppearanceSection />
       <FillSection />
+      <StrokeSection />
     </Fragment>
   );
 };

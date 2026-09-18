@@ -1,0 +1,75 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StrokeSection snapshots > should render the empty Stroke section with its add and styles buttons 1`] = `
+<DocumentFragment>
+  <div
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
+    data-test-section="stroke"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Stroke
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Apply stroke styles and variables"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M8.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m7-1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5M14 15.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0m-1 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Add stroke"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

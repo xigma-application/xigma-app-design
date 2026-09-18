@@ -9,7 +9,7 @@ describe('ApplyStylesButton behaviors', () => {
     // before
     render(
       <TooltipProvider>
-        <ApplyStylesButton />
+        <ApplyStylesButton ariaLabel="Apply styles and variables" tooltip="Apply styles and variables" />
       </TooltipProvider>,
     );
 
@@ -21,7 +21,7 @@ describe('ApplyStylesButton behaviors', () => {
     // before
     render(
       <TooltipProvider>
-        <ApplyStylesButton />
+        <ApplyStylesButton ariaLabel="Apply styles and variables" tooltip="Apply styles and variables" />
       </TooltipProvider>,
     );
 
