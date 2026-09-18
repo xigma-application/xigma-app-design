@@ -1315,6 +1315,34 @@ two different ways via backup-file round-trips: once with the Cancel button unwi
 editor stays open), and once with the reducer's snapshot-capture reverted to a plain assignment (Cancel
 exits the editor but the node keeps its post-Circle geometry, since there's nothing to restore from).
 
+**A "Shader" tab was added to `PaintTypeRow` as an inert placeholder** — icon only, no backing paint
+type, no panel body. The user's own framing: "dodaj sekcję shader do tego panelu z tą ikoną. Tylko
+tyle. Shadery zostawiamy narazie to za ciężki temat" (add a Shader section to this panel with that
+icon, just that — shaders are too heavy a topic for now). `ColorPickerTab.shader` was added to the
+enum and wired through every switch that already branches on `ColorPickerTab`, but each one either
+does nothing or renders nothing for it:
+- `renderBody.tsx` gets an explicit `case ColorPickerTab.shader: return null;` — **not** left to fall
+  into the `default:` case, since that case means "Solid" here, and an unhandled `'shader'` value would
+  have silently shown the Solid panel's body instead of a blank one.
+- `useSetActiveTab.ts`'s `isColorPickerTab` type guard gets `'shader'` added (it enumerates every valid
+  tab explicitly, so a value it doesn't know is treated as "not a real tab" and the whole handler
+  no-ops) — without this, clicking the Shader button wouldn't even visually mark it selected, since
+  `setActiveTab` would never fire. Its own internal `switch (tabName)` then gets `case
+  ColorPickerTab.shader: break;` — for the same elimination-pattern reason as `renderBody`, an
+  unhandled `'shader'` would have fallen into `default:`, which fires `onChange(value)` as if committing
+  a solid color, a real (if currently invisible, since the paint never actually changes to anything
+  the tab could reflect) side effect that doing nothing shouldn't have.
+
+The icon itself (`Shaders`, from `packages/components/src/Icon/svg/shaders.svg`) was registered in
+`xigma-app-shared` (`Icon/constants.ts`, alphabetical import + `Icons` entry) and pulled in via
+`npm run xigma:pull` — see [[xigma-icons]] for the general flow. A first attempt used a generic "Video"
+icon glyph for the **video fill's own right-panel swatch** in a related but separate task that same
+session and was corrected immediately once the user clarified they wanted the video's actual extracted-
+frame picture there (via `thumbnailUrl`, same mechanism `imageUrl` already used), not an icon — worth
+noting here only because it's the same class of mistake this Shader tab could invite in the future: a
+placeholder icon is for a tab/section that has no real content yet, not a substitute for showing real
+content a feature actually has available.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

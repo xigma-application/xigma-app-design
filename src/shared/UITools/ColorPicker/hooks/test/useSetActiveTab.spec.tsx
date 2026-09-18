@@ -283,6 +283,68 @@ describe('useSetActiveTab', () => {
     expect(onGradientChange).not.toHaveBeenCalled();
   });
 
+  it('should switch to the Shader tab without committing anything or throwing, since shaders have no backing paint type yet', () => {
+    // mock
+    const onChange = vi.fn();
+    const onGradientChange = vi.fn();
+    const onPatternChange = vi.fn();
+    const onImageChange = vi.fn();
+    const onVideoChange = vi.fn();
+    const setActiveTab = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useSetActiveTab(
+        ColorPickerTab.solid,
+        setActiveTab,
+        onChange,
+        VALUE,
+        GRADIENT_PANEL,
+        PATTERN_PANEL,
+        onGradientChange,
+        onPatternChange,
+        onImageChange,
+        onVideoChange,
+      ),
+    );
+
+    // action
+    expect(() => result.current(ColorPickerTab.shader)).not.toThrow();
+
+    // result — the tab itself switches (so the icon shows selected), but nothing is committed
+    expect(setActiveTab).toHaveBeenCalledWith(ColorPickerTab.shader);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onGradientChange).not.toHaveBeenCalled();
+    expect(onPatternChange).not.toHaveBeenCalled();
+    expect(onImageChange).not.toHaveBeenCalled();
+    expect(onVideoChange).not.toHaveBeenCalled();
+  });
+
+  it('should not reset the gradient or pattern panel state when switching to Shader', () => {
+    // mock
+    const gradientReset = vi.fn();
+    const patternReset = vi.fn();
+
+    // before
+    const { result } = renderHook(() =>
+      useSetActiveTab(
+        ColorPickerTab.solid,
+        vi.fn(),
+        vi.fn(),
+        VALUE,
+        { ...GRADIENT_PANEL, reset: gradientReset },
+        { ...PATTERN_PANEL, reset: patternReset },
+      ),
+    );
+
+    // action
+    result.current(ColorPickerTab.shader);
+
+    // result
+    expect(gradientReset).not.toHaveBeenCalled();
+    expect(patternReset).not.toHaveBeenCalled();
+  });
+
   it('should not recommit or reset anything when re-selecting the tab that is already active, so it never wipes an already-picked image', () => {
     // mock — this guards a real destructive bug: re-clicking the active Image tab used to be able to
     // wipe an already-picked image back to an empty placeholder, since committing an image paint has

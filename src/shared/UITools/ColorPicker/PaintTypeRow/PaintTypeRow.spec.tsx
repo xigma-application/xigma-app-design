@@ -148,4 +148,39 @@ describe('PaintTypeRow behaviors', () => {
     // result
     expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.image);
   });
+
+  it('should show the Shader button, not marked as the current paint type when solid is active', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.solid);
+
+    // result
+    const button = screen.getByRole('button', { name: 'Shader' });
+
+    expect(button).toBeInTheDocument();
+    expect(button.className).not.toContain('ButtonIcon--active');
+    expect(container.querySelectorAll('[class*="ButtonIcon--active"]')).toHaveLength(1);
+  });
+
+  it('should mark Shader as active when the shader tab is active', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.shader);
+
+    // result
+    expect(screen.getByRole('button', { name: 'Shader' }).className).toContain('ButtonIcon--active');
+    expect(container.querySelectorAll('[class*="ButtonIcon--active"]')).toHaveLength(1);
+  });
+
+  it('should call onSelectTab with shader when the Shader button is clicked', () => {
+    // mock
+    const onSelectTab = vi.fn();
+
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, onSelectTab);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Shader' }));
+
+    // result
+    expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.shader);
+  });
 });

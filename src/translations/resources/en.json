@@ -38,6 +38,7 @@
   "colorPicker.paintType.gradient": "Gradient",
   "colorPicker.paintType.image": "Image",
   "colorPicker.paintType.pattern": "Pattern",
+  "colorPicker.paintType.shader": "Shader",
   "colorPicker.paintType.solid": "Solid",
   "colorPicker.paintType.video": "Video",
   "colorPicker.pattern.alignmentLabel": "Alignment",

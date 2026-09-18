@@ -18,7 +18,8 @@ const isColorPickerTab = (value: string): value is ColorPickerTab =>
   value === ColorPickerTab.gradient ||
   value === ColorPickerTab.pattern ||
   value === ColorPickerTab.image ||
-  value === ColorPickerTab.video;
+  value === ColorPickerTab.video ||
+  value === ColorPickerTab.shader;
 
 export const useSetActiveTab =
   (
@@ -65,6 +66,8 @@ export const useSetActiveTab =
             onVideoChange?.({ ref: '', scaleMode: 'fill' });
             gradientPanel.reset();
             patternPanel.reset();
+            break;
+          case ColorPickerTab.shader:
             break;
           default:
             onChange(value);

@@ -165,4 +165,16 @@ describe('Body behaviors', () => {
     // result
     expect(screen.getByRole('button', { name: 'Upload from computer' })).toBeInTheDocument();
   });
+
+  it('should render no panel content for the shader tab, not silently falling back to the solid panel', () => {
+    // before — shaders are a placeholder tab for now (icon only); this guards against the switch's
+    // elimination-pattern `default:` (solid) silently swallowing an unhandled case
+    renderBody(ColorPickerTab.shader);
+
+    // result
+    expect(screen.queryByDisplayValue('ff0000')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stops')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Select source...' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Upload from computer' })).not.toBeInTheDocument();
+  });
 });

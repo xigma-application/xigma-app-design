@@ -57,6 +57,14 @@ export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, onSelectTab })
           onClick={(): void => onSelectTab(ColorPickerTab.video)}
         />
       </Tooltip>
+      <Tooltip content={t('colorPicker.paintType.shader')}>
+        <UITools.ButtonIcon
+          active={activeTab === ColorPickerTab.shader}
+          ariaLabel={t('colorPicker.paintType.shader')}
+          name="Shaders"
+          onClick={(): void => onSelectTab(ColorPickerTab.shader)}
+        />
+      </Tooltip>
     </div>
   );
 };

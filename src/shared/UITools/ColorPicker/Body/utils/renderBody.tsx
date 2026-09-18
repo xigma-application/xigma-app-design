@@ -73,6 +73,8 @@ export const renderBody = (props: TBodyProps): ReactNode => {
           videoPanel={videoPanel}
         />
       );
+    case ColorPickerTab.shader:
+      return null;
     default:
       return (
         <SolidPanel
