@@ -50,7 +50,7 @@ export const SectionColumn: FC<TSectionColumnProps> = ({
           [styles['SectionColumn--with-top-margin']]: withTopMargin,
         })}
       >
-        <SectionColumnLabels labels={labels} width={width} />
+        {size(labels) > 0 && <SectionColumnLabels labels={labels} width={width} />}
         <div
           className={cx(styles.SectionColumn__row, {
             [styles['SectionColumn__row--bottom-aligned']]: withBottomAlignedButtons,

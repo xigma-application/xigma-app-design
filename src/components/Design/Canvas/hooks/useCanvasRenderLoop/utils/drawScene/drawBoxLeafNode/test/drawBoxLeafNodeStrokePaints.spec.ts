@@ -43,7 +43,7 @@ describe('drawBoxLeafNodeStrokePaints', () => {
     drawBoxLeafNodeStrokePaints(context, node, 0.5, {}, new Map(), refs, null, 0);
 
     // result
-    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, 2, StrokeAlign.outside);
+    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, { bottom: 2, left: 2, right: 2, top: 2 }, StrokeAlign.outside);
     expect(drawBoxPaintsMock).toHaveBeenCalledWith(
       context,
       node,

@@ -8,7 +8,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawLineSizeLabel } from './drawLineSizeLabel';
 import { drawRectSizeLabel } from './drawRectSizeLabel';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
-import { getStrokePadding } from '../../../../utils/getNodeAtPoint/getStrokePadding';
+import { getStrokePaddings } from 'utils/design/stroke/getStrokePaddings';
 import { getSelectionBounds } from '../../../../utils/getSelectionBounds';
 import { isSmartSelectionGapHandleActive } from '../../../../utils/isSmartSelectionGapHandleActive';
 import { isSmartSelectionSwapDragActive } from '../../../../utils/isSmartSelectionSwapDragActive';
@@ -25,7 +25,7 @@ const getSingleNodeRotation = (node: TSceneNode): number => {
 
 const getSizeLabelRect = (nodes: TSceneNode[]): TSelectionSizeLabelRect => {
   if (nodes.length === 1) {
-    return { ...getNodeBounds(nodes[0]), padding: getStrokePadding(nodes[0]), rotation: getSingleNodeRotation(nodes[0]) };
+    return { ...getNodeBounds(nodes[0]), paddings: getStrokePaddings(nodes[0]), rotation: getSingleNodeRotation(nodes[0]) };
   }
 
   return { ...getSelectionBounds(nodes), rotation: 0 };

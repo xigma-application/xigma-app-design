@@ -8,7 +8,15 @@ type TReadablePaint = {
   scaleMode?: string;
   type: string;
 };
-type TReadableNode = { fills?: TReadablePaint[]; strokeAlign?: string; strokeWidth?: number; strokes?: TReadablePaint[] };
+type TReadableNode = {
+  fills?: TReadablePaint[];
+  strokeAlign?: string;
+  strokeLeftWidth?: number;
+  strokeSides?: string;
+  strokeTopWidth?: number;
+  strokeWidth?: number;
+  strokes?: TReadablePaint[];
+};
 type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number; property?: string } | null;
 
 const readImageEditor = (page: Page): Promise<TReadableImageEditor> =>
@@ -150,6 +158,46 @@ test.describe('Design panels — Stroke section', () => {
 
     // result
     expect((await readNode(page, id)).strokeAlign).toBe('center');
+  });
+
+  test('the individual strokes menu limits the stroke to one side, Custom shows four fields with Mixed, and All takes the largest weight', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-sides');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const chooseSides = async (label: string): Promise<void> => {
+      await page.getByLabel('Individual strokes').click();
+      await page.locator('[class*="PopoverItem__label"]', { hasText: label }).click();
+    };
+
+    // action
+    await chooseSides('Top');
+
+    // result
+    expect(await readNode(page, id)).toMatchObject({ strokeSides: 'top', strokeWidth: 1 });
+
+    // action
+    await chooseSides('Custom');
+    await page.getByLabel('Stroke left weight').fill('9');
+    await page.getByLabel('Stroke left weight').blur();
+
+    // result
+    await expect(page.getByLabel('Stroke weight')).toHaveValue('Mixed');
+    expect(await readNode(page, id)).toMatchObject({ strokeLeftWidth: 9, strokeSides: 'custom', strokeTopWidth: 1 });
+
+    // action
+    await chooseSides('All');
+
+    // result
+    expect(await readNode(page, id)).toMatchObject({ strokeSides: 'all', strokeWidth: 9 });
+    await expect(page.getByLabel('Stroke weight')).toHaveValue('9');
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

@@ -1,12 +1,16 @@
 // types
+import { TStrokeSideWidths } from 'utils/design/stroke/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getPaddedRect } from 'utils/design/stroke/getPaddedRect';
 import { rotatePoint } from 'utils/math/rotatePoint';
+
+const NO_PADDINGS: TStrokeSideWidths = { bottom: 0, left: 0, right: 0, top: 0 };
 
 export type TSelectionSizeLabelRect = {
   height: number;
-  padding?: number;
+  paddings?: TStrokeSideWidths;
   rotation: number;
   width: number;
   x: number;
@@ -43,15 +47,8 @@ const rotateEdge = (edge: TEdge, center: TPoint, rotation: number): TEdge => ({
 const pickBottomEdge = (edges: TEdge[]): TEdge => edges.reduce((bottom, edge) => (edge.normal.y > bottom.normal.y ? edge : bottom));
 
 export const getSelectionSizeLabelPlacement = (rect: TSelectionSizeLabelRect): TSelectionSizeLabelPlacement => {
-  const padding = rect.padding ?? 0;
   const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-  const paddedRect = {
-    ...rect,
-    height: rect.height + padding * 2,
-    width: rect.width + padding * 2,
-    x: rect.x - padding,
-    y: rect.y - padding,
-  };
+  const paddedRect = { ...rect, ...getPaddedRect(rect, rect.paddings ?? NO_PADDINGS) };
   const edges = getEdges(paddedRect).map((edge) => rotateEdge(edge, center, rect.rotation));
   const bottom = pickBottomEdge(edges);
 

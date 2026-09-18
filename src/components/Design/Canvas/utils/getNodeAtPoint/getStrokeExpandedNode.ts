@@ -2,18 +2,19 @@
 import { TBoxSceneNode } from 'types/design/types';
 
 // utils
-import { getStrokePadding } from './getStrokePadding';
+import { getStrokePaddings } from 'utils/design/stroke/getStrokePaddings';
 
 export const getStrokeExpandedNode = <T extends TBoxSceneNode>(node: T): T => {
-  const padding = getStrokePadding(node);
+  const { bottom, left, right, top } = getStrokePaddings(node);
+  const padding = Math.max(bottom, left, right, top);
 
   if (padding > 0) {
     const expansion = {
       cornerRadius: ('cornerRadius' in node ? (node.cornerRadius ?? 0) : 0) + padding,
-      height: node.height + padding * 2,
-      width: node.width + padding * 2,
-      x: node.x - padding,
-      y: node.y - padding,
+      height: node.height + top + bottom,
+      width: node.width + left + right,
+      x: node.x - left,
+      y: node.y - top,
     };
 
     return { ...node, ...expansion };

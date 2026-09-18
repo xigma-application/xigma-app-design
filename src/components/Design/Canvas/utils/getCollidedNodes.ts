@@ -1,22 +1,21 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getPaddedRect } from 'utils/design/stroke/getPaddedRect';
 import { getRotatedNodeBounds } from './getRotatedNodeBounds';
-import { getStrokePadding } from './getNodeAtPoint/getStrokePadding';
+import { getStrokedRotatedNodeBounds } from './getStrokedRotatedNodeBounds';
+import { getStrokePaddings } from 'utils/design/stroke/getStrokePaddings';
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
 
 const getPaddedNodeBounds = (node: TSceneNode): TDraftRect => {
-  const rotatedBounds = getRotatedNodeBounds(node);
-  const strokePadding = getStrokePadding(node);
+  if (node.type === NodeType.line || node.type === NodeType.vector) {
+    return getPaddedRect(getRotatedNodeBounds(node), getStrokePaddings(node));
+  }
 
-  return {
-    height: rotatedBounds.height + strokePadding * 2,
-    width: rotatedBounds.width + strokePadding * 2,
-    x: rotatedBounds.x - strokePadding,
-    y: rotatedBounds.y - strokePadding,
-  };
+  return getStrokedRotatedNodeBounds(node);
 };
 
 export const getCollidedNodes = (

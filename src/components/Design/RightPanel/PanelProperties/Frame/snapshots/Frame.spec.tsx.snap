@@ -919,10 +919,6 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
       data-test-section=""
     >
       <div
-        class="_SectionColumnLabels_ed28d5"
-        style="width: calc(100% - 32px);"
-      />
-      <div
         class="_SectionColumn__row_84b4eb"
       >
         <div

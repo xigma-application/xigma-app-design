@@ -10,7 +10,7 @@ import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawPathTextFontSizeGuide } from '../drawPathTextFontSizeGuide';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawSelectedPathTextHandle } from '../drawSelectedPathTextHandle';
-import { getSelectionOutlineBounds } from 'components/Design/Canvas/utils/getSelectionOutlineBounds';
+import { getSelectionOutlineDrawRect } from 'components/Design/Canvas/utils/getSelectionOutlineDrawRect';
 
 export const drawDefaultSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -23,7 +23,7 @@ export const drawDefaultSelectionOutline = (
   nodesById: Record<string, TSceneNode>,
 ): void => {
   const { rotation } = node;
-  const { height, width, x, y } = getSelectionOutlineBounds(node);
+  const { height, width, x, y } = getSelectionOutlineDrawRect(node);
   const outlineNode = { ...node, height, width, x, y };
   const pathNode = node.type === NodeType.text && node.pathId ? nodesById[node.pathId] : undefined;
 

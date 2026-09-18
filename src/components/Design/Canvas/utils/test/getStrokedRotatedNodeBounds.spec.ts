@@ -1,5 +1,5 @@
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { NodeType, StrokeAlign, StrokeSides } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -41,5 +41,18 @@ describe('getStrokedRotatedNodeBounds', () => {
     const bounds = getStrokedSelectionBounds([buildFrame(outsideStroke), buildFrame({ id: 'frame-2', x: 200, y: 20 })]);
 
     expect(bounds).toEqual({ height: 66, width: 298, x: 2, y: 12 });
+  });
+});
+
+describe('getStrokedRotatedNodeBounds with a single stroked side', () => {
+  it('should only grow the side that has an outside stroke', () => {
+    const frame = buildFrame({
+      strokeAlign: StrokeAlign.outside,
+      strokeSides: StrokeSides.top,
+      strokeWidth: 8,
+      strokes: outsideStroke.strokes,
+    });
+
+    expect(getStrokedRotatedNodeBounds(frame)).toEqual({ height: 58, width: 100, x: 10, y: 12 });
   });
 });

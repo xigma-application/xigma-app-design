@@ -399,7 +399,7 @@ describe('drawBoxLeafNode', () => {
     drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
 
     // result
-    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, 2, StrokeAlign.inside);
+    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, { bottom: 2, left: 2, right: 2, top: 2 }, StrokeAlign.inside);
     expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
     expect(drawVectorFillGroupMock).toHaveBeenLastCalledWith(
       context,

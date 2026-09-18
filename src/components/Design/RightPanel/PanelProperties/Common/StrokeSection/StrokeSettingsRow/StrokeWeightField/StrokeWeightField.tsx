@@ -1,7 +1,7 @@
 import { FC, FocusEvent } from 'react';
 
 // @xigma
-import { ScrubbableInput } from '@xigma/components';
+import { ScrubbableInput, TIconProps } from '@xigma/components';
 
 // components
 import { UITools } from 'shared';
@@ -11,18 +11,31 @@ import { STROKE_WEIGHT_MAX, STROKE_WEIGHT_MIN } from '../constants';
 
 export type TStrokeWeightFieldProps = {
   ariaLabel: string;
+  displayValue: string;
+  e2eValue?: string;
+  icon?: TIconProps['name'];
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
   onScrub: TFunc<[number]>;
-  value: number;
+  scrubValue: number;
 };
 
-export const StrokeWeightField: FC<TStrokeWeightFieldProps> = ({ ariaLabel, onBlur, onDragEnd, onDragStart, onScrub, value }) => (
+export const StrokeWeightField: FC<TStrokeWeightFieldProps> = ({
+  ariaLabel,
+  displayValue,
+  e2eValue = 'stroke-weight',
+  icon = 'Weight',
+  onBlur,
+  onDragEnd,
+  onDragStart,
+  onScrub,
+  scrubValue,
+}) => (
   <UITools.TextField
     aria-label={ariaLabel}
-    defaultValue={`${value}`}
-    e2eValue="stroke-weight"
+    defaultValue={displayValue}
+    e2eValue={e2eValue}
     onBlur={onBlur}
     startAdornment={
       <ScrubbableInput
@@ -31,9 +44,9 @@ export const StrokeWeightField: FC<TStrokeWeightFieldProps> = ({ ariaLabel, onBl
         onChange={onScrub}
         onMouseDown={onDragStart}
         onMouseUp={onDragEnd}
-        value={value}
+        value={scrubValue}
       >
-        <UITools.InputAdornment icon="Weight" />
+        <UITools.InputAdornment icon={icon} />
       </ScrubbableInput>
     }
     type="text"

@@ -1,5 +1,5 @@
 // types
-import { InsideStroke, LayoutVersion, NodeType, StrokeAlign } from 'types/design/enums';
+import { InsideStroke, LayoutVersion, NodeType, StrokeAlign, StrokeSides } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
@@ -32,6 +32,12 @@ describe('getFrameLayoutPadding', () => {
     const padded = frame({ paddingTop: 6, strokeWidth: 0 });
 
     expect(getFrameLayoutPadding(padded)).toEqual({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 6 });
+  });
+
+  it('should add only the stroked side to the padding for a single-side inside stroke', () => {
+    const padded = frame({ strokeAlign: StrokeAlign.inside, strokeColor: '#000', strokeSides: StrokeSides.top, strokeWidth: 5 });
+
+    expect(getFrameLayoutPadding(padded)).toEqual({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 5 });
   });
 
   describe('legacy layout version', () => {

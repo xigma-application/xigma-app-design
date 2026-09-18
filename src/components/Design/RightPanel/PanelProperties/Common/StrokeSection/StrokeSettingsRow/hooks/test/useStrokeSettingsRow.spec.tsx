@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { NodeType, StrokeAlign, StrokeSides } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -43,8 +43,8 @@ const addAndSelect = (overrides: Partial<TRectangleNode> = {}): string => {
 
 const readNode = (id: string): TRectangleNode => selectActivePage(store.getState()).nodes[id] as TRectangleNode;
 
-const blurEventFor = (value: string): FocusEvent<HTMLInputElement> =>
-  ({ target: Object.assign(document.createElement('input'), { value }) }) as unknown as FocusEvent<HTMLInputElement>;
+const blurEventFor = (value: string, defaultValue = ''): FocusEvent<HTMLInputElement> =>
+  ({ target: Object.assign(document.createElement('input'), { defaultValue, value }) }) as unknown as FocusEvent<HTMLInputElement>;
 
 describe('useStrokeSettingsRow', () => {
   afterEach(() => {
@@ -113,7 +113,7 @@ describe('useStrokeSettingsRow', () => {
     // before
     const id = addAndSelect({ strokeWidth: 3 });
     const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
-    const event = blurEventFor('abc');
+    const event = blurEventFor('abc', '3');
 
     // action
     act(() => result.current.onWeightBlur(event));
@@ -121,5 +121,59 @@ describe('useStrokeSettingsRow', () => {
     // result
     expect(event.target.value).toBe('3');
     expect(readNode(id).strokeWidth).toBe(3);
+  });
+
+  it('should switch to a single side keeping the weight', () => {
+    // before
+    const id = addAndSelect({ strokeWidth: 4 });
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => result.current.onSidesSelect(StrokeSides.top));
+
+    // result
+    expect(readNode(id)).toMatchObject({ strokeSides: StrokeSides.top, strokeWidth: 4 });
+  });
+
+  it('should report mixed when the custom sides differ and take the largest on switching back to all', () => {
+    // before
+    const id = addAndSelect({ strokeWidth: 4 });
+    const { result, rerender } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => result.current.onSidesSelect(StrokeSides.custom));
+    rerender();
+    act(() => result.current.onSideBlur('left')(blurEventFor('9', '4')));
+    rerender();
+
+    // result
+    expect(result.current.isWeightMixed).toBe(true);
+
+    // action
+    act(() => result.current.onSidesSelect(StrokeSides.all));
+
+    // result
+    expect(readNode(id)).toMatchObject({ strokeSides: StrokeSides.all, strokeWidth: 9 });
+  });
+
+  it('should set every side when a weight is typed in custom mode', () => {
+    // before
+    const id = addAndSelect({ strokeWidth: 4 });
+    const { result, rerender } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    act(() => result.current.onSidesSelect(StrokeSides.custom));
+    rerender();
+
+    // action
+    act(() => result.current.onWeightBlur(blurEventFor('6', '4')));
+
+    // result
+    expect(readNode(id)).toMatchObject({
+      strokeBottomWidth: 6,
+      strokeLeftWidth: 6,
+      strokeRightWidth: 6,
+      strokeTopWidth: 6,
+      strokeWidth: 6,
+    });
   });
 });

@@ -15,6 +15,7 @@ import {
   PathType,
   SizingMode,
   StrokeAlign,
+  StrokeSides,
 } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
@@ -143,6 +144,11 @@ export type TFrameNode = TBaseNode & {
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
+  strokeBottomWidth?: number;
+  strokeLeftWidth?: number;
+  strokeRightWidth?: number;
+  strokeSides?: StrokeSides;
+  strokeTopWidth?: number;
   strokes?: TPaint[];
   type: NodeType.frame;
   verticalGap?: number;
@@ -193,6 +199,11 @@ export type TRectangleNode = TBaseNode & {
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
+  strokeBottomWidth?: number;
+  strokeLeftWidth?: number;
+  strokeRightWidth?: number;
+  strokeSides?: StrokeSides;
+  strokeTopWidth?: number;
   strokes?: TPaint[];
   type: NodeType.rectangle;
 };

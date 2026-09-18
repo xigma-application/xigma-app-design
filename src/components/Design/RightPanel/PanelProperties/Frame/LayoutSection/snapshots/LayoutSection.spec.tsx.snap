@@ -319,10 +319,6 @@ exports[`LayoutSection snapshots > should render the flow row 1`] = `
       data-test-section=""
     >
       <div
-        class="_SectionColumnLabels_ed28d5"
-        style="width: calc(100% - 32px);"
-      />
-      <div
         class="_SectionColumn__row_84b4eb"
       >
         <div

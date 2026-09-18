@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@xigma/components';
 
 // components
+import StrokeSideFields from './StrokeSideFields/StrokeSideFields';
+import StrokeSidesMenu from './StrokeSidesMenu/StrokeSidesMenu';
 import StrokeWeightField from './StrokeWeightField/StrokeWeightField';
 import { UITools } from 'shared';
 
@@ -16,11 +18,25 @@ import { getStrokeAlignOptions } from './utils/getStrokeAlignOptions';
 import { translationNameSpace } from '../constants';
 
 // types
-import { StrokeAlign } from 'types/design/enums';
+import { StrokeAlign, StrokeSides } from 'types/design/enums';
 
 const StrokeSettingsRow: FC = () => {
   const { t } = useTranslation();
-  const { onPositionSelect, onWeightBlur, onWeightDragEnd, onWeightDragStart, onWeightScrub, position, weight } = useStrokeSettingsRow();
+  const {
+    isWeightMixed,
+    onPositionSelect,
+    onSideBlur,
+    onSideScrub,
+    onSidesSelect,
+    onWeightBlur,
+    onWeightDragEnd,
+    onWeightDragStart,
+    onWeightScrub,
+    position,
+    sideWeights,
+    sides,
+    weight,
+  } = useStrokeSettingsRow();
   const options = getStrokeAlignOptions((strokeAlign) => t(`${translationNameSpace}.position.options.${strokeAlign}`));
 
   return (
@@ -29,12 +45,11 @@ const StrokeSettingsRow: FC = () => {
         <Tooltip align="end" content={t(`${translationNameSpace}.advancedSettingsTooltip`)} key="advanced">
           <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.advancedSettingsAriaLabel`)} name="Properties" />
         </Tooltip>,
-        <Tooltip align="end" content={t(`${translationNameSpace}.individualStrokesTooltip`)} key="individual">
-          <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.individualStrokesAriaLabel`)} name="Stroke" />
-        </Tooltip>,
+        <StrokeSidesMenu key="individual" onSelect={onSidesSelect} sides={sides} />,
       ]}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.position.label`), t(`${translationNameSpace}.weight.label`)]}
+      withTopAlignedButtons
       withTopMargin
     >
       <UITools.Dropdown<StrokeAlign>
@@ -47,12 +62,22 @@ const StrokeSettingsRow: FC = () => {
       />
       <StrokeWeightField
         ariaLabel={t(`${translationNameSpace}.weight.ariaLabel`)}
+        displayValue={isWeightMixed ? t(`${translationNameSpace}.weight.mixed`) : `${weight}`}
         onBlur={onWeightBlur}
         onDragEnd={onWeightDragEnd}
         onDragStart={onWeightDragStart}
         onScrub={onWeightScrub}
-        value={weight}
+        scrubValue={weight}
       />
+      {sides === StrokeSides.custom && (
+        <StrokeSideFields
+          onDragEnd={onWeightDragEnd}
+          onDragStart={onWeightDragStart}
+          onSideBlur={onSideBlur}
+          onSideScrub={onSideScrub}
+          sideWeights={sideWeights}
+        />
+      )}
     </UITools.SectionColumn>
   );
 };

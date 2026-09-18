@@ -108,6 +108,15 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeSides {
+  all = 'all',
+  bottom = 'bottom',
+  custom = 'custom',
+  left = 'left',
+  right = 'right',
+  top = 'top',
+}
+
 export enum StrokeAlign {
   center = 'center',
   inside = 'inside',

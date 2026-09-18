@@ -6,7 +6,8 @@ import { TFrameNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getStrokePadding } from 'components/Design/Canvas/utils/getNodeAtPoint/getStrokePadding';
+import { getPaddedRect } from 'utils/design/stroke/getPaddedRect';
+import { getStrokePaddings } from 'utils/design/stroke/getStrokePaddings';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TFrameNameLabelAnchor = {
@@ -24,13 +25,7 @@ type TCorner = {
 };
 
 const getCorners = (node: TFrameNode): TCorner[] => {
-  const padding = getStrokePadding(node);
-  const { height, width, x, y } = {
-    height: node.height + padding * 2,
-    width: node.width + padding * 2,
-    x: node.x - padding,
-    y: node.y - padding,
-  };
+  const { height, width, x, y } = getPaddedRect(node, getStrokePaddings(node));
 
   return [
     { dimension: 'width', normal: { x: 0, y: -1 }, point: { x, y } },
@@ -55,8 +50,8 @@ export const getFrameNameLabelAnchor = (node: TFrameNode, zoom: number): TFrameN
   const { dimension, normal, point: corner } = pickTopCorner(corners);
   const point: TPoint = { x: corner.x + normal.x * offset, y: corner.y + normal.y * offset };
   const angleDeg = (Math.atan2(normal.y, normal.x) * 180) / Math.PI + 90;
-  const padding = getStrokePadding(node);
-  const maxWidth = (dimension === 'width' ? node.width : node.height) + padding * 2;
+  const padded = getPaddedRect(node, getStrokePaddings(node));
+  const maxWidth = dimension === 'width' ? padded.width : padded.height;
 
   return { angleDeg, maxWidth, point };
 };

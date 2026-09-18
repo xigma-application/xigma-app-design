@@ -5,6 +5,7 @@ import { TFrameNode } from 'types/design/types';
 
 // utils
 import { getFramePadding } from './getFramePadding';
+import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
 
 const strokeAffectsLayout = (frame: TFrameNode, layoutVersion: LayoutVersion): boolean => {
   const isInsideStrokeIncluded = (frame.insideStroke ?? InsideStroke.included) === InsideStroke.included;
@@ -23,11 +24,13 @@ export const getFrameLayoutPadding = (frame: TFrameNode, layoutVersion: LayoutVe
   const padding = getFramePadding(frame);
 
   if (frame.strokeWidth && strokeAffectsLayout(frame, layoutVersion)) {
+    const widths = getStrokeSideWidths(frame);
+
     return {
-      paddingBottom: padding.paddingBottom + frame.strokeWidth,
-      paddingLeft: padding.paddingLeft + frame.strokeWidth,
-      paddingRight: padding.paddingRight + frame.strokeWidth,
-      paddingTop: padding.paddingTop + frame.strokeWidth,
+      paddingBottom: padding.paddingBottom + widths.bottom,
+      paddingLeft: padding.paddingLeft + widths.left,
+      paddingRight: padding.paddingRight + widths.right,
+      paddingTop: padding.paddingTop + widths.top,
     };
   }
 
