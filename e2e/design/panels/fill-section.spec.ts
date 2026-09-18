@@ -3956,6 +3956,36 @@ test.describe('Design panels — Fill section', () => {
     expect(node.y).toBeCloseTo(cropAfterDrag.y, 1);
   });
 
+  test('clicking the Confirm (check) button in the Image crop toolbar exits crop mode, back to the Image edit toolbar', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-confirm-button');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // action — enter crop mode
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    const cropToolbar = page.locator('[class*="ImageCropToolbar_"]').first();
+
+    await expect(cropToolbar).toBeVisible();
+
+    // action — click the Confirm (check) button
+    await cropToolbar.getByRole('button', { name: 'Confirm' }).click();
+
+    // result — crop mode is exited entirely, back to the Image edit toolbar's own Crop button
+    await expect.poll(() => readImageEditor(page)).toBeNull();
+    await expect(cropToolbar).not.toBeVisible();
+    await expect(page.locator('[class*="ImageEditToolbar_"]').first().getByRole('button', { name: 'Crop' })).toBeVisible();
+  });
+
   test("picking Original from the aspect ratio menu resizes the node to the source file's real pixel dimensions", async ({ page }) => {
     const designPage = new DesignPage(page);
 

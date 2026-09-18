@@ -10,6 +10,7 @@ import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import { UITools } from 'shared';
 
 // hooks
+import { useHandleConfirmClick } from './hooks/useHandleConfirmClick';
 import { useHandleFitClick } from './hooks/useHandleFitClick';
 import { useImageCropToolbar } from './hooks/useImageCropToolbar';
 
@@ -23,6 +24,7 @@ const ImageCropToolbar: FC = () => {
   const { t } = useTranslation();
   const { isVisible, onZoomChange, zoom } = useImageCropToolbar();
   const handleFitClick = useHandleFitClick();
+  const handleConfirmClick = useHandleConfirmClick();
 
   if (!isVisible) {
     return null;
@@ -50,7 +52,7 @@ const ImageCropToolbar: FC = () => {
       <UITools.Button color="secondary" size="small" variant="outline">
         {t('common.cancel')}
       </UITools.Button>
-      <UITools.Button ariaLabel={t(`${translationNameSpace}.confirm`)} size="small">
+      <UITools.Button ariaLabel={t(`${translationNameSpace}.confirm`)} onClick={handleConfirmClick} size="small">
         <Icon color="onBlue1" name="Check" size={16} />
       </UITools.Button>
     </div>

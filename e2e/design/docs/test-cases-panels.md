@@ -1150,3 +1150,14 @@ crop rect already is what the node's new bounds should be.
 e2e coverage: drags the image (not the frame) by `(20, 20)` while in crop mode, then clicks Fit and
 confirms the node moves to exactly match the dragged crop rect — confirmed to genuinely fail (node
 stays at its pre-drag position) against the pre-wiring shell via a backup-file round-trip.
+
+#496 wires up the `ImageCropToolbar`'s Confirm (check icon) button — the last dead control in this
+toolbar's original UI shell. The user's own framing: "Przycisk check zamyka crop ten ostatni tzn.
+wychodzi z edycji" (the check button closes crop, this last one, i.e. exits editing). No geometry
+involved at all — `useHandleConfirmClick.ts` just dispatches `setImageEditor(null)`, the same call
+`useHandleExitImageEditor.ts` already uses to leave the Image editor from the FillSection panel side.
+The Cancel button beside it stays unwired — out of scope for this fix.
+
+e2e coverage: enters crop mode, clicks Confirm, and asserts `imageEditor` becomes `null` and the crop
+toolbar is replaced by the Image edit toolbar's own Crop button again — confirmed to genuinely fail
+(editor stays in crop mode) against the pre-wiring shell via a backup-file round-trip.

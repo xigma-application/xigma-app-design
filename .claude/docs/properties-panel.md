@@ -1262,6 +1262,19 @@ in crop mode, then clicks Fit and confirms the node moves to exactly match the d
 genuinely fail (node stays at its pre-drag position) against the pre-wiring shell via a backup-file
 round-trip.
 
+**The `ImageCropToolbar`'s Confirm (check icon) button exits crop mode entirely** — the last dead
+control in this toolbar's original UI shell. Per the user's own framing ("Przycisk check zamyka crop
+ten ostatni tzn. wychodzi z edycji" — the check button closes crop, this last one, i.e. exits editing),
+it does nothing to the crop geometry itself; it just clears the editor. `useHandleConfirmClick.ts`
+dispatches `setImageEditor(null)`, the same call `useHandleExitImageEditor.ts` (FillSection) and every
+`armExitImageEditorOnPointerDown`-style resolver already use elsewhere to leave the Image editor. The
+Cancel button next to it is a separate, still-unwired control — out of scope for this change.
+
+Covered by a new e2e test in `fill-section.spec.ts`: enters crop mode, clicks Confirm, and asserts
+`imageEditor` becomes `null` and the crop toolbar is replaced by the Image edit toolbar's own Crop
+button again — confirmed to genuinely fail (editor stays in crop mode) against the pre-wiring shell via
+a backup-file round-trip.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.
