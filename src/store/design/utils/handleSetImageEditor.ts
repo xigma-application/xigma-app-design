@@ -10,7 +10,11 @@ export const handleSetImageEditor = (state: TDesignState, payload: TImageEditorS
     state.imageEditor = null;
   } else {
     const previous = state.imageEditor;
-    const isSameCropTarget = previous?.mode === 'crop' && previous.nodeId === payload.nodeId && previous.paintIndex === payload.paintIndex;
+    const isSameCropTarget =
+      previous?.mode === 'crop' &&
+      previous.nodeId === payload.nodeId &&
+      previous.paintIndex === payload.paintIndex &&
+      (previous.property ?? 'fills') === (payload.property ?? 'fills');
 
     switch (true) {
       case payload.mode !== 'crop':
@@ -30,6 +34,7 @@ export const handleSetImageEditor = (state: TDesignState, payload: TImageEditorS
                 fills: node.fills,
                 height: node.height,
                 rotation: node.rotation,
+                strokes: node.strokes,
                 width: node.width,
                 x: node.x,
                 y: node.y,

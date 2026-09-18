@@ -2,6 +2,7 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getImageCropResizeHandleAtPoint } from 'components/Design/Canvas/utils/getImageCropResizeHandleAtPoint';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
@@ -18,7 +19,7 @@ export const resolveImageTileScaleHover = ({
     const node = selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId);
 
     if (node && isAppearanceNode(node) && node.rotation === 0) {
-      const paint = node.fills[imageEditor.paintIndex];
+      const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {
         const tileRect = getImageTileRect(node, paint);

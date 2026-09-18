@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../../types';
-import { TPaint } from 'types/design/paint/types';
+import { TPaint, TPatternPaint } from 'types/design/paint/types';
 
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
@@ -50,7 +50,7 @@ describe('resolvePatternPaintTile', () => {
   });
 
   it('should fall back to the frozen snapshot when there is no sourceNodeId', () => {
-    const frozenSourceSnapshot = { height: 1, nodes: [], width: 1 } as unknown as TPaint;
+    const frozenSourceSnapshot = { height: 1, nodes: [], width: 1 } as unknown as TPatternPaint['frozenSourceSnapshot'];
 
     expect(resolve({ ...basePattern, frozenSourceSnapshot } as TPaint)).toBe('frozen-tile');
   });

@@ -46,6 +46,7 @@ export type TCropCancelSnapshot = {
   fills: TPaint[];
   height: number;
   rotation: number;
+  strokes?: TPaint[];
   width: number;
   x: number;
   y: number;
@@ -56,10 +57,11 @@ export type TImageEditorState = {
   mode: TImageEditorMode;
   nodeId: string;
   paintIndex: number;
+  property?: TPaintProperty;
   selectedTarget?: TImageEditorTarget;
 };
 
-export type TImageFillPickerFocus = { nodeId: string; paintIndex: number };
+export type TImageFillPickerFocus = { nodeId: string; paintIndex: number; property?: TPaintProperty };
 
 export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number; property?: TPaintProperty };
 

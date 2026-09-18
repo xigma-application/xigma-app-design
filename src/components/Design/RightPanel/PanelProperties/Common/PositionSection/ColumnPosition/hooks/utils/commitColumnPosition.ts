@@ -4,6 +4,7 @@ import { selectNodes } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
@@ -21,7 +22,8 @@ export const commitColumnPosition = (
   const x = parent ? Math.round(absolute.x) : absolute.x;
   const y = parent ? Math.round(absolute.y) : absolute.y;
   const node = selectNodes(store.getState())[id];
-  const fills = node && isAppearanceNode(node) ? translateFillsCrop(node.fills, x - node.x, y - node.y) : undefined;
+  const cropChanges =
+    node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};
 
-  dispatch(updateNode({ changes: fills ? { fills, x, y } : { x, y }, id }));
+  dispatch(updateNode({ changes: { ...cropChanges, x, y }, id }));
 };

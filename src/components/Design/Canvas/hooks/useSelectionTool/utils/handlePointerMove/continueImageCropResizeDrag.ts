@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectImageEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -10,6 +10,8 @@ import { TImageCropResizeDragState } from 'types/design/canvas/types';
 import { TImageCrop } from 'types/design/paint/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getResizeAnchorSolver } from './continueResizeDrag/getResizeAnchorSolver';
 import { getResizeQueryPoint } from './continueResizeDrag/getResizeQueryPoint';
@@ -32,7 +34,8 @@ export const continueImageCropResizeDrag = (
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const property = selectImageEditor(state)?.property;
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {
         const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
@@ -49,9 +52,9 @@ export const continueImageCropResizeDrag = (
         const crop: TImageCrop = { height, rotation: origin.rotation, width, x: _x, y: _y };
         const flipX = scaleX < 0 ? !originalFlipX : originalFlipX;
         const flipY = scaleY < 0 ? !originalFlipY : originalFlipY;
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, crop, flipX, flipY } : fill));
+        const change = getPaintReplaceChange(node, property, paintIndex, { ...paint, crop, flipX, flipY });
 
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: change, id: nodeId }));
       }
     }
   }

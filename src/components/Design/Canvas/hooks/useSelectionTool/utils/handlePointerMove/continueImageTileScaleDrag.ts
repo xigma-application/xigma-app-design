@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { IMAGE_FILL_MAX_TILE_SCALE, IMAGE_FILL_MIN_TILE_SCALE } from 'constant/canvas';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectImageEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -12,6 +12,8 @@ import { AppDispatch, store } from 'store';
 import { TImageTileScaleDragState } from 'types/design/canvas/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { clamp } from 'utils/math/clamp';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -31,15 +33,16 @@ export const continueImageTileScaleDrag = (
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node) && startDistance > 0) {
-      const paint = node.fills[paintIndex];
+      const property = selectImageEditor(state)?.property;
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {
         const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const currentDistance = Math.hypot(point.x - anchor.x, point.y - anchor.y);
         const scale = clamp(startScale * (currentDistance / startDistance), IMAGE_FILL_MIN_TILE_SCALE, IMAGE_FILL_MAX_TILE_SCALE);
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, scale } : fill));
+        const change = getPaintReplaceChange(node, property, paintIndex, { ...paint, scale });
 
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: change, id: nodeId }));
       }
     }
   }

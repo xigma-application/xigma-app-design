@@ -7,6 +7,9 @@ import { selectImageEditor, selectNodes } from 'store/design/selectors';
 import { isAppearanceNode, TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
+// utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+
 export type TImageCropTarget = {
   node: TAppearanceNode;
   paint: TImagePaint | TVideoPaint;
@@ -16,11 +19,11 @@ export type TImageCropTarget = {
 export const selectImageCropTarget = createSelector(
   [selectImageEditor, selectNodes],
   (imageEditor, nodes): TImageCropTarget | undefined => {
-    if (imageEditor?.mode === 'crop') {
+    if (imageEditor?.mode === 'crop' && (imageEditor.property ?? 'fills') === 'fills') {
       const node = nodes[imageEditor.nodeId];
 
       if (isAppearanceNode(node)) {
-        const paint = node.fills[imageEditor.paintIndex];
+        const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
         if (paint?.type === 'image' || paint?.type === 'video') {
           return { node, paint, paintIndex: imageEditor.paintIndex };

@@ -72,6 +72,22 @@ describe('StrokeSection', () => {
     expect(container.querySelector('[class*="Section--muted"]')).not.toBeNull();
   });
 
+  it('should show the stroke settings row only once a stroke exists', () => {
+    // before
+    addRectangle();
+    renderStrokeSection();
+
+    // result
+    expect(screen.queryByText('Position')).toBeNull();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Add stroke'));
+
+    // result
+    expect(screen.getByText('Position')).toBeInTheDocument();
+    expect(screen.getByText('Weight')).toBeInTheDocument();
+  });
+
   it('should add a solid stroke paint with a default 1px width, leaving the fills untouched', () => {
     // before
     const id = addRectangle();

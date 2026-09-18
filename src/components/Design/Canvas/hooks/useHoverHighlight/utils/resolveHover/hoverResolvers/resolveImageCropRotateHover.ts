@@ -2,6 +2,7 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
@@ -18,7 +19,7 @@ export const resolveImageCropRotateHover = ({
     const node = selectedNodes.find((selectedNode) => selectedNode.id === imageEditor.nodeId);
 
     if (node && isAppearanceNode(node)) {
-      const paint = node.fills[imageEditor.paintIndex];
+      const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {
         const crop = getImageCropRect(node, paint);

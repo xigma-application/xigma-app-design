@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectImageEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -10,6 +10,8 @@ import { TImageCropRotateDragState } from 'types/design/canvas/types';
 import { TImageCrop } from 'types/design/paint/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -30,16 +32,17 @@ export const continueImageCropRotateDrag = (
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const property = selectImageEditor(state)?.property;
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (paint?.type === 'image' || paint?.type === 'video') {
         const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const deltaDegrees = getAngleBetweenPoints(pivot, point) - startAngle;
         const { rotation, x, y } = rotateShapeNodeOrigin(origin, pivot, deltaDegrees);
         const crop: TImageCrop = { height: origin.height, rotation, width: origin.width, x, y };
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, crop } : fill));
+        const change = getPaintReplaceChange(node, property, paintIndex, { ...paint, crop });
 
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: change, id: nodeId }));
       }
     }
   }

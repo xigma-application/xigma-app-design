@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getOriginalCropPaintChanges } from 'components/Design/Canvas/utils/getOriginalCropPaintChanges';
 import { getDragOriginalFills } from '../dragOriginalFillsCache';
 import { getGeometryDeltaChanges } from '../../../../../../utils/getGeometryDeltaChanges';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -27,11 +28,15 @@ const updateDraggedNodeOrigin = (
   const node = nodes[id];
   const geometryChanges = getGeometryDeltaChanges(origin, deltaX, deltaY);
   const imageEditor = selectImageEditor(store.getState());
-  const editedPaintIndex = imageEditor?.nodeId === id ? imageEditor.paintIndex : null;
-  const fills =
-    node && isAppearanceNode(node) ? translateFillsCrop(getDragOriginalFills(id, node.fills), deltaX, deltaY, editedPaintIndex) : undefined;
+  const editedImageEditor = imageEditor?.nodeId === id ? imageEditor : null;
+  const cropChanges =
+    node && isAppearanceNode(node)
+      ? getOriginalCropPaintChanges(node, getDragOriginalFills, editedImageEditor, (paints, skipIndex) =>
+          translateFillsCrop(paints, deltaX, deltaY, skipIndex),
+        )
+      : {};
 
-  dispatch(updateNode({ changes: fills ? { ...geometryChanges, fills } : geometryChanges, id }));
+  dispatch(updateNode({ changes: { ...geometryChanges, ...cropChanges }, id }));
 };
 
 const dispatchNodeOriginUpdates = (

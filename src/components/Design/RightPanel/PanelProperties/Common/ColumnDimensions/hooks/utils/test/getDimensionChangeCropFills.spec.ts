@@ -56,15 +56,15 @@ const addRectangleNode = (width: number, height: number): TSceneNode => {
 };
 
 describe('getDimensionChangeCropFills', () => {
-  it('should return undefined when there is no selected node', () => {
+  it('should return no changes when there is no selected node', () => {
     // action
     const result = getDimensionChangeCropFills(undefined, 100, 50, 200, 50);
 
     // result
-    expect(result).toBeUndefined();
+    expect(result).toEqual({});
   });
 
-  it('should return undefined when the selected node is not an appearance node', () => {
+  it('should return no changes when the selected node is not an appearance node', () => {
     // mock
     const node = addEllipseNode(100, 50);
 
@@ -72,10 +72,10 @@ describe('getDimensionChangeCropFills', () => {
     const result = getDimensionChangeCropFills(node, 100, 50, 200, 50);
 
     // result
-    expect(result).toBeUndefined();
+    expect(result).toEqual({});
   });
 
-  it('should return undefined when the appearance node has no image fill with a crop', () => {
+  it('should return no changes when the appearance node has no image fill with a crop', () => {
     // mock
     const node = addRectangleNode(100, 50);
 
@@ -83,7 +83,7 @@ describe('getDimensionChangeCropFills', () => {
     const result = getDimensionChangeCropFills(node, 100, 50, 200, 50);
 
     // result
-    expect(result).toBeUndefined();
+    expect(result).toEqual({});
   });
 
   it('should scale a stored image fill’s crop proportionally when the appearance node’s dimensions change', () => {
@@ -118,7 +118,7 @@ describe('getDimensionChangeCropFills', () => {
     const result = getDimensionChangeCropFills(node, 100, 50, 200, 50);
 
     // result
-    expect(result).toEqual([{ ...paint, crop: { height: 25, rotation: 0, width: 100, x: 50, y: 12.5 } }]);
+    expect(result).toEqual({ fills: [{ ...paint, crop: { height: 25, rotation: 0, width: 100, x: 50, y: 12.5 } }] });
   });
 
   it('should default the scale factor to 1 when the node’s current width or height is zero', () => {
@@ -153,6 +153,43 @@ describe('getDimensionChangeCropFills', () => {
     const result = getDimensionChangeCropFills(node, 0, 0, 200, 100);
 
     // result — the crop keeps its own size (scale factor defaults to 1) but re-centers on the node’s new center
-    expect(result).toEqual([{ ...paint, crop: { height: 25, rotation: 0, width: 50, x: 125, y: 62.5 } }]);
+    expect(result).toEqual({ fills: [{ ...paint, crop: { height: 25, rotation: 0, width: 50, x: 125, y: 62.5 } }] });
+  });
+
+  it('should also scale the crop of an image stroke, leaving the fills alone', () => {
+    // mock
+    const paint: TImagePaint = {
+      crop: { height: 25, rotation: 0, width: 50, x: 25, y: 12.5 },
+      opacity: 100,
+      ref: 'image-1',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+
+    store.dispatch(
+      addNode({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 50,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        strokes: [paint],
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const node = selectActivePage(store.getState()).nodes[rootOrder[rootOrder.length - 1]];
+
+    // action
+    const result = getDimensionChangeCropFills(node, 100, 50, 200, 50);
+
+    // result
+    expect(result.fills).toBeUndefined();
+    expect(result.strokes).toEqual([{ ...paint, crop: { height: 25, rotation: 0, width: 100, x: 50, y: 12.5 } }]);
   });
 });

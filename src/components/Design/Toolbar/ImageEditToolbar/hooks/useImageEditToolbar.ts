@@ -25,7 +25,10 @@ export const useImageEditToolbar = (): TUseImageEditToolbarResult => {
   }, []);
 
   const isVisible =
-    vectorEditingNodeIds.length === 0 && imageEditor?.mode !== 'crop' && (node?.fills.some((fill) => fill.type === 'image') ?? false);
+    vectorEditingNodeIds.length === 0 &&
+    imageEditor?.mode !== 'crop' &&
+    imageEditor?.property !== 'strokes' &&
+    (node?.fills.some((fill) => fill.type === 'image') ?? false);
 
   return { handleToggleSelectArea, isSelectAreaActive, isVisible };
 };

@@ -13,6 +13,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { collectNudgeSubtreeNodes } from './collectNudgeSubtreeNodes';
 import { handleNudgeVectorEdit } from './handleNudgeVectorEdit';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -23,9 +24,9 @@ import { updateNudgeDistanceGuide } from './updateNudgeDistanceGuide';
 const nudgeSubtreeNodes = (dispatch: AppDispatch, subtreeNodes: TSceneNode[], deltaX: number, deltaY: number): void => {
   subtreeNodes.forEach((node) => {
     const geometryChanges = getGeometryDeltaChanges(node, deltaX, deltaY);
-    const fills = isAppearanceNode(node) ? translateFillsCrop(node.fills, deltaX, deltaY) : undefined;
+    const cropChanges = isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, deltaX, deltaY)) : {};
 
-    dispatch(updateNode({ changes: fills ? { ...geometryChanges, fills } : geometryChanges, id: node.id }));
+    dispatch(updateNode({ changes: { ...geometryChanges, ...cropChanges }, id: node.id }));
   });
 };
 

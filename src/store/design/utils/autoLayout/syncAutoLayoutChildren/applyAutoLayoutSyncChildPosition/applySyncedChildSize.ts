@@ -4,24 +4,26 @@ import { TBoxSceneNode, TFrameNode, TSceneNode } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { scaleFillsCrop } from 'components/Design/Canvas/utils/scaleFillsCrop';
 
 const scaleChildFillsCrop = (child: TBoxSceneNode, target: TAutoLayoutChildPosition): void => {
   if (isAppearanceNode(child)) {
-    const fills = scaleFillsCrop(child.fills, {
+    const scale = {
       newCenterX: child.x + target.width / 2,
       newCenterY: child.y + target.height / 2,
       oldCenterX: child.x + child.width / 2,
       oldCenterY: child.y + child.height / 2,
       scaleX: child.width !== 0 ? target.width / child.width : 1,
       scaleY: child.height !== 0 ? target.height / child.height : 1,
-    });
+    };
 
-    if (fills) {
-      child.fills = fills;
-    }
+    Object.assign(
+      child,
+      getCropPaintChanges(child, (paints) => scaleFillsCrop(paints, scale)),
+    );
   }
 };
 

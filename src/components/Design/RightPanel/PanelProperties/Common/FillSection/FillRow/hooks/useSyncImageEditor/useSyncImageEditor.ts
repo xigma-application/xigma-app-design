@@ -7,6 +7,7 @@ import { store, useAppDispatch } from 'store';
 
 // types
 import { TImageEditorMode } from 'store/design/types';
+import { TPaintProperty } from 'types/design/paint/types';
 
 // utils
 import { clearOwnedImageEditorState } from './utils/clearOwnedImageEditorState';
@@ -14,6 +15,7 @@ import { clearOwnedImageEditorState } from './utils/clearOwnedImageEditorState';
 export const useSyncImageEditor = (
   nodeId: string | undefined,
   paintIndex: number,
+  property: TPaintProperty,
   isPickerOpen: boolean,
   isImageTabActive: boolean,
   initialMode: TImageEditorMode,
@@ -28,25 +30,25 @@ export const useSyncImageEditor = (
   useEffect(() => {
     if (nodeId && isPickerOpen && isImageTabActive) {
       wasActiveRef.current = true;
-      dispatch(setImageFillPickerFocus({ nodeId, paintIndex }));
+      dispatch(setImageFillPickerFocus({ nodeId, paintIndex, property }));
 
       if (!isArmSkippedRef.current) {
-        dispatch(setImageEditor({ mode: initialModeRef.current, nodeId, paintIndex }));
+        dispatch(setImageEditor({ mode: initialModeRef.current, nodeId, paintIndex, property }));
       }
     } else if (wasActiveRef.current && (!nodeId || !isImageTabActive)) {
       wasActiveRef.current = false;
       isArmSkippedRef.current = false;
-      clearOwnedImageEditorState(dispatch, nodeId, paintIndex);
+      clearOwnedImageEditorState(dispatch, nodeId, paintIndex, property);
     }
-  }, [dispatch, isImageTabActive, isPickerOpen, nodeId, paintIndex]);
+  }, [dispatch, isImageTabActive, isPickerOpen, nodeId, paintIndex, property]);
 
   useEffect(() => {
     return (): void => {
       const isNodeStillSelected = Boolean(nodeId) && selectSelectedNodes(store.getState()).some((node) => node.id === nodeId);
 
       if (wasActiveRef.current && !isNodeStillSelected) {
-        clearOwnedImageEditorState(dispatch, nodeId, paintIndex);
+        clearOwnedImageEditorState(dispatch, nodeId, paintIndex, property);
       }
     };
-  }, [dispatch, nodeId, paintIndex]);
+  }, [dispatch, nodeId, paintIndex, property]);
 };

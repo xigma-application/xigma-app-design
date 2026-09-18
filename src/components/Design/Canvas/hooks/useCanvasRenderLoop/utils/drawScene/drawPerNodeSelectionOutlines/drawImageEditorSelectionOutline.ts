@@ -5,6 +5,7 @@ import { TImageEditorState } from 'store/design/types';
 import { TBoxSceneNode, TPathNode, TViewport } from 'types/design/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorCropImageOutline } from './drawImageEditorCropImageOutline';
 import { drawImageEditorFrameOutline } from './drawImageEditorFrameOutline';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
@@ -23,7 +24,7 @@ const drawImageEditorTileOutline = (
   drawImageEditorFrameOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, false);
 
   if (isAppearanceNode(node)) {
-    const paint = node.fills[imageEditor.paintIndex];
+    const paint = getNodePaints(node, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {
       const tileRect = getImageTileRect(node, paint);

@@ -67,7 +67,7 @@ describe('useSyncPatternSourcePickTarget', () => {
 
   it('should clear the target when there is no nodeId', () => {
     // before
-    const { rerender } = renderHook(({ nodeId }) => useSyncPatternSourcePickTarget(nodeId, 0, true, true), {
+    const { rerender } = renderHook(({ nodeId }) => useSyncPatternSourcePickTarget(nodeId, 0, 'fills', true, true), {
       initialProps: { nodeId: 'node-1' as string | undefined },
       wrapper,
     });

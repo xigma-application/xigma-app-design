@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setImageEditor, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -231,5 +231,28 @@ describe('continueImageCropMoveDrag', () => {
       // result
       expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
     });
+  });
+
+  it('should move the crop of the image stroke being edited, leaving the fills untouched', () => {
+    // mock
+    const nodeId = addImageRectangle({
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      strokes: [{ opacity: 100, ref: 'image-2', rotation: 0, scaleMode: 'fill', type: 'image' }],
+    });
+    const canvas = createCanvas();
+    const origin = { height: 10, rotation: 0, width: 10, x: 60, y: 60 };
+    const dragRef = createRef({ nodeId, origin, paintIndex: 0, startPoint: { x: 0, y: 0 } });
+
+    // before
+    store.dispatch(setImageEditor({ mode: 'crop', nodeId, paintIndex: 0, property: 'strokes' }));
+    continueImageCropMoveDrag(canvas, pointerEvent(5, 8), store.dispatch, dragRef, createCanvasRefs());
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+
+    expect((node.strokes?.[0] as TImagePaint).crop).toEqual({ height: 10, rotation: 0, width: 10, x: 65, y: 68 });
+    expect(node.fills[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
+
+    store.dispatch(setImageEditor(null));
   });
 });

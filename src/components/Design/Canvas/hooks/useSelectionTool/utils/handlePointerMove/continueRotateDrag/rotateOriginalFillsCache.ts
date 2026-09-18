@@ -1,6 +1,8 @@
 // types
 import { TPaint } from 'types/design/paint/types';
 
+import { getStrokesCacheKey } from 'components/Design/Canvas/utils/getStrokesCacheKey';
+
 const rotateOriginalFillsCache = new Map<string, TPaint[]>();
 
 export const getRotateOriginalFills = (id: string, currentFills: TPaint[]): TPaint[] => {
@@ -13,4 +15,5 @@ export const getRotateOriginalFills = (id: string, currentFills: TPaint[]): TPai
 
 export const clearRotateOriginalFills = (id: string): void => {
   rotateOriginalFillsCache.delete(id);
+  rotateOriginalFillsCache.delete(getStrokesCacheKey(id));
 };

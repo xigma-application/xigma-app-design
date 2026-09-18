@@ -5,6 +5,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { applySyncedChildSize } from './applySyncedChildSize';
 import { getAutoLayoutRotatedSlotPosition } from '../../getAutoLayoutRotatedSlotPosition';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
@@ -17,11 +18,10 @@ const applyDeltaToSubtreeNode = (subtreeNode: TSceneNode, deltaX: number, deltaY
   Object.assign(subtreeNode, getGeometryDeltaChanges(subtreeNode, deltaX, deltaY));
 
   if (isAppearanceNode(subtreeNode)) {
-    const fills = translateFillsCrop(subtreeNode.fills, deltaX, deltaY);
-
-    if (fills) {
-      subtreeNode.fills = fills;
-    }
+    Object.assign(
+      subtreeNode,
+      getCropPaintChanges(subtreeNode, (paints) => translateFillsCrop(paints, deltaX, deltaY)),
+    );
   }
 };
 

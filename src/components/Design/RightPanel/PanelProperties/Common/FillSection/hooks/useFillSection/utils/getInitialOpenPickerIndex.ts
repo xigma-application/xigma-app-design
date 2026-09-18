@@ -9,10 +9,8 @@ export const getInitialOpenPickerIndex = (
   imageFillPickerFocus: TImageFillPickerFocus | null,
   nodeId: string | undefined,
 ): number | null => {
-  if (property === 'fills') {
-    if (imageFillPickerFocus && imageFillPickerFocus.nodeId === nodeId) {
-      return imageFillPickerFocus.paintIndex;
-    }
+  if (imageFillPickerFocus && imageFillPickerFocus.nodeId === nodeId && (imageFillPickerFocus.property ?? 'fills') === property) {
+    return imageFillPickerFocus.paintIndex;
   }
 
   return null;

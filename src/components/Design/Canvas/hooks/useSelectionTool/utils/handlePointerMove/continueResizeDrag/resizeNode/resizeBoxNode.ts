@@ -12,6 +12,8 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
+import { getEditedPaintIndex } from 'components/Design/Canvas/utils/getEditedPaintIndex';
+import { getStrokesCacheKey } from 'components/Design/Canvas/utils/getStrokesCacheKey';
 import { getResizeAxisScale } from './getResizeAxisScale';
 import { getResizeChanges } from './getResizeChanges';
 import { getResizedPosition } from './getResizedPosition';
@@ -34,41 +36,53 @@ const getMirroredFills = (fills: TPaint[], scaleX: number, scaleY: number, skipI
       )
     : fills;
 
-const getResizedBoxFills = (
+type TResizedGeometry = { height: number; origin: TBoxResizeOrigin; scaleX: number; scaleY: number; width: number; x: number; y: number };
+
+const getResizedPaints = (
+  paints: TPaint[],
+  cacheKey: string,
+  editedPaintIndex: number | null,
+  { height, origin, scaleX, scaleY, width, x, y }: TResizedGeometry,
+): TPaint[] | undefined => {
+  const originalPaints = getResizeOriginalFills(cacheKey, paints);
+
+  if (originalPaints.some(isMirrorableFill)) {
+    const mirroredPaints = getMirroredFills(originalPaints, scaleX, scaleY, editedPaintIndex);
+
+    return (
+      scaleFillsCrop(
+        mirroredPaints,
+        {
+          newCenterX: x + width / 2,
+          newCenterY: y + height / 2,
+          oldCenterX: origin.x + origin.width / 2,
+          oldCenterY: origin.y + origin.height / 2,
+          scaleX: origin.width !== 0 ? width / origin.width : 1,
+          scaleY: origin.height !== 0 ? height / origin.height : 1,
+        },
+        editedPaintIndex,
+      ) ?? mirroredPaints
+    );
+  }
+};
+
+const getResizedBoxPaintChanges = (
   node: TSceneNode | undefined,
   id: string,
-  origin: TBoxResizeOrigin,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  scaleX: number,
-  scaleY: number,
-): TPaint[] | undefined => {
+  geometry: TResizedGeometry,
+): { fills?: TPaint[]; strokes?: TPaint[] } => {
   if (node && isAppearanceNode(node)) {
-    const originalFills = getResizeOriginalFills(id, node.fills);
+    const imageEditor = selectImageEditor(store.getState());
+    const editedImageEditor = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor : null;
+    const fills = getResizedPaints(node.fills, id, getEditedPaintIndex(editedImageEditor, 'fills'), geometry);
+    const strokes = node.strokes
+      ? getResizedPaints(node.strokes, getStrokesCacheKey(id), getEditedPaintIndex(editedImageEditor, 'strokes'), geometry)
+      : undefined;
 
-    if (originalFills.some(isMirrorableFill)) {
-      const imageEditor = selectImageEditor(store.getState());
-      const editedPaintIndex = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor.paintIndex : null;
-      const mirroredFills = getMirroredFills(originalFills, scaleX, scaleY, editedPaintIndex);
-
-      return (
-        scaleFillsCrop(
-          mirroredFills,
-          {
-            newCenterX: x + width / 2,
-            newCenterY: y + height / 2,
-            oldCenterX: origin.x + origin.width / 2,
-            oldCenterY: origin.y + origin.height / 2,
-            scaleX: origin.width !== 0 ? width / origin.width : 1,
-            scaleY: origin.height !== 0 ? height / origin.height : 1,
-          },
-          editedPaintIndex,
-        ) ?? mirroredFills
-      );
-    }
+    return { ...(fills ? { fills } : {}), ...(strokes ? { strokes } : {}) };
   }
+
+  return {};
 };
 
 export const resizeBoxNode = (
@@ -90,7 +104,7 @@ export const resizeBoxNode = (
   const { x, y } = getResizedPosition(origin, anchors, scaleX, scaleY, width, height, rotatedAnchorSolver);
   const changes = getResizeChanges(origin, scaleX, scaleY, isSingleBoxOrigin, height, width, x, y);
   const sizingModeChanges = node ? getAutoLayoutSizingModeResetChanges(node, width !== origin.width, height !== origin.height) : {};
-  const fills = getResizedBoxFills(node, id, origin, x, y, width, height, scaleX, scaleY);
+  const paintChanges = getResizedBoxPaintChanges(node, id, { height, origin, scaleX, scaleY, width, x, y });
 
-  dispatch(updateNode({ changes: fills ? { ...changes, ...sizingModeChanges, fills } : { ...changes, ...sizingModeChanges }, id }));
+  dispatch(updateNode({ changes: { ...changes, ...sizingModeChanges, ...paintChanges }, id }));
 };

@@ -8,6 +8,7 @@ import { TImageRenderContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorOverflowQuad } from './drawImageEditorOverflowQuad';
 import { getOrCreateImagePlaceholderTexture } from 'utils/canvas/drawVectorNode/drawVectorImageFill/getOrCreateImagePlaceholderTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
@@ -34,7 +35,7 @@ export const drawImageEditorCropOverflowPreview = (
 ): void => {
   const node = imageEditor?.mode === 'crop' ? nodesById[imageEditor.nodeId] : undefined;
   const appearanceNode = node && isAppearanceNode(node) ? node : undefined;
-  const paint = appearanceNode && imageEditor ? appearanceNode.fills[imageEditor.paintIndex] : undefined;
+  const paint = appearanceNode && imageEditor ? getNodePaints(appearanceNode, imageEditor.property)[imageEditor.paintIndex] : undefined;
   const texture = getImageEditorPreviewTexture(context.gl, context.imageContext, paint);
 
   if (appearanceNode && paint?.type === 'image' && paint.crop && texture) {

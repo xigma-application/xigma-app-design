@@ -2,6 +2,7 @@
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
 import { getGroupSubtreeNodes } from '../../nodeHierarchy/getGroupSubtreeNodes';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -12,11 +13,10 @@ export const moveConstrainedChildSubtree = (nodes: Record<string, TSceneNode>, c
     Object.assign(subtreeNode, getGeometryDeltaChanges(subtreeNode, deltaX, deltaY));
 
     if (isAppearanceNode(subtreeNode)) {
-      const fills = translateFillsCrop(subtreeNode.fills, deltaX, deltaY);
-
-      if (fills) {
-        subtreeNode.fills = fills;
-      }
+      Object.assign(
+        subtreeNode,
+        getCropPaintChanges(subtreeNode, (paints) => translateFillsCrop(paints, deltaX, deltaY)),
+      );
     }
   });
 };

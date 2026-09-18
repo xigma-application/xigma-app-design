@@ -16,6 +16,7 @@ import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
+import { getOriginalCropPaintChanges } from 'components/Design/Canvas/utils/getOriginalCropPaintChanges';
 import { getRotateOriginalFills } from './rotateOriginalFillsCache';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { pinRotatedGroupBounds } from './pinRotatedGroupBounds';
@@ -40,13 +41,15 @@ const updateRotatedNodeOrigin = (
   const node = nodes[id];
   const nodeChanges = getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate);
   const imageEditor = selectImageEditor(store.getState());
-  const editedPaintIndex = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor.paintIndex : null;
-  const fills =
+  const editedImageEditor = imageEditor?.mode === 'crop' && imageEditor.nodeId === id ? imageEditor : null;
+  const cropChanges =
     node && isAppearanceNode(node)
-      ? rotateFillsCrop(getRotateOriginalFills(id, node.fills), pivot, deltaDegrees, editedPaintIndex)
-      : undefined;
+      ? getOriginalCropPaintChanges(node, getRotateOriginalFills, editedImageEditor, (paints, skipIndex) =>
+          rotateFillsCrop(paints, pivot, deltaDegrees, skipIndex),
+        )
+      : {};
 
-  dispatch(updateNode({ changes: fills ? { ...nodeChanges, fills } : nodeChanges, id }));
+  dispatch(updateNode({ changes: { ...nodeChanges, ...cropChanges }, id }));
 };
 
 const updateRotatedNodeOrigins = (

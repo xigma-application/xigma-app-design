@@ -46,9 +46,15 @@ const getDimensionUpdateChanges = (
 ): TSceneNodeChanges => {
   const clampedDimensionChanges = getClampedDimensionChanges(selectedNode, dimensionChanges);
   const sizingModeChanges = getSizingModeChanges(selectedNode, width, height, clampedDimensionChanges);
-  const fills = getDimensionChangeCropFills(selectedNode, width, height, clampedDimensionChanges.width, clampedDimensionChanges.height);
+  const cropChanges = getDimensionChangeCropFills(
+    selectedNode,
+    width,
+    height,
+    clampedDimensionChanges.width,
+    clampedDimensionChanges.height,
+  );
 
-  return fills ? { ...clampedDimensionChanges, ...sizingModeChanges, fills } : { ...clampedDimensionChanges, ...sizingModeChanges };
+  return { ...clampedDimensionChanges, ...sizingModeChanges, ...cropChanges };
 };
 
 export const commitDimensionChanges = (

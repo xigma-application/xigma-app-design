@@ -38,7 +38,8 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
   const initialIndex = getInitialOpenPickerIndex(property, imageFillPickerFocus, nodeId);
   const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialIndex);
-  const isImageEditorActive = useAppSelector(selectImageEditor) !== null;
+  const imageEditor = useAppSelector(selectImageEditor);
+  const isImageEditorActive = imageEditor !== null && (imageEditor.property ?? 'fills') === property;
   const handleExitImageEditor = useHandleExitImageEditor();
   const handleClosePicker = useHandleClosePicker(openPickerIndex, onPickerOpenChange);
   const stroke = { strokeAlign: node?.strokeAlign, strokeWidth: node?.strokeWidth };

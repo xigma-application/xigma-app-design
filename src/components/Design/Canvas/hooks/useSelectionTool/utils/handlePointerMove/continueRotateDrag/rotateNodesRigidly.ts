@@ -9,6 +9,7 @@ import { TPoint } from 'types/canvas';
 import { TRotateNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
+import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 import { getRotateNodeOrigins } from '../../handlePointerDown/getRotateNodeOrigins';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
@@ -27,9 +28,12 @@ const dispatchRigidlyRotatedNodeChanges = (
 ): void => {
   const currentNode = nodes[id];
   const geometryChanges = getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate);
-  const fills = currentNode && isAppearanceNode(currentNode) ? rotateFillsCrop(currentNode.fills, pivot, deltaDegrees) : undefined;
+  const cropChanges =
+    currentNode && isAppearanceNode(currentNode)
+      ? getCropPaintChanges(currentNode, (paints) => rotateFillsCrop(paints, pivot, deltaDegrees))
+      : {};
 
-  dispatch(updateNode({ changes: fills ? { ...geometryChanges, fills } : geometryChanges, id }));
+  dispatch(updateNode({ changes: { ...geometryChanges, ...cropChanges }, id }));
 };
 
 const dispatchRigidRotationChanges = (

@@ -6,6 +6,9 @@ import { updateNode } from 'store/design/slice';
 import { TImageCrop } from 'types/design/paint/types';
 import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
+// utils
+import { getPaintReplaceChange } from 'utils/design/paint/getPaintReplaceChange';
+
 export const commitImageCropDimensions = (
   dispatch: AppDispatch,
   imageCrop: TSelectedImageCrop,
@@ -13,7 +16,7 @@ export const commitImageCropDimensions = (
   nextHeight: number,
 ): void => {
   const crop: TImageCrop = { ...imageCrop.crop, height: Math.round(nextHeight), width: Math.round(nextWidth) };
-  const fills = imageCrop.node.fills.map((fill, index) => (index === imageCrop.paintIndex ? { ...imageCrop.paint, crop } : fill));
+  const change = getPaintReplaceChange(imageCrop.node, imageCrop.property, imageCrop.paintIndex, { ...imageCrop.paint, crop });
 
-  dispatch(updateNode({ changes: { fills }, id: imageCrop.node.id }));
+  dispatch(updateNode({ changes: change, id: imageCrop.node.id }));
 };

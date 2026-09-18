@@ -6,6 +6,7 @@ import { setGradientEditor } from 'store/design/slice';
 import { store, useAppDispatch } from 'store';
 
 // types
+import { TGradientPanelState } from 'shared/UITools/ColorPicker/types';
 import { TPaintProperty } from 'types/design/paint/types';
 
 export const useSyncGradientEditor = (
@@ -13,8 +14,7 @@ export const useSyncGradientEditor = (
   paintIndex: number,
   property: TPaintProperty,
   isPickerOpen: boolean,
-  isGradientTabActive: boolean,
-  selectedStopIndex: number | null,
+  { isGradientTabActive, selectedStopIndex }: TGradientPanelState,
 ): void => {
   const dispatch = useAppDispatch();
 

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -19,9 +19,9 @@ import styles from './fill-section.module.scss';
 // types
 import { TPaintProperty } from 'types/design/paint/types';
 
-export type TFillSectionProps = { property?: TPaintProperty };
+export type TFillSectionProps = { footer?: ReactNode; property?: TPaintProperty };
 
-export const FillSection: FC<TFillSectionProps> = ({ property = 'fills' }) => {
+export const FillSection: FC<TFillSectionProps> = ({ footer, property = 'fills' }) => {
   const { t } = useTranslation();
   const translationNameSpace = getPaintTranslationNamespace(property);
   const {
@@ -84,6 +84,7 @@ export const FillSection: FC<TFillSectionProps> = ({ property = 'fills' }) => {
           />
         ))}
       </div>
+      {fills.length > 0 && footer}
     </UITools.Section>
   );
 };

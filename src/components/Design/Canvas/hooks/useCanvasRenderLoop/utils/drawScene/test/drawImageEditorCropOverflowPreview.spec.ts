@@ -12,7 +12,7 @@ import { drawImageEditorCropOverflowPreview } from '../drawImageEditorCropOverfl
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const texture = {} as WebGLTexture;
 const placeholderTexture = {} as WebGLTexture;
-const getOrCreateImagePlaceholderTextureMock = vi.fn(() => placeholderTexture);
+const getOrCreateImagePlaceholderTextureMock = vi.fn<(...args: unknown[]) => WebGLTexture>(() => placeholderTexture);
 
 vi.mock('utils/canvas/drawVectorNode/drawVectorImageFill/getOrCreateImagePlaceholderTexture', () => ({
   getOrCreateImagePlaceholderTexture: (...args: unknown[]): unknown => getOrCreateImagePlaceholderTextureMock(...args),

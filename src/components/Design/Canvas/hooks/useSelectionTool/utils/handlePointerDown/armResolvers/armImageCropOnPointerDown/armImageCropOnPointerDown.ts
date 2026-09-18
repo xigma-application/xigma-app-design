@@ -8,6 +8,7 @@ import { TArmContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { armImageCropPaintOnPointerDown } from './armImageCropPaintOnPointerDown';
 import { armImageTileScaleOnPointerDown } from './armImageTileScaleOnPointerDown';
 import { getResizeHandleAtPoint } from 'components/Design/Canvas/utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
@@ -42,7 +43,7 @@ export const armImageCropOnPointerDown = ({
   }
 
   if (imageEditor?.mode === 'crop' && editorNode && isAppearanceNode(editorNode)) {
-    const paint = editorNode.fills[imageEditor.paintIndex];
+    const paint = getNodePaints(editorNode, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {
       return armImageCropPaintOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
@@ -50,7 +51,7 @@ export const armImageCropOnPointerDown = ({
   }
 
   if (imageEditor?.mode === 'tile' && editorNode && isAppearanceNode(editorNode)) {
-    const paint = editorNode.fills[imageEditor.paintIndex];
+    const paint = getNodePaints(editorNode, imageEditor.property)[imageEditor.paintIndex];
 
     if (paint?.type === 'image' || paint?.type === 'video') {
       return armImageTileScaleOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);

@@ -169,6 +169,7 @@ describe('handleSetImageEditor', () => {
       fills: secondFillNode.fills,
       height: 100,
       rotation: 0,
+      strokes: secondFillNode.strokes,
       width: 300,
       x: 10,
       y: 20,
@@ -183,6 +184,6 @@ describe('handleSetImageEditor', () => {
     handleSetImageEditor(state, { mode: 'crop', nodeId: 'missing-node', paintIndex: 0 });
 
     // result
-    expect(state.imageEditor).toEqual({ mode: 'crop', nodeId: 'missing-node', paintIndex: 0, cropCancelSnapshot: undefined });
+    expect(state.imageEditor).toEqual({ cropCancelSnapshot: undefined, mode: 'crop', nodeId: 'missing-node', paintIndex: 0 });
   });
 });

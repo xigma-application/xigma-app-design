@@ -8,6 +8,7 @@ import { TImageRenderContext } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { drawImageEditorOverflowQuad } from './drawImageEditorOverflowQuad';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
@@ -29,7 +30,7 @@ export const drawImageEditorTileOverflowPreview = (
 ): void => {
   const node = imageEditor?.mode === 'tile' ? nodesById[imageEditor.nodeId] : undefined;
   const appearanceNode = node && isAppearanceNode(node) && node.rotation === 0 ? node : undefined;
-  const paint = appearanceNode && imageEditor ? appearanceNode.fills[imageEditor.paintIndex] : undefined;
+  const paint = appearanceNode && imageEditor ? getNodePaints(appearanceNode, imageEditor.property)[imageEditor.paintIndex] : undefined;
   const texture = getImageEditorPreviewTexture(context.gl, context.imageContext, paint);
   const tileRect = appearanceNode && paint?.type === 'image' ? getImageTileRect(appearanceNode, paint) : undefined;
 
