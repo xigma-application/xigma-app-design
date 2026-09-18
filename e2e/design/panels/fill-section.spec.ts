@@ -3500,6 +3500,40 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
   });
 
+  test("clicking Crop targets the fill row whose picker is currently open, even when it isn't the row's own \"selected\" state (regression: opening a fill row's picker and selecting that row are decoupled states, so Crop still fell back to fill 0)", async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-crop-open-picker-focus');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // first fill: switch to image
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image', { exact: true }).click();
+
+    // add a second fill and switch it to image too — its picker stays open on the Image tab
+    // afterward, without ever clicking that row's own strip to "select" it
+    await page.getByLabel('Add fill').click();
+    await page.getByLabel('Hex color').nth(1).click();
+    await page.getByLabel('Image', { exact: true }).last().click();
+
+    const rows = page.locator('[class*="FillRow_"]:not([class*="FillRow__"])');
+
+    await expect(rows.nth(1)).toHaveClass(/FillRow--pickerOpen/);
+    await expect(rows.nth(1)).not.toHaveClass(/FillRow--selected/);
+
+    // action — click Crop in the canvas-side Image edit toolbar
+    await page.getByRole('button', { name: 'Crop' }).click();
+
+    // result — targets the fill whose picker is open (index 1), not the fallback (index 0)
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
+  });
+
   test('the Image edit toolbar hides once crop mode is entered, and comes back once it exits', async ({ page }) => {
     const designPage = new DesignPage(page);
 
@@ -3876,6 +3910,50 @@ test.describe('Design panels — Fill section', () => {
     await page.getByRole('menuitem', { name: 'Square (1:1)' }).click();
 
     expect((await readNode(page, id)).cornerRadius).toBe(0);
+  });
+
+  test('clicking the Fit button resizes the node to exactly match wherever the image currently is, not a fixed ratio', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-fit-button');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 800, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(400, 400, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 750, 250)).toEqual([255, 0, 0]);
+
+    // action — enter crop mode, then drag the image itself (not the frame) by (20, 20)
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    await designPage.pointerDown(750, 250);
+    await designPage.pointerMove(770, 270);
+    await designPage.pointerUp();
+
+    const cropAfterDrag = (await readNode(page, id)).fills![0].crop!;
+
+    // action — click the Fit button
+    await page.getByRole('button', { name: 'Fit' }).click();
+
+    // result — the node itself moved to exactly match the dragged crop rect, showing the whole
+    // image with nothing clipped off, not resized to any fixed aspect-ratio preset
+    const node = await readNode(page, id);
+
+    expect(node.width).toBeCloseTo(cropAfterDrag.width, 1);
+    expect(node.height).toBeCloseTo(cropAfterDrag.height, 1);
+    expect(node.x).toBeCloseTo(cropAfterDrag.x, 1);
+    expect(node.y).toBeCloseTo(cropAfterDrag.y, 1);
   });
 
   test("picking Original from the aspect ratio menu resizes the node to the source file's real pixel dimensions", async ({ page }) => {

@@ -38,4 +38,22 @@ describe('getCropTargetPaintIndex', () => {
     expect(getCropTargetPaintIndex(fills, [])).toBe(-1);
     expect(getCropTargetPaintIndex(fills, [0])).toBe(-1);
   });
+
+  it('(d) should pick the currently open picker fill when the selection has no image fill', () => {
+    const fills = [image, solid, image];
+
+    expect(getCropTargetPaintIndex(fills, [], 2)).toBe(2);
+  });
+
+  it('(d) should ignore the open picker index when it does not point at an image fill', () => {
+    const fills = [image, solid, image];
+
+    expect(getCropTargetPaintIndex(fills, [], 1)).toBe(0);
+  });
+
+  it('(d) should prefer the open picker index over an explicitly selected image fill', () => {
+    const fills = [image, solid, image];
+
+    expect(getCropTargetPaintIndex(fills, [0], 2)).toBe(2);
+  });
 });

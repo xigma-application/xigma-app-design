@@ -1226,6 +1226,42 @@ user caught live); picking "Original" with a distinctively-sized (300×150) sour
 node resizes to that exact pixel size. All confirmed to genuinely fail against their respective
 pre-fix states via a backup-file round-trip.
 
+**`getCropTargetPaintIndex.ts` (the Image edit toolbar's Crop button) needed a second signal besides
+`selectedFillIndices`.** An earlier fix in this cluster made the Crop button target whichever fill row
+is `selectedFillIndices`-selected, rather than always fill 0 — but a fill row's picker being *open* is
+tracked by an entirely separate piece of state (`imageFillPickerFocus`, see the `useSyncImageEditor`
+narrative above), decoupled from row selection. The user's live repro: open fill row 1's picker (Image
+tab), but the "selected" row state still pointed elsewhere — clicking Crop targeted fill 0 anyway. Fixed
+by adding an `openPickerIndex` third parameter to `getCropTargetPaintIndex`, sourced from
+`selectImageFillPickerFocus` (guarded to the currently selected node's own id) in `useHandleCropClick.ts`.
+Priority order, per explicit user correction ("switch" — the first pass checked
+`selectedFillIndices` before the open picker, the user asked for the reverse): the **open picker wins
+first**, then `selectedFillIndices`, then the fallback to the first image fill from the top — reasoning
+that an actively open picker is a stronger, more current signal of what the user is looking at than a
+possibly-stale row selection.
+
+Covered by a new e2e test in `fill-section.spec.ts`: switching a second fill to Image leaves its picker
+open (without ever clicking that row's own strip to "select" it), then confirms clicking Crop targets
+that open-picker row (index 1), not the fallback (index 0) — confirmed to genuinely fail against the
+pre-fix version via a backup-file round-trip.
+
+**The `ImageCropToolbar`'s "Fit" button (`FitLayout` icon, next to the aspect ratio menu) resizes the
+NODE to exactly match wherever the image currently is** — no ratio math at all, unlike every option in
+`ImageCropAspectRatioMenu`. The user's own framing: "Przycisk fit dostosowuje node do zdjęcia" (the Fit
+button adjusts the node to the image) / "Do tego co jest aktualnie" (to whatever is currently there).
+Implemented as `commitFitNodeToImage.ts`, the simplest of all the crop-toolbar commits: read the
+current crop rect via `getImageCropRect(node, paint)` (the same function every other crop-geometry util
+in this cluster reads from) and dispatch its `x/y/width/height` straight onto the node, unchanged — no
+interpolation, no target ratio, no centering math, since the crop rect is already exactly what should
+become the node's new bounds. `useHandleFitClick.ts` wires it to the button, sourcing `node`/`paint`
+from the same `selectImageCropTarget` selector every other crop-toolbar hook already uses.
+
+Covered by a new e2e test in `fill-section.spec.ts`: drags the image (not the frame) by `(20, 20)` while
+in crop mode, then clicks Fit and confirms the node moves to exactly match the dragged crop rect's own
+`x/y/width/height` — proving it tracks whatever the crop currently is, not a fixed preset — confirmed to
+genuinely fail (node stays at its pre-drag position) against the pre-wiring shell via a backup-file
+round-trip.
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

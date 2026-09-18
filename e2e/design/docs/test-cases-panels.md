@@ -1119,3 +1119,34 @@ confirms it also picks up a corner radius of exactly 50, and that picking "Squar
 squares the corners off again (the exact regression above); picking "Original" with a distinctively-sized
 300×150 source image confirms the node resizes to that exact pixel size. All confirmed to genuinely fail
 against their respective pre-fix states via a backup-file round-trip.
+
+#494 is a real, user-reported regression in the Image edit toolbar's Crop button, one layer beneath
+#461 (which fixed Crop targeting the `selectedFillIndices`-selected row instead of always fill 0):
+opening a fill row's picker and that row being "selected" turned out to be two entirely separate pieces
+of state (`imageFillPickerFocus` vs `selectedFillIndices`) — so with fill row 1's picker open but a
+stale/different `selectedFillIndices`, Crop still landed on fill 0. The user's report: "Crop wejście w
+ten tryb jeśli mam otwarty panel z fill pozycją index 1 i jest image to wybiera crop na fill z pozycją 0. Powinien uwzględnić jeszcze otwarty panel aktualny jeśli jest image." Fixed by adding an
+`openPickerIndex` parameter to `getCropTargetPaintIndex.ts`, sourced from `selectImageFillPickerFocus`
+in `useHandleCropClick.ts`. The user also corrected the priority order live ("switch"): the open picker
+must be checked **before** `selectedFillIndices`, not after — an open picker is a stronger signal of
+current intent than a possibly-stale selection. See `properties-panel.md`'s `getCropTargetPaintIndex.ts`
+note for the full breakdown.
+
+e2e coverage: switches a second fill to Image and leaves its picker open (without ever clicking that
+row's own strip to "select" it), then confirms clicking Crop targets that open-picker row (index 1),
+not the fallback (index 0) — confirmed to genuinely fail against the pre-fix version via a backup-file
+round-trip.
+
+#495 wires up the `ImageCropToolbar`'s "Fit" button (`FitLayout` icon) — another pure UI shell with no
+`onClick` at all. Unlike every option in `ImageCropAspectRatioMenu` (#493), this one has no ratio math:
+the user's own framing was "Przycisk fit dostosowuje node do zdjęcia" (the Fit button adjusts the node
+to the image) and, after a targeted clarifying question about how "current" should apply, "Do tego co
+jest aktualnie" (to whatever is currently there) — i.e. resize the node to exactly match the image's
+current crop rect, whatever shape/size that happens to be right now. Implemented as
+`commitFitNodeToImage.ts`: read the current crop via `getImageCropRect(node, paint)` and dispatch its
+`x/y/width/height` straight onto the node unchanged, no interpolation or centering needed since the
+crop rect already is what the node's new bounds should be.
+
+e2e coverage: drags the image (not the frame) by `(20, 20)` while in crop mode, then clicks Fit and
+confirms the node moves to exactly match the dragged crop rect — confirmed to genuinely fail (node
+stays at its pre-drag position) against the pre-wiring shell via a backup-file round-trip.

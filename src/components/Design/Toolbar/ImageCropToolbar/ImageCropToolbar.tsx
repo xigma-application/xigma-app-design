@@ -10,6 +10,7 @@ import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import { UITools } from 'shared';
 
 // hooks
+import { useHandleFitClick } from './hooks/useHandleFitClick';
 import { useImageCropToolbar } from './hooks/useImageCropToolbar';
 
 // others
@@ -21,6 +22,7 @@ import styles from './image-crop-toolbar.module.scss';
 const ImageCropToolbar: FC = () => {
   const { t } = useTranslation();
   const { isVisible, onZoomChange, zoom } = useImageCropToolbar();
+  const handleFitClick = useHandleFitClick();
 
   if (!isVisible) {
     return null;
@@ -43,7 +45,7 @@ const ImageCropToolbar: FC = () => {
         </div>
       </div>
       <ImageCropAspectRatioMenu />
-      <ToolbarButton icon="FitLayout" isActive={false} tooltip={t(`${translationNameSpace}.fit`)} />
+      <ToolbarButton icon="FitLayout" isActive={false} onClick={handleFitClick} tooltip={t(`${translationNameSpace}.fit`)} />
       <div className={styles.ImageCropToolbar__separator} />
       <UITools.Button color="secondary" size="small" variant="outline">
         {t('common.cancel')}

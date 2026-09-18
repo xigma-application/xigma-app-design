@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useHandleCropClick } from '../useHandleCropClick';
 
 // store
-import { addNode, setImageEditor, setSelectedFillIndices, setSelection } from 'store/design/slice';
+import { addNode, setImageEditor, setImageFillPickerFocus, setSelectedFillIndices, setSelection } from 'store/design/slice';
 import { selectActivePage, selectImageEditor, selectSelectedFillIndices } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -45,6 +45,7 @@ describe('useHandleCropClick', () => {
     store.dispatch(setSelection([]));
     store.dispatch(setSelectedFillIndices([]));
     store.dispatch(setImageEditor(null));
+    store.dispatch(setImageFillPickerFocus(null));
   });
 
   it('(a) should target the first image fill from the top when no fill row is selected', () => {
@@ -113,6 +114,43 @@ describe('useHandleCropClick', () => {
     const id = addRectangle([solid, imageWithoutCrop]);
 
     store.dispatch(setSelectedFillIndices([0]));
+
+    const { result } = renderUseHandleCropClick();
+
+    act(() => result.current());
+
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 1 });
+  });
+
+  it('(d) should target the fill row whose picker is currently open, even though it is not the "selected" fill row (regression: opening a fill row picker and its selectedFillIndices state are decoupled, so Crop fell back to fill 0 instead)', () => {
+    const id = addRectangle([imageWithoutCrop, solid, imageWithCrop]);
+
+    store.dispatch(setImageFillPickerFocus({ nodeId: id, paintIndex: 2 }));
+
+    const { result } = renderUseHandleCropClick();
+
+    act(() => result.current());
+
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 2 });
+  });
+
+  it('(d) should prefer the open picker fill over an explicitly selected different fill', () => {
+    const id = addRectangle([imageWithoutCrop, solid, imageWithCrop]);
+
+    store.dispatch(setSelectedFillIndices([0]));
+    store.dispatch(setImageFillPickerFocus({ nodeId: id, paintIndex: 2 }));
+
+    const { result } = renderUseHandleCropClick();
+
+    act(() => result.current());
+
+    expect(selectImageEditor(store.getState())).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 2 });
+  });
+
+  it('(d) should ignore an open picker focus that belongs to a different node', () => {
+    const id = addRectangle([solid, imageWithoutCrop]);
+
+    store.dispatch(setImageFillPickerFocus({ nodeId: 'some-other-node', paintIndex: 0 }));
 
     const { result } = renderUseHandleCropClick();
 

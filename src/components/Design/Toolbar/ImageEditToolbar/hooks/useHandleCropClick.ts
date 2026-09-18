@@ -1,5 +1,5 @@
 // store
-import { selectSelectedFillIndices, selectSelectedNodes } from 'store/design/selectors';
+import { selectImageFillPickerFocus, selectSelectedFillIndices, selectSelectedNodes } from 'store/design/selectors';
 import { setImageEditor, setSelectedFillIndices } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -12,11 +12,13 @@ export const useHandleCropClick = (): TFunc => {
   const dispatch = useAppDispatch();
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const selectedFillIndices = useAppSelector(selectSelectedFillIndices);
+  const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
   const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
 
   return (): void => {
     if (node) {
-      const paintIndex = getCropTargetPaintIndex(node.fills, selectedFillIndices);
+      const openPickerIndex = imageFillPickerFocus?.nodeId === node.id ? imageFillPickerFocus.paintIndex : undefined;
+      const paintIndex = getCropTargetPaintIndex(node.fills, selectedFillIndices, openPickerIndex);
 
       if (paintIndex !== -1) {
         dispatch(setImageEditor({ mode: 'crop', nodeId: node.id, paintIndex }));
