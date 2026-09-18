@@ -5980,6 +5980,43 @@ test.describe('Design panels — Fill section', () => {
       await expect(page.getByText('21.00 : 1')).toBeVisible();
     });
 
+    test('previews the nearest compliant point on hover of the level button and moves the handle there on click', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-correction-preview');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(page, designPage, { fills: [{ color: '#111111', opacity: 100, type: 'solid' }] }, BLACK_PAGE);
+
+      const autoCorrect = page.getByRole('button', { name: 'Auto-correct to the nearest compliant color' });
+      const preview = page.locator('[class*="correction-preview"]');
+
+      // result — black on near-black fails, and nothing is previewed until hovering
+      await expect(preview).toHaveCount(0);
+
+      // action
+      await autoCorrect.hover();
+
+      // result
+      await expect(preview).toBeVisible();
+
+      // action
+      await autoCorrect.click();
+
+      // result — the color moved to a passing one and the preview is gone
+      await expect(preview).toHaveCount(0);
+      await expect(page.getByText('Contrast standard not met')).toHaveCount(0);
+      const ratio = Number((await page.getByText(/^\d+\.\d{2} : 1$/).textContent())!.split(' ')[0]);
+
+      expect(ratio).toBeGreaterThanOrEqual(3);
+
+      // action — drag the handle to a failing dark spot on the map; the preview must not come back
+      await page.locator('[class*="SaturationMap__input"]').click({ position: { x: 100, y: 200 } });
+
+      // result
+      await expect(page.getByRole('button', { name: 'Auto-correct to the nearest compliant color' })).toBeVisible();
+      await expect(preview).toHaveCount(0);
+    });
+
     test('is locked with a message when a parent has a blend mode in appearance', async ({ page }) => {
       const designPage = new DesignPage(page);
 

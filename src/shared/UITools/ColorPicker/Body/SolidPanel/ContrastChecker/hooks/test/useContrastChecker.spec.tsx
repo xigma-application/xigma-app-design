@@ -131,6 +131,66 @@ describe('useContrastChecker', () => {
     expect(onCorrect.mock.calls[0][0].v).toBeLessThan(95);
   });
 
+  it('should expose the correction preview only while the auto-correct control is hovered and the color fails', () => {
+    // before — near-white fails against white
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 95 }, '#ffffff', vi.fn()));
+
+    expect(result.current.correctionPreview).toBeNull();
+
+    // action
+    act(() => result.current.onAutoCorrectHoverChange(true));
+
+    // result
+    expect(result.current.correctionPreview).not.toBeNull();
+
+    // action
+    act(() => result.current.onAutoCorrectHoverChange(false));
+
+    // result
+    expect(result.current.correctionPreview).toBeNull();
+  });
+
+  it('should not expose a correction preview when the color already passes, even while hovered', () => {
+    // before — black passes against white
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn()));
+
+    // action
+    act(() => result.current.onAutoCorrectHoverChange(true));
+
+    // result
+    expect(result.current.correctionPreview).toBeNull();
+  });
+
+  it('should clear the hover preview once the correction is applied, since the button may never report mouseleave', () => {
+    // before
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 95 }, '#ffffff', vi.fn()));
+
+    act(() => result.current.onAutoCorrectHoverChange(true));
+
+    // action
+    act(() => result.current.onAutoCorrect());
+
+    // result
+    expect(result.current.correctionPreview).toBeNull();
+  });
+
+  it('should correct to exactly the previewed color', () => {
+    // mock
+    const onCorrect = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 40, v: 60 }, '#db0000', onCorrect));
+
+    act(() => result.current.onAutoCorrectHoverChange(true));
+    const preview = result.current.correctionPreview;
+
+    // action
+    act(() => result.current.onAutoCorrect());
+
+    // result
+    expect(onCorrect).toHaveBeenCalledWith(preview);
+  });
+
   it('should not call onCorrect when there is no background to correct against', () => {
     // mock
     const onCorrect = vi.fn();

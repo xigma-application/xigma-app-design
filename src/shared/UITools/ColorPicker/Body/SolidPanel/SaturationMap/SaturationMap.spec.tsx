@@ -61,4 +61,24 @@ describe('SaturationMap behaviors', () => {
     // result
     expect(thumb.style.backgroundColor).toBe('rgb(255, 0, 0)');
   });
+
+  it('should draw the correction preview marker only when a preview is given', () => {
+    // before
+    const { container, rerender } = render(<SaturationMap color="#ff0000" hsv={{ h: 0, s: 100, v: 100 }} onChange={vi.fn()} />);
+
+    expect(container.querySelector('[class*="correction-preview"]')).toBeNull();
+
+    // action
+    rerender(
+      <SaturationMap
+        color="#ff0000"
+        contrastCorrectionPreview={{ h: 0, s: 20, v: 80 }}
+        hsv={{ h: 0, s: 100, v: 100 }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="correction-preview"]')).not.toBeNull();
+  });
 });

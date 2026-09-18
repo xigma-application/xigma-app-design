@@ -1443,6 +1443,15 @@ has a usable fill = page background ("Bierzesz z canvas").
   shows it. `isActive`/`category`/`level` live in the module-level `contrastCheckerStateCache`
   (restored on mount, written on change) so the choice survives closing the picker or reselecting; specs
   reset `contrastCheckerStateCache.current` in `beforeEach`.
+- **Auto-correct preview**: hovering the level button (`onAutoCorrectHoverChange`) makes `SaturationMap` draw a
+  small white-bordered marker filled with the color a click would apply (`correctionPreview` from
+  `useContrastChecker`). The target is `getCorrectionTarget`: the nearest point (straight-line in the s/v
+  plane) on any boundary polyline (`getNearestBoundaryPoint` + `projectPointOnSegment`; the clamped tail
+  that runs into the top edge is excluded), nudged in 0.05 V steps until the truncated ratio really passes.
+  Click applies exactly that target (`applyContrastCorrection`) and clears the hover state — the button gets
+  `pointer-events: none` once passing and never reports `mouseleave`, which used to resurrect the preview
+  on later map drags. Overlay-only helpers (`getFailRegionPolygon`, `getVisibleCurve`, `toSvgPoints`,
+  `toClipPathPoints`) live in `SaturationMap/ContrastOverlay/utils/`.
 - **Row UI** (`SolidPanel/ContrastChecker/`, 24px high, horizontal padding only): `ContrastValuesButton`
   (inline `assets/icons/contrast.svg?react`, recolored via `data-svg-property="fill-background"` /
   `"fill-foreground"` and CSS vars; opens a 180px "View color values" popover with Foreground/Background
@@ -1464,7 +1473,7 @@ has a usable fill = page background ("Bierzesz z canvas").
      it (same walk); an unsupported result beneath propagates;
   5. reaching the canvas: hidden or 0% opacity `backgroundPaint` -> `mixedBackground`, else its color.
   The foreground reason (`getContrastUnsupportedReason`: the edited fill or its node has a blend mode)
-  wins over the background one. Covered by `e2e/design/panels/fill-section.spec.ts` (#503–#511).
+  wins over the background one. Covered by `e2e/design/panels/fill-section.spec.ts` (#503–#512).
 - **Icons**: toggle is the shared `Contrast` icon, settings is `Properties`, `ContrastLocked` and
   `NotAllowed` were added to `xigma-app-shared`; the two-tone swatch is the local `contrast.svg` (fixed
   fill slots, not `Icon`).

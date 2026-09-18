@@ -25,4 +25,17 @@
     transform: translate(-50%, -50%);
     width: 16px;
   }
+
+  &__correction-preview {
+    border: 2px solid var(--color-on-blue-1);
+    border-radius: 50%;
+    box-shadow: var(--elevation-300);
+    height: 12px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -50%);
+    width: 12px;
+  }
 }

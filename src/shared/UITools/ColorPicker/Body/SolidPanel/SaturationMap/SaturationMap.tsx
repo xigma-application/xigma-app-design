@@ -16,17 +16,20 @@ import { THsv } from '../../../types';
 // utils
 import { getHueColor } from '../../../utils/getHueColor';
 import { getThumbOffset } from '../../../utils/getThumbOffset';
+import { hsvToRgb } from '../../../utils/hsvToRgb';
+import { rgbToHex } from 'utils/color/rgbToHex';
 
 export type TSaturationMapProps = {
   color: string;
   contrastBoundaries?: TContrastBoundary[];
+  contrastCorrectionPreview?: THsv | null;
   hsv: THsv;
   onChange: TFunc<[Partial<THsv>]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
 };
 
-export const SaturationMap: FC<TSaturationMapProps> = ({ color, contrastBoundaries, hsv, onChange, onDragEnd, onDragStart }) => {
+export const SaturationMap: FC<TSaturationMapProps> = ({ color, contrastBoundaries, contrastCorrectionPreview, hsv, onChange, onDragEnd, onDragStart }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     axis: 'both',
     onChange: ({ x, y }) => onChange({ s: x * 100, v: (1 - y) * 100 }),
@@ -46,6 +49,16 @@ export const SaturationMap: FC<TSaturationMapProps> = ({ color, contrastBoundari
         style={{ backgroundColor: getHueColor(hsv.h) }}
       >
         {contrastBoundaries && <ContrastOverlay boundaries={contrastBoundaries} />}
+        {contrastCorrectionPreview && (
+          <div
+            className={styles['SaturationMap__correction-preview']}
+            style={{
+              backgroundColor: rgbToHex(hsvToRgb(contrastCorrectionPreview)),
+              left: getThumbOffset(contrastCorrectionPreview.s / 100),
+              top: getThumbOffset(1 - contrastCorrectionPreview.v / 100),
+            }}
+          />
+        )}
         <div
           className={styles.SaturationMap__thumb}
           style={{

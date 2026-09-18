@@ -26,6 +26,7 @@ export type TContrastCheckerProps = {
   foregroundColor: string;
   level: ContrastLevel;
   onAutoCorrect: TFunc;
+  onAutoCorrectHoverChange: TFunc<[boolean]>;
   onSetCategory: TFunc<[ContrastCategory]>;
   onSetLevel: TFunc<[ContrastLevel]>;
   passes: boolean;
@@ -39,6 +40,7 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
   foregroundColor,
   level,
   onAutoCorrect,
+  onAutoCorrectHoverChange,
   onSetCategory,
   onSetLevel,
   passes,
@@ -64,6 +66,8 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
               endAdornment={levelLabel}
               name={passes ? 'Check' : 'NotAllowed'}
               onClick={onAutoCorrect}
+              onMouseEnter={(): void => onAutoCorrectHoverChange(true)}
+              onMouseLeave={(): void => onAutoCorrectHoverChange(false)}
               size={12}
             />
           </Tooltip>

@@ -17,6 +17,7 @@ const renderContrastChecker = (overrides: Partial<TContrastCheckerProps> = {}): 
         foregroundColor="#f2adad"
         level={ContrastLevel.aa}
         onAutoCorrect={vi.fn()}
+        onAutoCorrectHoverChange={vi.fn()}
         onSetCategory={vi.fn()}
         onSetLevel={vi.fn()}
         passes
@@ -57,7 +58,9 @@ describe('ContrastChecker', () => {
     renderContrastChecker({ passes: true });
 
     // result
-    expect(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' }).className).toContain('ContrastChecker__badge--passing');
+    expect(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' }).className).toContain(
+      'ContrastChecker__badge--passing',
+    );
   });
 
   it('should call onAutoCorrect when the ratio control is clicked while failing', () => {
@@ -72,6 +75,23 @@ describe('ContrastChecker', () => {
 
     // result
     expect(onAutoCorrect).toHaveBeenCalled();
+  });
+
+  it('should report hover on the auto-correct control so the map can preview the correction', () => {
+    // mock
+    const onAutoCorrectHoverChange = vi.fn();
+
+    // before
+    renderContrastChecker({ onAutoCorrectHoverChange, passes: false });
+    const button = screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' });
+
+    // action
+    fireEvent.mouseEnter(button);
+    fireEvent.mouseLeave(button);
+
+    // result
+    expect(onAutoCorrectHoverChange).toHaveBeenNthCalledWith(1, true);
+    expect(onAutoCorrectHoverChange).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should open the settings menu listing category and level options when the settings button is clicked', () => {

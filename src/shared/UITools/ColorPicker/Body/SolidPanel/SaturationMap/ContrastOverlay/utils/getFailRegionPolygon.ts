@@ -1,5 +1,5 @@
 // types
-import { TContrastBoundary, TContrastCurvePoint } from '../types';
+import { TContrastBoundary, TContrastCurvePoint } from '../../../ContrastChecker/types';
 
 const getSingleBoundaryFailRegion = (boundary: TContrastBoundary): TContrastCurvePoint[] => {
   const edgeV = boundary.passSide === 'lighter' ? 0 : 100;
@@ -14,11 +14,7 @@ const getBetweenBoundariesFailRegion = (lighter: TContrastBoundary, darker: TCon
   const lighterSaturations = new Set(topEdge.map((point) => point.s));
   const bottomEdge = [...darker.points].reverse().filter((point) => lighterSaturations.has(point.s));
 
-  if (topEdge.length > 0 && bottomEdge.length > 0) {
-    return [...topEdge, ...bottomEdge];
-  }
-
-  return null;
+  return topEdge.length > 0 && bottomEdge.length > 0 ? [...topEdge, ...bottomEdge] : null;
 };
 
 export const getFailRegionPolygon = (boundaries: TContrastBoundary[]): TContrastCurvePoint[] | null => {

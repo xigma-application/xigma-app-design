@@ -1,5 +1,5 @@
 // types
-import { TContrastBoundary } from '../../types';
+import { TContrastBoundary } from '../../../../ContrastChecker/types';
 
 // utils
 import { getFailRegionPolygon } from '../getFailRegionPolygon';

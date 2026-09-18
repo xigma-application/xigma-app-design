@@ -45,6 +45,7 @@ export const SolidPanel: FC<TSolidPanelProps> = ({
         foregroundColor={colorModel.hex}
         level={contrastChecker.level}
         onAutoCorrect={contrastChecker.onAutoCorrect}
+        onAutoCorrectHoverChange={contrastChecker.onAutoCorrectHoverChange}
         onSetCategory={contrastChecker.onSetCategory}
         onSetLevel={contrastChecker.onSetLevel}
         passes={contrastChecker.passes}
@@ -54,6 +55,7 @@ export const SolidPanel: FC<TSolidPanelProps> = ({
     <SaturationMap
       color={colorModel.hex}
       contrastBoundaries={contrastChecker?.isActive && !contrastChecker.unsupportedReason ? contrastChecker.boundaries : undefined}
+      contrastCorrectionPreview={contrastChecker?.isActive && !contrastChecker.unsupportedReason ? contrastChecker.correctionPreview : null}
       hsv={colorModel.hsv}
       onChange={colorModel.setHsv}
       onDragEnd={onDragEnd}
