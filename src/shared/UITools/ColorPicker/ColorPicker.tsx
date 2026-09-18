@@ -113,6 +113,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [isOpen, setIsOpen] = useState(initialOpen);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
+  const isContrastCheckerAvailable = Boolean(contrastBackgroundColor) || Boolean(contrastUnsupportedReason);
   const contrastChecker = useContrastChecker(colorModel.hsv, contrastBackgroundColor, colorModel.setHsv, contrastUnsupportedReason);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
@@ -193,7 +194,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             contrastCheckerActive={contrastChecker.isActive}
             onBlendModeChange={onBlendModeChange}
             onSelectTab={handleSetActiveTab}
-            onToggleContrastChecker={contrastBackgroundColor ? contrastChecker.onToggleActive : undefined}
+            onToggleContrastChecker={isContrastCheckerAvailable ? contrastChecker.onToggleActive : undefined}
           />
         )}
         <DockedPanelContext.Provider value={setDockedPanel}>
@@ -201,7 +202,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             activeTab={activeTab}
             alpha={value.alpha}
             colorModel={colorModel}
-            contrastChecker={contrastBackgroundColor ? contrastChecker : undefined}
+            contrastChecker={isContrastCheckerAvailable ? contrastChecker : undefined}
             gradientPanel={gradientPanel}
             imageAdjustments={imageAdjustments}
             imagePanel={imagePanel}

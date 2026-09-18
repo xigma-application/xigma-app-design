@@ -7,4 +7,11 @@ export type TContrastBoundary = { passSide: 'darker' | 'lighter'; points: TContr
 
 export type TContrastCheckerState = { category: ContrastCategory; isActive: boolean; level: ContrastLevel };
 
-export type TContrastUnsupportedReason = 'foreground';
+export type TContrastUnsupportedReason =
+  | 'backgroundBlendMode'
+  | 'foreground'
+  | 'gradientBackground'
+  | 'imageBackground'
+  | 'mixedBackground'
+  | 'patternBackground'
+  | 'videoBackground';

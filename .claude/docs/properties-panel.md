@@ -1428,22 +1428,46 @@ has a usable fill = page background ("Bierzesz z canvas").
   luminance monotonic in V, so `findVForLuminance` binary-searches V for a target luminance.
   `getContrastBoundaries` solves the WCAG ratio for the two possible foreground luminances
   (`lighterBound = ratio*(Lbg+.05)-.05`, `darkerBound = (Lbg+.05)/ratio-.05`), keeps those inside [0,1],
-  and samples each with `getIsoContrastCurve` (41 saturation samples). `getFailRegionPolygon` builds the
+  and samples each with `getIsoContrastCurve` (101 saturation samples; columns that can't reach the
+  luminance clamp to v=100 so the curve spans the full width). Luminance is searched on the unrounded
+  `hsvToRgbFloat` — the 8-bit `hsvToRgb` made the curve jagged. `getFailRegionPolygon` builds the
   failing area (one boundary: curve to the v=0/v=100 edge; two: the band between them) for the dotted
   texture. `getNearestPassingHsv` = auto-correct: same hue+saturation, V moved to the nearest boundary.
 - **Rendering**: `SaturationMap` takes optional `contrastBoundaries`; `ContrastOverlay` draws an SVG
   polyline per boundary and a `clip-path: polygon(...)` dotted div (no SVG `<pattern>` ids to collide).
   Points are `s%`, `(100-v)%` — same mapping as the thumb.
-- **State**: `useContrastChecker(hsv, backgroundColor, onCorrect)` is called in `ColorPicker.tsx`
-  (lifted so `PaintTypeRow`'s toggle and `SolidPanel`'s row share it) and only passed down when
-  `contrastBackgroundColor` is provided, so the vector paint tool's picker never shows it.
+- **State**: `useContrastChecker(hsv, backgroundColor, onCorrect, unsupportedReason)` is called in
+  `ColorPicker.tsx` (lifted so `PaintTypeRow`'s toggle and `SolidPanel`'s row share it) and only wired
+  when `contrastBackgroundColor` **or** `contrastUnsupportedReason` is provided (a locked background has
+  no color but must still offer the toggle — caught by e2e), so the vector paint tool's picker never
+  shows it. `isActive`/`category`/`level` live in the module-level `contrastCheckerStateCache`
+  (restored on mount, written on change) so the choice survives closing the picker or reselecting; specs
+  reset `contrastCheckerStateCache.current` in `beforeEach`.
+- **Row UI** (`SolidPanel/ContrastChecker/`, 24px high, horizontal padding only): `ContrastValuesButton`
+  (inline `assets/icons/contrast.svg?react`, recolored via `data-svg-property="fill-background"` /
+  `"fill-foreground"` and CSS vars; opens a 180px "View color values" popover with Foreground/Background
+  swatches + hex); on the right a `UITools.ButtonIcon` (`Check`/`NotAllowed` icon + level text as
+  `endAdornment`; click = auto-correct, `pointer-events: none` while passing; tooltip only when failing)
+  and the settings popover (`selected` while open, tooltip "Contrast settings"). While locked, `SolidPanel`
+  renders `ContrastUnsupported` (shared `ContrastLocked` icon + 11px message, 24px high) instead of the row,
+  and no overlay.
 - **Background resolution** lives in `FillRow` (it owns `nodeId`; `ColorPicker` stays store-free):
-  `useContrastBackgroundColor(nodeId)` -> `getContrastBackgroundColor` walks `getAncestorChain`
-  (new, `store/design/utils/nodeHierarchy/`) taking the nearest ancestor whose top visible fill is an
-  opaque solid (`getEffectiveFillColor`), or a section's plain `fill`; else `selectBackgroundPaint`.
-  Gradient/image/semi-transparent ancestors are skipped, not composited.
-- **Assets**: the small two-tone circle beside the ratio is `src/assets/icons/contrast.svg` (fixed
-  colors, plain `<img>`), the toggle is the shared `Contrast` icon, settings is `Settings`.
+  `useContrastBackground(nodeId)` -> `getContrastBackground` returns `{ color }` or `{ reason }`
+  (a `TContrastUnsupportedReason` that locks the checker and shows `ContrastUnsupported`). Rules, in order:
+  1. any ancestor with an active appearance `blendMode` -> `backgroundBlendMode`;
+  2. walking ancestors nearest-first (`getAncestorChain`), per node the dominant fill is the visible fill
+     with the highest opacity (ties: the higher one in the list); no visible fill -> go to the parent;
+     a section's plain `fill` counts as opaque solid;
+  3. the dominant fill having a blend mode -> `backgroundBlendMode`; non-solid -> `gradientBackground` /
+     `patternBackground` / `imageBackground` / `videoBackground`;
+  4. a solid below 100% is a legit background, composited (`blendHexColors`) over what resolves beneath
+     it (same walk); an unsupported result beneath propagates;
+  5. reaching the canvas: hidden or 0% opacity `backgroundPaint` -> `mixedBackground`, else its color.
+  The foreground reason (`getContrastUnsupportedReason`: the edited fill or its node has a blend mode)
+  wins over the background one. Covered by `e2e/design/panels/fill-section.spec.ts` (#503–#511).
+- **Icons**: toggle is the shared `Contrast` icon, settings is `Properties`, `ContrastLocked` and
+  `NotAllowed` were added to `xigma-app-shared`; the two-tone swatch is the local `contrast.svg` (fixed
+  fill slots, not `Icon`).
 - Not applicable to Color Styles/Variables in Figma (no single background); irrelevant here since
   there are none yet.
 - Nested `<button>` gotcha: `UITools.Popover` needs `asChild` when its trigger is a `ButtonIcon`

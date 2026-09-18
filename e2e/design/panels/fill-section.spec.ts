@@ -38,6 +38,40 @@ type TReadablePaint = {
 type TReadableNode = { cornerRadius?: number; fills?: TReadablePaint[]; height?: number; width?: number; x?: number; y?: number };
 type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number; selectedTarget?: string } | null;
 
+const setUpContrastScene = async (
+  page: Page,
+  designPage: DesignPage,
+  frameChanges: Record<string, unknown>,
+  pageBackground: { color: string; opacity: number; type: 'solid'; visible?: boolean },
+): Promise<void> => {
+  await designPage.drawFrame(700, 200, 1100, 500);
+  await designPage.drawRectangle(800, 250, 900, 350);
+
+  await page.evaluate(
+    async ({ background, changes }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes, setBackgroundPaint, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const { nodes, rootOrder } = pages[activePageId];
+      const frameId = rootOrder.find((id) => nodes[id].type === 'frame')!;
+      const rectId = rootOrder.find((id) => nodes[id].type === 'rectangle')!;
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(setBackgroundPaint(background));
+      store.dispatch(updateNode({ changes, id: frameId }));
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#000000', opacity: 100, type: 'solid' }] }, id: rectId }));
+    },
+    { background: pageBackground, changes: frameChanges },
+  );
+
+  await designPage.canvas.click({ position: { x: 850, y: 300 } });
+  await page.getByLabel('Hex color').click();
+  await page.getByLabel('Check color contrast').click();
+};
+
+const WHITE_PAGE = { color: '#ffffff', opacity: 100, type: 'solid' } as const;
+const BLACK_PAGE = { color: '#000000', opacity: 100, type: 'solid' } as const;
+
 const readFirstNodeId = (page: Page): Promise<string> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -5889,5 +5923,134 @@ test.describe('Design panels — Fill section', () => {
 
     // result
     await expect(page.getByText(/^\d+\.\d{2} : 1$/)).not.toHaveText(pageRatio!);
+  });
+
+  test.describe('contrast checker background resolution', () => {
+    test("measures against the parent frame's opaque solid fill", async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-parent-opaque');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(page, designPage, { fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }] }, BLACK_PAGE);
+
+      // result — black on the frame's white, not on the black page
+      await expect(page.getByText('21.00 : 1')).toBeVisible();
+    });
+
+    test('blends a semi-transparent parent fill over the page background', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-parent-blended');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(page, designPage, { fills: [{ color: '#ffffff', opacity: 50, type: 'solid' }] }, BLACK_PAGE);
+
+      // result — white at 50% over black is mid gray (#808080)
+      await expect(page.getByText('5.31 : 1')).toBeVisible();
+    });
+
+    test('picks the fill with the highest opacity among several parent fills', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-highest-opacity');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(
+        page,
+        designPage,
+        {
+          fills: [
+            { color: '#ff0000', opacity: 20, type: 'solid' },
+            { color: '#ffffff', opacity: 50, type: 'solid' },
+          ],
+        },
+        BLACK_PAGE,
+      );
+
+      // result — the 50% white fill wins, not the 20% red one
+      await expect(page.getByText('5.31 : 1')).toBeVisible();
+    });
+
+    test('goes past a parent with no visible fill to the page background', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-no-parent-fill');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(page, designPage, { fills: [] }, WHITE_PAGE);
+
+      // result
+      await expect(page.getByText('21.00 : 1')).toBeVisible();
+    });
+
+    test('is locked with a message when a parent has a blend mode in appearance', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-parent-blend');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(
+        page,
+        designPage,
+        { blendMode: 'multiply', fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }] },
+        WHITE_PAGE,
+      );
+
+      // result
+      await expect(page.getByText('Background has blend mode')).toBeVisible();
+      await expect(page.getByText(/^\d+\.\d{2} : 1$/)).toHaveCount(0);
+    });
+
+    test('is locked with a message when the chosen parent fill has a blend mode', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-fill-blend');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(
+        page,
+        designPage,
+        { fills: [{ blendMode: 'multiply', color: '#ffffff', opacity: 100, type: 'solid' }] },
+        WHITE_PAGE,
+      );
+
+      // result
+      await expect(page.getByText('Background has blend mode')).toBeVisible();
+    });
+
+    test('is locked with a type-specific message when the chosen parent fill is not solid', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-parent-gradient');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(
+        page,
+        designPage,
+        {
+          fills: [
+            {
+              end: { x: 1, y: 0.5 },
+              opacity: 100,
+              start: { x: 0, y: 0.5 },
+              stops: [
+                { color: '#ffffff', opacity: 100, position: 0 },
+                { color: '#000000', opacity: 100, position: 1 },
+              ],
+              type: 'gradient-linear',
+            },
+          ],
+        },
+        WHITE_PAGE,
+      );
+
+      // result
+      await expect(page.getByText('Gradient background')).toBeVisible();
+    });
+
+    test('is locked with a mixed background message when the page background is hidden', async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto('e2e-test-fill-section-contrast-hidden-page');
+      await expect(designPage.canvas).toBeVisible();
+      await setUpContrastScene(page, designPage, { fills: [] }, { ...WHITE_PAGE, visible: false });
+
+      // result
+      await expect(page.getByText('Mixed background')).toBeVisible();
+    });
   });
 });

@@ -469,6 +469,25 @@ describe('ColorPicker behaviors', () => {
     expect(screen.getByText('21.00 : 1')).toBeInTheDocument();
   });
 
+  it('should still offer the contrast toggle and show the locked message when only an unsupported reason is given', () => {
+    // before — no usable background color, but the reason must keep the toggle available
+    renderColorPicker({
+      contrastUnsupportedReason: 'gradientBackground',
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#000000' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+
+    // action
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(screen.getByText('Gradient background')).toBeInTheDocument();
+  });
+
   it('should draw the contrast overlay on the saturation map only while the checker is active', () => {
     // before
     renderColorPicker({

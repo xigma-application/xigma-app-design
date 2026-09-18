@@ -8,7 +8,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
-import { useContrastBackgroundColor } from './hooks/useContrastBackgroundColor';
+import { useContrastBackground } from './hooks/useContrastBackground';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
 import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
@@ -113,7 +113,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleImageTileScaleChange = useSetImagePaintTileScale(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const handleBlendModeChange = useSetFillBlendMode(paint, onChange);
-  const contrastBackgroundColor = useContrastBackgroundColor(nodeId);
+  const contrastBackground = useContrastBackground(nodeId);
   const contrastNode = useAppSelector(selectNodes)[nodeId ?? ''];
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
@@ -154,8 +154,8 @@ export const FillRow: FC<TFillRowProps> = ({
           alpha={value.alpha}
           blendMode={paint.blendMode ?? BlendMode.normal}
           className={styles.FillRow__color}
-          contrastBackgroundColor={contrastBackgroundColor}
-          contrastUnsupportedReason={getContrastUnsupportedReason(paint, contrastNode)}
+          contrastBackgroundColor={contrastBackground.color}
+          contrastUnsupportedReason={getContrastUnsupportedReason(paint, contrastNode) ?? contrastBackground.reason}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}
