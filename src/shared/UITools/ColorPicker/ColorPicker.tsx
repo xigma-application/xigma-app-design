@@ -31,6 +31,7 @@ import { useResetActiveTabOnReopen } from './hooks/useResetActiveTabOnReopen';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
 import { useSyncFillModeWithImageEditorCrop } from './hooks/useSyncFillModeWithImageEditorCrop';
 import { useTrackIsDragging } from './hooks/useTrackIsDragging';
+import { useContrastChecker } from './Body/SolidPanel/ContrastChecker/hooks/useContrastChecker';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 import { useImagePanel } from './Body/ImagePanel/hooks/useImagePanel';
 import { usePatternPanel } from './Body/PatternPanel/hooks/usePatternPanel';
@@ -57,6 +58,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   avoidCollisions,
   blendMode = BlendMode.normal,
   className = '',
+  contrastBackgroundColor,
   freezePositionOnGrow,
   headerExtra,
   imageAdjustments,
@@ -110,6 +112,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [isOpen, setIsOpen] = useState(initialOpen);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
+  const contrastChecker = useContrastChecker(colorModel.hsv, contrastBackgroundColor, colorModel.setHsv);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
   const imagePanel = useImagePanel(initialImageUrl, initialFillMode);
@@ -186,8 +189,10 @@ export const ColorPicker: FC<TColorPickerProps> = ({
           <PaintTypeRow
             activeTab={activeTab}
             blendMode={blendMode}
+            contrastCheckerActive={contrastChecker.isActive}
             onBlendModeChange={onBlendModeChange}
             onSelectTab={handleSetActiveTab}
+            onToggleContrastChecker={contrastBackgroundColor ? contrastChecker.onToggleActive : undefined}
           />
         )}
         <DockedPanelContext.Provider value={setDockedPanel}>
@@ -195,6 +200,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             activeTab={activeTab}
             alpha={value.alpha}
             colorModel={colorModel}
+            contrastChecker={contrastBackgroundColor ? contrastChecker : undefined}
             gradientPanel={gradientPanel}
             imageAdjustments={imageAdjustments}
             imagePanel={imagePanel}

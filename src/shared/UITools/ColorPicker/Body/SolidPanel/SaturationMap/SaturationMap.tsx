@@ -1,5 +1,8 @@
 import { FC } from 'react';
 
+// components
+import ContrastOverlay from './ContrastOverlay/ContrastOverlay';
+
 // hooks
 import { usePointerDrag } from '../../../hooks/usePointerDrag';
 
@@ -7,6 +10,7 @@ import { usePointerDrag } from '../../../hooks/usePointerDrag';
 import styles from './saturation-map.module.scss';
 
 // types
+import { TContrastBoundary } from '../ContrastChecker/types';
 import { THsv } from '../../../types';
 
 // utils
@@ -15,13 +19,14 @@ import { getThumbOffset } from '../../../utils/getThumbOffset';
 
 export type TSaturationMapProps = {
   color: string;
+  contrastBoundaries?: TContrastBoundary[];
   hsv: THsv;
   onChange: TFunc<[Partial<THsv>]>;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
 };
 
-export const SaturationMap: FC<TSaturationMapProps> = ({ color, hsv, onChange, onDragEnd, onDragStart }) => {
+export const SaturationMap: FC<TSaturationMapProps> = ({ color, contrastBoundaries, hsv, onChange, onDragEnd, onDragStart }) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     axis: 'both',
     onChange: ({ x, y }) => onChange({ s: x * 100, v: (1 - y) * 100 }),
@@ -40,6 +45,7 @@ export const SaturationMap: FC<TSaturationMapProps> = ({ color, hsv, onChange, o
         ref={trackRef}
         style={{ backgroundColor: getHueColor(hsv.h) }}
       >
+        {contrastBoundaries && <ContrastOverlay boundaries={contrastBoundaries} />}
         <div
           className={styles.SaturationMap__thumb}
           style={{

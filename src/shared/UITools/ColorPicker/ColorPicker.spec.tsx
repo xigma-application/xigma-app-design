@@ -424,6 +424,110 @@ describe('ColorPicker behaviors', () => {
     expect(multiplyIcon).not.toBe(defaultIcon);
   });
 
+  it('should not show the contrast checker toggle when no contrastBackgroundColor is given', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // action
+    fireEvent.click(screen.getByText('Open'));
+
+    // result
+    expect(screen.queryByLabelText('Check color contrast')).not.toBeInTheDocument();
+  });
+
+  it('should reveal the contrast ratio row, computed against contrastBackgroundColor, when the contrast toggle is clicked', () => {
+    // before — pure black on a white background is 21:1
+    renderColorPicker({
+      contrastBackgroundColor: '#ffffff',
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#000000' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+
+    expect(screen.queryByText(/: 1/)).not.toBeInTheDocument();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(screen.getByText('21.00 : 1')).toBeInTheDocument();
+  });
+
+  it('should draw the contrast overlay on the saturation map only while the checker is active', () => {
+    // before
+    renderColorPicker({
+      contrastBackgroundColor: '#ffffff',
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+
+    expect(document.querySelector('[class*="ContrastOverlay"]')).toBeNull();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(document.querySelector('[class*="ContrastOverlay"]')).not.toBeNull();
+  });
+
+  it('should auto-correct a failing color through onChange when the ratio is clicked', () => {
+    // mock
+    const onChange = vi.fn();
+
+    // before — near-white on white background fails
+    renderColorPicker({
+      contrastBackgroundColor: '#ffffff',
+      onChange,
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#f0f0f0' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Auto-correct to the nearest compliant color' }));
+
+    // result
+    expect(onChange).toHaveBeenCalled();
+    expect(onChange.mock.calls[0][0].hex).not.toBe('#f0f0f0');
+  });
+
+  it('should hide the contrast toggle again when switching away from the solid tab', () => {
+    // before
+    renderColorPicker({
+      contrastBackgroundColor: '#ffffff',
+      onChange: vi.fn(),
+      onGradientChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+
+    expect(screen.getByLabelText('Check color contrast')).toBeInTheDocument();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Gradient' }));
+
+    // result
+    expect(screen.queryByLabelText('Check color contrast')).not.toBeInTheDocument();
+  });
+
   it('should show a plain title label instead of any tabs when title is set', () => {
     // before
     renderColorPicker({

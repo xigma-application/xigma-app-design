@@ -8,6 +8,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 // hooks
 import { TFillSelectModifiers } from '../hooks/useFillSection/hooks/useFillSelection/useFillSelection';
 import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
+import { useContrastBackgroundColor } from './hooks/useContrastBackgroundColor';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
 import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
@@ -110,6 +111,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleImageTileScaleChange = useSetImagePaintTileScale(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const handleBlendModeChange = useSetFillBlendMode(paint, onChange);
+  const contrastBackgroundColor = useContrastBackgroundColor(nodeId);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern' && paint.type !== 'video';
@@ -148,6 +150,7 @@ export const FillRow: FC<TFillRowProps> = ({
           alpha={value.alpha}
           blendMode={paint.blendMode ?? BlendMode.normal}
           className={styles.FillRow__color}
+          contrastBackgroundColor={contrastBackgroundColor}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}

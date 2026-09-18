@@ -13,10 +13,19 @@ const renderPaintTypeRow = (
   onSelectTab: TFunc<[ColorPickerTab]> = vi.fn(),
   blendMode: BlendMode = BlendMode.normal,
   onBlendModeChange: TFunc<[BlendMode]> = vi.fn(),
+  onToggleContrastChecker?: TFunc,
+  contrastCheckerActive = false,
 ): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <PaintTypeRow activeTab={activeTab} blendMode={blendMode} onBlendModeChange={onBlendModeChange} onSelectTab={onSelectTab} />
+      <PaintTypeRow
+        activeTab={activeTab}
+        blendMode={blendMode}
+        contrastCheckerActive={contrastCheckerActive}
+        onBlendModeChange={onBlendModeChange}
+        onSelectTab={onSelectTab}
+        onToggleContrastChecker={onToggleContrastChecker}
+      />
     </TooltipProvider>,
   );
 
@@ -230,5 +239,52 @@ describe('PaintTypeRow behaviors', () => {
 
     // result
     expect(onBlendModeChange).toHaveBeenCalledWith(BlendMode.multiply);
+  });
+  it('should not show the contrast checker button when no toggle handler is given', () => {
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid);
+
+    // result
+    expect(screen.queryByLabelText('Check color contrast')).not.toBeInTheDocument();
+  });
+
+  it('should show the contrast checker button next to the blend mode button on the solid tab, inside the trailing wrapper', () => {
+    // before
+    const { container } = renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, vi.fn(), vi.fn());
+    const wrapper = container.querySelector('[class*="PaintTypeRow__extra"]');
+
+    // result
+    expect(wrapper?.querySelector('[aria-label="Check color contrast"]')).toBeInTheDocument();
+    expect(wrapper?.querySelector('[aria-label="Apply blend mode to fill"]')).toBeInTheDocument();
+  });
+
+  it('should hide the contrast checker button on every non-solid tab, since contrast only applies to solid fills', () => {
+    // before
+    renderPaintTypeRow(ColorPickerTab.gradient, vi.fn(), BlendMode.normal, vi.fn(), vi.fn());
+
+    // result
+    expect(screen.queryByLabelText('Check color contrast')).not.toBeInTheDocument();
+  });
+
+  it('should mark the contrast checker button active when contrastCheckerActive is set', () => {
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, vi.fn(), vi.fn(), true);
+
+    // result
+    expect(screen.getByLabelText('Check color contrast').className).toContain('ButtonIcon--active');
+  });
+
+  it('should call onToggleContrastChecker when the contrast checker button is clicked', () => {
+    // mock
+    const onToggleContrastChecker = vi.fn();
+
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, vi.fn(), onToggleContrastChecker);
+
+    // action
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(onToggleContrastChecker).toHaveBeenCalled();
   });
 });

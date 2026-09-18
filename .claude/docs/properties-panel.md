@@ -1410,6 +1410,45 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
+### Contrast checker (Solid tab only)
+
+Figma-style "Check color contrast": the last icon in `PaintTypeRow`'s trailing `__extra` wrapper (next to
+the blend mode button, wrapper reserved for exactly this). User: "tylko dla solid ... ren saturation map
+ma takie kroki i jakiś łuk po którym są kolory dopasowane kontrastowo do jego parenta. Czyli jak jest na
+canvas to z canvas ale jak jest w frame to z frame". Full scope shipped at once; fallback when no parent
+has a usable fill = page background ("Bierzesz z canvas").
+
+- **Math** (global, `utils/color/`): `getRelativeLuminance` + `getContrastRatio` (WCAG 2.1), and
+  `truncateContrastRatio` — the ratio is **truncated, not rounded** (Figma shipped a rounding bug where
+  4.499 showed as a pass), and pass/fail compares the truncated value. Thresholds live in
+  `ContrastChecker/constants.ts` (graphics AA 3; large text AA 3 / AAA 4.5; normal text AA 4.5 / AAA 7);
+  `Auto` resolves to Graphics because a shape fill picker has no text context; AAA is disabled for
+  Auto/Graphics.
+- **Curve** (`SolidPanel/ContrastChecker/utils/`): for the current hue, every saturation column has
+  luminance monotonic in V, so `findVForLuminance` binary-searches V for a target luminance.
+  `getContrastBoundaries` solves the WCAG ratio for the two possible foreground luminances
+  (`lighterBound = ratio*(Lbg+.05)-.05`, `darkerBound = (Lbg+.05)/ratio-.05`), keeps those inside [0,1],
+  and samples each with `getIsoContrastCurve` (41 saturation samples). `getFailRegionPolygon` builds the
+  failing area (one boundary: curve to the v=0/v=100 edge; two: the band between them) for the dotted
+  texture. `getNearestPassingHsv` = auto-correct: same hue+saturation, V moved to the nearest boundary.
+- **Rendering**: `SaturationMap` takes optional `contrastBoundaries`; `ContrastOverlay` draws an SVG
+  polyline per boundary and a `clip-path: polygon(...)` dotted div (no SVG `<pattern>` ids to collide).
+  Points are `s%`, `(100-v)%` — same mapping as the thumb.
+- **State**: `useContrastChecker(hsv, backgroundColor, onCorrect)` is called in `ColorPicker.tsx`
+  (lifted so `PaintTypeRow`'s toggle and `SolidPanel`'s row share it) and only passed down when
+  `contrastBackgroundColor` is provided, so the vector paint tool's picker never shows it.
+- **Background resolution** lives in `FillRow` (it owns `nodeId`; `ColorPicker` stays store-free):
+  `useContrastBackgroundColor(nodeId)` -> `getContrastBackgroundColor` walks `getAncestorChain`
+  (new, `store/design/utils/nodeHierarchy/`) taking the nearest ancestor whose top visible fill is an
+  opaque solid (`getEffectiveFillColor`), or a section's plain `fill`; else `selectBackgroundPaint`.
+  Gradient/image/semi-transparent ancestors are skipped, not composited.
+- **Assets**: the small two-tone circle beside the ratio is `src/assets/icons/contrast.svg` (fixed
+  colors, plain `<img>`), the toggle is the shared `Contrast` icon, settings is `Settings`.
+- Not applicable to Color Styles/Variables in Figma (no single background); irrelevant here since
+  there are none yet.
+- Nested `<button>` gotcha: `UITools.Popover` needs `asChild` when its trigger is a `ButtonIcon`
+  (caught by the e2e run's console error, fixed).
+
 ## Adding a panel for another node type
 
 1. Route it in `PanelProperties.tsx`.

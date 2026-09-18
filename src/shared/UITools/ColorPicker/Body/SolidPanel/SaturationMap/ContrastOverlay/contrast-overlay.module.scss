@@ -1,0 +1,27 @@
+.ContrastOverlay {
+  border-radius: 4px;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+
+  &__dots {
+    background-image: radial-gradient(circle, var(--color-on-blue-1) 1px, transparent 1.5px);
+    background-size: 8px 8px;
+    inset: 0;
+    opacity: 0.45;
+    position: absolute;
+  }
+
+  &__curves {
+    height: 100%;
+    inset: 0;
+    position: absolute;
+    width: 100%;
+  }
+
+  &__curve {
+    stroke: var(--color-on-blue-1);
+    stroke-width: 2px;
+  }
+}

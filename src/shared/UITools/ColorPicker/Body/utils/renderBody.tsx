@@ -16,6 +16,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     activeTab,
     alpha,
     colorModel,
+    contrastChecker,
     gradientPanel,
     imageAdjustments,
     imagePanel,
@@ -80,6 +81,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
         <SolidPanel
           alpha={alpha}
           colorModel={colorModel}
+          contrastChecker={contrastChecker}
           onCloseSampler={onCloseSampler}
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}

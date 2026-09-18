@@ -3957,7 +3957,9 @@ test.describe('Design panels — Fill section', () => {
     expect(node.y).toBeCloseTo(cropAfterDrag.y, 1);
   });
 
-  test('clicking the Confirm (check) button in the Image crop toolbar exits crop mode, back to the Image edit toolbar', async ({ page }) => {
+  test('clicking the Confirm (check) button in the Image crop toolbar exits crop mode, back to the Image edit toolbar', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-fill-section-image-crop-confirm-button');
@@ -5849,5 +5851,36 @@ test.describe('Design panels — Fill section', () => {
 
     // result
     expect((await readNode(page, id)).fills![0].blendMode).toBe('multiply');
+  });
+
+  test('the contrast checker measures a solid fill against the page background and draws its overlay on the saturation map', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-contrast-checker');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Check color contrast').click();
+
+    // result — no parent, so it's measured against the page background, with the dotted overlay on the map
+    const pageRatio = await page.getByText(/^\d+\.\d{2} : 1$/).textContent();
+
+    expect(pageRatio).not.toBeNull();
+    await expect(page.locator('[class*="ContrastOverlay"]').first()).toBeVisible();
+
+    // action — repaint the page background black, which changes the reference color
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setBackgroundPaint } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(setBackgroundPaint({ color: '#000000', opacity: 100, type: 'solid' }));
+    });
+
+    // result
+    await expect(page.getByText(/^\d+\.\d{2} : 1$/)).not.toHaveText(pageRatio!);
   });
 });

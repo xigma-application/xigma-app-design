@@ -259,6 +259,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 490 | Clicking anywhere else in the right panel exits the Image editor mode, the same as clicking the canvas already does                                                        |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 491 | Cycling through several image fills that each already have a committed crop (0→1→2→0→1) always enters crop mode on whichever fill was just clicked, never landing on null  |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 502 | A blend mode picked from the paint-type row's trailing icon commits onto the fill and survives a paint-type switch (solid → image)                                         |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 503 | The contrast checker toggle (solid tab only) shows the ratio against the page background and draws the overlay on the saturation map; ratio updates when the background changes |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
@@ -1343,3 +1344,9 @@ button, which already used that exact accessible name — `getByLabel('Apply ble
 two elements. Renamed to `"Apply blend mode to fill"` to disambiguate; see
 `.claude/docs/properties-panel.md` for the fuller writeup, including a separate circular-import
 gotcha the same change hit.
+
+#503 adds a Figma-style contrast checker to the Solid tab of the fill picker (details in
+`.claude/docs/properties-panel.md`). The WCAG math, iso-contrast curve, fail-region polygon,
+auto-correct and ancestor/background resolution are pure functions covered by unit tests; the e2e test
+covers the real browser flow (toggle, ratio, overlay, reacting to a page background change). Parent-frame
+resolution is unit-tested only (`getContrastBackgroundColor.spec.ts`).

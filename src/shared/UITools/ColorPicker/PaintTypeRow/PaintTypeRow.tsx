@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import BlendModeButton from './BlendModeButton/BlendModeButton';
+import ContrastCheckerButton from './ContrastCheckerButton/ContrastCheckerButton';
 import { Tooltip, UITools } from 'shared';
 
 // styles
@@ -15,11 +16,20 @@ import { ColorPickerTab } from '../enums';
 export type TPaintTypeRowProps = {
   activeTab: ColorPickerTab;
   blendMode: BlendMode;
+  contrastCheckerActive?: boolean;
   onBlendModeChange?: TFunc<[BlendMode]>;
   onSelectTab: TFunc<[ColorPickerTab]>;
+  onToggleContrastChecker?: TFunc;
 };
 
-export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, blendMode, onBlendModeChange, onSelectTab }) => {
+export const PaintTypeRow: FC<TPaintTypeRowProps> = ({
+  activeTab,
+  blendMode,
+  contrastCheckerActive = false,
+  onBlendModeChange,
+  onSelectTab,
+  onToggleContrastChecker,
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -74,6 +84,9 @@ export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, blendMode, onB
       </Tooltip>
       <div className={styles.PaintTypeRow__extra}>
         <BlendModeButton onChange={onBlendModeChange} value={blendMode} />
+        {activeTab === ColorPickerTab.solid && onToggleContrastChecker && (
+          <ContrastCheckerButton isActive={contrastCheckerActive} onToggle={onToggleContrastChecker} />
+        )}
       </div>
     </div>
   );

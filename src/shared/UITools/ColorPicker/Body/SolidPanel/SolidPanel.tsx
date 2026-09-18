@@ -3,6 +3,7 @@ import { FC } from 'react';
 // components
 import AlphaSlider from './AlphaSlider/AlphaSlider';
 import ColorValueInput from './ColorValueInput/ColorValueInput';
+import ContrastChecker from './ContrastChecker/ContrastChecker';
 import HueSlider from './HueSlider/HueSlider';
 import Sampler from '../../Sampler/Sampler';
 import SaturationMap from './SaturationMap/SaturationMap';
@@ -12,20 +13,43 @@ import styles from './solid-panel.module.scss';
 
 // types
 import { TUseColorModelResult } from '../../hooks/useColorModel';
+import { TUseContrastCheckerResult } from './ContrastChecker/hooks/useContrastChecker';
 
 export type TSolidPanelProps = {
   alpha: number;
   colorModel: TUseColorModelResult;
+  contrastChecker?: TUseContrastCheckerResult;
   onCloseSampler?: TFunc;
   onDragEnd?: TFunc;
   onDragStart?: TFunc;
   onOpenSampler?: TFunc;
 };
 
-export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onCloseSampler, onDragEnd, onDragStart, onOpenSampler }) => (
+export const SolidPanel: FC<TSolidPanelProps> = ({
+  alpha,
+  colorModel,
+  contrastChecker,
+  onCloseSampler,
+  onDragEnd,
+  onDragStart,
+  onOpenSampler,
+}) => (
   <div className={styles.SolidPanel}>
+    {contrastChecker?.isActive && (
+      <ContrastChecker
+        canShowAAA={contrastChecker.canShowAAA}
+        category={contrastChecker.category}
+        level={contrastChecker.level}
+        onAutoCorrect={contrastChecker.onAutoCorrect}
+        onSetCategory={contrastChecker.onSetCategory}
+        onSetLevel={contrastChecker.onSetLevel}
+        passes={contrastChecker.passes}
+        ratio={contrastChecker.ratio}
+      />
+    )}
     <SaturationMap
       color={colorModel.hex}
+      contrastBoundaries={contrastChecker?.isActive ? contrastChecker.boundaries : undefined}
       hsv={colorModel.hsv}
       onChange={colorModel.setHsv}
       onDragEnd={onDragEnd}

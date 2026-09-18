@@ -1,0 +1,30 @@
+.ContrastChecker {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 0;
+
+  &__swatch {
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 14px;
+    width: 14px;
+  }
+
+  &__ratio {
+    background: none;
+    border: none;
+    color: var(--color-neutral-1);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__settingsTrigger {
+    margin-left: auto;
+  }
+}

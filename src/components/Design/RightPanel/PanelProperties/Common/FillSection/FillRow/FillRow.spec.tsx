@@ -272,6 +272,40 @@ describe('FillRow behaviors', () => {
     });
   });
 
+  it('should show a contrast ratio against the page background when the contrast checker is toggled on a solid fill', () => {
+    // before
+    renderFillRow();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(screen.getByText(/^\d+\.\d{2} : 1$/)).toBeInTheDocument();
+  });
+
+  it('should not offer the contrast checker for a gradient fill, since contrast only applies to solid fills', () => {
+    // before
+    renderFillRow({
+      paint: {
+        end: { x: 1, y: 0.5 },
+        opacity: 100,
+        start: { x: 0, y: 0.5 },
+        stops: [
+          { color: '#ffffff', opacity: 100, position: 0 },
+          { color: '#000000', opacity: 100, position: 1 },
+        ],
+        type: 'gradient-linear',
+      },
+    });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+
+    // result
+    expect(screen.queryByLabelText('Check color contrast')).not.toBeInTheDocument();
+  });
+
   it('should commit a hex change through onChange, preserving the rest of the paint', () => {
     // mock
     const onChange = vi.fn();

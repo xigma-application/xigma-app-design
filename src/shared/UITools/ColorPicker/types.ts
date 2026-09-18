@@ -26,6 +26,7 @@ export type TColorPickerProps = {
   avoidCollisions?: TPopoverProps['avoidCollisions'];
   blendMode?: BlendMode;
   className?: string;
+  contrastBackgroundColor?: string;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
   imageAdjustments?: TImageAdjustments;
