@@ -5,7 +5,9 @@ import { TSceneNode } from 'types/design/types';
 import { getStrokeAlignInset } from 'utils/canvas/getStrokeAlignInset/getStrokeAlignInset';
 
 export const getStrokePadding = (node: TSceneNode): number => {
-  if ('strokeColor' in node && node.strokeColor && node.strokeWidth) {
+  const hasStroke = ('strokeColor' in node && Boolean(node.strokeColor)) || ('strokes' in node && (node.strokes ?? []).length > 0);
+
+  if (hasStroke && 'strokeWidth' in node && node.strokeWidth) {
     const strokeAlign = 'strokeAlign' in node ? node.strokeAlign : undefined;
     return getStrokeAlignInset(node.strokeWidth, strokeAlign).outer;
   }

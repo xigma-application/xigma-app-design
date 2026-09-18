@@ -6,6 +6,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TSelectionSizeLabelRect = {
   height: number;
+  padding?: number;
   rotation: number;
   width: number;
   x: number;
@@ -42,8 +43,16 @@ const rotateEdge = (edge: TEdge, center: TPoint, rotation: number): TEdge => ({
 const pickBottomEdge = (edges: TEdge[]): TEdge => edges.reduce((bottom, edge) => (edge.normal.y > bottom.normal.y ? edge : bottom));
 
 export const getSelectionSizeLabelPlacement = (rect: TSelectionSizeLabelRect): TSelectionSizeLabelPlacement => {
+  const padding = rect.padding ?? 0;
   const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-  const edges = getEdges(rect).map((edge) => rotateEdge(edge, center, rect.rotation));
+  const paddedRect = {
+    ...rect,
+    height: rect.height + padding * 2,
+    width: rect.width + padding * 2,
+    x: rect.x - padding,
+    y: rect.y - padding,
+  };
+  const edges = getEdges(paddedRect).map((edge) => rotateEdge(edge, center, rect.rotation));
   const bottom = pickBottomEdge(edges);
 
   return {

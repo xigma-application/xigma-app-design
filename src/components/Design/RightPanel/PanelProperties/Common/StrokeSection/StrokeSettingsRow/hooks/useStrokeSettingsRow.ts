@@ -15,6 +15,7 @@ import { isAppearanceNode } from '../../../AppearanceSection/types';
 import { parseStrokeWeight } from '../utils/parseStrokeWeight';
 
 export type TUseStrokeSettingsRowResult = {
+  onPositionSelect: TFunc<[StrokeAlign]>;
   onWeightBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onWeightDragEnd: TFunc;
   onWeightDragStart: TFunc;
@@ -28,6 +29,7 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
   const weight = node?.strokeWidth ?? 1;
+  const position = node?.strokeAlign ?? StrokeAlign.inside;
 
   const commitWeight = (nextWeight: number): void => {
     if (node) {
@@ -49,12 +51,21 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     }
   };
 
+  const onPositionSelect = (strokeAlign: StrokeAlign): void => {
+    if (node && strokeAlign !== position) {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      dispatch(updateNode({ changes: { strokeAlign }, id: node.id }));
+      dispatch(endHistoryGesture());
+    }
+  };
+
   return {
+    onPositionSelect,
     onWeightBlur,
     onWeightDragEnd: () => dispatch(endHistoryGesture()),
     onWeightDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onWeightScrub: commitWeight,
-    position: node?.strokeAlign ?? StrokeAlign.inside,
+    position,
     weight,
   };
 };

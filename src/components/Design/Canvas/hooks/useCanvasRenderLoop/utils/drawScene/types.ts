@@ -11,6 +11,8 @@ export type TDrawContext = {
   viewport: TViewport;
 };
 
+export type TBoxPaintPhase = 'all' | 'fill' | 'stroke';
+
 export type TDrawSceneContext = TDrawContext & {
   imageContext: TImageRenderContext;
 };

@@ -4,10 +4,12 @@ import { TFrameNode } from 'types/design/types';
 import { TMaskRenderer } from '../../types';
 
 // utils
+import { bindTarget } from '../../bindTarget';
 import { renderClippedFrame } from '../../renderClippedFrame';
 import { renderFrameNode } from '../renderFrameNode';
 import { renderIds } from '../../renderIds';
 
+vi.mock('../../bindTarget', () => ({ bindTarget: vi.fn() }));
 vi.mock('../../renderIds', () => ({ renderIds: vi.fn() }));
 vi.mock('../../renderClippedFrame', () => ({ renderClippedFrame: vi.fn() }));
 
@@ -40,7 +42,7 @@ describe('renderFrameNode', () => {
 
     renderFrameNode(renderer, frame, null);
 
-    expect(renderer.paintLeaf).toHaveBeenCalledWith(frame);
+    expect(renderer.paintLeaf).toHaveBeenCalledWith(frame, 'fill');
     expect(renderClippedFrame).toHaveBeenCalledWith(renderer, frame, null);
     expect(renderIds).not.toHaveBeenCalled();
   });
@@ -51,7 +53,7 @@ describe('renderFrameNode', () => {
 
     renderFrameNode(renderer, frame, null);
 
-    expect(renderer.paintLeaf).toHaveBeenCalledWith(frame);
+    expect(renderer.paintLeaf).toHaveBeenCalledWith(frame, 'fill');
     expect(renderIds).toHaveBeenCalledWith(renderer, ['child-a'], null);
     expect(renderClippedFrame).not.toHaveBeenCalled();
   });
@@ -73,5 +75,22 @@ describe('renderFrameNode', () => {
     renderFrameNode(renderer, frame, null);
 
     expect(renderIds).toHaveBeenCalledWith(renderer, ['child-b', 'child-a'], null);
+  });
+
+  it('should paint the frame stroke after its children so the stroke sits over them', () => {
+    const calls: string[] = [];
+    const renderer = { paintLeaf: vi.fn((_node, phase) => calls.push(`paint:${phase}`)) } as unknown as TMaskRenderer;
+    const frame = buildFrame({ childIds: ['child-a'], clipContent: false });
+
+    vi.mocked(renderIds).mockImplementation(() => {
+      calls.push('children');
+    });
+    vi.mocked(bindTarget).mockImplementation(() => {
+      calls.push('bind');
+    });
+
+    renderFrameNode(renderer, frame, null);
+
+    expect(calls).toEqual(['paint:fill', 'children', 'bind', 'paint:stroke']);
   });
 });

@@ -125,6 +125,33 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByLabel('Stroke weight')).toHaveValue('6');
   });
 
+  test('choosing Outside then Center in the stroke Position dropdown writes strokeAlign to the node', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-position');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const position = page.locator('[class*="SectionColumn"] [class*="Dropdown"]').first();
+
+    // action
+    await position.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+
+    // result
+    expect((await readNode(page, id)).strokeAlign).toBe('outside');
+
+    // action
+    await position.click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Center' }).click();
+
+    // result
+    expect((await readNode(page, id)).strokeAlign).toBe('center');
+  });
+
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
     const designPage = new DesignPage(page);
     const id = await pickStrokeImageMode(page, designPage, 'e2e-test-stroke-section-image-tile', 'Tile');

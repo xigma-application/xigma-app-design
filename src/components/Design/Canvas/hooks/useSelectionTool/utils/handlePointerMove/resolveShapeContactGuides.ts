@@ -9,7 +9,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
+import { getStrokedRotatedNodeBounds } from '../../../../utils/getStrokedRotatedNodeBounds';
 import { getShapeContactGuides, isContactGuideEligibleNode } from '../../../../utils/getShapeContactGuides';
 import { isAutoLayoutDropTargetActive } from 'utils/canvas/signals/isAutoLayoutDropTargetActive';
 
@@ -44,8 +44,8 @@ export const resolveShapeContactGuides = (event: PointerEvent, canvasRefs: TCanv
       const activeIds = activeNodes.map((node) => node.id);
       const candidates = Object.values(nodes)
         .filter((node) => !getIsDescendantOfMovedNodes(node.id, activeIds, nodes) && isContactGuideEligibleNode(node))
-        .map((node) => ({ bounds: getRotatedNodeBounds(node), id: node.id }));
-      const guides = activeNodes.flatMap((activeNode) => getShapeContactGuides(getRotatedNodeBounds(activeNode), candidates));
+        .map((node) => ({ bounds: getStrokedRotatedNodeBounds(node), id: node.id }));
+      const guides = activeNodes.flatMap((activeNode) => getShapeContactGuides(getStrokedRotatedNodeBounds(activeNode), candidates));
 
       canvasRefs.transform.contactGuidesRef.current = guides.length > 0 ? guides : null;
     } else {

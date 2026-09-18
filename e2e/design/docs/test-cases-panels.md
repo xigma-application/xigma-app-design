@@ -278,6 +278,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 519 | Typing a weight in the stroke settings row updates the stroke width                                                                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 520 | The Tile mode of an image stroke arms the image editor for the strokes, not the fills                                                                                             |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 521 | The Crop mode of an image stroke seeds a crop on the stroke; dragging the image moves it and leaves the fills alone                                                               |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 522 | Choosing Outside then Center in the stroke Position dropdown writes strokeAlign to the node                                                                                       |  ✅  |                  ✅ `stroke-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as

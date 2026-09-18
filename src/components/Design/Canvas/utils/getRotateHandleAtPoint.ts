@@ -10,6 +10,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { getNodeBounds } from './getNodeBounds';
 import { getRectCorners } from 'utils/canvas/getRectCorners';
 import { getSelectionBounds } from './getSelectionBounds';
+import { getSelectionOutlineBounds } from './getSelectionOutlineBounds';
 import { isGroupSelection } from './isGroupSelection';
 import { isPointInRect } from './isPointInRect';
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -40,7 +41,7 @@ export const getRotateHandleAtPoint = (
     const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const testPoint = singleNode.rotation === 0 ? point : rotatePoint(point, center, -singleNode.rotation);
 
-    return isInRotateRing(testPoint, bounds, viewport) ? { bounds, rotation: singleNode.rotation } : null;
+    return isInRotateRing(testPoint, getSelectionOutlineBounds(singleNode), viewport) ? { bounds, rotation: singleNode.rotation } : null;
   }
 
   if (isGroupSelection(selectedNodes)) {

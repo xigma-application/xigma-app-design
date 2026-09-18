@@ -10,6 +10,7 @@ import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawPathTextFontSizeGuide } from '../drawPathTextFontSizeGuide';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawSelectedPathTextHandle } from '../drawSelectedPathTextHandle';
+import { getSelectionOutlineBounds } from 'components/Design/Canvas/utils/getSelectionOutlineBounds';
 
 export const drawDefaultSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -21,11 +22,13 @@ export const drawDefaultSelectionOutline = (
   viewport: TViewport,
   nodesById: Record<string, TSceneNode>,
 ): void => {
-  const { height, rotation, width, x, y } = node;
+  const { rotation } = node;
+  const { height, width, x, y } = getSelectionOutlineBounds(node);
+  const outlineNode = { ...node, height, width, x, y };
   const pathNode = node.type === NodeType.text && node.pathId ? nodesById[node.pathId] : undefined;
 
   drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
-  drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
+  drawCornerHandles(gl, program, buffer, outlineNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
   drawSelectedPathTextHandle(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, pathNode);
   drawPathTextFontSizeGuide(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
 };

@@ -73,6 +73,18 @@ describe('useStrokeSettingsRow', () => {
     expect(result.current).toMatchObject({ position: StrokeAlign.center, weight: 4 });
   });
 
+  it('should write the chosen position to the node', () => {
+    // before
+    const id = addAndSelect();
+    const { result } = renderHook(() => useStrokeSettingsRow(), { wrapper });
+
+    // action
+    act(() => result.current.onPositionSelect(StrokeAlign.outside));
+
+    // result
+    expect(readNode(id).strokeAlign).toBe(StrokeAlign.outside);
+  });
+
   it('should write the scrubbed weight to the node', () => {
     // before
     const id = addAndSelect();

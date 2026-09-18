@@ -3,6 +3,7 @@ import { bindTarget } from './bindTarget';
 import { drawLeafNode } from '../drawLeafNode';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
+import { hasFrameStrokeOverChildren } from './hasFrameStrokeOverChildren';
 import { hasRealBlendMode } from './hasRealBlendMode';
 import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
@@ -10,7 +11,7 @@ import { renderIds } from './renderIds';
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TDrawSceneContext } from '../types';
+import { TBoxPaintPhase, TDrawSceneContext } from '../types';
 import { TMaskRenderer } from './types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 import { TSceneNode } from 'types/design/types';
@@ -25,17 +26,19 @@ export const drawSceneNodes = (
   editingPathId?: string | null,
 ): void => {
   const { nodesById, sceneNodes } = getGridTrackAffordanceDragSceneNodes(refs, rawNodesById, rawSceneNodes);
-  const paintLeaf = (node: TSceneNode): void => drawLeafNode(context, node, pathOutlineStyles, refs, nodesById, editingPathId);
+  const paintLeaf = (node: TSceneNode, phase?: TBoxPaintPhase): void =>
+    drawLeafNode(context, node, pathOutlineStyles, refs, nodesById, editingPathId, 0, phase);
 
   if (
     !sceneNodes.some(
       (node) =>
         node.type === NodeType.mask ||
         (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0) ||
+        hasFrameStrokeOverChildren(node) ||
         hasRealBlendMode(node, refs),
     )
   ) {
-    sceneNodes.forEach(paintLeaf);
+    sceneNodes.forEach((node) => paintLeaf(node));
   } else {
     const { gl, imageContext } = context;
     const sceneNodeById = new Map(sceneNodes.map((node) => [node.id, node]));

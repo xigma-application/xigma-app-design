@@ -4,13 +4,13 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getClipVisibleRect } from '../../../../utils/getNodeAtPoint/getClipVisibleRect';
-import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
+import { getStrokedRotatedNodeBounds } from '../../../../utils/getStrokedRotatedNodeBounds';
 
 const rectsOverlap = (a: TDraftRect, b: TDraftRect): boolean =>
   a.width > 0 && a.height > 0 && a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 const visibleBounds = (node: TSceneNode, clipRect: TDraftRect): TDraftRect => {
-  const bounds = getRotatedNodeBounds(node);
+  const bounds = getStrokedRotatedNodeBounds(node);
   const x = Math.max(bounds.x, clipRect.x);
   const y = Math.max(bounds.y, clipRect.y);
   const right = Math.min(bounds.x + bounds.width, clipRect.x + clipRect.width);

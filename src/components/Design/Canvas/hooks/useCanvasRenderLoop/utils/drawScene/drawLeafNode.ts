@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TDrawSceneContext } from './types';
+import { TBoxPaintPhase, TDrawSceneContext } from './types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode } from 'types/design/types';
 
@@ -28,6 +28,7 @@ export const drawLeafNode = (
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
   patternSourceDepth = 0,
+  phase: TBoxPaintPhase = 'all',
 ): void => {
   const node = getGridDragRenderNode(refs, getAutoLayoutReorderRenderNode(refs, rawNode, nodesById), nodesById);
   const opacity = getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(refs, node.id);
@@ -61,6 +62,6 @@ export const drawLeafNode = (
       drawTextLeafNode(context, node, nodesById);
       break;
     default:
-      drawBoxLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+      drawBoxLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth, phase);
   }
 };

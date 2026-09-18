@@ -7,6 +7,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { getHandleAtBounds } from './getHandleAtBounds';
 import { getNodeBounds } from '../getNodeBounds';
 import { getSelectionBounds } from '../getSelectionBounds';
+import { getSelectionOutlineBounds } from '../getSelectionOutlineBounds';
 import { getUnrotatedQueryPoint } from '../getUnrotatedQueryPoint';
 import { isGroupSelection } from '../isGroupSelection';
 
@@ -19,8 +20,9 @@ export const getResizeHandleAtPoint = (
 
   if (selectedNodes.length === 1 && singleNode.type !== NodeType.line) {
     const bounds = getNodeBounds(singleNode);
+    const outlineBounds = getSelectionOutlineBounds(singleNode);
     const testPoint = getUnrotatedQueryPoint(point, bounds, singleNode.rotation);
-    const handle = getHandleAtBounds(testPoint, bounds, viewport);
+    const handle = getHandleAtBounds(testPoint, outlineBounds, viewport);
 
     return handle ? { bounds, handle, rotation: singleNode.rotation } : null;
   }

@@ -7,7 +7,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getEligibleDraggedEntries } from '../../../../../utils/getDragAlignmentSnap/getEligibleDraggedEntries';
 import { getMatchedPairGuides } from '../../../../../utils/getEqualSpacingGuides/getMatchedPairGuides/getMatchedPairGuides';
-import { getRotatedNodeBounds } from '../../../../../utils/getRotatedNodeBounds';
+import { getStrokedRotatedNodeBounds } from '../../../../../utils/getStrokedRotatedNodeBounds';
 
 const NO_MATCH: TMatchedPairGuides = { labels: [], lines: [], markers: [] };
 
@@ -20,7 +20,7 @@ export const getMatchedPairDragGuides = (
 ): TMatchedPairGuides | null => {
   const entries = getEligibleDraggedEntries(nodes, dragState.nodeOrigins, Object.keys(dragState.nodeOrigins));
   const perChildGuides = entries.map(({ node, origin }) => {
-    const bounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
+    const bounds = getStrokedRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
 
     return getMatchedPairGuides(bounds, dragState.candidateShapes, sizeToleranceWorldUnits, centreToleranceWorldUnits);
   });

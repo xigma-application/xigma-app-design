@@ -1,6 +1,6 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TDrawSceneContext } from '../types';
+import { TBoxPaintPhase, TDrawSceneContext } from '../types';
 import { TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
@@ -18,8 +18,14 @@ export const drawBoxLeafNode = (
   refs: TCanvasRefs,
   editingPathId: string | null | undefined,
   patternSourceDepth = 0,
+  phase: TBoxPaintPhase = 'all',
 ): void => {
-  drawBoxLeafNodeFill(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
-  drawBoxLeafNodeStroke(context, node, opacity);
-  drawBoxLeafNodeStrokePaints(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+  if (phase !== 'stroke') {
+    drawBoxLeafNodeFill(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+  }
+
+  if (phase !== 'fill') {
+    drawBoxLeafNodeStroke(context, node, opacity);
+    drawBoxLeafNodeStrokePaints(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+  }
 };

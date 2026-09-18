@@ -10,11 +10,11 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getDistanceGuides } from '../../../utils/getDistanceGuides/getDistanceGuides';
-import { getRotatedNodeBounds } from '../../../utils/getRotatedNodeBounds';
-import { getSelectionBounds } from '../../../utils/getSelectionBounds';
+import { getStrokedRotatedNodeBounds } from '../../../utils/getStrokedRotatedNodeBounds';
+import { getStrokedSelectionBounds } from '../../../utils/getStrokedSelectionBounds';
 
 const getActiveRect = (selectedNodes: TSceneNode[]): TDraftRect =>
-  selectedNodes.length === 1 ? getRotatedNodeBounds(selectedNodes[0]) : getSelectionBounds(selectedNodes);
+  selectedNodes.length === 1 ? getStrokedRotatedNodeBounds(selectedNodes[0]) : getStrokedSelectionBounds(selectedNodes);
 
 export const resolveDistanceGuides = (
   event: PointerEvent,
@@ -34,7 +34,10 @@ export const resolveDistanceGuides = (
     !selectedNodes.some((node) => node.id === hoveredId);
 
   if (isEligible && hoveredNode) {
-    canvasRefs.transform.distanceGuidesRef.current = getDistanceGuides(getActiveRect(selectedNodes), getRotatedNodeBounds(hoveredNode));
+    canvasRefs.transform.distanceGuidesRef.current = getDistanceGuides(
+      getActiveRect(selectedNodes),
+      getStrokedRotatedNodeBounds(hoveredNode),
+    );
     setClassName('distance-measure');
   } else {
     canvasRefs.transform.distanceGuidesRef.current = null;

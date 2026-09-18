@@ -7,7 +7,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getChainSnap } from '../../../../../utils/getEqualSpacingGuides/getChainSnap';
 import { getEligibleDraggedEntries } from '../../../../../utils/getDragAlignmentSnap/getEligibleDraggedEntries';
-import { getRotatedNodeBounds } from '../../../../../utils/getRotatedNodeBounds';
+import { getStrokedRotatedNodeBounds } from '../../../../../utils/getStrokedRotatedNodeBounds';
 
 export type TChainGapDragSnap = { delta: TPoint; guides: TEqualSpacingGuides | null };
 
@@ -23,7 +23,7 @@ export const getChainGapDragSnap = (
   const entries = getEligibleDraggedEntries(nodes, dragState.nodeOrigins, Object.keys(dragState.nodeOrigins));
 
   for (const { node, origin } of entries) {
-    const bounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
+    const bounds = getStrokedRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
     const snap = getChainSnap(bounds, dragState.candidateShapes, toleranceWorldUnits);
 
     if (snap.guides.lines.length > 0) {

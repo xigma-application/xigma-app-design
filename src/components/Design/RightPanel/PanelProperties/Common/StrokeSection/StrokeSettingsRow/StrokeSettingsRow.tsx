@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -21,7 +20,7 @@ import { StrokeAlign } from 'types/design/enums';
 
 const StrokeSettingsRow: FC = () => {
   const { t } = useTranslation();
-  const { onWeightBlur, onWeightDragEnd, onWeightDragStart, onWeightScrub, position, weight } = useStrokeSettingsRow();
+  const { onPositionSelect, onWeightBlur, onWeightDragEnd, onWeightDragStart, onWeightScrub, position, weight } = useStrokeSettingsRow();
   const options = getStrokeAlignOptions((strokeAlign) => t(`${translationNameSpace}.position.options.${strokeAlign}`));
 
   return (
@@ -40,7 +39,7 @@ const StrokeSettingsRow: FC = () => {
     >
       <UITools.Dropdown<StrokeAlign>
         bypassGlobalShortcuts={false}
-        onSelect={noop}
+        onSelect={onPositionSelect}
         options={options}
         textAlign="left"
         value={position}

@@ -75,6 +75,7 @@ describe('createCanvasRefs behaviors', () => {
         imageCropMoveDragRef: { current: null },
         imageCropResizeDragRef: { current: null },
         imageCropRotateDragRef: { current: null },
+        imageTileScaleDragRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
       layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },
