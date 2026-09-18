@@ -230,13 +230,37 @@ not just the group itself. The button's icon fills in once a mode other than the
 and its tooltip changes from "Apply blend mode" to "Remove blend mode" to match — clicking it again
 at that point clears the mode straight away instead of reopening the menu; opening the menu again
 needs one more click. Hovering an option in the menu also now previews it live on the shape, the same
-way Figma does, without actually committing anything until it's clicked. Backgrounds/fills getting
-their own separate blend mode is a later step, not part of this one.
+way Figma does, without actually committing anything until it's clicked. Each fill's own blend mode is
+separate — see Stage 28.
 
 The Paint tool's color picker now has its own blend mode picker too, right next to its close button —
 pick one and the next face you paint uses it, actually blending against whatever's behind that face on
 the canvas. It's a one-time choice per stroke: once you finish painting, the picker drops back to
 Normal instead of staying set for the next face.
+
+## Stage 28 — Fill picker
+
+Every fill on a frame or rectangle now has a full picker, the same kind you get for a painted face,
+with a tab for each way to fill a shape:
+
+- [x] **Solid** — color map, hue and opacity sliders, hex/RGB/HSL/HSB/CSS values, an eyedropper, and
+      the colors already used on the page
+- [x] **Gradient** — linear, radial, angular and diamond, with editable stops and handles on the canvas
+- [x] **Pattern** — repeat any other shape as the fill
+- [x] **Image** and **Video** — pick a file, then Fill / Fit / Crop / Tile, rotate, and the usual
+      exposure, contrast, saturation and similar adjustments
+- [ ] **Shader** — the tab is there but empty for now
+
+Every fill also has its own blend mode, next to the tabs. It stays when you switch between Solid,
+Gradient, Image and so on, and each fill blends only with what's underneath it, so two fills on one
+shape can mix in different ways.
+
+On the Solid tab a contrast checker shows how readable the color is on its background, Figma-style.
+It reads the parent frame (or the canvas when there is none), mixes in see-through backgrounds, and
+gives the ratio with an AA / AAA badge. The color map draws a curve and dotted area where the contrast
+fails; hover the badge to preview the closest passing color, click to jump there. When the background
+or the fill has a blend mode, or the background is a gradient, image or similar, it says so instead of
+guessing.
 
 ## Related
 
