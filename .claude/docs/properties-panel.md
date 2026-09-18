@@ -1133,34 +1133,98 @@ real node in the store), while `zoom`/`onZoomChange` come from `selectImageCropT
 yet (texture not loaded, or crop mode just barely activated) instead of the old shell's arbitrary
 `ZOOM_SLIDER_DEFAULT = 50` (removed — no longer meaningful once the value is always real).
 
-**The initial seed (`seedImageCropIfNeeded.ts`) needed the exact same "always Fit/contain" fix.**
-This function — called from every crop-mode-entry path (`useHandleCropClick.ts`'s toolbar button, the
-dropdown's "Crop" option, and the resize-triggered auto-switch in `armResizeOnPointerDown.ts`) — used
-to delegate its size computation to `getImageCropRect.ts`'s own `seedFromNaturalSize`, which branches
-on `paint.scaleMode` (`'fit'` → contain, `'fill'`/default → cover) and is a **pre-existing, deliberately
-tested** behavior (`getImageCropRect.spec.ts`'s "should seed the cover rect for fill... extending past
-the node bounds" case, predating this session). Left alone, a default Fill-mode paint would still seed
-an overflowing crop the instant crop mode opens — before the slider is ever touched — which is exactly
-the bug the user's screenshot and follow-up messages were describing, just one step upstream of the
-toolbar itself. Fixed by giving `seedImageCropIfNeeded.ts` its own local `seedInitialCropRect` (reads
-`getEffectiveImageSize` + `getImageFillContainRect` directly, unconditionally) instead of calling
-`getImageCropRect`, so entering crop mode always starts non-overflowing regardless of scaleMode —
-without touching `getImageCropRect.ts` itself, since that function's *other* callers (hover-cursor
-resolvers, the crop-image canvas outline, `selectSelectedImageCrop`) still need its scaleMode-aware
-fallback for paints that already carry a `.crop` or whose seed hasn't committed yet. Confirmed safe: all
-7 pre-existing `seedImageCropIfNeeded.spec.ts` tests never actually exercised the branch difference
-(none of them mock a loaded texture), so none needed to change — only a new 8th test was added, using
-an asymmetric node/image pair to prove the seed now differs from the old cover-based value.
+**A fourth correction, after all of the above: entering crop mode must never itself change how the
+image looks.** An intermediate pass also forced `seedImageCropIfNeeded.ts` (called from every
+crop-mode-entry path — the toolbar's Crop button, the dropdown's "Crop" option, and the
+resize-triggered auto-switch in `armResizeOnPointerDown.ts`) to always seed the Fit/contain rect,
+reasoning that "never overflow" should apply from the very first frame. The user caught this live and
+reversed it directly: "To musi się dostosować do zdjęcia, nie może być takiej zmiany" (it must adapt to
+the image, there can't be a change like that) / "slider ma mieć odpowiednią pozycję... ale nie może
+ingerować w rozmiar zdjęcia gdy włączamy tą opcję" (the slider should show the right value, but it must
+not touch the image's size when this mode turns on). Reverted `seedImageCropIfNeeded.ts` back to its
+original behavior — delegating to `getImageCropRect.ts`'s own `seedFromNaturalSize`, which still
+branches on `paint.scaleMode` (`'fit'` → contain, `'fill'`/default → cover) exactly as it did before
+this whole feature, so opening crop mode is a pure no-op on how the image currently renders. The "always
+Fit/contain" rule from point 2 above applies **only** to the slider's own zoom math
+(`computeImageCropZoomRect`/`getImageCropZoomPercent`), which already correctly reports whatever percent
+the *current* (possibly still-overflowing) crop happens to sit at — including values other than exactly
+0% right after entering crop mode — and only actually resizes anything once the user touches it.
 
 Covered by three e2e tests in `fill-section.spec.ts`: one for the basic 0→100%→0 sweep on a
-matching-aspect (square node, square image) pair; one specifically for the never-overflow guarantee on
-a mismatched-aspect pair with the paint left at its default `scaleMode: 'fill'` (this is the one that
-caught the seed bug above — it failed with `seededCrop.height` at the overflowing cover value until the
-seed fix landed); and one proving the anchor stays wherever the user last dragged the image via a
-canvas pointer-drag inside the shape (`designPage.pointerDown`/`pointerMove`/`pointerUp`) before ever
-touching the slider, rather than snapping back to the frame's own center. All three were confirmed to
-genuinely fail against each of their corresponding pre-fix implementations via git-stash/backup-file
-round-trips.
+matching-aspect (square node, square image) pair; one confirming entering crop mode with a default
+Fill-mode paint leaves the (overflowing) crop exactly as it already was, and only *dragging the slider
+to 0%* produces the non-overflowing Fit/contain size; and one proving the anchor stays wherever the
+user last dragged the image via a canvas pointer-drag inside the shape
+(`designPage.pointerDown`/`pointerMove`/`pointerUp`) before ever touching the slider, rather than
+snapping back to the frame's own center. All three were confirmed to genuinely fail against each of
+their corresponding pre-fix implementations via git-stash/backup-file round-trips.
+
+**`ImageCropAspectRatioMenu` (same toolbar, the dropdown next to the zoom slider) resizes the NODE to
+fit a target aspect ratio around its current crop, rather than touching the crop/image at all** — the
+opposite direction from the zoom slider (which resizes the image around a fixed frame). Like the zoom
+slider, this was a pure UI shell (every `MenuItem` had `withCheck={false}`, no `onClick`, one item even
+had a hardcoded `selected` placeholder) until the user specified the mechanics directly: **"Original"**
+resizes the node to the paint's real native pixel dimensions; every other preset (**Square/Circle
+(1:1)**, **Landscape 16:9/4:3/3:2**, **Portrait 9:16/3:4/2:3**) resizes the node to the largest rect of
+that ratio that fits **inside the current crop rect** (never bigger — "dostosowanie node do zdjęcia",
+fitting the node *to* the image, not the other way around); and in both cases **the node ends up
+centered on the crop's own current center**, exactly mirroring the zoom slider's own anchor rule. The
+image/crop itself is never touched by any of this — a plain `updateNode` on the node's own `x/y/width/
+height` doesn't automatically drag `paint.crop` along (nothing else links them), so "resize the frame
+without moving the image" falls out for free, no special decoupling logic needed.
+
+New files under `ImageCropAspectRatioMenu/`: `types.ts` (`TAspectRatioTarget = 'original' | {
+cornerRadius?: 'max'; ratioWidth, ratioHeight }`), `constants.ts` (one named constant per preset —
+`ASPECT_RATIO_SQUARE`, `ASPECT_RATIO_CIRCLE`, `ASPECT_RATIO_LANDSCAPE_16_9`, etc. — plus
+`ASPECT_RATIO_PRESETS`, the full list, used for the Custom checkmark below), `utils/
+getAspectRatioPresetRect.ts` (the shared geometry: `'original'` uses `getEffectiveImageSize` centered on
+the current crop's center; any ratio target reuses `getImageFillContainRect(currentCropRect, ratioWidth,
+ratioHeight)` — the exact same util the crop's own Fit-mode math uses, just with the *crop rect* as the
+containing bounds instead of the *node*), `utils/commitAspectRatioPreset.ts` (dispatches the computed
+rect onto the node), and `utils/isAspectRatioPresetActive.ts` (the checkmark logic — **no menu state is
+stored anywhere**; each item independently recomputes its own target rect from the live node+paint and
+compares it against the node's actual current `x/y/width/height` within a small epsilon, exactly
+matching the user's own description: "sprawdzenie wartości aktualnego frame względem zdjęcia" (checking
+the current frame's values against the image)).
+
+**Circle needed one more thing beyond Square: an actual corner radius, and the user caught a real
+follow-on bug live.** "Circle (1:1)" and "Square (1:1)" share the identical 1:1 rect math, so the only
+way to tell them apart is `cornerRadius` — `ASPECT_RATIO_CIRCLE` carries `cornerRadius: 'max'`,
+`commitAspectRatioPreset.ts` resolves that to `getMaxCornerRadius(rect)` (`Math.min(width, height) / 2`,
+already used elsewhere for corner-radius drag clamping — reused here, not reinvented) and dispatches it
+alongside the resize. The bug: the first pass only set `cornerRadius` when the target explicitly asked
+for it, leaving it **untouched** for every other preset — so picking Circle then Square left the node
+still rounded ("Kurwaaa square ma radius usuwać" — Square must clear the radius). Fixed by always
+including `cornerRadius` in the dispatched changes: `getMaxCornerRadius(rect)` for Circle, a flat `0`
+for every other preset — cornerRadius is never left ambiguous/inherited, matching this whole feature's
+"always derive fresh, never carry over stale state" philosophy. `isAspectRatioPresetActive`'s own check
+only additionally verifies `cornerRadius` for the Circle target itself (Square's own check still ignores
+it) — so Square and Circle can still both show checked simultaneously if the shape happens to be 1:1
+with radius 0, an accepted, unforced consequence of every item checking itself independently rather than
+a single centrally-resolved "current preset".
+
+**"Custom" shows checked exactly when no fixed preset matches** — the user's own second follow-up
+("Jeśli jest custom to niech będzie check zaznaczony... Custom jest check wtedy kiedy żadna z opcji nie
+pasuje"). `useImageCropAspectRatioMenu.ts` derives `isCustomActive` as `!ASPECT_RATIO_PRESETS.some(isPresetActive)` — reusing the exact same list `constants.ts` exports, so a new preset added there is
+automatically covered by both the menu and this check with no separate registration step. Custom's own
+`MenuItem` needs no `withCheck` override at all: the shared `Menu` component's own default is `true`
+(shows the check slot, `selected` toggles its opacity), matching every other preset item — only `MenuSub`
+(the Landscape/Portrait *trigger* rows, which can never be individually checked) defaults to `false`.
+
+`hooks/useHandleSelectAspectRatioPreset.ts` (the click handler) and
+`hooks/useImageCropAspectRatioMenu.ts` (composes it with `isPresetActive`/`isCustomActive`, all sourced
+from the same `selectImageCropTarget` selector the zoom slider already uses) follow the same shape as
+`useHandleZoomChange.ts`/`useImageCropToolbar.ts`.
+
+Covered by three e2e tests in `fill-section.spec.ts`: picking "Square (1:1)" on a wide 200×100 node with
+a square source image, switched to Fit mode first (so — per the seed-revert above — the crop is seeded
+to the non-overflowing 100×100 contain rect rather than an overflowing cover rect), confirms the node
+shrinks to 100×100 while staying centered on the *original* node's own center; picking "Circle (1:1)"
+under the same setup confirms the node also picks up a corner radius of exactly 50 (half its own size),
+and that picking "Square" straight afterward squares the corners off again (the exact regression the
+user caught live); picking "Original" with a distinctively-sized (300×150) source image confirms the
+node resizes to that exact pixel size. All confirmed to genuinely fail against their respective
+pre-fix states via a backup-file round-trip.
 
 ## Adding a panel for another node type
 

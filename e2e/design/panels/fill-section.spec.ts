@@ -34,7 +34,7 @@ type TReadablePaint = {
   type: string;
   visible?: boolean;
 };
-type TReadableNode = { fills?: TReadablePaint[]; height?: number; width?: number; x?: number; y?: number };
+type TReadableNode = { cornerRadius?: number; fills?: TReadablePaint[]; height?: number; width?: number; x?: number; y?: number };
 type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number; selectedTarget?: string } | null;
 
 const readFirstNodeId = (page: Page): Promise<string> =>
@@ -3650,7 +3650,7 @@ test.describe('Design panels — Fill section', () => {
     expect(coverCrop.y + coverCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
   });
 
-  test('the Image crop toolbar slider never overflows the frame at 0%, leaving gaps on the unlocked axis instead — even for a Fill-mode paint', async ({
+  test('entering crop mode never changes how the image already looks, even though the slider itself always reasons in Fit terms once touched', async ({
     page,
   }) => {
     const designPage = new DesignPage(page);
@@ -3658,8 +3658,7 @@ test.describe('Design panels — Fill section', () => {
     await designPage.goto('e2e-test-fill-section-image-crop-toolbar-slider-fit');
     await expect(designPage.canvas).toBeVisible();
 
-    // a wide 200x80 rectangle with a square source image — the crop toolbar must letterbox it,
-    // never overflow either axis, regardless of the paint's own (default, untouched) Fill scaleMode
+    // a wide 200x80 rectangle with a square source image, left at its default Fill (cover) mode
     await designPage.drawRectangle(700, 200, 900, 280);
 
     const id = await readFirstNodeId(page);
@@ -3685,23 +3684,17 @@ test.describe('Design panels — Fill section', () => {
     await page.getByRole('button', { name: 'Crop' }).click();
     await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
 
-    // result — 0% (the initial seed) is the Fit/contain size: height locks exactly to the node
-    // (the constraining axis for a square image on a wide node), width gaps in well short of it —
-    // and, critically, neither axis ever exceeds the node's own bounds
+    // result — entering crop mode alone must not resize/reposition anything: the seed still follows
+    // the paint's own Fill (cover) scaleMode, so it overflows the node exactly like it already did a
+    // moment ago in the static (non-crop) render, not a Fit/contain size
     const seededCrop = (await readNode(page, id)).fills![0].crop!;
 
-    expect(seededCrop.height).toBe(node.height);
-    expect(seededCrop.width).toBeLessThan(node.width!);
-    expect(seededCrop.width).toBeLessThanOrEqual(node.width!);
-    expect(seededCrop.height).toBeLessThanOrEqual(node.height!);
-    expect(seededCrop.x + seededCrop.width / 2).toBeCloseTo(node.x! + node.width! / 2, 1);
-    expect(seededCrop.y + seededCrop.height / 2).toBeCloseTo(node.y! + node.height! / 2, 1);
+    expect(seededCrop.height).toBeGreaterThan(node.height!);
 
     const slider = page.locator('[class*="ImageCropToolbar_"]').first().getByRole('slider');
     const box = (await slider.boundingBox())!;
 
-    // action — drag to the far right end of the slider (100%) — at high zoom, growing past the
-    // frame is expected; the "never overflow" guarantee is only about the 0% baseline above
+    // action — drag to the far right end of the slider (100%)
     await page.mouse.click(box.x + box.width - 1, box.y + box.height / 2);
 
     const nativeCrop = (await readNode(page, id)).fills![0].crop!;
@@ -3709,10 +3702,11 @@ test.describe('Design panels — Fill section', () => {
     expect(nativeCrop.width).toBeGreaterThan(700);
     expect(nativeCrop.height).toBeGreaterThan(700);
 
-    // action — drag back to the far left end of the slider (0%)
+    // action — drag to the far left end of the slider (0%)
     await page.mouse.click(box.x + 1, box.y + box.height / 2);
 
-    // result — back down close to the Fit/contain size, still never overflowing the node
+    // result — only once the slider is actually touched does 0% resolve to the never-overflowing
+    // Fit/contain size, regardless of the paint's own Fill scaleMode
     const containCrop = (await readNode(page, id)).fills![0].crop!;
 
     expect(containCrop.width).toBeLessThan(100);
@@ -3778,6 +3772,146 @@ test.describe('Design panels — Fill section', () => {
     expect(zoomedCrop.width).toBeGreaterThan(cropAfterDrag.width);
     expect(zoomedCrop.x + zoomedCrop.width / 2).toBeCloseTo(draggedCenterX, 1);
     expect(zoomedCrop.y + zoomedCrop.height / 2).toBeCloseTo(draggedCenterY, 1);
+  });
+
+  test('picking Square (1:1) from the aspect ratio menu resizes the node to fit that ratio inside its current crop, centered on it', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-aspect-ratio-square');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a wide 200x100 rectangle so Square genuinely differs in shape from the node itself
+    await designPage.drawRectangle(700, 200, 900, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // a square source image, so the seeded Fit/contain crop is itself already square
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 800, 250)).toEqual([255, 0, 0]);
+
+    const nodeBeforeResize = await readNode(page, id);
+    const originalCenterX = nodeBeforeResize.x! + nodeBeforeResize.width! / 2;
+    const originalCenterY = nodeBeforeResize.y! + nodeBeforeResize.height! / 2;
+
+    // action — switch to Fit mode first, so the crop seeded on entering crop mode is the
+    // non-overflowing 100x100 contain rect (entering crop mode no longer forces this on its own —
+    // it only ever preserves whichever scaleMode was already active)
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Fit', { exact: true }).click();
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('fit');
+
+    // action — enter crop mode, then pick Square (1:1) from the aspect ratio menu
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    await page.getByLabel('Aspect ratio', { exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Square (1:1)' }).click();
+
+    // result — the node itself shrank to a 100x100 square (the seeded crop's own height, the
+    // constraining axis for a square image on this wide node), staying centered on the exact same
+    // point the original 200x100 node was centered on
+    const nodeAfterResize = await readNode(page, id);
+
+    expect(nodeAfterResize.width).toBeCloseTo(100, 1);
+    expect(nodeAfterResize.height).toBeCloseTo(100, 1);
+    expect(nodeAfterResize.x! + nodeAfterResize.width! / 2).toBeCloseTo(originalCenterX, 1);
+    expect(nodeAfterResize.y! + nodeAfterResize.height! / 2).toBeCloseTo(originalCenterY, 1);
+  });
+
+  test('picking Circle (1:1) from the aspect ratio menu resizes the node to a square and rounds its corners into a circle', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-aspect-ratio-circle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 800, 250)).toEqual([255, 0, 0]);
+
+    // action — switch to Fit mode first, so the crop seeds to the non-overflowing 100x100 contain
+    // rect (same setup as the Square test above)
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Fit', { exact: true }).click();
+    await expect.poll(async () => (await readNode(page, id)).fills![0].scaleMode).toBe('fit');
+
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    await page.getByLabel('Aspect ratio', { exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Circle (1:1)' }).click();
+
+    // result — the node became a 100x100 square, same as Square, but also picked up a corner
+    // radius of exactly half its own size (50), rounding it all the way into a circle
+    const node = await readNode(page, id);
+
+    expect(node.width).toBeCloseTo(100, 1);
+    expect(node.height).toBeCloseTo(100, 1);
+    expect(node.cornerRadius).toBeCloseTo(50, 1);
+
+    // action — picking Square afterward must square the corners off again, not leave it rounded
+    await page.getByLabel('Aspect ratio', { exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Square (1:1)' }).click();
+
+    expect((await readNode(page, id)).cornerRadius).toBe(0);
+  });
+
+  test("picking Original from the aspect ratio menu resizes the node to the source file's real pixel dimensions", async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-image-crop-aspect-ratio-original');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 300);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    // a distinctively-sized source image (300x150), unlike anything already on screen
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: await createSolidColorPngBuffer(300, 150, [255, 0, 0]),
+      mimeType: 'image/png',
+      name: 'source.png',
+    });
+
+    await expect.poll(async () => readPixelColor(page, 800, 250)).toEqual([255, 0, 0]);
+
+    // action — enter crop mode, then pick Original from the aspect ratio menu
+    await page.getByRole('button', { name: 'Crop' }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    await page.getByLabel('Aspect ratio', { exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Original' }).click();
+
+    // result — the node now matches the source file's real pixel dimensions exactly
+    const node = await readNode(page, id);
+
+    expect(node.width).toBeCloseTo(300, 1);
+    expect(node.height).toBeCloseTo(150, 1);
   });
 
   test('opening the Image tab enters a position-editing mode for the node, and closing the picker clears it again', async ({ page }) => {

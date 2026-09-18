@@ -1067,18 +1067,55 @@ frame's. See `properties-panel.md`'s `ImageCropToolbar` section for the full nar
 pure utils (`getEffectiveImageSize`, `getImageCropZoomPercent`, `computeImageCropZoomRect`,
 `commitImageCropZoom`, `selectImageCropTarget`).
 
-The Fit/contain correction also exposed a bug one level upstream: `seedImageCropIfNeeded.ts` (used by
-every crop-mode-entry path, not just this toolbar) was still seeding the pre-existing, deliberately
-cover-based value for a default Fill-mode paint, so a crop could start overflowing before the slider
-was ever touched. Fixed by giving it its own unconditional Fit/contain seed computation, without
-touching `getImageCropRect.ts`'s own scaleMode-aware branch (still correct and tested for its other,
-untouched callers).
+A fourth correction followed a false step in the other direction: an intermediate pass also forced
+`seedImageCropIfNeeded.ts` (used by every crop-mode-entry path, not just this toolbar) to always seed
+the Fit/contain rect, on the reasoning that "never overflow" should hold from the very first frame. The
+user reversed this immediately upon seeing it live ("czemu jak wybieram opcje crop to mi robi fit do
+node?" — why does picking Crop force a fit to the node?), then nailed the actual rule: "To musi się
+dostosować do zdjęcia, nie może być takiej zmiany" (it must adapt to the image, there can't be a change
+like that) — entering crop mode must never alter how the image currently looks; only the **slider**, once
+actually touched, reasons in Fit terms. Reverted `seedImageCropIfNeeded.ts` back to delegating to
+`getImageCropRect.ts`'s own scaleMode-aware `seedFromNaturalSize`, exactly as it was before this whole
+feature — so opening crop mode is a pure no-op on the image's appearance, regardless of scaleMode.
 
-e2e coverage, three tests: (1) the basic 0→100%→0 sweep on a square node + square image; (2) the
-never-overflow guarantee on a mismatched-aspect node/image pair with the paint left at its default
-`scaleMode: 'fill'` — this is the test that caught the `seedImageCropIfNeeded` bug above, failing with
-the seeded crop's height at the old overflowing cover value until that fix landed; (3) dragging the
-image off-center via a canvas pointer-drag before ever touching the slider, then confirming the zoomed
-crop stays centered on that dragged position rather than snapping back to the frame's center. All
-three confirmed to genuinely fail against their respective pre-fix implementations via backup-file
-round-trips (edit → rerun → confirm failure → restore).
+e2e coverage, three tests: (1) the basic 0→100%→0 sweep on a square node + square image; (2) confirming
+entering crop mode with a default Fill-mode paint leaves the (overflowing) crop exactly as it already
+was — no forced fit — and that only _dragging the slider to 0%_ produces the non-overflowing Fit/contain
+size; (3) dragging the image off-center via a canvas pointer-drag before ever touching the slider, then
+confirming the zoomed crop stays centered on that dragged position rather than snapping back to the
+frame's center. All three confirmed to genuinely fail against their respective pre-fix implementations
+via backup-file round-trips (edit → rerun → confirm failure → restore).
+
+#493 wires up `ImageCropAspectRatioMenu` (the dropdown next to the zoom slider, same toolbar as #492) —
+another pure UI shell with no `onClick`/`selected` logic at all. The user specified it tersely
+("Node się centruje wtedy względem zdjęcia... checki są poprzez sprawdzenie wartości aktualnego frame
+względem zdjęcia, nie zapisujemy żadnych stanów") and, after an over-cautious clarifying question was
+rejected outright ("Napisałem Ci już o co chodzi... czego nie rozumiesz?"), the direct reading held:
+"Original" resizes the node to the paint's real native pixel dimensions; every ratio preset (Square/
+Circle, Landscape/Portrait) resizes the node to the largest rect of that ratio fitting _inside_ the
+current crop rect (reusing `getImageFillContainRect` with the crop as bounds instead of the node); both
+cases center the resulting node on the crop's own current center. No selection state is stored anywhere
+— each menu item independently recomputes its own target rect and compares it against the node's actual
+current geometry to decide its own checkmark. See `properties-panel.md`'s `ImageCropAspectRatioMenu`
+section for the full file breakdown.
+
+Two follow-up corrections landed right after the first pass. First, Circle needed an actual corner
+radius to be distinguishable from Square at all (both resolve the identical 1:1 rect) —
+`ASPECT_RATIO_CIRCLE` carries `cornerRadius: 'max'`, resolved via the existing `getMaxCornerRadius`
+util. The first version of this only set `cornerRadius` when a preset explicitly asked for it, leaving
+it **untouched** otherwise — so picking Circle then Square left the shape still rounded, caught live by
+the user ("Kurwaaa square ma radius usuwać" — Square must clear the radius). Fixed by always including
+`cornerRadius` in the dispatched changes (max for Circle, `0` for everything else), so it's never
+ambiguous or carried over from a prior pick. Second, "Custom" now shows checked exactly when no fixed
+preset matches ("Custom jest check wtedy kiedy żadna z opcji nie pasuje") — `useImageCropAspectRatioMenu`
+derives `isCustomActive` as "none of `ASPECT_RATIO_PRESETS` are active," reusing the same preset list
+the menu itself renders from.
+
+e2e coverage, three tests: picking "Square (1:1)" on a 200×100 node with a square source image, switched
+to Fit mode first (so — per the seed-revert above — the crop seeds to the non-overflowing 100×100
+contain rect rather than an overflowing cover rect) confirms the node shrinks to exactly 100×100,
+staying centered on the _original_ node's own center; picking "Circle (1:1)" under the same setup
+confirms it also picks up a corner radius of exactly 50, and that picking "Square" straight afterward
+squares the corners off again (the exact regression above); picking "Original" with a distinctively-sized
+300×150 source image confirms the node resizes to that exact pixel size. All confirmed to genuinely fail
+against their respective pre-fix states via a backup-file round-trip.
