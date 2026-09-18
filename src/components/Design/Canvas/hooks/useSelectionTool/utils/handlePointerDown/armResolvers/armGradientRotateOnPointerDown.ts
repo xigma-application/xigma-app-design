@@ -13,6 +13,7 @@ import { getGradientRotateHandleAtPoint } from '../../../../../utils/getGradient
 import { getTouchedRectEdges, TRectEdge } from 'utils/canvas/getTouchedRectEdges';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isEllipseHandleGradientPaint } from '../../../../../utils/isEllipseHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 const GRADIENT_EDGE_ATTACH_TOLERANCE_PX = 0.5;
 
@@ -53,7 +54,7 @@ export const armGradientRotateOnPointerDown = ({
   const [node] = selectedNodes;
 
   if (rotateHit && gradientEditor && isAppearanceNode(node)) {
-    const paint = node.fills[rotateHit.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[rotateHit.paintIndex];
 
     if (paint?.type === 'gradient-linear') {
       const { bounds } = rotateHit;

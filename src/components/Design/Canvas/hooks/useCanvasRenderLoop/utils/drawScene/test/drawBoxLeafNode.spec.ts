@@ -141,7 +141,13 @@ describe('drawBoxLeafNode', () => {
 
   it("should pass a single fill's own blend mode through only that fill's own drawVectorFillGroup call, not the other fills in the stack", () => {
     // mock — two image fills, only the top one carries a non-default blend mode
-    const bottomFill: TRectangleNode['fills'][number] = { opacity: 100, ref: 'asset-bottom', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const bottomFill: TRectangleNode['fills'][number] = {
+      opacity: 100,
+      ref: 'asset-bottom',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
     const topFill: TRectangleNode['fills'][number] = {
       blendMode: BlendMode.multiply,
       opacity: 100,
@@ -157,8 +163,26 @@ describe('drawBoxLeafNode', () => {
 
     // result — the bottom fill's own call never sees the top fill's blend mode, and vice versa
     expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
-    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(1, context, null, null, [[{ x: 0, y: 0 }]], [bottomFill], [null], DEFAULT_BOX_ROTATION);
-    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(2, context, null, null, [[{ x: 0, y: 0 }]], [topFill], [null], DEFAULT_BOX_ROTATION);
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
+      1,
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [bottomFill],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
+      2,
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [topFill],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
   });
 
   it('should resolve a pattern source tile per pattern paint with a sourceNodeId, and release it after drawing', () => {
@@ -294,15 +318,7 @@ describe('drawBoxLeafNode', () => {
 
     // result
     expect(resolvePatternSourceTileMock).not.toHaveBeenCalled();
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
-      context,
-      null,
-      null,
-      [[{ x: 0, y: 0 }]],
-      [pattern],
-      [null],
-      DEFAULT_BOX_ROTATION,
-    );
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [null], DEFAULT_BOX_ROTATION);
   });
 
   it('should pass the node’s own rotation, center, and unrotated local bounds through as boxRotation, so a rotated pattern fill can stay attached to the shape', () => {

@@ -16,7 +16,17 @@ const addImageRectNode = (crop: TImagePaint['crop']): TRectangleNode => {
   const paint: TImagePaint = { crop, opacity: 100, ref: 'image-1', rotation: 0, scaleMode: 'fill', type: 'image' };
 
   store.dispatch(
-    addNode({ fills: [paint], height: 20, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 0, y: 0 }),
+    addNode({
+      fills: [paint],
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder, nodes } = selectActivePage(store.getState());

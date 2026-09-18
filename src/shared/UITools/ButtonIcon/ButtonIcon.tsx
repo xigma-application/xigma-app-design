@@ -22,7 +22,23 @@ export type TButtonIconProps = {
 } & Omit<ComponentPropsWithoutRef<'button'>, 'children' | 'className' | 'disabled' | 'name' | 'onClick' | 'type'>;
 
 export const ButtonIcon = forwardRef<HTMLButtonElement, TButtonIconProps>(
-  ({ active, ariaLabel, className = '', color, disabled = false, endAdornment, name, onClick, selected = false, size = 24, startAdornment, ...rest }, ref) => (
+  (
+    {
+      active,
+      ariaLabel,
+      className = '',
+      color,
+      disabled = false,
+      endAdornment,
+      name,
+      onClick,
+      selected = false,
+      size = 24,
+      startAdornment,
+      ...rest
+    },
+    ref,
+  ) => (
     <button
       {...rest}
       aria-label={ariaLabel}

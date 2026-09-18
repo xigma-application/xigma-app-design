@@ -1410,6 +1410,23 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
+### Stroke section (paints only, no canvas stroke yet)
+
+`Common/StrokeSection` is `<FillSection property="strokes" />`: the whole Fill machinery is parameterized by
+`TPaintProperty = 'fills' | 'strokes'` (`types/design/paint/types.ts`). `Frame`/`Rectangle` nodes carry an
+optional `strokes: TPaint[]` next to `fills` (plus the older `strokeWidth`, set to **1** when the first stroke is
+added — `commitFills`). Helpers `getNodePaints(node, property)` / `getPaintsChange(property, paints)` in
+`utils/design/paint/`. Rows are the same `FillRow` (all tabs, blend mode, contrast, reorder/hide/remove) with
+stroke translations (`getPaintTranslationNamespace`), and **no image editor / crop toolbar** (`editorNodeId` is
+`undefined` for strokes, so `useSyncImageEditor`, resume-focus and scale-mode editor hooks never target them; the
+picker's Crop option is still listed but inert). Canvas-side, `gradientEditor` and `patternSourcePickTarget` carry
+an optional `property`: the gradient handle drawing/hit-testing (`getGradient*AtPoint`, `drawGradientHandleLayer`,
+`armGradient*OnPointerDown`) read `getNodePaints(node, gradientEditor.property)` and the `continueGradient*Drag`
+handlers write through `getPaintsChange(selectGradientEditor(state)?.property, …)`, so handles work for stroke
+gradients although the stroke itself isn't drawn yet (no Weight/Position UI or rendering). Contrast background
+is unchanged: it always reads the **fills** of the ancestors (never their strokes), ending at the page
+background, since the canvas has no border. e2e #516 in `fill-section.spec.ts`.
+
 ### Right panel scrolling
 
 `RightPanel` is a flex column: `Header` keeps its natural height, `RightPanel__properties` (`flex: 1;
@@ -1425,9 +1442,7 @@ Opt-in per section (Export, Fill and Stroke today): while the section has no con
 hovered, `Section--muted` turns the label and the header icons (`svg-color` on `Section__component`)
 `neutral-2`, and hides anything tagged `data-section-idle-hidden` (the shared `Common/ApplyStylesButton` — `StylesAndVariables` icon, used by Fill and Stroke —
 `opacity: 0`); hover or any content restores `neutral-1` / full opacity. All of it transitions
-`0.1s ease-out` (color, fill, stroke, opacity). `Common/StrokeSection` is an empty placeholder (no
-stroke model yet: add/styles buttons do nothing) shown after Fill on Frame and Rectangle. e2e #514 in
-`fill-section.spec.ts` covers Fill.
+`0.1s ease-out` (color, fill, stroke, opacity). See the Stroke section below. e2e #514 in `fill-section.spec.ts` covers Fill.
 
 ### Appearance: Blend mode row
 

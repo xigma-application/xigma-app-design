@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setGradientEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -265,5 +265,27 @@ describe('continueGradientRadiusDrag', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
       fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     });
+  });
+
+  it('should write radiusRatio into the strokes when the active gradient editor targets strokes, leaving the fills alone', () => {
+    // before
+    const nodeId = addGradientRectangle();
+    const canvas = createCanvas();
+    const dragRef = createGradientRadiusDragRef({ nodeId, paintIndex: 0 });
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+
+    store.dispatch(updateNode({ changes: { strokes: node.fills }, id: nodeId }));
+    store.dispatch(setGradientEditor({ nodeId, paintIndex: 0, property: 'strokes', selectedStopIndex: null }));
+
+    // action — half of the full radius
+    continueGradientRadiusDrag(canvas, pointerEvent(0, 90), store.dispatch, dragRef);
+    store.dispatch(setGradientEditor(null));
+
+    // result
+    const next = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
+    const stroke = next.strokes?.[0];
+
+    expect(stroke && 'radiusRatio' in stroke ? stroke.radiusRatio : undefined).toBeCloseTo(0.4, 5);
+    expect(next.fills[0]).not.toHaveProperty('radiusRatio');
   });
 });

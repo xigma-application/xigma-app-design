@@ -11,13 +11,19 @@ import { UITools } from 'shared';
 import { useFillSection } from './hooks/useFillSection/useFillSection';
 
 // others
-import { translationNameSpace } from './constants';
+import { getPaintTranslationNamespace } from './constants';
 
 // styles
 import styles from './fill-section.module.scss';
 
-export const FillSection: FC = () => {
+// types
+import { TPaintProperty } from 'types/design/paint/types';
+
+export type TFillSectionProps = { property?: TPaintProperty };
+
+export const FillSection: FC<TFillSectionProps> = ({ property = 'fills' }) => {
   const { t } = useTranslation();
+  const translationNameSpace = getPaintTranslationNamespace(property);
   const {
     containerRef,
     dropIndicatorOffset,
@@ -36,7 +42,7 @@ export const FillSection: FC = () => {
     onToggleVisible,
     openPickerIndex,
     registerRow,
-  } = useFillSection();
+  } = useFillSection(property);
 
   return (
     <UITools.Section
@@ -48,7 +54,7 @@ export const FillSection: FC = () => {
           tooltip={t(`${translationNameSpace}.applyStylesTooltip`)}
         />
       }
-      e2eValue="fill"
+      e2eValue={property === 'strokes' ? 'stroke' : 'fill'}
       hasContent={fills.length > 0}
       label={t(`${translationNameSpace}.label`)}
       mutedWhenEmpty
@@ -73,6 +79,7 @@ export const FillSection: FC = () => {
             openPickerIndex={openPickerIndex}
             paint={paint}
             paintIndex={index}
+            property={property}
             registerRow={registerRow(index)}
           />
         ))}

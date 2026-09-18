@@ -13,6 +13,8 @@ import { getInterpolatedGradientColor } from '../../../../../utils/getInterpolat
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
 import { MAX_STOPS } from 'shared/UITools/ColorPicker/Body/GradientPanel/constants';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 
 export const armAddGradientStopOnPointerDown = ({ dispatch, point, selectedNodes, viewport }: TArmContext): true | undefined => {
   const gradientEditor = selectGradientEditor(store.getState());
@@ -20,16 +22,18 @@ export const armAddGradientStopOnPointerDown = ({ dispatch, point, selectedNodes
   const [node] = selectedNodes;
 
   if (gradientAddStopHit && gradientEditor && isAppearanceNode(node)) {
-    const paint = node.fills[gradientAddStopHit.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientAddStopHit.paintIndex];
 
     if (isLineHandleGradientPaint(paint) && paint.stops.length < MAX_STOPS) {
       const { color, opacity } = getInterpolatedGradientColor(paint.stops, gradientAddStopHit.position);
       const newStop: TGradientStop = { color, opacity, position: gradientAddStopHit.position };
       const sortedStops = [...paint.stops, newStop].sort((a, b) => a.position - b.position);
-      const fills = node.fills.map((fill, index) => (index === gradientAddStopHit.paintIndex ? { ...paint, stops: sortedStops } : fill));
+      const fills = getNodePaints(node, gradientEditor.property).map((fill, index) =>
+        index === gradientAddStopHit.paintIndex ? { ...paint, stops: sortedStops } : fill,
+      );
       const newStopIndex = sortedStops.indexOf(newStop);
 
-      dispatch(updateNode({ changes: { fills }, id: node.id }));
+      dispatch(updateNode({ changes: getPaintsChange(gradientEditor.property, fills), id: node.id }));
       dispatch(setGradientEditor({ ...gradientEditor, selectedStopIndex: newStopIndex }));
 
       return true;

@@ -143,6 +143,7 @@ export type TFrameNode = TBaseNode & {
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
+  strokes?: TPaint[];
   type: NodeType.frame;
   verticalGap?: number;
   verticalGapMode?: GapMode;
@@ -192,6 +193,7 @@ export type TRectangleNode = TBaseNode & {
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
   strokeWidth?: number;
+  strokes?: TPaint[];
   type: NodeType.rectangle;
 };
 

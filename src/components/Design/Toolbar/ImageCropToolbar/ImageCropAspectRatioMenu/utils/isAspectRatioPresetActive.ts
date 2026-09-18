@@ -7,15 +7,20 @@ import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 import { getAspectRatioPresetRect } from './getAspectRatioPresetRect';
 import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius';
 
+type TRectLike = { height: number; width: number; x: number; y: number };
+
 const CLOSE_ENOUGH_EPSILON = 0.5;
 
 const isClose = (a: number, b: number): boolean => Math.abs(a - b) < CLOSE_ENOUGH_EPSILON;
+
+const doesNodeMatchRect = (node: TRectLike, rect: TRectLike): boolean =>
+  isClose(node.x, rect.x) && isClose(node.y, rect.y) && isClose(node.width, rect.width) && isClose(node.height, rect.height);
 
 export const isAspectRatioPresetActive = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint, target: TAspectRatioTarget): boolean => {
   const rect = getAspectRatioPresetRect(node, paint, target);
 
   if (rect) {
-    const matchesRect = isClose(node.x, rect.x) && isClose(node.y, rect.y) && isClose(node.width, rect.width) && isClose(node.height, rect.height);
+    const matchesRect = doesNodeMatchRect(node, rect);
     const wantsMaxCornerRadius = typeof target === 'object' && target.cornerRadius === 'max';
 
     if (wantsMaxCornerRadius) {

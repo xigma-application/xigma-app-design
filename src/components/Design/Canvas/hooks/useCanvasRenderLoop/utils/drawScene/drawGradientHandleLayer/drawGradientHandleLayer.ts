@@ -20,6 +20,7 @@ import { getGradientWorldPoints } from './getGradientWorldPoints';
 import { getNodeBounds } from '../../../../../utils/getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const drawGradientHandleLayer = (
   context: TDrawSceneContext,
@@ -30,7 +31,7 @@ export const drawGradientHandleLayer = (
   const [selectedNode] = selectedNodes;
 
   if (gradientEditor && selectedNodes.length === 1 && selectedNode.id === gradientEditor.nodeId && isAppearanceNode(selectedNode)) {
-    const paint = selectedNode.fills[gradientEditor.paintIndex];
+    const paint = getNodePaints(selectedNode, gradientEditor.property)[gradientEditor.paintIndex];
 
     if (isLineHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(selectedNode);

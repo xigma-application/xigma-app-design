@@ -14,6 +14,7 @@ import { getPositionAroundGradientEllipse } from './getPositionAroundGradientEll
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { toNormalizedGradientPoint } from './toNormalizedGradientPoint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 const GRADIENT_ELLIPSE_HIT_TOLERANCE_PX = 8;
 
@@ -35,7 +36,7 @@ export const getGradientEllipsePositionAtPoint = (
     !getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
     !getGradientRadiusHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
-    const paint = node.fills[gradientEditor.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientEditor.paintIndex];
 
     if (paint?.type === 'gradient-angular') {
       const bounds = getNodeBounds(node);

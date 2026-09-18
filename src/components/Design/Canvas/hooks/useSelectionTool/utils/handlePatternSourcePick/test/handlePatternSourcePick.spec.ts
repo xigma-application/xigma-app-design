@@ -1,6 +1,6 @@
 // store
 import { selectActivePage, selectIsPatternSourcePicking } from 'store/design/selectors';
-import { addNode, groupNodes, setPatternSourcePickTarget, setPatternSourcePicking, setSelection } from 'store/design/slice';
+import { addNode, groupNodes, setPatternSourcePickTarget, setPatternSourcePicking, setSelection, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -373,5 +373,36 @@ describe('handlePatternSourcePick', () => {
 
     // result
     expect(getFills(targetId)[0]).toMatchObject({ sourceNodeId: childId });
+  });
+
+  it("should write the hit node's id into the target stroke pattern paint and leave the fills alone when the target property is strokes", () => {
+    // mock
+    const targetId = addPatternRectangle(600, 600);
+    const sourceId = addSourceFrame(700, 700);
+    const strokePattern: TRectangleNode['fills'][number] = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      offsetX: 0,
+      offsetY: 0,
+      opacity: 100,
+      scale: 100,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'rectangular',
+      type: 'pattern',
+    };
+
+    store.dispatch(updateNode({ changes: { strokes: [strokePattern] }, id: targetId }));
+    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0, property: 'strokes' }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    handlePatternSourcePick(createCanvas(), pointerEvent(705, 705), store.dispatch);
+
+    // result
+    const node = selectActivePage(store.getState()).nodes[targetId] as TRectangleNode;
+
+    expect(node.strokes?.[0]).toMatchObject({ sourceNodeId: sourceId, type: 'pattern' });
+    expect(node.fills[0]).not.toHaveProperty('sourceNodeId');
   });
 });

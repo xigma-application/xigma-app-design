@@ -24,7 +24,8 @@ export const useImageCropAspectRatioMenu = (): TUseImageCropAspectRatioMenuResul
   const target = useAppSelector(selectImageCropTarget);
   const onSelectPreset = useHandleSelectAspectRatioPreset(target?.node, target?.paint);
 
-  const isPresetActive = (preset: TAspectRatioTarget): boolean => (target ? isAspectRatioPresetActive(target.node, target.paint, preset) : false);
+  const isPresetActive = (preset: TAspectRatioTarget): boolean =>
+    target ? isAspectRatioPresetActive(target.node, target.paint, preset) : false;
 
   return {
     isCustomActive: Boolean(target) && !ASPECT_RATIO_PRESETS.some(isPresetActive),

@@ -13,7 +13,19 @@ import { getDimensionChangeCropFills } from '../getDimensionChangeCropFills';
 
 const addEllipseNode = (width: number, height: number): TSceneNode => {
   store.dispatch(
-    addNode({ fill: '#ff0000', flipX: false, flipY: false, height, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width, x: 0, y: 0 }),
+    addNode({
+      fill: '#ff0000',
+      flipX: false,
+      flipY: false,
+      height,
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

@@ -10,6 +10,7 @@ import { getGradientStopHandleAtPoint } from './getGradientStopHandleAtPoint';
 import { getNodeBounds } from './getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isEllipseHandleGradientPaint } from './isEllipseHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const GRADIENT_RADIUS_HANDLE_RADIUS_PX = 6;
 
@@ -31,7 +32,7 @@ export const getGradientRadiusHandleAtPoint = (
     !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor) &&
     !getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
-    const paint = node.fills[gradientEditor.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientEditor.paintIndex];
 
     if (isEllipseHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);

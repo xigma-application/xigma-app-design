@@ -29,7 +29,15 @@ export type TSaturationMapProps = {
   onDragStart?: TFunc;
 };
 
-export const SaturationMap: FC<TSaturationMapProps> = ({ color, contrastBoundaries, contrastCorrectionPreview, hsv, onChange, onDragEnd, onDragStart }) => {
+export const SaturationMap: FC<TSaturationMapProps> = ({
+  color,
+  contrastBoundaries,
+  contrastCorrectionPreview,
+  hsv,
+  onChange,
+  onDragEnd,
+  onDragStart,
+}) => {
   const { onPointerDown, onPointerMove, onPointerUp, trackRef } = usePointerDrag({
     axis: 'both',
     onChange: ({ x, y }) => onChange({ s: x * 100, v: (1 - y) * 100 }),

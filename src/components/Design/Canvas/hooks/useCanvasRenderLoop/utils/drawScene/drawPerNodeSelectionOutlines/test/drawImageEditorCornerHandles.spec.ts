@@ -98,7 +98,17 @@ describe('drawImageEditorCornerHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawImageEditorCornerHandles(gl, program, buffer, { height: 40, width: 40, x: 0, y: 0 }, '#0c8ce9', 100, 100, { x: 0, y: 0, zoom: 4 }, 0);
+    drawImageEditorCornerHandles(
+      gl,
+      program,
+      buffer,
+      { height: 40, width: 40, x: 0, y: 0 },
+      '#0c8ce9',
+      100,
+      100,
+      { x: 0, y: 0, zoom: 4 },
+      0,
+    );
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

@@ -5,9 +5,13 @@ import { selectGradientEditor } from 'store/design/selectors';
 import { setGradientEditor } from 'store/design/slice';
 import { store, useAppDispatch } from 'store';
 
+// types
+import { TPaintProperty } from 'types/design/paint/types';
+
 export const useSyncGradientEditor = (
   nodeId: string | undefined,
   paintIndex: number,
+  property: TPaintProperty,
   isPickerOpen: boolean,
   isGradientTabActive: boolean,
   selectedStopIndex: number | null,
@@ -16,15 +20,15 @@ export const useSyncGradientEditor = (
 
   useEffect(() => {
     if (nodeId && isPickerOpen && isGradientTabActive) {
-      dispatch(setGradientEditor({ nodeId, paintIndex, selectedStopIndex }));
+      dispatch(setGradientEditor({ nodeId, paintIndex, property, selectedStopIndex }));
     }
 
     return (): void => {
       const current = selectGradientEditor(store.getState());
 
-      if (current && current.nodeId === nodeId && current.paintIndex === paintIndex) {
+      if (current && current.nodeId === nodeId && current.paintIndex === paintIndex && (current.property ?? 'fills') === property) {
         dispatch(setGradientEditor(null));
       }
     };
-  }, [dispatch, isGradientTabActive, isPickerOpen, nodeId, paintIndex, selectedStopIndex]);
+  }, [dispatch, isGradientTabActive, isPickerOpen, nodeId, paintIndex, property, selectedStopIndex]);
 };

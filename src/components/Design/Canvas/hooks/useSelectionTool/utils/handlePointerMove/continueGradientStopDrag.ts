@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectGradientEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -21,6 +21,8 @@ import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradien
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 
 type TGradientStopCandidate = { index: number; stop: TGradientStop };
 
@@ -69,10 +71,11 @@ export const continueGradientStopDrag = (
   if (dragState) {
     const { color, draggedStopIndex, nodeId, opacity, paintIndex } = dragState;
     const state = store.getState();
+    const property = selectGradientEditor(state)?.property;
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (isLineHandleGradientPaint(paint)) {
         const referencePosition = paint.stops[draggedStopIndex]?.position ?? 0;
@@ -86,12 +89,14 @@ export const continueGradientStopDrag = (
           const position = getGradientStopDragPosition(paint, bounds, node.rotation, worldPoint, start, end);
           const updatedStops = paint.stops.map((stop, index) => (index === resolved.index ? { ...stop, position } : stop));
           const sortedStops = [...updatedStops].sort((a, b) => a.position - b.position);
-          const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, stops: sortedStops } : fill));
+          const fills = getNodePaints(node, property).map((fill, index) =>
+            index === paintIndex ? { ...paint, stops: sortedStops } : fill,
+          );
           const nextIndex = sortedStops.findIndex((stop) => stop.position === position && stop.color === color && stop.opacity === opacity);
 
           // the dragged stop was just written into updatedStops with this exact position/color/opacity, so sortedStops (the same entries, only reordered) always contains a match
           dragState.draggedStopIndex = nextIndex === -1 ? /* v8 ignore next */ resolved.index : nextIndex;
-          dispatch(updateNode({ changes: { fills }, id: nodeId }));
+          dispatch(updateNode({ changes: getPaintsChange(property, fills), id: nodeId }));
         }
       }
     }

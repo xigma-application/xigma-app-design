@@ -25,7 +25,17 @@ const renderImageCropHeader = (): ReturnType<typeof render> =>
 
 const addCropTargetNode = (paint: TPaint): string => {
   store.dispatch(
-    addNode({ fills: [paint], height: 100, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 100, x: 0, y: 0 }),
+    addNode({
+      fills: [paint],
+      height: 100,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

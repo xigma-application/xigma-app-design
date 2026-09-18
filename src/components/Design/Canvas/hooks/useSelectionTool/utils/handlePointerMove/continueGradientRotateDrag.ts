@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectGradientEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -21,6 +21,8 @@ import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/C
 import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradientPaint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 
 type TGradientRotateFrame = {
   guidePivot: TPoint;
@@ -104,10 +106,11 @@ export const continueGradientRotateDrag = (
   if (dragState) {
     const { nodeId, paintIndex } = dragState;
     const state = store.getState();
+    const property = selectGradientEditor(state)?.property;
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (isLineHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
@@ -115,13 +118,13 @@ export const continueGradientRotateDrag = (
         const frame = getGradientRotateFrame(dragState, bounds, worldPoint, node.rotation);
         const start = toNormalizedGradientPoint(frame.localPoints.start, bounds);
         const end = toNormalizedGradientPoint(frame.localPoints.end, bounds);
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, end, start } : fill));
+        const fills = getNodePaints(node, property).map((fill, index) => (index === paintIndex ? { ...paint, end, start } : fill));
 
         canvasRefs.transform.alignmentGuideRef.current = frame.snap
           ? getGradientRotateAxisGuide(frame.guidePivot, bounds, node.rotation, frame.snap.snappedDegrees)
           : null;
         dragState.pointerPosition = worldPoint;
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: getPaintsChange(property, fills), id: nodeId }));
       }
     }
   }

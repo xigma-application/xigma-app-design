@@ -9,11 +9,13 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { isAppearanceNode } from '../../../AppearanceSection/types';
-import { TPaint } from 'types/design/paint/types';
+import { TPaint, TPaintProperty } from 'types/design/paint/types';
 import { TUseFillSectionResult } from './types';
 
 // utils
 import { commitFills } from './utils/commitFills';
+import { getInitialOpenPickerIndex } from './utils/getInitialOpenPickerIndex';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { resolveFillDragIndices } from './utils/resolveFillDragIndices';
 import { toggleFillVisibility } from './utils/toggleFillVisibility';
@@ -25,19 +27,19 @@ import { useHandleClosePicker } from './hooks/useHandleClosePicker/useHandleClos
 import { useHandleExitImageEditor } from './hooks/useHandleExitImageEditor/useHandleExitImageEditor';
 import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerIndex';
 
-export const useFillSection = (): TUseFillSectionResult => {
+export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
   const [selectedNode] = useAppSelector(selectSelectedNodes);
   const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const fills = node?.fills ?? [];
+  const fills = node ? getNodePaints(node, property) : [];
   const nodeId = node?.id;
-  const commit = (nextFills: TPaint[]): void => commitFills(dispatch, nodeId, nextFills);
+  const commit = (nextFills: TPaint[]): void => commitFills(dispatch, nodeId, nextFills, property, node?.strokeWidth);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { clearSelection, onSelectRow, selectedIndices, setSelection } = useFillSelection(fills.length);
   const { beginDrag, dragState, registerRow } = useFillReorderDrag(fills, commit, setSelection, containerRef);
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
-  const initialOpenPickerIndex = imageFillPickerFocus && imageFillPickerFocus.nodeId === nodeId ? imageFillPickerFocus.paintIndex : null;
-  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialOpenPickerIndex);
+  const initialIndex = getInitialOpenPickerIndex(property, imageFillPickerFocus, nodeId);
+  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialIndex);
   const isImageEditorActive = useAppSelector(selectImageEditor) !== null;
   const handleExitImageEditor = useHandleExitImageEditor();
   const handleClosePicker = useHandleClosePicker(openPickerIndex, onPickerOpenChange);

@@ -13,7 +13,17 @@ import { commitImageCropDimensions } from '../commitImageCropDimensions';
 
 const addImageRectNode = (paint: TImagePaint): string => {
   store.dispatch(
-    addNode({ fills: [paint], height: 40, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 40, x: 0, y: 0 }),
+    addNode({
+      fills: [paint],
+      height: 40,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 40,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

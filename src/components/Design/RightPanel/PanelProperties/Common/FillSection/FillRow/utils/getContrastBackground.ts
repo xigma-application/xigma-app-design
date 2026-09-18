@@ -18,7 +18,5 @@ export const getContrastBackground = (
   const node = nodeId ? nodesById[nodeId] : undefined;
   const ancestors = node ? getAncestorChain(node, nodesById) : [];
 
-  return ancestors.some(hasAppearanceBlendMode)
-    ? { reason: 'backgroundBlendMode' }
-    : resolveContrastBackground(ancestors, pageBackground);
+  return ancestors.some(hasAppearanceBlendMode) ? { reason: 'backgroundBlendMode' } : resolveContrastBackground(ancestors, pageBackground);
 };

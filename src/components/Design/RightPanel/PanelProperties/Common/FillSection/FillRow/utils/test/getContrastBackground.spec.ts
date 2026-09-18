@@ -51,7 +51,12 @@ const section = (id: string, fill: string, parentId: string | null = null): TSec
   y: 0,
 });
 
-const solid = (color: string, opacity = 100, extra: Partial<TSolidPaint> = {}): TSolidPaint => ({ color, opacity, type: 'solid', ...extra });
+const solid = (color: string, opacity = 100, extra: Partial<TSolidPaint> = {}): TSolidPaint => ({
+  color,
+  opacity,
+  type: 'solid',
+  ...extra,
+});
 
 describe('getContrastBackground', () => {
   it('should fall back to the page background when the node has no parent', () => {
@@ -111,7 +116,11 @@ describe('getContrastBackground', () => {
   });
 
   it('should skip a parent with no fills at all', () => {
-    const nodes: Record<string, TSceneNode> = { a: rect('a', 'inner'), inner: frame('inner', [], 'outer'), outer: frame('outer', [solid('#0000ff')]) };
+    const nodes: Record<string, TSceneNode> = {
+      a: rect('a', 'inner'),
+      inner: frame('inner', [], 'outer'),
+      outer: frame('outer', [solid('#0000ff')]),
+    };
 
     expect(getContrastBackground('a', nodes, PAGE)).toEqual({ color: '#0000ff' });
   });
@@ -139,7 +148,10 @@ describe('getContrastBackground', () => {
   });
 
   it('should block with the blend-mode reason when the chosen fill has a blend mode', () => {
-    const nodes: Record<string, TSceneNode> = { a: rect('a', 'f'), f: frame('f', [solid('#ff0000', 100, { blendMode: BlendMode.multiply })]) };
+    const nodes: Record<string, TSceneNode> = {
+      a: rect('a', 'f'),
+      f: frame('f', [solid('#ff0000', 100, { blendMode: BlendMode.multiply })]),
+    };
 
     expect(getContrastBackground('a', nodes, PAGE)).toEqual({ reason: 'backgroundBlendMode' });
   });

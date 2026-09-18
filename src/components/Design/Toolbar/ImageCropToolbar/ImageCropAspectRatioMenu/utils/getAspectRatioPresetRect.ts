@@ -9,7 +9,11 @@ import { getEffectiveImageSize } from 'components/Design/Canvas/utils/getEffecti
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 
-export const getAspectRatioPresetRect = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint, target: TAspectRatioTarget): TDraftRect | undefined => {
+export const getAspectRatioPresetRect = (
+  node: TAppearanceNode,
+  paint: TImagePaint | TVideoPaint,
+  target: TAspectRatioTarget,
+): TDraftRect | undefined => {
   const cropRect = getImageCropRect(node, paint);
 
   if (target === 'original') {

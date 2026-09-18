@@ -10,6 +10,7 @@ import { armGradientEndpointMoveDrag } from '../armGradientEndpointMoveDrag';
 import { getGradientEndpointMoveHandleAtPoint } from '../../../../../utils/getGradientEndpointMoveHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const armGradientEndpointMoveOnPointerDown = ({
   canvas,
@@ -24,7 +25,7 @@ export const armGradientEndpointMoveOnPointerDown = ({
   const [node] = selectedNodes;
 
   if (moveHit && gradientEditor && isAppearanceNode(node)) {
-    const paint = node.fills[moveHit.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[moveHit.paintIndex];
 
     /* v8 ignore if -- getGradientEndpointMoveHandleAtPoint already checked isLineHandleGradientPaint on this exact paint before returning a hit, so this is always true here */
     if (isLineHandleGradientPaint(paint)) {

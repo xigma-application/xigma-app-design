@@ -10,7 +10,7 @@ import {
   TGridTrackValueEditRequest,
 } from 'types/design/canvas/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
-import { TPaint, TSolidPaint } from 'types/design/paint/types';
+import { TPaint, TPaintProperty, TSolidPaint } from 'types/design/paint/types';
 
 export type TDesignPage = {
   backgroundPaint: TSolidPaint;
@@ -35,13 +35,21 @@ export type TMaskConnectorLine = {
 
 export type TMaskConnectorInfo = TMaskConnectorLine[];
 
-export type TGradientEditorState = { nodeId: string; paintIndex: number; selectedStopIndex: number | null };
+export type TGradientEditorState = { nodeId: string; paintIndex: number; property?: TPaintProperty; selectedStopIndex: number | null };
 
 export type TImageEditorMode = 'crop' | 'position' | 'tile';
 
 export type TImageEditorTarget = 'frame' | 'image';
 
-export type TCropCancelSnapshot = { cornerRadius?: number; fills: TPaint[]; height: number; rotation: number; width: number; x: number; y: number };
+export type TCropCancelSnapshot = {
+  cornerRadius?: number;
+  fills: TPaint[];
+  height: number;
+  rotation: number;
+  width: number;
+  x: number;
+  y: number;
+};
 
 export type TImageEditorState = {
   cropCancelSnapshot?: TCropCancelSnapshot;
@@ -53,7 +61,7 @@ export type TImageEditorState = {
 
 export type TImageFillPickerFocus = { nodeId: string; paintIndex: number };
 
-export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number };
+export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number; property?: TPaintProperty };
 
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;

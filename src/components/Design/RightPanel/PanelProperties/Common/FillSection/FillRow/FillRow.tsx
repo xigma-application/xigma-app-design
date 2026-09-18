@@ -34,7 +34,7 @@ import { useAppSelector } from 'store';
 // others
 import { DEFAULT_GRADIENT_PANEL_STATE } from './constants';
 import { DEFAULT_IMAGE_ADJUSTMENTS, IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
-import { translationNameSpace } from '../constants';
+import { getPaintTranslationNamespace } from '../constants';
 
 // styles
 import styles from './fill-row.module.scss';
@@ -69,6 +69,7 @@ export type TFillRowProps = {
   openPickerIndex: number | null;
   paint: TPaint;
   paintIndex: number;
+  property?: TPaintProperty;
   registerRow: (element: HTMLElement | null) => void;
 };
 
@@ -87,14 +88,17 @@ export const FillRow: FC<TFillRowProps> = ({
   openPickerIndex,
   paint,
   paintIndex,
+  property = 'fills',
   registerRow,
 }) => {
   const { t } = useTranslation();
+  const translationNameSpace = getPaintTranslationNamespace(property);
+  const editorNodeId = property === 'fills' ? nodeId : undefined;
   const isVisible = paint.visible !== false;
   const isImage = paint.type === 'image';
   const isVideo = paint.type === 'video';
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
-  const isResumingImageFocus = getIsResumingImageFocus(isImage || isVideo, imageFillPickerFocus, nodeId, paintIndex);
+  const isResumingImageFocus = getIsResumingImageFocus(isImage || isVideo, imageFillPickerFocus, editorNodeId, paintIndex);
   const isPickerOpen = paintIndex === openPickerIndex;
   const [isImageTabActive, setIsImageTabActive] = useState(isResumingImageFocus && isImage);
   const [isVideoTabActive, setIsVideoTabActive] = useState(isResumingImageFocus && isVideo);
@@ -109,7 +113,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleVideoChange = useConvertToVideoPaint(paint, onChange);
   const handleImageAdjustmentChange = useSetImagePaintAdjustment(paint, onChange);
   const handleImageRotate = useRotateImagePaint(paint, onChange);
-  const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
+  const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, editorNodeId, paintIndex);
   const handleImageTileScaleChange = useSetImagePaintTileScale(paint, onChange);
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const handleBlendModeChange = useSetFillBlendMode(paint, onChange);
@@ -127,9 +131,16 @@ export const FillRow: FC<TFillRowProps> = ({
 
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsImageTabActive);
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsVideoTabActive);
-  useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isMediaTabActive, initialMode, skipInitialImageEditorArmRef.current);
-  useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
+  useSyncGradientEditor(
+    nodeId,
+    paintIndex,
+    property,
+    isPickerOpen,
+    gradientPanelState.isGradientTabActive,
+    gradientPanelState.selectedStopIndex,
+  );
+  useSyncImageEditor(editorNodeId, paintIndex, isPickerOpen, isMediaTabActive, initialMode, skipInitialImageEditorArmRef.current);
+  useSyncPatternSourcePickTarget(nodeId, paintIndex, property, isPickerOpen, isPattern);
 
   return (
     <div

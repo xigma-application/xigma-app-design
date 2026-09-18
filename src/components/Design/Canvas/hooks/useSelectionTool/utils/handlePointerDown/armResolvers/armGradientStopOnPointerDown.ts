@@ -11,6 +11,7 @@ import { armGradientStopDrag } from '../armGradientStopDrag';
 import { getGradientStopHandleAtPoint } from '../../../../../utils/getGradientStopHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from '../../../../../utils/isLineHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const armGradientStopOnPointerDown = ({
   canvas,
@@ -26,7 +27,7 @@ export const armGradientStopOnPointerDown = ({
   const [node] = selectedNodes;
 
   if (gradientStopHit && gradientEditor && isAppearanceNode(node)) {
-    const paint = node.fills[gradientStopHit.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientStopHit.paintIndex];
 
     /* v8 ignore if -- getGradientStopHandleAtPoint already checked isLineHandleGradientPaint on this exact paint before returning a hit, so this is always true here */
     if (isLineHandleGradientPaint(paint)) {

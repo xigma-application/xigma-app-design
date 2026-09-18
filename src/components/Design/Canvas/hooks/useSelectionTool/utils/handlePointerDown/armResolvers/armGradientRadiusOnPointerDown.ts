@@ -10,6 +10,7 @@ import { armGradientRadiusDrag } from '../armGradientRadiusDrag';
 import { getGradientRadiusHandleAtPoint } from '../../../../../utils/getGradientRadiusHandleAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isEllipseHandleGradientPaint } from '../../../../../utils/isEllipseHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const armGradientRadiusOnPointerDown = ({
   canvas,
@@ -24,7 +25,7 @@ export const armGradientRadiusOnPointerDown = ({
   const [node] = selectedNodes;
 
   if (radiusHit && gradientEditor && isAppearanceNode(node)) {
-    const paint = node.fills[radiusHit.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[radiusHit.paintIndex];
 
     /* v8 ignore if -- getGradientRadiusHandleAtPoint already checked isEllipseHandleGradientPaint on this exact paint before returning a hit, so this is always true here */
     if (isEllipseHandleGradientPaint(paint)) {

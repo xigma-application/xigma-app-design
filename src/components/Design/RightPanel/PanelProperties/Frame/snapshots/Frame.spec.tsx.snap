@@ -1306,6 +1306,9 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
         </button>
       </div>
     </div>
+    <div
+      class="_FillSection__rows_172b23"
+    />
   </div>
 </DocumentFragment>
 `;

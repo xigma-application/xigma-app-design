@@ -19,15 +19,15 @@ describe('useSyncGradientEditor', () => {
 
   it('should set the gradient editor when the picker is open on the gradient tab with a nodeId', () => {
     // before
-    renderHook(() => useSyncGradientEditor('node-1', 2, true, true, 1), { wrapper });
+    renderHook(() => useSyncGradientEditor('node-1', 2, 'fills', true, true, 1), { wrapper });
 
     // result
-    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 2, selectedStopIndex: 1 });
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 2, property: 'fills', selectedStopIndex: 1 });
   });
 
   it('should not touch the gradient editor on mount when the picker is closed', () => {
     // before
-    renderHook(() => useSyncGradientEditor('node-1', 0, false, true, null), { wrapper });
+    renderHook(() => useSyncGradientEditor('node-1', 0, 'fills', false, true, null), { wrapper });
 
     // result
     expect(selectGradientEditor(store.getState())).toBeNull();
@@ -35,12 +35,12 @@ describe('useSyncGradientEditor', () => {
 
   it('should clear the gradient editor once it was set and the picker then closes', () => {
     // before
-    const { rerender } = renderHook(({ isPickerOpen }) => useSyncGradientEditor('node-1', 0, isPickerOpen, true, null), {
+    const { rerender } = renderHook(({ isPickerOpen }) => useSyncGradientEditor('node-1', 0, 'fills', isPickerOpen, true, null), {
       initialProps: { isPickerOpen: true },
       wrapper,
     });
 
-    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, selectedStopIndex: null });
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, property: 'fills', selectedStopIndex: null });
 
     // action
     rerender({ isPickerOpen: false });
@@ -65,7 +65,7 @@ describe('useSyncGradientEditor', () => {
 
   it('should clear the gradient editor on unmount', () => {
     // before
-    const { unmount } = renderHook(() => useSyncGradientEditor('node-1', 0, true, true, null), { wrapper });
+    const { unmount } = renderHook(() => useSyncGradientEditor('node-1', 0, 'fills', true, true, null), { wrapper });
 
     // action
     unmount();
@@ -78,8 +78,8 @@ describe('useSyncGradientEditor', () => {
     // before — two rows rendered together, exactly like sibling FillRows under the same FillSection;
     // fill 1 (called second, matching its higher index) currently owns the editor
     const useTwoRows = (activeIndex: number | null): void => {
-      useSyncGradientEditor('node-1', 0, activeIndex === 0, activeIndex === 0, null);
-      useSyncGradientEditor('node-1', 1, activeIndex === 1, activeIndex === 1, null);
+      useSyncGradientEditor('node-1', 0, 'fills', activeIndex === 0, activeIndex === 0, null);
+      useSyncGradientEditor('node-1', 1, 'fills', activeIndex === 1, activeIndex === 1, null);
     };
 
     const { rerender } = renderHook(({ activeIndex }) => useTwoRows(activeIndex), {
@@ -87,13 +87,29 @@ describe('useSyncGradientEditor', () => {
       wrapper,
     });
 
-    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 1, selectedStopIndex: null });
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 1, property: 'fills', selectedStopIndex: null });
 
     // action — a single render transition: fill 0 activates and fill 1 deactivates together, the
     // same way both derive from one shared openPickerIndex changing in the real app
     rerender({ activeIndex: 0 });
 
     // result — fill 0's claim survives; fill 1's own cleanup must not have clobbered it back to null
-    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, selectedStopIndex: null });
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, property: 'fills', selectedStopIndex: null });
+  });
+
+  it('should tag the editor with the strokes property and not clear a fills editor of the same index', () => {
+    // before
+    store.dispatch(setGradientEditor({ nodeId: 'node-1', paintIndex: 0, property: 'fills', selectedStopIndex: null }));
+    const { unmount } = renderHook(() => useSyncGradientEditor('node-1', 0, 'strokes', true, true, 1), { wrapper });
+
+    // result
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, property: 'strokes', selectedStopIndex: 1 });
+
+    // action — restore the fills editor as if its row re-activated, then unmount the strokes row
+    store.dispatch(setGradientEditor({ nodeId: 'node-1', paintIndex: 0, property: 'fills', selectedStopIndex: null }));
+    unmount();
+
+    // result
+    expect(selectGradientEditor(store.getState())).toEqual({ nodeId: 'node-1', paintIndex: 0, property: 'fills', selectedStopIndex: null });
   });
 });

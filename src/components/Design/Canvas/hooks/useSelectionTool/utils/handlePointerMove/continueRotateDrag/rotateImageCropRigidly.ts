@@ -17,7 +17,9 @@ export const rotateImageCropRigidly = (dispatch: AppDispatch, imageCrop: TSelect
     const pivot = { x: crop.x + crop.width / 2, y: crop.y + crop.height / 2 };
     const { rotation, x, y } = rotateShapeNodeOrigin(crop, pivot, deltaDegrees);
     const newCrop: TImageCrop = { height: crop.height, rotation, width: crop.width, x, y };
-    const fills = imageCrop.node.fills.map((fill, index) => (index === imageCrop.paintIndex ? { ...imageCrop.paint, crop: newCrop } : fill));
+    const fills = imageCrop.node.fills.map((fill, index) =>
+      index === imageCrop.paintIndex ? { ...imageCrop.paint, crop: newCrop } : fill,
+    );
 
     dispatch(updateNode({ changes: { fills }, id: imageCrop.node.id }));
   }

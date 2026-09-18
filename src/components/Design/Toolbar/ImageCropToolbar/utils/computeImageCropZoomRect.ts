@@ -7,7 +7,11 @@ import { getEffectiveImageSize } from 'components/Design/Canvas/utils/getEffecti
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 
-export const computeImageCropZoomRect = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint, targetPercent: number): TImageCrop | undefined => {
+export const computeImageCropZoomRect = (
+  node: TAppearanceNode,
+  paint: TImagePaint | TVideoPaint,
+  targetPercent: number,
+): TImageCrop | undefined => {
   const effectiveSize = getEffectiveImageSize(paint);
 
   if (effectiveSize) {

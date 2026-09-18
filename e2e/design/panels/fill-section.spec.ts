@@ -35,7 +35,16 @@ type TReadablePaint = {
   type: string;
   visible?: boolean;
 };
-type TReadableNode = { cornerRadius?: number; fills?: TReadablePaint[]; height?: number; width?: number; x?: number; y?: number };
+type TReadableNode = {
+  cornerRadius?: number;
+  fills?: TReadablePaint[];
+  height?: number;
+  strokeWidth?: number;
+  strokes?: TReadablePaint[];
+  width?: number;
+  x?: number;
+  y?: number;
+};
 type TReadableImageEditor = { mode: string; nodeId: string; paintIndex: number; selectedTarget?: string } | null;
 
 const setUpContrastScene = async (
@@ -6172,5 +6181,40 @@ test.describe('Design panels — Fill section', () => {
     });
 
     expect(await scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  });
+
+  test('the Stroke section adds a solid 1px stroke paint next to the fills, and its picker edits only the strokes', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-stroke-paints');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const fillsBefore = (await readNode(page, id)).fills;
+
+    // action
+    await page.getByLabel('Add stroke').click();
+
+    // result — a solid stroke paint with the default 1px width; fills untouched
+    const added = await readNode(page, id);
+
+    expect(added.strokes).toHaveLength(1);
+    expect(added.strokes![0].type).toBe('solid');
+    expect(added.strokeWidth).toBe(1);
+    expect(added.fills).toEqual(fillsBefore);
+
+    // action — recolor the stroke through its own picker
+    const strokeHexInput = page.getByLabel('Stroke color').locator('..').getByRole('textbox').first();
+
+    await strokeHexInput.fill('ff0000');
+    await strokeHexInput.press('Enter');
+
+    // result
+    const recolored = await readNode(page, id);
+
+    expect(recolored.strokes![0].color).toBe('#ff0000');
+    expect(recolored.fills).toEqual(fillsBefore);
   });
 });

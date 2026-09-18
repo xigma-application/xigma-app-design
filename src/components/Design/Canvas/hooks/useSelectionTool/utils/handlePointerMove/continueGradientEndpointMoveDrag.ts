@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectGradientEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -19,6 +19,8 @@ import { isLineHandleGradientPaint } from '../../../../utils/isLineHandleGradien
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 
 export const continueGradientEndpointMoveDrag = (
   canvas: HTMLCanvasElement,
@@ -32,10 +34,11 @@ export const continueGradientEndpointMoveDrag = (
   if (dragState) {
     const { endpoint, nodeId, paintIndex } = dragState;
     const state = store.getState();
+    const property = selectGradientEditor(state)?.property;
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (isLineHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
@@ -45,10 +48,10 @@ export const continueGradientEndpointMoveDrag = (
         const localPoint = node.rotation === 0 ? worldPoint : rotatePoint(worldPoint, boundsCenter, -node.rotation);
         const rawNormalized = toNormalizedGradientPoint(localPoint, bounds);
         const { point, snappedX, snappedY } = getGradientMoveSnapPoint(rawNormalized, bounds, viewport.zoom);
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, [endpoint]: point } : fill));
+        const fills = getNodePaints(node, property).map((fill, index) => (index === paintIndex ? { ...paint, [endpoint]: point } : fill));
 
         canvasRefs.transform.alignmentGuideRef.current = getGradientMoveSnapGuide(point, bounds, node.rotation, snappedX, snappedY);
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: getPaintsChange(property, fills), id: nodeId }));
       }
     }
   }

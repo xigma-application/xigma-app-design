@@ -199,7 +199,9 @@ describe('drawImageEditorCropOverflowPreview', () => {
     const gl = createGlMock();
     const croppedPlaceholderRectangle: TRectangleNode = {
       ...rectangle,
-      fills: [{ crop: { height: 40, rotation: 0, width: 40, x: 10, y: 5 }, opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' }],
+      fills: [
+        { crop: { height: 40, rotation: 0, width: 40, x: 10, y: 5 }, opacity: 100, ref: '', rotation: 0, scaleMode: 'fill', type: 'image' },
+      ],
     };
 
     // before

@@ -7,6 +7,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { getGradientEllipsePositionAtPoint } from './getGradientEllipsePositionAtPoint';
 import { getGradientLinePositionAtPoint } from './getGradientLinePositionAtPoint';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const getGradientAddStopPositionAtPoint = (
   point: TPoint,
@@ -17,7 +18,7 @@ export const getGradientAddStopPositionAtPoint = (
   const [node] = selectedNodes;
 
   if (gradientEditor && selectedNodes.length === 1 && isAppearanceNode(node)) {
-    const paint = node.fills[gradientEditor.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientEditor.paintIndex];
 
     if (paint?.type === 'gradient-angular') {
       return getGradientEllipsePositionAtPoint(point, selectedNodes, viewport, gradientEditor);

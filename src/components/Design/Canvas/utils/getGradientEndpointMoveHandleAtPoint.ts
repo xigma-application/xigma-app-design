@@ -10,6 +10,7 @@ import { getGradientWorldPoints } from 'components/Design/Canvas/hooks/useCanvas
 import { getNodeBounds } from './getNodeBounds';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { isLineHandleGradientPaint } from './isLineHandleGradientPaint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 
 export const GRADIENT_ENDPOINT_MOVE_RADIUS_PX = 6;
 
@@ -34,7 +35,7 @@ export const getGradientEndpointMoveHandleAtPoint = (
     isAppearanceNode(node) &&
     !getGradientStopHandleAtPoint(point, selectedNodes, viewport, gradientEditor)
   ) {
-    const paint = node.fills[gradientEditor.paintIndex];
+    const paint = getNodePaints(node, gradientEditor.property)[gradientEditor.paintIndex];
 
     if (isLineHandleGradientPaint(paint)) {
       const bounds = getNodeBounds(node);

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectGradientEditor, selectNodes, selectViewport } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
@@ -18,6 +18,8 @@ import { isEllipseHandleGradientPaint } from '../../../../utils/isEllipseHandleG
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 
 export const continueGradientRadiusDrag = (
   canvas: HTMLCanvasElement,
@@ -30,10 +32,11 @@ export const continueGradientRadiusDrag = (
   if (dragState) {
     const { nodeId, paintIndex } = dragState;
     const state = store.getState();
+    const property = selectGradientEditor(state)?.property;
     const node = selectNodes(state)[nodeId];
 
     if (isAppearanceNode(node)) {
-      const paint = node.fills[paintIndex];
+      const paint = getNodePaints(node, property)[paintIndex];
 
       if (isEllipseHandleGradientPaint(paint)) {
         const bounds = getNodeBounds(node);
@@ -43,9 +46,9 @@ export const continueGradientRadiusDrag = (
         const localPoint = node.rotation === 0 ? worldPoint : rotatePoint(worldPoint, boundsCenter, -node.rotation);
         const normalized = toNormalizedGradientPoint(localPoint, bounds);
         const radiusRatio = getGradientRadiusRatioFromPoint(paint.start, paint.end, normalized);
-        const fills = node.fills.map((fill, index) => (index === paintIndex ? { ...paint, radiusRatio } : fill));
+        const fills = getNodePaints(node, property).map((fill, index) => (index === paintIndex ? { ...paint, radiusRatio } : fill));
 
-        dispatch(updateNode({ changes: { fills }, id: nodeId }));
+        dispatch(updateNode({ changes: getPaintsChange(property, fills), id: nodeId }));
       }
     }
   }

@@ -66,7 +66,8 @@ const addImageFrameNode = (paint: TImagePaint): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const readCrop = (id: string): TImagePaint['crop'] => (selectActivePage(store.getState()).nodes[id] as { fills: TImagePaint[] }).fills[0].crop;
+const readCrop = (id: string): TImagePaint['crop'] =>
+  (selectActivePage(store.getState()).nodes[id] as { fills: TImagePaint[] }).fills[0].crop;
 
 describe('useColumnRotation', () => {
   afterEach(() => {

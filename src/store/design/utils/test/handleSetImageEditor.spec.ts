@@ -114,12 +114,15 @@ describe('handleSetImageEditor', () => {
 
   it('should keep the existing cancel snapshot when re-dispatching crop mode for the same target (e.g. selectedTarget changes)', () => {
     // mock
-    const state = buildState({ 'node-1': node }, {
-      cropCancelSnapshot: { cornerRadius: 0, fills: node.fills, height: 100, rotation: 0, width: 200, x: 10, y: 20 },
-      mode: 'crop',
-      nodeId: 'node-1',
-      paintIndex: 0,
-    });
+    const state = buildState(
+      { 'node-1': node },
+      {
+        cropCancelSnapshot: { cornerRadius: 0, fills: node.fills, height: 100, rotation: 0, width: 200, x: 10, y: 20 },
+        mode: 'crop',
+        nodeId: 'node-1',
+        paintIndex: 0,
+      },
+    );
 
     // mutate the node afterwards, simulating a crop edit already committed since entering crop mode
     state.pages['page-1'].nodes['node-1'] = { ...node, width: 999 };
@@ -128,7 +131,15 @@ describe('handleSetImageEditor', () => {
     handleSetImageEditor(state, { mode: 'crop', nodeId: 'node-1', paintIndex: 0, selectedTarget: 'image' });
 
     // result — the ORIGINAL (pre-edit) snapshot survives, not a freshly captured (already-edited) one
-    expect(state.imageEditor?.cropCancelSnapshot).toEqual({ cornerRadius: 0, fills: node.fills, height: 100, rotation: 0, width: 200, x: 10, y: 20 });
+    expect(state.imageEditor?.cropCancelSnapshot).toEqual({
+      cornerRadius: 0,
+      fills: node.fills,
+      height: 100,
+      rotation: 0,
+      width: 200,
+      x: 10,
+      y: 20,
+    });
     expect(state.imageEditor?.selectedTarget).toBe('image');
   });
 
@@ -139,12 +150,15 @@ describe('handleSetImageEditor', () => {
       fills: [node.fills[0], { opacity: 100, ref: 'image-2', rotation: 0, scaleMode: 'fill', type: 'image' }],
       width: 300,
     };
-    const state = buildState({ 'node-1': secondFillNode }, {
-      cropCancelSnapshot: { cornerRadius: 0, fills: node.fills, height: 100, rotation: 0, width: 200, x: 10, y: 20 },
-      mode: 'crop',
-      nodeId: 'node-1',
-      paintIndex: 0,
-    });
+    const state = buildState(
+      { 'node-1': secondFillNode },
+      {
+        cropCancelSnapshot: { cornerRadius: 0, fills: node.fills, height: 100, rotation: 0, width: 200, x: 10, y: 20 },
+        mode: 'crop',
+        nodeId: 'node-1',
+        paintIndex: 0,
+      },
+    );
 
     // before — the picker switches to a different fill row on the same node, still in crop mode
     handleSetImageEditor(state, { mode: 'crop', nodeId: 'node-1', paintIndex: 1 });

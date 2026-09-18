@@ -1,5 +1,7 @@
 // utils
 import { doesNodeHavePatternInSubtree } from './doesNodeHavePatternInSubtree';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
+import { getPaintsChange } from 'utils/design/paint/getPaintsChange';
 import { getGroupChildHitAtPoint } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerDown/getGroupChildHitAtPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getSelectionHitAtPoint } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerDown/getSelectionHitAtPoint/getSelectionHitAtPoint';
@@ -31,14 +33,15 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
         const targetNode = nodesById[target.nodeId];
 
         if (targetNode && 'fills' in targetNode) {
-          const paint = targetNode.fills[target.paintIndex];
+          const paints = getNodePaints(targetNode, target.property);
+          const paint = paints[target.paintIndex];
 
           if (paint && paint.type === 'pattern') {
-            const nextFills: TPaint[] = targetNode.fills.map((fill, index) =>
-              index === target.paintIndex ? { ...paint, frozenSourceSnapshot: null, sourceNodeId: hit.id } : fill,
+            const nextPaints: TPaint[] = paints.map((entry, index) =>
+              index === target.paintIndex ? { ...paint, frozenSourceSnapshot: null, sourceNodeId: hit.id } : entry,
             );
 
-            dispatch(updateNode({ changes: { fills: nextFills }, id: target.nodeId }));
+            dispatch(updateNode({ changes: getPaintsChange(target.property, nextPaints), id: target.nodeId }));
           }
         }
       }

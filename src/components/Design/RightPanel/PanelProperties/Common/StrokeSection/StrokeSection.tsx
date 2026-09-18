@@ -1,32 +1,8 @@
 import { FC } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // components
-import ApplyStylesButton from '../ApplyStylesButton/ApplyStylesButton';
-import { UITools } from 'shared';
+import FillSection from '../FillSection/FillSection';
 
-// others
-import { translationNameSpace } from './constants';
-
-export const StrokeSection: FC = () => {
-  const { t } = useTranslation();
-
-  return (
-    <UITools.Section
-      addAriaLabel={t(`${translationNameSpace}.addAriaLabel`)}
-      addTooltip={t(`${translationNameSpace}.addTooltip`)}
-      component={
-        <ApplyStylesButton
-          ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)}
-          tooltip={t(`${translationNameSpace}.applyStylesTooltip`)}
-        />
-      }
-      e2eValue="stroke"
-      label={t(`${translationNameSpace}.label`)}
-      mutedWhenEmpty
-      onAdd={() => {}}
-    />
-  );
-};
+export const StrokeSection: FC = () => <FillSection property="strokes" />;
 
 export default StrokeSection;
