@@ -155,6 +155,7 @@ exports[`PanelContent snapshots > should render the File panel for the file nav 
             class="_PagesHeaderActions_4396dd"
           >
             <button
+              aria-label="Find"
               aria-pressed="false"
               class="_ButtonIcon_2062db"
               data-state="closed"
@@ -177,6 +178,7 @@ exports[`PanelContent snapshots > should render the File panel for the file nav 
               </svg>
             </button>
             <button
+              aria-label="Add new page"
               aria-pressed="false"
               class="_ButtonIcon_2062db"
               data-state="closed"
