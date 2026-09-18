@@ -1,5 +1,5 @@
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { BlendMode, NodeType, StrokeAlign } from 'types/design/enums';
 import { TDrawSceneContext } from '../types';
 import { TRectangleNode, TSectionNode } from 'types/design/types';
 
@@ -113,19 +113,52 @@ describe('drawBoxLeafNode', () => {
     // action
     drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
 
-    // result — drawn last-to-first, so '#111111' (list position 1) paints last, on top
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+    // result — drawn last-to-first, so '#111111' (list position 1) paints last, on top; each fill
+    // gets its own drawVectorFillGroup call, not one call for the whole stack, so a fill's own blend
+    // mode only isolates that one fill against what's already drawn below it
+    expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
+      1,
       context,
       null,
       null,
       [[{ x: 0, y: 0 }]],
-      [
-        { color: '#222222', opacity: 100, type: 'solid' },
-        { color: '#111111', opacity: 100, type: 'solid' },
-      ],
-      [null, null],
+      [{ color: '#222222', opacity: 100, type: 'solid' }],
+      [null],
       DEFAULT_BOX_ROTATION,
     );
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
+      2,
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }]],
+      [{ color: '#111111', opacity: 100, type: 'solid' }],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
+  });
+
+  it("should pass a single fill's own blend mode through only that fill's own drawVectorFillGroup call, not the other fills in the stack", () => {
+    // mock — two image fills, only the top one carries a non-default blend mode
+    const bottomFill: TRectangleNode['fills'][number] = { opacity: 100, ref: 'asset-bottom', rotation: 0, scaleMode: 'fill', type: 'image' };
+    const topFill: TRectangleNode['fills'][number] = {
+      blendMode: BlendMode.multiply,
+      opacity: 100,
+      ref: 'asset-top',
+      rotation: 0,
+      scaleMode: 'fill',
+      type: 'image',
+    };
+    const node = rect({ fills: [topFill, bottomFill] });
+
+    // action
+    drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
+
+    // result — the bottom fill's own call never sees the top fill's blend mode, and vice versa
+    expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(1, context, null, null, [[{ x: 0, y: 0 }]], [bottomFill], [null], DEFAULT_BOX_ROTATION);
+    expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(2, context, null, null, [[{ x: 0, y: 0 }]], [topFill], [null], DEFAULT_BOX_ROTATION);
   });
 
   it('should resolve a pattern source tile per pattern paint with a sourceNodeId, and release it after drawing', () => {

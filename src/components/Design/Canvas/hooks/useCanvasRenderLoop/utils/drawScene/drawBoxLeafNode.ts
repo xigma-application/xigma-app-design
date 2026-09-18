@@ -60,20 +60,16 @@ const drawBoxLeafNodeFill = (
     const resolvedTiles = paints.map((paint) =>
       resolvePatternPaintTile(context, paint, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth),
     );
+    const polygon = getBoxFillPolygon(node);
+    const boxRotation = {
+      center: { x: node.x + node.width / 2, y: node.y + node.height / 2 },
+      degrees: node.rotation,
+      localBounds: { height: node.height, width: node.width, x: node.x, y: node.y },
+    };
 
-    drawVectorFillGroup(
-      context,
-      null,
-      null,
-      [getBoxFillPolygon(node)],
-      paints,
-      resolvedTiles.map((resolved) => resolved?.tile ?? null),
-      {
-        center: { x: node.x + node.width / 2, y: node.y + node.height / 2 },
-        degrees: node.rotation,
-        localBounds: { height: node.height, width: node.width, x: node.x, y: node.y },
-      },
-    );
+    paints.forEach((paint, index) => {
+      drawVectorFillGroup(context, null, null, [polygon], [paint], [resolvedTiles[index]?.tile ?? null], boxRotation);
+    });
     resolvedTiles.forEach((resolved) => resolved?.release());
   } else {
     drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
