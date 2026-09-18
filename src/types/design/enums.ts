@@ -108,6 +108,15 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeProfile {
+  eye = 'eye',
+  mirroredTaper = 'mirroredTaper',
+  quarterTaper = 'quarterTaper',
+  taper = 'taper',
+  uniform = 'uniform',
+  wedge = 'wedge',
+}
+
 export enum StrokeSides {
   all = 'all',
   bottom = 'bottom',
