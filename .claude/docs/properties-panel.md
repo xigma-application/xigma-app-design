@@ -1410,6 +1410,15 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
+### Right panel scrolling
+
+`RightPanel` is a flex column: `Header` keeps its natural height, `RightPanel__properties` (`flex: 1;
+min-height: 0; position: relative`) wraps `RightPanel__properties-scroll` (`overflow-y: auto`, native bar
+hidden with `scrollbar-hidden`) plus the shared `ScrollThumb`, which only renders when the content
+overflows. No `calc()` with the header height. The floating (minimized) panel is pinned with
+`top: 12px; bottom: 12px` (`top: 32px` with rulers) instead of `100vh` min/max-height arithmetic, so it
+can't be squeezed differently at the top when rulers show. e2e #515 in `fill-section.spec.ts`.
+
 ### Muted empty sections (`Section` `mutedWhenEmpty`)
 
 Opt-in per section (Export and Fill today): while the section has no content (`hasContent`) and isn't

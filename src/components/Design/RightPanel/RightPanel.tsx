@@ -5,6 +5,7 @@ import { FC, useRef } from 'react';
 import Header from './Header/Header';
 import MinimizedHeader from './MinimizedHeader/MinimizedHeader';
 import PanelProperties from './PanelProperties/PanelProperties';
+import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
 
 // core
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
@@ -27,6 +28,7 @@ import styles from './right-panel.module.scss';
 
 const RightPanel: FC = () => {
   const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const isUiHidden = useAppSelector(selectIsUiHidden);
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
@@ -56,7 +58,12 @@ const RightPanel: FC = () => {
     >
       <div className={styles['RightPanel__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorX }} />
       <Header />
-      <PanelProperties />
+      <div className={styles.RightPanel__properties}>
+        <div className={styles['RightPanel__properties-scroll']} ref={scrollRef}>
+          <PanelProperties />
+        </div>
+        <ScrollThumb scrollRef={scrollRef} />
+      </div>
     </div>
   );
 };

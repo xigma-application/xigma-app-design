@@ -6134,4 +6134,43 @@ test.describe('Design panels — Fill section', () => {
     // result — with content it stays visible without hover
     await expect(stylesIcon).toHaveCSS('opacity', '1');
   });
+
+  test('the right panel scrolls its properties with the custom scroll thumb only once they overflow the panel height', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-panel-scroll');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const thumb = page.locator('[class*="RightPanel__properties"] [class*="ScrollThumb"]');
+
+    // result — a couple of rows fit, so there is nothing to scroll
+    await expect(thumb).toHaveCount(0);
+
+    // action — pile on enough fills to overflow the panel
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: { fills: Array.from({ length: 30 }, () => ({ color: '#ff0000', opacity: 100, type: 'solid' })) },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    // result — the thumb appears, and the panel really scrolls
+    await expect(thumb).toBeVisible();
+
+    const scroll = page.locator('[class*="RightPanel__properties-scroll"]');
+
+    await scroll.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+
+    expect(await scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  });
 });
