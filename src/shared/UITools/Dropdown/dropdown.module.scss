@@ -31,6 +31,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
+    &--left {
+      text-align: left;
+    }
+
     &--no-truncate {
       overflow: visible;
       text-overflow: clip;

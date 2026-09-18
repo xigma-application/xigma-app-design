@@ -269,6 +269,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 510 | Contrast checker is locked ("Gradient background") when the chosen parent fill is not solid                                                                                       |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 511 | Contrast checker is locked ("Mixed background") when the page background is hidden                                                                                                |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 512 | Hovering the contrast level button previews the nearest compliant point on the saturation map; clicking moves the handle there and the preview does not return on later map drags |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 513 | A set blend mode shows a Blend mode row under Opacity/Corner radius; its dropdown changes the mode and its minus (tooltip "Remove") resets it to Pass through and hides the row   |  ✅  |                ✅ `appearance-panel.spec.ts`                 |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as

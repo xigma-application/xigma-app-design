@@ -273,4 +273,40 @@ test.describe('Design panels — Appearance section', () => {
 
     expect(after.equals(before)).toBe(false);
   });
+
+  test('a set blend mode also shows a Blend mode row whose dropdown changes it and whose minus removes it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-blend-mode-row');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // result — no row while on the default Pass through
+    await expect(page.getByLabel('Remove blend mode')).toHaveCount(0);
+
+    // action
+    await page.getByLabel('Apply blend mode').click();
+    await page.getByText('Multiply', { exact: true }).click();
+
+    // result — the row appears with the chosen mode
+    await expect(page.getByLabel('Remove blend mode')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Multiply' })).toBeVisible();
+
+    // action — change it from the row's dropdown
+    await page.getByRole('button', { name: 'Multiply' }).click();
+    await page.getByText('Darken', { exact: true }).click();
+
+    // result
+    expect((await readNode(page, id)).blendMode).toBe('darken');
+
+    // action — remove it with the minus
+    await page.getByLabel('Remove blend mode').click();
+
+    // result
+    expect((await readNode(page, id)).blendMode).toBe('passThrough');
+    await expect(page.getByLabel('Remove blend mode')).toHaveCount(0);
+  });
 });

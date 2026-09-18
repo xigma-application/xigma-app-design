@@ -1410,6 +1410,16 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
+### Appearance: Blend mode row
+
+`Common/AppearanceSection/BlendModeRow/` renders under the Opacity / Corner radius rows only while the
+node's `blendMode` is set to something other than `passThrough` (the header drop button still sets and
+clears it): a "Blend mode" `SectionColumn` (`single`) holding an outline `UITools.Dropdown` (new optional
+`icon` prop = leading `DropEmpty`, options from `BLEND_MODE_GROUPS.flat()`, `onHoverOption` writes the
+same `blendMode.previewRef` the header menu uses so hovering previews live) and a `Minus` `ButtonIcon`
+(tooltip "Remove", aria "Remove blend mode") that commits `passThrough`. Same `commitBlendModeChange`
+as the header button, so both stay in sync. e2e #513 in `appearance-panel.spec.ts`.
+
 ### Contrast checker (Solid tab only)
 
 Figma-style "Check color contrast": the last icon in `PaintTypeRow`'s trailing `__extra` wrapper (next to

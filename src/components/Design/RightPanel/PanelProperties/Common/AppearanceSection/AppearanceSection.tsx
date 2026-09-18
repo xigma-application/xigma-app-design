@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AppearanceHeaderButtons from './AppearanceHeaderButtons/AppearanceHeaderButtons';
+import BlendModeRow from './BlendModeRow/BlendModeRow';
 import CornerRadiusButtonIcons from './CornerRadius/CornerRadiusButtonIcons';
 import CornerRadiusFieldList from './CornerRadius/CornerRadiusFieldList';
 import CornerRadiusInput from './CornerRadius/CornerRadiusInput';
@@ -51,6 +52,7 @@ const AppearanceSection: FC = () => {
           <CornerRadiusFieldList fields={cornerRadius.individualFields} />
         </UITools.SectionColumn>
       )}
+      <BlendModeRow />
     </UITools.Section>
   );
 };

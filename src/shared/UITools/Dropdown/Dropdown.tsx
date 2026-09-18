@@ -2,6 +2,9 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import cx from 'classnames';
 import { ReactElement } from 'react';
 
+// @xigma
+import { TIconProps } from '@xigma/components';
+
 // components
 import DropdownPanel from './DropdownPanel/DropdownPanel';
 import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
@@ -22,9 +25,11 @@ export type TDropdownProps<TValue extends string> = {
   bypassGlobalShortcuts?: boolean;
   className?: string;
   disabled?: boolean;
+  icon?: TIconProps['name'];
   onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
+  textAlign?: 'center' | 'left';
   truncate?: boolean;
   value: TValue;
   variant?: TDropdownVariant;
@@ -34,9 +39,11 @@ export const Dropdown = <TValue extends string>({
   bypassGlobalShortcuts = true,
   className = '',
   disabled = false,
+  icon,
   onHoverOption,
   onSelect,
   options,
+  textAlign = 'center',
   truncate = true,
   value,
   variant = 'filled',
@@ -51,7 +58,13 @@ export const Dropdown = <TValue extends string>({
       className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
       disabled={disabled}
     >
-      <span className={cx(styles.Dropdown__label, { [styles['Dropdown__label--no-truncate']]: !truncate })}>
+      {icon && <Icon name={icon} size={24} />}
+      <span
+        className={cx(styles.Dropdown__label, {
+          [styles['Dropdown__label--left']]: textAlign === 'left',
+          [styles['Dropdown__label--no-truncate']]: !truncate,
+        })}
+      >
         {selectedOption?.triggerLabel ?? selectedOption?.label}
       </span>
       <Icon name="ChevronDown" size={24} />

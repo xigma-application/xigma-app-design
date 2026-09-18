@@ -19,6 +19,32 @@ describe('Dropdown snapshots', () => {
 });
 
 describe('Dropdown behaviors', () => {
+  it('should left-align the trigger label only when textAlign is "left"', () => {
+    // before
+    const { container, rerender } = render(<Dropdown onSelect={vi.fn()} options={options} value="hex" />);
+
+    expect(container.querySelector('[class*="Dropdown__label--left"]')).toBeNull();
+
+    // action
+    rerender(<Dropdown onSelect={vi.fn()} options={options} textAlign="left" value="hex" />);
+
+    // result
+    expect(container.querySelector('[class*="Dropdown__label--left"]')).not.toBeNull();
+  });
+
+  it('should show a leading icon in the trigger only when an icon is given', () => {
+    // before
+    const { container, rerender } = render(<Dropdown onSelect={vi.fn()} options={options} value="hex" />);
+
+    expect(container.querySelectorAll('button svg')).toHaveLength(1);
+
+    // action
+    rerender(<Dropdown icon="DropEmpty" onSelect={vi.fn()} options={options} value="hex" />);
+
+    // result
+    expect(container.querySelectorAll('button svg')).toHaveLength(2);
+  });
+
   it('should not apply the outline modifier class by default', () => {
     // before
     const { container } = render(<Dropdown onSelect={vi.fn()} options={options} value="hex" />);
