@@ -1,10 +1,10 @@
 // types
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 
-export const getEffectiveImageSize = (paint: TImagePaint): { height: number; width: number } | undefined => {
+export const getEffectiveImageSize = (paint: TImagePaint | TVideoPaint): { height: number; width: number } | undefined => {
   const imageSize = imagePaintTextureSizeCache.get(paint.ref);
 
   if (imageSize) {

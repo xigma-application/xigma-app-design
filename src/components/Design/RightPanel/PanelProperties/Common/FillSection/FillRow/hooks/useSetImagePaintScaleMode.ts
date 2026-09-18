@@ -9,7 +9,7 @@ import { setImageEditor } from 'store/design/slice';
 // types
 import { TImageEditorState } from 'store/design/types';
 import { TImageFillMode } from 'shared/UITools/ColorPicker/Body/ImagePanel/types';
-import { TImagePaint, TPaint } from 'types/design/paint/types';
+import { TImagePaint, TPaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { seedImageCropIfNeeded } from 'components/Design/Canvas/utils/seedImageCropIfNeeded';
@@ -22,7 +22,7 @@ const isImageEditorTargeting = (
 
 const applyImageFillModeChange = (
   dispatch: AppDispatch,
-  paint: TImagePaint,
+  paint: TImagePaint | TVideoPaint,
   onChange: TFunc<[TPaint]>,
   imageEditor: TImageEditorState | null,
   nodeId: string | undefined,
@@ -50,7 +50,7 @@ const enterImageCropMode = (
 
 const enterImageTileMode = (
   dispatch: AppDispatch,
-  paint: TImagePaint,
+  paint: TImagePaint | TVideoPaint,
   onChange: TFunc<[TPaint]>,
   imageEditor: TImageEditorState | null,
   nodeId: string | undefined,
@@ -73,11 +73,11 @@ export const useSetImagePaintScaleMode = (
   const imageEditor = useAppSelector(selectImageEditor);
 
   return (fillMode): void => {
-    if (paint.type === 'image' && (fillMode === 'fill' || fillMode === 'fit')) {
+    if ((paint.type === 'image' || paint.type === 'video') && (fillMode === 'fill' || fillMode === 'fit')) {
       applyImageFillModeChange(dispatch, paint, onChange, imageEditor, nodeId, paintIndex, fillMode);
-    } else if (paint.type === 'image' && fillMode === 'crop') {
+    } else if ((paint.type === 'image' || paint.type === 'video') && fillMode === 'crop') {
       enterImageCropMode(dispatch, imageEditor, nodeId, paintIndex);
-    } else if (paint.type === 'image' && fillMode === 'tile') {
+    } else if ((paint.type === 'image' || paint.type === 'video') && fillMode === 'tile') {
       enterImageTileMode(dispatch, paint, onChange, imageEditor, nodeId, paintIndex);
     }
   };

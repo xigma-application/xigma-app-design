@@ -68,18 +68,16 @@ describe('ImageCropDimensionsSection', () => {
     expect(screen.getByLabelText('Height')).toHaveValue(120);
   });
 
-  it('should force the aspect-ratio lock on and disabled, unlike a plain frame/rectangle', () => {
+  it('should hide the aspect-ratio lock button entirely, since it is always locked here and a permanently-disabled toggle serves no purpose', () => {
     // mock
     addImageCropRectNode({ height: 120, rotation: 0, width: 80, x: 0, y: 0 });
 
     // before
     renderImageCropDimensionsSection();
 
-    // result — locked, so the label reads "Unlock…" like any other locked dimensions row
-    const lockButton = screen.getByLabelText('Unlock aspect ratio');
-
-    expect(lockButton).toBeDisabled();
-    expect(lockButton).toHaveAttribute('aria-pressed', 'true');
+    // result — neither the locked nor unlocked variant of the button renders at all
+    expect(screen.queryByLabelText('Unlock aspect ratio')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Lock aspect ratio')).not.toBeInTheDocument();
   });
 
   it('should scale the height proportionally when the width is committed, since the lock cannot be turned off', () => {

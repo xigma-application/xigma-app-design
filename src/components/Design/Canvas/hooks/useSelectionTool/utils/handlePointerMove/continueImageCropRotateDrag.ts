@@ -32,7 +32,7 @@ export const continueImageCropRotateDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const deltaDegrees = getAngleBetweenPoints(pivot, point) - startAngle;
         const { rotation, x, y } = rotateShapeNodeOrigin(origin, pivot, deltaDegrees);

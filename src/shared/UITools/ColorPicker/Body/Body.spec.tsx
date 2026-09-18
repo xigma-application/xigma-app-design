@@ -86,6 +86,13 @@ const imagePanel = {
   tint: 0,
 };
 
+const videoPanel = {
+  fillMode: 'fill' as const,
+  setFillMode: vi.fn(),
+  setVideo: vi.fn(),
+  videoUrl: null,
+};
+
 const renderBody = (activeTab: ColorPickerTab, patternSourceNodeId?: string | null): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
@@ -98,6 +105,7 @@ const renderBody = (activeTab: ColorPickerTab, patternSourceNodeId?: string | nu
         patternPanel={patternPanel}
         patternSourceNodeId={patternSourceNodeId}
         patternSourcePicking={patternSourcePicking}
+        videoPanel={videoPanel}
       />
     </TooltipProvider>,
   );

@@ -60,7 +60,7 @@ const ColumnDimensions: FC = () => {
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={ColumnDimensionsButtonIcons(locked, lockDisabled, onToggleLock, t)}
+      buttonsIcon={lockDisabled ? [] : ColumnDimensionsButtonIcons(locked, lockDisabled, onToggleLock, t)}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.label`)]}
       withBottomMargin

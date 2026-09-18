@@ -13,7 +13,7 @@ export const seedImageCropIfNeeded = (dispatch: AppDispatch, node: TSceneNode | 
   if (node && isAppearanceNode(node)) {
     const paint = node.fills[paintIndex];
 
-    if (paint?.type === 'image' && !paint.crop) {
+    if ((paint?.type === 'image' || paint?.type === 'video') && !paint.crop) {
       const isLeavingTile = paint.scaleMode === 'tile';
       const paintForCrop = isLeavingTile ? { ...paint, scale: undefined, scaleMode: 'fill' as const } : paint;
       const crop = getImageCropRect(node, paintForCrop);

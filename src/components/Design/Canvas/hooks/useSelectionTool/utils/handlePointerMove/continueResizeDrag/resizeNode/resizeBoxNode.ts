@@ -5,7 +5,7 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TImagePaint, TPaint, TPatternPaint } from 'types/design/paint/types';
+import { TImagePaint, TPaint, TPatternPaint, TVideoPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TResizeNodeOrigin, TVectorNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
@@ -22,7 +22,8 @@ import { scaleFillsCrop } from 'components/Design/Canvas/utils/scaleFillsCrop';
 
 type TBoxResizeOrigin = Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number } | TVectorNodeOrigin>;
 
-const isMirrorableFill = (fill: TPaint): fill is TImagePaint | TPatternPaint => fill.type === 'image' || fill.type === 'pattern';
+const isMirrorableFill = (fill: TPaint): fill is TImagePaint | TPatternPaint | TVideoPaint =>
+  fill.type === 'image' || fill.type === 'pattern' || fill.type === 'video';
 
 const getMirroredFills = (fills: TPaint[], scaleX: number, scaleY: number, skipIndex: number | null): TPaint[] =>
   scaleX < 0 || scaleY < 0

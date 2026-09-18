@@ -23,7 +23,7 @@ export const drawImageEditorCropImageOutline = (
   if (imageEditor.mode === 'crop' && isAppearanceNode(node)) {
     const paint = node.fills[imageEditor.paintIndex];
 
-    if (paint?.type === 'image') {
+    if (paint?.type === 'image' || paint?.type === 'video') {
       const crop = getImageCropRect(node, paint);
       drawImageEditorImageOutline(gl, program, buffer, crop, canvasWidth, canvasHeight, viewport, isImageSelected);
     }

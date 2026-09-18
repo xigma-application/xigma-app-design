@@ -1,7 +1,7 @@
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TAspectRatioTarget } from '../types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { getAspectRatioPresetRect } from './getAspectRatioPresetRect';
@@ -11,7 +11,7 @@ const CLOSE_ENOUGH_EPSILON = 0.5;
 
 const isClose = (a: number, b: number): boolean => Math.abs(a - b) < CLOSE_ENOUGH_EPSILON;
 
-export const isAspectRatioPresetActive = (node: TAppearanceNode, paint: TImagePaint, target: TAspectRatioTarget): boolean => {
+export const isAspectRatioPresetActive = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint, target: TAspectRatioTarget): boolean => {
   const rect = getAspectRatioPresetRect(node, paint, target);
 
   if (rect) {

@@ -68,7 +68,7 @@ export const drawVectorFillPaints = (
           alpha,
           boxRotation,
         );
-      } else if (paint.type === 'image') {
+      } else if (paint.type === 'image' || paint.type === 'video') {
         drawVectorImageFill(
           gl,
           program,
@@ -92,7 +92,7 @@ export const drawVectorFillPaints = (
           paint.flipY,
           boxRotation,
           paint.scale,
-          paint.adjustments,
+          paint.type === 'image' ? paint.adjustments : undefined,
         );
       } else {
         drawVectorGradientFill(

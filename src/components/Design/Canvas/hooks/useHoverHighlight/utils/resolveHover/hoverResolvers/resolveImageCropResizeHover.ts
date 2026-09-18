@@ -20,7 +20,7 @@ export const resolveImageCropResizeHover = ({
     if (node && isAppearanceNode(node)) {
       const paint = node.fills[imageEditor.paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const crop = getImageCropRect(node, paint);
         const handle = getImageCropResizeHandleAtPoint(point, crop, viewport);
 

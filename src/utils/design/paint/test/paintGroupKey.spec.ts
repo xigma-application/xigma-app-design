@@ -4,7 +4,7 @@ import { paintGroupKey } from '../paintGroupKey';
 
 // types
 import { BlendMode } from 'types/design/enums';
-import { TGradientPaint, TImagePaint, TPatternPaint } from 'types/design/paint/types';
+import { TGradientPaint, TImagePaint, TPatternPaint, TVideoPaint } from 'types/design/paint/types';
 
 describe('paintGroupKey', () => {
   it('should produce an identical key for two structurally equal solid stacks', () => {
@@ -46,6 +46,12 @@ describe('paintGroupKey', () => {
     const image: TImagePaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
 
     expect(paintGroupKey([image])).not.toBe(paintGroupKey([{ ...image, scaleMode: 'tile' }]));
+  });
+
+  it('should key a video paint by ref and scale mode', () => {
+    const video: TVideoPaint = { opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'video' };
+
+    expect(paintGroupKey([video])).not.toBe(paintGroupKey([{ ...video, scaleMode: 'tile' }]));
   });
 
   it('should key a pattern paint without throwing, even though it has no gradient geometry', () => {

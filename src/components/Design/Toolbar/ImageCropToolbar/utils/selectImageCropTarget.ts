@@ -5,11 +5,11 @@ import { selectImageEditor, selectNodes } from 'store/design/selectors';
 
 // types
 import { isAppearanceNode, TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 export type TImageCropTarget = {
   node: TAppearanceNode;
-  paint: TImagePaint;
+  paint: TImagePaint | TVideoPaint;
   paintIndex: number;
 };
 
@@ -22,7 +22,7 @@ export const selectImageCropTarget = createSelector(
       if (isAppearanceNode(node)) {
         const paint = node.fills[imageEditor.paintIndex];
 
-        if (paint?.type === 'image') {
+        if (paint?.type === 'image' || paint?.type === 'video') {
           return { node, paint, paintIndex: imageEditor.paintIndex };
         }
       }

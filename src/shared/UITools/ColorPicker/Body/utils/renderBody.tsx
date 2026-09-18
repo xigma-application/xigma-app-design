@@ -5,6 +5,7 @@ import GradientPanel from '../GradientPanel/GradientPanel';
 import ImagePanel from '../ImagePanel/ImagePanel';
 import PatternPanel from '../PatternPanel/PatternPanel';
 import SolidPanel from '../SolidPanel/SolidPanel';
+import VideoPanel from '../VideoPanel/VideoPanel';
 
 // types
 import { ColorPickerTab } from '../../enums';
@@ -27,9 +28,14 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     onImageScaleModeChange,
     onImageTileScaleChange,
     onOpenSampler,
+    onVideoRotate,
+    onVideoScaleModeChange,
+    onVideoTileScaleChange,
     patternPanel,
     patternSourceNodeId,
     patternSourcePicking,
+    videoPanel,
+    videoTileScale,
   } = props;
 
   switch (activeTab) {
@@ -55,6 +61,16 @@ export const renderBody = (props: TBodyProps): ReactNode => {
           onScaleModeChange={onImageScaleModeChange}
           onTileScaleChange={onImageTileScaleChange}
           tileScale={imageTileScale}
+        />
+      );
+    case ColorPickerTab.video:
+      return (
+        <VideoPanel
+          onRotate={onVideoRotate}
+          onScaleModeChange={onVideoScaleModeChange}
+          onTileScaleChange={onVideoTileScaleChange}
+          tileScale={videoTileScale}
+          videoPanel={videoPanel}
         />
       );
     default:

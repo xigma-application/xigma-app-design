@@ -11,6 +11,7 @@ import { useBeginFillHandleDrag } from './hooks/useBeginFillHandleDrag';
 import { useConvertSolidToGradientPaint } from './hooks/useConvertSolidToGradientPaint';
 import { useConvertToImagePaint } from './hooks/useConvertToImagePaint';
 import { useConvertToPatternPaint } from './hooks/useConvertToPatternPaint';
+import { useConvertToVideoPaint } from './hooks/useConvertToVideoPaint';
 import { useDeactivateImageTabOnPickerClose } from './hooks/useDeactivateImageTabOnPickerClose';
 import { useHandleSolidPaintChange } from './hooks/useHandleSolidPaintChange';
 import { useIsPointerOverGradientHandle } from './hooks/useIsPointerOverGradientHandle';
@@ -86,10 +87,12 @@ export const FillRow: FC<TFillRowProps> = ({
   const { t } = useTranslation();
   const isVisible = paint.visible !== false;
   const isImage = paint.type === 'image';
+  const isVideo = paint.type === 'video';
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
-  const isResumingImageFocus = isImage && imageFillPickerFocus?.nodeId === nodeId && imageFillPickerFocus?.paintIndex === paintIndex;
+  const isResumingImageFocus = (isImage || isVideo) && imageFillPickerFocus?.nodeId === nodeId && imageFillPickerFocus?.paintIndex === paintIndex;
   const isPickerOpen = paintIndex === openPickerIndex;
-  const [isImageTabActive, setIsImageTabActive] = useState(isResumingImageFocus);
+  const [isImageTabActive, setIsImageTabActive] = useState(isResumingImageFocus && isImage);
+  const [isVideoTabActive, setIsVideoTabActive] = useState(isResumingImageFocus && isVideo);
   const skipInitialImageEditorArmRef = useRef(isResumingImageFocus);
   const [gradientPanelState, setGradientPanelState] = useState(DEFAULT_GRADIENT_PANEL_STATE);
   const handleClick = useSelectFillRow(onSelect);
@@ -98,6 +101,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handleSolidChange = useHandleSolidPaintChange(paint, onChange);
   const handleGradientChange = useConvertSolidToGradientPaint(paint, onChange);
   const handleImageChange = useConvertToImagePaint(paint, onChange);
+  const handleVideoChange = useConvertToVideoPaint(paint, onChange);
   const handleImageAdjustmentChange = useSetImagePaintAdjustment(paint, onChange);
   const handleImageRotate = useRotateImagePaint(paint, onChange);
   const handleImageScaleModeChange = useSetImagePaintScaleMode(paint, onChange, nodeId, paintIndex);
@@ -105,16 +109,17 @@ export const FillRow: FC<TFillRowProps> = ({
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
-  const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern';
+  const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern' && paint.type !== 'video';
   const value = { alpha: paint.opacity, hex: getFillRowSwatchHex(paint) };
   const hexDisplayValue = getFillRowHexDisplayValue(paint, t);
-  const imageTileScale = paint.type === 'image' ? (paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE) : IMAGE_FILL_DEFAULT_TILE_SCALE;
-  const imageAdjustments = paint.type === 'image' ? getImagePaintAdjustments(paint) : DEFAULT_IMAGE_ADJUSTMENTS;
+  const mediaTileScale = isImage || isVideo ? (paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE) : IMAGE_FILL_DEFAULT_TILE_SCALE;
+  const imageAdjustments = isImage ? getImagePaintAdjustments(paint) : DEFAULT_IMAGE_ADJUSTMENTS;
   const initialMode = getInitialImageEditorModeFromPaint(paint);
 
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsImageTabActive);
+  useDeactivateImageTabOnPickerClose(isPickerOpen, setIsVideoTabActive);
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive, initialMode, skipInitialImageEditorArmRef.current);
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive || isVideoTabActive, initialMode, skipInitialImageEditorArmRef.current);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
@@ -142,7 +147,7 @@ export const FillRow: FC<TFillRowProps> = ({
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}
-          imageTileScale={imageTileScale}
+          imageTileScale={mediaTileScale}
           imageUrl={isImage ? paint.ref : undefined}
           initialActiveTab={getFillRowInitialActiveTab(paint)}
           initialFillMode={getInitialImageFillModeFromPaint(paint)}
@@ -169,6 +174,11 @@ export const FillRow: FC<TFillRowProps> = ({
           onPickerChange={handleSolidChange}
           onToggleVisibility={onToggleVisible}
           onTriggerClick={isPickerOpen ? undefined : handleOpenThisPicker}
+          onVideoChange={handleVideoChange}
+          onVideoRotate={handleImageRotate}
+          onVideoScaleModeChange={handleImageScaleModeChange}
+          onVideoTabActiveChange={setIsVideoTabActive}
+          onVideoTileScaleChange={handleImageTileScaleChange}
           paintTypeRow
           patternSourceNodeId={isPattern ? paint.sourceNodeId : undefined}
           side="right"
@@ -176,6 +186,8 @@ export const FillRow: FC<TFillRowProps> = ({
           toggleVisibilityAriaLabel={t(`${translationNameSpace}.${isVisible ? 'hideAriaLabel' : 'showAriaLabel'}`)}
           toggleVisibilityTooltip={t(`${translationNameSpace}.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}
           triggerAriaLabel={t(`${translationNameSpace}.hexAriaLabel`)}
+          videoTileScale={mediaTileScale}
+          videoUrl={isVideo ? paint.ref : undefined}
         />
       </span>
       <Tooltip content={t(`${translationNameSpace}.deleteTooltip`)}>

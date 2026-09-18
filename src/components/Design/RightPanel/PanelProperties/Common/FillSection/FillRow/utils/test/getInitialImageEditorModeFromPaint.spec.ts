@@ -37,4 +37,17 @@ describe('getInitialImageEditorModeFromPaint', () => {
       'position',
     );
   });
+
+  it('should return crop for a video paint with a stored crop rect', () => {
+    const paint = {
+      crop: { height: 10, rotation: 0, width: 10, x: 0, y: 0 },
+      opacity: 100,
+      ref: 'asset-1',
+      rotation: 0,
+      scaleMode: 'fill' as const,
+      type: 'video' as const,
+    };
+
+    expect(getInitialImageEditorModeFromPaint(paint)).toBe('crop');
+  });
 });

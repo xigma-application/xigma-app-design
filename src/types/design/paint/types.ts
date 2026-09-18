@@ -3,7 +3,7 @@ import { BlendMode } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
-export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'pattern' | 'solid';
+export type TPaintType = 'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'pattern' | 'solid' | 'video';
 
 export type TImageScaleMode = 'fill' | 'fit' | 'stretch' | 'tile';
 
@@ -66,6 +66,17 @@ export type TImagePaint = TPaintBase & {
   type: 'image';
 };
 
+export type TVideoPaint = TPaintBase & {
+  crop?: TImageCrop;
+  flipX?: boolean;
+  flipY?: boolean;
+  ref: string;
+  rotation: number;
+  scale?: number;
+  scaleMode: TImageScaleMode;
+  type: 'video';
+};
+
 export type TPatternPaint = TPaintBase & {
   alignmentIndex: number;
   direction: TPatternDirection;
@@ -82,4 +93,4 @@ export type TPatternPaint = TPaintBase & {
   type: 'pattern';
 };
 
-export type TPaint = TGradientPaint | TImagePaint | TPatternPaint | TSolidPaint;
+export type TPaint = TGradientPaint | TImagePaint | TPatternPaint | TSolidPaint | TVideoPaint;

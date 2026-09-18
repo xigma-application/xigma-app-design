@@ -15,13 +15,13 @@ export const scaleFillsCrop = (
   transform: TScaleFillsCropTransform,
   skipPaintIndex: number | null = null,
 ): TPaint[] | undefined => {
-  const hasCrop = Array.isArray(fills) && fills.some((fill, index) => fill.type === 'image' && fill.crop && index !== skipPaintIndex);
+  const hasCrop = Array.isArray(fills) && fills.some((fill, index) => (fill.type === 'image' || fill.type === 'video') && fill.crop && index !== skipPaintIndex);
 
   if (hasCrop && fills) {
     const { newCenterX, newCenterY, oldCenterX, oldCenterY, scaleX, scaleY } = transform;
 
     return fills.map((fill, index) => {
-      if (fill.type === 'image' && fill.crop && index !== skipPaintIndex) {
+      if ((fill.type === 'image' || fill.type === 'video') && fill.crop && index !== skipPaintIndex) {
         const { crop } = fill;
         const width = crop.width * scaleX;
         const height = crop.height * scaleY;

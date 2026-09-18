@@ -22,6 +22,8 @@ import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInterac
 import { useNotifyGradientPanelState } from './hooks/useNotifyGradientPanelState';
 import { useNotifyImagePanelState } from './hooks/useNotifyImagePanelState';
 import { useNotifyImageTabActiveState } from './hooks/useNotifyImageTabActiveState';
+import { useNotifyVideoPanelState } from './hooks/useNotifyVideoPanelState';
+import { useNotifyVideoTabActiveState } from './hooks/useNotifyVideoTabActiveState';
 import { useOpenSessionId } from './hooks/useOpenSessionId';
 import { usePatternSourcePicking } from './hooks/usePatternSourcePicking';
 import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
@@ -32,6 +34,7 @@ import { useTrackIsDragging } from './hooks/useTrackIsDragging';
 import { useGradientPanel } from './Body/GradientPanel/hooks/useGradientPanel/useGradientPanel';
 import { useImagePanel } from './Body/ImagePanel/hooks/useImagePanel';
 import { usePatternPanel } from './Body/PatternPanel/hooks/usePatternPanel';
+import { useVideoPanel } from './Body/VideoPanel/hooks/useVideoPanel';
 
 // others
 import { DEFAULT_ACTIVE_TAB, DEFAULT_LIBRARY_TAB, DEFAULT_PRESETS } from './constants';
@@ -62,6 +65,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   initialImageUrl,
   initialOpen = false,
   initialPattern,
+  initialVideoUrl,
   isPointerOverGradientHandle,
   moveable = false,
   onChange,
@@ -78,6 +82,12 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   onImageUrlChange,
   onOpenChange,
   onPatternChange,
+  onVideoChange,
+  onVideoRotate,
+  onVideoScaleModeChange,
+  onVideoTabActiveChange,
+  onVideoTileScaleChange,
+  onVideoUrlChange,
   paintTypeRow = false,
   patternSourceNodeId,
   presets = DEFAULT_PRESETS,
@@ -89,6 +99,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   triggerAriaLabel,
   triggerClassName,
   value,
+  videoTileScale,
 }) => {
   const [activeTab, setActiveTab] = useState(initialActiveTab ?? DEFAULT_ACTIVE_TAB);
   const [libraryTab, setLibraryTab] = useState(DEFAULT_LIBRARY_TAB);
@@ -99,6 +110,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
   const imagePanel = useImagePanel(initialImageUrl, initialFillMode);
+  const videoPanel = useVideoPanel(initialVideoUrl, initialFillMode);
   const patternPanel = usePatternPanel(onPatternChange, initialPattern, openSessionId);
   const colorSampler = useColorSampler(colorModel.setHex);
   const patternSourcePicking = usePatternSourcePicking();
@@ -106,7 +118,8 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const ignoreGradientCanvasInteractOutside = useIgnoreGradientCanvasInteractOutside(isPointerOverGradientHandle);
   const ignorePatternSourcePickingInteractOutside = useIgnorePatternSourcePickingInteractOutside(patternSourcePicking.isActive);
   const isImageTabActive = activeTab === ColorPickerTab.image;
-  const ignoreDismissWhileImageTabActive = useIgnoreDismissWhileImageTabActive(isImageTabActive);
+  const isVideoTabActive = activeTab === ColorPickerTab.video;
+  const ignoreDismissWhileImageTabActive = useIgnoreDismissWhileImageTabActive(isImageTabActive || isVideoTabActive);
   const handlePopoverOpenChange = usePopoverOpenChange(colorSampler.close, patternSourcePicking.close, onOpenChange);
   const handleOpenChange = useHandleOpenChange(setIsOpen, handlePopoverOpenChange);
   const preview = getColorPickerPreview(activeTab, gradientPanel.stops, gradientPanel.type, gradientPanel.angle, value);
@@ -121,6 +134,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
     onGradientChange,
     onPatternChange,
     onImageChange,
+    onVideoChange,
   );
 
   const handleInteractOutside = useHandleInteractOutside(
@@ -134,8 +148,11 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   useNotifyGradientPanelState(activeTab, gradientPanel, onGradientPanelStateChange);
   useNotifyImagePanelState(imagePanel, onImageUrlChange, onImageChange);
   useNotifyImageTabActiveState(activeTab, onImageTabActiveChange);
+  useNotifyVideoPanelState(videoPanel, onVideoUrlChange, onVideoChange);
+  useNotifyVideoTabActiveState(activeTab, onVideoTabActiveChange);
   useClosePatternSourcePickingOnEscape(patternSourcePicking.isActive, patternSourcePicking.close);
   useSyncFillModeWithImageEditorCrop(isImageTabActive, imagePanel.setFillMode);
+  useSyncFillModeWithImageEditorCrop(isVideoTabActive, videoPanel.setFillMode);
 
   return (
     <Popover
@@ -180,9 +197,14 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             onImageScaleModeChange={onImageScaleModeChange}
             onImageTileScaleChange={onImageTileScaleChange}
             onOpenSampler={colorSampler.open}
+            onVideoRotate={onVideoRotate}
+            onVideoScaleModeChange={onVideoScaleModeChange}
+            onVideoTileScaleChange={onVideoTileScaleChange}
             patternPanel={patternPanel}
             patternSourceNodeId={patternSourceNodeId}
             patternSourcePicking={patternSourcePicking}
+            videoPanel={videoPanel}
+            videoTileScale={videoTileScale}
           />
         </DockedPanelContext.Provider>
         {activeTab === ColorPickerTab.solid && <Footer onSelectPreset={colorModel.setPreset} presets={presets} />}

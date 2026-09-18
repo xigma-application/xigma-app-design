@@ -5531,7 +5531,7 @@ test.describe('Design panels — Fill section', () => {
     expect(node.fills?.[0].crop).toMatchObject({ height: 140, rotation: 90, width: 180 });
   });
 
-  test("the ImageCrop panel's Dimensions row shows the aspect-ratio lock permanently on and disabled, and editing width scales height to match", async ({
+  test("the ImageCrop panel's Dimensions row hides the aspect-ratio lock button entirely (it's always locked there, so showing a permanently-disabled toggle serves no purpose), and editing width scales height to match", async ({
     page,
   }) => {
     const designPage = new DesignPage(page);
@@ -5558,11 +5558,9 @@ test.describe('Design panels — Fill section', () => {
     await designPage.pointerUp();
     await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
 
-    // result — the lock is on and can't be turned off
-    const lockButton = page.getByLabel('Unlock aspect ratio');
-
-    await expect(lockButton).toBeVisible();
-    await expect(lockButton).toBeDisabled();
+    // result — no lock button at all, neither the locked nor unlocked variant
+    await expect(page.getByLabel('Unlock aspect ratio')).not.toBeVisible();
+    await expect(page.getByLabel('Lock aspect ratio')).not.toBeVisible();
 
     // action — halving the width from the panel
     const widthInput = page.locator('[data-test-text-field-input="width"]');
@@ -5571,7 +5569,8 @@ test.describe('Design panels — Fill section', () => {
     await widthInput.fill('90');
     await widthInput.press('Enter');
 
-    // result — height scaled down to match the same 180:140 ratio
+    // result — height scaled down to match the same 180:140 ratio, since the crop stays locked
+    // internally even without a visible toggle
     const node = await readNode(page, id);
 
     expect(node.fills?.[0].crop).toMatchObject({ height: 70, width: 90 });
@@ -5698,5 +5697,97 @@ test.describe('Design panels — Fill section', () => {
       await page.getByLabel('Hex color').nth(index).click();
       await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: index });
     }
+  });
+
+  test('picking the Video tab turns the fill into a video paint, 1:1 with how selecting Image works', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-video-fill-pick');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // action — switch the fill to Video, the same way switching to Image converts the paint
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Video', { exact: true }).click();
+
+    // result — the node's fill became a real video paint
+    const node = await readNode(page, id);
+
+    expect(node.fills![0].type).toBe('video');
+    expect(node.fills![0].scaleMode).toBe('fill');
+
+    // result — the Video panel's own upload button is available to pick a file
+    await expect(page.getByRole('button', { name: 'Upload from computer' })).toBeVisible();
+  });
+
+  test('picking Crop from the dropdown on a video fill enters crop mode and shows the crop-mode toolbar (zoom/aspect ratio/Fit/Cancel/Confirm), even though there is no base Image-edit toolbar for video', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-video-fill-crop-toolbar');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Video', { exact: true }).click();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      buffer: Buffer.from('fake video bytes'),
+      mimeType: 'video/mp4',
+      name: 'clip.mp4',
+    });
+
+    // result — the base Image edit toolbar (Crop button + dropdown on the canvas) never shows for a
+    // video-only fill, since the user's spec explicitly excludes it
+    await expect(page.locator('[class*="ImageEditToolbar_"]').first().getByRole('button', { name: 'Crop' })).not.toBeVisible();
+
+    // action — enter crop mode through the picker panel's own Fill/Fit/Crop/Tile dropdown instead
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Crop', { exact: true }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id, paintIndex: 0 });
+
+    // result — the crop-mode toolbar (zoom slider, aspect ratio menu, Fit, Cancel, Confirm) shows,
+    // 1:1 with how it works for an image fill
+    const cropToolbar = page.locator('[class*="ImageCropToolbar_"]').first();
+
+    await expect(cropToolbar).toBeVisible();
+    await expect(cropToolbar.getByRole('slider')).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Fit' })).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { name: 'Confirm' })).toBeVisible();
+  });
+
+  test('the right-panel Crop panel header shows "Video" (not "Image") when the crop target is a video fill', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-video-crop-header-label');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Video', { exact: true }).click();
+
+    // action — enter crop mode via the dropdown, then select the video itself as the target
+    await page.locator('[class*="ImageFillModeRow__dropdown"]').click();
+    await page.getByText('Crop', { exact: true }).click();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ mode: 'crop', nodeId: id });
+
+    await designPage.pointerDown(800, 280);
+    await designPage.pointerUp();
+    await expect.poll(() => readImageEditor(page)).toMatchObject({ selectedTarget: 'image' });
+
+    // result — the right-panel Crop header reads "Video", not the default "Image" label
+    await expect(page.getByText('Video', { exact: true })).toBeVisible();
+    await expect(page.getByText('Image', { exact: true })).not.toBeVisible();
   });
 });

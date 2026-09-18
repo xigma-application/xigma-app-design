@@ -3,4 +3,5 @@ export enum ColorPickerTab {
   image = 'image',
   pattern = 'pattern',
   solid = 'solid',
+  video = 'video',
 }

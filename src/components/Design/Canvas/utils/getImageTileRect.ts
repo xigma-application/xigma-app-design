@@ -3,12 +3,12 @@ import { IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
 
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { TImageCrop, TImagePaint } from 'types/design/paint/types';
+import { TImageCrop, TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { imagePaintTextureSizeCache } from 'utils/canvas/getOrLoadTexture';
 
-export const getImageTileRect = (node: TAppearanceNode, paint: TImagePaint): TImageCrop | undefined => {
+export const getImageTileRect = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint): TImageCrop | undefined => {
   const imageSize = imagePaintTextureSizeCache.get(paint.ref);
 
   if (imageSize) {

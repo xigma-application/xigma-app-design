@@ -13,6 +13,8 @@ export const getFillRowHexDisplayValue = (paint: TPaint, t: TFunction): string |
       return 'Pattern';
     case 'image':
       return t(`${translationNameSpace}.imageLabel`);
+    case 'video':
+      return t(`${translationNameSpace}.videoLabel`);
     case 'solid':
       return undefined;
     default:

@@ -20,7 +20,7 @@ export const resolveImageTileScaleHover = ({
     if (node && isAppearanceNode(node) && node.rotation === 0) {
       const paint = node.fills[imageEditor.paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const tileRect = getImageTileRect(node, paint);
         const handle = tileRect ? getImageCropResizeHandleAtPoint(point, tileRect, viewport) : null;
 

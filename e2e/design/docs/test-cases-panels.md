@@ -1195,3 +1195,63 @@ to genuinely fail two different ways via backup-file round-trips: with the Cance
 (Cancel exits but the node keeps its post-edit geometry). Also required loosening two pre-existing e2e
 assertions (`toEqual` → `toMatchObject` on `imageEditor`) that predated this feature and didn't expect
 the new `cropCancelSnapshot` field to be present once a real node is targeted.
+
+#498 adds a new `video` paint type (`TVideoPaint`), 1:1 with Image everywhere except two elements the
+user explicitly cut: the adjustment sliders (`ImageAdjustmentSliders`) and the canvas-floating base
+`ImageEditToolbar` (the one with the Fill/Fit/Crop/Tile dropdown + its own Crop button) — that toolbar
+never shows for a video-only fill. Everything else — the picker's own Fill/Fit/Crop/Tile dropdown, the
+crop-mode `ImageCropToolbar` (zoom/aspect ratio/Fit/Cancel/Confirm), the right-panel Crop panel, and
+canvas-drag crop editing (drag/resize/rotate the video inside its frame) — all work for video exactly
+as they do for image. See `.claude/docs/video-fill.md` for the full file-by-file breakdown (30+ files
+widened from `paint.type === 'image'` to also accept `'video'`, versus the handful that needed a
+genuinely new `'video'` branch). Real video pixel rendering is deliberately out of scope for now — a
+video paint draws as a flat gray placeholder on canvas, since building actual `<video>` → WebGL texture
+decoding is a separate, sizable subsystem the user never asked for; only editing-UI parity was in scope.
+
+The user pressure-tested the scope hard before landing here — several rounds of correction on exactly
+which toolbar disappears ("Toolbar nie bedzie" → "Ale toolbar ten podstawowy bez niego" → "trybu crop...
+ten ma być" → "1:1 z image - znika tylko ten podstawowy toolbar ale [tryb] crop [mode] zostaje i znikają
+slidery do saturation itd.") — the final, authoritative statement is what's implemented: only the base
+toolbar and the adjustment sliders are gone; everything else, including the crop-mode toolbar, stays.
+
+e2e coverage, two tests: picking the Video tab turns the node's fill into a real `type: 'video'` paint
+(mirroring how selecting Image converts the paint) and shows the Video panel's own upload button;
+picking "Crop" from the picker's own dropdown on a video fill enters crop mode and shows the full
+crop-mode toolbar (slider, Fit, Cancel, Confirm), while confirming the base Image-edit toolbar's Crop
+button never appears for a video-only fill. Both confirmed to genuinely fail (`getByLabel('Video')`
+times out) against a version with the Video tab button removed, via a backup-file round-trip.
+
+Note: an e2e test asserting the uploaded file's `ref` becomes a real `blob:` URL was deliberately not
+written — a genuinely decodable video file can't be constructed as an inline test fixture the way
+`createSolidColorPngBuffer` does for images (video containers are far more complex than raw pixel
+buffers), and this repo's own pre-existing Media tool (`useDrawMediaTool`, which places a video the
+same way) has never had e2e coverage of its real-video-file path either — only unit tests, mocking
+`extractVideoFrame`. This is a consistent, existing boundary, not a new gap.
+
+#499: on the user's own instruction — "Na canvas nie widać 1 klatki obrazu z wideo. Ten problem był
+rozwiązany dla media" (you can't see a single frame of the video on canvas; this was already solved for
+media) — video fills now render a real still frame on canvas instead of the flat gray placeholder from
+#498's first pass, by reusing the exact mechanism the pre-existing Media tool already uses: extract one
+frame from the video file into a PNG blob (`extractVideoFrame.ts`, moved from `useDrawMediaTool/utils/`
+to the global `utils/canvas/` once it gained a second consumer) and treat that PNG as the paint's `ref`
+— the entire existing image-fill WebGL pipeline then renders it with zero video-specific code. See
+`.claude/docs/video-fill.md`'s "Revised after the first pass" section for the full before/after.
+
+e2e coverage: none added specifically for the frame-extraction pixel path, for the same
+non-constructible-video-fixture reason as #498 above — covered by unit tests only
+(`extractVideoFrame.spec.ts`, moved and re-verified; `useVideoPanel.spec.tsx`/`VideoSourcePreview.spec.tsx`,
+both updated to mock `extractVideoFrame` and assert the resulting frame URL becomes `videoUrl`/the
+background image, instead of asserting a raw `URL.createObjectURL(file)` call).
+
+#500, two smaller follow-ups from the same conversation: the right-panel Crop header now reads "Video"
+instead of the hardcoded "Image" label when the crop target is a video paint (new
+`useImageCropHeaderLabel.ts`, reading the already-widened `selectSelectedImageCrop`); and the
+Dimensions row's aspect-ratio lock button is hidden entirely (not just disabled) whenever editing a
+crop target, since `useColumnDimensions.ts` already forces it permanently locked-and-disabled there —
+showing a toggle that can never be toggled served no purpose. Both are one-line-condition fixes reusing
+signals (`paint.type`, `lockDisabled`) that already existed.
+
+e2e coverage: a new test confirms the Crop header shows "Video" (not "Image") when the crop target is a
+video fill; the pre-existing aspect-ratio-lock e2e test was updated from asserting the button is
+"visible and disabled" to asserting neither the locked nor unlocked button variant is visible at all.
+Both confirmed to genuinely fail against their pre-fix versions via backup-file round-trips.

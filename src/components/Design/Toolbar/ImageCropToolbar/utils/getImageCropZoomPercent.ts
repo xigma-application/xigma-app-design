@@ -1,13 +1,13 @@
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { getEffectiveImageSize } from 'components/Design/Canvas/utils/getEffectiveImageSize';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
 import { getImageFillContainRect } from 'utils/canvas/drawVectorNode/getImageFillContainRect';
 
-export const getImageCropZoomPercent = (node: TAppearanceNode, paint: TImagePaint): number => {
+export const getImageCropZoomPercent = (node: TAppearanceNode, paint: TImagePaint | TVideoPaint): number => {
   const effectiveSize = getEffectiveImageSize(paint);
 
   if (effectiveSize && effectiveSize.width > 0) {

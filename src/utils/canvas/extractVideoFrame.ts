@@ -1,5 +1,8 @@
-// types
-import { TArmedMedia } from './loadArmedMedia';
+export type TExtractedVideoFrame = {
+  naturalHeight: number;
+  naturalWidth: number;
+  src: string;
+};
 
 const FRAME_SEEK_OFFSET_SECONDS = 0.1;
 
@@ -11,7 +14,7 @@ const hideVideoElement = (video: HTMLVideoElement): void => {
   video.style.pointerEvents = 'none';
 };
 
-const captureVideoFrame = (video: HTMLVideoElement, onLoad: (armed: TArmedMedia) => void): void => {
+const captureVideoFrame = (video: HTMLVideoElement, onLoad: (frame: TExtractedVideoFrame) => void): void => {
   const canvas = document.createElement('canvas');
 
   canvas.width = video.videoWidth;
@@ -35,7 +38,7 @@ const cleanupVideoElement = (video: HTMLVideoElement, videoSrc: string): void =>
   URL.revokeObjectURL(videoSrc);
 };
 
-const seekToFrame = (video: HTMLVideoElement, onLoad: (armed: TArmedMedia) => void, onSettled: () => void): void => {
+const seekToFrame = (video: HTMLVideoElement, onLoad: (frame: TExtractedVideoFrame) => void, onSettled: () => void): void => {
   const seekTime = Number.isFinite(video.duration) && video.duration > 0 ? Math.min(FRAME_SEEK_OFFSET_SECONDS, video.duration / 2) : 0;
 
   if (seekTime > 0) {
@@ -50,7 +53,7 @@ const seekToFrame = (video: HTMLVideoElement, onLoad: (armed: TArmedMedia) => vo
   }
 };
 
-export const extractVideoFrame = (file: File, onLoad: (armed: TArmedMedia) => void): void => {
+export const extractVideoFrame = (file: File, onLoad: (frame: TExtractedVideoFrame) => void): void => {
   const video = document.createElement('video');
   const videoSrc = URL.createObjectURL(file);
 

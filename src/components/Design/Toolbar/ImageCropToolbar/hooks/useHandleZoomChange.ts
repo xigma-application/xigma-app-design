@@ -5,14 +5,14 @@ import { useAppDispatch } from 'store';
 
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { commitImageCropZoom } from '../utils/commitImageCropZoom';
 
 export const useHandleZoomChange = (
   node: TAppearanceNode | undefined,
-  paint: TImagePaint | undefined,
+  paint: TImagePaint | TVideoPaint | undefined,
   paintIndex: number | undefined,
 ): TFunc<[number]> => {
   const dispatch = useAppDispatch();

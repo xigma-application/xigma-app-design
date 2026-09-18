@@ -44,7 +44,7 @@ export const armImageCropOnPointerDown = ({
   if (imageEditor?.mode === 'crop' && editorNode && isAppearanceNode(editorNode)) {
     const paint = editorNode.fills[imageEditor.paintIndex];
 
-    if (paint?.type === 'image') {
+    if (paint?.type === 'image' || paint?.type === 'video') {
       return armImageCropPaintOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
     }
   }
@@ -52,7 +52,7 @@ export const armImageCropOnPointerDown = ({
   if (imageEditor?.mode === 'tile' && editorNode && isAppearanceNode(editorNode)) {
     const paint = editorNode.fills[imageEditor.paintIndex];
 
-    if (paint?.type === 'image') {
+    if (paint?.type === 'image' || paint?.type === 'video') {
       return armImageTileScaleOnPointerDown(canvas, canvasRefs, dispatch, event, hit, point, viewport, imageEditor, editorNode, paint);
     }
   }

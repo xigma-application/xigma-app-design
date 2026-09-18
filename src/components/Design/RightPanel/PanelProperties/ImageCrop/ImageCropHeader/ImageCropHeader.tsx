@@ -1,16 +1,15 @@
 import { FC } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // components
 import PanelHeader from '../../Common/PanelHeader/PanelHeader';
 
-// others
-import { translationNameSpace } from './constants';
+// hooks
+import { useImageCropHeaderLabel } from './hooks/useImageCropHeaderLabel';
 
 const ImageCropHeader: FC = () => {
-  const { t } = useTranslation();
+  const label = useImageCropHeaderLabel();
 
-  return <PanelHeader buttons={null} e2eValue="image-crop" label={t(`${translationNameSpace}.label`)} />;
+  return <PanelHeader buttons={null} e2eValue="image-crop" label={label} />;
 };
 
 export default ImageCropHeader;

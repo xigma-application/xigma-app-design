@@ -14,6 +14,7 @@ const singlePaintKey = (paint: TPaint): string => {
     case 'solid':
       return `${head}:${paint.color}`;
     case 'image':
+    case 'video':
       return `${head}:${paint.ref}:${paint.scaleMode}`;
     case 'pattern':
       return head;

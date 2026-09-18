@@ -27,6 +27,7 @@ import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/Grad
 import { TImageAdjustments } from 'types/design/paint/types';
 import { TImageFillMode, TImagePanelChange } from '../ColorPicker/Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from '../ColorPicker/Body/PatternPanel/types';
+import { TVideoPanelChange } from '../ColorPicker/Body/VideoPanel/types';
 
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
@@ -63,6 +64,11 @@ export type TColorPickerInputProps = {
   onPickerChange: TFunc<[TColorPickerValue]>;
   onToggleVisibility?: TFunc;
   onTriggerClick?: TFunc;
+  onVideoChange?: TFunc<[TVideoPanelChange]>;
+  onVideoRotate?: TFunc;
+  onVideoScaleModeChange?: TFunc<[TImageFillMode]>;
+  onVideoTabActiveChange?: TFunc<[boolean]>;
+  onVideoTileScaleChange?: TFunc<[number]>;
   paintTypeRow?: boolean;
   patternSourceNodeId?: string | null;
   side?: TColorPickerProps['side'];
@@ -71,6 +77,8 @@ export type TColorPickerInputProps = {
   toggleVisibilityAriaLabel?: string;
   toggleVisibilityTooltip?: ReactNode;
   triggerAriaLabel?: string;
+  videoTileScale?: number;
+  videoUrl?: string;
 };
 
 export const ColorPickerInput: FC<TColorPickerInputProps> = ({
@@ -108,6 +116,11 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   onPickerChange,
   onToggleVisibility,
   onTriggerClick,
+  onVideoChange,
+  onVideoRotate,
+  onVideoScaleModeChange,
+  onVideoTabActiveChange,
+  onVideoTileScaleChange,
   paintTypeRow = false,
   patternSourceNodeId,
   side = 'top',
@@ -116,6 +129,8 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   toggleVisibilityAriaLabel,
   toggleVisibilityTooltip,
   triggerAriaLabel,
+  videoTileScale,
+  videoUrl,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const onBlurHex = useHexCommit(hex, onCommitHex);
@@ -154,6 +169,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 initialImageUrl={imageUrl}
                 initialOpen={initialOpen}
                 initialPattern={initialPattern}
+                initialVideoUrl={videoUrl}
                 isPointerOverGradientHandle={isPointerOverGradientHandle}
                 moveable
                 onChange={onPickerChange}
@@ -170,6 +186,11 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 onImageUrlChange={setPickedImageUrl}
                 onOpenChange={onOpenChange}
                 onPatternChange={onPatternChange}
+                onVideoChange={onVideoChange}
+                onVideoRotate={onVideoRotate}
+                onVideoScaleModeChange={onVideoScaleModeChange}
+                onVideoTabActiveChange={onVideoTabActiveChange}
+                onVideoTileScaleChange={onVideoTileScaleChange}
                 paintTypeRow={paintTypeRow}
                 patternSourceNodeId={patternSourceNodeId}
                 side={side}
@@ -179,6 +200,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 triggerAriaLabel={triggerAriaLabel}
                 triggerClassName={styles.ColorPickerInput__trigger}
                 value={{ alpha, hex }}
+                videoTileScale={videoTileScale}
               />
             )
           }

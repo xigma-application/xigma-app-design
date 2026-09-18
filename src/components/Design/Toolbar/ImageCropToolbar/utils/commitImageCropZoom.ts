@@ -4,7 +4,7 @@ import { updateNode } from 'store/design/slice';
 
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { computeImageCropZoomRect } from './computeImageCropZoomRect';
@@ -12,7 +12,7 @@ import { computeImageCropZoomRect } from './computeImageCropZoomRect';
 export const commitImageCropZoom = (
   dispatch: AppDispatch,
   node: TAppearanceNode,
-  paint: TImagePaint,
+  paint: TImagePaint | TVideoPaint,
   paintIndex: number,
   targetPercent: number,
 ): void => {

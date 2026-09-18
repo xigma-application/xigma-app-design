@@ -34,6 +34,12 @@ describe('getFillRowHexDisplayValue', () => {
     );
   });
 
+  it('should return the translated video label for a video paint', () => {
+    expect(getFillRowHexDisplayValue({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'video' }, t)).toBe(
+      'design.rightPanel.panelProperties.common.fillSection.videoLabel',
+    );
+  });
+
   it('should return the translated gradient type label for a gradient paint', () => {
     expect(
       getFillRowHexDisplayValue(

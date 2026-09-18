@@ -49,6 +49,14 @@ export const PaintTypeRow: FC<TPaintTypeRowProps> = ({ activeTab, onSelectTab })
           onClick={(): void => onSelectTab(ColorPickerTab.image)}
         />
       </Tooltip>
+      <Tooltip content={t('colorPicker.paintType.video')}>
+        <UITools.ButtonIcon
+          active={activeTab === ColorPickerTab.video}
+          ariaLabel={t('colorPicker.paintType.video')}
+          name="Video"
+          onClick={(): void => onSelectTab(ColorPickerTab.video)}
+        />
+      </Tooltip>
     </div>
   );
 };

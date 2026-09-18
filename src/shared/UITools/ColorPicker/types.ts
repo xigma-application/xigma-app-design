@@ -9,6 +9,7 @@ import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/typ
 import { TImageAdjustments } from 'types/design/paint/types';
 import { TImageFillMode, TImagePanelChange } from './Body/ImagePanel/types';
 import { TInitialPattern, TPatternPanelChange } from './Body/PatternPanel/types';
+import { TVideoPanelChange } from './Body/VideoPanel/types';
 
 export type TColorPickerValue = { alpha: number; hex: string };
 
@@ -33,6 +34,7 @@ export type TColorPickerProps = {
   initialImageUrl?: string;
   initialOpen?: boolean;
   initialPattern?: TInitialPattern;
+  initialVideoUrl?: string;
   isPointerOverGradientHandle?: TFunc<[], boolean>;
   moveable?: boolean;
   onChange: TFunc<[TColorPickerValue]>;
@@ -49,6 +51,12 @@ export type TColorPickerProps = {
   onImageUrlChange?: TFunc<[string | null]>;
   onOpenChange?: TFunc<[boolean]>;
   onPatternChange?: TFunc<[TPatternPanelChange]>;
+  onVideoChange?: TFunc<[TVideoPanelChange]>;
+  onVideoRotate?: TFunc;
+  onVideoScaleModeChange?: TFunc<[TImageFillMode]>;
+  onVideoTabActiveChange?: TFunc<[boolean]>;
+  onVideoTileScaleChange?: TFunc<[number]>;
+  onVideoUrlChange?: TFunc<[string | null]>;
   paintTypeRow?: boolean;
   patternSourceNodeId?: string | null;
   presets?: TColorPickerValue[];
@@ -60,4 +68,5 @@ export type TColorPickerProps = {
   triggerAriaLabel?: string;
   triggerClassName?: string;
   value: TColorPickerValue;
+  videoTileScale?: number;
 };

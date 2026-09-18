@@ -1,5 +1,5 @@
 // types
-import { TGradientPaint, TImagePaint, TPatternPaint, TSolidPaint } from 'types/design/paint/types';
+import { TGradientPaint, TImagePaint, TPatternPaint, TSolidPaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { drawVectorFillPaints } from '../drawVectorFillPaints';
@@ -186,6 +186,61 @@ describe('drawVectorFillPaints', () => {
     );
 
     // result
+    expect(drawVectorFillMock).not.toHaveBeenCalled();
+    expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a video layer through the image program too, forwarding its ref (an extracted still frame, not the raw video file) the same way an image paint does', () => {
+    // mock
+    const video: TVideoPaint = { opacity: 100, ref: 'blob:frame-1', rotation: 0, scaleMode: 'fill', type: 'video' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [video],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+    );
+
+    // result — no adjustments param exists on TVideoPaint, so it's forwarded as undefined
+    expect(drawVectorImageFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      'blob:frame-1',
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      0,
+      'fill',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });

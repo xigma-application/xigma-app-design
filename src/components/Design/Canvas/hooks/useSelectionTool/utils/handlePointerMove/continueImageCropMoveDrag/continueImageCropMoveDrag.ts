@@ -35,7 +35,7 @@ export const continueImageCropMoveDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const viewport = selectViewport(state);
         const point = screenToWorld(getPointerPosition(canvas, event), viewport);
         const rawDelta = { x: point.x - startPoint.x, y: point.y - startPoint.y };

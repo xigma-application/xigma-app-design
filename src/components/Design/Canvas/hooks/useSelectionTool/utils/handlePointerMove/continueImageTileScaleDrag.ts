@@ -33,7 +33,7 @@ export const continueImageTileScaleDrag = (
     if (isAppearanceNode(node) && startDistance > 0) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const currentDistance = Math.hypot(point.x - anchor.x, point.y - anchor.y);
         const scale = clamp(startScale * (currentDistance / startDistance), IMAGE_FILL_MIN_TILE_SCALE, IMAGE_FILL_MAX_TILE_SCALE);

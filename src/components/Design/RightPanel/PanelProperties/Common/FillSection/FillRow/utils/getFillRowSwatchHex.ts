@@ -5,6 +5,7 @@ export const getFillRowSwatchHex = (paint: TPaint): string => {
   switch (paint.type) {
     case 'pattern':
     case 'image':
+    case 'video':
       return '#ffffff';
     case 'solid':
       return paint.color;

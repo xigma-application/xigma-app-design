@@ -32,6 +32,12 @@ describe('getFillRowInitialActiveTab', () => {
     );
   });
 
+  it('should return the video tab for a video paint', () => {
+    expect(getFillRowInitialActiveTab({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'video' })).toBe(
+      ColorPickerTab.video,
+    );
+  });
+
   it('should return the gradient tab for a gradient paint', () => {
     expect(
       getFillRowInitialActiveTab({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' }),

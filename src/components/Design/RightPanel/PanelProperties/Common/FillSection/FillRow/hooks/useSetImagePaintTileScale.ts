@@ -3,7 +3,7 @@ import { TPaint } from 'types/design/paint/types';
 
 export const useSetImagePaintTileScale = (paint: TPaint, onChange: TFunc<[TPaint]>): TFunc<[number]> => {
   return (scale): void => {
-    if (paint.type === 'image') {
+    if (paint.type === 'image' || paint.type === 'video') {
       onChange({ ...paint, scale });
     }
   };

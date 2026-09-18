@@ -34,7 +34,7 @@ export const continueImageCropResizeDrag = (
     if (isAppearanceNode(node)) {
       const paint = node.fills[paintIndex];
 
-      if (paint?.type === 'image') {
+      if (paint?.type === 'image' || paint?.type === 'video') {
         const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
         const singleRotatableOrigin = origin.rotation !== 0 ? { ...origin, flip: null } : null;
         const queryPoint = getResizeQueryPoint(rawPoint, origin, singleRotatableOrigin);

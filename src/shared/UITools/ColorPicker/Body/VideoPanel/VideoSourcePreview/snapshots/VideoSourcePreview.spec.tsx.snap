@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VideoSourcePreview snapshots > should render VideoSourcePreview 1`] = `
+<DocumentFragment>
+  <div
+    class="_VideoSourcePreview_a906d1"
+  >
+    <input
+      accept="video/*"
+      hidden=""
+      type="file"
+    />
+    <button
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--primary_b88d2e _Button--small_b88d2e"
+      type="button"
+    >
+      Upload from computer
+    </button>
+  </div>
+</DocumentFragment>
+`;

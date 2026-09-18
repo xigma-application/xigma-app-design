@@ -36,4 +36,8 @@ describe('getInitialImageFillModeFromPaint', () => {
       'fill',
     );
   });
+
+  it('should return fill for a fill-scaled video paint without a stored crop', () => {
+    expect(getInitialImageFillModeFromPaint({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'video' })).toBe('fill');
+  });
 });

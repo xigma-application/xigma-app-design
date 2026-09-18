@@ -25,7 +25,7 @@ const drawImageEditorTileOutline = (
   if (isAppearanceNode(node)) {
     const paint = node.fills[imageEditor.paintIndex];
 
-    if (paint?.type === 'image') {
+    if (paint?.type === 'image' || paint?.type === 'video') {
       const tileRect = getImageTileRect(node, paint);
 
       if (tileRect) {

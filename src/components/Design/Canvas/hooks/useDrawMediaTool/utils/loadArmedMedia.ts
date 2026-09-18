@@ -1,11 +1,7 @@
 // utils
-import { extractVideoFrame } from './extractVideoFrame';
+import { extractVideoFrame, TExtractedVideoFrame } from 'utils/canvas/extractVideoFrame';
 
-export type TArmedMedia = {
-  naturalHeight: number;
-  naturalWidth: number;
-  src: string;
-};
+export type TArmedMedia = TExtractedVideoFrame;
 
 const loadArmedImage = (file: File, onLoad: (armed: TArmedMedia) => void): void => {
   const src = URL.createObjectURL(file);

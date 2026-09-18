@@ -8,6 +8,8 @@ export const getFillRowInitialActiveTab = (paint: TPaint): ColorPickerTab | unde
       return ColorPickerTab.pattern;
     case 'image':
       return ColorPickerTab.image;
+    case 'video':
+      return ColorPickerTab.video;
     case 'solid':
       return undefined;
     default:

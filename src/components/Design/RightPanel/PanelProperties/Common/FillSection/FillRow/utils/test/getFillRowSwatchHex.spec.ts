@@ -27,6 +27,10 @@ describe('getFillRowSwatchHex', () => {
     expect(getFillRowSwatchHex({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'image' })).toBe('#ffffff');
   });
 
+  it('should return white for a video paint', () => {
+    expect(getFillRowSwatchHex({ opacity: 100, ref: 'asset-1', rotation: 0, scaleMode: 'fill', type: 'video' })).toBe('#ffffff');
+  });
+
   it('should return the first stop color for a gradient paint', () => {
     expect(
       getFillRowSwatchHex({

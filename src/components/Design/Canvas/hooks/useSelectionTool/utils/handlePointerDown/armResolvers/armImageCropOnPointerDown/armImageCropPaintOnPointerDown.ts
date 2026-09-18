@@ -6,7 +6,7 @@ import { TImageEditorState } from 'store/design/types';
 // types
 import { TAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TImagePaint } from 'types/design/paint/types';
+import { TImagePaint, TVideoPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
@@ -28,7 +28,7 @@ export const armImageCropPaintOnPointerDown = (
   viewport: TViewport,
   imageEditor: TImageEditorState,
   node: TAppearanceNode,
-  paint: TImagePaint,
+  paint: TImagePaint | TVideoPaint,
 ): true | undefined => {
   const crop = getImageCropRect(node, paint);
   const selectedTarget = imageEditor.selectedTarget ?? 'frame';
