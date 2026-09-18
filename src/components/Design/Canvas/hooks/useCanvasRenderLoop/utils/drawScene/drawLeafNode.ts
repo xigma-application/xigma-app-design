@@ -6,7 +6,7 @@ import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { drawBoxLeafNode } from './drawBoxLeafNode';
+import { drawBoxLeafNode } from './drawBoxLeafNode/drawBoxLeafNode';
 import { drawEllipseLeafNode } from './drawEllipseLeafNode/drawEllipseLeafNode';
 import { drawLineLeafNode } from './drawLineLeafNode';
 import { drawMediaLeafNode } from './drawMediaLeafNode';

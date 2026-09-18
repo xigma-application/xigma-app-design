@@ -82,14 +82,15 @@ describe('StrokeSection', () => {
 
     // result
     expect(readNode(id).strokes).toHaveLength(1);
-    expect(readNode(id).strokes?.[0].type).toBe('solid');
+    expect(readNode(id).strokes?.[0]).toMatchObject({ color: '#000000', type: 'solid' });
     expect(readNode(id).strokeWidth).toBe(1);
+    expect(readNode(id).strokeAlign).toBe('inside');
     expect(readNode(id).fills).toHaveLength(1);
   });
 
   it('should keep an existing stroke width when adding another stroke', () => {
     // before
-    const id = addRectangle({ strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], strokeWidth: 4 });
+    const id = addRectangle({ strokeWidth: 4, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] });
     renderStrokeSection();
 
     // action

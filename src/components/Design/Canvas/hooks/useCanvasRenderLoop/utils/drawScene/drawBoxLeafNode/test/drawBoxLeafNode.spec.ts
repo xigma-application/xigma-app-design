@@ -1,16 +1,17 @@
 // types
 import { BlendMode, NodeType, StrokeAlign } from 'types/design/enums';
-import { TDrawSceneContext } from '../types';
+import { TDrawSceneContext } from '../../types';
 import { TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawBoxLeafNode } from '../drawBoxLeafNode';
 
 const drawRectMock = vi.fn();
 const drawThickOutlineMock = vi.fn();
 const drawVectorFillGroupMock = vi.fn();
 const getBoxFillPolygonMock = vi.fn();
+const getBoxStrokePolygonsMock = vi.fn();
 const resolvePatternSourceTileMock = vi.fn();
 const resolveFrozenPatternSourceTileMock = vi.fn();
 
@@ -18,14 +19,15 @@ vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]
 vi.mock('utils/canvas/drawThickOutline/drawThickOutline', () => ({
   drawThickOutline: (...args: unknown[]): void => drawThickOutlineMock(...args),
 }));
-vi.mock('../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorFillGroup', () => ({
+vi.mock('../../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorFillGroup', () => ({
   drawVectorFillGroup: (...args: unknown[]): void => drawVectorFillGroupMock(...args),
 }));
-vi.mock('../getBoxFillPolygon', () => ({ getBoxFillPolygon: (...args: unknown[]): unknown => getBoxFillPolygonMock(...args) }));
-vi.mock('../resolvePatternSourceTile', () => ({
+vi.mock('../../getBoxStrokePolygons', () => ({ getBoxStrokePolygons: (...args: unknown[]): unknown => getBoxStrokePolygonsMock(...args) }));
+vi.mock('../../getBoxFillPolygon', () => ({ getBoxFillPolygon: (...args: unknown[]): unknown => getBoxFillPolygonMock(...args) }));
+vi.mock('../../resolvePatternSourceTile', () => ({
   resolvePatternSourceTile: (...args: unknown[]): unknown => resolvePatternSourceTileMock(...args),
 }));
-vi.mock('../resolveFrozenPatternSourceTile', () => ({
+vi.mock('../../resolveFrozenPatternSourceTile', () => ({
   resolveFrozenPatternSourceTile: (...args: unknown[]): unknown => resolveFrozenPatternSourceTileMock(...args),
 }));
 
@@ -75,6 +77,7 @@ describe('drawBoxLeafNode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getBoxFillPolygonMock.mockReturnValue([{ x: 0, y: 0 }]);
+    getBoxStrokePolygonsMock.mockReturnValue([[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]]);
     resolvePatternSourceTileMock.mockReturnValue(null);
     resolveFrozenPatternSourceTileMock.mockReturnValue(null);
   });
@@ -386,5 +389,44 @@ describe('drawBoxLeafNode', () => {
 
     // result
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the stroke paints as a ring (outer and inner polygon) through the shared vector fill group, after the fills', () => {
+    // mock
+    const node = rect({ strokeAlign: StrokeAlign.inside, strokeWidth: 2, strokes: [{ color: '#f00', opacity: 100, type: 'solid' }] });
+
+    // action
+    drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
+
+    // result
+    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, 2, StrokeAlign.inside);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorFillGroupMock).toHaveBeenLastCalledWith(
+      context,
+      null,
+      null,
+      [[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]],
+      [{ color: '#f00', opacity: 100, type: 'solid' }],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
+  });
+
+  it('should not draw stroke paints when there are none or the stroke width is missing', () => {
+    // action
+    drawBoxLeafNode(context, rect({ strokeWidth: 2, strokes: [] }), 1, nodesById, pathOutlineStyles, refs, editingPathId);
+    drawBoxLeafNode(
+      context,
+      rect({ strokes: [{ color: '#f00', opacity: 100, type: 'solid' }] }),
+      1,
+      nodesById,
+      pathOutlineStyles,
+      refs,
+      editingPathId,
+    );
+
+    // result — only the two fills were drawn
+    expect(getBoxStrokePolygonsMock).not.toHaveBeenCalled();
+    expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
   });
 });

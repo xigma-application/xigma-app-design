@@ -4073,7 +4073,7 @@ test.describe('Design panels — Fill section', () => {
     const cropToolbar = page.locator('[class*="ImageCropToolbar_"]').first();
 
     // action — click Cancel instead of Confirm
-    await cropToolbar.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await cropToolbar.getByRole('button', { exact: true, name: 'Cancel' }).click();
 
     // result — crop mode is exited, and the node is back to exactly how it looked before Crop was
     // ever clicked, not just before the last change
@@ -5806,7 +5806,7 @@ test.describe('Design panels — Fill section', () => {
     await expect(cropToolbar).toBeVisible();
     await expect(cropToolbar.getByRole('slider')).toBeVisible();
     await expect(cropToolbar.getByRole('button', { name: 'Fit' })).toBeVisible();
-    await expect(cropToolbar.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible();
+    await expect(cropToolbar.getByRole('button', { exact: true, name: 'Cancel' })).toBeVisible();
     await expect(cropToolbar.getByRole('button', { name: 'Confirm' })).toBeVisible();
   });
 
@@ -6216,5 +6216,39 @@ test.describe('Design panels — Fill section', () => {
 
     expect(recolored.strokes![0].color).toBe('#ff0000');
     expect(recolored.fills).toEqual(fillsBefore);
+  });
+
+  test('a stroke paint is drawn on the canvas as an inside ring: its color at the edge, the fill untouched inside', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-stroke-render');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // seed a plain white fill and a thick red inside stroke so the pixels are unambiguous
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
+            strokeAlign: 'inside',
+            strokeWidth: 12,
+            strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+          },
+          id: nodeId,
+        }),
+      );
+    }, id);
+
+    // result — inside the ring's band (left edge), the stroke color; well inside, the fill; just outside, not the stroke
+    await expect.poll(() => readPixelColor(page, 705, 280)).toEqual([255, 0, 0]);
+    expect(await readPixelColor(page, 780, 280)).toEqual([255, 255, 255]);
+    expect(await readPixelColor(page, 695, 280)).not.toEqual([255, 0, 0]);
   });
 });

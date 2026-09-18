@@ -1410,12 +1410,12 @@ ikona" (wrap it so it's pushed to the right, with room for another icon to land 
   'shared/UITools/Popover/Popover'`, not `import { Popover } from 'shared'`) — `BlendModeMenu.tsx`
   now does the same: `import { PopoverCompound } from 'shared/UITools/Popover/Popover'`.
 
-### Stroke section (paints only, no canvas stroke yet)
+### Stroke section (paints, default 1px inside stroke drawn on the canvas)
 
 `Common/StrokeSection` is `<FillSection property="strokes" />`: the whole Fill machinery is parameterized by
 `TPaintProperty = 'fills' | 'strokes'` (`types/design/paint/types.ts`). `Frame`/`Rectangle` nodes carry an
-optional `strokes: TPaint[]` next to `fills` (plus the older `strokeWidth`, set to **1** when the first stroke is
-added — `commitFills`). Helpers `getNodePaints(node, property)` / `getPaintsChange(property, paints)` in
+optional `strokes: TPaint[]` next to `fills` (plus the older `strokeWidth` / `strokeAlign`, defaulted to **1** and **inside** when the first stroke is
+added — `commitFills`; `StrokeAlign` also has `center` / `outside`). Helpers `getNodePaints(node, property)` / `getPaintsChange(property, paints)` in
 `utils/design/paint/`. Rows are the same `FillRow` (all tabs, blend mode, contrast, reorder/hide/remove) with
 stroke translations (`getPaintTranslationNamespace`), and **no image editor / crop toolbar** (`editorNodeId` is
 `undefined` for strokes, so `useSyncImageEditor`, resume-focus and scale-mode editor hooks never target them; the
@@ -1423,7 +1423,12 @@ picker's Crop option is still listed but inert). Canvas-side, `gradientEditor` a
 an optional `property`: the gradient handle drawing/hit-testing (`getGradient*AtPoint`, `drawGradientHandleLayer`,
 `armGradient*OnPointerDown`) read `getNodePaints(node, gradientEditor.property)` and the `continueGradient*Drag`
 handlers write through `getPaintsChange(selectGradientEditor(state)?.property, …)`, so handles work for stroke
-gradients although the stroke itself isn't drawn yet (no Weight/Position UI or rendering). Contrast background
+gradients. There is no Weight/Position UI yet, but the stroke IS drawn: `drawBoxLeafNode/` (split into
+`drawBoxLeafNodeFill`, `drawBoxLeafNodeStroke` (legacy solid `strokeColor`), `drawBoxLeafNodeStrokePaints`,
+`drawBoxPaints`, `resolvePatternPaintTile`) paints `strokes` through the same `drawVectorFillGroup` as the fills,
+but over a ring — `getBoxStrokePolygons` returns [outer, inner] outlines (world-unit width via
+`getStrokeAlignInset`, rounded corners offset, collapsing inner when thicker than the node) and the stencil's
+even-odd rule fills only the band; paints map to the node's own bounds like fills. Contrast background
 is unchanged: it always reads the **fills** of the ancestors (never their strokes), ending at the page
 background, since the canvas has no border. e2e #516 in `fill-section.spec.ts`.
 

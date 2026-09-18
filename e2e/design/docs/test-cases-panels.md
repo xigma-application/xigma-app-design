@@ -273,6 +273,7 @@ directly on the canvas (not just via the docked panel's own `GradientBar`).
 | 514 | An empty Fill section is muted with its styles icon hidden until hovered, and returns to normal once it has fills                                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 515 | The right panel scrolls its properties with the custom scroll thumb only once they overflow the panel height (header stays fixed)                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 | 516 | The Stroke section adds a solid stroke paint with a default 1px width next to the fills, and its picker recolors only the strokes                                                 |  ✅  |                  ✅ `fill-section.spec.ts`                   |
+| 517 | A stroke paint is drawn on the canvas as an inside ring: its color in the edge band, the fill untouched inside, nothing just outside                                              |  ✅  |                  ✅ `fill-section.spec.ts`                   |
 
 #393-#409 are all real, reported regressions. #410-#420 are new feature coverage (radial and angular
 gradient on-canvas editing), not bug fixes, but every one of #412-#415 was raised by the user as
