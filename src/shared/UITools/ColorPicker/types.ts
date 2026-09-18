@@ -6,6 +6,7 @@ import { TPopoverProps } from 'shared/UITools/Popover/Popover';
 // types
 import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from './enums';
+import { TContrastUnsupportedReason } from './Body/SolidPanel/ContrastChecker/types';
 import { TGradientPanelChange, TInitialGradient } from './Body/GradientPanel/types';
 import { TImageAdjustments } from 'types/design/paint/types';
 import { TImageFillMode, TImagePanelChange } from './Body/ImagePanel/types';
@@ -27,6 +28,7 @@ export type TColorPickerProps = {
   blendMode?: BlendMode;
   className?: string;
   contrastBackgroundColor?: string;
+  contrastUnsupportedReason?: TContrastUnsupportedReason;
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
   imageAdjustments?: TImageAdjustments;

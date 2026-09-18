@@ -1,0 +1,67 @@
+.ContrastValuesButton {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-medium);
+  color: var(--color-neutral-1);
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  padding: 4px 8px;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+  }
+
+  &--open,
+  &--open:hover {
+    background-color: var(--color-bg-selected);
+    color: var(--color-icon-selected);
+  }
+
+  &__swatch {
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 14px;
+    width: 14px;
+
+    :global([data-svg-property='fill-background']) {
+      fill: var(--contrast-background);
+    }
+
+    :global([data-svg-property='fill-foreground']) {
+      fill: var(--contrast-foreground);
+    }
+  }
+
+  &__popover {
+    border-radius: 13px;
+  }
+
+  &__values {
+    align-items: center;
+    color: var(--color-neutral-1);
+    column-gap: 16px;
+    font-size: 11px;
+    padding: 8px 12px;
+    padding-left: 16px;
+    row-gap: 12px;
+    width: 180px;
+  }
+
+  &__value {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  &__label {
+    color: var(--color-neutral-2);
+  }
+
+  &__color-group {
+    align-items: center;
+    display: flex;
+  }
+}

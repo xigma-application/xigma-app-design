@@ -11,8 +11,10 @@ const renderContrastChecker = (overrides: Partial<TContrastCheckerProps> = {}): 
   render(
     <TooltipProvider>
       <ContrastChecker
+        backgroundColor="#535353"
         canShowAAA={false}
         category={ContrastCategory.auto}
+        foregroundColor="#f2adad"
         level={ContrastLevel.aa}
         onAutoCorrect={vi.fn()}
         onSetCategory={vi.fn()}
@@ -90,5 +92,19 @@ describe('ContrastChecker', () => {
     // result
     expect(screen.getByText('Graphics')).toBeInTheDocument();
     expect(screen.getByText('AAA')).toBeInTheDocument();
+  });
+
+  it('should mark the settings button selected while its menu is open', () => {
+    // before
+    renderContrastChecker();
+    const button = screen.getByLabelText('Contrast checker settings');
+
+    expect(button.className).not.toContain('ButtonIcon--selected');
+
+    // action
+    fireEvent.click(button);
+
+    // result
+    expect(button.className).toContain('ButtonIcon--selected');
   });
 });

@@ -3,10 +3,34 @@ import { act, renderHook } from '@testing-library/react';
 // hooks
 import { useContrastChecker } from '../useContrastChecker';
 
+// others
+import { contrastCheckerStateCache } from '../../utils/contrastCheckerStateCache';
+import { DEFAULT_CONTRAST_CHECKER_STATE } from '../../constants';
+
 // types
 import { ContrastCategory, ContrastLevel } from '../../enums';
 
 describe('useContrastChecker', () => {
+  beforeEach(() => {
+    contrastCheckerStateCache.current = DEFAULT_CONTRAST_CHECKER_STATE;
+  });
+
+  it('should restore the active state, category and level after the hook is unmounted and mounted again', () => {
+    // before
+    const first = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn()));
+
+    act(() => first.result.current.onToggleActive());
+    act(() => first.result.current.onSetCategory(ContrastCategory.normalText));
+    first.unmount();
+
+    // action
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn()));
+
+    // result
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.category).toBe(ContrastCategory.normalText);
+  });
+
   it('should default to inactive, Auto category, and AA level', () => {
     // before
     const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn()));
@@ -119,5 +143,24 @@ describe('useContrastChecker', () => {
 
     // result
     expect(onCorrect).not.toHaveBeenCalled();
+  });
+
+  it('should expose the unsupported reason and report no ratio or boundaries while unsupported', () => {
+    // before
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn(), 'foreground'));
+
+    // result
+    expect(result.current.unsupportedReason).toBe('foreground');
+    expect(result.current.ratio).toBeNull();
+    expect(result.current.boundaries).toEqual([]);
+    expect(result.current.passes).toBe(false);
+  });
+
+  it('should have no unsupported reason by default', () => {
+    // before
+    const { result } = renderHook(() => useContrastChecker({ h: 0, s: 0, v: 0 }, '#ffffff', vi.fn()));
+
+    // result
+    expect(result.current.unsupportedReason).toBeNull();
   });
 });

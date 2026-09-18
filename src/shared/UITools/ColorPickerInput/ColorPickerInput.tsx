@@ -23,6 +23,7 @@ import styles from './color-picker-input.module.scss';
 import { BlendMode } from 'types/design/enums';
 import { ColorPickerTab } from '../ColorPicker/enums';
 import { TColorPickerProps, TColorPickerValue, TGradientPanelState } from '../ColorPicker/types';
+import { TContrastUnsupportedReason } from '../ColorPicker/Body/SolidPanel/ContrastChecker/types';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TGradientPanelChange, TInitialGradient } from '../ColorPicker/Body/GradientPanel/types';
 import { TImageAdjustments } from 'types/design/paint/types';
@@ -36,6 +37,7 @@ export type TColorPickerInputProps = {
   blendMode?: BlendMode;
   className?: string;
   contrastBackgroundColor?: string;
+  contrastUnsupportedReason?: TContrastUnsupportedReason;
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
@@ -91,6 +93,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   blendMode,
   className = '',
   contrastBackgroundColor,
+  contrastUnsupportedReason,
   e2eValue = '',
   hex,
   hexDisplayValue,
@@ -170,6 +173,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 align={align}
                 blendMode={blendMode}
                 contrastBackgroundColor={contrastBackgroundColor}
+                contrastUnsupportedReason={contrastUnsupportedReason}
                 imageAdjustments={imageAdjustments}
                 imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}

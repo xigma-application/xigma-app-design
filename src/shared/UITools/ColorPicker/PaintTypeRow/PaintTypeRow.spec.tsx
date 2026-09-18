@@ -271,7 +271,7 @@ describe('PaintTypeRow behaviors', () => {
     renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, vi.fn(), vi.fn(), true);
 
     // result
-    expect(screen.getByLabelText('Check color contrast').className).toContain('ButtonIcon--active');
+    expect(screen.getByLabelText('Check color contrast').className).toContain('ButtonIcon--selected');
   });
 
   it('should call onToggleContrastChecker when the contrast checker button is clicked', () => {

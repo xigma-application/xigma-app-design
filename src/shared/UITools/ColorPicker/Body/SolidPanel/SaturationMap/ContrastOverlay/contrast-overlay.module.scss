@@ -6,10 +6,10 @@
   position: absolute;
 
   &__dots {
-    background-image: radial-gradient(circle, var(--color-on-blue-1) 1px, transparent 1.5px);
-    background-size: 8px 8px;
-    inset: 0;
-    opacity: 0.45;
+    background-image: radial-gradient(circle, var(--color-on-blue-1) 0.5px, transparent 0.8px);
+    background-size: 6px 6px;
+    inset: 2px;
+    opacity: 0.5;
     position: absolute;
   }
 
@@ -22,6 +22,8 @@
 
   &__curve {
     stroke: var(--color-on-blue-1);
-    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1px;
   }
 }

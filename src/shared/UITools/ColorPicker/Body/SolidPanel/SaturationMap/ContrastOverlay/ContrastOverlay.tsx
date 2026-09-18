@@ -13,6 +13,12 @@ export type TContrastOverlayProps = { boundaries: TContrastBoundary[] };
 
 const toSvgPoints = (points: TContrastCurvePoint[]): string => points.map(({ s, v }) => `${s},${100 - v}`).join(' ');
 
+const getVisibleCurve = (points: TContrastCurvePoint[]): TContrastCurvePoint[] => {
+  const firstClamped = points.findIndex((point) => point.v >= 100);
+
+  return firstClamped === -1 ? points : points.slice(0, firstClamped + 1);
+};
+
 const toClipPathPoints = (points: TContrastCurvePoint[]): string => points.map(({ s, v }) => `${s}% ${100 - v}%`).join(', ');
 
 export const ContrastOverlay: FC<TContrastOverlayProps> = ({ boundaries }) => {
@@ -27,7 +33,7 @@ export const ContrastOverlay: FC<TContrastOverlayProps> = ({ boundaries }) => {
             className={styles.ContrastOverlay__curve}
             fill="none"
             key={boundary.passSide}
-            points={toSvgPoints(boundary.points)}
+            points={toSvgPoints(getVisibleCurve(boundary.points))}
             vectorEffect="non-scaling-stroke"
           />
         ))}

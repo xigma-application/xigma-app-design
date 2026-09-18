@@ -4,10 +4,13 @@ import { useTranslation } from 'react-i18next';
 // components
 import ContrastBadge from './ContrastBadge/ContrastBadge';
 import ContrastSettingsMenu from './ContrastSettingsMenu/ContrastSettingsMenu';
+import ContrastValuesButton from './ContrastValuesButton/ContrastValuesButton';
 import { UITools } from 'shared';
 
+// hooks
+import { useContrastSettingsMenu } from './hooks/useContrastSettingsMenu';
+
 // others
-import contrastSwatchIconUrl from 'assets/icons/contrast.svg';
 import { translationNameSpace } from './constants';
 
 // styles
@@ -17,8 +20,10 @@ import styles from './contrast-checker.module.scss';
 import { ContrastCategory, ContrastLevel } from './enums';
 
 export type TContrastCheckerProps = {
+  backgroundColor: string | null;
   canShowAAA: boolean;
   category: ContrastCategory;
+  foregroundColor: string;
   level: ContrastLevel;
   onAutoCorrect: TFunc;
   onSetCategory: TFunc<[ContrastCategory]>;
@@ -28,8 +33,10 @@ export type TContrastCheckerProps = {
 };
 
 export const ContrastChecker: FC<TContrastCheckerProps> = ({
+  backgroundColor,
   canShowAAA,
   category,
+  foregroundColor,
   level,
   onAutoCorrect,
   onSetCategory,
@@ -38,42 +45,45 @@ export const ContrastChecker: FC<TContrastCheckerProps> = ({
   ratio,
 }) => {
   const { t } = useTranslation();
+  const { onOpenChange, open } = useContrastSettingsMenu();
 
   return (
     <div className={styles.ContrastChecker}>
-      <img alt="" className={styles.ContrastChecker__swatch} src={contrastSwatchIconUrl} />
-      <button
-        aria-label={t(`${translationNameSpace}.autoCorrectAriaLabel`)}
-        className={styles.ContrastChecker__ratio}
-        disabled={ratio === null || passes}
-        onClick={onAutoCorrect}
-        type="button"
-      >
-        {ratio !== null
-          ? t(`${translationNameSpace}.ratioLabel`, { ratio: ratio.toFixed(2) })
-          : t(`${translationNameSpace}.noBackgroundLabel`)}
-      </button>
-      {ratio !== null && <ContrastBadge label={t(`${translationNameSpace}.level.${level}`)} passes={passes} />}
-      <UITools.Popover
-        align="end"
-        asChild
-        trigger={
-          <UITools.ButtonIcon
-            ariaLabel={t(`${translationNameSpace}.settingsAriaLabel`)}
-            className={styles.ContrastChecker__settingsTrigger}
-            name="Settings"
-            size={16}
+      {ratio !== null && backgroundColor ? (
+        <ContrastValuesButton backgroundColor={backgroundColor} foregroundColor={foregroundColor} ratio={ratio} />
+      ) : (
+        <span className={styles.ContrastChecker__empty}>{t(`${translationNameSpace}.noBackgroundLabel`)}</span>
+      )}
+      <div className={styles.ContrastChecker__actions}>
+        {ratio !== null && (
+          <button
+            aria-label={t(`${translationNameSpace}.autoCorrectAriaLabel`)}
+            className={styles.ContrastChecker__badge}
+            disabled={passes}
+            onClick={onAutoCorrect}
+            type="button"
+          >
+            <ContrastBadge label={t(`${translationNameSpace}.level.${level}`)} passes={passes} />
+          </button>
+        )}
+        <UITools.Popover
+          align="end"
+          asChild
+          onOpenChange={onOpenChange}
+          open={open}
+          trigger={
+            <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.settingsAriaLabel`)} name="Properties" selected={open} size={24} />
+          }
+        >
+          <ContrastSettingsMenu
+            canShowAAA={canShowAAA}
+            category={category}
+            level={level}
+            onSelectCategory={onSetCategory}
+            onSelectLevel={onSetLevel}
           />
-        }
-      >
-        <ContrastSettingsMenu
-          canShowAAA={canShowAAA}
-          category={category}
-          level={level}
-          onSelectCategory={onSetCategory}
-          onSelectLevel={onSetLevel}
-        />
-      </UITools.Popover>
+        </UITools.Popover>
+      </div>
     </div>
   );
 };

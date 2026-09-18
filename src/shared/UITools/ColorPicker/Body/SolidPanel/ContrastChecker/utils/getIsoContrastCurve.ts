@@ -4,7 +4,8 @@ import { findVForLuminance } from './findVForLuminance';
 // types
 import { TContrastCurvePoint } from '../types';
 
-const SAMPLE_COUNT = 41;
+const SAMPLE_COUNT = 101;
+const MAX_V = 100;
 
 export const getIsoContrastCurve = (hue: number, targetLuminance: number): TContrastCurvePoint[] => {
   const points: TContrastCurvePoint[] = [];
@@ -13,9 +14,7 @@ export const getIsoContrastCurve = (hue: number, targetLuminance: number): TCont
     const saturation = (index / (SAMPLE_COUNT - 1)) * 100;
     const v = findVForLuminance(hue, saturation, targetLuminance);
 
-    if (v !== null) {
-      points.push({ s: saturation, v });
-    }
+    points.push({ s: saturation, v: v ?? MAX_V });
   }
 
   return points;

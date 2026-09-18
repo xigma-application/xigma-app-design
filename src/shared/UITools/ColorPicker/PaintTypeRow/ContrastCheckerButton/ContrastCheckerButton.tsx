@@ -15,7 +15,7 @@ export const ContrastCheckerButton: FC<TContrastCheckerButtonProps> = ({ isActiv
 
   return (
     <Tooltip content={label}>
-      <UITools.ButtonIcon active={isActive} ariaLabel={label} name="Contrast" onClick={onToggle} />
+      <UITools.ButtonIcon ariaLabel={label} name="Contrast" onClick={onToggle} selected={isActive} />
     </Tooltip>
   );
 };

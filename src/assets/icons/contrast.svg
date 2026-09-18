@@ -1,5 +1,5 @@
 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <circle id="background" cx="7" cy="7" r="7" fill="#535353" fill-opacity="1"></circle>
-    <path id="foreground" d="M7 -6.11959e-07C3.13401 -9.49935e-07 6.43956e-07 3.13401 3.0598e-07 7C4.74968e-07 5.067 1.567 3.5 3.5 3.5C5.433 3.5 7 5.067 7 7C7 8.933 8.567 10.5 10.5 10.5C12.433 10.5 14 8.933 14 7C14 3.13401 10.866 -2.73984e-07 7 -6.11959e-07Z" fill="#EAE8E8" fill-opacity="1"></path>
+    <circle data-svg-property="fill-background" id="background" cx="7" cy="7" r="7" fill="#535353" fill-opacity="1"></circle>
+    <path data-svg-property="fill-foreground" id="foreground" d="M7 -6.11959e-07C3.13401 -9.49935e-07 6.43956e-07 3.13401 3.0598e-07 7C4.74968e-07 5.067 1.567 3.5 3.5 3.5C5.433 3.5 7 5.067 7 7C7 8.933 8.567 10.5 10.5 10.5C12.433 10.5 14 8.933 14 7C14 3.13401 10.866 -2.73984e-07 7 -6.11959e-07Z" fill="#c17474" fill-opacity="1"></path>
     <circle id="border" cx="7" cy="7" r="6.5" stroke="black" stroke-opacity="0.15"></circle>
 </svg>

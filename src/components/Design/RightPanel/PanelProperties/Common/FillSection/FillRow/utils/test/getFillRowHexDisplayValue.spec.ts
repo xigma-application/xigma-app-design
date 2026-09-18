@@ -42,10 +42,7 @@ describe('getFillRowHexDisplayValue', () => {
 
   it('should return the translated gradient type label for a gradient paint', () => {
     expect(
-      getFillRowHexDisplayValue(
-        { end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' },
-        t,
-      ),
+      getFillRowHexDisplayValue({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' }, t),
     ).toBe('colorPicker.gradient.type.linear');
   });
 });

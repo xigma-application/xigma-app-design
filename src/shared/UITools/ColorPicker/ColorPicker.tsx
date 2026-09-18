@@ -59,6 +59,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   blendMode = BlendMode.normal,
   className = '',
   contrastBackgroundColor,
+  contrastUnsupportedReason,
   freezePositionOnGrow,
   headerExtra,
   imageAdjustments,
@@ -112,7 +113,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const [isOpen, setIsOpen] = useState(initialOpen);
   const openSessionId = useOpenSessionId(isOpen);
   const colorModel = useColorModel(value, onChange);
-  const contrastChecker = useContrastChecker(colorModel.hsv, contrastBackgroundColor, colorModel.setHsv);
+  const contrastChecker = useContrastChecker(colorModel.hsv, contrastBackgroundColor, colorModel.setHsv, contrastUnsupportedReason);
   const { handleDragEnd, handleDragStart, isDraggingRef } = useTrackIsDragging(onDragStart, onDragEnd);
   const gradientPanel = useGradientPanel(onGradientChange, initialGradient, openSessionId, isDraggingRef);
   const imagePanel = useImagePanel(initialImageUrl, initialFillMode);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 // others
-import { DEFAULT_CONTRAST_CHECKER_STATE } from '../constants';
+import { contrastCheckerStateCache } from '../utils/contrastCheckerStateCache';
 import { getContrastBoundaries } from '../utils/getContrastBoundaries';
 import { getContrastThreshold } from '../utils/getContrastThreshold';
 import { getContrastRatio } from 'utils/color/getContrastRatio';
@@ -13,10 +13,11 @@ import { truncateContrastRatio } from 'utils/color/truncateContrastRatio';
 
 // types
 import { ContrastCategory, ContrastLevel } from '../enums';
-import { TContrastBoundary, TContrastCheckerState } from '../types';
+import { TContrastBoundary, TContrastCheckerState, TContrastUnsupportedReason } from '../types';
 import { THsv } from '../../../../types';
 
 export type TUseContrastCheckerResult = {
+  backgroundColor: string | null;
   boundaries: TContrastBoundary[];
   canShowAAA: boolean;
   category: ContrastCategory;
@@ -28,19 +29,27 @@ export type TUseContrastCheckerResult = {
   onToggleActive: TFunc;
   passes: boolean;
   ratio: number | null;
+  unsupportedReason: TContrastUnsupportedReason | null;
 };
 
 export const useContrastChecker = (
   hsv: THsv,
   backgroundColor: string | null | undefined,
   onCorrect: TFunc<[THsv]>,
+  unsupportedReason: TContrastUnsupportedReason | undefined = undefined,
 ): TUseContrastCheckerResult => {
-  const [state, setState] = useState<TContrastCheckerState>(DEFAULT_CONTRAST_CHECKER_STATE);
-  const backgroundLuminance = backgroundColor ? getRelativeLuminance(hexToRgb(backgroundColor)) : null;
+  const [state, setState] = useState<TContrastCheckerState>(contrastCheckerStateCache.current);
+  const updateState = (patch: Partial<TContrastCheckerState>): void => {
+    contrastCheckerStateCache.current = { ...contrastCheckerStateCache.current, ...patch };
+    setState(contrastCheckerStateCache.current);
+  };
+  const isSupported = unsupportedReason === undefined;
+  const backgroundLuminance = backgroundColor && isSupported ? getRelativeLuminance(hexToRgb(backgroundColor)) : null;
   const threshold = getContrastThreshold(state.category, state.level);
-  const ratio = backgroundColor ? truncateContrastRatio(getContrastRatio(hsvToRgb(hsv), hexToRgb(backgroundColor))) : null;
+  const ratio = backgroundColor && isSupported ? truncateContrastRatio(getContrastRatio(hsvToRgb(hsv), hexToRgb(backgroundColor))) : null;
 
   return {
+    backgroundColor: backgroundColor ?? null,
     boundaries: backgroundLuminance !== null ? getContrastBoundaries(hsv.h, backgroundLuminance, threshold) : [],
     canShowAAA: state.category === ContrastCategory.normalText || state.category === ContrastCategory.largeText,
     category: state.category,
@@ -53,10 +62,11 @@ export const useContrastChecker = (
         onCorrect(corrected);
       }
     },
-    onSetCategory: (category: ContrastCategory): void => setState((previous) => ({ ...previous, category })),
-    onSetLevel: (level: ContrastLevel): void => setState((previous) => ({ ...previous, level })),
-    onToggleActive: (): void => setState((previous) => ({ ...previous, isActive: !previous.isActive })),
+    onSetCategory: (category: ContrastCategory): void => updateState({ category }),
+    onSetLevel: (level: ContrastLevel): void => updateState({ level }),
+    onToggleActive: (): void => updateState({ isActive: !contrastCheckerStateCache.current.isActive }),
     passes: ratio !== null && ratio >= threshold,
     ratio,
+    unsupportedReason: unsupportedReason ?? null,
   };
 };

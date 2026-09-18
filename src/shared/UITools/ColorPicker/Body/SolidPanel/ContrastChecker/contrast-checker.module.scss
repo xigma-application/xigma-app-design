@@ -4,19 +4,16 @@
   gap: 8px;
   padding: 8px 16px 0;
 
-  &__swatch {
-    border-radius: 50%;
-    flex-shrink: 0;
-    height: 14px;
-    width: 14px;
+  &__empty {
+    color: var(--color-neutral-2);
+    font-size: 12px;
   }
 
-  &__ratio {
+  &__badge {
     background: none;
     border: none;
-    color: var(--color-neutral-1);
+    color: inherit;
     cursor: pointer;
-    font-size: 12px;
     padding: 0;
 
     &:disabled {
@@ -24,7 +21,10 @@
     }
   }
 
-  &__settingsTrigger {
+  &__actions {
+    align-items: center;
+    display: flex;
+    gap: 4px;
     margin-left: auto;
   }
 }

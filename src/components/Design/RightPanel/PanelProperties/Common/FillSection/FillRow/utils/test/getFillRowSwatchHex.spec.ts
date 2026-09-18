@@ -44,8 +44,8 @@ describe('getFillRowSwatchHex', () => {
   });
 
   it('should fall back to black when a gradient paint has no stops', () => {
-    expect(
-      getFillRowSwatchHex({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' }),
-    ).toBe('#000000');
+    expect(getFillRowSwatchHex({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' })).toBe(
+      '#000000',
+    );
   });
 });

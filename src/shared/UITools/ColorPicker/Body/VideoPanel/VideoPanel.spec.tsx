@@ -18,10 +18,7 @@ vi.mock('utils/canvas/extractVideoFrame', () => ({
   extractVideoFrame: (...args: unknown[]): unknown => extractVideoFrameMock(...args),
 }));
 
-const VideoPanelWrapper = ({
-  onRotate,
-  onScaleModeChange,
-}: Pick<TVideoPanelProps, 'onRotate' | 'onScaleModeChange'>): ReactNode => {
+const VideoPanelWrapper = ({ onRotate, onScaleModeChange }: Pick<TVideoPanelProps, 'onRotate' | 'onScaleModeChange'>): ReactNode => {
   const videoPanel = useVideoPanel();
 
   return <VideoPanel onRotate={onRotate} onScaleModeChange={onScaleModeChange} videoPanel={videoPanel} />;

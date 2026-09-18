@@ -4,6 +4,7 @@ import { FC } from 'react';
 import AlphaSlider from './AlphaSlider/AlphaSlider';
 import ColorValueInput from './ColorValueInput/ColorValueInput';
 import ContrastChecker from './ContrastChecker/ContrastChecker';
+import ContrastUnsupported from './ContrastChecker/ContrastUnsupported/ContrastUnsupported';
 import HueSlider from './HueSlider/HueSlider';
 import Sampler from '../../Sampler/Sampler';
 import SaturationMap from './SaturationMap/SaturationMap';
@@ -35,10 +36,13 @@ export const SolidPanel: FC<TSolidPanelProps> = ({
   onOpenSampler,
 }) => (
   <div className={styles.SolidPanel}>
-    {contrastChecker?.isActive && (
+    {contrastChecker?.isActive && contrastChecker.unsupportedReason && <ContrastUnsupported reason={contrastChecker.unsupportedReason} />}
+    {contrastChecker?.isActive && !contrastChecker.unsupportedReason && (
       <ContrastChecker
+        backgroundColor={contrastChecker.backgroundColor}
         canShowAAA={contrastChecker.canShowAAA}
         category={contrastChecker.category}
+        foregroundColor={colorModel.hex}
         level={contrastChecker.level}
         onAutoCorrect={contrastChecker.onAutoCorrect}
         onSetCategory={contrastChecker.onSetCategory}
@@ -49,7 +53,7 @@ export const SolidPanel: FC<TSolidPanelProps> = ({
     )}
     <SaturationMap
       color={colorModel.hex}
-      contrastBoundaries={contrastChecker?.isActive ? contrastChecker.boundaries : undefined}
+      contrastBoundaries={contrastChecker?.isActive && !contrastChecker.unsupportedReason ? contrastChecker.boundaries : undefined}
       hsv={colorModel.hsv}
       onChange={colorModel.setHsv}
       onDragEnd={onDragEnd}

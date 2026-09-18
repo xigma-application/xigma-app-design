@@ -17,7 +17,7 @@ describe('ContrastCheckerButton', () => {
     renderContrastCheckerButton(false);
 
     // result
-    expect(screen.getByLabelText('Check color contrast').className).not.toContain('ButtonIcon--active');
+    expect(screen.getByLabelText('Check color contrast').className).not.toContain('ButtonIcon--selected');
   });
 
   it('should render active when isActive is true', () => {
@@ -25,7 +25,7 @@ describe('ContrastCheckerButton', () => {
     renderContrastCheckerButton(true);
 
     // result
-    expect(screen.getByLabelText('Check color contrast').className).toContain('ButtonIcon--active');
+    expect(screen.getByLabelText('Check color contrast').className).toContain('ButtonIcon--selected');
   });
 
   it('should call onToggle when clicked', () => {

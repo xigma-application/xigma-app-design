@@ -6,6 +6,10 @@ import { Provider } from 'react-redux';
 import ColorPicker from './ColorPicker';
 import { TooltipProvider } from 'shared';
 
+// others
+import { contrastCheckerStateCache } from 'shared/UITools/ColorPicker/Body/SolidPanel/ContrastChecker/utils/contrastCheckerStateCache';
+import { DEFAULT_CONTRAST_CHECKER_STATE } from 'shared/UITools/ColorPicker/Body/SolidPanel/ContrastChecker/constants';
+
 // store
 import { store } from 'store';
 
@@ -39,6 +43,10 @@ describe('ColorPicker snapshots', () => {
 });
 
 describe('ColorPicker behaviors', () => {
+  beforeEach(() => {
+    contrastCheckerStateCache.current = DEFAULT_CONTRAST_CHECKER_STATE;
+  });
+
   it('should pass a solid preview to a function trigger by default', () => {
     // mock
     const trigger = vi.fn().mockReturnValue(<button type="button">Open</button>);
@@ -504,6 +512,28 @@ describe('ColorPicker behaviors', () => {
     // result
     expect(onChange).toHaveBeenCalled();
     expect(onChange.mock.calls[0][0].hex).not.toBe('#f0f0f0');
+  });
+
+  it('should show the blend mode message instead of a ratio and overlay when contrast is unsupported', () => {
+    // before
+    renderColorPicker({
+      contrastBackgroundColor: '#ffffff',
+      contrastUnsupportedReason: 'foreground',
+      onChange: vi.fn(),
+      paintTypeRow: true,
+      trigger: <button type="button">Open</button>,
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    fireEvent.click(screen.getByText('Open'));
+
+    // action
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(screen.getByText('Foreground has blend mode')).toBeInTheDocument();
+    expect(screen.queryByText(/: 1/)).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="ContrastOverlay"]')).toBeNull();
   });
 
   it('should hide the contrast toggle again when switching away from the solid tab', () => {

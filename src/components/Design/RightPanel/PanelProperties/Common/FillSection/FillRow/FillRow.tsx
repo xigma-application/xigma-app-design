@@ -28,7 +28,7 @@ import { useSyncImageEditor } from './hooks/useSyncImageEditor/useSyncImageEdito
 import { useSyncPatternSourcePickTarget } from './hooks/useSyncPatternSourcePickTarget';
 
 // store
-import { selectImageFillPickerFocus } from 'store/design/selectors';
+import { selectImageFillPickerFocus, selectNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // others
@@ -44,6 +44,8 @@ import { BlendMode } from 'types/design/enums';
 import { TPaint } from 'types/design/paint/types';
 
 // utils
+import { getContrastUnsupportedReason } from './utils/getContrastUnsupportedReason';
+import { getIsResumingImageFocus } from './utils/getIsResumingImageFocus';
 import { getFillRowHexDisplayValue } from './utils/getFillRowHexDisplayValue';
 import { getFillRowInitialActiveTab } from './utils/getFillRowInitialActiveTab';
 import { getInitialImageEditorModeFromPaint } from './utils/getInitialImageEditorModeFromPaint';
@@ -92,7 +94,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const isImage = paint.type === 'image';
   const isVideo = paint.type === 'video';
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
-  const isResumingImageFocus = (isImage || isVideo) && imageFillPickerFocus?.nodeId === nodeId && imageFillPickerFocus?.paintIndex === paintIndex;
+  const isResumingImageFocus = getIsResumingImageFocus(isImage || isVideo, imageFillPickerFocus, nodeId, paintIndex);
   const isPickerOpen = paintIndex === openPickerIndex;
   const [isImageTabActive, setIsImageTabActive] = useState(isResumingImageFocus && isImage);
   const [isVideoTabActive, setIsVideoTabActive] = useState(isResumingImageFocus && isVideo);
@@ -112,6 +114,7 @@ export const FillRow: FC<TFillRowProps> = ({
   const handlePatternChange = useConvertToPatternPaint(paint, onChange);
   const handleBlendModeChange = useSetFillBlendMode(paint, onChange);
   const contrastBackgroundColor = useContrastBackgroundColor(nodeId);
+  const contrastNode = useAppSelector(selectNodes)[nodeId ?? ''];
   const isPointerOverGradientHandle = useIsPointerOverGradientHandle();
   const isPattern = paint.type === 'pattern';
   const isGradient = paint.type !== 'solid' && paint.type !== 'image' && paint.type !== 'pattern' && paint.type !== 'video';
@@ -120,11 +123,12 @@ export const FillRow: FC<TFillRowProps> = ({
   const mediaTileScale = isImage || isVideo ? (paint.scale ?? IMAGE_FILL_DEFAULT_TILE_SCALE) : IMAGE_FILL_DEFAULT_TILE_SCALE;
   const imageAdjustments = isImage ? getImagePaintAdjustments(paint) : DEFAULT_IMAGE_ADJUSTMENTS;
   const initialMode = getInitialImageEditorModeFromPaint(paint);
+  const isMediaTabActive = isImageTabActive || isVideoTabActive;
 
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsImageTabActive);
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsVideoTabActive);
   useSyncGradientEditor(nodeId, paintIndex, isPickerOpen, gradientPanelState.isGradientTabActive, gradientPanelState.selectedStopIndex);
-  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isImageTabActive || isVideoTabActive, initialMode, skipInitialImageEditorArmRef.current);
+  useSyncImageEditor(nodeId, paintIndex, isPickerOpen, isMediaTabActive, initialMode, skipInitialImageEditorArmRef.current);
   useSyncPatternSourcePickTarget(nodeId, paintIndex, isPickerOpen, isPattern);
 
   return (
@@ -151,6 +155,7 @@ export const FillRow: FC<TFillRowProps> = ({
           blendMode={paint.blendMode ?? BlendMode.normal}
           className={styles.FillRow__color}
           contrastBackgroundColor={contrastBackgroundColor}
+          contrastUnsupportedReason={getContrastUnsupportedReason(paint, contrastNode)}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}

@@ -101,9 +101,7 @@ describe('useSetActiveTab', () => {
     const onChange = vi.fn();
 
     // before
-    const { result } = renderHook(() =>
-      useSetActiveTab(ColorPickerTab.gradient, vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL),
-    );
+    const { result } = renderHook(() => useSetActiveTab(ColorPickerTab.gradient, vi.fn(), onChange, VALUE, GRADIENT_PANEL, PATTERN_PANEL));
 
     // action
     result.current(ColorPickerTab.solid);

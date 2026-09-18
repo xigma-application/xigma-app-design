@@ -12,6 +12,10 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 // hooks
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
+// others
+import { contrastCheckerStateCache } from 'shared/UITools/ColorPicker/Body/SolidPanel/ContrastChecker/utils/contrastCheckerStateCache';
+import { DEFAULT_CONTRAST_CHECKER_STATE } from 'shared/UITools/ColorPicker/Body/SolidPanel/ContrastChecker/constants';
+
 // store
 import { selectImageEditor } from 'store/design/selectors';
 import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
@@ -104,6 +108,7 @@ const renderFillRow = (overrides: Partial<TFillRowProps> = {}): ReturnType<typeo
 
 describe('FillRow behaviors', () => {
   beforeEach(() => {
+    contrastCheckerStateCache.current = DEFAULT_CONTRAST_CHECKER_STATE;
     usePatternThumbnailMock.mockClear();
   });
 
@@ -282,6 +287,18 @@ describe('FillRow behaviors', () => {
 
     // result
     expect(screen.getByText(/^\d+\.\d{2} : 1$/)).toBeInTheDocument();
+  });
+
+  it('should say the foreground has a blend mode, instead of a ratio, when the fill has one', () => {
+    // before
+    renderFillRow({ paint: { ...SOLID_PAINT, blendMode: BlendMode.multiply } });
+
+    // action
+    fireEvent.click(screen.getByLabelText('Hex color'));
+    fireEvent.click(screen.getByLabelText('Check color contrast'));
+
+    // result
+    expect(screen.getByText('Foreground has blend mode')).toBeInTheDocument();
   });
 
   it('should not offer the contrast checker for a gradient fill, since contrast only applies to solid fills', () => {

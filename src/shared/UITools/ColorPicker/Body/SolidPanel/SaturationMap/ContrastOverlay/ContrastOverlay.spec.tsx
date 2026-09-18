@@ -73,4 +73,22 @@ describe('ContrastOverlay', () => {
     // result
     expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true');
   });
+
+  it('should stop drawing the curve line where it reaches the top edge, while the dotted region still spans the full width', () => {
+    // before
+    const clamped: TContrastBoundary = {
+      passSide: 'lighter',
+      points: [
+        { s: 0, v: 50 },
+        { s: 50, v: 100 },
+        { s: 100, v: 100 },
+      ],
+    };
+    const { container } = render(<ContrastOverlay boundaries={[clamped]} />);
+    const dots = container.querySelector('[class*="ContrastOverlay__dots"]') as HTMLElement;
+
+    // result
+    expect(container.querySelector('polyline')?.getAttribute('points')).toBe('0,50 50,0');
+    expect(dots.style.clipPath).toContain('100% 0%');
+  });
 });

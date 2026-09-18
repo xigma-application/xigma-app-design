@@ -5872,6 +5872,13 @@ test.describe('Design panels — Fill section', () => {
     expect(pageRatio).not.toBeNull();
     await expect(page.locator('[class*="ContrastOverlay"]').first()).toBeVisible();
 
+    // action — close the picker and reopen it: the checker stays on
+    await page.getByRole('button', { name: 'Close' }).click();
+    await page.getByLabel('Hex color').click();
+
+    // result
+    await expect(page.getByText(/^\d+\.\d{2} : 1$/)).toBeVisible();
+
     // action — repaint the page background black, which changes the reference color
     await page.evaluate(async () => {
       const { store } = await import('/src/store/index.ts');
