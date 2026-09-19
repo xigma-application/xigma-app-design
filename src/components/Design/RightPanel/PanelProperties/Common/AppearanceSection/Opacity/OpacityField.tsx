@@ -28,6 +28,7 @@ const OpacityField: FC<TOpacityFieldProps> = ({ onBlur, onScrub, value }) => {
         defaultValue={`${value}%`}
         e2eValue="opacity"
         onBlur={onBlur}
+        stepNumbers={{ max: OPACITY_MAX, min: OPACITY_MIN }}
         startAdornment={
           <ScrubbableInput max={OPACITY_MAX} min={OPACITY_MIN} onChange={onScrub} value={value}>
             <UITools.InputAdornment icon="Opacity" />

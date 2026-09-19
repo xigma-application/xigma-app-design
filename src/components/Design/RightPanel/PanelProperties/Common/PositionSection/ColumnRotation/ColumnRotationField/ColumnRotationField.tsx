@@ -36,6 +36,7 @@ export const ColumnRotationField: FC<TColumnRotationFieldProps> = ({
     defaultValue={`${value}°`}
     e2eValue={e2eValue}
     onBlur={onBlur}
+    stepNumbers={{ max: ROTATION_MAX, min: ROTATION_MIN }}
     startAdornment={
       <ScrubbableInput
         loop

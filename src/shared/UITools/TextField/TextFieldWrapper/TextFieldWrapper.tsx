@@ -4,6 +4,7 @@ import { FC, InputHTMLAttributes, ReactNode, RefObject } from 'react';
 // hooks
 import { useKeepMountedWhileFocused } from './hooks/useKeepMountedWhileFocused';
 import { useSelectInputOnClick } from './hooks/useSelectInputOnClick';
+import { useStepNumbersThroughBlur } from './hooks/useStepNumbersThroughBlur';
 import { useStopInputKeyPropagation } from './hooks/useStopInputKeyPropagation';
 
 // others
@@ -13,6 +14,7 @@ import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
 import styles from './text-field-wrapper.module.scss';
 
 // types
+import { TStepNumbers } from 'hooks/useStepNumbersOnKeyDown/types';
 import { E2EAttribute } from 'types/e2e';
 import { TE2EValue } from 'shared/E2EDataAttributes/types';
 import { TextFieldVariant } from '../enums';
@@ -26,6 +28,7 @@ export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>,
   keepEndAdornmentOnFocus?: boolean;
   keepMountedWhileFocused?: boolean;
   startAdornment?: ReactNode;
+  stepNumbers?: TStepNumbers;
   variant?: TextFieldVariant;
 };
 
@@ -46,12 +49,13 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
   onMouseEnter,
   onMouseLeave,
   startAdornment,
+  stepNumbers,
   variant = TextFieldVariant.filled,
   ...restProps
 }) => {
   const handleClick = useSelectInputOnClick(onClick);
-  const handleKeyDown = useStopInputKeyPropagation(onKeyDown);
-  const { handleBlur, handleFocus, inputKey } = useKeepMountedWhileFocused(keepMountedWhileFocused, defaultValue as string | number, onBlur, onFocus);
+  const handleKeyDown = useStopInputKeyPropagation(useStepNumbersThroughBlur(stepNumbers, onBlur, onKeyDown));
+  const { handleBlur, handleFocus, inputKey } = useKeepMountedWhileFocused(keepMountedWhileFocused || Boolean(stepNumbers), defaultValue as string | number, onBlur, onFocus);
 
   return (
     <div

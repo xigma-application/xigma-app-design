@@ -48,6 +48,7 @@ export const ImageFillModeRow: FC<TImageFillModeRowProps> = ({ fillMode, onRotat
             className={styles.ImageFillModeRow__scale}
             defaultValue={`${percent}%`}
             onBlur={commitTileScalePercent}
+            stepNumbers={{ min: 1 }}
             type="text"
             variant={TextFieldVariant.outlined}
           />

@@ -99,6 +99,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
         />
       }
       onBlur={onBlur}
+      stepNumbers={{ max: DIMENSIONS_MAX, min: DIMENSIONS_MIN }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       startAdornment={

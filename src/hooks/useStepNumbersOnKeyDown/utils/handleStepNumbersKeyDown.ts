@@ -25,8 +25,11 @@ export const handleStepNumbersKeyDown = (
 
     if (stepped) {
       input.value = stepped.text;
-      input.setSelectionRange(stepped.selectionStart, stepped.selectionEnd);
-      onStep?.(stepped.text);
+      if (input.selectionStart !== null) {
+        input.setSelectionRange(stepped.selectionStart, stepped.selectionEnd);
+      }
+
+      onStep?.(stepped.text, event);
     }
   }
 };

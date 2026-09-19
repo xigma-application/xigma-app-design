@@ -24,7 +24,7 @@ describe('handleStepNumbersKeyDown', () => {
     // result
     expect(event.currentTarget.value).toBe('9, 5');
     expect(event.preventDefault).toHaveBeenCalled();
-    expect(onStep).toHaveBeenCalledWith('9, 5');
+    expect(onStep).toHaveBeenCalledWith('9, 5', event);
   });
 
   it('should step only the number at the caret down, by the shift step when Shift is held', () => {
@@ -50,5 +50,25 @@ describe('handleStepNumbersKeyDown', () => {
     // result
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(event.currentTarget.value).toBe('8');
+  });
+});
+
+describe('handleStepNumbersKeyDown on number inputs', () => {
+  it('should step the value even though a number input has no selection range', () => {
+    // before
+    const input = document.createElement('input');
+
+    input.type = 'number';
+    input.value = '700';
+
+    const event = { currentTarget: input, key: 'ArrowUp', preventDefault: vi.fn(), shiftKey: true } as unknown as KeyboardEvent<HTMLInputElement>;
+    const onStep = vi.fn();
+
+    // action
+    handleStepNumbersKeyDown(event, { onStep });
+
+    // result
+    expect(input.value).toBe('710');
+    expect(onStep).toHaveBeenCalledWith('710', event);
   });
 });

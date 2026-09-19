@@ -37,6 +37,7 @@ export const StrokeWeightField: FC<TStrokeWeightFieldProps> = ({
     defaultValue={displayValue}
     e2eValue={e2eValue}
     onBlur={onBlur}
+    stepNumbers={{ max: STROKE_WEIGHT_MAX, min: STROKE_WEIGHT_MIN }}
     startAdornment={
       <ScrubbableInput
         max={STROKE_WEIGHT_MAX}

@@ -10,7 +10,7 @@ import { UITools } from 'shared';
 import { useCornerSmoothingPopover } from './hooks/useCornerSmoothingPopover';
 
 // others
-import { IOS_SMOOTHING_VALUE } from './constants';
+import { IOS_SMOOTHING_VALUE, SMOOTHING_MAX, SMOOTHING_MIN } from './constants';
 import { translationNameSpace } from '../../../constants';
 
 // styles
@@ -43,6 +43,7 @@ export const CornerSmoothingPopover: FC<TCornerSmoothingPopoverProps> = ({ onClo
           defaultValue={`${value}%`}
           e2eValue="corner-smoothing"
           onBlur={onBlur}
+          stepNumbers={{ max: SMOOTHING_MAX, min: SMOOTHING_MIN }}
           type="text"
         />
       </div>

@@ -42,6 +42,7 @@ const CornerRadiusInput: FC<TCornerRadiusInputProps> = ({
         defaultValue={value}
         e2eValue={e2eValue}
         onBlur={handleBlur}
+        stepNumbers={{ max: CORNER_RADIUS_MAX, min: CORNER_RADIUS_MIN }}
         startAdornment={
           <ScrubbableInput max={CORNER_RADIUS_MAX} min={CORNER_RADIUS_MIN} onChange={onScrub} value={scrubValue}>
             <UITools.InputAdornment icon={iconName} />

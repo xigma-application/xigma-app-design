@@ -14,6 +14,7 @@ import TextFieldWrapper from '../TextField/TextFieldWrapper/TextFieldWrapper';
 // hooks
 import { useAlphaCommit } from './hooks/useAlphaCommit';
 import { useHexCommit } from './hooks/useHexCommit';
+import { useHexStepKeyDown } from './hooks/useHexStepKeyDown';
 import { usePatternThumbnail } from '../ColorPicker/Body/PatternPanel/PatternSourcePreview/hooks/usePatternThumbnail';
 
 // styles
@@ -144,6 +145,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const onBlurHex = useHexCommit(hex, onCommitHex);
+  const onKeyDownHex = useHexStepKeyDown(onCommitHex);
   const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
   const rounded = Math.round(alpha);
   const [pickedImageUrl, setPickedImageUrl] = useState<string | null>(null);
@@ -159,8 +161,10 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
         <TextFieldWrapper
           defaultValue={hexDisplayValue ?? hex.replace('#', '')}
           e2eValue={`${e2eValue}-color`}
+          keepMountedWhileFocused
           maxLength={6}
           onBlur={hexDisplayValue ? undefined : onBlurHex}
+          onKeyDown={hexDisplayValue ? undefined : onKeyDownHex}
           onClick={hexDisplayValue ? handleHexFieldClick : undefined}
           readOnly={Boolean(hexDisplayValue)}
           startAdornment={
@@ -232,6 +236,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           max={100}
           min={0}
           onBlur={onBlurAlpha}
+          stepNumbers={{ max: 100, min: 0 }}
           type="number"
         />
       </FieldGroup>

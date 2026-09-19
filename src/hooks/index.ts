@@ -5,6 +5,7 @@ export * from './useResizeHandler/useResizeHandler';
 export * from './useResizeHandler/types';
 export * from './useScrollThumb/types';
 export * from './useScrollThumb/useScrollThumb';
+export * from './useStepNumbersOnKeyDown/types';
 export * from './useStepNumbersOnKeyDown/useStepNumbersOnKeyDown';
 export * from './useStopClickPropagation/useStopClickPropagation';
 export * from './useVirtualList/useVirtualList';

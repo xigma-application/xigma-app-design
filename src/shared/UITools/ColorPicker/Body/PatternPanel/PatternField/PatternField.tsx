@@ -52,6 +52,7 @@ export const PatternField: FC<TPatternFieldProps> = ({
       defaultValue={`${value}${suffix}`}
       e2eValue={e2eValue}
       onBlur={onBlur}
+      stepNumbers={{ max: max, min: min }}
       onKeyDown={onKeyDown}
       startAdornment={
         <ScrubbableInput max={max} min={min} onChange={onChange} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value}>

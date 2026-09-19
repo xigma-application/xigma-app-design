@@ -44,6 +44,7 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
       disabled={disabled}
       e2eValue={e2eValue}
       onBlur={onBlur}
+      stepNumbers={{ max: POSITION_MAX, min: POSITION_MIN }}
       startAdornment={
         <ScrubbableInput
           disabled={disabled}

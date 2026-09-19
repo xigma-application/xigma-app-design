@@ -39,6 +39,7 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
         endAdornment={endAdornment}
         key={`${value}-${revision}`}
         onBlur={(event) => handleCommit(event.target.value)}
+        stepNumbers={{ max: GRID_COUNT_MAX, min: GRID_COUNT_MIN }}
         startAdornment={
           <ScrubbableInput
             max={GRID_COUNT_MAX}

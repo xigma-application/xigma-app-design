@@ -26,6 +26,7 @@ export const StrokeSettingsDynamicTab: FC = () => {
             defaultValue={DEFAULT_STROKE_DYNAMIC_VALUES[field]}
             e2eValue={`stroke-${field}`}
             startAdornment={<UITools.InputAdornment icon={STROKE_DYNAMIC_ICONS[field]} />}
+            stepNumbers={{ max: 100, min: 0 }}
             type="text"
           />
         </StrokeSettingsField>

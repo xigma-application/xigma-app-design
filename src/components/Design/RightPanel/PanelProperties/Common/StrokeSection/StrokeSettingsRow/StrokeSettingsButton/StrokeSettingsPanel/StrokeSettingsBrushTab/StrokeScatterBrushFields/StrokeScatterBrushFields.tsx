@@ -37,6 +37,7 @@ export const StrokeScatterBrushFields: FC = () => {
                     <UITools.InputAdornment icon={STROKE_SCATTER_BRUSH_FIELD_ICONS[field]} />
                   ) : undefined
                 }
+                stepNumbers={{ max: DEFAULT_STROKE_SCATTER_BRUSH_VALUES[field].endsWith('%') ? 100 : 360, min: 0 }}
                 type="text"
               />
             </Tooltip>

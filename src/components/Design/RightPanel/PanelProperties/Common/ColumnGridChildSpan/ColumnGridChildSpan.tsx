@@ -40,6 +40,7 @@ const ColumnGridChildSpan: FC = () => {
         defaultValue={columnSpan}
         e2eValue="grid-column-span"
         onBlur={revertOnReject(onCommitColumnSpan, columnSpan)}
+        stepNumbers={{ max: maxColumnSpan, min: 1 }}
         startAdornment={
           <ScrubbableInput
             max={maxColumnSpan}
@@ -58,6 +59,7 @@ const ColumnGridChildSpan: FC = () => {
         defaultValue={rowSpan}
         e2eValue="grid-row-span"
         onBlur={revertOnReject(onCommitRowSpan, rowSpan)}
+        stepNumbers={{ max: maxRowSpan, min: 1 }}
         startAdornment={
           <ScrubbableInput max={maxRowSpan} min={1} onChange={(next) => onCommitRowSpan(next.toString())} value={parseInt(rowSpan, 10)}>
             <Icon color="neutral2" name="GridRowSpan" size={24} />

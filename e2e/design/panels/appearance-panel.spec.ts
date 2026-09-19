@@ -13,6 +13,7 @@ type TReadableNode = {
   cornerSmoothing?: number;
   hidden?: boolean;
   opacity?: number;
+  x?: number;
 };
 
 const readFirstNodeId = (page: Page): Promise<string> =>
@@ -32,6 +33,38 @@ const readNode = (page: Page, id: string): Promise<TReadableNode> =>
   }, id);
 
 test.describe('Design panels — Appearance section', () => {
+  test('ArrowUp/ArrowDown in the opacity and X position fields step the value, commit it live and keep the field focused', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-arrow-step');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+    const opacityInput = page.locator('[data-test-text-field-input="opacity"]');
+
+    // action
+    await opacityInput.click();
+    await opacityInput.press('ArrowDown');
+    await opacityInput.press('ArrowDown');
+
+    // result
+    await expect(opacityInput).toBeFocused();
+    await expect(opacityInput).toHaveValue('98%');
+    expect((await readNode(page, id)).opacity).toBeCloseTo(0.98);
+
+    // action
+    const before = (await readNode(page, id)).x as number;
+    const positionInput = page.locator('[data-test-text-field-input="x"]');
+
+    await positionInput.click();
+    await positionInput.press('Shift+ArrowUp');
+
+    // result
+    expect((await readNode(page, id)).x).toBe(before + 10);
+  });
+
   test('typing an opacity percentage commits it as a 0-1 fraction and dims the shape', async ({ page }) => {
     const designPage = new DesignPage(page);
 

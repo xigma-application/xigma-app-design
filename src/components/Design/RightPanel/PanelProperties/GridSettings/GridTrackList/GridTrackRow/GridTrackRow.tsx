@@ -116,6 +116,7 @@ export const GridTrackRow: FC<TGridTrackRowProps> = ({
           onBlur={valueBlurHandlerByMode[track.mode]}
           onClick={handleValueClick}
           onFocus={isFill ? selectNumberPortion : undefined}
+          stepNumbers={{ min: isFill ? 1 : 0 }}
           type={isFill ? 'text' : 'number'}
         />
       </span>

@@ -67,6 +67,7 @@ export const GapField: FC<TGapFieldProps> = ({
           )
         }
         onBlur={handleBlur}
+        stepNumbers={{ max: GAP_MAX, min: GAP_MIN }}
         startAdornment={
           <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onCommit} value={value}>
             <UITools.InputAdornment icon={isHorizontal ? 'GapColumns' : 'GapRows'} />

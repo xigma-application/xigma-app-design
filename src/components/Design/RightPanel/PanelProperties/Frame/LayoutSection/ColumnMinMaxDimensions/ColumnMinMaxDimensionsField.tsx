@@ -53,6 +53,7 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
       e2eValue={e2eValue}
       inputRef={inputRef}
       onBlur={onBlur}
+      stepNumbers={{ max: DIMENSIONS_MAX, min: 0 }}
       onMouseEnter={hintHover.onMouseEnter}
       onMouseLeave={hintHover.onMouseLeave}
       startAdornment={

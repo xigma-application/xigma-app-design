@@ -47,6 +47,7 @@ const PaddingInput: FC<TPaddingInputProps> = ({
           defaultValue={value}
           e2eValue={e2eValue}
           onBlur={handleBlur}
+          stepNumbers={{ max: PADDING_MAX, min: PADDING_MIN }}
           startAdornment={
             <ScrubbableInput max={PADDING_MAX} min={PADDING_MIN} onChange={onScrub} value={scrubValue}>
               <UITools.InputAdornment icon={iconName} />
