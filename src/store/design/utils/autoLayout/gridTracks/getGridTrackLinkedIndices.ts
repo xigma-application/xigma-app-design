@@ -11,9 +11,10 @@ export const getGridTrackLinkedIndices = (children: TGridTrackChild[], trackCoun
 
       if (span > 1) {
         const indices = Array.from({ length: span }, (_unused, offset) => anchor + offset).filter((index) => index < trackCount);
+        const merged = Array.from(new Set(indices.flatMap((index) => groups[index]))).sort((first, second) => first - second);
 
-        indices.forEach((index) => {
-          groups[index] = indices;
+        merged.forEach((index) => {
+          groups[index] = merged;
         });
       }
     }

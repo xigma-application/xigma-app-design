@@ -26,4 +26,15 @@ describe('getGridTrackLinkedIndices', () => {
   it('should clip a span that reaches past the track count', () => {
     expect(getGridTrackLinkedIndices([child('a', 1, 3)], 3)).toEqual([[0], [1, 2], [1, 2]]);
   });
+
+  it('should chain overlapping spans into one group whatever the child order', () => {
+    expect(getGridTrackLinkedIndices([child('a', 0, 2), child('b', 1, 2)], 4)).toEqual([[0, 1, 2], [0, 1, 2], [0, 1, 2], [3]]);
+    expect(getGridTrackLinkedIndices([child('b', 1, 2), child('a', 0, 2)], 4)).toEqual([[0, 1, 2], [0, 1, 2], [0, 1, 2], [3]]);
+    expect(getGridTrackLinkedIndices([child('a', 0, 2), child('c', 2, 2), child('b', 1, 2)], 4)).toEqual([
+      [0, 1, 2, 3],
+      [0, 1, 2, 3],
+      [0, 1, 2, 3],
+      [0, 1, 2, 3],
+    ]);
+  });
 });

@@ -1577,6 +1577,59 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readAnchors()).toEqual(afterFirst);
   });
 
+  test('grabbing a track handle selects the whole chain of overlapping spans, not just the first span', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-track-span-chain');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode, moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false, gridColumnCount: 4, gridRowCount: 2 }, id: frameId }));
+
+      const addRect = (): string => {
+        store.dispatch(
+          addNode({ fill: '#000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: 'rectangle', width: 20, x: 0, y: 0 }),
+        );
+        const state = store.getState().design;
+
+        return state.pages[state.activePageId].rootOrder.at(-1) as string;
+      };
+
+      const first = addRect();
+      const second = addRect();
+
+      store.dispatch(moveNodes({ nodeIds: [first, second], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 0, gridColumnSpan: 2, gridRowAnchorIndex: 0 }, id: first }));
+      store.dispatch(updateNode({ changes: { gridColumnAnchorIndex: 1, gridColumnSpan: 2, gridRowAnchorIndex: 1 }, id: second }));
+    });
+
+    await selectFrameRow(page);
+    await openGridSettings(page);
+
+    const handle = page
+      .locator('[data-test-section="grid-columns"]')
+      .locator('[data-test-grid-track-row="0"]')
+      .getByRole('button', { name: 'Reorder track' });
+    const box = await handle.boundingBox();
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.up();
+
+    // the first span covers columns 0-1, the second covers 1-2, so grabbing column 0 takes all three
+    await expect.poll(() => readGridTrackSelection(page)).toMatchObject({ axis: 'column', indices: [0, 1, 2] });
+  });
+
   test('toggling automatic positioning off freezes every child into an anchor, so a track reorder still carries a never-anchored child', async ({
     page,
   }) => {
