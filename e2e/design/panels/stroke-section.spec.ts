@@ -441,6 +441,51 @@ test.describe('Design panels — Stroke section', () => {
     expect(flippedScreenshot.equals(wedgeScreenshot)).toBe(false);
   });
 
+  test('picking a stroke Join writes strokeJoin to the node and reshapes the outer corners of an outside stroke on the canvas', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-join-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    // action: a thick outside stroke makes the corner shape clearly visible
+    await weight.fill('24');
+    await weight.press('Enter');
+    await weight.blur();
+    await page.locator('[class*="SectionColumn"] [class*="Dropdown"]').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+    await page.getByLabel('Advanced stroke settings').click();
+
+    // result
+    const miterScreenshot = await designPage.canvas.screenshot();
+
+    // action
+    await page.getByLabel('Round', { exact: true }).click();
+
+    // result
+    expect((await readNode(page, id)).strokeJoin).toBe('round');
+
+    const roundScreenshot = await designPage.canvas.screenshot();
+
+    expect(roundScreenshot.equals(miterScreenshot)).toBe(false);
+
+    // action
+    await page.getByLabel('Bevel', { exact: true }).click();
+
+    // result
+    expect((await readNode(page, id)).strokeJoin).toBe('bevel');
+
+    const bevelScreenshot = await designPage.canvas.screenshot();
+
+    expect(bevelScreenshot.equals(roundScreenshot)).toBe(false);
+    expect(bevelScreenshot.equals(miterScreenshot)).toBe(false);
+  });
+
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
     const designPage = new DesignPage(page);
     const id = await pickStrokeImageMode(page, designPage, 'e2e-test-stroke-section-image-tile', 'Tile');

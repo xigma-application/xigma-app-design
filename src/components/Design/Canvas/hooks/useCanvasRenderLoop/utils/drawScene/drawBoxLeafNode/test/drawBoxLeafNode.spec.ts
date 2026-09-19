@@ -1,5 +1,5 @@
 // types
-import { BlendMode, NodeType, StrokeAlign } from 'types/design/enums';
+import { BlendMode, NodeType, StrokeAlign, StrokeJoin } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TRectangleNode, TSectionNode } from 'types/design/types';
 
@@ -399,7 +399,7 @@ describe('drawBoxLeafNode', () => {
     drawBoxLeafNode(context, node, 1, nodesById, pathOutlineStyles, refs, editingPathId);
 
     // result
-    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, { bottom: 2, left: 2, right: 2, top: 2 }, StrokeAlign.inside);
+    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, { bottom: 2, left: 2, right: 2, top: 2 }, StrokeAlign.inside, StrokeJoin.miter);
     expect(drawVectorFillGroupMock).toHaveBeenCalledTimes(2);
     expect(drawVectorFillGroupMock).toHaveBeenLastCalledWith(
       context,

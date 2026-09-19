@@ -14,7 +14,6 @@ import {
   DEFAULT_STROKE_DASHES,
   DEFAULT_STROKE_DASH_CAP,
   DEFAULT_STROKE_GAP,
-  DEFAULT_STROKE_JOIN,
   STROKE_STYLE_ICONS,
   STROKE_STYLE_MENU_WIDTH_PX,
   TStrokeStyle,
@@ -31,7 +30,7 @@ import styles from './stroke-settings-basic-tab.module.scss';
 
 export const StrokeSettingsBasicTab: FC = () => {
   const { t } = useTranslation();
-  const { hasDashes, isCustom, isDashed, onStyleSelect, style } = useStrokeSettingsBasicTab();
+  const { hasDashes, isCustom, isDashed, join, onJoinSelect, onStyleSelect, style } = useStrokeSettingsBasicTab();
   const namespace = `${translationNameSpace}.settings`;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));
   const dashCapButtons = getStrokeDashCapButtons((cap) => t(`${namespace}.dashCap.options.${cap}`));
@@ -102,9 +101,9 @@ export const StrokeSettingsBasicTab: FC = () => {
       <StrokeSettingsField label={t(`${namespace}.join.label`)}>
         <UITools.ToggleButtonGroup
           className={fieldStyles.StrokeSettingsField__input}
-          onChange={noop}
+          onChange={onJoinSelect}
           toggleButtons={joinButtons}
-          value={DEFAULT_STROKE_JOIN}
+          value={join}
         />
       </StrokeSettingsField>
       <StrokeSettingsField label={t(`${namespace}.miterAngle.label`)}>

@@ -1,5 +1,5 @@
 // types
-import { StrokeProfile, StrokeSides } from 'types/design/enums';
+import { StrokeJoin, StrokeProfile, StrokeSides } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
@@ -16,5 +16,5 @@ export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode): TPo
     return getBoxStrokeProfilePolygons(node, node.strokeWidth, node.strokeAlign, profile, node.strokeProfileFlipped ?? false);
   }
 
-  return getBoxStrokePolygons(node, getStrokeSideWidths(node), node.strokeAlign);
+  return getBoxStrokePolygons(node, getStrokeSideWidths(node), node.strokeAlign, node.strokeJoin ?? StrokeJoin.miter);
 };

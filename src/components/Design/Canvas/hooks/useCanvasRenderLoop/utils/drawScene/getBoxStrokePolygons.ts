@@ -1,5 +1,5 @@
 // types
-import { StrokeAlign } from 'types/design/enums';
+import { StrokeAlign, StrokeJoin } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 import { TStrokeSideWidths } from 'utils/design/stroke/types';
@@ -32,10 +32,25 @@ const getOffsetRect = (node: TFrameNode | TRectangleNode, top: number, right: nu
   };
 };
 
+const hasCornerRadius = (node: TFrameNode | TRectangleNode): boolean =>
+  [node.cornerRadius, node.cornerRadiusBottomLeft, node.cornerRadiusBottomRight, node.cornerRadiusTopLeft, node.cornerRadiusTopRight].some(
+    (radius) => (radius ?? 0) > 0,
+  );
+
+const joinOuterRect = (rect: TRoundedRect, top: number, right: number, bottom: number, left: number): TRoundedRect => ({
+  ...rect,
+  cornerRadiusBottomLeft: Math.max(0, (bottom + left) / 2),
+  cornerRadiusBottomRight: Math.max(0, (bottom + right) / 2),
+  cornerRadiusTopLeft: Math.max(0, (top + left) / 2),
+  cornerRadiusTopRight: Math.max(0, (top + right) / 2),
+  cornerSmoothing: 0,
+});
+
 export const getBoxStrokePolygons = (
   node: TFrameNode | TRectangleNode,
   widths: TStrokeSideWidths,
   strokeAlign: StrokeAlign | undefined,
+  join: StrokeJoin = StrokeJoin.miter,
 ): TPoint[][] => {
   const align = strokeAlign ?? StrokeAlign.inside;
   const bottom = getStrokeAlignInset(widths.bottom, align);
@@ -43,12 +58,17 @@ export const getBoxStrokePolygons = (
   const right = getStrokeAlignInset(widths.right, align);
   const top = getStrokeAlignInset(widths.top, align);
   const center = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+  const isJoined = join !== StrokeJoin.miter && !hasCornerRadius(node);
+  const outerRect = getOffsetRect(node, top.outer, right.outer, bottom.outer, left.outer);
   const rects = [
-    getOffsetRect(node, top.outer, right.outer, bottom.outer, left.outer),
+    isJoined ? joinOuterRect(outerRect, top.outer, right.outer, bottom.outer, left.outer) : outerRect,
     getOffsetRect(node, -top.inner, -right.inner, -bottom.inner, -left.inner),
   ];
+  const outerSegments = join === StrokeJoin.bevel ? 1 : ROUNDED_RECT_CORNER_SEGMENTS;
 
-  return rects.map((rect) =>
-    getRoundedRectPoints(rect, ROUNDED_RECT_CORNER_SEGMENTS).map((point) => rotatePoint(point, center, node.rotation)),
+  return rects.map((rect, index) =>
+    getRoundedRectPoints(rect, isJoined && index === 0 ? outerSegments : ROUNDED_RECT_CORNER_SEGMENTS).map((point) =>
+      rotatePoint(point, center, node.rotation),
+    ),
   );
 };

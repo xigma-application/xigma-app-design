@@ -1,5 +1,5 @@
 // types
-import { StrokeProfile } from 'types/design/enums';
+import { StrokeJoin, StrokeProfile } from 'types/design/enums';
 import { TIconProps } from '@xigma/components';
 
 export const STROKE_STYLES = ['solid', 'dashed', 'custom'] as const;
@@ -15,14 +15,12 @@ export const STROKE_STYLE_ICON_SIZE = 24;
 
 export const STROKE_STYLE_MENU_WIDTH_PX = 144;
 
-export const STROKE_JOINS = ['miter', 'bevel', 'round'] as const;
+export const STROKE_JOINS: StrokeJoin[] = [StrokeJoin.miter, StrokeJoin.bevel, StrokeJoin.round];
 
-export type TStrokeJoin = (typeof STROKE_JOINS)[number];
-
-export const STROKE_JOIN_ICONS: Record<TStrokeJoin, TIconProps['name']> = {
-  bevel: 'StrokeJoinBevel',
-  miter: 'StrokeJoinMiter',
-  round: 'StrokeJoinRound',
+export const STROKE_JOIN_ICONS: Record<StrokeJoin, TIconProps['name']> = {
+  [StrokeJoin.bevel]: 'StrokeJoinBevel',
+  [StrokeJoin.miter]: 'StrokeJoinMiter',
+  [StrokeJoin.round]: 'StrokeJoinRound',
 };
 
 export const STROKE_DASH_CAPS = ['none', 'square', 'round'] as const;
@@ -45,7 +43,7 @@ export const DEFAULT_STROKE_DASHES = '20, 40, 60, 80';
 
 export const DEFAULT_STROKE_STYLE: TStrokeStyle = 'solid';
 
-export const DEFAULT_STROKE_JOIN: TStrokeJoin = 'miter';
+export const DEFAULT_STROKE_JOIN = StrokeJoin.miter;
 
 export const DEFAULT_STROKE_PROFILE = StrokeProfile.uniform;
 

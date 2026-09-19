@@ -108,6 +108,12 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeJoin {
+  bevel = 'bevel',
+  miter = 'miter',
+  round = 'round',
+}
+
 export enum StrokeMode {
   basic = 'basic',
   brush = 'brush',

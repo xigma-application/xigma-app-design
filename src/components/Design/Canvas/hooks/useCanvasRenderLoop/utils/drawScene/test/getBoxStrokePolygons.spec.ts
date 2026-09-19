@@ -1,5 +1,5 @@
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { NodeType, StrokeAlign, StrokeJoin } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 import { TStrokeSideWidths } from 'utils/design/stroke/types';
@@ -92,5 +92,34 @@ describe('getBoxStrokePolygons', () => {
 
     expect(bounds(outer)).toEqual({ height: 40, width: 105, x: 5, y: 20 });
     expect(bounds(inner)).toEqual({ height: 40, width: 100, x: 10, y: 20 });
+  });
+
+  it('should keep sharp outer corners for the Miter join', () => {
+    const [outer] = getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.outside, StrokeJoin.miter);
+
+    expect(outer.some((point) => point.x === 6 && point.y === 16)).toBe(true);
+  });
+
+  it('should cut the outer corners off for the Bevel join and round them for the Round join', () => {
+    const [miterOuter] = getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.outside, StrokeJoin.miter);
+    const [bevelOuter] = getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.outside, StrokeJoin.bevel);
+    const [roundOuter] = getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.outside, StrokeJoin.round);
+
+    expect(bevelOuter.some((point) => point.x === 6 && point.y === 16)).toBe(false);
+    expect(bevelOuter.some((point) => point.x === 6 && point.y === 20)).toBe(true);
+    expect(bevelOuter.some((point) => point.x === 10 && point.y === 16)).toBe(true);
+    expect(roundOuter.some((point) => point.x === 6 && point.y === 16)).toBe(false);
+    expect(roundOuter.length).toBeGreaterThan(bevelOuter.length);
+    expect(bounds(bevelOuter)).toEqual(bounds(miterOuter));
+  });
+
+  it('should not change an inside stroke or a rounded rectangle for any join', () => {
+    const inside = getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.inside, StrokeJoin.miter);
+    const rounded = rect({ cornerRadius: 6 });
+
+    expect(getBoxStrokePolygons(rect(), uniform(4), StrokeAlign.inside, StrokeJoin.round)).toEqual(inside);
+    expect(getBoxStrokePolygons(rounded, uniform(4), StrokeAlign.outside, StrokeJoin.bevel)).toEqual(
+      getBoxStrokePolygons(rounded, uniform(4), StrokeAlign.outside, StrokeJoin.miter),
+    );
   });
 });

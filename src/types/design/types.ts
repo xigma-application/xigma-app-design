@@ -15,6 +15,7 @@ import {
   PathType,
   SizingMode,
   StrokeAlign,
+  StrokeJoin,
   StrokeMode,
   StrokeProfile,
   StrokeSides,
@@ -147,6 +148,7 @@ export type TFrameNode = TBaseNode & {
   strokeColor?: string;
   strokeWidth?: number;
   strokeBottomWidth?: number;
+  strokeJoin?: StrokeJoin;
   strokeLeftWidth?: number;
   strokeMode?: StrokeMode;
   strokeProfile?: StrokeProfile;
@@ -205,6 +207,7 @@ export type TRectangleNode = TBaseNode & {
   strokeColor?: string;
   strokeWidth?: number;
   strokeBottomWidth?: number;
+  strokeJoin?: StrokeJoin;
   strokeLeftWidth?: number;
   strokeMode?: StrokeMode;
   strokeProfile?: StrokeProfile;
