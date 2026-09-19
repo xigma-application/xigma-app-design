@@ -1073,6 +1073,8 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
           </svg>
         </button>
         <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
           aria-label="Add effect"
           aria-pressed="false"
           class="_ButtonIcon_2062db"
