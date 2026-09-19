@@ -1,0 +1,15 @@
+.StrokeBrushPreview {
+  display: block;
+  filter: invert(1);
+  height: auto;
+
+  :root[data-theme='light'] & {
+    filter: none;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) & {
+      filter: none;
+    }
+  }
+}

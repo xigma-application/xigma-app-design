@@ -262,7 +262,7 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByLabel('Flip width profile')).toBeDisabled();
 
     // action
-    await widthProfileRow.locator('[class*="tooltip-target"]').hover();
+    await widthProfileRow.locator('[class*="tooltipTarget"]').hover();
 
     // result
     await expect(page.getByText("Can't use width profiles on dashed strokes").first()).toBeVisible();
@@ -289,10 +289,23 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByText('Center').first()).toBeVisible();
 
     // action
-    await page.getByText('Brush').click();
+    await page.getByText('Brush', { exact: true }).click();
 
     // result
-    await expect(page.getByText('Width profile')).toHaveCount(0);
+    await expect(page.getByText('Direction')).toBeVisible();
+    await expect(page.getByText('Style')).toHaveCount(0);
+    await expect(page.getByLabel('Individual strokes')).toBeHidden();
+
+    const brushTrigger = page.locator('[class*="StrokeSettingsBrushTab__brush"] button').first();
+
+    expect((await brushTrigger.boundingBox())?.height).toBe(32);
+    expect((await page.locator('[class*="StrokeSettingsBrushTab__brush"]').boundingBox())?.height).toBe(44);
+
+    // action
+    await brushTrigger.click();
+
+    // result
+    await expect(page.getByAltText('Blockbuster')).toBeVisible();
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

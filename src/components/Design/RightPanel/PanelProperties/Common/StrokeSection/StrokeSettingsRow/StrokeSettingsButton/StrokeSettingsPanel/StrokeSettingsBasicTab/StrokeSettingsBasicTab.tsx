@@ -2,11 +2,9 @@ import { FC } from 'react';
 import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-// @xigma
-import { Tooltip } from '@xigma/components';
-
 // components
 import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
+import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
 // others
@@ -17,16 +15,13 @@ import {
   DEFAULT_STROKE_DASH_CAP,
   DEFAULT_STROKE_GAP,
   DEFAULT_STROKE_JOIN,
-  DEFAULT_STROKE_PROFILE,
   STROKE_STYLE_ICONS,
   STROKE_STYLE_MENU_WIDTH_PX,
   TStrokeStyle,
 } from './constants';
 import { getStrokeDashCapButtons } from './utils/getStrokeDashCapButtons';
 import { getStrokeJoinButtons } from './utils/getStrokeJoinButtons';
-import { getStrokeProfileOptions } from './utils/getStrokeProfileOptions';
 import { getStrokeStyleOptions } from './utils/getStrokeStyleOptions';
-import { isStrokeProfileFlippable } from './utils/isStrokeProfileFlippable';
 import { useStrokeSettingsBasicTab } from './hooks/useStrokeSettingsBasicTab';
 import { translationNameSpace } from '../../../../constants';
 
@@ -34,16 +29,11 @@ import { translationNameSpace } from '../../../../constants';
 import fieldStyles from '../StrokeSettingsField/stroke-settings-field.module.scss';
 import styles from './stroke-settings-basic-tab.module.scss';
 
-// types
-import { StrokeProfile } from 'types/design/enums';
-
 export const StrokeSettingsBasicTab: FC = () => {
   const { t } = useTranslation();
   const { hasDashes, isCustom, isDashed, onStyleSelect, style } = useStrokeSettingsBasicTab();
   const namespace = `${translationNameSpace}.settings`;
-  const profile = DEFAULT_STROKE_PROFILE;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));
-  const profileOptions = getStrokeProfileOptions((option) => t(`${namespace}.widthProfile.options.${option}`));
   const dashCapButtons = getStrokeDashCapButtons((cap) => t(`${namespace}.dashCap.options.${cap}`));
   const joinButtons = getStrokeJoinButtons((join) => t(`${namespace}.join.options.${join}`));
 
@@ -108,29 +98,7 @@ export const StrokeSettingsBasicTab: FC = () => {
           </StrokeSettingsField>
         </>
       )}
-      <StrokeSettingsField label={t(`${namespace}.widthProfile.label`)}>
-        <Tooltip content={hasDashes ? t(`${namespace}.widthProfile.dashedDisabledTooltip`) : undefined}>
-          <span className={styles['StrokeSettingsBasicTab__tooltip-target']}>
-            <UITools.Dropdown<StrokeProfile>
-              bypassGlobalShortcuts={false}
-              className={fieldStyles.StrokeSettingsField__input}
-              disabled={hasDashes}
-              onSelect={noop}
-              options={profileOptions}
-              textAlign="left"
-              value={profile}
-              variant="outline"
-            />
-          </span>
-        </Tooltip>
-        <Tooltip content={t(`${namespace}.widthProfile.flipTooltip`)}>
-          <UITools.ButtonIcon
-            ariaLabel={t(`${namespace}.widthProfile.flipAriaLabel`)}
-            disabled={hasDashes || !isStrokeProfileFlippable(profile)}
-            name="FlipHorizontal"
-          />
-        </Tooltip>
-      </StrokeSettingsField>
+      <StrokeSettingsWidthProfileField disabled={hasDashes} />
       <StrokeSettingsField label={t(`${namespace}.join.label`)}>
         <UITools.ToggleButtonGroup
           className={fieldStyles.StrokeSettingsField__input}

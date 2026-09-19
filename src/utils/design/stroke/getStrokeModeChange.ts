@@ -8,7 +8,7 @@ import { getStrokeSidesChange } from './getStrokeSidesChange';
 export type TStrokeModeChange = TStrokeSidesChange & { strokeMode: StrokeMode };
 
 export const getStrokeModeChange = (node: TStrokeSideSource, mode: StrokeMode): TStrokeModeChange => {
-  if (mode === StrokeMode.dynamic && (node.strokeSides ?? StrokeSides.all) !== StrokeSides.all) {
+  if (mode !== StrokeMode.basic && (node.strokeSides ?? StrokeSides.all) !== StrokeSides.all) {
     return { ...getStrokeSidesChange(node, StrokeSides.all), strokeMode: mode };
   }
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import StrokeSettingsBasicTab from './StrokeSettingsBasicTab/StrokeSettingsBasicTab';
+import StrokeSettingsBrushTab from './StrokeSettingsBrushTab/StrokeSettingsBrushTab';
 import StrokeSettingsDynamicTab from './StrokeSettingsDynamicTab/StrokeSettingsDynamicTab';
 import StrokeSettingsPanelHeader from './StrokeSettingsPanelHeader/StrokeSettingsPanelHeader';
 import { UITools } from 'shared';
@@ -36,6 +37,7 @@ export const StrokeSettingsPanel: FC<TStrokeSettingsPanelProps> = ({ onClose }) 
         <UITools.ToggleButtonGroup onChange={onTabChange} toggleButtons={tabButtons} value={activeTab} />
         {activeTab === StrokeMode.basic && <StrokeSettingsBasicTab />}
         {activeTab === StrokeMode.dynamic && <StrokeSettingsDynamicTab />}
+        {activeTab === StrokeMode.brush && <StrokeSettingsBrushTab />}
       </div>
     </div>
   );

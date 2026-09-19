@@ -82,7 +82,7 @@ describe('StrokeSettingsPanel', () => {
     expect(screen.queryByText('Width profile')).not.toBeInTheDocument();
   });
 
-  it('should hide the Basic rows when the Brush tab is active', () => {
+  it('should show the brush dropdown, Direction and Width profile on the Brush tab instead of the Basic rows', () => {
     // before
     renderPanel();
 
@@ -90,6 +90,9 @@ describe('StrokeSettingsPanel', () => {
     fireEvent.click(screen.getByText('Brush'));
 
     // result
-    expect(screen.queryByText('Width profile')).not.toBeInTheDocument();
+    expect(screen.getByText('Direction')).toBeInTheDocument();
+    expect(screen.getByText('Width profile')).toBeInTheDocument();
+    expect(screen.queryByText('Style')).not.toBeInTheDocument();
+    expect(screen.getByAltText('Heist')).toBeInTheDocument();
   });
 });

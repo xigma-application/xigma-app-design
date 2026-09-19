@@ -23,4 +23,12 @@ describe('getStrokeModeChange', () => {
 
     expect(getStrokeModeChange(node, StrokeMode.dynamic)).toMatchObject({ strokeSides: StrokeSides.all, strokeWidth: 9 });
   });
+
+  it('should reset a single side to all when switching to brush too', () => {
+    expect(getStrokeModeChange({ strokeSides: StrokeSides.left, strokeWidth: 6 }, StrokeMode.brush)).toMatchObject({
+      strokeMode: StrokeMode.brush,
+      strokeSides: StrokeSides.all,
+      strokeWidth: 6,
+    });
+  });
 });

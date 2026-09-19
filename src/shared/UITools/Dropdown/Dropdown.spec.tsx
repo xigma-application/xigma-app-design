@@ -191,3 +191,13 @@ describe('Dropdown behaviors', () => {
     expect(screen.getByText('RGB').closest('[data-test-bypass-global-shortcuts]')).toBeNull();
   });
 });
+
+describe('Dropdown size', () => {
+  it('should add the large modifier to the trigger for size large', () => {
+    // before
+    render(<Dropdown onSelect={vi.fn()} options={options} size="large" value="hex" />);
+
+    // result
+    expect(screen.getByRole('button').className).toContain('Dropdown--large');
+  });
+});

@@ -104,7 +104,7 @@ describe('StrokeSettingsRow', () => {
     expect(screen.getByLabelText('Stroke bottom weight')).toHaveValue('4');
   });
 
-  it('should disable Position showing Center and hide (keep in the DOM) the individual strokes button for a dynamic stroke', () => {
+  it('should disable Position showing Center and hide (keep in the DOM) the individual strokes button for a dynamic or brush stroke', () => {
     // before
     store.dispatch(
       addNode({

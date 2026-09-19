@@ -18,7 +18,7 @@ import { useDropdownState } from './hooks/useDropdownState';
 import styles from './dropdown.module.scss';
 
 // types
-import { TDropdownOption, TDropdownVariant } from './types';
+import { TDropdownOption, TDropdownSize, TDropdownVariant } from './types';
 import { E2EAttribute } from 'types/e2e';
 
 export type TDropdownProps<TValue extends string> = {
@@ -26,10 +26,12 @@ export type TDropdownProps<TValue extends string> = {
   className?: string;
   disabled?: boolean;
   icon?: TIconProps['name'];
+  menuMaxHeight?: number;
   menuWidth?: number;
   onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
+  size?: TDropdownSize;
   textAlign?: 'center' | 'left';
   truncate?: boolean;
   value: TValue;
@@ -41,10 +43,12 @@ export const Dropdown = <TValue extends string>({
   className = '',
   disabled = false,
   icon,
+  menuMaxHeight,
   menuWidth,
   onHoverOption,
   onSelect,
   options,
+  size = 'default',
   textAlign = 'center',
   truncate = true,
   value,
@@ -57,7 +61,11 @@ export const Dropdown = <TValue extends string>({
 
   const trigger = (
     <PopoverPrimitive.Trigger
-      className={cx(styles.Dropdown, { [styles['Dropdown--outline']]: variant === 'outline' }, className)}
+      className={cx(
+        styles.Dropdown,
+        { [styles['Dropdown--large']]: size === 'large', [styles['Dropdown--outline']]: variant === 'outline' },
+        className,
+      )}
       disabled={disabled}
     >
       {icon && <Icon name={icon} size={24} />}
@@ -77,6 +85,7 @@ export const Dropdown = <TValue extends string>({
     <PopoverPrimitive.Content align="center" className={styles.Dropdown__content} onKeyDown={handleKeyDown} side="bottom" sideOffset={4}>
       <DropdownPanel
         highlightedIndex={highlightedIndex}
+        menuMaxHeight={menuMaxHeight}
         menuWidth={menuWidth}
         onHighlight={setHighlightedIndex}
         onSelect={onSelect}

@@ -21,7 +21,7 @@ import { getStrokeWeightDisplay } from 'utils/design/stroke/getStrokeWeightDispl
 import { parseStrokeWeight } from '../utils/parseStrokeWeight';
 
 export type TUseStrokeSettingsRowResult = {
-  isDynamic: boolean;
+  isNonBasicMode: boolean;
   isWeightMixed: boolean;
   onPositionSelect: TFunc<[StrokeAlign]>;
   onSideBlur: (side: TStrokeSide) => TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -94,7 +94,7 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     };
 
   return {
-    isDynamic: node?.strokeMode === StrokeMode.dynamic,
+    isNonBasicMode: (node?.strokeMode ?? StrokeMode.basic) !== StrokeMode.basic,
     isWeightMixed: weightDisplay === null,
     onPositionSelect,
     onSideBlur,

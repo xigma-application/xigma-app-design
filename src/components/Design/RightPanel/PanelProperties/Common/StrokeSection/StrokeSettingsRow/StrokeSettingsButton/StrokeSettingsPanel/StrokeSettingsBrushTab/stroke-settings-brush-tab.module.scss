@@ -1,0 +1,22 @@
+$sectionHeight: 44px;
+
+.StrokeSettingsBrushTab {
+  display: flex;
+  flex-direction: column;
+
+  &__brush {
+    align-items: center;
+    display: flex;
+    height: $sectionHeight;
+  }
+
+  &__dropdown.StrokeSettingsBrushTab__dropdown {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__divider {
+    border-top: 1px solid var(--color-neutral-3);
+    margin: 8px -16px;
+  }
+}

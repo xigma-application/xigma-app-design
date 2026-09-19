@@ -96,3 +96,19 @@ describe('DropdownPanel width', () => {
     expect((container.querySelector('[class*="DropdownPanel"]') as HTMLElement).style.width).toBe('144px');
   });
 });
+
+describe('DropdownPanel max height', () => {
+  it('should make the panel scrollable up to menuMaxHeight', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <DropdownPanel highlightedIndex={0} menuMaxHeight={200} onHighlight={vi.fn()} onSelect={vi.fn()} options={options} value="hex" />
+      </PopoverPrimitive.Root>,
+    );
+    const panel = container.querySelector('[class*="DropdownPanel"]') as HTMLElement;
+
+    // result
+    expect(panel.style.maxHeight).toBe('200px');
+    expect(panel.style.overflowY).toBe('auto');
+  });
+});

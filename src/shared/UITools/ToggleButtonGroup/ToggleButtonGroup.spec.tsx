@@ -155,3 +155,17 @@ describe('ToggleButtonGroup behaviors', () => {
     expect(container.querySelector('[data-test-toggle-button-group="flow"]')).not.toBeNull();
   });
 });
+
+describe('ToggleButtonGroup flipped icon', () => {
+  it('should wrap a flipped icon so it can be mirrored', () => {
+    // before
+    const { container } = renderToggleButtonGroup({
+      onChange: vi.fn(),
+      toggleButtons: [{ ariaLabel: 'Left', icon: 'ArrowRight', iconFlipped: true, value: 'left' }],
+      value: 'left',
+    });
+
+    // result
+    expect(container.querySelector('[class*="ToggleButtonGroup__icon--flipped"]')).not.toBeNull();
+  });
+});

@@ -15,6 +15,7 @@ import { TDropdownOption } from '../types';
 
 export type TDropdownPanelProps<TValue extends string> = {
   highlightedIndex: number;
+  menuMaxHeight?: number;
   menuWidth?: number;
   onHighlight: TFunc<[number]>;
   onSelect: TFunc<[TValue]>;
@@ -24,6 +25,7 @@ export type TDropdownPanelProps<TValue extends string> = {
 
 export const DropdownPanel = <TValue extends string>({
   highlightedIndex,
+  menuMaxHeight,
   menuWidth,
   onHighlight,
   onSelect,
@@ -34,7 +36,10 @@ export const DropdownPanel = <TValue extends string>({
   const handleHighlight = useHighlightDropdownOption(onHighlight);
 
   return (
-    <div className={styles.DropdownPanel} style={menuWidth ? { width: menuWidth } : undefined}>
+    <div
+      className={styles.DropdownPanel}
+      style={{ maxHeight: menuMaxHeight, overflowY: menuMaxHeight ? 'auto' : undefined, width: menuWidth }}
+    >
       {options.map((option, index) => (
         <Fragment key={option.value}>
           {option.separatorBefore && <div className={styles.DropdownPanel__separator} />}

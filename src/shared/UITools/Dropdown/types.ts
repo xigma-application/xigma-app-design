@@ -13,4 +13,6 @@ export type TDropdownOption<TValue extends string> = {
   value: TValue;
 };
 
+export type TDropdownSize = 'default' | 'large';
+
 export type TDropdownVariant = 'filled' | 'outline';
