@@ -10,7 +10,7 @@ import { UITools } from 'shared';
 
 // hooks
 import { useStrokeBrushPicker } from './hooks/useStrokeBrushPicker';
-import { useStrokeSettingsBrushTab } from './hooks/useStrokeSettingsBrushTab';
+import { useStrokeSettingsBrushTab } from './hooks/useStrokeSettingsBrushTab/useStrokeSettingsBrushTab';
 
 // others
 import { getBrushById } from './utils/getBrushById';
@@ -24,8 +24,8 @@ import styles from './stroke-settings-brush-tab.module.scss';
 
 export const StrokeSettingsBrushTab: FC = () => {
   const { t } = useTranslation();
-  const { brush, direction, onBrushSelect, onDirectionChange } = useStrokeSettingsBrushTab();
-  const { isPickerOpen, onTogglePicker, triggerRef } = useStrokeBrushPicker(brush, onBrushSelect);
+  const { brush, direction, onBrushCommit, onBrushSelect, onDirectionChange, onScatterBlur, scatterValues } = useStrokeSettingsBrushTab();
+  const { isPickerOpen, onTogglePicker, triggerRef } = useStrokeBrushPicker(brush, onBrushSelect, onBrushCommit);
   const namespace = `${translationNameSpace}.settings`;
   const selectedBrush = getBrushById(brush);
   const isScatterBrush = getBrushCategoryId(brush) === 'scatter';
@@ -44,7 +44,7 @@ export const StrokeSettingsBrushTab: FC = () => {
         />
       </div>
       {isScatterBrush ? (
-        <StrokeScatterBrushFields />
+        <StrokeScatterBrushFields onBlur={onScatterBlur} values={scatterValues} />
       ) : (
         <StrokeSettingsField label={t(`${namespace}.brush.direction.label`)}>
           <UITools.ToggleButtonGroup

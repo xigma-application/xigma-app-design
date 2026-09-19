@@ -106,4 +106,22 @@ describe('useStrokeBrushPicker', () => {
     expect(result.current.isPickerOpen).toBe(false);
     expect(setDockedPanel).toHaveBeenLastCalledWith(null);
   });
+
+  it('should commit through onBrushCommit with the brush that was active when the picker opened', () => {
+    // before
+    const setDockedPanel = vi.fn();
+    const onBrushCommit = vi.fn();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
+      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
+    );
+    const { result } = renderHook(() => useStrokeBrushPicker('heist', vi.fn(), onBrushCommit), { wrapper });
+
+    act(() => result.current.onTogglePicker());
+
+    // action
+    act(() => setDockedPanel.mock.calls[0][0].props.onSelect('noir'));
+
+    // result
+    expect(onBrushCommit).toHaveBeenCalledWith('noir', 'heist');
+  });
 });

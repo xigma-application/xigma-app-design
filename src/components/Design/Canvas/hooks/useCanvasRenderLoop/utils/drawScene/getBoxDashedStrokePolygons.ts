@@ -34,7 +34,10 @@ const buildRing = (outer: TPoint[], inner: TPoint[]): TRing => {
 
 const sampleAt = (ring: TRing, distance: number): TRingSample => {
   const wrapped = ((distance % ring.perimeter) + ring.perimeter) % ring.perimeter;
-  const index = ring.cumulative.reduce((found, start, candidate) => (start <= wrapped && ring.lengths[candidate] > 0 ? candidate : found), 0);
+  const index = ring.cumulative.reduce(
+    (found, start, candidate) => (start <= wrapped && ring.lengths[candidate] > 0 ? candidate : found),
+    0,
+  );
   const next = (index + 1) % ring.outer.length;
   const t = ring.lengths[index] > 0 ? (wrapped - ring.cumulative[index]) / ring.lengths[index] : 0;
 
@@ -89,9 +92,7 @@ const getDashPolygon = (ring: TRing, start: number, end: number, cap: StrokeDash
   const endTangent = getTangent(ring, b);
   const startTangent = getTangent(ring, a);
   const endCap = isRound ? getCapPoints(last.outer, last.inner, endTangent, extension) : [];
-  const startCap = isRound
-    ? getCapPoints(first.inner, first.outer, { x: -startTangent.x, y: -startTangent.y }, extension)
-    : [];
+  const startCap = isRound ? getCapPoints(first.inner, first.outer, { x: -startTangent.x, y: -startTangent.y }, extension) : [];
 
   return dropDuplicates([...outerPoints, ...endCap, ...innerPoints.reverse(), ...startCap]);
 };

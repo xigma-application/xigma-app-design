@@ -37,9 +37,10 @@ const drawPaintsInOrder = (
   paints: TPaint[],
   resolvedTiles: (TResolvedPatternSourceTile | null)[],
   boxRotation: TBoxFillRotation,
+  faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
 ): void => {
   paints.forEach((paint, index) => {
-    drawVectorFillGroup(context, null, null, polygons, [paint], [resolvedTiles[index]?.tile ?? null], boxRotation);
+    drawVectorFillGroup(context, faceBufferCache, null, polygons, [paint], [resolvedTiles[index]?.tile ?? null], boxRotation);
   });
 };
 
@@ -58,11 +59,12 @@ export const drawBoxPaints = (
   refs: TCanvasRefs,
   editingPathId: string | null | undefined,
   patternSourceDepth: number,
+  faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null = null,
 ): void => {
   const paints = getFillsInPaintOrder(getScaledFillPaints(sourcePaints, opacity));
   const resolvedTiles = resolvePaintTiles(context, paints, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
   const boxRotation = getBoxRotation(node);
 
-  drawPaintsInOrder(context, polygons, paints, resolvedTiles, boxRotation);
+  drawPaintsInOrder(context, polygons, paints, resolvedTiles, boxRotation, faceBufferCache);
   releasePaintTiles(resolvedTiles);
 };

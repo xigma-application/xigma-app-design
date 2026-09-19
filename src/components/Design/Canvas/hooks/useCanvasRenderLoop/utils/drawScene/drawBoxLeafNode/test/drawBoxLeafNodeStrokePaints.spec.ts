@@ -11,7 +11,7 @@ const drawBoxPaintsMock = vi.fn();
 const getBoxStrokeRingPolygonsMock = vi.fn();
 
 vi.mock('../drawBoxPaints', () => ({ drawBoxPaints: (...args: unknown[]): void => drawBoxPaintsMock(...args) }));
-vi.mock('../../getBoxStrokeRingPolygons', () => ({
+vi.mock('../../getBoxStrokeRingPolygons/getBoxStrokeRingPolygons', () => ({
   getBoxStrokeRingPolygons: (...args: unknown[]): unknown => getBoxStrokeRingPolygonsMock(...args),
 }));
 
@@ -57,6 +57,7 @@ describe('drawBoxLeafNodeStrokePaints', () => {
       refs,
       null,
       0,
+      null,
     );
   });
 

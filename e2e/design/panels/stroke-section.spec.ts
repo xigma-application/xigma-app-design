@@ -9,6 +9,10 @@ type TReadablePaint = {
   type: string;
 };
 type TReadableNode = {
+  strokeBrush?: string;
+  strokeBrushDirection?: string;
+  strokeBrushGap?: number;
+  strokeBrushWiggle?: number;
   strokeDynamicFrequency?: number;
   strokeDynamicSmoothen?: number;
   strokeDynamicWiggle?: number;
@@ -445,7 +449,9 @@ test.describe('Design panels — Stroke section', () => {
     expect(flippedScreenshot.equals(wedgeScreenshot)).toBe(false);
   });
 
-  test('picking a stroke Join writes strokeJoin to the node and reshapes the outer corners of an outside stroke on the canvas', async ({ page }) => {
+  test('picking a stroke Join writes strokeJoin to the node and reshapes the outer corners of an outside stroke on the canvas', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-stroke-section-join-canvas');
@@ -490,7 +496,9 @@ test.describe('Design panels — Stroke section', () => {
     expect(bevelScreenshot.equals(miterScreenshot)).toBe(false);
   });
 
-  test('the Miter angle is shown only for the Miter join, clamps to 7.17-180 and a 90+ angle bevels the box corners on the canvas', async ({ page }) => {
+  test('the Miter angle is shown only for the Miter join, clamps to 7.17-180 and a 90+ angle bevels the box corners on the canvas', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-stroke-section-miter-angle');
@@ -540,7 +548,9 @@ test.describe('Design panels — Stroke section', () => {
     await expect(miterAngle).toHaveCount(0);
   });
 
-  test('the dashed and custom stroke styles write their fields to the node and actually redraw the stroke as dashes on the canvas', async ({ page }) => {
+  test('the dashed and custom stroke styles write their fields to the node and actually redraw the stroke as dashes on the canvas', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-stroke-section-dashes-canvas');
@@ -646,12 +656,7 @@ test.describe('Design panels — Stroke section', () => {
     const id = await readFirstNodeId(page);
 
     await page.getByLabel('Advanced stroke settings').click();
-    await page
-      .locator('[class*="StrokeSettingsField__row"]')
-      .filter({ hasText: 'Style' })
-      .locator('button')
-      .first()
-      .click();
+    await page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Style' }).locator('button').first().click();
     await page.locator('[class*="DropdownOption__label"]', { hasText: 'Custom' }).click();
 
     const dashes = page.getByLabel('Dashes');
@@ -734,6 +739,82 @@ test.describe('Design panels — Stroke section', () => {
     await expect(wiggle).toBeFocused();
     await expect(wiggle).toHaveValue('601%');
     expect((await readNode(page, id)).strokeDynamicWiggle).toBe(601);
+  });
+
+  test('the Brush tab writes the brush, direction and scatter values to the node and redraws the stroke on the canvas, with the width profile applied', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-brush');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    await weight.fill('14');
+    await weight.press('Enter');
+    await weight.blur();
+
+    const plainScreenshot = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Advanced stroke settings').click();
+    await page.getByText('Brush', { exact: true }).click();
+
+    // result: the brush mode alone already redraws the stroke as a stretched brush
+    await expect.poll(async () => (await designPage.canvas.screenshot()).equals(plainScreenshot)).toBe(false);
+
+    const heistRight = await designPage.canvas.screenshot();
+
+    // action: the opposite direction runs the brush the other way round the loop
+    await page.locator('[class*="StrokeSettingsButtonPopover"]').getByLabel('Left').click();
+
+    // result
+    expect((await readNode(page, id)).strokeBrushDirection).toBe('left');
+    expect((await designPage.canvas.screenshot()).equals(heistRight)).toBe(false);
+
+    // action: the width profile reshapes the brush stroke too
+    const heistLeft = await designPage.canvas.screenshot();
+
+    await page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' }).locator('button').first().click();
+    await page.getByAltText('Wedge').click();
+
+    // result
+    expect((await designPage.canvas.screenshot()).equals(heistLeft)).toBe(false);
+
+    // action: pick a scatter brush and change its Gap
+    const brushTrigger = page.locator('[class*="StrokeSettingsBrushTab__brush"] button').first();
+
+    await brushTrigger.click();
+    await page.getByAltText('Bubblegum').click();
+
+    // result
+    expect((await readNode(page, id)).strokeBrush).toBe('bubblegum');
+
+    const scatterDefault = await designPage.canvas.screenshot();
+    const gap = page.getByLabel('Gap');
+
+    await gap.fill('500');
+    await gap.blur();
+
+    // result
+    expect(await readNode(page, id)).toMatchObject({ strokeBrush: 'bubblegum', strokeBrushGap: 500 });
+    await expect(gap).toHaveValue('500%');
+    expect((await designPage.canvas.screenshot()).equals(scatterDefault)).toBe(false);
+
+    // action: ArrowUp steps the Wiggle live and keeps the field focused
+    const wiggle = page.getByLabel('Wiggle');
+
+    await wiggle.click();
+    await wiggle.press('ArrowUp');
+
+    // result
+    await expect(wiggle).toBeFocused();
+    await expect(wiggle).toHaveValue('1%');
+    expect((await readNode(page, id)).strokeBrushWiggle).toBe(1);
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

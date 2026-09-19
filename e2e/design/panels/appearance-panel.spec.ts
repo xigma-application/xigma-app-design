@@ -33,7 +33,9 @@ const readNode = (page: Page, id: string): Promise<TReadableNode> =>
   }, id);
 
 test.describe('Design panels — Appearance section', () => {
-  test('ArrowUp/ArrowDown in the opacity and X position fields step the value, commit it live and keep the field focused', async ({ page }) => {
+  test('ArrowUp/ArrowDown in the opacity and X position fields step the value, commit it live and keep the field focused', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-appearance-arrow-step');

@@ -13,7 +13,11 @@ export type TUseStrokeBrushPickerResult = {
   triggerRef: RefObject<HTMLButtonElement | null>;
 };
 
-export const useStrokeBrushPicker = (brush: string, onBrushSelect: TFunc<[string]>): TUseStrokeBrushPickerResult => {
+export const useStrokeBrushPicker = (
+  brush: string,
+  onBrushSelect: TFunc<[string]>,
+  onBrushCommit?: TFunc<[string, string]>,
+): TUseStrokeBrushPickerResult => {
   const setDockedPanel = useContext(StrokeSettingsDockedPanelContext);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -34,8 +38,16 @@ export const useStrokeBrushPicker = (brush: string, onBrushSelect: TFunc<[string
     setIsPickerOpen(false);
   };
 
+  const commitBrush = (nextBrush: string): void => {
+    if (onBrushCommit) {
+      onBrushCommit(nextBrush, originalBrushRef.current);
+    } else {
+      onBrushSelect(nextBrush);
+    }
+  };
+
   const handleSelect = (nextBrush: string): void => {
-    onBrushSelect(nextBrush);
+    commitBrush(nextBrush);
     setDockedPanel?.(null);
     setIsPickerOpen(false);
   };

@@ -1,5 +1,6 @@
 // types
 import { TImageRenderContext } from '../../types';
+import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 export type TDrawContext = {
@@ -16,3 +17,14 @@ export type TBoxPaintPhase = 'all' | 'fill' | 'stroke';
 export type TDrawSceneContext = TDrawContext & {
   imageContext: TImageRenderContext;
 };
+
+export type TStrokeRing = {
+  cumulative: number[];
+  inner: TPoint[];
+  lengths: number[];
+  mids: TPoint[];
+  outer: TPoint[];
+  perimeter: number;
+};
+
+export type TStrokeRingSample = { mid: TPoint; tangent: TPoint; vec: TPoint };

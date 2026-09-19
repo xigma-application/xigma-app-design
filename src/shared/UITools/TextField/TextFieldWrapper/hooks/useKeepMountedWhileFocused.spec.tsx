@@ -9,7 +9,9 @@ const event = {} as FocusEvent<HTMLInputElement>;
 describe('useKeepMountedWhileFocused', () => {
   it('should keep following the default value while not focused', () => {
     // before
-    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(true, value, undefined, undefined), { initialProps: { value: 'a' } });
+    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(true, value, undefined, undefined), {
+      initialProps: { value: 'a' },
+    });
 
     // action
     rerender({ value: 'b' });
@@ -22,7 +24,9 @@ describe('useKeepMountedWhileFocused', () => {
     // before
     const onBlur = vi.fn();
     const onFocus = vi.fn();
-    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(true, value, onBlur, onFocus), { initialProps: { value: 'a' } });
+    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(true, value, onBlur, onFocus), {
+      initialProps: { value: 'a' },
+    });
 
     // action
     act(() => result.current.handleFocus(event));
@@ -42,7 +46,9 @@ describe('useKeepMountedWhileFocused', () => {
 
   it('should not freeze when disabled', () => {
     // before
-    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(false, value, undefined, undefined), { initialProps: { value: 'a' } });
+    const { rerender, result } = renderHook(({ value }) => useKeepMountedWhileFocused(false, value, undefined, undefined), {
+      initialProps: { value: 'a' },
+    });
 
     // action
     act(() => result.current.handleFocus(event));

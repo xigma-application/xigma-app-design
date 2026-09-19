@@ -15,6 +15,7 @@ import {
   PathType,
   SizingMode,
   StrokeAlign,
+  StrokeBrushDirection,
   StrokeDashCap,
   StrokeJoin,
   StrokeMode,
@@ -152,6 +153,13 @@ export type TFrameNode = TBaseNode & {
   paddingTop?: number;
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeBrush?: string;
+  strokeBrushAngularJitter?: number;
+  strokeBrushDirection?: StrokeBrushDirection;
+  strokeBrushGap?: number;
+  strokeBrushRotation?: number;
+  strokeBrushSizeJitter?: number;
+  strokeBrushWiggle?: number;
   strokeDash?: number;
   strokeDashCap?: StrokeDashCap;
   strokeDashes?: number[];
@@ -220,6 +228,13 @@ export type TRectangleNode = TBaseNode & {
   fills: TPaint[];
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeBrush?: string;
+  strokeBrushAngularJitter?: number;
+  strokeBrushDirection?: StrokeBrushDirection;
+  strokeBrushGap?: number;
+  strokeBrushRotation?: number;
+  strokeBrushSizeJitter?: number;
+  strokeBrushWiggle?: number;
   strokeDash?: number;
   strokeDashCap?: StrokeDashCap;
   strokeDashes?: number[];

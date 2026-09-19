@@ -61,7 +61,12 @@ describe('handleStepNumbersKeyDown on number inputs', () => {
     input.type = 'number';
     input.value = '700';
 
-    const event = { currentTarget: input, key: 'ArrowUp', preventDefault: vi.fn(), shiftKey: true } as unknown as KeyboardEvent<HTMLInputElement>;
+    const event = {
+      currentTarget: input,
+      key: 'ArrowUp',
+      preventDefault: vi.fn(),
+      shiftKey: true,
+    } as unknown as KeyboardEvent<HTMLInputElement>;
     const onStep = vi.fn();
 
     // action

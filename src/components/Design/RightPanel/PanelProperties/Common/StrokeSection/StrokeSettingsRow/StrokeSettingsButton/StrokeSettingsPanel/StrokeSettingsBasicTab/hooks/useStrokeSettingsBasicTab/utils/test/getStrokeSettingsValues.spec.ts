@@ -28,8 +28,16 @@ describe('getStrokeSettingsValues', () => {
   });
 
   it('should flag the dashed and custom styles', () => {
-    expect(getStrokeSettingsValues({ strokeStyle: StrokeStyle.dashed })).toMatchObject({ hasDashes: true, isCustom: false, isDashed: true });
-    expect(getStrokeSettingsValues({ strokeStyle: StrokeStyle.custom })).toMatchObject({ hasDashes: true, isCustom: true, isDashed: false });
+    expect(getStrokeSettingsValues({ strokeStyle: StrokeStyle.dashed })).toMatchObject({
+      hasDashes: true,
+      isCustom: false,
+      isDashed: true,
+    });
+    expect(getStrokeSettingsValues({ strokeStyle: StrokeStyle.custom })).toMatchObject({
+      hasDashes: true,
+      isCustom: true,
+      isDashed: false,
+    });
   });
 
   it('should offer the miter angle only for the Miter join on an Outside or Center stroke', () => {

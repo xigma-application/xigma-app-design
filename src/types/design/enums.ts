@@ -120,6 +120,11 @@ export enum StrokeJoin {
   round = 'round',
 }
 
+export enum StrokeBrushDirection {
+  left = 'left',
+  right = 'right',
+}
+
 export enum StrokeMode {
   basic = 'basic',
   brush = 'brush',

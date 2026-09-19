@@ -1,0 +1,12 @@
+export const DOT_POINTS = 6;
+export const MIN_DOT_RADIUS = 0.75;
+export const DOT_RADIUS_RATIO = 0.02;
+export const CLOUD_RADIUS = 0.55;
+export const SIZE_JITTER_SPAN = 0.6;
+export const STAMP_SCALE_MIN = 0.2;
+export const STAMP_SCALE_MAX = 3;
+export const WIGGLE_SIGMA = 0.75;
+export const MIN_DOTS_PER_STAMP = 6;
+export const STATS_SIGMA_MIN = 0.16;
+export const STATS_SIGMA_MAX = 0.28;
+export const DEGREES_TO_RADIANS = Math.PI / 180;

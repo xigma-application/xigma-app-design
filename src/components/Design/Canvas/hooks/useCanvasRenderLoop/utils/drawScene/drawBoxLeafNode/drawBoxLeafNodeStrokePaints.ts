@@ -4,9 +4,15 @@ import { TDrawSceneContext } from '../types';
 import { TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
+// types (enums)
+import { StrokeMode } from 'types/design/enums';
+import { TPoint } from 'types/canvas';
+
 // utils
 import { drawBoxPaints } from './drawBoxPaints';
-import { getBoxStrokeRingPolygons } from '../getBoxStrokeRingPolygons';
+import { getBoxStrokeRingPolygons } from '../getBoxStrokeRingPolygons/getBoxStrokeRingPolygons';
+
+const BRUSH_FACE_BUFFERS = new WeakMap<TPoint[], WebGLBuffer>();
 
 export const drawBoxLeafNodeStrokePaints = (
   context: TDrawSceneContext,
@@ -20,6 +26,20 @@ export const drawBoxLeafNodeStrokePaints = (
 ): void => {
   if ('fills' in node && node.strokes && node.strokes.length > 0 && node.strokeWidth) {
     const polygons = getBoxStrokeRingPolygons(node);
-    drawBoxPaints(context, node, node.strokes, polygons, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+    const faceBufferCache = 'strokeMode' in node && node.strokeMode === StrokeMode.brush ? BRUSH_FACE_BUFFERS : null;
+
+    drawBoxPaints(
+      context,
+      node,
+      node.strokes,
+      polygons,
+      opacity,
+      nodesById,
+      pathOutlineStyles,
+      refs,
+      editingPathId,
+      patternSourceDepth,
+      faceBufferCache,
+    );
   }
 };

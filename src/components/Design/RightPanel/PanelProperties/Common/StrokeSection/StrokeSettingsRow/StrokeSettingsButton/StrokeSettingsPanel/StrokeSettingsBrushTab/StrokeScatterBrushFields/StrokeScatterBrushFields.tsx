@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, FocusEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -9,13 +9,23 @@ import StrokeSettingsField from '../../StrokeSettingsField/StrokeSettingsField';
 import { UITools } from 'shared';
 
 // others
-import { DEFAULT_STROKE_SCATTER_BRUSH_VALUES, STROKE_SCATTER_BRUSH_FIELD_ICONS, STROKE_SCATTER_BRUSH_FIELDS } from '../constants';
+import {
+  STROKE_SCATTER_BRUSH_FIELD_ICONS,
+  STROKE_SCATTER_BRUSH_FIELDS,
+  STROKE_SCATTER_BRUSH_LIMITS,
+  TStrokeScatterBrushField,
+} from '../constants';
 import { translationNameSpace } from '../../../../../constants';
 
 // styles
 import fieldStyles from '../../StrokeSettingsField/stroke-settings-field.module.scss';
 
-export const StrokeScatterBrushFields: FC = () => {
+export type TStrokeScatterBrushFieldsProps = {
+  onBlur: (field: TStrokeScatterBrushField) => TFunc<[FocusEvent<HTMLInputElement>]>;
+  values: Record<TStrokeScatterBrushField, number>;
+};
+
+export const StrokeScatterBrushFields: FC<TStrokeScatterBrushFieldsProps> = ({ onBlur, values }) => {
   const { t } = useTranslation();
   const namespace = `${translationNameSpace}.settings.brush`;
 
@@ -30,14 +40,15 @@ export const StrokeScatterBrushFields: FC = () => {
               <UITools.TextField
                 aria-label={label}
                 className={fieldStyles.StrokeSettingsField__input}
-                defaultValue={DEFAULT_STROKE_SCATTER_BRUSH_VALUES[field]}
+                defaultValue={`${values[field]}${STROKE_SCATTER_BRUSH_LIMITS[field].unit}`}
                 e2eValue={`stroke-brush-${field}`}
+                onBlur={onBlur(field)}
                 startAdornment={
                   STROKE_SCATTER_BRUSH_FIELD_ICONS[field] ? (
                     <UITools.InputAdornment icon={STROKE_SCATTER_BRUSH_FIELD_ICONS[field]} />
                   ) : undefined
                 }
-                stepNumbers={{ max: DEFAULT_STROKE_SCATTER_BRUSH_VALUES[field].endsWith('%') ? 100 : 360, min: 0 }}
+                stepNumbers={{ max: STROKE_SCATTER_BRUSH_LIMITS[field].max, min: STROKE_SCATTER_BRUSH_LIMITS[field].min }}
                 type="text"
               />
             </Tooltip>

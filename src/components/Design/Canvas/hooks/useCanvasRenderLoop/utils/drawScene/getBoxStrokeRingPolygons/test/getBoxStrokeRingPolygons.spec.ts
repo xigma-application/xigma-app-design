@@ -3,8 +3,8 @@ import { NodeType, StrokeAlign, StrokeProfile, StrokeSides } from 'types/design/
 import { TRectangleNode } from 'types/design/types';
 
 // utils
-import { getBoxStrokePolygons } from '../getBoxStrokePolygons';
-import { getBoxStrokeProfilePolygons } from '../getBoxStrokeProfilePolygons';
+import { getBoxStrokePolygons } from '../../getBoxStrokePolygons';
+import { getBoxStrokeProfilePolygons } from '../../getBoxStrokeProfilePolygons';
 import { getBoxStrokeRingPolygons } from '../getBoxStrokeRingPolygons';
 
 const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
@@ -54,7 +54,7 @@ describe('getBoxStrokeRingPolygons', () => {
     const result = getBoxStrokeRingPolygons(node);
 
     // result
-    expect(result).toEqual(getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, true));
+    expect(result).toEqual(getBoxStrokeProfilePolygons(node));
   });
 
   it('should default to not flipped when strokeProfileFlipped is unset', () => {
@@ -65,7 +65,7 @@ describe('getBoxStrokeRingPolygons', () => {
     const result = getBoxStrokeRingPolygons(node);
 
     // result
-    expect(result).toEqual(getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, false));
+    expect(result).toEqual(getBoxStrokeProfilePolygons(node));
   });
 
   it('should fall back to the uniform polygons when the sides are not all', () => {

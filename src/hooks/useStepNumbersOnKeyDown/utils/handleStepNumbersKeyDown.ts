@@ -16,10 +16,16 @@ export const handleStepNumbersKeyDown = (
 
   if (direction !== undefined) {
     const input = event.currentTarget;
-    const stepped = stepNumbersInText(input.value, input.selectionStart ?? 0, input.selectionEnd ?? 0, direction * (event.shiftKey ? shiftStep : step), {
-      max,
-      min,
-    });
+    const stepped = stepNumbersInText(
+      input.value,
+      input.selectionStart ?? 0,
+      input.selectionEnd ?? 0,
+      direction * (event.shiftKey ? shiftStep : step),
+      {
+        max,
+        min,
+      },
+    );
 
     event.preventDefault();
 

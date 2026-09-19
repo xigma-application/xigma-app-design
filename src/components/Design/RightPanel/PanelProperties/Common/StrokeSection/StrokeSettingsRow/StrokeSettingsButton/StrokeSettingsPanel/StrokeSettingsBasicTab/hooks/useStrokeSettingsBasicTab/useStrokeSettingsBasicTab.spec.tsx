@@ -42,7 +42,14 @@ describe('useStrokeSettingsBasicTab', () => {
     const blur = (value: string): FocusEvent<HTMLInputElement> => ({ target: { value } }) as FocusEvent<HTMLInputElement>;
 
     // result
-    expect(result.current).toMatchObject({ dash: 20, dashCap: StrokeDashCap.none, gap: 20, hasDashes: false, isCustom: false, isDashed: false });
+    expect(result.current).toMatchObject({
+      dash: 20,
+      dashCap: StrokeDashCap.none,
+      gap: 20,
+      hasDashes: false,
+      isCustom: false,
+      isDashed: false,
+    });
 
     // action
     act(() => result.current.onStyleSelect(StrokeStyle.dashed));

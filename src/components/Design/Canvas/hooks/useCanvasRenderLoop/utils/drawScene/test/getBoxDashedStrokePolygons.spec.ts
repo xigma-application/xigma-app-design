@@ -20,7 +20,13 @@ const inner: TPoint[] = [
 ];
 
 const getArea = (polygon: TPoint[]): number =>
-  Math.abs(polygon.reduce((total, point, index) => total + (point.x * polygon[(index + 1) % polygon.length].y - polygon[(index + 1) % polygon.length].x * point.y), 0)) / 2;
+  Math.abs(
+    polygon.reduce(
+      (total, point, index) =>
+        total + (point.x * polygon[(index + 1) % polygon.length].y - polygon[(index + 1) % polygon.length].x * point.y),
+      0,
+    ),
+  ) / 2;
 
 const getTotalArea = (polygons: TPoint[][]): number => polygons.reduce((total, polygon) => total + getArea(polygon), 0);
 

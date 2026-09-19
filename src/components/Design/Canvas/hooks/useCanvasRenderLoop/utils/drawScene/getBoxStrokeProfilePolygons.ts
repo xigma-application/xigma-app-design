@@ -1,5 +1,5 @@
 // types
-import { StrokeAlign, StrokeProfile } from 'types/design/enums';
+import { StrokeProfile } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
@@ -14,15 +14,13 @@ const lerpPoint = (from: TPoint, to: TPoint, t: number): TPoint => ({
   y: from.y + (to.y - from.y) * t,
 });
 
-export const getBoxStrokeProfilePolygons = (
-  node: TFrameNode | TRectangleNode,
-  width: number,
-  strokeAlign: StrokeAlign | undefined,
-  profile: StrokeProfile,
-  flipped: boolean,
-): TPoint[][] => {
+export const getBoxStrokeProfilePolygons = (node: TFrameNode | TRectangleNode): TPoint[][] => {
+  const flipped = node.strokeProfileFlipped ?? false;
+  const profile = node.strokeProfile ?? StrokeProfile.uniform;
+  const width = node.strokeWidth ?? 0;
+
   if (profile !== StrokeProfile.quarterTaper) {
-    const [outerLoop, innerLoop] = getBoxStrokePolygons(node, { bottom: width, left: width, right: width, top: width }, strokeAlign);
+    const [outerLoop, innerLoop] = getBoxStrokePolygons(node, { bottom: width, left: width, right: width, top: width }, node.strokeAlign);
     const positions = getLoopArcLengthPositions(outerLoop);
 
     const profiledInnerLoop = innerLoop.map((point, index) => {
@@ -33,5 +31,5 @@ export const getBoxStrokeProfilePolygons = (
     return [outerLoop, profiledInnerLoop];
   }
 
-  return getQuarterTaperBoxStrokePolygons(node, width, strokeAlign, flipped);
+  return getQuarterTaperBoxStrokePolygons(node, width, node.strokeAlign, flipped);
 };

@@ -13,6 +13,8 @@ const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
   name: 'Rectangle',
   parentId: null,
   rotation: 0,
+  strokeAlign: StrokeAlign.inside,
+  strokeWidth: 4,
   type: NodeType.rectangle,
   width: 100,
   x: 10,
@@ -28,7 +30,7 @@ describe('getBoxStrokeProfilePolygons', () => {
     const node = rect();
 
     // action
-    const [outer] = getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, false);
+    const [outer] = getBoxStrokeProfilePolygons({ ...node, strokeProfile: StrokeProfile.wedge, strokeProfileFlipped: false });
     const [uniformOuter] = getBoxStrokePolygons(node, { bottom: 4, left: 4, right: 4, top: 4 }, StrokeAlign.inside);
 
     // result
@@ -40,7 +42,7 @@ describe('getBoxStrokeProfilePolygons', () => {
     const node = rect();
 
     // action
-    const [, inner] = getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, false);
+    const [, inner] = getBoxStrokeProfilePolygons({ ...node, strokeProfile: StrokeProfile.wedge, strokeProfileFlipped: false });
     const [, uniformInner] = getBoxStrokePolygons(node, { bottom: 4, left: 4, right: 4, top: 4 }, StrokeAlign.inside);
 
     // result
@@ -52,7 +54,7 @@ describe('getBoxStrokeProfilePolygons', () => {
     const node = rect();
 
     // action
-    const [outer, inner] = getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, false);
+    const [outer, inner] = getBoxStrokeProfilePolygons({ ...node, strokeProfile: StrokeProfile.wedge, strokeProfileFlipped: false });
     const [, uniformInner] = getBoxStrokePolygons(node, { bottom: 4, left: 4, right: 4, top: 4 }, StrokeAlign.inside);
     const lastIndex = inner.length - 1;
 
@@ -65,7 +67,7 @@ describe('getBoxStrokeProfilePolygons', () => {
     const node = rect();
 
     // action
-    const [outer, inner] = getBoxStrokeProfilePolygons(node, 4, StrokeAlign.inside, StrokeProfile.wedge, true);
+    const [outer, inner] = getBoxStrokeProfilePolygons({ ...node, strokeProfile: StrokeProfile.wedge, strokeProfileFlipped: true });
     const [, uniformInner] = getBoxStrokePolygons(node, { bottom: 4, left: 4, right: 4, top: 4 }, StrokeAlign.inside);
 
     // result

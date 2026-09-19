@@ -5,9 +5,15 @@ import { StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
 import { getStrokeModeChange } from '../getStrokeModeChange';
 
 describe('getStrokeModeChange', () => {
-  it('should only set the mode (and Center for dynamic) when leaving sides untouched', () => {
-    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.brush)).toEqual({ strokeMode: StrokeMode.brush });
-    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.dynamic)).toEqual({ strokeAlign: StrokeAlign.center, strokeMode: StrokeMode.dynamic });
+  it('should only set the mode (and Center for dynamic and brush) when leaving sides untouched', () => {
+    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.brush)).toEqual({
+      strokeAlign: StrokeAlign.center,
+      strokeMode: StrokeMode.brush,
+    });
+    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.dynamic)).toEqual({
+      strokeAlign: StrokeAlign.center,
+      strokeMode: StrokeMode.dynamic,
+    });
   });
 
   it('should reset a single side to all with the same weight when switching to dynamic', () => {

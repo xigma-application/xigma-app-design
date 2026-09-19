@@ -17,10 +17,7 @@ import { StrokeStyle } from 'types/design/enums';
 
 // others
 import { STROKE_MITER_ANGLE_MAX, STROKE_MITER_ANGLE_MIN } from 'constant/strokeMiterAngle';
-import {
-  STROKE_STYLE_ICONS,
-  STROKE_STYLE_MENU_WIDTH_PX,
-} from './constants';
+import { STROKE_STYLE_ICONS, STROKE_STYLE_MENU_WIDTH_PX } from './constants';
 import { getStrokeDashCapButtons } from './utils/getStrokeDashCapButtons';
 import { getStrokeJoinButtons } from './utils/getStrokeJoinButtons';
 import { getStrokeStyleOptions } from './utils/getStrokeStyleOptions';
@@ -39,10 +36,34 @@ export const StrokeSettingsBasicTab: FC = () => {
     dashes,
     gap,
     hasDashes,
-    isCustom, isDashed, isMiter, join, miterAngle, onDashBlur, onDashCapSelect, onDashStep, onDashesBlur, onDashesStep, onGapBlur, onGapStep, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onMiterAngleStep, onStyleSelect, style } = useStrokeSettingsBasicTab();
+    isCustom,
+    isDashed,
+    isMiter,
+    join,
+    miterAngle,
+    onDashBlur,
+    onDashCapSelect,
+    onDashStep,
+    onDashesBlur,
+    onDashesStep,
+    onGapBlur,
+    onGapStep,
+    onJoinSelect,
+    onMiterAngleBlur,
+    onMiterAngleDragEnd,
+    onMiterAngleDragStart,
+    onMiterAngleScrub,
+    onMiterAngleStep,
+    onStyleSelect,
+    style,
+  } = useStrokeSettingsBasicTab();
   const onDashKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onDashStep });
   const onGapKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onGapStep });
-  const onMiterAngleKeyDown = useStepNumbersOnKeyDown({ max: STROKE_MITER_ANGLE_MAX, min: STROKE_MITER_ANGLE_MIN, onStep: onMiterAngleStep });
+  const onMiterAngleKeyDown = useStepNumbersOnKeyDown({
+    max: STROKE_MITER_ANGLE_MAX,
+    min: STROKE_MITER_ANGLE_MIN,
+    onStep: onMiterAngleStep,
+  });
   const onDashesKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onDashesStep });
   const namespace = `${translationNameSpace}.settings`;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));

@@ -55,7 +55,12 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
 }) => {
   const handleClick = useSelectInputOnClick(onClick);
   const handleKeyDown = useStopInputKeyPropagation(useStepNumbersThroughBlur(stepNumbers, onBlur, onKeyDown));
-  const { handleBlur, handleFocus, inputKey } = useKeepMountedWhileFocused(keepMountedWhileFocused || Boolean(stepNumbers), defaultValue as string | number, onBlur, onFocus);
+  const { handleBlur, handleFocus, inputKey } = useKeepMountedWhileFocused(
+    keepMountedWhileFocused || Boolean(stepNumbers),
+    defaultValue as string | number,
+    onBlur,
+    onFocus,
+  );
 
   return (
     <div
