@@ -1,7 +1,11 @@
-import { FC } from 'react';
+import cx from 'classnames';
+import { FC, useRef } from 'react';
 
 // components
 import StrokeBrushOption from './StrokeBrushOption/StrokeBrushOption';
+
+// hooks
+import { useIsHeaderStuck } from './hooks/useIsHeaderStuck/useIsHeaderStuck';
 
 // others
 import { STROKE_BRUSH_CATEGORY_HEADER_HEIGHT_PX } from '../constants';
@@ -30,23 +34,32 @@ export const StrokeBrushCategorySection: FC<TStrokeBrushCategorySectionProps> = 
   onHoverStart,
   onSelect,
   selectedBrushId,
-}) => (
-  <div className={styles.StrokeBrushCategorySection}>
-    <div className={styles.StrokeBrushCategorySection__header} style={{ height: STROKE_BRUSH_CATEGORY_HEADER_HEIGHT_PX }}>
-      {getCategoryLabel(category.labelTranslationKey)}
+}) => {
+  const headerRef = useRef<HTMLDivElement>(null);
+  const isStuck = useIsHeaderStuck(headerRef);
+
+  return (
+    <div className={styles.StrokeBrushCategorySection}>
+      <div
+        className={cx(styles.StrokeBrushCategorySection__header, { [styles['StrokeBrushCategorySection__header--stuck']]: isStuck })}
+        ref={headerRef}
+        style={{ height: STROKE_BRUSH_CATEGORY_HEADER_HEIGHT_PX }}
+      >
+        {getCategoryLabel(category.labelTranslationKey)}
+      </div>
+      {category.brushes.map((brush) => (
+        <StrokeBrushOption
+          brush={brush}
+          key={brush.id}
+          label={getBrushLabel(brush.labelTranslationKey)}
+          onClick={() => onSelect(brush.id)}
+          onMouseEnter={() => onHoverStart(brush.id)}
+          onMouseLeave={onHoverEnd}
+          selected={brush.id === selectedBrushId}
+        />
+      ))}
     </div>
-    {category.brushes.map((brush) => (
-      <StrokeBrushOption
-        brush={brush}
-        key={brush.id}
-        label={getBrushLabel(brush.labelTranslationKey)}
-        onClick={() => onSelect(brush.id)}
-        onMouseEnter={() => onHoverStart(brush.id)}
-        onMouseLeave={onHoverEnd}
-        selected={brush.id === selectedBrushId}
-      />
-    ))}
-  </div>
-);
+  );
+};
 
 export default StrokeBrushCategorySection;

@@ -333,6 +333,28 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByText('Stretch brushes')).toBeVisible();
     await expect(page.getByAltText('Blockbuster')).toBeVisible();
 
+    const pickerList = page.locator('[class*="StrokeBrushPicker__list"]');
+    const stretchHeader = page.getByText('Stretch brushes');
+
+    await expect(stretchHeader).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)');
+
+    // action: scrolling the list keeps the category header pinned to the top and draws its bottom border
+    await pickerList.evaluate((element) => {
+      element.scrollTop = 200;
+    });
+
+    // result
+    await expect(stretchHeader).not.toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)');
+    expect(Math.abs(((await stretchHeader.boundingBox())?.y ?? 0) - ((await pickerList.boundingBox())?.y ?? 0))).toBeLessThanOrEqual(1);
+
+    // action
+    await pickerList.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+
+    // result
+    await expect(stretchHeader).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)');
+
     const pickerBox = await page.locator('[class*="StrokeSettingsPanel__docked"]').boundingBox();
     const popoverBox = await page.locator('[class*="StrokeSettingsButtonPopover"]').boundingBox();
 
