@@ -109,7 +109,9 @@ describe('getBoxStrokePolygons', () => {
     expect(bevelOuter.some((point) => point.x === 6 && point.y === 20)).toBe(true);
     expect(bevelOuter.some((point) => point.x === 10 && point.y === 16)).toBe(true);
     expect(roundOuter.some((point) => point.x === 6 && point.y === 16)).toBe(false);
-    expect(roundOuter.length).toBeGreaterThan(bevelOuter.length);
+    expect(roundOuter.some((point) => point.x > 6.5 && point.x < 9.5 && point.y > 16.5 && point.y < 19.5)).toBe(true);
+    expect(bevelOuter.filter((point) => point.x < 10 && point.y < 20).every((point) => Math.abs(point.x + point.y - 26) < 1e-9)).toBe(true);
+    expect(roundOuter).toHaveLength(bevelOuter.length);
     expect(bounds(bevelOuter)).toEqual(bounds(miterOuter));
   });
 

@@ -1,0 +1,4 @@
+export const STROKE_DASH_DEFAULT = 20;
+export const STROKE_DASHES_DEFAULT = [20, 40, 60, 80];
+export const STROKE_DASH_MAX_COUNT = 4000;
+export const STROKE_DASH_MAX_LENGTH = 100000;

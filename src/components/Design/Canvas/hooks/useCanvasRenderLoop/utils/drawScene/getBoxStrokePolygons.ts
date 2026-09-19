@@ -12,6 +12,8 @@ import { getRoundedRectPoints, TRoundedRect } from 'utils/canvas/shapes/getRound
 import { getStrokeAlignInset } from 'utils/canvas/getStrokeAlignInset/getStrokeAlignInset';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
+const POINTS_PER_CORNER = ROUNDED_RECT_CORNER_SEGMENTS + 1;
+
 const offsetRadius = (radius: number, firstDelta: number, secondDelta: number): number =>
   radius > 0 ? Math.max(0, radius + (firstDelta + secondDelta) / 2) : 0;
 
@@ -46,6 +48,16 @@ const joinOuterRect = (rect: TRoundedRect, top: number, right: number, bottom: n
   cornerSmoothing: 0,
 });
 
+const bevelCorners = (points: TPoint[]): TPoint[] =>
+  points.map((_, index) => {
+    const start = index - (index % POINTS_PER_CORNER);
+    const from = points[start];
+    const to = points[start + POINTS_PER_CORNER - 1];
+    const t = (index - start) / ROUNDED_RECT_CORNER_SEGMENTS;
+
+    return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t };
+  });
+
 export const getBoxStrokePolygons = (
   node: TFrameNode | TRectangleNode,
   widths: TStrokeSideWidths,
@@ -64,11 +76,12 @@ export const getBoxStrokePolygons = (
     isJoined ? joinOuterRect(outerRect, top.outer, right.outer, bottom.outer, left.outer) : outerRect,
     getOffsetRect(node, -top.inner, -right.inner, -bottom.inner, -left.inner),
   ];
-  const outerSegments = join === StrokeJoin.bevel ? 1 : ROUNDED_RECT_CORNER_SEGMENTS;
 
-  return rects.map((rect, index) =>
-    getRoundedRectPoints(rect, isJoined && index === 0 ? outerSegments : ROUNDED_RECT_CORNER_SEGMENTS).map((point) =>
+  return rects.map((rect, index) => {
+    const points = getRoundedRectPoints(rect, ROUNDED_RECT_CORNER_SEGMENTS);
+
+    return (isJoined && index === 0 && join === StrokeJoin.bevel ? bevelCorners(points) : points).map((point) =>
       rotatePoint(point, center, node.rotation),
-    ),
-  );
+    );
+  });
 };

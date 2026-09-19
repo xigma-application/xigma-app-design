@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -10,21 +9,19 @@ import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
+// types
+import { StrokeStyle } from 'types/design/enums';
+
 // others
 import { STROKE_MITER_ANGLE_MAX, STROKE_MITER_ANGLE_MIN } from 'constant/strokeMiterAngle';
 import {
-  DEFAULT_STROKE_DASH,
-  DEFAULT_STROKE_DASHES,
-  DEFAULT_STROKE_DASH_CAP,
-  DEFAULT_STROKE_GAP,
   STROKE_STYLE_ICONS,
   STROKE_STYLE_MENU_WIDTH_PX,
-  TStrokeStyle,
 } from './constants';
 import { getStrokeDashCapButtons } from './utils/getStrokeDashCapButtons';
 import { getStrokeJoinButtons } from './utils/getStrokeJoinButtons';
 import { getStrokeStyleOptions } from './utils/getStrokeStyleOptions';
-import { useStrokeSettingsBasicTab } from './hooks/useStrokeSettingsBasicTab';
+import { useStrokeSettingsBasicTab } from './hooks/useStrokeSettingsBasicTab/useStrokeSettingsBasicTab';
 import { translationNameSpace } from '../../../../constants';
 
 // styles
@@ -33,7 +30,13 @@ import styles from './stroke-settings-basic-tab.module.scss';
 
 export const StrokeSettingsBasicTab: FC = () => {
   const { t } = useTranslation();
-  const { hasDashes, isCustom, isDashed, isMiter, join, miterAngle, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onStyleSelect, style } = useStrokeSettingsBasicTab();
+  const {
+    dash,
+    dashCap,
+    dashes,
+    gap,
+    hasDashes,
+    isCustom, isDashed, isMiter, join, miterAngle, onDashBlur, onDashCapSelect, onDashesBlur, onGapBlur, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onStyleSelect, style } = useStrokeSettingsBasicTab();
   const namespace = `${translationNameSpace}.settings`;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));
   const dashCapButtons = getStrokeDashCapButtons((cap) => t(`${namespace}.dashCap.options.${cap}`));
@@ -42,7 +45,7 @@ export const StrokeSettingsBasicTab: FC = () => {
   return (
     <div className={styles.StrokeSettingsBasicTab}>
       <StrokeSettingsField label={t(`${namespace}.style.label`)}>
-        <UITools.Dropdown<TStrokeStyle>
+        <UITools.Dropdown<StrokeStyle>
           bypassGlobalShortcuts={false}
           className={fieldStyles.StrokeSettingsField__input}
           icon={STROKE_STYLE_ICONS[style]}
@@ -60,8 +63,9 @@ export const StrokeSettingsBasicTab: FC = () => {
             <UITools.TextField
               aria-label={t(`${namespace}.dash.label`)}
               className={fieldStyles.StrokeSettingsField__input}
-              defaultValue={DEFAULT_STROKE_DASH}
+              defaultValue={String(dash)}
               e2eValue="stroke-dash"
+              onBlur={onDashBlur}
               type="text"
             />
           </StrokeSettingsField>
@@ -69,9 +73,9 @@ export const StrokeSettingsBasicTab: FC = () => {
             <UITools.TextField
               aria-label={t(`${namespace}.gap.label`)}
               className={fieldStyles.StrokeSettingsField__input}
-              defaultValue={DEFAULT_STROKE_GAP}
-              disabled
+              defaultValue={String(gap)}
               e2eValue="stroke-gap"
+              onBlur={onGapBlur}
               type="text"
             />
           </StrokeSettingsField>
@@ -82,8 +86,9 @@ export const StrokeSettingsBasicTab: FC = () => {
           <UITools.TextField
             aria-label={t(`${namespace}.dashes.label`)}
             className={fieldStyles.StrokeSettingsField__input}
-            defaultValue={DEFAULT_STROKE_DASHES}
+            defaultValue={dashes.join(', ')}
             e2eValue="stroke-dashes"
+            onBlur={onDashesBlur}
             type="text"
           />
         </StrokeSettingsField>
@@ -93,9 +98,9 @@ export const StrokeSettingsBasicTab: FC = () => {
           <StrokeSettingsField label={t(`${namespace}.dashCap.label`)}>
             <UITools.ToggleButtonGroup
               className={fieldStyles.StrokeSettingsField__input}
-              onChange={noop}
+              onChange={onDashCapSelect}
               toggleButtons={dashCapButtons}
-              value={DEFAULT_STROKE_DASH_CAP}
+              value={dashCap}
             />
           </StrokeSettingsField>
         </>

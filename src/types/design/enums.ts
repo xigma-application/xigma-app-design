@@ -108,6 +108,12 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeDashCap {
+  none = 'none',
+  round = 'round',
+  square = 'square',
+}
+
 export enum StrokeJoin {
   bevel = 'bevel',
   miter = 'miter',
@@ -127,6 +133,12 @@ export enum StrokeProfile {
   taper = 'taper',
   uniform = 'uniform',
   wedge = 'wedge',
+}
+
+export enum StrokeStyle {
+  custom = 'custom',
+  dashed = 'dashed',
+  solid = 'solid',
 }
 
 export enum StrokeSides {

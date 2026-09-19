@@ -15,8 +15,10 @@ import {
   PathType,
   SizingMode,
   StrokeAlign,
+  StrokeDashCap,
   StrokeJoin,
   StrokeMode,
+  StrokeStyle,
   StrokeProfile,
   StrokeSides,
 } from './enums';
@@ -110,6 +112,10 @@ export type TEllipseNode = TBaseNode & {
   flipY?: boolean;
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeDash?: number;
+  strokeDashCap?: StrokeDashCap;
+  strokeDashes?: number[];
+  strokeGap?: number;
   strokeWidth?: number;
   type: NodeType.ellipse;
 };
@@ -146,6 +152,10 @@ export type TFrameNode = TBaseNode & {
   paddingTop?: number;
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeDash?: number;
+  strokeDashCap?: StrokeDashCap;
+  strokeDashes?: number[];
+  strokeGap?: number;
   strokeWidth?: number;
   strokeBottomWidth?: number;
   strokeJoin?: StrokeJoin;
@@ -156,6 +166,7 @@ export type TFrameNode = TBaseNode & {
   strokeProfileFlipped?: boolean;
   strokeRightWidth?: number;
   strokeSides?: StrokeSides;
+  strokeStyle?: StrokeStyle;
   strokeTopWidth?: number;
   strokes?: TPaint[];
   type: NodeType.frame;
@@ -206,6 +217,10 @@ export type TRectangleNode = TBaseNode & {
   fills: TPaint[];
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeDash?: number;
+  strokeDashCap?: StrokeDashCap;
+  strokeDashes?: number[];
+  strokeGap?: number;
   strokeWidth?: number;
   strokeBottomWidth?: number;
   strokeJoin?: StrokeJoin;
@@ -216,6 +231,7 @@ export type TRectangleNode = TBaseNode & {
   strokeProfileFlipped?: boolean;
   strokeRightWidth?: number;
   strokeSides?: StrokeSides;
+  strokeStyle?: StrokeStyle;
   strokeTopWidth?: number;
   strokes?: TPaint[];
   type: NodeType.rectangle;
@@ -249,6 +265,10 @@ export type TTextNode = TBaseNode & {
   pathStartOffset?: number;
   strokeAlign?: StrokeAlign;
   strokeColor?: string;
+  strokeDash?: number;
+  strokeDashCap?: StrokeDashCap;
+  strokeDashes?: number[];
+  strokeGap?: number;
   strokeWidth?: number;
   type: NodeType.text;
 };

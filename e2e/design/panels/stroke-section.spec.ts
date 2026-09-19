@@ -270,7 +270,7 @@ test.describe('Design panels — Stroke section', () => {
 
     // result
     await expect(page.getByLabel('Dash', { exact: true })).toHaveValue('20');
-    await expect(page.getByLabel('Gap')).toBeDisabled();
+    await expect(page.getByLabel('Gap')).toHaveValue('20');
     await expect(page.getByText('Dash cap')).toBeVisible();
 
     const widthProfileRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' });
@@ -535,6 +535,98 @@ test.describe('Design panels — Stroke section', () => {
 
     // result
     await expect(miterAngle).toHaveCount(0);
+  });
+
+  test('the dashed and custom stroke styles write their fields to the node and actually redraw the stroke as dashes on the canvas', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-dashes-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    await weight.fill('12');
+    await weight.press('Enter');
+    await weight.blur();
+    await page.getByLabel('Advanced stroke settings').click();
+
+    const styleRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Style' });
+
+    // result
+    const solidScreenshot = await designPage.canvas.screenshot();
+
+    // action
+    await styleRow.locator('button').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Dashed' }).click();
+
+    // result
+    expect((await readNode(page, id)).strokeStyle).toBe('dashed');
+
+    const dashedScreenshot = await designPage.canvas.screenshot();
+
+    expect(dashedScreenshot.equals(solidScreenshot)).toBe(false);
+
+    // action: a longer dash with the Gap following it changes the pattern
+    const dash = page.getByLabel('Dash', { exact: true });
+
+    await dash.fill('40');
+    await dash.blur();
+
+    // result
+    expect((await readNode(page, id)).strokeDash).toBe(40);
+    await expect(page.getByLabel('Gap')).toHaveValue('40');
+    expect((await designPage.canvas.screenshot()).equals(dashedScreenshot)).toBe(false);
+
+    // action: Gap edits on its own
+    const gap = page.getByLabel('Gap');
+
+    await gap.fill('10');
+    await gap.blur();
+
+    // result
+    expect((await readNode(page, id)).strokeGap).toBe(10);
+
+    const gapScreenshot = await designPage.canvas.screenshot();
+
+    // action: a round cap rounds the dash ends
+    await page.getByLabel('Round', { exact: true }).first().click();
+
+    // result
+    expect((await readNode(page, id)).strokeDashCap).toBe('round');
+    expect((await designPage.canvas.screenshot()).equals(gapScreenshot)).toBe(false);
+
+    // action: the Join reshapes the corners of the dashes too, once the stroke sits outside the shape
+    const dashedRoundScreenshot = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Advanced stroke settings').click();
+    await page.locator('[class*="SectionColumn"] [class*="Dropdown"]').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+    await page.getByLabel('Advanced stroke settings').click();
+
+    const outsideMiterScreenshot = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Round', { exact: true }).last().click();
+
+    // result
+    expect((await readNode(page, id)).strokeJoin).toBe('round');
+    expect((await designPage.canvas.screenshot()).equals(outsideMiterScreenshot)).toBe(false);
+    expect(outsideMiterScreenshot.equals(dashedRoundScreenshot)).toBe(false);
+
+    // action: the custom style takes a dash, gap, dash, gap list
+    await styleRow.locator('button').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Custom' }).click();
+
+    const dashes = page.getByLabel('Dashes');
+
+    await dashes.fill('10, 20, 30, 20');
+    await dashes.blur();
+
+    // result
+    expect((await readNode(page, id)).strokeDashes).toEqual([10, 20, 30, 20]);
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
