@@ -12,14 +12,15 @@ import styles from './stroke-settings-panel-header.module.scss';
 
 export type TStrokeSettingsPanelHeaderProps = {
   onClose: TFunc;
+  title?: string;
 };
 
-export const StrokeSettingsPanelHeader: FC<TStrokeSettingsPanelHeaderProps> = ({ onClose }) => {
+export const StrokeSettingsPanelHeader: FC<TStrokeSettingsPanelHeaderProps> = ({ onClose, title }) => {
   const { t } = useTranslation();
 
   return (
     <div className={styles.StrokeSettingsPanelHeader}>
-      <span className={styles.StrokeSettingsPanelHeader__title}>{t(`${translationNameSpace}.settings.title`)}</span>
+      <span className={styles.StrokeSettingsPanelHeader__title}>{title ?? t(`${translationNameSpace}.settings.title`)}</span>
       <Tooltip content={t('common.close')}>
         <UITools.ButtonIcon
           ariaLabel={t('common.close')}

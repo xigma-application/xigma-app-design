@@ -1,0 +1,45 @@
+.StrokeBrushOption {
+  border-radius: 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 68px;
+  padding: 0 12px;
+  padding-bottom: 12px;
+  padding-top: 4px;
+  row-gap: 4px;
+
+  &:hover:not(&--selected) {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+  }
+
+  &--selected {
+    background-color: var(--color-selected);
+  }
+
+  &__header {
+    align-items: center;
+    display: flex;
+  }
+
+  &__check {
+    display: flex;
+  }
+
+  &__label {
+    color: var(--color-neutral-1);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__image {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+}

@@ -1,7 +1,8 @@
 .StrokeBrushPreview {
   display: block;
   filter: invert(1);
-  height: auto;
+  height: 100%;
+  width: auto;
 
   :root[data-theme='light'] & {
     filter: none;

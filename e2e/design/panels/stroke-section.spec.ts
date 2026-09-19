@@ -305,7 +305,78 @@ test.describe('Design panels — Stroke section', () => {
     await brushTrigger.click();
 
     // result
+    await expect(page.getByText('Brushes', { exact: true })).toBeVisible();
+    await expect(page.getByText('Stretch brushes')).toBeVisible();
     await expect(page.getByAltText('Blockbuster')).toBeVisible();
+
+    const pickerBox = await page.locator('[class*="StrokeSettingsPanel__docked"]').boundingBox();
+    const popoverBox = await page.locator('[class*="StrokeSettingsButtonPopover"]').boundingBox();
+
+    expect(Math.abs((pickerBox?.x ?? 0) + (pickerBox?.width ?? 0) - (popoverBox?.x ?? 0))).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs((pickerBox?.y ?? 0) + (pickerBox?.height ?? 0) - ((popoverBox?.y ?? 0) + (popoverBox?.height ?? 0))),
+    ).toBeLessThanOrEqual(1);
+
+    // action: clicking outside the brushes picker (but still inside the Stroke settings panel) closes only the picker
+    await page.getByText('Stroke settings').click();
+
+    // result
+    await expect(page.getByText('Brushes', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Stroke settings')).toBeVisible();
+
+    // action
+    await brushTrigger.click();
+    await page.getByAltText('Blockbuster').click();
+
+    // result
+    await expect(page.getByText('Brushes', { exact: true })).toHaveCount(0);
+    await expect(page.getByAltText('Blockbuster').first()).toBeVisible();
+
+    // action: pick a brush from the second (scatter) category, which swaps Direction for the scatter fields
+    await brushTrigger.click();
+    await expect(page.getByText('Scatter brushes')).toBeVisible();
+    await page.getByAltText('Bubblegum').click();
+
+    // result
+    const strokeSettingsPopover = page.locator('[class*="StrokeSettingsButtonPopover"]');
+
+    await expect(page.getByText('Direction')).toHaveCount(0);
+    await expect(strokeSettingsPopover.getByLabel('Gap')).toHaveValue('45%');
+    await expect(strokeSettingsPopover.getByLabel('Wiggle')).toHaveValue('0%');
+    await expect(strokeSettingsPopover.getByLabel('Size jitter')).toHaveValue('0%');
+    await expect(strokeSettingsPopover.getByLabel('Angular jitter')).toHaveValue('180°');
+    await expect(strokeSettingsPopover.getByLabel('Rotation')).toHaveValue('179°');
+
+    // action: hovering another option previews it live (value and form swap without a click)
+    await brushTrigger.click();
+
+    const pickerBoxBeforeHover = await page.locator('[class*="StrokeSettingsPanel__docked"]').boundingBox();
+
+    await page.getByAltText('Blockbuster').hover();
+
+    // result
+    await expect(page.getByText('Direction')).toBeVisible();
+    await expect(strokeSettingsPopover.getByLabel('Gap')).toHaveCount(0);
+
+    // result: the form's height change (scatter fields -> Direction row) must not drag the picker with it
+    const pickerBoxAfterHover = await page.locator('[class*="StrokeSettingsPanel__docked"]').boundingBox();
+
+    expect(Math.abs((pickerBoxAfterHover?.x ?? 0) - (pickerBoxBeforeHover?.x ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs((pickerBoxAfterHover?.y ?? 0) - (pickerBoxBeforeHover?.y ?? 0))).toBeLessThanOrEqual(1);
+
+    // action: leaving the option without clicking it reverts the preview
+    await page.getByText('Brushes', { exact: true }).hover();
+
+    // result
+    await expect(page.getByText('Direction')).toHaveCount(0);
+    await expect(strokeSettingsPopover.getByLabel('Gap')).toHaveValue('45%');
+
+    // action: closing the picker without clicking an option keeps the reverted (previous) brush
+    await page.getByText('Stroke settings').click();
+
+    // result
+    await expect(page.getByText('Brushes', { exact: true })).toHaveCount(0);
+    await expect(strokeSettingsPopover.getByLabel('Gap')).toHaveValue('45%');
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

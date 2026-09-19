@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import StrokeBrushPreview from './StrokeBrushPreview';
 
 describe('StrokeBrushPreview', () => {
-  it('should render the brush image with its label and the preview width', () => {
+  it('should render the brush image with its label, filling the height of its container', () => {
     // action
     render(<StrokeBrushPreview label="Heist" src="heist.png" />);
 
@@ -12,6 +12,6 @@ describe('StrokeBrushPreview', () => {
     const image = screen.getByAltText('Heist');
 
     expect(image).toHaveAttribute('src', 'heist.png');
-    expect(image).toHaveAttribute('width', '144');
+    expect(image.className).toContain('StrokeBrushPreview');
   });
 });
