@@ -2,14 +2,17 @@ import { FC } from 'react';
 import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+// @xigma
+import { ScrubbableInput } from '@xigma/components';
+
 // components
 import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
 // others
+import { STROKE_MITER_ANGLE_MAX, STROKE_MITER_ANGLE_MIN } from 'constant/strokeMiterAngle';
 import {
-  DEFAULT_MITER_ANGLE,
   DEFAULT_STROKE_DASH,
   DEFAULT_STROKE_DASHES,
   DEFAULT_STROKE_DASH_CAP,
@@ -30,7 +33,7 @@ import styles from './stroke-settings-basic-tab.module.scss';
 
 export const StrokeSettingsBasicTab: FC = () => {
   const { t } = useTranslation();
-  const { hasDashes, isCustom, isDashed, join, onJoinSelect, onStyleSelect, style } = useStrokeSettingsBasicTab();
+  const { hasDashes, isCustom, isDashed, isMiter, join, miterAngle, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onStyleSelect, style } = useStrokeSettingsBasicTab();
   const namespace = `${translationNameSpace}.settings`;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));
   const dashCapButtons = getStrokeDashCapButtons((cap) => t(`${namespace}.dashCap.options.${cap}`));
@@ -106,16 +109,30 @@ export const StrokeSettingsBasicTab: FC = () => {
           value={join}
         />
       </StrokeSettingsField>
-      <StrokeSettingsField label={t(`${namespace}.miterAngle.label`)}>
-        <UITools.TextField
-          aria-label={t(`${namespace}.miterAngle.ariaLabel`)}
-          className={fieldStyles.StrokeSettingsField__input}
-          defaultValue={DEFAULT_MITER_ANGLE}
-          e2eValue="stroke-miter-angle"
-          startAdornment={<UITools.InputAdornment icon="Protractor" />}
-          type="text"
-        />
-      </StrokeSettingsField>
+      {isMiter && (
+        <StrokeSettingsField label={t(`${namespace}.miterAngle.label`)}>
+          <UITools.TextField
+            aria-label={t(`${namespace}.miterAngle.ariaLabel`)}
+            className={fieldStyles.StrokeSettingsField__input}
+            defaultValue={`${miterAngle}°`}
+            e2eValue="stroke-miter-angle"
+            onBlur={onMiterAngleBlur}
+            startAdornment={
+              <ScrubbableInput
+                max={STROKE_MITER_ANGLE_MAX}
+                min={STROKE_MITER_ANGLE_MIN}
+                onChange={onMiterAngleScrub}
+                onMouseDown={onMiterAngleDragStart}
+                onMouseUp={onMiterAngleDragEnd}
+                value={miterAngle}
+              >
+                <UITools.InputAdornment icon="Protractor" />
+              </ScrubbableInput>
+            }
+            type="text"
+          />
+        </StrokeSettingsField>
+      )}
     </div>
   );
 };

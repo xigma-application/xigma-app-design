@@ -51,7 +51,7 @@ describe('StrokeSettingsPanel', () => {
     expect(screen.getByText('Style')).toBeInTheDocument();
     expect(screen.getByText('Width profile')).toBeInTheDocument();
     expect(screen.getByText('Join')).toBeInTheDocument();
-    expect(screen.getByText('Miter angle')).toBeInTheDocument();
+    expect(screen.queryByText('Miter angle')).not.toBeInTheDocument();
 
     // action
     fireEvent.click(screen.getByLabelText('Close'));

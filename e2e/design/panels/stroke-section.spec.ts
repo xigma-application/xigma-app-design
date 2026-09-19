@@ -221,15 +221,16 @@ test.describe('Design panels — Stroke section', () => {
 
     const rows = page.locator('[class*="StrokeSettingsField__row"]');
 
-    await expect(rows).toHaveCount(4);
+    await expect(rows).toHaveCount(3);
+    await expect(page.getByLabel('Miter angle', { exact: true })).toHaveCount(0);
 
-    for (const box of await Promise.all([0, 1, 2, 3].map((index) => rows.nth(index).boundingBox()))) {
+    for (const box of await Promise.all([0, 1, 2].map((index) => rows.nth(index).boundingBox()))) {
       expect(box?.height).toBe(32);
     }
 
     const panelBox = await page.locator('[class*="StrokeSettingsPanel__body"]').boundingBox();
     const inputBoxes = await Promise.all(
-      [0, 1, 2, 3].map((index) => rows.nth(index).locator('[class*="StrokeSettingsField__control"]').boundingBox()),
+      [0, 1, 2].map((index) => rows.nth(index).locator('[class*="StrokeSettingsField__control"]').boundingBox()),
     );
 
     for (const box of inputBoxes) {
@@ -484,6 +485,56 @@ test.describe('Design panels — Stroke section', () => {
 
     expect(bevelScreenshot.equals(roundScreenshot)).toBe(false);
     expect(bevelScreenshot.equals(miterScreenshot)).toBe(false);
+  });
+
+  test('the Miter angle is shown only for the Miter join, clamps to 7.17-180 and a 90+ angle bevels the box corners on the canvas', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-miter-angle');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    await weight.fill('24');
+    await weight.press('Enter');
+    await weight.blur();
+    await page.locator('[class*="SectionColumn"] [class*="Dropdown"]').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+    await page.getByLabel('Advanced stroke settings').click();
+
+    const miterAngle = page.getByLabel('Miter angle', { exact: true });
+
+    // result: Miter is the default join, so the field is there with Figma's default angle
+    await expect(miterAngle).toHaveValue('28.96°');
+
+    const sharpScreenshot = await designPage.canvas.screenshot();
+
+    // action: below the minimum clamps up
+    await miterAngle.fill('1');
+    await miterAngle.blur();
+
+    // result
+    await expect(miterAngle).toHaveValue('7.17°');
+    expect((await readNode(page, id)).strokeMiterAngle).toBe(7.17);
+
+    // action: above the maximum clamps down, and a 90+ angle bevels the 90 degree box corners
+    await miterAngle.fill('500');
+    await miterAngle.blur();
+
+    // result
+    await expect(miterAngle).toHaveValue('180°');
+    expect((await readNode(page, id)).strokeMiterAngle).toBe(180);
+    expect((await designPage.canvas.screenshot()).equals(sharpScreenshot)).toBe(false);
+
+    // action: the field is only available for the Miter join
+    await page.getByLabel('Round', { exact: true }).click();
+
+    // result
+    await expect(miterAngle).toHaveCount(0);
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

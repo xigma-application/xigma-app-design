@@ -150,6 +150,7 @@ export type TFrameNode = TBaseNode & {
   strokeBottomWidth?: number;
   strokeJoin?: StrokeJoin;
   strokeLeftWidth?: number;
+  strokeMiterAngle?: number;
   strokeMode?: StrokeMode;
   strokeProfile?: StrokeProfile;
   strokeProfileFlipped?: boolean;
@@ -209,6 +210,7 @@ export type TRectangleNode = TBaseNode & {
   strokeBottomWidth?: number;
   strokeJoin?: StrokeJoin;
   strokeLeftWidth?: number;
+  strokeMiterAngle?: number;
   strokeMode?: StrokeMode;
   strokeProfile?: StrokeProfile;
   strokeProfileFlipped?: boolean;

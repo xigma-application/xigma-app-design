@@ -6,6 +6,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getBoxStrokePolygons } from './getBoxStrokePolygons';
 import { getBoxStrokeProfilePolygons } from './getBoxStrokeProfilePolygons';
+import { getBoxStrokeJoin } from 'utils/design/stroke/getBoxStrokeJoin';
 import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
 
 export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode): TPoint[][] => {
@@ -16,5 +17,5 @@ export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode): TPo
     return getBoxStrokeProfilePolygons(node, node.strokeWidth, node.strokeAlign, profile, node.strokeProfileFlipped ?? false);
   }
 
-  return getBoxStrokePolygons(node, getStrokeSideWidths(node), node.strokeAlign, node.strokeJoin ?? StrokeJoin.miter);
+  return getBoxStrokePolygons(node, getStrokeSideWidths(node), node.strokeAlign, getBoxStrokeJoin(node.strokeJoin ?? StrokeJoin.miter, node.strokeMiterAngle));
 };

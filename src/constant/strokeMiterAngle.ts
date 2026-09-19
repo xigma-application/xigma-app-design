@@ -1,0 +1,3 @@
+export const STROKE_MITER_ANGLE_DEFAULT = 28.96;
+export const STROKE_MITER_ANGLE_MIN = 7.17;
+export const STROKE_MITER_ANGLE_MAX = 180;

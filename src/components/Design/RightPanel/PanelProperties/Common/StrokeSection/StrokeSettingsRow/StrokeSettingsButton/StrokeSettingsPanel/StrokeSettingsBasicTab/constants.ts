@@ -46,5 +46,3 @@ export const DEFAULT_STROKE_STYLE: TStrokeStyle = 'solid';
 export const DEFAULT_STROKE_JOIN = StrokeJoin.miter;
 
 export const DEFAULT_STROKE_PROFILE = StrokeProfile.uniform;
-
-export const DEFAULT_MITER_ANGLE = '28.96°';
