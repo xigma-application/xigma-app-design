@@ -2,6 +2,7 @@ import { FC, Fragment } from 'react';
 
 // components
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
+import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import FillSection from '../Common/FillSection/FillSection';
 import FrameHeader from './FrameHeader/FrameHeader';
 import LayoutSection from './LayoutSection/LayoutSection';
@@ -16,6 +17,7 @@ const Frame: FC = () => (
     <AppearanceSection />
     <FillSection />
     <StrokeSection />
+    <EffectsSection />
   </Fragment>
 );
 
