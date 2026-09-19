@@ -55,6 +55,7 @@ const StrokeSettingsRow: FC = () => {
         onSelect={onPositionSelect}
         options={options}
         textAlign="left"
+        truncate={false}
         value={isNonBasicMode ? StrokeAlign.center : position}
         variant="outline"
       />
