@@ -1,38 +1,9 @@
-$controlWidth: 128px;
-$rowHeight: 32px;
-
 .StrokeSettingsBasicTab {
   display: flex;
   flex-direction: column;
 
-  &__row {
-    align-items: center;
-    column-gap: 8px;
+  &__tooltip-target {
     display: flex;
-    height: $rowHeight;
-  }
-
-  &__label {
-    color: var(--color-neutral-2);
-    flex: 1;
-    font-size: 11px;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__control {
-    align-items: center;
-    column-gap: 4px;
-    display: flex;
-    flex: 0 0 $controlWidth;
-    height: $rowHeight;
-    min-width: 0;
-    width: $controlWidth;
-  }
-
-  &__input.StrokeSettingsBasicTab__input {
     flex: 1;
     min-width: 0;
   }

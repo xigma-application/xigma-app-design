@@ -15,6 +15,11 @@
     border-color: var(--color-neutral-3);
   }
 
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+
   &[data-state='open'] {
     border-color: var(--color-blue-1);
   }

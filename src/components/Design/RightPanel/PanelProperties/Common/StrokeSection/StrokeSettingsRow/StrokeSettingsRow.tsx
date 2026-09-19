@@ -21,6 +21,7 @@ import { StrokeAlign, StrokeSides } from 'types/design/enums';
 const StrokeSettingsRow: FC = () => {
   const { t } = useTranslation();
   const {
+    isDynamic,
     isWeightMixed,
     onPositionSelect,
     onSideBlur,
@@ -39,7 +40,10 @@ const StrokeSettingsRow: FC = () => {
 
   return (
     <UITools.SectionColumn
-      buttonsIcon={[<StrokeSettingsButton key="advanced" />, <StrokeSidesMenu key="individual" onSelect={onSidesSelect} sides={sides} />]}
+      buttonsIcon={[
+        <StrokeSettingsButton key="advanced" />,
+        <StrokeSidesMenu hidden={isDynamic} key="individual" onSelect={onSidesSelect} sides={sides} />,
+      ]}
       gridColumnType={UITools.GridColumnType.twoInputs}
       labels={[t(`${translationNameSpace}.position.label`), t(`${translationNameSpace}.weight.label`)]}
       withTopAlignedButtons
@@ -47,10 +51,11 @@ const StrokeSettingsRow: FC = () => {
     >
       <UITools.Dropdown<StrokeAlign>
         bypassGlobalShortcuts={false}
+        disabled={isDynamic}
         onSelect={onPositionSelect}
         options={options}
         textAlign="left"
-        value={position}
+        value={isDynamic ? StrokeAlign.center : position}
         variant="outline"
       />
       <StrokeWeightField
@@ -62,7 +67,7 @@ const StrokeSettingsRow: FC = () => {
         onScrub={onWeightScrub}
         scrubValue={weight}
       />
-      {sides === StrokeSides.custom && (
+      {sides === StrokeSides.custom && !isDynamic && (
         <StrokeSideFields
           onDragEnd={onWeightDragEnd}
           onDragStart={onWeightDragStart}

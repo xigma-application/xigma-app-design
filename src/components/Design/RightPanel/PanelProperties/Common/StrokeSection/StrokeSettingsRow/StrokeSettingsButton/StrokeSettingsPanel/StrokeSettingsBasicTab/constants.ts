@@ -25,6 +25,24 @@ export const STROKE_JOIN_ICONS: Record<TStrokeJoin, TIconProps['name']> = {
   round: 'StrokeJoinRound',
 };
 
+export const STROKE_DASH_CAPS = ['none', 'square', 'round'] as const;
+
+export type TStrokeDashCap = (typeof STROKE_DASH_CAPS)[number];
+
+export const STROKE_DASH_CAP_ICONS: Record<TStrokeDashCap, TIconProps['name']> = {
+  none: 'StrokeCapNone',
+  round: 'StrokeCapRound',
+  square: 'StrokeCapSquare',
+};
+
+export const DEFAULT_STROKE_DASH_CAP: TStrokeDashCap = 'none';
+
+export const DEFAULT_STROKE_DASH = '20';
+
+export const DEFAULT_STROKE_GAP = '20';
+
+export const DEFAULT_STROKE_DASHES = '20, 40, 60, 80';
+
 export const DEFAULT_STROKE_STYLE: TStrokeStyle = 'solid';
 
 export const DEFAULT_STROKE_JOIN: TStrokeJoin = 'miter';

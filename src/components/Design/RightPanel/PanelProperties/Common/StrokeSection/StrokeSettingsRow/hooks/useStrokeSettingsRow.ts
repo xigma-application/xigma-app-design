@@ -8,7 +8,7 @@ import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { StrokeAlign, StrokeSides } from 'types/design/enums';
+import { StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
 import { isAppearanceNode } from '../../../AppearanceSection/types';
 import { TStrokeSide, TStrokeSideWidths } from 'utils/design/stroke/types';
 
@@ -21,6 +21,7 @@ import { getStrokeWeightDisplay } from 'utils/design/stroke/getStrokeWeightDispl
 import { parseStrokeWeight } from '../utils/parseStrokeWeight';
 
 export type TUseStrokeSettingsRowResult = {
+  isDynamic: boolean;
   isWeightMixed: boolean;
   onPositionSelect: TFunc<[StrokeAlign]>;
   onSideBlur: (side: TStrokeSide) => TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -93,6 +94,7 @@ export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
     };
 
   return {
+    isDynamic: node?.strokeMode === StrokeMode.dynamic,
     isWeightMixed: weightDisplay === null,
     onPositionSelect,
     onSideBlur,

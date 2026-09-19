@@ -217,7 +217,7 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByText('Dynamic')).toBeVisible();
     await expect(page.getByText('Brush')).toBeVisible();
 
-    const rows = page.locator('[class*="StrokeSettingsBasicTab__row"]');
+    const rows = page.locator('[class*="StrokeSettingsField__row"]');
 
     await expect(rows).toHaveCount(4);
 
@@ -227,7 +227,7 @@ test.describe('Design panels — Stroke section', () => {
 
     const panelBox = await page.locator('[class*="StrokeSettingsPanel__body"]').boundingBox();
     const inputBoxes = await Promise.all(
-      [0, 1, 2, 3].map((index) => rows.nth(index).locator('[class*="StrokeSettingsBasicTab__control"]').boundingBox()),
+      [0, 1, 2, 3].map((index) => rows.nth(index).locator('[class*="StrokeSettingsField__control"]').boundingBox()),
     );
 
     for (const box of inputBoxes) {
@@ -244,6 +244,49 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.locator('[class*="StrokeProfilePreview__image"]')).toHaveCount(5);
     await expect(page.locator('[class*="StrokeProfilePreview__uniform"]')).toHaveCount(2);
     await page.locator('[class*="StrokeProfilePreview__uniform"]').last().click();
+
+    await expect(page.getByLabel('Dash', { exact: true })).toHaveCount(0);
+
+    // action
+    await rows.nth(0).locator('button').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Dashed' }).click();
+
+    // result
+    await expect(page.getByLabel('Dash', { exact: true })).toHaveValue('20');
+    await expect(page.getByLabel('Gap')).toBeDisabled();
+    await expect(page.getByText('Dash cap')).toBeVisible();
+
+    const widthProfileRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' });
+
+    await expect(widthProfileRow.locator('button').first()).toBeDisabled();
+    await expect(page.getByLabel('Flip width profile')).toBeDisabled();
+
+    // action
+    await widthProfileRow.locator('[class*="tooltip-target"]').hover();
+
+    // result
+    await expect(page.getByText("Can't use width profiles on dashed strokes").first()).toBeVisible();
+
+    // action
+    await rows.nth(0).locator('button').first().click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Custom' }).click();
+
+    // result
+    await expect(page.getByLabel('Dashes')).toHaveValue('20, 40, 60, 80');
+    await expect(page.getByLabel('Gap')).toHaveCount(0);
+    await expect(page.getByText('Dash cap')).toBeVisible();
+    await expect(page.getByLabel('Flip width profile')).toBeDisabled();
+
+    // action
+    await page.getByText('Dynamic', { exact: true }).click();
+
+    // result
+    await expect(page.getByLabel('Frequency')).toHaveValue('75%');
+    await expect(page.getByLabel('Wiggle')).toHaveValue('30%');
+    await expect(page.getByLabel('Smoothen')).toHaveValue('50%');
+    await expect(page.getByLabel('Individual strokes')).toBeHidden();
+    await expect(page.getByLabel('Individual strokes')).toHaveCount(1);
+    await expect(page.getByText('Center').first()).toBeVisible();
 
     // action
     await page.getByText('Brush').click();

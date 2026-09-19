@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import StrokeSettingsBasicTab from './StrokeSettingsBasicTab/StrokeSettingsBasicTab';
+import StrokeSettingsDynamicTab from './StrokeSettingsDynamicTab/StrokeSettingsDynamicTab';
 import StrokeSettingsPanelHeader from './StrokeSettingsPanelHeader/StrokeSettingsPanelHeader';
 import { UITools } from 'shared';
 
@@ -17,7 +18,7 @@ import { translationNameSpace } from '../../../constants';
 import styles from './stroke-settings-panel.module.scss';
 
 // types
-import { StrokeSettingsTab } from './enums';
+import { StrokeMode } from 'types/design/enums';
 
 export type TStrokeSettingsPanelProps = {
   onClose: TFunc;
@@ -33,7 +34,8 @@ export const StrokeSettingsPanel: FC<TStrokeSettingsPanelProps> = ({ onClose }) 
       <StrokeSettingsPanelHeader onClose={onClose} />
       <div className={styles.StrokeSettingsPanel__body}>
         <UITools.ToggleButtonGroup onChange={onTabChange} toggleButtons={tabButtons} value={activeTab} />
-        {activeTab === StrokeSettingsTab.basic && <StrokeSettingsBasicTab />}
+        {activeTab === StrokeMode.basic && <StrokeSettingsBasicTab />}
+        {activeTab === StrokeMode.dynamic && <StrokeSettingsDynamicTab />}
       </div>
     </div>
   );

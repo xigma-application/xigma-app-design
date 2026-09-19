@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 
 // styles
-import styles from './stroke-settings-basic-tab.module.scss';
+import styles from './stroke-settings-field.module.scss';
 
 export type TStrokeSettingsFieldProps = {
   children: ReactNode;
@@ -9,9 +9,9 @@ export type TStrokeSettingsFieldProps = {
 };
 
 export const StrokeSettingsField: FC<TStrokeSettingsFieldProps> = ({ children, label }) => (
-  <div className={styles.StrokeSettingsBasicTab__row}>
-    <span className={styles.StrokeSettingsBasicTab__label}>{label}</span>
-    <div className={styles.StrokeSettingsBasicTab__control}>{children}</div>
+  <div className={styles.StrokeSettingsField__row}>
+    <span className={styles.StrokeSettingsField__label}>{label}</span>
+    <div className={styles.StrokeSettingsField__control}>{children}</div>
   </div>
 );
 

@@ -108,6 +108,12 @@ export enum SizingMode {
   hug = 'hug',
 }
 
+export enum StrokeMode {
+  basic = 'basic',
+  brush = 'brush',
+  dynamic = 'dynamic',
+}
+
 export enum StrokeProfile {
   eye = 'eye',
   mirroredTaper = 'mirroredTaper',

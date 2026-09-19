@@ -14,7 +14,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, StrokeAlign, StrokeSides } from 'types/design/enums';
+import { NodeType, StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
 
 describe('StrokeSettingsRow', () => {
   afterEach(() => {
@@ -102,5 +102,43 @@ describe('StrokeSettingsRow', () => {
     expect(screen.getByLabelText('Stroke top weight')).toHaveValue('2');
     expect(screen.getByLabelText('Stroke right weight')).toHaveValue('3');
     expect(screen.getByLabelText('Stroke bottom weight')).toHaveValue('4');
+  });
+
+  it('should disable Position showing Center and hide (keep in the DOM) the individual strokes button for a dynamic stroke', () => {
+    // before
+    store.dispatch(
+      addNode({
+        fills: [],
+        height: 10,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        strokeAlign: StrokeAlign.outside,
+        strokeMode: StrokeMode.dynamic,
+        strokeWidth: 3,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // action
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <StrokeSettingsRow />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('Center').closest('button')).toBeDisabled();
+    expect(screen.getByLabelText('Individual strokes', { selector: '[aria-hidden="true"]' })).toBeDisabled();
+    expect(screen.getByLabelText('Advanced stroke settings')).toBeInTheDocument();
   });
 });

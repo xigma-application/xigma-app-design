@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,17 +11,21 @@ import { getStrokeSidesTriggerIcon } from '../utils/getStrokeSidesTriggerIcon';
 import { STROKE_SIDES_ORDER } from '../constants';
 import { translationNameSpace } from '../../constants';
 
+// styles
+import styles from './stroke-sides-menu.module.scss';
+
 // types
 import { StrokeSides } from 'types/design/enums';
 
 export type TStrokeSidesMenuProps = {
+  hidden?: boolean;
   onSelect: TFunc<[StrokeSides]>;
   sides: StrokeSides;
 };
 
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
-const StrokeSidesMenu: FC<TStrokeSidesMenuProps> = ({ onSelect, sides }) => {
+const StrokeSidesMenu: FC<TStrokeSidesMenuProps> = ({ hidden = false, onSelect, sides }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -31,6 +36,9 @@ const StrokeSidesMenu: FC<TStrokeSidesMenuProps> = ({ onSelect, sides }) => {
       onOpenChange={setIsOpen}
       trigger={
         <UITools.ButtonIcon
+          aria-hidden={hidden}
+          className={cx({ [styles['StrokeSidesMenu__trigger--hidden']]: hidden })}
+          disabled={hidden}
           ariaLabel={t(`${translationNameSpace}.individualStrokesAriaLabel`)}
           name={getStrokeSidesTriggerIcon(sides)}
           selected={isOpen}
