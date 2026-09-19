@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { noop } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -9,8 +8,10 @@ import { Tooltip } from '@xigma/components';
 import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import { UITools } from 'shared';
 
+// hooks
+import { useStrokeSettingsWidthProfileField } from './hooks/useStrokeSettingsWidthProfileField';
+
 // others
-import { DEFAULT_STROKE_PROFILE } from '../StrokeSettingsBasicTab/constants';
 import { getStrokeProfileOptions } from '../StrokeSettingsBasicTab/utils/getStrokeProfileOptions';
 import { isStrokeProfileFlippable } from '../StrokeSettingsBasicTab/utils/isStrokeProfileFlippable';
 import { translationNameSpace } from '../../../../constants';
@@ -28,8 +29,8 @@ export type TStrokeSettingsWidthProfileFieldProps = {
 
 export const StrokeSettingsWidthProfileField: FC<TStrokeSettingsWidthProfileFieldProps> = ({ disabled = false }) => {
   const { t } = useTranslation();
+  const { flipped, onFlipToggle, onProfileSelect, profile } = useStrokeSettingsWidthProfileField();
   const namespace = `${translationNameSpace}.settings`;
-  const profile = DEFAULT_STROKE_PROFILE;
   const profileOptions = getStrokeProfileOptions((option) => t(`${namespace}.widthProfile.options.${option}`));
 
   return (
@@ -40,7 +41,7 @@ export const StrokeSettingsWidthProfileField: FC<TStrokeSettingsWidthProfileFiel
             bypassGlobalShortcuts={false}
             className={fieldStyles.StrokeSettingsField__input}
             disabled={disabled}
-            onSelect={noop}
+            onSelect={onProfileSelect}
             options={profileOptions}
             textAlign="left"
             value={profile}
@@ -53,6 +54,8 @@ export const StrokeSettingsWidthProfileField: FC<TStrokeSettingsWidthProfileFiel
           ariaLabel={t(`${namespace}.widthProfile.flipAriaLabel`)}
           disabled={disabled || !isStrokeProfileFlippable(profile)}
           name="FlipHorizontal"
+          onClick={onFlipToggle}
+          selected={flipped}
         />
       </Tooltip>
     </StrokeSettingsField>

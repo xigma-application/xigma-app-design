@@ -8,10 +8,12 @@ import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs'
 import { drawBoxLeafNodeStrokePaints } from '../drawBoxLeafNodeStrokePaints';
 
 const drawBoxPaintsMock = vi.fn();
-const getBoxStrokePolygonsMock = vi.fn();
+const getBoxStrokeRingPolygonsMock = vi.fn();
 
 vi.mock('../drawBoxPaints', () => ({ drawBoxPaints: (...args: unknown[]): void => drawBoxPaintsMock(...args) }));
-vi.mock('../../getBoxStrokePolygons', () => ({ getBoxStrokePolygons: (...args: unknown[]): unknown => getBoxStrokePolygonsMock(...args) }));
+vi.mock('../../getBoxStrokeRingPolygons', () => ({
+  getBoxStrokeRingPolygons: (...args: unknown[]): unknown => getBoxStrokeRingPolygonsMock(...args),
+}));
 
 const context = {} as TDrawSceneContext;
 const refs = createCanvasRefs();
@@ -32,7 +34,7 @@ const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
 describe('drawBoxLeafNodeStrokePaints', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getBoxStrokePolygonsMock.mockReturnValue([[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]]);
+    getBoxStrokeRingPolygonsMock.mockReturnValue([[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]]);
   });
 
   it('should draw the stroke paints inside the ring polygons', () => {
@@ -43,7 +45,7 @@ describe('drawBoxLeafNodeStrokePaints', () => {
     drawBoxLeafNodeStrokePaints(context, node, 0.5, {}, new Map(), refs, null, 0);
 
     // result
-    expect(getBoxStrokePolygonsMock).toHaveBeenCalledWith(node, { bottom: 2, left: 2, right: 2, top: 2 }, StrokeAlign.outside);
+    expect(getBoxStrokeRingPolygonsMock).toHaveBeenCalledWith(node);
     expect(drawBoxPaintsMock).toHaveBeenCalledWith(
       context,
       node,

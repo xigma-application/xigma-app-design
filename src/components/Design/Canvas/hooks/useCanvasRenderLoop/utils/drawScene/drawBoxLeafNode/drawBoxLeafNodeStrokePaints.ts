@@ -6,8 +6,7 @@ import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
 // utils
 import { drawBoxPaints } from './drawBoxPaints';
-import { getBoxStrokePolygons } from '../getBoxStrokePolygons';
-import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
+import { getBoxStrokeRingPolygons } from '../getBoxStrokeRingPolygons';
 
 export const drawBoxLeafNodeStrokePaints = (
   context: TDrawSceneContext,
@@ -20,7 +19,7 @@ export const drawBoxLeafNodeStrokePaints = (
   patternSourceDepth: number,
 ): void => {
   if ('fills' in node && node.strokes && node.strokes.length > 0 && node.strokeWidth) {
-    const polygons = getBoxStrokePolygons(node, getStrokeSideWidths(node), node.strokeAlign);
+    const polygons = getBoxStrokeRingPolygons(node);
     drawBoxPaints(context, node, node.strokes, polygons, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
   }
 };

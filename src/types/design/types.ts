@@ -16,6 +16,7 @@ import {
   SizingMode,
   StrokeAlign,
   StrokeMode,
+  StrokeProfile,
   StrokeSides,
 } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
@@ -148,6 +149,8 @@ export type TFrameNode = TBaseNode & {
   strokeBottomWidth?: number;
   strokeLeftWidth?: number;
   strokeMode?: StrokeMode;
+  strokeProfile?: StrokeProfile;
+  strokeProfileFlipped?: boolean;
   strokeRightWidth?: number;
   strokeSides?: StrokeSides;
   strokeTopWidth?: number;
@@ -204,6 +207,8 @@ export type TRectangleNode = TBaseNode & {
   strokeBottomWidth?: number;
   strokeLeftWidth?: number;
   strokeMode?: StrokeMode;
+  strokeProfile?: StrokeProfile;
+  strokeProfileFlipped?: boolean;
   strokeRightWidth?: number;
   strokeSides?: StrokeSides;
   strokeTopWidth?: number;

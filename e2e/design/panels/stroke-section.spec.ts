@@ -12,6 +12,8 @@ type TReadableNode = {
   fills?: TReadablePaint[];
   strokeAlign?: string;
   strokeLeftWidth?: number;
+  strokeProfile?: string;
+  strokeProfileFlipped?: boolean;
   strokeSides?: string;
   strokeTopWidth?: number;
   strokeWidth?: number;
@@ -237,6 +239,20 @@ test.describe('Design panels — Stroke section', () => {
 
     await expect(page.getByLabel('Flip width profile')).toBeDisabled();
 
+    // action: Wedge, Taper and Quarter taper are the flippable profiles, unlike the default Uniform
+    await rows.nth(1).locator('button').first().click();
+    await page.getByAltText('Quarter taper').click();
+
+    // result
+    await expect(page.getByLabel('Flip width profile')).toBeEnabled();
+
+    // action: back to the default Uniform profile
+    await rows.nth(1).locator('button').first().click();
+    await page.locator('[class*="StrokeProfilePreview__uniform"]').last().click();
+
+    // result
+    await expect(page.getByLabel('Flip width profile')).toBeDisabled();
+
     // action
     await rows.nth(1).locator('button').first().click();
 
@@ -377,6 +393,52 @@ test.describe('Design panels — Stroke section', () => {
     // result
     await expect(page.getByText('Brushes', { exact: true })).toHaveCount(0);
     await expect(strokeSettingsPopover.getByLabel('Gap')).toHaveValue('45%');
+  });
+
+  test('picking a width profile actually redraws the stroke on the canvas, and flip redraws it again', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-width-profile-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    // action: a thick stroke makes a width-profile difference clearly visible on screen
+    await weight.fill('24');
+    await weight.press('Enter');
+    await weight.blur();
+    await page.getByLabel('Advanced stroke settings').click();
+
+    const rows = page.locator('[class*="StrokeSettingsField__row"]');
+    const widthProfileRow = rows.filter({ hasText: 'Width profile' });
+
+    // result
+    const uniformScreenshot = await designPage.canvas.screenshot();
+
+    // action
+    await widthProfileRow.locator('button').first().click();
+    await page.getByAltText('Wedge').click();
+
+    // result: a non-uniform profile actually changes the rendered stroke
+    expect((await readNode(page, id)).strokeProfile).toBe('wedge');
+
+    const wedgeScreenshot = await designPage.canvas.screenshot();
+
+    expect(wedgeScreenshot.equals(uniformScreenshot)).toBe(false);
+
+    // action: flip mirrors which end of the loop is thick, changing the render again
+    await page.getByLabel('Flip width profile').click();
+
+    // result
+    expect((await readNode(page, id)).strokeProfileFlipped).toBe(true);
+
+    const flippedScreenshot = await designPage.canvas.screenshot();
+
+    expect(flippedScreenshot.equals(wedgeScreenshot)).toBe(false);
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
