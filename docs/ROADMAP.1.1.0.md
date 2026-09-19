@@ -162,8 +162,8 @@ evenly). It also holds the Layout version switch — Figma split its auto layout
 padding, an auto gap never overlaps children, a lone spaced child sits at the start, and a shape's
 stroke only affects layout when it's aligned to the inside.
 
-- [ ] stroke alignment (inside / center / outside) is applied by the engine and to rendering, but has
-      no panel control yet — it can only be set in code
+- [x] stroke alignment (inside / center / outside) is applied by the engine and to rendering, and now
+      has a Position control in the Stroke section (Stage 29)
 
 ## Stage 25 — Auto layout: grid flow
 
@@ -261,6 +261,21 @@ gives the ratio with an AA / AAA badge. The color map draws a curve and dotted a
 fails; hover the badge to preview the closest passing color, click to jump there. When the background
 or the fill has a blend mode, or the background is a gradient, image or similar, it says so instead of
 guessing.
+
+## Stage 29 — Stroke
+
+The Stroke section works like Fill (several strokes, color / gradient / image, blend mode) and adds
+the stroke-specific settings:
+
+- [x] **Position** (inside / center / outside), **Weight**, and individual sides (top / right /
+      bottom / left) with their own widths
+- [x] **Advanced settings** panel with three tabs: **Basic** (solid / dashed / custom dashes, width
+      profile, join, miter angle), **Dynamic** (wobbly line: Frequency, Wiggle, Smoothen) and **Brush**
+      (pick a brush and its direction; scatter brushes add Gap, Wiggle, jitter and Rotation)
+- [x] all of it is drawn on the canvas and undoable — for rectangles and frames for now
+- [ ] the same modes for other shapes and vector paths
+
+Below it sits an **Effects** section, empty for now: same header and Add button, nothing happens yet.
 
 ## Related
 
