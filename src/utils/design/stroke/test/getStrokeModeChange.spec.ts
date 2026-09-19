@@ -1,13 +1,13 @@
 // types
-import { StrokeMode, StrokeSides } from 'types/design/enums';
+import { StrokeAlign, StrokeMode, StrokeSides } from 'types/design/enums';
 
 // utils
 import { getStrokeModeChange } from '../getStrokeModeChange';
 
 describe('getStrokeModeChange', () => {
-  it('should only set the mode when leaving sides untouched', () => {
+  it('should only set the mode (and Center for dynamic) when leaving sides untouched', () => {
     expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.brush)).toEqual({ strokeMode: StrokeMode.brush });
-    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.dynamic)).toEqual({ strokeMode: StrokeMode.dynamic });
+    expect(getStrokeModeChange({ strokeWidth: 4 }, StrokeMode.dynamic)).toEqual({ strokeAlign: StrokeAlign.center, strokeMode: StrokeMode.dynamic });
   });
 
   it('should reset a single side to all with the same weight when switching to dynamic', () => {

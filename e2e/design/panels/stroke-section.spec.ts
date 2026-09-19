@@ -9,6 +9,9 @@ type TReadablePaint = {
   type: string;
 };
 type TReadableNode = {
+  strokeDynamicFrequency?: number;
+  strokeDynamicSmoothen?: number;
+  strokeDynamicWiggle?: number;
   fills?: TReadablePaint[];
   strokeAlign?: string;
   strokeLeftWidth?: number;
@@ -676,6 +679,61 @@ test.describe('Design panels — Stroke section', () => {
     // result
     await expect(dashes).toHaveValue('9, 4, 7, 9');
     expect((await readNode(page, id)).strokeDashes).toEqual([9, 4, 7, 9]);
+  });
+
+  test('the Dynamic tab writes Frequency, Wiggle and Smoothen to the node with their limits and redraws the stroke as a wobbly line on the canvas', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-dynamic');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+    const weight = page.getByLabel('Stroke weight');
+
+    await weight.fill('6');
+    await weight.press('Enter');
+    await weight.blur();
+
+    const plainScreenshot = await designPage.canvas.screenshot();
+
+    await page.getByLabel('Advanced stroke settings').click();
+    await page.getByText('Dynamic', { exact: true }).click();
+
+    // result: the dynamic mode alone already reshapes the stroke
+    await expect.poll(async () => (await designPage.canvas.screenshot()).equals(plainScreenshot)).toBe(false);
+
+    const dynamicScreenshot = await designPage.canvas.screenshot();
+    const frequency = page.getByLabel('Frequency');
+    const wiggle = page.getByLabel('Wiggle');
+    const smoothen = page.getByLabel('Smoothen');
+
+    // action
+    await wiggle.fill('600');
+    await wiggle.blur();
+    await frequency.fill('5000');
+    await frequency.blur();
+    await smoothen.fill('250');
+    await smoothen.blur();
+
+    // result
+    expect(await readNode(page, id)).toMatchObject({ strokeDynamicFrequency: 2000, strokeDynamicSmoothen: 100, strokeDynamicWiggle: 600 });
+    await expect(frequency).toHaveValue('2000%');
+    await expect(smoothen).toHaveValue('100%');
+    expect((await designPage.canvas.screenshot()).equals(dynamicScreenshot)).toBe(false);
+
+    // action: ArrowUp steps the Wiggle live and keeps the field focused
+    await wiggle.click();
+    await wiggle.press('ArrowUp');
+
+    // result
+    await expect(wiggle).toBeFocused();
+    await expect(wiggle).toHaveValue('601%');
+    expect((await readNode(page, id)).strokeDynamicWiggle).toBe(601);
   });
 
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {

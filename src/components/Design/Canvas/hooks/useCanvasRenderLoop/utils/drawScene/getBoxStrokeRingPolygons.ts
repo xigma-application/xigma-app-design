@@ -1,17 +1,19 @@
 // types
-import { StrokeDashCap, StrokeJoin, StrokeProfile, StrokeSides } from 'types/design/enums';
+import { StrokeAlign, StrokeDashCap, StrokeJoin, StrokeMode, StrokeProfile, StrokeSides } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
 import { getBoxDashedStrokePolygons } from './getBoxDashedStrokePolygons';
+import { getBoxDynamicStrokePolygons } from './getBoxDynamicStrokePolygons';
 import { getBoxStrokePolygons } from './getBoxStrokePolygons';
 import { getBoxStrokeProfilePolygons } from './getBoxStrokeProfilePolygons';
 import { getBoxStrokeJoin } from 'utils/design/stroke/getBoxStrokeJoin';
 import { getStrokeDashPattern } from 'utils/design/stroke/getStrokeDashPattern';
+import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValues';
 import { getStrokeSideWidths } from 'utils/design/stroke/getStrokeSideWidths';
 
-type TRingMode = 'dashed' | 'profile' | 'uniform';
+type TRingMode = 'dashed' | 'dynamic' | 'profile' | 'uniform';
 
 const getRingMode = (node: TFrameNode | TRectangleNode, dashPattern: number[] | null): TRingMode => {
   const hasWidth = Boolean(node.strokeWidth);
@@ -19,6 +21,8 @@ const getRingMode = (node: TFrameNode | TRectangleNode, dashPattern: number[] | 
     (node.strokeProfile ?? StrokeProfile.uniform) !== StrokeProfile.uniform && (node.strokeSides ?? StrokeSides.all) === StrokeSides.all;
 
   switch (true) {
+    case hasWidth && node.strokeMode === StrokeMode.dynamic:
+      return 'dynamic';
     case hasWidth && dashPattern !== null:
       return 'dashed';
     case hasWidth && hasProfile:
@@ -40,6 +44,14 @@ export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode): TPo
   const dashPattern = getStrokeDashPattern(node);
 
   switch (getRingMode(node, dashPattern)) {
+    case 'dynamic': {
+      const [outerLoop, innerLoop] = getBoxStrokePolygons(node, getStrokeSideWidths(node), StrokeAlign.center, StrokeJoin.miter);
+
+      return (
+        getBoxDynamicStrokePolygons(outerLoop, innerLoop, { ...getStrokeDynamicValues(node), seed: node.id, strokeWidth: node.strokeWidth ?? 0 }) ??
+        getUniformRingPolygons(node)
+      );
+    }
     case 'dashed': {
       const [outerLoop, innerLoop] = getBoxStrokePolygons(
         node,

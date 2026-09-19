@@ -155,6 +155,9 @@ export type TFrameNode = TBaseNode & {
   strokeDash?: number;
   strokeDashCap?: StrokeDashCap;
   strokeDashes?: number[];
+  strokeDynamicFrequency?: number;
+  strokeDynamicSmoothen?: number;
+  strokeDynamicWiggle?: number;
   strokeGap?: number;
   strokeWidth?: number;
   strokeBottomWidth?: number;
@@ -220,6 +223,9 @@ export type TRectangleNode = TBaseNode & {
   strokeDash?: number;
   strokeDashCap?: StrokeDashCap;
   strokeDashes?: number[];
+  strokeDynamicFrequency?: number;
+  strokeDynamicSmoothen?: number;
+  strokeDynamicWiggle?: number;
   strokeGap?: number;
   strokeWidth?: number;
   strokeBottomWidth?: number;
