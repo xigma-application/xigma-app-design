@@ -208,6 +208,30 @@ test.describe('auto-layout — Grid flow', () => {
     expect(unique((await getChildren(page)).map(({ x }) => x))).toHaveLength(2);
   });
 
+  test('ArrowUp in the Grid popover Columns field keeps the field focused while the column count keeps growing', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-grid-popover-arrow-focus');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+    const before = await readColumnCount(page);
+
+    await columnsField.click();
+    await columnsField.press('ArrowUp');
+    await columnsField.press('ArrowUp');
+
+    await expect(columnsField).toBeFocused();
+    await expect(columnsField).toHaveValue(String(before + 2));
+    await expect.poll(() => readColumnCount(page)).toBe(before + 2);
+  });
+
   test('the Grid size popover opens anchored to the top-left corner of its trigger tile', async ({ page }) => {
     const designPage = new DesignPage(page);
 

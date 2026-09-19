@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState } from 'react';
+import { FC, FocusEvent, ReactNode, useState } from 'react';
 import { kebabCase } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -30,6 +30,14 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
     setRevision((current) => current + 1);
   };
 
+  const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
+    if (document.activeElement === event.target) {
+      onCommit(event.target.value);
+    } else {
+      handleCommit(event.target.value);
+    }
+  };
+
   return (
     <Tooltip content={label}>
       <UITools.TextField
@@ -37,8 +45,8 @@ export const GridInputCells: FC<TGridInputCellsProps> = ({ endAdornment, iconNam
         defaultValue={value}
         e2eValue={key}
         endAdornment={endAdornment}
-        key={`${value}-${revision}`}
-        onBlur={(event) => handleCommit(event.target.value)}
+        key={revision}
+        onBlur={handleBlur}
         stepNumbers={{ max: GRID_COUNT_MAX, min: GRID_COUNT_MIN }}
         startAdornment={
           <ScrubbableInput
