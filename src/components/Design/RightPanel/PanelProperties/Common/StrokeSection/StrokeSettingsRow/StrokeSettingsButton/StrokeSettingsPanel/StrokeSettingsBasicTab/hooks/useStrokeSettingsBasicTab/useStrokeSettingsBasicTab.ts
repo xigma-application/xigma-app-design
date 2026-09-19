@@ -13,10 +13,14 @@ import { TStrokeChanges, TUseStrokeSettingsBasicTabResult } from './types';
 import { getStrokeSettingsValues } from './utils/getStrokeSettingsValues';
 import { handleStrokeDashBlur } from './utils/handleStrokeDashBlur';
 import { handleStrokeDashCapSelect } from './utils/handleStrokeDashCapSelect';
+import { handleStrokeDashStep } from './utils/handleStrokeDashStep';
 import { handleStrokeDashesBlur } from './utils/handleStrokeDashesBlur';
+import { handleStrokeDashesStep } from './utils/handleStrokeDashesStep';
 import { handleStrokeGapBlur } from './utils/handleStrokeGapBlur';
+import { handleStrokeGapStep } from './utils/handleStrokeGapStep';
 import { handleStrokeJoinSelect } from './utils/handleStrokeJoinSelect';
 import { handleStrokeMiterAngleBlur } from './utils/handleStrokeMiterAngleBlur';
+import { handleStrokeMiterAngleStep } from './utils/handleStrokeMiterAngleStep';
 import { handleStrokeMiterAngleScrub } from './utils/handleStrokeMiterAngleScrub';
 import { handleStrokeStyleSelect } from './utils/handleStrokeStyleSelect';
 
@@ -44,13 +48,17 @@ export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult =>
     ...values,
     onDashBlur: (event) => handleStrokeDashBlur(event, values.dash, commit),
     onDashCapSelect: (value) => handleStrokeDashCapSelect(value, values.dashCap, commit),
+    onDashStep: (text) => handleStrokeDashStep(text, values.dash, commit),
     onDashesBlur: (event) => handleStrokeDashesBlur(event, values.dashes, commit),
+    onDashesStep: (text) => handleStrokeDashesStep(text, values.dashes, commit),
     onGapBlur: (event) => handleStrokeGapBlur(event, values.gap, commit),
+    onGapStep: (text) => handleStrokeGapStep(text, values.gap, commit),
     onJoinSelect: (value) => handleStrokeJoinSelect(value, values.join, commit),
     onMiterAngleBlur: (event) => handleStrokeMiterAngleBlur(event, values.miterAngle, commit),
     onMiterAngleDragEnd: () => dispatch(endHistoryGesture()),
     onMiterAngleDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onMiterAngleScrub: (value) => handleStrokeMiterAngleScrub(value, update),
+    onMiterAngleStep: (text) => handleStrokeMiterAngleStep(text, values.miterAngle, commit),
     onStyleSelect: (nextStyle) => handleStrokeStyleSelect(nextStyle, values.style, commit),
   };
 };

@@ -9,6 +9,9 @@ import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
+// hooks
+import { useStepNumbersOnKeyDown } from 'hooks';
+
 // types
 import { StrokeStyle } from 'types/design/enums';
 
@@ -36,7 +39,11 @@ export const StrokeSettingsBasicTab: FC = () => {
     dashes,
     gap,
     hasDashes,
-    isCustom, isDashed, isMiter, join, miterAngle, onDashBlur, onDashCapSelect, onDashesBlur, onGapBlur, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onStyleSelect, style } = useStrokeSettingsBasicTab();
+    isCustom, isDashed, isMiter, join, miterAngle, onDashBlur, onDashCapSelect, onDashStep, onDashesBlur, onDashesStep, onGapBlur, onGapStep, onJoinSelect, onMiterAngleBlur, onMiterAngleDragEnd, onMiterAngleDragStart, onMiterAngleScrub, onMiterAngleStep, onStyleSelect, style } = useStrokeSettingsBasicTab();
+  const onDashKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onDashStep });
+  const onGapKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onGapStep });
+  const onMiterAngleKeyDown = useStepNumbersOnKeyDown({ max: STROKE_MITER_ANGLE_MAX, min: STROKE_MITER_ANGLE_MIN, onStep: onMiterAngleStep });
+  const onDashesKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onDashesStep });
   const namespace = `${translationNameSpace}.settings`;
   const styleOptions = getStrokeStyleOptions((style) => t(`${namespace}.style.options.${style}`));
   const dashCapButtons = getStrokeDashCapButtons((cap) => t(`${namespace}.dashCap.options.${cap}`));
@@ -65,7 +72,9 @@ export const StrokeSettingsBasicTab: FC = () => {
               className={fieldStyles.StrokeSettingsField__input}
               defaultValue={String(dash)}
               e2eValue="stroke-dash"
+              keepMountedWhileFocused
               onBlur={onDashBlur}
+              onKeyDown={onDashKeyDown}
               type="text"
             />
           </StrokeSettingsField>
@@ -75,7 +84,9 @@ export const StrokeSettingsBasicTab: FC = () => {
               className={fieldStyles.StrokeSettingsField__input}
               defaultValue={String(gap)}
               e2eValue="stroke-gap"
+              keepMountedWhileFocused
               onBlur={onGapBlur}
+              onKeyDown={onGapKeyDown}
               type="text"
             />
           </StrokeSettingsField>
@@ -88,7 +99,9 @@ export const StrokeSettingsBasicTab: FC = () => {
             className={fieldStyles.StrokeSettingsField__input}
             defaultValue={dashes.join(', ')}
             e2eValue="stroke-dashes"
+            keepMountedWhileFocused
             onBlur={onDashesBlur}
+            onKeyDown={onDashesKeyDown}
             type="text"
           />
         </StrokeSettingsField>
@@ -121,7 +134,9 @@ export const StrokeSettingsBasicTab: FC = () => {
             className={fieldStyles.StrokeSettingsField__input}
             defaultValue={`${miterAngle}°`}
             e2eValue="stroke-miter-angle"
+            keepMountedWhileFocused
             onBlur={onMiterAngleBlur}
+            onKeyDown={onMiterAngleKeyDown}
             startAdornment={
               <ScrubbableInput
                 max={STROKE_MITER_ANGLE_MAX}

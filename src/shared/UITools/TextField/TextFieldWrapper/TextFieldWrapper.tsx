@@ -2,6 +2,7 @@ import cx from 'classnames';
 import { FC, InputHTMLAttributes, ReactNode, RefObject } from 'react';
 
 // hooks
+import { useKeepMountedWhileFocused } from './hooks/useKeepMountedWhileFocused';
 import { useSelectInputOnClick } from './hooks/useSelectInputOnClick';
 import { useStopInputKeyPropagation } from './hooks/useStopInputKeyPropagation';
 
@@ -23,6 +24,7 @@ export type TTextFieldWrapperProps = Omit<InputHTMLAttributes<HTMLInputElement>,
   endAdornment?: ReactNode;
   inputRef?: RefObject<HTMLInputElement | null>;
   keepEndAdornmentOnFocus?: boolean;
+  keepMountedWhileFocused?: boolean;
   startAdornment?: ReactNode;
   variant?: TextFieldVariant;
 };
@@ -36,7 +38,10 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
   endAdornment,
   inputRef,
   keepEndAdornmentOnFocus = false,
+  keepMountedWhileFocused = false,
+  onBlur,
   onClick,
+  onFocus,
   onKeyDown,
   onMouseEnter,
   onMouseLeave,
@@ -46,6 +51,7 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
 }) => {
   const handleClick = useSelectInputOnClick(onClick);
   const handleKeyDown = useStopInputKeyPropagation(onKeyDown);
+  const { handleBlur, handleFocus, inputKey } = useKeepMountedWhileFocused(keepMountedWhileFocused, defaultValue as string | number, onBlur, onFocus);
 
   return (
     <div
@@ -64,8 +70,10 @@ export const TextFieldWrapper: FC<TTextFieldWrapperProps> = ({
         className={styles.TextFieldWrapper__input}
         defaultValue={defaultValue}
         disabled={disabled}
-        key={defaultValue as string | number}
+        key={inputKey}
+        onBlur={handleBlur}
         onClick={handleClick}
+        onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         ref={inputRef}
         {...getAttributes(E2EAttribute.textFieldInput, e2eValue)}

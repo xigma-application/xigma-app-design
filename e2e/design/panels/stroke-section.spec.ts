@@ -629,6 +629,55 @@ test.describe('Design panels — Stroke section', () => {
     expect((await readNode(page, id)).strokeDashes).toEqual([10, 20, 30, 20]);
   });
 
+  test('the custom Dashes field steps every number with ArrowUp/Down while all are selected, and only the number at the caret otherwise, keeping focus', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-dashes-arrows');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.getByLabel('Add stroke').click();
+
+    const id = await readFirstNodeId(page);
+
+    await page.getByLabel('Advanced stroke settings').click();
+    await page
+      .locator('[class*="StrokeSettingsField__row"]')
+      .filter({ hasText: 'Style' })
+      .locator('button')
+      .first()
+      .click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Custom' }).click();
+
+    const dashes = page.getByLabel('Dashes');
+
+    await dashes.fill('8, 4, 6, 8');
+    await dashes.blur();
+
+    // action: click selects all, ArrowUp steps all four
+    await dashes.click();
+    await dashes.press('ArrowUp');
+
+    // result
+    await expect(dashes).toBeFocused();
+    await expect(dashes).toHaveValue('9, 5, 7, 9');
+    expect((await readNode(page, id)).strokeDashes).toEqual([9, 5, 7, 9]);
+
+    // action: a caret on the second number steps only that number
+    await dashes.press('Home');
+    await dashes.press('ArrowRight');
+    await dashes.press('ArrowRight');
+    await dashes.press('ArrowRight');
+    await dashes.press('ArrowRight');
+    await dashes.press('ArrowDown');
+
+    // result
+    await expect(dashes).toHaveValue('9, 4, 7, 9');
+    expect((await readNode(page, id)).strokeDashes).toEqual([9, 4, 7, 9]);
+  });
+
   test('the Tile mode of an image stroke arms the image editor for the strokes, not the fills', async ({ page }) => {
     const designPage = new DesignPage(page);
     const id = await pickStrokeImageMode(page, designPage, 'e2e-test-stroke-section-image-tile', 'Tile');
