@@ -1,6 +1,11 @@
 // types
 import { StrokeProfile } from 'types/design/enums';
 
+// utils
+import { getMirroredTaperWidthMultiplier } from './getMirroredTaperWidthMultiplier';
+import { getQuarterTaperWidthMultiplier } from './getQuarterTaperWidthMultiplier';
+import { getTaperWidthMultiplier } from './getTaperWidthMultiplier';
+
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 
 const smoothstep = (value: number): number => {
@@ -15,13 +20,13 @@ export const getStrokeProfileWidthMultiplier = (profile: StrokeProfile, loopPosi
     case StrokeProfile.wedge:
       return 1 - position;
     case StrokeProfile.taper:
-      return 1 - smoothstep(position);
+      return getTaperWidthMultiplier(loopPosition, flipped);
     case StrokeProfile.quarterTaper:
-      return position < 0.75 ? 1 : 1 - smoothstep((position - 0.75) / 0.25);
+      return getQuarterTaperWidthMultiplier(loopPosition, flipped);
     case StrokeProfile.eye:
       return smoothstep(Math.min(position, 1 - position) * 2);
     case StrokeProfile.mirroredTaper:
-      return smoothstep(Math.min(position, 1 - position) / 0.25);
+      return getMirroredTaperWidthMultiplier(position);
     default:
       return 1;
   }

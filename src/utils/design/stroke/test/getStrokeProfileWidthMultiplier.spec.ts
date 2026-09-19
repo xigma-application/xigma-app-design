@@ -22,17 +22,17 @@ describe('getStrokeProfileWidthMultiplier', () => {
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.wedge, 1, true)).toBe(1);
   });
 
-  it('should ease the Taper profile from full width to zero', () => {
+  it('should ease the Taper profile from full width down to a flat, truncated end width, never to zero', () => {
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.taper, 0, false)).toBe(1);
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.taper, 1, false)).toBe(0);
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.taper, 0.5, false)).toBeCloseTo(0.5);
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.taper, 1, false)).toBe(0.5);
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.taper, 0.5, false)).toBeCloseTo(0.75);
   });
 
-  it('should keep the Quarter taper profile full for the first three quarters, then taper', () => {
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 0, false)).toBe(1);
+  it('should keep the Quarter taper profile flat and full in the middle, meeting at the same truncated width on both sides of the seam', () => {
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 0, false)).toBe(0.6);
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 0.5, false)).toBe(1);
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 0.75, false)).toBe(1);
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 1, false)).toBe(0);
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.quarterTaper, 1, false)).toBe(0.6);
   });
 
   it('should peak the Eye profile at the middle and taper to zero at both ends', () => {
@@ -41,12 +41,12 @@ describe('getStrokeProfileWidthMultiplier', () => {
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.eye, 1, false)).toBe(0);
   });
 
-  it('should keep the Mirrored taper profile flat in the middle and taper only near both ends', () => {
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 0, false)).toBe(0);
+  it('should keep the Mirrored taper profile flat in the middle, meeting at the same flat, truncated width on both sides of the seam', () => {
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 0, false)).toBe(0.6);
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 0.25, false)).toBe(1);
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 0.5, false)).toBe(1);
     expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 0.75, false)).toBe(1);
-    expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 1, false)).toBe(0);
+    expect(getStrokeProfileWidthMultiplier(StrokeProfile.mirroredTaper, 1, false)).toBe(0.6);
   });
 
   it('should not change the symmetric Eye and Mirrored taper profiles when flipped', () => {

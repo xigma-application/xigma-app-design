@@ -6,6 +6,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getBoxStrokePolygons } from './getBoxStrokePolygons';
 import { getLoopArcLengthPositions } from 'utils/canvas/getLoopArcLengthPositions';
+import { getQuarterTaperBoxStrokePolygons } from './getQuarterTaperBoxStrokePolygons';
 import { getStrokeProfileWidthMultiplier } from 'utils/design/stroke/getStrokeProfileWidthMultiplier';
 
 const lerpPoint = (from: TPoint, to: TPoint, t: number): TPoint => ({
@@ -20,14 +21,17 @@ export const getBoxStrokeProfilePolygons = (
   profile: StrokeProfile,
   flipped: boolean,
 ): TPoint[][] => {
-  const [outerLoop, innerLoop] = getBoxStrokePolygons(node, { bottom: width, left: width, right: width, top: width }, strokeAlign);
-  const positions = getLoopArcLengthPositions(outerLoop);
+  if (profile !== StrokeProfile.quarterTaper) {
+    const [outerLoop, innerLoop] = getBoxStrokePolygons(node, { bottom: width, left: width, right: width, top: width }, strokeAlign);
+    const positions = getLoopArcLengthPositions(outerLoop);
 
-  const profiledInnerLoop = innerLoop.map((point, index) => {
-    const multiplier = getStrokeProfileWidthMultiplier(profile, positions[index], flipped);
+    const profiledInnerLoop = innerLoop.map((point, index) => {
+      const multiplier = getStrokeProfileWidthMultiplier(profile, positions[index], flipped);
+      return lerpPoint(outerLoop[index], point, multiplier);
+    });
 
-    return lerpPoint(outerLoop[index], point, multiplier);
-  });
+    return [outerLoop, profiledInnerLoop];
+  }
 
-  return [outerLoop, profiledInnerLoop];
+  return getQuarterTaperBoxStrokePolygons(node, width, strokeAlign, flipped);
 };
