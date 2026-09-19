@@ -275,7 +275,11 @@ the stroke-specific settings:
 - [x] all of it is drawn on the canvas and undoable — for rectangles and frames for now
 - [ ] the same modes for other shapes and vector paths
 
-Below it sits an **Effects** section, empty for now: same header and Add button, nothing happens yet.
+Below it sits an **Effects** section (Inner shadow and Drop shadow for now):
+
+- [x] add an effect from the plus menu, hide or delete it, and drag rows to reorder, like Fill and Stroke
+- [x] click an effect to edit its Position (X / Y), Blur, Spread, Color and blend mode, or switch its type from the panel header
+- [ ] effects are saved but not drawn on the canvas yet, and the other effect types (Layer blur, Background blur, Noise, Texture, Glass, Shader) are still to do
 
 ## Related
 

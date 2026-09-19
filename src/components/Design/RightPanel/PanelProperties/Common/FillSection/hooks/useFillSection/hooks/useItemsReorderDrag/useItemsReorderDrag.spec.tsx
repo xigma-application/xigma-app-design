@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 // hooks
-import { useFillReorderDrag } from './useFillReorderDrag';
+import { useItemsReorderDrag } from './useItemsReorderDrag';
 
 const paint = (color: string): { color: string; opacity: number; type: 'solid' } => ({ color, opacity: 100, type: 'solid' });
 
@@ -16,15 +16,15 @@ const containerRef = (top = 0): RefObject<HTMLElement | null> => ({
   current: { getBoundingClientRect: () => ({ top }) } as unknown as HTMLElement,
 });
 
-describe('useFillReorderDrag', () => {
+describe('useItemsReorderDrag', () => {
   it('should start with no drag state', () => {
-    const { result } = renderHook(() => useFillReorderDrag(fills, vi.fn(), vi.fn(), containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, vi.fn(), vi.fn(), containerRef()));
 
     expect(result.current.dragState).toBeNull();
   });
 
   it('should begin a drag anchored on the grabbed index, unmoved, and block the default', () => {
-    const { result } = renderHook(() => useFillReorderDrag(fills, vi.fn(), vi.fn(), containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, vi.fn(), vi.fn(), containerRef()));
     const event = pointerEvent();
 
     act(() => result.current.beginDrag([2], 2, event));
@@ -36,7 +36,7 @@ describe('useFillReorderDrag', () => {
   it('should track the drop index/offset from the pointer position, flag the move, and commit the reorder on release', () => {
     const commit = vi.fn();
     const setSelection = vi.fn();
-    const { result } = renderHook(() => useFillReorderDrag(fills, commit, setSelection, containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, commit, setSelection, containerRef()));
 
     act(() => {
       result.current.registerRow(0)(rowAt(0));
@@ -59,7 +59,7 @@ describe('useFillReorderDrag', () => {
   });
 
   it('should compute the drop offset relative to the container, not the viewport', () => {
-    const { result } = renderHook(() => useFillReorderDrag(fills, vi.fn(), vi.fn(), containerRef(100)));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, vi.fn(), vi.fn(), containerRef(100)));
 
     act(() => result.current.registerRow(0)(rowAt(140)));
 
@@ -72,7 +72,7 @@ describe('useFillReorderDrag', () => {
   it('should still report the release when nothing moved, reselecting the grabbed row without committing', () => {
     const commit = vi.fn();
     const setSelection = vi.fn();
-    const { result } = renderHook(() => useFillReorderDrag(fills, commit, setSelection, containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, commit, setSelection, containerRef()));
 
     act(() => result.current.beginDrag([0, 1], 0, pointerEvent()));
     act(() => window.dispatchEvent(new PointerEvent('pointerup')));
@@ -84,7 +84,7 @@ describe('useFillReorderDrag', () => {
   it('should not throw or double-commit on a stray extra pointerup once the drag has already ended', () => {
     const commit = vi.fn();
     const setSelection = vi.fn();
-    const { result } = renderHook(() => useFillReorderDrag(fills, commit, setSelection, containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills, commit, setSelection, containerRef()));
 
     act(() => result.current.beginDrag([0], 0, pointerEvent()));
 
@@ -99,7 +99,7 @@ describe('useFillReorderDrag', () => {
   });
 
   it('should forget a row element when it unmounts', () => {
-    const { result } = renderHook(() => useFillReorderDrag(fills.slice(0, 2), vi.fn(), vi.fn(), containerRef()));
+    const { result } = renderHook(() => useItemsReorderDrag(fills.slice(0, 2), vi.fn(), vi.fn(), containerRef()));
 
     act(() => {
       result.current.registerRow(0)(rowAt(0));
@@ -114,7 +114,7 @@ describe('useFillReorderDrag', () => {
 
   it('should detach its listeners when unmounted mid-drag', () => {
     const removeSpy = vi.spyOn(window, 'removeEventListener');
-    const { result, unmount } = renderHook(() => useFillReorderDrag(fills.slice(0, 2), vi.fn(), vi.fn(), containerRef()));
+    const { result, unmount } = renderHook(() => useItemsReorderDrag(fills.slice(0, 2), vi.fn(), vi.fn(), containerRef()));
 
     act(() => result.current.beginDrag([0], 0, pointerEvent()));
     unmount();

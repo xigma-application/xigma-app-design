@@ -1,0 +1,30 @@
+.EffectSettingsField {
+  align-items: center;
+  column-gap: 8px;
+  display: flex;
+  height: 32px;
+
+  &__label {
+    color: var(--color-neutral-2);
+    flex: 1;
+    font-size: 11px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__control {
+    align-items: center;
+    display: flex;
+    flex: 0 0 136px;
+    height: 32px;
+    min-width: 0;
+    width: 136px;
+  }
+
+  &__input.EffectSettingsField__input {
+    flex: 1;
+    min-width: 0;
+  }
+}

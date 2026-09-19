@@ -2,14 +2,20 @@ import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import EffectTypeItems from '../EffectTypeItems/EffectTypeItems';
 import { UITools } from 'shared';
 
 // others
-import { EFFECT_MENU_OPTIONS, SHADER_MENU_OPTION, translationNameSpace } from '../constants';
+import { translationNameSpace } from '../constants';
 
-const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
+// types
+import { EffectType } from 'types/design/enums';
 
-const EffectsMenu: FC = () => {
+export type TEffectsMenuProps = {
+  onSelect: TFunc<[EffectType]>;
+};
+
+const EffectsMenu: FC<TEffectsMenuProps> = ({ onSelect }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -21,15 +27,7 @@ const EffectsMenu: FC = () => {
       trigger={<UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.addAriaLabel`)} name="Plus" selected={isOpen} />}
       triggerTooltip={t(`${translationNameSpace}.addTooltip`)}
     >
-      {EFFECT_MENU_OPTIONS.map(({ icon, type }) => (
-        <PopoverItem icon={icon} iconSize={24} key={type} label={t(`${translationNameSpace}.menu.options.${type}`)} />
-      ))}
-      <PopoverSeparator />
-      <PopoverItem
-        icon={SHADER_MENU_OPTION.icon}
-        iconSize={24}
-        label={t(`${translationNameSpace}.menu.options.${SHADER_MENU_OPTION.type}`)}
-      />
+      <EffectTypeItems onSelect={onSelect} />
     </UITools.Popover>
   );
 };

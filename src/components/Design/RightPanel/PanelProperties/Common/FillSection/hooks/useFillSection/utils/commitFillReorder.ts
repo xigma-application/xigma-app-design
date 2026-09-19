@@ -1,12 +1,9 @@
-// types
-import { TPaint } from 'types/design/paint/types';
-
 // utils
 import { getFillReorderResult } from './getFillReorderResult';
 
-export const commitFillReorder = (
-  fills: TPaint[],
-  commit: (nextFills: TPaint[]) => void,
+export const commitFillReorder = <TItem>(
+  fills: TItem[],
+  commit: (nextFills: TItem[]) => void,
   setSelection: (indices: number[]) => void,
   sourceIndices: number[],
   insertionSlot: number,

@@ -1,9 +1,6 @@
-// types
-import { TPaint } from 'types/design/paint/types';
+export type TFillReorderResult<TItem> = { fills: TItem[]; selectedIndices: number[] };
 
-export type TFillReorderResult = { fills: TPaint[]; selectedIndices: number[] };
-
-export const getFillReorderResult = (fills: TPaint[], sourceIndices: number[], insertionSlot: number): TFillReorderResult => {
+export const getFillReorderResult = <TItem>(fills: TItem[], sourceIndices: number[], insertionSlot: number): TFillReorderResult<TItem> => {
   const sortedSources = [...sourceIndices].sort((left, right) => left - right);
   const sourceSet = new Set(sortedSources);
   const movedItems = sortedSources.map((index) => fills[index]);

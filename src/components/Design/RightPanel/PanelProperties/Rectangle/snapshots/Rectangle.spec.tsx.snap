@@ -1101,6 +1101,9 @@ exports[`Rectangle snapshots > should render the header, position and dimensions
         </button>
       </div>
     </div>
+    <div
+      class="_EffectsSection__rows_8c7597"
+    />
   </div>
 </DocumentFragment>
 `;

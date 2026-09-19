@@ -7,6 +7,7 @@ import {
   AutoSpacing,
   BlendMode,
   CanvasStacking,
+  EffectType,
   GapMode,
   InsideStroke,
   LayoutMode,
@@ -26,6 +27,18 @@ import {
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
+
+export type TEffect = {
+  blendMode?: BlendMode;
+  blur: number;
+  color: string;
+  opacity: number;
+  spread: number;
+  type: EffectType;
+  visible?: boolean;
+  x: number;
+  y: number;
+};
 
 export type TComment = TPoint & {
   author: string;
@@ -133,6 +146,7 @@ export type TFrameNode = TBaseNode & {
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
   cornerSmoothing?: number;
+  effects?: TEffect[];
   fills: TPaint[];
   gridAutoPlacement?: boolean;
   gridColumnCount?: number;
@@ -225,6 +239,7 @@ export type TRectangleNode = TBaseNode & {
   cornerRadiusTopLeft?: number;
   cornerRadiusTopRight?: number;
   cornerSmoothing?: number;
+  effects?: TEffect[];
   fills: TPaint[];
   strokeAlign?: StrokeAlign;
   strokeColor?: string;

@@ -21,7 +21,7 @@ import { resolveFillDragIndices } from './utils/resolveFillDragIndices';
 import { toggleFillVisibility } from './utils/toggleFillVisibility';
 import { useClearFillSelectionOnOutsideClick } from './hooks/useClearFillSelectionOnOutsideClick/useClearFillSelectionOnOutsideClick';
 import { useExitImageEditorOnPanelClick } from './hooks/useExitImageEditorOnPanelClick/useExitImageEditorOnPanelClick';
-import { useFillReorderDrag } from './hooks/useFillReorderDrag/useFillReorderDrag';
+import { useItemsReorderDrag } from './hooks/useItemsReorderDrag/useItemsReorderDrag';
 import { useFillSelection } from './hooks/useFillSelection/useFillSelection';
 import { useHandleClosePicker } from './hooks/useHandleClosePicker/useHandleClosePicker';
 import { useHandleExitImageEditor } from './hooks/useHandleExitImageEditor/useHandleExitImageEditor';
@@ -44,7 +44,7 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
   const handleClosePicker = useHandleClosePicker(openPickerIndex, onPickerOpenChange);
   const stroke = { strokeAlign: node?.strokeAlign, strokeWidth: node?.strokeWidth };
   const commit = (nextFills: TPaint[]): void => commitFills(dispatch, nodeId, nextFills, property, stroke);
-  const { beginDrag, dragState, registerRow } = useFillReorderDrag(fills, commit, setSelection, containerRef);
+  const { beginDrag, dragState, registerRow } = useItemsReorderDrag(fills, commit, setSelection, containerRef);
 
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, clearSelection);
   useExitImageEditorOnPanelClick(containerRef, isImageEditorActive, openPickerIndex !== null, handleExitImageEditor, handleClosePicker);

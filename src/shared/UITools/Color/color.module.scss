@@ -52,24 +52,10 @@
   &__picker-alpha {
     background-image:
       linear-gradient(var(--color-alpha-preview), var(--color-alpha-preview)),
-      conic-gradient(#000000 90deg, #343c43 90deg 180deg, #000000 180deg 270deg, #343c43 270deg);
+      conic-gradient(#ffffff 90deg, #e1e1e1 90deg 180deg, #ffffff 180deg 270deg, #e1e1e1 270deg);
     background-size:
       100% 100%,
       4px 4px;
     height: 100%;
-
-    :root[data-theme='light'] & {
-      background-image:
-        linear-gradient(var(--color-alpha-preview), var(--color-alpha-preview)),
-        conic-gradient(#ffffff 90deg, #e1e1e1 90deg 180deg, #ffffff 180deg 270deg, #e1e1e1 270deg);
-    }
-
-    @media (prefers-color-scheme: light) {
-      :root:not([data-theme]) & {
-        background-image:
-          linear-gradient(var(--color-alpha-preview), var(--color-alpha-preview)),
-          conic-gradient(#ffffff 90deg, #e1e1e1 90deg 180deg, #ffffff 180deg 270deg, #e1e1e1 270deg);
-      }
-    }
   }
 }

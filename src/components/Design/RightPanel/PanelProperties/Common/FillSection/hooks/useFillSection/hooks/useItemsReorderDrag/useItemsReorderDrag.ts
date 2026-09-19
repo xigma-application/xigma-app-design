@@ -1,8 +1,5 @@
 import { PointerEvent as ReactPointerEvent, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-// types
-import { TPaint } from 'types/design/paint/types';
-
 // utils
 import { getFillDropIndex } from './utils/getFillDropIndex';
 import { getFillDropOffset } from './utils/getFillDropOffset';
@@ -11,18 +8,18 @@ import { registerFillRow } from './utils/registerFillRow';
 
 export type TFillDragState = { dropIndex: number; dropOffset: number; grabbedIndex: number; hasMoved: boolean; sourceIndices: number[] };
 
-export type TUseFillReorderDragResult = {
+export type TUseItemsReorderDragResult = {
   beginDrag: TFunc<[number[], number, ReactPointerEvent]>;
   dragState: TFillDragState | null;
   registerRow: (index: number) => (element: HTMLElement | null) => void;
 };
 
-export const useFillReorderDrag = (
-  fills: TPaint[],
-  commit: (nextFills: TPaint[]) => void,
+export const useItemsReorderDrag = <TItem>(
+  fills: TItem[],
+  commit: (nextFills: TItem[]) => void,
   setSelection: (indices: number[]) => void,
   containerRef: RefObject<HTMLElement | null>,
-): TUseFillReorderDragResult => {
+): TUseItemsReorderDragResult => {
   const [dragState, setDragState] = useState<TFillDragState | null>(null);
   const dropIndexRef = useRef(0);
   const rowsRef = useRef<Map<number, HTMLElement>>(new Map());

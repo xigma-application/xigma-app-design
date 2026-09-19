@@ -14,12 +14,12 @@ import { translationNameSpace } from './constants';
 // types
 import { BlendMode } from 'types/design/enums';
 
-export type TBlendModeButtonProps = { onChange?: TFunc<[BlendMode]>; value: BlendMode };
+export type TBlendModeButtonProps = { ariaLabel?: string; onChange?: TFunc<[BlendMode]>; value: BlendMode };
 
-export const BlendModeButton: FC<TBlendModeButtonProps> = ({ onChange, value }) => {
+export const BlendModeButton: FC<TBlendModeButtonProps> = ({ ariaLabel, onChange, value }) => {
   const { t } = useTranslation();
   const { icon, onOpenChange, open, selectBlendMode } = useBlendModeButton(value, onChange);
-  const label = t(`${translationNameSpace}.ariaLabel`);
+  const label = ariaLabel ?? t(`${translationNameSpace}.ariaLabel`);
 
   return (
     <UITools.Popover
