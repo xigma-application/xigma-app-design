@@ -1,6 +1,6 @@
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import cx from 'classnames';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 
 // @xigma
 import { TIconProps } from '@xigma/components';
@@ -12,6 +12,7 @@ import { Icon } from 'shared';
 import styles from './dropdown-option.module.scss';
 
 export type TDropdownOptionProps = {
+  content?: ReactNode;
   highlighted: boolean;
   icon?: TIconProps['name'];
   iconSize?: number;
@@ -21,7 +22,16 @@ export type TDropdownOptionProps = {
   selected: boolean;
 };
 
-export const DropdownOption: FC<TDropdownOptionProps> = ({ highlighted, icon, iconSize = 12, label, onClick, onMouseEnter, selected }) => (
+export const DropdownOption: FC<TDropdownOptionProps> = ({
+  content,
+  highlighted,
+  icon,
+  iconSize = 12,
+  label,
+  onClick,
+  onMouseEnter,
+  selected,
+}) => (
   <PopoverPrimitive.Close asChild>
     <div
       className={cx(styles.DropdownOption, { [styles['DropdownOption--highlighted']]: highlighted })}
@@ -36,7 +46,7 @@ export const DropdownOption: FC<TDropdownOptionProps> = ({ highlighted, icon, ic
           <Icon name={icon} size={iconSize} />
         </span>
       )}
-      <span className={styles.DropdownOption__label}>{label}</span>
+      <span className={styles.DropdownOption__label}>{content ?? label}</span>
     </div>
   </PopoverPrimitive.Close>
 );

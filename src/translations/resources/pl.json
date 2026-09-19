@@ -642,6 +642,7 @@
   "design.rightPanel.panelProperties.common.strokeSection.settings.style.label": "Styl",
   "design.rightPanel.panelProperties.common.strokeSection.settings.style.options.solid": "Ciągły",
   "design.rightPanel.panelProperties.common.strokeSection.settings.style.options.dashed": "Przerywany",
+  "design.rightPanel.panelProperties.common.strokeSection.settings.style.options.custom": "Własny",
   "design.rightPanel.panelProperties.common.strokeSection.settings.widthProfile.label": "Profil szerokości",
   "design.rightPanel.panelProperties.common.strokeSection.settings.widthProfile.flipTooltip": "Odwróć profil szerokości",
   "design.rightPanel.panelProperties.common.strokeSection.settings.widthProfile.flipAriaLabel": "Odwróć profil szerokości",

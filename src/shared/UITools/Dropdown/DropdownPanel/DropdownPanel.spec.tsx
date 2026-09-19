@@ -59,3 +59,40 @@ describe('DropdownPanel behaviors', () => {
     expect(onHighlight).toHaveBeenCalledWith(1);
   });
 });
+
+describe('DropdownPanel separator', () => {
+  it('should render a separator before an option marked with separatorBefore', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <DropdownPanel
+          highlightedIndex={0}
+          onHighlight={vi.fn()}
+          onSelect={vi.fn()}
+          options={[
+            { label: 'Solid', value: 'solid' },
+            { label: 'Custom', separatorBefore: true, value: 'custom' },
+          ]}
+          value="solid"
+        />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(container.querySelectorAll('[class*="DropdownPanel__separator"]')).toHaveLength(1);
+  });
+});
+
+describe('DropdownPanel width', () => {
+  it('should apply menuWidth as the panel width', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <DropdownPanel highlightedIndex={0} menuWidth={144} onHighlight={vi.fn()} onSelect={vi.fn()} options={options} value="hex" />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect((container.querySelector('[class*="DropdownPanel"]') as HTMLElement).style.width).toBe('144px');
+  });
+});

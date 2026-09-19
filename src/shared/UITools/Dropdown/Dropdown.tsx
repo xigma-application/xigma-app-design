@@ -26,6 +26,7 @@ export type TDropdownProps<TValue extends string> = {
   className?: string;
   disabled?: boolean;
   icon?: TIconProps['name'];
+  menuWidth?: number;
   onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
@@ -40,6 +41,7 @@ export const Dropdown = <TValue extends string>({
   className = '',
   disabled = false,
   icon,
+  menuWidth,
   onHoverOption,
   onSelect,
   options,
@@ -65,7 +67,7 @@ export const Dropdown = <TValue extends string>({
           [styles['Dropdown__label--no-truncate']]: !truncate,
         })}
       >
-        {selectedOption?.triggerLabel ?? selectedOption?.label}
+        {selectedOption?.content ?? selectedOption?.triggerLabel ?? selectedOption?.label}
       </span>
       <Icon name="ChevronDown" size={24} />
     </PopoverPrimitive.Trigger>
@@ -75,6 +77,7 @@ export const Dropdown = <TValue extends string>({
     <PopoverPrimitive.Content align="center" className={styles.Dropdown__content} onKeyDown={handleKeyDown} side="bottom" sideOffset={4}>
       <DropdownPanel
         highlightedIndex={highlightedIndex}
+        menuWidth={menuWidth}
         onHighlight={setHighlightedIndex}
         onSelect={onSelect}
         options={options}

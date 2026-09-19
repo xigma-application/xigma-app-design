@@ -2,14 +2,18 @@
 import { StrokeProfile } from 'types/design/enums';
 import { TIconProps } from '@xigma/components';
 
-export const STROKE_STYLES = ['solid', 'dashed'] as const;
+export const STROKE_STYLES = ['solid', 'dashed', 'custom'] as const;
 
 export type TStrokeStyle = (typeof STROKE_STYLES)[number];
 
-export const STROKE_STYLE_ICONS: Record<TStrokeStyle, TIconProps['name']> = {
+export const STROKE_STYLE_ICONS: Partial<Record<TStrokeStyle, TIconProps['name']>> = {
   dashed: 'StrokeDashed',
   solid: 'StrokeSolid',
 };
+
+export const STROKE_STYLE_ICON_SIZE = 24;
+
+export const STROKE_STYLE_MENU_WIDTH_PX = 144;
 
 export const STROKE_JOINS = ['miter', 'bevel', 'round'] as const;
 

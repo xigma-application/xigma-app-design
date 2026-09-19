@@ -10,7 +10,14 @@ import StrokeSettingsField from './StrokeSettingsField';
 import { UITools } from 'shared';
 
 // others
-import { DEFAULT_MITER_ANGLE, DEFAULT_STROKE_JOIN, DEFAULT_STROKE_PROFILE, DEFAULT_STROKE_STYLE, STROKE_STYLE_ICONS } from './constants';
+import {
+  DEFAULT_MITER_ANGLE,
+  DEFAULT_STROKE_JOIN,
+  DEFAULT_STROKE_PROFILE,
+  DEFAULT_STROKE_STYLE,
+  STROKE_STYLE_ICONS,
+  STROKE_STYLE_MENU_WIDTH_PX,
+} from './constants';
 import { getStrokeJoinButtons } from './utils/getStrokeJoinButtons';
 import { getStrokeProfileOptions } from './utils/getStrokeProfileOptions';
 import { getStrokeStyleOptions } from './utils/getStrokeStyleOptions';
@@ -38,6 +45,7 @@ export const StrokeSettingsBasicTab: FC = () => {
           bypassGlobalShortcuts={false}
           className={styles.StrokeSettingsBasicTab__input}
           icon={STROKE_STYLE_ICONS[DEFAULT_STROKE_STYLE]}
+          menuWidth={STROKE_STYLE_MENU_WIDTH_PX}
           onSelect={noop}
           options={styleOptions}
           textAlign="left"

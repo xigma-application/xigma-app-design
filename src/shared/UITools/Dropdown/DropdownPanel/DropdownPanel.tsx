@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { Fragment, ReactElement } from 'react';
 
 // components
 import DropdownOption from '../DropdownOption/DropdownOption';
@@ -15,6 +15,7 @@ import { TDropdownOption } from '../types';
 
 export type TDropdownPanelProps<TValue extends string> = {
   highlightedIndex: number;
+  menuWidth?: number;
   onHighlight: TFunc<[number]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
@@ -23,6 +24,7 @@ export type TDropdownPanelProps<TValue extends string> = {
 
 export const DropdownPanel = <TValue extends string>({
   highlightedIndex,
+  menuWidth,
   onHighlight,
   onSelect,
   options,
@@ -32,18 +34,21 @@ export const DropdownPanel = <TValue extends string>({
   const handleHighlight = useHighlightDropdownOption(onHighlight);
 
   return (
-    <div className={styles.DropdownPanel}>
+    <div className={styles.DropdownPanel} style={menuWidth ? { width: menuWidth } : undefined}>
       {options.map((option, index) => (
-        <DropdownOption
-          highlighted={index === highlightedIndex}
-          icon={option.icon}
-          iconSize={option.iconSize}
-          key={option.value}
-          label={option.label}
-          onClick={handleSelect(option.value)}
-          onMouseEnter={handleHighlight(index)}
-          selected={option.value === value}
-        />
+        <Fragment key={option.value}>
+          {option.separatorBefore && <div className={styles.DropdownPanel__separator} />}
+          <DropdownOption
+            content={option.content}
+            highlighted={index === highlightedIndex}
+            icon={option.icon}
+            iconSize={option.iconSize}
+            label={option.label}
+            onClick={handleSelect(option.value)}
+            onMouseEnter={handleHighlight(index)}
+            selected={option.value === value}
+          />
+        </Fragment>
       ))}
     </div>
   );

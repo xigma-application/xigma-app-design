@@ -238,6 +238,14 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByLabel('Flip width profile')).toBeDisabled();
 
     // action
+    await rows.nth(1).locator('button').first().click();
+
+    // result
+    await expect(page.locator('[class*="StrokeProfilePreview__image"]')).toHaveCount(5);
+    await expect(page.locator('[class*="StrokeProfilePreview__uniform"]')).toHaveCount(2);
+    await page.locator('[class*="StrokeProfilePreview__uniform"]').last().click();
+
+    // action
     await page.getByText('Brush').click();
 
     // result

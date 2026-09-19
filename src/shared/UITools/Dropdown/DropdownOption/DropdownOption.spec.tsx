@@ -99,3 +99,25 @@ describe('DropdownOption behaviors', () => {
     expect(container.querySelector('[class*="DropdownOption__icon"]')).toBeNull();
   });
 });
+
+describe('DropdownOption content', () => {
+  it('should render custom content instead of the label when content is given', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <DropdownOption
+          content={<i data-testid="custom" />}
+          highlighted={false}
+          label="Wedge"
+          onClick={vi.fn()}
+          onMouseEnter={vi.fn()}
+          selected={false}
+        />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(screen.getByTestId('custom')).toBeInTheDocument();
+    expect(screen.queryByText('Wedge')).not.toBeInTheDocument();
+  });
+});

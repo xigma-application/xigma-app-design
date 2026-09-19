@@ -9,4 +9,10 @@
   padding: 4px;
   row-gap: 1px;
   width: auto;
+
+  &__separator {
+    background-color: var(--color-neutral-3);
+    height: 1px;
+    margin: 4px -4px;
+  }
 }
