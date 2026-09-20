@@ -1,4 +1,5 @@
 // types
+import { EffectType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
@@ -23,6 +24,7 @@ export const drawBoxLeafNodeFill = (
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   if ('fills' in node) {
+    drawBoxEffects(context, node, opacity, refs, EffectType.dropShadow);
     drawBoxPaints(
       context,
       node,
@@ -35,7 +37,7 @@ export const drawBoxLeafNodeFill = (
       editingPathId,
       patternSourceDepth,
     );
-    drawBoxEffects(context, node, opacity, refs);
+    drawBoxEffects(context, node, opacity, refs, EffectType.innerShadow);
   } else {
     drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
   }
