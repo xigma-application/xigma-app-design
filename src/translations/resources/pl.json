@@ -589,6 +589,8 @@
   "design.rightPanel.panelProperties.common.effectsSection.row.showAriaLabel": "Pokaż efekt",
   "design.rightPanel.panelProperties.common.effectsSection.row.showTooltip": "Pokaż efekt",
   "design.rightPanel.panelProperties.common.effectsSection.settings.blendModeAriaLabel": "Zastosuj tryb mieszania do efektu",
+  "design.rightPanel.panelProperties.common.effectsSection.settings.blurMode.progressive": "Progresywne",
+  "design.rightPanel.panelProperties.common.effectsSection.settings.blurMode.uniform": "Jednolite",
   "design.rightPanel.panelProperties.common.effectsSection.settings.changeTypeAriaLabel": "Zmień typ efektu",
   "design.rightPanel.panelProperties.common.effectsSection.settings.colorTriggerAriaLabel": "Kolor efektu",
   "design.rightPanel.panelProperties.common.effectsSection.settings.fields.blur": "Rozmycie efektu",

@@ -240,6 +240,53 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(async () => Math.abs((await readLuma(800, 363)) - backgroundLuma)).toBeLessThan(4);
   });
 
+  test('a layer blur softens the rectangle edges in both directions, shows only the Blur field, and disappears when hidden', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-layer-blur-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 220, width: 220, x: 690, y: 190 };
+    const readLuma = async (x: number, y: number): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+
+      return png.data[((y - clip.y) * png.width + (x - clip.x)) * 4];
+    };
+
+    // result — sharp edge: right outside is the canvas, right inside is the fill
+    const backgroundLuma = await readLuma(800, 190);
+    const fillLuma = await readLuma(800, 280);
+
+    expect(Math.abs((await readLuma(800, 198)) - backgroundLuma)).toBeLessThan(4);
+    expect(Math.abs((await readLuma(800, 204)) - fillLuma)).toBeLessThan(4);
+
+    // action
+    await addEffect(page, 'Layer blur');
+    await page.getByLabel('Effect blur').fill('16');
+    await page.getByLabel('Effect blur').press('Enter');
+
+    // result — only the blur controls are shown
+    await expect(page.getByLabel('Effect X offset')).toHaveCount(0);
+    await expect(page.getByText('Uniform', { exact: true })).toBeVisible();
+
+    // result — the fill bleeds outward and fades inward at the edge
+    await expect.poll(async () => (await readLuma(800, 198)) - backgroundLuma).toBeGreaterThan(5);
+    expect(fillLuma - (await readLuma(800, 204))).toBeGreaterThan(8);
+    expect(Math.abs((await readLuma(800, 280)) - fillLuma)).toBeLessThan(6);
+
+    // action — hiding the effect makes the edge sharp again
+    await page.getByLabel('Hide effect').click();
+
+    // result
+    await expect.poll(async () => Math.abs((await readLuma(800, 198)) - backgroundLuma)).toBeLessThan(4);
+  });
+
   test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {
     const designPage = new DesignPage(page);
 

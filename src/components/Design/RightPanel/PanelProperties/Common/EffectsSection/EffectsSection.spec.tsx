@@ -107,14 +107,31 @@ describe('EffectsSection', () => {
   });
 
   it('should not add effect types that are not supported yet', () => {
-    // Step 1: Try to add a layer blur
+    // Step 1: Try to add a background blur
+    const id = addRectangle();
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Background blur'));
+
+    // Step 2: Assert nothing was added
+    expect(read(id).effects).toBeUndefined();
+  });
+
+  it('should add a layer blur and show only its Blur field with the Uniform / Progressive toggle', () => {
+    // Step 1: Add a layer blur
     const id = addRectangle();
     renderSection();
     fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
     fireEvent.click(screen.getByText('Layer blur'));
 
-    // Step 2: Assert nothing was added
-    expect(read(id).effects).toBeUndefined();
+    // Step 2: Assert it is saved and the panel shows the blur-specific controls
+    expect(read(id).effects?.[0]).toMatchObject({ blur: 4, type: 'layerBlur' });
+    expect(screen.getByText('Uniform')).toBeTruthy();
+    expect(screen.getByText('Progressive')).toBeTruthy();
+    expect(screen.getByLabelText('Effect blur')).toBeTruthy();
+    expect(screen.queryByLabelText('Effect X offset')).toBeNull();
+    expect(screen.queryByLabelText('Effect color')).toBeNull();
+    expect(screen.queryByLabelText('Apply blend mode to effect')).toBeNull();
   });
 
   it('should hide, show and delete an effect', () => {

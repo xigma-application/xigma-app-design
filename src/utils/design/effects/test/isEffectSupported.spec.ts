@@ -5,10 +5,11 @@ import { EffectType } from 'types/design/enums';
 import { isEffectSupported } from '../isEffectSupported';
 
 describe('isEffectSupported', () => {
-  it('should support only the inner and drop shadow', () => {
+  it('should support only the shadows and the layer blur', () => {
     expect(isEffectSupported(EffectType.innerShadow)).toBe(true);
     expect(isEffectSupported(EffectType.dropShadow)).toBe(true);
-    expect(isEffectSupported(EffectType.layerBlur)).toBe(false);
+    expect(isEffectSupported(EffectType.layerBlur)).toBe(true);
+    expect(isEffectSupported(EffectType.backgroundBlur)).toBe(false);
     expect(isEffectSupported(EffectType.shader)).toBe(false);
   });
 });

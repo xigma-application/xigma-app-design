@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
+import EffectBlurModeToggle from './EffectBlurModeToggle/EffectBlurModeToggle';
 import EffectSettingsField from './EffectSettingsField/EffectSettingsField';
 import EffectSettingsHeader from './EffectSettingsHeader/EffectSettingsHeader';
 import { UITools } from 'shared';
@@ -13,11 +14,14 @@ import { UITools } from 'shared';
 import { useEffectSettingsPanel } from './hooks/useEffectSettingsPanel/useEffectSettingsPanel';
 
 // others
-import { EFFECT_NUMBER_FIELDS, EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
+import { EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
 
 // styles
 import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss';
 import styles from './effect-settings-panel.module.scss';
+
+// utils
+import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
 // types
 import { BlendMode } from 'types/design/enums';
@@ -41,12 +45,14 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   onDragStart,
 }) => {
   const { t } = useTranslation();
+  const { fields, hasBlendMode, hasBlurModeToggle, hasColor } = getEffectPanelLayout(effect.type);
   const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
 
   return (
     <div className={styles.EffectSettingsPanel}>
       <EffectSettingsHeader
         blendMode={effect.blendMode ?? BlendMode.normal}
+        hasBlendMode={hasBlendMode}
         onBlendModeChange={(blendMode): void => onChange({ ...effect, blendMode })}
         onBlendModePreview={onBlendModePreview}
         onClose={onClose}
@@ -54,7 +60,8 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
         type={effect.type}
       />
       <div className={styles.EffectSettingsPanel__body}>
-        {EFFECT_NUMBER_FIELDS.map(({ adornmentLabel, icon, key, labelKey, min }) => (
+        {hasBlurModeToggle && <EffectBlurModeToggle />}
+        {fields.map(({ adornmentLabel, icon, key, labelKey, min }) => (
           <EffectSettingsField key={key} label={labelKey && t(`${translationNameSpace}.settings.labels.${labelKey}`)}>
             <UITools.TextField
               aria-label={t(`${translationNameSpace}.settings.fields.${key}`)}
@@ -79,23 +86,25 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
             />
           </EffectSettingsField>
         ))}
-        <EffectSettingsField label={t(`${translationNameSpace}.settings.labels.color`)}>
-          <UITools.ColorPickerInput
-            align="start"
-            alpha={effect.opacity}
-            className={styles.EffectSettingsPanel__color}
-            e2eValue="effect"
-            hex={effect.color}
-            onCommitAlpha={onCommitAlpha}
-            onCommitHex={onCommitHex}
-            onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
-            onPickerChange={onPickerChange}
-            side="left"
-            simple
-            triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
-          />
-        </EffectSettingsField>
+        {hasColor && (
+          <EffectSettingsField label={t(`${translationNameSpace}.settings.labels.color`)}>
+            <UITools.ColorPickerInput
+              align="start"
+              alpha={effect.opacity}
+              className={styles.EffectSettingsPanel__color}
+              e2eValue="effect"
+              hex={effect.color}
+              onCommitAlpha={onCommitAlpha}
+              onCommitHex={onCommitHex}
+              onDragEnd={onDragEnd}
+              onDragStart={onDragStart}
+              onPickerChange={onPickerChange}
+              side="left"
+              simple
+              triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
+            />
+          </EffectSettingsField>
+        )}
       </div>
     </div>
   );

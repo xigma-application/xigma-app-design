@@ -577,6 +577,8 @@
   "design.rightPanel.panelProperties.common.effectsSection.row.showAriaLabel": "Show effect",
   "design.rightPanel.panelProperties.common.effectsSection.row.showTooltip": "Show effect",
   "design.rightPanel.panelProperties.common.effectsSection.settings.blendModeAriaLabel": "Apply blend mode to effect",
+  "design.rightPanel.panelProperties.common.effectsSection.settings.blurMode.progressive": "Progressive",
+  "design.rightPanel.panelProperties.common.effectsSection.settings.blurMode.uniform": "Uniform",
   "design.rightPanel.panelProperties.common.effectsSection.settings.changeTypeAriaLabel": "Change effect type",
   "design.rightPanel.panelProperties.common.effectsSection.settings.colorTriggerAriaLabel": "Effect color",
   "design.rightPanel.panelProperties.common.effectsSection.settings.fields.blur": "Effect blur",

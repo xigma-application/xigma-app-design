@@ -17,6 +17,7 @@ import { BlendMode, EffectType } from 'types/design/enums';
 
 export type TEffectSettingsHeaderProps = {
   blendMode: BlendMode;
+  hasBlendMode: boolean;
   onBlendModeChange: TFunc<[BlendMode]>;
   onBlendModePreview: TFunc<[BlendMode | null]>;
   onClose: TFunc;
@@ -26,6 +27,7 @@ export type TEffectSettingsHeaderProps = {
 
 export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({
   blendMode,
+  hasBlendMode,
   onBlendModeChange,
   onBlendModePreview,
   onClose,
@@ -57,12 +59,14 @@ export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({
         <EffectTypeItems onSelect={onTypeChange} selectedType={type} withCheck />
       </UITools.Popover>
       <div className={styles.EffectSettingsHeader__actions}>
-        <BlendModeButton
-          ariaLabel={t(`${translationNameSpace}.settings.blendModeAriaLabel`)}
-          onChange={onBlendModeChange}
-          onPreview={onBlendModePreview}
-          value={blendMode}
-        />
+        {hasBlendMode && (
+          <BlendModeButton
+            ariaLabel={t(`${translationNameSpace}.settings.blendModeAriaLabel`)}
+            onChange={onBlendModeChange}
+            onPreview={onBlendModePreview}
+            value={blendMode}
+          />
+        )}
         <Tooltip content={t('common.close')}>
           <UITools.ButtonIcon ariaLabel={t('common.close')} name="Close" onClick={onClose} />
         </Tooltip>
