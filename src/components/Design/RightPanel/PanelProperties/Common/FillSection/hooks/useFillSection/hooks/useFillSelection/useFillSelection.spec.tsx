@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useFillSelection } from './useFillSelection';
 
 // store
-import { setSelectedFillIndices } from 'store/design/slice';
+import { setSelectedFillIndices, setSelectedStrokeIndices } from 'store/design/slice';
 import { store } from 'store';
 
 const noMods = { meta: false, shift: false };
@@ -19,12 +19,26 @@ const renderUseFillSelection = (count: number): ReturnType<typeof renderHook<Ret
 describe('useFillSelection', () => {
   afterEach(() => {
     store.dispatch(setSelectedFillIndices([]));
+    store.dispatch(setSelectedStrokeIndices([]));
   });
 
   it('should start with an empty selection', () => {
     const { result } = renderUseFillSelection(4);
 
     expect(result.current.selectedIndices).toEqual([]);
+  });
+
+  it('should keep the fill and stroke selections separate, and an empty stroke list must not trim the fill selection', () => {
+    // before
+    const fills = renderUseFillSelection(1);
+    const strokes = renderHook(() => useFillSelection(0, 'strokes'), { wrapper });
+
+    // action
+    act(() => fills.result.current.onSelectRow(0, noMods));
+
+    // result
+    expect(fills.result.current.selectedIndices).toEqual([0]);
+    expect(strokes.result.current.selectedIndices).toEqual([]);
   });
 
   it('should replace the selection on a plain click', () => {

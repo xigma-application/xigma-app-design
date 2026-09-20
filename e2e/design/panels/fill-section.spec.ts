@@ -3520,7 +3520,6 @@ test.describe('Design panels — Fill section', () => {
 
     // add a second fill and switch it to image too
     await page.getByLabel('Add fill').click();
-    await page.getByLabel('Hex color').nth(1).click();
     await page.getByLabel('Image', { exact: true }).last().click();
 
     // close the still-open picker popover via its own trigger (clicking the canvas doesn't dismiss
@@ -3563,7 +3562,6 @@ test.describe('Design panels — Fill section', () => {
     // add a second fill and switch it to image too — its picker stays open on the Image tab
     // afterward, without ever clicking that row's own strip to "select" it
     await page.getByLabel('Add fill').click();
-    await page.getByLabel('Hex color').nth(1).click();
     await page.getByLabel('Image', { exact: true }).last().click();
 
     const rows = page.locator('[class*="FillRow_"]:not([class*="FillRow__"])');
@@ -4144,7 +4142,7 @@ test.describe('Design panels — Fill section', () => {
 
     // result — switching tabs alone (even before a source is picked) enters position-editing mode
     // for this exact node/paint
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     // action — close the picker
     await page.keyboard.press('Escape');
@@ -4166,7 +4164,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     // action — the shape can still be resized exactly as before while the picker is open
     await designPage.pointerDown(700, 200);
@@ -5070,7 +5068,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
 
@@ -5105,7 +5103,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
 
@@ -5140,7 +5138,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
 
@@ -5177,7 +5175,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
 
@@ -5206,7 +5204,7 @@ test.describe('Design panels — Fill section', () => {
 
     await page.getByLabel('Hex color').click();
     await page.getByLabel('Image').click();
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
 
@@ -5216,7 +5214,7 @@ test.describe('Design panels — Fill section', () => {
     await designPage.click(800, 280);
 
     // result — still selected, still in position mode, and the panel is not dismissed
-    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageEditor(page)).toEqual({ mode: 'position', nodeId: id, paintIndex: 0, property: 'fills' });
     expect(await readSelectedIds(page)).toEqual([id]);
     await expect(panel).toBeVisible();
   });
@@ -5686,14 +5684,10 @@ test.describe('Design panels — Fill section', () => {
     // just gets hidden behind the full-screen crop overlay while it's up
     await page.keyboard.press('Escape');
     await expect.poll(() => readImageEditor(page)).toBeNull();
-    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 0 });
+    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 0, property: 'fills' });
 
-    // add a second fill and open its own picker
+    // add a second fill — its own picker opens right away
     await page.getByLabel('Add fill').click();
-
-    const secondHexTrigger = page.getByLabel('Hex color').nth(1);
-
-    await secondHexTrigger.click();
 
     // action — switch the second fill to Image too, while the first fill's stale popover is still
     // sitting open in the DOM (this is what threw a Playwright strict-mode violation while
@@ -5705,7 +5699,7 @@ test.describe('Design panels — Fill section', () => {
     await expect(page.locator('[class*="ColorPicker_"]:not([class*="ColorPicker__"])')).toHaveCount(1);
 
     // result — global focus now genuinely belongs to the second fill, not left stuck on the first
-    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 1 });
+    await expect.poll(() => readImageFillPickerFocus(page)).toEqual({ nodeId: id, paintIndex: 1, property: 'fills' });
     await expect.poll(() => readImageEditor(page)).toMatchObject({ nodeId: id, paintIndex: 1 });
   });
 

@@ -26,6 +26,7 @@ import {
   TGradientEditorState,
   TImageEditorState,
   TImageFillPickerFocus,
+  TOpenPropertyPanel,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
   TPatternSourcePickTarget,
@@ -55,6 +56,7 @@ import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
+import { handleCloseOpenPropertyPanel } from './utils/handleCloseOpenPropertyPanel';
 import { handleDeleteAllGuides } from './utils/handleDeleteAllGuides';
 import { handleDeleteGuide } from './utils/handleDeleteGuide';
 import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
@@ -123,6 +125,7 @@ const initialState: TDesignState = {
   lastPenTool: DEFAULT_PEN_TOOL,
   lastShapeTool: DEFAULT_SHAPE_TOOL,
   lastTextTool: DEFAULT_TEXT_TOOL,
+  openPropertyPanel: null,
   pages: {
     [initialPageId]: {
       backgroundPaint: DEFAULT_PAINT,
@@ -176,6 +179,7 @@ const designSlice = createSlice({
     cancelCommentDraft: (state) => {
       state.commentDraftPosition = null;
     },
+    closeOpenPropertyPanel: (state, action: PayloadAction<TOpenPropertyPanel>) => handleCloseOpenPropertyPanel(state, action.payload),
     createMaskGroup: {
       prepare: () => ({ payload: { groupId: nanoid() } }),
       reducer: (state, action: PayloadAction<{ groupId: string }>) => handleUseNodesAsMask(state, action.payload.groupId),
@@ -244,6 +248,9 @@ const designSlice = createSlice({
     setMinMaxRevealed: (state, action: PayloadAction<{ bound: keyof TRevealedMinMax; value: boolean }>) => {
       state.revealedMinMax[action.payload.bound] = action.payload.value;
     },
+    setOpenPropertyPanel: (state, action: PayloadAction<TOpenPropertyPanel | null>) => {
+      state.openPropertyPanel = action.payload;
+    },
     setPaint: (state, action: PayloadAction<TPaint>) => {
       getActivePage(state).paint = action.payload;
     },
@@ -264,6 +271,9 @@ const designSlice = createSlice({
     },
     setSelectedFillIndices: (state, action: PayloadAction<number[]>) => {
       getActivePage(state).selectedFillIndices = action.payload;
+    },
+    setSelectedStrokeIndices: (state, action: PayloadAction<number[]>) => {
+      getActivePage(state).selectedStrokeIndices = action.payload;
     },
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
     setTemporaryActiveTool: (state, action: PayloadAction<ToolName>) => {
@@ -325,6 +335,7 @@ export const {
   addPage,
   bringSelectionToFront,
   cancelCommentDraft,
+  closeOpenPropertyPanel,
   createMaskGroup,
   deleteAllGuides,
   deleteComment,
@@ -357,6 +368,7 @@ export const {
   setImageFillPickerFocus,
   setMediaToolArmed,
   setMinMaxRevealed,
+  setOpenPropertyPanel,
   setPaint,
   setPaintBlendMode,
   setPanelGridTrackSelection,
@@ -364,6 +376,7 @@ export const {
   setPatternSourcePicking,
   setPenActiveVertexId,
   setSelectedFillIndices,
+  setSelectedStrokeIndices,
   setSelection,
   setTemporaryActiveTool,
   setVectorEditingNodeIds,

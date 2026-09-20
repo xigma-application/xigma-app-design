@@ -16,6 +16,12 @@ const resetRevealedMinMaxIfSelectionChanged = (state: TDesignState, selectionCha
   }
 };
 
+const resetOpenPropertyPanelIfSelectionChanged = (state: TDesignState, selectionChanged: boolean): void => {
+  if (selectionChanged) {
+    state.openPropertyPanel = null;
+  }
+};
+
 export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[]): void => {
   const page = getActivePage(state);
   const normalizedIds = dropTextPathGuides(dropDescendantsOfSelected(nextSelectedIds, page.nodes), page.nodes);
@@ -26,6 +32,7 @@ export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[
   deleteDegenerateDeselectedNodes(state, deselectedIds);
   exitVectorEditingIfNeeded(state, normalizedIds);
   resetRevealedMinMaxIfSelectionChanged(state, selectionChanged);
+  resetOpenPropertyPanelIfSelectionChanged(state, selectionChanged);
   resetGridTrackAffordanceState(state);
   page.selectedIds = normalizedIds;
 };

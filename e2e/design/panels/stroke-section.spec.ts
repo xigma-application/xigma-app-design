@@ -58,7 +58,6 @@ const pickStrokeImageMode = async (page: Page, designPage: DesignPage, sessionNa
 
   const id = await readFirstNodeId(page);
 
-  await page.getByLabel('Stroke color').first().click();
   await page.getByLabel('Image', { exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles({
     buffer: await createSolidColorPngBuffer(40, 40, [255, 0, 0]),

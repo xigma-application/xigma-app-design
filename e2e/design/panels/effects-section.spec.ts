@@ -58,12 +58,8 @@ test.describe('Design panels — Effects section', () => {
     const row = page.locator('[class*="EffectRow__trigger"]');
 
     await expect(row).toBeVisible();
-    await expect(row).not.toHaveClass(/EffectRow__trigger--active/);
 
-    // action
-    await row.click();
-
-    // result
+    // result — choosing the effect opens its panel and highlights the row
     await expect(row).toHaveClass(/EffectRow__trigger--active/);
 
     const panel = page.locator('[class*="EffectSettingsPanel_"]').first();

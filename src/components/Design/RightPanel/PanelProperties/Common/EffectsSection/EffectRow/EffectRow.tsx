@@ -8,6 +8,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { usePanelEdgeSideOffset } from 'components/Design/RightPanel/hooks/usePanelEdgeSideOffset';
+import { useReturnFocusOnUserClose } from './hooks/useReturnFocusOnUserClose/useReturnFocusOnUserClose';
 
 // others
 import { EFFECT_ICONS, translationNameSpace } from '../constants';
@@ -50,6 +51,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const sideOffset = usePanelEdgeSideOffset(triggerRef, isOpen);
+  const { markUserClose, onClose, onCloseAutoFocus } = useReturnFocusOnUserClose(onOpenChange);
   const isVisible = effect.visible !== false;
   const isActive = isOpen || isSelected || isDragging;
 
@@ -68,6 +70,8 @@ export const EffectRow: FC<TEffectRowProps> = ({
         asChild
         className={styles.EffectRow__popover}
         moveable
+        onCloseAutoFocus={onCloseAutoFocus}
+        onEscapeKeyDown={markUserClose}
         onOpenChange={onOpenChange}
         open={isOpen}
         side="left"
@@ -83,13 +87,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
           </button>
         }
       >
-        <EffectSettingsPanel
-          effect={effect}
-          onChange={onChange}
-          onClose={(): void => onOpenChange(false)}
-          onDragEnd={onDragEnd}
-          onDragStart={onDragStart}
-        />
+        <EffectSettingsPanel effect={effect} onChange={onChange} onClose={onClose} onDragEnd={onDragEnd} onDragStart={onDragStart} />
       </UITools.Popover>
       <Tooltip align="end" content={t(`${translationNameSpace}.row.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}>
         <UITools.ButtonIcon

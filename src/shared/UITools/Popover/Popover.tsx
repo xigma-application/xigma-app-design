@@ -26,6 +26,7 @@ export type TPopoverProps = {
   className?: string;
   freezePositionOnGrow?: boolean;
   moveable?: boolean;
+  onCloseAutoFocus?: (event: Event) => void;
   onEscapeKeyDown?: (event: KeyboardEvent) => void;
   onInteractOutside?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
@@ -47,6 +48,7 @@ export const Popover: FC<TPopoverProps> = ({
   className = '',
   freezePositionOnGrow = false,
   moveable = false,
+  onCloseAutoFocus,
   onEscapeKeyDown,
   onInteractOutside,
   onOpenChange,
@@ -78,6 +80,7 @@ export const Popover: FC<TPopoverProps> = ({
             avoidCollisions={avoidCollisions}
             className={cx(styles.Popover, { [styles['Popover--scrollable']]: scrollable }, className)}
             collisionPadding={scrollable ? 10 : undefined}
+            onCloseAutoFocus={onCloseAutoFocus}
             onEscapeKeyDown={onEscapeKeyDown}
             onInteractOutside={handleInteractOutside}
             onPointerDown={moveable ? onPointerDown : undefined}

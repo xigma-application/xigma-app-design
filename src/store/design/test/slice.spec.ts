@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_NAME, DEFAULT_PAINT, DEFAULT_VECTOR_PAINT } from '../const
 
 // store
 import slice, {
+  closeOpenPropertyPanel,
   addComment,
   addGuide,
   addNode,
@@ -32,6 +33,7 @@ import slice, {
   setImageEditor,
   setPaint,
   setPaintBlendMode,
+  setOpenPropertyPanel,
   setPanelGridTrackSelection,
   setPenActiveVertexId,
   setSelection,
@@ -119,6 +121,7 @@ describe('design slice', () => {
       lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
+      openPropertyPanel: null,
       pages: {
         [activePageId]: {
           backgroundPaint: DEFAULT_PAINT,
@@ -741,6 +744,18 @@ describe('design slice', () => {
 
     // result
     expect(cleared.gridTrackSelection).toBeNull();
+  });
+
+  it('should open a property panel and close it only when the same panel is named', () => {
+    // action
+    const panel = { index: 1, nodeId: 'node-1', property: 'strokes' as const };
+    const open = slice(undefined, setOpenPropertyPanel(panel));
+
+    // result
+    expect(open.openPropertyPanel).toEqual(panel);
+    expect(slice(open, closeOpenPropertyPanel({ ...panel, index: 0 })).openPropertyPanel).toEqual(panel);
+    expect(slice(open, closeOpenPropertyPanel({ ...panel, property: 'fills' })).openPropertyPanel).toEqual(panel);
+    expect(slice(open, closeOpenPropertyPanel(panel)).openPropertyPanel).toBeNull();
   });
 
   it('should set and clear the panel grid track selection', () => {

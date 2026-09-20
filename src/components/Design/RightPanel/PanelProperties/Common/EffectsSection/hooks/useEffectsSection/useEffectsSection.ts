@@ -32,7 +32,7 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
   const nodeId = node?.id;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
-  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, null);
+  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, 'effects', null);
   const commit = (nextEffects: TEffect[]): void => commitEffects(dispatch, nodeId, nextEffects);
   const { beginDrag, dragState, registerRow } = useItemsReorderDrag(effects, commit, setSelectedIndices, containerRef);
 
@@ -50,7 +50,11 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
     effects,
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index) => selectedIndices.includes(index),
-    onAdd: (type): void => commit([...effects, createEffect(type)]),
+    onAdd: (type): void => {
+      commit([...effects, createEffect(type)]);
+      setSelectedIndices([effects.length]);
+      onPickerOpenChange(effects.length, true);
+    },
     onChange: (index, effect): void => commit(effects.map((current, currentIndex) => (currentIndex === index ? effect : current))),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),

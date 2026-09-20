@@ -12,6 +12,7 @@ import {
   TGradientEditorState,
   TImageEditorState,
   TImageFillPickerFocus,
+  TOpenPropertyPanel,
   TPatternSourcePickTarget,
   TRevealedMinMax,
 } from './types';
@@ -96,6 +97,8 @@ export const selectPanelGridTrackSelection = (state: RootState): TGridTrackSelec
 
 export const selectImageEditor = (state: RootState): TImageEditorState | null => state.design.imageEditor;
 
+export const selectOpenPropertyPanel = (state: RootState): TOpenPropertyPanel | null => state.design.openPropertyPanel ?? null;
+
 export const selectImageFillPickerFocus = (state: RootState): TImageFillPickerFocus | null => state.design.imageFillPickerFocus ?? null;
 
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
@@ -157,6 +160,8 @@ export const selectTopLevelFrameNodes = createSelector([selectRenderOrderedNodes
 export const selectMaskConnectorRoleById = createSelector([selectNodes], (nodes) => resolveMaskConnectorRoles(nodes));
 
 export const selectSelectedFillIndices = createSelector([selectActivePage], (page): number[] => page.selectedFillIndices ?? []);
+
+export const selectSelectedStrokeIndices = createSelector([selectActivePage], (page): number[] => page.selectedStrokeIndices ?? []);
 
 export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 

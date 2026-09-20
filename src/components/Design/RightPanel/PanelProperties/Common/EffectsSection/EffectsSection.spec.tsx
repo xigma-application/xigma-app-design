@@ -136,12 +136,11 @@ describe('EffectsSection', () => {
     expect(read(id).effects).toEqual([]);
   });
 
-  it('should open the settings panel from the row and commit edited values, including a type change', () => {
-    // Step 1: One effect, open its panel
+  it('should open the settings panel for a newly added effect and commit edited values, including a type change', () => {
+    // Step 1: Adding the effect opens its panel
     const id = addRectangle();
     renderSection();
     addInnerShadow();
-    fireEvent.click(screen.getByText('Inner shadow'));
 
     // Step 2: Edit X, Blur and Spread
     const x = screen.getByLabelText('Effect X offset') as HTMLInputElement;
@@ -162,11 +161,10 @@ describe('EffectsSection', () => {
   });
 
   it('should set the effect blend mode from the panel header', () => {
-    // Step 1: One effect, open its panel
+    // Step 1: Adding the effect opens its panel
     const id = addRectangle();
     renderSection();
     addInnerShadow();
-    fireEvent.click(screen.getByText('Inner shadow'));
 
     // Step 2: Pick Multiply from the blend mode menu
     fireEvent.click(screen.getByRole('button', { name: 'Apply blend mode to effect' }));

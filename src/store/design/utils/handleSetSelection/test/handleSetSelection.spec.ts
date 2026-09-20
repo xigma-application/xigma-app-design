@@ -440,6 +440,31 @@ describe('handleSetSelection', () => {
     expect(state.revealedMinMax).toEqual({ maxHeight: false, maxWidth: false, minHeight: false, minWidth: true });
   });
 
+  it('should close the open fill / stroke / effect panel when the selection changes', () => {
+    // mock
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id], {
+      openPropertyPanel: { index: 0, nodeId: frame.id, property: 'fills' },
+    });
+
+    // before
+    handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.openPropertyPanel).toBeNull();
+  });
+
+  it('should keep the open panel when the selection is unchanged', () => {
+    // mock
+    const state = buildState({ [frame.id]: frame }, [frame.id], { openPropertyPanel: { index: 1, nodeId: frame.id, property: 'effects' } });
+
+    // before
+    handleSetSelection(state, [frame.id]);
+
+    // result
+    expect(state.openPropertyPanel).toEqual({ index: 1, nodeId: frame.id, property: 'effects' });
+  });
+
   it('should clear the grid track affordance state when the selection changes', () => {
     // mock
     const other = { ...frame, id: 'other' };

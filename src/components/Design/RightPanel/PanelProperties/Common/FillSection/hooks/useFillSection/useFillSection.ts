@@ -34,10 +34,10 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
   const fills = node ? getNodePaints(node, property) : [];
   const nodeId = node?.id;
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { clearSelection, onSelectRow, selectedIndices, setSelection } = useFillSelection(fills.length);
+  const { clearSelection, onSelectRow, selectedIndices, setSelection } = useFillSelection(fills.length, property);
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
   const initialIndex = getInitialOpenPickerIndex(property, imageFillPickerFocus, nodeId);
-  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, initialIndex);
+  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, property, initialIndex);
   const imageEditor = useAppSelector(selectImageEditor);
   const isImageEditorActive = imageEditor !== null && (imageEditor.property ?? 'fills') === property;
   const handleExitImageEditor = useHandleExitImageEditor();
@@ -56,7 +56,10 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index) => selectedIndices.includes(index),
     nodeId,
-    onAdd: (): void => commit([...fills, makeSolidPaint(getDefaultPaintColor(property))]),
+    onAdd: (): void => {
+      commit([...fills, makeSolidPaint(getDefaultPaintColor(property))]);
+      onPickerOpenChange(fills.length, true);
+    },
     onChange: (index, paint): void => commit(fills.map((fill, fillIndex) => (fillIndex === index ? paint : fill))),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),

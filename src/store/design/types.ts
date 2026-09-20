@@ -22,6 +22,7 @@ export type TDesignPage = {
   paint: TPaint;
   rootOrder: string[];
   selectedFillIndices?: number[];
+  selectedStrokeIndices?: number[];
   selectedIds: string[];
   viewport: TViewport;
 };
@@ -34,6 +35,10 @@ export type TMaskConnectorLine = {
 };
 
 export type TMaskConnectorInfo = TMaskConnectorLine[];
+
+export type TPropertyPanelKind = TPaintProperty | 'effects';
+
+export type TOpenPropertyPanel = { index: number; nodeId: string; property: TPropertyPanelKind };
 
 export type TGradientEditorState = { nodeId: string; paintIndex: number; property?: TPaintProperty; selectedStopIndex: number | null };
 
@@ -113,6 +118,7 @@ export type TDesignState = {
   lastPenTool: ToolName;
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
+  openPropertyPanel?: TOpenPropertyPanel | null;
   pages: Record<string, TDesignPage>;
   panelGridTrackSelection?: TGridTrackSelection | null;
   patternSourcePickTarget: TPatternSourcePickTarget | null;
