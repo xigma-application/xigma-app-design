@@ -42,7 +42,7 @@ const renderIsolatedContent = (renderer: TMaskRenderer, node: TSceneNode, target
   const rect = getIsolatedScissorRect(renderer, node);
 
   if (!rect?.offscreen) {
-    const backdrop = blendMode === BlendMode.normal && rect ? null : captureBackdropTexture(renderer, rect);
+    const backdrop = blendMode === BlendMode.normal ? null : captureBackdropTexture(renderer, rect);
     const contentTarget = pool.acquire();
     const paint = (): void => paintIsolatedContent(renderer, node, contentTarget, rect);
 

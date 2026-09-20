@@ -70,4 +70,13 @@ describe('getEffectPanelLayout', () => {
     expect(getEffectPanelLayout({ ...createEffect(EffectType.noise), noiseType: EffectNoiseType.duo }).hasSecondaryColor).toBe(true);
     expect(getEffectPanelLayout(createEffect(EffectType.dropShadow)).hasSecondaryColor).toBe(false);
   });
+
+  it('should give a texture the size and radius fields and the Clip to shape checkbox, without blend mode or color', () => {
+    // action
+    const layout = getEffectPanelLayout(createEffect(EffectType.texture));
+
+    // result
+    expect(layout.fields.map(({ key }) => key)).toEqual(['noiseSize', 'noiseSize', 'radius']);
+    expect(layout).toMatchObject({ hasBlendMode: false, hasClipToShape: true, hasColor: false, hasNoiseTypeToggle: false });
+  });
 });

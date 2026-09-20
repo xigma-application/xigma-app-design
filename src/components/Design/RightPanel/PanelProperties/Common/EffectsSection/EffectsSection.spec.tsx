@@ -107,11 +107,11 @@ describe('EffectsSection', () => {
   });
 
   it('should not add effect types that are not supported yet', () => {
-    // Step 1: Try to add a texture
+    // Step 1: Try to add a glass
     const id = addRectangle();
     renderSection();
     fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
-    fireEvent.click(screen.getByText('Texture'));
+    fireEvent.click(screen.getByText('Glass'));
 
     // Step 2: Assert nothing was added
     expect(read(id).effects).toBeUndefined();

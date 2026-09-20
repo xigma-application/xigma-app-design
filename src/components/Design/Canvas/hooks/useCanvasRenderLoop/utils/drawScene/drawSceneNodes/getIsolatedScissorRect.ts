@@ -6,7 +6,9 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getDropShadowMargin } from '../drawBoxLeafNode/getDropShadowMargin';
+import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
 import { getNodeBlurParams } from './getNodeBlurParams';
+import { getNodeTexture } from './getNodeTexture';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
@@ -31,20 +33,25 @@ const getRotatedCorners = (bounds: TDraftRect, rotation: number): TPoint[] => {
   ].map((corner) => rotatePoint(corner, center, rotation));
 };
 
+const getScissorMargin = (node: TSceneNode, blurRadius: number, textureRadius: number, scale: number): number => {
+  const strokeWidth = 'strokeWidth' in node ? (node.strokeWidth ?? 0) : 0;
+  return blurRadius * 2 + textureRadius * scale + (getShadowMargin(node) + strokeWidth) * Math.max(1, scale) + SCISSOR_PADDING_PX;
+};
+
 export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode): TScissorRect | null => {
   const isSimpleBox =
     (node.type === NodeType.rectangle || node.type === NodeType.frame) && !('childIds' in node && node.childIds.length > 0);
   const blur = isSimpleBox ? getNodeBlurParams(renderer, node, EffectType.layerBlur) : null;
+  const texture = isSimpleBox ? getNodeTexture(node) : undefined;
 
-  if (isSimpleBox && blur) {
+  if (isSimpleBox && (blur || texture)) {
     const { context, gl } = renderer;
     const { viewport } = context;
     const bounds = getNodeBounds(node);
     const rotation = 'rotation' in node ? node.rotation : 0;
     const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
     const scale = viewport.zoom * pixelRatio;
-    const strokeWidth = 'strokeWidth' in node ? (node.strokeWidth ?? 0) : 0;
-    const margin = blur.radius * 2 + (getShadowMargin(node) + strokeWidth) * Math.max(1, scale) + SCISSOR_PADDING_PX;
+    const margin = getScissorMargin(node, blur?.radius ?? 0, texture ? getEffectTexture(texture).radius : 0, scale);
     const corners = getRotatedCorners(bounds, rotation);
     const xs = corners.map((corner) => (corner.x * viewport.zoom + viewport.x) * pixelRatio);
     const ys = corners.map((corner) => (corner.y * viewport.zoom + viewport.y) * pixelRatio);

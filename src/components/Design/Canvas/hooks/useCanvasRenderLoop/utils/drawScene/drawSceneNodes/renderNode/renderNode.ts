@@ -6,6 +6,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 import { applyBackgroundBlur } from '../applyBackgroundBlur';
 import { dispatchNodeType } from './dispatchNodeType';
 import { getNodeLayerBlur } from '../getNodeLayerBlur';
+import { getNodeTexture } from '../getNodeTexture';
 import { hasRealBlendMode } from '../hasRealBlendMode';
 import { renderIsolatedBlendNode } from './renderIsolatedBlendNode';
 
@@ -15,7 +16,7 @@ export const renderNode = (renderer: TMaskRenderer, id: string, target: TRenderT
   if (node) {
     applyBackgroundBlur(renderer, node, target);
 
-    if (hasRealBlendMode(node, renderer.refs) || getNodeLayerBlur(node) > 0) {
+    if (hasRealBlendMode(node, renderer.refs) || getNodeLayerBlur(node) > 0 || getNodeTexture(node)) {
       renderIsolatedBlendNode(renderer, node, target);
     } else {
       dispatchNodeType(renderer, node, target);

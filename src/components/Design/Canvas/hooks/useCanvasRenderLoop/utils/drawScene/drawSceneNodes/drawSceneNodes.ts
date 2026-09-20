@@ -5,6 +5,7 @@ import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceD
 import { getHoistedDragIds } from './getHoistedDragIds';
 import { getNodeBackgroundBlur } from './getNodeBackgroundBlur';
 import { getNodeLayerBlur } from './getNodeLayerBlur';
+import { getNodeTexture } from './getNodeTexture';
 import { hasFrameNoiseOverChildren } from './hasFrameNoiseOverChildren';
 import { hasFrameStrokeOverChildren } from './hasFrameStrokeOverChildren';
 import { hasRealBlendMode } from './hasRealBlendMode';
@@ -41,6 +42,7 @@ export const drawSceneNodes = (
         hasFrameNoiseOverChildren(node) ||
         hasRealBlendMode(node, refs) ||
         getNodeLayerBlur(node) > 0 ||
+        Boolean(getNodeTexture(node)) ||
         getNodeBackgroundBlur(node) > 0,
     )
   ) {

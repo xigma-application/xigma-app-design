@@ -1,5 +1,11 @@
 // others
-import { EFFECT_NOISE_FIELDS, EFFECT_NOISE_MULTI_FIELDS, EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from '../../constants';
+import {
+  EFFECT_NOISE_FIELDS,
+  EFFECT_NOISE_MULTI_FIELDS,
+  EFFECT_NUMBER_FIELDS,
+  EFFECT_PROGRESSIVE_BLUR_FIELDS,
+  EFFECT_TEXTURE_FIELDS,
+} from '../../constants';
 
 // types
 import { EffectNoiseType, EffectType } from 'types/design/enums';
@@ -14,12 +20,20 @@ export type TEffectPanelLayout = {
   fields: readonly TEffectField[];
   hasBlendMode: boolean;
   hasBlurModeToggle: boolean;
+  hasClipToShape: boolean;
   hasColor: boolean;
   hasNoiseTypeToggle: boolean;
   hasSecondaryColor: boolean;
 };
 
-const BLUR_LAYOUT = { hasBlendMode: false, hasBlurModeToggle: true, hasColor: false, hasNoiseTypeToggle: false, hasSecondaryColor: false };
+const BLUR_LAYOUT = {
+  hasBlendMode: false,
+  hasBlurModeToggle: true,
+  hasClipToShape: false,
+  hasColor: false,
+  hasNoiseTypeToggle: false,
+  hasSecondaryColor: false,
+};
 
 export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
   switch (effect.type) {
@@ -34,15 +48,27 @@ export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
         fields: getEffectNoise(effect).noiseType === EffectNoiseType.multi ? EFFECT_NOISE_MULTI_FIELDS : EFFECT_NOISE_FIELDS,
         hasBlendMode: true,
         hasBlurModeToggle: false,
+        hasClipToShape: false,
         hasColor: getEffectNoise(effect).noiseType !== EffectNoiseType.multi,
         hasNoiseTypeToggle: true,
         hasSecondaryColor: getEffectNoise(effect).noiseType === EffectNoiseType.duo,
+      };
+    case EffectType.texture:
+      return {
+        fields: EFFECT_TEXTURE_FIELDS,
+        hasBlendMode: false,
+        hasBlurModeToggle: false,
+        hasClipToShape: true,
+        hasColor: false,
+        hasNoiseTypeToggle: false,
+        hasSecondaryColor: false,
       };
     default:
       return {
         fields: EFFECT_NUMBER_FIELDS,
         hasBlendMode: true,
         hasBlurModeToggle: false,
+        hasClipToShape: false,
         hasColor: true,
         hasNoiseTypeToggle: false,
         hasSecondaryColor: false,

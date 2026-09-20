@@ -6,4 +6,5 @@ export const isEffectSupported = (type: EffectType): boolean =>
   type === EffectType.dropShadow ||
   type === EffectType.layerBlur ||
   type === EffectType.backgroundBlur ||
-  type === EffectType.noise;
+  type === EffectType.noise ||
+  type === EffectType.texture;

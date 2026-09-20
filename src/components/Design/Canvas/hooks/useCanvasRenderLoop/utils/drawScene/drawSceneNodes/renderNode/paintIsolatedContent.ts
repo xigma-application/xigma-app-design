@@ -4,6 +4,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { applyTextureEffect } from '../applyTextureEffect';
 import { blitBlurCacheEntry } from '../blitBlurCacheEntry';
 import { blurIsolatedNode } from '../blurIsolatedNode';
 import { dispatchNodeType } from './dispatchNodeType';
@@ -24,6 +25,21 @@ const canReuseEntry = (entry: TBlurCacheEntry, rect: TScissorRect, zoom: number,
   return entry.zoom === zoom || isZoomChanging;
 };
 
+const paintAndCacheContent = (
+  renderer: TMaskRenderer,
+  node: TSceneNode,
+  contentTarget: TRenderTarget,
+  rect: TScissorRect | null,
+  key: string | null,
+): void => {
+  dispatchNodeType(renderer, node, contentTarget);
+  blurIsolatedNode(renderer, node, contentTarget, rect);
+
+  if (key && rect) {
+    storeBlurCacheEntry(renderer.gl, node.id, key, contentTarget, rect, renderer.context.viewport.zoom);
+  }
+};
+
 export const paintIsolatedContent = (
   renderer: TMaskRenderer,
   node: TSceneNode,
@@ -39,11 +55,8 @@ export const paintIsolatedContent = (
   if (entry && rect && canReuseEntry(entry, rect, zoom, isZoomChanging)) {
     blitBlurCacheEntry(gl, entry, contentTarget, rect, zoom);
   } else {
-    dispatchNodeType(renderer, node, contentTarget);
-    blurIsolatedNode(renderer, node, contentTarget, rect);
-
-    if (key && rect) {
-      storeBlurCacheEntry(gl, node.id, key, contentTarget, rect, zoom);
-    }
+    paintAndCacheContent(renderer, node, contentTarget, rect, key);
   }
+
+  applyTextureEffect(renderer, node, contentTarget, rect);
 };

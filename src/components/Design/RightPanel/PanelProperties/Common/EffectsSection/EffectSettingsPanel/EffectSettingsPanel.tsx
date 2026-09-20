@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
+import EffectClipToShapeField from './EffectClipToShapeField/EffectClipToShapeField';
 import EffectColorField from './EffectColorField/EffectColorField';
 import EffectNoiseTypeToggle from './EffectNoiseTypeToggle/EffectNoiseTypeToggle';
 import EffectBlurModeToggle from './EffectBlurModeToggle/EffectBlurModeToggle';
@@ -24,6 +25,7 @@ import styles from './effect-settings-panel.module.scss';
 
 // utils
 import { getEffectNoise } from 'utils/design/effects/getEffectNoise';
+import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
 import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
@@ -51,8 +53,11 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   onDragStart,
 }) => {
   const { t } = useTranslation();
-  const { fields, hasBlendMode, hasBlurModeToggle, hasColor, hasNoiseTypeToggle, hasSecondaryColor } = getEffectPanelLayout(effect);
   const noise = getEffectNoise(effect);
+
+  const { fields, hasBlendMode, hasBlurModeToggle, hasClipToShape, hasColor, hasNoiseTypeToggle, hasSecondaryColor } =
+    getEffectPanelLayout(effect);
+
   const {
     onBlur,
     onCommitAlpha,
@@ -124,6 +129,12 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
             onDragStart={onDragStart}
             onPickerChange={onPickerChange}
             triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
+          />
+        )}
+        {hasClipToShape && (
+          <EffectClipToShapeField
+            onChange={(clipToShape): void => onChange({ ...effect, clipToShape })}
+            value={getEffectTexture(effect).clipToShape}
           />
         )}
         {hasSecondaryColor && (

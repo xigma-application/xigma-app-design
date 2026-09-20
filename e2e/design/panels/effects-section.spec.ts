@@ -537,6 +537,128 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(readHues, { timeout: 15000 }).toBeGreaterThanOrEqual(2);
   });
 
+  test('a texture roughens the rectangle edges both outward and inward, and Clip to shape keeps it from growing past the shape', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-texture-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 40, width: 160, x: 720, y: 180 };
+    const readEdge = async (): Promise<{ inside: number; outside: number }> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const at = (x: number, y: number): number => png.data[(y * png.width + x) * 4];
+      const background = at(2, 2);
+      const fill = at(2, 38);
+      let outside = 0;
+      let inside = 0;
+
+      for (let x = 0; x < png.width; x += 1) {
+        for (let y = 0; y < 16; y += 1) {
+          if (Math.abs(at(x, y) - fill) < Math.abs(at(x, y) - background)) {
+            outside += 1;
+          }
+        }
+
+        for (let y = 24; y < 40; y += 1) {
+          if (Math.abs(at(x, y) - background) < Math.abs(at(x, y) - fill)) {
+            inside += 1;
+          }
+        }
+      }
+
+      return { inside, outside };
+    };
+
+    // result — a plain edge has neither bumps nor bites
+    expect(await readEdge()).toEqual({ inside: 0, outside: 0 });
+
+    // action
+    await addEffect(page, 'Texture');
+    await page.getByLabel('Effect radius').fill('10');
+    await page.getByLabel('Effect radius').press('Enter');
+    await page.mouse.move(1750, 900);
+
+    // result — the edge grows bumps outside and bites inside
+    await expect.poll(async () => (await readEdge()).outside, { timeout: 15000 }).toBeGreaterThan(20);
+    expect((await readEdge()).inside).toBeGreaterThan(20);
+
+    // action
+    await page.locator('[data-test-checkbox-input="effect-clip-to-shape"]').setChecked(true, { force: true });
+    await page.mouse.move(1750, 900);
+
+    // result — nothing grows past the shape any more, the bites stay
+    await expect.poll(async () => (await readEdge()).outside, { timeout: 15000 }).toBeLessThan(5);
+    expect((await readEdge()).inside).toBeGreaterThan(20);
+  });
+
+  test('a texture with Clip to shape on a frame keeps the frame outline intact but roughens its child and stroke', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-texture-frame-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(700, 200, 1000, 400);
+    await addEffect(page, 'Texture');
+    await page.getByLabel('Effect texture size X').fill('12');
+    await page.getByLabel('Effect texture size X').press('Enter');
+    await page.getByLabel('Effect radius').fill('20');
+    await page.getByLabel('Effect radius').press('Enter');
+    await page.locator('[data-test-checkbox-input="effect-clip-to-shape"]').setChecked(true, { force: true });
+    await designPage.drawRectangle(1200, 200, 1300, 280);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId, childId] = pages[activePageId].rootOrder;
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { height: 80, width: 100, x: 800, y: 280 }, id: childId }));
+    });
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 200, width: 300, x: 700, y: 180 };
+    const readShares = async (): Promise<{ childBump: number; frameEdge: number }> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const at = (x: number, y: number): number => png.data[((y - clip.y) * png.width + (x - clip.x)) * 4];
+      const background = at(705, 185);
+      const frame = at(720, 260);
+      const child = at(850, 320);
+      let childBump = 0;
+      let frameEdge = 0;
+
+      for (let x = 810; x < 890; x += 1) {
+        for (let y = 260; y < 278; y += 1) {
+          if (Math.abs(at(x, y) - child) < Math.abs(at(x, y) - frame)) {
+            childBump += 1;
+          }
+        }
+      }
+
+      for (let x = 900; x < 980; x += 1) {
+        for (let y = 192; y < 208; y += 1) {
+          const expected = y < 200 ? background : frame;
+
+          if (Math.abs(at(x, y) - expected) > 30) {
+            frameEdge += 1;
+          }
+        }
+      }
+
+      return { childBump, frameEdge };
+    };
+
+    // result — the child grows bumps outside its rectangle while the frame edge stays a straight line
+    await expect.poll(async () => (await readShares()).childBump, { timeout: 15000 }).toBeGreaterThan(8);
+    expect((await readShares()).frameEdge).toBeLessThan(8);
+  });
+
   test('a frame noise is drawn over the frame children, not under them', async ({ page }) => {
     const designPage = new DesignPage(page);
 

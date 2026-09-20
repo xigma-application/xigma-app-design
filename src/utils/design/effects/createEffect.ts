@@ -6,13 +6,15 @@ import {
   DEFAULT_EFFECT_SPREAD,
   DEFAULT_EFFECT_X,
   DEFAULT_EFFECT_Y,
+  DEFAULT_TEXTURE_RADIUS,
+  DEFAULT_TEXTURE_SIZE,
 } from 'constant/effect';
 
 // types
 import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
-export const createEffect = (type: EffectType): TEffect => ({
+const createBaseEffect = (type: EffectType): TEffect => ({
   blendMode: BlendMode.normal,
   blur: DEFAULT_EFFECT_BLUR,
   color: DEFAULT_EFFECT_COLOR,
@@ -22,3 +24,8 @@ export const createEffect = (type: EffectType): TEffect => ({
   x: DEFAULT_EFFECT_X,
   y: DEFAULT_EFFECT_Y,
 });
+
+export const createEffect = (type: EffectType): TEffect =>
+  type === EffectType.texture
+    ? { ...createBaseEffect(type), noiseSize: DEFAULT_TEXTURE_SIZE, radius: DEFAULT_TEXTURE_RADIUS }
+    : createBaseEffect(type);

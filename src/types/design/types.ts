@@ -34,12 +34,14 @@ export type TEffect = {
   blendMode?: BlendMode;
   blur: number;
   blurType?: EffectBlurType;
+  clipToShape?: boolean;
   color: string;
   density?: number;
   end?: TPoint;
   noiseSize?: number;
   noiseType?: EffectNoiseType;
   opacity: number;
+  radius?: number;
   secondaryColor?: string;
   secondaryOpacity?: number;
   spread: number;

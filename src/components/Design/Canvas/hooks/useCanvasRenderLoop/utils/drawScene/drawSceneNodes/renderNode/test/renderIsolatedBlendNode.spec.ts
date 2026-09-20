@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 import { bindTarget } from '../../bindTarget';
 import { captureBackdropTexture } from '../../captureBackdropTexture';
 import { compositeBlend } from '../../../compositeBlend';
+import { drawIsolatedContent } from '../../drawIsolatedContent';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { paintIsolatedContent } from '../paintIsolatedContent';
 import { renderIntoTarget } from '../../renderIntoTarget';
@@ -16,6 +17,7 @@ import { renderIsolatedBlendNode } from '../renderIsolatedBlendNode';
 vi.mock('../../bindTarget', () => ({ bindTarget: vi.fn() }));
 vi.mock('../../captureBackdropTexture', () => ({ captureBackdropTexture: vi.fn() }));
 vi.mock('../../../compositeBlend', () => ({ compositeBlend: vi.fn() }));
+vi.mock('../../drawIsolatedContent', () => ({ drawIsolatedContent: vi.fn() }));
 vi.mock('../paintIsolatedContent', () => ({ paintIsolatedContent: vi.fn() }));
 vi.mock('../../renderIntoTarget', () => ({ renderIntoTarget: vi.fn((_renderer, _target, paint) => paint()) }));
 
@@ -52,20 +54,20 @@ describe('renderIsolatedBlendNode', () => {
     expect(pool.release).toHaveBeenCalledWith(backdrop);
   });
 
-  it('should fall back to Normal when the node somehow has no blend mode of its own', () => {
+  it('should draw a Normal blend node straight over the target without capturing a backdrop', () => {
     // mock
-    const contentTarget = { tag: 'content-target' } as unknown as TRenderTarget;
-    const backdrop = { texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
+    const contentTarget = { tag: 'content-target', texture: { tag: 'content-texture' } } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => contentTarget), release: vi.fn() } as unknown as TMaskRenderer['pool'];
     const renderer = { context: {}, gl, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
     const node = { id: 'node-1', type: NodeType.line } as unknown as TSceneNode;
-
-    (captureBackdropTexture as unknown as ReturnType<typeof vi.fn>).mockReturnValue(backdrop);
 
     // action
     renderIsolatedBlendNode(renderer, node, null);
 
     // result
-    expect(compositeBlend).toHaveBeenCalledWith(expect.anything(), contentTarget.texture, backdrop.texture, BlendMode.normal);
+    expect(captureBackdropTexture).not.toHaveBeenCalled();
+    expect(compositeBlend).not.toHaveBeenCalled();
+    expect(drawIsolatedContent).toHaveBeenCalledWith(renderer, contentTarget.texture);
+    expect(pool.release).toHaveBeenCalledWith(contentTarget);
   });
 });

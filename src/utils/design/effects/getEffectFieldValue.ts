@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_NOISE_DENSITY, DEFAULT_NOISE_SIZE, DEFAULT_PROGRESSIVE_BLUR_START } from 'constant/effect';
+import { DEFAULT_NOISE_DENSITY, DEFAULT_NOISE_SIZE, DEFAULT_PROGRESSIVE_BLUR_START, DEFAULT_TEXTURE_RADIUS } from 'constant/effect';
 
 // types
 import { TEffect } from 'types/design/types';
@@ -7,9 +7,10 @@ import { TEffect } from 'types/design/types';
 const DEFAULTS: Partial<Record<TNumericEffectField, number>> = {
   density: DEFAULT_NOISE_DENSITY,
   noiseSize: DEFAULT_NOISE_SIZE,
+  radius: DEFAULT_TEXTURE_RADIUS,
   startBlur: DEFAULT_PROGRESSIVE_BLUR_START,
 };
 
-export type TNumericEffectField = 'blur' | 'density' | 'noiseSize' | 'opacity' | 'spread' | 'startBlur' | 'x' | 'y';
+export type TNumericEffectField = 'blur' | 'density' | 'noiseSize' | 'opacity' | 'radius' | 'spread' | 'startBlur' | 'x' | 'y';
 
 export const getEffectFieldValue = (effect: TEffect, field: TNumericEffectField): number => effect[field] ?? DEFAULTS[field] ?? 0;

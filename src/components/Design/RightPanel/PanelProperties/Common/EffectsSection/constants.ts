@@ -53,6 +53,12 @@ export const EFFECT_NOISE_FIELDS: readonly TEffectField[] = [
   { icon: 'Density', key: 'density', labelKey: 'density', min: 0, unit: '%' },
 ];
 
+export const EFFECT_TEXTURE_FIELDS: readonly TEffectField[] = [
+  { adornmentLabel: 'X', ariaKey: 'textureSize', key: 'noiseSize', labelKey: 'size', min: 0.01 },
+  { adornmentLabel: 'Y', ariaKey: 'textureSizeY', isReadOnly: true, key: 'noiseSize', min: 0.01 },
+  { icon: 'Spread', key: 'radius', labelKey: 'radius', min: 0 },
+];
+
 export const EFFECT_NOISE_MULTI_FIELDS: readonly TEffectField[] = [
   ...EFFECT_NOISE_FIELDS,
   { icon: 'Opacity', key: 'opacity', labelKey: 'opacity', min: 0, unit: '%' },
