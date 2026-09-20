@@ -17,6 +17,8 @@ uniform float u_dispersion;
 uniform float u_lightAngle;
 uniform float u_lightIntensity;
 uniform float u_splay;
+uniform float u_useShapeMask;
+uniform float u_frostLod;
 
 in vec2 v_texCoord;
 out vec4 outColor;
@@ -71,9 +73,9 @@ void main() {
   vec2 warpUv = vec2(warpWorld.x, -warpWorld.y) * u_zoom * u_pixelRatio / u_size;
 
   float dispersionScale = u_dispersion * 0.6;
-  vec4 colorR = texture(u_content, v_texCoord + warpUv * (1.0 + dispersionScale));
-  vec4 colorG = texture(u_content, v_texCoord + warpUv);
-  vec4 colorB = texture(u_content, v_texCoord + warpUv * (1.0 - dispersionScale));
+  vec4 colorR = textureLod(u_content, v_texCoord + warpUv * (1.0 + dispersionScale), u_frostLod);
+  vec4 colorG = textureLod(u_content, v_texCoord + warpUv, u_frostLod);
+  vec4 colorB = textureLod(u_content, v_texCoord + warpUv * (1.0 - dispersionScale), u_frostLod);
   vec3 refracted = vec3(colorR.r, colorG.g, colorB.b);
 
   // a groove that runs uniformly around the whole perimeter — a highlight ring just inside
@@ -93,6 +95,8 @@ void main() {
 
   lit = mix(lit, vec3(0.0), shadowLine * mix(0.55, 0.3, lightFactor));
 
-  outColor = vec4(lit, colorG.a);
+  float coverage = u_useShapeMask > 0.5 ? clamp(0.5 - dist * u_zoom * u_pixelRatio, 0.0, 1.0) : 1.0;
+
+  outColor = vec4(lit, colorG.a * coverage);
 }
 `;

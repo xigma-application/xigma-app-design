@@ -18,7 +18,9 @@ export const drawGlassPass = (
   node: TSceneNode,
   effect: TEffect,
   content: TRenderTarget,
-  output: TRenderTarget,
+  output: Pick<TRenderTarget, 'height' | 'width'>,
+  useShapeMask = false,
+  frostLod = 0,
 ): void => {
   const { context, gl } = renderer;
   const glassProgram = getGlassProgram(gl);
@@ -56,6 +58,8 @@ export const drawGlassPass = (
     setFloat('u_lightAngle', (glass.lightAngle * Math.PI) / 180);
     setFloat('u_lightIntensity', glass.lightIntensity / 100);
     setFloat('u_splay', glass.splay / 100);
+    setFloat('u_useShapeMask', useShapeMask ? 1 : 0);
+    setFloat('u_frostLod', frostLod);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindTexture(gl.TEXTURE_2D, null);

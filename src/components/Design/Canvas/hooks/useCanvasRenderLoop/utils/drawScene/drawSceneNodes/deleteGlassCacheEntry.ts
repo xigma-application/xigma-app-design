@@ -1,4 +1,5 @@
 // utils
+import { deleteGlassEntryResources } from './deleteGlassEntryResources';
 import { glassCaches } from './glassCaches';
 
 export const deleteGlassCacheEntry = (gl: WebGL2RenderingContext, nodeId: string): void => {
@@ -6,10 +7,7 @@ export const deleteGlassCacheEntry = (gl: WebGL2RenderingContext, nodeId: string
   const entry = cache?.get(nodeId);
 
   if (cache && entry) {
-    gl.deleteFramebuffer(entry.framebuffer);
-    gl.deleteTexture(entry.texture);
-    gl.deleteFramebuffer(entry.maskFramebuffer);
-    gl.deleteTexture(entry.maskTexture);
+    deleteGlassEntryResources(gl, entry);
     cache.delete(nodeId);
   }
 };

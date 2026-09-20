@@ -5,6 +5,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 
 // utils
 import { bindTarget } from '../bindTarget';
+import { canSkipFrameClip } from '../canSkipFrameClip';
 import { getFrameChildIdsInPaintOrder } from 'store/design/utils/getFrameChildIdsInPaintOrder';
 import { renderClippedFrame } from '../renderClippedFrame';
 import { renderIds } from '../renderIds';
@@ -12,7 +13,7 @@ import { renderIds } from '../renderIds';
 export const renderFrameNode = (renderer: TMaskRenderer, node: TFrameNode, target: TRenderTarget | null): void => {
   renderer.paintLeaf(node, 'fill');
 
-  if (node.clipContent && node.childIds.length > 0) {
+  if (node.clipContent && node.childIds.length > 0 && !canSkipFrameClip(renderer, node)) {
     renderClippedFrame(renderer, node, target);
   } else {
     renderIds(renderer, getFrameChildIdsInPaintOrder(node), target);

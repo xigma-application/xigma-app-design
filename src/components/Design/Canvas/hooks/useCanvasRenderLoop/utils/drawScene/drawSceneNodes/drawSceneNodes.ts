@@ -10,6 +10,8 @@ import { getNodeTexture } from './getNodeTexture';
 import { hasFrameNoiseOverChildren } from './hasFrameNoiseOverChildren';
 import { hasFrameStrokeOverChildren } from './hasFrameStrokeOverChildren';
 import { hasRealBlendMode } from './hasRealBlendMode';
+import { markNodeDrawnOverGlassBackdrop } from './markNodeDrawnOverGlassBackdrop';
+import { releaseGlassBackdrop } from './releaseGlassBackdrop';
 import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
 
@@ -56,7 +58,10 @@ export const drawSceneNodes = (
       context,
       gl,
       hoistedIds: getHoistedDragIds(refs, sceneNodeById),
-      paintLeaf,
+      paintLeaf: (node, phase) => {
+        paintLeaf(node, phase);
+        markNodeDrawnOverGlassBackdrop(renderer, node);
+      },
       pool: imageContext.renderTargetPool,
       refs,
       sceneNodeById,
@@ -67,5 +72,6 @@ export const drawSceneNodes = (
     renderHoistedIds(renderer);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     bindTarget(renderer, null);
+    releaseGlassBackdrop(renderer);
   }
 };

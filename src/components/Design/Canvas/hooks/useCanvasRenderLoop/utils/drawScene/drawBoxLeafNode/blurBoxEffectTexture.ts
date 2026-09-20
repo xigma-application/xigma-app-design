@@ -8,11 +8,13 @@ import { TProgressiveBlurUniforms } from './types';
 // utils
 import { drawEffectBlurPass } from './drawEffectBlurPass';
 
+type TBlurTarget = Pick<TRenderTarget, 'framebuffer' | 'height' | 'texture' | 'width'>;
+
 export const blurBoxEffectTexture = (
   gl: WebGL2RenderingContext,
   imageContext: TImageRenderContext,
-  source: TRenderTarget,
-  temp: TRenderTarget,
+  source: TBlurTarget,
+  temp: TBlurTarget,
   radius: number,
   progressive?: TProgressiveBlurUniforms,
   unpremultiply = false,
