@@ -35,4 +35,13 @@ describe('getEffectPanelLayout', () => {
     ]);
     expect(layout.hasBlurModeToggle).toBe(true);
   });
+
+  it('should lay a background blur out like a layer blur', () => {
+    // action
+    const layout = getEffectPanelLayout(createEffect(EffectType.backgroundBlur));
+
+    // result
+    expect(layout.fields.map(({ key }) => key)).toEqual(['blur']);
+    expect(layout).toMatchObject({ hasBlendMode: false, hasBlurModeToggle: true, hasColor: false });
+  });
 });

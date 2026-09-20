@@ -3,6 +3,7 @@ import { bindTarget } from './bindTarget';
 import { drawLeafNode } from '../drawLeafNode';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
+import { getNodeBackgroundBlur } from './getNodeBackgroundBlur';
 import { getNodeLayerBlur } from './getNodeLayerBlur';
 import { hasFrameStrokeOverChildren } from './hasFrameStrokeOverChildren';
 import { hasRealBlendMode } from './hasRealBlendMode';
@@ -37,7 +38,8 @@ export const drawSceneNodes = (
         (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0) ||
         hasFrameStrokeOverChildren(node) ||
         hasRealBlendMode(node, refs) ||
-        getNodeLayerBlur(node) > 0,
+        getNodeLayerBlur(node) > 0 ||
+        getNodeBackgroundBlur(node) > 0,
     )
   ) {
     sceneNodes.forEach((node) => paintLeaf(node));

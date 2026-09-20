@@ -11,6 +11,9 @@ import { UITools } from 'shared';
 // hooks
 import { useEffectsSection } from './hooks/useEffectsSection/useEffectsSection';
 
+// utils
+import { getDisabledBlurTypes } from 'utils/design/effects/getDisabledBlurTypes';
+
 // others
 import { translationNameSpace } from './constants';
 
@@ -46,7 +49,7 @@ export const EffectsSection: FC = () => {
             ariaLabel={t(`${translationNameSpace}.applyStylesAriaLabel`)}
             tooltip={t(`${translationNameSpace}.applyStylesTooltip`)}
           />
-          <EffectsMenu onSelect={onAdd} />
+          <EffectsMenu disabledTypes={getDisabledBlurTypes(effects)} onSelect={onAdd} />
         </Fragment>
       }
       e2eValue="effects"
@@ -58,6 +61,7 @@ export const EffectsSection: FC = () => {
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {effects.map((effect, index) => (
           <EffectRow
+            disabledTypes={getDisabledBlurTypes(effects, index)}
             effect={effect}
             isDragging={isRowDragging(index)}
             isOpen={openIndex === index}

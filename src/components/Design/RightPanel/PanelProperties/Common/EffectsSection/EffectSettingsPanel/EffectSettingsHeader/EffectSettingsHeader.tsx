@@ -17,6 +17,7 @@ import { BlendMode, EffectType } from 'types/design/enums';
 
 export type TEffectSettingsHeaderProps = {
   blendMode: BlendMode;
+  disabledTypes: EffectType[];
   hasBlendMode: boolean;
   onBlendModeChange: TFunc<[BlendMode]>;
   onBlendModePreview: TFunc<[BlendMode | null]>;
@@ -27,6 +28,7 @@ export type TEffectSettingsHeaderProps = {
 
 export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({
   blendMode,
+  disabledTypes,
   hasBlendMode,
   onBlendModeChange,
   onBlendModePreview,
@@ -56,7 +58,7 @@ export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({
           </button>
         }
       >
-        <EffectTypeItems onSelect={onTypeChange} selectedType={type} withCheck />
+        <EffectTypeItems disabledTypes={disabledTypes} onSelect={onTypeChange} selectedType={type} withCheck />
       </UITools.Popover>
       <div className={styles.EffectSettingsHeader__actions}>
         {hasBlendMode && (

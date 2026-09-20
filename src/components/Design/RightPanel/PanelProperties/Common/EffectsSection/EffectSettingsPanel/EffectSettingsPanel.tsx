@@ -25,10 +25,11 @@ import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
 // types
-import { BlendMode } from 'types/design/enums';
+import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
 export type TEffectSettingsPanelProps = {
+  disabledTypes: EffectType[];
   effect: TEffect;
   onBlendModePreview: TFunc<[BlendMode | null]>;
   onChange: TFunc<[TEffect]>;
@@ -38,6 +39,7 @@ export type TEffectSettingsPanelProps = {
 };
 
 export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
+  disabledTypes,
   effect,
   onBlendModePreview,
   onChange,
@@ -53,6 +55,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
     <div className={styles.EffectSettingsPanel}>
       <EffectSettingsHeader
         blendMode={effect.blendMode ?? BlendMode.normal}
+        disabledTypes={disabledTypes}
         hasBlendMode={hasBlendMode}
         onBlendModeChange={(blendMode): void => onChange({ ...effect, blendMode })}
         onBlendModePreview={onBlendModePreview}

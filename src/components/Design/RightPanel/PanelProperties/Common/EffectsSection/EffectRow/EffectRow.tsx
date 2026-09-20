@@ -18,10 +18,11 @@ import { EFFECT_ICONS, translationNameSpace } from '../constants';
 import styles from './effect-row.module.scss';
 
 // types
-import { BlendMode } from 'types/design/enums';
+import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
 export type TEffectRowProps = {
+  disabledTypes: EffectType[];
   effect: TEffect;
   isDragging: boolean;
   isOpen: boolean;
@@ -38,6 +39,7 @@ export type TEffectRowProps = {
 };
 
 export const EffectRow: FC<TEffectRowProps> = ({
+  disabledTypes,
   effect,
   isDragging,
   isOpen,
@@ -94,6 +96,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
         }
       >
         <EffectSettingsPanel
+          disabledTypes={disabledTypes}
           effect={effect}
           onBlendModePreview={onBlendModePreview}
           onChange={onChange}

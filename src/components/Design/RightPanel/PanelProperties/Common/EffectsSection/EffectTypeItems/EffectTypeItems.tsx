@@ -14,6 +14,7 @@ import { EffectType } from 'types/design/enums';
 import { isEffectSupported } from 'utils/design/effects/isEffectSupported';
 
 export type TEffectTypeItemsProps = {
+  disabledTypes?: EffectType[];
   onSelect: TFunc<[EffectType]>;
   selectedType?: EffectType;
   withCheck?: boolean;
@@ -21,12 +22,12 @@ export type TEffectTypeItemsProps = {
 
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
-const EffectTypeItems: FC<TEffectTypeItemsProps> = ({ onSelect, selectedType, withCheck = false }) => {
+const EffectTypeItems: FC<TEffectTypeItemsProps> = ({ disabledTypes = [], onSelect, selectedType, withCheck = false }) => {
   const { t } = useTranslation();
 
   const renderItem = (type: EffectType): ReactElement => (
     <PopoverItem
-      disabled={!isEffectSupported(type)}
+      disabled={!isEffectSupported(type) || disabledTypes.includes(type)}
       icon={EFFECT_ICONS[type]}
       iconSize={24}
       key={type}

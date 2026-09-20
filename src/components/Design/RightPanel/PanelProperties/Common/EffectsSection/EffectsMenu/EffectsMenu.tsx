@@ -12,10 +12,11 @@ import { translationNameSpace } from '../constants';
 import { EffectType } from 'types/design/enums';
 
 export type TEffectsMenuProps = {
+  disabledTypes: EffectType[];
   onSelect: TFunc<[EffectType]>;
 };
 
-const EffectsMenu: FC<TEffectsMenuProps> = ({ onSelect }) => {
+const EffectsMenu: FC<TEffectsMenuProps> = ({ disabledTypes, onSelect }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const didSelectRef = useRef(false);
@@ -41,7 +42,7 @@ const EffectsMenu: FC<TEffectsMenuProps> = ({ onSelect }) => {
       trigger={<UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.addAriaLabel`)} name="Plus" selected={isOpen} />}
       triggerTooltip={t(`${translationNameSpace}.addTooltip`)}
     >
-      <EffectTypeItems onSelect={handleSelect} />
+      <EffectTypeItems disabledTypes={disabledTypes} onSelect={handleSelect} />
     </UITools.Popover>
   );
 };

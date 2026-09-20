@@ -13,7 +13,7 @@ import { TPoint } from 'types/canvas';
 import { getGradientMoveSnapGuide } from '../../../../utils/getGradientMoveSnapGuide';
 import { getGradientMoveSnapPoint } from '../../../../utils/getGradientMoveSnapPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
-import { isProgressiveLayerBlur } from 'utils/design/effects/isProgressiveLayerBlur';
+import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 import { toNormalizedGradientPoint } from '../../../../utils/toNormalizedGradientPoint';
@@ -33,7 +33,7 @@ export const continueProgressiveBlurDrag = (
     const node = selectNodes(state)[nodeId];
     const effect = node && 'effects' in node ? node.effects?.[effectIndex] : undefined;
 
-    if (node && 'effects' in node && node.effects && effect && isProgressiveLayerBlur(effect)) {
+    if (node && 'effects' in node && node.effects && effect && isProgressiveBlur(effect)) {
       const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
       const boundsCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
       const viewport = selectViewport(state);

@@ -107,11 +107,11 @@ describe('EffectsSection', () => {
   });
 
   it('should not add effect types that are not supported yet', () => {
-    // Step 1: Try to add a background blur
+    // Step 1: Try to add a noise
     const id = addRectangle();
     renderSection();
     fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
-    fireEvent.click(screen.getByText('Background blur'));
+    fireEvent.click(screen.getByText('Noise'));
 
     // Step 2: Assert nothing was added
     expect(read(id).effects).toBeUndefined();
@@ -132,6 +132,22 @@ describe('EffectsSection', () => {
     expect(screen.queryByLabelText('Effect X offset')).toBeNull();
     expect(screen.queryByLabelText('Effect color')).toBeNull();
     expect(screen.queryByLabelText('Apply blend mode to effect')).toBeNull();
+  });
+
+  it('should allow only one blur per layer by disabling both blur types once one is added', () => {
+    // Step 1: Add a layer blur
+    const id = addRectangle();
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Layer blur'));
+
+    // Step 2: Open the menu again and try both blur types
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Background blur'));
+    fireEvent.click(screen.getAllByText('Layer blur').at(-1)!);
+
+    // Step 3: Assert nothing more was added
+    expect(read(id).effects).toHaveLength(1);
   });
 
   it('should hide, show and delete an effect', () => {

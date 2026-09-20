@@ -345,6 +345,63 @@ test.describe('Design panels — Effects section', () => {
     await expect(page.getByText('Progressive', { exact: true })).toBeVisible();
   });
 
+  test('a background blur softens only what is behind the layer, inside the layer shape', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-background-blur-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await designPage.drawRectangle(850, 220, 1000, 340);
+
+    const layerId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[1];
+
+      store.dispatch(updateNode({ changes: { fills: [] }, id }));
+
+      return id;
+    });
+
+    expect(layerId).toBeTruthy();
+
+    await addEffect(page, 'Background blur');
+    await page.getByLabel('Effect blur').fill('10');
+    await page.getByLabel('Effect blur').press('Enter');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 200, width: 320, x: 690, y: 190 };
+    const readLumas = async (points: [number, number][]): Promise<number[]> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+
+      return points.map(([x, y]) => png.data[((y - clip.y) * png.width + (x - clip.x)) * 4]);
+    };
+    const softened = async (): Promise<boolean> => {
+      const [inside, outside] = await readLumas([
+        [896, 300],
+        [902, 300],
+      ]);
+
+      return inside < 217 - 10 && outside > 68 + 10;
+    };
+
+    // result — inside the layer the hard edge of the rectangle behind it is softened in both directions
+    await expect.poll(softened, { timeout: 30000 }).toBe(true);
+
+    // result — outside the layer the same edge stays sharp
+    const [nearEdge, farInside, farOutside] = await readLumas([
+      [896, 210],
+      [880, 210],
+      [960, 210],
+    ]);
+
+    expect(Math.abs(nearEdge - farInside)).toBeLessThan(4);
+    expect(farOutside).toBe(68);
+  });
+
   test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {
     const designPage = new DesignPage(page);
 

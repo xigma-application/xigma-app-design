@@ -3,7 +3,7 @@ import { TEffect, TFrameNode, TRectangleNode, TSceneNode } from 'types/design/ty
 import { TOpenPropertyPanel } from 'store/design/types';
 
 // utils
-import { isProgressiveLayerBlur } from 'utils/design/effects/isProgressiveLayerBlur';
+import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
 
 export type TOpenProgressiveBlur = {
   effect: TEffect;
@@ -21,7 +21,7 @@ export const getOpenProgressiveBlur = (
     if ('effects' in node && node.effects) {
       const effect = node.effects[openPropertyPanel.index];
 
-      if (isProgressiveLayerBlur(effect) && effect.visible !== false) {
+      if (isProgressiveBlur(effect) && effect.visible !== false) {
         return { effect, effectIndex: openPropertyPanel.index, node };
       }
     }

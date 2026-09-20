@@ -6,4 +6,5 @@ import { TSceneNode } from 'types/design/types';
 import { getEffectBlurAmount } from './getEffectBlurAmount';
 import { getNodeEffectOfType } from './getNodeEffectOfType';
 
-export const getNodeLayerBlur = (node: TSceneNode): number => getEffectBlurAmount(getNodeEffectOfType(node, EffectType.layerBlur));
+export const getNodeBackgroundBlur = (node: TSceneNode): number =>
+  getEffectBlurAmount(getNodeEffectOfType(node, EffectType.backgroundBlur));
