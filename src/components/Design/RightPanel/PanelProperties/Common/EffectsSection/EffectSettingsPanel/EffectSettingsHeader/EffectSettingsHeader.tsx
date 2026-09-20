@@ -18,12 +18,20 @@ import { BlendMode, EffectType } from 'types/design/enums';
 export type TEffectSettingsHeaderProps = {
   blendMode: BlendMode;
   onBlendModeChange: TFunc<[BlendMode]>;
+  onBlendModePreview: TFunc<[BlendMode | null]>;
   onClose: TFunc;
   onTypeChange: TFunc<[EffectType]>;
   type: EffectType;
 };
 
-export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({ blendMode, onBlendModeChange, onClose, onTypeChange, type }) => {
+export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({
+  blendMode,
+  onBlendModeChange,
+  onBlendModePreview,
+  onClose,
+  onTypeChange,
+  type,
+}) => {
   const { t } = useTranslation();
   const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false);
 
@@ -52,6 +60,7 @@ export const EffectSettingsHeader: FC<TEffectSettingsHeaderProps> = ({ blendMode
         <BlendModeButton
           ariaLabel={t(`${translationNameSpace}.settings.blendModeAriaLabel`)}
           onChange={onBlendModeChange}
+          onPreview={onBlendModePreview}
           value={blendMode}
         />
         <Tooltip content={t('common.close')}>

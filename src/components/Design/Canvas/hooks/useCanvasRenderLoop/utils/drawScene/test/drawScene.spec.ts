@@ -58,6 +58,8 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IMAGE_CONTEXT: TImageRenderContext = {
   blendCompositeBuffer: {} as WebGLBuffer,
   blendCompositeProgram: {} as WebGLProgram,
+  blurBuffer: {} as WebGLBuffer,
+  blurProgram: {} as WebGLProgram,
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   checkerboardProgram: {} as WebGLProgram,

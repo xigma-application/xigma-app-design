@@ -13,13 +13,23 @@ export type TUseBlendModeButtonResult = {
   selectBlendMode: (blendMode: BlendMode) => TFunc;
 };
 
-export const useBlendModeButton = (value: BlendMode, onChange?: TFunc<[BlendMode]>): TUseBlendModeButtonResult => {
+export const useBlendModeButton = (
+  value: BlendMode,
+  onChange?: TFunc<[BlendMode]>,
+  onPreview?: TFunc<[BlendMode | null]>,
+): TUseBlendModeButtonResult => {
   const [open, setOpen] = useState(false);
   const isDefault = value === BlendMode.normal;
 
   return {
     icon: isDefault ? 'DropEmpty' : 'DropFilled',
-    onOpenChange: setOpen,
+    onOpenChange: (nextOpen): void => {
+      if (!nextOpen) {
+        onPreview?.(null);
+      }
+
+      setOpen(nextOpen);
+    },
     open,
     selectBlendMode: (blendMode: BlendMode) => (): void => {
       onChange?.(blendMode);

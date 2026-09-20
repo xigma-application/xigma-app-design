@@ -10,10 +10,11 @@ import { BlendMode } from 'types/design/enums';
 const renderBlendModeMenu = (
   value: BlendMode = BlendMode.normal,
   onSelect: TFunc<[BlendMode], TFunc> = () => vi.fn(),
+  onPreview?: TFunc<[BlendMode | null]>,
 ): ReturnType<typeof render> =>
   render(
     <PopoverPrimitive.Root open>
-      <BlendModeMenu onSelect={onSelect} value={value} />
+      <BlendModeMenu onPreview={onPreview} onSelect={onSelect} value={value} />
     </PopoverPrimitive.Root>,
   );
 
@@ -53,5 +54,22 @@ describe('BlendModeMenu', () => {
 
     // result
     expect(onSelect).toHaveBeenCalledWith(BlendMode.screen);
+  });
+
+  it('should report the hovered blend mode for preview, and null when the pointer leaves it', () => {
+    // mock
+    const onPreview = vi.fn();
+
+    // before
+    renderBlendModeMenu(BlendMode.normal, () => vi.fn(), onPreview);
+    const option = screen.getByText('Screen');
+
+    // action
+    fireEvent.mouseEnter(option.closest('div')!.parentElement!);
+    fireEvent.mouseLeave(option.closest('div')!.parentElement!);
+
+    // result
+    expect(onPreview).toHaveBeenNthCalledWith(1, BlendMode.screen);
+    expect(onPreview).toHaveBeenNthCalledWith(2, null);
   });
 });

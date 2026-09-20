@@ -1,7 +1,7 @@
 // types
-import { EffectType, NodeType } from 'types/design/enums';
+import { BlendMode, EffectType, NodeType } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
-import { TImageRenderContext } from '../../../types';
+import { TImageRenderContext } from '../../../../types';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
@@ -15,7 +15,7 @@ const drawEffectSilhouetteMock = vi.fn();
 const drawEffectShapeMaskMock = vi.fn();
 const blurBoxEffectTextureMock = vi.fn();
 const compositeMaskMock = vi.fn();
-const drawEffectTextureMock = vi.fn();
+const drawEffectTextureBlendedMock = vi.fn();
 
 vi.mock('utils/canvas/renderTarget/createRenderTargetPool/createTarget', () => ({
   createTarget: (...args: unknown[]): unknown => createTargetMock(...args),
@@ -36,8 +36,8 @@ vi.mock('../blurBoxEffectTexture', () => ({
   blurBoxEffectTexture: (...args: unknown[]): void => blurBoxEffectTextureMock(...args),
 }));
 vi.mock('../../compositeMask', () => ({ compositeMask: (...args: unknown[]): void => compositeMaskMock(...args) }));
-vi.mock('../drawEffectTexture', () => ({
-  drawEffectTexture: (...args: unknown[]): void => drawEffectTextureMock(...args),
+vi.mock('../drawEffectTextureBlended', () => ({
+  drawEffectTextureBlended: (...args: unknown[]): void => drawEffectTextureBlendedMock(...args),
 }));
 
 const createGlMock = (): WebGL2RenderingContext =>
@@ -113,7 +113,7 @@ describe('drawBoxInnerShadow', () => {
     const effect = createEffect(EffectType.innerShadow);
 
     // action
-    drawBoxInnerShadow(context, node, effect, 1);
+    drawBoxInnerShadow(context, node, effect, 1, BlendMode.multiply);
 
     // result — three same-sized targets created (shadow, temp, mask)
     expect(createTargetMock).toHaveBeenCalledTimes(3);
@@ -138,12 +138,13 @@ describe('drawBoxInnerShadow', () => {
     // result — the previous framebuffer/viewport are restored before the final on-screen draw
     expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, { tag: 'previous-framebuffer' });
     expect(gl.viewport).toHaveBeenLastCalledWith(1, 2, 300, 200);
-    expect(drawEffectTextureMock).toHaveBeenCalledWith(
+    expect(drawEffectTextureBlendedMock).toHaveBeenCalledWith(
       context,
       expect.objectContaining({ tag: 'tex' }),
       expect.objectContaining({ x: 100 - (width - node.width) / 2, y: 200 - (height - node.height) / 2 }),
       15,
       0.25,
+      BlendMode.multiply,
     );
 
     // result — every target is disposed

@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../../types';
-import { TImageRenderContext } from '../../../types';
+import { TImageRenderContext } from '../../../../types';
 
 // utils
 import { drawEffectTexture } from '../drawEffectTexture';

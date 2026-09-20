@@ -1,7 +1,7 @@
 import { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 // types
-import { EffectType } from 'types/design/enums';
+import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
 export type TUseEffectsSectionResult = {
@@ -11,6 +11,7 @@ export type TUseEffectsSectionResult = {
   isRowDragging: (index: number) => boolean;
   isRowSelected: (index: number) => boolean;
   onAdd: TFunc<[EffectType]>;
+  onBlendModePreview: (index: number, blendMode: BlendMode | null) => void;
   onChange: (index: number, effect: TEffect) => void;
   onDragEnd: TFunc;
   onDragStart: TFunc;

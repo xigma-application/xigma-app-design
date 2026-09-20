@@ -1,5 +1,5 @@
 // types
-import { TImageRenderContext } from '../../../types';
+import { TImageRenderContext } from '../../../../types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
 // utils

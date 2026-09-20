@@ -1,4 +1,4 @@
-import { FC, Fragment } from 'react';
+import { FC, Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -24,7 +24,7 @@ const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 const EffectTypeItems: FC<TEffectTypeItemsProps> = ({ onSelect, selectedType, withCheck = false }) => {
   const { t } = useTranslation();
 
-  const renderItem = (type: EffectType): JSX.Element => (
+  const renderItem = (type: EffectType): ReactElement => (
     <PopoverItem
       disabled={!isEffectSupported(type)}
       icon={EFFECT_ICONS[type]}

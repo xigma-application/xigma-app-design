@@ -10,7 +10,7 @@ describe('createBlendModeRefs behaviors', () => {
     const refs = createBlendModeRefs();
 
     // result
-    expect(refs).toEqual({ previewRef: { current: null } });
+    expect(refs).toEqual({ effectPreviewRef: { current: null }, previewRef: { current: null } });
   });
 
   it('should apply overrides on top of the defaults', () => {

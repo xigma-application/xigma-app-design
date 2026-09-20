@@ -35,7 +35,7 @@ export const drawBoxLeafNodeFill = (
       editingPathId,
       patternSourceDepth,
     );
-    drawBoxEffects(context, node, opacity);
+    drawBoxEffects(context, node, opacity, refs);
   } else {
     drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
   }

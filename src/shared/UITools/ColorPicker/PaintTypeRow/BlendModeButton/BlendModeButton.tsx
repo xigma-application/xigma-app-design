@@ -14,11 +14,16 @@ import { translationNameSpace } from './constants';
 // types
 import { BlendMode } from 'types/design/enums';
 
-export type TBlendModeButtonProps = { ariaLabel?: string; onChange?: TFunc<[BlendMode]>; value: BlendMode };
+export type TBlendModeButtonProps = {
+  ariaLabel?: string;
+  onChange?: TFunc<[BlendMode]>;
+  onPreview?: TFunc<[BlendMode | null]>;
+  value: BlendMode;
+};
 
-export const BlendModeButton: FC<TBlendModeButtonProps> = ({ ariaLabel, onChange, value }) => {
+export const BlendModeButton: FC<TBlendModeButtonProps> = ({ ariaLabel, onChange, onPreview, value }) => {
   const { t } = useTranslation();
-  const { icon, onOpenChange, open, selectBlendMode } = useBlendModeButton(value, onChange);
+  const { icon, onOpenChange, open, selectBlendMode } = useBlendModeButton(value, onChange, onPreview);
   const label = ariaLabel ?? t(`${translationNameSpace}.ariaLabel`);
 
   return (
@@ -29,7 +34,7 @@ export const BlendModeButton: FC<TBlendModeButtonProps> = ({ ariaLabel, onChange
       trigger={<UITools.ButtonIcon ariaLabel={label} name={icon} selected={open} />}
       triggerTooltip={label}
     >
-      <BlendModeMenu onSelect={selectBlendMode} value={value} />
+      <BlendModeMenu onPreview={onPreview} onSelect={selectBlendMode} value={value} />
     </UITools.Popover>
   );
 };

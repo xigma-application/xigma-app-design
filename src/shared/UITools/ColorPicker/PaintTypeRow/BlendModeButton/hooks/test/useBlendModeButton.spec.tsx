@@ -63,4 +63,25 @@ describe('useBlendModeButton', () => {
     // result
     expect(() => result.current.selectBlendMode(BlendMode.multiply)()).not.toThrow();
   });
+
+  it('should clear the preview when the menu closes, but not when it opens', () => {
+    // mock
+    const onPreview = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useBlendModeButton(BlendMode.normal, undefined, onPreview));
+
+    // action
+    act(() => result.current.onOpenChange(true));
+
+    // result
+    expect(onPreview).not.toHaveBeenCalled();
+
+    // action
+    act(() => result.current.onOpenChange(false));
+
+    // result
+    expect(onPreview).toHaveBeenCalledWith(null);
+    expect(result.current.open).toBe(false);
+  });
 });

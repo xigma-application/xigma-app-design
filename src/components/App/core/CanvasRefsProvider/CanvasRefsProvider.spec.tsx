@@ -19,7 +19,7 @@ describe('CanvasRefsProvider behaviors', () => {
 
     // result
     expect(result.current).toEqual({
-      blendMode: { previewRef: { current: null } },
+      blendMode: { effectPreviewRef: { current: null }, previewRef: { current: null } },
       canvasRef: { current: null },
       colorSampleRequestRef: { current: null },
       cornerRadius: {
@@ -83,6 +83,7 @@ describe('CanvasRefsProvider behaviors', () => {
         imageCropMoveDragRef: { current: null },
         imageCropResizeDragRef: { current: null },
         imageCropRotateDragRef: { current: null },
+        imageTileScaleDragRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
       layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },

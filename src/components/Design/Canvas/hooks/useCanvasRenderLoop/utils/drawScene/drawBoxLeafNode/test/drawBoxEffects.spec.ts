@@ -1,9 +1,10 @@
 // types
-import { EffectType, NodeType } from 'types/design/enums';
+import { BlendMode, EffectType, NodeType } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { createEffect } from 'utils/design/effects/createEffect';
 import { drawBoxEffects } from '../drawBoxEffects';
 
@@ -14,6 +15,7 @@ vi.mock('../drawBoxInnerShadow', () => ({
 }));
 
 const context = {} as TDrawSceneContext;
+const refs = createCanvasRefs();
 const baseNode: TRectangleNode = {
   fills: [],
   height: 40,
@@ -38,10 +40,10 @@ describe('drawBoxEffects', () => {
     const node = { ...baseNode, effects: [innerShadow] };
 
     // action
-    drawBoxEffects(context, node, 1);
+    drawBoxEffects(context, node, 1, refs);
 
     // result
-    expect(drawBoxInnerShadowMock).toHaveBeenCalledWith(context, node, innerShadow, 1);
+    expect(drawBoxInnerShadowMock).toHaveBeenCalledWith(context, node, innerShadow, 1, BlendMode.normal);
   });
 
   it('should skip a hidden inner shadow', () => {
@@ -49,7 +51,7 @@ describe('drawBoxEffects', () => {
     const node = { ...baseNode, effects: [{ ...createEffect(EffectType.innerShadow), visible: false }] };
 
     // action
-    drawBoxEffects(context, node, 1);
+    drawBoxEffects(context, node, 1, refs);
 
     // result
     expect(drawBoxInnerShadowMock).not.toHaveBeenCalled();
@@ -60,7 +62,7 @@ describe('drawBoxEffects', () => {
     const node = { ...baseNode, effects: [createEffect(EffectType.dropShadow)] };
 
     // action
-    drawBoxEffects(context, node, 1);
+    drawBoxEffects(context, node, 1, refs);
 
     // result
     expect(drawBoxInnerShadowMock).not.toHaveBeenCalled();
@@ -68,10 +70,30 @@ describe('drawBoxEffects', () => {
 
   it('should do nothing without effects, or when the node has collapsed to zero size', () => {
     // action
-    drawBoxEffects(context, baseNode, 1);
-    drawBoxEffects(context, { ...baseNode, effects: [createEffect(EffectType.innerShadow)], width: 0 }, 1);
+    drawBoxEffects(context, baseNode, 1, refs);
+    drawBoxEffects(context, { ...baseNode, effects: [createEffect(EffectType.innerShadow)], width: 0 }, 1, refs);
 
     // result
     expect(drawBoxInnerShadowMock).not.toHaveBeenCalled();
+  });
+
+  it('should pass the effect blend mode, and prefer the hover preview for the matching effect', () => {
+    // mock
+    const multiplied = { ...createEffect(EffectType.innerShadow), blendMode: BlendMode.multiply };
+    const plain = createEffect(EffectType.innerShadow);
+    const node = { ...baseNode, effects: [multiplied, plain] };
+    const previewRefs = createCanvasRefs({
+      blendMode: {
+        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeId: 'r1' } },
+        previewRef: { current: null },
+      },
+    });
+
+    // action
+    drawBoxEffects(context, node, 1, previewRefs);
+
+    // result
+    expect(drawBoxInnerShadowMock).toHaveBeenNthCalledWith(1, context, node, multiplied, 1, BlendMode.multiply);
+    expect(drawBoxInnerShadowMock).toHaveBeenNthCalledWith(2, context, node, plain, 1, BlendMode.screen);
   });
 });

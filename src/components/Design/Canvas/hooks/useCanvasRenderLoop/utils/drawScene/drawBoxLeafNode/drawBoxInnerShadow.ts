@@ -1,4 +1,5 @@
 // types
+import { BlendMode } from 'types/design/enums';
 import { TDrawSceneContext } from '../types';
 import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
 
@@ -9,7 +10,7 @@ import { createTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/c
 import { disposeTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/disposeTarget';
 import { drawEffectShapeMask } from './drawEffectShapeMask';
 import { drawEffectSilhouette } from './drawEffectSilhouette';
-import { drawEffectTexture } from './drawEffectTexture';
+import { drawEffectTextureBlended } from './drawEffectTextureBlended';
 import { getBoxEffectMargin } from './getBoxEffectMargin';
 import { getBoxEffectShapeRect } from './getBoxEffectShapeRect';
 import { getBoxEffectTargetSize } from './getBoxEffectTargetSize';
@@ -23,6 +24,7 @@ export const drawBoxInnerShadow = (
   node: TFrameNode | TRectangleNode,
   effect: TEffect,
   opacity: number,
+  blendMode?: BlendMode,
 ): void => {
   const { gl, imageContext } = context;
   const margin = getBoxEffectMargin(effect.blur);
@@ -68,12 +70,13 @@ export const drawBoxInnerShadow = (
   setAlphaWriteEnabled(gl, imageContext, previousAlphaWriteEnabled);
   gl.blendFuncSeparate(...previousBlendFunc);
 
-  drawEffectTexture(
+  drawEffectTextureBlended(
     context,
     tempTarget.texture,
     { height: size.height, width: size.width, x: node.x - margin, y: node.y - margin },
     node.rotation,
     (effect.opacity / 100) * opacity,
+    blendMode,
   );
 
   disposeTarget(gl, shadowTarget);

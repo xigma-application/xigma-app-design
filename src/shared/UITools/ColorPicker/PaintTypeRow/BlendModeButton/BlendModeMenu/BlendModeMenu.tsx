@@ -14,11 +14,12 @@ import { FACE_BLEND_MODE_GROUPS } from 'types/design/constants';
 const { PopoverItem, PopoverSeparator } = PopoverCompound;
 
 export type TBlendModeMenuProps = {
+  onPreview?: TFunc<[BlendMode | null]>;
   onSelect: (blendMode: BlendMode) => TFunc;
   value: BlendMode;
 };
 
-export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ onSelect, value }) => {
+export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ onPreview, onSelect, value }) => {
   const { t } = useTranslation();
 
   return (
@@ -27,12 +28,13 @@ export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ onSelect, value }) => {
         <Fragment key={group[0]}>
           {index > 0 && <PopoverSeparator />}
           {group.map((blendMode) => (
-            <PopoverItem
-              key={blendMode}
-              label={t(`${translationNameSpace}.options.${blendMode}`)}
-              onClick={onSelect(blendMode)}
-              selected={value === blendMode}
-            />
+            <div key={blendMode} onMouseEnter={(): void => onPreview?.(blendMode)} onMouseLeave={(): void => onPreview?.(null)}>
+              <PopoverItem
+                label={t(`${translationNameSpace}.options.${blendMode}`)}
+                onClick={onSelect(blendMode)}
+                selected={value === blendMode}
+              />
+            </div>
           ))}
         </Fragment>
       ))}

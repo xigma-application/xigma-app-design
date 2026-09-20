@@ -25,13 +25,21 @@ import { TEffect } from 'types/design/types';
 
 export type TEffectSettingsPanelProps = {
   effect: TEffect;
+  onBlendModePreview: TFunc<[BlendMode | null]>;
   onChange: TFunc<[TEffect]>;
   onClose: TFunc;
   onDragEnd: TFunc;
   onDragStart: TFunc;
 };
 
-export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({ effect, onChange, onClose, onDragEnd, onDragStart }) => {
+export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
+  effect,
+  onBlendModePreview,
+  onChange,
+  onClose,
+  onDragEnd,
+  onDragStart,
+}) => {
   const { t } = useTranslation();
   const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
 
@@ -40,6 +48,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({ effect, onC
       <EffectSettingsHeader
         blendMode={effect.blendMode ?? BlendMode.normal}
         onBlendModeChange={(blendMode): void => onChange({ ...effect, blendMode })}
+        onBlendModePreview={onBlendModePreview}
         onClose={onClose}
         onTypeChange={(type): void => onChange({ ...effect, type })}
         type={effect.type}

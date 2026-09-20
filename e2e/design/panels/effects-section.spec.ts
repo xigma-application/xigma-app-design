@@ -187,6 +187,58 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(async () => Math.abs((await readLuma(800, 203)) - centerLuma)).toBeLessThan(4);
   });
 
+  test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-blend-mode-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await addEffect(page, 'Inner shadow');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 180, width: 220, x: 690, y: 190 };
+    const readLuma = async (x: number, y: number): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+
+      return png.data[((y - clip.y) * png.width + (x - clip.x)) * 4];
+    };
+    const readDarkening = async (): Promise<number> => (await readLuma(800, 280)) - (await readLuma(800, 203));
+
+    // result — a normal dark shadow darkens the top edge
+    await expect.poll(readDarkening).toBeGreaterThan(20);
+
+    // action — hovering Screen previews it: a dark shadow screened over grey no longer darkens
+    await page.getByLabel('Apply blend mode to effect').click();
+    await page.getByText('Screen', { exact: true }).hover();
+
+    // result
+    await expect.poll(async () => Math.abs(await readDarkening())).toBeLessThan(6);
+
+    // action — moving the pointer to another option changes the preview back
+    await page.getByText('Normal', { exact: true }).hover();
+
+    // result
+    await expect.poll(readDarkening).toBeGreaterThan(20);
+
+    // action — leaving the menu without choosing keeps the committed value
+    await page.getByText('Screen', { exact: true }).hover();
+    await page.getByLabel('Apply blend mode to effect').click();
+    await page.mouse.move(1750, 900);
+
+    // result
+    await expect.poll(readDarkening).toBeGreaterThan(20);
+
+    // action — choosing Screen commits it
+    await page.getByLabel('Apply blend mode to effect').click();
+    await page.getByText('Screen', { exact: true }).click();
+    await page.mouse.move(1750, 900);
+
+    // result
+    await expect.poll(async () => Math.abs(await readDarkening())).toBeLessThan(6);
+  });
+
   test('effects can be hidden and deleted, and dragging a row past another reorders them with a drop indicator', async ({ page }) => {
     const designPage = new DesignPage(page);
 

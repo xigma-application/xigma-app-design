@@ -9,7 +9,7 @@ describe('useBlendModeRefs behaviors', () => {
     const { result } = renderHook(() => useBlendModeRefs());
 
     // result
-    expect(result.current).toEqual({ previewRef: { current: null } });
+    expect(result.current).toEqual({ effectPreviewRef: { current: null }, previewRef: { current: null } });
   });
 
   it('should keep returning the same refs object across re-renders', () => {

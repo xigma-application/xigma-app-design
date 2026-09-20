@@ -74,6 +74,8 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
   blendCompositeBuffer: {} as WebGLBuffer,
   blendCompositeProgram: {} as WebGLProgram,
+  blurBuffer: {} as WebGLBuffer,
+  blurProgram: {} as WebGLProgram,
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   checkerboardProgram: {} as WebGLProgram,

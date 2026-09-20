@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
 // hooks
+import { useEffectBlendModePreview } from '../useEffectBlendModePreview/useEffectBlendModePreview';
 import { useClearFillSelectionOnOutsideClick } from '../../../FillSection/hooks/useFillSection/hooks/useClearFillSelectionOnOutsideClick/useClearFillSelectionOnOutsideClick';
 import { useItemsReorderDrag } from '../../../FillSection/hooks/useFillSection/hooks/useItemsReorderDrag/useItemsReorderDrag';
 import { useOpenPickerIndex } from '../../../FillSection/hooks/useFillSection/hooks/useOpenPickerIndex/useOpenPickerIndex';
@@ -33,6 +34,7 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, 'effects', null);
+  const { onBlendModePreview } = useEffectBlendModePreview(nodeId, openPickerIndex);
   const commit = (nextEffects: TEffect[]): void => commitEffects(dispatch, nodeId, nextEffects);
   const { beginDrag, dragState, registerRow } = useItemsReorderDrag(effects, commit, setSelectedIndices, containerRef);
 
@@ -55,6 +57,7 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
       setSelectedIndices([effects.length]);
       onPickerOpenChange(effects.length, true);
     },
+    onBlendModePreview,
     onChange: (index, effect): void => commit(effects.map((current, currentIndex) => (currentIndex === index ? effect : current))),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),

@@ -17,6 +17,7 @@ import { EFFECT_ICONS, translationNameSpace } from '../constants';
 import styles from './effect-row.module.scss';
 
 // types
+import { BlendMode } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
 export type TEffectRowProps = {
@@ -24,6 +25,7 @@ export type TEffectRowProps = {
   isDragging: boolean;
   isOpen: boolean;
   isSelected: boolean;
+  onBlendModePreview: TFunc<[BlendMode | null]>;
   onChange: TFunc<[TEffect]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
@@ -39,6 +41,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
   isDragging,
   isOpen,
   isSelected,
+  onBlendModePreview,
   onChange,
   onDragEnd,
   onDragStart,
@@ -87,7 +90,14 @@ export const EffectRow: FC<TEffectRowProps> = ({
           </button>
         }
       >
-        <EffectSettingsPanel effect={effect} onChange={onChange} onClose={onClose} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+        <EffectSettingsPanel
+          effect={effect}
+          onBlendModePreview={onBlendModePreview}
+          onChange={onChange}
+          onClose={onClose}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+        />
       </UITools.Popover>
       <Tooltip align="end" content={t(`${translationNameSpace}.row.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}>
         <UITools.ButtonIcon

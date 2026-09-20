@@ -26,6 +26,7 @@ export const EffectsSection: FC = () => {
     isRowDragging,
     isRowSelected,
     onAdd,
+    onBlendModePreview,
     onChange,
     onDragEnd,
     onDragStart,
@@ -62,6 +63,7 @@ export const EffectsSection: FC = () => {
             isOpen={openIndex === index}
             isSelected={isRowSelected(index)}
             key={index}
+            onBlendModePreview={(blendMode): void => onBlendModePreview(index, blendMode)}
             onChange={(next): void => onChange(index, next)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
