@@ -178,6 +178,25 @@ describe('EffectsSection', () => {
     expect(screen.getByLabelText('Effect density')).toHaveValue('40%');
   });
 
+  it('should switch a noise to Duo, which adds a second color, and ignore Multi', () => {
+    // Step 1: Add a noise
+    const id = addRectangle();
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Noise'));
+    expect(screen.queryByLabelText('Effect secondary color')).toBeNull();
+
+    // Step 2: Multi is not implemented and changes nothing
+    fireEvent.click(screen.getByText('Multi'));
+    expect(read(id).effects?.[0].noiseType).toBeUndefined();
+
+    // Step 3: Duo shows the second color row, labelled Colors
+    fireEvent.click(screen.getByText('Duo'));
+    expect(read(id).effects?.[0].noiseType).toBe('duo');
+    expect(screen.getByLabelText('Effect secondary color')).toBeTruthy();
+    expect(screen.getByText('Colors')).toBeTruthy();
+  });
+
   it('should hide, show and delete an effect', () => {
     // Step 1: One effect
     const id = addRectangle();

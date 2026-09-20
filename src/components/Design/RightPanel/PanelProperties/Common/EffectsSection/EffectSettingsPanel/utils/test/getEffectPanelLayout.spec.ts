@@ -1,5 +1,5 @@
 // types
-import { EffectBlurType, EffectType } from 'types/design/enums';
+import { EffectBlurType, EffectNoiseType, EffectType } from 'types/design/enums';
 
 // utils
 import { createEffect } from 'utils/design/effects/createEffect';
@@ -53,5 +53,12 @@ describe('getEffectPanelLayout', () => {
     expect(layout.fields.map(({ ariaKey, key }) => ariaKey ?? key)).toEqual(['noiseSize', 'noiseSizeY', 'density']);
     expect(layout.fields[1].isReadOnly).toBe(true);
     expect(layout).toMatchObject({ hasBlendMode: true, hasBlurModeToggle: false, hasColor: true, hasNoiseTypeToggle: true });
+  });
+
+  it('should add the second color row only for a duo noise', () => {
+    // result
+    expect(getEffectPanelLayout(createEffect(EffectType.noise)).hasSecondaryColor).toBe(false);
+    expect(getEffectPanelLayout({ ...createEffect(EffectType.noise), noiseType: EffectNoiseType.duo }).hasSecondaryColor).toBe(true);
+    expect(getEffectPanelLayout(createEffect(EffectType.dropShadow)).hasSecondaryColor).toBe(false);
   });
 });

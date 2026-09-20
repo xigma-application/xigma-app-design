@@ -1,5 +1,5 @@
 // types
-import { EffectType, NodeType } from 'types/design/enums';
+import { EffectNoiseType, EffectType, NodeType } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TImageRenderContext } from '../../../../types';
 import { TRectangleNode } from 'types/design/types';
@@ -24,6 +24,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     getAttribLocation: vi.fn(() => 0),
     getUniformLocation: vi.fn((_program: WebGLProgram, name: string) => ({ name })),
     uniform1f: vi.fn(),
+    uniform1i: vi.fn(),
     uniform2f: vi.fn(),
     uniform4f: vi.fn(),
     useProgram: vi.fn(),
@@ -94,5 +95,27 @@ describe('drawNoiseShape', () => {
     expect(gl.uniform1f).toHaveBeenCalledWith({ name: 'u_cellSize' }, 0.5);
     expect(gl.uniform1f).toHaveBeenCalledWith({ name: 'u_density' }, 0.5);
     expect(gl.uniform1f).toHaveBeenCalledWith({ name: 'u_pixelRatio' }, 1);
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_duo' }, 0);
+  });
+
+  it('should hand the shader the second color at its own opacity, times the node opacity, for a duo noise', () => {
+    // mock
+    const gl = createGlMock();
+    const context = {
+      buffer: {},
+      canvasHeight: 1200,
+      canvasWidth: 1000,
+      gl,
+      imageContext: { noiseProgram: {} } as TImageRenderContext,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDrawSceneContext;
+    const effect = { ...createEffect(EffectType.noise), noiseType: EffectNoiseType.duo, secondaryColor: '#00ff00', secondaryOpacity: 60 };
+
+    // action
+    drawNoiseShape(context, node, effect, 0.5);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_duo' }, 1);
+    expect(gl.uniform4f).toHaveBeenCalledWith({ name: 'u_secondaryColor' }, 0, 1, 0, 0.3);
   });
 });

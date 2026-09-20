@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
+import EffectColorField from './EffectColorField/EffectColorField';
 import EffectNoiseTypeToggle from './EffectNoiseTypeToggle/EffectNoiseTypeToggle';
 import EffectBlurModeToggle from './EffectBlurModeToggle/EffectBlurModeToggle';
 import EffectSettingsField from './EffectSettingsField/EffectSettingsField';
@@ -22,6 +23,7 @@ import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss
 import styles from './effect-settings-panel.module.scss';
 
 // utils
+import { getEffectNoise } from 'utils/design/effects/getEffectNoise';
 import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
@@ -49,8 +51,18 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   onDragStart,
 }) => {
   const { t } = useTranslation();
-  const { fields, hasBlendMode, hasBlurModeToggle, hasColor, hasNoiseTypeToggle } = getEffectPanelLayout(effect);
-  const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
+  const { fields, hasBlendMode, hasBlurModeToggle, hasColor, hasNoiseTypeToggle, hasSecondaryColor } = getEffectPanelLayout(effect);
+  const noise = getEffectNoise(effect);
+  const {
+    onBlur,
+    onCommitAlpha,
+    onCommitHex,
+    onCommitSecondaryAlpha,
+    onCommitSecondaryHex,
+    onPickerChange,
+    onScrub,
+    onSecondaryPickerChange,
+  } = useEffectSettingsPanel(effect, onChange);
 
   return (
     <div className={styles.EffectSettingsPanel}>
@@ -68,7 +80,9 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
         {hasBlurModeToggle && (
           <EffectBlurModeToggle blurType={effect.blurType} onChange={(blurType): void => onChange({ ...effect, blurType })} />
         )}
-        {hasNoiseTypeToggle && <EffectNoiseTypeToggle />}
+        {hasNoiseTypeToggle && (
+          <EffectNoiseTypeToggle noiseType={effect.noiseType} onChange={(noiseType): void => onChange({ ...effect, noiseType })} />
+        )}
         {fields.map(({ adornmentLabel, ariaKey, icon, isReadOnly, key, labelKey, min, unit }) => (
           <EffectSettingsField
             key={`${key}-${adornmentLabel ?? ''}`}
@@ -99,23 +113,31 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
           </EffectSettingsField>
         ))}
         {hasColor && (
-          <EffectSettingsField label={t(`${translationNameSpace}.settings.labels.color`)}>
-            <UITools.ColorPickerInput
-              align="start"
-              alpha={effect.opacity}
-              className={styles.EffectSettingsPanel__color}
-              e2eValue="effect"
-              hex={effect.color}
-              onCommitAlpha={onCommitAlpha}
-              onCommitHex={onCommitHex}
-              onDragEnd={onDragEnd}
-              onDragStart={onDragStart}
-              onPickerChange={onPickerChange}
-              side="left"
-              simple
-              triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
-            />
-          </EffectSettingsField>
+          <EffectColorField
+            alpha={effect.opacity}
+            e2eValue="effect"
+            hex={effect.color}
+            label={t(`${translationNameSpace}.settings.labels.${hasSecondaryColor ? 'colors' : 'color'}`)}
+            onCommitAlpha={onCommitAlpha}
+            onCommitHex={onCommitHex}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onPickerChange={onPickerChange}
+            triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
+          />
+        )}
+        {hasSecondaryColor && (
+          <EffectColorField
+            alpha={noise.secondaryOpacity}
+            e2eValue="effect-secondary"
+            hex={noise.secondaryColor}
+            onCommitAlpha={onCommitSecondaryAlpha}
+            onCommitHex={onCommitSecondaryHex}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onPickerChange={onSecondaryPickerChange}
+            triggerAriaLabel={t(`${translationNameSpace}.settings.secondaryColorTriggerAriaLabel`)}
+          />
         )}
       </div>
     </div>

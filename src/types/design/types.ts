@@ -40,6 +40,8 @@ export type TEffect = {
   noiseSize?: number;
   noiseType?: EffectNoiseType;
   opacity: number;
+  secondaryColor?: string;
+  secondaryOpacity?: number;
   spread: number;
   start?: TPoint;
   startBlur?: number;

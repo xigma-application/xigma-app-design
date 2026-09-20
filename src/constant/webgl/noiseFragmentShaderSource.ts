@@ -2,6 +2,8 @@ export default `#version 300 es
 precision highp float;
 
 uniform vec4 u_color;
+uniform vec4 u_secondaryColor;
+uniform int u_duo;
 uniform vec2 u_viewportOffset;
 uniform float u_zoom;
 uniform float u_pixelRatio;
@@ -39,10 +41,15 @@ void main() {
   vec2 local = vec2(offset.x * cosine - offset.y * sine, offset.x * sine + offset.y * cosine);
   vec2 point = local / max(u_cellSize, 0.0001);
   float value = 0.65 * valueNoise(point) + 0.35 * valueNoise(point * 2.3 + vec2(17.0, 31.0));
-  float threshold = 0.5 + (0.5 - u_density) * 0.55;
+  float spreadFromMiddle = (0.5 - u_density) * 0.55;
   float edge = max(fwidth(value) * 0.75, 0.0001);
-  float lit = u_density > 0.0 ? smoothstep(threshold - edge, threshold + edge, value) : 0.0;
+  float enabled = u_density > 0.0 ? 1.0 : 0.0;
+  float primary = u_color.a * enabled * smoothstep(0.5 + spreadFromMiddle - edge, 0.5 + spreadFromMiddle + edge, value);
+  float secondary = u_duo == 1
+    ? u_secondaryColor.a * enabled * (1.0 - smoothstep(0.5 - spreadFromMiddle - edge, 0.5 - spreadFromMiddle + edge, value))
+    : 0.0;
+  float alpha = primary + secondary - primary * secondary;
 
-  outColor = vec4(u_color.rgb, u_color.a * lit);
+  outColor = vec4((u_color.rgb * primary + u_secondaryColor.rgb * secondary) / max(primary + secondary, 0.0001), alpha);
 }
 `;

@@ -448,6 +448,98 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(readDarkShare, { timeout: 15000 }).toBeLessThan(0.01);
   });
 
+  test('a duo noise fills the rectangle with two tones, the first color where the noise is high and the second where it is low', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-noise-duo-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await addEffect(page, 'Noise');
+    await page.getByText('Duo', { exact: true }).click();
+    await page.getByLabel('Effect noise size X').fill('4');
+    await page.getByLabel('Effect noise size X').press('Enter');
+
+    const secondHex = page.getByLabel('Effect secondary color').locator('..').getByRole('textbox').first();
+
+    await secondHex.fill('ff0000');
+    await secondHex.press('Enter');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 120, width: 160, x: 720, y: 220 };
+    const readShares = async (): Promise<{ dark: number; red: number }> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const total = png.width * png.height;
+      let dark = 0;
+      let red = 0;
+
+      for (let index = 0; index < total; index += 1) {
+        const [r, g] = [png.data[index * 4], png.data[index * 4 + 1]];
+
+        if (r - g > 30) {
+          red += 1;
+        } else if (r < 190 && Math.abs(r - g) < 6) {
+          dark += 1;
+        }
+      }
+
+      return { dark: dark / total, red: red / total };
+    };
+
+    // result — both tones cover a good part of the rectangle and together nearly all of it
+    await expect.poll(async () => (await readShares()).red, { timeout: 15000 }).toBeGreaterThan(0.25);
+
+    const { dark, red } = await readShares();
+
+    expect(dark).toBeGreaterThan(0.25);
+    expect(dark + red).toBeGreaterThan(0.75);
+  });
+
+  test('a frame noise is drawn over the frame children, not under them', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-noise-children-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(700, 200, 1000, 400);
+    await addEffect(page, 'Noise');
+    await page.getByLabel('Effect noise size X').fill('4');
+    await page.getByLabel('Effect noise size X').press('Enter');
+    await designPage.drawRectangle(1200, 200, 1300, 280);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId, childId] = pages[activePageId].rootOrder;
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { height: 80, width: 100, x: 800, y: 280 }, id: childId }));
+    });
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 60, width: 80, x: 810, y: 290 };
+    const readDarkShare = async (): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const lumas: number[] = [];
+
+      for (let index = 0; index < png.width * png.height; index += 1) {
+        lumas.push(png.data[index * 4]);
+      }
+
+      const brightest = Math.max(...lumas);
+
+      return lumas.filter((luma) => luma < brightest - 20).length / lumas.length;
+    };
+
+    // result — inside the child rectangle the noise still darkens about half of the area
+    await expect.poll(readDarkShare, { timeout: 15000 }).toBeGreaterThan(0.25);
+    expect(await readDarkShare()).toBeLessThan(0.75);
+  });
+
   test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {
     const designPage = new DesignPage(page);
 
