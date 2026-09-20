@@ -16,6 +16,7 @@ import { useStepNumbersOnKeyDown } from 'hooks';
 import { StrokeStyle } from 'types/design/enums';
 
 // others
+import { STROKE_DASH_MAX_LENGTH } from 'constant/strokeDash';
 import { STROKE_MITER_ANGLE_MAX, STROKE_MITER_ANGLE_MIN } from 'constant/strokeMiterAngle';
 import { STROKE_STYLE_ICONS, STROKE_STYLE_MENU_WIDTH_PX } from './constants';
 import { getStrokeDashCapButtons } from './utils/getStrokeDashCapButtons';
@@ -43,10 +44,13 @@ export const StrokeSettingsBasicTab: FC = () => {
     miterAngle,
     onDashBlur,
     onDashCapSelect,
+    onDashScrub,
     onDashStep,
     onDashesBlur,
+    onDashesScrub,
     onDashesStep,
     onGapBlur,
+    onGapScrub,
     onGapStep,
     onJoinSelect,
     onMiterAngleBlur,
@@ -54,6 +58,8 @@ export const StrokeSettingsBasicTab: FC = () => {
     onMiterAngleDragStart,
     onMiterAngleScrub,
     onMiterAngleStep,
+    onScrubDragEnd,
+    onScrubDragStart,
     onStyleSelect,
     style,
   } = useStrokeSettingsBasicTab();
@@ -96,6 +102,16 @@ export const StrokeSettingsBasicTab: FC = () => {
               keepMountedWhileFocused
               onBlur={onDashBlur}
               onKeyDown={onDashKeyDown}
+              startAdornment={
+                <UITools.ScrubbableEdge
+                  max={STROKE_DASH_MAX_LENGTH}
+                  min={0}
+                  onChange={onDashScrub}
+                  onDragEnd={onScrubDragEnd}
+                  onDragStart={onScrubDragStart}
+                  value={dash}
+                />
+              }
               type="text"
             />
           </StrokeSettingsField>
@@ -108,6 +124,16 @@ export const StrokeSettingsBasicTab: FC = () => {
               keepMountedWhileFocused
               onBlur={onGapBlur}
               onKeyDown={onGapKeyDown}
+              startAdornment={
+                <UITools.ScrubbableEdge
+                  max={STROKE_DASH_MAX_LENGTH}
+                  min={0}
+                  onChange={onGapScrub}
+                  onDragEnd={onScrubDragEnd}
+                  onDragStart={onScrubDragStart}
+                  value={gap}
+                />
+              }
               type="text"
             />
           </StrokeSettingsField>
@@ -123,6 +149,16 @@ export const StrokeSettingsBasicTab: FC = () => {
             keepMountedWhileFocused
             onBlur={onDashesBlur}
             onKeyDown={onDashesKeyDown}
+            startAdornment={
+              <UITools.ScrubbableEdge
+                max={STROKE_DASH_MAX_LENGTH}
+                min={0}
+                onChange={onDashesScrub}
+                onDragEnd={onScrubDragEnd}
+                onDragStart={onScrubDragStart}
+                value={dashes[0] ?? 0}
+              />
+            }
             type="text"
           />
         </StrokeSettingsField>

@@ -38,10 +38,13 @@ export type TStrokeSettingsValuesSource = {
 export type TUseStrokeSettingsBasicTabResult = TStrokeSettingsValues & {
   onDashBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDashCapSelect: TFunc<[string]>;
+  onDashScrub: TFunc<[number]>;
   onDashStep: TFunc<[string]>;
   onDashesBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
+  onDashesScrub: TFunc<[number]>;
   onDashesStep: TFunc<[string]>;
   onGapBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
+  onGapScrub: TFunc<[number]>;
   onGapStep: TFunc<[string]>;
   onJoinSelect: TFunc<[string]>;
   onMiterAngleBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -49,5 +52,7 @@ export type TUseStrokeSettingsBasicTabResult = TStrokeSettingsValues & {
   onMiterAngleDragStart: TFunc;
   onMiterAngleStep: TFunc<[string]>;
   onMiterAngleScrub: TFunc<[number]>;
+  onScrubDragEnd: TFunc;
+  onScrubDragStart: TFunc;
   onStyleSelect: TFunc<[StrokeStyle]>;
 };

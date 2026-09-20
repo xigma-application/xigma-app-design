@@ -279,6 +279,20 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByLabel('Gap')).toHaveValue('20');
     await expect(page.getByText('Dash cap')).toBeVisible();
 
+    // action: dragging from the left edge of the Dash and Gap fields scrubs their values
+    for (const label of ['Dash', 'Gap']) {
+      const field = page.getByLabel(label, { exact: true });
+      const fieldBox = (await field.boundingBox())!;
+
+      await page.mouse.move(fieldBox.x - 4, fieldBox.y + fieldBox.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(fieldBox.x + 26, fieldBox.y + fieldBox.height / 2, { steps: 6 });
+      await page.mouse.up();
+
+      // result
+      await expect.poll(async () => Number(await field.inputValue()), { timeout: 10000 }).toBeGreaterThan(20);
+    }
+
     const widthProfileRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' });
 
     await expect(widthProfileRow.locator('button').first()).toBeDisabled();

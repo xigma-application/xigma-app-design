@@ -80,6 +80,32 @@ describe('useStrokeSettingsBasicTab', () => {
     // result
     expect(result.current).toMatchObject({ hasDashes: true, isCustom: true, isDashed: false });
     expect(getNode().strokeDashes).toEqual([10, 20, 5, 20]);
+
+    // action: scrubbing the left edge of Dashes shifts the whole list inside one history gesture
+    act(() => result.current.onScrubDragStart());
+    act(() => result.current.onDashesScrub(12));
+    act(() => result.current.onScrubDragEnd());
+
+    // result
+    expect(getNode().strokeDashes).toEqual([12, 22, 7, 22]);
+  });
+
+  it('should scrub the dash and the gap of a dashed stroke from the left edge of their fields', () => {
+    // before
+    const id = addAndSelect();
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+    const getNode = (): TRectangleNode => selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    // action
+    act(() => result.current.onStyleSelect(StrokeStyle.dashed));
+    act(() => result.current.onScrubDragStart());
+    act(() => result.current.onDashScrub(14));
+    act(() => result.current.onGapScrub(6));
+    act(() => result.current.onScrubDragEnd());
+
+    // result
+    expect(getNode().strokeDash).toBe(14);
+    expect(getNode().strokeGap).toBe(6);
   });
 
   it('should start with the Miter join and write the chosen join to the selected node', () => {
