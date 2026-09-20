@@ -39,7 +39,7 @@ const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, maskConne
       node={node}
       onToggleExpand={onToggleExpand}
       renderIcon={(item): ReactNode => <LayerRowIcon isMask={isMask} node={item} />}
-      renderMenu={(params): ReactNode => <LayerContextMenu {...params} node={node} />}
+      renderMenu={(params): ReactNode => (params.isOpen ? <LayerContextMenu {...params} node={node} /> : null)}
     >
       <LayerRowMaskDecorations isMask={isMask} maskConnectorLines={maskConnectorInfo} />
     </TreeItem>

@@ -13,3 +13,7 @@ export type TMaskRenderer = {
   refs: TCanvasRefs;
   sceneNodeById: Map<string, TSceneNode>;
 };
+
+export type TScissorRect = { clipped?: boolean; height: number; originX?: number; originY?: number; width: number; x: number; y: number };
+
+export type TBlurCacheEntry = { framebuffer: WebGLFramebuffer; height: number; key: string; texture: WebGLTexture; width: number };

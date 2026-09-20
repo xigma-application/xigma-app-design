@@ -11,9 +11,13 @@ vi.mock('../bindTarget', () => ({ bindTarget: vi.fn() }));
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     COLOR_BUFFER_BIT: 16384,
+    SCISSOR_TEST: 3089,
     STENCIL_BUFFER_BIT: 1024,
     clear: vi.fn(),
     clearColor: vi.fn(),
+    disable: vi.fn(),
+    enable: vi.fn(),
+    scissor: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
 
 describe('renderIntoTarget', () => {
@@ -38,5 +42,20 @@ describe('renderIntoTarget', () => {
     expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     expect(paint).toHaveBeenCalledTimes(1);
     expect(calls).toEqual(['bind', 'clear', 'paint']);
+  });
+
+  it('should limit the clear to the given rect and paint unscissored', () => {
+    const gl = createGlMock();
+    const renderer = { gl } as unknown as TMaskRenderer;
+    const target = { id: 'target' } as unknown as TRenderTarget;
+    const calls: string[] = [];
+
+    (gl.clear as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => calls.push('clear'));
+    (gl.disable as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => calls.push('disable'));
+
+    renderIntoTarget(renderer, target, () => calls.push('paint'), { height: 4, width: 3, x: 1, y: 2 });
+
+    expect(gl.scissor).toHaveBeenCalledWith(1, 2, 3, 4);
+    expect(calls).toEqual(['clear', 'disable', 'paint']);
   });
 });

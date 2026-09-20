@@ -19,6 +19,8 @@ vi.mock('../../../compositeBlend', () => ({ compositeBlend: vi.fn() }));
 vi.mock('../dispatchNodeType', () => ({ dispatchNodeType: vi.fn() }));
 vi.mock('../../renderIntoTarget', () => ({ renderIntoTarget: vi.fn((_renderer, _target, paint) => paint()) }));
 
+const gl = { SCISSOR_TEST: 3089, disable: vi.fn(), enable: vi.fn(), scissor: vi.fn() } as unknown as WebGL2RenderingContext;
+
 describe('renderIsolatedBlendNode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -30,7 +32,7 @@ describe('renderIsolatedBlendNode', () => {
     const backdrop = { tag: 'backdrop-target', texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => contentTarget), release: vi.fn() } as unknown as TMaskRenderer['pool'];
     const context = { tag: 'context' } as unknown as TMaskRenderer['context'];
-    const renderer = { context, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
+    const renderer = { context, gl, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
     const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
     const target = { tag: 'outer-target' } as unknown as TRenderTarget;
 
@@ -41,8 +43,8 @@ describe('renderIsolatedBlendNode', () => {
 
     // result — backdrop captured while target is bound, before the isolated content is drawn
     expect(bindTarget).toHaveBeenNthCalledWith(1, renderer, target);
-    expect(captureBackdropTexture).toHaveBeenCalledWith(renderer);
-    expect(renderIntoTarget).toHaveBeenCalledWith(renderer, contentTarget, expect.any(Function));
+    expect(captureBackdropTexture).toHaveBeenCalledWith(renderer, null);
+    expect(renderIntoTarget).toHaveBeenCalledWith(renderer, contentTarget, expect.any(Function), null);
     expect(dispatchNodeType).toHaveBeenCalledWith(renderer, node, contentTarget);
     expect(bindTarget).toHaveBeenNthCalledWith(2, renderer, target);
     expect(compositeBlend).toHaveBeenCalledWith(context, contentTarget.texture, backdrop.texture, BlendMode.multiply);
@@ -55,7 +57,7 @@ describe('renderIsolatedBlendNode', () => {
     const contentTarget = { tag: 'content-target' } as unknown as TRenderTarget;
     const backdrop = { texture: { tag: 'backdrop-texture' } } as unknown as TRenderTarget;
     const pool = { acquire: vi.fn(() => contentTarget), release: vi.fn() } as unknown as TMaskRenderer['pool'];
-    const renderer = { context: {}, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
+    const renderer = { context: {}, gl, pool, refs: createCanvasRefs() } as unknown as TMaskRenderer;
     const node = { id: 'node-1', type: NodeType.line } as unknown as TSceneNode;
 
     (captureBackdropTexture as unknown as ReturnType<typeof vi.fn>).mockReturnValue(backdrop);
