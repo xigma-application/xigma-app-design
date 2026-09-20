@@ -11,6 +11,8 @@ import { TTextureSize } from 'utils/canvas/getOrLoadTexture';
 export type TImageRenderContext = {
   blendCompositeBuffer: WebGLBuffer;
   blendCompositeProgram: WebGLProgram;
+  blurBuffer: WebGLBuffer;
+  blurProgram: WebGLProgram;
   buffer: WebGLBuffer;
   cache: Map<string, WebGLTexture>;
   checkerboardProgram: WebGLProgram;

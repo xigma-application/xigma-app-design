@@ -1,6 +1,9 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// @xigma
+import { ScrubbableInput } from '@xigma/components';
+
 // components
 import EffectSettingsField from './EffectSettingsField/EffectSettingsField';
 import EffectSettingsHeader from './EffectSettingsHeader/EffectSettingsHeader';
@@ -10,7 +13,7 @@ import { UITools } from 'shared';
 import { useEffectSettingsPanel } from './hooks/useEffectSettingsPanel/useEffectSettingsPanel';
 
 // others
-import { EFFECT_NUMBER_FIELDS, translationNameSpace } from '../constants';
+import { EFFECT_NUMBER_FIELDS, EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
 
 // styles
 import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss';
@@ -30,7 +33,7 @@ export type TEffectSettingsPanelProps = {
 
 export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({ effect, onChange, onClose, onDragEnd, onDragStart }) => {
   const { t } = useTranslation();
-  const { onBlur, onCommitAlpha, onCommitHex, onPickerChange } = useEffectSettingsPanel(effect, onChange);
+  const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
 
   return (
     <div className={styles.EffectSettingsPanel}>
@@ -50,7 +53,18 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({ effect, onC
               defaultValue={`${effect[key]}`}
               e2eValue={`effect-${key}`}
               onBlur={onBlur(key, min)}
-              startAdornment={<UITools.InputAdornment icon={icon} label={adornmentLabel} />}
+              startAdornment={
+                <ScrubbableInput
+                  max={EFFECT_SCRUB_LIMIT}
+                  min={Math.max(min, -EFFECT_SCRUB_LIMIT)}
+                  onChange={onScrub(key, min)}
+                  onMouseDown={onDragStart}
+                  onMouseUp={onDragEnd}
+                  value={effect[key]}
+                >
+                  <UITools.InputAdornment icon={icon} label={adornmentLabel} />
+                </ScrubbableInput>
+              }
               stepNumbers={{ min }}
               type="text"
             />

@@ -22,6 +22,8 @@ export const setupRenderLoop = (
   maskCompositeBuffer: WebGLBuffer,
   blendCompositeProgram: WebGLProgram,
   blendCompositeBuffer: WebGLBuffer,
+  blurProgram: WebGLProgram,
+  blurBuffer: WebGLBuffer,
   dragSnapshotProgram: WebGLProgram,
   gradientProgram: WebGLProgram,
   dragGradientProgram: WebGLProgram,
@@ -35,6 +37,8 @@ export const setupRenderLoop = (
   const imageContext: TImageRenderContext = {
     blendCompositeBuffer,
     blendCompositeProgram,
+    blurBuffer,
+    blurProgram,
     buffer: imageBuffer,
     cache: new Map(),
     checkerboardProgram,

@@ -5,6 +5,7 @@ import { TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/desi
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
 // utils
+import { drawBoxEffects } from './drawBoxEffects';
 import { drawBoxPaints } from './drawBoxPaints';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { getBoxFillPolygon } from '../getBoxFillPolygon';
@@ -34,6 +35,7 @@ export const drawBoxLeafNodeFill = (
       editingPathId,
       patternSourceDepth,
     );
+    drawBoxEffects(context, node, opacity);
   } else {
     drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
   }

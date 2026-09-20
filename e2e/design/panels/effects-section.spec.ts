@@ -83,6 +83,18 @@ test.describe('Design panels — Effects section', () => {
     // result
     expect((await readNode(page, id)).effects?.[0]).toMatchObject({ blur: 0, y: 8 });
 
+    // action: dragging the X label scrubs its value
+    const xLabel = page.locator('[class*="EffectSettingsPanel_"]').getByText('X', { exact: true });
+    const xBox = (await xLabel.boundingBox())!;
+
+    await page.mouse.move(xBox.x + xBox.width / 2, xBox.y + xBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(xBox.x + xBox.width / 2 + 30, xBox.y + xBox.height / 2, { steps: 6 });
+    await page.mouse.up();
+
+    // result
+    await expect.poll(async () => (await readNode(page, id)).effects?.[0].x).toBeGreaterThan(0);
+
     // action: arrow keys step the number
     await page.getByLabel('Effect spread').focus();
     await page.keyboard.press('ArrowUp');
@@ -109,6 +121,70 @@ test.describe('Design panels — Effects section', () => {
 
     // result
     await expect(row).not.toHaveClass(/EffectRow__trigger--active/);
+  });
+
+  test('an inner shadow is drawn inside the rectangle along the edge away from its offset, follows its values, and disappears when hidden', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-inner-shadow-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 180, width: 220, x: 690, y: 190 };
+    const readChannels = async (x: number, y: number): Promise<number[]> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const index = ((y - clip.y) * png.width + (x - clip.x)) * 4;
+
+      return [png.data[index], png.data[index + 1], png.data[index + 2]];
+    };
+    const readLuma = async (x: number, y: number): Promise<number> => (await readChannels(x, y))[0];
+
+    // result — with no effect the top edge and the center are the same grey
+    const centerLuma = await readLuma(800, 280);
+
+    expect(Math.abs((await readLuma(800, 203)) - centerLuma)).toBeLessThan(4);
+
+    // action
+    await addEffect(page, 'Inner shadow');
+
+    // result — the default shadow (y offset 4) darkens the top edge, not the bottom one or the center
+    await expect.poll(async () => centerLuma - (await readLuma(800, 203))).toBeGreaterThan(20);
+    expect(Math.abs((await readLuma(800, 357)) - centerLuma)).toBeLessThan(6);
+    expect(Math.abs((await readLuma(800, 280)) - centerLuma)).toBeLessThan(6);
+
+    // action — a bigger blur spreads the shadow further into the rectangle
+    const narrowLuma = await readLuma(800, 214);
+
+    await page.getByLabel('Effect blur').fill('24');
+    await page.getByLabel('Effect blur').press('Enter');
+
+    // result
+    await expect.poll(async () => (await readLuma(800, 214)) < narrowLuma - 4).toBe(true);
+
+    // action — a colored shadow keeps its color while it fades out, without going dark or grey at the edge
+    await page.getByLabel('Effect blur').fill('4');
+    await page.getByLabel('Effect blur').press('Enter');
+
+    const hexInput = page.getByLabel('Effect color').locator('..').getByRole('textbox').first();
+
+    await hexInput.fill('ff0000');
+    await hexInput.press('Enter');
+
+    // result — every pixel of the fade keeps the red channel at least as high as the grey rectangle
+    await expect.poll(async () => (await readChannels(800, 203))[1]).toBeLessThan(centerLuma - 20);
+    expect((await readChannels(800, 203))[0]).toBeGreaterThanOrEqual(centerLuma - 3);
+    expect((await readChannels(800, 205))[0]).toBeGreaterThanOrEqual(centerLuma - 3);
+
+    // action — hiding the effect removes the shadow again
+    await page.getByLabel('Hide effect').click();
+
+    // result
+    await expect.poll(async () => Math.abs((await readLuma(800, 203)) - centerLuma)).toBeLessThan(4);
   });
 
   test('effects can be hidden and deleted, and dragging a row past another reorders them with a drop indicator', async ({ page }) => {

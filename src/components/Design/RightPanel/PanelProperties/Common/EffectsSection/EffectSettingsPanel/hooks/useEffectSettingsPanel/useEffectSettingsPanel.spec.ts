@@ -26,4 +26,17 @@ describe('useEffectSettingsPanel', () => {
     expect(onChange).toHaveBeenNthCalledWith(2, { ...effect, opacity: 60 });
     expect(onChange).toHaveBeenNthCalledWith(3, { ...effect, color: '#00ff00', opacity: 10 });
   });
+
+  it('should commit scrubbed numbers for the named field', () => {
+    // Step 1: Prepare
+    const effect = createEffect(EffectType.innerShadow);
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useEffectSettingsPanel(effect, onChange));
+
+    // Step 2: Scrub Y
+    result.current.onScrub('y', Number.NEGATIVE_INFINITY)(12);
+
+    // Step 3: Assert
+    expect(onChange).toHaveBeenCalledWith({ ...effect, y: 12 });
+  });
 });

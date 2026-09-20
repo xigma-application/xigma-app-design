@@ -30,6 +30,8 @@ export const EFFECT_MENU_TYPES: EffectType[] = [
 
 export const EFFECT_MENU_SEPARATED_TYPE = EffectType.shader;
 
+export const EFFECT_SCRUB_LIMIT = 100000;
+
 export const EFFECT_NUMBER_FIELDS = [
   { adornmentLabel: 'X', icon: undefined, key: 'x', labelKey: 'position', min: Number.NEGATIVE_INFINITY },
   { adornmentLabel: 'Y', icon: undefined, key: 'y', labelKey: undefined, min: Number.NEGATIVE_INFINITY },
