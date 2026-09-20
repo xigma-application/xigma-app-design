@@ -28,7 +28,7 @@ import {
   selectAreRulersVisible,
   selectSelectedIds,
   selectTopLevelFrameNodes,
-  selectViewport,
+  selectZoom,
 } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
@@ -77,7 +77,7 @@ const ViewMenu: FC = () => {
   const areFrameOutlinesVisible = useAppSelector(selectAreFrameOutlinesVisible);
   const areMaskOutlinesVisible = useAppSelector(selectAreMaskOutlinesVisible);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
-  const viewport = useAppSelector(selectViewport);
+  const zoom = useAppSelector(selectZoom);
   const selectedIds = useAppSelector(selectSelectedIds);
   const frameNodes = useAppSelector(selectTopLevelFrameNodes);
   const handleAdditionalLabelsClick = useViewMenuAdditionalLabelsClick();
@@ -125,13 +125,13 @@ const ViewMenu: FC = () => {
       </MenuSub>
       <MenuSeparator />
       <MenuItem
-        disabled={viewport.zoom >= ZOOM_MAX}
+        disabled={zoom >= ZOOM_MAX}
         label={t(VIEW_MENU_ZOOM_IN_KEY)}
         onClick={handleZoomInClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomIn.join('')}
       />
       <MenuItem
-        disabled={viewport.zoom <= ZOOM_MIN}
+        disabled={zoom <= ZOOM_MIN}
         label={t(VIEW_MENU_ZOOM_OUT_KEY)}
         onClick={handleZoomOutClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomOut.join('')}

@@ -4,7 +4,6 @@ import { TFrameNode } from 'types/design/types';
 // utils
 import { buildFrameNameLabelVertices } from './buildFrameNameLabelVertices';
 import { FRAME_NAME_LABEL_CACHE_MAX_ENTRIES, frameNameLabelCache } from './frameNameLabelCache';
-import { getFrameNameLabelCacheKey } from './getFrameNameLabelCacheKey';
 
 const evictOldestFrameNameLabelCacheEntry = (): void => {
   if (frameNameLabelCache.size >= FRAME_NAME_LABEL_CACHE_MAX_ENTRIES) {
@@ -13,17 +12,16 @@ const evictOldestFrameNameLabelCacheEntry = (): void => {
 };
 
 export const getFrameNameLabelVertices = (node: TFrameNode, zoom: number): Float32Array => {
-  const key = getFrameNameLabelCacheKey(node, zoom);
   const cached = frameNameLabelCache.get(node.id);
 
-  if (cached && cached.key === key) {
+  if (cached && cached.node === node && cached.zoom === zoom) {
     return cached.vertices;
   }
 
   const vertices = buildFrameNameLabelVertices(node, zoom);
 
   evictOldestFrameNameLabelCacheEntry();
-  frameNameLabelCache.set(node.id, { key, vertices });
+  frameNameLabelCache.set(node.id, { node, vertices, zoom });
 
   return vertices;
 };

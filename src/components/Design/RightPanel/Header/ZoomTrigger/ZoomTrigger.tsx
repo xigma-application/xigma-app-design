@@ -9,7 +9,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 import { translationNameSpace } from './constants';
 
 // store
-import { selectViewport } from 'store/design/selectors';
+import { selectZoom } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -17,8 +17,8 @@ import styles from './zoom-trigger.module.scss';
 
 const ZoomTrigger: FC = () => {
   const { t } = useTranslation();
-  const viewport = useAppSelector(selectViewport);
-  const zoomPercentage = Math.round(viewport.zoom * 100);
+  const zoom = useAppSelector(selectZoom);
+  const zoomPercentage = Math.round(zoom * 100);
 
   return (
     <UITools.ButtonMenu

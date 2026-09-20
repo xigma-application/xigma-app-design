@@ -51,8 +51,10 @@ const createGlCanvasRef = (): TGlCanvasRef => {
     deleteBuffer: vi.fn(),
     deleteProgram,
     enable: vi.fn(),
+    getAttribLocation: vi.fn(() => 0),
     getProgramParameter: vi.fn(() => true),
     getShaderParameter: vi.fn(() => true),
+    getUniformLocation: vi.fn(() => ({})),
     linkProgram: vi.fn(),
     shaderSource: vi.fn(),
   } as unknown as WebGL2RenderingContext);

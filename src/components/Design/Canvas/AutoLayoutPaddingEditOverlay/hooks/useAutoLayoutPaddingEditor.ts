@@ -1,7 +1,10 @@
 import { useCallback, useEffect } from 'react';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
-import { selectEditingAutoLayoutPadding, selectNodes, selectViewport } from 'store/design/selectors';
+import { selectEditingAutoLayoutPadding, selectNodes } from 'store/design/selectors';
 import { stopAutoLayoutPaddingEdit, updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -22,7 +25,7 @@ type TAutoLayoutPaddingEditor = {
 export const useAutoLayoutPaddingEditor = (refs: TCanvasRefs): TAutoLayoutPaddingEditor => {
   const editState = useAppSelector(selectEditingAutoLayoutPadding);
   const nodes = useAppSelector(selectNodes);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(editState !== null);
   const dispatch = useAppDispatch();
   const edit = getAutoLayoutPaddingEditDetails(editState, nodes, viewport);
 

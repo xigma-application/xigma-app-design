@@ -1,5 +1,8 @@
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
-import { selectImageEditor, selectNodes, selectViewport } from 'store/design/selectors';
+import { selectImageEditor, selectNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -11,7 +14,7 @@ import { getImageCropExpandButtonPosition } from '../utils/getImageCropExpandBut
 export const useImageCropExpandButton = (): TPoint | null => {
   const imageEditor = useAppSelector(selectImageEditor);
   const nodes = useAppSelector(selectNodes);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(imageEditor !== null);
 
   return getImageCropExpandButtonPosition(imageEditor, nodes, viewport);
 };

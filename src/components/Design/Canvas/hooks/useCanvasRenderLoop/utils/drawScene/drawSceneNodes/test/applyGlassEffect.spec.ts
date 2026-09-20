@@ -32,7 +32,9 @@ vi.mock('../../compositeMask', () => ({
   compositeMask: (...args: unknown[]): number => calls.push('composite') && compositeMaskMock(...args),
 }));
 vi.mock('../getGlassCacheHit', () => ({ getGlassCacheHit: (...args: unknown[]): unknown => getGlassCacheHitMock(...args) }));
-vi.mock('../getIsolatedScissorRect', () => ({ getIsolatedScissorRect: (...args: unknown[]): unknown => getIsolatedScissorRectMock(...args) }));
+vi.mock('../getIsolatedScissorRect', () => ({
+  getIsolatedScissorRect: (...args: unknown[]): unknown => getIsolatedScissorRectMock(...args),
+}));
 vi.mock('../paintBackgroundBlurShape', () => ({
   paintBackgroundBlurShape: (...args: unknown[]): number => calls.push('shape') && paintBackgroundBlurShapeMock(...args),
 }));
@@ -45,7 +47,9 @@ vi.mock('../renderIntoTarget', () => ({
     paint();
   },
 }));
-vi.mock('../setScissorRect', () => ({ setScissorRect: (...args: unknown[]): number => calls.push('scissor') && setScissorRectMock(...args) }));
+vi.mock('../setScissorRect', () => ({
+  setScissorRect: (...args: unknown[]): number => calls.push('scissor') && setScissorRectMock(...args),
+}));
 vi.mock('../storeGlassCacheEntry', () => ({
   storeGlassCacheEntry: (...args: unknown[]): number => calls.push('store') && storeGlassCacheEntryMock(...args),
 }));
@@ -105,7 +109,7 @@ describe('applyGlassEffect', () => {
     applyGlassEffect(renderer, node, null);
 
     // result
-    expect(calls).toEqual(['bind', 'warp', 'store', 'render', 'shape', 'bind', 'scissor', 'composite', 'scissor']);
+    expect(calls).toEqual(['bind', 'warp', 'render', 'scissor', 'shape', 'scissor', 'store', 'bind', 'scissor', 'composite', 'scissor']);
     expect(renderFreshGlassWarpMock).toHaveBeenCalledWith(
       renderer,
       node,
@@ -114,10 +118,31 @@ describe('applyGlassEffect', () => {
       expect.any(Number),
       expect.objectContaining({ tag: 'warped' }),
     );
-    expect(storeGlassCacheEntryMock).toHaveBeenCalledWith(renderer.gl, 'r1', NODES_STATE, expect.objectContaining({ tag: 'warped' }), RECT);
+    expect(storeGlassCacheEntryMock).toHaveBeenCalledWith(
+      renderer.gl,
+      'r1',
+      NODES_STATE,
+      expect.objectContaining({ tag: 'warped' }),
+      expect.objectContaining({ tag: 'mask' }),
+      RECT,
+    );
     expect(blitGlassCacheEntryMock).not.toHaveBeenCalled();
     expect(compositeMaskMock).toHaveBeenCalledWith(renderer.context, { tag: 'warped-tex' }, { tag: 'mask-tex' });
     expect(pool.release).toHaveBeenCalledTimes(2);
+  });
+
+  it('should not cache a warp whose rect is cut by the screen edge', () => {
+    // mock
+    const { renderer } = createRenderer();
+
+    getIsolatedScissorRectMock.mockReturnValue({ ...RECT, clipped: true });
+
+    // action
+    applyGlassEffect(renderer, node, null);
+
+    // result
+    expect(renderFreshGlassWarpMock).toHaveBeenCalled();
+    expect(storeGlassCacheEntryMock).not.toHaveBeenCalled();
   });
 
   it('should blit the cached warp instead of rebuilding it, on a cache hit', () => {
@@ -131,8 +156,15 @@ describe('applyGlassEffect', () => {
     applyGlassEffect(renderer, node, null);
 
     // result
-    expect(calls).toEqual(['bind', 'blit', 'render', 'shape', 'bind', 'scissor', 'composite', 'scissor']);
-    expect(blitGlassCacheEntryMock).toHaveBeenCalledWith(renderer.gl, cachedEntry, expect.objectContaining({ tag: 'warped' }), RECT);
+    expect(calls).toEqual(['bind', 'blit', 'bind', 'scissor', 'composite', 'scissor']);
+    expect(blitGlassCacheEntryMock).toHaveBeenCalledWith(
+      renderer.gl,
+      cachedEntry,
+      expect.objectContaining({ tag: 'warped' }),
+      expect.objectContaining({ tag: 'mask' }),
+      RECT,
+    );
+    expect(paintBackgroundBlurShapeMock).not.toHaveBeenCalled();
     expect(renderFreshGlassWarpMock).not.toHaveBeenCalled();
     expect(storeGlassCacheEntryMock).not.toHaveBeenCalled();
   });

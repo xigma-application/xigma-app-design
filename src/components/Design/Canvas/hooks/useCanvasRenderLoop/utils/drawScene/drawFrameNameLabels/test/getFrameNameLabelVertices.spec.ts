@@ -42,20 +42,23 @@ describe('getFrameNameLabelVertices', () => {
     expect(result).toEqual(new Float32Array([1, 2, 3]));
   });
 
-  it('should reuse the cached vertices on a later call with the exact same node and zoom', () => {
+  it('should reuse the cached vertices on a later call with the exact same node reference and zoom', () => {
+    // mock
+    const frame = buildFrame();
+
     // before
-    getFrameNameLabelVertices(buildFrame(), 1);
+    getFrameNameLabelVertices(frame, 1);
     buildFrameNameLabelVerticesMock.mockClear();
 
     // action
-    const result = getFrameNameLabelVertices(buildFrame(), 1);
+    const result = getFrameNameLabelVertices(frame, 1);
 
     // result
     expect(buildFrameNameLabelVerticesMock).not.toHaveBeenCalled();
     expect(result).toEqual(new Float32Array([1, 2, 3]));
   });
 
-  it('should rebuild when the node name changes', () => {
+  it('should rebuild when the node changes (a new object reference)', () => {
     // before
     getFrameNameLabelVertices(buildFrame(), 1);
     buildFrameNameLabelVerticesMock.mockClear();
@@ -68,26 +71,33 @@ describe('getFrameNameLabelVertices', () => {
   });
 
   it('should rebuild when the zoom changes', () => {
+    // mock
+    const frame = buildFrame();
+
     // before
-    getFrameNameLabelVertices(buildFrame(), 1);
+    getFrameNameLabelVertices(frame, 1);
     buildFrameNameLabelVerticesMock.mockClear();
 
     // action
-    getFrameNameLabelVertices(buildFrame(), 2);
+    getFrameNameLabelVertices(frame, 2);
 
     // result
     expect(buildFrameNameLabelVerticesMock).toHaveBeenCalledWith(buildFrame(), 2);
   });
 
   it('should not rebuild just because an unrelated node panned by, keyed independently per node id', () => {
+    // mock
+    const first = buildFrame();
+    const second = buildFrame({ id: 'frame-2' });
+
     // before
-    getFrameNameLabelVertices(buildFrame(), 1);
-    getFrameNameLabelVertices(buildFrame({ id: 'frame-2' }), 1);
+    getFrameNameLabelVertices(first, 1);
+    getFrameNameLabelVertices(second, 1);
     buildFrameNameLabelVerticesMock.mockClear();
 
     // action
-    getFrameNameLabelVertices(buildFrame(), 1);
-    getFrameNameLabelVertices(buildFrame({ id: 'frame-2' }), 1);
+    getFrameNameLabelVertices(first, 1);
+    getFrameNameLabelVertices(second, 1);
 
     // result
     expect(buildFrameNameLabelVerticesMock).not.toHaveBeenCalled();

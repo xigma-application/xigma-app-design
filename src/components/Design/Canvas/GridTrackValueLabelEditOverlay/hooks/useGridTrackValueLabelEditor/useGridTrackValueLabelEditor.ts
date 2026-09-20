@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
 import { store, useAppDispatch, useAppSelector } from 'store';
-import { selectGridTrackValueEditRequest, selectViewport } from 'store/design/selectors';
+import { selectGridTrackValueEditRequest } from 'store/design/selectors';
 import { setGridTrackValueEditRequest } from 'store/design/slice';
 
 // types
@@ -18,7 +21,7 @@ import { TGridTrackValueEditTarget } from 'utils/canvas/gridSlots/getGridTrackVa
 export const useGridTrackValueLabelEditor = (refs: TCanvasRefs): TGridTrackValueLabelEditor => {
   const request = useAppSelector(selectGridTrackValueEditRequest);
   const [edit, setEdit] = useState<TGridTrackValueEditTarget | null>(null);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(edit !== null);
   const dispatch = useAppDispatch();
 
   useEffect(() => {

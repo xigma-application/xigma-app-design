@@ -17,6 +17,7 @@ export type TMaskRenderer = {
 export type TScissorRect = {
   clipped?: boolean;
   height: number;
+  margin?: number;
   offscreen?: boolean;
   originX?: number;
   originY?: number;
@@ -42,9 +43,17 @@ export type TBlurCacheEntry = {
 export type TGlassCacheEntry = {
   framebuffer: WebGLFramebuffer;
   height: number;
+  localX: number;
+  localY: number;
+  maskFramebuffer: WebGLFramebuffer;
+  maskTexture: WebGLTexture;
   nodesState: unknown;
+  rawHeight: number;
+  rawWidth: number;
   texture: WebGLTexture;
+  validBottom: number;
+  validLeft: number;
+  validRight: number;
+  validTop: number;
   width: number;
-  x: number;
-  y: number;
 };

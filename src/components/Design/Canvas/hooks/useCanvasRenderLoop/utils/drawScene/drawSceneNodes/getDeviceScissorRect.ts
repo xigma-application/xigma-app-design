@@ -18,9 +18,12 @@ export const getDeviceScissorRect = (renderer: TMaskRenderer, corners: TPoint[],
   const top = Math.min(gl.drawingBufferHeight, rawTop);
 
   if (right > left && top > bottom) {
+    const clipped = left !== rawLeft || right !== rawRight || bottom !== rawBottom || top !== rawTop;
+
     return {
-      clipped: left !== rawLeft || right !== rawRight || bottom !== rawBottom || top !== rawTop,
+      clipped,
       height: top - bottom,
+      ...(clipped ? { margin } : {}),
       originX: rawLeft,
       originY: rawBottom,
       rawHeight: rawTop - rawBottom,

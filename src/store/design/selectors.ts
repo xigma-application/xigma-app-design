@@ -201,3 +201,5 @@ export const selectDescendantIdsOfSelected = createSelector([selectSelectedNodes
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
 
 export const selectViewport = createSelector([selectActivePage], (page): TViewport => page.viewport);
+
+export const selectZoom = createSelector([selectViewport], (viewport): number => viewport.zoom);

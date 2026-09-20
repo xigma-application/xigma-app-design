@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
-import { selectActivePage, selectActiveTool, selectViewport } from 'store/design/selectors';
+import { selectActivePage, selectActiveTool } from 'store/design/selectors';
 import { store, useAppDispatch, useAppSelector } from 'store';
 import { updateNode } from 'store/design/slice';
 
@@ -17,7 +20,7 @@ import { handleDoubleClick } from './handleDoubleClick';
 export const useVectorWidthLabelEditor = (refs: TCanvasRefs): TVectorWidthLabelEditor => {
   const [edit, setEdit] = useState<TVectorWidthLabelEdit | null>(null);
   const activeTool = useAppSelector(selectActiveTool);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(edit !== null);
   const dispatch = useAppDispatch();
   const cancel = useCallback((): void => setEdit(null), []);
 

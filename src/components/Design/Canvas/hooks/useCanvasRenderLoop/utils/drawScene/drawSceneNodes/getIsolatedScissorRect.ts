@@ -70,12 +70,20 @@ const getScissorMargin = (renderer: TMaskRenderer, node: TSceneNode, members: TS
 const getVisibleMembers = (node: TSceneNode, subtree: TSceneNode[]): TSceneNode[] =>
   node.type === NodeType.frame && node.clipContent ? [] : subtree;
 
+const getGlassOnlyRect = (renderer: TMaskRenderer, node: TSceneNode): TScissorRect => {
+  const { context, gl } = renderer;
+  const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
+  const margin = getScissorMargin(renderer, node, [], 0, context.viewport.zoom * pixelRatio);
+
+  return getDeviceScissorRect(renderer, getMembersCorners(node, []), margin);
+};
+
 export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode): TScissorRect | null => {
   const isBox = node.type === NodeType.rectangle || node.type === NodeType.frame;
   const subtree = isBox ? getIsolatedSubtree(renderer, node) : null;
   const blur = subtree ? getNodeBlurParams(renderer, node, EffectType.layerBlur) : null;
   const texture = subtree ? getNodeTexture(node) : undefined;
-  const glass = subtree ? getNodeGlass(node) : undefined;
+  const glass = isBox ? getNodeGlass(node) : undefined;
 
   if (subtree && (blur || texture || glass)) {
     const { context, gl } = renderer;
@@ -86,5 +94,5 @@ export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode
     return getDeviceScissorRect(renderer, getMembersCorners(node, members), margin);
   }
 
-  return null;
+  return !subtree && glass ? getGlassOnlyRect(renderer, node) : null;
 };

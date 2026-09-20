@@ -35,7 +35,7 @@ import { ZOOM_TO_MENU_PERCENTAGE_KEY } from 'components/Design/LeftPanel/NavRail
 import { translationNameSpace } from './constants';
 
 // store
-import { selectAreAdditionalLabelsVisible, selectAreRulersVisible, selectViewport } from 'store/design/selectors';
+import { selectAreAdditionalLabelsVisible, selectAreRulersVisible, selectZoom } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -45,10 +45,10 @@ const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 const ZoomMenu: FC = () => {
   const { t } = useTranslation();
-  const viewport = useAppSelector(selectViewport);
+  const zoom = useAppSelector(selectZoom);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
   const areAdditionalLabelsVisible = useAppSelector(selectAreAdditionalLabelsVisible);
-  const [inputValue, setInputValue] = useState(String(Math.round(viewport.zoom * 100)));
+  const [inputValue, setInputValue] = useState(String(Math.round(zoom * 100)));
   const handleInputChange = useHandleZoomInputChange(setInputValue);
   const handleInputCommit = useHandleZoomInputCommit(setInputValue);
   const handleZoomInClick = useZoomInClick();
@@ -59,8 +59,8 @@ const ZoomMenu: FC = () => {
   const handleAdditionalLabelsClick = useAdditionalLabelsClick();
 
   useEffect(() => {
-    setInputValue(String(Math.round(viewport.zoom * 100)));
-  }, [viewport.zoom]);
+    setInputValue(String(Math.round(zoom * 100)));
+  }, [zoom]);
 
   return (
     <div className={styles.ZoomMenu}>
@@ -99,7 +99,7 @@ const ZoomMenu: FC = () => {
           key={percent}
           label={t(ZOOM_TO_MENU_PERCENTAGE_KEY, { percent: percent * 100 })}
           onClick={selectZoomPercentage(percent)}
-          selected={Math.round(viewport.zoom * 100) === percent * 100}
+          selected={Math.round(zoom * 100) === percent * 100}
         />
       ))}
       <PopoverSeparator />

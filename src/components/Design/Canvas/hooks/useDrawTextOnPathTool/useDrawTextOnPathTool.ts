@@ -3,8 +3,11 @@ import { useEffect, useRef } from 'react';
 // core
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -20,7 +23,7 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
   const { canvasRef, draftRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(activeTool === ToolName.textOnPath);
   const dispatch = useAppDispatch();
   const { setClassName } = useClassNames();
   const startRef = useRef<TPoint | null>(null);

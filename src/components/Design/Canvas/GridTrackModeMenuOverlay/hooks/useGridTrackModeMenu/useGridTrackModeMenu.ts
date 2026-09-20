@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 // shared
 import { TVirtualAnchor } from 'shared';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
 import { store, useAppDispatch, useAppSelector } from 'store';
-import { selectGridTrackModeMenuRequest, selectNodes, selectViewport } from 'store/design/selectors';
+import { selectGridTrackModeMenuRequest, selectNodes } from 'store/design/selectors';
 import { setGridTrackModeMenuRequest } from 'store/design/slice';
 
 // types
@@ -22,7 +25,7 @@ import { worldToScreen } from 'components/Design/Canvas/utils/worldToScreen';
 export const useGridTrackModeMenu = (): TGridTrackModeMenu => {
   const { t } = useTranslation();
   const request = useAppSelector(selectGridTrackModeMenuRequest);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(request !== null);
   const dispatch = useAppDispatch();
   const anchorRef = useRef<TVirtualAnchor>({ getBoundingClientRect: (): DOMRect => new DOMRect() });
   const [target, setTarget] = useState<TGridTrackModeMenuTarget | null>(null);

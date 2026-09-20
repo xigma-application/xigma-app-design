@@ -10,6 +10,7 @@ import gridVertexShaderSource from 'constant/webgl/gridVertexShaderSource';
 import imageFragmentShaderSource from 'constant/webgl/imageFragmentShaderSource';
 import imageVertexShaderSource from 'constant/webgl/imageVertexShaderSource';
 import maskCompositeFragmentShaderSource from 'constant/webgl/maskCompositeFragmentShaderSource';
+import maskCompositeUvVertexShaderSource from 'constant/webgl/maskCompositeUvVertexShaderSource';
 import maskCompositeVertexShaderSource from 'constant/webgl/maskCompositeVertexShaderSource';
 import msdfFragmentShaderSource from 'constant/webgl/msdfFragmentShaderSource';
 import noiseFragmentShaderSource from 'constant/webgl/noiseFragmentShaderSource';
@@ -18,19 +19,19 @@ import vectorDragVertexShaderSource from 'constant/webgl/vectorDragVertexShaderS
 import vectorGradientFillFragmentShaderSource from 'constant/webgl/vectorGradientFillFragmentShaderSource';
 import vectorGradientFillVertexShaderSource from 'constant/webgl/vectorGradientFillVertexShaderSource';
 import vertexShaderSource from 'constant/webgl/vertexShaderSource';
-import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { createProgram } from './utils/createProgram';
+import { getCachedGlContext } from './utils/getCachedGlContext';
 import { setupRenderLoop } from './utils/setupRenderLoop';
 
 export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
   useEffect(() => {
     const canvas = refs.canvasRef.current;
-    const gl = canvas?.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES);
+    const gl = getCachedGlContext(canvas ?? null);
     const program = gl && createProgram(gl, vertexShaderSource, fragmentShaderSource);
     const buffer = gl && gl.createBuffer();
     const imageProgram = gl && createProgram(gl, imageVertexShaderSource, imageFragmentShaderSource);
@@ -40,7 +41,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const gridProgram = gl && createProgram(gl, gridVertexShaderSource, gridFragmentShaderSource);
     const gridBuffer = gl && gl.createBuffer();
     const checkerboardProgram = gl && createProgram(gl, gridVertexShaderSource, checkerboardFragmentShaderSource);
-    const maskCompositeProgram = gl && createProgram(gl, maskCompositeVertexShaderSource, maskCompositeFragmentShaderSource);
+    const maskCompositeProgram = gl && createProgram(gl, maskCompositeUvVertexShaderSource, maskCompositeFragmentShaderSource);
     const maskCompositeBuffer = gl && gl.createBuffer();
     const blendCompositeProgram = gl && createProgram(gl, maskCompositeVertexShaderSource, blendCompositeFragmentShaderSource);
     const blendCompositeBuffer = gl && gl.createBuffer();

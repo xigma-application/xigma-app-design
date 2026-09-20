@@ -107,4 +107,15 @@ describe('getIsolatedScissorRect', () => {
     // result
     expect(getIsolatedScissorRect(renderer, { ...node, effects: [{ ...createEffect(EffectType.glass), visible: false }] })).toBeNull();
   });
+
+  it('should still scissor a glass frame to its own box when a child cannot be measured, but not a blur one', () => {
+    // mock
+    const textChild = { ...node, effects: [], id: 't1', type: NodeType.text } as unknown as TSceneNode;
+    const withText = { ...renderer, sceneNodeById: new Map([['t1', textChild]]) } as unknown as TMaskRenderer;
+    const frame = { ...node, childIds: ['t1'], clipContent: false, type: NodeType.frame } as unknown as TFrameNode;
+
+    // result
+    expect(getIsolatedScissorRect(withText, { ...frame, effects: [createEffect(EffectType.glass)] })).not.toBeNull();
+    expect(getIsolatedScissorRect(withText, frame)).toBeNull();
+  });
 });

@@ -3,7 +3,14 @@ import { TDrawSceneContext } from './types';
 
 const FULLSCREEN_QUAD = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
 
-export const compositeMask = (context: TDrawSceneContext, content: WebGLTexture, mask: WebGLTexture): void => {
+const IDENTITY_UV_TRANSFORM: [number, number, number, number] = [1, 1, 0, 0];
+
+export const compositeMask = (
+  context: TDrawSceneContext,
+  content: WebGLTexture,
+  mask: WebGLTexture,
+  uvTransform: [number, number, number, number] = IDENTITY_UV_TRANSFORM,
+): void => {
   const { gl, imageContext } = context;
   const program = imageContext.maskCompositeProgram;
   const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -13,6 +20,7 @@ export const compositeMask = (context: TDrawSceneContext, content: WebGLTexture,
   gl.bufferData(gl.ARRAY_BUFFER, FULLSCREEN_QUAD, gl.STATIC_DRAW);
   gl.enableVertexAttribArray(positionLocation);
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+  gl.uniform4f(gl.getUniformLocation(program, 'u_uvTransform'), ...uvTransform);
 
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, content);

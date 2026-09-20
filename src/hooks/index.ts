@@ -1,3 +1,4 @@
+export * from './useActiveViewport/useActiveViewport';
 export * from './useKeyboardHandler/useKeyboardHandler';
 export * from './useKeyboardHandler/types';
 export * from './usePreventMenuRefocus/usePreventMenuRefocus';

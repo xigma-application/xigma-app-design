@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 // hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
 import { useDoubleClickActivation } from '../../hooks/useDoubleClickActivation/useDoubleClickActivation';
 
 // store
-import { selectViewport } from 'store/design/selectors';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppDispatch } from 'store';
 import { updateNode } from 'store/design/slice';
 
 // types
@@ -24,7 +24,7 @@ type TFrameNameLabelEditor = {
 
 export const useFrameNameLabelEditor = (refs: TCanvasRefs): TFrameNameLabelEditor => {
   const [edit, setEdit] = useState<TFrameNameLabelEdit | null>(null);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(edit !== null);
   const dispatch = useAppDispatch();
 
   useEffect(() => {

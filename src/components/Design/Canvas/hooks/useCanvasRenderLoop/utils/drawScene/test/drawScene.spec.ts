@@ -222,12 +222,12 @@ describe('drawScene', () => {
         clipContent: true,
         fills: [{ color: '#336699', opacity: 100, type: 'solid' }],
         height: 20,
-        name: 'Hidden Frame',
+        // no name, so it has no label whose glyph quads could coincidentally match countFillDraws'
+        // (TRIANGLES, 0, 6) signature below
+        name: '',
         parentId: null,
         rotation: 0,
         type: NodeType.frame,
-        // wide enough that its name label isn't ellipsis-truncated down to a single glyph, which
-        // would coincidentally match countFillDraws' (TRIANGLES, 0, 6) signature below
         width: 300,
         x: 0,
         y: 0,

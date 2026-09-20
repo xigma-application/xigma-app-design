@@ -8,7 +8,9 @@ import { TDrawSceneContext } from '../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { drawFrameNameLabel } from './drawFrameNameLabel';
+import { concatFloat32Arrays } from './concatFloat32Arrays';
+import { drawFrameNameLabelVertices } from './drawFrameNameLabelVertices';
+import { getFrameNameLabelVertices } from './getFrameNameLabelVertices';
 import { isNestedFrame } from 'store/design/utils/nodeHierarchy/isNestedFrame';
 
 export const drawFrameNameLabels = (
@@ -22,15 +24,26 @@ export const drawFrameNameLabels = (
   const { canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
   const editingNodeId = refs.frameName.editingLabelRef.current;
 
+  const normalVertices: Float32Array[] = [];
+  const highlightedVertices: Float32Array[] = [];
+
   nodes
     .filter(
       (node): node is TSceneNode & { childIds: []; clipContent: true; type: NodeType.frame } =>
-        node.type === NodeType.frame && node.id !== editingNodeId && !isNestedFrame(node, nodesById),
+        node.type === NodeType.frame && node.name.length > 0 && node.id !== editingNodeId && !isNestedFrame(node, nodesById),
     )
     .forEach((node) => {
       const isHighlighted = selectedIds.has(node.id) || node.id === hoveredNodeId;
-      const fill = isHighlighted ? FRAME_NAME_LABEL_SELECTED_FILL : FRAME_NAME_LABEL_FILL;
 
-      drawFrameNameLabel(gl, imageContext, node, fill, canvasWidth, canvasHeight, viewport);
+      (isHighlighted ? highlightedVertices : normalVertices).push(getFrameNameLabelVertices(node, viewport.zoom));
     });
+
+  [
+    { fill: FRAME_NAME_LABEL_FILL, vertices: normalVertices },
+    { fill: FRAME_NAME_LABEL_SELECTED_FILL, vertices: highlightedVertices },
+  ].forEach(({ fill, vertices }) => {
+    if (vertices.length > 0) {
+      drawFrameNameLabelVertices(gl, imageContext, concatFloat32Arrays(vertices), fill, canvasWidth, canvasHeight, viewport);
+    }
+  });
 };

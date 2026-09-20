@@ -5,6 +5,7 @@ import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 import { TEXT_FONT_FAMILY, TEXT_FONT_SIZE } from '../constants';
 
 // hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
 import { useBlockShortcutPropagation } from './hooks/useBlockShortcutPropagation';
 import { useCommitTextEdit } from './hooks/useCommitTextEdit';
 import { useSeedEditableTextOnEntry } from './hooks/useSeedEditableTextOnEntry';
@@ -12,7 +13,7 @@ import { useTextEditInput } from './hooks/useTextEditInput';
 import { useTrackTextEditSelection } from './hooks/useTrackTextEditSelection';
 
 // store
-import { selectEditingNodeId, selectEditingTextBox, selectEditingTextContent, selectViewport } from 'store/design/selectors';
+import { selectEditingNodeId, selectEditingTextBox, selectEditingTextContent } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -31,7 +32,7 @@ const TextEditOverlay: FC = () => {
   const handleInput = useTextEditInput();
   const handleKeyDown = useBlockShortcutPropagation(box, selectOnCommitRef);
   const handleSelect = useTrackTextEditSelection();
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(box !== null);
 
   useSeedEditableTextOnEntry(elementRef, box, editingNodeId, editingTextContent);
 

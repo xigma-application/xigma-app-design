@@ -3,6 +3,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 import { TGlassCacheEntry, TScissorRect } from './types';
 
 // utils
+import { copyTargetRectToTexture } from './copyTargetRectToTexture';
 import { deleteGlassCacheEntry } from './deleteGlassCacheEntry';
 import { GLASS_CACHE_MAX_ENTRIES, glassCaches } from './glassCaches';
 
@@ -12,44 +13,52 @@ const evictOldestGlassCacheEntry = (gl: WebGL2RenderingContext, cache: Map<strin
   }
 };
 
+const getValidWindow = (
+  rect: TScissorRect,
+): Pick<TGlassCacheEntry, 'localX' | 'localY' | 'validBottom' | 'validLeft' | 'validRight' | 'validTop'> => {
+  const margin = rect.margin ?? 0;
+  const localX = rect.x - (rect.originX ?? rect.x);
+  const localY = rect.y - (rect.originY ?? rect.y);
+  const rawWidth = rect.rawWidth ?? rect.width;
+  const rawHeight = rect.rawHeight ?? rect.height;
+
+  return {
+    localX,
+    localY,
+    validBottom: localY + (localY > 0 ? margin : 0),
+    validLeft: localX + (localX > 0 ? margin : 0),
+    validRight: localX + rect.width - (localX + rect.width < rawWidth ? margin : 0),
+    validTop: localY + rect.height - (localY + rect.height < rawHeight ? margin : 0),
+  };
+};
+
 export const storeGlassCacheEntry = (
   gl: WebGL2RenderingContext,
   nodeId: string,
   nodesState: unknown,
-  source: TRenderTarget,
+  warped: TRenderTarget,
+  mask: TRenderTarget,
   rect: TScissorRect,
 ): void => {
   const cache = glassCaches.get(gl) ?? new Map();
-  const texture = gl.createTexture() as WebGLTexture;
-  const framebuffer = gl.createFramebuffer() as WebGLFramebuffer;
 
   glassCaches.set(gl, cache);
   deleteGlassCacheEntry(gl, nodeId);
   evictOldestGlassCacheEntry(gl, cache);
 
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rect.width, rect.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.bindTexture(gl.TEXTURE_2D, null);
+  const content = copyTargetRectToTexture(gl, warped, rect);
+  const shape = copyTargetRectToTexture(gl, mask, rect);
 
-  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, source.framebuffer);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
-  gl.blitFramebuffer(
-    rect.x,
-    rect.y,
-    rect.x + rect.width,
-    rect.y + rect.height,
-    0,
-    0,
-    rect.width,
-    rect.height,
-    gl.COLOR_BUFFER_BIT,
-    gl.NEAREST,
-  );
-
-  cache.set(nodeId, { framebuffer, height: rect.height, nodesState, texture, width: rect.width, x: rect.x, y: rect.y });
+  cache.set(nodeId, {
+    ...getValidWindow(rect),
+    framebuffer: content.framebuffer,
+    height: rect.height,
+    maskFramebuffer: shape.framebuffer,
+    maskTexture: shape.texture,
+    nodesState,
+    rawHeight: rect.rawHeight ?? rect.height,
+    rawWidth: rect.rawWidth ?? rect.width,
+    texture: content.texture,
+    width: rect.width,
+  });
 };

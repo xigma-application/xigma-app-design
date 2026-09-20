@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+// hooks
+import { useActiveViewport } from 'hooks/useActiveViewport/useActiveViewport';
+
 // store
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
@@ -25,7 +28,7 @@ export type TPolygonToolConfig = {
 export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool }: TPolygonToolConfig): void => {
   const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
-  const viewport = useAppSelector(selectViewport);
+  const viewport = useActiveViewport(activeTool === tool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
