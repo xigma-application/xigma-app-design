@@ -275,12 +275,37 @@ the stroke-specific settings:
 - [x] all of it is drawn on the canvas and undoable — for rectangles and frames for now
 - [ ] the same modes for other shapes and vector paths
 
-Below it sits an **Effects** section (Inner shadow and Drop shadow for now):
+Below it sits an **Effects** section, with every effect type now drawn on the canvas except Shader:
 
 - [x] add an effect from the plus menu, hide or delete it, and drag rows to reorder, like Fill and Stroke
-- [x] click an effect to edit its Position (X / Y), Blur, Spread, Color and blend mode, or switch its type from the panel header
-- [x] **Inner shadow** is drawn on the canvas (offset, blur, spread, color and opacity) for rectangles and frames
-- [ ] Drop shadow is saved but not drawn yet, and the other effect types (Layer blur, Background blur, Noise, Texture, Glass, Shader) are still to do
+  (the reorder handle only shows up once there's a second effect to reorder against — same for Fill
+  and Stroke)
+- [x] click an effect to edit its settings, or switch its type from the panel header
+- [x] **Inner shadow** and **Drop shadow** — offset, blur, spread, color and opacity
+- [x] **Layer blur** — blurs the shape itself, either evenly (Uniform) or fading across it in one
+      direction, with draggable handles on the canvas (Progressive)
+- [x] **Background blur** — blurs whatever sits behind the shape, showing through its own silhouette
+- [x] **Noise** — a grain texture over the shape, in one color (Mono), two colors (Duo), or full color
+      speckle (Multi), with size and density controls
+- [x] **Texture** — a repeating fine texture pattern over the shape
+- [x] **Glass** — a frosted-glass look: a light dial and angle, refraction, splay and frost sliders
+      bend and blur whatever is behind the shape like real glass
+- [ ] **Shader** is still not implemented — greyed out in the menu
+
+## Stage 30 — Layout guide (Grid / Columns / Rows), Frame only
+
+Figma-style layout guides, for measuring and lining things up — separate from the existing ruler
+guides you drag out from the ruler. A Frame's right panel gets its own Layout guide section: add a
+guide from the plus button (defaults to Grid), each row shows a 24x24 icon that opens its full
+settings panel plus a small dropdown next to it to switch its type (Grid / Columns / Rows) without
+opening that panel, an eye to hide/show it, and a minus to delete it — rows can be dragged to
+reorder once there's more than one, same rule as Fill/Stroke/Effects.
+
+- [x] **Grid** — evenly spaced lines every N pixels, in a color and opacity you pick
+- [x] **Columns** / **Rows** — a set number of evenly spaced bands, with alignment (stretch / start /
+      end / center), a fixed width or height, margin and gutter
+- [x] drawn on the canvas, clipped so a guide never spills outside its own frame
+- [x] a global on/off toggle for every guide at once — Shift+G, or from the View and Zoom menus
 
 ## Related
 
