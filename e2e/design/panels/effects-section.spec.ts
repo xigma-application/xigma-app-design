@@ -289,6 +289,43 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(async () => Math.abs((await readLuma(800, 198)) - backgroundLuma)).toBeLessThan(4);
   });
 
+  test('a layer blur on a frame blurs its children with it and softens the frame edge', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-layer-blur-frame-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(700, 200, 1000, 400);
+    await addEffect(page, 'Layer blur');
+    await page.getByLabel('Effect blur').fill('12');
+    await page.getByLabel('Effect blur').press('Enter');
+    await designPage.drawRectangle(1200, 200, 1300, 280);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId, childId] = pages[activePageId].rootOrder;
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(updateNode({ changes: { height: 80, width: 100, x: 800, y: 280 }, id: childId }));
+    });
+    await page.mouse.move(1750, 900);
+
+    const readLuma = async (x: number, y: number): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const clip = { height: 1, width: 1, x, y };
+
+      return PNG.sync.read(await page.screenshot({ clip })).data[0];
+    };
+
+    // result — the frame edge bleeds outward, the child edge is soft inside the frame
+    await expect.poll(async () => (await readLuma(850, 198)) - (await readLuma(850, 170)), { timeout: 20000 }).toBeGreaterThan(5);
+    await expect.poll(async () => Math.abs((await readLuma(850, 279)) - (await readLuma(850, 250))), { timeout: 20000 }).toBeGreaterThan(3);
+    expect(Math.abs((await readLuma(850, 320)) - (await readLuma(830, 320)))).toBeLessThan(6);
+  });
+
   test('a progressive layer blur blurs only toward the end handle, and the handles can be dragged with snapping to the node', async ({
     page,
   }) => {

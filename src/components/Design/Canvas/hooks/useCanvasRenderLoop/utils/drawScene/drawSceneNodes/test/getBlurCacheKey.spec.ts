@@ -15,7 +15,7 @@ const node = { id: 'r1', type: NodeType.rectangle, width: 10, x: 1, y: 2 } as un
 describe('getBlurCacheKey', () => {
   it('should ignore the node position so panning and moving reuse the cache', () => {
     // result
-    expect(getBlurCacheKey(renderer, node)).toBe(getBlurCacheKey(renderer, { ...node, x: 300, y: 400 }));
+    expect(getBlurCacheKey(renderer, node, [])).toBe(getBlurCacheKey(renderer, { ...node, x: 300, y: 400 }, []));
   });
 
   it('should change with the node content but not with the zoom, which is handled by scaling the cached texture', () => {
@@ -23,7 +23,18 @@ describe('getBlurCacheKey', () => {
     const zoomed = { ...renderer, context: { ...renderer.context, viewport: { x: 0, y: 0, zoom: 2 } } } as unknown as TMaskRenderer;
 
     // result
-    expect(getBlurCacheKey(renderer, node)).not.toBe(getBlurCacheKey(renderer, { ...node, width: 11 }));
-    expect(getBlurCacheKey(renderer, node)).toBe(getBlurCacheKey(zoomed, node));
+    expect(getBlurCacheKey(renderer, node, [])).not.toBe(getBlurCacheKey(renderer, { ...node, width: 11 }, []));
+    expect(getBlurCacheKey(renderer, node, [])).toBe(getBlurCacheKey(zoomed, node, []));
+  });
+
+  it('should keep the key when a frame and its children move together, and change it when only a child moves', () => {
+    // mock
+    const child = { id: 'c1', type: NodeType.rectangle, width: 4, x: 3, y: 4 } as unknown as TRectangleNode;
+
+    // result
+    expect(getBlurCacheKey(renderer, node, [child])).toBe(
+      getBlurCacheKey(renderer, { ...node, x: 101, y: 102 }, [{ ...child, x: 103, y: 104 } as TRectangleNode]),
+    );
+    expect(getBlurCacheKey(renderer, node, [child])).not.toBe(getBlurCacheKey(renderer, node, [{ ...child, x: 9 } as TRectangleNode]));
   });
 });

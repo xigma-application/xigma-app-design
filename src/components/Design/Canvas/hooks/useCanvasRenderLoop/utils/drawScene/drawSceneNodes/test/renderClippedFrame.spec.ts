@@ -19,6 +19,16 @@ vi.mock('../renderIntoTarget', () => ({
   renderIntoTarget: vi.fn((_renderer, _target, paint: () => void) => paint()),
 }));
 
+const glMock = {
+  SCISSOR_TEST: 3089,
+  disable: vi.fn(),
+  drawingBufferHeight: 200,
+  drawingBufferWidth: 400,
+  enable: vi.fn(),
+  id: 'gl',
+  scissor: vi.fn(),
+};
+
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: ['child-a', 'child-b'],
   clipContent: true,
@@ -48,19 +58,31 @@ describe('renderClippedFrame', () => {
       buffer: { id: 'buffer' },
       canvasHeight: 100,
       canvasWidth: 200,
-      gl: { id: 'gl' },
+      gl: glMock,
       program: { id: 'program' },
       viewport: { x: 0, y: 0, zoom: 1 },
     };
-    const renderer = { context, pool } as unknown as TMaskRenderer;
+    const renderer = { context, gl: glMock, pool } as unknown as TMaskRenderer;
     const frame = buildFrame();
     const parentTarget = { id: 'parent' } as never;
 
     renderClippedFrame(renderer, frame, parentTarget);
 
     expect(pool.acquire).toHaveBeenCalledTimes(2);
-    expect(renderIntoTarget).toHaveBeenNthCalledWith(1, renderer, contentTarget, expect.any(Function));
-    expect(renderIntoTarget).toHaveBeenNthCalledWith(2, renderer, maskTarget, expect.any(Function));
+    expect(renderIntoTarget).toHaveBeenNthCalledWith(
+      1,
+      renderer,
+      contentTarget,
+      expect.any(Function),
+      expect.objectContaining({ clipped: expect.any(Boolean) }),
+    );
+    expect(renderIntoTarget).toHaveBeenNthCalledWith(
+      2,
+      renderer,
+      maskTarget,
+      expect.any(Function),
+      expect.objectContaining({ clipped: expect.any(Boolean) }),
+    );
     expect(renderIds).toHaveBeenCalledWith(renderer, ['child-a', 'child-b'], contentTarget);
     expect(drawRect).toHaveBeenCalledWith(
       context.gl,
@@ -74,6 +96,7 @@ describe('renderClippedFrame', () => {
     );
     expect(bindTarget).toHaveBeenCalledWith(renderer, parentTarget);
     expect(compositeMask).toHaveBeenCalledWith(context, 'content-tex', 'mask-tex');
+    expect(glMock.scissor).toHaveBeenCalled();
     expect(pool.release).toHaveBeenNthCalledWith(1, contentTarget);
     expect(pool.release).toHaveBeenNthCalledWith(2, maskTarget);
   });
@@ -86,15 +109,33 @@ describe('renderClippedFrame', () => {
       buffer: { id: 'buffer' },
       canvasHeight: 100,
       canvasWidth: 200,
-      gl: { id: 'gl' },
+      gl: glMock,
       program: { id: 'program' },
       viewport: { x: 0, y: 0, zoom: 1 },
     };
-    const renderer = { context, pool } as unknown as TMaskRenderer;
+    const renderer = { context, gl: glMock, pool } as unknown as TMaskRenderer;
     const frame = buildFrame({ canvasStacking: CanvasStacking.firstOnTop });
 
     renderClippedFrame(renderer, frame, { id: 'parent' } as never);
 
     expect(renderIds).toHaveBeenCalledWith(renderer, ['child-b', 'child-a'], contentTarget);
+  });
+
+  it('should skip a frame that is completely off screen', () => {
+    const pool = { acquire: vi.fn(), release: vi.fn() };
+    const context = {
+      buffer: {},
+      canvasHeight: 100,
+      canvasWidth: 200,
+      gl: glMock,
+      program: {},
+      viewport: { x: 5000, y: 0, zoom: 1 },
+    };
+    const renderer = { context, gl: glMock, pool } as unknown as TMaskRenderer;
+
+    renderClippedFrame(renderer, buildFrame(), { id: 'parent' } as never);
+
+    expect(pool.acquire).not.toHaveBeenCalled();
+    expect(renderIds).not.toHaveBeenCalled();
   });
 });

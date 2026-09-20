@@ -10,6 +10,7 @@ import { blurIsolatedNode } from '../blurIsolatedNode';
 import { dispatchNodeType } from './dispatchNodeType';
 import { getBlurCacheEntry } from '../getBlurCacheEntry';
 import { getBlurCacheKey } from '../getBlurCacheKey';
+import { getIsolatedSubtree } from '../getIsolatedSubtree';
 import { isBlurCacheable } from '../isBlurCacheable';
 import { isBlurZoomChanging } from '../isBlurZoomChanging';
 import { storeBlurCacheEntry } from '../storeBlurCacheEntry';
@@ -49,7 +50,8 @@ export const paintIsolatedContent = (
   const { context, gl } = renderer;
   const { zoom } = context.viewport;
   const isZoomChanging = isBlurZoomChanging(gl, zoom, performance.now());
-  const key = rect && isBlurCacheable(node) ? getBlurCacheKey(renderer, node) : null;
+  const subtree = rect ? getIsolatedSubtree(renderer, node) : null;
+  const key = subtree && isBlurCacheable([node, ...subtree]) ? getBlurCacheKey(renderer, node, subtree) : null;
   const entry = key ? getBlurCacheEntry(gl, node.id, key) : null;
 
   if (entry && rect && canReuseEntry(entry, rect, zoom, isZoomChanging)) {

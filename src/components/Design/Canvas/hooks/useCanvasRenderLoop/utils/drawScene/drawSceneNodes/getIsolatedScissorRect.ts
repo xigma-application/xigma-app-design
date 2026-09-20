@@ -1,16 +1,18 @@
 // types
 import { EffectType, NodeType } from 'types/design/enums';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TPoint } from 'types/canvas';
 import { TMaskRenderer, TScissorRect } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getDropShadowMargin } from '../drawBoxLeafNode/getDropShadowMargin';
 import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
+import { getDeviceScissorRect } from './getDeviceScissorRect';
+import { getIsolatedSubtree } from './getIsolatedSubtree';
 import { getNodeBlurParams } from './getNodeBlurParams';
 import { getNodeTexture } from './getNodeTexture';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
-import { rotatePoint } from 'utils/math/rotatePoint';
+import { getRotatedCorners } from './getRotatedCorners';
 
 const SCISSOR_PADDING_PX = 4;
 
@@ -22,63 +24,44 @@ const getShadowMargin = (node: TSceneNode): number =>
       )
     : 0;
 
-const getRotatedCorners = (bounds: TDraftRect, rotation: number): TPoint[] => {
-  const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+const getMembersCorners = (node: TSceneNode, members: TSceneNode[]): TPoint[] =>
+  [node, ...members].flatMap((member) => getRotatedCorners(getNodeBounds(member), 'rotation' in member ? member.rotation : 0));
 
-  return [
-    { x: bounds.x, y: bounds.y },
-    { x: bounds.x + bounds.width, y: bounds.y },
-    { x: bounds.x + bounds.width, y: bounds.y + bounds.height },
-    { x: bounds.x, y: bounds.y + bounds.height },
-  ].map((corner) => rotatePoint(corner, center, rotation));
-};
-
-const getScissorMargin = (node: TSceneNode, blurRadius: number, textureRadius: number, scale: number): number => {
+const getNodeMargin = (renderer: TMaskRenderer, node: TSceneNode, scale: number): number => {
   const strokeWidth = 'strokeWidth' in node ? (node.strokeWidth ?? 0) : 0;
-  return blurRadius * 2 + textureRadius * scale + (getShadowMargin(node) + strokeWidth) * Math.max(1, scale) + SCISSOR_PADDING_PX;
+  const texture = getNodeTexture(node);
+  const blur = getNodeBlurParams(renderer, node, EffectType.layerBlur);
+
+  return (
+    (blur?.radius ?? 0) * 2 +
+    (texture ? getEffectTexture(texture).radius * scale : 0) +
+    (getShadowMargin(node) + strokeWidth) * Math.max(1, scale)
+  );
 };
+
+const getScissorMargin = (renderer: TMaskRenderer, node: TSceneNode, members: TSceneNode[], blurRadius: number, scale: number): number => {
+  const ownMargin = getNodeMargin(renderer, node, scale) - blurRadius * 2;
+  const memberMargin = members.reduce((margin, member) => Math.max(margin, getNodeMargin(renderer, member, scale)), 0);
+
+  return blurRadius * 2 + Math.max(ownMargin, memberMargin) + SCISSOR_PADDING_PX;
+};
+
+const getVisibleMembers = (node: TSceneNode, subtree: TSceneNode[]): TSceneNode[] =>
+  node.type === NodeType.frame && node.clipContent ? [] : subtree;
 
 export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode): TScissorRect | null => {
-  const isSimpleBox =
-    (node.type === NodeType.rectangle || node.type === NodeType.frame) && !('childIds' in node && node.childIds.length > 0);
-  const blur = isSimpleBox ? getNodeBlurParams(renderer, node, EffectType.layerBlur) : null;
-  const texture = isSimpleBox ? getNodeTexture(node) : undefined;
+  const isBox = node.type === NodeType.rectangle || node.type === NodeType.frame;
+  const subtree = isBox ? getIsolatedSubtree(renderer, node) : null;
+  const blur = subtree ? getNodeBlurParams(renderer, node, EffectType.layerBlur) : null;
+  const texture = subtree ? getNodeTexture(node) : undefined;
 
-  if (isSimpleBox && (blur || texture)) {
+  if (subtree && (blur || texture)) {
     const { context, gl } = renderer;
-    const { viewport } = context;
-    const bounds = getNodeBounds(node);
-    const rotation = 'rotation' in node ? node.rotation : 0;
+    const members = getVisibleMembers(node, subtree);
     const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
-    const scale = viewport.zoom * pixelRatio;
-    const margin = getScissorMargin(node, blur?.radius ?? 0, texture ? getEffectTexture(texture).radius : 0, scale);
-    const corners = getRotatedCorners(bounds, rotation);
-    const xs = corners.map((corner) => (corner.x * viewport.zoom + viewport.x) * pixelRatio);
-    const ys = corners.map((corner) => (corner.y * viewport.zoom + viewport.y) * pixelRatio);
-    const rawLeft = Math.floor(Math.min(...xs) - margin);
-    const rawRight = Math.ceil(Math.max(...xs) + margin);
-    const rawBottom = Math.floor(gl.drawingBufferHeight - Math.max(...ys) - margin);
-    const rawTop = Math.ceil(gl.drawingBufferHeight - Math.min(...ys) + margin);
-    const left = Math.max(0, rawLeft);
-    const right = Math.min(gl.drawingBufferWidth, rawRight);
-    const bottom = Math.max(0, rawBottom);
-    const top = Math.min(gl.drawingBufferHeight, rawTop);
+    const margin = getScissorMargin(renderer, node, members, blur?.radius ?? 0, context.viewport.zoom * pixelRatio);
 
-    if (right > left && top > bottom) {
-      return {
-        clipped: left !== rawLeft || right !== rawRight || bottom !== rawBottom || top !== rawTop,
-        height: top - bottom,
-        originX: rawLeft,
-        originY: rawBottom,
-        rawHeight: rawTop - rawBottom,
-        rawWidth: rawRight - rawLeft,
-        width: right - left,
-        x: left,
-        y: bottom,
-      };
-    }
-
-    return { height: 0, offscreen: true, width: 0, x: 0, y: 0 };
+    return getDeviceScissorRect(renderer, getMembersCorners(node, members), margin);
   }
 
   return null;

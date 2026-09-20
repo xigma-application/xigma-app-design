@@ -1,6 +1,6 @@
 // types
 import { EffectType, NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 import { TMaskRenderer } from '../types';
 
 // utils
@@ -49,12 +49,34 @@ describe('getIsolatedScissorRect', () => {
     expect(getIsolatedScissorRect(renderer, { ...node, effects: [] })).toBeNull();
   });
 
-  it('should be null for a frame with children, whose content can overflow it', () => {
+  it('should grow to the children of a frame that does not clip them', () => {
     // mock
+    const child = { ...node, effects: [], id: 'c1', x: 150, y: 60 } as TRectangleNode;
     const frame = { ...node, childIds: ['c1'], clipContent: false, type: NodeType.frame } as unknown as TFrameNode;
+    const withChild = { ...renderer, sceneNodeById: new Map([['c1', child]]) } as unknown as TMaskRenderer;
+
+    // result — the child sits 100 units to the right, so the rect gets 400 device pixels wider
+    expect(getIsolatedScissorRect(withChild, frame)).toEqual(expect.objectContaining({ height: 472, width: 1272, x: 184 }));
+  });
+
+  it('should ignore the children of a frame that clips its content', () => {
+    // mock
+    const child = { ...node, effects: [], id: 'c1', x: 150, y: 60 } as TRectangleNode;
+    const frame = { ...node, childIds: ['c1'], clipContent: true, type: NodeType.frame } as unknown as TFrameNode;
+    const withChild = { ...renderer, sceneNodeById: new Map([['c1', child]]) } as unknown as TMaskRenderer;
 
     // result
-    expect(getIsolatedScissorRect(renderer, frame)).toBeNull();
+    expect(getIsolatedScissorRect(withChild, frame)).toEqual(expect.objectContaining({ width: 872 }));
+  });
+
+  it('should be null when a child cannot be measured, like a text', () => {
+    // mock
+    const text = { id: 'c1', type: NodeType.text } as unknown as TSceneNode;
+    const frame = { ...node, childIds: ['c1'], clipContent: false, type: NodeType.frame } as unknown as TFrameNode;
+    const withText = { ...renderer, sceneNodeById: new Map([['c1', text]]) } as unknown as TMaskRenderer;
+
+    // result
+    expect(getIsolatedScissorRect(withText, frame)).toBeNull();
   });
 
   it('should clamp to the drawing buffer', () => {
