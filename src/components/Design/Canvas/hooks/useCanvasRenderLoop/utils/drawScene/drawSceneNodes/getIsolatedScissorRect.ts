@@ -5,16 +5,36 @@ import { TMaskRenderer, TScissorRect } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { EFFECT_BLUR_MAX_PX } from '../drawBoxLeafNode/constants';
 import { getDropShadowMargin } from '../drawBoxLeafNode/getDropShadowMargin';
+import { getEffectGlass } from 'utils/design/effects/getEffectGlass';
 import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
 import { getDeviceScissorRect } from './getDeviceScissorRect';
 import { getIsolatedSubtree } from './getIsolatedSubtree';
+import { getLayerBlurRadius } from './getLayerBlurRadius';
 import { getNodeBlurParams } from './getNodeBlurParams';
+import { getNodeGlass } from './getNodeGlass';
 import { getNodeTexture } from './getNodeTexture';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getRotatedCorners } from './getRotatedCorners';
 
 const SCISSOR_PADDING_PX = 4;
+
+const GLASS_MAX_DISPLACEMENT_PX = 40;
+const GLASS_DISPERSION_FACTOR = 1.6;
+
+const getGlassMargin = (renderer: TMaskRenderer, node: TSceneNode, scale: number): number => {
+  const glass = getNodeGlass(node);
+
+  if (glass) {
+    const { frost, refraction } = getEffectGlass(glass);
+    const frostRadius = getLayerBlurRadius(renderer, (frost / 100) * EFFECT_BLUR_MAX_PX);
+
+    return frostRadius * 2 + GLASS_MAX_DISPLACEMENT_PX * (refraction / 100) * GLASS_DISPERSION_FACTOR * scale;
+  }
+
+  return 0;
+};
 
 const getShadowMargin = (node: TSceneNode): number =>
   'effects' in node
@@ -35,6 +55,7 @@ const getNodeMargin = (renderer: TMaskRenderer, node: TSceneNode, scale: number)
   return (
     (blur?.radius ?? 0) * 2 +
     (texture ? getEffectTexture(texture).radius * scale : 0) +
+    getGlassMargin(renderer, node, scale) +
     (getShadowMargin(node) + strokeWidth) * Math.max(1, scale)
   );
 };
@@ -54,8 +75,9 @@ export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode
   const subtree = isBox ? getIsolatedSubtree(renderer, node) : null;
   const blur = subtree ? getNodeBlurParams(renderer, node, EffectType.layerBlur) : null;
   const texture = subtree ? getNodeTexture(node) : undefined;
+  const glass = subtree ? getNodeGlass(node) : undefined;
 
-  if (subtree && (blur || texture)) {
+  if (subtree && (blur || texture || glass)) {
     const { context, gl } = renderer;
     const members = getVisibleMembers(node, subtree);
     const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;

@@ -4,6 +4,7 @@ import { drawLeafNode } from '../drawLeafNode';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
 import { getNodeBackgroundBlur } from './getNodeBackgroundBlur';
+import { getNodeGlass } from './getNodeGlass';
 import { getNodeLayerBlur } from './getNodeLayerBlur';
 import { getNodeTexture } from './getNodeTexture';
 import { hasFrameNoiseOverChildren } from './hasFrameNoiseOverChildren';
@@ -43,6 +44,7 @@ export const drawSceneNodes = (
         hasRealBlendMode(node, refs) ||
         getNodeLayerBlur(node) > 0 ||
         Boolean(getNodeTexture(node)) ||
+        Boolean(getNodeGlass(node)) ||
         getNodeBackgroundBlur(node) > 0,
     )
   ) {

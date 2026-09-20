@@ -6,29 +6,12 @@ import { TImageRenderContext } from '../../../../types';
 // utils
 import { drawFrameNameLabel } from '../drawFrameNameLabel';
 
-const buildGlyphQuadsMock = vi.fn();
-const getGlyphQuadBoundsMock = vi.fn();
-const getFrameNameLabelAnchorMock = vi.fn();
-const translateGlyphVerticesMock = vi.fn();
-const rotateGlyphVerticesMock = vi.fn();
+const getFrameNameLabelVerticesMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
 const drawMsdfGlyphsMock = vi.fn();
-const truncateTextToWidthMock = vi.fn();
 
-vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
-  buildGlyphQuads: (...args: unknown[]): unknown => buildGlyphQuadsMock(...args),
-}));
-vi.mock('utils/canvas/text/getGlyphQuadBounds', () => ({
-  getGlyphQuadBounds: (...args: unknown[]): unknown => getGlyphQuadBoundsMock(...args),
-}));
-vi.mock('../getFrameNameLabelAnchor', () => ({
-  getFrameNameLabelAnchor: (...args: unknown[]): unknown => getFrameNameLabelAnchorMock(...args),
-}));
-vi.mock('utils/canvas/text/translateGlyphVertices', () => ({
-  translateGlyphVertices: (...args: unknown[]): unknown => translateGlyphVerticesMock(...args),
-}));
-vi.mock('utils/canvas/text/rotateGlyphVertices', () => ({
-  rotateGlyphVertices: (...args: unknown[]): unknown => rotateGlyphVerticesMock(...args),
+vi.mock('../getFrameNameLabelVertices', () => ({
+  getFrameNameLabelVertices: (...args: unknown[]): unknown => getFrameNameLabelVerticesMock(...args),
 }));
 vi.mock('utils/canvas/text/getMsdfAtlasTexture', () => ({
   getMsdfAtlasTexture: (...args: unknown[]): unknown => getMsdfAtlasTextureMock(...args),
@@ -36,15 +19,10 @@ vi.mock('utils/canvas/text/getMsdfAtlasTexture', () => ({
 vi.mock('utils/canvas/text/drawMsdfGlyphs', () => ({
   drawMsdfGlyphs: (...args: unknown[]): void => drawMsdfGlyphsMock(...args),
 }));
-vi.mock('utils/canvas/text/truncateTextToWidth', () => ({
-  truncateTextToWidth: (...args: unknown[]): unknown => truncateTextToWidthMock(...args),
-}));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const imageContext = { cache: new Map(), msdfBuffer: {}, msdfProgram: {} } as unknown as TImageRenderContext;
-const BOUNDS = { maxX: 6, maxY: 9, minX: -6, minY: -9 };
-const ANCHOR = { angleDeg: 0, maxWidth: 200, point: { x: 20, y: -12 } };
 
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],
@@ -64,57 +42,20 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 describe('drawFrameNameLabel', () => {
   beforeEach(() => {
-    buildGlyphQuadsMock.mockClear().mockReturnValue([]);
-    getGlyphQuadBoundsMock.mockClear().mockReturnValue(BOUNDS);
-    getFrameNameLabelAnchorMock.mockClear().mockReturnValue(ANCHOR);
-    translateGlyphVerticesMock.mockClear().mockReturnValue(new Float32Array());
-    rotateGlyphVerticesMock.mockClear().mockImplementation((vertices: Float32Array) => vertices);
+    getFrameNameLabelVerticesMock.mockClear().mockReturnValue(new Float32Array([1, 2, 3]));
     getMsdfAtlasTextureMock.mockClear().mockReturnValue({});
     drawMsdfGlyphsMock.mockClear();
-    truncateTextToWidthMock.mockClear().mockImplementation((text: string) => text);
   });
 
-  it('should measure the node name at a zoom-scaled font size', () => {
+  it('should get the (cached) vertices for the node at the current zoom', () => {
     // before
     drawFrameNameLabel(gl, imageContext, buildFrame(), '#8c8c8c', 200, 150, { x: 0, y: 0, zoom: 2 });
 
     // result
-    expect(buildGlyphQuadsMock).toHaveBeenCalledWith(expect.anything(), ['Frame 1'], 5.5, 0, 0);
+    expect(getFrameNameLabelVerticesMock).toHaveBeenCalledWith(buildFrame(), 2);
   });
 
-  it('should truncate the name to the anchor’s maxWidth before measuring it, so a cramped frame ellipsizes it', () => {
-    // mock
-    getFrameNameLabelAnchorMock.mockReturnValue({ ...ANCHOR, maxWidth: 40 });
-    truncateTextToWidthMock.mockReturnValue('Fra…');
-
-    // before
-    drawFrameNameLabel(gl, imageContext, buildFrame(), '#8c8c8c', 200, 150, { x: 0, y: 0, zoom: 2 });
-
-    // result
-    expect(truncateTextToWidthMock).toHaveBeenCalledWith('Frame 1', 40, 5.5);
-    expect(buildGlyphQuadsMock).toHaveBeenCalledWith(expect.anything(), ['Fra…'], 5.5, 0, 0);
-  });
-
-  it('should translate the glyph bounds so its top-left corner lands on the anchor point', () => {
-    // before
-    drawFrameNameLabel(gl, imageContext, buildFrame(), '#8c8c8c', 200, 150, IDENTITY_VIEWPORT);
-
-    // result — bounds top-left is (-6,-9), anchor is (20,-12): dx=26, dy=-3
-    expect(translateGlyphVerticesMock).toHaveBeenCalledWith(expect.any(Float32Array), 26, -3);
-  });
-
-  it('should rotate the translated glyphs around the anchor by the anchor’s angle', () => {
-    // mock
-    getFrameNameLabelAnchorMock.mockReturnValue({ angleDeg: 30, point: { x: 20, y: -12 } });
-
-    // before
-    drawFrameNameLabel(gl, imageContext, buildFrame(), '#8c8c8c', 200, 150, IDENTITY_VIEWPORT);
-
-    // result
-    expect(rotateGlyphVerticesMock).toHaveBeenCalledWith(translateGlyphVerticesMock.mock.results[0].value, { x: 20, y: -12 }, 30);
-  });
-
-  it('should draw the glyphs through the msdf program/buffer, using the given fill colour', () => {
+  it('should draw the glyphs through the msdf program/buffer, using the given fill colour and a zoom-scaled font size', () => {
     // before
     drawFrameNameLabel(gl, imageContext, buildFrame(), '#337ae1', 200, 150, IDENTITY_VIEWPORT);
 
@@ -125,7 +66,7 @@ describe('drawFrameNameLabel', () => {
       imageContext.msdfBuffer,
       getMsdfAtlasTextureMock.mock.results[0].value,
       expect.anything(),
-      rotateGlyphVerticesMock.mock.results[0].value,
+      new Float32Array([1, 2, 3]),
       '#337ae1',
       11,
       200,
@@ -139,19 +80,18 @@ describe('drawFrameNameLabel', () => {
     drawFrameNameLabel(gl, imageContext, buildFrame({ name: '' }), '#8c8c8c', 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(buildGlyphQuadsMock).not.toHaveBeenCalled();
+    expect(getFrameNameLabelVerticesMock).not.toHaveBeenCalled();
     expect(drawMsdfGlyphsMock).not.toHaveBeenCalled();
   });
 
-  it('should draw nothing when the name produces no glyph bounds', () => {
-    // mock — the anchor is still needed upfront, to know how much width is available to truncate to
-    getGlyphQuadBoundsMock.mockReturnValue(null);
+  it('should draw nothing when the vertices are empty, like when the name produces no glyph bounds', () => {
+    // mock
+    getFrameNameLabelVerticesMock.mockReturnValue(new Float32Array(0));
 
     // before
     drawFrameNameLabel(gl, imageContext, buildFrame(), '#8c8c8c', 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(getFrameNameLabelAnchorMock).toHaveBeenCalled();
     expect(drawMsdfGlyphsMock).not.toHaveBeenCalled();
   });
 });

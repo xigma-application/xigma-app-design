@@ -5,13 +5,17 @@ import { TMaskRenderer } from '../types';
 
 // utils
 import { bindTarget } from '../bindTarget';
+import { captureBackdropTexture } from '../captureBackdropTexture';
 import { compositeMask } from '../../compositeMask';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { renderClippedFrame } from '../renderClippedFrame';
 import { renderIds } from '../renderIds';
 import { renderIntoTarget } from '../renderIntoTarget';
 
+const contentTarget = { texture: 'content-tex' };
+
 vi.mock('../bindTarget', () => ({ bindTarget: vi.fn() }));
+vi.mock('../captureBackdropTexture', () => ({ captureBackdropTexture: vi.fn(() => contentTarget) }));
 vi.mock('../../compositeMask', () => ({ compositeMask: vi.fn() }));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: vi.fn() }));
 vi.mock('../renderIds', () => ({ renderIds: vi.fn() }));
@@ -50,10 +54,9 @@ describe('renderClippedFrame', () => {
     vi.clearAllMocks();
   });
 
-  it('should render the children into one target, a white full-alpha frame rect into another, then composite them back onto the parent target', () => {
-    const contentTarget = { texture: 'content-tex' };
+  it('should seed the content target with a real copy of the backdrop, render the children on top of it, a white full-alpha frame rect into another target, then composite them back onto the parent target', () => {
     const maskTarget = { texture: 'mask-tex' };
-    const pool = { acquire: vi.fn().mockReturnValueOnce(contentTarget).mockReturnValueOnce(maskTarget), release: vi.fn() };
+    const pool = { acquire: vi.fn().mockReturnValueOnce(maskTarget), release: vi.fn() };
     const context = {
       buffer: { id: 'buffer' },
       canvasHeight: 100,
@@ -68,22 +71,17 @@ describe('renderClippedFrame', () => {
 
     renderClippedFrame(renderer, frame, parentTarget);
 
-    expect(pool.acquire).toHaveBeenCalledTimes(2);
-    expect(renderIntoTarget).toHaveBeenNthCalledWith(
-      1,
-      renderer,
-      contentTarget,
-      expect.any(Function),
-      expect.objectContaining({ clipped: expect.any(Boolean) }),
-    );
-    expect(renderIntoTarget).toHaveBeenNthCalledWith(
-      2,
+    expect(bindTarget).toHaveBeenNthCalledWith(1, renderer, parentTarget);
+    expect(captureBackdropTexture).toHaveBeenCalledWith(renderer, expect.objectContaining({ clipped: expect.any(Boolean) }));
+    expect(bindTarget).toHaveBeenNthCalledWith(2, renderer, contentTarget);
+    expect(renderIds).toHaveBeenCalledWith(renderer, ['child-a', 'child-b'], contentTarget);
+    expect(pool.acquire).toHaveBeenCalledTimes(1);
+    expect(renderIntoTarget).toHaveBeenCalledWith(
       renderer,
       maskTarget,
       expect.any(Function),
       expect.objectContaining({ clipped: expect.any(Boolean) }),
     );
-    expect(renderIds).toHaveBeenCalledWith(renderer, ['child-a', 'child-b'], contentTarget);
     expect(drawRect).toHaveBeenCalledWith(
       context.gl,
       context.program,
@@ -94,7 +92,7 @@ describe('renderClippedFrame', () => {
       context.viewport,
       12,
     );
-    expect(bindTarget).toHaveBeenCalledWith(renderer, parentTarget);
+    expect(bindTarget).toHaveBeenNthCalledWith(3, renderer, parentTarget);
     expect(compositeMask).toHaveBeenCalledWith(context, 'content-tex', 'mask-tex');
     expect(glMock.scissor).toHaveBeenCalled();
     expect(pool.release).toHaveBeenNthCalledWith(1, contentTarget);
@@ -102,9 +100,8 @@ describe('renderClippedFrame', () => {
   });
 
   it('should paint the children in reverse order when the frame is set to first on top', () => {
-    const contentTarget = { texture: 'content-tex' };
     const maskTarget = { texture: 'mask-tex' };
-    const pool = { acquire: vi.fn().mockReturnValueOnce(contentTarget).mockReturnValueOnce(maskTarget), release: vi.fn() };
+    const pool = { acquire: vi.fn().mockReturnValueOnce(maskTarget), release: vi.fn() };
     const context = {
       buffer: { id: 'buffer' },
       canvasHeight: 100,
@@ -135,6 +132,7 @@ describe('renderClippedFrame', () => {
 
     renderClippedFrame(renderer, buildFrame(), { id: 'parent' } as never);
 
+    expect(captureBackdropTexture).not.toHaveBeenCalled();
     expect(pool.acquire).not.toHaveBeenCalled();
     expect(renderIds).not.toHaveBeenCalled();
   });

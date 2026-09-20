@@ -49,6 +49,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     clearColor: vi.fn(),
     colorMask: vi.fn(),
     copyTexImage2D: vi.fn(),
+    copyTexSubImage2D: vi.fn(),
     createBuffer: vi.fn(() => ({})),
     createTexture: vi.fn(() => ({})),
     disable: vi.fn(),

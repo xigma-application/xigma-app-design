@@ -38,3 +38,13 @@ export type TBlurCacheEntry = {
   y: number;
   zoom: number;
 };
+
+export type TGlassCacheEntry = {
+  framebuffer: WebGLFramebuffer;
+  height: number;
+  nodesState: unknown;
+  texture: WebGLTexture;
+  width: number;
+  x: number;
+  y: number;
+};

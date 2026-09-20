@@ -90,4 +90,21 @@ describe('getIsolatedScissorRect', () => {
       expect.objectContaining({ clipped: true, originX: expect.any(Number), x: 0 }),
     );
   });
+
+  it('should grow the rect for a glass effect too, for its frost radius and refraction/dispersion reach', () => {
+    // mock
+    const glassNode = { ...node, effects: [createEffect(EffectType.glass)] };
+
+    // action
+    const withGlass = getIsolatedScissorRect(renderer, glassNode);
+
+    // result — well beyond the plain node box at this zoom (200 x 2 = 400 device px wide)
+    expect(withGlass).not.toBeNull();
+    expect(withGlass!.width).toBeGreaterThan(400);
+  });
+
+  it('should be null for a glass effect that is turned off', () => {
+    // result
+    expect(getIsolatedScissorRect(renderer, { ...node, effects: [{ ...createEffect(EffectType.glass), visible: false }] })).toBeNull();
+  });
 });

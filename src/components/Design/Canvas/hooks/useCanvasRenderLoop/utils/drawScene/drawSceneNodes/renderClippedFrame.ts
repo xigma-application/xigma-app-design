@@ -1,5 +1,6 @@
 // utils
 import { bindTarget } from './bindTarget';
+import { captureBackdropTexture } from './captureBackdropTexture';
 import { compositeMask } from '../compositeMask';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { getDeviceScissorRect } from './getDeviceScissorRect';
@@ -23,10 +24,13 @@ export const renderClippedFrame = (renderer: TMaskRenderer, frame: TFrameNode, t
   const rect = getDeviceScissorRect(renderer, getRotatedCorners(getNodeBounds(frame), frame.rotation), CLIP_PADDING_PX);
 
   if (!rect.offscreen) {
-    const contentTarget = pool.acquire();
+    bindTarget(renderer, target);
+
+    const contentTarget = captureBackdropTexture(renderer, rect);
     const maskTarget = pool.acquire();
 
-    renderIntoTarget(renderer, contentTarget, () => renderIds(renderer, getFrameChildIdsInPaintOrder(frame), contentTarget), rect);
+    bindTarget(renderer, contentTarget);
+    renderIds(renderer, getFrameChildIdsInPaintOrder(frame), contentTarget);
     renderIntoTarget(
       renderer,
       maskTarget,

@@ -776,6 +776,149 @@ test.describe('Design panels — Effects section', () => {
       .toBeGreaterThan(20);
   });
 
+  test('a glass effect bevels the edges of a translucent shape, lighter on the side facing the light', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-glass-render-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 1000, 400);
+
+    const id = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder[0];
+    });
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#808080', opacity: 10, type: 'solid' }] }, id: nodeId }));
+    }, id);
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 200, width: 300, x: 700, y: 200 };
+    const readCornerBrightness = async (): Promise<{ bottomRight: number; topLeft: number }> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const at = (x: number, y: number): number => png.data[(y * png.width + x) * 4];
+
+      return { bottomRight: at(clip.width - 6, clip.height - 6), topLeft: at(6, 6) };
+    };
+
+    // result — a flat translucent fill over a plain background has no corner shading
+    const before = await readCornerBrightness();
+
+    expect(Math.abs(before.topLeft - before.bottomRight)).toBeLessThan(3);
+
+    // action — the default light points to the top-left (-45°)
+    await addEffect(page, 'Glass');
+    await page.mouse.move(1750, 900);
+
+    // result — the corner facing the light is beveled brighter than the one facing away
+    await expect
+      .poll(async () => (await readCornerBrightness()).topLeft - (await readCornerBrightness()).bottomRight, { timeout: 15000 })
+      .toBeGreaterThan(10);
+  });
+
+  test('a glass effect on a shape nested inside a clipping frame still shows the real backdrop through it, not a blank buffer', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-glass-nested-frame-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    // two solid backdrop halves — the glass shape below straddles the seam between them
+    await designPage.drawRectangle(700, 200, 850, 400);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[pages[activePageId].rootOrder.length - 1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }] }, id }));
+    });
+    await designPage.drawRectangle(850, 200, 1000, 400);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const id = pages[activePageId].rootOrder[pages[activePageId].rootOrder.length - 1];
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }, id }));
+    });
+
+    // a clipping frame with no fill of its own, covering both halves
+    await designPage.drawFrame(680, 180, 1020, 420);
+
+    const frameId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder[pages[activePageId].rootOrder.length - 1];
+    });
+
+    await page.evaluate(async (id) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(updateNode({ changes: { clipContent: true, fills: [] }, id }));
+    }, frameId);
+
+    // the glass shape, nested as the frame's child, straddling the red/blue seam
+    await designPage.drawRectangle(750, 250, 950, 350);
+
+    const rectId = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder[pages[activePageId].rootOrder.length - 1];
+    });
+
+    await page.evaluate(
+      async ({ frameId: id, rectId: nodeId }) => {
+        const { store } = await import('/src/store/index.ts');
+        const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+
+        store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex: 0, targetParentId: id }));
+        store.dispatch(updateNode({ changes: { fills: [{ color: '#808080', opacity: 10, type: 'solid' }] }, id: nodeId }));
+      },
+      { frameId, rectId },
+    );
+
+    // action — minimal warp/frost so the two backdrop halves stay cleanly separated for the assertion below
+    await addEffect(page, 'Glass');
+    await page.evaluate(async (id) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { createEffect } = await import('/src/utils/design/effects/createEffect.ts');
+
+      store.dispatch(
+        updateNode({ changes: { effects: [{ ...createEffect('glass' as never), depth: 0, dispersion: 0, frost: 0, refraction: 0 }] }, id }),
+      );
+    }, rectId);
+    await page.mouse.move(1750, 900);
+
+    // result — the shape still tints red on the left half and blue on the right half, proving it
+    // captured the real backdrop behind the frame instead of an empty isolated buffer
+    const clip = { height: 100, width: 200, x: 750, y: 250 };
+    const { PNG } = await import('pngjs');
+    const png = PNG.sync.read(await page.screenshot({ clip }));
+    const at = (x: number, y: number): { b: number; r: number } => ({
+      b: png.data[(y * png.width + x) * 4 + 2],
+      r: png.data[(y * png.width + x) * 4],
+    });
+
+    const overRed = at(20, 50);
+    const overBlue = at(180, 50);
+
+    expect(overRed.r - overRed.b).toBeGreaterThan(20);
+    expect(overBlue.b - overBlue.r).toBeGreaterThan(20);
+  });
+
   test('a noise covers an outside stroke too, not only the fill', async ({ page }) => {
     const designPage = new DesignPage(page);
 
