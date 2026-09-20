@@ -26,8 +26,8 @@ export const drawBoxLeafNode = (
   }
 
   if (phase !== 'fill') {
-    drawBoxLeafNodeNoise(context, node, opacity, refs);
     drawBoxLeafNodeStroke(context, node, opacity);
     drawBoxLeafNodeStrokePaints(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
+    drawBoxLeafNodeNoise(context, node, opacity, refs);
   }
 };

@@ -8,6 +8,7 @@ import { TPoint } from 'types/canvas';
 import { NOISE_MAX_COVERAGE } from './constants';
 
 // utils
+import { drawNoiseMask } from './drawNoiseMask';
 import { getEffectNoise } from 'utils/design/effects/getEffectNoise';
 import { getNoiseShapePoints } from './getNoiseShapePoints';
 import { hexToRgbFloat } from 'utils/canvas/hexToRgbFloat';
@@ -16,6 +17,7 @@ import { toFanVertices } from 'utils/canvas/toFanVertices';
 
 export const drawNoiseShape = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode, effect: TEffect, opacity: number): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
+  const mask = drawNoiseMask(context, node);
   const program = imageContext.noiseProgram;
   const { density, noiseSize, noiseType, secondaryColor, secondaryOpacity } = getEffectNoise(effect);
   const color = hexToRgbFloat(effect.color);
@@ -27,6 +29,10 @@ export const drawNoiseShape = (context: TDrawSceneContext, node: TFrameNode | TR
   const location = gl.getUniformLocation(program, 'u_secondaryColor');
 
   gl.useProgram(program);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, mask.texture);
+  gl.uniform1i(gl.getUniformLocation(program, 'u_mask'), 0);
+  gl.uniform2f(gl.getUniformLocation(program, 'u_maskSize'), mask.width, mask.height);
   gl.uniform2f(gl.getUniformLocation(program, 'u_resolution'), canvasWidth, canvasHeight);
   gl.uniform2f(gl.getUniformLocation(program, 'u_viewportOffset'), viewport.x, viewport.y);
   gl.uniform4f(gl.getUniformLocation(program, 'u_color'), color[0], color[1], color[2], (effect.opacity / 100) * opacity);
@@ -49,4 +55,6 @@ export const drawNoiseShape = (context: TDrawSceneContext, node: TFrameNode | TR
 
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
   gl.drawArrays(gl.TRIANGLE_FAN, 0, points.length + 2);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  imageContext.renderTargetPool.release(mask);
 };

@@ -18,36 +18,34 @@ const node: TRectangleNode = {
   y: 20,
 };
 
+const getExtents = (node: TRectangleNode): number[] => {
+  const points = getNoiseShapePoints(node);
+  const xs = points.map(({ x }) => x);
+  const ys = points.map(({ y }) => y);
+
+  return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+};
+
 describe('getNoiseShapePoints', () => {
-  it('should return the node corners in world space', () => {
-    // action
-    const points = getNoiseShapePoints(node);
-    const xs = points.map(({ x }) => x);
-    const ys = points.map(({ y }) => y);
-
+  it('should return the four corners of the node bounds with a small padding, in world space', () => {
     // result
-    expect([Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]).toEqual([10, 110, 20, 60]);
+    expect(getNoiseShapePoints(node)).toHaveLength(4);
+    expect(getExtents(node)).toEqual([8, 112, 18, 62]);
   });
 
-  it('should rotate the shape around the node center', () => {
+  it('should grow by the stroke width so an outside stroke is covered too', () => {
+    // result
+    expect(getExtents({ ...node, strokeWidth: 10 })).toEqual([-2, 122, 8, 72]);
+  });
+
+  it('should rotate the bounds around the node center', () => {
     // action — a 90 degree rotation swaps the extents around the center (60, 40)
-    const points = getNoiseShapePoints({ ...node, rotation: 90 });
-    const xs = points.map(({ x }) => x);
-    const ys = points.map(({ y }) => y);
+    const [minX, maxX, minY, maxY] = getExtents({ ...node, rotation: 90 });
 
     // result
-    expect(Math.min(...xs)).toBeCloseTo(40, 5);
-    expect(Math.max(...xs)).toBeCloseTo(80, 5);
-    expect(Math.min(...ys)).toBeCloseTo(-10, 5);
-    expect(Math.max(...ys)).toBeCloseTo(90, 5);
-  });
-
-  it('should round the corners with the node corner radius', () => {
-    // action
-    const points = getNoiseShapePoints({ ...node, cornerRadius: 10 });
-
-    // result
-    expect(points.some(({ x, y }) => x === 10 && y === 20)).toBe(false);
-    expect(points.length).toBeGreaterThan(4);
+    expect(minX).toBeCloseTo(38, 5);
+    expect(maxX).toBeCloseTo(82, 5);
+    expect(minY).toBeCloseTo(-12, 5);
+    expect(maxY).toBeCloseTo(92, 5);
   });
 });

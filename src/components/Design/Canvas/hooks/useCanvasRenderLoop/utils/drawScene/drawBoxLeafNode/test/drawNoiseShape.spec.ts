@@ -8,13 +8,19 @@ import { TRectangleNode } from 'types/design/types';
 import { createEffect } from 'utils/design/effects/createEffect';
 import { drawNoiseShape } from '../drawNoiseShape';
 
+vi.mock('../drawNoiseMask', () => ({ drawNoiseMask: (): unknown => ({ height: 2400, texture: { tag: 'mask' }, width: 2000 }) }));
+
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ARRAY_BUFFER: 34962,
     FLOAT: 5126,
     STATIC_DRAW: 35044,
+    TEXTURE0: 33984,
+    TEXTURE_2D: 3553,
     TRIANGLE_FAN: 6,
+    activeTexture: vi.fn(),
     bindBuffer: vi.fn(),
+    bindTexture: vi.fn(),
     bufferData: vi.fn(),
     disableVertexAttribArray: vi.fn(),
     drawArrays: vi.fn(),
@@ -54,7 +60,7 @@ describe('drawNoiseShape', () => {
       canvasHeight: 1200,
       canvasWidth: 1000,
       gl,
-      imageContext: { noiseProgram } as TImageRenderContext,
+      imageContext: { noiseProgram, renderTargetPool: { release: vi.fn() } } as unknown as TImageRenderContext,
       viewport: { x: 5, y: 6, zoom: 2 },
     } as unknown as TDrawSceneContext;
     const effect = { ...createEffect(EffectType.noise), color: '#ff0000', density: 50, noiseSize: 3, opacity: 40 };
@@ -84,7 +90,7 @@ describe('drawNoiseShape', () => {
       canvasHeight: 0,
       canvasWidth: 0,
       gl,
-      imageContext: { noiseProgram: {} } as TImageRenderContext,
+      imageContext: { noiseProgram: {}, renderTargetPool: { release: vi.fn() } } as unknown as TImageRenderContext,
       viewport: { x: 0, y: 0, zoom: 1 },
     } as unknown as TDrawSceneContext;
 
@@ -106,7 +112,7 @@ describe('drawNoiseShape', () => {
       canvasHeight: 1200,
       canvasWidth: 1000,
       gl,
-      imageContext: { noiseProgram: {} } as TImageRenderContext,
+      imageContext: { noiseProgram: {}, renderTargetPool: { release: vi.fn() } } as unknown as TImageRenderContext,
       viewport: { x: 0, y: 0, zoom: 1 },
     } as unknown as TDrawSceneContext;
     const effect = { ...createEffect(EffectType.noise), noiseType: EffectNoiseType.duo, secondaryColor: '#00ff00', secondaryOpacity: 60 };

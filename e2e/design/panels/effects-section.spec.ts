@@ -659,6 +659,49 @@ test.describe('Design panels — Effects section', () => {
     expect((await readShares()).frameEdge).toBeLessThan(8);
   });
 
+  test('a noise covers an outside stroke too, not only the fill', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-noise-stroke-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(updateNode({ changes: { strokeAlign: 'outside', strokeColor: '#ffffff', strokeWidth: 24 }, id: nodeId }));
+    }, id);
+    await addEffect(page, 'Noise');
+    await page.getByLabel('Effect noise size X').fill('4');
+    await page.getByLabel('Effect noise size X').press('Enter');
+    await page.getByLabel('Effect color').locator('..').getByRole('textbox').first().fill('000000');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 100, width: 20, x: 678, y: 240 };
+    const readToned = async (): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      let toned = 0;
+
+      for (let index = 0; index < png.width * png.height; index += 1) {
+        const luma = png.data[index * 4];
+
+        if (luma > 110 && luma < 235) {
+          toned += 1;
+        }
+      }
+
+      return toned / (png.width * png.height);
+    };
+
+    // result — the outside stroke is no longer a flat white band, part of it is toned by the noise
+    await expect.poll(readToned, { timeout: 15000 }).toBeGreaterThan(0.15);
+  });
+
   test('a frame noise is drawn over the frame children, not under them', async ({ page }) => {
     const designPage = new DesignPage(page);
 

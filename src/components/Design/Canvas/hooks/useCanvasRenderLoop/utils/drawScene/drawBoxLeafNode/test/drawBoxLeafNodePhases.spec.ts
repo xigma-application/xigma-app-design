@@ -47,21 +47,21 @@ describe('drawBoxLeafNode phases', () => {
     calls.length = 0;
   });
 
-  it('should draw the noise between the children and the stroke, not with the fill', () => {
+  it('should draw the noise over the stroke, after the children, not with the fill', () => {
     // action
     drawBoxLeafNode(context, rectangle, 1, {}, new Map(), refs, null, 0, 'fill');
     drawBoxLeafNode(context, rectangle, 1, {}, new Map(), refs, null, 0, 'stroke');
 
     // result
-    expect(calls).toEqual(['fill', 'noise', 'stroke', 'strokePaints']);
+    expect(calls).toEqual(['fill', 'stroke', 'strokePaints', 'noise']);
   });
 
-  it('should draw fill, noise and stroke in order for the all-in-one phase', () => {
+  it('should draw fill, stroke and then the noise in order for the all-in-one phase', () => {
     // action
     drawBoxLeafNode(context, rectangle, 1, {}, new Map(), refs, null);
 
     // result
-    expect(calls).toEqual(['fill', 'noise', 'stroke', 'strokePaints']);
+    expect(calls).toEqual(['fill', 'stroke', 'strokePaints', 'noise']);
   });
 
   it('should leave the noise decision to drawBoxLeafNodeNoise for every box node, including a section', () => {
@@ -69,6 +69,6 @@ describe('drawBoxLeafNode phases', () => {
     drawBoxLeafNode(context, section, 1, {}, new Map(), refs, null);
 
     // result
-    expect(calls).toEqual(['fill', 'noise', 'stroke', 'strokePaints']);
+    expect(calls).toEqual(['fill', 'stroke', 'strokePaints', 'noise']);
   });
 });
