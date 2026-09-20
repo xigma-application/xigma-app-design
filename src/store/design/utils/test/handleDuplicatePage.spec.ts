@@ -65,6 +65,7 @@ const buildState = (pages: TDesignPage[], activePageId: string): TDesignState =>
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

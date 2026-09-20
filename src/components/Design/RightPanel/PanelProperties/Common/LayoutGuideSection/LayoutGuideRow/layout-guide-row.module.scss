@@ -1,0 +1,79 @@
+.LayoutGuideRow {
+  align-items: center;
+  column-gap: 8px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 24px 24px;
+  height: 32px;
+  padding: 0 8px 0 16px;
+  position: relative;
+
+  &--selected {
+    background-color: var(--color-bg-selected);
+  }
+
+  &--selected &__handle {
+    opacity: 1;
+  }
+
+  &__handle {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--color-neutral-2);
+    cursor: grab;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    left: 0;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+  }
+
+  &:hover &__handle {
+    opacity: 1;
+  }
+
+  &__handle--dragging {
+    color: var(--color-neutral-1);
+    opacity: 1;
+  }
+
+  &__trigger {
+    align-items: center;
+    background-color: var(--color-neutral-5);
+    border: 1px solid var(--color-neutral-3);
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: var(--color-neutral-1);
+    column-gap: 4px;
+    cursor: pointer;
+    display: flex;
+    height: 24px;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 0 8px;
+    width: 100%;
+
+    &--active {
+      border-color: var(--color-blue-1);
+    }
+  }
+
+  &__label {
+    font-size: 11px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__popover {
+    background-color: var(--color-neutral-5);
+    padding: 0;
+    width: 240px;
+  }
+}

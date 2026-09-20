@@ -82,6 +82,26 @@ export enum LayoutVersion {
   updated = 'updated',
 }
 
+export enum LayoutGuideType {
+  columns = 'columns',
+  grid = 'grid',
+  rows = 'rows',
+}
+
+export enum LayoutGuideColumnsAlign {
+  center = 'center',
+  left = 'left',
+  right = 'right',
+  stretch = 'stretch',
+}
+
+export enum LayoutGuideRowsAlign {
+  bottom = 'bottom',
+  center = 'center',
+  stretch = 'stretch',
+  top = 'top',
+}
+
 export enum NodeType {
   ellipse = 'ellipse',
   frame = 'frame',

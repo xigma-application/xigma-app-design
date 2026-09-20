@@ -64,6 +64,7 @@ export const FillSection: FC<TFillSectionProps> = ({ footer, property = 'fills' 
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {fills.map((paint, index) => (
           <FillRow
+            canDrag={fills.length > 1}
             isDragging={isRowDragging(index)}
             isSelected={isRowSelected(index)}
             key={`${nodeId}-${index}`}

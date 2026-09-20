@@ -102,8 +102,21 @@ describe('EffectsSection', () => {
     expect(read(id).effects).toEqual([
       { blendMode: BlendMode.normal, blur: 4, color: '#000000', opacity: 25, spread: 0, type: EffectType.innerShadow, x: 0, y: 4 },
     ]);
-    expect(screen.getByRole('button', { name: 'Reorder effect' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Hide effect' })).toBeTruthy();
+    // Step 3: A single effect has nothing to reorder against, so there is no drag handle
+    expect(screen.queryByRole('button', { name: 'Reorder effect' })).toBeNull();
+  });
+
+  it('should show the reorder handle once a second effect exists', () => {
+    // Step 1: Add two effects
+    addRectangle();
+    renderSection();
+    addInnerShadow();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Drop shadow'));
+
+    // Step 2: Assert
+    expect(screen.getAllByRole('button', { name: 'Reorder effect' })).toHaveLength(2);
   });
 
   it('should not add effect types that are not supported yet', () => {

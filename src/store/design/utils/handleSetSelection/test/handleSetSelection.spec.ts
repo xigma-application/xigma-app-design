@@ -50,6 +50,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

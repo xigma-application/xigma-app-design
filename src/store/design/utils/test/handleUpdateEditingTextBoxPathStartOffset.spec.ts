@@ -48,6 +48,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

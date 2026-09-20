@@ -147,6 +147,7 @@ const initialState: TDesignState = {
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },
@@ -301,6 +302,9 @@ const designSlice = createSlice({
     toggleFrameOutlinesVisible: (state) => {
       state.preferences.areFrameOutlinesVisible = !state.preferences.areFrameOutlinesVisible;
     },
+    toggleLayoutGuidesVisible: (state) => {
+      state.preferences.areLayoutGuidesVisible = !state.preferences.areLayoutGuidesVisible;
+    },
     toggleMaskOutlinesVisible: (state) => {
       state.preferences.areMaskOutlinesVisible = !state.preferences.areMaskOutlinesVisible;
     },
@@ -390,6 +394,7 @@ export const {
   toggleAdditionalLabels,
   toggleFrameClipContent,
   toggleFrameOutlinesVisible,
+  toggleLayoutGuidesVisible,
   toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,

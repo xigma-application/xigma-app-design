@@ -50,6 +50,7 @@ const buildState = (nodes: Record<string, TPathNode | TRectangleNode | TTextNode
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

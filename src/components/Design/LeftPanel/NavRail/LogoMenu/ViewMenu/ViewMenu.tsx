@@ -10,6 +10,7 @@ import { MenuCompound } from 'shared';
 // hooks
 import { useViewMenuAdditionalLabelsClick } from './hooks/useViewMenuAdditionalLabelsClick';
 import { useViewMenuFrameOutlinesClick } from './hooks/useViewMenuFrameOutlinesClick';
+import { useViewMenuLayoutGuidesClick } from './hooks/useViewMenuLayoutGuidesClick';
 import { useViewMenuMaskOutlinesClick } from './hooks/useViewMenuMaskOutlinesClick';
 import { useViewMenuRulersClick } from './hooks/useViewMenuRulersClick';
 import { useViewMenuZoomInClick } from './hooks/useViewMenuZoomInClick';
@@ -24,6 +25,7 @@ import { useViewMenuZoomToSelectionClick } from './hooks/useViewMenuZoomToSelect
 import {
   selectAreAdditionalLabelsVisible,
   selectAreFrameOutlinesVisible,
+  selectAreLayoutGuidesVisible,
   selectAreMaskOutlinesVisible,
   selectAreRulersVisible,
   selectSelectedIds,
@@ -75,6 +77,7 @@ const ViewMenu: FC = () => {
   const { t } = useTranslation();
   const areAdditionalLabelsVisible = useAppSelector(selectAreAdditionalLabelsVisible);
   const areFrameOutlinesVisible = useAppSelector(selectAreFrameOutlinesVisible);
+  const areLayoutGuidesVisible = useAppSelector(selectAreLayoutGuidesVisible);
   const areMaskOutlinesVisible = useAppSelector(selectAreMaskOutlinesVisible);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
   const zoom = useAppSelector(selectZoom);
@@ -82,6 +85,7 @@ const ViewMenu: FC = () => {
   const frameNodes = useAppSelector(selectTopLevelFrameNodes);
   const handleAdditionalLabelsClick = useViewMenuAdditionalLabelsClick();
   const handleFrameOutlinesClick = useViewMenuFrameOutlinesClick();
+  const handleLayoutGuidesClick = useViewMenuLayoutGuidesClick();
   const handleMaskOutlinesClick = useViewMenuMaskOutlinesClick();
   const handleRulersClick = useViewMenuRulersClick();
   const handleZoomInClick = useViewMenuZoomInClick();
@@ -95,7 +99,12 @@ const ViewMenu: FC = () => {
   return (
     <>
       <MenuItem disabled label={t(VIEW_MENU_PIXEL_GRID_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.pixelGrid.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_LAYOUT_GUIDES_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.layoutGuides.join('')} />
+      <MenuItem
+        label={t(VIEW_MENU_LAYOUT_GUIDES_KEY)}
+        onClick={handleLayoutGuidesClick}
+        selected={areLayoutGuidesVisible}
+        shortcut={KEYBOARD_SHORTCUTS.layoutGuides.join('')}
+      />
       <MenuItem
         label={t(VIEW_MENU_RULERS_KEY)}
         onClick={handleRulersClick}

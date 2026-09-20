@@ -45,6 +45,7 @@ export type TStandardKeyboardShortcuts = {
   resizeToFit: TShortcut;
   selectAll: TShortcut;
   sendToBack: TShortcut;
+  toggleLayoutGuides: TShortcut;
   toggleRulers: TShortcut;
   toggleUiHidden: TShortcut;
   toggleUiMinimized: TShortcut;

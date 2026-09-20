@@ -2,6 +2,7 @@
 import {
   selectActiveTool,
   selectAllGuideLines,
+  selectAreLayoutGuidesVisible,
   selectAreRulersVisible,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
@@ -60,6 +61,7 @@ import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawImageEditorCropOverflowPreview } from './drawImageEditorCropOverflowPreview';
 import { drawImageEditorTileOverflowPreview } from './drawImageEditorTileOverflowPreview';
+import { drawLayoutGuides } from './drawLayoutGuides/drawLayoutGuides';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawMaskOutlines } from './drawMaskOutlines';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';
@@ -116,6 +118,7 @@ export const drawScene = (
   const viewport = selectViewport(state);
   const { clientHeight, clientWidth } = canvas;
   const areRulersVisible = selectAreRulersVisible(state);
+  const areLayoutGuidesVisible = selectAreLayoutGuidesVisible(state);
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
   const gradientEditor = selectGradientEditor(state);
@@ -173,6 +176,7 @@ export const drawScene = (
   drawAutoLayoutGapHandles(ctx, selectedNodes, refs, nodesById);
   drawAutoLayoutPaddingHandles(ctx, selectedNodes, refs, nodesById);
   drawGridSlots(ctx, selectedNodes, nodesById);
+  drawLayoutGuides(ctx, filteredNodes, areLayoutGuidesVisible);
   drawGridSectionHighlight(ctx, gridSectionHighlight, gridTrackSelection, refs, nodesById);
   drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById, gridTrackSelection);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);

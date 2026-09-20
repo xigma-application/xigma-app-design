@@ -1380,5 +1380,51 @@ exports[`Frame snapshots > should render the FrameHeader 1`] = `
       class="_EffectsSection__rows_8c7597"
     />
   </div>
+  <div
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
+    data-test-section="layout-guide"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Layout guide
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Add layout guide"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_LayoutGuideSection__rows_13a61c"
+    />
+  </div>
 </DocumentFragment>
 `;

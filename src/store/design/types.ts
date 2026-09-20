@@ -36,7 +36,7 @@ export type TMaskConnectorLine = {
 
 export type TMaskConnectorInfo = TMaskConnectorLine[];
 
-export type TPropertyPanelKind = TPaintProperty | 'effects';
+export type TPropertyPanelKind = TPaintProperty | 'effects' | 'layoutGuides';
 
 export type TOpenPropertyPanel = { index: number; nodeId: string; property: TPropertyPanelKind };
 
@@ -73,6 +73,7 @@ export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number; pro
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;
   areFrameOutlinesVisible: boolean;
+  areLayoutGuidesVisible: boolean;
   areMaskOutlinesVisible: boolean;
   areRulersVisible: boolean;
 };

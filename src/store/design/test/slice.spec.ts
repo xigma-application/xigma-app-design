@@ -48,6 +48,7 @@ import slice, {
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
   toggleFrameOutlinesVisible,
+  toggleLayoutGuidesVisible,
   toggleMaskOutlinesVisible,
   toggleNodeHidden,
   toggleNodeLocked,
@@ -143,6 +144,7 @@ describe('design slice', () => {
       preferences: {
         areAdditionalLabelsVisible: true,
         areFrameOutlinesVisible: false,
+        areLayoutGuidesVisible: true,
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
       },
@@ -869,6 +871,20 @@ describe('design slice', () => {
 
     // result
     expect(hiddenAgain.preferences.areMaskOutlinesVisible).toBe(false);
+  });
+
+  it('should toggle the layout guides visibility flag, defaulting to visible', () => {
+    // action
+    const hidden = slice(undefined, toggleLayoutGuidesVisible());
+
+    // result
+    expect(hidden.preferences.areLayoutGuidesVisible).toBe(false);
+
+    // action
+    const visibleAgain = slice(hidden, toggleLayoutGuidesVisible());
+
+    // result
+    expect(visibleAgain.preferences.areLayoutGuidesVisible).toBe(true);
   });
 
   it('should update the live text edit content', () => {

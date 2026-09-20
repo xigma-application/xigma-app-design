@@ -63,6 +63,7 @@ const buildState = (nodes: TDesignPage['nodes'], imageEditor: TImageEditorState 
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

@@ -68,6 +68,7 @@ const buildState = (nodes: Record<string, TSceneNode> = {}): TDesignState => ({
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

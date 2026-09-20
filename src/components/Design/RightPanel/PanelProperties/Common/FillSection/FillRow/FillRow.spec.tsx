@@ -63,6 +63,7 @@ const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnTy
 
   return (
     <FillRowHarness
+      canDrag
       isDragging={false}
       isSelected={false}
       nodeId="node-1"
@@ -86,6 +87,7 @@ const renderFillRow = (overrides: Partial<TFillRowProps> = {}): ReturnType<typeo
   render(
     <TestProviders>
       <FillRowHarness
+        canDrag
         isDragging={false}
         isSelected={false}
         nodeId="node-1"

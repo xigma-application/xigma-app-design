@@ -61,6 +61,7 @@ export const EffectsSection: FC = () => {
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {effects.map((effect, index) => (
           <EffectRow
+            canDrag={effects.length > 1}
             disabledTypes={getDisabledBlurTypes(effects, index)}
             effect={effect}
             isDragging={isRowDragging(index)}

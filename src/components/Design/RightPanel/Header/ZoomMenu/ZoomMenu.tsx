@@ -8,6 +8,7 @@ import { UITools } from 'shared';
 import { useAdditionalLabelsClick } from './hooks/useAdditionalLabelsClick';
 import { useHandleZoomInputChange } from './hooks/useHandleZoomInputChange';
 import { useHandleZoomInputCommit } from './hooks/useHandleZoomInputCommit';
+import { useLayoutGuidesClick } from './hooks/useLayoutGuidesClick';
 import { useRulersClick } from './hooks/useRulersClick';
 import { useSelectZoomPercentage } from './hooks/useSelectZoomPercentage';
 import { useZoomInClick } from './hooks/useZoomInClick';
@@ -35,7 +36,7 @@ import { ZOOM_TO_MENU_PERCENTAGE_KEY } from 'components/Design/LeftPanel/NavRail
 import { translationNameSpace } from './constants';
 
 // store
-import { selectAreAdditionalLabelsVisible, selectAreRulersVisible, selectZoom } from 'store/design/selectors';
+import { selectAreAdditionalLabelsVisible, selectAreLayoutGuidesVisible, selectAreRulersVisible, selectZoom } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -47,6 +48,7 @@ const ZoomMenu: FC = () => {
   const { t } = useTranslation();
   const zoom = useAppSelector(selectZoom);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
+  const areLayoutGuidesVisible = useAppSelector(selectAreLayoutGuidesVisible);
   const areAdditionalLabelsVisible = useAppSelector(selectAreAdditionalLabelsVisible);
   const [inputValue, setInputValue] = useState(String(Math.round(zoom * 100)));
   const handleInputChange = useHandleZoomInputChange(setInputValue);
@@ -56,6 +58,7 @@ const ZoomMenu: FC = () => {
   const handleZoomToFitClick = useZoomToFitClick();
   const selectZoomPercentage = useSelectZoomPercentage();
   const handleRulersClick = useRulersClick();
+  const handleLayoutGuidesClick = useLayoutGuidesClick();
   const handleAdditionalLabelsClick = useAdditionalLabelsClick();
 
   useEffect(() => {
@@ -111,7 +114,12 @@ const ZoomMenu: FC = () => {
         selected
         shortcut={KEYBOARD_SHORTCUTS.snapToPixelGrid.join('')}
       />
-      <PopoverItem disabled label={t(VIEW_MENU_LAYOUT_GUIDES_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.layoutGuides.join('')} />
+      <PopoverItem
+        label={t(VIEW_MENU_LAYOUT_GUIDES_KEY)}
+        onClick={handleLayoutGuidesClick}
+        selected={areLayoutGuidesVisible}
+        shortcut={KEYBOARD_SHORTCUTS.layoutGuides.join('')}
+      />
       <PopoverItem
         label={t(VIEW_MENU_RULERS_KEY)}
         onClick={handleRulersClick}

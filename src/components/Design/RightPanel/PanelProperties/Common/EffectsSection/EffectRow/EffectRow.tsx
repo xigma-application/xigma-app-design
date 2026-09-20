@@ -22,6 +22,7 @@ import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 
 export type TEffectRowProps = {
+  canDrag: boolean;
   disabledTypes: EffectType[];
   effect: TEffect;
   isDragging: boolean;
@@ -39,6 +40,7 @@ export type TEffectRowProps = {
 };
 
 export const EffectRow: FC<TEffectRowProps> = ({
+  canDrag,
   disabledTypes,
   effect,
   isDragging,
@@ -64,14 +66,16 @@ export const EffectRow: FC<TEffectRowProps> = ({
 
   return (
     <div className={styles.EffectRow} ref={registerRow}>
-      <button
-        aria-label={t(`${translationNameSpace}.row.reorderAriaLabel`)}
-        className={cx(styles.EffectRow__handle, { [styles['EffectRow__handle--dragging']]: isDragging })}
-        onPointerDown={onStartDrag}
-        type="button"
-      >
-        <Icon color="neutral2" name="RowGrabber" size={7} />
-      </button>
+      {canDrag && (
+        <button
+          aria-label={t(`${translationNameSpace}.row.reorderAriaLabel`)}
+          className={cx(styles.EffectRow__handle, { [styles['EffectRow__handle--dragging']]: isDragging })}
+          onPointerDown={onStartDrag}
+          type="button"
+        >
+          <Icon color="neutral2" name="RowGrabber" size={7} />
+        </button>
+      )}
       <UITools.Popover
         align="start"
         asChild

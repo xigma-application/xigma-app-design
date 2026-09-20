@@ -57,6 +57,8 @@ export const selectAreAdditionalLabelsVisible = (state: RootState): boolean => s
 
 export const selectAreFrameOutlinesVisible = (state: RootState): boolean => state.design.preferences.areFrameOutlinesVisible;
 
+export const selectAreLayoutGuidesVisible = (state: RootState): boolean => state.design.preferences.areLayoutGuidesVisible;
+
 export const selectAreMaskOutlinesVisible = (state: RootState): boolean => state.design.preferences.areMaskOutlinesVisible;
 
 export const selectAreRulersVisible = (state: RootState): boolean => state.design.preferences.areRulersVisible;

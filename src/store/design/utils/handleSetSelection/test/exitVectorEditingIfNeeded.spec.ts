@@ -50,6 +50,7 @@ const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

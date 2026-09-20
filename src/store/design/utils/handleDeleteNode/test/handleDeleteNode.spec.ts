@@ -65,6 +65,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TD
   preferences: {
     areAdditionalLabelsVisible: true,
     areFrameOutlinesVisible: false,
+    areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
   },

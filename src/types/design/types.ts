@@ -12,6 +12,9 @@ import {
   EffectType,
   GapMode,
   InsideStroke,
+  LayoutGuideColumnsAlign,
+  LayoutGuideRowsAlign,
+  LayoutGuideType,
   LayoutMode,
   LayoutVersion,
   NodeType,
@@ -58,6 +61,21 @@ export type TEffect = {
   visible?: boolean;
   x: number;
   y: number;
+};
+
+export type TLayoutGuide = {
+  color: string;
+  columnsAlign?: LayoutGuideColumnsAlign;
+  count?: number;
+  gutter?: number;
+  height?: number;
+  margin?: number;
+  opacity: number;
+  rowsAlign?: LayoutGuideRowsAlign;
+  size?: number;
+  type: LayoutGuideType;
+  visible?: boolean;
+  width?: number;
 };
 
 export type TComment = TPoint & {
@@ -178,6 +196,7 @@ export type TFrameNode = TBaseNode & {
   horizontalGapMode?: GapMode;
   insideStroke?: InsideStroke;
   layoutAlignment?: AlignmentLayout;
+  layoutGuides?: TLayoutGuide[];
   layoutMode?: LayoutMode;
   layoutVersion?: LayoutVersion;
   layoutWrap?: boolean;

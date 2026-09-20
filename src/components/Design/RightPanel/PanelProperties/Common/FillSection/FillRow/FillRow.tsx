@@ -55,6 +55,7 @@ import { getInitialPatternFromPaint } from './utils/getInitialPatternFromPaint';
 import { getImagePaintAdjustments } from 'utils/design/paint/getImagePaintAdjustments';
 
 export type TFillRowProps = {
+  canDrag: boolean;
   isDragging: boolean;
   isSelected: boolean;
   nodeId: string | undefined;
@@ -74,6 +75,7 @@ export type TFillRowProps = {
 };
 
 export const FillRow: FC<TFillRowProps> = ({
+  canDrag,
   isDragging,
   isSelected,
   nodeId,
@@ -137,20 +139,22 @@ export const FillRow: FC<TFillRowProps> = ({
   return (
     <div
       className={cx(styles.FillRow, {
-        [styles['FillRow--selected']]: isSelected || isDragging,
+        [styles['FillRow--selected']]: canDrag && (isSelected || isDragging),
         [styles['FillRow--pickerOpen']]: isPickerOpen,
       })}
-      onClick={handleClick}
+      onClick={canDrag ? handleClick : undefined}
       ref={registerRow}
     >
-      <button
-        aria-label={t(`${translationNameSpace}.reorderAriaLabel`)}
-        className={cx(styles.FillRow__handle, { [styles['FillRow__handle--dragging']]: isDragging })}
-        onPointerDown={handlePointerDown}
-        type="button"
-      >
-        <Icon color="neutral2" name="RowGrabber" size={7} />
-      </button>
+      {canDrag && (
+        <button
+          aria-label={t(`${translationNameSpace}.reorderAriaLabel`)}
+          className={cx(styles.FillRow__handle, { [styles['FillRow__handle--dragging']]: isDragging })}
+          onPointerDown={handlePointerDown}
+          type="button"
+        >
+          <Icon color="neutral2" name="RowGrabber" size={7} />
+        </button>
+      )}
       <span data-no-select style={{ display: 'contents' }}>
         <UITools.ColorPickerInput
           align="start"

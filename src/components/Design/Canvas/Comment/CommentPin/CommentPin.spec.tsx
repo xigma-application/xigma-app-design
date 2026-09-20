@@ -61,6 +61,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         preferences: {
           areAdditionalLabelsVisible: true,
           areFrameOutlinesVisible: false,
+          areLayoutGuidesVisible: true,
           areMaskOutlinesVisible: false,
           areRulersVisible: false,
         },

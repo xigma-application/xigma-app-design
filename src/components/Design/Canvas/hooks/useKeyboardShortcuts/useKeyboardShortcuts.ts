@@ -34,6 +34,7 @@ import { handleRedo } from './utils/handleRedo';
 import { handleResizeToFit } from './utils/handleResizeToFit';
 import { handleSelectAll } from './utils/handleSelectAll';
 import { handleSendToBack } from './utils/handleSendToBack';
+import { handleToggleLayoutGuides } from './utils/handleToggleLayoutGuides';
 import { handleToggleRulers } from './utils/handleToggleRulers';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
@@ -80,6 +81,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
       { action: (): any => handleSelectAll(dispatch, refs), ...shortcuts.selectAll },
+      { action: (): any => handleToggleLayoutGuides(dispatch), ...shortcuts.toggleLayoutGuides },
       { action: (): any => handleToggleRulers(dispatch), ...shortcuts.toggleRulers },
       { action: (): any => dispatch(toggleUiHidden()), ...shortcuts.toggleUiHidden },
       { action: (): any => dispatch(toggleUiMinimized()), ...shortcuts.toggleUiMinimized },
