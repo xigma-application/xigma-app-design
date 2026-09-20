@@ -3,6 +3,7 @@ import { createBlendModeRefs } from './hooks/useBlendModeRefs/createBlendModeRef
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
 import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
+import { createProgressiveBlurRefs } from './hooks/useProgressiveBlurRefs/createProgressiveBlurRefs';
 import { createGradientEndpointMoveRefs } from './hooks/useGradientEndpointMoveRefs/createGradientEndpointMoveRefs';
 import { createGradientRadiusRefs } from './hooks/useGradientRadiusRefs/createGradientRadiusRefs';
 import { createGradientRotateRefs } from './hooks/useGradientRotateRefs/createGradientRotateRefs';
@@ -55,6 +56,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   media: createMediaRefs(overrides.media),
   pen: createPenRefs(overrides.pen),
   pencil: createPencilRefs(overrides.pencil),
+  progressiveBlur: createProgressiveBlurRefs(overrides.progressiveBlur),
   sectionName: createSectionNameRefs(overrides.sectionName),
   shapeBuilder: createShapeBuilderRefs(overrides.shapeBuilder),
   slice: createSliceRefs(overrides.slice),

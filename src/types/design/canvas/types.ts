@@ -137,6 +137,19 @@ export type TGradientEndpointMoveRefs = {
   gradientEndpointMoveDragRef: RefObject<TGradientEndpointMoveDragState | null>;
 };
 
+export type TProgressiveBlurEndpoint = 'end' | 'start';
+
+export type TProgressiveBlurDragState = {
+  effectIndex: number;
+  endpoint: TProgressiveBlurEndpoint;
+  nodeId: string;
+};
+
+export type TProgressiveBlurRefs = {
+  dragRef: RefObject<TProgressiveBlurDragState | null>;
+  hoveredEndpointRef: RefObject<TProgressiveBlurEndpoint | null>;
+};
+
 export type TImageCropMoveDragState = {
   nodeId: string;
   origin: TImageCrop;
@@ -676,6 +689,7 @@ export type TCanvasRefs = {
   patternThumbnailRequestRef: RefObject<TPatternThumbnailRequest | null>;
   pen: TPenRefs;
   pencil: TPencilRefs;
+  progressiveBlur: TProgressiveBlurRefs;
   sectionName: TSectionNameRefs;
   shapeBuilder: TShapeBuilderRefs;
   slice: TSliceRefs;

@@ -12,6 +12,7 @@ import { useBlendModeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/h
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
+import { useProgressiveBlurRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useProgressiveBlurRefs/useProgressiveBlurRefs';
 import { useGradientEndpointMoveRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientEndpointMoveRefs/useGradientEndpointMoveRefs';
 import { useGradientRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientRadiusRefs/useGradientRadiusRefs';
 import { useGradientRotateRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGradientRotateRefs/useGradientRotateRefs';
@@ -58,6 +59,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const layoutRefs = useLayoutRefs();
   const mediaRefs = useMediaRefs();
   const penRefs = usePenRefs();
+  const progressiveBlurRefs = useProgressiveBlurRefs();
   const sectionNameRefs = useSectionNameRefs();
   const transformRefs = useTransformRefs();
   const pencilRefs = usePencilRefs();
@@ -100,6 +102,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       patternThumbnailRequestRef,
       pen: penRefs,
       pencil: pencilRefs,
+      progressiveBlur: progressiveBlurRefs,
       sectionName: sectionNameRefs,
       shapeBuilder: shapeBuilderRefs,
       slice: sliceRefs,
@@ -132,6 +135,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       mediaRefs,
       penRefs,
       pencilRefs,
+      progressiveBlurRefs,
       sectionNameRefs,
       shapeBuilderRefs,
       sliceRefs,

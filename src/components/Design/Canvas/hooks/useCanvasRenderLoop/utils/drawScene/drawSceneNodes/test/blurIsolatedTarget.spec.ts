@@ -36,7 +36,7 @@ describe('blurIsolatedTarget', () => {
 
     // result
     expect(calls).toEqual(['copy', 'blur', 'scene']);
-    expect(blurBoxEffectTextureMock).toHaveBeenCalledWith(gl, imageContext, target, temp, 8);
+    expect(blurBoxEffectTextureMock).toHaveBeenCalledWith(gl, imageContext, target, temp, 8, undefined, true);
     expect(gl.blendFuncSeparate).toHaveBeenCalledWith(770, 771, 1, 771);
     expect(pool.release).toHaveBeenCalledWith(temp);
   });

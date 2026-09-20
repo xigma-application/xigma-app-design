@@ -10,6 +10,7 @@ import {
   selectEditingTextContent,
   selectGradientEditor,
   selectImageEditor,
+  selectOpenPropertyPanel,
   selectNodes,
   selectSelectedNodes,
   selectSmartSelectionNodes,
@@ -38,6 +39,7 @@ import { resolveGradientLineHandleHover } from './resolveGradientLineHandleHover
 import { resolveGradientRadiusHandleHover } from './resolveGradientRadiusHandleHover';
 import { resolveGradientRotateHandleHover } from './resolveGradientRotateHandleHover';
 import { resolveGradientStopHandleHover } from './resolveGradientStopHandleHover';
+import { resolveProgressiveBlurHandleHover } from './resolveProgressiveBlurHandleHover';
 import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
 import { resolvePolygonVertexCountHandleHover } from './resolvePolygonVertexCountHandleHover';
 import { resolveStarCornerRadiusHandleHover } from './resolveStarCornerRadiusHandleHover';
@@ -84,6 +86,7 @@ export const resolveToolHover = (
     isControlPressed,
     leafNodes: getHoverLeafNodes(state, nodesById, isControlPressed),
     nodesById,
+    openPropertyPanel: selectOpenPropertyPanel(state),
     point,
     refs,
     resizableSelectedNodes,
@@ -99,6 +102,7 @@ export const resolveToolHover = (
   resolveEllipseArcHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveEllipseArcRotateHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveEllipseArcRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
+  resolveProgressiveBlurHandleHover(point, selectedNodes, viewport, ctx.openPropertyPanel, refs);
   resolveGradientStopHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveGradientEndpointMoveHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
   resolveGradientRadiusHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);

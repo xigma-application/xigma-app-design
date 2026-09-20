@@ -4,3 +4,6 @@ export const DEFAULT_EFFECT_OPACITY = 25;
 export const DEFAULT_EFFECT_SPREAD = 0;
 export const DEFAULT_EFFECT_X = 0;
 export const DEFAULT_EFFECT_Y = 4;
+export const DEFAULT_PROGRESSIVE_BLUR_END_POINT = { x: 0.5, y: 1 };
+export const DEFAULT_PROGRESSIVE_BLUR_START = 0;
+export const DEFAULT_PROGRESSIVE_BLUR_START_POINT = { x: 0.5, y: 0 };

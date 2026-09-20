@@ -20,6 +20,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     uniform1f: vi.fn(),
     uniform1i: vi.fn(),
     uniform2f: vi.fn(),
+    uniform4f: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
@@ -40,5 +41,24 @@ describe('drawEffectBlurPass', () => {
     expect(gl.uniform2f).toHaveBeenCalledWith({ name: 'u_texelSize' }, 0.02, 0.05);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
     expect(gl.bindTexture).toHaveBeenLastCalledWith(gl.TEXTURE_2D, null);
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_progressive' }, 0);
+    expect(gl.uniform2f).toHaveBeenCalledWith({ name: 'u_size' }, 50, 20);
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_unpremultiply' }, 0);
+  });
+
+  it('should upload the progressive line and radii when given', () => {
+    // mock
+    const gl = createGlMock();
+
+    // action
+    drawEffectBlurPass(gl, {} as WebGLProgram, {} as WebGLBuffer, {} as WebGLTexture, [0, 1], 6, 50, 20, {
+      line: [1, 2, 3, 4],
+      radii: [0, 6],
+    });
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_progressive' }, 1);
+    expect(gl.uniform4f).toHaveBeenCalledWith({ name: 'u_line' }, 1, 2, 3, 4);
+    expect(gl.uniform2f).toHaveBeenCalledWith({ name: 'u_radii' }, 0, 6);
   });
 });

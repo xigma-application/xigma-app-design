@@ -5,13 +5,12 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { blurIsolatedTarget } from './blurIsolatedTarget';
-import { getLayerBlurRadius } from './getLayerBlurRadius';
-import { getNodeLayerBlur } from './getNodeLayerBlur';
+import { getNodeLayerBlurParams } from './getNodeLayerBlurParams';
 
 export const blurIsolatedNode = (renderer: TMaskRenderer, node: TSceneNode, contentTarget: TRenderTarget): void => {
-  const layerBlur = getNodeLayerBlur(node);
+  const params = getNodeLayerBlurParams(renderer, node);
 
-  if (layerBlur > 0) {
-    blurIsolatedTarget(renderer, contentTarget, getLayerBlurRadius(renderer, layerBlur));
+  if (params && params.radius > 0) {
+    blurIsolatedTarget(renderer, contentTarget, params.radius, params.progressive);
   }
 };

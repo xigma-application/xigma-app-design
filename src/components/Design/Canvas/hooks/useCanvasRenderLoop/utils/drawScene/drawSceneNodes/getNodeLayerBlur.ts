@@ -1,11 +1,18 @@
 // types
-import { EffectType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { getNodeLayerBlurEffect } from './getNodeLayerBlurEffect';
+import { getProgressiveBlur } from 'utils/design/effects/getProgressiveBlur';
+import { isProgressiveLayerBlur } from 'utils/design/effects/isProgressiveLayerBlur';
+
 export const getNodeLayerBlur = (node: TSceneNode): number => {
-  if ('effects' in node && node.effects) {
-    return node.effects.find((effect) => effect.type === EffectType.layerBlur && effect.visible !== false)?.blur ?? 0;
+  const effect = getNodeLayerBlurEffect(node);
+
+  if (effect && isProgressiveLayerBlur(effect)) {
+    const { endBlur, startBlur } = getProgressiveBlur(effect);
+    return Math.max(startBlur, endBlur);
   }
 
-  return 0;
+  return effect?.blur ?? 0;
 };

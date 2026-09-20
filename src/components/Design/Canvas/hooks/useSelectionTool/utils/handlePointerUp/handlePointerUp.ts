@@ -15,6 +15,7 @@ import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
 import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
 import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
+import { disarmProgressiveBlurDrag } from './disarmProgressiveBlurDrag';
 import { disarmGradientEndpointMoveDrag } from './disarmGradientEndpointMoveDrag';
 import { disarmGradientRadiusDrag } from './disarmGradientRadiusDrag';
 import { disarmGradientRotateDrag } from './disarmGradientRotateDrag';
@@ -79,6 +80,7 @@ export const handlePointerUp = (
   disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRatioDragRef);
   disarmGradientStopDrag(canvas, event, canvasRefs.gradientStop.gradientStopDragRef);
+  disarmProgressiveBlurDrag(canvas, event, canvasRefs.progressiveBlur.dragRef, canvasRefs);
   disarmGradientEndpointMoveDrag(canvas, event, canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef, canvasRefs);
   disarmGradientRadiusDrag(canvas, event, canvasRefs.gradientRadius.gradientRadiusDragRef);
   disarmGradientRotateDrag(canvas, event, canvasRefs.gradientRotate.gradientRotateDragRef, canvasRefs);

@@ -18,6 +18,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   isControlPressed: false,
   leafNodes: [],
   nodesById: {},
+  openPropertyPanel: null,
   point: { x: 0, y: 0 },
   refs: createCanvasRefs(),
   resizableSelectedNodes: [],

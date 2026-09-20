@@ -21,6 +21,7 @@ import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss
 import styles from './effect-settings-panel.module.scss';
 
 // utils
+import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
 // types
@@ -45,7 +46,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   onDragStart,
 }) => {
   const { t } = useTranslation();
-  const { fields, hasBlendMode, hasBlurModeToggle, hasColor } = getEffectPanelLayout(effect.type);
+  const { fields, hasBlendMode, hasBlurModeToggle, hasColor } = getEffectPanelLayout(effect);
   const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
 
   return (
@@ -60,13 +61,15 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
         type={effect.type}
       />
       <div className={styles.EffectSettingsPanel__body}>
-        {hasBlurModeToggle && <EffectBlurModeToggle />}
+        {hasBlurModeToggle && (
+          <EffectBlurModeToggle blurType={effect.blurType} onChange={(blurType): void => onChange({ ...effect, blurType })} />
+        )}
         {fields.map(({ adornmentLabel, icon, key, labelKey, min }) => (
           <EffectSettingsField key={key} label={labelKey && t(`${translationNameSpace}.settings.labels.${labelKey}`)}>
             <UITools.TextField
               aria-label={t(`${translationNameSpace}.settings.fields.${key}`)}
               className={fieldStyles.EffectSettingsField__input}
-              defaultValue={`${effect[key]}`}
+              defaultValue={`${getEffectFieldValue(effect, key)}`}
               e2eValue={`effect-${key}`}
               onBlur={onBlur(key, min)}
               startAdornment={
@@ -76,7 +79,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
                   onChange={onScrub(key, min)}
                   onMouseDown={onDragStart}
                   onMouseUp={onDragEnd}
-                  value={effect[key]}
+                  value={getEffectFieldValue(effect, key)}
                 >
                   <UITools.InputAdornment icon={icon} label={adornmentLabel} />
                 </ScrubbableInput>

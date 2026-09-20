@@ -14,6 +14,7 @@ import { continueEllipseArcDrag } from './continueEllipseArcDrag';
 import { continueEllipseArcRatioDrag } from './continueEllipseArcRatioDrag';
 import { continueEllipseArcRotateDrag } from './continueEllipseArcRotateDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
+import { continueProgressiveBlurDrag } from './continueProgressiveBlurDrag';
 import { continueGradientEndpointMoveDrag } from './continueGradientEndpointMoveDrag';
 import { continueGradientRadiusDrag } from './continueGradientRadiusDrag';
 import { continueGradientRotateDrag } from './continueGradientRotateDrag';
@@ -83,6 +84,7 @@ export const handlePointerMove = (
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRatioDragRef);
   continueGradientStopDrag(canvas, event, dispatch, canvasRefs.gradientStop.gradientStopDragRef);
+  continueProgressiveBlurDrag(canvas, event, dispatch, canvasRefs.progressiveBlur.dragRef, canvasRefs);
   continueGradientEndpointMoveDrag(canvas, event, dispatch, canvasRefs.gradientEndpointMove.gradientEndpointMoveDragRef, canvasRefs);
   continueGradientRadiusDrag(canvas, event, dispatch, canvasRefs.gradientRadius.gradientRadiusDragRef);
   continueGradientRotateDrag(canvas, event, dispatch, canvasRefs.gradientRotate.gradientRotateDragRef, canvasRefs);

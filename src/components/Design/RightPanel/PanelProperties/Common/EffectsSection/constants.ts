@@ -38,3 +38,8 @@ export const EFFECT_NUMBER_FIELDS = [
   { adornmentLabel: undefined, icon: 'LayerBlur', key: 'blur', labelKey: 'blur', min: 0 },
   { adornmentLabel: undefined, icon: 'Spread', key: 'spread', labelKey: 'spread', min: Number.NEGATIVE_INFINITY },
 ] as const;
+
+export const EFFECT_PROGRESSIVE_BLUR_FIELDS = [
+  { adornmentLabel: undefined, icon: 'LayerBlur', key: 'startBlur', labelKey: 'start', min: 0 },
+  { adornmentLabel: undefined, icon: 'LayerBlur', key: 'blur', labelKey: 'end', min: 0 },
+] as const;

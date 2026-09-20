@@ -7,6 +7,7 @@ import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRat
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
 import { armExitImageEditorOnPointerDown } from './armResolvers/armExitImageEditorOnPointerDown';
 import { armAddGradientStopOnPointerDown } from './armResolvers/armAddGradientStopOnPointerDown';
+import { armProgressiveBlurOnPointerDown } from './armResolvers/armProgressiveBlurOnPointerDown';
 import { armGradientEndpointMoveOnPointerDown } from './armResolvers/armGradientEndpointMoveOnPointerDown';
 import { armGradientRadiusOnPointerDown } from './armResolvers/armGradientRadiusOnPointerDown';
 import { armGradientRotateOnPointerDown } from './armResolvers/armGradientRotateOnPointerDown';
@@ -72,6 +73,7 @@ export const ARM_RESOLVERS = [
   armPolygonVertexCountOnPointerDown,
   armStarVertexCountOnPointerDown,
   armStarRatioOnPointerDown,
+  armProgressiveBlurOnPointerDown,
   armGradientStopOnPointerDown,
   armGradientEndpointMoveOnPointerDown,
   armGradientRadiusOnPointerDown,

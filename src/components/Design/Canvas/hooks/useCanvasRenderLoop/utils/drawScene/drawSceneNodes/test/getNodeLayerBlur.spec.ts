@@ -1,5 +1,5 @@
 // types
-import { EffectType, NodeType } from 'types/design/enums';
+import { EffectBlurType, EffectType, NodeType } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
@@ -34,5 +34,13 @@ describe('getNodeLayerBlur', () => {
     expect(getNodeLayerBlur({ ...node, effects: [createEffect(EffectType.innerShadow)] })).toBe(0);
     expect(getNodeLayerBlur(node)).toBe(0);
     expect(getNodeLayerBlur({ ...node, type: NodeType.ellipse } as never)).toBe(0);
+  });
+
+  it('should use the larger of the start and end blur for a progressive layer blur', () => {
+    // mock
+    const effects = [{ ...createEffect(EffectType.layerBlur), blur: 4, blurType: EffectBlurType.progressive, startBlur: 9 }];
+
+    // result
+    expect(getNodeLayerBlur({ ...node, effects })).toBe(9);
   });
 });

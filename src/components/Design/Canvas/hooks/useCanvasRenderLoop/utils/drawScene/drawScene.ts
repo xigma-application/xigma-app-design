@@ -10,6 +10,7 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectGradientEditor,
+  selectOpenPropertyPanel,
   selectGridSectionHighlight,
   selectGridTrackSelection,
   selectImageEditor,
@@ -49,6 +50,7 @@ import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawFrameOutlines } from './drawFrameOutlines';
+import { drawProgressiveBlurHandleLayer } from './drawProgressiveBlurHandleLayer/drawProgressiveBlurHandleLayer';
 import { drawGradientHandleLayer } from './drawGradientHandleLayer/drawGradientHandleLayer';
 import { drawGridDropTarget } from './drawGridDropTarget/drawGridDropTarget';
 import { drawGridSectionHighlight } from './drawGridSectionHighlight/drawGridSectionHighlight';
@@ -117,6 +119,7 @@ export const drawScene = (
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
   const gradientEditor = selectGradientEditor(state);
+  const openPropertyPanel = selectOpenPropertyPanel(state);
   const guideLines = selectAllGuideLines(state);
   const imageEditor = selectImageEditor(state);
   const nodesById = selectNodes(state);
@@ -180,6 +183,7 @@ export const drawScene = (
   drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
   drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawGradientHandleLayer(ctx, selectedNodes, gradientEditor, refs);
+  drawProgressiveBlurHandleLayer(ctx, selectedNodes, openPropertyPanel, refs);
   drawFrame(ctx, refs);
   drawDraftSizeLabel(ctx, refs);
   drawDraftFrameNameLabel(ctx, refs, nodesById);

@@ -102,6 +102,7 @@ describe('CanvasRefsProvider behaviors', () => {
         pencilRawPreviewPointsRef: { current: null },
         pencilShowRawPreviewRef: { current: false },
       },
+      progressiveBlur: { dragRef: { current: null }, hoveredEndpointRef: { current: null } },
       sectionName: { editingLabelRef: { current: null } },
       shapeBuilder: {
         isVectorShapeBuilderBoxModeRef: { current: false },

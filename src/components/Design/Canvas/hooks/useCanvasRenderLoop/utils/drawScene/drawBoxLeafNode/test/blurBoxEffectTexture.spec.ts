@@ -56,6 +56,8 @@ describe('blurBoxEffectTexture', () => {
       8,
       source.width,
       source.height,
+      undefined,
+      false,
     );
     expect(gl.bindFramebuffer).toHaveBeenNthCalledWith(2, gl.FRAMEBUFFER, source.framebuffer);
     expect(drawEffectBlurPassMock).toHaveBeenNthCalledWith(
@@ -68,6 +70,37 @@ describe('blurBoxEffectTexture', () => {
       8,
       temp.width,
       temp.height,
+      undefined,
+      false,
     );
+  });
+
+  it('should pass the progressive uniforms to both passes', () => {
+    // mock
+    const gl = createGlMock();
+    const source = buildTarget('source', 40);
+    const temp = buildTarget('temp', 40);
+    const imageContext = { blurBuffer: {} as WebGLBuffer, blurProgram: {} as WebGLProgram } as TImageRenderContext;
+    const progressive = { line: [0, 0, 0, 40] as [number, number, number, number], radii: [0, 8] as [number, number] };
+
+    // action
+    blurBoxEffectTexture(gl, imageContext, source, temp, 8, progressive);
+
+    // result
+    expect(drawEffectBlurPassMock.mock.calls.map((call) => call[8])).toEqual([progressive, progressive]);
+  });
+
+  it('should un-premultiply only on the final pass when asked', () => {
+    // mock
+    const gl = createGlMock();
+    const source = buildTarget('source', 40);
+    const temp = buildTarget('temp', 40);
+    const imageContext = { blurBuffer: {} as WebGLBuffer, blurProgram: {} as WebGLProgram } as TImageRenderContext;
+
+    // action
+    blurBoxEffectTexture(gl, imageContext, source, temp, 8, undefined, true);
+
+    // result
+    expect(drawEffectBlurPassMock.mock.calls.map((call) => call[9])).toEqual([false, true]);
   });
 });

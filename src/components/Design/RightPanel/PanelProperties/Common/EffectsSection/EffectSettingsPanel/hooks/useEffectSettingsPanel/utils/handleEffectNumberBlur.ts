@@ -5,6 +5,7 @@ import { TEffect } from 'types/design/types';
 import { TEffectNumberField } from '../../../../types';
 
 // utils
+import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectNumberFromInput } from 'utils/design/effects/getEffectNumberFromInput';
 
 export const handleEffectNumberBlur = (
@@ -16,9 +17,9 @@ export const handleEffectNumberBlur = (
 ): void => {
   const next = getEffectNumberFromInput(event.target.value, min);
 
-  if (next !== undefined && next !== effect[field]) {
+  if (next !== undefined && next !== getEffectFieldValue(effect, field)) {
     onChange({ ...effect, [field]: next });
   }
 
-  event.target.value = `${next ?? effect[field]}`;
+  event.target.value = `${next ?? getEffectFieldValue(effect, field)}`;
 };

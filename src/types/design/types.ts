@@ -7,6 +7,7 @@ import {
   AutoSpacing,
   BlendMode,
   CanvasStacking,
+  EffectBlurType,
   EffectType,
   GapMode,
   InsideStroke,
@@ -31,9 +32,13 @@ import { TPaint } from 'types/design/paint/types';
 export type TEffect = {
   blendMode?: BlendMode;
   blur: number;
+  blurType?: EffectBlurType;
   color: string;
+  end?: TPoint;
   opacity: number;
   spread: number;
+  start?: TPoint;
+  startBlur?: number;
   type: EffectType;
   visible?: boolean;
   x: number;

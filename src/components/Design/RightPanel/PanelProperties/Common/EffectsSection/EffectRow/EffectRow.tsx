@@ -8,6 +8,7 @@ import { Icon, Tooltip, UITools } from 'shared';
 
 // hooks
 import { usePanelEdgeSideOffset } from 'components/Design/RightPanel/hooks/usePanelEdgeSideOffset';
+import { useIgnoreProgressiveBlurInteractOutside } from './hooks/useIgnoreProgressiveBlurInteractOutside/useIgnoreProgressiveBlurInteractOutside';
 import { useReturnFocusOnUserClose } from './hooks/useReturnFocusOnUserClose/useReturnFocusOnUserClose';
 
 // others
@@ -54,6 +55,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const sideOffset = usePanelEdgeSideOffset(triggerRef, isOpen);
+  const onInteractOutside = useIgnoreProgressiveBlurInteractOutside();
   const { markUserClose, onClose, onCloseAutoFocus } = useReturnFocusOnUserClose(onOpenChange);
   const isVisible = effect.visible !== false;
   const isActive = isOpen || isSelected || isDragging;
@@ -75,6 +77,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
         moveable
         onCloseAutoFocus={onCloseAutoFocus}
         onEscapeKeyDown={markUserClose}
+        onInteractOutside={onInteractOutside}
         onOpenChange={onOpenChange}
         open={isOpen}
         side="left"

@@ -5,6 +5,8 @@ import { DesignPage } from '../model/DesignPage';
 
 type TReadableEffect = {
   blur: number;
+  end?: { x: number; y: number };
+  start?: { x: number; y: number };
   color: string;
   opacity: number;
   spread: number;
@@ -285,6 +287,62 @@ test.describe('Design panels — Effects section', () => {
 
     // result
     await expect.poll(async () => Math.abs((await readLuma(800, 198)) - backgroundLuma)).toBeLessThan(4);
+  });
+
+  test('a progressive layer blur blurs only toward the end handle, and the handles can be dragged with snapping to the node', async ({
+    page,
+  }) => {
+    test.setTimeout(90000);
+
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-progressive-blur-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await addEffect(page, 'Layer blur');
+    await page.getByText('Progressive', { exact: true }).click();
+    await page.getByLabel('Effect blur').fill('10');
+    await page.getByLabel('Effect blur').press('Enter');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 220, width: 220, x: 690, y: 190 };
+    const readLuma = async (x: number, y: number): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+
+      return png.data[((y - clip.y) * png.width + (x - clip.x)) * 4];
+    };
+
+    // result — the panel shows Start and End fields with the saved defaults
+    await expect(page.getByLabel('Effect start blur')).toHaveValue('0');
+    await expect(page.getByLabel('Effect blur')).toHaveValue('10');
+
+    // result — the start end (top) stays sharp while the end (bottom) bleeds outward
+    const backgroundLuma = await readLuma(750, 380);
+
+    await expect.poll(async () => (await readLuma(750, 363)) - backgroundLuma).toBeGreaterThan(8);
+    expect(Math.abs((await readLuma(750, 198)) - (await readLuma(750, 190)))).toBeLessThan(4);
+
+    // action — drag the end handle near the left edge, 30px above the bottom
+    await page.mouse.move(800, 360);
+    await page.waitForTimeout(400);
+    await page.mouse.down();
+    await page.mouse.move(750, 340, { steps: 4 });
+    await page.mouse.move(703, 330, { steps: 4 });
+    await page.mouse.up();
+
+    // result — x snapped to the node's left edge, y follows the pointer, the start handle is untouched and the panel stays open
+    const end = async (): Promise<{ x: number; y: number } | undefined> => {
+      const id = await readFirstNodeId(page);
+
+      return (await readNode(page, id)).effects?.[0].end;
+    };
+
+    await expect.poll(async () => (await end())?.x, { timeout: 20000 }).toBe(0);
+    expect(((await end())?.y ?? 0) > 0.75 && ((await end())?.y ?? 0) < 0.9).toBe(true);
+    expect((await readNode(page, await readFirstNodeId(page))).effects?.[0].start).toBeUndefined();
+    await expect(page.getByText('Progressive', { exact: true })).toBeVisible();
   });
 
   test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {

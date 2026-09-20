@@ -190,6 +190,11 @@ export enum ToolName {
   variableWidth = 'variableWidth',
 }
 
+export enum EffectBlurType {
+  progressive = 'progressive',
+  uniform = 'uniform',
+}
+
 export enum EffectType {
   backgroundBlur = 'backgroundBlur',
   dropShadow = 'dropShadow',

@@ -10,22 +10,27 @@ import { translationNameSpace } from '../../constants';
 // styles
 import styles from './effect-blur-mode-toggle.module.scss';
 
-const BLUR_MODE_UNIFORM = 'uniform';
-const BLUR_MODE_PROGRESSIVE = 'progressive';
+// types
+import { EffectBlurType } from 'types/design/enums';
 
-export const EffectBlurModeToggle: FC = () => {
+export type TEffectBlurModeToggleProps = {
+  blurType?: EffectBlurType;
+  onChange: TFunc<[EffectBlurType]>;
+};
+
+export const EffectBlurModeToggle: FC<TEffectBlurModeToggleProps> = ({ blurType = EffectBlurType.uniform, onChange }) => {
   const { t } = useTranslation();
 
   return (
     <UITools.ToggleButtonGroup
       className={styles.EffectBlurModeToggle}
       e2eValue="effect-blur-mode"
-      onChange={(): void => undefined}
+      onChange={(value): void => onChange(value as EffectBlurType)}
       toggleButtons={[
-        { label: t(`${translationNameSpace}.settings.blurMode.uniform`), value: BLUR_MODE_UNIFORM },
-        { label: t(`${translationNameSpace}.settings.blurMode.progressive`), value: BLUR_MODE_PROGRESSIVE },
+        { label: t(`${translationNameSpace}.settings.blurMode.uniform`), value: EffectBlurType.uniform },
+        { label: t(`${translationNameSpace}.settings.blurMode.progressive`), value: EffectBlurType.progressive },
       ]}
-      value={BLUR_MODE_UNIFORM}
+      value={blurType}
     />
   );
 };
