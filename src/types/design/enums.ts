@@ -195,6 +195,12 @@ export enum EffectBlurType {
   uniform = 'uniform',
 }
 
+export enum EffectNoiseType {
+  duo = 'duo',
+  mono = 'mono',
+  multi = 'multi',
+}
+
 export enum EffectType {
   backgroundBlur = 'backgroundBlur',
   dropShadow = 'dropShadow',

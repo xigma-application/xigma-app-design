@@ -402,6 +402,52 @@ test.describe('Design panels — Effects section', () => {
     expect(farOutside).toBe(68);
   });
 
+  test('a noise speckles the rectangle with grains of the effect color, fewer of them at a lower density, and none when hidden', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-noise-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await addEffect(page, 'Noise');
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 120, width: 160, x: 720, y: 220 };
+    const readDarkShare = async (): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const lumas: number[] = [];
+
+      for (let index = 0; index < png.width * png.height; index += 1) {
+        lumas.push(png.data[index * 4]);
+      }
+
+      const brightest = Math.max(...lumas);
+
+      return lumas.filter((luma) => luma < brightest - 20).length / lumas.length;
+    };
+
+    // result — about half of the grains are darkened at the full density
+    await expect.poll(readDarkShare, { timeout: 15000 }).toBeGreaterThan(0.3);
+    expect(await readDarkShare()).toBeLessThan(0.7);
+
+    // action
+    await page.getByLabel('Effect density').fill('20%');
+    await page.getByLabel('Effect density').press('Enter');
+
+    // result — a lower density leaves fewer dark grains
+    await expect.poll(readDarkShare, { timeout: 15000 }).toBeLessThan(0.25);
+    expect(await readDarkShare()).toBeGreaterThan(0.03);
+
+    // action
+    await page.getByLabel('Hide effect').click();
+
+    // result
+    await expect.poll(readDarkShare, { timeout: 15000 }).toBeLessThan(0.01);
+  });
+
   test('hovering a blend mode in the effect panel previews it on the canvas, and choosing it keeps it', async ({ page }) => {
     const designPage = new DesignPage(page);
 

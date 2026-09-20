@@ -16,4 +16,11 @@ describe('getEffectFieldValue', () => {
     expect(getEffectFieldValue(createEffect(EffectType.layerBlur), 'startBlur')).toBe(0);
     expect(getEffectFieldValue({ ...createEffect(EffectType.layerBlur), startBlur: 5 }, 'startBlur')).toBe(5);
   });
+
+  it('should fall back to the noise defaults', () => {
+    // result
+    expect(getEffectFieldValue(createEffect(EffectType.noise), 'noiseSize')).toBe(0.5);
+    expect(getEffectFieldValue(createEffect(EffectType.noise), 'density')).toBe(100);
+    expect(getEffectFieldValue({ ...createEffect(EffectType.noise), density: 30 }, 'density')).toBe(30);
+  });
 });

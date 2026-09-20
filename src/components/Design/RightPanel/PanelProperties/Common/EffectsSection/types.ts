@@ -1,6 +1,18 @@
-// others
-import { EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from './constants';
+// @xigma
+import { TIconProps } from '@xigma/components';
 
-export type TEffectField = (typeof EFFECT_NUMBER_FIELDS)[number] | (typeof EFFECT_PROGRESSIVE_BLUR_FIELDS)[number];
+// utils
+import { TNumericEffectField } from 'utils/design/effects/getEffectFieldValue';
 
-export type TEffectNumberField = TEffectField['key'];
+export type TEffectNumberField = TNumericEffectField;
+
+export type TEffectField = {
+  adornmentLabel?: string;
+  ariaKey?: string;
+  icon?: TIconProps['name'];
+  isReadOnly?: boolean;
+  key: TEffectNumberField;
+  labelKey?: string;
+  min: number;
+  unit?: string;
+};

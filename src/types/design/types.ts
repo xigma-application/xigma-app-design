@@ -8,6 +8,7 @@ import {
   BlendMode,
   CanvasStacking,
   EffectBlurType,
+  EffectNoiseType,
   EffectType,
   GapMode,
   InsideStroke,
@@ -34,7 +35,10 @@ export type TEffect = {
   blur: number;
   blurType?: EffectBlurType;
   color: string;
+  density?: number;
   end?: TPoint;
+  noiseSize?: number;
+  noiseType?: EffectNoiseType;
   opacity: number;
   spread: number;
   start?: TPoint;

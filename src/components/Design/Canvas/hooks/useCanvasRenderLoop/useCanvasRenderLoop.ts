@@ -12,6 +12,7 @@ import imageVertexShaderSource from 'constant/webgl/imageVertexShaderSource';
 import maskCompositeFragmentShaderSource from 'constant/webgl/maskCompositeFragmentShaderSource';
 import maskCompositeVertexShaderSource from 'constant/webgl/maskCompositeVertexShaderSource';
 import msdfFragmentShaderSource from 'constant/webgl/msdfFragmentShaderSource';
+import noiseFragmentShaderSource from 'constant/webgl/noiseFragmentShaderSource';
 import patternSourceTileFragmentShaderSource from 'constant/webgl/patternSourceTileFragmentShaderSource';
 import vectorDragVertexShaderSource from 'constant/webgl/vectorDragVertexShaderSource';
 import vectorGradientFillFragmentShaderSource from 'constant/webgl/vectorGradientFillFragmentShaderSource';
@@ -45,6 +46,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const blendCompositeBuffer = gl && gl.createBuffer();
     const blurProgram = gl && createProgram(gl, maskCompositeVertexShaderSource, blurFragmentShaderSource);
     const blurBuffer = gl && gl.createBuffer();
+    const noiseProgram = gl && createProgram(gl, vertexShaderSource, noiseFragmentShaderSource);
     const dragSnapshotProgram = gl && createProgram(gl, vectorDragVertexShaderSource, fragmentShaderSource);
     const gradientProgram = gl && createProgram(gl, vectorGradientFillVertexShaderSource, vectorGradientFillFragmentShaderSource);
     const dragGradientProgram = gl && createProgram(gl, vectorGradientFillVertexShaderSource, vectorGradientFillFragmentShaderSource);
@@ -68,6 +70,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
       blendCompositeBuffer &&
       blurProgram &&
       blurBuffer &&
+      noiseProgram &&
       dragSnapshotProgram &&
       gradientProgram &&
       dragGradientProgram &&
@@ -90,6 +93,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         blendCompositeBuffer,
         blurProgram,
         blurBuffer,
+        noiseProgram,
         dragSnapshotProgram,
         gradientProgram,
         dragGradientProgram,
@@ -115,6 +119,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteProgram(maskCompositeProgram);
         gl.deleteProgram(blendCompositeProgram);
         gl.deleteProgram(blurProgram);
+        gl.deleteProgram(noiseProgram);
         gl.deleteProgram(dragSnapshotProgram);
         gl.deleteProgram(gradientProgram);
         gl.deleteProgram(dragGradientProgram);

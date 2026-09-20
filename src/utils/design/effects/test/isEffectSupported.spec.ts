@@ -10,7 +10,8 @@ describe('isEffectSupported', () => {
     expect(isEffectSupported(EffectType.dropShadow)).toBe(true);
     expect(isEffectSupported(EffectType.layerBlur)).toBe(true);
     expect(isEffectSupported(EffectType.backgroundBlur)).toBe(true);
-    expect(isEffectSupported(EffectType.noise)).toBe(false);
+    expect(isEffectSupported(EffectType.noise)).toBe(true);
+    expect(isEffectSupported(EffectType.texture)).toBe(false);
     expect(isEffectSupported(EffectType.shader)).toBe(false);
   });
 });

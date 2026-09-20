@@ -107,11 +107,11 @@ describe('EffectsSection', () => {
   });
 
   it('should not add effect types that are not supported yet', () => {
-    // Step 1: Try to add a noise
+    // Step 1: Try to add a texture
     const id = addRectangle();
     renderSection();
     fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
-    fireEvent.click(screen.getByText('Noise'));
+    fireEvent.click(screen.getByText('Texture'));
 
     // Step 2: Assert nothing was added
     expect(read(id).effects).toBeUndefined();
@@ -148,6 +148,34 @@ describe('EffectsSection', () => {
 
     // Step 3: Assert nothing more was added
     expect(read(id).effects).toHaveLength(1);
+  });
+
+  it('should add a noise and show its size, density and color fields with the Mono / Duo / Multi toggle', () => {
+    // Step 1: Add a noise
+    const id = addRectangle();
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Noise'));
+
+    // Step 2: Assert it is saved and the panel shows the noise controls
+    expect(read(id).effects?.[0]).toMatchObject({ type: 'noise' });
+    expect(screen.getByText('Mono')).toBeTruthy();
+    expect(screen.getByText('Duo')).toBeTruthy();
+    expect(screen.getByText('Multi')).toBeTruthy();
+    expect(screen.getByLabelText('Effect noise size X')).toHaveValue('0.5');
+    expect(screen.getByLabelText('Effect noise size Y')).toBeDisabled();
+    expect(screen.getByLabelText('Effect density')).toHaveValue('100%');
+    expect(screen.getByLabelText('Apply blend mode to effect')).toBeTruthy();
+
+    // Step 3: The density is clamped to 100 and keeps its percent sign, and a lower value is saved
+    fireEvent.change(screen.getByLabelText('Effect density'), { target: { value: '250' } });
+    fireEvent.blur(screen.getByLabelText('Effect density'));
+    expect(screen.getByLabelText('Effect density')).toHaveValue('100%');
+
+    fireEvent.change(screen.getByLabelText('Effect density'), { target: { value: '40%' } });
+    fireEvent.blur(screen.getByLabelText('Effect density'));
+    expect(read(id).effects?.[0].density).toBe(40);
+    expect(screen.getByLabelText('Effect density')).toHaveValue('40%');
   });
 
   it('should hide, show and delete an effect', () => {

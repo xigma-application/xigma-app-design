@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
+import EffectNoiseTypeToggle from './EffectNoiseTypeToggle/EffectNoiseTypeToggle';
 import EffectBlurModeToggle from './EffectBlurModeToggle/EffectBlurModeToggle';
 import EffectSettingsField from './EffectSettingsField/EffectSettingsField';
 import EffectSettingsHeader from './EffectSettingsHeader/EffectSettingsHeader';
@@ -14,7 +15,7 @@ import { UITools } from 'shared';
 import { useEffectSettingsPanel } from './hooks/useEffectSettingsPanel/useEffectSettingsPanel';
 
 // others
-import { EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
+import { EFFECT_FIELD_MAX, EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
 
 // styles
 import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss';
@@ -48,7 +49,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   onDragStart,
 }) => {
   const { t } = useTranslation();
-  const { fields, hasBlendMode, hasBlurModeToggle, hasColor } = getEffectPanelLayout(effect);
+  const { fields, hasBlendMode, hasBlurModeToggle, hasColor, hasNoiseTypeToggle } = getEffectPanelLayout(effect);
   const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = useEffectSettingsPanel(effect, onChange);
 
   return (
@@ -67,17 +68,22 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
         {hasBlurModeToggle && (
           <EffectBlurModeToggle blurType={effect.blurType} onChange={(blurType): void => onChange({ ...effect, blurType })} />
         )}
-        {fields.map(({ adornmentLabel, icon, key, labelKey, min }) => (
-          <EffectSettingsField key={key} label={labelKey && t(`${translationNameSpace}.settings.labels.${labelKey}`)}>
+        {hasNoiseTypeToggle && <EffectNoiseTypeToggle />}
+        {fields.map(({ adornmentLabel, ariaKey, icon, isReadOnly, key, labelKey, min, unit }) => (
+          <EffectSettingsField
+            key={`${key}-${adornmentLabel ?? ''}`}
+            label={labelKey && t(`${translationNameSpace}.settings.labels.${labelKey}`)}
+          >
             <UITools.TextField
-              aria-label={t(`${translationNameSpace}.settings.fields.${key}`)}
+              aria-label={t(`${translationNameSpace}.settings.fields.${ariaKey ?? key}`)}
               className={fieldStyles.EffectSettingsField__input}
-              defaultValue={`${getEffectFieldValue(effect, key)}`}
+              defaultValue={`${getEffectFieldValue(effect, key)}${unit ?? ''}`}
+              disabled={isReadOnly}
               e2eValue={`effect-${key}`}
-              onBlur={onBlur(key, min)}
+              onBlur={onBlur(key, min, unit)}
               startAdornment={
                 <ScrubbableInput
-                  max={EFFECT_SCRUB_LIMIT}
+                  max={Math.min(EFFECT_FIELD_MAX[key] ?? EFFECT_SCRUB_LIMIT, EFFECT_SCRUB_LIMIT)}
                   min={Math.max(min, -EFFECT_SCRUB_LIMIT)}
                   onChange={onScrub(key, min)}
                   onMouseDown={onDragStart}
@@ -87,7 +93,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
                   <UITools.InputAdornment icon={icon} label={adornmentLabel} />
                 </ScrubbableInput>
               }
-              stepNumbers={{ min }}
+              stepNumbers={{ max: EFFECT_FIELD_MAX[key], min }}
               type="text"
             />
           </EffectSettingsField>

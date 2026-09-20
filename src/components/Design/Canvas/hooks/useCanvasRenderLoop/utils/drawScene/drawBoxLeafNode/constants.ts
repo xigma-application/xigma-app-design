@@ -12,3 +12,4 @@ export const EFFECT_NEUTRAL_IMAGE_ADJUSTMENT_UNIFORMS = [
   'u_shadows',
 ];
 export const EFFECT_VERTEX_ATTRIBUTE_SLOTS = 8;
+export const NOISE_MAX_COVERAGE = 0.5;

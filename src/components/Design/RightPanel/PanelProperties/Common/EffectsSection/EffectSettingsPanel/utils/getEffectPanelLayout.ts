@@ -1,12 +1,12 @@
 // others
-import { EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from '../../constants';
+import { EFFECT_NOISE_FIELDS, EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from '../../constants';
 
 // types
+import { EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
 import { TEffectField } from '../../types';
 
 // utils
-import { EffectType } from 'types/design/enums';
 import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
 
 export type TEffectPanelLayout = {
@@ -14,17 +14,22 @@ export type TEffectPanelLayout = {
   hasBlendMode: boolean;
   hasBlurModeToggle: boolean;
   hasColor: boolean;
+  hasNoiseTypeToggle: boolean;
 };
 
-export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
-  if (effect.type === EffectType.layerBlur || effect.type === EffectType.backgroundBlur) {
-    return {
-      fields: isProgressiveBlur(effect) ? EFFECT_PROGRESSIVE_BLUR_FIELDS : EFFECT_NUMBER_FIELDS.filter(({ key }) => key === 'blur'),
-      hasBlendMode: false,
-      hasBlurModeToggle: true,
-      hasColor: false,
-    };
-  }
+const BLUR_LAYOUT = { hasBlendMode: false, hasBlurModeToggle: true, hasColor: false, hasNoiseTypeToggle: false };
 
-  return { fields: EFFECT_NUMBER_FIELDS, hasBlendMode: true, hasBlurModeToggle: false, hasColor: true };
+export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
+  switch (effect.type) {
+    case EffectType.layerBlur:
+    case EffectType.backgroundBlur:
+      return {
+        ...BLUR_LAYOUT,
+        fields: isProgressiveBlur(effect) ? EFFECT_PROGRESSIVE_BLUR_FIELDS : EFFECT_NUMBER_FIELDS.filter(({ key }) => key === 'blur'),
+      };
+    case EffectType.noise:
+      return { fields: EFFECT_NOISE_FIELDS, hasBlendMode: true, hasBlurModeToggle: false, hasColor: true, hasNoiseTypeToggle: true };
+    default:
+      return { fields: EFFECT_NUMBER_FIELDS, hasBlendMode: true, hasBlurModeToggle: false, hasColor: true, hasNoiseTypeToggle: false };
+  }
 };

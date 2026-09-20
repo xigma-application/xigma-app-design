@@ -1,6 +1,9 @@
 // @xigma
 import { TIconProps } from '@xigma/components';
 
+// types
+import { TEffectField, TEffectNumberField } from './types';
+
 // others
 import { EffectType } from 'types/design/enums';
 import { translationNameSpace as parentNameSpace } from '../constants';
@@ -32,14 +35,22 @@ export const EFFECT_MENU_SEPARATED_TYPE = EffectType.shader;
 
 export const EFFECT_SCRUB_LIMIT = 100000;
 
-export const EFFECT_NUMBER_FIELDS = [
+export const EFFECT_NUMBER_FIELDS: readonly TEffectField[] = [
   { adornmentLabel: 'X', icon: undefined, key: 'x', labelKey: 'position', min: Number.NEGATIVE_INFINITY },
   { adornmentLabel: 'Y', icon: undefined, key: 'y', labelKey: undefined, min: Number.NEGATIVE_INFINITY },
   { adornmentLabel: undefined, icon: 'LayerBlur', key: 'blur', labelKey: 'blur', min: 0 },
   { adornmentLabel: undefined, icon: 'Spread', key: 'spread', labelKey: 'spread', min: Number.NEGATIVE_INFINITY },
-] as const;
+];
 
-export const EFFECT_PROGRESSIVE_BLUR_FIELDS = [
+export const EFFECT_PROGRESSIVE_BLUR_FIELDS: readonly TEffectField[] = [
   { adornmentLabel: undefined, icon: 'LayerBlur', key: 'startBlur', labelKey: 'start', min: 0 },
   { adornmentLabel: undefined, icon: 'LayerBlur', key: 'blur', labelKey: 'end', min: 0 },
-] as const;
+];
+
+export const EFFECT_NOISE_FIELDS: readonly TEffectField[] = [
+  { adornmentLabel: 'X', key: 'noiseSize', labelKey: 'noiseSize', min: 0.01 },
+  { adornmentLabel: 'Y', ariaKey: 'noiseSizeY', isReadOnly: true, key: 'noiseSize', min: 0.01 },
+  { icon: 'Density', key: 'density', labelKey: 'density', min: 0, unit: '%' },
+];
+
+export const EFFECT_FIELD_MAX: Partial<Record<TEffectNumberField, number>> = { density: 100 };

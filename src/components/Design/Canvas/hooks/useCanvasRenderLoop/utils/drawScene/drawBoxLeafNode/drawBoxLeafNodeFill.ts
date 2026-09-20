@@ -38,6 +38,7 @@ export const drawBoxLeafNodeFill = (
       patternSourceDepth,
     );
     drawBoxEffects(context, node, opacity, refs, EffectType.innerShadow);
+    drawBoxEffects(context, node, opacity, refs, EffectType.noise);
   } else {
     drawRect(gl, program, buffer, { ...node, fillAlpha: opacity }, canvasWidth, canvasHeight, viewport, node.rotation);
   }

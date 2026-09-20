@@ -15,4 +15,10 @@ describe('getEffectNumberFromInput', () => {
     expect(getEffectNumberFromInput('')).toBeUndefined();
     expect(getEffectNumberFromInput('abc')).toBeUndefined();
   });
+
+  it('should clamp to the maximum and accept a trailing percent sign', () => {
+    expect(getEffectNumberFromInput('250', 0, 100)).toBe(100);
+    expect(getEffectNumberFromInput('40%', 0, 100)).toBe(40);
+    expect(getEffectNumberFromInput('40 %')).toBe(40);
+  });
 });

@@ -1,12 +1,10 @@
 // types
-import { EffectType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 
 // utils
-import { drawBoxDropShadow } from './drawBoxDropShadow';
-import { drawBoxInnerShadow } from './drawBoxInnerShadow';
+import { getBoxEffectDrawer, TDrawableBoxEffectType } from './getBoxEffectDrawer';
 import { getEffectBlendModePreview } from 'utils/canvas/blendMode/getEffectBlendModePreview';
 
 export const drawBoxEffects = (
@@ -14,10 +12,10 @@ export const drawBoxEffects = (
   node: TFrameNode | TRectangleNode,
   opacity: number,
   refs: TCanvasRefs,
-  effectType: EffectType.dropShadow | EffectType.innerShadow,
+  effectType: TDrawableBoxEffectType,
 ): void => {
   if (node.width > 0 && node.height > 0 && node.effects) {
-    const draw = effectType === EffectType.dropShadow ? drawBoxDropShadow : drawBoxInnerShadow;
+    const draw = getBoxEffectDrawer(effectType);
 
     node.effects.forEach((effect, index) => {
       if (effect.visible !== false && effect.type === effectType) {

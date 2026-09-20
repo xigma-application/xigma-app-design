@@ -44,4 +44,14 @@ describe('getEffectPanelLayout', () => {
     expect(layout.fields.map(({ key }) => key)).toEqual(['blur']);
     expect(layout).toMatchObject({ hasBlendMode: false, hasBlurModeToggle: true, hasColor: false });
   });
+
+  it('should show the noise size, density and color with the blend mode and the Mono / Duo / Multi toggle for a noise', () => {
+    // action
+    const layout = getEffectPanelLayout(createEffect(EffectType.noise));
+
+    // result
+    expect(layout.fields.map(({ ariaKey, key }) => ariaKey ?? key)).toEqual(['noiseSize', 'noiseSizeY', 'density']);
+    expect(layout.fields[1].isReadOnly).toBe(true);
+    expect(layout).toMatchObject({ hasBlendMode: true, hasBlurModeToggle: false, hasColor: true, hasNoiseTypeToggle: true });
+  });
 });

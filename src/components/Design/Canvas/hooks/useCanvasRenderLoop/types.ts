@@ -32,6 +32,7 @@ export type TImageRenderContext = {
   maskCompositeProgram: WebGLProgram;
   msdfBuffer: WebGLBuffer;
   msdfProgram: WebGLProgram;
+  noiseProgram: WebGLProgram;
   patternTileProgram: WebGLProgram;
   program: WebGLProgram;
   renderTargetPool: TRenderTargetPool;

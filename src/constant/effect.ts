@@ -7,3 +7,5 @@ export const DEFAULT_EFFECT_Y = 4;
 export const DEFAULT_PROGRESSIVE_BLUR_END_POINT = { x: 0.5, y: 1 };
 export const DEFAULT_PROGRESSIVE_BLUR_START = 0;
 export const DEFAULT_PROGRESSIVE_BLUR_START_POINT = { x: 0.5, y: 0 };
+export const DEFAULT_NOISE_DENSITY = 100;
+export const DEFAULT_NOISE_SIZE = 0.5;
