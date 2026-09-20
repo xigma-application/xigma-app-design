@@ -289,9 +289,7 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(async () => Math.abs((await readLuma(800, 198)) - backgroundLuma)).toBeLessThan(4);
   });
 
-  test('a layer blur on a frame blurs its children with it and softens the frame edge', async ({
-    page,
-  }) => {
+  test('a layer blur on a frame blurs its children with it and softens the frame edge', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-effects-layer-blur-frame-canvas');
@@ -694,6 +692,88 @@ test.describe('Design panels — Effects section', () => {
     // result — the child grows bumps outside its rectangle while the frame edge stays a straight line
     await expect.poll(async () => (await readShares()).childBump, { timeout: 15000 }).toBeGreaterThan(8);
     expect((await readShares()).frameEdge).toBeLessThan(8);
+  });
+
+  test('a glass effect shows the light dial and five sliders with inputs, and the values are saved on the node', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-glass-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+
+    const id = await readFirstNodeId(page);
+
+    // action
+    await addEffect(page, 'Glass');
+
+    // result — the light and the five sliders are there, without a color row
+    await expect(page.getByLabel('Effect light angle')).toHaveValue('-45°');
+    await expect(page.getByLabel('Effect light intensity')).toHaveValue('80%');
+    await expect(page.getByLabel('Effect refraction', { exact: true })).toHaveValue('80');
+    await expect(page.getByLabel('Effect depth', { exact: true })).toHaveValue('20');
+    await expect(page.getByLabel('Effect dispersion', { exact: true })).toHaveValue('50');
+    await expect(page.getByLabel('Effect frost', { exact: true })).toHaveValue('4');
+    await expect(page.getByLabel('Effect splay', { exact: true })).toHaveValue('0');
+    await expect(page.getByLabel('Effect color')).toHaveCount(0);
+
+    // action — type into an input
+    await page.getByLabel('Effect splay', { exact: true }).fill('35');
+    await page.getByLabel('Effect splay', { exact: true }).press('Enter');
+
+    // result
+    expect(((await readNode(page, id)).effects?.[0] as { splay?: number }).splay).toBe(35);
+
+    // action — drag the dial to point the light to the right of its center
+    const dial = page.getByLabel('Effect light direction');
+    const box = await dial.boundingBox();
+    const panel = page.locator('[class*="EffectSettingsPanel_"]').first();
+    const panelBefore = await panel.boundingBox();
+
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + box!.width - 2, box!.y + box!.height / 2, { steps: 4 });
+    await page.mouse.up();
+
+    // result — the settings panel did not move with the drag
+    expect(await panel.boundingBox()).toEqual(panelBefore);
+
+    // result — a light straight to the right is 90 degrees
+    await expect(page.getByLabel('Effect light angle')).toHaveValue('90°');
+    expect(((await readNode(page, id)).effects?.[0] as { lightAngle?: number }).lightAngle).toBe(90);
+
+    // action — drag a slider thumb to its far end
+    const slider = page.getByLabel('Effect frost slider');
+    const track = await slider.boundingBox();
+
+    await page.mouse.move(track!.x + 8, track!.y + track!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(track!.x + track!.width + 5, track!.y + track!.height / 2, { steps: 4 });
+    await page.mouse.up();
+
+    // result
+    await expect(page.getByLabel('Effect frost', { exact: true })).toHaveValue('100');
+
+    // action — hover an input to see its tooltip
+    await page.getByLabel('Effect dispersion', { exact: true }).hover();
+
+    // result
+    await expect(page.getByRole('tooltip').getByText('Dispersion')).toBeVisible();
+
+    // action — scrub the depth by dragging from the left edge of its input
+    await page.mouse.move(1750, 900);
+    await expect(page.getByRole('tooltip')).toHaveCount(0);
+    const depth = await page.getByLabel('Effect depth', { exact: true }).boundingBox();
+
+    await page.mouse.move(depth!.x - 4, depth!.y + depth!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(depth!.x + 26, depth!.y + depth!.height / 2, { steps: 6 });
+    await page.mouse.up();
+
+    // result — dragging to the right raises the value from its default of 20
+    await expect
+      .poll(async () => Number(await page.getByLabel('Effect depth', { exact: true }).inputValue()), { timeout: 10000 })
+      .toBeGreaterThan(20);
   });
 
   test('a noise covers an outside stroke too, not only the fill', async ({ page }) => {

@@ -71,6 +71,15 @@ describe('getEffectPanelLayout', () => {
     expect(getEffectPanelLayout(createEffect(EffectType.dropShadow)).hasSecondaryColor).toBe(false);
   });
 
+  it('should give a glass only the glass controls', () => {
+    // action
+    const layout = getEffectPanelLayout(createEffect(EffectType.glass));
+
+    // result
+    expect(layout.fields).toEqual([]);
+    expect(layout).toMatchObject({ hasBlendMode: false, hasClipToShape: false, hasColor: false, hasGlassControls: true });
+  });
+
   it('should give a texture the size and radius fields and the Clip to shape checkbox, without blend mode or color', () => {
     // action
     const layout = getEffectPanelLayout(createEffect(EffectType.texture));

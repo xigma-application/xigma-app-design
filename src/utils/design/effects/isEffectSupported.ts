@@ -7,4 +7,5 @@ export const isEffectSupported = (type: EffectType): boolean =>
   type === EffectType.layerBlur ||
   type === EffectType.backgroundBlur ||
   type === EffectType.noise ||
-  type === EffectType.texture;
+  type === EffectType.texture ||
+  type === EffectType.glass;

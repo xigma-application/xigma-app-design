@@ -22,6 +22,7 @@ export type TEffectPanelLayout = {
   hasBlurModeToggle: boolean;
   hasClipToShape: boolean;
   hasColor: boolean;
+  hasGlassControls: boolean;
   hasNoiseTypeToggle: boolean;
   hasSecondaryColor: boolean;
 };
@@ -31,6 +32,7 @@ const BLUR_LAYOUT = {
   hasBlurModeToggle: true,
   hasClipToShape: false,
   hasColor: false,
+  hasGlassControls: false,
   hasNoiseTypeToggle: false,
   hasSecondaryColor: false,
 };
@@ -50,6 +52,7 @@ export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
         hasBlurModeToggle: false,
         hasClipToShape: false,
         hasColor: getEffectNoise(effect).noiseType !== EffectNoiseType.multi,
+        hasGlassControls: false,
         hasNoiseTypeToggle: true,
         hasSecondaryColor: getEffectNoise(effect).noiseType === EffectNoiseType.duo,
       };
@@ -60,6 +63,18 @@ export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
         hasBlurModeToggle: false,
         hasClipToShape: true,
         hasColor: false,
+        hasGlassControls: false,
+        hasNoiseTypeToggle: false,
+        hasSecondaryColor: false,
+      };
+    case EffectType.glass:
+      return {
+        fields: [],
+        hasBlendMode: false,
+        hasBlurModeToggle: false,
+        hasClipToShape: false,
+        hasColor: false,
+        hasGlassControls: true,
         hasNoiseTypeToggle: false,
         hasSecondaryColor: false,
       };
@@ -70,6 +85,7 @@ export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
         hasBlurModeToggle: false,
         hasClipToShape: false,
         hasColor: true,
+        hasGlassControls: false,
         hasNoiseTypeToggle: false,
         hasSecondaryColor: false,
       };

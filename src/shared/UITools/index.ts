@@ -16,9 +16,11 @@ import FieldGroup from './FieldGroup/FieldGroup';
 import InputAdornment from './InputAdornment/InputAdornment';
 import Popover, { PopoverCompound } from './Popover/Popover';
 import SearchInput from './SearchInput/SearchInput';
+import ScrubbableEdge from './ScrubbableEdge/ScrubbableEdge';
 import Section from './Section/Section';
 import SectionColumn from './SectionColumn/SectionColumn';
 import Slider from './Slider/Slider';
+import SliderInput from './SliderInput/SliderInput';
 import Tabs from './Tabs/Tabs';
 import TextField from './TextField/TextField';
 import ToggleButtonGroup from './ToggleButtonGroup/ToggleButtonGroup';
@@ -45,9 +47,11 @@ export const UITools = {
   Popover,
   PopoverCompound,
   SearchInput,
+  ScrubbableEdge,
   Section,
   SectionColumn,
   Slider,
+  SliderInput,
   Tabs,
   TextField,
   ToggleButtonGroup,

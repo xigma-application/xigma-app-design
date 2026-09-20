@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
+import EffectGlassControls from './EffectGlassControls/EffectGlassControls';
 import EffectClipToShapeField from './EffectClipToShapeField/EffectClipToShapeField';
 import EffectColorField from './EffectColorField/EffectColorField';
 import EffectNoiseTypeToggle from './EffectNoiseTypeToggle/EffectNoiseTypeToggle';
@@ -55,7 +56,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   const { t } = useTranslation();
   const noise = getEffectNoise(effect);
 
-  const { fields, hasBlendMode, hasBlurModeToggle, hasClipToShape, hasColor, hasNoiseTypeToggle, hasSecondaryColor } =
+  const { fields, hasBlendMode, hasBlurModeToggle, hasClipToShape, hasColor, hasGlassControls, hasNoiseTypeToggle, hasSecondaryColor } =
     getEffectPanelLayout(effect);
 
   const {
@@ -131,6 +132,7 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
             triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
           />
         )}
+        {hasGlassControls && <EffectGlassControls effect={effect} onChange={onChange} onDragEnd={onDragEnd} onDragStart={onDragStart} />}
         {hasClipToShape && (
           <EffectClipToShapeField
             onChange={(clipToShape): void => onChange({ ...effect, clipToShape })}

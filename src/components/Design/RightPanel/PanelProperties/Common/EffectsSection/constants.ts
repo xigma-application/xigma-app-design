@@ -64,4 +64,13 @@ export const EFFECT_NOISE_MULTI_FIELDS: readonly TEffectField[] = [
   { icon: 'Opacity', key: 'opacity', labelKey: 'opacity', min: 0, unit: '%' },
 ];
 
+export const EFFECT_GLASS_SLIDERS: readonly { key: 'depth' | 'dispersion' | 'frost' | 'refraction' | 'splay'; max: number; min: number }[] =
+  [
+    { key: 'refraction', max: 100, min: 0 },
+    { key: 'depth', max: 100, min: 0 },
+    { key: 'dispersion', max: 100, min: 0 },
+    { key: 'frost', max: 100, min: 0 },
+    { key: 'splay', max: 100, min: 0 },
+  ];
+
 export const EFFECT_FIELD_MAX: Partial<Record<TEffectNumberField, number>> = { density: 100, opacity: 100 };

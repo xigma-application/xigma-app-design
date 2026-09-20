@@ -107,11 +107,11 @@ describe('EffectsSection', () => {
   });
 
   it('should not add effect types that are not supported yet', () => {
-    // Step 1: Try to add a glass
+    // Step 1: Try to add a shader
     const id = addRectangle();
     renderSection();
     fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
-    fireEvent.click(screen.getByText('Glass'));
+    fireEvent.click(screen.getByText('Shader'));
 
     // Step 2: Assert nothing was added
     expect(read(id).effects).toBeUndefined();
@@ -197,6 +197,35 @@ describe('EffectsSection', () => {
     expect(read(id).effects?.[0].noiseType).toBe('duo');
     expect(screen.getByLabelText('Effect secondary color')).toBeTruthy();
     expect(screen.getByText('Colors')).toBeTruthy();
+  });
+
+  it('should add a glass with the light dial, five sliders with inputs, and save what is typed', () => {
+    // Step 1: Add a glass
+    const id = addRectangle();
+    renderSection();
+    fireEvent.click(screen.getByRole('button', { name: 'Add effect' }));
+    fireEvent.click(screen.getByText('Glass'));
+
+    // Step 2: Assert the panel shows the light controls and the sliders
+    expect(screen.getByLabelText('Effect light direction')).toBeTruthy();
+    expect(screen.getByLabelText('Effect light angle')).toBeTruthy();
+    expect(screen.getByLabelText('Effect refraction')).toBeTruthy();
+    expect(screen.getByLabelText('Effect splay slider')).toBeTruthy();
+    expect(screen.queryByLabelText('Effect color')).toBeNull();
+
+    // Step 3: Type a frost value
+    const frost = screen.getByLabelText('Effect frost') as HTMLInputElement;
+
+    fireEvent.change(frost, { target: { value: '30' } });
+    fireEvent.blur(frost);
+    expect(read(id).effects?.[0].frost).toBe(30);
+
+    // Step 4: Type a light angle with the degree sign
+    const angle = screen.getByLabelText('Effect light angle') as HTMLInputElement;
+
+    fireEvent.change(angle, { target: { value: '-58°' } });
+    fireEvent.blur(angle);
+    expect(read(id).effects?.[0].lightAngle).toBe(-58);
   });
 
   it('should hide, show and delete an effect', () => {
