@@ -14,6 +14,27 @@ export type TMaskRenderer = {
   sceneNodeById: Map<string, TSceneNode>;
 };
 
-export type TScissorRect = { clipped?: boolean; height: number; originX?: number; originY?: number; width: number; x: number; y: number };
+export type TScissorRect = {
+  clipped?: boolean;
+  height: number;
+  offscreen?: boolean;
+  originX?: number;
+  originY?: number;
+  rawHeight?: number;
+  rawWidth?: number;
+  width: number;
+  x: number;
+  y: number;
+};
 
-export type TBlurCacheEntry = { framebuffer: WebGLFramebuffer; height: number; key: string; texture: WebGLTexture; width: number };
+export type TBlurCacheEntry = {
+  clipped: boolean;
+  framebuffer: WebGLFramebuffer;
+  height: number;
+  key: string;
+  texture: WebGLTexture;
+  width: number;
+  x: number;
+  y: number;
+  zoom: number;
+};

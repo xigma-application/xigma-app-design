@@ -63,11 +63,15 @@ export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode
         height: top - bottom,
         originX: rawLeft,
         originY: rawBottom,
+        rawHeight: rawTop - rawBottom,
+        rawWidth: rawRight - rawLeft,
         width: right - left,
         x: left,
         y: bottom,
       };
     }
+
+    return { height: 0, offscreen: true, width: 0, x: 0, y: 0 };
   }
 
   return null;

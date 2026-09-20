@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 // store
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
-import { selectActivePage } from 'store/design/selectors';
+import { selectNodes, selectRootOrder } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -22,7 +22,8 @@ const isTextPathGuideNode = (node: TSceneNode, nodes: Record<string, TSceneNode>
   node.type === NodeType.path || (node.type === NodeType.vector && isVectorBoundAsTextPath(nodes, node.id));
 
 export const useTreeSource = (): TUseTreeSourceResult => {
-  const { nodes, rootOrder } = useAppSelector(selectActivePage);
+  const nodes = useAppSelector(selectNodes);
+  const rootOrder = useAppSelector(selectRootOrder);
 
   const getChildren = useCallback(
     (item: TSceneNode): TSceneNode[] | undefined => {

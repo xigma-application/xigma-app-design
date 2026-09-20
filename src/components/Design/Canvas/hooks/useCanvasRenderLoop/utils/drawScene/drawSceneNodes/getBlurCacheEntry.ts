@@ -5,6 +5,15 @@ import { TBlurCacheEntry } from './types';
 import { blurCaches } from './blurCaches';
 
 export const getBlurCacheEntry = (gl: WebGL2RenderingContext, nodeId: string, key: string): TBlurCacheEntry | null => {
-  const entry = blurCaches.get(gl)?.get(nodeId);
-  return entry && entry.key === key ? entry : null;
+  const cache = blurCaches.get(gl);
+  const entry = cache?.get(nodeId);
+
+  if (cache && entry && entry.key === key) {
+    cache.delete(nodeId);
+    cache.set(nodeId, entry);
+
+    return entry;
+  }
+
+  return null;
 };

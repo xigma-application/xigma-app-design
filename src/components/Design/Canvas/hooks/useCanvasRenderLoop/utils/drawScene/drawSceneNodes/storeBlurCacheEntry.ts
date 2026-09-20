@@ -18,6 +18,7 @@ export const storeBlurCacheEntry = (
   key: string,
   source: TRenderTarget,
   rect: TScissorRect,
+  zoom: number,
 ): void => {
   const cache = blurCaches.get(gl) ?? new Map();
   const texture = gl.createTexture() as WebGLTexture;
@@ -50,5 +51,15 @@ export const storeBlurCacheEntry = (
     gl.NEAREST,
   );
 
-  cache.set(nodeId, { framebuffer, height: rect.height, key, texture, width: rect.width });
+  cache.set(nodeId, {
+    clipped: Boolean(rect.clipped),
+    framebuffer,
+    height: rect.height,
+    key,
+    texture,
+    width: rect.width,
+    x: rect.x,
+    y: rect.y,
+    zoom,
+  });
 };

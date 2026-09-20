@@ -10,6 +10,7 @@ import { storeBlurCacheEntry } from '../storeBlurCacheEntry';
 const createGl = (): WebGL2RenderingContext =>
   ({
     COLOR_BUFFER_BIT: 16384,
+    LINEAR: 9729,
     NEAREST: 9728,
     bindFramebuffer: vi.fn(),
     bindTexture: vi.fn(),
@@ -24,7 +25,7 @@ const createGl = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const source = { framebuffer: { tag: 'source' } } as unknown as TRenderTarget;
-const rect = { height: 4, originX: -2, originY: 6, width: 3, x: 0, y: 6 };
+const rect = { height: 4, originX: -2, originY: 6, rawHeight: 4, rawWidth: 5, width: 3, x: 0, y: 6 };
 
 describe('blur cache', () => {
   it('should store the rect of a target and return it only for the same key', () => {
@@ -32,7 +33,7 @@ describe('blur cache', () => {
     const gl = createGl();
 
     // action
-    storeBlurCacheEntry(gl, 'n1', 'key-a', source, rect);
+    storeBlurCacheEntry(gl, 'n1', 'key-a', source, rect, 1);
 
     // result
     expect(gl.blitFramebuffer).toHaveBeenCalledWith(0, 6, 3, 10, 0, 0, 3, 4, 16384, 9728);
@@ -45,8 +46,8 @@ describe('blur cache', () => {
     const gl = createGl();
 
     // action
-    storeBlurCacheEntry(gl, 'n2', 'key-a', source, rect);
-    storeBlurCacheEntry(gl, 'n2', 'key-b', source, rect);
+    storeBlurCacheEntry(gl, 'n2', 'key-a', source, rect, 1);
+    storeBlurCacheEntry(gl, 'n2', 'key-b', source, rect, 1);
     deleteBlurCacheEntry(gl, 'n2');
 
     // result
@@ -59,13 +60,50 @@ describe('blur cache', () => {
     const gl = createGl();
     const target = { framebuffer: { tag: 'target' } } as unknown as TRenderTarget;
 
-    storeBlurCacheEntry(gl, 'n3', 'key-a', source, rect);
+    storeBlurCacheEntry(gl, 'n3', 'key-a', source, rect, 1);
     const entry = getBlurCacheEntry(gl, 'n3', 'key-a');
 
     // action
-    blitBlurCacheEntry(gl, entry!, target, rect);
+    blitBlurCacheEntry(gl, entry!, target, rect, 1);
 
     // result
-    expect(gl.blitFramebuffer).toHaveBeenLastCalledWith(0, 0, 3, 4, -2, 6, 1, 10, 16384, 9728);
+    expect(gl.blitFramebuffer).toHaveBeenLastCalledWith(0, 0, 3, 4, -1, 6, 2, 10, 16384, 9728);
+  });
+});
+
+describe('blur cache scaling', () => {
+  it('should stretch an entry stored at another zoom around the rect center with linear filtering', () => {
+    // mock
+    const gl = createGl();
+    const target = { framebuffer: { tag: 'target' } } as unknown as TRenderTarget;
+
+    storeBlurCacheEntry(gl, 'z1', 'key-a', source, rect, 1);
+    const entry = getBlurCacheEntry(gl, 'z1', 'key-a');
+
+    // action
+    blitBlurCacheEntry(gl, entry!, target, rect, 2);
+
+    // result — 3x4 becomes 6x8, centered on x = -2 + 5 / 2, y = 6 + 4 / 2
+    expect(gl.blitFramebuffer).toHaveBeenLastCalledWith(0, 0, 3, 4, -2, 4, 4, 12, 16384, 9729);
+  });
+});
+
+describe('blur cache eviction', () => {
+  it('should evict the least recently used node, not the oldest stored one', () => {
+    // mock
+    const gl = createGl();
+
+    for (let i = 0; i < 256; i += 1) {
+      storeBlurCacheEntry(gl, `lru-${i}`, 'key', source, rect, 1);
+    }
+
+    // action — touching the first node makes the second one the oldest
+    getBlurCacheEntry(gl, 'lru-0', 'key');
+    storeBlurCacheEntry(gl, 'lru-new', 'key', source, rect, 1);
+
+    // result
+    expect(getBlurCacheEntry(gl, 'lru-0', 'key')).not.toBeNull();
+    expect(getBlurCacheEntry(gl, 'lru-1', 'key')).toBeNull();
+    expect(getBlurCacheEntry(gl, 'lru-new', 'key')).not.toBeNull();
   });
 });

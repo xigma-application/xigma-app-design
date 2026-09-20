@@ -1,5 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 
+// others
+import { EMPTY_SELECTED_INDICES } from './constants';
+
 // store
 import { RootState } from 'store';
 
@@ -43,6 +46,8 @@ export type { TMaskConnectorInfo, TMaskConnectorLine, TMaskConnectorRole } from 
 export const selectActivePageId = (state: RootState): string => state.design.activePageId;
 
 export const selectPages = (state: RootState): Record<string, TDesignPage> => state.design.pages;
+
+export const selectActivePageName = (state: RootState): string => state.design.pages[state.design.activePageId].name;
 
 export const selectActivePage = createSelector([selectActivePageId, selectPages], (activePageId, pages) => pages[activePageId]);
 
@@ -145,7 +150,7 @@ export const selectPenActiveVertexId = (state: RootState): string | null => stat
 
 export const selectRevealedMinMax = (state: RootState): TRevealedMinMax => state.design.revealedMinMax;
 
-const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);
+export const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
@@ -159,9 +164,15 @@ export const selectTopLevelFrameNodes = createSelector([selectRenderOrderedNodes
 
 export const selectMaskConnectorRoleById = createSelector([selectNodes], (nodes) => resolveMaskConnectorRoles(nodes));
 
-export const selectSelectedFillIndices = createSelector([selectActivePage], (page): number[] => page.selectedFillIndices ?? []);
+export const selectSelectedFillIndices = createSelector(
+  [selectActivePage],
+  (page): number[] => page.selectedFillIndices ?? EMPTY_SELECTED_INDICES,
+);
 
-export const selectSelectedStrokeIndices = createSelector([selectActivePage], (page): number[] => page.selectedStrokeIndices ?? []);
+export const selectSelectedStrokeIndices = createSelector(
+  [selectActivePage],
+  (page): number[] => page.selectedStrokeIndices ?? EMPTY_SELECTED_INDICES,
+);
 
 export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 

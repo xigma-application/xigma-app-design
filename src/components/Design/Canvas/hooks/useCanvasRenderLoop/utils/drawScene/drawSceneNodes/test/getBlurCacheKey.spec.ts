@@ -18,12 +18,12 @@ describe('getBlurCacheKey', () => {
     expect(getBlurCacheKey(renderer, node)).toBe(getBlurCacheKey(renderer, { ...node, x: 300, y: 400 }));
   });
 
-  it('should change with the node content and with the zoom', () => {
+  it('should change with the node content but not with the zoom, which is handled by scaling the cached texture', () => {
     // mock
     const zoomed = { ...renderer, context: { ...renderer.context, viewport: { x: 0, y: 0, zoom: 2 } } } as unknown as TMaskRenderer;
 
     // result
     expect(getBlurCacheKey(renderer, node)).not.toBe(getBlurCacheKey(renderer, { ...node, width: 11 }));
-    expect(getBlurCacheKey(renderer, node)).not.toBe(getBlurCacheKey(zoomed, node));
+    expect(getBlurCacheKey(renderer, node)).toBe(getBlurCacheKey(zoomed, node));
   });
 });

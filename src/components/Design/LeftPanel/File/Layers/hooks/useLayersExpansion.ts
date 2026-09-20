@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // store
-import { selectActivePage } from 'store/design/selectors';
+import { selectNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // utils
@@ -15,7 +15,7 @@ export type TUseLayersExpansionResult = {
 };
 
 export const useLayersExpansion = (): TUseLayersExpansionResult => {
-  const { nodes } = useAppSelector(selectActivePage);
+  const nodes = useAppSelector(selectNodes);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const collapseAll = (): void => setExpandedIds(new Set());
 

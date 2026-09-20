@@ -40,17 +40,20 @@ const renderIsolatedContent = (renderer: TMaskRenderer, node: TSceneNode, target
   const { gl, pool, refs } = renderer;
   const blendMode = getIsolatedBlendMode(node, refs);
   const rect = getIsolatedScissorRect(renderer, node);
-  const backdrop = blendMode === BlendMode.normal && rect ? null : captureBackdropTexture(renderer, rect);
-  const contentTarget = pool.acquire();
-  const paint = (): void => paintIsolatedContent(renderer, node, contentTarget, rect);
 
-  renderIntoTarget(renderer, contentTarget, paint, rect && expandScissorRect(gl, rect, EFFECT_BLUR_MAX_PX));
-  bindTarget(renderer, target);
-  setScissorRect(gl, rect);
-  compositeIsolatedContent(renderer, contentTarget.texture, backdrop, blendMode);
-  setScissorRect(gl, null);
-  pool.release(contentTarget);
-  releaseBackdrop(renderer, backdrop);
+  if (!rect?.offscreen) {
+    const backdrop = blendMode === BlendMode.normal && rect ? null : captureBackdropTexture(renderer, rect);
+    const contentTarget = pool.acquire();
+    const paint = (): void => paintIsolatedContent(renderer, node, contentTarget, rect);
+
+    renderIntoTarget(renderer, contentTarget, paint, rect && expandScissorRect(gl, rect, EFFECT_BLUR_MAX_PX));
+    bindTarget(renderer, target);
+    setScissorRect(gl, rect);
+    compositeIsolatedContent(renderer, contentTarget.texture, backdrop, blendMode);
+    setScissorRect(gl, null);
+    pool.release(contentTarget);
+    releaseBackdrop(renderer, backdrop);
+  }
 };
 
 export const renderIsolatedBlendNode = (renderer: TMaskRenderer, node: TSceneNode, target: TRenderTarget | null): void => {

@@ -12,14 +12,15 @@ import { useHeaderPageMenu } from './hooks/useHeaderPageMenu';
 import { useTogglePagesExpanded } from './hooks/useTogglePagesExpanded';
 
 // store
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePageId, selectActivePageName } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
 import styles from './pages.module.scss';
 
 const Pages: FC = () => {
-  const activePage = useAppSelector(selectActivePage);
+  const activePageId = useAppSelector(selectActivePageId);
+  const activePageName = useAppSelector(selectActivePageName);
   const { expand, handleStopPropagation, handleToggleClick, handleToggleKeyDown, isExpanded } = useTogglePagesExpanded();
   const { clearPendingEditPageId, handleAddPage, pendingEditPageId } = useAddPage(expand);
   const headerMenu = useHeaderPageMenu(!isExpanded);
@@ -35,13 +36,13 @@ const Pages: FC = () => {
         role="button"
         tabIndex={0}
       >
-        <PagesHeaderTitle activePageName={activePage.name} isExpanded={isExpanded} />
+        <PagesHeaderTitle activePageName={activePageName} isExpanded={isExpanded} />
         <PagesHeaderActions onAddPage={handleAddPage} onStopPropagation={handleStopPropagation} />
       </div>
       {isExpanded && <PagesList onPendingEditFinished={clearPendingEditPageId} pendingEditPageId={pendingEditPageId} />}
       <PageRowMenu
         anchorRef={headerMenu.anchorRef}
-        id={activePage.id}
+        id={activePageId}
         isOpen={headerMenu.isOpen}
         onOpenChange={headerMenu.onOpenChange}
         onRename={expand}

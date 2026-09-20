@@ -9,14 +9,14 @@ import { bindTarget } from '../../bindTarget';
 import { captureBackdropTexture } from '../../captureBackdropTexture';
 import { compositeBlend } from '../../../compositeBlend';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
-import { dispatchNodeType } from '../dispatchNodeType';
+import { paintIsolatedContent } from '../paintIsolatedContent';
 import { renderIntoTarget } from '../../renderIntoTarget';
 import { renderIsolatedBlendNode } from '../renderIsolatedBlendNode';
 
 vi.mock('../../bindTarget', () => ({ bindTarget: vi.fn() }));
 vi.mock('../../captureBackdropTexture', () => ({ captureBackdropTexture: vi.fn() }));
 vi.mock('../../../compositeBlend', () => ({ compositeBlend: vi.fn() }));
-vi.mock('../dispatchNodeType', () => ({ dispatchNodeType: vi.fn() }));
+vi.mock('../paintIsolatedContent', () => ({ paintIsolatedContent: vi.fn() }));
 vi.mock('../../renderIntoTarget', () => ({ renderIntoTarget: vi.fn((_renderer, _target, paint) => paint()) }));
 
 const gl = { SCISSOR_TEST: 3089, disable: vi.fn(), enable: vi.fn(), scissor: vi.fn() } as unknown as WebGL2RenderingContext;
@@ -45,7 +45,7 @@ describe('renderIsolatedBlendNode', () => {
     expect(bindTarget).toHaveBeenNthCalledWith(1, renderer, target);
     expect(captureBackdropTexture).toHaveBeenCalledWith(renderer, null);
     expect(renderIntoTarget).toHaveBeenCalledWith(renderer, contentTarget, expect.any(Function), null);
-    expect(dispatchNodeType).toHaveBeenCalledWith(renderer, node, contentTarget);
+    expect(paintIsolatedContent).toHaveBeenCalledWith(renderer, node, contentTarget, null);
     expect(bindTarget).toHaveBeenNthCalledWith(2, renderer, target);
     expect(compositeBlend).toHaveBeenCalledWith(context, contentTarget.texture, backdrop.texture, BlendMode.multiply);
     expect(pool.release).toHaveBeenCalledWith(contentTarget);

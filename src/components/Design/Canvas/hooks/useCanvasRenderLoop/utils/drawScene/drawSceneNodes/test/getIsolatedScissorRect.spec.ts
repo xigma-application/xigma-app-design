@@ -36,6 +36,8 @@ describe('getIsolatedScissorRect', () => {
       height: 472,
       originX: 184,
       originY: 484,
+      rawHeight: 472,
+      rawWidth: 872,
       width: 872,
       x: 184,
       y: 484,

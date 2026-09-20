@@ -34,3 +34,5 @@ export const TOOL_DEFAULT_NODE_NAMES: ReadonlySet<string> = new Set([
   'Text',
   'Path',
 ]);
+
+export const EMPTY_SELECTED_INDICES: number[] = [];
