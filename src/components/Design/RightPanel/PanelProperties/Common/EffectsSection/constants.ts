@@ -53,4 +53,9 @@ export const EFFECT_NOISE_FIELDS: readonly TEffectField[] = [
   { icon: 'Density', key: 'density', labelKey: 'density', min: 0, unit: '%' },
 ];
 
-export const EFFECT_FIELD_MAX: Partial<Record<TEffectNumberField, number>> = { density: 100 };
+export const EFFECT_NOISE_MULTI_FIELDS: readonly TEffectField[] = [
+  ...EFFECT_NOISE_FIELDS,
+  { icon: 'Opacity', key: 'opacity', labelKey: 'opacity', min: 0, unit: '%' },
+];
+
+export const EFFECT_FIELD_MAX: Partial<Record<TEffectNumberField, number>> = { density: 100, opacity: 100 };

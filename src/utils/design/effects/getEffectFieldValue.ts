@@ -10,6 +10,6 @@ const DEFAULTS: Partial<Record<TNumericEffectField, number>> = {
   startBlur: DEFAULT_PROGRESSIVE_BLUR_START,
 };
 
-export type TNumericEffectField = 'blur' | 'density' | 'noiseSize' | 'spread' | 'startBlur' | 'x' | 'y';
+export type TNumericEffectField = 'blur' | 'density' | 'noiseSize' | 'opacity' | 'spread' | 'startBlur' | 'x' | 'y';
 
 export const getEffectFieldValue = (effect: TEffect, field: TNumericEffectField): number => effect[field] ?? DEFAULTS[field] ?? 0;

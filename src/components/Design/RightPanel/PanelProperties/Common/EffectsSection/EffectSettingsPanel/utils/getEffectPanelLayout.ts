@@ -1,5 +1,5 @@
 // others
-import { EFFECT_NOISE_FIELDS, EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from '../../constants';
+import { EFFECT_NOISE_FIELDS, EFFECT_NOISE_MULTI_FIELDS, EFFECT_NUMBER_FIELDS, EFFECT_PROGRESSIVE_BLUR_FIELDS } from '../../constants';
 
 // types
 import { EffectNoiseType, EffectType } from 'types/design/enums';
@@ -31,10 +31,10 @@ export const getEffectPanelLayout = (effect: TEffect): TEffectPanelLayout => {
       };
     case EffectType.noise:
       return {
-        fields: EFFECT_NOISE_FIELDS,
+        fields: getEffectNoise(effect).noiseType === EffectNoiseType.multi ? EFFECT_NOISE_MULTI_FIELDS : EFFECT_NOISE_FIELDS,
         hasBlendMode: true,
         hasBlurModeToggle: false,
-        hasColor: true,
+        hasColor: getEffectNoise(effect).noiseType !== EffectNoiseType.multi,
         hasNoiseTypeToggle: true,
         hasSecondaryColor: getEffectNoise(effect).noiseType === EffectNoiseType.duo,
       };

@@ -178,7 +178,7 @@ describe('EffectsSection', () => {
     expect(screen.getByLabelText('Effect density')).toHaveValue('40%');
   });
 
-  it('should switch a noise to Duo, which adds a second color, and ignore Multi', () => {
+  it('should switch a noise to Multi, which drops the color row for an Opacity field, and to Duo, which adds a second color', () => {
     // Step 1: Add a noise
     const id = addRectangle();
     renderSection();
@@ -186,9 +186,11 @@ describe('EffectsSection', () => {
     fireEvent.click(screen.getByText('Noise'));
     expect(screen.queryByLabelText('Effect secondary color')).toBeNull();
 
-    // Step 2: Multi is not implemented and changes nothing
+    // Step 2: Multi takes the colors from the noise, so the color row is replaced by an Opacity field
     fireEvent.click(screen.getByText('Multi'));
-    expect(read(id).effects?.[0].noiseType).toBeUndefined();
+    expect(read(id).effects?.[0].noiseType).toBe('multi');
+    expect(screen.queryByLabelText('Effect color')).toBeNull();
+    expect(screen.getByLabelText('Effect opacity')).toBeTruthy();
 
     // Step 3: Duo shows the second color row, labelled Colors
     fireEvent.click(screen.getByText('Duo'));

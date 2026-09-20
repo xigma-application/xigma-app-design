@@ -498,6 +498,45 @@ test.describe('Design panels — Effects section', () => {
     expect(dark + red).toBeGreaterThan(0.75);
   });
 
+  test('a multi noise paints colored blobs without a color row, so the rectangle shows more than one hue', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-noise-multi-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await addEffect(page, 'Noise');
+    await page.getByText('Multi', { exact: true }).click();
+    await page.getByLabel('Effect noise size X').fill('12');
+    await page.getByLabel('Effect noise size X').press('Enter');
+    await page.getByLabel('Effect opacity').fill('100');
+    await page.getByLabel('Effect opacity').press('Enter');
+    await page.mouse.move(1750, 900);
+
+    // result — the color rows are gone
+    await expect(page.getByLabel('Effect secondary color')).toHaveCount(0);
+
+    const clip = { height: 120, width: 160, x: 720, y: 220 };
+    const readHues = async (): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const hues = new Set<number>();
+
+      for (let index = 0; index < png.width * png.height; index += 1) {
+        const [r, g, b] = [png.data[index * 4], png.data[index * 4 + 1], png.data[index * 4 + 2]];
+
+        if (Math.max(r, g, b) - Math.min(r, g, b) > 40) {
+          hues.add(r >= g && r >= b ? 0 : g >= b ? 1 : 2);
+        }
+      }
+
+      return hues.size;
+    };
+
+    // result — colored pixels dominated by different channels appear across the blobs
+    await expect.poll(readHues, { timeout: 15000 }).toBeGreaterThanOrEqual(2);
+  });
+
   test('a frame noise is drawn over the frame children, not under them', async ({ page }) => {
     const designPage = new DesignPage(page);
 

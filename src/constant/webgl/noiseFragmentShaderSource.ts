@@ -4,6 +4,7 @@ precision highp float;
 uniform vec4 u_color;
 uniform vec4 u_secondaryColor;
 uniform int u_duo;
+uniform int u_multi;
 uniform vec2 u_viewportOffset;
 uniform float u_zoom;
 uniform float u_pixelRatio;
@@ -33,6 +34,17 @@ float valueNoise(vec2 point) {
   return mix(bottom, top, blend.y);
 }
 
+vec3 multiColor(vec2 point) {
+  vec2 colorPoint = point * 0.45;
+  vec3 channels = vec3(
+    valueNoise(colorPoint + vec2(3.1, 7.7)),
+    valueNoise(colorPoint + vec2(41.3, 19.9)),
+    valueNoise(colorPoint + vec2(83.7, 61.1))
+  );
+
+  return smoothstep(0.2, 0.8, channels);
+}
+
 void main() {
   vec2 screen = vec2(gl_FragCoord.x, u_drawingBufferHeight - gl_FragCoord.y) / u_pixelRatio;
   vec2 offset = (screen - u_viewportOffset) / u_zoom - u_center;
@@ -50,6 +62,8 @@ void main() {
     : 0.0;
   float alpha = primary + secondary - primary * secondary;
 
-  outColor = vec4((u_color.rgb * primary + u_secondaryColor.rgb * secondary) / max(primary + secondary, 0.0001), alpha);
+  vec4 duoOrMono = vec4((u_color.rgb * primary + u_secondaryColor.rgb * secondary) / max(primary + secondary, 0.0001), alpha);
+
+  outColor = u_multi == 1 ? vec4(multiColor(point), primary) : duoOrMono;
 }
 `;

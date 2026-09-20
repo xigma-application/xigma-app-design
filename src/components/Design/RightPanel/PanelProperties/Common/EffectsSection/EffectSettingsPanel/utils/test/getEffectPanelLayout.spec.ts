@@ -55,6 +55,15 @@ describe('getEffectPanelLayout', () => {
     expect(layout).toMatchObject({ hasBlendMode: true, hasBlurModeToggle: false, hasColor: true, hasNoiseTypeToggle: true });
   });
 
+  it('should hide the color row and add an Opacity field for a multi noise, whose colors come from the noise itself', () => {
+    // result
+    expect(
+      getEffectPanelLayout({ ...createEffect(EffectType.noise), noiseType: EffectNoiseType.multi }).fields.map(({ key }) => key),
+    ).toEqual(['noiseSize', 'noiseSize', 'density', 'opacity']);
+    expect(getEffectPanelLayout({ ...createEffect(EffectType.noise), noiseType: EffectNoiseType.multi }).hasColor).toBe(false);
+    expect(getEffectPanelLayout({ ...createEffect(EffectType.noise), noiseType: EffectNoiseType.duo }).hasColor).toBe(true);
+  });
+
   it('should add the second color row only for a duo noise', () => {
     // result
     expect(getEffectPanelLayout(createEffect(EffectType.noise)).hasSecondaryColor).toBe(false);

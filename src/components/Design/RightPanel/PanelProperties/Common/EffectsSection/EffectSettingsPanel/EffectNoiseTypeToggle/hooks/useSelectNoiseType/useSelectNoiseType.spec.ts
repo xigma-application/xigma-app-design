@@ -7,7 +7,7 @@ import { useSelectNoiseType } from './useSelectNoiseType';
 import { EffectNoiseType } from 'types/design/enums';
 
 describe('useSelectNoiseType', () => {
-  it('should pass Mono and Duo through', () => {
+  it('should pass Mono, Duo and Multi through', () => {
     // mock
     const onChange = vi.fn();
     const { result } = renderHook(() => useSelectNoiseType(onChange));
@@ -15,21 +15,11 @@ describe('useSelectNoiseType', () => {
     // action
     result.current('duo');
     result.current('mono');
+    result.current('multi');
 
     // result
     expect(onChange).toHaveBeenNthCalledWith(1, EffectNoiseType.duo);
     expect(onChange).toHaveBeenNthCalledWith(2, EffectNoiseType.mono);
-  });
-
-  it('should ignore Multi, which is not implemented yet', () => {
-    // mock
-    const onChange = vi.fn();
-    const { result } = renderHook(() => useSelectNoiseType(onChange));
-
-    // action
-    result.current('multi');
-
-    // result
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenNthCalledWith(3, EffectNoiseType.multi);
   });
 });

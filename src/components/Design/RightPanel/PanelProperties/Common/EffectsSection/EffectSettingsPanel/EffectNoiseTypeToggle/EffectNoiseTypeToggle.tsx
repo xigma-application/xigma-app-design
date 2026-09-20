@@ -33,7 +33,7 @@ export const EffectNoiseTypeToggle: FC<TEffectNoiseTypeToggleProps> = ({ noiseTy
       e2eValue="effect-noise-type"
       onChange={onSelect}
       toggleButtons={NOISE_TYPES.map((type) => ({ label: t(`${translationNameSpace}.settings.noiseType.${type}`), value: type }))}
-      value={noiseType === EffectNoiseType.multi ? EffectNoiseType.mono : noiseType}
+      value={noiseType}
     />
   );
 };
