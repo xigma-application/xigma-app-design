@@ -133,6 +133,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       150,
       IDENTITY_VIEWPORT,
       false,
+      undefined,
     );
     expect(drawVectorFillPaintsMock).toHaveBeenNthCalledWith(
       2,
@@ -153,6 +154,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       150,
       IDENTITY_VIEWPORT,
       false,
+      undefined,
     );
   });
 

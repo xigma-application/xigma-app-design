@@ -9,6 +9,22 @@ export const translationNameSpace = `${parentNameSpace}.export`;
 
 export const EXPORT_PREVIEW_SIZE = 256;
 
+export const EXPORT_JPEG_QUALITY = 0.92;
+
+export const EXPORT_FORMAT_EXTENSION: Record<ExportFormat, string> = {
+  [ExportFormat.jpeg]: 'jpg',
+  [ExportFormat.pdf]: 'pdf',
+  [ExportFormat.png]: 'png',
+  [ExportFormat.svg]: 'svg',
+};
+
+export const EXPORT_FORMAT_MIME_TYPE: Record<ExportFormat, string> = {
+  [ExportFormat.jpeg]: 'image/jpeg',
+  [ExportFormat.pdf]: '',
+  [ExportFormat.png]: 'image/png',
+  [ExportFormat.svg]: '',
+};
+
 export const EXPORT_SCALE_MENU_OPTIONS: ExportScale[] = [
   ExportScale.half,
   ExportScale.threeQuarters,

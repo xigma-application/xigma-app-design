@@ -48,3 +48,5 @@ export type TLineSegment = {
 export type TResizeHandle = 'e' | 'n' | 'ne' | 'nw' | 's' | 'se' | 'sw' | 'w';
 
 export type TCornerRadiusHandle = 'ne' | 'nw' | 'se' | 'sw';
+
+export type TImageFilterQuality = 'basic' | 'detailed';

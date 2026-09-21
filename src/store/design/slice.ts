@@ -114,6 +114,7 @@ const initialState: TDesignState = {
   imageEditor: null,
   imageFillPickerFocus: null,
   isActionsPanelOpen: false,
+  isExporting: false,
   isGridSettingsPanelOpen: false,
   isMediaToolArmed: false,
   isPatternSourcePicking: false,
@@ -243,6 +244,9 @@ const designSlice = createSlice({
     setImageFillPickerFocus: (state, action: PayloadAction<TImageFillPickerFocus | null>) => {
       state.imageFillPickerFocus = action.payload;
     },
+    setIsExporting: (state, action: PayloadAction<boolean>) => {
+      state.isExporting = action.payload;
+    },
     setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
       state.isMediaToolArmed = action.payload;
     },
@@ -370,6 +374,7 @@ export const {
   setHoveredDimensionField,
   setImageEditor,
   setImageFillPickerFocus,
+  setIsExporting,
   setMediaToolArmed,
   setMinMaxRevealed,
   setOpenPropertyPanel,

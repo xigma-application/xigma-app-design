@@ -13,7 +13,7 @@ export const drawVectorNodeResizeSnapshotFace = (
   snapshot: TVectorNodeResizeSnapshot,
   face: TVectorNodeResizeSnapshot['facesByPaint'][number],
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
   const {
     cache: imageTextureCache,
     gradientProgram,
@@ -53,6 +53,7 @@ export const drawVectorNodeResizeSnapshotFace = (
     canvasHeight,
     viewport,
     isAlphaWriteEnabled,
+    imageFilterQuality,
     {
       center: newCenter,
       degrees: snapshot.rotation,

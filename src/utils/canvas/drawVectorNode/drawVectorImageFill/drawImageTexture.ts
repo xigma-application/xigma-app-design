@@ -1,5 +1,5 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TTextureSize } from '../../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
@@ -67,6 +67,7 @@ export const drawImageTexture = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha: number,
+  imageFilterQuality: TImageFilterQuality,
   rotation: number,
   scaleMode: TImageScaleMode,
   crop: TImageCrop | undefined,
@@ -102,12 +103,15 @@ export const drawImageTexture = (
   const highlightsLocation = gl.getUniformLocation(imageProgram, 'u_highlights');
   const shadowsLocation = gl.getUniformLocation(imageProgram, 'u_shadows');
   const stride = 4 * Float32Array.BYTES_PER_ELEMENT;
+  const minFilter = imageFilterQuality === 'detailed' ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR;
 
   gl.useProgram(imageProgram);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapMode);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapMode);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.uniform1i(textureLocation, 0);
   gl.uniform1f(opacityLocation, alpha);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

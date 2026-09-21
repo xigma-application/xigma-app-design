@@ -98,6 +98,7 @@ describe('drawVectorNodeResizeSnapshotFace', () => {
       150,
       IDENTITY_VIEWPORT,
       false,
+      undefined,
       { center: { x: 10, y: 5 }, degrees: 0, localBounds: { height: 10, width: 20, x: 0, y: 0 } },
     );
   });

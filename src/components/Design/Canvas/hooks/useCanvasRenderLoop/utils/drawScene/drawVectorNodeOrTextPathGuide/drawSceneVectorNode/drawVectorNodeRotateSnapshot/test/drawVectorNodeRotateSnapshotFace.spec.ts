@@ -85,6 +85,7 @@ describe('drawVectorNodeRotateSnapshotFace', () => {
       150,
       IDENTITY_VIEWPORT,
       false,
+      undefined,
       { center: { x: 0, y: 0 }, degrees: 90, localBounds: { height: 10, width: 10, x: 0, y: 0 } },
     );
 

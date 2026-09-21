@@ -110,6 +110,8 @@ export const selectImageFillPickerFocus = (state: RootState): TImageFillPickerFo
 
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
 
+export const selectIsExporting = (state: RootState): boolean => Boolean(state.design.isExporting);
+
 export const selectIsGridSettingsPanelOpen = (state: RootState): boolean => Boolean(state.design.isGridSettingsPanelOpen);
 
 export const selectIsMediaToolArmed = (state: RootState): boolean => state.design.isMediaToolArmed;

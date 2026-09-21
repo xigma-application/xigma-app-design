@@ -9,9 +9,14 @@ import { UITools } from 'shared';
 
 // hooks
 import { useExportSection } from './hooks/useExportSection/useExportSection';
+import { useHandleExportClick } from './hooks/useHandleExportClick';
 
 // others
 import { translationNameSpace } from './constants';
+
+// store
+import { selectIsExporting } from 'store/design/selectors';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './export.module.scss';
@@ -32,6 +37,8 @@ const Export: FC = () => {
     registerRow,
     settings,
   } = useExportSection();
+  const isExporting = useAppSelector(selectIsExporting);
+  const handleExportClick = useHandleExportClick(node, settings);
 
   return (
     <UITools.Section
@@ -62,7 +69,13 @@ const Export: FC = () => {
       </div>
       {settings.length > 0 && node && (
         <div className={styles.Export__footer}>
-          <UITools.Button className={styles.Export__exportButton} color="secondary" variant="outline">
+          <UITools.Button
+            className={styles.Export__exportButton}
+            color="secondary"
+            disabled={isExporting}
+            onClick={handleExportClick}
+            variant="outline"
+          >
             {t(`${translationNameSpace}.exportButton`, { name: node.name })}
           </UITools.Button>
           <ExportPreview nodeId={node.id} />

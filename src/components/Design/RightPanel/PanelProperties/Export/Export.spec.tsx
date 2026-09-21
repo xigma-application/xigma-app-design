@@ -365,6 +365,25 @@ describe('Export behaviors', () => {
     expect(screen.getByRole('button', { name: 'Export My Frame' })).toBeInTheDocument();
   });
 
+  it('should disable the export button while exporting, then re-enable it once done', async () => {
+    // before
+    addAndSelectFrame('My Frame');
+    renderExport();
+    addRow();
+
+    const button = screen.getByRole('button', { name: 'Export My Frame' });
+
+    // action
+    fireEvent.click(button);
+
+    // result — no export renderer is registered in this test, so nothing is actually rendered/downloaded,
+    // but the click still flips the exporting flag synchronously before it resolves
+    expect(button).toBeDisabled();
+
+    // result
+    await waitFor(() => expect(button).not.toBeDisabled());
+  });
+
   it('should show the preview thumbnail once expanded', async () => {
     // mock
     const sampler = vi.fn().mockResolvedValue('data:image/png;base64,abc');

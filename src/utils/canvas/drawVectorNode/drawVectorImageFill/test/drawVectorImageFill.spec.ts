@@ -19,6 +19,8 @@ const createGlMock = (): WebGL2RenderingContext =>
     FLOAT: 5126,
     INVERT: 5386,
     KEEP: 7680,
+    LINEAR: 9729,
+    LINEAR_MIPMAP_LINEAR: 9987,
     NOTEQUAL: 517,
     REPEAT: 10497,
     STATIC_DRAW: 35044,
@@ -26,6 +28,8 @@ const createGlMock = (): WebGL2RenderingContext =>
     STENCIL_TEST: 2960,
     TEXTURE0: 33984,
     TEXTURE_2D: 3553,
+    TEXTURE_MAG_FILTER: 10240,
+    TEXTURE_MIN_FILTER: 10241,
     TEXTURE_WRAP_S: 10242,
     TEXTURE_WRAP_T: 10243,
     TRIANGLES: 4,
@@ -397,6 +401,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -441,6 +446,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -483,6 +489,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       90,
     );
 
@@ -524,6 +531,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       90,
     );
 
@@ -603,6 +611,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       0.4,
+      'basic',
     );
 
     // result
@@ -637,6 +646,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fit',
     );
@@ -679,6 +689,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
     );
@@ -718,6 +729,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fit',
       { height: 15, rotation: 0, width: 20, x: 10, y: 5 },
@@ -760,6 +772,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       { height: 40, rotation: 90, width: 40, x: 0, y: 0 },
@@ -804,6 +817,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -849,6 +863,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       { height: 40, rotation: 90, width: 40, x: 0, y: 0 },
@@ -894,6 +909,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'tile',
       undefined,
@@ -961,6 +977,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'tile',
     );
@@ -1061,6 +1078,7 @@ describe('drawVectorImageFill', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -1079,5 +1097,111 @@ describe('drawVectorImageFill', () => {
     expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_tint, 15);
     expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_highlights, 30);
     expect(gl.uniform1f).toHaveBeenCalledWith(locations.u_shadows, -30);
+  });
+
+  it('should use plain linear filtering (no mipmaps) for basic image quality', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      'basic',
+    );
+
+    // result
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  });
+
+  it('should use mipmapped linear filtering for detailed image quality on a real (non-placeholder) texture', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrLoadTextureMock.mockReturnValue(texture);
+
+    // before
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      REF,
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      'detailed',
+    );
+
+    // result
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  });
+
+  it('should never use mipmapped filtering for the placeholder texture, even when detailed quality is requested', () => {
+    // mock — the placeholder never gets a mipmap chain generated, so sampling it with a mipmap filter would render it invisible
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const imageProgram = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const imageTextureCache = new Map<string, WebGLTexture>();
+    const imageTextureSizeCache = new Map<string, { height: number; width: number }>();
+
+    getOrCreateImagePlaceholderTextureMock.mockReturnValue(texture);
+
+    // before — no ref, so the placeholder texture is used
+    drawVectorImageFill(
+      gl,
+      program,
+      imageProgram,
+      buffer,
+      null,
+      null,
+      faces,
+      '',
+      imageTextureCache,
+      imageTextureSizeCache,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      1,
+      'detailed',
+    );
+
+    // result
+    expect(gl.texParameteri).toHaveBeenCalledWith(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   });
 });

@@ -9,3 +9,5 @@ export type TExportSetting = {
   scale: ExportScale;
   suffix: string;
 };
+
+export type TExportFile = { blob: Blob; fileName: string };

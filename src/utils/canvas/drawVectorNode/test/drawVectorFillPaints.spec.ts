@@ -66,6 +66,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -109,6 +110,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -152,6 +154,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -183,6 +186,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -213,6 +217,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result — no adjustments param exists on TVideoPaint, so it's forwarded as undefined
@@ -232,6 +237,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -274,6 +280,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -317,6 +324,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result — the actual real-vs-placeholder texture resolution now lives inside drawVectorImageFill
@@ -337,6 +345,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -374,6 +383,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -406,6 +416,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
       boxRotation,
     );
 
@@ -426,6 +437,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'basic',
       0,
       'fill',
       undefined,
@@ -460,10 +472,11 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][15]).toBe(180);
+    expect(drawVectorImageFillMock.mock.calls[0][16]).toBe(180);
   });
 
   it('should pass the image paint scale mode through to the image fill drawer', () => {
@@ -489,10 +502,11 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][16]).toBe('fit');
+    expect(drawVectorImageFillMock.mock.calls[0][17]).toBe('fit');
   });
 
   it('should pass the image paint crop through to the image fill drawer', () => {
@@ -519,10 +533,11 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][17]).toBe(crop);
+    expect(drawVectorImageFillMock.mock.calls[0][18]).toBe(crop);
   });
 
   it('should pass the image paint adjustments through to the image fill drawer', () => {
@@ -549,10 +564,11 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
-    expect(drawVectorImageFillMock.mock.calls[0][22]).toBe(adjustments);
+    expect(drawVectorImageFillMock.mock.calls[0][23]).toBe(adjustments);
   });
 
   it('should convert a partial image paint opacity (0-100) into the 0-1 alpha the image shader expects', () => {
@@ -578,10 +594,41 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
     expect(drawVectorImageFillMock.mock.calls[0][14]).toBe(0.4);
+  });
+
+  it('should pass the requested image filter quality through to the image fill drawer', () => {
+    // mock
+    const image: TImagePaint = { opacity: 100, ref: 'blob:asset-1', rotation: 0, scaleMode: 'fill', type: 'image' };
+
+    // before
+    drawVectorFillPaints(
+      gl,
+      program,
+      gradientProgram,
+      patternTileProgram,
+      imageProgram,
+      imageTextureCache,
+      imageTextureSizeCache,
+      buffer,
+      null,
+      null,
+      faces,
+      [image],
+      [],
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      'detailed',
+    );
+
+    // result
+    expect(drawVectorImageFillMock.mock.calls[0][15]).toBe('detailed');
   });
 
   it('should draw a pattern layer as a placeholder through the solid program, not as a gradient', () => {
@@ -618,6 +665,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
     );
 
     // result
@@ -677,6 +725,7 @@ describe('drawVectorFillPaints', () => {
       100,
       IDENTITY_VIEWPORT,
       false,
+      'basic',
       boxRotation,
     );
 

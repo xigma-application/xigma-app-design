@@ -1,5 +1,5 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -29,6 +29,7 @@ export const drawVectorFillPaints = (
   canvasHeight: number,
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
+  imageFilterQuality: TImageFilterQuality | undefined,
   boxRotation?: TBoxFillRotation,
 ): void => {
   paints.forEach((paint, index) => {
@@ -85,6 +86,7 @@ export const drawVectorFillPaints = (
           viewport,
           isAlphaWriteEnabled,
           alpha,
+          imageFilterQuality,
           paint.rotation,
           paint.scaleMode,
           paint.crop,

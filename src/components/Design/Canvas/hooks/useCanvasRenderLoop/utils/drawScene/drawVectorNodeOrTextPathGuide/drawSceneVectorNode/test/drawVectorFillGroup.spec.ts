@@ -118,6 +118,7 @@ describe('drawVectorFillGroup', () => {
       context.viewport,
       false,
       undefined,
+      undefined,
     );
     expect(pool.acquire).not.toHaveBeenCalled();
     expect(compositeBlend).not.toHaveBeenCalled();
@@ -154,6 +155,7 @@ describe('drawVectorFillGroup', () => {
       200,
       context.viewport,
       false,
+      undefined,
       boxRotation,
     );
   });
@@ -204,6 +206,7 @@ describe('drawVectorFillGroup', () => {
       200,
       context.viewport,
       true,
+      undefined,
       undefined,
     );
 
@@ -260,6 +263,7 @@ describe('drawVectorFillGroup', () => {
       200,
       context.viewport,
       true,
+      undefined,
       boxRotation,
     );
   });

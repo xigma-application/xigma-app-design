@@ -5,6 +5,7 @@ import { FC } from 'react';
 import ActionsButton from './ActionsButton/ActionsButton';
 import ActionsPanel from './ActionsButton/ActionsPanel/ActionsPanel';
 import DesignHint from './DesignHint/DesignHint';
+import ExportHint from './ExportHint/ExportHint';
 import ImageCropToolbar from './ImageCropToolbar/ImageCropToolbar';
 import ImageEditToolbar from './ImageEditToolbar/ImageEditToolbar';
 import MediaToolHint from './MediaToolHint/MediaToolHint';
@@ -43,6 +44,7 @@ const Toolbar: FC = () => {
           <ImageCropToolbar />
           <MediaToolHint />
           <DesignHint />
+          <ExportHint />
         </div>
       </PopoverPrimitive.Anchor>
       <ActionsPanel />

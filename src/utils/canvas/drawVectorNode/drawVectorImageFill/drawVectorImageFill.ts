@@ -2,7 +2,7 @@
 import { IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX } from 'constant/canvas';
 
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -35,6 +35,7 @@ export const drawVectorImageFill = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha = 1,
+  imageFilterQuality: TImageFilterQuality | undefined = 'basic',
   rotation = 0,
   scaleMode: TImageScaleMode = 'fill',
   crop?: TImageCrop,
@@ -52,6 +53,9 @@ export const drawVectorImageFill = (
       : getOrCreateImagePlaceholderTexture(gl, imageTextureCache);
 
     if (texture) {
+      // the placeholder texture never gets a mipmap chain generated, so it must never be sampled with a mipmap filter
+      const resolvedFilterQuality: TImageFilterQuality = ref ? imageFilterQuality : 'basic';
+
       drawImageTexture(
         gl,
         imageProgram,
@@ -66,6 +70,7 @@ export const drawVectorImageFill = (
         viewport,
         isAlphaWriteEnabled,
         alpha,
+        resolvedFilterQuality,
         rotation,
         scaleMode,
         crop,

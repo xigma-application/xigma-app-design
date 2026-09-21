@@ -1011,6 +1011,7 @@
   "design.toolbar.actionsPanel.suggestions": "Suggestions",
   "design.toolbar.actionsPanel.tabAll": "All",
   "design.toolbar.actionsPanel.tabPluginsWidgets": "Plugins & widgets",
+  "design.toolbar.exportHint.exporting": "Exporting...",
   "design.toolbar.imageCropToolbar.aspectRatio": "Aspect ratio",
   "design.toolbar.imageCropToolbar.circle": "Circle (1:1)",
   "design.toolbar.imageCropToolbar.confirm": "Confirm",

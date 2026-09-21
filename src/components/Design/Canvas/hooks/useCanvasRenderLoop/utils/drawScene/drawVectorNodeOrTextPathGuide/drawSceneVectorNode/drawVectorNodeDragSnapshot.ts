@@ -7,7 +7,7 @@ import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFill
 import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawVectorThickStrokeVertices';
 
 export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot: TVectorNodeDragSnapshot): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, viewport } = context;
   const {
     cache: imageTextureCache,
     dragGradientProgram,
@@ -46,6 +46,7 @@ export const drawVectorNodeDragSnapshot = (context: TDrawSceneContext, snapshot:
       canvasHeight,
       viewport,
       isAlphaWriteEnabled,
+      imageFilterQuality,
     );
   });
 

@@ -41,6 +41,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TCanvasRefsProviderProps } from './types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TDraftEntity } from 'types/design/types';
+import { TExportRenderRequest } from 'utils/canvas/exportRender/types';
 import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
@@ -78,6 +79,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorSampleRequestRef = useRef<TColorSampleRequest | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
+  const exportRenderRequestRef = useRef<TExportRenderRequest | null>(null);
   const patternThumbnailRequestRef = useRef<TPatternThumbnailRequest | null>(null);
 
   const refs = useMemo<TCanvasRefs>(
@@ -88,6 +90,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       cornerRadius: cornerRadiusRefs,
       draftRef,
       ellipseArc: ellipseArcRefs,
+      exportRenderRequestRef,
       frameName: frameNameRefs,
       gradientEndpointMove: gradientEndpointMoveRefs,
       gradientRadius: gradientRadiusRefs,

@@ -108,6 +108,7 @@ export type TDesignState = {
   imageEditor: TImageEditorState | null;
   imageFillPickerFocus?: TImageFillPickerFocus | null;
   isActionsPanelOpen: boolean;
+  isExporting?: boolean;
   isGridSettingsPanelOpen?: boolean;
   isMediaToolArmed: boolean;
   isPatternSourcePicking: boolean;

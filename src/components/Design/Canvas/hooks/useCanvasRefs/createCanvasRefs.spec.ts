@@ -25,6 +25,7 @@ describe('createCanvasRefs behaviors', () => {
         ellipseArcRatioDragRef: { current: null },
         ellipseArcRotateDragRef: { current: null },
       },
+      exportRenderRequestRef: { current: null },
       frameName: { editingLabelRef: { current: null } },
       gradientEndpointMove: { gradientEndpointMoveDragRef: { current: null } },
       gradientRadius: { gradientRadiusDragRef: { current: null } },

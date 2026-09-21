@@ -1,6 +1,6 @@
 // types
 import { TImageRenderContext } from '../../types';
-import { TPoint } from 'types/canvas';
+import { TImageFilterQuality, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 export type TDrawContext = {
@@ -8,6 +8,7 @@ export type TDrawContext = {
   canvasHeight: number;
   canvasWidth: number;
   gl: WebGL2RenderingContext;
+  imageFilterQuality?: TImageFilterQuality;
   program: WebGLProgram;
   viewport: TViewport;
 };

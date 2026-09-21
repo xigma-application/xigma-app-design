@@ -16,6 +16,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     UNSIGNED_BYTE: 5121,
     bindTexture: vi.fn(),
     createTexture: vi.fn((): WebGLTexture | null => ({})),
+    generateMipmap: vi.fn(),
     texImage2D: vi.fn(),
     texParameteri: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
@@ -85,6 +86,7 @@ describe('getOrLoadTexture', () => {
     // result
     expect(gl.texImage2D).toHaveBeenCalledWith(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, texture);
+    expect(gl.generateMipmap).toHaveBeenCalledWith(gl.TEXTURE_2D);
   });
 
   it('should record the loaded image natural size in the given size cache', () => {

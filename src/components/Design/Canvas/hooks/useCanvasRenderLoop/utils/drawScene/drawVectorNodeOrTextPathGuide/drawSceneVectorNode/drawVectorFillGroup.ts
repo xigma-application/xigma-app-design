@@ -21,7 +21,7 @@ const drawIsolatedFillGroup = (
   blendMode: BlendMode,
   boxRotation?: TBoxFillRotation,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
   const pool = imageContext.renderTargetPool;
   const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const previousViewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
@@ -65,6 +65,7 @@ const drawIsolatedFillGroup = (
     canvasHeight,
     viewport,
     true,
+    imageFilterQuality,
     boxRotation,
   );
 
@@ -93,7 +94,7 @@ export const drawVectorFillGroup = (
   if (blendMode) {
     drawIsolatedFillGroup(context, faceBufferCache, nodeBounds, polygons, paint, patternSourceTiles, blendMode, boxRotation);
   } else {
-    const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
+    const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
 
     drawVectorFillPaints(
       gl,
@@ -113,6 +114,7 @@ export const drawVectorFillGroup = (
       canvasHeight,
       viewport,
       imageContext.isAlphaWriteEnabled,
+      imageFilterQuality,
       boxRotation,
     );
   }

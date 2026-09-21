@@ -1031,6 +1031,7 @@
   "design.toolbar.actionsPanel.suggestions": "Sugestie",
   "design.toolbar.actionsPanel.tabAll": "Wszystko",
   "design.toolbar.actionsPanel.tabPluginsWidgets": "Wtyczki i widżety",
+  "design.toolbar.exportHint.exporting": "Eksportowanie...",
   "design.toolbar.imageCropToolbar.aspectRatio": "Proporcje",
   "design.toolbar.imageCropToolbar.circle": "Koło (1:1)",
   "design.toolbar.imageCropToolbar.confirm": "Zatwierdź",

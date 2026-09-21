@@ -317,6 +317,23 @@ updates every fill and stroke that shares it, in a single undo step, and rows au
 split apart as an edit makes them match (or stop matching) another. Each row can only be changed to a
 solid, gradient or shader color, never an image, video or pattern, and has no contrast checker.
 
+## Stage 32 — Export, Frame and Rectangle
+
+A Frame or Rectangle's right panel gets an Export section: add a row from the plus button, each one
+picks a scale (0.5x–4x, or a fixed 512px width/height) and a format, plus a settings popover for a
+filename suffix and a few more options. Rows can be dragged to reorder or clicked to select, same as
+Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thumbnail of the shape.
+
+- [x] PNG and JPEG rows actually export, at the row's own scale; exporting more than one row at once
+      downloads a zip instead, with every file named uniquely
+- [x] a small "Exporting..." message shows above the toolbar while a download is being prepared
+- [x] "Ignore overlapping layers" actually changes the export: on (default) it exports only the
+      shape's own content, off includes whatever else on the canvas visually overlaps it too
+- [x] "Image resampling" (Basic/Detailed) actually changes how any image or video fill inside the
+      export is filtered when scaled down — Detailed looks noticeably sharper than a plain resize
+- [ ] SVG and PDF rows are listed in the format menu but don't export anything yet
+- [ ] color profile is still cosmetic — every export stays plain sRGB regardless of the setting
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.
