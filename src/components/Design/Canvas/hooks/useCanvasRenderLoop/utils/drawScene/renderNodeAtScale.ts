@@ -1,6 +1,5 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TColorProfile } from 'types/canvas';
 import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
@@ -9,7 +8,6 @@ import { createTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/c
 import { disposeTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/disposeTarget';
 import { drawLeafNode } from './drawLeafNode';
 import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
-import { setActiveColorProfile } from 'utils/canvas/activeColorProfile';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 
 export type TRenderedNodePixels = { height: number; pixels: Uint8Array; width: number };
@@ -21,7 +19,6 @@ export const renderNodeAtScale = (
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
   scale: number,
-  colorProfile: TColorProfile = 'srgb',
 ): TRenderedNodePixels | null => {
   const sourceNode = nodesById[sourceNodeId];
 
@@ -55,7 +52,6 @@ export const renderNodeAtScale = (
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      setActiveColorProfile(colorProfile);
 
       nodesToDraw.forEach((node) => {
         drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0);
@@ -64,7 +60,6 @@ export const renderNodeAtScale = (
       const pixels = new Uint8Array(width * height * 4);
 
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      setActiveColorProfile('srgb');
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer);
       gl.viewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);

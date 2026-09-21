@@ -1,6 +1,5 @@
 // utils
 import { getOrLoadTexture } from '../getOrLoadTexture';
-import { setActiveColorProfile } from '../activeColorProfile';
 
 type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
 
@@ -39,8 +38,6 @@ const stubImageConstructor = (): { getLastImage: () => TFakeImage } => {
 describe('getOrLoadTexture', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-    setActiveColorProfile('srgb');
   });
 
   it('should return the cached texture without creating a new one', () => {
@@ -133,81 +130,5 @@ describe('getOrLoadTexture', () => {
     // result
     expect(getOrLoadTexture(gl, cache, 'image.png')).toBeNull();
     expect(gl.texImage2D).not.toHaveBeenCalled();
-  });
-
-  it('should cache a Display P3 export render separately from the same src used with the sRGB (live canvas) profile', () => {
-    // mock
-    stubImageConstructor();
-
-    const gl = createGlMock();
-    const cache = new Map<string, WebGLTexture>();
-
-    // before — first load at the default (srgb) profile
-    const srgbTexture = getOrLoadTexture(gl, cache, 'image.png');
-
-    setActiveColorProfile('displayP3');
-
-    // action — same src, but now under the Display P3 profile
-    const p3Texture = getOrLoadTexture(gl, cache, 'image.png');
-
-    // result — two distinct cache entries/textures, so a live sRGB draw of the same image is never
-    // silently corrupted by a Display P3 export (or vice versa)
-    expect(p3Texture).not.toBe(srgbTexture);
-    expect(cache.size).toBe(2);
-  });
-
-  it('should draw the image onto an intermediate Display P3 canvas and upload its gamut-mapped pixels when exporting with the Display P3 profile', () => {
-    // mock
-    const { getLastImage } = stubImageConstructor();
-    const gl = createGlMock();
-    const cache = new Map<string, WebGLTexture>();
-    const drawImage = vi.fn();
-    const p3ImageData = { data: new Uint8ClampedArray(4) };
-    const getImageData = vi.fn().mockReturnValue(p3ImageData);
-    const getContext = vi.fn().mockReturnValue({ drawImage, getImageData });
-
-    vi.spyOn(document, 'createElement').mockReturnValue({ getContext, height: 0, width: 0 } as unknown as HTMLCanvasElement);
-
-    setActiveColorProfile('displayP3');
-
-    // before
-    getOrLoadTexture(gl, cache, 'image.png');
-
-    const image = getLastImage();
-
-    // action
-    image.onload?.();
-
-    // result — decoded through a { colorSpace: 'display-p3' } canvas, not uploaded straight from the <img>
-    expect(getContext).toHaveBeenCalledWith('2d', { colorSpace: 'display-p3' });
-    expect(drawImage).toHaveBeenCalledWith(image, 0, 0);
-    expect(getImageData).toHaveBeenCalledWith(0, 0, 10, 20, { colorSpace: 'display-p3' });
-    expect(gl.texImage2D).toHaveBeenCalledWith(gl.TEXTURE_2D, 0, gl.RGBA, 10, 20, 0, gl.RGBA, gl.UNSIGNED_BYTE, p3ImageData.data);
-  });
-
-  it('should fall back to uploading the plain <img> element when a Display P3 canvas context is unavailable', () => {
-    // mock — mirrors jsdom's own behavior (canvas 2D context stubbed to null without the optional `canvas` package)
-    const { getLastImage } = stubImageConstructor();
-    const gl = createGlMock();
-    const cache = new Map<string, WebGLTexture>();
-
-    vi.spyOn(document, 'createElement').mockReturnValue({
-      getContext: vi.fn().mockReturnValue(null),
-      height: 0,
-      width: 0,
-    } as unknown as HTMLCanvasElement);
-
-    setActiveColorProfile('displayP3');
-
-    // before
-    getOrLoadTexture(gl, cache, 'image.png');
-
-    const image = getLastImage();
-
-    // action
-    image.onload?.();
-
-    // result
-    expect(gl.texImage2D).toHaveBeenCalledWith(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
   });
 });

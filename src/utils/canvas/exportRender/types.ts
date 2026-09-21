@@ -1,10 +1,9 @@
 // types
-import { TColorProfile, TImageFilterQuality } from 'types/canvas';
+import { TImageFilterQuality } from 'types/canvas';
 
 export type TExportRenderedPixels = { height: number; pixels: Uint8Array; width: number };
 
 export type TExportRenderRequest = {
-  colorProfile: TColorProfile;
   ignoreOverlappingLayers: boolean;
   imageFilterQuality: TImageFilterQuality;
   nodeId: string;
@@ -17,5 +16,4 @@ export type TExportRenderer = (
   scale: number,
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,
-  colorProfile: TColorProfile,
 ) => Promise<TExportRenderedPixels | null>;

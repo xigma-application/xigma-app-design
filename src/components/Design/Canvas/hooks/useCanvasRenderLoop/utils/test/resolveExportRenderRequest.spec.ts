@@ -66,7 +66,6 @@ describe('resolveExportRenderRequest', () => {
     const nodesToDraw = [{ id: 'r1' }];
 
     refs.exportRenderRequestRef.current = {
-      colorProfile: 'displayP3',
       ignoreOverlappingLayers: true,
       imageFilterQuality: 'detailed',
       nodeId: 'r1',
@@ -97,7 +96,6 @@ describe('resolveExportRenderRequest', () => {
       expect.any(Object),
       refs,
       2,
-      'displayP3',
     );
     expect(onResolve).toHaveBeenCalledWith(pixels);
     expect(refs.exportRenderRequestRef.current).toBeNull();
@@ -108,7 +106,6 @@ describe('resolveExportRenderRequest', () => {
     const onResolve = vi.fn();
 
     refs.exportRenderRequestRef.current = {
-      colorProfile: 'srgb',
       ignoreOverlappingLayers: false,
       imageFilterQuality: 'basic',
       nodeId: 'missing',

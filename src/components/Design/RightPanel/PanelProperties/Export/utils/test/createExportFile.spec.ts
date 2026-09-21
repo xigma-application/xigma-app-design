@@ -80,7 +80,7 @@ describe('createExportFile', () => {
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 'srgb');
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels.pixels, pixels.width, pixels.height, 'image/png', undefined, 'srgb');
     expect(result).toEqual({ blob, fileName: 'Icon.png' });
   });
@@ -105,7 +105,7 @@ describe('createExportFile', () => {
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, false, ExportImageResampling.basic, 'srgb');
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, false, ExportImageResampling.basic);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels.pixels, pixels.width, pixels.height, 'image/jpeg', 0.92, 'srgb');
     expect(result).toEqual({ blob, fileName: 'Icon.jpg' });
   });
@@ -130,7 +130,7 @@ describe('createExportFile', () => {
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed, 'srgb');
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed);
   });
 
   it('should render and encode using the Display P3 target when that color profile is requested', async () => {
@@ -145,7 +145,7 @@ describe('createExportFile', () => {
     await createExportFile('node-a', ExportFormat.png, 1, 'Icon.png', true, ExportImageResampling.detailed, ExportColorProfile.displayP3);
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed, 'displayP3');
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(
       pixels.pixels,
       pixels.width,

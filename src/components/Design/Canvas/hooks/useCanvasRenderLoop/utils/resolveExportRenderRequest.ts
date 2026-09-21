@@ -37,6 +37,6 @@ export const resolveExportRenderRequest = (
       viewport: { x: 0, y: 0, zoom: 1 },
     };
 
-    request.onResolve(renderNodeAtScale(context, request.nodeId, nodesToDraw, nodesById, refs, request.scale, request.colorProfile));
+    request.onResolve(renderNodeAtScale(context, request.nodeId, nodesToDraw, nodesById, refs, request.scale));
   }
 };

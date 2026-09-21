@@ -19,8 +19,7 @@ export const createExportFile = async (
   imageResampling: ExportImageResampling,
   colorProfile: ExportColorProfile,
 ): Promise<TExportFile | null> => {
-  const colorProfileTarget = getColorProfileTarget(colorProfile);
-  const rendered = await renderNodeForExport(nodeId, scale, ignoreOverlappingLayers, imageResampling, colorProfileTarget);
+  const rendered = await renderNodeForExport(nodeId, scale, ignoreOverlappingLayers, imageResampling);
 
   if (rendered) {
     const quality = format === ExportFormat.jpeg ? EXPORT_JPEG_QUALITY : undefined;
@@ -30,7 +29,7 @@ export const createExportFile = async (
       rendered.height,
       EXPORT_FORMAT_MIME_TYPE[format],
       quality,
-      colorProfileTarget,
+      getColorProfileTarget(colorProfile),
     );
 
     if (blob) {

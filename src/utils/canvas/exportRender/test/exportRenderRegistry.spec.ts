@@ -4,7 +4,7 @@ import { registerExportRenderer, renderNodeForExport } from '../exportRenderRegi
 describe('exportRenderRegistry', () => {
   it('should resolve null when no renderer is registered', async () => {
     // action
-    const result = await renderNodeForExport('node-a', 2, true, 'detailed', 'srgb');
+    const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
     expect(result).toBeNull();
@@ -19,10 +19,10 @@ describe('exportRenderRegistry', () => {
     const unregister = registerExportRenderer(renderer);
 
     // action
-    const result = await renderNodeForExport('node-a', 2, true, 'detailed', 'srgb');
+    const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
-    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed', 'srgb');
+    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed');
     expect(result).toBe(pixels);
 
     // after
@@ -39,7 +39,7 @@ describe('exportRenderRegistry', () => {
     unregister();
 
     // action
-    const result = await renderNodeForExport('node-a', 2, true, 'detailed', 'srgb');
+    const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
     expect(renderer).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('exportRenderRegistry', () => {
     unregisterFirst();
 
     // action
-    const result = await renderNodeForExport('node-a', 2, true, 'detailed', 'srgb');
+    const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
     expect(result).toBe(secondPixels);

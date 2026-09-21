@@ -6,7 +6,6 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { getActiveColorProfile } from 'utils/canvas/activeColorProfile';
 import { renderNodeAtScale } from '../renderNodeAtScale';
 
 const drawLeafNodeMock = vi.fn();
@@ -185,47 +184,5 @@ describe('renderNodeAtScale', () => {
     // result
     expect(drawLeafNodeMock).toHaveBeenCalledTimes(1);
     expect(drawLeafNodeMock).toHaveBeenCalledWith(expect.anything(), sibling, new Map(), refs, nodesById, null, 0);
-  });
-
-  it('should default the active color profile to srgb when none is given', () => {
-    // mock
-    const gl = createGlMock();
-
-    createTargetMock.mockReturnValue({ framebuffer: {}, height: 20, texture: {}, width: 20 });
-
-    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
-    const source = rect('r1');
-
-    drawLeafNodeMock.mockImplementation(() => {
-      expect(getActiveColorProfile()).toBe('srgb');
-    });
-
-    // before / result
-    renderNodeAtScale(context, 'r1', [source], { r1: source }, refs, 1);
-
-    expect(drawLeafNodeMock).toHaveBeenCalledTimes(1);
-    expect(getActiveColorProfile()).toBe('srgb');
-  });
-
-  it('should set the active color profile to displayP3 while drawing, then reset it to srgb afterward', () => {
-    // mock
-    const gl = createGlMock();
-
-    createTargetMock.mockReturnValue({ framebuffer: {}, height: 20, texture: {}, width: 20 });
-
-    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
-    const source = rect('r1');
-
-    drawLeafNodeMock.mockImplementation(() => {
-      expect(getActiveColorProfile()).toBe('displayP3');
-    });
-
-    // before
-    renderNodeAtScale(context, 'r1', [source], { r1: source }, refs, 1, 'displayP3');
-
-    // result — drawLeafNodeMock's own assertion (above) proves it was 'displayP3' during the draw;
-    // this proves it doesn't leak into whatever renders next (the live canvas, another export, ...)
-    expect(drawLeafNodeMock).toHaveBeenCalledTimes(1);
-    expect(getActiveColorProfile()).toBe('srgb');
   });
 });
