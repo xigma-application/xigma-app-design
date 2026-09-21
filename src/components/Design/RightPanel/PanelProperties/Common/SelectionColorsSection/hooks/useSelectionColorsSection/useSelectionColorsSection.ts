@@ -31,6 +31,7 @@ export const useSelectionColorsSection = (): TUseSelectionColorsSectionResult =>
   );
 
   return {
+    getSelectionCount: (occurrences): number => getSelectionColorSelectionNodeIds(occurrences, nodesById).length,
     groups,
     hasChildren,
     onChange: (occurrences, nextPaint): void => commitSelectionColorChange(dispatch, nodesById, occurrences, nextPaint),

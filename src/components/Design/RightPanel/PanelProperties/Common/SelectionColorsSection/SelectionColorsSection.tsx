@@ -18,7 +18,7 @@ import styles from './selection-colors-section.module.scss';
 
 export const SelectionColorsSection: FC = () => {
   const { t } = useTranslation();
-  const { groups, hasChildren, onChange, onOpenChange, onSelectNodes, openGroupKey } = useSelectionColorsSection();
+  const { getSelectionCount, groups, hasChildren, onChange, onOpenChange, onSelectNodes, openGroupKey } = useSelectionColorsSection();
   const { handleToggleClick, handleToggleKeyDown, isExpanded } = useToggleSelectionColorsExpanded();
   const isCollapsible = groups.length > MAX_SELECTION_COLOR_PREVIEW;
   const showRows = !isCollapsible || isExpanded;
@@ -52,6 +52,7 @@ export const SelectionColorsSection: FC = () => {
               onChange={(paint): void => onChange(group.occurrences, paint)}
               onOpenChange={(isOpen): void => onOpenChange(group, isOpen)}
               onSelectNodes={(): void => onSelectNodes(group.occurrences)}
+              selectionCount={getSelectionCount(group.occurrences)}
             />
           ))}
         </div>

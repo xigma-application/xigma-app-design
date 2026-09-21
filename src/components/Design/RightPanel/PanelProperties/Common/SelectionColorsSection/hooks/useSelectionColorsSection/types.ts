@@ -5,6 +5,7 @@ import { TSelectionColorGroup, TSelectionColorOccurrence } from '../../types';
 export type TOpenSelectionColorGroup = { key: string; occurrences: TSelectionColorOccurrence[] };
 
 export type TUseSelectionColorsSectionResult = {
+  getSelectionCount: (occurrences: TSelectionColorOccurrence[]) => number;
   groups: TSelectionColorGroup[];
   hasChildren: boolean;
   onChange: (occurrences: TSelectionColorOccurrence[], nextPaint: TSolidPaint | TGradientPaint) => void;

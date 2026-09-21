@@ -74,6 +74,21 @@ describe('useSelectionColorsSection', () => {
     expect(result.current.openGroupKey).toBeNull();
   });
 
+  it('should count how many nodes a group of occurrences would actually select', () => {
+    // mock
+    const otherChildId = addRectangleNode({ fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
+    const frameId = addFrameNode({ childIds: [otherChildId] });
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    const { result } = renderHook(() => useSelectionColorsSection(), { wrapper });
+
+    // result
+    expect(result.current.groups).toHaveLength(1);
+    expect(result.current.getSelectionCount(result.current.groups[0].occurrences)).toBe(2);
+  });
+
   it('should track which group key is open and clear it when told it closed', () => {
     // mock
     const frameId = addFrameNode();

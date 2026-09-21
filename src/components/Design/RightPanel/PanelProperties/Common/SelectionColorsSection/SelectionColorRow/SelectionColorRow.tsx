@@ -31,9 +31,17 @@ export type TSelectionColorRowProps = {
   onChange: TFunc<[TSolidPaint | TGradientPaint]>;
   onOpenChange: TFunc<[boolean]>;
   onSelectNodes: TFunc;
+  selectionCount: number;
 };
 
-export const SelectionColorRow: FC<TSelectionColorRowProps> = ({ group, isOpen, onChange, onOpenChange, onSelectNodes }) => {
+export const SelectionColorRow: FC<TSelectionColorRowProps> = ({
+  group,
+  isOpen,
+  onChange,
+  onOpenChange,
+  onSelectNodes,
+  selectionCount,
+}) => {
   const { t } = useTranslation();
   const { paint } = group;
   const isGradient = paint.type !== 'solid';
@@ -76,9 +84,9 @@ export const SelectionColorRow: FC<TSelectionColorRowProps> = ({ group, isOpen, 
           name="StylesAndVariables"
         />
       </Tooltip>
-      <Tooltip content={t(`${translationNameSpace}.selectTooltip`)}>
+      <Tooltip content={t(`${translationNameSpace}.selectTooltip`, { count: selectionCount })}>
         <UITools.ButtonIcon
-          ariaLabel={t(`${translationNameSpace}.selectAriaLabel`)}
+          ariaLabel={t(`${translationNameSpace}.selectAriaLabel`, { count: selectionCount })}
           className={styles.SelectionColorRow__actionIcon}
           name="Shield"
           onClick={onSelectNodes}

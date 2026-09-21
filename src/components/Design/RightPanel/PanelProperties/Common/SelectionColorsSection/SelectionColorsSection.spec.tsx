@@ -213,7 +213,7 @@ describe('SelectionColorsSection behaviors', () => {
 
     // result
     expect(screen.getByLabelText('Apply styles and variables').className).toMatch(/SelectionColorRow__actionIcon/);
-    expect(screen.getByLabelText('Select item using this color').className).toMatch(/SelectionColorRow__actionIcon/);
+    expect(screen.getByLabelText('Select 1 item using this color').className).toMatch(/SelectionColorRow__actionIcon/);
   });
 
   it('should select every node sharing a color when clicking its select button', () => {
@@ -225,7 +225,7 @@ describe('SelectionColorsSection behaviors', () => {
     renderSection();
 
     // action — the RED group is the frame's own fill, listed first
-    fireEvent.click(screen.getAllByLabelText('Select item using this color')[0]);
+    fireEvent.click(screen.getAllByLabelText('Select 1 item using this color')[0]);
 
     // result
     expect(selectActivePage(store.getState()).selectedIds).toEqual([frameId]);
@@ -243,10 +243,25 @@ describe('SelectionColorsSection behaviors', () => {
     renderSection();
 
     // action
-    fireEvent.click(screen.getByLabelText('Select item using this color'));
+    fireEvent.click(screen.getByLabelText('Select 1 item using this color'));
 
     // result
     expect(selectActivePage(store.getState()).selectedIds).toEqual([frameId]);
+  });
+
+  it('should pluralize the select tooltip/label with the number of nodes that will be selected', () => {
+    // mock
+    const otherChildId = addRectangleNode({ fills: [RED] });
+    const frameId = addFrameNode({ childIds: [otherChildId], fills: [RED] });
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderSection();
+
+    // result — the frame and its child both carry RED but aren't in a parent/child relationship
+    // with each other for selection purposes here, so both count toward the same group
+    expect(screen.getByLabelText('Select 2 items using this color')).toBeInTheDocument();
   });
 
   it('should merge the frame’s own fill with an identical child fill into a single row', () => {
