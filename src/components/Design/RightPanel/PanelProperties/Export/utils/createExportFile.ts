@@ -2,11 +2,12 @@
 import { EXPORT_FORMAT_MIME_TYPE, EXPORT_JPEG_QUALITY } from '../constants';
 
 // types
-import { ExportFormat, ExportImageResampling } from '../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling } from '../enums';
 import { TExportFile } from '../types';
 
 // utils
 import { createImageBlobFromPixels } from 'utils/canvas/createImageBlobFromPixels';
+import { getColorProfileTarget } from './getColorProfileTarget';
 import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegistry';
 
 export const createExportFile = async (
@@ -16,8 +17,10 @@ export const createExportFile = async (
   fileName: string,
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
+  colorProfile: ExportColorProfile,
 ): Promise<TExportFile | null> => {
-  const rendered = await renderNodeForExport(nodeId, scale, ignoreOverlappingLayers, imageResampling);
+  const colorProfileTarget = getColorProfileTarget(colorProfile);
+  const rendered = await renderNodeForExport(nodeId, scale, ignoreOverlappingLayers, imageResampling, colorProfileTarget);
 
   if (rendered) {
     const quality = format === ExportFormat.jpeg ? EXPORT_JPEG_QUALITY : undefined;
@@ -27,6 +30,7 @@ export const createExportFile = async (
       rendered.height,
       EXPORT_FORMAT_MIME_TYPE[format],
       quality,
+      colorProfileTarget,
     );
 
     if (blob) {

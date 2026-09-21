@@ -2,7 +2,7 @@
 import { DEFAULT_EXPORT_SETTING } from '../../constants';
 
 // types
-import { ExportFormat, ExportImageResampling } from '../../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling } from '../../enums';
 import { TExportSetting } from '../../types';
 
 // utils
@@ -52,6 +52,7 @@ describe('exportNode', () => {
       'Icon.png',
       true,
       DEFAULT_EXPORT_SETTING.imageResampling,
+      DEFAULT_EXPORT_SETTING.colorProfile,
     );
     expect(createExportZipBlobMock).not.toHaveBeenCalled();
     expect(downloadBlobMock).toHaveBeenCalledWith(file.blob, 'Icon.png');
@@ -74,6 +75,7 @@ describe('exportNode', () => {
       'Icon.png',
       false,
       DEFAULT_EXPORT_SETTING.imageResampling,
+      DEFAULT_EXPORT_SETTING.colorProfile,
     );
   });
 
@@ -87,7 +89,63 @@ describe('exportNode', () => {
     await exportNode('node-a', 'Icon', bounds, [setting({ format: ExportFormat.png, imageResampling: ExportImageResampling.basic })]);
 
     // result
-    expect(createExportFileMock).toHaveBeenCalledWith('node-a', ExportFormat.png, 1, 'Icon.png', true, ExportImageResampling.basic);
+    expect(createExportFileMock).toHaveBeenCalledWith(
+      'node-a',
+      ExportFormat.png,
+      1,
+      'Icon.png',
+      true,
+      ExportImageResampling.basic,
+      DEFAULT_EXPORT_SETTING.colorProfile,
+    );
+  });
+
+  it('should forward each row own colorProfile setting', async () => {
+    // mock
+    const file = { blob: { size: 4, type: 'image/png' } as Blob, fileName: 'Icon.png' };
+
+    createExportFileMock.mockResolvedValue(file);
+
+    // action
+    await exportNode('node-a', 'Icon', bounds, [setting({ colorProfile: ExportColorProfile.displayP3, format: ExportFormat.png })]);
+
+    // result
+    expect(createExportFileMock).toHaveBeenCalledWith(
+      'node-a',
+      ExportFormat.png,
+      1,
+      'Icon.png',
+      true,
+      DEFAULT_EXPORT_SETTING.imageResampling,
+      ExportColorProfile.displayP3,
+    );
+  });
+
+  it('should render rows one at a time, not concurrently, since the export-render request is a single slot rather than a queue', async () => {
+    // mock — the second row's render must not start until the first row's promise has resolved
+    let resolveFirst: (file: { blob: Blob; fileName: string } | null) => void = () => {};
+    const firstFilePromise = new Promise<{ blob: Blob; fileName: string } | null>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const secondFile = { blob: { size: 4, type: 'image/jpeg' } as Blob, fileName: 'Icon.jpg' };
+
+    createExportFileMock.mockReturnValueOnce(firstFilePromise).mockResolvedValueOnce(secondFile);
+
+    // action
+    const exportPromise = exportNode('node-a', 'Icon', bounds, [
+      setting({ format: ExportFormat.png }),
+      setting({ format: ExportFormat.jpeg }),
+    ]);
+
+    // result — only the first row's render has been requested so far
+    expect(createExportFileMock).toHaveBeenCalledTimes(1);
+
+    // action
+    resolveFirst({ blob: { size: 4, type: 'image/png' } as Blob, fileName: 'Icon.png' });
+    await exportPromise;
+
+    // result — the second row's render only started after the first one resolved
+    expect(createExportFileMock).toHaveBeenCalledTimes(2);
   });
 
   it('should zip and download multiple rendered files as one archive named after the node', async () => {

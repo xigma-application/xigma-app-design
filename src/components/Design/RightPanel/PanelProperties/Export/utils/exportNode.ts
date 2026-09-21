@@ -13,18 +13,22 @@ import { isRasterExportFormat } from './isRasterExportFormat';
 export const exportNode = async (nodeId: string, nodeName: string, bounds: TDraftRect, settings: TExportSetting[]): Promise<void> => {
   const rasterSettings = settings.filter((setting) => isRasterExportFormat(setting.format));
   const fileNames = getExportFileNames(nodeName, rasterSettings);
-  const renderedFiles = await Promise.all(
-    rasterSettings.map((setting, index) =>
-      createExportFile(
-        nodeId,
-        setting.format,
-        getExportScaleFactor(setting.scale, bounds),
-        fileNames[index],
-        setting.ignoreOverlappingLayers,
-        setting.imageResampling,
-      ),
-    ),
-  );
+  const renderedFiles: (TExportFile | null)[] = [];
+
+  for (const [index, setting] of rasterSettings.entries()) {
+    const file = await createExportFile(
+      nodeId,
+      setting.format,
+      getExportScaleFactor(setting.scale, bounds),
+      fileNames[index],
+      setting.ignoreOverlappingLayers,
+      setting.imageResampling,
+      setting.colorProfile,
+    );
+
+    renderedFiles.push(file);
+  }
+
   const files = renderedFiles.filter((file): file is TExportFile => file !== null);
 
   if (files.length === 1) {

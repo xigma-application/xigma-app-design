@@ -331,8 +331,11 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       shape's own content, off includes whatever else on the canvas visually overlaps it too
 - [x] "Image resampling" (Basic/Detailed) actually changes how any image or video fill inside the
       export is filtered when scaled down — Detailed looks noticeably sharper than a plain resize
+- [x] Color profile actually changes the export: sRGB is today's normal export, Display P3 gives a
+      real wider-gamut file — a photo fill keeps more of its original vividness instead of getting
+      clipped down to sRGB, and every other color (solid fills, gradients, strokes, shadows, noise)
+      is correctly converted too, not just tagged
 - [ ] SVG and PDF rows are listed in the format menu but don't export anything yet
-- [ ] color profile is still cosmetic — every export stays plain sRGB regardless of the setting
 
 ## Related
 

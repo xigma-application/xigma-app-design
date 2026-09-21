@@ -8,17 +8,18 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegistry';
 
 describe('useRegisterExportRenderer', () => {
-  it('should file a pending request with the given nodeId, scale, ignoreOverlappingLayers and imageFilterQuality', () => {
+  it('should file a pending request with the given nodeId, scale, ignoreOverlappingLayers, imageFilterQuality and colorProfile', () => {
     // before
     const refs = createCanvasRefs();
 
     renderHook(() => useRegisterExportRenderer(refs));
 
     // action
-    void renderNodeForExport('node-a', 2, false, 'detailed');
+    void renderNodeForExport('node-a', 2, false, 'detailed', 'displayP3');
 
     // result
     expect(refs.exportRenderRequestRef.current).toMatchObject({
+      colorProfile: 'displayP3',
       ignoreOverlappingLayers: false,
       imageFilterQuality: 'detailed',
       nodeId: 'node-a',
@@ -33,7 +34,7 @@ describe('useRegisterExportRenderer', () => {
     renderHook(() => useRegisterExportRenderer(refs));
 
     // action
-    const renderPromise = renderNodeForExport('node-a', 2, true, 'basic');
+    const renderPromise = renderNodeForExport('node-a', 2, true, 'basic', 'srgb');
     const pixels = { height: 20, pixels: new Uint8Array(4), width: 20 };
 
     refs.exportRenderRequestRef.current?.onResolve(pixels);
@@ -50,7 +51,7 @@ describe('useRegisterExportRenderer', () => {
     unmount();
 
     // action
-    const result = await renderNodeForExport('node-a', 2, true, 'basic');
+    const result = await renderNodeForExport('node-a', 2, true, 'basic', 'srgb');
 
     // result
     expect(result).toBeNull();
