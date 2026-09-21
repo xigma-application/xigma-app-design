@@ -24,6 +24,7 @@ export const exportNode = async (nodeId: string, nodeName: string, bounds: TDraf
       setting.ignoreOverlappingLayers,
       setting.imageResampling,
       setting.colorProfile,
+      setting.quality,
     );
 
     renderedFiles.push(file);

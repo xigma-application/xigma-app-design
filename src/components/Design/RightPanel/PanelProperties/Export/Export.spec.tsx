@@ -307,6 +307,43 @@ describe('Export behaviors', () => {
     expect(screen.getByText('Basic')).toBeInTheDocument();
   });
 
+  it('should hide the quality field for png and show it for jpeg', () => {
+    // before
+    renderExport();
+    addRow();
+    openSettings();
+
+    // result
+    expect(screen.queryByText('Quality')).toBeNull();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getAllByText('PNG')[0]);
+    fireEvent.click(screen.getByText('JPEG'));
+    openSettings();
+
+    // result
+    expect(screen.getByText('Quality')).toBeInTheDocument();
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
+
+  it('should change the jpeg quality from the dropdown', () => {
+    // before
+    renderExport();
+    addRow();
+    fireEvent.click(screen.getAllByText('PNG')[0]);
+    fireEvent.click(screen.getByText('JPEG'));
+    openSettings();
+
+    // action
+    fireEvent.click(screen.getByText('High'));
+    fireEvent.click(screen.getByText('Low'));
+
+    // result
+    expect(screen.getByText('Low')).toBeInTheDocument();
+    expect(screen.queryByText('High')).toBeNull();
+  });
+
   it('should toggle the ignore overlapping layers checkbox', () => {
     // before
     renderExport();

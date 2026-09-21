@@ -1,5 +1,5 @@
 // types
-import { ExportColorProfile, ExportFormat, ExportImageResampling } from '../../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality } from '../../enums';
 
 // utils
 import { createExportFile } from '../createExportFile';
@@ -39,6 +39,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -52,7 +53,16 @@ describe('createExportFile', () => {
     createPdfBlobMock.mockResolvedValue({ size: 4, type: 'application/pdf' } as Blob);
 
     // action
-    await createExportFile('node-a', ExportFormat.pdf, 4, 'Icon.pdf', false, ExportImageResampling.basic, ExportColorProfile.srgb);
+    await createExportFile(
+      'node-a',
+      ExportFormat.pdf,
+      4,
+      'Icon.pdf',
+      false,
+      ExportImageResampling.basic,
+      ExportColorProfile.srgb,
+      ExportQuality.high,
+    );
 
     // result
     expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic);
@@ -71,6 +81,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -90,6 +101,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -111,6 +123,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -134,6 +147,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -159,6 +173,7 @@ describe('createExportFile', () => {
       false,
       ExportImageResampling.basic,
       ExportColorProfile.srgb,
+      ExportQuality.high,
     );
 
     // result
@@ -184,6 +199,7 @@ describe('createExportFile', () => {
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgbSameAsFile,
+      ExportQuality.high,
     );
 
     // result
@@ -199,7 +215,16 @@ describe('createExportFile', () => {
     createImageBlobFromPixelsMock.mockResolvedValue(blob);
 
     // action
-    await createExportFile('node-a', ExportFormat.png, 1, 'Icon.png', true, ExportImageResampling.detailed, ExportColorProfile.displayP3);
+    await createExportFile(
+      'node-a',
+      ExportFormat.png,
+      1,
+      'Icon.png',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.displayP3,
+      ExportQuality.high,
+    );
 
     // result
     expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed);
@@ -211,5 +236,39 @@ describe('createExportFile', () => {
       undefined,
       'displayP3',
     );
+  });
+
+  it('should map the chosen quality to the jpeg encoder quality', async () => {
+    // mock
+    const pixels = { height: 10, pixels: new Uint8Array(4), width: 10 };
+
+    renderNodeForExportMock.mockResolvedValue(pixels);
+    createImageBlobFromPixelsMock.mockResolvedValue({ size: 4, type: 'image/jpeg' } as Blob);
+
+    // action
+    await createExportFile(
+      'node-a',
+      ExportFormat.jpeg,
+      1,
+      'Icon.jpg',
+      true,
+      ExportImageResampling.basic,
+      ExportColorProfile.srgb,
+      ExportQuality.medium,
+    );
+    await createExportFile(
+      'node-a',
+      ExportFormat.jpeg,
+      1,
+      'Icon.jpg',
+      true,
+      ExportImageResampling.basic,
+      ExportColorProfile.srgb,
+      ExportQuality.low,
+    );
+
+    // result
+    expect(createImageBlobFromPixelsMock.mock.calls[0][4]).toBe(0.75);
+    expect(createImageBlobFromPixelsMock.mock.calls[1][4]).toBe(0.5);
   });
 });

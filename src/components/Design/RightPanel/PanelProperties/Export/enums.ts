@@ -23,6 +23,12 @@ export enum ExportColorProfile {
   srgbSameAsFile = 'srgbSameAsFile',
 }
 
+export enum ExportQuality {
+  high = 'high',
+  low = 'low',
+  medium = 'medium',
+}
+
 export enum ExportImageResampling {
   basic = 'basic',
   detailed = 'detailed',

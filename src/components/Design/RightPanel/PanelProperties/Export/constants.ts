@@ -2,14 +2,18 @@
 import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
-import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportScale } from './enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality, ExportScale } from './enums';
 import { TExportSetting } from './types';
 
 export const translationNameSpace = `${parentNameSpace}.export`;
 
 export const EXPORT_PREVIEW_SIZE = 256;
 
-export const EXPORT_JPEG_QUALITY = 0.92;
+export const EXPORT_JPEG_QUALITY: Record<ExportQuality, number> = {
+  [ExportQuality.high]: 0.92,
+  [ExportQuality.low]: 0.5,
+  [ExportQuality.medium]: 0.75,
+};
 
 export const PDF_MIN_RASTER_SCALE = 2;
 
@@ -47,6 +51,8 @@ export const EXPORT_COLOR_PROFILE_MENU_OPTIONS: ExportColorProfile[] = [
   ExportColorProfile.displayP3,
 ];
 
+export const EXPORT_QUALITY_MENU_OPTIONS: ExportQuality[] = [ExportQuality.high, ExportQuality.medium, ExportQuality.low];
+
 export const EXPORT_IMAGE_RESAMPLING_MENU_OPTIONS: ExportImageResampling[] = [ExportImageResampling.detailed, ExportImageResampling.basic];
 
 export const DEFAULT_EXPORT_SETTING: TExportSetting = {
@@ -54,6 +60,7 @@ export const DEFAULT_EXPORT_SETTING: TExportSetting = {
   format: ExportFormat.png,
   ignoreOverlappingLayers: true,
   imageResampling: ExportImageResampling.detailed,
+  quality: ExportQuality.high,
   scale: ExportScale.one,
   suffix: '',
 };

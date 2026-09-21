@@ -2,7 +2,7 @@
 import { DEFAULT_EXPORT_SETTING } from '../../constants';
 
 // types
-import { ExportColorProfile, ExportFormat, ExportImageResampling } from '../../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality } from '../../enums';
 import { TExportSetting } from '../../types';
 
 // utils
@@ -53,6 +53,7 @@ describe('exportNode', () => {
       true,
       DEFAULT_EXPORT_SETTING.imageResampling,
       DEFAULT_EXPORT_SETTING.colorProfile,
+      DEFAULT_EXPORT_SETTING.quality,
     );
     expect(createExportZipBlobMock).not.toHaveBeenCalled();
     expect(downloadBlobMock).toHaveBeenCalledWith(file.blob, 'Icon.png');
@@ -76,6 +77,7 @@ describe('exportNode', () => {
       false,
       DEFAULT_EXPORT_SETTING.imageResampling,
       DEFAULT_EXPORT_SETTING.colorProfile,
+      DEFAULT_EXPORT_SETTING.quality,
     );
   });
 
@@ -97,6 +99,7 @@ describe('exportNode', () => {
       true,
       ExportImageResampling.basic,
       DEFAULT_EXPORT_SETTING.colorProfile,
+      DEFAULT_EXPORT_SETTING.quality,
     );
   });
 
@@ -118,7 +121,19 @@ describe('exportNode', () => {
       true,
       DEFAULT_EXPORT_SETTING.imageResampling,
       ExportColorProfile.displayP3,
+      DEFAULT_EXPORT_SETTING.quality,
     );
+  });
+
+  it('should forward each row own quality setting', async () => {
+    // mock
+    createExportFileMock.mockResolvedValue({ blob: { size: 4, type: 'image/jpeg' } as Blob, fileName: 'Icon.jpg' });
+
+    // action
+    await exportNode('node-a', 'Icon', bounds, [setting({ format: ExportFormat.jpeg, quality: ExportQuality.low })]);
+
+    // result
+    expect(createExportFileMock.mock.calls[0][7]).toBe(ExportQuality.low);
   });
 
   it('should render rows one at a time, not concurrently, since the export-render request is a single slot rather than a queue', async () => {

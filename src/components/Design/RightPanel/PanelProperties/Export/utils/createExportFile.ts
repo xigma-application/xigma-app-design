@@ -2,7 +2,7 @@
 import { EXPORT_FORMAT_MIME_TYPE, EXPORT_JPEG_QUALITY, PDF_MIN_RASTER_SCALE } from '../constants';
 
 // types
-import { ExportColorProfile, ExportFormat, ExportImageResampling } from '../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality } from '../enums';
 import { TExportFile } from '../types';
 
 // utils
@@ -19,6 +19,7 @@ export const createExportFile = async (
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
   colorProfile: ExportColorProfile,
+  jpegQuality: ExportQuality,
 ): Promise<TExportFile | null> => {
   if (format === ExportFormat.pdf) {
     const pdfBlob = await createPdfBlob(nodeId, Math.max(scale, PDF_MIN_RASTER_SCALE), ignoreOverlappingLayers, imageResampling);
@@ -28,7 +29,7 @@ export const createExportFile = async (
   const rendered = await renderNodeForExport(nodeId, scale, ignoreOverlappingLayers, imageResampling);
 
   if (rendered) {
-    const quality = format === ExportFormat.jpeg ? EXPORT_JPEG_QUALITY : undefined;
+    const quality = format === ExportFormat.jpeg ? EXPORT_JPEG_QUALITY[jpegQuality] : undefined;
     const blob = await createImageBlobFromPixels(
       rendered.pixels,
       rendered.width,

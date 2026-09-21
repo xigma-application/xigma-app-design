@@ -7,6 +7,7 @@ import { Tooltip, UITools } from 'shared';
 
 // others
 import { getExportColorProfileOptions } from '../../utils/getExportColorProfileOptions';
+import { getExportQualityOptions } from '../../utils/getExportQualityOptions';
 import { getExportImageResamplingOptions } from '../../utils/getExportImageResamplingOptions';
 import { translationNameSpace } from '../../constants';
 
@@ -14,7 +15,7 @@ import { translationNameSpace } from '../../constants';
 import styles from './export-settings-panel.module.scss';
 
 // types
-import { ExportColorProfile, ExportImageResampling } from '../../enums';
+import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality } from '../../enums';
 import { TExportSetting } from '../../types';
 
 export type TExportSettingsPanelProps = {
@@ -31,6 +32,8 @@ export const ExportSettingsPanel: FC<TExportSettingsPanelProps> = ({ onChange, o
   const imageResamplingOptions = getExportImageResamplingOptions((imageResampling) =>
     t(`${translationNameSpace}.settings.imageResampling.options.${imageResampling}`),
   );
+
+  const qualityOptions = getExportQualityOptions((quality) => t(`${translationNameSpace}.settings.quality.options.${quality}`));
 
   return (
     <div className={styles.ExportSettingsPanel}>
@@ -63,6 +66,18 @@ export const ExportSettingsPanel: FC<TExportSettingsPanelProps> = ({ onChange, o
             variant="outline"
           />
         </EffectSettingsField>
+        {setting.format === ExportFormat.jpeg && (
+          <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.quality`)}>
+            <UITools.Dropdown<ExportQuality>
+              className={styles.ExportSettingsPanel__input}
+              onSelect={(quality): void => onChange({ ...setting, quality })}
+              options={qualityOptions}
+              textAlign="left"
+              value={setting.quality}
+              variant="outline"
+            />
+          </EffectSettingsField>
+        )}
         <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.imageResampling`)}>
           <UITools.Dropdown<ExportImageResampling>
             className={styles.ExportSettingsPanel__input}

@@ -334,6 +334,7 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] Color profile tags the exported file: Display P3 files look more vivid (same as Figma's
       Display P3 export, which also keeps the original color numbers and just labels them P3),
       sRGB is the plain normal export
+- [x] JPEG rows get a Quality setting (High/Medium/Low) in the settings popover, shown only for JPEG
 - [x] PDF export (first version): plain text stays real, selectable text; everything else is drawn
       as an image layer in the right stacking order
 - [ ] PDF: draw shapes as real vector shapes instead of images, and text on a path as curves
