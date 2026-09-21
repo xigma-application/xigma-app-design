@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { PDFDocument } from 'pdf-lib';
+import { decodePDFRawStream, PDFDocument, PDFRawStream } from 'pdf-lib';
 
 // store
 import { selectNodes } from 'store/design/selectors';
@@ -31,6 +31,15 @@ const PNG_1X1 = Uint8Array.from(
   atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='),
   (char) => char.charCodeAt(0),
 );
+
+const readPdfContent = async (blob: Blob | null): Promise<string> => {
+  const pdf = await readPdf(blob);
+
+  return pdf.context
+    .enumerateIndirectObjects()
+    .map(([, object]) => (object instanceof PDFRawStream ? new TextDecoder('latin1').decode(decodePDFRawStream(object).decode()) : ''))
+    .join('\n');
+};
 
 const readPdf = async (blob: Blob | null): Promise<PDFDocument> => {
   const bytes = await new Promise<ArrayBuffer>((resolve) => {
@@ -68,7 +77,7 @@ describe('createPdfBlob', () => {
           {
             childIds: ['pdf-text'],
             clipContent: false,
-            fills: [],
+            fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
             height: 80,
             id: 'pdf-frame',
             name: 'Frame',
@@ -115,7 +124,17 @@ describe('createPdfBlob', () => {
   it('should skip a raster layer that could not be rendered or encoded', async () => {
     // mock
     store.dispatch(
-      addNode({ fills: [], height: 30, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 40, x: 0, y: 0 }),
+      addNode({
+        fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+        height: 30,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 40,
+        x: 0,
+        y: 0,
+      }),
     );
 
     const rectId = Object.keys(selectNodes(store.getState())).slice(-1)[0];
@@ -133,5 +152,39 @@ describe('createPdfBlob', () => {
     expect(withoutRender.getPage(0).getSize()).toEqual({ height: 30, width: 40 });
     expect(withoutBlob.getPage(0).getSize()).toEqual({ height: 30, width: 40 });
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw a solid rectangle with a stroke as real vector paths without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+            height: 30,
+            id: 'pdf-rect',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            strokeWidth: 2,
+            strokes: [{ color: '#0000ff', opacity: 50, type: 'solid' }],
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-rect'],
+      }),
+    );
+
+    // action
+    const text = await readPdfContent(await createPdfBlob('pdf-rect', 2, true, ExportImageResampling.basic));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('f*');
+    expect(text).toContain('/XigmaOpacity0');
+    expect(text).toContain('/XigmaOpacity1');
   });
 });

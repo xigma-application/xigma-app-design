@@ -1,5 +1,5 @@
 import fontkit from '@pdf-lib/fontkit';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName } from 'pdf-lib';
 
 // store
 import { selectNodes, selectRootOrder } from 'store/design/selectors';
@@ -8,11 +8,13 @@ import { store } from 'store';
 // types
 import { ExportImageResampling } from '../../enums';
 import { PdfLayerType } from './enums';
-import { TSceneNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
+import { canExportShapeAsVector } from './canExportShapeAsVector';
 import { canExportTextAsRealText } from './canExportTextAsRealText';
 import { createImageBlobFromPixels } from 'utils/canvas/createImageBlobFromPixels';
+import { drawPdfShape } from './drawPdfShape';
 import { drawPdfTextNode } from './drawPdfTextNode';
 import { getExportRenderNodes } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getExportRenderNodes';
 import { getPdfLayers } from './getPdfLayers';
@@ -39,12 +41,19 @@ export const createPdfBlob = async (
     const font = await pdfDocument.embedFont(await loadPdfFontBytes(), { subset: true });
     const fontCharacters = new Set(font.getCharacterSet());
     const nodes = getExportRenderNodes(nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
-    const layers = getPdfLayers(nodes, (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters));
+    const layers = getPdfLayers(
+      nodes,
+      (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters),
+      (shapeNode: TFrameNode | TRectangleNode) => canExportShapeAsVector(shapeNode, nodesById),
+    );
+    const graphicsStates = new Map<number, PDFName>();
     const page = pdfDocument.addPage([bounds.width, bounds.height]);
 
     for (const layer of layers) {
       if (layer.type === PdfLayerType.text) {
         drawPdfTextNode(page, font, layer.node, bounds);
+      } else if (layer.type === PdfLayerType.vector) {
+        drawPdfShape(page, layer.node, nodesById, bounds, graphicsStates);
       } else {
         const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, layer.nodeIds);
         const blob = rendered ? await createImageBlobFromPixels(rendered.pixels, rendered.width, rendered.height, 'image/png') : null;

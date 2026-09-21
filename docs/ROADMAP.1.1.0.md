@@ -337,7 +337,8 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] JPEG rows get a Quality setting (High/Medium/Low) in the settings popover, shown only for JPEG
 - [x] PDF export (first version): plain text stays real, selectable text; everything else is drawn
       as an image layer in the right stacking order
-- [ ] PDF: draw shapes as real vector shapes instead of images, and text on a path as curves
+- [x] PDF: rectangles and frames with plain colors are real vector shapes
+- [ ] PDF: ellipses, polygons, stars, lines and paths as vector shapes, gradients, and text on a path as curves
 - [ ] SVG rows are listed in the format menu but don't export anything yet
 
 ## Related
