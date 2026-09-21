@@ -55,6 +55,7 @@ import { getColorPickerPreview } from './utils/getColorPickerPreview';
 
 export const ColorPicker: FC<TColorPickerProps> = ({
   align,
+  availableTabs,
   avoidCollisions,
   blendMode = BlendMode.normal,
   className = '',
@@ -190,6 +191,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
         {paintTypeRow && (
           <PaintTypeRow
             activeTab={activeTab}
+            availableTabs={availableTabs}
             blendMode={blendMode}
             contrastCheckerActive={contrastChecker.isActive}
             onBlendModeChange={onBlendModeChange}

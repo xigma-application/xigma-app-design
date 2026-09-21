@@ -35,6 +35,7 @@ import { TVideoPanelChange } from '../ColorPicker/Body/VideoPanel/types';
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
   alpha: number;
+  availableTabs?: TColorPickerProps['availableTabs'];
   blendMode?: BlendMode;
   className?: string;
   contrastBackgroundColor?: string;
@@ -91,6 +92,7 @@ export type TColorPickerInputProps = {
 export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   align = 'end',
   alpha,
+  availableTabs,
   blendMode,
   className = '',
   contrastBackgroundColor,
@@ -175,6 +177,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
             ) : (
               <ColorPicker
                 align={align}
+                availableTabs={availableTabs}
                 blendMode={blendMode}
                 contrastBackgroundColor={contrastBackgroundColor}
                 contrastUnsupportedReason={contrastUnsupportedReason}

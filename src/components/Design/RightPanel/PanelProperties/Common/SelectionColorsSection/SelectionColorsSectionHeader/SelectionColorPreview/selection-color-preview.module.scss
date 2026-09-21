@@ -1,0 +1,27 @@
+.SelectionColorPreview {
+  align-items: center;
+  column-gap: 4px;
+  display: flex;
+  flex-shrink: 0;
+
+  &__swatch {
+    border-radius: 6px;
+    flex-shrink: 0;
+    height: 20px;
+    width: 20px;
+  }
+
+  &__overflowContainer {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
+  }
+
+  &__overflow {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+  }
+}

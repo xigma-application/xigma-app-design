@@ -15,11 +15,13 @@ const renderPaintTypeRow = (
   onBlendModeChange: TFunc<[BlendMode]> = vi.fn(),
   onToggleContrastChecker?: TFunc,
   contrastCheckerActive = false,
+  availableTabs?: ColorPickerTab[],
 ): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
       <PaintTypeRow
         activeTab={activeTab}
+        availableTabs={availableTabs}
         blendMode={blendMode}
         contrastCheckerActive={contrastCheckerActive}
         onBlendModeChange={onBlendModeChange}
@@ -161,6 +163,20 @@ describe('PaintTypeRow behaviors', () => {
     expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.image);
   });
 
+  it('should call onSelectTab with video when the Video button is clicked', () => {
+    // mock
+    const onSelectTab = vi.fn();
+
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, onSelectTab);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Video' }));
+
+    // result
+    expect(onSelectTab).toHaveBeenCalledWith(ColorPickerTab.video);
+  });
+
   it('should show the Shader button, not marked as the current paint type when solid is active', () => {
     // before
     const { container } = renderPaintTypeRow(ColorPickerTab.solid);
@@ -286,5 +302,32 @@ describe('PaintTypeRow behaviors', () => {
 
     // result
     expect(onToggleContrastChecker).toHaveBeenCalled();
+  });
+
+  it('should show every paint type button when availableTabs is not given', () => {
+    // before
+    renderPaintTypeRow();
+
+    // result
+    ['Solid', 'Gradient', 'Pattern', 'Image', 'Video', 'Shader'].forEach((label) => {
+      expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+    });
+  });
+
+  it('should only show the buttons listed in availableTabs', () => {
+    // before
+    renderPaintTypeRow(ColorPickerTab.solid, vi.fn(), BlendMode.normal, vi.fn(), undefined, false, [
+      ColorPickerTab.solid,
+      ColorPickerTab.gradient,
+      ColorPickerTab.shader,
+    ]);
+
+    // result
+    expect(screen.getByRole('button', { name: 'Solid' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Gradient' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Shader' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pattern' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Image' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Video' })).toBeNull();
   });
 });

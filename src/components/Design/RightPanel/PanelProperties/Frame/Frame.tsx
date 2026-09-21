@@ -8,6 +8,7 @@ import FrameHeader from './FrameHeader/FrameHeader';
 import LayoutGuideSection from '../Common/LayoutGuideSection/LayoutGuideSection';
 import LayoutSection from './LayoutSection/LayoutSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
+import SelectionColorsSection from '../Common/SelectionColorsSection/SelectionColorsSection';
 import StrokeSection from '../Common/StrokeSection/StrokeSection';
 
 const Frame: FC = () => (
@@ -19,6 +20,7 @@ const Frame: FC = () => (
     <FillSection />
     <StrokeSection />
     <EffectsSection />
+    <SelectionColorsSection />
     <LayoutGuideSection />
   </Fragment>
 );

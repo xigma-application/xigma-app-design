@@ -1,0 +1,21 @@
+.SelectionColorRow {
+  align-items: center;
+  column-gap: 4px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px 24px;
+  padding-right: 8px;
+
+  &__color {
+    min-width: 0;
+    padding-right: 0 !important;
+  }
+
+  &__actionIcon {
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
+  }
+
+  &:hover &__actionIcon {
+    opacity: 1;
+  }
+}

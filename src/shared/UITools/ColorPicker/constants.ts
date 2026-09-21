@@ -6,6 +6,15 @@ export const translationNameSpace = 'colorPicker';
 
 export const DEFAULT_ACTIVE_TAB = ColorPickerTab.solid;
 
+export const ALL_PAINT_TYPE_TABS: ColorPickerTab[] = [
+  ColorPickerTab.solid,
+  ColorPickerTab.gradient,
+  ColorPickerTab.pattern,
+  ColorPickerTab.image,
+  ColorPickerTab.video,
+  ColorPickerTab.shader,
+];
+
 export const DEFAULT_LIBRARY_TAB = 'custom';
 
 export const SLIDER_THUMB_RADIUS = 8;

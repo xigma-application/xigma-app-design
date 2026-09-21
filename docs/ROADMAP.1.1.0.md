@@ -278,8 +278,8 @@ the stroke-specific settings:
 Below it sits an **Effects** section, with every effect type now drawn on the canvas except Shader:
 
 - [x] add an effect from the plus menu, hide or delete it, and drag rows to reorder, like Fill and Stroke
-  (the reorder handle only shows up once there's a second effect to reorder against — same for Fill
-  and Stroke)
+      (the reorder handle only shows up once there's a second effect to reorder against — same for Fill
+      and Stroke)
 - [x] click an effect to edit its settings, or switch its type from the panel header
 - [x] **Inner shadow** and **Drop shadow** — offset, blur, spread, color and opacity
 - [x] **Layer blur** — blurs the shape itself, either evenly (Uniform) or fading across it in one
@@ -306,6 +306,16 @@ reorder once there's more than one, same rule as Fill/Stroke/Effects.
       end / center), a fixed width or height, margin and gutter
 - [x] drawn on the canvas, clipped so a guide never spills outside its own frame
 - [x] a global on/off toggle for every guide at once — Shift+G, or from the View and Zoom menus
+
+## Stage 31 — Selection colors, Frame only
+
+A frame's right panel now lists every color used anywhere inside it — its own fill/stroke plus every
+child's, however deeply nested — as one deduplicated palette, Figma-style. A fill and a stroke of the
+same color count as one entry, and so do two identical fills, as long as they share a blend mode; the
+same color with a different blend mode gets its own row. Editing a row's color, opacity or blend mode
+updates every fill and stroke that shares it, in a single undo step, and rows automatically merge or
+split apart as an edit makes them match (or stop matching) another. Each row can only be changed to a
+solid, gradient or shader color, never an image, video or pattern, and has no contrast checker.
 
 ## Related
 

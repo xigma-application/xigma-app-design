@@ -24,6 +24,7 @@ export type TGradientPanelState = { isGradientTabActive: boolean; selectedStopIn
 
 export type TColorPickerProps = {
   align?: TPopoverProps['align'];
+  availableTabs?: ColorPickerTab[];
   avoidCollisions?: TPopoverProps['avoidCollisions'];
   blendMode?: BlendMode;
   className?: string;
