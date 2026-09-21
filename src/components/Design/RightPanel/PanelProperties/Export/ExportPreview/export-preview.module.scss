@@ -3,13 +3,21 @@
     padding-left: 0;
   }
 
+  &__texture {
+    background-image: url('../../../../../../assets/images/blank-media.png');
+    background-repeat: repeat;
+    background-size: 208px 208px;
+    border-radius: 5px;
+    height: 210px;
+    overflow: hidden;
+    width: 210px;
+  }
+
   &__image {
-    background-color: var(--color-neutral-5);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
-    border-radius: 5px;
-    height: 160px;
+    height: 100%;
     width: 100%;
   }
 }

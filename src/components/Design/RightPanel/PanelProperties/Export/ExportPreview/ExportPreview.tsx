@@ -25,7 +25,9 @@ export const ExportPreview: FC<TExportPreviewProps> = ({ nodeId }) => {
         {
           className: styles.ExportPreview__header,
           content: (
-            <div className={styles.ExportPreview__image} style={previewUrl ? { backgroundImage: `url("${previewUrl}")` } : undefined} />
+            <div className={styles.ExportPreview__texture}>
+              <div className={styles.ExportPreview__image} style={previewUrl ? { backgroundImage: `url("${previewUrl}")` } : undefined} />
+            </div>
           ),
           icon: 'ChevronRight',
           iconRotation: { collapsed: 0, expanded: 90 },
