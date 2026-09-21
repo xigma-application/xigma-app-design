@@ -11,6 +11,8 @@ export const EXPORT_PREVIEW_SIZE = 256;
 
 export const EXPORT_JPEG_QUALITY = 0.92;
 
+export const PDF_MIN_RASTER_SCALE = 2;
+
 export const EXPORT_FORMAT_EXTENSION: Record<ExportFormat, string> = {
   [ExportFormat.jpeg]: 'jpg',
   [ExportFormat.pdf]: 'pdf',

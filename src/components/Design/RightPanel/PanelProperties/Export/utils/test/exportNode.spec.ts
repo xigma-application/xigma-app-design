@@ -26,9 +26,9 @@ describe('exportNode', () => {
     downloadBlobMock.mockClear();
   });
 
-  it('should skip non-raster (svg/pdf) rows entirely', async () => {
+  it('should skip unsupported (svg) rows entirely', async () => {
     // action
-    await exportNode('node-a', 'Icon', bounds, [setting({ format: ExportFormat.svg }), setting({ format: ExportFormat.pdf })]);
+    await exportNode('node-a', 'Icon', bounds, [setting({ format: ExportFormat.svg })]);
 
     // result
     expect(createExportFileMock).not.toHaveBeenCalled();

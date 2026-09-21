@@ -8,14 +8,14 @@ import { createExportZipBlob } from './createExportZipBlob';
 import { downloadBlob } from 'utils/downloadBlob';
 import { getExportFileNames } from './getExportFileNames';
 import { getExportScaleFactor } from './getExportScaleFactor';
-import { isRasterExportFormat } from './isRasterExportFormat';
+import { isSupportedExportFormat } from './isSupportedExportFormat';
 
 export const exportNode = async (nodeId: string, nodeName: string, bounds: TDraftRect, settings: TExportSetting[]): Promise<void> => {
-  const rasterSettings = settings.filter((setting) => isRasterExportFormat(setting.format));
-  const fileNames = getExportFileNames(nodeName, rasterSettings);
+  const supportedSettings = settings.filter((setting) => isSupportedExportFormat(setting.format));
+  const fileNames = getExportFileNames(nodeName, supportedSettings);
   const renderedFiles: (TExportFile | null)[] = [];
 
-  for (const [index, setting] of rasterSettings.entries()) {
+  for (const [index, setting] of supportedSettings.entries()) {
     const file = await createExportFile(
       nodeId,
       setting.format,

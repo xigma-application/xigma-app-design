@@ -6,6 +6,7 @@ import { createExportFile } from '../createExportFile';
 
 const renderNodeForExportMock = vi.fn();
 const createImageBlobFromPixelsMock = vi.fn();
+const createPdfBlobMock = vi.fn();
 
 vi.mock('utils/canvas/exportRender/exportRenderRegistry', () => ({
   renderNodeForExport: (...args: unknown[]): unknown => renderNodeForExportMock(...args),
@@ -14,10 +15,66 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
   createImageBlobFromPixels: (...args: unknown[]): unknown => createImageBlobFromPixelsMock(...args),
 }));
 
+vi.mock('../pdf/createPdfBlob', () => ({ createPdfBlob: (...args: unknown[]): unknown => createPdfBlobMock(...args) }));
+
 describe('createExportFile', () => {
   beforeEach(() => {
     renderNodeForExportMock.mockClear();
     createImageBlobFromPixelsMock.mockClear();
+    createPdfBlobMock.mockClear();
+  });
+
+  it('should build a pdf with at least the minimum raster scale and skip the pixel pipeline', async () => {
+    // mock
+    const blob = { size: 4, type: 'application/pdf' } as Blob;
+
+    createPdfBlobMock.mockResolvedValue(blob);
+
+    // action
+    const result = await createExportFile(
+      'node-a',
+      ExportFormat.pdf,
+      1,
+      'Icon.pdf',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+    );
+
+    // result
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed);
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ blob, fileName: 'Icon.pdf' });
+  });
+
+  it('should keep a larger export scale for the pdf raster layers', async () => {
+    // mock
+    createPdfBlobMock.mockResolvedValue({ size: 4, type: 'application/pdf' } as Blob);
+
+    // action
+    await createExportFile('node-a', ExportFormat.pdf, 4, 'Icon.pdf', false, ExportImageResampling.basic, ExportColorProfile.srgb);
+
+    // result
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic);
+  });
+
+  it('should return null when the pdf could not be built', async () => {
+    // mock
+    createPdfBlobMock.mockResolvedValue(null);
+
+    // action
+    const result = await createExportFile(
+      'node-a',
+      ExportFormat.pdf,
+      1,
+      'Icon.pdf',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+    );
+
+    // result
+    expect(result).toBeNull();
   });
 
   it('should return null when the node could not be rendered', async () => {

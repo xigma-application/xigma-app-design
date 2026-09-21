@@ -122,4 +122,26 @@ describe('resolveExportRenderRequest', () => {
     expect(getExportRenderNodesMock).toHaveBeenCalledWith('missing', expect.any(Object), expect.any(Array), false);
     expect(onResolve).toHaveBeenCalledWith(null);
   });
+
+  it('should draw only the nodes listed in includeNodeIds when the request narrows the render', () => {
+    // mock
+    const onResolve = vi.fn();
+
+    refs.exportRenderRequestRef.current = {
+      ignoreOverlappingLayers: true,
+      imageFilterQuality: 'basic',
+      includeNodeIds: new Set(['b']),
+      nodeId: 'a',
+      onResolve,
+      scale: 1,
+    };
+    getExportRenderNodesMock.mockReturnValue([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
+    renderNodeAtScaleMock.mockReturnValue(null);
+
+    // before
+    resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
+
+    // result
+    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'a', [{ id: 'b' }], expect.any(Object), refs, 1);
+  });
 });

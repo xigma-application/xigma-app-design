@@ -26,6 +26,20 @@ describe('useRegisterExportRenderer', () => {
     });
   });
 
+  it('should forward the includeNodeIds filter into the filed request', () => {
+    // before
+    const refs = createCanvasRefs();
+    const includeNodeIds = new Set(['node-b']);
+
+    renderHook(() => useRegisterExportRenderer(refs));
+
+    // action
+    void renderNodeForExport('node-a', 1, true, 'basic', includeNodeIds);
+
+    // result
+    expect(refs.exportRenderRequestRef.current?.includeNodeIds).toBe(includeNodeIds);
+  });
+
   it('should resolve the render once the render loop calls the filed onResolve callback', async () => {
     // before
     const refs = createCanvasRefs();

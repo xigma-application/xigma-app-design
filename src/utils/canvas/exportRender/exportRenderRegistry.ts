@@ -19,5 +19,6 @@ export const renderNodeForExport = async (
   scale: number,
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,
+  includeNodeIds?: ReadonlySet<string>,
 ): Promise<TExportRenderedPixels | null> =>
-  activeRenderer ? activeRenderer(nodeId, scale, ignoreOverlappingLayers, imageFilterQuality) : null;
+  activeRenderer ? activeRenderer(nodeId, scale, ignoreOverlappingLayers, imageFilterQuality, includeNodeIds) : null;

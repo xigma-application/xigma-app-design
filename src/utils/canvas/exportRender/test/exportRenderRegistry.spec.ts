@@ -22,7 +22,7 @@ describe('exportRenderRegistry', () => {
     const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
-    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed');
+    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed', undefined);
     expect(result).toBe(pixels);
 
     // after

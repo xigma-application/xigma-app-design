@@ -15,9 +15,17 @@ export const useRegisterExportRenderer = (refs: TCanvasRefs): void => {
       scale: number,
       ignoreOverlappingLayers: boolean,
       imageFilterQuality: TImageFilterQuality,
+      includeNodeIds?: ReadonlySet<string>,
     ): Promise<TExportRenderedPixels | null> =>
       new Promise((resolve) => {
-        refs.exportRenderRequestRef.current = { ignoreOverlappingLayers, imageFilterQuality, nodeId, onResolve: resolve, scale };
+        refs.exportRenderRequestRef.current = {
+          ignoreOverlappingLayers,
+          imageFilterQuality,
+          includeNodeIds,
+          nodeId,
+          onResolve: resolve,
+          scale,
+        };
       });
 
     return registerExportRenderer(renderNode);

@@ -25,7 +25,9 @@ export const resolveExportRenderRequest = (
 
     const state = store.getState();
     const nodesById = selectNodes(state);
-    const nodesToDraw = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), request.ignoreOverlappingLayers);
+    const { includeNodeIds } = request;
+    const renderNodes = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), request.ignoreOverlappingLayers);
+    const nodesToDraw = includeNodeIds ? renderNodes.filter((node) => includeNodeIds.has(node.id)) : renderNodes;
     const context: TDrawSceneContext = {
       buffer,
       canvasHeight: 0,
