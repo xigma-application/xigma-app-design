@@ -13,6 +13,7 @@ exports[`AccordionItem snapshots > should render its content expanded when defau
     >
       <span
         class="_AccordionItem__icon_f05791 _AccordionItem__icon--expanded_f05791"
+        style="transform: rotate(0deg);"
       >
         <svg
           class="Icon"
@@ -62,6 +63,7 @@ exports[`AccordionItem snapshots > should render its header collapsed by default
     >
       <span
         class="_AccordionItem__icon_f05791"
+        style="transform: rotate(-90deg);"
       >
         <svg
           class="Icon"

@@ -17,8 +17,11 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 // utils
 import { getAttributes } from 'shared/E2EDataAttributes/utils/getAttributes';
 
+export type TCheckboxColor = 'primary' | 'secondary';
+
 export type TCheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'color' | 'onChange' | 'value'> & {
   className?: string;
+  color?: TCheckboxColor;
   e2eValue?: TE2EValue;
   isMixed?: boolean;
   label: string;
@@ -26,8 +29,19 @@ export type TCheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'classN
   value: boolean;
 };
 
-export const Checkbox: FC<TCheckboxProps> = ({ className = '', e2eValue = '', isMixed = false, label, onChange, value, ...restProps }) => {
+export const Checkbox: FC<TCheckboxProps> = ({
+  className = '',
+  color = 'primary',
+  e2eValue = '',
+  isMixed = false,
+  label,
+  onChange,
+  value,
+  ...restProps
+}) => {
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => onChange(event.target.checked);
+  const isFilled = value || isMixed;
+  const iconColor = color === 'primary' ? 'onBlue1' : 'neutral1';
 
   return (
     <E2EDataAttribute type={E2EAttribute.checkbox} value={e2eValue}>
@@ -40,8 +54,16 @@ export const Checkbox: FC<TCheckboxProps> = ({ className = '', e2eValue = '', is
           {...getAttributes(E2EAttribute.checkboxInput, e2eValue)}
           {...restProps}
         />
-        <div className={styles['Checkbox__input-wrapper']}>
-          {isMixed ? <Icon name="CheckboxMixed" size={8} /> : value && <Icon name="Checkbox" size={8} />}
+        <div
+          className={cx(styles['Checkbox__input-wrapper'], {
+            [styles[`Checkbox__input-wrapper--${color}`]]: isFilled,
+          })}
+        >
+          {isMixed ? (
+            <Icon color={iconColor} name="CheckboxMixed" size={8} />
+          ) : (
+            value && <Icon color={iconColor} name="Checkbox" size={8} />
+          )}
         </div>
         <span className={styles.Checkbox__label}>{label}</span>
       </div>

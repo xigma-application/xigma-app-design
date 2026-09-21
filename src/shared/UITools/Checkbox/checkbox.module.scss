@@ -26,6 +26,11 @@
     height: 16px;
     justify-content: center;
     width: 16px;
+
+    &--primary {
+      background-color: var(--color-blue-1);
+      border-color: var(--color-blue-1);
+    }
   }
 
   &__label {

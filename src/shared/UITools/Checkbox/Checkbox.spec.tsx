@@ -30,9 +30,41 @@ describe('Checkbox snapshots', () => {
     // result
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('should render the checked state with the secondary color', () => {
+    // before
+    const { asFragment } = renderCheckbox({ color: 'secondary', value: true });
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
 
 describe('Checkbox behaviors', () => {
+  it('should default to the primary color with a blue-filled wrapper once checked', () => {
+    // before
+    const { container } = renderCheckbox({ value: true });
+
+    // result
+    expect(container.querySelector('[class*="Checkbox__input-wrapper--primary"]')).toBeInTheDocument();
+  });
+
+  it('should not fill the wrapper with the secondary color once checked', () => {
+    // before
+    const { container } = renderCheckbox({ color: 'secondary', value: true });
+
+    // result
+    expect(container.querySelector('[class*="Checkbox__input-wrapper--primary"]')).toBeNull();
+  });
+
+  it('should not fill the wrapper while unchecked, regardless of color', () => {
+    // before
+    const { container } = renderCheckbox({ value: false });
+
+    // result
+    expect(container.querySelector('[class*="Checkbox__input-wrapper--primary"]')).toBeNull();
+  });
+
   it('should render the label', () => {
     // before
     renderCheckbox();

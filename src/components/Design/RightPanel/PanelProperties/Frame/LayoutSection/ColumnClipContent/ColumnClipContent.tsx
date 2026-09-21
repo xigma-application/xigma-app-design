@@ -16,7 +16,13 @@ const ColumnClipContent: FC = () => {
 
   return (
     <UITools.SectionColumn withBottomMargin withTopMargin>
-      <UITools.Checkbox e2eValue="clip-content" label={t(`${translationNameSpace}.label`)} onChange={onChange} value={clipContent} />
+      <UITools.Checkbox
+        color="secondary"
+        e2eValue="clip-content"
+        label={t(`${translationNameSpace}.label`)}
+        onChange={onChange}
+        value={clipContent}
+      />
     </UITools.SectionColumn>
   );
 };

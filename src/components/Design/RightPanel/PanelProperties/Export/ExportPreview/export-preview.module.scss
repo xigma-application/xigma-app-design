@@ -1,0 +1,15 @@
+.ExportPreview {
+  &__header.ExportPreview__header {
+    padding-left: 0;
+  }
+
+  &__image {
+    background-color: var(--color-neutral-5);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 5px;
+    height: 160px;
+    width: 100%;
+  }
+}

@@ -21,6 +21,7 @@ export const EffectClipToShapeField: FC<TEffectClipToShapeFieldProps> = ({ onCha
   return (
     <div className={styles.EffectClipToShapeField}>
       <UITools.Checkbox
+        color="secondary"
         e2eValue="effect-clip-to-shape"
         label={t(`${translationNameSpace}.settings.clipToShape`)}
         onChange={onChange}

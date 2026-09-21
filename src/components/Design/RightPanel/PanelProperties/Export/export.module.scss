@@ -1,0 +1,19 @@
+.Export {
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  &__footer {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 16px 12px;
+    padding-bottom: 0;
+    row-gap: 8px;
+  }
+
+  &__exportButton {
+    justify-content: center;
+  }
+}

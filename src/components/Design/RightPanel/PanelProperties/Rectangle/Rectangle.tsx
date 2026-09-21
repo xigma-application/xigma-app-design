@@ -6,6 +6,7 @@ import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import EffectsSection from '../Common/EffectsSection/EffectsSection';
+import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
 import StrokeSection from '../Common/StrokeSection/StrokeSection';
@@ -30,6 +31,7 @@ const Rectangle: FC = () => {
       <FillSection />
       <StrokeSection />
       <EffectsSection />
+      <Export />
     </Fragment>
   );
 };

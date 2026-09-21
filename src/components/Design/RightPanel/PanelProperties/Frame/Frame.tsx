@@ -3,6 +3,7 @@ import { FC, Fragment } from 'react';
 // components
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import EffectsSection from '../Common/EffectsSection/EffectsSection';
+import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
 import FrameHeader from './FrameHeader/FrameHeader';
 import LayoutGuideSection from '../Common/LayoutGuideSection/LayoutGuideSection';
@@ -22,6 +23,7 @@ const Frame: FC = () => (
     <EffectsSection />
     <SelectionColorsSection />
     <LayoutGuideSection />
+    <Export />
   </Fragment>
 );
 

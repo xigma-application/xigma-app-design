@@ -86,4 +86,62 @@ describe('AccordionItem behaviors', () => {
     // result
     expect(container.querySelector('[data-test-accordion-item="phone"]')).not.toBeNull();
   });
+
+  it('should default to the Triangle icon rotated -90deg while collapsed and 0deg while expanded', () => {
+    // before
+    const { container } = render(<AccordionItem item={{ content: <span>body</span>, label: 'Phone' }} />);
+    const icon = container.querySelector('[class*="AccordionItem__icon"]') as HTMLElement;
+
+    // result
+    expect(icon).toHaveStyle({ transform: 'rotate(-90deg)' });
+
+    // action
+    fireEvent.click(screen.getByRole('button'));
+
+    // result
+    expect(icon).toHaveStyle({ transform: 'rotate(0deg)' });
+  });
+
+  it('should use a custom icon and rotation range when given one', () => {
+    // before
+    const { container } = render(
+      <AccordionItem
+        item={{ content: <span>body</span>, icon: 'ChevronRight', iconRotation: { collapsed: 0, expanded: 90 }, label: 'Phone' }}
+      />,
+    );
+    const icon = container.querySelector('[class*="AccordionItem__icon"]') as HTMLElement;
+
+    // result
+    expect(icon).toHaveStyle({ transform: 'rotate(0deg)' });
+
+    // action
+    fireEvent.click(screen.getByRole('button'));
+
+    // result
+    expect(icon).toHaveStyle({ transform: 'rotate(90deg)' });
+  });
+
+  it('should merge a custom className onto the header', () => {
+    // before
+    render(<AccordionItem item={{ className: 'custom-header', content: <span>body</span>, label: 'Phone' }} />);
+
+    // result
+    expect(screen.getByRole('button').className).toContain('custom-header');
+  });
+
+  it('should default the icon size to 6px', () => {
+    // before
+    render(<AccordionItem item={{ content: <span>body</span>, label: 'Phone' }} />);
+
+    // result
+    expect(screen.getByRole('button').querySelector('svg')).toHaveAttribute('height', '6');
+  });
+
+  it('should use a custom icon size when given one', () => {
+    // before
+    render(<AccordionItem item={{ content: <span>body</span>, iconSize: 24, label: 'Phone' }} />);
+
+    // result
+    expect(screen.getByRole('button').querySelector('svg')).toHaveAttribute('height', '24');
+  });
 });
