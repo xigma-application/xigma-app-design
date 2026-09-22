@@ -6,6 +6,7 @@ import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 import { hasVectorStroke } from '../hasVectorStroke';
 import { isSafeAncestorChain } from '../isSafeAncestorChain';
+import { isSvgVectorFillPaint } from './isSvgVectorFillPaint';
 import { isSvgVectorPaint } from './isSvgVectorPaint';
 
 const isOwnStyleSupported = (node: TFrameNode | TRectangleNode): boolean =>
@@ -14,7 +15,7 @@ const isOwnStyleSupported = (node: TFrameNode | TRectangleNode): boolean =>
   !node.effects?.some((effect) => effect.visible !== false) &&
   !(node.strokeColor && node.strokeWidth) &&
   (!node.strokeMode || node.strokeMode === StrokeMode.basic) &&
-  node.fills.every(isSvgVectorPaint) &&
+  node.fills.every(isSvgVectorFillPaint) &&
   (!hasVectorStroke(node) || (node.strokes ?? []).every(isSvgVectorPaint));
 
 export const canExportBoxShapeAsSvgVector = (node: TFrameNode | TRectangleNode, nodesById: Record<string, TSceneNode>): boolean =>

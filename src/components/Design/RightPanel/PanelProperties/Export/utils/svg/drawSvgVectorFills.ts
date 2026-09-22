@@ -7,16 +7,16 @@ import { drawSvgPaintPolygons } from './drawSvgPaintPolygons';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
-export const drawSvgVectorFills = (
+export const drawSvgVectorFills = async (
   elements: string[],
   defs: string[],
   renderedNode: TVectorNode,
   opacity: number,
   bounds: TDraftRect,
-): void => {
+): Promise<void> => {
   const nodeBounds = getVectorNodeBounds(renderedNode);
 
-  groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
-    drawSvgPaintPolygons(elements, defs, paint, polygons, opacity, bounds, nodeBounds);
-  });
+  for (const { paint, polygons } of groupFilledFacesForRendering(renderedNode)) {
+    await drawSvgPaintPolygons(elements, defs, paint, polygons, opacity, bounds, nodeBounds);
+  }
 };

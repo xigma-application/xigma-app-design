@@ -8,6 +8,7 @@ import { canExportBoxShapeAsSvgVector } from '../canExportBoxShapeAsSvgVector';
 
 const solid: TPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
 const image: TPaint = { opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' };
+const video: TPaint = { opacity: 100, ref: 'vid', rotation: 0, scaleMode: 'fill', type: 'video' };
 const linearGradient: TGradientPaint = {
   end: { x: 10, y: 10 },
   opacity: 100,
@@ -46,9 +47,33 @@ describe('canExportBoxShapeAsSvgVector', () => {
     expect(check(rectangle({ strokeMode: StrokeMode.basic }))).toBe(true);
   });
 
-  it('should reject non-solid fills and non-solid drawn strokes', () => {
-    expect(check(rectangle({ fills: [image] }))).toBe(false);
+  it('should allow simple image and video fills, but still reject them as a drawn stroke', () => {
+    expect(check(rectangle({ fills: [image] }))).toBe(true);
+    expect(check(rectangle({ fills: [video] }))).toBe(true);
     expect(check(rectangle({ strokeWidth: 2, strokes: [image] }))).toBe(false);
+  });
+
+  it('should reject an image fill with no ref, non-default color adjustments, or a blend mode', () => {
+    expect(check(rectangle({ fills: [{ ...image, ref: '' }] }))).toBe(false);
+    expect(
+      check(
+        rectangle({
+          fills: [
+            { ...image, adjustments: { contrast: 0, exposure: 10, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 } },
+          ],
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      check(
+        rectangle({
+          fills: [
+            { ...image, adjustments: { contrast: 0, exposure: 0, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 } },
+          ],
+        }),
+      ),
+    ).toBe(true);
+    expect(check(rectangle({ fills: [{ ...image, blendMode: BlendMode.multiply }] }))).toBe(false);
   });
 
   it('should allow linear and radial gradient fills', () => {

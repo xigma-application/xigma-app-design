@@ -37,6 +37,7 @@ vi.mock('utils/canvas/text/fontOutline/getTextFlattenVector', () => ({
 }));
 
 const readSvgText = async (blob: Blob | null): Promise<string> => (blob ? blob.text() : '');
+const sourceImageBlob = { tag: 'source-image' } as unknown as Blob;
 
 describe('createSvgBlob', () => {
   beforeEach(() => {
@@ -48,6 +49,21 @@ describe('createSvgBlob', () => {
     renderNodeForExportMock.mockResolvedValue({ height: 1, pixels: new Uint8Array(4), width: 1 });
     createImageBlobFromPixelsMock.mockResolvedValue('raster-blob');
     blobToDataUrlMock.mockResolvedValue('data:image/png;base64,AAAA');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (): Promise<{ blob: () => Promise<Blob>; ok: boolean }> => ({
+        blob: async (): Promise<Blob> => sourceImageBlob,
+        ok: true,
+      })),
+    );
+    vi.stubGlobal(
+      'createImageBitmap',
+      vi.fn(async (): Promise<{ height: number; width: number }> => ({ height: 80, width: 100 })),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should return null when the node does not exist', async () => {
@@ -351,7 +367,16 @@ describe('createSvgBlob', () => {
     // mock
     store.dispatch(
       addNode({
-        fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+        fills: [
+          {
+            adjustments: { contrast: 0, exposure: 10, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 },
+            opacity: 100,
+            ref: 'img',
+            rotation: 0,
+            scaleMode: 'fill',
+            type: 'image',
+          },
+        ],
         height: 30,
         name: 'Rect',
         parentId: null,
@@ -377,7 +402,16 @@ describe('createSvgBlob', () => {
     // mock
     store.dispatch(
       addNode({
-        fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+        fills: [
+          {
+            adjustments: { contrast: 0, exposure: 10, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 },
+            opacity: 100,
+            ref: 'img',
+            rotation: 0,
+            scaleMode: 'fill',
+            type: 'image',
+          },
+        ],
         height: 30,
         name: 'Rect',
         parentId: null,
@@ -413,7 +447,16 @@ describe('createSvgBlob', () => {
           {
             childIds: ['svg-text'],
             clipContent: false,
-            fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+            fills: [
+              {
+                adjustments: { contrast: 0, exposure: 10, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 },
+                opacity: 100,
+                ref: 'img',
+                rotation: 0,
+                scaleMode: 'fill',
+                type: 'image',
+              },
+            ],
             height: 80,
             id: 'svg-text-frame',
             name: 'Frame',
@@ -539,5 +582,219 @@ describe('createSvgBlob', () => {
     );
     expect(text).toContain('<path d="M');
     expect(text).not.toContain('<tspan');
+  });
+
+  it('should draw a simple image fill (mode fill) as a real, clipped <image> without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [{ opacity: 100, ref: 'https://assets.test/photo.png', rotation: 0, scaleMode: 'fill', type: 'image' }],
+            height: 30,
+            id: 'svg-image-fill',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-image-fill'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-image-fill', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(fetch).toHaveBeenCalledWith('https://assets.test/photo.png');
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('<defs><clipPath id="XigmaClip0">');
+    expect(text).toContain('<image href="data:image/png;base64,AAAA" x="0" y="0" width="40" height="30"');
+    expect(text).toContain('preserveAspectRatio="xMidYMid slice"');
+    expect(text).toContain('clip-path="url(#XigmaClip0)"');
+  });
+
+  it('should draw a video fill the same way as an image fill', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [{ opacity: 100, ref: 'https://assets.test/frame.png', rotation: 0, scaleMode: 'fit', type: 'video' }],
+            height: 30,
+            id: 'svg-video-fill',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-video-fill'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-video-fill', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('preserveAspectRatio="xMidYMid meet"');
+  });
+
+  it('should fall back to raster for an image fill with non-default color adjustments (no SVG filter equivalent)', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                adjustments: { contrast: 0, exposure: 15, highlights: 0, saturation: 0, shadows: 0, temperature: 0, tint: 0 },
+                opacity: 100,
+                ref: 'https://assets.test/photo.png',
+                rotation: 0,
+                scaleMode: 'fill',
+                type: 'image',
+              },
+            ],
+            height: 30,
+            id: 'svg-image-adjusted',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-image-adjusted'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-image-adjusted', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(fetch).not.toHaveBeenCalled();
+    expect(renderNodeForExportMock).toHaveBeenCalledWith(
+      'svg-image-adjusted',
+      2,
+      true,
+      ExportImageResampling.basic,
+      new Set(['svg-image-adjusted']),
+    );
+    expect(text).toContain('<image href="data:image/png;base64,AAAA"');
+    expect(text).not.toContain('clip-path');
+  });
+
+  it('should draw a crop-mode image fill positioned at the crop rect with no aspect-ratio stretching', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                crop: { height: 20, rotation: 10, width: 25, x: 5, y: 3 },
+                opacity: 100,
+                ref: 'https://assets.test/photo.png',
+                rotation: 0,
+                scaleMode: 'fill',
+                type: 'image',
+              },
+            ],
+            height: 30,
+            id: 'svg-image-crop',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-image-crop'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-image-crop', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(text).toContain('x="5" y="3" width="25" height="20"');
+    expect(text).toContain('preserveAspectRatio="none"');
+    expect(text).toContain('transform="rotate(10 ');
+  });
+
+  it('should draw a tile-mode image fill as a pattern fill on the shape polygon, not a separate <image> element', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [{ opacity: 100, ref: 'https://assets.test/photo.png', rotation: 0, scale: 0.5, scaleMode: 'tile', type: 'image' }],
+            height: 30,
+            id: 'svg-image-tile',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-image-tile'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-image-tile', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(text).toContain('<defs><pattern id="XigmaPattern0" patternUnits="userSpaceOnUse" width="50" height="40">');
+    expect(text).toContain('fill="url(#XigmaPattern0)"');
+    expect(text).not.toContain('<image href="data:image/png;base64,AAAA" x=');
+  });
+
+  it('should draw a standalone media (image/video) node as a full-stretch image without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            flipX: false,
+            flipY: false,
+            height: 30,
+            id: 'svg-media',
+            name: 'Media',
+            parentId: null,
+            rotation: 0,
+            src: 'https://assets.test/photo.png',
+            type: NodeType.media,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-media'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-media', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('<image href="data:image/png;base64,AAAA" x="0" y="0" width="40" height="30" preserveAspectRatio="none"/>');
   });
 });

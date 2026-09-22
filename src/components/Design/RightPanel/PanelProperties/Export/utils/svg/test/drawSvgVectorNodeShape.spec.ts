@@ -39,12 +39,12 @@ describe('drawSvgVectorNodeShape', () => {
     drawSvgVectorRoundedCapsMock.mockClear();
   });
 
-  it('should draw fills, stroke and rounded caps in order with the effective opacity', () => {
+  it('should draw fills, stroke and rounded caps in order with the effective opacity', async () => {
     // action
     const elements: string[] = [];
     const defs: string[] = [];
 
-    drawSvgVectorNodeShape(elements, defs, node, {}, bounds);
+    await drawSvgVectorNodeShape(elements, defs, node, {}, bounds);
 
     // result
     expect(drawSvgVectorFillsMock).toHaveBeenCalledWith(elements, defs, node, 1, bounds);
@@ -52,7 +52,7 @@ describe('drawSvgVectorNodeShape', () => {
     expect(drawSvgVectorRoundedCapsMock).toHaveBeenCalledWith(elements, node, 1, bounds);
   });
 
-  it('should multiply in the inherited ancestor opacity', () => {
+  it('should multiply in the inherited ancestor opacity', async () => {
     // mock
     const parent: TFrameNode = {
       childIds: ['v'],
@@ -71,7 +71,7 @@ describe('drawSvgVectorNodeShape', () => {
     };
 
     // action
-    drawSvgVectorNodeShape([], [], { ...node, parentId: 'p' }, { p: parent }, bounds);
+    await drawSvgVectorNodeShape([], [], { ...node, parentId: 'p' }, { p: parent }, bounds);
 
     // result
     expect(drawSvgVectorFillsMock.mock.calls[0][3]).toBeCloseTo(0.5);

@@ -41,7 +41,7 @@ describe('drawSvgVectorFills', () => {
     getVectorNodeBoundsMock.mockReturnValue({ height: 20, width: 20, x: 0, y: 0 });
   });
 
-  it('should draw one paint-polygons call per fill group, threading the rendered node bounds through as the gradient fill bounds', () => {
+  it('should draw one paint-polygons call per fill group, threading the rendered node bounds through as the gradient fill bounds', async () => {
     // mock
     const paintA = [{ color: '#111111', opacity: 100, type: 'solid' as const }];
     const paintB = [{ color: '#222222', opacity: 100, type: 'solid' as const }];
@@ -57,7 +57,7 @@ describe('drawSvgVectorFills', () => {
     const defs: string[] = [];
 
     // action
-    drawSvgVectorFills(elements, defs, node, 0.5, bounds);
+    await drawSvgVectorFills(elements, defs, node, 0.5, bounds);
 
     // result
     expect(getVectorNodeBoundsMock).toHaveBeenCalledWith(node);
@@ -69,12 +69,12 @@ describe('drawSvgVectorFills', () => {
     expect(drawSvgPaintPolygonsMock).toHaveBeenNthCalledWith(2, elements, defs, paintB, polygonsB, 0.5, bounds, nodeBounds);
   });
 
-  it('should draw nothing when there are no fill groups', () => {
+  it('should draw nothing when there are no fill groups', async () => {
     // mock
     groupFilledFacesForRenderingMock.mockReturnValue([]);
 
     // action
-    drawSvgVectorFills([], [], node, 1, bounds);
+    await drawSvgVectorFills([], [], node, 1, bounds);
 
     // result
     expect(drawSvgPaintPolygonsMock).not.toHaveBeenCalled();

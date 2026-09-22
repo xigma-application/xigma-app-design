@@ -9,18 +9,19 @@ import { getBoxStrokeRingPolygons } from 'components/Design/Canvas/hooks/useCanv
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
 import { hasVectorStroke } from '../hasVectorStroke';
 
-export const drawSvgBoxShape = (
+export const drawSvgBoxShape = async (
   elements: string[],
   defs: string[],
   node: TFrameNode | TRectangleNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
-): void => {
+): Promise<void> => {
   const opacity = getEffectiveOpacity(node, nodesById);
+  const boxGeometry = { rect: { height: node.height, width: node.width, x: node.x, y: node.y }, rotation: node.rotation };
 
-  drawSvgPaintPolygons(elements, defs, node.fills, [getBoxFillPolygon(node)], opacity, bounds);
+  await drawSvgPaintPolygons(elements, defs, node.fills, [getBoxFillPolygon(node)], opacity, bounds, null, boxGeometry);
 
   if (node.strokes && hasVectorStroke(node)) {
-    drawSvgPaintPolygons(elements, defs, node.strokes, getBoxStrokeRingPolygons(node), opacity, bounds);
+    await drawSvgPaintPolygons(elements, defs, node.strokes, getBoxStrokeRingPolygons(node), opacity, bounds);
   }
 };

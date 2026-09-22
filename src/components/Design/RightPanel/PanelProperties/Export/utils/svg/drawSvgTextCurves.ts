@@ -25,6 +25,6 @@ export const drawSvgTextCurves = async (
     const renderedNode = getRenderedVectorNode(vector);
     const opacity = getEffectiveOpacity(node, nodesById);
 
-    drawSvgVectorFills(elements, defs, renderedNode, opacity, bounds);
+    await drawSvgVectorFills(elements, defs, renderedNode, opacity, bounds);
   }
 };

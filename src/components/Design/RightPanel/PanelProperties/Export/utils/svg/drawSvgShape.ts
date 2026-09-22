@@ -7,26 +7,30 @@ import { TSvgShapeNode } from './types';
 // utils
 import { drawSvgBoxShape } from './drawSvgBoxShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
+import { drawSvgMediaNodeShape } from './drawSvgMediaNodeShape';
 import { drawSvgSimpleShape } from './drawSvgSimpleShape';
 import { drawSvgVectorNodeShape } from './drawSvgVectorNodeShape';
 
-export const drawSvgShape = (
+export const drawSvgShape = async (
   elements: string[],
   defs: string[],
   node: TSvgShapeNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
-): void => {
+): Promise<void> => {
   switch (node.type) {
     case NodeType.frame:
     case NodeType.rectangle:
-      drawSvgBoxShape(elements, defs, node, nodesById, bounds);
+      await drawSvgBoxShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.line:
       drawSvgLineShape(elements, node, nodesById, bounds);
       break;
     case NodeType.vector:
-      drawSvgVectorNodeShape(elements, defs, node, nodesById, bounds);
+      await drawSvgVectorNodeShape(elements, defs, node, nodesById, bounds);
+      break;
+    case NodeType.media:
+      await drawSvgMediaNodeShape(elements, node, nodesById, bounds);
       break;
     default:
       drawSvgSimpleShape(elements, node, nodesById, bounds);

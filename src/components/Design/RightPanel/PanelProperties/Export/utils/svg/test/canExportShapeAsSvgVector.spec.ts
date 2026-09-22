@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TMediaNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsSvgVector } from '../canExportShapeAsSvgVector';
@@ -63,6 +63,21 @@ const vector: TVectorNode = {
   vertices: {},
 };
 
+const media: TMediaNode = {
+  flipX: false,
+  flipY: false,
+  height: 10,
+  id: 'm',
+  name: 'm',
+  parentId: null,
+  rotation: 0,
+  src: 's',
+  type: NodeType.media,
+  width: 10,
+  x: 0,
+  y: 0,
+};
+
 describe('canExportShapeAsSvgVector', () => {
   it('should route a box shape through the box eligibility check', () => {
     expect(canExportShapeAsSvgVector(rectangle, {})).toBe(true);
@@ -87,5 +102,10 @@ describe('canExportShapeAsSvgVector', () => {
   it('should route a pen-tool vector node through the vector-node eligibility check', () => {
     expect(canExportShapeAsSvgVector(vector, {})).toBe(true);
     expect(canExportShapeAsSvgVector({ ...vector, hidden: true }, {})).toBe(false);
+  });
+
+  it('should route a standalone media node through the media eligibility check', () => {
+    expect(canExportShapeAsSvgVector(media, {})).toBe(true);
+    expect(canExportShapeAsSvgVector({ ...media, src: '' }, {})).toBe(false);
   });
 });

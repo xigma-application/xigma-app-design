@@ -9,17 +9,18 @@ import { drawSvgVectorStroke } from './drawSvgVectorStroke';
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
 import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode';
 
-export const drawSvgVectorNodeShape = (
+export const drawSvgVectorNodeShape = async (
   elements: string[],
   defs: string[],
   node: TVectorNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
-): void => {
+): Promise<void> => {
   const renderedNode = getRenderedVectorNode(node);
   const opacity = getEffectiveOpacity(node, nodesById);
 
-  drawSvgVectorFills(elements, defs, renderedNode, opacity, bounds);
+  await drawSvgVectorFills(elements, defs, renderedNode, opacity, bounds);
+
   drawSvgVectorStroke(elements, renderedNode, opacity, bounds);
   drawSvgVectorRoundedCaps(elements, renderedNode, opacity, bounds);
 };

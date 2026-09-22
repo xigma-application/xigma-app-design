@@ -358,6 +358,10 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       caps) export as real vector paths
 - [x] SVG: plain text exports as real, selectable `<text>`; text on a path exports as real vector
       curves instead of an image
+- [x] SVG: images and videos (fills and standalone layers) embed as real `<image>` elements instead of
+      being flattened into a raster snapshot — covers all four fill modes (fill, fit, crop, tile, the
+      last via a repeating `<pattern>`); an image with color adjustments still falls back to raster,
+      since SVG has no matching filter
 
 ## Related
 

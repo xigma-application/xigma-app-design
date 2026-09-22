@@ -54,7 +54,7 @@ export const createSvgBlob = async (
           await drawSvgTextCurves(elements, defs, layer.node, nodesById, bounds);
           break;
         case SvgLayerType.vector:
-          drawSvgShape(elements, defs, layer.node, nodesById, bounds);
+          await drawSvgShape(elements, defs, layer.node, nodesById, bounds);
           break;
         default:
           await embedSvgRasterLayer(

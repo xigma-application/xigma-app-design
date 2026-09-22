@@ -1,8 +1,18 @@
 // types
 import { SvgLayerType } from './enums';
-import { TEllipseNode, TFrameNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
+import {
+  TEllipseNode,
+  TFrameNode,
+  TLineNode,
+  TMediaNode,
+  TPolygonNode,
+  TRectangleNode,
+  TStarNode,
+  TTextNode,
+  TVectorNode,
+} from 'types/design/types';
 
-export type TSvgShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode | TLineNode | TVectorNode;
+export type TSvgShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode | TLineNode | TVectorNode | TMediaNode;
 
 export type TSvgRasterLayer = { nodeIds: Set<string>; type: SvgLayerType.raster };
 

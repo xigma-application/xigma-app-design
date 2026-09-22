@@ -1,18 +1,20 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TPaint } from 'types/design/paint/types';
+import { TGradientPaint, TImagePaint, TPaint, TSolidPaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
 import { drawSvgGradientPolygons } from './drawSvgGradientPolygons';
+import { drawSvgImagePaint, TSvgImageBoxGeometry } from './drawSvgImagePaint';
 import { drawSvgPolygons } from './drawSvgPolygons';
 import { getFillsInPaintOrder } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getFillsInPaintOrder';
 import { getScaledFillPaints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getScaledFillPaints';
 
-const VECTOR_PAINT_TYPES: TPaint['type'][] = ['solid', 'gradient-linear', 'gradient-radial'];
+const VECTOR_PAINT_TYPES: TPaint['type'][] = ['solid', 'gradient-linear', 'gradient-radial', 'image', 'video'];
 
-const isVisibleVectorPaint = (paint: TPaint): boolean => paint.visible !== false && VECTOR_PAINT_TYPES.includes(paint.type);
+const isVisibleVectorPaint = (paint: TPaint): paint is TSolidPaint | TGradientPaint | TImagePaint | TVideoPaint =>
+  paint.visible !== false && VECTOR_PAINT_TYPES.includes(paint.type);
 
-export const drawSvgPaintPolygons = (
+export const drawSvgPaintPolygons = async (
   elements: string[],
   defs: string[],
   paints: TPaint[],
@@ -20,14 +22,24 @@ export const drawSvgPaintPolygons = (
   opacity: number,
   bounds: TDraftRect,
   nodeBounds: TDraftRect | null = null,
-): void => {
-  getFillsInPaintOrder(getScaledFillPaints(paints, opacity))
-    .filter(isVisibleVectorPaint)
-    .forEach((paint) => {
-      if (paint.type === 'solid') {
+  boxGeometry: TSvgImageBoxGeometry | null = null,
+): Promise<void> => {
+  const visiblePaints = getFillsInPaintOrder(getScaledFillPaints(paints, opacity)).filter(isVisibleVectorPaint);
+
+  for (const paint of visiblePaints) {
+    switch (paint.type) {
+      case 'solid':
         drawSvgPolygons(elements, polygons, paint.color, paint.opacity / 100, bounds);
-      } else {
+        break;
+      case 'gradient-linear':
+      case 'gradient-radial':
         drawSvgGradientPolygons(elements, defs, paint, polygons, paint.opacity / 100, bounds, nodeBounds);
-      }
-    });
+        break;
+      default:
+        if (boxGeometry) {
+          await drawSvgImagePaint(elements, defs, paint as TImagePaint | TVideoPaint, polygons, paint.opacity / 100, bounds, boxGeometry);
+        }
+        break;
+    }
+  }
 };

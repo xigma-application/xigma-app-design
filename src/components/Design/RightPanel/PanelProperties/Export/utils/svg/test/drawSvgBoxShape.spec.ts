@@ -22,27 +22,27 @@ const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
 });
 
 describe('drawSvgBoxShape', () => {
-  it('should draw the fill with the paint opacity as a fraction', () => {
+  it('should draw the fill with the paint opacity as a fraction', async () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, [], rectangle({ fills: [{ color: '#00ff00', opacity: 40, type: 'solid' }] }), {}, bounds);
+    await drawSvgBoxShape(elements, [], rectangle({ fills: [{ color: '#00ff00', opacity: 40, type: 'solid' }] }), {}, bounds);
 
     expect(elements).toHaveLength(1);
     expect(elements[0]).toContain('fill="#00ff00"');
     expect(elements[0]).toContain('fill-opacity="0.4"');
   });
 
-  it('should draw stacked fills bottom to top and skip hidden and non-solid paints', () => {
+  it('should draw stacked fills bottom to top and skip hidden and unsupported paints', async () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(
+    await drawSvgBoxShape(
       elements,
       [],
       rectangle({
         fills: [
           { color: '#111111', opacity: 100, type: 'solid' },
           { color: '#222222', opacity: 100, type: 'solid', visible: false },
-          { opacity: 100, ref: 'i', rotation: 0, scaleMode: 'fill', type: 'image' },
+          { end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-angular' },
           { color: '#333333', opacity: 100, type: 'solid' },
         ],
       }),
@@ -55,7 +55,7 @@ describe('drawSvgBoxShape', () => {
     expect(elements[1]).toContain('fill="#111111"');
   });
 
-  it('should multiply in the inherited opacity of the ancestors', () => {
+  it('should multiply in the inherited opacity of the ancestors', async () => {
     const parent: TFrameNode = {
       childIds: ['r'],
       clipContent: false,
@@ -73,29 +73,35 @@ describe('drawSvgBoxShape', () => {
     };
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, [], rectangle({ parentId: 'p' }), { p: parent }, bounds);
+    await drawSvgBoxShape(elements, [], rectangle({ parentId: 'p' }), { p: parent }, bounds);
 
     expect(elements[0]).toContain('fill-opacity="0.5"');
   });
 
-  it('should draw the stroke ring after the fill when the node has a stroke', () => {
+  it('should draw the stroke ring after the fill when the node has a stroke', async () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, [], rectangle({ strokeWidth: 2, strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }), {}, bounds);
+    await drawSvgBoxShape(
+      elements,
+      [],
+      rectangle({ strokeWidth: 2, strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }),
+      {},
+      bounds,
+    );
 
     expect(elements).toHaveLength(2);
     expect(elements[1]).toContain('fill="#0000ff"');
   });
 
-  it('should skip the stroke draw when the node has no stroke', () => {
+  it('should skip the stroke draw when the node has no stroke', async () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, [], rectangle(), {}, bounds);
+    await drawSvgBoxShape(elements, [], rectangle(), {}, bounds);
 
     expect(elements).toHaveLength(1);
   });
 
-  it('should thread the defs array through to a gradient fill', () => {
+  it('should thread the defs array through to a gradient fill', async () => {
     const elements: string[] = [];
     const defs: string[] = [];
     const gradient = {
@@ -109,7 +115,7 @@ describe('drawSvgBoxShape', () => {
       type: 'gradient-linear' as const,
     };
 
-    drawSvgBoxShape(elements, defs, rectangle({ fills: [gradient] }), {}, bounds);
+    await drawSvgBoxShape(elements, defs, rectangle({ fills: [gradient] }), {}, bounds);
 
     expect(defs).toHaveLength(1);
     expect(defs[0]).toContain('<linearGradient');

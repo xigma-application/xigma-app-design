@@ -6,6 +6,7 @@ import { TSvgShapeNode } from './types';
 // utils
 import { canExportBoxShapeAsSvgVector } from './canExportBoxShapeAsSvgVector';
 import { canExportLineAsSvgVector } from './canExportLineAsSvgVector';
+import { canExportMediaNodeAsSvgVector } from './canExportMediaNodeAsSvgVector';
 import { canExportSimpleShapeAsSvgVector } from './canExportSimpleShapeAsSvgVector';
 import { canExportVectorNodeAsSvgVector } from './canExportVectorNodeAsSvgVector';
 
@@ -18,6 +19,8 @@ export const canExportShapeAsSvgVector = (node: TSvgShapeNode, nodesById: Record
       return canExportLineAsSvgVector(node, nodesById);
     case NodeType.vector:
       return canExportVectorNodeAsSvgVector(node, nodesById);
+    case NodeType.media:
+      return canExportMediaNodeAsSvgVector(node, nodesById);
     default:
       return canExportSimpleShapeAsSvgVector(node, nodesById);
   }
