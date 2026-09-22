@@ -21,7 +21,7 @@ describe('captureBackdropTexture', () => {
     const gl = createGlMock();
     const backdrop = { texture: { tag: 'backdrop' } } as unknown as ReturnType<TMaskRenderer['pool']['acquire']>;
     const pool = { acquire: vi.fn(() => backdrop) } as unknown as TMaskRenderer['pool'];
-    const renderer = { gl, pool } as unknown as TMaskRenderer;
+    const renderer = { context: {}, gl, pool } as unknown as TMaskRenderer;
 
     // action
     const result = captureBackdropTexture(renderer);

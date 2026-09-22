@@ -3,11 +3,14 @@ import { TGlassCacheEntry, TMaskRenderer, TScissorRect } from './types';
 
 // utils
 import { compositeMask } from '../compositeMask';
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { setScissorRect } from './setScissorRect';
 
 export const compositeGlassCacheEntry = (renderer: TMaskRenderer, entry: TGlassCacheEntry, rect: TScissorRect): void => {
   const { context, gl } = renderer;
-  const { drawingBufferHeight, drawingBufferWidth } = gl;
+  const drawingBufferWidth = getDevicePixelWidth(context, gl);
+  const drawingBufferHeight = getDevicePixelHeight(context, gl);
   const scaleX = entry.rawWidth / (rect.rawWidth ?? rect.width);
   const scaleY = entry.rawHeight / (rect.rawHeight ?? rect.height);
 

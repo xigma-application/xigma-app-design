@@ -37,7 +37,7 @@ const releaseBackdrop = (renderer: TMaskRenderer, backdrop: TRenderTarget | null
 };
 
 const renderIsolatedContent = (renderer: TMaskRenderer, node: TSceneNode, target: TRenderTarget | null): void => {
-  const { gl, pool, refs } = renderer;
+  const { context, gl, pool, refs } = renderer;
   const blendMode = getIsolatedBlendMode(node, refs);
   const rect = getIsolatedScissorRect(renderer, node);
 
@@ -46,7 +46,7 @@ const renderIsolatedContent = (renderer: TMaskRenderer, node: TSceneNode, target
     const contentTarget = pool.acquire();
     const paint = (): void => paintIsolatedContent(renderer, node, contentTarget, rect);
 
-    renderIntoTarget(renderer, contentTarget, paint, rect && expandScissorRect(gl, rect, EFFECT_BLUR_MAX_PX));
+    renderIntoTarget(renderer, contentTarget, paint, rect && expandScissorRect(context, gl, rect, EFFECT_BLUR_MAX_PX));
     bindTarget(renderer, target);
     setScissorRect(gl, rect);
     compositeIsolatedContent(renderer, contentTarget.texture, backdrop, blendMode);

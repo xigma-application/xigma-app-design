@@ -6,6 +6,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { EFFECT_BLUR_MAX_PX } from '../drawBoxLeafNode/constants';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { getDropShadowMargin } from '../drawBoxLeafNode/getDropShadowMargin';
 import { getEffectGlass } from 'utils/design/effects/getEffectGlass';
 import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
@@ -72,7 +73,7 @@ const getVisibleMembers = (node: TSceneNode, subtree: TSceneNode[]): TSceneNode[
 
 const getGlassOnlyRect = (renderer: TMaskRenderer, node: TSceneNode): TScissorRect => {
   const { context, gl } = renderer;
-  const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
+  const pixelRatio = context.canvasWidth > 0 ? getDevicePixelWidth(context, gl) / context.canvasWidth : 1;
   const margin = getScissorMargin(renderer, node, [], 0, context.viewport.zoom * pixelRatio);
 
   return getDeviceScissorRect(renderer, getMembersCorners(node, []), margin);
@@ -88,7 +89,7 @@ export const getIsolatedScissorRect = (renderer: TMaskRenderer, node: TSceneNode
   if (subtree && (blur || texture || glass)) {
     const { context, gl } = renderer;
     const members = getVisibleMembers(node, subtree);
-    const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
+    const pixelRatio = context.canvasWidth > 0 ? getDevicePixelWidth(context, gl) / context.canvasWidth : 1;
     const margin = getScissorMargin(renderer, node, members, blur?.radius ?? 0, context.viewport.zoom * pixelRatio);
 
     return getDeviceScissorRect(renderer, getMembersCorners(node, members), margin);

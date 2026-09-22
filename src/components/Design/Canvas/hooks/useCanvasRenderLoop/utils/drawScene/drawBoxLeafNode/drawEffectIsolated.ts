@@ -4,6 +4,8 @@ import { TDrawSceneContext } from '../types';
 
 // utils
 import { compositeBlend } from '../compositeBlend';
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 
 export const drawEffectIsolated = (context: TDrawSceneContext, blendMode: BlendMode, paint: () => void): void => {
@@ -21,7 +23,7 @@ export const drawEffectIsolated = (context: TDrawSceneContext, blendMode: BlendM
   const backdrop = pool.acquire();
 
   gl.bindTexture(gl.TEXTURE_2D, backdrop.texture);
-  gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, 0);
+  gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, getDevicePixelWidth(context, gl), getDevicePixelHeight(context, gl), 0);
   gl.bindTexture(gl.TEXTURE_2D, null);
 
   const contentTarget = pool.acquire();

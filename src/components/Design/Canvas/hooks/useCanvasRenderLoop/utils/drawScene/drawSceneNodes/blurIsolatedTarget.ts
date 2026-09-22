@@ -20,7 +20,7 @@ export const blurIsolatedTarget = (
   const temp = pool.acquire();
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, temp.framebuffer);
-  setScissorRect(gl, rect && expandScissorRect(gl, rect, EFFECT_BLUR_MAX_PX));
+  setScissorRect(gl, rect && expandScissorRect(context, gl, rect, EFFECT_BLUR_MAX_PX));
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   setScissorRect(gl, rect);

@@ -7,6 +7,8 @@ import { TPaint } from 'types/design/paint/types';
 // utils
 import { compositeBlend } from '../../compositeBlend';
 import { drawVectorFillPaints } from 'utils/canvas/drawVectorNode/drawVectorFillPaints';
+import { getDevicePixelHeight } from '../../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../../getDevicePixelWidth';
 import { getFaceGroupBlendMode } from './getFaceGroupBlendMode';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 import { TBoxFillRotation, TPatternSourceTile } from 'utils/canvas/drawVectorNode/drawVectorPatternSourceTile';
@@ -35,7 +37,7 @@ const drawIsolatedFillGroup = (
   const backdrop = pool.acquire();
 
   gl.bindTexture(gl.TEXTURE_2D, backdrop.texture);
-  gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, 0);
+  gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, getDevicePixelWidth(context, gl), getDevicePixelHeight(context, gl), 0);
   gl.bindTexture(gl.TEXTURE_2D, null);
 
   const contentTarget = pool.acquire();

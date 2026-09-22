@@ -7,6 +7,8 @@ import { acquireGlassBackdrop } from './acquireGlassBackdrop';
 import { drawGlassPass } from './drawGlassPass';
 import { EFFECT_BLUR_MAX_PX } from '../drawBoxLeafNode/constants';
 import { ensureGlassBackdropMipmaps } from './ensureGlassBackdropMipmaps';
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { getEffectGlass } from 'utils/design/effects/getEffectGlass';
 import { getLayerBlurRadius } from './getLayerBlurRadius';
 import { glassBackdropStates } from './glassBackdropStates';
@@ -14,7 +16,7 @@ import { markGlassBackdropDirty } from './markGlassBackdropDirty';
 import { setScissorRect } from './setScissorRect';
 
 export const renderDirectGlass = (renderer: TMaskRenderer, node: TSceneNode, effect: TEffect, rect: TScissorRect): void => {
-  const { gl } = renderer;
+  const { context, gl } = renderer;
   const backdrop = acquireGlassBackdrop(renderer, rect, true);
   const state = glassBackdropStates.get(renderer);
   const frostRadius = getLayerBlurRadius(renderer, (getEffectGlass(effect).frost / 100) * EFFECT_BLUR_MAX_PX);
@@ -25,7 +27,15 @@ export const renderDirectGlass = (renderer: TMaskRenderer, node: TSceneNode, eff
   }
 
   setScissorRect(gl, rect);
-  drawGlassPass(renderer, node, effect, backdrop, { height: gl.drawingBufferHeight, width: gl.drawingBufferWidth }, true, frostLod);
+  drawGlassPass(
+    renderer,
+    node,
+    effect,
+    backdrop,
+    { height: getDevicePixelHeight(context, gl), width: getDevicePixelWidth(context, gl) },
+    true,
+    frostLod,
+  );
   setScissorRect(gl, null);
   markGlassBackdropDirty(renderer, rect);
 };

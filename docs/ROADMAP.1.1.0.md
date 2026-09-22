@@ -375,6 +375,9 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       an icon sitting in a bigger empty frame), "Outline text" (convert all text to shapes so it looks
       identical everywhere, not dependent on which fonts a viewer has), and "Include 'id' attribute"
       (name each shape in the SVG file after its layer name, for SVG only)
+- [x] Fixed: layer blur (and background blur, glass, blend mode) didn't show up at all in exported
+      SVG/PDF/PNG/JPEG files, even though it looked correct on the canvas — exports now render blur
+      and other effects the same way the canvas does
 
 ## Related
 

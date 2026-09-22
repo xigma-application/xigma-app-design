@@ -1,19 +1,16 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TDrawSceneContext } from '../types';
+import { TDrawSceneContext } from '../../types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { renderNodeAtScale } from '../renderNodeAtScale';
+import { renderExportTarget } from '../renderExportTarget';
 
-const drawLeafNodeMock = vi.fn();
 const createTargetMock = vi.fn();
 const disposeTargetMock = vi.fn();
 const setAlphaWriteEnabledMock = vi.fn();
 
-vi.mock('../drawLeafNode', () => ({ drawLeafNode: (...args: unknown[]): void => drawLeafNodeMock(...args) }));
 vi.mock('utils/canvas/renderTarget/createRenderTargetPool/createTarget', () => ({
   createTarget: (...args: unknown[]): unknown => createTargetMock(...args),
 }));
@@ -74,11 +71,8 @@ const rect = (id: string, overrides: Partial<TSceneNode> = {}): TSceneNode =>
     ...overrides,
   }) as TSceneNode;
 
-describe('renderNodeAtScale', () => {
-  const refs = createCanvasRefs();
-
+describe('renderExportTarget', () => {
   beforeEach(() => {
-    drawLeafNodeMock.mockClear();
     createTargetMock.mockClear();
     disposeTargetMock.mockClear();
     setAlphaWriteEnabledMock.mockClear();
@@ -87,40 +81,46 @@ describe('renderNodeAtScale', () => {
   it('should return null when the source node does not exist', () => {
     // mock
     const context = { gl: createGlMock(), imageContext: {} } as unknown as TDrawSceneContext;
+    const draw = vi.fn();
 
     // before
-    const result = renderNodeAtScale(context, 'missing', [], {}, refs, 2);
+    const result = renderExportTarget(context, 'missing', {}, 2, undefined, draw);
 
     // result
     expect(result).toBeNull();
     expect(createTargetMock).not.toHaveBeenCalled();
+    expect(draw).not.toHaveBeenCalled();
   });
 
   it('should return null for a hidden source node', () => {
     // mock
     const context = { gl: createGlMock(), imageContext: {} } as unknown as TDrawSceneContext;
     const nodesById = { r1: rect('r1', { hidden: true }) };
+    const draw = vi.fn();
 
     // before
-    const result = renderNodeAtScale(context, 'r1', [], nodesById, refs, 2);
+    const result = renderExportTarget(context, 'r1', nodesById, 2, undefined, draw);
 
     // result
     expect(result).toBeNull();
+    expect(draw).not.toHaveBeenCalled();
   });
 
   it('should return null for a degenerate (zero-size) source node', () => {
     // mock
     const context = { gl: createGlMock(), imageContext: {} } as unknown as TDrawSceneContext;
     const nodesById = { r1: rect('r1', { height: 0 }) };
+    const draw = vi.fn();
 
     // before
-    const result = renderNodeAtScale(context, 'r1', [], nodesById, refs, 2);
+    const result = renderExportTarget(context, 'r1', nodesById, 2, undefined, draw);
 
     // result
     expect(result).toBeNull();
+    expect(draw).not.toHaveBeenCalled();
   });
 
-  it('should render the source subtree at the exact requested scale, and read it back upright', () => {
+  it('should set up the export target at the exact requested scale, invoke draw once, and read it back upright', () => {
     // mock
     const gl = createGlMock();
     const target = { framebuffer: { tag: 'export-fbo' }, height: 100, texture: {}, width: 200 } as unknown as TRenderTarget;
@@ -129,12 +129,11 @@ describe('renderNodeAtScale', () => {
 
     const imageContext = { isAlphaWriteEnabled: false };
     const context = { gl, imageContext } as unknown as TDrawSceneContext;
-    const child = rect('c1');
-    const parent = { ...rect('f1', { height: 50, width: 100, x: 10, y: 20 }), childIds: ['c1'], type: NodeType.frame } as TSceneNode;
-    const nodesById = { c1: child, f1: parent };
+    const nodesById = { f1: rect('f1', { height: 50, type: NodeType.frame, width: 100, x: 10, y: 20 }) };
+    const draw = vi.fn();
 
     // before — an explicit 2x scale, independent of any "fit into a square" computation
-    const result = renderNodeAtScale(context, 'f1', [parent, child], nodesById, refs, 2);
+    const result = renderExportTarget(context, 'f1', nodesById, 2, undefined, draw);
 
     // result — 100x50 scaled by 2 -> 200x100, not clamped to any square/size limit
     expect(createTargetMock).toHaveBeenCalledWith(gl, 200, 100);
@@ -142,16 +141,15 @@ describe('renderNodeAtScale', () => {
     expect(gl.viewport).toHaveBeenCalledWith(0, 0, 200, 100);
     expect(setAlphaWriteEnabledMock).toHaveBeenNthCalledWith(1, gl, imageContext, true);
 
-    // result — both the source and its child were drawn, using a synthetic viewport that maps the
-    // node's own bounds to the exact requested scale
-    expect(drawLeafNodeMock).toHaveBeenCalledTimes(2);
-    const [drawnContext] = drawLeafNodeMock.mock.calls[0] as [TDrawSceneContext];
+    // result — draw is called once with a synthetic viewport mapping the node's own bounds to the
+    // exact requested scale, and the freshly created target
+    expect(draw).toHaveBeenCalledTimes(1);
+    const [drawnContext, drawnTarget] = draw.mock.calls[0] as [TDrawSceneContext, TRenderTarget];
 
     expect(drawnContext.canvasWidth).toBe(200);
     expect(drawnContext.canvasHeight).toBe(100);
     expect(drawnContext.viewport).toEqual({ x: -20, y: -40, zoom: 2 });
-    expect(drawLeafNodeMock).toHaveBeenNthCalledWith(1, drawnContext, parent, new Map(), refs, nodesById, null, 0);
-    expect(drawLeafNodeMock).toHaveBeenNthCalledWith(2, drawnContext, child, new Map(), refs, nodesById, null, 0);
+    expect(drawnTarget).toBe(target);
 
     // result — pixels read back at the target's own resolution, then previous GL state restored
     expect(gl.readPixels).toHaveBeenCalledWith(0, 0, 200, 100, gl.RGBA, gl.UNSIGNED_BYTE, expect.any(Uint8Array));
@@ -173,40 +171,19 @@ describe('renderNodeAtScale', () => {
     createTargetMock.mockReturnValue(target);
 
     const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
-    const frame = { ...rect('f1', { height: 200, width: 200, x: 0, y: 0 }), type: NodeType.frame } as TSceneNode;
-    const nodesById = { f1: frame };
+    const nodesById = { f1: rect('f1', { height: 200, type: NodeType.frame, width: 200, x: 0, y: 0 }) };
     const boundsOverride = { height: 10, width: 10, x: 20, y: 20 };
+    const draw = vi.fn();
 
     // before — the node's own declared bounds are 200x200, but the override should win instead
-    const result = renderNodeAtScale(context, 'f1', [frame], nodesById, refs, 1, boundsOverride);
+    const result = renderExportTarget(context, 'f1', nodesById, 1, boundsOverride, draw);
 
     // result
     expect(createTargetMock).toHaveBeenCalledWith(gl, 10, 10);
     expect(result).toEqual({ height: 10, pixels: expect.any(Uint8Array), width: 10 });
 
-    const [drawnContext] = drawLeafNodeMock.mock.calls[0] as [TDrawSceneContext];
+    const [drawnContext] = draw.mock.calls[0] as [TDrawSceneContext];
 
     expect(drawnContext.viewport).toEqual({ x: -20, y: -20, zoom: 1 });
-  });
-
-  it('should draw exactly the given node list, not derive the source node subtree itself', () => {
-    // mock — an unrelated sibling passed in nodesToDraw, absent from the source node's own children,
-    // proves the caller (not this function) decides which nodes end up on the canvas
-    const gl = createGlMock();
-    const target = { framebuffer: { tag: 'export-fbo' }, height: 20, texture: {}, width: 20 } as unknown as TRenderTarget;
-
-    createTargetMock.mockReturnValue(target);
-
-    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
-    const source = rect('r1');
-    const sibling = rect('r2', { x: 50 });
-    const nodesById = { r1: source, r2: sibling };
-
-    // before
-    renderNodeAtScale(context, 'r1', [sibling], nodesById, refs, 1);
-
-    // result
-    expect(drawLeafNodeMock).toHaveBeenCalledTimes(1);
-    expect(drawLeafNodeMock).toHaveBeenCalledWith(expect.anything(), sibling, new Map(), refs, nodesById, null, 0);
   });
 });

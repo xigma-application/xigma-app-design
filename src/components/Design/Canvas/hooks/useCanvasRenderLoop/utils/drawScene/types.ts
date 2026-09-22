@@ -7,6 +7,8 @@ export type TDrawContext = {
   buffer: WebGLBuffer;
   canvasHeight: number;
   canvasWidth: number;
+  devicePixelHeight?: number;
+  devicePixelWidth?: number;
   gl: WebGL2RenderingContext;
   imageFilterQuality?: TImageFilterQuality;
   program: WebGLProgram;

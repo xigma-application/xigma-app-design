@@ -6,7 +6,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { collectPatternSourceSubtree } from './collectPatternSourceSubtree';
 import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
-import { renderNodeAtScale } from './renderNodeAtScale';
+import { renderNodeAtScale } from './renderExport/renderNodeAtScale';
 
 export type TRenderedPatternThumbnailPixels = { height: number; pixels: Uint8Array; width: number };
 

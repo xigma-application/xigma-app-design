@@ -1,26 +1,26 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect } from 'types/canvas';
-import { TDrawSceneContext } from './types';
+import { TDrawSceneContext } from '../types';
+import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { createTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/createTarget';
 import { disposeTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/disposeTarget';
-import { drawLeafNode } from './drawLeafNode';
-import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
+import { getRotatedNodeBounds } from '../../../../../utils/getRotatedNodeBounds';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 
 export type TRenderedNodePixels = { height: number; pixels: Uint8Array; width: number };
 
-export const renderNodeAtScale = (
+export type TRenderExportDraw = (renderContext: TDrawSceneContext, target: TRenderTarget) => void;
+
+export const renderExportTarget = (
   context: TDrawSceneContext,
   sourceNodeId: string,
-  nodesToDraw: TSceneNode[],
   nodesById: Record<string, TSceneNode>,
-  refs: TCanvasRefs,
   scale: number,
-  boundsOverride?: TDraftRect,
+  boundsOverride: TDraftRect | undefined,
+  draw: TRenderExportDraw,
 ): TRenderedNodePixels | null => {
   const sourceNode = nodesById[sourceNodeId];
 
@@ -45,6 +45,8 @@ export const renderNodeAtScale = (
         ...context,
         canvasHeight: height,
         canvasWidth: width,
+        devicePixelHeight: height,
+        devicePixelWidth: width,
         viewport: { x: -bounds.x * scale, y: -bounds.y * scale, zoom: scale },
       };
 
@@ -55,9 +57,7 @@ export const renderNodeAtScale = (
       gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-      nodesToDraw.forEach((node) => {
-        drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0);
-      });
+      draw(renderContext, target);
 
       const pixels = new Uint8Array(width * height * 4);
 

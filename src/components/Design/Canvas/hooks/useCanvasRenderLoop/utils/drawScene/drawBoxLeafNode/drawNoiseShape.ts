@@ -9,6 +9,8 @@ import { NOISE_MAX_COVERAGE } from './constants';
 
 // utils
 import { drawNoiseMask } from './drawNoiseMask';
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { getEffectNoise } from 'utils/design/effects/getEffectNoise';
 import { getNoiseShapePoints } from './getNoiseShapePoints';
 import { hexToRgbFloat } from 'utils/canvas/hexToRgbFloat';
@@ -42,8 +44,8 @@ export const drawNoiseShape = (context: TDrawSceneContext, node: TFrameNode | TR
   gl.uniform2f(gl.getUniformLocation(program, 'u_center'), center.x, center.y);
 
   setFloat('u_zoom', viewport.zoom);
-  setFloat('u_pixelRatio', canvasWidth > 0 ? gl.drawingBufferWidth / canvasWidth : 1);
-  setFloat('u_drawingBufferHeight', gl.drawingBufferHeight);
+  setFloat('u_pixelRatio', canvasWidth > 0 ? getDevicePixelWidth(context, gl) / canvasWidth : 1);
+  setFloat('u_drawingBufferHeight', getDevicePixelHeight(context, gl));
   setFloat('u_rotation', (node.rotation * Math.PI) / 180);
   setFloat('u_cellSize', noiseSize);
   setFloat('u_density', (density / 100) * NOISE_MAX_COVERAGE);

@@ -9,7 +9,8 @@ import { TImageRenderContext } from '../types';
 
 // utils
 import { getExportRenderNodes } from './drawScene/getExportRenderNodes';
-import { renderNodeAtScale } from './drawScene/renderNodeAtScale';
+import { renderNodeAtScale } from './drawScene/renderExport/renderNodeAtScale';
+import { renderNodeSubtreeAtScale } from './drawScene/renderExport/renderNodeSubtreeAtScale';
 
 export const resolveExportRenderRequest = (
   gl: WebGL2RenderingContext,
@@ -25,9 +26,7 @@ export const resolveExportRenderRequest = (
 
     const state = store.getState();
     const nodesById = selectNodes(state);
-    const { includeNodeIds } = request;
-    const renderNodes = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), request.ignoreOverlappingLayers);
-    const nodesToDraw = includeNodeIds ? renderNodes.filter((node) => includeNodeIds.has(node.id)) : renderNodes;
+    const { includeNodeIds, ignoreOverlappingLayers } = request;
     const context: TDrawSceneContext = {
       buffer,
       canvasHeight: 0,
@@ -39,6 +38,13 @@ export const resolveExportRenderRequest = (
       viewport: { x: 0, y: 0, zoom: 1 },
     };
 
-    request.onResolve(renderNodeAtScale(context, request.nodeId, nodesToDraw, nodesById, refs, request.scale, request.boundsOverride));
+    if (includeNodeIds || !ignoreOverlappingLayers) {
+      const renderNodes = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
+      const nodesToDraw = includeNodeIds ? renderNodes.filter((node) => includeNodeIds.has(node.id)) : renderNodes;
+
+      request.onResolve(renderNodeAtScale(context, request.nodeId, nodesToDraw, nodesById, refs, request.scale, request.boundsOverride));
+    } else {
+      request.onResolve(renderNodeSubtreeAtScale(context, request.nodeId, nodesById, refs, request.scale, request.boundsOverride));
+    }
   }
 };

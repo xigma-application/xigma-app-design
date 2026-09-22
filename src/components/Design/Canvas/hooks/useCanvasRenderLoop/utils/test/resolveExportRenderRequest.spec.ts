@@ -12,10 +12,14 @@ import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { resolveExportRenderRequest } from '../resolveExportRenderRequest';
 
 const renderNodeAtScaleMock = vi.fn();
+const renderNodeSubtreeAtScaleMock = vi.fn();
 const getExportRenderNodesMock = vi.fn();
 
-vi.mock('../drawScene/renderNodeAtScale', () => ({
+vi.mock('../drawScene/renderExport/renderNodeAtScale', () => ({
   renderNodeAtScale: (...args: unknown[]): unknown => renderNodeAtScaleMock(...args),
+}));
+vi.mock('../drawScene/renderExport/renderNodeSubtreeAtScale', () => ({
+  renderNodeSubtreeAtScale: (...args: unknown[]): unknown => renderNodeSubtreeAtScaleMock(...args),
 }));
 vi.mock('../drawScene/getExportRenderNodes', () => ({
   getExportRenderNodes: (...args: unknown[]): unknown => getExportRenderNodesMock(...args),
@@ -25,6 +29,16 @@ const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 const imageContext = {} as TImageRenderContext;
+const EXPECTED_CONTEXT = {
+  buffer,
+  canvasHeight: 0,
+  canvasWidth: 0,
+  gl,
+  imageContext,
+  imageFilterQuality: 'detailed',
+  program,
+  viewport: { x: 0, y: 0, zoom: 1 },
+};
 
 describe('resolveExportRenderRequest', () => {
   let refs: TCanvasRefs;
@@ -33,6 +47,7 @@ describe('resolveExportRenderRequest', () => {
     store.dispatch(setSelection([]));
     refs = createCanvasRefs();
     renderNodeAtScaleMock.mockClear();
+    renderNodeSubtreeAtScaleMock.mockClear();
     getExportRenderNodesMock.mockClear();
   });
 
@@ -42,11 +57,12 @@ describe('resolveExportRenderRequest', () => {
 
     // result
     expect(renderNodeAtScaleMock).not.toHaveBeenCalled();
+    expect(renderNodeSubtreeAtScaleMock).not.toHaveBeenCalled();
     expect(getExportRenderNodesMock).not.toHaveBeenCalled();
   });
 
-  it('should resolve the pending request with the rendered pixels and clear it', () => {
-    // mock
+  it('should render through the effect-aware subtree renderer for the default request (ignoreOverlappingLayers on, no includeNodeIds), without flattening the render list', () => {
+    // mock — "Ignore overlapping layers" defaults to true, so this is the common real-world request shape
     store.dispatch(
       addNode({
         fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
@@ -63,7 +79,6 @@ describe('resolveExportRenderRequest', () => {
 
     const onResolve = vi.fn();
     const pixels = { height: 40, pixels: new Uint8Array(4), width: 40 };
-    const nodesToDraw = [{ id: 'r1' }];
 
     refs.exportRenderRequestRef.current = {
       ignoreOverlappingLayers: true,
@@ -72,60 +87,70 @@ describe('resolveExportRenderRequest', () => {
       onResolve,
       scale: 2,
     };
-    getExportRenderNodesMock.mockReturnValue(nodesToDraw);
-    renderNodeAtScaleMock.mockReturnValue(pixels);
+    renderNodeSubtreeAtScaleMock.mockReturnValue(pixels);
 
     // before
     resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
 
     // result
-    expect(getExportRenderNodesMock).toHaveBeenCalledWith('r1', expect.any(Object), expect.any(Array), true);
-    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(
-      {
-        buffer,
-        canvasHeight: 0,
-        canvasWidth: 0,
-        gl,
-        imageContext,
-        imageFilterQuality: 'detailed',
-        program,
-        viewport: { x: 0, y: 0, zoom: 1 },
-      },
-      'r1',
-      nodesToDraw,
-      expect.any(Object),
-      refs,
-      2,
-      undefined,
-    );
+    expect(getExportRenderNodesMock).not.toHaveBeenCalled();
+    expect(renderNodeAtScaleMock).not.toHaveBeenCalled();
+    expect(renderNodeSubtreeAtScaleMock).toHaveBeenCalledWith(EXPECTED_CONTEXT, 'r1', expect.any(Object), refs, 2, undefined);
     expect(onResolve).toHaveBeenCalledWith(pixels);
     expect(refs.exportRenderRequestRef.current).toBeNull();
   });
 
-  it('should resolve with null when the node could not be rendered', () => {
+  it('should forward the request own bounds override to the subtree renderer', () => {
     // mock
     const onResolve = vi.fn();
+    const boundsOverride = { height: 10, width: 10, x: 5, y: 5 };
 
     refs.exportRenderRequestRef.current = {
-      ignoreOverlappingLayers: false,
+      boundsOverride,
+      ignoreOverlappingLayers: true,
       imageFilterQuality: 'basic',
       nodeId: 'missing',
       onResolve,
       scale: 2,
     };
-    getExportRenderNodesMock.mockReturnValue([]);
+    renderNodeSubtreeAtScaleMock.mockReturnValue(null);
+
+    // before
+    resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
+
+    // result
+    expect(renderNodeSubtreeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'missing', expect.any(Object), refs, 2, boundsOverride);
+    expect(onResolve).toHaveBeenCalledWith(null);
+  });
+
+  it('should fall back to the flat renderer when ignoreOverlappingLayers is off (the whole document own real z-order is needed, not just one subtree)', () => {
+    // mock
+    const onResolve = vi.fn();
+    const nodesToDraw = [{ id: 'r1' }];
+
+    refs.exportRenderRequestRef.current = {
+      ignoreOverlappingLayers: false,
+      imageFilterQuality: 'detailed',
+      nodeId: 'r1',
+      onResolve,
+      scale: 2,
+    };
+    getExportRenderNodesMock.mockReturnValue(nodesToDraw);
     renderNodeAtScaleMock.mockReturnValue(null);
 
     // before
     resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
 
     // result
-    expect(getExportRenderNodesMock).toHaveBeenCalledWith('missing', expect.any(Object), expect.any(Array), false);
+    expect(getExportRenderNodesMock).toHaveBeenCalledWith('r1', expect.any(Object), expect.any(Array), false);
+    expect(renderNodeSubtreeAtScaleMock).not.toHaveBeenCalled();
+    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(EXPECTED_CONTEXT, 'r1', nodesToDraw, expect.any(Object), refs, 2, undefined);
     expect(onResolve).toHaveBeenCalledWith(null);
   });
 
-  it('should draw only the nodes listed in includeNodeIds when the request narrows the render', () => {
-    // mock
+  it('should draw only the nodes listed in includeNodeIds, via the flat renderer, even with the default ignoreOverlappingLayers: true', () => {
+    // mock — includeNodeIds is an arbitrary cross-subtree subset (e.g. a raster-layer run of several
+    // merged, not-necessarily-related nodes), so it can never reduce to a single subtree walk
     const onResolve = vi.fn();
 
     refs.exportRenderRequestRef.current = {
@@ -143,17 +168,19 @@ describe('resolveExportRenderRequest', () => {
     resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
 
     // result
+    expect(getExportRenderNodesMock).toHaveBeenCalledWith('a', expect.any(Object), expect.any(Array), true);
+    expect(renderNodeSubtreeAtScaleMock).not.toHaveBeenCalled();
     expect(renderNodeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'a', [{ id: 'b' }], expect.any(Object), refs, 1, undefined);
   });
 
-  it('should forward the request own bounds override to renderNodeAtScale', () => {
+  it('should forward the request own bounds override to the flat renderer', () => {
     // mock
     const onResolve = vi.fn();
     const boundsOverride = { height: 10, width: 10, x: 5, y: 5 };
 
     refs.exportRenderRequestRef.current = {
       boundsOverride,
-      ignoreOverlappingLayers: true,
+      ignoreOverlappingLayers: false,
       imageFilterQuality: 'basic',
       nodeId: 'a',
       onResolve,

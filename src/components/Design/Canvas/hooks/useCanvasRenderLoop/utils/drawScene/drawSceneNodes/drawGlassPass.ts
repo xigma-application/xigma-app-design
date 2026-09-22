@@ -7,6 +7,8 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 import { TEffect, TSceneNode } from 'types/design/types';
 
 // utils
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { getEffectGlass } from 'utils/design/effects/getEffectGlass';
 import { getGlassProgram } from './getGlassProgram';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
@@ -49,8 +51,8 @@ export const drawGlassPass = (
     gl.uniform2f(gl.getUniformLocation(program, 'u_halfSize'), bounds.width / 2, bounds.height / 2);
     setFloat('u_cornerRadius', getNodeCornerRadius(node));
     setFloat('u_zoom', viewport.zoom);
-    setFloat('u_pixelRatio', context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1);
-    setFloat('u_drawingBufferHeight', gl.drawingBufferHeight);
+    setFloat('u_pixelRatio', context.canvasWidth > 0 ? getDevicePixelWidth(context, gl) / context.canvasWidth : 1);
+    setFloat('u_drawingBufferHeight', getDevicePixelHeight(context, gl));
     setFloat('u_rotation', ('rotation' in node ? node.rotation * Math.PI : 0) / 180);
     setFloat('u_refraction', glass.refraction / 100);
     setFloat('u_depth', glass.depth / 100);

@@ -38,9 +38,9 @@ export const applyTextureEffect = (renderer: TMaskRenderer, node: TSceneNode, co
   const effect = getNodeTexture(node);
 
   if (effect) {
-    const { gl, paintLeaf, pool } = renderer;
+    const { context, gl, paintLeaf, pool } = renderer;
     const { clipToShape } = getEffectTexture(effect);
-    const clearRect = rect && expandScissorRect(gl, rect, TEXTURE_CLEAR_PADDING_PX);
+    const clearRect = rect && expandScissorRect(context, gl, rect, TEXTURE_CLEAR_PADDING_PX);
     const shape = clipToShape ? pool.acquire() : null;
     const output = pool.acquire();
     const hasChildren = 'childIds' in node && node.childIds.length > 0;

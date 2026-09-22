@@ -2,20 +2,26 @@
 import { TMaskRenderer, TScissorRect } from './types';
 import { TPoint } from 'types/canvas';
 
+// utils
+import { getDevicePixelHeight } from '../getDevicePixelHeight';
+import { getDevicePixelWidth } from '../getDevicePixelWidth';
+
 export const getDeviceScissorRect = (renderer: TMaskRenderer, corners: TPoint[], margin: number): TScissorRect => {
   const { context, gl } = renderer;
   const { viewport } = context;
-  const pixelRatio = context.canvasWidth > 0 ? gl.drawingBufferWidth / context.canvasWidth : 1;
+  const deviceWidth = getDevicePixelWidth(context, gl);
+  const deviceHeight = getDevicePixelHeight(context, gl);
+  const pixelRatio = context.canvasWidth > 0 ? deviceWidth / context.canvasWidth : 1;
   const xs = corners.map((corner) => (corner.x * viewport.zoom + viewport.x) * pixelRatio);
   const ys = corners.map((corner) => (corner.y * viewport.zoom + viewport.y) * pixelRatio);
   const rawLeft = Math.floor(Math.min(...xs) - margin);
   const rawRight = Math.ceil(Math.max(...xs) + margin);
-  const rawBottom = Math.floor(gl.drawingBufferHeight - Math.max(...ys) - margin);
-  const rawTop = Math.ceil(gl.drawingBufferHeight - Math.min(...ys) + margin);
+  const rawBottom = Math.floor(deviceHeight - Math.max(...ys) - margin);
+  const rawTop = Math.ceil(deviceHeight - Math.min(...ys) + margin);
   const left = Math.max(0, rawLeft);
-  const right = Math.min(gl.drawingBufferWidth, rawRight);
+  const right = Math.min(deviceWidth, rawRight);
   const bottom = Math.max(0, rawBottom);
-  const top = Math.min(gl.drawingBufferHeight, rawTop);
+  const top = Math.min(deviceHeight, rawTop);
 
   if (right > left && top > bottom) {
     const clipped = left !== rawLeft || right !== rawRight || bottom !== rawBottom || top !== rawTop;
