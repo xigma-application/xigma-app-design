@@ -16,7 +16,6 @@ const markNodeDrawnOverGlassBackdropMock = vi.fn();
 const releaseGlassBackdropMock = vi.fn();
 const renderHoistedIdsMock = vi.fn();
 const renderIdsMock = vi.fn();
-const createFixedRenderTargetPoolMock = vi.fn();
 
 vi.mock('../../drawLeafNode', () => ({ drawLeafNode: (...args: unknown[]): void => drawLeafNodeMock(...args) }));
 vi.mock('../renderExportTarget', () => ({
@@ -36,9 +35,6 @@ vi.mock('../../drawSceneNodes/renderHoistedIds', () => ({
 }));
 vi.mock('../../drawSceneNodes/renderIds', () => ({
   renderIds: (...args: unknown[]): void => renderIdsMock(...args),
-}));
-vi.mock('utils/canvas/renderTarget/createRenderTargetPool/createFixedRenderTargetPool', () => ({
-  createFixedRenderTargetPool: (...args: unknown[]): unknown => createFixedRenderTargetPoolMock(...args),
 }));
 
 const rect = (id: string, overrides: Partial<TSceneNode> = {}): TSceneNode =>
@@ -69,7 +65,6 @@ describe('renderNodeSubtreeAtScale', () => {
     releaseGlassBackdropMock.mockClear();
     renderHoistedIdsMock.mockClear();
     renderIdsMock.mockClear();
-    createFixedRenderTargetPoolMock.mockClear();
     getHoistedDragIdsMock.mockReturnValue(hoistedIds);
   });
 
@@ -95,15 +90,16 @@ describe('renderNodeSubtreeAtScale', () => {
     const child = rect('c1', { parentId: 'f1' });
     const nodesById = { c1: child, f1: frame };
     const target = { framebuffer: {}, height: 40, texture: {}, width: 40 } as unknown as TRenderTarget;
+    // renderExportTarget already replaces imageContext.renderTargetPool with one sized to this
+    // export's own target before calling draw — this renderer just needs to reuse it.
+    const exportScopedPool = { acquire: vi.fn(), dispose: vi.fn(), release: vi.fn() };
     const drawnContext = {
       canvasHeight: 40,
       canvasWidth: 40,
       gl: { tag: 'gl' },
-      imageContext: { renderTargetPool: { tag: 'live-canvas-pool' } },
+      imageContext: { renderTargetPool: exportScopedPool },
     } as unknown as TDrawSceneContext;
-    const fixedPool = { acquire: vi.fn(), dispose: vi.fn(), release: vi.fn() };
 
-    createFixedRenderTargetPoolMock.mockReturnValue(fixedPool);
     renderExportTargetMock.mockImplementation((...args: unknown[]) => {
       const draw = args[5] as (renderContext: TDrawSceneContext, renderTarget: TRenderTarget) => void;
       draw(drawnContext, target);
@@ -112,11 +108,6 @@ describe('renderNodeSubtreeAtScale', () => {
 
     // before — the tree root is the single source node id, not the caller-supplied flat list
     renderNodeSubtreeAtScale(context, 'f1', nodesById, refs, 1);
-
-    // result — a fresh pool sized to the export's own target (not the live canvas's
-    // gl.drawingBufferWidth/Height-sized shared pool) is built and disposed after rendering
-    expect(createFixedRenderTargetPoolMock).toHaveBeenCalledWith(drawnContext.gl, target.width, target.height);
-    expect(fixedPool.dispose).toHaveBeenCalledTimes(1);
 
     // result — renderIds walks the real childIds tree starting from just [sourceNodeId], into the
     // export's own render target (not the live-canvas default framebuffer)
@@ -128,7 +119,7 @@ describe('renderNodeSubtreeAtScale', () => {
     expect(renderer.context).toBe(drawnContext);
     expect(renderer.gl).toBe(drawnContext.gl);
     expect(renderer.hoistedIds).toBe(hoistedIds);
-    expect(renderer.pool).toBe(fixedPool);
+    expect(renderer.pool).toBe(exportScopedPool);
     expect(renderer.refs).toBe(refs);
     expect(renderer.sceneNodeById).toEqual(
       new Map([
