@@ -7,6 +7,7 @@ import { createExportFile } from '../createExportFile';
 const renderNodeForExportMock = vi.fn();
 const createImageBlobFromPixelsMock = vi.fn();
 const createPdfBlobMock = vi.fn();
+const createSvgBlobMock = vi.fn();
 
 vi.mock('utils/canvas/exportRender/exportRenderRegistry', () => ({
   renderNodeForExport: (...args: unknown[]): unknown => renderNodeForExportMock(...args),
@@ -16,12 +17,14 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
 }));
 
 vi.mock('../pdf/createPdfBlob', () => ({ createPdfBlob: (...args: unknown[]): unknown => createPdfBlobMock(...args) }));
+vi.mock('../svg/createSvgBlob', () => ({ createSvgBlob: (...args: unknown[]): unknown => createSvgBlobMock(...args) }));
 
 describe('createExportFile', () => {
   beforeEach(() => {
     renderNodeForExportMock.mockClear();
     createImageBlobFromPixelsMock.mockClear();
     createPdfBlobMock.mockClear();
+    createSvgBlobMock.mockClear();
   });
 
   it('should build a pdf with at least the minimum raster scale and skip the pixel pipeline', async () => {
@@ -98,6 +101,50 @@ describe('createExportFile', () => {
       ExportFormat.pdf,
       1,
       'Icon.pdf',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+      ExportQuality.high,
+    );
+
+    // result
+    expect(result).toBeNull();
+  });
+
+  it('should build an svg with at least the minimum raster scale and skip the pixel pipeline', async () => {
+    // mock
+    const blob = { size: 4, type: 'image/svg+xml' } as Blob;
+
+    createSvgBlobMock.mockResolvedValue(blob);
+
+    // action
+    const result = await createExportFile(
+      'node-a',
+      ExportFormat.svg,
+      1,
+      'Icon.svg',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+      ExportQuality.high,
+    );
+
+    // result
+    expect(createSvgBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92);
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ blob, fileName: 'Icon.svg' });
+  });
+
+  it('should return null when the svg could not be built', async () => {
+    // mock
+    createSvgBlobMock.mockResolvedValue(null);
+
+    // action
+    const result = await createExportFile(
+      'node-a',
+      ExportFormat.svg,
+      1,
+      'Icon.svg',
       true,
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,

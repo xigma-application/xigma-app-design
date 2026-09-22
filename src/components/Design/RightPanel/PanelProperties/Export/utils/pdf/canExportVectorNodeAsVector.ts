@@ -6,7 +6,7 @@ import { getRenderedVectorNode } from 'utils/canvas/render/getRenderedVectorNode
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { isPlainPaint } from './isPlainPaint';
-import { isSafeAncestorChain } from './isSafeAncestorChain';
+import { isSafeAncestorChain } from '../isSafeAncestorChain';
 
 const hasVisibleStroke = (node: TVectorNode): boolean => Boolean(node.strokeWidth > 0 && node.strokeColor);
 

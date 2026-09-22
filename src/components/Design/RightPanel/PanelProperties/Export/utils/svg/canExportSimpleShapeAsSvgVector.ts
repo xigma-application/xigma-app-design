@@ -9,7 +9,7 @@ import { isSafeAncestorChain } from '../isSafeAncestorChain';
 const isOwnStyleSupported = (node: TEllipseNode | TPolygonNode | TStarNode): boolean =>
   !node.hidden && (!node.blendMode || node.blendMode === BlendMode.normal);
 
-export const canExportSimpleShapeAsVector = (
+export const canExportSimpleShapeAsSvgVector = (
   node: TEllipseNode | TPolygonNode | TStarNode,
   nodesById: Record<string, TSceneNode>,
 ): boolean => isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);

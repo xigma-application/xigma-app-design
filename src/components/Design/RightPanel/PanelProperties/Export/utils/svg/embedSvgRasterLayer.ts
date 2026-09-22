@@ -1,17 +1,16 @@
-import { PDFDocument, PDFPage } from 'pdf-lib';
-
 // types
 import { ExportImageResampling } from '../../enums';
 import { TDraftRect } from 'types/canvas';
 
 // utils
+import { blobToDataUrl } from 'utils/blobToDataUrl';
 import { createImageBlobFromPixels } from 'utils/canvas/createImageBlobFromPixels';
 import { flattenPixelsToOpaqueWhite } from '../flattenPixelsToOpaqueWhite';
+import { formatSvgNumber } from './formatSvgNumber';
 import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegistry';
 
-export const embedPdfRasterLayer = async (
-  pdfDocument: PDFDocument,
-  page: PDFPage,
+export const embedSvgRasterLayer = async (
+  elements: string[],
   nodeId: string,
   rasterScale: number,
   ignoreOverlappingLayers: boolean,
@@ -35,7 +34,10 @@ export const embedPdfRasterLayer = async (
     : null;
 
   if (blob) {
-    const image = useJpeg ? await pdfDocument.embedJpg(await blob.arrayBuffer()) : await pdfDocument.embedPng(await blob.arrayBuffer());
-    page.drawImage(image, { height: bounds.height, width: bounds.width, x: 0, y: 0 });
+    const dataUrl = await blobToDataUrl(blob);
+
+    elements.push(
+      `<image href="${dataUrl}" x="0" y="0" width="${formatSvgNumber(bounds.width)}" height="${formatSvgNumber(bounds.height)}"/>`,
+    );
   }
 };

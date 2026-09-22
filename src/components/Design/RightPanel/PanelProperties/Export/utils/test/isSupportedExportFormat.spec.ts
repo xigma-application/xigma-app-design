@@ -17,7 +17,7 @@ describe('isSupportedExportFormat', () => {
     expect(isSupportedExportFormat(ExportFormat.pdf)).toBe(true);
   });
 
-  it('should not support svg yet', () => {
-    expect(isSupportedExportFormat(ExportFormat.svg)).toBe(false);
+  it('should support svg', () => {
+    expect(isSupportedExportFormat(ExportFormat.svg)).toBe(true);
   });
 });

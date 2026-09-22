@@ -15,7 +15,7 @@ export const EXPORT_JPEG_QUALITY: Record<ExportQuality, number> = {
   [ExportQuality.medium]: 0.75,
 };
 
-export const PDF_MIN_RASTER_SCALE = 2;
+export const EXPORT_MIN_VECTOR_RASTER_SCALE = 2;
 
 export const EXPORT_FORMAT_EXTENSION: Record<ExportFormat, string> = {
   [ExportFormat.jpeg]: 'jpg',

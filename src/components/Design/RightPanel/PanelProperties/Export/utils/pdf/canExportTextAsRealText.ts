@@ -3,7 +3,7 @@ import { BlendMode } from 'types/design/enums';
 import { TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
-import { isSafeAncestorChain } from './isSafeAncestorChain';
+import { isSafeAncestorChain } from '../isSafeAncestorChain';
 
 const isOwnStyleSupported = (node: TTextNode, fontCharacters: ReadonlySet<number>): boolean =>
   !node.hidden &&

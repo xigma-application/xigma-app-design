@@ -26,13 +26,27 @@ describe('exportNode', () => {
     downloadBlobMock.mockClear();
   });
 
-  it('should skip unsupported (svg) rows entirely', async () => {
+  it('should build and download an svg row', async () => {
+    // mock
+    const file = { blob: { size: 4, type: 'image/svg+xml' } as Blob, fileName: 'Icon.svg' };
+
+    createExportFileMock.mockResolvedValue(file);
+
     // action
     await exportNode('node-a', 'Icon', bounds, [setting({ format: ExportFormat.svg })]);
 
     // result
-    expect(createExportFileMock).not.toHaveBeenCalled();
-    expect(downloadBlobMock).not.toHaveBeenCalled();
+    expect(createExportFileMock).toHaveBeenCalledWith(
+      'node-a',
+      ExportFormat.svg,
+      1,
+      'Icon.svg',
+      true,
+      DEFAULT_EXPORT_SETTING.imageResampling,
+      DEFAULT_EXPORT_SETTING.colorProfile,
+      DEFAULT_EXPORT_SETTING.quality,
+    );
+    expect(downloadBlobMock).toHaveBeenCalledWith(file.blob, 'Icon.svg');
   });
 
   it('should download a single rendered file directly, without zipping', async () => {
