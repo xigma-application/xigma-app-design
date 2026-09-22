@@ -1,5 +1,6 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDraftRect } from 'types/canvas';
 import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
@@ -19,11 +20,12 @@ export const renderNodeAtScale = (
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
   scale: number,
+  boundsOverride?: TDraftRect,
 ): TRenderedNodePixels | null => {
   const sourceNode = nodesById[sourceNodeId];
 
   if (sourceNode && !sourceNode.hidden) {
-    const bounds = getRotatedNodeBounds(sourceNode);
+    const bounds = boundsOverride ?? getRotatedNodeBounds(sourceNode);
 
     if (bounds.width > 0 && bounds.height > 0) {
       const { gl, imageContext } = context;

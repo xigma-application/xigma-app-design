@@ -1,6 +1,6 @@
 // types
+import { TDraftRect, TImageFilterQuality } from 'types/canvas';
 import { TExportRenderedPixels, TExportRenderer } from './types';
-import { TImageFilterQuality } from 'types/canvas';
 
 let activeRenderer: TExportRenderer | null = null;
 
@@ -20,5 +20,6 @@ export const renderNodeForExport = async (
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,
   includeNodeIds?: ReadonlySet<string>,
+  boundsOverride?: TDraftRect,
 ): Promise<TExportRenderedPixels | null> =>
-  activeRenderer ? activeRenderer(nodeId, scale, ignoreOverlappingLayers, imageFilterQuality, includeNodeIds) : null;
+  activeRenderer ? activeRenderer(nodeId, scale, ignoreOverlappingLayers, imageFilterQuality, includeNodeIds, boundsOverride) : null;

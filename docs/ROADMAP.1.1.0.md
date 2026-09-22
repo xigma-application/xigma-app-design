@@ -370,6 +370,11 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] SVG: shapes and text inside a semi-transparent or blend-mode frame or group (Multiply, Screen,
       etc.) now export as real vectors too, with the same blend mode applied to the exported file;
       PDF text under a semi-transparent frame now also exports correctly instead of being skipped
+- [x] Export panel: three new options matching Figma's own export dialog — "Include bounding box"
+      (crop the export tightly to the actual visible content instead of the full frame size, e.g. for
+      an icon sitting in a bigger empty frame), "Outline text" (convert all text to shapes so it looks
+      identical everywhere, not dependent on which fonts a viewer has), and "Include 'id' attribute"
+      (name each shape in the SVG file after its layer name, for SVG only)
 
 ## Related
 

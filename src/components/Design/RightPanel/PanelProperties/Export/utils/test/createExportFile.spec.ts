@@ -17,7 +17,9 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
 }));
 
 vi.mock('../pdf/createPdfBlob', () => ({ createPdfBlob: (...args: unknown[]): unknown => createPdfBlobMock(...args) }));
-vi.mock('../svg/createSvgBlob', () => ({ createSvgBlob: (...args: unknown[]): unknown => createSvgBlobMock(...args) }));
+vi.mock('../svg/createSvgBlob/createSvgBlob', () => ({ createSvgBlob: (...args: unknown[]): unknown => createSvgBlobMock(...args) }));
+
+const bounds = { height: 10, width: 10, x: 0, y: 0 };
 
 describe('createExportFile', () => {
   beforeEach(() => {
@@ -43,12 +45,38 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92);
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92, false, bounds);
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(result).toEqual({ blob, fileName: 'Icon.pdf' });
+  });
+
+  it('should forward outlineText to the pdf builder', async () => {
+    // mock
+    createPdfBlobMock.mockResolvedValue({ size: 4, type: 'application/pdf' } as Blob);
+
+    // action
+    await createExportFile(
+      'node-a',
+      ExportFormat.pdf,
+      1,
+      'Icon.pdf',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+      ExportQuality.high,
+      bounds,
+      true,
+      false,
+    );
+
+    // result
+    expect(createPdfBlobMock.mock.calls[0][5]).toBe(true);
   });
 
   it('should keep a larger export scale for the pdf raster layers', async () => {
@@ -65,10 +93,13 @@ describe('createExportFile', () => {
       ExportImageResampling.basic,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic, 0.92);
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic, 0.92, false, bounds);
   });
 
   it('should map the chosen quality to the pdf raster layer jpeg quality too', async () => {
@@ -85,6 +116,9 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.low,
+      bounds,
+      false,
+      false,
     );
 
     // result
@@ -105,6 +139,9 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
@@ -127,12 +164,39 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(createSvgBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92);
+    expect(createSvgBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92, false, false, bounds);
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(result).toEqual({ blob, fileName: 'Icon.svg' });
+  });
+
+  it('should forward outlineText and includeIdAttribute to the svg builder', async () => {
+    // mock
+    createSvgBlobMock.mockResolvedValue({ size: 4, type: 'image/svg+xml' } as Blob);
+
+    // action
+    await createExportFile(
+      'node-a',
+      ExportFormat.svg,
+      1,
+      'Icon.svg',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+      ExportQuality.high,
+      bounds,
+      true,
+      true,
+    );
+
+    // result
+    expect(createSvgBlobMock.mock.calls[0][5]).toBe(true);
+    expect(createSvgBlobMock.mock.calls[0][6]).toBe(true);
   });
 
   it('should return null when the svg could not be built', async () => {
@@ -149,13 +213,16 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
     expect(result).toBeNull();
   });
 
-  it('should return null when the node could not be rendered', async () => {
+  it('should render at the requested bounds override and return null when the node could not be rendered', async () => {
     // mock
     renderNodeForExportMock.mockResolvedValue(null);
 
@@ -169,11 +236,15 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
     expect(result).toBeNull();
     expect(createImageBlobFromPixelsMock).not.toHaveBeenCalled();
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, undefined, bounds);
   });
 
   it('should return null when the render succeeded but the blob could not be created', async () => {
@@ -191,6 +262,9 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
@@ -215,10 +289,13 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed);
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, undefined, bounds);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels.pixels, pixels.width, pixels.height, 'image/png', undefined, 'srgb');
     expect(result).toEqual({ blob, fileName: 'Icon.png' });
   });
@@ -241,10 +318,13 @@ describe('createExportFile', () => {
       ExportImageResampling.basic,
       ExportColorProfile.srgb,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, false, ExportImageResampling.basic);
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, false, ExportImageResampling.basic, undefined, bounds);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels.pixels, pixels.width, pixels.height, 'image/jpeg', 0.92, 'srgb');
     expect(result).toEqual({ blob, fileName: 'Icon.jpg' });
   });
@@ -267,10 +347,13 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.srgbSameAsFile,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed);
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed, undefined, bounds);
   });
 
   it('should render and encode using the Display P3 target when that color profile is requested', async () => {
@@ -291,10 +374,13 @@ describe('createExportFile', () => {
       ExportImageResampling.detailed,
       ExportColorProfile.displayP3,
       ExportQuality.high,
+      bounds,
+      false,
+      false,
     );
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed);
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('node-a', 1, true, ExportImageResampling.detailed, undefined, bounds);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(
       pixels.pixels,
       pixels.width,
@@ -322,6 +408,9 @@ describe('createExportFile', () => {
       ExportImageResampling.basic,
       ExportColorProfile.srgb,
       ExportQuality.medium,
+      bounds,
+      false,
+      false,
     );
     await createExportFile(
       'node-a',
@@ -332,6 +421,9 @@ describe('createExportFile', () => {
       ExportImageResampling.basic,
       ExportColorProfile.srgb,
       ExportQuality.low,
+      bounds,
+      false,
+      false,
     );
 
     // result

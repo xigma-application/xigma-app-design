@@ -165,6 +165,30 @@ describe('renderNodeAtScale', () => {
     expect(result?.pixels).toHaveLength(200 * 100 * 4);
   });
 
+  it('should use an explicit bounds override instead of the source node own declared bounds when given one', () => {
+    // mock
+    const gl = createGlMock();
+    const target = { framebuffer: { tag: 'export-fbo' }, height: 10, texture: {}, width: 10 } as unknown as TRenderTarget;
+
+    createTargetMock.mockReturnValue(target);
+
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const frame = { ...rect('f1', { height: 200, width: 200, x: 0, y: 0 }), type: NodeType.frame } as TSceneNode;
+    const nodesById = { f1: frame };
+    const boundsOverride = { height: 10, width: 10, x: 20, y: 20 };
+
+    // before — the node's own declared bounds are 200x200, but the override should win instead
+    const result = renderNodeAtScale(context, 'f1', [frame], nodesById, refs, 1, boundsOverride);
+
+    // result
+    expect(createTargetMock).toHaveBeenCalledWith(gl, 10, 10);
+    expect(result).toEqual({ height: 10, pixels: expect.any(Uint8Array), width: 10 });
+
+    const [drawnContext] = drawLeafNodeMock.mock.calls[0] as [TDrawSceneContext];
+
+    expect(drawnContext.viewport).toEqual({ x: -20, y: -20, zoom: 1 });
+  });
+
   it('should draw exactly the given node list, not derive the source node subtree itself', () => {
     // mock — an unrelated sibling passed in nodesToDraw, absent from the source node's own children,
     // proves the caller (not this function) decides which nodes end up on the canvas

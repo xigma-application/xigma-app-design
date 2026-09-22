@@ -22,8 +22,26 @@ describe('exportRenderRegistry', () => {
     const result = await renderNodeForExport('node-a', 2, true, 'detailed');
 
     // result
-    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed', undefined);
+    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed', undefined, undefined);
     expect(result).toBe(pixels);
+
+    // after
+    unregister();
+  });
+
+  it('should forward an explicit bounds override to the registered renderer', async () => {
+    // mock
+    const renderer = vi.fn().mockResolvedValue(null);
+    const boundsOverride = { height: 10, width: 10, x: 5, y: 5 };
+
+    // before
+    const unregister = registerExportRenderer(renderer);
+
+    // action
+    await renderNodeForExport('node-a', 2, true, 'detailed', undefined, boundsOverride);
+
+    // result
+    expect(renderer).toHaveBeenCalledWith('node-a', 2, true, 'detailed', undefined, boundsOverride);
 
     // after
     unregister();

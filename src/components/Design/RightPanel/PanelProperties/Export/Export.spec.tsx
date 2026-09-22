@@ -263,7 +263,8 @@ describe('Export behaviors', () => {
     expect(screen.getByPlaceholderText('None')).toBeInTheDocument();
     expect(screen.getByText('sRGB (same as file)')).toBeInTheDocument();
     expect(screen.getByText('Detailed')).toBeInTheDocument();
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getAllByRole('checkbox')[0]).toBeChecked();
+    expect(screen.getAllByRole('checkbox')[1]).not.toBeChecked();
   });
 
   it('should commit the suffix on blur', () => {
@@ -360,10 +361,73 @@ describe('Export behaviors', () => {
     openSettings();
 
     // action
-    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getAllByRole('checkbox')[0]);
 
     // result
-    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(screen.getAllByRole('checkbox')[0]).not.toBeChecked();
+  });
+
+  it('should toggle the include bounding box checkbox', () => {
+    // before
+    renderExport();
+    addRow();
+    openSettings();
+
+    // action
+    fireEvent.click(screen.getAllByRole('checkbox')[1]);
+
+    // result
+    expect(screen.getAllByRole('checkbox')[1]).toBeChecked();
+  });
+
+  it('should hide outline text and include id attribute for png/jpeg, show only outline text for pdf, and show both for svg', () => {
+    // before
+    renderExport();
+    addRow();
+    openSettings();
+
+    // result: png (default format)
+    expect(screen.queryByText('Outline text')).toBeNull();
+    expect(screen.queryByText('Include "id" attribute')).toBeNull();
+
+    // action: switch to pdf
+    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getAllByText('PNG')[0]);
+    fireEvent.click(screen.getByText('PDF'));
+    openSettings();
+
+    // result: pdf
+    expect(screen.getByText('Outline text')).toBeInTheDocument();
+    expect(screen.queryByText('Include "id" attribute')).toBeNull();
+
+    // action: switch to svg
+    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getAllByText('PDF')[0]);
+    fireEvent.click(screen.getByText('SVG'));
+    openSettings();
+
+    // result: svg
+    expect(screen.getByText('Outline text')).toBeInTheDocument();
+    expect(screen.getByText('Include "id" attribute')).toBeInTheDocument();
+  });
+
+  it('should toggle the outline text and include id attribute checkboxes for svg', () => {
+    // before
+    renderExport();
+    addRow();
+    openSettings();
+    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getAllByText('PNG')[0]);
+    fireEvent.click(screen.getByText('SVG'));
+    openSettings();
+
+    // action
+    fireEvent.click(screen.getAllByRole('checkbox')[2]);
+    fireEvent.click(screen.getAllByRole('checkbox')[3]);
+
+    // result
+    expect(screen.getAllByRole('checkbox')[2]).toBeChecked();
+    expect(screen.getAllByRole('checkbox')[3]).toBeChecked();
   });
 
   it('should close the settings popover with the close button', () => {

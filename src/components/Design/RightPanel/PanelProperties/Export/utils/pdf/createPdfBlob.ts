@@ -8,11 +8,13 @@ import { store } from 'store';
 // types
 import { ExportImageResampling } from '../../enums';
 import { PdfLayerType } from './enums';
+import { TDraftRect } from 'types/canvas';
 import { TPdfShapeNode } from './types';
 import { TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from './canExportShapeAsVector';
+import { canExportTextAsOutline } from '../canExportTextAsOutline';
 import { canExportTextAsRealText } from './canExportTextAsRealText';
 import { canExportTextOnPathAsVectorCurves } from '../canExportTextOnPathAsVectorCurves';
 import { drawPdfShape } from './drawPdfShape';
@@ -30,13 +32,15 @@ export const createPdfBlob = async (
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
   jpegQuality: number,
+  outlineText: boolean = false,
+  boundsOverride?: TDraftRect,
 ): Promise<Blob | null> => {
   const state = store.getState();
   const nodesById: Record<string, TSceneNode> = selectNodes(state);
   const node = nodesById[nodeId];
 
   if (node) {
-    const bounds = getRotatedNodeBounds(node);
+    const bounds = boundsOverride ?? getRotatedNodeBounds(node);
     const pdfDocument = await PDFDocument.create();
 
     pdfDocument.registerFontkit(fontkit);
@@ -46,9 +50,10 @@ export const createPdfBlob = async (
     const nodes = getExportRenderNodes(nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
     const layers = getPdfLayers(
       nodes,
-      (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters),
+      (textNode: TTextNode) => !outlineText && canExportTextAsRealText(textNode, nodesById, fontCharacters),
       (shapeNode: TPdfShapeNode) => canExportShapeAsVector(shapeNode, nodesById),
-      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById, false),
+      (textNode: TTextNode) =>
+        outlineText ? canExportTextAsOutline(textNode, nodesById, false) : canExportTextOnPathAsVectorCurves(textNode, nodesById, false),
     );
     const graphicsStates = new Map<number, PDFName>();
     const page = pdfDocument.addPage([bounds.width, bounds.height]);

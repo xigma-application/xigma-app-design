@@ -6,6 +6,9 @@ export type TExportSetting = {
   format: ExportFormat;
   ignoreOverlappingLayers: boolean;
   imageResampling: ExportImageResampling;
+  includeBoundingBox: boolean;
+  includeIdAttribute: boolean;
+  outlineText: boolean;
   quality: ExportQuality;
   scale: ExportScale;
   suffix: string;

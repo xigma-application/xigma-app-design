@@ -71,7 +71,7 @@ describe('useHandleExportClick', () => {
 
     // result — flagged as exporting immediately, with the right node bounds forwarded
     expect(selectIsExporting(store.getState())).toBe(true);
-    expect(exportNodeMock).toHaveBeenCalledWith('r1', 'Rectangle', { height: 20, width: 20, x: 0, y: 0 }, [DEFAULT_EXPORT_SETTING]);
+    expect(exportNodeMock).toHaveBeenCalledWith('r1', 'Rectangle', [DEFAULT_EXPORT_SETTING]);
 
     // action
     await act(async () => {

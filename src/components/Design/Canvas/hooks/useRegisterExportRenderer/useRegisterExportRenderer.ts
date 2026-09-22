@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDraftRect, TImageFilterQuality } from 'types/canvas';
 import { TExportRenderedPixels } from 'utils/canvas/exportRender/types';
-import { TImageFilterQuality } from 'types/canvas';
 
 // utils
 import { registerExportRenderer } from 'utils/canvas/exportRender/exportRenderRegistry';
@@ -16,9 +16,11 @@ export const useRegisterExportRenderer = (refs: TCanvasRefs): void => {
       ignoreOverlappingLayers: boolean,
       imageFilterQuality: TImageFilterQuality,
       includeNodeIds?: ReadonlySet<string>,
+      boundsOverride?: TDraftRect,
     ): Promise<TExportRenderedPixels | null> =>
       new Promise((resolve) => {
         refs.exportRenderRequestRef.current = {
+          boundsOverride,
           ignoreOverlappingLayers,
           imageFilterQuality,
           includeNodeIds,

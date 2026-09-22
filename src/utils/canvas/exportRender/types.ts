@@ -1,9 +1,10 @@
 // types
-import { TImageFilterQuality } from 'types/canvas';
+import { TDraftRect, TImageFilterQuality } from 'types/canvas';
 
 export type TExportRenderedPixels = { height: number; pixels: Uint8Array; width: number };
 
 export type TExportRenderRequest = {
+  boundsOverride?: TDraftRect;
   includeNodeIds?: ReadonlySet<string>;
   ignoreOverlappingLayers: boolean;
   imageFilterQuality: TImageFilterQuality;
@@ -18,4 +19,5 @@ export type TExportRenderer = (
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,
   includeNodeIds?: ReadonlySet<string>,
+  boundsOverride?: TDraftRect,
 ) => Promise<TExportRenderedPixels | null>;

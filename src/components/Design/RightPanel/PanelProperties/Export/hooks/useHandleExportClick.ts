@@ -8,7 +8,6 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { exportNode } from '../utils/exportNode';
-import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 
 export const useHandleExportClick = (node: TSceneNode | undefined, settings: TExportSetting[]): TFunc<[], Promise<void>> => {
   const dispatch = useAppDispatch();
@@ -18,7 +17,7 @@ export const useHandleExportClick = (node: TSceneNode | undefined, settings: TEx
       dispatch(setIsExporting(true));
 
       try {
-        await exportNode(node.id, node.name, getRotatedNodeBounds(node), settings);
+        await exportNode(node.id, node.name, settings);
       } finally {
         dispatch(setIsExporting(false));
       }

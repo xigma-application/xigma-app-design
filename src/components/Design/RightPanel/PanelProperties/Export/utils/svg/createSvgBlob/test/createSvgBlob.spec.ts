@@ -4,7 +4,7 @@ import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { ExportImageResampling } from '../../../enums';
+import { ExportImageResampling } from '../../../../enums';
 import { BlendMode, NodeType, PathType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
@@ -639,6 +639,68 @@ describe('createSvgBlob', () => {
       expect.objectContaining({ id: 'svg-path' }),
     );
     expect(text).toContain('<path d="M');
+    expect(text).not.toContain('<tspan');
+  });
+
+  it('should force even plain (non-path) text through the outline/curves tier when outlineText is on, skipping real <text> entirely', async () => {
+    // mock
+    const flattenedVector: TVectorNode = {
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      fillByKey: {},
+      filledFaceKeys: ['face-1'],
+      holeParentByKey: {},
+      id: 'flattened',
+      name: 'flattened',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '',
+      strokeWidth: 0,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 10, y: 10 } },
+    };
+
+    getTextFlattenVectorMock.mockResolvedValue(flattenedVector);
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            content: 'Hi',
+            fill: '#000000',
+            flipX: false,
+            flipY: false,
+            fontFamily: 'Inter',
+            fontSize: 16,
+            height: 20,
+            id: 'svg-outline-text',
+            name: 'Label',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.text,
+            width: 60,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-outline-text'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(
+      await createSvgBlob('svg-outline-text', 2, true, ExportImageResampling.basic, JPEG_QUALITY, true),
+    );
+
+    // result
+    expect(getTextFlattenVectorMock).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ id: 'svg-outline-text' }), undefined);
+    expect(text).toContain('<path d="M');
+    expect(text).not.toContain('<text');
     expect(text).not.toContain('<tspan');
   });
 

@@ -40,6 +40,20 @@ describe('useRegisterExportRenderer', () => {
     expect(refs.exportRenderRequestRef.current?.includeNodeIds).toBe(includeNodeIds);
   });
 
+  it('should forward the bounds override into the filed request', () => {
+    // before
+    const refs = createCanvasRefs();
+    const boundsOverride = { height: 10, width: 10, x: 5, y: 5 };
+
+    renderHook(() => useRegisterExportRenderer(refs));
+
+    // action
+    void renderNodeForExport('node-a', 1, true, 'basic', undefined, boundsOverride);
+
+    // result
+    expect(refs.exportRenderRequestRef.current?.boundsOverride).toBe(boundsOverride);
+  });
+
   it('should resolve the render once the render loop calls the filed onResolve callback', async () => {
     // before
     const refs = createCanvasRefs();

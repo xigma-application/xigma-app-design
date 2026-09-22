@@ -96,6 +96,7 @@ describe('resolveExportRenderRequest', () => {
       expect.any(Object),
       refs,
       2,
+      undefined,
     );
     expect(onResolve).toHaveBeenCalledWith(pixels);
     expect(refs.exportRenderRequestRef.current).toBeNull();
@@ -142,6 +143,29 @@ describe('resolveExportRenderRequest', () => {
     resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
 
     // result
-    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'a', [{ id: 'b' }], expect.any(Object), refs, 1);
+    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'a', [{ id: 'b' }], expect.any(Object), refs, 1, undefined);
+  });
+
+  it('should forward the request own bounds override to renderNodeAtScale', () => {
+    // mock
+    const onResolve = vi.fn();
+    const boundsOverride = { height: 10, width: 10, x: 5, y: 5 };
+
+    refs.exportRenderRequestRef.current = {
+      boundsOverride,
+      ignoreOverlappingLayers: true,
+      imageFilterQuality: 'basic',
+      nodeId: 'a',
+      onResolve,
+      scale: 1,
+    };
+    getExportRenderNodesMock.mockReturnValue([]);
+    renderNodeAtScaleMock.mockReturnValue(null);
+
+    // before
+    resolveExportRenderRequest(gl, program, buffer, imageContext, refs);
+
+    // result
+    expect(renderNodeAtScaleMock).toHaveBeenCalledWith(expect.any(Object), 'a', [], expect.any(Object), refs, 1, boundsOverride);
   });
 });
