@@ -16,12 +16,12 @@ export const embedPdfRasterLayer = async (
   rasterScale: number,
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
-  nodeIds: ReadonlySet<string>,
+  contextIds: string[],
   bounds: TDraftRect,
   useJpeg: boolean,
   jpegQuality: number,
 ): Promise<void> => {
-  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, nodeIds);
+  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, new Set(contextIds));
   const blob = rendered
     ? useJpeg
       ? await createImageBlobFromPixels(

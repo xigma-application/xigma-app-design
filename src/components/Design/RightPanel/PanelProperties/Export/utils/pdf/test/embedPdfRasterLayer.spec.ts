@@ -15,7 +15,7 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
 }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
-const nodeIds = new Set(['a']);
+const contextIds = ['a'];
 
 describe('embedPdfRasterLayer', () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe('embedPdfRasterLayer', () => {
     const page = { drawImage: vi.fn() } as never;
 
     // action
-    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     // result
     expect(createImageBlobFromPixelsMock).not.toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe('embedPdfRasterLayer', () => {
     const page = { drawImage: vi.fn() } as never;
 
     // action
-    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     // result
     expect((pdfDocument as { embedPng: ReturnType<typeof vi.fn> }).embedPng).not.toHaveBeenCalled();
@@ -65,9 +65,10 @@ describe('embedPdfRasterLayer', () => {
     const page = { drawImage } as never;
 
     // action
-    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     // result
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds));
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels, 10, 10, 'image/png');
     expect(embedPng).toHaveBeenCalledTimes(1);
     expect(drawImage).toHaveBeenCalledWith('png-image', { height: 100, width: 100, x: 0, y: 0 });
@@ -86,7 +87,7 @@ describe('embedPdfRasterLayer', () => {
     const page = { drawImage } as never;
 
     // action
-    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, true, 0.5);
+    await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, true, 0.5);
 
     // result
     expect(Array.from(createImageBlobFromPixelsMock.mock.calls[0][0] as Uint8Array)).toEqual([255, 255, 255, 255]);

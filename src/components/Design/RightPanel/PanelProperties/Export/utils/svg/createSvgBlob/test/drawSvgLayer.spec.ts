@@ -155,10 +155,10 @@ describe('drawSvgLayer', () => {
   it('should embed a raster layer using the raster-specific context fields', async () => {
     getSvgLayerAncestorGroupsMock.mockReturnValue([]);
 
-    const nodeIds = new Set(['a']);
+    const contextIds = ['a'];
     const elements: string[] = [];
 
-    await drawSvgLayer(elements, [], { nodeIds, type: SvgLayerType.raster } as never, context, [], new Map());
+    await drawSvgLayer(elements, [], { contextIds, nodeIds: new Set(['a']), type: SvgLayerType.raster } as never, context, [], new Map());
 
     expect(embedSvgRasterLayerMock).toHaveBeenCalledWith(
       elements,
@@ -166,7 +166,7 @@ describe('drawSvgLayer', () => {
       context.rasterScale,
       context.ignoreOverlappingLayers,
       context.imageResampling,
-      nodeIds,
+      contextIds,
       context.bounds,
       context.isSoleRasterLayer,
       context.jpegQuality,

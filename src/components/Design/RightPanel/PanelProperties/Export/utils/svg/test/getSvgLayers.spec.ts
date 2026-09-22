@@ -103,7 +103,7 @@ describe('getSvgLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['a', 'b']), type: SvgLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['a', 'b'], nodeIds: new Set(['a', 'b']), type: SvgLayerType.raster }]);
   });
 
   it('should split raster layers around a real text layer to keep the paint order', () => {
@@ -117,9 +117,9 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: text('t'), type: SvgLayerType.text },
-      { nodeIds: new Set(['b']), type: SvgLayerType.raster },
+      { contextIds: ['a', 't', 'b'], nodeIds: new Set(['b']), type: SvgLayerType.raster },
     ]);
   });
 
@@ -134,9 +134,9 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['f']), type: SvgLayerType.raster },
+      { contextIds: ['f'], nodeIds: new Set(['f']), type: SvgLayerType.raster },
       { node: rectangle('r'), type: SvgLayerType.vector },
-      { nodeIds: new Set(['s']), type: SvgLayerType.raster },
+      { contextIds: ['f', 'r', 's'], nodeIds: new Set(['s']), type: SvgLayerType.raster },
     ]);
   });
 
@@ -151,7 +151,7 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: ellipse('e'), type: SvgLayerType.vector },
     ]);
   });
@@ -167,7 +167,7 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: line('l'), type: SvgLayerType.vector },
     ]);
   });
@@ -183,7 +183,7 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: vector('vec'), type: SvgLayerType.vector },
     ]);
   });
@@ -198,7 +198,7 @@ describe('getSvgLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['f']), type: SvgLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['f'], nodeIds: new Set(['f']), type: SvgLayerType.raster }]);
   });
 
   it('should keep a text node that cannot be real text or vector curves inside the raster layer', () => {
@@ -211,7 +211,7 @@ describe('getSvgLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['a', 't']), type: SvgLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['a', 't'], nodeIds: new Set(['a', 't']), type: SvgLayerType.raster }]);
   });
 
   it('should turn a text node that cannot be real text but can be vector curves into its own textCurves layer', () => {
@@ -225,9 +225,27 @@ describe('getSvgLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: text('t'), type: SvgLayerType.textCurves },
-      { nodeIds: new Set(['b']), type: SvgLayerType.raster },
+      { contextIds: ['a', 't', 'b'], nodeIds: new Set(['b']), type: SvgLayerType.raster },
+    ]);
+  });
+
+  it('should set contextIds to every node seen so far, including earlier vector-eligible siblings, not just this raster layer own nodeIds', () => {
+    // mock — a raster node (e.g. one with a Glass/blur effect) needs the real backdrop it's already
+    // sitting on top of to render correctly, even when that backdrop is otherwise vector-eligible and
+    // exported as its own separate vector layer
+    const layers = getSvgLayers(
+      [rectangle('backdrop'), rectangle('glass')],
+      () => true,
+      (node) => node.id === 'backdrop',
+      () => false,
+    );
+
+    // result
+    expect(layers).toEqual([
+      { node: rectangle('backdrop'), type: SvgLayerType.vector },
+      { contextIds: ['backdrop', 'glass'], nodeIds: new Set(['glass']), type: SvgLayerType.raster },
     ]);
   });
 

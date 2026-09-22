@@ -103,7 +103,7 @@ describe('getPdfLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['a', 'b']), type: PdfLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['a', 'b'], nodeIds: new Set(['a', 'b']), type: PdfLayerType.raster }]);
   });
 
   it('should split raster layers around a real text layer to keep the paint order', () => {
@@ -117,9 +117,9 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: text('t'), type: PdfLayerType.text },
-      { nodeIds: new Set(['b']), type: PdfLayerType.raster },
+      { contextIds: ['a', 't', 'b'], nodeIds: new Set(['b']), type: PdfLayerType.raster },
     ]);
   });
 
@@ -134,9 +134,9 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['f']), type: PdfLayerType.raster },
+      { contextIds: ['f'], nodeIds: new Set(['f']), type: PdfLayerType.raster },
       { node: rectangle('r'), type: PdfLayerType.vector },
-      { nodeIds: new Set(['s']), type: PdfLayerType.raster },
+      { contextIds: ['f', 'r', 's'], nodeIds: new Set(['s']), type: PdfLayerType.raster },
     ]);
   });
 
@@ -151,7 +151,7 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: ellipse('e'), type: PdfLayerType.vector },
     ]);
   });
@@ -167,7 +167,7 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: line('l'), type: PdfLayerType.vector },
     ]);
   });
@@ -183,7 +183,7 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: vector('vec'), type: PdfLayerType.vector },
     ]);
   });
@@ -198,7 +198,7 @@ describe('getPdfLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['f']), type: PdfLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['f'], nodeIds: new Set(['f']), type: PdfLayerType.raster }]);
   });
 
   it('should keep a text node that cannot be real text or vector curves inside the raster layer', () => {
@@ -211,7 +211,7 @@ describe('getPdfLayers', () => {
     );
 
     // result
-    expect(layers).toEqual([{ nodeIds: new Set(['a', 't']), type: PdfLayerType.raster }]);
+    expect(layers).toEqual([{ contextIds: ['a', 't'], nodeIds: new Set(['a', 't']), type: PdfLayerType.raster }]);
   });
 
   it('should turn a text node that cannot be real text but can be vector curves into its own textCurves layer', () => {
@@ -225,9 +225,27 @@ describe('getPdfLayers', () => {
 
     // result
     expect(layers).toEqual([
-      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { contextIds: ['a'], nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: text('t'), type: PdfLayerType.textCurves },
-      { nodeIds: new Set(['b']), type: PdfLayerType.raster },
+      { contextIds: ['a', 't', 'b'], nodeIds: new Set(['b']), type: PdfLayerType.raster },
+    ]);
+  });
+
+  it('should set contextIds to every node seen so far, including earlier vector-eligible siblings, not just this raster layer own nodeIds', () => {
+    // mock — a raster node (e.g. one with a Glass/blur effect) needs the real backdrop it's already
+    // sitting on top of to render correctly, even when that backdrop is otherwise vector-eligible and
+    // exported as its own separate vector layer
+    const layers = getPdfLayers(
+      [rectangle('backdrop'), rectangle('glass')],
+      () => true,
+      (node) => node.id === 'backdrop',
+      () => false,
+    );
+
+    // result
+    expect(layers).toEqual([
+      { node: rectangle('backdrop'), type: PdfLayerType.vector },
+      { contextIds: ['backdrop', 'glass'], nodeIds: new Set(['glass']), type: PdfLayerType.raster },
     ]);
   });
 

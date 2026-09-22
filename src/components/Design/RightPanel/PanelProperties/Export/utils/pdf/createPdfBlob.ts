@@ -78,7 +78,7 @@ export const createPdfBlob = async (
             rasterScale,
             ignoreOverlappingLayers,
             imageResampling,
-            layer.nodeIds,
+            layer.contextIds,
             bounds,
             isSoleRasterLayer,
             jpegQuality,

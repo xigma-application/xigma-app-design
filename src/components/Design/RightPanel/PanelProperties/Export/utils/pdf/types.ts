@@ -4,7 +4,7 @@ import { TEllipseNode, TFrameNode, TLineNode, TPolygonNode, TRectangleNode, TSta
 
 export type TPdfShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode | TLineNode | TVectorNode;
 
-export type TPdfRasterLayer = { nodeIds: Set<string>; type: PdfLayerType.raster };
+export type TPdfRasterLayer = { contextIds: string[]; nodeIds: Set<string>; type: PdfLayerType.raster };
 
 export type TPdfTextLayer = { node: TTextNode; type: PdfLayerType.text };
 

@@ -7,9 +7,10 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
-import { renderNodeSubtreeAtScale } from '../renderNodeSubtreeAtScale';
+import { renderNodeIdsAtScale } from '../renderNodeIdsAtScale';
 
 const buildExportMaskRendererMock = vi.fn();
+const getTopLevelIdsMock = vi.fn();
 const renderExportTargetMock = vi.fn();
 const releaseGlassBackdropMock = vi.fn();
 const renderHoistedIdsMock = vi.fn();
@@ -18,6 +19,7 @@ const renderIdsMock = vi.fn();
 vi.mock('../buildExportMaskRenderer', () => ({
   buildExportMaskRenderer: (...args: unknown[]): unknown => buildExportMaskRendererMock(...args),
 }));
+vi.mock('../getTopLevelIds', () => ({ getTopLevelIds: (...args: unknown[]): unknown => getTopLevelIdsMock(...args) }));
 vi.mock('../renderExportTarget', () => ({
   renderExportTarget: (...args: unknown[]): unknown => renderExportTargetMock(...args),
 }));
@@ -31,7 +33,7 @@ vi.mock('../../drawSceneNodes/renderIds', () => ({
   renderIds: (...args: unknown[]): void => renderIdsMock(...args),
 }));
 
-const rect = (id: string, overrides: Partial<TSceneNode> = {}): TSceneNode =>
+const rect = (id: string): TSceneNode =>
   ({
     fills: [],
     height: 20,
@@ -43,10 +45,9 @@ const rect = (id: string, overrides: Partial<TSceneNode> = {}): TSceneNode =>
     width: 20,
     x: 0,
     y: 0,
-    ...overrides,
   }) as TSceneNode;
 
-describe('renderNodeSubtreeAtScale', () => {
+describe('renderNodeIdsAtScale', () => {
   const refs = createCanvasRefs();
   const context = {} as TDrawSceneContext;
 
@@ -63,18 +64,16 @@ describe('renderNodeSubtreeAtScale', () => {
     renderExportTargetMock.mockReturnValue(pixels);
 
     // before
-    const result = renderNodeSubtreeAtScale(context, 'r1', nodesById, refs, 2, boundsOverride);
+    const result = renderNodeIdsAtScale(context, 'f1', ['r1'], nodesById, refs, 2, boundsOverride);
 
     // result
-    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'r1', nodesById, 2, boundsOverride, expect.any(Function));
+    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'f1', nodesById, 2, boundsOverride, expect.any(Function));
     expect(result).toBe(pixels);
   });
 
-  it('should render just the source node id as the tree root, through the real per-node effect dispatch, into the export target', () => {
+  it('should render only the top-level ids within the given set (filtering out any id whose ancestor is also in the set), through the real per-node effect dispatch', () => {
     // mock
-    const frame = { ...rect('f1'), childIds: ['c1'], type: NodeType.frame } as TSceneNode;
-    const child = rect('c1', { parentId: 'f1' });
-    const nodesById = { c1: child, f1: frame };
+    const nodesById = { c1: rect('c1'), c2: rect('c2') };
     const target = { framebuffer: {}, height: 40, texture: {}, width: 40 } as unknown as TRenderTarget;
     const drawnContext = { canvasHeight: 40, canvasWidth: 40, gl: { tag: 'gl' } } as unknown as TDrawSceneContext;
     const renderer = { tag: 'renderer' } as unknown as TMaskRenderer;
@@ -85,18 +84,17 @@ describe('renderNodeSubtreeAtScale', () => {
       return null;
     });
     buildExportMaskRendererMock.mockReturnValue(renderer);
+    getTopLevelIdsMock.mockReturnValue(['c1']);
 
-    // before — the tree root is the single source node id, not the caller-supplied flat list
-    renderNodeSubtreeAtScale(context, 'f1', nodesById, refs, 1);
+    // before — a wider raw id set than what actually ends up rendered
+    renderNodeIdsAtScale(context, 'f1', ['c1', 'c2'], nodesById, refs, 1);
 
-    // result — the shared renderer builder is used, sourced from this export's own drawn context
+    // result — the raw id list is filtered through getTopLevelIds before it ever reaches renderIds,
+    // so a frame and its own already-listed child never both get drawn (which would double-draw the
+    // child once via the frame's own recursion and once via its separate list entry)
+    expect(getTopLevelIdsMock).toHaveBeenCalledWith(['c1', 'c2'], nodesById);
     expect(buildExportMaskRendererMock).toHaveBeenCalledWith(drawnContext, nodesById, refs);
-
-    // result — renderIds walks the real childIds tree starting from just [sourceNodeId], into the
-    // export's own render target (not the live-canvas default framebuffer)
-    expect(renderIdsMock).toHaveBeenCalledWith(renderer, ['f1'], target);
-
-    // result — hoisted-drag and glass-backdrop bookkeeping mirror the live scene renderer
+    expect(renderIdsMock).toHaveBeenCalledWith(renderer, ['c1'], target);
     expect(renderHoistedIdsMock).toHaveBeenCalledWith(renderer);
     expect(releaseGlassBackdropMock).toHaveBeenCalledWith(renderer);
   });

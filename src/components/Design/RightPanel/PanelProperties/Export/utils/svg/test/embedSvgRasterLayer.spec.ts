@@ -17,7 +17,7 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
 vi.mock('utils/blobToDataUrl', () => ({ blobToDataUrl: (...args: unknown[]): unknown => blobToDataUrlMock(...args) }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
-const nodeIds = new Set(['a']);
+const contextIds = ['a'];
 
 describe('embedSvgRasterLayer', () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe('embedSvgRasterLayer', () => {
     renderNodeForExportMock.mockResolvedValue(null);
     const elements: string[] = [];
 
-    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     expect(createImageBlobFromPixelsMock).not.toHaveBeenCalled();
     expect(elements).toEqual([]);
@@ -41,7 +41,7 @@ describe('embedSvgRasterLayer', () => {
     createImageBlobFromPixelsMock.mockResolvedValue(null);
     const elements: string[] = [];
 
-    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     expect(blobToDataUrlMock).not.toHaveBeenCalled();
     expect(elements).toEqual([]);
@@ -56,8 +56,9 @@ describe('embedSvgRasterLayer', () => {
 
     const elements: string[] = [];
 
-    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, false, 0.92);
+    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds));
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels, 10, 10, 'image/png');
     expect(elements).toEqual(['<image href="data:image/png;base64,AAAA" x="0" y="0" width="100" height="100"/>']);
   });
@@ -71,7 +72,7 @@ describe('embedSvgRasterLayer', () => {
 
     const elements: string[] = [];
 
-    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, nodeIds, bounds, true, 0.5);
+    await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, true, 0.5);
 
     expect(Array.from(createImageBlobFromPixelsMock.mock.calls[0][0] as Uint8Array)).toEqual([255, 255, 255, 255]);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(expect.any(Uint8Array), 10, 10, 'image/jpeg', 0.5);

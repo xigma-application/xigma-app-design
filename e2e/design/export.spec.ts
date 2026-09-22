@@ -87,6 +87,34 @@ const exportSelectedNode = async (page: Page, scale?: '2x'): Promise<PNG> => {
   return downloadToPng(download);
 };
 
+const exportSelectedNodeAsSvg = async (page: Page): Promise<string> => {
+  await page.getByRole('button', { name: 'Add export setting' }).click();
+  await page.getByText('PNG', { exact: true }).click();
+  await page.getByText('SVG', { exact: true }).click();
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { exact: false, name: /^Export / }).last().click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stream) {
+    chunks.push(chunk as Buffer);
+  }
+
+  return Buffer.concat(chunks).toString('utf-8');
+};
+
+const readEmbeddedRasterPng = (svg: string): PNG => {
+  const match = svg.match(/<image href="data:image\/png;base64,([^"]+)"/);
+
+  if (!match) {
+    throw new Error('No embedded raster <image> found in the exported SVG');
+  }
+
+  return PNG.sync.read(Buffer.from(match[1], 'base64'));
+};
+
 test.describe('Design panels — Export', () => {
   test('a Noise effect on a plain rectangle exports the rectangle content, not the page background', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -170,6 +198,60 @@ test.describe('Design panels — Export', () => {
     const overRed = at(Math.floor(png.width * 0.35), Math.floor(png.height * 0.5));
     const overBlue = at(Math.floor(png.width * 0.65), Math.floor(png.height * 0.5));
 
+    expect(overRed.r - overRed.b).toBeGreaterThan(20);
+    expect(overBlue.b - overBlue.r).toBeGreaterThan(20);
+  });
+
+  test('a Glass effect next to a vector-eligible backdrop shows that real backdrop through it in the SVG/PDF raster fallback, not a blank layer', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+    await designPage.goto('e2e-test-export-glass-svg-raster-layer');
+    await expect(designPage.canvas).toBeVisible();
+
+    // a frame containing red/blue backdrop halves (opaque, plain-filled — vector-eligible on their
+    // own) with a glass rect on top (raster-ineligible), so the glass rect becomes its own separate
+    // raster layer sandwiched between two vector layers within the exported frame's subtree, instead
+    // of sharing one subtree walk with them
+    await designPage.drawFrame(700, 200, 1000, 400);
+    const frameId = await readLastNodeId(page);
+
+    await designPage.drawRectangle(700, 200, 850, 400);
+    const redId = await readLastNodeId(page);
+    await setFill(page, redId, '#ff0000');
+    await reparent(page, redId, frameId, 0);
+
+    await designPage.drawRectangle(850, 200, 1000, 400);
+    const blueId = await readLastNodeId(page);
+    await setFill(page, blueId, '#0000ff');
+    await reparent(page, blueId, frameId, 1);
+
+    await designPage.drawRectangle(750, 250, 950, 350);
+    const glassId = await readLastNodeId(page);
+    await setFill(page, glassId, '#808080', 10);
+    await addGlassEffect(page, glassId);
+    await reparent(page, glassId, frameId, 2);
+    await page.waitForTimeout(300);
+
+    await selectNode(page, frameId);
+    await page.waitForTimeout(200);
+
+    const svg = await exportSelectedNodeAsSvg(page);
+    const png = readEmbeddedRasterPng(svg);
+    const at = (x: number, y: number): { alpha: number; b: number; r: number } => {
+      const offset = (y * png.width + x) * 4;
+
+      return { alpha: png.data[offset + 3], b: png.data[offset + 2], r: png.data[offset] };
+    };
+
+    const overRed = at(Math.floor(png.width * 0.25), Math.floor(png.height * 0.5));
+    const overBlue = at(Math.floor(png.width * 0.75), Math.floor(png.height * 0.5));
+
+    // result — the raster layer's own render must include the vector-eligible siblings drawn before
+    // it in z-order (its "context"), not just its own isolated node, or the glass has nothing real to
+    // refract and comes out blank/near-transparent instead of tinted
+    expect(overRed.alpha).toBeGreaterThan(200);
+    expect(overBlue.alpha).toBeGreaterThan(200);
     expect(overRed.r - overRed.b).toBeGreaterThan(20);
     expect(overBlue.b - overBlue.r).toBeGreaterThan(20);
   });

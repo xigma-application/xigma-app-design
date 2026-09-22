@@ -17,19 +17,21 @@ const VECTOR_CANDIDATE_TYPES: NodeType[] = [
 
 const isVectorCandidate = (node: TSceneNode): node is TSvgShapeNode => VECTOR_CANDIDATE_TYPES.includes(node.type);
 
-const addToRasterLayer = (layers: TSvgLayer[], node: TSceneNode): void => {
+const addToRasterLayer = (layers: TSvgLayer[], node: TSceneNode, contextIds: string[]): void => {
   const lastLayer = layers[layers.length - 1];
 
   if (lastLayer && lastLayer.type === SvgLayerType.raster) {
     lastLayer.nodeIds.add(node.id);
+    lastLayer.contextIds = contextIds;
   } else {
-    layers.push({ nodeIds: new Set([node.id]), type: SvgLayerType.raster });
+    layers.push({ contextIds, nodeIds: new Set([node.id]), type: SvgLayerType.raster });
   }
 };
 
 const addTextLayer = (
   layers: TSvgLayer[],
   node: TTextNode,
+  contextIds: string[],
   canExportAsRealText: (node: TTextNode) => boolean,
   canExportAsTextCurves: (node: TTextNode) => boolean,
 ): void => {
@@ -38,7 +40,7 @@ const addTextLayer = (
   } else if (canExportAsTextCurves(node)) {
     layers.push({ node, type: SvgLayerType.textCurves });
   } else {
-    addToRasterLayer(layers, node);
+    addToRasterLayer(layers, node, contextIds);
   }
 };
 
@@ -47,15 +49,20 @@ export const getSvgLayers = (
   canExportAsRealText: (node: TTextNode) => boolean,
   canExportAsVector: (node: TSvgShapeNode) => boolean,
   canExportAsTextCurves: (node: TTextNode) => boolean,
-): TSvgLayer[] =>
-  nodes.reduce<TSvgLayer[]>((layers, node) => {
+): TSvgLayer[] => {
+  const seenIds: string[] = [];
+
+  return nodes.reduce<TSvgLayer[]>((layers, node) => {
+    seenIds.push(node.id);
+
     if (node.type === NodeType.text) {
-      addTextLayer(layers, node, canExportAsRealText, canExportAsTextCurves);
+      addTextLayer(layers, node, seenIds.slice(), canExportAsRealText, canExportAsTextCurves);
     } else if (isVectorCandidate(node) && canExportAsVector(node)) {
       layers.push({ node, type: SvgLayerType.vector });
     } else {
-      addToRasterLayer(layers, node);
+      addToRasterLayer(layers, node, seenIds.slice());
     }
 
     return layers;
   }, []);
+};

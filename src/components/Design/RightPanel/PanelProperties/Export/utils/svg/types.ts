@@ -21,7 +21,7 @@ export type TSvgLocalTransform = { localCenter: TPoint; localRotation: number };
 
 export type TSvgAncestorGroup = { id: string; markup: string };
 
-export type TSvgRasterLayer = { nodeIds: Set<string>; type: SvgLayerType.raster };
+export type TSvgRasterLayer = { contextIds: string[]; nodeIds: Set<string>; type: SvgLayerType.raster };
 
 export type TSvgTextLayer = { node: TTextNode; type: SvgLayerType.text };
 

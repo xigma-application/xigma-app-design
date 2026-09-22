@@ -10,6 +10,7 @@ import { TImageRenderContext } from '../types';
 // utils
 import { getExportRenderNodes } from './drawScene/getExportRenderNodes';
 import { renderNodeAtScale } from './drawScene/renderExport/renderNodeAtScale';
+import { renderNodeIdsAtScale } from './drawScene/renderExport/renderNodeIdsAtScale';
 import { renderNodeSubtreeAtScale } from './drawScene/renderExport/renderNodeSubtreeAtScale';
 
 export const resolveExportRenderRequest = (
@@ -38,11 +39,15 @@ export const resolveExportRenderRequest = (
       viewport: { x: 0, y: 0, zoom: 1 },
     };
 
-    if (includeNodeIds || !ignoreOverlappingLayers) {
+    if (includeNodeIds) {
       const renderNodes = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
-      const nodesToDraw = includeNodeIds ? renderNodes.filter((node) => includeNodeIds.has(node.id)) : renderNodes;
+      const ids = renderNodes.filter((node) => includeNodeIds.has(node.id)).map((node) => node.id);
 
-      request.onResolve(renderNodeAtScale(context, request.nodeId, nodesToDraw, nodesById, refs, request.scale, request.boundsOverride));
+      request.onResolve(renderNodeIdsAtScale(context, request.nodeId, ids, nodesById, refs, request.scale, request.boundsOverride));
+    } else if (!ignoreOverlappingLayers) {
+      const renderNodes = getExportRenderNodes(request.nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
+
+      request.onResolve(renderNodeAtScale(context, request.nodeId, renderNodes, nodesById, refs, request.scale, request.boundsOverride));
     } else {
       request.onResolve(renderNodeSubtreeAtScale(context, request.nodeId, nodesById, refs, request.scale, request.boundsOverride));
     }
