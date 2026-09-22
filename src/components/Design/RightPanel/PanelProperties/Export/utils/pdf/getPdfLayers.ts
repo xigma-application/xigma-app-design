@@ -26,14 +26,30 @@ const addToRasterLayer = (layers: TPdfLayer[], node: TSceneNode): void => {
   }
 };
 
+const addTextLayer = (
+  layers: TPdfLayer[],
+  node: TTextNode,
+  canExportAsRealText: (node: TTextNode) => boolean,
+  canExportAsTextCurves: (node: TTextNode) => boolean,
+): void => {
+  if (canExportAsRealText(node)) {
+    layers.push({ node, type: PdfLayerType.text });
+  } else if (canExportAsTextCurves(node)) {
+    layers.push({ node, type: PdfLayerType.textCurves });
+  } else {
+    addToRasterLayer(layers, node);
+  }
+};
+
 export const getPdfLayers = (
   nodes: TSceneNode[],
   canExportAsRealText: (node: TTextNode) => boolean,
   canExportAsVector: (node: TPdfShapeNode) => boolean,
+  canExportAsTextCurves: (node: TTextNode) => boolean,
 ): TPdfLayer[] =>
   nodes.reduce<TPdfLayer[]>((layers, node) => {
-    if (node.type === NodeType.text && canExportAsRealText(node)) {
-      layers.push({ node, type: PdfLayerType.text });
+    if (node.type === NodeType.text) {
+      addTextLayer(layers, node, canExportAsRealText, canExportAsTextCurves);
     } else if (isVectorCandidate(node) && canExportAsVector(node)) {
       layers.push({ node, type: PdfLayerType.vector });
     } else {

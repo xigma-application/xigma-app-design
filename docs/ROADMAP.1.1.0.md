@@ -347,7 +347,7 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] PDF: linear and radial gradients (fully opaque stops) are real native shadings
 - [x] PDF: angular and diamond gradients (fully opaque stops) are real native shadings too
 - [x] PDF: gradients with translucent stops are also real native shadings, using a soft mask
-- [ ] PDF: text on a path as curves
+- [x] PDF: text on a path exports as real vector curves instead of an image
 - [ ] SVG rows are listed in the format menu but don't export anything yet
 
 ## Related

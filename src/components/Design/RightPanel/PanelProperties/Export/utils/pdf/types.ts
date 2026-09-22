@@ -8,6 +8,8 @@ export type TPdfRasterLayer = { nodeIds: Set<string>; type: PdfLayerType.raster 
 
 export type TPdfTextLayer = { node: TTextNode; type: PdfLayerType.text };
 
+export type TPdfTextCurvesLayer = { node: TTextNode; type: PdfLayerType.textCurves };
+
 export type TPdfVectorLayer = { node: TPdfShapeNode; type: PdfLayerType.vector };
 
-export type TPdfLayer = TPdfRasterLayer | TPdfTextLayer | TPdfVectorLayer;
+export type TPdfLayer = TPdfRasterLayer | TPdfTextLayer | TPdfTextCurvesLayer | TPdfVectorLayer;

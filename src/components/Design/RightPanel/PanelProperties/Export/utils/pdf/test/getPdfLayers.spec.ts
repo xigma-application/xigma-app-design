@@ -99,6 +99,7 @@ describe('getPdfLayers', () => {
       [rectangle('a'), rectangle('b')],
       () => true,
       () => false,
+      () => false,
     );
 
     // result
@@ -110,6 +111,7 @@ describe('getPdfLayers', () => {
     const layers = getPdfLayers(
       [rectangle('a'), text('t'), rectangle('b')],
       () => true,
+      () => false,
       () => false,
     );
 
@@ -127,6 +129,7 @@ describe('getPdfLayers', () => {
       [frame('f'), rectangle('r'), rectangle('s')],
       () => true,
       (node) => node.id === 'r',
+      () => false,
     );
 
     // result
@@ -143,6 +146,7 @@ describe('getPdfLayers', () => {
       [rectangle('a'), ellipse('e')],
       () => true,
       (node) => node.type === NodeType.ellipse,
+      () => false,
     );
 
     // result
@@ -158,6 +162,7 @@ describe('getPdfLayers', () => {
       [rectangle('a'), line('l')],
       () => true,
       (node) => node.type === NodeType.line,
+      () => false,
     );
 
     // result
@@ -173,6 +178,7 @@ describe('getPdfLayers', () => {
       [rectangle('a'), vector('vec')],
       () => true,
       (node) => node.type === NodeType.vector,
+      () => false,
     );
 
     // result
@@ -188,21 +194,53 @@ describe('getPdfLayers', () => {
       [frame('f')],
       () => true,
       () => false,
+      () => false,
     );
 
     // result
     expect(layers).toEqual([{ nodeIds: new Set(['f']), type: PdfLayerType.raster }]);
   });
 
-  it('should keep a text node that cannot be real text inside the raster layer', () => {
+  it('should keep a text node that cannot be real text or vector curves inside the raster layer', () => {
     // action
     const layers = getPdfLayers(
       [rectangle('a'), text('t')],
       (node: TTextNode) => node.id !== 't',
       () => false,
+      () => false,
     );
 
     // result
     expect(layers).toEqual([{ nodeIds: new Set(['a', 't']), type: PdfLayerType.raster }]);
+  });
+
+  it('should turn a text node that cannot be real text but can be vector curves into its own textCurves layer', () => {
+    // action
+    const layers = getPdfLayers(
+      [rectangle('a'), text('t'), rectangle('b')],
+      () => false,
+      () => false,
+      (node: TTextNode) => node.id === 't',
+    );
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { node: text('t'), type: PdfLayerType.textCurves },
+      { nodeIds: new Set(['b']), type: PdfLayerType.raster },
+    ]);
+  });
+
+  it('should prefer real text over vector curves when a text node qualifies for both', () => {
+    // action
+    const layers = getPdfLayers(
+      [text('t')],
+      () => true,
+      () => false,
+      () => true,
+    );
+
+    // result
+    expect(layers).toEqual([{ node: text('t'), type: PdfLayerType.text }]);
   });
 });

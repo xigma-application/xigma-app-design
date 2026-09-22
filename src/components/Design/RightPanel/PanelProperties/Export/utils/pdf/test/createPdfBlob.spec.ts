@@ -8,7 +8,8 @@ import { store } from 'store';
 
 // types
 import { ExportImageResampling } from '../../../enums';
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { createPdfBlob } from '../createPdfBlob';
@@ -17,12 +18,16 @@ const JPEG_QUALITY = 0.92;
 
 const renderNodeForExportMock = vi.fn();
 const createImageBlobFromPixelsMock = vi.fn();
+const getTextFlattenVectorMock = vi.fn();
 
 vi.mock('utils/canvas/exportRender/exportRenderRegistry', () => ({
   renderNodeForExport: (...args: unknown[]): unknown => renderNodeForExportMock(...args),
 }));
 vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
   createImageBlobFromPixels: (...args: unknown[]): unknown => createImageBlobFromPixelsMock(...args),
+}));
+vi.mock('utils/canvas/text/fontOutline/getTextFlattenVector', () => ({
+  getTextFlattenVector: (...args: unknown[]): unknown => getTextFlattenVectorMock(...args),
 }));
 vi.mock('../loadPdfFontBytes', () => ({
   loadPdfFontBytes: (): Promise<ArrayBuffer> =>
@@ -88,6 +93,7 @@ describe('createPdfBlob', () => {
     store.dispatch(setSelection([]));
     renderNodeForExportMock.mockReset();
     createImageBlobFromPixelsMock.mockReset();
+    getTextFlattenVectorMock.mockReset();
     renderNodeForExportMock.mockResolvedValue({ height: 1, pixels: new Uint8Array(4), width: 1 });
     createImageBlobFromPixelsMock.mockImplementation((_pixels: Uint8Array, _width: number, _height: number, mimeType: string) =>
       Promise.resolve({ arrayBuffer: () => Promise.resolve((mimeType === 'image/jpeg' ? JPEG_1X1 : PNG_1X1).buffer) }),
@@ -534,5 +540,81 @@ describe('createPdfBlob', () => {
     expect(objectDictText).toContain('/Luminosity');
     expect(objectDictText).toContain('/DeviceGray');
     expect(objectDictText).toContain('/Subtype /Form');
+  });
+
+  it('should draw text bound to a path as vector curves instead of raster, since it cannot be real selectable text', async () => {
+    // mock
+    const flattenedVector: TVectorNode = {
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      fillByKey: {},
+      filledFaceKeys: ['face-1'],
+      holeParentByKey: {},
+      id: 'flattened',
+      name: 'flattened',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '',
+      strokeWidth: 0,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 10, y: 10 } },
+    };
+
+    getTextFlattenVectorMock.mockResolvedValue(flattenedVector);
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            height: 40,
+            id: 'pdf-path',
+            name: 'Path',
+            parentId: null,
+            pathType: PathType.ellipse,
+            rotation: 0,
+            type: NodeType.path,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+          {
+            content: 'Hi',
+            fill: '#ff0000',
+            flipX: false,
+            flipY: false,
+            fontFamily: 'Inter',
+            fontSize: 20,
+            height: 40,
+            id: 'pdf-text-path',
+            name: 'Text',
+            parentId: null,
+            pathId: 'pdf-path',
+            rotation: 0,
+            type: NodeType.text,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-path', 'pdf-text-path'],
+      }),
+    );
+
+    // action
+    const blob = await createPdfBlob('pdf-text-path', 2, true, ExportImageResampling.basic, JPEG_QUALITY);
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(getTextFlattenVectorMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ id: 'pdf-text-path', pathId: 'pdf-path' }),
+      expect.objectContaining({ id: 'pdf-path' }),
+    );
+    expect(await readPdfContent(blob)).toContain('f*');
   });
 });

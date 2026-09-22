@@ -14,7 +14,9 @@ import { TSceneNode, TTextNode } from 'types/design/types';
 // utils
 import { canExportShapeAsVector } from './canExportShapeAsVector';
 import { canExportTextAsRealText } from './canExportTextAsRealText';
+import { canExportTextOnPathAsVectorCurves } from './canExportTextOnPathAsVectorCurves';
 import { drawPdfShape } from './drawPdfShape';
+import { drawPdfTextCurves } from './drawPdfTextCurves';
 import { drawPdfTextNode } from './drawPdfTextNode';
 import { embedPdfRasterLayer } from './embedPdfRasterLayer';
 import { getExportRenderNodes } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getExportRenderNodes';
@@ -46,29 +48,37 @@ export const createPdfBlob = async (
       nodes,
       (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters),
       (shapeNode: TPdfShapeNode) => canExportShapeAsVector(shapeNode, nodesById),
+      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById),
     );
     const graphicsStates = new Map<number, PDFName>();
     const page = pdfDocument.addPage([bounds.width, bounds.height]);
     const isSoleRasterLayer = layers.length === 1 && layers[0].type === PdfLayerType.raster;
 
     for (const layer of layers) {
-      if (layer.type === PdfLayerType.text) {
-        drawPdfTextNode(page, font, layer.node, bounds);
-      } else if (layer.type === PdfLayerType.vector) {
-        drawPdfShape(page, layer.node, nodesById, bounds, graphicsStates);
-      } else {
-        await embedPdfRasterLayer(
-          pdfDocument,
-          page,
-          nodeId,
-          rasterScale,
-          ignoreOverlappingLayers,
-          imageResampling,
-          layer.nodeIds,
-          bounds,
-          isSoleRasterLayer,
-          jpegQuality,
-        );
+      switch (layer.type) {
+        case PdfLayerType.text:
+          drawPdfTextNode(page, font, layer.node, bounds);
+          break;
+        case PdfLayerType.textCurves:
+          await drawPdfTextCurves(page, layer.node, nodesById, bounds, graphicsStates);
+          break;
+        case PdfLayerType.vector:
+          drawPdfShape(page, layer.node, nodesById, bounds, graphicsStates);
+          break;
+        default:
+          await embedPdfRasterLayer(
+            pdfDocument,
+            page,
+            nodeId,
+            rasterScale,
+            ignoreOverlappingLayers,
+            imageResampling,
+            layer.nodeIds,
+            bounds,
+            isSoleRasterLayer,
+            jpegQuality,
+          );
+          break;
       }
     }
 
