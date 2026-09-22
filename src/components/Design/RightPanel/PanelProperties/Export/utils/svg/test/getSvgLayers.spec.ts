@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { SvgLayerType } from '../enums';
-import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TSceneNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getSvgLayers } from '../getSvgLayers';
@@ -93,17 +93,44 @@ const text = (id: string): TSceneNode => ({
 });
 
 describe('getSvgLayers', () => {
-  it('should merge consecutive non-vector nodes into one raster layer', () => {
+  it('should merge consecutive non-text nodes into one raster layer', () => {
     // action
-    const layers = getSvgLayers([rectangle('a'), rectangle('b')], () => false);
+    const layers = getSvgLayers(
+      [rectangle('a'), rectangle('b')],
+      () => true,
+      () => false,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([{ nodeIds: new Set(['a', 'b']), type: SvgLayerType.raster }]);
   });
 
+  it('should split raster layers around a real text layer to keep the paint order', () => {
+    // action
+    const layers = getSvgLayers(
+      [rectangle('a'), text('t'), rectangle('b')],
+      () => true,
+      () => false,
+      () => false,
+    );
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { node: text('t'), type: SvgLayerType.text },
+      { nodeIds: new Set(['b']), type: SvgLayerType.raster },
+    ]);
+  });
+
   it('should turn a vector-eligible rectangle into its own vector layer between raster layers', () => {
     // action
-    const layers = getSvgLayers([frame('f'), rectangle('r'), rectangle('s')], (node) => node.id === 'r');
+    const layers = getSvgLayers(
+      [frame('f'), rectangle('r'), rectangle('s')],
+      () => true,
+      (node) => node.id === 'r',
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([
@@ -115,7 +142,12 @@ describe('getSvgLayers', () => {
 
   it('should turn a vector-eligible ellipse into its own vector layer', () => {
     // action
-    const layers = getSvgLayers([rectangle('a'), ellipse('e')], (node) => node.type === NodeType.ellipse);
+    const layers = getSvgLayers(
+      [rectangle('a'), ellipse('e')],
+      () => true,
+      (node) => node.type === NodeType.ellipse,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([
@@ -126,7 +158,12 @@ describe('getSvgLayers', () => {
 
   it('should turn a vector-eligible line into its own vector layer', () => {
     // action
-    const layers = getSvgLayers([rectangle('a'), line('l')], (node) => node.type === NodeType.line);
+    const layers = getSvgLayers(
+      [rectangle('a'), line('l')],
+      () => true,
+      (node) => node.type === NodeType.line,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([
@@ -137,7 +174,12 @@ describe('getSvgLayers', () => {
 
   it('should turn a vector-eligible pen-tool vector node into its own vector layer', () => {
     // action
-    const layers = getSvgLayers([rectangle('a'), vector('vec')], (node) => node.type === NodeType.vector);
+    const layers = getSvgLayers(
+      [rectangle('a'), vector('vec')],
+      () => true,
+      (node) => node.type === NodeType.vector,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([
@@ -148,17 +190,57 @@ describe('getSvgLayers', () => {
 
   it('should send a frame that cannot be vector into the raster layer', () => {
     // action
-    const layers = getSvgLayers([frame('f')], () => false);
+    const layers = getSvgLayers(
+      [frame('f')],
+      () => true,
+      () => false,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([{ nodeIds: new Set(['f']), type: SvgLayerType.raster }]);
   });
 
-  it('should send a text node (not a vector candidate in this stage) into the raster layer', () => {
+  it('should keep a text node that cannot be real text or vector curves inside the raster layer', () => {
     // action
-    const layers = getSvgLayers([rectangle('a'), text('t')], () => false);
+    const layers = getSvgLayers(
+      [rectangle('a'), text('t')],
+      (node: TTextNode) => node.id !== 't',
+      () => false,
+      () => false,
+    );
 
     // result
     expect(layers).toEqual([{ nodeIds: new Set(['a', 't']), type: SvgLayerType.raster }]);
+  });
+
+  it('should turn a text node that cannot be real text but can be vector curves into its own textCurves layer', () => {
+    // action
+    const layers = getSvgLayers(
+      [rectangle('a'), text('t'), rectangle('b')],
+      () => false,
+      () => false,
+      (node: TTextNode) => node.id === 't',
+    );
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { node: text('t'), type: SvgLayerType.textCurves },
+      { nodeIds: new Set(['b']), type: SvgLayerType.raster },
+    ]);
+  });
+
+  it('should prefer real text over vector curves when a text node qualifies for both', () => {
+    // action
+    const layers = getSvgLayers(
+      [text('t')],
+      () => true,
+      () => false,
+      () => true,
+    );
+
+    // result
+    expect(layers).toEqual([{ node: text('t'), type: SvgLayerType.text }]);
   });
 });

@@ -5,7 +5,8 @@ import { store } from 'store';
 
 // types
 import { ExportImageResampling } from '../../../enums';
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { createSvgBlob } from '../createSvgBlob';
@@ -15,6 +16,7 @@ const JPEG_QUALITY = 0.92;
 const renderNodeForExportMock = vi.fn();
 const createImageBlobFromPixelsMock = vi.fn();
 const blobToDataUrlMock = vi.fn();
+const getTextFlattenVectorMock = vi.fn();
 
 vi.mock('utils/canvas/exportRender/exportRenderRegistry', () => ({
   renderNodeForExport: (...args: unknown[]): unknown => renderNodeForExportMock(...args),
@@ -30,6 +32,9 @@ vi.mock('utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoi
     { x: 35, y: 25 },
   ],
 }));
+vi.mock('utils/canvas/text/fontOutline/getTextFlattenVector', () => ({
+  getTextFlattenVector: (...args: unknown[]): unknown => getTextFlattenVectorMock(...args),
+}));
 
 const readSvgText = async (blob: Blob | null): Promise<string> => (blob ? blob.text() : '');
 
@@ -39,6 +44,7 @@ describe('createSvgBlob', () => {
     renderNodeForExportMock.mockReset();
     createImageBlobFromPixelsMock.mockReset();
     blobToDataUrlMock.mockReset();
+    getTextFlattenVectorMock.mockReset();
     renderNodeForExportMock.mockResolvedValue({ height: 1, pixels: new Uint8Array(4), width: 1 });
     createImageBlobFromPixelsMock.mockResolvedValue('raster-blob');
     blobToDataUrlMock.mockResolvedValue('data:image/png;base64,AAAA');
@@ -397,5 +403,141 @@ describe('createSvgBlob', () => {
     // result
     expect(withoutRender).not.toContain('<image');
     expect(withoutBlob).not.toContain('<image');
+  });
+
+  it('should draw plain text as real selectable <text> without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            childIds: ['svg-text'],
+            clipContent: false,
+            fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+            height: 80,
+            id: 'svg-text-frame',
+            name: 'Frame',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.frame,
+            width: 120,
+            x: 0,
+            y: 0,
+          },
+          {
+            content: 'Hi',
+            fill: '#000000',
+            flipX: false,
+            flipY: false,
+            fontFamily: 'Inter',
+            fontSize: 16,
+            height: 20,
+            id: 'svg-text',
+            name: 'Label',
+            parentId: 'svg-text-frame',
+            rotation: 0,
+            type: NodeType.text,
+            width: 60,
+            x: 10,
+            y: 10,
+          },
+        ],
+        rootIds: ['svg-text-frame'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-text-frame', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).toHaveBeenCalledTimes(1);
+    expect(renderNodeForExportMock).toHaveBeenCalledWith(
+      'svg-text-frame',
+      2,
+      true,
+      ExportImageResampling.basic,
+      new Set(['svg-text-frame']),
+    );
+    expect(text).toContain('<text fill="#000000" font-family="Inter, sans-serif" font-size="16">');
+    expect(text).toContain('<tspan');
+    expect(text).toContain('>H</tspan>');
+    expect(text).toContain('>i</tspan>');
+  });
+
+  it('should draw text bound to a path as vector curves instead of raster, since it cannot be real selectable text', async () => {
+    // mock
+    const flattenedVector: TVectorNode = {
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      fillByKey: {},
+      filledFaceKeys: ['face-1'],
+      holeParentByKey: {},
+      id: 'flattened',
+      name: 'flattened',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '',
+      strokeWidth: 0,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 10, y: 10 } },
+    };
+
+    getTextFlattenVectorMock.mockResolvedValue(flattenedVector);
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            height: 40,
+            id: 'svg-path',
+            name: 'Path',
+            parentId: null,
+            pathType: PathType.ellipse,
+            rotation: 0,
+            type: NodeType.path,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+          {
+            content: 'Hi',
+            fill: '#ff0000',
+            flipX: false,
+            flipY: false,
+            fontFamily: 'Inter',
+            fontSize: 20,
+            height: 40,
+            id: 'svg-text-path',
+            name: 'Text',
+            parentId: null,
+            pathId: 'svg-path',
+            rotation: 0,
+            type: NodeType.text,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-path', 'svg-text-path'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-text-path', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(getTextFlattenVectorMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ id: 'svg-text-path', pathId: 'svg-path' }),
+      expect.objectContaining({ id: 'svg-path' }),
+    );
+    expect(text).toContain('<path d="M');
+    expect(text).not.toContain('<tspan');
   });
 });

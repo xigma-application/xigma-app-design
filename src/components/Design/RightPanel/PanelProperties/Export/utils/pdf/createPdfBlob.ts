@@ -14,7 +14,7 @@ import { TSceneNode, TTextNode } from 'types/design/types';
 // utils
 import { canExportShapeAsVector } from './canExportShapeAsVector';
 import { canExportTextAsRealText } from './canExportTextAsRealText';
-import { canExportTextOnPathAsVectorCurves } from './canExportTextOnPathAsVectorCurves';
+import { canExportTextOnPathAsVectorCurves } from '../canExportTextOnPathAsVectorCurves';
 import { drawPdfShape } from './drawPdfShape';
 import { drawPdfTextCurves } from './drawPdfTextCurves';
 import { drawPdfTextNode } from './drawPdfTextNode';

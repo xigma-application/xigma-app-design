@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { SvgLayerType } from './enums';
-import { TSceneNode } from 'types/design/types';
+import { TSceneNode, TTextNode } from 'types/design/types';
 import { TSvgLayer, TSvgShapeNode } from './types';
 
 const VECTOR_CANDIDATE_TYPES: NodeType[] = [
@@ -26,9 +26,31 @@ const addToRasterLayer = (layers: TSvgLayer[], node: TSceneNode): void => {
   }
 };
 
-export const getSvgLayers = (nodes: TSceneNode[], canExportAsVector: (node: TSvgShapeNode) => boolean): TSvgLayer[] =>
+const addTextLayer = (
+  layers: TSvgLayer[],
+  node: TTextNode,
+  canExportAsRealText: (node: TTextNode) => boolean,
+  canExportAsTextCurves: (node: TTextNode) => boolean,
+): void => {
+  if (canExportAsRealText(node)) {
+    layers.push({ node, type: SvgLayerType.text });
+  } else if (canExportAsTextCurves(node)) {
+    layers.push({ node, type: SvgLayerType.textCurves });
+  } else {
+    addToRasterLayer(layers, node);
+  }
+};
+
+export const getSvgLayers = (
+  nodes: TSceneNode[],
+  canExportAsRealText: (node: TTextNode) => boolean,
+  canExportAsVector: (node: TSvgShapeNode) => boolean,
+  canExportAsTextCurves: (node: TTextNode) => boolean,
+): TSvgLayer[] =>
   nodes.reduce<TSvgLayer[]>((layers, node) => {
-    if (isVectorCandidate(node) && canExportAsVector(node)) {
+    if (node.type === NodeType.text) {
+      addTextLayer(layers, node, canExportAsRealText, canExportAsTextCurves);
+    } else if (isVectorCandidate(node) && canExportAsVector(node)) {
       layers.push({ node, type: SvgLayerType.vector });
     } else {
       addToRasterLayer(layers, node);
