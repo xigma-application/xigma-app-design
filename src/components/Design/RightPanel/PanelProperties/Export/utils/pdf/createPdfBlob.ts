@@ -39,7 +39,7 @@ export const createPdfBlob = async (
 
     pdfDocument.registerFontkit(fontkit);
 
-    const font = await pdfDocument.embedFont(await loadPdfFontBytes(), { subset: true });
+    const font = await pdfDocument.embedFont(await loadPdfFontBytes(), { subset: false });
     const fontCharacters = new Set(font.getCharacterSet());
     const nodes = getExportRenderNodes(nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
     const layers = getPdfLayers(
