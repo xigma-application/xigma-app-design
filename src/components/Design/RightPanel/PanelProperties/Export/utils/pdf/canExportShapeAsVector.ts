@@ -5,9 +5,17 @@ import { TPdfShapeNode } from './types';
 
 // utils
 import { canExportBoxShapeAsVector } from './canExportBoxShapeAsVector';
+import { canExportLineAsVector } from './canExportLineAsVector';
 import { canExportSimpleShapeAsVector } from './canExportSimpleShapeAsVector';
 
-export const canExportShapeAsVector = (node: TPdfShapeNode, nodesById: Record<string, TSceneNode>): boolean =>
-  node.type === NodeType.frame || node.type === NodeType.rectangle
-    ? canExportBoxShapeAsVector(node, nodesById)
-    : canExportSimpleShapeAsVector(node, nodesById);
+export const canExportShapeAsVector = (node: TPdfShapeNode, nodesById: Record<string, TSceneNode>): boolean => {
+  switch (node.type) {
+    case NodeType.frame:
+    case NodeType.rectangle:
+      return canExportBoxShapeAsVector(node, nodesById);
+    case NodeType.line:
+      return canExportLineAsVector(node, nodesById);
+    default:
+      return canExportSimpleShapeAsVector(node, nodesById);
+  }
+};

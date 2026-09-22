@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { PdfLayerType } from '../enums';
-import { TEllipseNode, TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getPdfLayers } from '../getPdfLayers';
@@ -45,6 +45,18 @@ const ellipse = (id: string): TEllipseNode => ({
   width: 10,
   x: 0,
   y: 0,
+});
+
+const line = (id: string): TLineNode => ({
+  id,
+  name: id,
+  parentId: null,
+  stroke: '#000000',
+  type: NodeType.line,
+  x1: 0,
+  x2: 10,
+  y1: 0,
+  y2: 0,
 });
 
 const text = (id: string): TSceneNode => ({
@@ -122,6 +134,21 @@ describe('getPdfLayers', () => {
     expect(layers).toEqual([
       { nodeIds: new Set(['a']), type: PdfLayerType.raster },
       { node: ellipse('e'), type: PdfLayerType.vector },
+    ]);
+  });
+
+  it('should turn a vector-eligible line into its own vector layer', () => {
+    // action
+    const layers = getPdfLayers(
+      [rectangle('a'), line('l')],
+      () => true,
+      (node) => node.type === NodeType.line,
+    );
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { node: line('l'), type: PdfLayerType.vector },
     ]);
   });
 

@@ -4,7 +4,14 @@ import { PdfLayerType } from './enums';
 import { TPdfLayer, TPdfShapeNode } from './types';
 import { TSceneNode, TTextNode } from 'types/design/types';
 
-const VECTOR_CANDIDATE_TYPES: NodeType[] = [NodeType.frame, NodeType.rectangle, NodeType.ellipse, NodeType.polygon, NodeType.star];
+const VECTOR_CANDIDATE_TYPES: NodeType[] = [
+  NodeType.frame,
+  NodeType.rectangle,
+  NodeType.ellipse,
+  NodeType.polygon,
+  NodeType.star,
+  NodeType.line,
+];
 
 const isVectorCandidate = (node: TSceneNode): node is TPdfShapeNode => VECTOR_CANDIDATE_TYPES.includes(node.type);
 

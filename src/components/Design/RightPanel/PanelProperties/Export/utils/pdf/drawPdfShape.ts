@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawPdfBoxShape } from './drawPdfBoxShape';
+import { drawPdfLineShape } from './drawPdfLineShape';
 import { drawPdfSimpleShape } from './drawPdfSimpleShape';
 
 export const drawPdfShape = (
@@ -17,9 +18,15 @@ export const drawPdfShape = (
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
 ): void => {
-  if (node.type === NodeType.frame || node.type === NodeType.rectangle) {
-    drawPdfBoxShape(page, node, nodesById, bounds, graphicsStates);
-  } else {
-    drawPdfSimpleShape(page, node, nodesById, bounds, graphicsStates);
+  switch (node.type) {
+    case NodeType.frame:
+    case NodeType.rectangle:
+      drawPdfBoxShape(page, node, nodesById, bounds, graphicsStates);
+      break;
+    case NodeType.line:
+      drawPdfLineShape(page, node, nodesById, bounds, graphicsStates);
+      break;
+    default:
+      drawPdfSimpleShape(page, node, nodesById, bounds, graphicsStates);
   }
 };

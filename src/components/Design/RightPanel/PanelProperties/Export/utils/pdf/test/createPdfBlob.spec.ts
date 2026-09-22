@@ -313,4 +313,33 @@ describe('createPdfBlob', () => {
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(text).toContain('f*');
   });
+
+  it('should draw a plain line as a real vector path without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            id: 'pdf-line',
+            name: 'Line',
+            parentId: null,
+            stroke: '#0000ff',
+            type: NodeType.line,
+            x1: 0,
+            x2: 40,
+            y1: 0,
+            y2: 30,
+          },
+        ],
+        rootIds: ['pdf-line'],
+      }),
+    );
+
+    // action
+    const text = await readPdfContent(await createPdfBlob('pdf-line', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('f*');
+  });
 });

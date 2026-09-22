@@ -342,7 +342,8 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] Fixed a bug where real PDF text was invisible
 - [x] PDF rows also get the Quality setting: when the whole export is one image (nothing vector or
       real text on the page), it's compressed as JPEG at that quality instead of always lossless
-- [ ] PDF: lines and paths as vector shapes, gradients, and text on a path as curves
+- [x] PDF: straight lines (including arrow endpoints) with plain colors are real vector shapes
+- [ ] PDF: pen-tool shapes as vector paths, gradients, and text on a path as curves
 - [ ] SVG rows are listed in the format menu but don't export anything yet
 
 ## Related
