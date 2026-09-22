@@ -8,7 +8,8 @@ import { store } from 'store';
 // types
 import { ExportImageResampling } from '../../enums';
 import { PdfLayerType } from './enums';
-import { TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
+import { TPdfShapeNode } from './types';
+import { TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from './canExportShapeAsVector';
@@ -44,7 +45,7 @@ export const createPdfBlob = async (
     const layers = getPdfLayers(
       nodes,
       (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters),
-      (shapeNode: TFrameNode | TRectangleNode) => canExportShapeAsVector(shapeNode, nodesById),
+      (shapeNode: TPdfShapeNode) => canExportShapeAsVector(shapeNode, nodesById),
     );
     const graphicsStates = new Map<number, PDFName>();
     const page = pdfDocument.addPage([bounds.width, bounds.height]);

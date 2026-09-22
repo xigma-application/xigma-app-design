@@ -1,11 +1,12 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { PdfLayerType } from './enums';
-import { TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
-import { TPdfLayer } from './types';
+import { TPdfLayer, TPdfShapeNode } from './types';
+import { TSceneNode, TTextNode } from 'types/design/types';
 
-const isVectorCandidate = (node: TSceneNode): node is TFrameNode | TRectangleNode =>
-  node.type === NodeType.frame || node.type === NodeType.rectangle;
+const VECTOR_CANDIDATE_TYPES: NodeType[] = [NodeType.frame, NodeType.rectangle, NodeType.ellipse, NodeType.polygon, NodeType.star];
+
+const isVectorCandidate = (node: TSceneNode): node is TPdfShapeNode => VECTOR_CANDIDATE_TYPES.includes(node.type);
 
 const addToRasterLayer = (layers: TPdfLayer[], node: TSceneNode): void => {
   const lastLayer = layers[layers.length - 1];
@@ -20,7 +21,7 @@ const addToRasterLayer = (layers: TPdfLayer[], node: TSceneNode): void => {
 export const getPdfLayers = (
   nodes: TSceneNode[],
   canExportAsRealText: (node: TTextNode) => boolean,
-  canExportAsVector: (node: TFrameNode | TRectangleNode) => boolean,
+  canExportAsVector: (node: TPdfShapeNode) => boolean,
 ): TPdfLayer[] =>
   nodes.reduce<TPdfLayer[]>((layers, node) => {
     if (node.type === NodeType.text && canExportAsRealText(node)) {

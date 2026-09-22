@@ -1,11 +1,13 @@
 // types
 import { PdfLayerType } from './enums';
-import { TFrameNode, TRectangleNode, TTextNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
+
+export type TPdfShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode;
 
 export type TPdfRasterLayer = { nodeIds: Set<string>; type: PdfLayerType.raster };
 
 export type TPdfTextLayer = { node: TTextNode; type: PdfLayerType.text };
 
-export type TPdfVectorLayer = { node: TFrameNode | TRectangleNode; type: PdfLayerType.vector };
+export type TPdfVectorLayer = { node: TPdfShapeNode; type: PdfLayerType.vector };
 
 export type TPdfLayer = TPdfRasterLayer | TPdfTextLayer | TPdfVectorLayer;

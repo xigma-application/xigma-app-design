@@ -187,4 +187,34 @@ describe('createPdfBlob', () => {
     expect(text).toContain('/XigmaOpacity0');
     expect(text).toContain('/XigmaOpacity1');
   });
+
+  it('should draw a plain ellipse as a real vector path without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fill: '#00ff00',
+            height: 30,
+            id: 'pdf-ellipse',
+            name: 'Ellipse',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.ellipse,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-ellipse'],
+      }),
+    );
+
+    // action
+    const text = await readPdfContent(await createPdfBlob('pdf-ellipse', 2, true, ExportImageResampling.basic));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('f*');
+  });
 });

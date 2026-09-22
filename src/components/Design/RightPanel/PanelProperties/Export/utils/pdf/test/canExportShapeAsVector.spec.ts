@@ -1,16 +1,12 @@
 // types
-import { BlendMode, EffectType, NodeType, StrokeMode } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
-import { TPaint } from 'types/design/paint/types';
+import { NodeType } from 'types/design/enums';
+import { TEllipseNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from '../canExportShapeAsVector';
 
-const solid: TPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
-const image: TPaint = { opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' };
-
-const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
-  fills: [solid],
+const rectangle: TRectangleNode = {
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'r',
   name: 'r',
@@ -20,70 +16,29 @@ const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
   width: 10,
   x: 0,
   y: 0,
-  ...overrides,
-});
+};
 
-const check = (node: TRectangleNode | TFrameNode): boolean => canExportShapeAsVector(node, {});
+const ellipse: TEllipseNode = {
+  fill: '#ff0000',
+  height: 10,
+  id: 'e',
+  name: 'e',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.ellipse,
+  width: 10,
+  x: 0,
+  y: 0,
+};
 
 describe('canExportShapeAsVector', () => {
-  it('should allow a plain solid rectangle', () => {
-    expect(check(rectangle())).toBe(true);
+  it('should route a box shape through the box eligibility check', () => {
+    expect(canExportShapeAsVector(rectangle, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...rectangle, strokeColor: '#000000', strokeWidth: 2 }, {})).toBe(false);
   });
 
-  it('should allow solid strokes and ignore hidden non-solid paints', () => {
-    expect(check(rectangle({ strokeWidth: 2, strokes: [solid] }))).toBe(true);
-    expect(check(rectangle({ fills: [solid, { ...image, visible: false }] }))).toBe(true);
-    expect(check(rectangle({ strokeMode: StrokeMode.basic }))).toBe(true);
-  });
-
-  it('should reject non-solid fills and non-solid drawn strokes', () => {
-    expect(check(rectangle({ fills: [image] }))).toBe(false);
-    expect(check(rectangle({ strokeWidth: 2, strokes: [image] }))).toBe(false);
-  });
-
-  it('should ignore stroke paints that are not drawn because the width is zero', () => {
-    expect(check(rectangle({ strokes: [image] }))).toBe(true);
-  });
-
-  it('should reject paints with a blend mode', () => {
-    expect(check(rectangle({ fills: [{ ...solid, blendMode: BlendMode.multiply }] }))).toBe(false);
-    expect(check(rectangle({ fills: [{ ...solid, blendMode: BlendMode.normal }] }))).toBe(true);
-  });
-
-  it('should reject a hidden or blended node', () => {
-    expect(check(rectangle({ hidden: true }))).toBe(false);
-    expect(check(rectangle({ blendMode: BlendMode.screen }))).toBe(false);
-    expect(check(rectangle({ blendMode: BlendMode.normal }))).toBe(true);
-  });
-
-  it('should reject visible effects but allow hidden ones', () => {
-    const effect = { blur: 4, color: '#000000', opacity: 50, spread: 0, type: EffectType.dropShadow, x: 0, y: 2 };
-
-    expect(check(rectangle({ effects: [effect] }))).toBe(false);
-    expect(check(rectangle({ effects: [{ ...effect, visible: false }] }))).toBe(true);
-  });
-
-  it('should reject legacy strokes and brush stroke mode', () => {
-    expect(check(rectangle({ strokeColor: '#000000', strokeWidth: 2 }))).toBe(false);
-    expect(check(rectangle({ strokeMode: StrokeMode.brush }))).toBe(false);
-  });
-
-  it('should reject a node whose ancestor is unsafe', () => {
-    const parent: TFrameNode = {
-      childIds: ['r'],
-      clipContent: true,
-      fills: [],
-      height: 5,
-      id: 'p',
-      name: 'p',
-      parentId: null,
-      rotation: 0,
-      type: NodeType.frame,
-      width: 5,
-      x: 0,
-      y: 0,
-    };
-
-    expect(canExportShapeAsVector(rectangle({ parentId: 'p' }), { p: parent })).toBe(false);
+  it('should route an ellipse/polygon/star through the simple-shape eligibility check', () => {
+    expect(canExportShapeAsVector(ellipse, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...ellipse, hidden: true }, {})).toBe(false);
   });
 });

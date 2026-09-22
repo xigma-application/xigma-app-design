@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { PdfLayerType } from '../enums';
-import { TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getPdfLayers } from '../getPdfLayers';
@@ -29,6 +29,19 @@ const rectangle = (id: string): TFrameNode | (TRectangleNode & TSceneNode) => ({
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+});
+
+const ellipse = (id: string): TEllipseNode => ({
+  fill: '#ff0000',
+  height: 10,
+  id,
+  name: id,
+  parentId: null,
+  rotation: 0,
+  type: NodeType.ellipse,
   width: 10,
   x: 0,
   y: 0,
@@ -94,6 +107,21 @@ describe('getPdfLayers', () => {
       { nodeIds: new Set(['f']), type: PdfLayerType.raster },
       { node: rectangle('r'), type: PdfLayerType.vector },
       { nodeIds: new Set(['s']), type: PdfLayerType.raster },
+    ]);
+  });
+
+  it('should turn a vector-eligible ellipse into its own vector layer', () => {
+    // action
+    const layers = getPdfLayers(
+      [rectangle('a'), ellipse('e')],
+      () => true,
+      (node) => node.type === NodeType.ellipse,
+    );
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: PdfLayerType.raster },
+      { node: ellipse('e'), type: PdfLayerType.vector },
     ]);
   });
 

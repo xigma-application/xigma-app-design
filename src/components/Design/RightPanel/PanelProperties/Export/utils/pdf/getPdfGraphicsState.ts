@@ -7,7 +7,7 @@ export const getPdfGraphicsState = (page: PDFPage, opacity: number, cache: Map<n
     const { context } = page.doc;
     const name = PDFName.of(`XigmaOpacity${cache.size}`);
 
-    page.node.setExtGState(name, context.register(context.obj({ CA: opacity, ca: opacity, Type: 'ExtGState' })));
+    page.node.setExtGState(name, context.register(context.obj({ CA: opacity, Type: 'ExtGState', ca: opacity })));
     cache.set(opacity, name);
 
     return name;
