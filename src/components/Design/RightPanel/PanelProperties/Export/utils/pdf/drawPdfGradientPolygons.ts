@@ -6,6 +6,7 @@ import { TGradientPaint } from 'types/design/paint/types';
 
 // utils
 import { getPdfAxialShadingPattern } from './getPdfAxialShadingPattern';
+import { getPdfFunctionBasedShadingPattern } from './getPdfFunctionBasedShadingPattern';
 import { getPdfGraphicsState } from './getPdfGraphicsState';
 import { getPdfPolygonPathOperators } from './drawPdfPolygons';
 import { getPdfGradientGeometry } from './getPdfGradientGeometry';
@@ -16,9 +17,14 @@ const getPdfGradientPatternDict = (page: PDFPage, paint: TGradientPaint, bounds:
   const { context } = page.doc;
   const geometry = getPdfGradientGeometry(paint, bounds);
 
-  return paint.type === 'gradient-linear'
-    ? getPdfAxialShadingPattern(context, paint.stops, geometry)
-    : getPdfRadialShadingPattern(context, paint.stops, geometry, paint.radiusRatio);
+  switch (paint.type) {
+    case 'gradient-linear':
+      return getPdfAxialShadingPattern(context, paint.stops, geometry);
+    case 'gradient-radial':
+      return getPdfRadialShadingPattern(context, paint.stops, geometry, paint.radiusRatio);
+    default:
+      return getPdfFunctionBasedShadingPattern(context, paint.type, paint.stops, geometry, paint.radiusRatio ?? 1, bounds);
+  }
 };
 
 export const drawPdfGradientPolygons = (

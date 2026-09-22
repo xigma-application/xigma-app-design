@@ -78,14 +78,11 @@ describe('canExportBoxShapeAsVector', () => {
     expect(check(rectangle({ strokeMode: StrokeMode.brush }))).toBe(false);
   });
 
-  it('should allow a linear or radial gradient fill with fully opaque stops', () => {
+  it('should allow any gradient type fill with fully opaque stops', () => {
     expect(check(rectangle({ fills: [linearGradient] }))).toBe(true);
     expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-radial' }] }))).toBe(true);
-  });
-
-  it('should reject an angular or diamond gradient fill for now', () => {
-    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(false);
-    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(false);
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(true);
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(true);
   });
 
   it('should reject a gradient fill with any translucent stop', () => {

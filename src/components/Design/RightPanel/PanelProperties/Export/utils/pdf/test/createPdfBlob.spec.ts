@@ -63,6 +63,15 @@ const hasDctDecodeFilter = async (blob: Blob | null): Promise<boolean> => {
   return pdf.context.enumerateIndirectObjects().some(([, object]) => object.toString().includes('DCTDecode'));
 };
 
+const readPdfObjectDictText = async (blob: Blob | null): Promise<string> => {
+  const pdf = await readPdf(blob);
+
+  return pdf.context
+    .enumerateIndirectObjects()
+    .map(([, object]) => object.toString())
+    .join('\n');
+};
+
 const readPdf = async (blob: Blob | null): Promise<PDFDocument> => {
   const bytes = await new Promise<ArrayBuffer>((resolve) => {
     const reader = new FileReader();
@@ -389,5 +398,94 @@ describe('createPdfBlob', () => {
     // result
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(text).toContain('f*');
+  });
+
+  it('should draw a linear gradient fill as a real axial shading pattern without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 40, y: 0 },
+                opacity: 100,
+                start: { x: 0, y: 0 },
+                stops: [
+                  { color: '#ff0000', opacity: 100, position: 0 },
+                  { color: '#0000ff', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+            height: 30,
+            id: 'pdf-linear',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-linear'],
+      }),
+    );
+
+    // action
+    const blob = await createPdfBlob('pdf-linear', 2, true, ExportImageResampling.basic, JPEG_QUALITY);
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(await readPdfContent(blob)).toContain('/Pattern cs');
+    expect(await readPdfObjectDictText(blob)).toContain('ShadingType 2');
+  });
+
+  it('should draw an angular gradient fill as a real function-based shading pattern without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 20, y: 0 },
+                opacity: 100,
+                start: { x: 20, y: 15 },
+                stops: [
+                  { color: '#ff0000', opacity: 100, position: 0 },
+                  { color: '#0000ff', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-angular',
+              },
+            ],
+            height: 30,
+            id: 'pdf-angular',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-angular'],
+      }),
+    );
+
+    // action
+    const blob = await createPdfBlob('pdf-angular', 2, true, ExportImageResampling.basic, JPEG_QUALITY);
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(await readPdfContent(blob)).toContain('/Pattern cs');
+
+    const objectDictText = await readPdfObjectDictText(blob);
+
+    expect(objectDictText).toContain('ShadingType 1');
+    expect(objectDictText).toContain('FunctionType 4');
+    expect(await readPdfContent(blob)).toContain('atan');
   });
 });

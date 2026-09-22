@@ -8,6 +8,7 @@ import { drawPdfGradientPolygons } from '../drawPdfGradientPolygons';
 
 const getPdfAxialShadingPatternMock = vi.fn();
 const getPdfRadialShadingPatternMock = vi.fn();
+const getPdfFunctionBasedShadingPatternMock = vi.fn();
 const registerPdfPatternMock = vi.fn();
 
 vi.mock('../getPdfAxialShadingPattern', () => ({
@@ -15,6 +16,9 @@ vi.mock('../getPdfAxialShadingPattern', () => ({
 }));
 vi.mock('../getPdfRadialShadingPattern', () => ({
   getPdfRadialShadingPattern: (...args: unknown[]): unknown => getPdfRadialShadingPatternMock(...args),
+}));
+vi.mock('../getPdfFunctionBasedShadingPattern', () => ({
+  getPdfFunctionBasedShadingPattern: (...args: unknown[]): unknown => getPdfFunctionBasedShadingPatternMock(...args),
 }));
 vi.mock('../registerPdfPattern', () => ({ registerPdfPattern: (...args: unknown[]): unknown => registerPdfPatternMock(...args) }));
 
@@ -43,6 +47,7 @@ describe('drawPdfGradientPolygons', () => {
   beforeEach(() => {
     getPdfAxialShadingPatternMock.mockReset();
     getPdfRadialShadingPatternMock.mockReset();
+    getPdfFunctionBasedShadingPatternMock.mockReset();
     registerPdfPatternMock.mockReset();
     registerPdfPatternMock.mockReturnValue(PDFName.of('XigmaPattern0'));
   });
@@ -92,5 +97,49 @@ describe('drawPdfGradientPolygons', () => {
     // result
     expect(getPdfRadialShadingPatternMock).toHaveBeenCalledWith(context, linearPaint.stops, expect.any(Object), 0.5);
     expect(getPdfAxialShadingPatternMock).not.toHaveBeenCalled();
+  });
+
+  it('should build a function-based pattern for an angular or diamond gradient', () => {
+    // mock
+    getPdfFunctionBasedShadingPatternMock.mockReturnValue({ PatternType: 2 });
+
+    const context = { obj: (value: unknown): unknown => value, register: (): string => 'ref' };
+    const page = { doc: { context }, node: { setExtGState: vi.fn() }, pushOperators: vi.fn() } as never;
+
+    // action
+    drawPdfGradientPolygons(page, { ...linearPaint, radiusRatio: 0.5, type: 'gradient-angular' }, polygons, 1, bounds, states);
+
+    // result
+    expect(getPdfFunctionBasedShadingPatternMock).toHaveBeenCalledWith(
+      context,
+      'gradient-angular',
+      linearPaint.stops,
+      expect.any(Object),
+      0.5,
+      bounds,
+    );
+    expect(getPdfAxialShadingPatternMock).not.toHaveBeenCalled();
+    expect(getPdfRadialShadingPatternMock).not.toHaveBeenCalled();
+  });
+
+  it('should default the radius ratio to 1 for an angular/diamond gradient when it is not set', () => {
+    // mock
+    getPdfFunctionBasedShadingPatternMock.mockReturnValue({ PatternType: 2 });
+
+    const context = { obj: (value: unknown): unknown => value, register: (): string => 'ref' };
+    const page = { doc: { context }, node: { setExtGState: vi.fn() }, pushOperators: vi.fn() } as never;
+
+    // action
+    drawPdfGradientPolygons(page, { ...linearPaint, type: 'gradient-diamond' }, polygons, 1, bounds, states);
+
+    // result
+    expect(getPdfFunctionBasedShadingPatternMock).toHaveBeenCalledWith(
+      context,
+      'gradient-diamond',
+      linearPaint.stops,
+      expect.any(Object),
+      1,
+      bounds,
+    );
   });
 });

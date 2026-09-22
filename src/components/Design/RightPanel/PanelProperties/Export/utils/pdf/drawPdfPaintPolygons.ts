@@ -10,8 +10,10 @@ import { drawPdfPolygons } from './drawPdfPolygons';
 import { getFillsInPaintOrder } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getFillsInPaintOrder';
 import { getScaledFillPaints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getScaledFillPaints';
 
+const PLAIN_PAINT_TYPES: TPaint['type'][] = ['solid', 'gradient-linear', 'gradient-radial', 'gradient-angular', 'gradient-diamond'];
+
 const isVisiblePlainPaint = (paint: TPaint): paint is TSolidPaint | TGradientPaint =>
-  paint.visible !== false && (paint.type === 'solid' || paint.type === 'gradient-linear' || paint.type === 'gradient-radial');
+  paint.visible !== false && PLAIN_PAINT_TYPES.includes(paint.type);
 
 export const drawPdfPaintPolygons = (
   page: PDFPage,

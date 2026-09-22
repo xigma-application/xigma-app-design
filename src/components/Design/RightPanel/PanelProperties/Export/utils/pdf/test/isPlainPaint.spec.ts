@@ -36,14 +36,11 @@ describe('isPlainPaint', () => {
     expect(isPlainPaint({ ...solid, blendMode: BlendMode.multiply })).toBe(false);
   });
 
-  it('should allow a linear or radial gradient paint with a normal blend mode', () => {
+  it('should allow any gradient type with a normal blend mode', () => {
     expect(isPlainPaint(linearGradient)).toBe(true);
     expect(isPlainPaint({ ...linearGradient, type: 'gradient-radial' })).toBe(true);
+    expect(isPlainPaint({ ...linearGradient, type: 'gradient-angular' })).toBe(true);
+    expect(isPlainPaint({ ...linearGradient, type: 'gradient-diamond' })).toBe(true);
     expect(isPlainPaint({ ...linearGradient, blendMode: BlendMode.multiply })).toBe(false);
-  });
-
-  it('should reject an angular or diamond gradient paint for now', () => {
-    expect(isPlainPaint({ ...linearGradient, type: 'gradient-angular' })).toBe(false);
-    expect(isPlainPaint({ ...linearGradient, type: 'gradient-diamond' })).toBe(false);
   });
 });
