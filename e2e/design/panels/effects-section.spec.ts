@@ -1056,6 +1056,58 @@ test.describe('Design panels — Effects section', () => {
     await expect.poll(async () => Math.abs(await readDarkening())).toBeLessThan(6);
   });
 
+  test('a drop shadow on a rectangle nested inside a clipping frame still shows the rectangle itself, not just its shadow', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-drop-shadow-frame-child-canvas');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(700, 200, 1000, 400);
+    await designPage.drawRectangle(1200, 200, 1300, 280);
+
+    const { childId } = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { moveNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId, childId] = pages[activePageId].rootOrder;
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(
+        updateNode({
+          changes: { fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }], height: 80, width: 100, x: 800, y: 280 },
+          id: childId,
+        }),
+      );
+      store.dispatch(setSelection([childId]));
+
+      return { childId };
+    });
+    await page.mouse.move(1750, 900);
+
+    const clip = { height: 200, width: 300, x: 700, y: 180 };
+    const readGreenness = async (x: number, y: number): Promise<number> => {
+      const { PNG } = await import('pngjs');
+      const png = PNG.sync.read(await page.screenshot({ clip }));
+      const index = ((y - clip.y) * png.width + (x - clip.x)) * 4;
+
+      return png.data[index + 1] - png.data[index];
+    };
+
+    // result — before the effect, the child's own green fill is visible inside the frame
+    await expect.poll(async () => readGreenness(850, 320)).toBeGreaterThan(50);
+
+    // action
+    await addEffect(page, 'Drop shadow');
+
+    // result — the effect landed on the child, not the frame
+    expect((await readNode(page, childId)).effects?.[0].type).toBe('dropShadow');
+
+    // result — the rectangle's own green fill is still visible, not overwritten/hidden by the clip-mask composite
+    await expect.poll(async () => readGreenness(850, 320)).toBeGreaterThan(50);
+  });
+
   test('effects can be hidden and deleted, and dragging a row past another reorders them with a drop indicator', async ({ page }) => {
     const designPage = new DesignPage(page);
 

@@ -150,4 +150,49 @@ describe('drawBoxInnerShadow', () => {
     // result — every target is disposed
     expect(disposeTargetMock).toHaveBeenCalledTimes(3);
   });
+
+  it('should restore the framebuffer that was bound before creating the offscreen targets, not whatever they left bound', () => {
+    // mock — a stateful gl that tracks its own current binding, and a createTarget that (like the
+    // real one) unbinds to the default framebuffer as its own cleanup side effect
+    let currentFramebuffer: unknown = { tag: 'content-target' };
+    const gl = createGlMock();
+
+    (gl.bindFramebuffer as ReturnType<typeof vi.fn>).mockImplementation((_target: number, framebuffer: unknown) => {
+      currentFramebuffer = framebuffer;
+    });
+    (gl.getParameter as ReturnType<typeof vi.fn>).mockImplementation((param: number) => {
+      if (param === gl.FRAMEBUFFER_BINDING) {
+        return currentFramebuffer;
+      }
+
+      if (param === gl.VIEWPORT) {
+        return new Int32Array([1, 2, 300, 200]);
+      }
+
+      return `blend-${param}`;
+    });
+    createTargetMock.mockImplementation((_gl: unknown, width: number, height: number) => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+      return { framebuffer: { height, tag: 'fb', width }, height, stencil: {}, texture: { height, tag: 'tex', width }, width };
+    });
+
+    const imageContext = { buffer: {}, isAlphaWriteEnabled: false, program: {} } as unknown as TImageRenderContext;
+    const context: TDrawSceneContext = {
+      buffer: { tag: 'plain-buffer' } as unknown as WebGLBuffer,
+      canvasHeight: 800,
+      canvasWidth: 1200,
+      gl,
+      imageContext,
+      program: { tag: 'plain-program' } as unknown as WebGLProgram,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    };
+
+    // action — a frame's clipped-content target is bound (like renderClippedFrame does) before drawing the child's shadow
+    gl.bindFramebuffer(gl.FRAMEBUFFER, { tag: 'content-target' });
+    drawBoxInnerShadow(context, node, createEffect(EffectType.innerShadow), 1);
+
+    // result — restores the content target, not null (the real canvas)
+    expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, { tag: 'content-target' });
+  });
 });

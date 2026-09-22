@@ -126,4 +126,32 @@ describe('drawBoxDropShadow', () => {
     // result
     expect(drawEffectShapeFanMock).not.toHaveBeenCalled();
   });
+
+  it('should restore the framebuffer that was bound before creating the offscreen targets, not whatever they left bound', () => {
+    // mock — a stateful gl that tracks its own current binding, and a createTarget that (like the
+    // real one) unbinds to the default framebuffer as its own cleanup side effect
+    let currentFramebuffer: unknown = { tag: 'content-target' };
+    const gl = createGlMock();
+
+    (gl.bindFramebuffer as ReturnType<typeof vi.fn>).mockImplementation((_target: number, framebuffer: unknown) => {
+      currentFramebuffer = framebuffer;
+    });
+    (gl.getParameter as ReturnType<typeof vi.fn>).mockImplementation((param: number) =>
+      param === gl.FRAMEBUFFER_BINDING ? currentFramebuffer : new Int32Array([1, 2, 300, 200]),
+    );
+    createTargetMock.mockImplementation((_gl: unknown, width: number, height: number) => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+      return { framebuffer: { tag: 'fb' }, height, texture: { tag: 'tex' }, width };
+    });
+
+    const context = { buffer: {}, gl, imageContext: { isAlphaWriteEnabled: false }, program: {} } as unknown as TDrawSceneContext;
+
+    // action — a frame's clipped-content target is bound (like renderClippedFrame does) before drawing the child's shadow
+    gl.bindFramebuffer(gl.FRAMEBUFFER, { tag: 'content-target' });
+    drawBoxDropShadow(context, node, createEffect(EffectType.dropShadow), 1);
+
+    // result — restores the content target, not null (the real canvas)
+    expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, { tag: 'content-target' });
+  });
 });

@@ -33,9 +33,6 @@ export const drawBoxInnerShadow = (
   const holeRect = getEffectHoleRect(node, effect, margin);
   const radius = getEffectBlurRadius(effect.blur);
   const color = hexToRgbFloat(effect.color);
-  const shadowTarget = createTarget(gl, size.width, size.height);
-  const tempTarget = createTarget(gl, size.width, size.height);
-  const maskTarget = createTarget(gl, size.width, size.height);
   const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const previousViewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
   const previousAlphaWriteEnabled = imageContext.isAlphaWriteEnabled;
@@ -45,6 +42,9 @@ export const drawBoxInnerShadow = (
     gl.getParameter(gl.BLEND_SRC_ALPHA),
     gl.getParameter(gl.BLEND_DST_ALPHA),
   ] as [number, number, number, number];
+  const shadowTarget = createTarget(gl, size.width, size.height);
+  const tempTarget = createTarget(gl, size.width, size.height);
+  const maskTarget = createTarget(gl, size.width, size.height);
 
   setAlphaWriteEnabled(gl, imageContext, true);
 

@@ -28,8 +28,6 @@ export const drawBoxDropShadow = (
   const size = getBoxEffectTargetSize(node, margin);
   const shadowRect = getDropShadowRect(node, effect, margin);
   const color = hexToRgbFloat(effect.color);
-  const shadowTarget = createTarget(gl, size.width, size.height);
-  const tempTarget = createTarget(gl, size.width, size.height);
   const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const previousViewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
   const previousAlphaWriteEnabled = imageContext.isAlphaWriteEnabled;
@@ -39,6 +37,8 @@ export const drawBoxDropShadow = (
     gl.getParameter(gl.BLEND_SRC_ALPHA),
     gl.getParameter(gl.BLEND_DST_ALPHA),
   ] as [number, number, number, number];
+  const shadowTarget = createTarget(gl, size.width, size.height);
+  const tempTarget = createTarget(gl, size.width, size.height);
 
   setAlphaWriteEnabled(gl, imageContext, true);
 
