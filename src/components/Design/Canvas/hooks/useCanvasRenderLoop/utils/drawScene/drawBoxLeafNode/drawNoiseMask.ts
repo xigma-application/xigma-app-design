@@ -46,9 +46,9 @@ const drawMaskShapes = (context: TDrawSceneContext, node: TFrameNode | TRectangl
 
 export const drawNoiseMask = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode): TRenderTarget => {
   const { gl, imageContext } = context;
-  const mask = imageContext.renderTargetPool.acquire();
   const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const previousViewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
+  const mask = imageContext.renderTargetPool.acquire();
   const previousBlendFunc = [
     gl.getParameter(gl.BLEND_SRC_RGB),
     gl.getParameter(gl.BLEND_DST_RGB),

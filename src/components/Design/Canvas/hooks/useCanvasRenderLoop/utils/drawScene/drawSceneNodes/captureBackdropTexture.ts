@@ -17,8 +17,10 @@ const copyFramebufferToBoundTexture = (context: TDrawSceneContext, gl: WebGL2Ren
 
 export const captureBackdropTexture = (renderer: TMaskRenderer, rect: TScissorRect | null = null): TRenderTarget => {
   const { context, gl, pool } = renderer;
+  const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const backdrop = pool.acquire();
 
+  gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer);
   gl.bindTexture(gl.TEXTURE_2D, backdrop.texture);
   copyFramebufferToBoundTexture(context, gl, rect);
   gl.bindTexture(gl.TEXTURE_2D, null);

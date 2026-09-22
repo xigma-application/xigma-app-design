@@ -32,6 +32,7 @@ export const renderFreshGlass = (
   const mask = pool.acquire();
   const frostRadius = getLayerBlurRadius(renderer, (getEffectGlass(effect).frost / 100) * EFFECT_BLUR_MAX_PX);
 
+  bindTarget(renderer, target);
   renderFreshGlassWarp(renderer, node, effect, rect, frostRadius, warped, sharedBackdrop);
   renderIntoTarget(
     renderer,
