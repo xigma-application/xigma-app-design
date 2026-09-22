@@ -51,8 +51,22 @@ describe('renderNodeAtScale', () => {
     const result = renderNodeAtScale(context, 'r1', [], nodesById, refs, 2, boundsOverride);
 
     // result
-    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'r1', nodesById, 2, boundsOverride, expect.any(Function));
+    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'r1', nodesById, 2, boundsOverride, expect.any(Function), undefined);
     expect(result).toBe(pixels);
+  });
+
+  it('should forward an explicit backgroundColor through to renderExportTarget (whole-page export needs it to seed the page background)', () => {
+    // mock
+    const boundsOverride = { height: 5, width: 5, x: 0, y: 0 };
+    const backgroundColor = [0.2, 0.2, 0.2, 1] as const;
+
+    renderExportTargetMock.mockReturnValue(null);
+
+    // before — sourceNodeId is null, matching a whole-page export with no single root node
+    renderNodeAtScale(context, null, [], {}, refs, 2, boundsOverride, backgroundColor);
+
+    // result
+    expect(renderExportTargetMock).toHaveBeenCalledWith(context, null, {}, 2, boundsOverride, expect.any(Function), backgroundColor);
   });
 
   it('should draw exactly the given node list, flatly, via the shared leaf drawer', () => {

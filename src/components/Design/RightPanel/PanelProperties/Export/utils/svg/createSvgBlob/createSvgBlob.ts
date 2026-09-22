@@ -1,5 +1,5 @@
 // store
-import { selectNodes, selectRootOrder } from 'store/design/selectors';
+import { selectBackgroundPaint, selectNodes, selectRootOrder } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -15,14 +15,41 @@ import { canExportTextAsOutline } from '../../canExportTextAsOutline';
 import { canExportTextAsSvgRealText } from '../canExportTextAsSvgRealText';
 import { canExportTextOnPathAsVectorCurves } from '../../canExportTextOnPathAsVectorCurves';
 import { drawSvgLayer } from './drawSvgLayer';
+import { drawSvgPageBackground } from '../drawSvgPageBackground';
 import { getExportRenderNodes } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getExportRenderNodes';
+import { getRenderOrderedNodes } from 'store/design/utils/getRenderOrderedNodes';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 import { getSvgBlobMarkup } from './getSvgBlobMarkup';
 import { getSvgLayers } from '../getSvgLayers';
 import { updateSvgAncestorGroupStack } from '../updateSvgAncestorGroupStack';
 
+type TSvgExportSource = { bounds: TDraftRect; nodes: TSceneNode[] };
+
+const getSvgExportSource = (
+  nodeId: string | null,
+  nodesById: Record<string, TSceneNode>,
+  rootOrder: string[],
+  ignoreOverlappingLayers: boolean,
+  boundsOverride: TDraftRect | undefined,
+): TSvgExportSource | null => {
+  if (nodeId === null) {
+    return boundsOverride
+      ? { bounds: boundsOverride, nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden) }
+      : null;
+  }
+
+  const node = nodesById[nodeId];
+
+  return node
+    ? {
+        bounds: boundsOverride ?? getRotatedNodeBounds(node),
+        nodes: getExportRenderNodes(nodeId, nodesById, rootOrder, ignoreOverlappingLayers),
+      }
+    : null;
+};
+
 export const createSvgBlob = async (
-  nodeId: string,
+  nodeId: string | null,
   rasterScale: number,
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
@@ -33,11 +60,10 @@ export const createSvgBlob = async (
 ): Promise<Blob | null> => {
   const state = store.getState();
   const nodesById: Record<string, TSceneNode> = selectNodes(state);
-  const node = nodesById[nodeId];
+  const source = getSvgExportSource(nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers, boundsOverride);
 
-  if (node) {
-    const bounds = boundsOverride ?? getRotatedNodeBounds(node);
-    const nodes = getExportRenderNodes(nodeId, nodesById, selectRootOrder(state), ignoreOverlappingLayers);
+  if (source) {
+    const { bounds, nodes } = source;
     const layers = getSvgLayers(
       nodes,
       (textNode: TTextNode) => !outlineText && canExportTextAsSvgRealText(textNode, nodesById),
@@ -60,6 +86,10 @@ export const createSvgBlob = async (
     const defs: string[] = [];
     const usedIds = new Map<string, number>();
     let openGroups: TSvgAncestorGroup[] = [];
+
+    if (nodeId === null) {
+      drawSvgPageBackground(elements, bounds, selectBackgroundPaint(state));
+    }
 
     for (const layer of layers) {
       openGroups = await drawSvgLayer(elements, defs, layer, context, openGroups, usedIds);

@@ -14,7 +14,7 @@ import { getColorProfileTarget } from './getColorProfileTarget';
 import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegistry';
 
 export const createExportFile = async (
-  nodeId: string,
+  nodeId: string | null,
   format: ExportFormat,
   scale: number,
   fileName: string,

@@ -1,15 +1,14 @@
 import { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 // types
-import { TExportSetting } from '../../types';
-import { TSceneNode } from 'types/design/types';
+import { TExportSetting, TExportTarget } from '../../types';
 
 export type TUseExportSectionResult = {
   containerRef: RefObject<HTMLDivElement | null>;
   dropIndicatorOffset: number | null;
+  exportTarget: TExportTarget;
   isRowDragging: (index: number) => boolean;
   isRowSelected: (index: number) => boolean;
-  node: TSceneNode | undefined;
   onAdd: TFunc;
   onChange: (index: number, next: TExportSetting) => void;
   onRemove: (index: number) => void;

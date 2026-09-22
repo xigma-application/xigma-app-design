@@ -15,3 +15,5 @@ export type TExportSetting = {
 };
 
 export type TExportFile = { blob: Blob; fileName: string };
+
+export type TExportTarget = { id: string | null; name: string };

@@ -26,9 +26,9 @@ const Export: FC = () => {
   const {
     containerRef,
     dropIndicatorOffset,
+    exportTarget,
     isRowDragging,
     isRowSelected,
-    node,
     onAdd,
     onChange,
     onRemove,
@@ -38,7 +38,7 @@ const Export: FC = () => {
     settings,
   } = useExportSection();
   const isExporting = useAppSelector(selectIsExporting);
-  const handleExportClick = useHandleExportClick(node, settings);
+  const handleExportClick = useHandleExportClick(exportTarget, settings);
 
   return (
     <UITools.Section
@@ -67,7 +67,7 @@ const Export: FC = () => {
           />
         ))}
       </div>
-      {settings.length > 0 && node && (
+      {settings.length > 0 && (
         <div className={styles.Export__footer}>
           <UITools.Button
             className={styles.Export__exportButton}
@@ -76,9 +76,9 @@ const Export: FC = () => {
             onClick={handleExportClick}
             variant="outline"
           >
-            {t(`${translationNameSpace}.exportButton`, { name: node.name })}
+            {t(`${translationNameSpace}.exportButton`, { name: exportTarget.name })}
           </UITools.Button>
-          <ExportPreview nodeId={node.id} />
+          <ExportPreview nodeId={exportTarget.id} />
         </div>
       )}
     </UITools.Section>

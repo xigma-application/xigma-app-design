@@ -10,15 +10,24 @@ import { renderExportTarget, TRenderedNodePixels } from './renderExportTarget';
 
 export const renderNodeAtScale = (
   context: TDrawSceneContext,
-  sourceNodeId: string,
+  sourceNodeId: string | null,
   nodesToDraw: TSceneNode[],
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
   scale: number,
   boundsOverride?: TDraftRect,
+  backgroundColor?: readonly [number, number, number, number],
 ): TRenderedNodePixels | null =>
-  renderExportTarget(context, sourceNodeId, nodesById, scale, boundsOverride, (renderContext) => {
-    nodesToDraw.forEach((node) => {
-      drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0);
-    });
-  });
+  renderExportTarget(
+    context,
+    sourceNodeId,
+    nodesById,
+    scale,
+    boundsOverride,
+    (renderContext) => {
+      nodesToDraw.forEach((node) => {
+        drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0);
+      });
+    },
+    backgroundColor,
+  );

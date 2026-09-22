@@ -15,7 +15,7 @@ export const registerExportRenderer = (renderer: TExportRenderer): TFunc => {
 };
 
 export const renderNodeForExport = async (
-  nodeId: string,
+  nodeId: string | null,
   scale: number,
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,

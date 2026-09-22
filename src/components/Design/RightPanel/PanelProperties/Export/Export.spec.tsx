@@ -443,14 +443,16 @@ describe('Export behaviors', () => {
     expect(screen.queryByPlaceholderText('None')).toBeNull();
   });
 
-  it('should not show the export button or preview without a selected node', () => {
+  it('should show the export button and preview for the whole page, named after it, when nothing is selected', () => {
     // before
     renderExport();
     addRow();
 
-    // result
-    expect(screen.queryByText(/^Export /)).toBeNull();
-    expect(screen.queryByText('Preview')).toBeNull();
+    // result — whole-page export, so the button is named after the active page instead of any node
+    const pageName = selectActivePage(store.getState()).name;
+
+    expect(screen.getByRole('button', { name: `Export ${pageName}` })).toBeInTheDocument();
+    expect(screen.getByText('Preview')).toBeInTheDocument();
   });
 
   it('should not show the export button or preview without any rows', () => {

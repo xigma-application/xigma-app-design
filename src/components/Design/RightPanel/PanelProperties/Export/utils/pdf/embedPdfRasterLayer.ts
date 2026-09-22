@@ -12,7 +12,7 @@ import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegis
 export const embedPdfRasterLayer = async (
   pdfDocument: PDFDocument,
   page: PDFPage,
-  nodeId: string,
+  nodeId: string | null,
   rasterScale: number,
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
@@ -21,7 +21,7 @@ export const embedPdfRasterLayer = async (
   useJpeg: boolean,
   jpegQuality: number,
 ): Promise<void> => {
-  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, new Set(contextIds));
+  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, new Set(contextIds), bounds);
   const blob = rendered
     ? useJpeg
       ? await createImageBlobFromPixels(

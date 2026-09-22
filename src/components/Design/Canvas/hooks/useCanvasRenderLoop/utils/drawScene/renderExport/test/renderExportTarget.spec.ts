@@ -184,6 +184,80 @@ describe('renderExportTarget', () => {
     expect(result?.pixels).toHaveLength(200 * 100 * 4);
   });
 
+  it('should return null when sourceNodeId is null (whole-page export) and no bounds override was given', () => {
+    // mock — a null sourceNodeId means there is no single node to fall back to for bounds, so a
+    // whole-page export with no computed union bounds cannot proceed
+    const context = { gl: createGlMock(), imageContext: {} } as unknown as TDrawSceneContext;
+    const draw = vi.fn();
+
+    // before
+    const result = renderExportTarget(context, null, {}, 2, undefined, draw);
+
+    // result
+    expect(result).toBeNull();
+    expect(createTargetMock).not.toHaveBeenCalled();
+    expect(draw).not.toHaveBeenCalled();
+  });
+
+  it('should render at the given bounds override with a null sourceNodeId, without looking up any node', () => {
+    // mock
+    const gl = createGlMock();
+    const target = { framebuffer: { tag: 'export-fbo' }, height: 10, texture: {}, width: 10 } as unknown as TRenderTarget;
+
+    createTargetMock.mockReturnValue(target);
+
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const boundsOverride = { height: 10, width: 10, x: 20, y: 20 };
+    const draw = vi.fn();
+
+    // before — nodesById is empty; nothing is ever looked up in it when sourceNodeId is null
+    const result = renderExportTarget(context, null, {}, 1, boundsOverride, draw);
+
+    // result
+    expect(createTargetMock).toHaveBeenCalledWith(gl, 10, 10);
+    expect(result).toEqual({ height: 10, pixels: expect.any(Uint8Array), width: 10 });
+
+    const [drawnContext] = draw.mock.calls[0] as [TDrawSceneContext];
+
+    expect(drawnContext.viewport).toEqual({ x: -20, y: -20, zoom: 1 });
+  });
+
+  it('should clear the target to the given backgroundColor instead of transparent when one is provided', () => {
+    // mock — a whole-page export seeds the page's own background color instead of starting transparent
+    const gl = createGlMock();
+    const target = { framebuffer: { tag: 'export-fbo' }, height: 10, texture: {}, width: 10 } as unknown as TRenderTarget;
+
+    createTargetMock.mockReturnValue(target);
+
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const boundsOverride = { height: 10, width: 10, x: 0, y: 0 };
+    const draw = vi.fn();
+
+    // before
+    renderExportTarget(context, null, {}, 1, boundsOverride, draw, [0.2, 0.4, 0.6, 1]);
+
+    // result
+    expect(gl.clearColor).toHaveBeenCalledWith(0.2, 0.4, 0.6, 1);
+  });
+
+  it('should clear the target to fully transparent when no backgroundColor is given', () => {
+    // mock
+    const gl = createGlMock();
+    const target = { framebuffer: { tag: 'export-fbo' }, height: 10, texture: {}, width: 10 } as unknown as TRenderTarget;
+
+    createTargetMock.mockReturnValue(target);
+
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const nodesById = { f1: rect('f1', { height: 10, width: 10, x: 0, y: 0 }) };
+    const draw = vi.fn();
+
+    // before
+    renderExportTarget(context, 'f1', nodesById, 1, undefined, draw);
+
+    // result
+    expect(gl.clearColor).toHaveBeenCalledWith(0, 0, 0, 0);
+  });
+
   it('should use an explicit bounds override instead of the source node own declared bounds when given one', () => {
     // mock
     const gl = createGlMock();

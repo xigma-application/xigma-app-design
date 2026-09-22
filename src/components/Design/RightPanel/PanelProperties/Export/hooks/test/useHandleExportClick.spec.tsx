@@ -13,8 +13,7 @@ import { selectIsExporting } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
-import { TSceneNode } from 'types/design/types';
+import { TExportTarget } from '../../types';
 
 const exportNodeMock = vi.fn();
 
@@ -22,33 +21,25 @@ vi.mock('../../utils/exportNode', () => ({ exportNode: (...args: unknown[]): unk
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
-const node = {
-  fills: [],
-  height: 20,
-  id: 'r1',
-  name: 'Rectangle',
-  parentId: null,
-  rotation: 0,
-  type: NodeType.rectangle,
-  width: 20,
-  x: 0,
-  y: 0,
-} as TSceneNode;
+const exportTarget: TExportTarget = { id: 'r1', name: 'Rectangle' };
 
 describe('useHandleExportClick', () => {
   beforeEach(() => {
     exportNodeMock.mockReset();
   });
 
-  it('should do nothing when there is no selected node', async () => {
+  it('should export the whole page (id null) when there is no selected node', async () => {
+    // mock
+    const pageTarget: TExportTarget = { id: null, name: 'Page 1' };
+
     // before
-    const { result } = renderHook(() => useHandleExportClick(undefined, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick(pageTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
 
     // action
     await act(() => result.current());
 
     // result
-    expect(exportNodeMock).not.toHaveBeenCalled();
+    expect(exportNodeMock).toHaveBeenCalledWith(null, 'Page 1', [DEFAULT_EXPORT_SETTING]);
   });
 
   it('should mark exporting while the export runs, then clear it once done', async () => {
@@ -60,7 +51,7 @@ describe('useHandleExportClick', () => {
 
     exportNodeMock.mockReturnValue(exportPromise);
 
-    const { result } = renderHook(() => useHandleExportClick(node, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick(exportTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
 
     // action
     let clickPromise: Promise<void> = Promise.resolve();
@@ -87,7 +78,7 @@ describe('useHandleExportClick', () => {
     // mock
     exportNodeMock.mockRejectedValue(new Error('boom'));
 
-    const { result } = renderHook(() => useHandleExportClick(node, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick(exportTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
 
     // action
     await act(async () => {

@@ -11,7 +11,7 @@ import { renderNodeForExport } from 'utils/canvas/exportRender/exportRenderRegis
 
 export const embedSvgRasterLayer = async (
   elements: string[],
-  nodeId: string,
+  nodeId: string | null,
   rasterScale: number,
   ignoreOverlappingLayers: boolean,
   imageResampling: ExportImageResampling,
@@ -20,7 +20,7 @@ export const embedSvgRasterLayer = async (
   useJpeg: boolean,
   jpegQuality: number,
 ): Promise<void> => {
-  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, new Set(contextIds));
+  const rendered = await renderNodeForExport(nodeId, rasterScale, ignoreOverlappingLayers, imageResampling, new Set(contextIds), bounds);
   const blob = rendered
     ? useJpeg
       ? await createImageBlobFromPixels(

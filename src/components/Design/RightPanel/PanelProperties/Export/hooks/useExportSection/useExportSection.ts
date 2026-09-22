@@ -5,11 +5,11 @@ import { useClearFillSelectionOnOutsideClick } from '../../../Common/FillSection
 import { useItemsReorderDrag } from '../../../Common/FillSection/hooks/useFillSection/hooks/useItemsReorderDrag/useItemsReorderDrag';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectActivePage, selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
-import { TExportSetting } from '../../types';
+import { TExportSetting, TExportTarget } from '../../types';
 import { TUseExportSectionResult } from './types';
 
 // utils
@@ -18,7 +18,9 @@ import { resolveFillDragIndices } from '../../../Common/FillSection/hooks/useFil
 
 export const useExportSection = (): TUseExportSectionResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
+  const activePage = useAppSelector(selectActivePage);
   const node = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
+  const exportTarget: TExportTarget = { id: node?.id ?? null, name: node?.name ?? activePage.name };
   const [settings, setSettings] = useState<TExportSetting[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -28,14 +30,14 @@ export const useExportSection = (): TUseExportSectionResult => {
 
   useEffect(() => {
     setSettings([]);
-  }, [node?.id]);
+  }, [exportTarget.id]);
 
   return {
     containerRef,
     dropIndicatorOffset: dragState?.hasMoved ? dragState.dropOffset : null,
+    exportTarget,
     isRowDragging: (index): boolean => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index): boolean => selectedIndices.includes(index),
-    node,
     onAdd: (): void => setSettings((previous) => [...previous, createExportSetting()]),
     onChange: (index, next): void => setSettings((previous) => previous.map((setting, i) => (i === index ? next : setting))),
     onRemove: (index): void => setSettings((previous) => previous.filter((_, i) => i !== index)),

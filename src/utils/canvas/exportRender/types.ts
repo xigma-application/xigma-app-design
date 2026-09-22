@@ -8,13 +8,13 @@ export type TExportRenderRequest = {
   includeNodeIds?: ReadonlySet<string>;
   ignoreOverlappingLayers: boolean;
   imageFilterQuality: TImageFilterQuality;
-  nodeId: string;
+  nodeId: string | null;
   onResolve: TFunc<[TExportRenderedPixels | null]>;
   scale: number;
 };
 
 export type TExportRenderer = (
-  nodeId: string,
+  nodeId: string | null,
   scale: number,
   ignoreOverlappingLayers: boolean,
   imageFilterQuality: TImageFilterQuality,

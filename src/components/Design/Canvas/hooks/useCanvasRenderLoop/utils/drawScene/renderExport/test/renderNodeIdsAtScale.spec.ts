@@ -67,8 +67,31 @@ describe('renderNodeIdsAtScale', () => {
     const result = renderNodeIdsAtScale(context, 'f1', ['r1'], nodesById, refs, 2, boundsOverride);
 
     // result
-    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'f1', nodesById, 2, boundsOverride, expect.any(Function));
+    expect(renderExportTargetMock).toHaveBeenCalledWith(context, 'f1', nodesById, 2, boundsOverride, expect.any(Function), undefined);
     expect(result).toBe(pixels);
+  });
+
+  it('should forward an explicit backgroundColor through to renderExportTarget (whole-page export needs it to seed the page background)', () => {
+    // mock
+    const nodesById = { r1: rect('r1') };
+    const boundsOverride = { height: 5, width: 5, x: 0, y: 0 };
+    const backgroundColor = [0.2, 0.2, 0.2, 1] as const;
+
+    renderExportTargetMock.mockReturnValue(null);
+
+    // before — sourceNodeId is null, matching a whole-page export with no single root node
+    renderNodeIdsAtScale(context, null, ['r1'], nodesById, refs, 2, boundsOverride, backgroundColor);
+
+    // result
+    expect(renderExportTargetMock).toHaveBeenCalledWith(
+      context,
+      null,
+      nodesById,
+      2,
+      boundsOverride,
+      expect.any(Function),
+      backgroundColor,
+    );
   });
 
   it('should render only the top-level ids within the given set (filtering out any id whose ancestor is also in the set), through the real per-node effect dispatch', () => {

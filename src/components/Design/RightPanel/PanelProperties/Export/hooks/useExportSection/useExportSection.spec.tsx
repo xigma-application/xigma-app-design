@@ -42,12 +42,12 @@ const addFrameNode = (): string => {
 };
 
 describe('useExportSection', () => {
-  it('should have no node and no settings without a single selected node', () => {
+  it('should fall back to the whole page (id null, page name) and no settings without a single selected node', () => {
     // before
     const { result } = renderHook(() => useExportSection(), { wrapper });
 
     // result
-    expect(result.current.node).toBeUndefined();
+    expect(result.current.exportTarget).toEqual({ id: null, name: selectActivePage(store.getState()).name });
     expect(result.current.settings).toEqual([]);
   });
 
@@ -58,7 +58,7 @@ describe('useExportSection', () => {
     const { result } = renderHook(() => useExportSection(), { wrapper });
 
     // result
-    expect(result.current.node?.id).toBe(frameId);
+    expect(result.current.exportTarget.id).toBe(frameId);
   });
 
   it('should add a default export setting on add', () => {

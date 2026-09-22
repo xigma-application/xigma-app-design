@@ -76,6 +76,8 @@ describe('resolvePatternThumbnailRequest', () => {
       expect.any(Object),
       refs,
       256,
+      expect.any(Array),
+      expect.any(Array),
     );
     expect(createImageDataUrlFromPixelsMock).toHaveBeenCalledWith(expect.any(Uint8Array), 256, 128);
     expect(onResolve).toHaveBeenCalledWith('data:image/png;base64,abc');

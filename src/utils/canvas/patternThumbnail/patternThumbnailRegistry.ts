@@ -13,5 +13,5 @@ export const registerPatternThumbnailSampler = (sampler: TPatternThumbnailSample
   };
 };
 
-export const samplePatternThumbnail = async (sourceNodeId: string, size: number): Promise<string | null> =>
+export const samplePatternThumbnail = async (sourceNodeId: string | null, size: number): Promise<string | null> =>
   activeSampler ? activeSampler(sourceNodeId, size) : null;

@@ -68,7 +68,7 @@ describe('embedPdfRasterLayer', () => {
     await embedPdfRasterLayer(pdfDocument, page, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds));
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds), bounds);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels, 10, 10, 'image/png');
     expect(embedPng).toHaveBeenCalledTimes(1);
     expect(drawImage).toHaveBeenCalledWith('png-image', { height: 100, width: 100, x: 0, y: 0 });

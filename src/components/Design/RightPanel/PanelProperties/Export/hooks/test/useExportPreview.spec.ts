@@ -10,17 +10,17 @@ import { EXPORT_PREVIEW_SIZE } from '../../constants';
 import { registerPatternThumbnailSampler } from 'utils/canvas/patternThumbnail/patternThumbnailRegistry';
 
 describe('useExportPreview', () => {
-  it('should return null without requesting a sample when there is no nodeId', () => {
+  it('should request a whole-page sample (nodeId null) when nothing is selected', async () => {
     // mock
-    const sampler = vi.fn().mockResolvedValue('data:image/png;base64,abc');
+    const sampler = vi.fn().mockResolvedValue('data:image/png;base64,page');
 
     // before
     const unregister = registerPatternThumbnailSampler(sampler);
-    const { result } = renderHook(() => useExportPreview(undefined));
+    const { result } = renderHook(() => useExportPreview(null));
 
     // result
-    expect(result.current).toBeNull();
-    expect(sampler).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current).toBe('data:image/png;base64,page'));
+    expect(sampler).toHaveBeenCalledWith(null, EXPORT_PREVIEW_SIZE);
 
     // after
     unregister();
@@ -62,23 +62,24 @@ describe('useExportPreview', () => {
     unregister();
   });
 
-  it('should reset back to null once nodeId is cleared', async () => {
+  it('should switch to a whole-page sample once the selected node is cleared (nodeId becomes null)', async () => {
     // mock
-    const sampler = vi.fn().mockResolvedValue('data:image/png;base64,abc');
+    const sampler = vi.fn().mockResolvedValueOnce('data:image/png;base64,abc').mockResolvedValueOnce('data:image/png;base64,page');
 
     // before
     const unregister = registerPatternThumbnailSampler(sampler);
     const { rerender, result } = renderHook(({ nodeId }) => useExportPreview(nodeId), {
-      initialProps: { nodeId: 'node-a' as string | undefined },
+      initialProps: { nodeId: 'node-a' as string | null },
     });
 
     await waitFor(() => expect(result.current).toBe('data:image/png;base64,abc'));
 
     // action
-    rerender({ nodeId: undefined });
+    rerender({ nodeId: null });
 
     // result
-    expect(result.current).toBeNull();
+    await waitFor(() => expect(result.current).toBe('data:image/png;base64,page'));
+    expect(sampler).toHaveBeenLastCalledWith(null, EXPORT_PREVIEW_SIZE);
 
     // after
     unregister();

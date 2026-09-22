@@ -7,6 +7,7 @@ import { TPaint } from 'types/design/paint/types';
 // utils
 import { getExportSubtreeNodes } from './getExportSubtreeNodes';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
+import { unionRects } from './unionRects';
 
 const hasVisiblePaint = (paints: TPaint[] | undefined): boolean => (paints ?? []).some((paint) => paint.visible !== false);
 
@@ -33,19 +34,6 @@ const intersectRects = (a: TDraftRect, b: TDraftRect): TDraftRect | null => {
   const bottom = Math.min(a.y + a.height, b.y + b.height);
 
   return right > x && bottom > y ? { height: bottom - y, width: right - x, x, y } : null;
-};
-
-const unionRects = (a: TDraftRect | null, b: TDraftRect): TDraftRect => {
-  if (a) {
-    const x = Math.min(a.x, b.x);
-    const y = Math.min(a.y, b.y);
-    const right = Math.max(a.x + a.width, b.x + b.width);
-    const bottom = Math.max(a.y + a.height, b.y + b.height);
-
-    return { height: bottom - y, width: right - x, x, y };
-  }
-
-  return b;
 };
 
 const intersectWithClippingAncestors = (

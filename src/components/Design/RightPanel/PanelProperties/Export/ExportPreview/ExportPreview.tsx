@@ -13,7 +13,7 @@ import { translationNameSpace } from '../constants';
 // styles
 import styles from './export-preview.module.scss';
 
-export type TExportPreviewProps = { nodeId: string };
+export type TExportPreviewProps = { nodeId: string | null };
 
 export const ExportPreview: FC<TExportPreviewProps> = ({ nodeId }) => {
   const { t } = useTranslation();

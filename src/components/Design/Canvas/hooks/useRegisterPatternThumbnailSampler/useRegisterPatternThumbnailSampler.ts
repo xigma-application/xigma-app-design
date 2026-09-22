@@ -8,7 +8,7 @@ import { registerPatternThumbnailSampler } from 'utils/canvas/patternThumbnail/p
 
 export const useRegisterPatternThumbnailSampler = (refs: TCanvasRefs): void => {
   useEffect(() => {
-    const sampleThumbnail = (sourceNodeId: string, size: number): Promise<string | null> =>
+    const sampleThumbnail = (sourceNodeId: string | null, size: number): Promise<string | null> =>
       new Promise((resolve) => {
         refs.patternThumbnailRequestRef.current = { onResolve: resolve, size, sourceNodeId };
       });

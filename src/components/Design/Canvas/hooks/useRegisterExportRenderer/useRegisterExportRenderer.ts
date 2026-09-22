@@ -11,7 +11,7 @@ import { registerExportRenderer } from 'utils/canvas/exportRender/exportRenderRe
 export const useRegisterExportRenderer = (refs: TCanvasRefs): void => {
   useEffect(() => {
     const renderNode = (
-      nodeId: string,
+      nodeId: string | null,
       scale: number,
       ignoreOverlappingLayers: boolean,
       imageFilterQuality: TImageFilterQuality,

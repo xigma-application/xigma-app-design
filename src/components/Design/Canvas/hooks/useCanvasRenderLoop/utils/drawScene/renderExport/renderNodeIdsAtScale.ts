@@ -14,17 +14,26 @@ import { renderIds } from '../drawSceneNodes/renderIds';
 
 export const renderNodeIdsAtScale = (
   context: TDrawSceneContext,
-  sourceNodeId: string,
+  sourceNodeId: string | null,
   ids: string[],
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
   scale: number,
   boundsOverride?: TDraftRect,
+  backgroundColor?: readonly [number, number, number, number],
 ): TRenderedNodePixels | null =>
-  renderExportTarget(context, sourceNodeId, nodesById, scale, boundsOverride, (renderContext, target) => {
-    const renderer = buildExportMaskRenderer(renderContext, nodesById, refs);
+  renderExportTarget(
+    context,
+    sourceNodeId,
+    nodesById,
+    scale,
+    boundsOverride,
+    (renderContext, target) => {
+      const renderer = buildExportMaskRenderer(renderContext, nodesById, refs);
 
-    renderIds(renderer, getTopLevelIds(ids, nodesById), target);
-    renderHoistedIds(renderer);
-    releaseGlassBackdrop(renderer);
-  });
+      renderIds(renderer, getTopLevelIds(ids, nodesById), target);
+      renderHoistedIds(renderer);
+      releaseGlassBackdrop(renderer);
+    },
+    backgroundColor,
+  );

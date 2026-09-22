@@ -3,24 +3,21 @@ import { setIsExporting } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
-import { TExportSetting } from '../types';
-import { TSceneNode } from 'types/design/types';
+import { TExportSetting, TExportTarget } from '../types';
 
 // utils
 import { exportNode } from '../utils/exportNode';
 
-export const useHandleExportClick = (node: TSceneNode | undefined, settings: TExportSetting[]): TFunc<[], Promise<void>> => {
+export const useHandleExportClick = (exportTarget: TExportTarget, settings: TExportSetting[]): TFunc<[], Promise<void>> => {
   const dispatch = useAppDispatch();
 
   return async (): Promise<void> => {
-    if (node) {
-      dispatch(setIsExporting(true));
+    dispatch(setIsExporting(true));
 
-      try {
-        await exportNode(node.id, node.name, settings);
-      } finally {
-        dispatch(setIsExporting(false));
-      }
+    try {
+      await exportNode(exportTarget.id, exportTarget.name, settings);
+    } finally {
+      dispatch(setIsExporting(false));
     }
   };
 };

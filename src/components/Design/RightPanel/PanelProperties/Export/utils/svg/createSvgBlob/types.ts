@@ -10,7 +10,7 @@ export type TSvgDrawContext = {
   includeIdAttribute: boolean;
   isSoleRasterLayer: boolean;
   jpegQuality: number;
-  nodeId: string;
+  nodeId: string | null;
   nodesById: Record<string, TSceneNode>;
   rasterScale: number;
 };

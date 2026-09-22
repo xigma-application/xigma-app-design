@@ -58,7 +58,7 @@ describe('embedSvgRasterLayer', () => {
 
     await embedSvgRasterLayer(elements, 'n', 2, true, ExportImageResampling.basic, contextIds, bounds, false, 0.92);
 
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds));
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('n', 2, true, ExportImageResampling.basic, new Set(contextIds), bounds);
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledWith(pixels, 10, 10, 'image/png');
     expect(elements).toEqual(['<image href="data:image/png;base64,AAAA" x="0" y="0" width="100" height="100"/>']);
   });

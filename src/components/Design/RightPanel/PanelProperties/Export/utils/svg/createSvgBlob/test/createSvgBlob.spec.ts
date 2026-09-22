@@ -558,6 +558,7 @@ describe('createSvgBlob', () => {
       true,
       ExportImageResampling.basic,
       new Set(['svg-text-frame']),
+      { height: 80, width: 120, x: 0, y: 0 },
     );
     expect(text).toContain('<text fill="#000000" font-family="Inter, sans-serif" font-size="16">');
     expect(text).toContain('<tspan');
@@ -810,6 +811,7 @@ describe('createSvgBlob', () => {
       true,
       ExportImageResampling.basic,
       new Set(['svg-image-adjusted']),
+      { height: 30, width: 40, x: 0, y: 0 },
     );
     expect(text).toContain('<image href="data:image/png;base64,AAAA"');
     expect(text).not.toContain('clip-path');
