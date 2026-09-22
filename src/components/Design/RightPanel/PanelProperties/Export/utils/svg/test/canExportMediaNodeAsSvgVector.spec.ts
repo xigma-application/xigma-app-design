@@ -58,9 +58,9 @@ describe('canExportMediaNodeAsSvgVector', () => {
     expect(check(media({ blendMode: BlendMode.normal }))).toBe(true);
   });
 
-  it('should allow a translucent ancestor (opacity is applied through getEffectiveOpacity) but reject a rotated one', () => {
+  it('should allow a translucent ancestor (opacity is applied through getEffectiveOpacity) and a rotated one', () => {
     expect(check(media({ parentId: 'f' }), frame({ opacity: 0.5 }))).toBe(true);
-    expect(check(media({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(false);
+    expect(check(media({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(true);
     expect(check(media({ parentId: 'f' }), frame())).toBe(true);
   });
 });

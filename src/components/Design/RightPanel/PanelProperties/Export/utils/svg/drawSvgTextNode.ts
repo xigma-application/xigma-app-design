@@ -9,6 +9,7 @@ import { TTextNode } from 'types/design/types';
 import { escapeSvgText } from './escapeSvgText';
 import { formatSvgNumber } from './formatSvgNumber';
 import { getStraightTextGlyphPlacements } from 'utils/canvas/text/fontOutline/getStraightTextGlyphPlacements';
+import { getSvgRotateTransformValue } from './getSvgRotateTransformValue';
 import { toSvgPagePoint } from './toSvgPagePoint';
 
 export const drawSvgTextNode = (elements: string[], node: TTextNode, bounds: TDraftRect): void => {
@@ -22,9 +23,11 @@ export const drawSvgTextNode = (elements: string[], node: TTextNode, bounds: TDr
   if (glyphs) {
     const opacity = node.opacity ?? 1;
     const opacityAttribute = opacity < 1 ? ` opacity="${formatSvgNumber(opacity)}"` : '';
+    const rotationValue = getSvgRotateTransformValue(node.rotation, node, bounds);
+    const transformAttribute = rotationValue ? ` transform="${rotationValue}"` : '';
 
     elements.push(
-      `<text fill="${node.fill}" font-family="Inter, sans-serif" font-size="${formatSvgNumber(node.fontSize)}"${opacityAttribute}>${glyphs}</text>`,
+      `<text fill="${node.fill}" font-family="Inter, sans-serif" font-size="${formatSvgNumber(node.fontSize)}"${opacityAttribute}${transformAttribute}>${glyphs}</text>`,
     );
   }
 };

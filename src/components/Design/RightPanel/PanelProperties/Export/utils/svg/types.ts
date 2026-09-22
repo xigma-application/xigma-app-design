@@ -1,5 +1,6 @@
 // types
 import { SvgLayerType } from './enums';
+import { TPoint } from 'types/canvas';
 import {
   TEllipseNode,
   TFrameNode,
@@ -13,6 +14,12 @@ import {
 } from 'types/design/types';
 
 export type TSvgShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode | TLineNode | TVectorNode | TMediaNode;
+
+export type TSvgBoxModelShapeNode = TFrameNode | TRectangleNode | TEllipseNode | TPolygonNode | TStarNode | TMediaNode;
+
+export type TSvgLocalTransform = { localCenter: TPoint; localRotation: number };
+
+export type TSvgAncestorGroup = { id: string; markup: string };
 
 export type TSvgRasterLayer = { nodeIds: Set<string>; type: SvgLayerType.raster };
 

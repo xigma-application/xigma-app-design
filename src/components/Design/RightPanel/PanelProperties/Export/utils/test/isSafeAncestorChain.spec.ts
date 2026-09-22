@@ -36,13 +36,16 @@ describe('isSafeAncestorChain', () => {
     expect(check(false)).toBe(true);
   });
 
-  it('should reject hidden, rotated, blended and mask ancestors', () => {
+  it('should reject hidden, blended and mask ancestors', () => {
     expect(check(true, frame({ hidden: true }))).toBe(false);
-    expect(check(true, frame({ rotation: 4 }))).toBe(false);
     expect(check(true, frame({ blendMode: BlendMode.multiply }))).toBe(false);
     expect(
       check(true, { childIds: [], height: 1, id: 'f', name: 'm', parentId: null, rotation: 0, type: NodeType.mask, width: 1, x: 0, y: 0 }),
     ).toBe(false);
+  });
+
+  it('should accept a rotated, non-clipping ancestor', () => {
+    expect(check(true, frame({ rotation: 45 }))).toBe(true);
   });
 
   it('should accept a normal blend mode', () => {
@@ -71,5 +74,21 @@ describe('isSafeAncestorChain', () => {
     const inner = frame({ id: 'f', parentId: 'outer' });
 
     expect(check(true, inner, outer)).toBe(false);
+  });
+
+  it('should accept bounds contained in a rotated clipping frame even though they fall outside its unrotated axis-aligned rect', () => {
+    // ancestor is a 200x50 frame rotated 90°, so its true visual clip region is a 50x200 rect centered at (200,125), spanning x:[175,225] y:[25,225]
+    const clip = frame({ clipContent: true, height: 50, rotation: 90, width: 200, x: 100, y: 100 });
+    // these bounds sit at y:50..60, outside the frame's own unrotated rect (y:[100,150]), but inside its rotated visual region
+    const rotatedBounds = { height: 10, width: 10, x: 180, y: 50 };
+
+    expect(isSafeAncestorChain(rotatedBounds, 'f', { f: clip }, true)).toBe(true);
+  });
+
+  it('should still reject bounds genuinely outside a rotated clipping frame', () => {
+    const clip = frame({ clipContent: true, height: 50, rotation: 90, width: 200, x: 100, y: 100 });
+    const farBounds = { height: 10, width: 10, x: 0, y: 0 };
+
+    expect(isSafeAncestorChain(farBounds, 'f', { f: clip }, true)).toBe(false);
   });
 });

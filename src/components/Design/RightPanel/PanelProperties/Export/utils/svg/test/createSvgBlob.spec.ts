@@ -824,6 +824,64 @@ describe('createSvgBlob', () => {
     expect(text).not.toContain('<image href="data:image/png;base64,AAAA" x=');
   });
 
+  it('should wrap a shape nested inside a rotated frame in a <g transform> group, using geometry decomposed relative to the frame', async () => {
+    // mock
+    // frame: x:100 y:100 w:100 h:100 rotation:90 -> center (150,150), a square so its rotated AABB is unchanged: bounds x:100 y:100 w:100 h:100
+    // child: absolute center (180,150) rotation:90 (i.e. no rotation of its own beyond the frame's) -> local rotation 0,
+    // local center (150,150) + rotate((30,0), -90 degrees) = (150,120) -> local x:140 y:110, translated into the g's pivot-relative page space: (40,10)-(60,30)
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            childIds: ['svg-rotated-child'],
+            clipContent: false,
+            fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
+            height: 100,
+            id: 'svg-rotated-frame',
+            name: 'Frame',
+            parentId: null,
+            rotation: 90,
+            type: NodeType.frame,
+            width: 100,
+            x: 100,
+            y: 100,
+          },
+          {
+            fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+            height: 20,
+            id: 'svg-rotated-child',
+            name: 'Rect',
+            parentId: 'svg-rotated-frame',
+            rotation: 90,
+            type: NodeType.rectangle,
+            width: 20,
+            x: 170,
+            y: 140,
+          },
+        ],
+        rootIds: ['svg-rotated-frame'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-rotated-frame', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+
+    const frameFillIndex = text.indexOf('fill="#0000ff"');
+    const groupOpenIndex = text.indexOf('<g transform="rotate(90, 50, 50)">');
+    const childFillIndex = text.indexOf('fill="#ff0000"');
+    const groupCloseIndex = text.lastIndexOf('</g>');
+
+    expect(frameFillIndex).toBeGreaterThan(-1);
+    expect(groupOpenIndex).toBeGreaterThan(frameFillIndex);
+    expect(childFillIndex).toBeGreaterThan(groupOpenIndex);
+    expect(groupCloseIndex).toBeGreaterThan(childFillIndex);
+    expect(text.slice(groupOpenIndex, groupCloseIndex)).toContain('40 10');
+    expect(text.slice(groupOpenIndex, groupCloseIndex)).toContain('60 30');
+  });
+
   it('should draw a standalone media (image/video) node as a full-stretch image without rendering any raster layer', async () => {
     // mock
     store.dispatch(

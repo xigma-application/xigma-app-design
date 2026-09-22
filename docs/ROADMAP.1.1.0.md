@@ -364,6 +364,9 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] SVG: angular and diamond gradients export as a close vector approximation (a fan of thin flat
       sectors for angular, concentric rings for diamond, clipped to the shape) instead of a raster
       image, since SVG has no native conic/Manhattan gradient primitive to render them exactly
+- [x] SVG: shapes and text inside a rotated frame or group now export as real vectors too, grouped
+      into the exported file the same way they're grouped in the design, instead of only working when
+      every containing frame/group is unrotated
 
 ## Related
 

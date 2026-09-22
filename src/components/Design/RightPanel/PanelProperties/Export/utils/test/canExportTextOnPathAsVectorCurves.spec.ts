@@ -96,8 +96,8 @@ describe('canExportTextOnPathAsVectorCurves', () => {
     expect(check(text({ parentId: 'f' }), frame({ opacity: 0.4 }))).toBe(true);
   });
 
-  it('should reject text under a rotated, hidden or blended ancestor', () => {
-    expect(check(text({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(false);
+  it('should allow a rotated ancestor but reject a hidden or blended one', () => {
+    expect(check(text({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(true);
     expect(check(text({ parentId: 'f' }), frame({ hidden: true }))).toBe(false);
     expect(check(text({ parentId: 'f' }), frame({ blendMode: BlendMode.screen }))).toBe(false);
   });

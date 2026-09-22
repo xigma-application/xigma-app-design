@@ -98,9 +98,9 @@ describe('canExportTextAsSvgRealText', () => {
     expect(check(text({ parentId: 'm' }), mask)).toBe(false);
   });
 
-  it('should reject text under a translucent, rotated, hidden or blended ancestor', () => {
+  it('should allow a rotated ancestor but reject a translucent, hidden or blended one', () => {
     expect(check(text({ parentId: 'f' }), frame({ opacity: 0.5 }))).toBe(false);
-    expect(check(text({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(false);
+    expect(check(text({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(true);
     expect(check(text({ parentId: 'f' }), frame({ hidden: true }))).toBe(false);
     expect(check(text({ parentId: 'f' }), frame({ blendMode: BlendMode.screen }))).toBe(false);
   });

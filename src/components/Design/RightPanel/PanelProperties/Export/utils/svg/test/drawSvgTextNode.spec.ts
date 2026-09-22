@@ -57,6 +57,17 @@ describe('drawSvgTextNode', () => {
     expect(elements[0]).toContain('<text fill="#ff0000" font-family="Inter, sans-serif" font-size="20">');
   });
 
+  it('should rotate the whole <text> block around its own center via a transform, since glyph placement itself ignores rotation', () => {
+    // mock
+    const elements: string[] = [];
+
+    // action
+    drawSvgTextNode(elements, { ...node, rotation: 45 }, { height: 200, width: 300, x: 10, y: 20 });
+
+    // result
+    expect(elements[0]).toContain('transform="rotate(45 90 52)"');
+  });
+
   it('should draw nothing when every character is missing from the glyph atlas', () => {
     // mock
     const elements: string[] = [];

@@ -6,7 +6,7 @@ import { store } from 'store';
 import { ExportImageResampling } from '../../enums';
 import { SvgLayerType } from './enums';
 import { TSceneNode, TTextNode } from 'types/design/types';
-import { TSvgShapeNode } from './types';
+import { TSvgAncestorGroup, TSvgShapeNode } from './types';
 
 // utils
 import { canExportShapeAsSvgVector } from './canExportShapeAsSvgVector';
@@ -19,7 +19,11 @@ import { embedSvgRasterLayer } from './embedSvgRasterLayer';
 import { formatSvgNumber } from './formatSvgNumber';
 import { getExportRenderNodes } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getExportRenderNodes';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
+import { getSvgLayerAncestorGroups } from './getSvgLayerAncestorGroups';
 import { getSvgLayers } from './getSvgLayers';
+import { getSvgLocalizedNode } from './getSvgLocalizedNode';
+import { isSvgBoxModelShapeNode } from './isSvgBoxModelShapeNode';
+import { updateSvgAncestorGroupStack } from './updateSvgAncestorGroupStack';
 
 export const createSvgBlob = async (
   nodeId: string,
@@ -44,18 +48,23 @@ export const createSvgBlob = async (
     const isSoleRasterLayer = layers.length === 1 && layers[0].type === SvgLayerType.raster;
     const elements: string[] = [];
     const defs: string[] = [];
+    let openGroups: TSvgAncestorGroup[] = [];
 
     for (const layer of layers) {
+      openGroups = updateSvgAncestorGroupStack(elements, openGroups, getSvgLayerAncestorGroups(layer, nodesById, bounds));
+
       switch (layer.type) {
         case SvgLayerType.text:
-          drawSvgTextNode(elements, layer.node, bounds);
+          drawSvgTextNode(elements, getSvgLocalizedNode(layer.node, nodesById), bounds);
           break;
         case SvgLayerType.textCurves:
           await drawSvgTextCurves(elements, defs, layer.node, nodesById, bounds);
           break;
-        case SvgLayerType.vector:
-          await drawSvgShape(elements, defs, layer.node, nodesById, bounds);
+        case SvgLayerType.vector: {
+          const shapeNode = isSvgBoxModelShapeNode(layer.node) ? getSvgLocalizedNode(layer.node, nodesById) : layer.node;
+          await drawSvgShape(elements, defs, shapeNode, nodesById, bounds);
           break;
+        }
         default:
           await embedSvgRasterLayer(
             elements,
@@ -71,6 +80,8 @@ export const createSvgBlob = async (
           break;
       }
     }
+
+    updateSvgAncestorGroupStack(elements, openGroups, []);
 
     const width = formatSvgNumber(bounds.width);
     const height = formatSvgNumber(bounds.height);
