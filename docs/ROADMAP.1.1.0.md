@@ -351,6 +351,9 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] SVG export (first version): rectangles, frames, ellipses, polygons, stars and lines with plain
       colors export as real `<path>` vector shapes; everything else (gradients, images/video, text,
       pen-tool shapes) is drawn as an embedded raster image in the right stacking order
+- [x] SVG: linear and radial gradients on Frame/Rectangle fills and strokes export as real native
+      `<linearGradient>`/`<radialGradient>` (angular and diamond gradients still fall back to a raster
+      image, since SVG has no native conic/Manhattan gradient primitive)
 
 ## Related
 

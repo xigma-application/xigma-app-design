@@ -25,7 +25,7 @@ describe('drawSvgBoxShape', () => {
   it('should draw the fill with the paint opacity as a fraction', () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, rectangle({ fills: [{ color: '#00ff00', opacity: 40, type: 'solid' }] }), {}, bounds);
+    drawSvgBoxShape(elements, [], rectangle({ fills: [{ color: '#00ff00', opacity: 40, type: 'solid' }] }), {}, bounds);
 
     expect(elements).toHaveLength(1);
     expect(elements[0]).toContain('fill="#00ff00"');
@@ -37,6 +37,7 @@ describe('drawSvgBoxShape', () => {
 
     drawSvgBoxShape(
       elements,
+      [],
       rectangle({
         fills: [
           { color: '#111111', opacity: 100, type: 'solid' },
@@ -72,7 +73,7 @@ describe('drawSvgBoxShape', () => {
     };
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, rectangle({ parentId: 'p' }), { p: parent }, bounds);
+    drawSvgBoxShape(elements, [], rectangle({ parentId: 'p' }), { p: parent }, bounds);
 
     expect(elements[0]).toContain('fill-opacity="0.5"');
   });
@@ -80,7 +81,7 @@ describe('drawSvgBoxShape', () => {
   it('should draw the stroke ring after the fill when the node has a stroke', () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, rectangle({ strokeWidth: 2, strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }), {}, bounds);
+    drawSvgBoxShape(elements, [], rectangle({ strokeWidth: 2, strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }), {}, bounds);
 
     expect(elements).toHaveLength(2);
     expect(elements[1]).toContain('fill="#0000ff"');
@@ -89,8 +90,29 @@ describe('drawSvgBoxShape', () => {
   it('should skip the stroke draw when the node has no stroke', () => {
     const elements: string[] = [];
 
-    drawSvgBoxShape(elements, rectangle(), {}, bounds);
+    drawSvgBoxShape(elements, [], rectangle(), {}, bounds);
 
     expect(elements).toHaveLength(1);
+  });
+
+  it('should thread the defs array through to a gradient fill', () => {
+    const elements: string[] = [];
+    const defs: string[] = [];
+    const gradient = {
+      end: { x: 1, y: 0 },
+      opacity: 100,
+      start: { x: 0, y: 0 },
+      stops: [
+        { color: '#ff0000', opacity: 100, position: 0 },
+        { color: '#0000ff', opacity: 100, position: 1 },
+      ],
+      type: 'gradient-linear' as const,
+    };
+
+    drawSvgBoxShape(elements, defs, rectangle({ fills: [gradient] }), {}, bounds);
+
+    expect(defs).toHaveLength(1);
+    expect(defs[0]).toContain('<linearGradient');
+    expect(elements[0]).toContain('fill="url(#XigmaGradient0)"');
   });
 });

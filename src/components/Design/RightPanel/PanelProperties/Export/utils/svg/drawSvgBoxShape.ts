@@ -11,15 +11,16 @@ import { hasVectorStroke } from '../hasVectorStroke';
 
 export const drawSvgBoxShape = (
   elements: string[],
+  defs: string[],
   node: TFrameNode | TRectangleNode,
   nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
 ): void => {
   const opacity = getEffectiveOpacity(node, nodesById);
 
-  drawSvgPaintPolygons(elements, node.fills, [getBoxFillPolygon(node)], opacity, bounds);
+  drawSvgPaintPolygons(elements, defs, node.fills, [getBoxFillPolygon(node)], opacity, bounds);
 
   if (node.strokes && hasVectorStroke(node)) {
-    drawSvgPaintPolygons(elements, node.strokes, getBoxStrokeRingPolygons(node), opacity, bounds);
+    drawSvgPaintPolygons(elements, defs, node.strokes, getBoxStrokeRingPolygons(node), opacity, bounds);
   }
 };

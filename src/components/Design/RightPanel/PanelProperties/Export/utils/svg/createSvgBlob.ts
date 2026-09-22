@@ -34,10 +34,11 @@ export const createSvgBlob = async (
     const layers = getSvgLayers(nodes, (shapeNode: TSvgShapeNode) => canExportShapeAsSvgVector(shapeNode, nodesById));
     const isSoleRasterLayer = layers.length === 1 && layers[0].type === SvgLayerType.raster;
     const elements: string[] = [];
+    const defs: string[] = [];
 
     for (const layer of layers) {
       if (layer.type === SvgLayerType.vector) {
-        drawSvgShape(elements, layer.node, nodesById, bounds);
+        drawSvgShape(elements, defs, layer.node, nodesById, bounds);
       } else {
         await embedSvgRasterLayer(
           elements,
@@ -55,7 +56,8 @@ export const createSvgBlob = async (
 
     const width = formatSvgNumber(bounds.width);
     const height = formatSvgNumber(bounds.height);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${elements.join('')}</svg>`;
+    const defsMarkup = defs.length > 0 ? `<defs>${defs.join('')}</defs>` : '';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defsMarkup}${elements.join('')}</svg>`;
 
     return new Blob([svg], { type: 'image/svg+xml' });
   }

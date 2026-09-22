@@ -3,9 +3,12 @@ import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { formatSvgNumber } from './formatSvgNumber';
+import { toSvgPagePoint } from './toSvgPagePoint';
 
-const toPagePoint = (point: TPoint, bounds: TDraftRect): string =>
-  `${formatSvgNumber(point.x - bounds.x)} ${formatSvgNumber(point.y - bounds.y)}`;
+const toPagePoint = (point: TPoint, bounds: TDraftRect): string => {
+  const pagePoint = toSvgPagePoint(point, bounds);
+  return `${formatSvgNumber(pagePoint.x)} ${formatSvgNumber(pagePoint.y)}`;
+};
 
 const getPolygonPathData = (polygon: TPoint[], bounds: TDraftRect): string => {
   const [first, ...rest] = polygon;

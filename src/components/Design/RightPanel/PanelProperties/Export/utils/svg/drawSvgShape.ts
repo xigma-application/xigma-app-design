@@ -9,11 +9,17 @@ import { drawSvgBoxShape } from './drawSvgBoxShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
 import { drawSvgSimpleShape } from './drawSvgSimpleShape';
 
-export const drawSvgShape = (elements: string[], node: TSvgShapeNode, nodesById: Record<string, TSceneNode>, bounds: TDraftRect): void => {
+export const drawSvgShape = (
+  elements: string[],
+  defs: string[],
+  node: TSvgShapeNode,
+  nodesById: Record<string, TSceneNode>,
+  bounds: TDraftRect,
+): void => {
   switch (node.type) {
     case NodeType.frame:
     case NodeType.rectangle:
-      drawSvgBoxShape(elements, node, nodesById, bounds);
+      drawSvgBoxShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.line:
       drawSvgLineShape(elements, node, nodesById, bounds);

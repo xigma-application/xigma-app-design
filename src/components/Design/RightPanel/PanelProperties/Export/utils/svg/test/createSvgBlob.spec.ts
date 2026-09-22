@@ -164,7 +164,95 @@ describe('createSvgBlob', () => {
     expect(text).toContain('fill="#0000ff"');
   });
 
-  it('should fall back to an embedded raster image for a gradient fill (not yet supported as vector)', async () => {
+  it('should draw a linear gradient fill as a real <linearGradient> without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0, y: 0.5 },
+                stops: [
+                  { color: '#ff0000', opacity: 100, position: 0 },
+                  { color: '#0000ff', opacity: 50, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+            height: 30,
+            id: 'svg-linear-gradient',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 15,
+            y: 22,
+          },
+        ],
+        rootIds: ['svg-linear-gradient'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-linear-gradient', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('<defs><linearGradient');
+    expect(text).toContain('stop-color="#ff0000"');
+    expect(text).toContain('stop-color="#0000ff" stop-opacity="0.5"');
+    expect(text).toContain('fill="url(#XigmaGradient0)"');
+  });
+
+  it('should draw a radial gradient fill as a real <radialGradient> without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                radiusRatio: 0.5,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#ff0000', opacity: 100, position: 0 },
+                  { color: '#0000ff', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-radial',
+              },
+            ],
+            height: 30,
+            id: 'svg-radial-gradient',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 8,
+            y: 12,
+          },
+        ],
+        rootIds: ['svg-radial-gradient'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-radial-gradient', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('<defs><radialGradient');
+    expect(text).toContain('gradientTransform="matrix(');
+    expect(text).toContain('fill="url(#XigmaGradient0)"');
+  });
+
+  it('should fall back to an embedded raster image for an angular/diamond gradient fill (no native SVG primitive yet)', async () => {
     // mock
     store.dispatch(
       addNodes({
@@ -179,7 +267,7 @@ describe('createSvgBlob', () => {
                   { color: '#ff0000', opacity: 100, position: 0 },
                   { color: '#0000ff', opacity: 100, position: 1 },
                 ],
-                type: 'gradient-linear',
+                type: 'gradient-angular',
               },
             ],
             height: 30,

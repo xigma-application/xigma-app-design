@@ -66,7 +66,7 @@ describe('drawSvgShape', () => {
   });
 
   it('should dispatch a rectangle to drawSvgBoxShape', () => {
-    drawSvgShape([], rectangle, {}, bounds);
+    drawSvgShape([], [], rectangle, {}, bounds);
 
     expect(drawSvgBoxShapeMock).toHaveBeenCalledTimes(1);
     expect(drawSvgLineShapeMock).not.toHaveBeenCalled();
@@ -74,13 +74,13 @@ describe('drawSvgShape', () => {
   });
 
   it('should dispatch a frame to drawSvgBoxShape', () => {
-    drawSvgShape([], frame, {}, bounds);
+    drawSvgShape([], [], frame, {}, bounds);
 
     expect(drawSvgBoxShapeMock).toHaveBeenCalledTimes(1);
   });
 
   it('should dispatch an ellipse/polygon/star to drawSvgSimpleShape', () => {
-    drawSvgShape([], ellipse, {}, bounds);
+    drawSvgShape([], [], ellipse, {}, bounds);
 
     expect(drawSvgSimpleShapeMock).toHaveBeenCalledTimes(1);
     expect(drawSvgBoxShapeMock).not.toHaveBeenCalled();
@@ -88,7 +88,7 @@ describe('drawSvgShape', () => {
   });
 
   it('should dispatch a line to drawSvgLineShape', () => {
-    drawSvgShape([], line, {}, bounds);
+    drawSvgShape([], [], line, {}, bounds);
 
     expect(drawSvgLineShapeMock).toHaveBeenCalledTimes(1);
     expect(drawSvgBoxShapeMock).not.toHaveBeenCalled();
