@@ -13,6 +13,21 @@ vi.mock('utils/canvas/drawVectorNode/groupFilledFacesForRendering', () => ({
 
 const solidGroup = { paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], polygons: [] };
 const imageGroup = { paint: [{ opacity: 100, ref: 'i', rotation: 0, scaleMode: 'fill', type: 'image' }], polygons: [] };
+const gradientGroup = {
+  paint: [
+    {
+      end: { x: 10, y: 10 },
+      opacity: 100,
+      start: { x: 0, y: 0 },
+      stops: [
+        { color: '#ff0000', opacity: 100, position: 0 },
+        { color: '#0000ff', opacity: 100, position: 1 },
+      ],
+      type: 'gradient-linear',
+    },
+  ],
+  polygons: [],
+};
 
 const vectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
   defaultFill: null,
@@ -61,6 +76,18 @@ describe('canExportVectorNodeAsVector', () => {
 
   it('should allow a width profile when the stroke itself is not visible', () => {
     expect(canExportVectorNodeAsVector(vectorNode({ strokeWidth: 0, widthProfile: { points: {} } }), {})).toBe(true);
+  });
+
+  it('should allow a linear/radial gradient fill group with fully opaque stops', () => {
+    groupFilledFacesForRenderingMock.mockReturnValue([gradientGroup]);
+    expect(canExportVectorNodeAsVector(vectorNode(), {})).toBe(true);
+  });
+
+  it('should reject a gradient fill group with a translucent stop', () => {
+    groupFilledFacesForRenderingMock.mockReturnValue([
+      { ...gradientGroup, paint: [{ ...gradientGroup.paint[0], stops: [{ color: '#ff0000', opacity: 50, position: 0 }] }] },
+    ]);
+    expect(canExportVectorNodeAsVector(vectorNode(), {})).toBe(false);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {

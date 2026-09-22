@@ -344,7 +344,8 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       real text on the page), it's compressed as JPEG at that quality instead of always lossless
 - [x] PDF: straight lines (including arrow endpoints) with plain colors are real vector shapes
 - [x] PDF: pen-tool shapes with plain colors (fill and uniform stroke) are real vector paths
-- [ ] PDF: gradients as native shadings, and text on a path as curves
+- [x] PDF: linear and radial gradients (fully opaque stops) are real native shadings
+- [ ] PDF: angular/diamond gradients, translucent gradient stops, and text on a path as curves
 - [ ] SVG rows are listed in the format menu but don't export anything yet
 
 ## Related

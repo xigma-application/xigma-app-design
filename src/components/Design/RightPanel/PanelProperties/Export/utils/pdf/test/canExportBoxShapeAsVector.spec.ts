@@ -1,13 +1,23 @@
 // types
 import { BlendMode, EffectType, NodeType, StrokeMode } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
-import { TPaint } from 'types/design/paint/types';
+import { TGradientPaint, TPaint } from 'types/design/paint/types';
 
 // utils
 import { canExportBoxShapeAsVector } from '../canExportBoxShapeAsVector';
 
 const solid: TPaint = { color: '#ff0000', opacity: 100, type: 'solid' };
 const image: TPaint = { opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' };
+const linearGradient: TGradientPaint = {
+  end: { x: 10, y: 10 },
+  opacity: 100,
+  start: { x: 0, y: 0 },
+  stops: [
+    { color: '#ff0000', opacity: 100, position: 0 },
+    { color: '#0000ff', opacity: 100, position: 1 },
+  ],
+  type: 'gradient-linear',
+};
 
 const rectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
   fills: [solid],
@@ -66,6 +76,22 @@ describe('canExportBoxShapeAsVector', () => {
   it('should reject legacy strokes and brush stroke mode', () => {
     expect(check(rectangle({ strokeColor: '#000000', strokeWidth: 2 }))).toBe(false);
     expect(check(rectangle({ strokeMode: StrokeMode.brush }))).toBe(false);
+  });
+
+  it('should allow a linear or radial gradient fill with fully opaque stops', () => {
+    expect(check(rectangle({ fills: [linearGradient] }))).toBe(true);
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-radial' }] }))).toBe(true);
+  });
+
+  it('should reject an angular or diamond gradient fill for now', () => {
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(false);
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(false);
+  });
+
+  it('should reject a gradient fill with any translucent stop', () => {
+    const translucentGradient = { ...linearGradient, stops: [linearGradient.stops[0], { ...linearGradient.stops[1], opacity: 50 }] };
+
+    expect(check(rectangle({ fills: [translucentGradient] }))).toBe(false);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {

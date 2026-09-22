@@ -4,8 +4,12 @@ import { PDFName } from 'pdf-lib';
 import { drawPdfPaintPolygons } from '../drawPdfPaintPolygons';
 
 const drawPdfPolygonsMock = vi.fn();
+const drawPdfGradientPolygonsMock = vi.fn();
 
 vi.mock('../drawPdfPolygons', () => ({ drawPdfPolygons: (...args: unknown[]): void => drawPdfPolygonsMock(...args) }));
+vi.mock('../drawPdfGradientPolygons', () => ({
+  drawPdfGradientPolygons: (...args: unknown[]): void => drawPdfGradientPolygonsMock(...args),
+}));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
 const page = {} as never;
@@ -21,6 +25,7 @@ const states = new Map<number, PDFName>();
 describe('drawPdfPaintPolygons', () => {
   beforeEach(() => {
     drawPdfPolygonsMock.mockClear();
+    drawPdfGradientPolygonsMock.mockClear();
   });
 
   it('should draw one visible solid paint with its opacity as a fraction', () => {
@@ -32,7 +37,7 @@ describe('drawPdfPaintPolygons', () => {
     expect(drawPdfPolygonsMock).toHaveBeenCalledWith(page, polygons, '#00ff00', 0.4, bounds, states);
   });
 
-  it('should skip hidden and non-solid paints and draw the rest bottom to top', () => {
+  it('should skip hidden and unsupported paints and draw the rest bottom to top', () => {
     // action
     drawPdfPaintPolygons(
       page,
@@ -50,5 +55,18 @@ describe('drawPdfPaintPolygons', () => {
 
     // result
     expect(drawPdfPolygonsMock.mock.calls.map((call) => call[2])).toEqual(['#333333', '#111111']);
+  });
+
+  it('should draw a gradient paint through drawPdfGradientPolygons with its opacity as a fraction', () => {
+    // mock
+    const gradient = { end: { x: 10, y: 0 }, opacity: 40, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' as const };
+
+    // action
+    drawPdfPaintPolygons(page, [gradient], polygons, 1, bounds, states);
+
+    // result
+    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
+    expect(drawPdfGradientPolygonsMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfGradientPolygonsMock).toHaveBeenCalledWith(page, { ...gradient, opacity: 40 }, polygons, 0.4, bounds, states);
   });
 });

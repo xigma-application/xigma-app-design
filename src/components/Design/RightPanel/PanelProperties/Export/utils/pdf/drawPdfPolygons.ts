@@ -18,9 +18,16 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { getPdfGraphicsState } from './getPdfGraphicsState';
 import { hexToRgbFloat } from 'utils/canvas/hexToRgbFloat';
+import { toPdfPagePoint } from './toPdfPagePoint';
+
+export const getPdfPolygonPathOperators = (polygons: TPoint[][], bounds: TDraftRect): PDFOperator[] =>
+  polygons.filter((polygon) => polygon.length >= 3).flatMap((polygon) => getPolygonOperators(polygon, bounds));
 
 const getPolygonOperators = (polygon: TPoint[], bounds: TDraftRect): PDFOperator[] => {
-  const toPage = (point: TPoint): [number, number] => [point.x - bounds.x, bounds.height - (point.y - bounds.y)];
+  const toPage = (point: TPoint): [number, number] => {
+    const pagePoint = toPdfPagePoint(point, bounds);
+    return [pagePoint.x, pagePoint.y];
+  };
   const [first, ...rest] = polygon;
 
   return [moveTo(...toPage(first)), ...rest.map((point) => lineTo(...toPage(point))), closePath()];
@@ -41,7 +48,7 @@ export const drawPdfPolygons = (
     pushGraphicsState(),
     setGraphicsState(getPdfGraphicsState(page, opacity, graphicsStates)),
     setFillingRgbColor(red, green, blue),
-    ...polygons.filter((polygon) => polygon.length >= 3).flatMap((polygon) => getPolygonOperators(polygon, bounds)),
+    ...getPdfPolygonPathOperators(polygons, bounds),
     PDFOperator.of(fillRule === 'evenOdd' ? PDFOperatorNames.FillEvenOdd : PDFOperatorNames.FillNonZero),
     popGraphicsState(),
   );
