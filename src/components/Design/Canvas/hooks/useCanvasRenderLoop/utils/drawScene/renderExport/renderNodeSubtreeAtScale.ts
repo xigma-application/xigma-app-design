@@ -6,7 +6,6 @@ import { TMaskRenderer } from '../drawSceneNodes/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { createFixedRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/createFixedRenderTargetPool';
 import { drawLeafNode } from '../drawLeafNode';
 import { getHoistedDragIds } from '../drawSceneNodes/getHoistedDragIds';
 import { markNodeDrawnOverGlassBackdrop } from '../drawSceneNodes/markNodeDrawnOverGlassBackdrop';
@@ -25,7 +24,6 @@ export const renderNodeSubtreeAtScale = (
 ): TRenderedNodePixels | null =>
   renderExportTarget(context, sourceNodeId, nodesById, scale, boundsOverride, (renderContext, target) => {
     const sceneNodeById = new Map(Object.entries(nodesById));
-    const pool = createFixedRenderTargetPool(renderContext.gl, target.width, target.height);
     const renderer: TMaskRenderer = {
       context: renderContext,
       gl: renderContext.gl,
@@ -34,7 +32,10 @@ export const renderNodeSubtreeAtScale = (
         drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0, phase);
         markNodeDrawnOverGlassBackdrop(renderer, node);
       },
-      pool,
+      // renderExportTarget already swapped renderContext.imageContext.renderTargetPool for one
+      // sized to this export's own target, so reusing it here keeps every scratch allocation —
+      // isolated-effect content and this renderer's own — pooled together, correctly sized.
+      pool: renderContext.imageContext.renderTargetPool,
       refs,
       sceneNodeById,
     };
@@ -42,5 +43,4 @@ export const renderNodeSubtreeAtScale = (
     renderIds(renderer, [sourceNodeId], target);
     renderHoistedIds(renderer);
     releaseGlassBackdrop(renderer);
-    pool.dispose();
   });

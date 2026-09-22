@@ -10,6 +10,7 @@ import { renderExportTarget } from '../renderExportTarget';
 const createTargetMock = vi.fn();
 const disposeTargetMock = vi.fn();
 const setAlphaWriteEnabledMock = vi.fn();
+const createFixedRenderTargetPoolMock = vi.fn();
 
 vi.mock('utils/canvas/renderTarget/createRenderTargetPool/createTarget', () => ({
   createTarget: (...args: unknown[]): unknown => createTargetMock(...args),
@@ -19,6 +20,9 @@ vi.mock('utils/canvas/renderTarget/createRenderTargetPool/disposeTarget', () => 
 }));
 vi.mock('utils/canvas/setAlphaWriteEnabled', () => ({
   setAlphaWriteEnabled: (...args: unknown[]): void => setAlphaWriteEnabledMock(...args),
+}));
+vi.mock('utils/canvas/renderTarget/createRenderTargetPool/createFixedRenderTargetPool', () => ({
+  createFixedRenderTargetPool: (...args: unknown[]): unknown => createFixedRenderTargetPoolMock(...args),
 }));
 
 const createGlMock = (): WebGL2RenderingContext =>
@@ -76,6 +80,8 @@ describe('renderExportTarget', () => {
     createTargetMock.mockClear();
     disposeTargetMock.mockClear();
     setAlphaWriteEnabledMock.mockClear();
+    createFixedRenderTargetPoolMock.mockClear();
+    createFixedRenderTargetPoolMock.mockReturnValue({ acquire: vi.fn(), dispose: vi.fn(), release: vi.fn() });
   });
 
   it('should return null when the source node does not exist', () => {
@@ -127,10 +133,13 @@ describe('renderExportTarget', () => {
 
     createTargetMock.mockReturnValue(target);
 
-    const imageContext = { isAlphaWriteEnabled: false };
+    const imageContext = { isAlphaWriteEnabled: false, renderTargetPool: { tag: 'live-canvas-pool' } };
     const context = { gl, imageContext } as unknown as TDrawSceneContext;
     const nodesById = { f1: rect('f1', { height: 50, type: NodeType.frame, width: 100, x: 10, y: 20 }) };
     const draw = vi.fn();
+    const fixedPool = { acquire: vi.fn(), dispose: vi.fn(), release: vi.fn() };
+
+    createFixedRenderTargetPoolMock.mockReturnValue(fixedPool);
 
     // before — an explicit 2x scale, independent of any "fit into a square" computation
     const result = renderExportTarget(context, 'f1', nodesById, 2, undefined, draw);
@@ -141,6 +150,12 @@ describe('renderExportTarget', () => {
     expect(gl.viewport).toHaveBeenCalledWith(0, 0, 200, 100);
     expect(setAlphaWriteEnabledMock).toHaveBeenNthCalledWith(1, gl, imageContext, true);
 
+    // result — a fresh pool sized to this export's own target replaces the live canvas's shared,
+    // real-screen-sized pool inside the context handed to draw, so every scratch allocation reached
+    // through context.imageContext.renderTargetPool (not just through a TMaskRenderer) is sized
+    // correctly too
+    expect(createFixedRenderTargetPoolMock).toHaveBeenCalledWith(gl, 200, 100);
+
     // result — draw is called once with a synthetic viewport mapping the node's own bounds to the
     // exact requested scale, and the freshly created target
     expect(draw).toHaveBeenCalledTimes(1);
@@ -149,7 +164,10 @@ describe('renderExportTarget', () => {
     expect(drawnContext.canvasWidth).toBe(200);
     expect(drawnContext.canvasHeight).toBe(100);
     expect(drawnContext.viewport).toEqual({ x: -20, y: -40, zoom: 2 });
+    expect(drawnContext.imageContext.renderTargetPool).toBe(fixedPool);
+    expect(drawnContext.imageContext.isAlphaWriteEnabled).toBe(imageContext.isAlphaWriteEnabled);
     expect(drawnTarget).toBe(target);
+    expect(fixedPool.dispose).toHaveBeenCalledTimes(1);
 
     // result — pixels read back at the target's own resolution, then previous GL state restored
     expect(gl.readPixels).toHaveBeenCalledWith(0, 0, 200, 100, gl.RGBA, gl.UNSIGNED_BYTE, expect.any(Uint8Array));
@@ -157,6 +175,9 @@ describe('renderExportTarget', () => {
     expect(gl.viewport).toHaveBeenLastCalledWith(0, 0, 400, 300);
     expect(setAlphaWriteEnabledMock).toHaveBeenNthCalledWith(2, gl, imageContext, false);
     expect(disposeTargetMock).toHaveBeenCalledWith(gl, target);
+
+    // result — the live canvas's own shared pool is left completely untouched
+    expect(imageContext.renderTargetPool).toEqual({ tag: 'live-canvas-pool' });
 
     // result
     expect(result).toEqual({ height: 100, pixels: expect.any(Uint8Array), width: 200 });
