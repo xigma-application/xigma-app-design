@@ -322,7 +322,7 @@ describe('createSvgBlob', () => {
     expect(text).toContain('fill="url(#XigmaGradient0)"');
   });
 
-  it('should fall back to an embedded raster image for an angular/diamond gradient fill (no native SVG primitive yet)', async () => {
+  it('should draw an angular gradient fill as a clipped fan of vector sectors, not a raster image', async () => {
     // mock
     store.dispatch(
       addNodes({
@@ -341,7 +341,7 @@ describe('createSvgBlob', () => {
               },
             ],
             height: 30,
-            id: 'svg-gradient',
+            id: 'svg-angular-gradient',
             name: 'Rect',
             parentId: null,
             rotation: 0,
@@ -351,16 +351,74 @@ describe('createSvgBlob', () => {
             y: 0,
           },
         ],
-        rootIds: ['svg-gradient'],
+        rootIds: ['svg-angular-gradient'],
       }),
     );
 
     // action
-    const text = await readSvgText(await createSvgBlob('svg-gradient', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+    const text = await readSvgText(await createSvgBlob('svg-angular-gradient', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     // result
-    expect(renderNodeForExportMock).toHaveBeenCalledWith('svg-gradient', 2, true, ExportImageResampling.basic, new Set(['svg-gradient']));
-    expect(text).toContain('<image href="data:image/png;base64,AAAA"');
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).not.toContain('<image');
+    expect(text).toContain('<defs><clipPath id="XigmaClip0">');
+    expect(text).toContain('<g clip-path="url(#XigmaClip0)">');
+
+    const sectorFills = [...text.matchAll(/fill="(#[0-9a-f]{6})"/g)].map((match) => match[1]);
+
+    expect(sectorFills.length).toBeGreaterThan(100);
+    expect(new Set(sectorFills).size).toBeGreaterThan(100);
+    expect(sectorFills[0]?.startsWith('#f')).toBe(true); // near the red stop (position 0)
+    expect(sectorFills[sectorFills.length - 1]?.endsWith('fe')).toBe(true); // near the blue stop (position 1)
+  });
+
+  it('should draw a diamond gradient fill as a clipped set of concentric vector rings, not a raster image', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 1, y: 0.5 },
+                opacity: 100,
+                start: { x: 0.5, y: 0.5 },
+                stops: [
+                  { color: '#00ff00', opacity: 100, position: 0 },
+                  { color: '#ff00ff', opacity: 100, position: 1 },
+                ],
+                type: 'gradient-diamond',
+              },
+            ],
+            height: 30,
+            id: 'svg-diamond-gradient',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['svg-diamond-gradient'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-diamond-gradient', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).not.toContain('<image');
+    expect(text).toContain('<g clip-path="url(#XigmaClip0)">');
+
+    const ringFills = [...text.matchAll(/fill="(#[0-9a-f]{6})"/g)].map((match) => match[1]);
+
+    expect(ringFills.length).toBeGreaterThan(30);
+    expect(new Set(ringFills).size).toBeGreaterThan(10);
+    expect(ringFills[0]).toMatch(/^#0[0-9a-f]f[0-9a-f]0[0-9a-f]$/); // near the green stop (position 0)
+    expect(ringFills).toContain('#ff00ff'); // the magenta stop (position 1), clamped flat beyond it
   });
 
   it('should encode a page that is entirely one raster layer as an opaque-white-flattened jpeg at the given quality', async () => {

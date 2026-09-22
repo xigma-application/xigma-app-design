@@ -3,13 +3,23 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TGradientPaint, TImagePaint, TPaint, TSolidPaint, TVideoPaint } from 'types/design/paint/types';
 
 // utils
+import { drawSvgAngularGradientPolygons } from './drawSvgAngularGradientPolygons';
+import { drawSvgDiamondGradientPolygons } from './drawSvgDiamondGradientPolygons';
 import { drawSvgGradientPolygons } from './drawSvgGradientPolygons';
 import { drawSvgImagePaint, TSvgImageBoxGeometry } from './drawSvgImagePaint';
 import { drawSvgPolygons } from './drawSvgPolygons';
 import { getFillsInPaintOrder } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getFillsInPaintOrder';
 import { getScaledFillPaints } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getScaledFillPaints';
 
-const VECTOR_PAINT_TYPES: TPaint['type'][] = ['solid', 'gradient-linear', 'gradient-radial', 'image', 'video'];
+const VECTOR_PAINT_TYPES: TPaint['type'][] = [
+  'solid',
+  'gradient-linear',
+  'gradient-radial',
+  'gradient-angular',
+  'gradient-diamond',
+  'image',
+  'video',
+];
 
 const isVisibleVectorPaint = (paint: TPaint): paint is TSolidPaint | TGradientPaint | TImagePaint | TVideoPaint =>
   paint.visible !== false && VECTOR_PAINT_TYPES.includes(paint.type);
@@ -34,6 +44,12 @@ export const drawSvgPaintPolygons = async (
       case 'gradient-linear':
       case 'gradient-radial':
         drawSvgGradientPolygons(elements, defs, paint, polygons, paint.opacity / 100, bounds, nodeBounds);
+        break;
+      case 'gradient-angular':
+        drawSvgAngularGradientPolygons(elements, defs, paint, polygons, paint.opacity / 100, bounds, nodeBounds);
+        break;
+      case 'gradient-diamond':
+        drawSvgDiamondGradientPolygons(elements, defs, paint, polygons, paint.opacity / 100, bounds, nodeBounds);
         break;
       default:
         if (boxGeometry) {

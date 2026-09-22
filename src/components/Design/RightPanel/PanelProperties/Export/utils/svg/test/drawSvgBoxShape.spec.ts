@@ -34,6 +34,17 @@ describe('drawSvgBoxShape', () => {
 
   it('should draw stacked fills bottom to top and skip hidden and unsupported paints', async () => {
     const elements: string[] = [];
+    const pattern = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      offsetX: 0,
+      offsetY: 0,
+      scale: 1,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'grid',
+      type: 'pattern',
+    };
 
     await drawSvgBoxShape(
       elements,
@@ -42,9 +53,9 @@ describe('drawSvgBoxShape', () => {
         fills: [
           { color: '#111111', opacity: 100, type: 'solid' },
           { color: '#222222', opacity: 100, type: 'solid', visible: false },
-          { end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-angular' },
+          pattern,
           { color: '#333333', opacity: 100, type: 'solid' },
-        ],
+        ] as never,
       }),
       {},
       bounds,

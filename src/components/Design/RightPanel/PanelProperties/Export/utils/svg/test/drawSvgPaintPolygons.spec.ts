@@ -2,10 +2,18 @@
 import { drawSvgPaintPolygons } from '../drawSvgPaintPolygons';
 
 const drawSvgGradientPolygonsMock = vi.fn();
+const drawSvgAngularGradientPolygonsMock = vi.fn();
+const drawSvgDiamondGradientPolygonsMock = vi.fn();
 const drawSvgImagePaintMock = vi.fn();
 
 vi.mock('../drawSvgGradientPolygons', () => ({
   drawSvgGradientPolygons: (...args: unknown[]): void => drawSvgGradientPolygonsMock(...args),
+}));
+vi.mock('../drawSvgAngularGradientPolygons', () => ({
+  drawSvgAngularGradientPolygons: (...args: unknown[]): void => drawSvgAngularGradientPolygonsMock(...args),
+}));
+vi.mock('../drawSvgDiamondGradientPolygons', () => ({
+  drawSvgDiamondGradientPolygons: (...args: unknown[]): void => drawSvgDiamondGradientPolygonsMock(...args),
 }));
 vi.mock('../drawSvgImagePaint', () => ({
   drawSvgImagePaint: (...args: unknown[]): Promise<void> => drawSvgImagePaintMock(...args),
@@ -23,6 +31,8 @@ const polygons = [
 describe('drawSvgPaintPolygons', () => {
   beforeEach(() => {
     drawSvgGradientPolygonsMock.mockClear();
+    drawSvgAngularGradientPolygonsMock.mockClear();
+    drawSvgDiamondGradientPolygonsMock.mockClear();
     drawSvgImagePaintMock.mockClear();
     drawSvgImagePaintMock.mockResolvedValue(undefined);
   });
@@ -37,8 +47,19 @@ describe('drawSvgPaintPolygons', () => {
     expect(elements[0]).toContain('fill-opacity="0.4"');
   });
 
-  it('should skip hidden and unsupported (angular/diamond/pattern) paints and draw the rest bottom to top', async () => {
+  it('should skip hidden and unsupported (pattern) paints and draw the rest bottom to top', async () => {
     const elements: string[] = [];
+    const pattern = {
+      alignmentIndex: 0,
+      direction: 'horizontal',
+      offsetX: 0,
+      offsetY: 0,
+      scale: 1,
+      spacingX: 0,
+      spacingY: 0,
+      tileType: 'grid',
+      type: 'pattern',
+    };
 
     await drawSvgPaintPolygons(
       elements,
@@ -46,19 +67,7 @@ describe('drawSvgPaintPolygons', () => {
       [
         { color: '#111111', opacity: 100, type: 'solid' },
         { color: '#222222', opacity: 100, type: 'solid', visible: false },
-        { end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-angular' },
-        { end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-diamond' },
-        {
-          alignmentIndex: 0,
-          direction: 'horizontal',
-          offsetX: 0,
-          offsetY: 0,
-          scale: 1,
-          spacingX: 0,
-          spacingY: 0,
-          tileType: 'grid',
-          type: 'pattern',
-        },
+        pattern,
         { color: '#333333', opacity: 100, type: 'solid' },
       ] as never,
       polygons,
@@ -70,6 +79,58 @@ describe('drawSvgPaintPolygons', () => {
     expect(elements[0]).toContain('fill="#333333"');
     expect(elements[1]).toContain('fill="#111111"');
     expect(drawSvgImagePaintMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw an angular gradient paint through drawSvgAngularGradientPolygons with its opacity as a fraction', async () => {
+    const elements: string[] = [];
+    const defs: string[] = [];
+    const gradient = {
+      end: { x: 10, y: 0 },
+      opacity: 40,
+      start: { x: 0, y: 0 },
+      stops: [{ color: '#ff0000', opacity: 100, position: 0 }],
+      type: 'gradient-angular' as const,
+    };
+
+    await drawSvgPaintPolygons(elements, defs, [gradient], polygons, 1, bounds);
+
+    expect(drawSvgAngularGradientPolygonsMock).toHaveBeenCalledWith(
+      elements,
+      defs,
+      { ...gradient, opacity: 40 },
+      polygons,
+      0.4,
+      bounds,
+      null,
+    );
+    expect(drawSvgDiamondGradientPolygonsMock).not.toHaveBeenCalled();
+    expect(drawSvgGradientPolygonsMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a diamond gradient paint through drawSvgDiamondGradientPolygons, forwarding a given node bounds', async () => {
+    const elements: string[] = [];
+    const defs: string[] = [];
+    const gradient = {
+      end: { x: 1, y: 0 },
+      opacity: 40,
+      start: { x: 0, y: 0 },
+      stops: [{ color: '#ff0000', opacity: 100, position: 0 }],
+      type: 'gradient-diamond' as const,
+    };
+    const nodeBounds = { height: 5, width: 5, x: 1, y: 1 };
+
+    await drawSvgPaintPolygons(elements, defs, [gradient], polygons, 1, bounds, nodeBounds);
+
+    expect(drawSvgDiamondGradientPolygonsMock).toHaveBeenCalledWith(
+      elements,
+      defs,
+      { ...gradient, opacity: 40 },
+      polygons,
+      0.4,
+      bounds,
+      nodeBounds,
+    );
+    expect(drawSvgAngularGradientPolygonsMock).not.toHaveBeenCalled();
   });
 
   it('should multiply in the given opacity', async () => {

@@ -88,11 +88,11 @@ describe('canExportVectorNodeAsSvgVector', () => {
     expect(canExportVectorNodeAsSvgVector(vectorNode(), {})).toBe(true);
   });
 
-  it('should reject an angular/diamond gradient fill group (no native SVG primitive yet)', () => {
+  it('should allow an angular/diamond gradient fill group (approximated as vector sectors/rings)', () => {
     groupFilledFacesForRenderingMock.mockReturnValue([
       { ...linearGradientGroup, paint: [{ ...linearGradientGroup.paint[0], type: 'gradient-angular' }] },
     ]);
-    expect(canExportVectorNodeAsSvgVector(vectorNode(), {})).toBe(false);
+    expect(canExportVectorNodeAsSvgVector(vectorNode(), {})).toBe(true);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {

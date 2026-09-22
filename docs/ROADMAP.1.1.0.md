@@ -352,8 +352,7 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       colors export as real `<path>` vector shapes; everything else (gradients, images/video, text,
       pen-tool shapes) is drawn as an embedded raster image in the right stacking order
 - [x] SVG: linear and radial gradients on Frame/Rectangle fills and strokes export as real native
-      `<linearGradient>`/`<radialGradient>` (angular and diamond gradients still fall back to a raster
-      image, since SVG has no native conic/Manhattan gradient primitive)
+      `<linearGradient>`/`<radialGradient>`
 - [x] SVG: pen-tool shapes (fill, including linear/radial gradient faces, uniform stroke and round
       caps) export as real vector paths
 - [x] SVG: plain text exports as real, selectable `<text>`; text on a path exports as real vector
@@ -362,6 +361,9 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       being flattened into a raster snapshot — covers all four fill modes (fill, fit, crop, tile, the
       last via a repeating `<pattern>`); an image with color adjustments still falls back to raster,
       since SVG has no matching filter
+- [x] SVG: angular and diamond gradients export as a close vector approximation (a fan of thin flat
+      sectors for angular, concentric rings for diamond, clipped to the shape) instead of a raster
+      image, since SVG has no native conic/Manhattan gradient primitive to render them exactly
 
 ## Related
 

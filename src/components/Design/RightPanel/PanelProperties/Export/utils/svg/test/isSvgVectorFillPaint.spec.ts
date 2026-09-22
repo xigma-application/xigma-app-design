@@ -20,9 +20,9 @@ describe('isSvgVectorFillPaint', () => {
     expect(isSvgVectorFillPaint({ color: '#ff0000', opacity: 100, type: 'solid' })).toBe(true);
   });
 
-  it('should reject an angular gradient (delegates to isSvgVectorPaint)', () => {
+  it('should allow an angular gradient (delegates to isSvgVectorPaint)', () => {
     expect(isSvgVectorFillPaint({ end: { x: 1, y: 0 }, opacity: 100, start: { x: 0, y: 0 }, stops: [], type: 'gradient-angular' })).toBe(
-      false,
+      true,
     );
   });
 

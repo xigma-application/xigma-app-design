@@ -42,8 +42,9 @@ describe('isSvgVectorPaint', () => {
     expect(isSvgVectorPaint({ ...linearGradient, blendMode: BlendMode.multiply })).toBe(false);
   });
 
-  it('should reject angular and diamond gradients (not yet supported natively in SVG)', () => {
-    expect(isSvgVectorPaint({ ...linearGradient, type: 'gradient-angular' })).toBe(false);
-    expect(isSvgVectorPaint({ ...linearGradient, type: 'gradient-diamond' })).toBe(false);
+  it('should allow angular and diamond gradients, approximated as vector sectors/rings', () => {
+    expect(isSvgVectorPaint({ ...linearGradient, type: 'gradient-angular' })).toBe(true);
+    expect(isSvgVectorPaint({ ...linearGradient, type: 'gradient-diamond' })).toBe(true);
+    expect(isSvgVectorPaint({ ...linearGradient, blendMode: BlendMode.multiply, type: 'gradient-angular' })).toBe(false);
   });
 });

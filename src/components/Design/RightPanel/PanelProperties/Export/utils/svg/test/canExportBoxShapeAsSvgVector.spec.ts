@@ -81,9 +81,9 @@ describe('canExportBoxShapeAsSvgVector', () => {
     expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-radial' }] }))).toBe(true);
   });
 
-  it('should reject angular and diamond gradient fills (no native SVG primitive yet)', () => {
-    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(false);
-    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(false);
+  it('should allow angular and diamond gradient fills (approximated as vector sectors/rings)', () => {
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(true);
+    expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(true);
   });
 
   it('should ignore stroke paints that are not drawn because the width is zero', () => {
