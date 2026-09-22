@@ -66,7 +66,7 @@ export const ExportSettingsPanel: FC<TExportSettingsPanelProps> = ({ onChange, o
             variant="outline"
           />
         </EffectSettingsField>
-        {setting.format === ExportFormat.jpeg && (
+        {(setting.format === ExportFormat.jpeg || setting.format === ExportFormat.pdf) && (
           <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.quality`)}>
             <UITools.Dropdown<ExportQuality>
               className={styles.ExportSettingsPanel__input}

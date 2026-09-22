@@ -307,7 +307,7 @@ describe('Export behaviors', () => {
     expect(screen.getByText('Basic')).toBeInTheDocument();
   });
 
-  it('should hide the quality field for png and show it for jpeg', () => {
+  it('should hide the quality field for png and show it for jpeg and pdf', () => {
     // before
     renderExport();
     addRow();
@@ -325,6 +325,15 @@ describe('Export behaviors', () => {
     // result
     expect(screen.getByText('Quality')).toBeInTheDocument();
     expect(screen.getByText('High')).toBeInTheDocument();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getAllByText('JPEG')[0]);
+    fireEvent.click(screen.getByText('PDF'));
+    openSettings();
+
+    // result
+    expect(screen.getByText('Quality')).toBeInTheDocument();
   });
 
   it('should change the jpeg quality from the dropdown', () => {

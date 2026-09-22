@@ -22,7 +22,13 @@ export const createExportFile = async (
   jpegQuality: ExportQuality,
 ): Promise<TExportFile | null> => {
   if (format === ExportFormat.pdf) {
-    const pdfBlob = await createPdfBlob(nodeId, Math.max(scale, PDF_MIN_RASTER_SCALE), ignoreOverlappingLayers, imageResampling);
+    const pdfBlob = await createPdfBlob(
+      nodeId,
+      Math.max(scale, PDF_MIN_RASTER_SCALE),
+      ignoreOverlappingLayers,
+      imageResampling,
+      EXPORT_JPEG_QUALITY[jpegQuality],
+    );
     return pdfBlob ? { blob: pdfBlob, fileName } : null;
   }
 

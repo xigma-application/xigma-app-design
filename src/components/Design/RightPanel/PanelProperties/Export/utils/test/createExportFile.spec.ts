@@ -43,7 +43,7 @@ describe('createExportFile', () => {
     );
 
     // result
-    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed);
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 2, true, ExportImageResampling.detailed, 0.92);
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(result).toEqual({ blob, fileName: 'Icon.pdf' });
   });
@@ -65,7 +65,27 @@ describe('createExportFile', () => {
     );
 
     // result
-    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic);
+    expect(createPdfBlobMock).toHaveBeenCalledWith('node-a', 4, false, ExportImageResampling.basic, 0.92);
+  });
+
+  it('should map the chosen quality to the pdf raster layer jpeg quality too', async () => {
+    // mock
+    createPdfBlobMock.mockResolvedValue({ size: 4, type: 'application/pdf' } as Blob);
+
+    // action
+    await createExportFile(
+      'node-a',
+      ExportFormat.pdf,
+      1,
+      'Icon.pdf',
+      true,
+      ExportImageResampling.detailed,
+      ExportColorProfile.srgb,
+      ExportQuality.low,
+    );
+
+    // result
+    expect(createPdfBlobMock.mock.calls[0][4]).toBe(0.5);
   });
 
   it('should return null when the pdf could not be built', async () => {

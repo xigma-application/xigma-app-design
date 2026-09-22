@@ -13,6 +13,8 @@ import { NodeType } from 'types/design/enums';
 // utils
 import { createPdfBlob } from '../createPdfBlob';
 
+const JPEG_QUALITY = 0.92;
+
 const renderNodeForExportMock = vi.fn();
 const createImageBlobFromPixelsMock = vi.fn();
 
@@ -32,6 +34,13 @@ const PNG_1X1 = Uint8Array.from(
   (char) => char.charCodeAt(0),
 );
 
+const JPEG_1X1 = Uint8Array.from(
+  atob(
+    '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
+  ),
+  (char) => char.charCodeAt(0),
+);
+
 const readPdfContent = async (blob: Blob | null): Promise<string> => {
   const pdf = await readPdf(blob);
 
@@ -39,6 +48,12 @@ const readPdfContent = async (blob: Blob | null): Promise<string> => {
     .enumerateIndirectObjects()
     .map(([, object]) => (object instanceof PDFRawStream ? new TextDecoder('latin1').decode(decodePDFRawStream(object).decode()) : ''))
     .join('\n');
+};
+
+const hasDctDecodeFilter = async (blob: Blob | null): Promise<boolean> => {
+  const pdf = await readPdf(blob);
+
+  return pdf.context.enumerateIndirectObjects().some(([, object]) => object.toString().includes('DCTDecode'));
 };
 
 const readPdf = async (blob: Blob | null): Promise<PDFDocument> => {
@@ -58,12 +73,14 @@ describe('createPdfBlob', () => {
     renderNodeForExportMock.mockReset();
     createImageBlobFromPixelsMock.mockReset();
     renderNodeForExportMock.mockResolvedValue({ height: 1, pixels: new Uint8Array(4), width: 1 });
-    createImageBlobFromPixelsMock.mockResolvedValue({ arrayBuffer: () => Promise.resolve(PNG_1X1.buffer) });
+    createImageBlobFromPixelsMock.mockImplementation((_pixels: Uint8Array, _width: number, _height: number, mimeType: string) =>
+      Promise.resolve({ arrayBuffer: () => Promise.resolve((mimeType === 'image/jpeg' ? JPEG_1X1 : PNG_1X1).buffer) }),
+    );
   });
 
   it('should return null when the node does not exist', async () => {
     // action
-    const result = await createPdfBlob('missing', 2, true, ExportImageResampling.detailed);
+    const result = await createPdfBlob('missing', 2, true, ExportImageResampling.detailed, JPEG_QUALITY);
 
     // result
     expect(result).toBeNull();
@@ -111,7 +128,7 @@ describe('createPdfBlob', () => {
     );
 
     // action
-    const blob = await createPdfBlob('pdf-frame', 2, true, ExportImageResampling.basic);
+    const blob = await createPdfBlob('pdf-frame', 2, true, ExportImageResampling.basic, JPEG_QUALITY);
     const pdf = await readPdf(blob);
 
     // result
@@ -119,6 +136,57 @@ describe('createPdfBlob', () => {
     expect(pdf.getPage(0).getSize()).toEqual({ height: 80, width: 120 });
     expect(renderNodeForExportMock).toHaveBeenCalledTimes(1);
     expect(renderNodeForExportMock).toHaveBeenCalledWith('pdf-frame', 2, true, ExportImageResampling.basic, new Set(['pdf-frame']));
+    expect(createImageBlobFromPixelsMock.mock.calls[0][3]).toBe('image/png');
+  });
+
+  it('should skip a png raster layer that could not be encoded when it is not the sole layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            childIds: ['pdf-text-2'],
+            clipContent: false,
+            fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+            height: 80,
+            id: 'pdf-frame-2',
+            name: 'Frame',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.frame,
+            width: 120,
+            x: 0,
+            y: 0,
+          },
+          {
+            content: 'Hi',
+            fill: '#000000',
+            flipX: false,
+            flipY: false,
+            fontFamily: 'Inter',
+            fontSize: 16,
+            height: 20,
+            id: 'pdf-text-2',
+            name: 'Label',
+            parentId: 'pdf-frame-2',
+            rotation: 0,
+            type: NodeType.text,
+            width: 60,
+            x: 10,
+            y: 10,
+          },
+        ],
+        rootIds: ['pdf-frame-2'],
+      }),
+    );
+
+    createImageBlobFromPixelsMock.mockResolvedValueOnce(null);
+
+    // action
+    const pdf = await readPdf(await createPdfBlob('pdf-frame-2', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(pdf.getPage(0).getSize()).toEqual({ height: 80, width: 120 });
   });
 
   it('should skip a raster layer that could not be rendered or encoded', async () => {
@@ -142,16 +210,44 @@ describe('createPdfBlob', () => {
     renderNodeForExportMock.mockResolvedValueOnce(null);
 
     // action
-    const withoutRender = await readPdf(await createPdfBlob(rectId, 2, true, ExportImageResampling.basic));
+    const withoutRender = await readPdf(await createPdfBlob(rectId, 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     createImageBlobFromPixelsMock.mockResolvedValueOnce(null);
 
-    const withoutBlob = await readPdf(await createPdfBlob(rectId, 2, true, ExportImageResampling.basic));
+    const withoutBlob = await readPdf(await createPdfBlob(rectId, 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     // result
     expect(withoutRender.getPage(0).getSize()).toEqual({ height: 30, width: 40 });
     expect(withoutBlob.getPage(0).getSize()).toEqual({ height: 30, width: 40 });
     expect(createImageBlobFromPixelsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should encode a page that is entirely one raster layer as an opaque-white-flattened jpeg at the given quality', async () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [{ opacity: 100, ref: 'img', rotation: 0, scaleMode: 'fill', type: 'image' }],
+        height: 30,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 40,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const rectId = Object.keys(selectNodes(store.getState())).slice(-1)[0];
+
+    // action
+    const blob = await createPdfBlob(rectId, 2, true, ExportImageResampling.basic, JPEG_QUALITY);
+
+    // result
+    expect(createImageBlobFromPixelsMock.mock.calls[0][3]).toBe('image/jpeg');
+    expect(createImageBlobFromPixelsMock.mock.calls[0][4]).toBe(JPEG_QUALITY);
+    expect(Array.from(createImageBlobFromPixelsMock.mock.calls[0][0] as Uint8Array)).toEqual([255, 255, 255, 255]);
+    expect(await hasDctDecodeFilter(blob)).toBe(true);
   });
 
   it('should draw a solid rectangle with a stroke as real vector paths without rendering any raster layer', async () => {
@@ -179,7 +275,7 @@ describe('createPdfBlob', () => {
     );
 
     // action
-    const text = await readPdfContent(await createPdfBlob('pdf-rect', 2, true, ExportImageResampling.basic));
+    const text = await readPdfContent(await createPdfBlob('pdf-rect', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     // result
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
@@ -211,7 +307,7 @@ describe('createPdfBlob', () => {
     );
 
     // action
-    const text = await readPdfContent(await createPdfBlob('pdf-ellipse', 2, true, ExportImageResampling.basic));
+    const text = await readPdfContent(await createPdfBlob('pdf-ellipse', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     // result
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
