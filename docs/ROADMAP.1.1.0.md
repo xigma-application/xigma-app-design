@@ -354,6 +354,8 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] SVG: linear and radial gradients on Frame/Rectangle fills and strokes export as real native
       `<linearGradient>`/`<radialGradient>` (angular and diamond gradients still fall back to a raster
       image, since SVG has no native conic/Manhattan gradient primitive)
+- [x] SVG: pen-tool shapes (fill, including linear/radial gradient faces, uniform stroke and round
+      caps) export as real vector paths
 
 ## Related
 

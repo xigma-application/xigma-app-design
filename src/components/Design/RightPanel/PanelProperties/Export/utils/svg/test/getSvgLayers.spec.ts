@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { SvgLayerType } from '../enums';
-import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getSvgLayers } from '../getSvgLayers';
@@ -57,6 +57,21 @@ const line = (id: string): TLineNode => ({
   x2: 10,
   y1: 0,
   y2: 0,
+});
+
+const vector = (id: string): TVectorNode => ({
+  defaultFill: null,
+  filledFaceKeys: [],
+  id,
+  name: id,
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '',
+  strokeWidth: 0,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
 });
 
 const text = (id: string): TSceneNode => ({
@@ -117,6 +132,17 @@ describe('getSvgLayers', () => {
     expect(layers).toEqual([
       { nodeIds: new Set(['a']), type: SvgLayerType.raster },
       { node: line('l'), type: SvgLayerType.vector },
+    ]);
+  });
+
+  it('should turn a vector-eligible pen-tool vector node into its own vector layer', () => {
+    // action
+    const layers = getSvgLayers([rectangle('a'), vector('vec')], (node) => node.type === NodeType.vector);
+
+    // result
+    expect(layers).toEqual([
+      { nodeIds: new Set(['a']), type: SvgLayerType.raster },
+      { node: vector('vec'), type: SvgLayerType.vector },
     ]);
   });
 

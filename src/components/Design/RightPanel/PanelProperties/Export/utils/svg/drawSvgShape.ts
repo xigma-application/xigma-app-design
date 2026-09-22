@@ -8,6 +8,7 @@ import { TSvgShapeNode } from './types';
 import { drawSvgBoxShape } from './drawSvgBoxShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
 import { drawSvgSimpleShape } from './drawSvgSimpleShape';
+import { drawSvgVectorNodeShape } from './drawSvgVectorNodeShape';
 
 export const drawSvgShape = (
   elements: string[],
@@ -23,6 +24,9 @@ export const drawSvgShape = (
       break;
     case NodeType.line:
       drawSvgLineShape(elements, node, nodesById, bounds);
+      break;
+    case NodeType.vector:
+      drawSvgVectorNodeShape(elements, defs, node, nodesById, bounds);
       break;
     default:
       drawSvgSimpleShape(elements, node, nodesById, bounds);

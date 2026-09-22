@@ -7,6 +7,7 @@ import { TSvgShapeNode } from './types';
 import { canExportBoxShapeAsSvgVector } from './canExportBoxShapeAsSvgVector';
 import { canExportLineAsSvgVector } from './canExportLineAsSvgVector';
 import { canExportSimpleShapeAsSvgVector } from './canExportSimpleShapeAsSvgVector';
+import { canExportVectorNodeAsSvgVector } from './canExportVectorNodeAsSvgVector';
 
 export const canExportShapeAsSvgVector = (node: TSvgShapeNode, nodesById: Record<string, TSceneNode>): boolean => {
   switch (node.type) {
@@ -15,6 +16,8 @@ export const canExportShapeAsSvgVector = (node: TSvgShapeNode, nodesById: Record
       return canExportBoxShapeAsSvgVector(node, nodesById);
     case NodeType.line:
       return canExportLineAsSvgVector(node, nodesById);
+    case NodeType.vector:
+      return canExportVectorNodeAsSvgVector(node, nodesById);
     default:
       return canExportSimpleShapeAsSvgVector(node, nodesById);
   }

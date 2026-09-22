@@ -23,6 +23,13 @@ vi.mock('utils/canvas/createImageBlobFromPixels', () => ({
   createImageBlobFromPixels: (...args: unknown[]): unknown => createImageBlobFromPixelsMock(...args),
 }));
 vi.mock('utils/blobToDataUrl', () => ({ blobToDataUrl: (...args: unknown[]): unknown => blobToDataUrlMock(...args) }));
+vi.mock('utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
+  getVectorFillLoopPoints: (): { x: number; y: number }[] => [
+    { x: 5, y: 5 },
+    { x: 35, y: 5 },
+    { x: 35, y: 25 },
+  ],
+}));
 
 const readSvgText = async (blob: Blob | null): Promise<string> => (blob ? blob.text() : '');
 
@@ -162,6 +169,47 @@ describe('createSvgBlob', () => {
     // result
     expect(renderNodeForExportMock).not.toHaveBeenCalled();
     expect(text).toContain('fill="#0000ff"');
+  });
+
+  it('should draw a plain filled pen-tool vector node as a real vector path without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
+            fillByKey: { face: [{ color: '#ff00ff', opacity: 100, type: 'solid' }] },
+            filledFaceKeys: ['face'],
+            id: 'svg-vector',
+            name: 'Vector',
+            parentId: null,
+            rotation: 0,
+            segments: {
+              s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+              s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+              s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+            },
+            strokeColor: '',
+            strokeWidth: 0,
+            type: NodeType.vector,
+            vertexHandleModes: {},
+            vertices: {
+              a: { id: 'a', x: 5, y: 5 },
+              b: { id: 'b', x: 35, y: 5 },
+              c: { id: 'c', x: 35, y: 25 },
+            },
+          },
+        ],
+        rootIds: ['svg-vector'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-vector', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('fill="#ff00ff"');
   });
 
   it('should draw a linear gradient fill as a real <linearGradient> without rendering any raster layer', async () => {

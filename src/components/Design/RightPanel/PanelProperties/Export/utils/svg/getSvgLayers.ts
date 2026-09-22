@@ -11,6 +11,7 @@ const VECTOR_CANDIDATE_TYPES: NodeType[] = [
   NodeType.polygon,
   NodeType.star,
   NodeType.line,
+  NodeType.vector,
 ];
 
 const isVectorCandidate = (node: TSceneNode): node is TSvgShapeNode => VECTOR_CANDIDATE_TYPES.includes(node.type);
