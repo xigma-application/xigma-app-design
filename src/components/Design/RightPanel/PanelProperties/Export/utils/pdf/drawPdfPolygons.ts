@@ -33,6 +33,7 @@ export const drawPdfPolygons = (
   opacity: number,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
+  fillRule: 'evenOdd' | 'nonZero' = 'evenOdd',
 ): void => {
   const [red, green, blue] = hexToRgbFloat(color);
 
@@ -41,7 +42,7 @@ export const drawPdfPolygons = (
     setGraphicsState(getPdfGraphicsState(page, opacity, graphicsStates)),
     setFillingRgbColor(red, green, blue),
     ...polygons.filter((polygon) => polygon.length >= 3).flatMap((polygon) => getPolygonOperators(polygon, bounds)),
-    PDFOperator.of(PDFOperatorNames.FillEvenOdd),
+    PDFOperator.of(fillRule === 'evenOdd' ? PDFOperatorNames.FillEvenOdd : PDFOperatorNames.FillNonZero),
     popGraphicsState(),
   );
 };

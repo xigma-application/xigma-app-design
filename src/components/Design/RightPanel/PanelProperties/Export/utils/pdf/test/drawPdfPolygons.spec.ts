@@ -28,4 +28,28 @@ describe('drawPdfPolygons', () => {
 
     expect(rendered).toEqual(['q', '/XigmaOpacity0 gs', '1 0 0 rg', '0 100 m', '20 100 l', '20 80 l', 'h', 'f*', 'Q']);
   });
+
+  it('should use the non-zero fill operator when the fill rule is nonZero', () => {
+    // mock
+    const pushOperators = vi.fn();
+    const page = {
+      doc: { context: { obj: (value: unknown): unknown => value, register: (): string => 'ref' } },
+      node: { setExtGState: vi.fn() },
+      pushOperators,
+    } as never;
+    const polygon = [
+      { x: 10, y: 20 },
+      { x: 30, y: 20 },
+      { x: 30, y: 40 },
+    ];
+
+    // action
+    drawPdfPolygons(page, [polygon], '#ff0000', 1, bounds, new Map<number, PDFName>(), 'nonZero');
+
+    // result
+    const rendered = pushOperators.mock.calls[0].map((operator: { toString: () => string }) => operator.toString());
+
+    expect(rendered).toContain('f');
+    expect(rendered).not.toContain('f*');
+  });
 });

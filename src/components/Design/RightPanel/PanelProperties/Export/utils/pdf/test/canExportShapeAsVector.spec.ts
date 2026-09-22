@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from '../canExportShapeAsVector';
@@ -33,6 +33,21 @@ const ellipse: TEllipseNode = {
 
 const line: TLineNode = { id: 'l', name: 'l', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };
 
+const vector: TVectorNode = {
+  defaultFill: null,
+  filledFaceKeys: [],
+  id: 'vec',
+  name: 'vec',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '',
+  strokeWidth: 0,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
+};
+
 describe('canExportShapeAsVector', () => {
   it('should route a box shape through the box eligibility check', () => {
     expect(canExportShapeAsVector(rectangle, {})).toBe(true);
@@ -47,5 +62,10 @@ describe('canExportShapeAsVector', () => {
   it('should route a line through the line eligibility check', () => {
     expect(canExportShapeAsVector(line, {})).toBe(true);
     expect(canExportShapeAsVector({ ...line, hidden: true }, {})).toBe(false);
+  });
+
+  it('should route a pen-tool vector node through the vector-node eligibility check', () => {
+    expect(canExportShapeAsVector(vector, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...vector, hidden: true }, {})).toBe(false);
   });
 });

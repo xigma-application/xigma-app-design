@@ -1,15 +1,12 @@
 // types
 import { BlendMode, StrokeMode } from 'types/design/enums';
 import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
-import { TPaint } from 'types/design/paint/types';
 
 // utils
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
 import { hasVectorStroke } from './hasVectorStroke';
+import { isPlainSolidPaint } from './isPlainSolidPaint';
 import { isSafeAncestorChain } from './isSafeAncestorChain';
-
-const isPlainSolidPaint = (paint: TPaint): boolean =>
-  paint.visible === false || (paint.type === 'solid' && (!paint.blendMode || paint.blendMode === BlendMode.normal));
 
 const isOwnStyleSupported = (node: TFrameNode | TRectangleNode): boolean =>
   !node.hidden &&

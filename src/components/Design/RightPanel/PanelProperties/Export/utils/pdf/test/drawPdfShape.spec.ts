@@ -2,7 +2,7 @@ import { PDFName } from 'pdf-lib';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawPdfShape } from '../drawPdfShape';
@@ -10,10 +10,14 @@ import { drawPdfShape } from '../drawPdfShape';
 const drawPdfBoxShapeMock = vi.fn();
 const drawPdfLineShapeMock = vi.fn();
 const drawPdfSimpleShapeMock = vi.fn();
+const drawPdfVectorNodeShapeMock = vi.fn();
 
 vi.mock('../drawPdfBoxShape', () => ({ drawPdfBoxShape: (...args: unknown[]): void => drawPdfBoxShapeMock(...args) }));
 vi.mock('../drawPdfLineShape', () => ({ drawPdfLineShape: (...args: unknown[]): void => drawPdfLineShapeMock(...args) }));
 vi.mock('../drawPdfSimpleShape', () => ({ drawPdfSimpleShape: (...args: unknown[]): void => drawPdfSimpleShapeMock(...args) }));
+vi.mock('../drawPdfVectorNodeShape', () => ({
+  drawPdfVectorNodeShape: (...args: unknown[]): void => drawPdfVectorNodeShapeMock(...args),
+}));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
 const page = {} as never;
@@ -62,11 +66,27 @@ const frame: TFrameNode = {
   y: 0,
 };
 
+const vector: TVectorNode = {
+  defaultFill: null,
+  filledFaceKeys: [],
+  id: 'vec',
+  name: 'vec',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '',
+  strokeWidth: 0,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
+};
+
 describe('drawPdfShape', () => {
   beforeEach(() => {
     drawPdfBoxShapeMock.mockClear();
     drawPdfLineShapeMock.mockClear();
     drawPdfSimpleShapeMock.mockClear();
+    drawPdfVectorNodeShapeMock.mockClear();
   });
 
   it('should dispatch a rectangle to drawPdfBoxShape', () => {
@@ -106,6 +126,17 @@ describe('drawPdfShape', () => {
     // result
     expect(drawPdfLineShapeMock).toHaveBeenCalledTimes(1);
     expect(drawPdfBoxShapeMock).not.toHaveBeenCalled();
+    expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
+  });
+
+  it('should dispatch a pen-tool vector node to drawPdfVectorNodeShape', () => {
+    // action
+    drawPdfShape(page, vector, {}, bounds, states);
+
+    // result
+    expect(drawPdfVectorNodeShapeMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfBoxShapeMock).not.toHaveBeenCalled();
+    expect(drawPdfLineShapeMock).not.toHaveBeenCalled();
     expect(drawPdfSimpleShapeMock).not.toHaveBeenCalled();
   });
 });

@@ -28,6 +28,13 @@ vi.mock('../loadPdfFontBytes', () => ({
   loadPdfFontBytes: (): Promise<ArrayBuffer> =>
     Promise.resolve(new Uint8Array(readFileSync('src/assets/fonts/inter/source/Inter-Regular.ttf')) as unknown as ArrayBuffer),
 }));
+vi.mock('utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
+  getVectorFillLoopPoints: (): { x: number; y: number }[] => [
+    { x: 5, y: 5 },
+    { x: 35, y: 5 },
+    { x: 35, y: 25 },
+  ],
+}));
 
 const PNG_1X1 = Uint8Array.from(
   atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='),
@@ -337,6 +344,47 @@ describe('createPdfBlob', () => {
 
     // action
     const text = await readPdfContent(await createPdfBlob('pdf-line', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(text).toContain('f*');
+  });
+
+  it('should draw a plain filled pen-tool vector node as a real vector path without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
+            fillByKey: { face: [{ color: '#ff00ff', opacity: 100, type: 'solid' }] },
+            filledFaceKeys: ['face'],
+            id: 'pdf-vector',
+            name: 'Vector',
+            parentId: null,
+            rotation: 0,
+            segments: {
+              s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+              s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+              s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+            },
+            strokeColor: '',
+            strokeWidth: 0,
+            type: NodeType.vector,
+            vertexHandleModes: {},
+            vertices: {
+              a: { id: 'a', x: 5, y: 5 },
+              b: { id: 'b', x: 35, y: 5 },
+              c: { id: 'c', x: 35, y: 25 },
+            },
+          },
+        ],
+        rootIds: ['pdf-vector'],
+      }),
+    );
+
+    // action
+    const text = await readPdfContent(await createPdfBlob('pdf-vector', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
 
     // result
     expect(renderNodeForExportMock).not.toHaveBeenCalled();

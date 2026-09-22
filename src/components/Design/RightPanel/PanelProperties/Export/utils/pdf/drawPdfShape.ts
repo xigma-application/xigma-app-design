@@ -10,6 +10,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawPdfBoxShape } from './drawPdfBoxShape';
 import { drawPdfLineShape } from './drawPdfLineShape';
 import { drawPdfSimpleShape } from './drawPdfSimpleShape';
+import { drawPdfVectorNodeShape } from './drawPdfVectorNodeShape';
 
 export const drawPdfShape = (
   page: PDFPage,
@@ -25,6 +26,9 @@ export const drawPdfShape = (
       break;
     case NodeType.line:
       drawPdfLineShape(page, node, nodesById, bounds, graphicsStates);
+      break;
+    case NodeType.vector:
+      drawPdfVectorNodeShape(page, node, nodesById, bounds, graphicsStates);
       break;
     default:
       drawPdfSimpleShape(page, node, nodesById, bounds, graphicsStates);
