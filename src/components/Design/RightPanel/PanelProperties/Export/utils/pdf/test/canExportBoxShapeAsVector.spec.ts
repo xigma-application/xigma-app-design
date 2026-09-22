@@ -78,17 +78,15 @@ describe('canExportBoxShapeAsVector', () => {
     expect(check(rectangle({ strokeMode: StrokeMode.brush }))).toBe(false);
   });
 
-  it('should allow any gradient type fill with fully opaque stops', () => {
+  it('should allow any gradient type fill regardless of opacity', () => {
     expect(check(rectangle({ fills: [linearGradient] }))).toBe(true);
     expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-radial' }] }))).toBe(true);
     expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-angular' }] }))).toBe(true);
     expect(check(rectangle({ fills: [{ ...linearGradient, type: 'gradient-diamond' }] }))).toBe(true);
-  });
 
-  it('should reject a gradient fill with any translucent stop', () => {
     const translucentGradient = { ...linearGradient, stops: [linearGradient.stops[0], { ...linearGradient.stops[1], opacity: 50 }] };
 
-    expect(check(rectangle({ fills: [translucentGradient] }))).toBe(false);
+    expect(check(rectangle({ fills: [translucentGradient] }))).toBe(true);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {

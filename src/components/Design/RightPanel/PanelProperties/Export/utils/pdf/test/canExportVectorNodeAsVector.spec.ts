@@ -78,16 +78,14 @@ describe('canExportVectorNodeAsVector', () => {
     expect(canExportVectorNodeAsVector(vectorNode({ strokeWidth: 0, widthProfile: { points: {} } }), {})).toBe(true);
   });
 
-  it('should allow a linear/radial gradient fill group with fully opaque stops', () => {
+  it('should allow a gradient fill group regardless of stop opacity', () => {
     groupFilledFacesForRenderingMock.mockReturnValue([gradientGroup]);
     expect(canExportVectorNodeAsVector(vectorNode(), {})).toBe(true);
-  });
 
-  it('should reject a gradient fill group with a translucent stop', () => {
     groupFilledFacesForRenderingMock.mockReturnValue([
       { ...gradientGroup, paint: [{ ...gradientGroup.paint[0], stops: [{ color: '#ff0000', opacity: 50, position: 0 }] }] },
     ]);
-    expect(canExportVectorNodeAsVector(vectorNode(), {})).toBe(false);
+    expect(canExportVectorNodeAsVector(vectorNode(), {})).toBe(true);
   });
 
   it('should reject a node whose ancestor is unsafe', () => {

@@ -7,10 +7,12 @@ import { TGradientPaint } from 'types/design/paint/types';
 // utils
 import { getPdfAxialShadingPattern } from './getPdfAxialShadingPattern';
 import { getPdfFunctionBasedShadingPattern } from './getPdfFunctionBasedShadingPattern';
+import { getPdfGradientSoftMaskState } from './getPdfGradientSoftMaskState';
 import { getPdfGraphicsState } from './getPdfGraphicsState';
 import { getPdfPolygonPathOperators } from './drawPdfPolygons';
 import { getPdfGradientGeometry } from './getPdfGradientGeometry';
 import { getPdfRadialShadingPattern } from './getPdfRadialShadingPattern';
+import { isOpaqueGradientPaint } from './isOpaqueGradientPaint';
 import { registerPdfPattern } from './registerPdfPattern';
 
 const getPdfGradientPatternDict = (page: PDFPage, paint: TGradientPaint, bounds: TDraftRect): Record<string, unknown> => {
@@ -36,10 +38,12 @@ export const drawPdfGradientPolygons = (
   graphicsStates: Map<number, PDFName>,
 ): void => {
   const patternName = registerPdfPattern(page, getPdfGradientPatternDict(page, paint, bounds));
+  const softMaskState = isOpaqueGradientPaint(paint) ? null : getPdfGradientSoftMaskState(page, paint, polygons, bounds);
 
   page.pushOperators(
     pushGraphicsState(),
     setGraphicsState(getPdfGraphicsState(page, opacity, graphicsStates)),
+    ...(softMaskState ? [setGraphicsState(softMaskState)] : []),
     PDFOperator.of(PDFOperatorNames.NonStrokingColorspace, [PDFName.of('Pattern')]),
     PDFOperator.of(PDFOperatorNames.NonStrokingColorN, [patternName]),
     ...getPdfPolygonPathOperators(polygons, bounds),

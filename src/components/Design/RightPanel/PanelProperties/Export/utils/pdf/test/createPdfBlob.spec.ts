@@ -488,4 +488,51 @@ describe('createPdfBlob', () => {
     expect(objectDictText).toContain('FunctionType 4');
     expect(await readPdfContent(blob)).toContain('atan');
   });
+
+  it('should draw a gradient with a translucent stop as a vector shading behind a luminosity soft mask, without rendering any raster layer', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [
+              {
+                end: { x: 40, y: 0 },
+                opacity: 100,
+                start: { x: 0, y: 0 },
+                stops: [
+                  { color: '#ff0000', opacity: 100, position: 0 },
+                  { color: '#0000ff', opacity: 50, position: 1 },
+                ],
+                type: 'gradient-linear',
+              },
+            ],
+            height: 30,
+            id: 'pdf-translucent',
+            name: 'Rect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['pdf-translucent'],
+      }),
+    );
+
+    // action
+    const blob = await createPdfBlob('pdf-translucent', 2, true, ExportImageResampling.basic, JPEG_QUALITY);
+
+    // result
+    expect(renderNodeForExportMock).not.toHaveBeenCalled();
+    expect(await readPdfContent(blob)).toContain('/Pattern cs');
+
+    const objectDictText = await readPdfObjectDictText(blob);
+
+    expect(objectDictText).toContain('/Luminosity');
+    expect(objectDictText).toContain('/DeviceGray');
+    expect(objectDictText).toContain('/Subtype /Form');
+  });
 });

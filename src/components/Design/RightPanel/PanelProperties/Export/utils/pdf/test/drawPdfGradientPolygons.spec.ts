@@ -9,6 +9,7 @@ import { drawPdfGradientPolygons } from '../drawPdfGradientPolygons';
 const getPdfAxialShadingPatternMock = vi.fn();
 const getPdfRadialShadingPatternMock = vi.fn();
 const getPdfFunctionBasedShadingPatternMock = vi.fn();
+const getPdfGradientSoftMaskStateMock = vi.fn();
 const registerPdfPatternMock = vi.fn();
 
 vi.mock('../getPdfAxialShadingPattern', () => ({
@@ -19,6 +20,9 @@ vi.mock('../getPdfRadialShadingPattern', () => ({
 }));
 vi.mock('../getPdfFunctionBasedShadingPattern', () => ({
   getPdfFunctionBasedShadingPattern: (...args: unknown[]): unknown => getPdfFunctionBasedShadingPatternMock(...args),
+}));
+vi.mock('../getPdfGradientSoftMaskState', () => ({
+  getPdfGradientSoftMaskState: (...args: unknown[]): unknown => getPdfGradientSoftMaskStateMock(...args),
 }));
 vi.mock('../registerPdfPattern', () => ({ registerPdfPattern: (...args: unknown[]): unknown => registerPdfPatternMock(...args) }));
 
@@ -48,6 +52,7 @@ describe('drawPdfGradientPolygons', () => {
     getPdfAxialShadingPatternMock.mockReset();
     getPdfRadialShadingPatternMock.mockReset();
     getPdfFunctionBasedShadingPatternMock.mockReset();
+    getPdfGradientSoftMaskStateMock.mockReset();
     registerPdfPatternMock.mockReset();
     registerPdfPatternMock.mockReturnValue(PDFName.of('XigmaPattern0'));
   });
@@ -66,6 +71,7 @@ describe('drawPdfGradientPolygons', () => {
     // result
     expect(getPdfAxialShadingPatternMock).toHaveBeenCalledWith(context, linearPaint.stops, expect.any(Object));
     expect(getPdfRadialShadingPatternMock).not.toHaveBeenCalled();
+    expect(getPdfGradientSoftMaskStateMock).not.toHaveBeenCalled();
     expect(registerPdfPatternMock).toHaveBeenCalledWith(page, { PatternType: 2 });
 
     const rendered = pushOperators.mock.calls[0].map((operator: { toString: () => string }) => operator.toString());
@@ -141,5 +147,41 @@ describe('drawPdfGradientPolygons', () => {
       1,
       bounds,
     );
+  });
+
+  it('should apply a soft mask graphics state when a gradient has a translucent stop', () => {
+    // mock
+    getPdfAxialShadingPatternMock.mockReturnValue({ PatternType: 2 });
+    getPdfGradientSoftMaskStateMock.mockReturnValue(PDFName.of('XigmaSoftMask0'));
+
+    const pushOperators = vi.fn();
+    const context = { obj: (value: unknown): unknown => value, register: (): string => 'ref' };
+    const page = { doc: { context }, node: { setExtGState: vi.fn() }, pushOperators } as never;
+    const translucentPaint: TGradientPaint = {
+      ...linearPaint,
+      stops: [linearPaint.stops[0], { ...linearPaint.stops[1], opacity: 50 }],
+    };
+
+    // action
+    drawPdfGradientPolygons(page, translucentPaint, polygons, 1, bounds, states);
+
+    // result
+    expect(getPdfGradientSoftMaskStateMock).toHaveBeenCalledWith(page, translucentPaint, polygons, bounds);
+
+    const rendered = pushOperators.mock.calls[0].map((operator: { toString: () => string }) => operator.toString());
+
+    expect(rendered).toEqual([
+      'q',
+      '/XigmaOpacity1 gs',
+      '/XigmaSoftMask0 gs',
+      '/Pattern cs',
+      '/XigmaPattern0 scn',
+      '0 100 m',
+      '10 100 l',
+      '10 90 l',
+      'h',
+      'f*',
+      'Q',
+    ]);
   });
 });
