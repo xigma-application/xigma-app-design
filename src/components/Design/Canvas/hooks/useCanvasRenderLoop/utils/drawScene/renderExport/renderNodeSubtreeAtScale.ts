@@ -32,9 +32,6 @@ export const renderNodeSubtreeAtScale = (
         drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0, phase);
         markNodeDrawnOverGlassBackdrop(renderer, node);
       },
-      // renderExportTarget already swapped renderContext.imageContext.renderTargetPool for one
-      // sized to this export's own target, so reusing it here keeps every scratch allocation —
-      // isolated-effect content and this renderer's own — pooled together, correctly sized.
       pool: renderContext.imageContext.renderTargetPool,
       refs,
       sceneNodeById,

@@ -49,10 +49,6 @@ export const renderExportTarget = (
       gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-      // Every scratch target this render needs (isolated blur/glass content, noise/shadow masks, ...)
-      // is pulled from imageContext.renderTargetPool — including code reached only through `context`,
-      // not through a TMaskRenderer. That pool always sizes its targets to the real, visible canvas,
-      // so it's swapped here for one sized to this export's own target, for every consumer at once.
       const pool = createFixedRenderTargetPool(gl, width, height);
       const renderContext: TDrawSceneContext = {
         ...context,
