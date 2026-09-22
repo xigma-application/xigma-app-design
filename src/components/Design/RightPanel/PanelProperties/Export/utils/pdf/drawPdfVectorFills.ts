@@ -6,6 +6,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { drawPdfPaintPolygons } from './drawPdfPaintPolygons';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 export const drawPdfVectorFills = (
@@ -15,7 +16,9 @@ export const drawPdfVectorFills = (
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
 ): void => {
+  const nodeBounds = getVectorNodeBounds(renderedNode);
+
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
-    drawPdfPaintPolygons(page, paint, polygons, opacity, bounds, graphicsStates);
+    drawPdfPaintPolygons(page, paint, polygons, opacity, bounds, graphicsStates, nodeBounds);
   });
 };

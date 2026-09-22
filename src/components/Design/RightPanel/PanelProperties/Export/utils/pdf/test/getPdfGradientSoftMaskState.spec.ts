@@ -32,7 +32,7 @@ describe('getPdfGradientSoftMaskState', () => {
     const page = pdfDocument.addPage([200, 100]);
 
     // action
-    const name = getPdfGradientSoftMaskState(page, paint, polygons, bounds);
+    const name = getPdfGradientSoftMaskState(page, paint, polygons, bounds, bounds);
 
     // result
     const extGStates = page.node.normalizedEntries().ExtGState;

@@ -90,6 +90,28 @@ describe('drawPdfGradientPolygons', () => {
     ]);
   });
 
+  it('should use an explicit node bounds as the gradient fill bounds instead of the polygon extents', () => {
+    // mock
+    getPdfAxialShadingPatternMock.mockReturnValue({ PatternType: 2 });
+
+    const context = { obj: (value: unknown): unknown => value, register: (): string => 'ref' };
+    const page = { doc: { context }, node: { setExtGState: vi.fn() }, pushOperators: vi.fn() } as never;
+    const explicitNodeBounds = { height: 50, width: 50, x: 5, y: 5 };
+
+    // action
+    drawPdfGradientPolygons(page, linearPaint, polygons, 1, bounds, states, explicitNodeBounds);
+
+    // result
+    expect(getPdfGradientSoftMaskStateMock).not.toHaveBeenCalled();
+    // start is normalized {x:0,y:0} placed inside the 50x50 explicit bounds at (5,5), then flipped into
+    // a 100-tall page: x unchanged at 5, y becomes 100 - (5 - 0) = 95
+    expect(getPdfAxialShadingPatternMock).toHaveBeenCalledWith(
+      context,
+      linearPaint.stops,
+      expect.objectContaining({ startPage: { x: 5, y: 95 } }),
+    );
+  });
+
   it('should build a radial pattern for a radial gradient', () => {
     // mock
     getPdfRadialShadingPatternMock.mockReturnValue({ Matrix: [1, 0, 0, 1, 0, 0], PatternType: 2 });
@@ -165,8 +187,14 @@ describe('drawPdfGradientPolygons', () => {
     // action
     drawPdfGradientPolygons(page, translucentPaint, polygons, 1, bounds, states);
 
-    // result
-    expect(getPdfGradientSoftMaskStateMock).toHaveBeenCalledWith(page, translucentPaint, polygons, bounds);
+    // result — fillBounds is auto-computed from the polygon extents (no explicit node bounds passed)
+    expect(getPdfGradientSoftMaskStateMock).toHaveBeenCalledWith(
+      page,
+      translucentPaint,
+      polygons,
+      { height: 10, width: 10, x: 0, y: 0 },
+      bounds,
+    );
 
     const rendered = pushOperators.mock.calls[0].map((operator: { toString: () => string }) => operator.toString());
 

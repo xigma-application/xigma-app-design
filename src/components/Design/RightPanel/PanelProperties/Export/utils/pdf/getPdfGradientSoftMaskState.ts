@@ -10,24 +10,29 @@ import { getPdfGradientGeometry } from './getPdfGradientGeometry';
 import { getPdfPolygonPathOperators } from './drawPdfPolygons';
 import { registerPdfPatternInDict } from './registerPdfPatternInDict';
 
-export const getPdfGradientSoftMaskState = (page: PDFPage, paint: TGradientPaint, polygons: TPoint[][], bounds: TDraftRect): PDFName => {
+export const getPdfGradientSoftMaskState = (
+  page: PDFPage,
+  paint: TGradientPaint,
+  polygons: TPoint[][],
+  fillBounds: TDraftRect,
+  pageBounds: TDraftRect,
+): PDFName => {
   const { context } = page.doc;
-  const geometry = getPdfGradientGeometry(paint, bounds);
-  const alphaPatternDict = getPdfGradientAlphaPatternDict(context, paint, geometry, bounds);
-
+  const geometry = getPdfGradientGeometry(paint, fillBounds, pageBounds);
+  const alphaPatternDict = getPdfGradientAlphaPatternDict(context, paint, geometry, pageBounds);
   const resources = PDFDict.withContext(context);
   const patternName = registerPdfPatternInDict(resources, alphaPatternDict);
 
   const content = [
     PDFOperator.of(PDFOperatorNames.NonStrokingColorspace, [PDFName.of('Pattern')]),
     PDFOperator.of(PDFOperatorNames.NonStrokingColorN, [patternName]),
-    ...getPdfPolygonPathOperators(polygons, bounds),
+    ...getPdfPolygonPathOperators(polygons, pageBounds),
     PDFOperator.of(PDFOperatorNames.FillEvenOdd),
   ];
 
   const formRef = context.register(
     context.formXObject(content, {
-      BBox: [0, 0, bounds.width, bounds.height],
+      BBox: [0, 0, pageBounds.width, pageBounds.height],
       Group: { CS: 'DeviceGray', S: 'Transparency', Type: 'Group' },
       Resources: resources,
     } as never),

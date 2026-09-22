@@ -12,12 +12,18 @@ import { getPdfGraphicsState } from './getPdfGraphicsState';
 import { getPdfPolygonPathOperators } from './drawPdfPolygons';
 import { getPdfGradientGeometry } from './getPdfGradientGeometry';
 import { getPdfRadialShadingPattern } from './getPdfRadialShadingPattern';
+import { getVectorFillBounds } from 'utils/canvas/drawVectorNode/getVectorFillBounds';
 import { isOpaqueGradientPaint } from './isOpaqueGradientPaint';
 import { registerPdfPattern } from './registerPdfPattern';
 
-const getPdfGradientPatternDict = (page: PDFPage, paint: TGradientPaint, bounds: TDraftRect): Record<string, unknown> => {
+const getPdfGradientPatternDict = (
+  page: PDFPage,
+  paint: TGradientPaint,
+  fillBounds: TDraftRect,
+  pageBounds: TDraftRect,
+): Record<string, unknown> => {
   const { context } = page.doc;
-  const geometry = getPdfGradientGeometry(paint, bounds);
+  const geometry = getPdfGradientGeometry(paint, fillBounds, pageBounds);
 
   switch (paint.type) {
     case 'gradient-linear':
@@ -25,7 +31,7 @@ const getPdfGradientPatternDict = (page: PDFPage, paint: TGradientPaint, bounds:
     case 'gradient-radial':
       return getPdfRadialShadingPattern(context, paint.stops, geometry, paint.radiusRatio);
     default:
-      return getPdfFunctionBasedShadingPattern(context, paint.type, paint.stops, geometry, paint.radiusRatio ?? 1, bounds);
+      return getPdfFunctionBasedShadingPattern(context, paint.type, paint.stops, geometry, paint.radiusRatio ?? 1, pageBounds);
   }
 };
 
@@ -36,9 +42,11 @@ export const drawPdfGradientPolygons = (
   opacity: number,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
+  nodeBounds: TDraftRect | null = null,
 ): void => {
-  const patternName = registerPdfPattern(page, getPdfGradientPatternDict(page, paint, bounds));
-  const softMaskState = isOpaqueGradientPaint(paint) ? null : getPdfGradientSoftMaskState(page, paint, polygons, bounds);
+  const fillBounds = getVectorFillBounds(polygons, nodeBounds);
+  const patternName = registerPdfPattern(page, getPdfGradientPatternDict(page, paint, fillBounds, bounds));
+  const softMaskState = isOpaqueGradientPaint(paint) ? null : getPdfGradientSoftMaskState(page, paint, polygons, fillBounds, bounds);
 
   page.pushOperators(
     pushGraphicsState(),

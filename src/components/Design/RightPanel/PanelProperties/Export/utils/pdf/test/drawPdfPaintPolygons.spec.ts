@@ -67,6 +67,18 @@ describe('drawPdfPaintPolygons', () => {
     // result
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
     expect(drawPdfGradientPolygonsMock).toHaveBeenCalledTimes(1);
-    expect(drawPdfGradientPolygonsMock).toHaveBeenCalledWith(page, { ...gradient, opacity: 40 }, polygons, 0.4, bounds, states);
+    expect(drawPdfGradientPolygonsMock).toHaveBeenCalledWith(page, { ...gradient, opacity: 40 }, polygons, 0.4, bounds, states, null);
+  });
+
+  it('should forward a given node bounds through to a gradient paint', () => {
+    // mock
+    const gradient = { end: { x: 1, y: 0 }, opacity: 40, start: { x: 0, y: 0 }, stops: [], type: 'gradient-linear' as const };
+    const nodeBounds = { height: 5, width: 5, x: 1, y: 1 };
+
+    // action
+    drawPdfPaintPolygons(page, [gradient], polygons, 1, bounds, states, nodeBounds);
+
+    // result
+    expect(drawPdfGradientPolygonsMock).toHaveBeenCalledWith(page, { ...gradient, opacity: 40 }, polygons, 0.4, bounds, states, nodeBounds);
   });
 });

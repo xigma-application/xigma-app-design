@@ -22,6 +22,7 @@ export const drawPdfPaintPolygons = (
   opacity: number,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
+  nodeBounds: TDraftRect | null = null,
 ): void => {
   getFillsInPaintOrder(getScaledFillPaints(paints, opacity))
     .filter(isVisiblePlainPaint)
@@ -29,7 +30,7 @@ export const drawPdfPaintPolygons = (
       if (paint.type === 'solid') {
         drawPdfPolygons(page, polygons, paint.color, paint.opacity / 100, bounds, graphicsStates);
       } else {
-        drawPdfGradientPolygons(page, paint, polygons, paint.opacity / 100, bounds, graphicsStates);
+        drawPdfGradientPolygons(page, paint, polygons, paint.opacity / 100, bounds, graphicsStates, nodeBounds);
       }
     });
 };

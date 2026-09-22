@@ -414,9 +414,14 @@ describe('createPdfBlob', () => {
           {
             fills: [
               {
-                end: { x: 40, y: 0 },
+                // start/end are normalized 0..1 fractions of the shape's own bounds, not absolute
+                // points — the shape below sits well away from the page origin specifically so this
+                // test would fail if that normalization were skipped (a real bug caught in production:
+                // treating them as absolute collapsed the gradient axis to a near-zero segment far
+                // off-page, which rendered as one flat color)
+                end: { x: 1, y: 0.5 },
                 opacity: 100,
-                start: { x: 0, y: 0 },
+                start: { x: 0, y: 0.5 },
                 stops: [
                   { color: '#ff0000', opacity: 100, position: 0 },
                   { color: '#0000ff', opacity: 100, position: 1 },
@@ -431,8 +436,8 @@ describe('createPdfBlob', () => {
             rotation: 0,
             type: NodeType.rectangle,
             width: 40,
-            x: 0,
-            y: 0,
+            x: 15,
+            y: 22,
           },
         ],
         rootIds: ['pdf-linear'],
@@ -456,9 +461,10 @@ describe('createPdfBlob', () => {
           {
             fills: [
               {
-                end: { x: 20, y: 0 },
+                // normalized fractions (see the linear gradient test above for why)
+                end: { x: 1, y: 0.5 },
                 opacity: 100,
-                start: { x: 20, y: 15 },
+                start: { x: 0.5, y: 0.5 },
                 stops: [
                   { color: '#ff0000', opacity: 100, position: 0 },
                   { color: '#0000ff', opacity: 100, position: 1 },
@@ -473,8 +479,8 @@ describe('createPdfBlob', () => {
             rotation: 0,
             type: NodeType.rectangle,
             width: 40,
-            x: 0,
-            y: 0,
+            x: 8,
+            y: 12,
           },
         ],
         rootIds: ['pdf-angular'],
@@ -503,9 +509,10 @@ describe('createPdfBlob', () => {
           {
             fills: [
               {
-                end: { x: 40, y: 0 },
+                // normalized fractions (see the linear gradient test above for why)
+                end: { x: 1, y: 0.5 },
                 opacity: 100,
-                start: { x: 0, y: 0 },
+                start: { x: 0, y: 0.5 },
                 stops: [
                   { color: '#ff0000', opacity: 100, position: 0 },
                   { color: '#0000ff', opacity: 50, position: 1 },
@@ -520,8 +527,8 @@ describe('createPdfBlob', () => {
             rotation: 0,
             type: NodeType.rectangle,
             width: 40,
-            x: 0,
-            y: 0,
+            x: 33,
+            y: 7,
           },
         ],
         rootIds: ['pdf-translucent'],

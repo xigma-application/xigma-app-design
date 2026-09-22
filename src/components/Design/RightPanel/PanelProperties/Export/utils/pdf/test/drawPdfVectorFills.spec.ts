@@ -9,9 +9,13 @@ import { drawPdfVectorFills } from '../drawPdfVectorFills';
 
 const groupFilledFacesForRenderingMock = vi.fn();
 const drawPdfPaintPolygonsMock = vi.fn();
+const getVectorNodeBoundsMock = vi.fn();
 
 vi.mock('utils/canvas/drawVectorNode/groupFilledFacesForRendering', () => ({
   groupFilledFacesForRendering: (...args: unknown[]): unknown => groupFilledFacesForRenderingMock(...args),
+}));
+vi.mock('utils/canvas/vectorNetwork/getVectorNodeBounds', () => ({
+  getVectorNodeBounds: (...args: unknown[]): unknown => getVectorNodeBoundsMock(...args),
 }));
 vi.mock('../drawPdfPaintPolygons', () => ({ drawPdfPaintPolygons: (...args: unknown[]): void => drawPdfPaintPolygonsMock(...args) }));
 
@@ -37,9 +41,11 @@ const node: TVectorNode = {
 describe('drawPdfVectorFills', () => {
   beforeEach(() => {
     drawPdfPaintPolygonsMock.mockClear();
+    getVectorNodeBoundsMock.mockReset();
+    getVectorNodeBoundsMock.mockReturnValue({ height: 20, width: 20, x: 0, y: 0 });
   });
 
-  it('should draw one paint-polygons call per fill group', () => {
+  it('should draw one paint-polygons call per fill group, threading the rendered node bounds through as the gradient fill bounds', () => {
     // mock
     const paintA = [{ color: '#111111', opacity: 100, type: 'solid' as const }];
     const paintB = [{ color: '#222222', opacity: 100, type: 'solid' as const }];
@@ -55,9 +61,13 @@ describe('drawPdfVectorFills', () => {
     drawPdfVectorFills(page, node, 0.5, bounds, states);
 
     // result
+    expect(getVectorNodeBoundsMock).toHaveBeenCalledWith(node);
+
+    const nodeBounds = { height: 20, width: 20, x: 0, y: 0 };
+
     expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(2);
-    expect(drawPdfPaintPolygonsMock).toHaveBeenNthCalledWith(1, page, paintA, polygonsA, 0.5, bounds, states);
-    expect(drawPdfPaintPolygonsMock).toHaveBeenNthCalledWith(2, page, paintB, polygonsB, 0.5, bounds, states);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenNthCalledWith(1, page, paintA, polygonsA, 0.5, bounds, states, nodeBounds);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenNthCalledWith(2, page, paintB, polygonsB, 0.5, bounds, states, nodeBounds);
   });
 
   it('should draw nothing when there are no fill groups', () => {
