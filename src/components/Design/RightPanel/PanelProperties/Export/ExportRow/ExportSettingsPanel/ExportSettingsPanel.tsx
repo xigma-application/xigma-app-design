@@ -88,29 +88,37 @@ export const ExportSettingsPanel: FC<TExportSettingsPanelProps> = ({ onChange, o
             variant="outline"
           />
         </EffectSettingsField>
-        <UITools.Checkbox
-          label={t(`${translationNameSpace}.settings.labels.ignoreOverlappingLayers`)}
-          onChange={(ignoreOverlappingLayers): void => onChange({ ...setting, ignoreOverlappingLayers })}
-          value={setting.ignoreOverlappingLayers}
-        />
-        <UITools.Checkbox
-          label={t(`${translationNameSpace}.settings.labels.includeBoundingBox`)}
-          onChange={(includeBoundingBox): void => onChange({ ...setting, includeBoundingBox })}
-          value={setting.includeBoundingBox}
-        />
-        {(setting.format === ExportFormat.svg || setting.format === ExportFormat.pdf) && (
+        <div className={styles['ExportSettingsPanel__checkbox-row']}>
           <UITools.Checkbox
-            label={t(`${translationNameSpace}.settings.labels.outlineText`)}
-            onChange={(outlineText): void => onChange({ ...setting, outlineText })}
-            value={setting.outlineText}
+            label={t(`${translationNameSpace}.settings.labels.ignoreOverlappingLayers`)}
+            onChange={(ignoreOverlappingLayers): void => onChange({ ...setting, ignoreOverlappingLayers })}
+            value={setting.ignoreOverlappingLayers}
           />
+        </div>
+        <div className={styles['ExportSettingsPanel__checkbox-row']}>
+          <UITools.Checkbox
+            label={t(`${translationNameSpace}.settings.labels.includeBoundingBox`)}
+            onChange={(includeBoundingBox): void => onChange({ ...setting, includeBoundingBox })}
+            value={setting.includeBoundingBox}
+          />
+        </div>
+        {(setting.format === ExportFormat.svg || setting.format === ExportFormat.pdf) && (
+          <div className={styles['ExportSettingsPanel__checkbox-row']}>
+            <UITools.Checkbox
+              label={t(`${translationNameSpace}.settings.labels.outlineText`)}
+              onChange={(outlineText): void => onChange({ ...setting, outlineText })}
+              value={setting.outlineText}
+            />
+          </div>
         )}
         {setting.format === ExportFormat.svg && (
-          <UITools.Checkbox
-            label={t(`${translationNameSpace}.settings.labels.includeIdAttribute`)}
-            onChange={(includeIdAttribute): void => onChange({ ...setting, includeIdAttribute })}
-            value={setting.includeIdAttribute}
-          />
+          <div className={styles['ExportSettingsPanel__checkbox-row']}>
+            <UITools.Checkbox
+              label={t(`${translationNameSpace}.settings.labels.includeIdAttribute`)}
+              onChange={(includeIdAttribute): void => onChange({ ...setting, includeIdAttribute })}
+              value={setting.includeIdAttribute}
+            />
+          </div>
         )}
       </div>
     </div>

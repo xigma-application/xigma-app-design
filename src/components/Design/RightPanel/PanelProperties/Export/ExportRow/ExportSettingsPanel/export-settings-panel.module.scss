@@ -33,4 +33,10 @@
     flex: 1;
     min-width: 0;
   }
+
+  &__checkbox-row {
+    align-items: center;
+    display: flex;
+    height: 32px;
+  }
 }
