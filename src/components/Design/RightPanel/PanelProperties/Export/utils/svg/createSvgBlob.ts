@@ -43,7 +43,7 @@ export const createSvgBlob = async (
       nodes,
       (textNode: TTextNode) => canExportTextAsSvgRealText(textNode, nodesById),
       (shapeNode: TSvgShapeNode) => canExportShapeAsSvgVector(shapeNode, nodesById),
-      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById),
+      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById, true),
     );
     const isSoleRasterLayer = layers.length === 1 && layers[0].type === SvgLayerType.raster;
     const elements: string[] = [];
@@ -55,7 +55,7 @@ export const createSvgBlob = async (
 
       switch (layer.type) {
         case SvgLayerType.text:
-          drawSvgTextNode(elements, getSvgLocalizedNode(layer.node, nodesById), bounds);
+          drawSvgTextNode(elements, getSvgLocalizedNode(layer.node, nodesById), nodesById, bounds);
           break;
         case SvgLayerType.textCurves:
           await drawSvgTextCurves(elements, defs, layer.node, nodesById, bounds);

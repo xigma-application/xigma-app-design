@@ -7,7 +7,6 @@ import { isSafeAncestorChain } from '../isSafeAncestorChain';
 
 const isOwnStyleSupported = (node: TTextNode, fontCharacters: ReadonlySet<number>): boolean =>
   !node.hidden &&
-  (node.opacity ?? 1) === 1 &&
   node.rotation === 0 &&
   (!node.blendMode || node.blendMode === BlendMode.normal) &&
   !node.pathId &&
@@ -21,4 +20,4 @@ export const canExportTextAsRealText = (
   node: TTextNode,
   nodesById: Record<string, TSceneNode>,
   fontCharacters: ReadonlySet<number>,
-): boolean => isOwnStyleSupported(node, fontCharacters) && isSafeAncestorChain(node, node.parentId, nodesById, false);
+): boolean => isOwnStyleSupported(node, fontCharacters) && isSafeAncestorChain(node, node.parentId, nodesById, true, false);

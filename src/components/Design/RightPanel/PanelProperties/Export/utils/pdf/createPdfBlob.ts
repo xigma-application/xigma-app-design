@@ -48,7 +48,7 @@ export const createPdfBlob = async (
       nodes,
       (textNode: TTextNode) => canExportTextAsRealText(textNode, nodesById, fontCharacters),
       (shapeNode: TPdfShapeNode) => canExportShapeAsVector(shapeNode, nodesById),
-      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById),
+      (textNode: TTextNode) => canExportTextOnPathAsVectorCurves(textNode, nodesById, false),
     );
     const graphicsStates = new Map<number, PDFName>();
     const page = pdfDocument.addPage([bounds.width, bounds.height]);
@@ -57,7 +57,7 @@ export const createPdfBlob = async (
     for (const layer of layers) {
       switch (layer.type) {
         case PdfLayerType.text:
-          drawPdfTextNode(page, font, layer.node, bounds);
+          drawPdfTextNode(page, font, layer.node, nodesById, bounds);
           break;
         case PdfLayerType.textCurves:
           await drawPdfTextCurves(page, layer.node, nodesById, bounds, graphicsStates);

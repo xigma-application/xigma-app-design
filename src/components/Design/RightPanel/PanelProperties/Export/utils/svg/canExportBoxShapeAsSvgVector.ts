@@ -19,4 +19,4 @@ const isOwnStyleSupported = (node: TFrameNode | TRectangleNode): boolean =>
   (!hasVectorStroke(node) || (node.strokes ?? []).every(isSvgVectorPaint));
 
 export const canExportBoxShapeAsSvgVector = (node: TFrameNode | TRectangleNode, nodesById: Record<string, TSceneNode>): boolean =>
-  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, true);

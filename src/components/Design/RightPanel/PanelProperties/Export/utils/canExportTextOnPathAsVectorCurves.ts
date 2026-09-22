@@ -15,5 +15,8 @@ const isOwnStyleSupported = (node: TTextNode, nodesById: Record<string, TSceneNo
   node.content.length > 0 &&
   Boolean(node.pathId && nodesById[node.pathId]);
 
-export const canExportTextOnPathAsVectorCurves = (node: TTextNode, nodesById: Record<string, TSceneNode>): boolean =>
-  isOwnStyleSupported(node, nodesById) && isSafeAncestorChain(node, node.parentId, nodesById, true);
+export const canExportTextOnPathAsVectorCurves = (
+  node: TTextNode,
+  nodesById: Record<string, TSceneNode>,
+  allowBlendMode: boolean,
+): boolean => isOwnStyleSupported(node, nodesById) && isSafeAncestorChain(node, node.parentId, nodesById, true, allowBlendMode);

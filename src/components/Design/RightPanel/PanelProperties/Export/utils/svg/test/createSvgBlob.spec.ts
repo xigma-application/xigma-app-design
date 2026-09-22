@@ -5,7 +5,7 @@ import { store } from 'store';
 
 // types
 import { ExportImageResampling } from '../../../enums';
-import { NodeType, PathType } from 'types/design/enums';
+import { BlendMode, NodeType, PathType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -880,6 +880,58 @@ describe('createSvgBlob', () => {
     expect(groupCloseIndex).toBeGreaterThan(childFillIndex);
     expect(text.slice(groupOpenIndex, groupCloseIndex)).toContain('40 10');
     expect(text.slice(groupOpenIndex, groupCloseIndex)).toContain('60 30');
+  });
+
+  it('should wrap a shape nested inside a blended frame in a <g style="mix-blend-mode"> isolated group, instead of falling back to raster', async () => {
+    // mock
+    // the frame's own fill still falls back to raster, since a node's OWN non-normal blend mode was always
+    // (and still is) excluded from that node's own eligibility — unrelated to the ancestor gate under test here
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            blendMode: BlendMode.multiply,
+            childIds: ['svg-blended-child'],
+            clipContent: false,
+            fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
+            height: 100,
+            id: 'svg-blended-frame',
+            name: 'Frame',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.frame,
+            width: 100,
+            x: 0,
+            y: 0,
+          },
+          {
+            fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+            height: 20,
+            id: 'svg-blended-child',
+            name: 'Rect',
+            parentId: 'svg-blended-frame',
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 20,
+            x: 10,
+            y: 10,
+          },
+        ],
+        rootIds: ['svg-blended-frame'],
+      }),
+    );
+
+    // action
+    const text = await readSvgText(await createSvgBlob('svg-blended-frame', 2, true, ExportImageResampling.basic, JPEG_QUALITY));
+
+    // result
+    const groupOpenIndex = text.indexOf('<g style="mix-blend-mode: multiply; isolation: isolate">');
+    const childFillIndex = text.indexOf('fill="#ff0000"');
+    const groupCloseIndex = text.lastIndexOf('</g>');
+
+    expect(groupOpenIndex).toBeGreaterThan(-1);
+    expect(childFillIndex).toBeGreaterThan(groupOpenIndex);
+    expect(groupCloseIndex).toBeGreaterThan(childFillIndex);
   });
 
   it('should draw a standalone media (image/video) node as a full-stretch image without rendering any raster layer', async () => {

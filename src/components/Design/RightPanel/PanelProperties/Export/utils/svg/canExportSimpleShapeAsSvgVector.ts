@@ -12,4 +12,4 @@ const isOwnStyleSupported = (node: TEllipseNode | TPolygonNode | TStarNode): boo
 export const canExportSimpleShapeAsSvgVector = (
   node: TEllipseNode | TPolygonNode | TStarNode,
   nodesById: Record<string, TSceneNode>,
-): boolean => isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+): boolean => isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, true);

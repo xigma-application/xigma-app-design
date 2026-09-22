@@ -367,6 +367,9 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
 - [x] SVG: shapes and text inside a rotated frame or group now export as real vectors too, grouped
       into the exported file the same way they're grouped in the design, instead of only working when
       every containing frame/group is unrotated
+- [x] SVG: shapes and text inside a semi-transparent or blend-mode frame or group (Multiply, Screen,
+      etc.) now export as real vectors too, with the same blend mode applied to the exported file;
+      PDF text under a semi-transparent frame now also exports correctly instead of being skipped
 
 ## Related
 

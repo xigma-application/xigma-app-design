@@ -5,7 +5,7 @@ import { TSceneNode } from 'types/design/types';
 import { TSvgAncestorGroup, TSvgLayer } from './types';
 
 // utils
-import { getSvgRotatedAncestorGroups } from './getSvgRotatedAncestorGroups';
+import { getSvgAncestorGroups } from './getSvgAncestorGroups';
 import { isSvgBoxModelShapeNode } from './isSvgBoxModelShapeNode';
 
 export const getSvgLayerAncestorGroups = (
@@ -15,9 +15,11 @@ export const getSvgLayerAncestorGroups = (
 ): TSvgAncestorGroup[] => {
   switch (layer.type) {
     case SvgLayerType.text:
-      return getSvgRotatedAncestorGroups(layer.node.parentId, nodesById, bounds);
+      return getSvgAncestorGroups(layer.node.parentId, nodesById, bounds, true);
+    case SvgLayerType.textCurves:
+      return getSvgAncestorGroups(layer.node.parentId, nodesById, bounds, false);
     case SvgLayerType.vector:
-      return isSvgBoxModelShapeNode(layer.node) ? getSvgRotatedAncestorGroups(layer.node.parentId, nodesById, bounds) : [];
+      return getSvgAncestorGroups(layer.node.parentId, nodesById, bounds, isSvgBoxModelShapeNode(layer.node));
     default:
       return [];
   }

@@ -10,4 +10,4 @@ const isOwnStyleSupported = (node: TMediaNode): boolean =>
   !node.hidden && (!node.blendMode || node.blendMode === BlendMode.normal) && Boolean(node.src);
 
 export const canExportMediaNodeAsSvgVector = (node: TMediaNode, nodesById: Record<string, TSceneNode>): boolean =>
-  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, true);

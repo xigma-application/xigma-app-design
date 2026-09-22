@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TTextNode } from 'types/design/types';
+import { TFrameNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { drawPdfTextNode } from '../drawPdfTextNode';
@@ -32,7 +32,7 @@ describe('drawPdfTextNode', () => {
     const font = { name: 'font' } as never;
 
     // action
-    drawPdfTextNode(page, font, node, { height: 200, width: 300, x: 10, y: 20 });
+    drawPdfTextNode(page, font, node, {}, { height: 200, width: 300, x: 10, y: 20 });
 
     // result
     expect(drawText).toHaveBeenCalledTimes(2);
@@ -50,9 +50,41 @@ describe('drawPdfTextNode', () => {
     const drawText = vi.fn();
 
     // action
-    drawPdfTextNode({ drawText } as never, {} as never, { ...node, opacity: undefined }, { height: 200, width: 300, x: 0, y: 0 });
+    drawPdfTextNode({ drawText } as never, {} as never, { ...node, opacity: undefined }, {}, { height: 200, width: 300, x: 0, y: 0 });
 
     // result
     expect(drawText.mock.calls[0][1].opacity).toBe(1);
+  });
+
+  it('should compose its own opacity with every ancestor frame opacity, not just its own', () => {
+    // mock
+    const drawText = vi.fn();
+    const parent: TFrameNode = {
+      childIds: ['t'],
+      clipContent: false,
+      fills: [],
+      height: 100,
+      id: 'parent',
+      name: 'parent',
+      opacity: 0.5,
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const nodesById: Record<string, TSceneNode> = { parent };
+
+    // action
+    drawPdfTextNode({ drawText } as never, {} as never, { ...node, opacity: 0.5, parentId: 'parent' }, nodesById, {
+      height: 200,
+      width: 300,
+      x: 10,
+      y: 20,
+    });
+
+    // result — 0.5 (own) * 0.5 (parent) = 0.25
+    expect(drawText.mock.calls[0][1].opacity).toBe(0.25);
   });
 });

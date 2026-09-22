@@ -18,4 +18,4 @@ const isOwnStyleSupported = (node: TFrameNode | TRectangleNode): boolean =>
   (!hasVectorStroke(node) || (node.strokes ?? []).every(isPlainPaint));
 
 export const canExportBoxShapeAsVector = (node: TFrameNode | TRectangleNode, nodesById: Record<string, TSceneNode>): boolean =>
-  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, false);

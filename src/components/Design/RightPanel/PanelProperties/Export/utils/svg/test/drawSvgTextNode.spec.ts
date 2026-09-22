@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TTextNode } from 'types/design/types';
+import { TFrameNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { drawSvgTextNode } from '../drawSvgTextNode';
@@ -30,7 +30,7 @@ describe('drawSvgTextNode', () => {
     const elements: string[] = [];
 
     // action
-    drawSvgTextNode(elements, node, { height: 200, width: 300, x: 10, y: 20 });
+    drawSvgTextNode(elements, node, {}, { height: 200, width: 300, x: 10, y: 20 });
 
     // result
     expect(elements).toHaveLength(1);
@@ -51,10 +51,37 @@ describe('drawSvgTextNode', () => {
     const elements: string[] = [];
 
     // action
-    drawSvgTextNode(elements, { ...node, opacity: undefined }, { height: 200, width: 300, x: 0, y: 0 });
+    drawSvgTextNode(elements, { ...node, opacity: undefined }, {}, { height: 200, width: 300, x: 0, y: 0 });
 
     // result
     expect(elements[0]).toContain('<text fill="#ff0000" font-family="Inter, sans-serif" font-size="20">');
+  });
+
+  it('should compose its own opacity with every ancestor frame opacity, not just its own', () => {
+    // mock
+    const elements: string[] = [];
+    const parent: TFrameNode = {
+      childIds: ['t'],
+      clipContent: false,
+      fills: [],
+      height: 100,
+      id: 'parent',
+      name: 'parent',
+      opacity: 0.5,
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const nodesById: Record<string, TSceneNode> = { parent };
+
+    // action
+    drawSvgTextNode(elements, { ...node, opacity: 0.5, parentId: 'parent' }, nodesById, { height: 200, width: 300, x: 10, y: 20 });
+
+    // result — 0.5 (own) * 0.5 (parent) = 0.25
+    expect(elements[0]).toContain('opacity="0.25"');
   });
 
   it('should rotate the whole <text> block around its own center via a transform, since glyph placement itself ignores rotation', () => {
@@ -62,7 +89,7 @@ describe('drawSvgTextNode', () => {
     const elements: string[] = [];
 
     // action
-    drawSvgTextNode(elements, { ...node, rotation: 45 }, { height: 200, width: 300, x: 10, y: 20 });
+    drawSvgTextNode(elements, { ...node, rotation: 45 }, {}, { height: 200, width: 300, x: 10, y: 20 });
 
     // result
     expect(elements[0]).toContain('transform="rotate(45 90 52)"');
@@ -73,7 +100,7 @@ describe('drawSvgTextNode', () => {
     const elements: string[] = [];
 
     // action
-    drawSvgTextNode(elements, { ...node, content: '\u0001\u0002' }, { height: 200, width: 300, x: 0, y: 0 });
+    drawSvgTextNode(elements, { ...node, content: '\u0001\u0002' }, {}, { height: 200, width: 300, x: 0, y: 0 });
 
     // result
     expect(elements).toHaveLength(0);

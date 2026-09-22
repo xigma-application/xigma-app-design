@@ -58,13 +58,13 @@ describe('canExportTextAsRealText', () => {
     expect(check(text({ pathId: 'p' }))).toBe(false);
   });
 
-  it('should reject flipped, rotated, hidden, translucent or blended text', () => {
+  it('should reject flipped, rotated, hidden or blended text, but allow translucent text', () => {
     expect(check(text({ flipX: true }))).toBe(false);
     expect(check(text({ flipY: true }))).toBe(false);
     expect(check(text({ rotation: 10 }))).toBe(false);
     expect(check(text({ hidden: true }))).toBe(false);
-    expect(check(text({ opacity: 0.5 }))).toBe(false);
     expect(check(text({ blendMode: BlendMode.multiply }))).toBe(false);
+    expect(check(text({ opacity: 0.5 }))).toBe(true);
   });
 
   it('should accept an explicit normal blend mode and full opacity', () => {
@@ -101,8 +101,8 @@ describe('canExportTextAsRealText', () => {
     expect(check(text({ parentId: 'm' }), mask)).toBe(false);
   });
 
-  it('should allow a rotated ancestor but reject a translucent, hidden or blended one', () => {
-    expect(check(text({ parentId: 'f' }), frame({ opacity: 0.5 }))).toBe(false);
+  it('should allow a rotated or translucent ancestor but reject a hidden or blended one', () => {
+    expect(check(text({ parentId: 'f' }), frame({ opacity: 0.5 }))).toBe(true);
     expect(check(text({ parentId: 'f' }), frame({ rotation: 5 }))).toBe(true);
     expect(check(text({ parentId: 'f' }), frame({ hidden: true }))).toBe(false);
     expect(check(text({ parentId: 'f' }), frame({ blendMode: BlendMode.screen }))).toBe(false);
@@ -119,7 +119,7 @@ describe('canExportTextAsRealText', () => {
 
   it('should check every ancestor up the chain', () => {
     const inner = frame({ id: 'inner', parentId: 'outer' });
-    const outer = frame({ id: 'outer', opacity: 0.4 });
+    const outer = frame({ hidden: true, id: 'outer' });
 
     expect(check(text({ parentId: 'inner' }), inner, outer)).toBe(false);
   });

@@ -16,4 +16,4 @@ const isOwnStyleSupported = (node: TVectorNode): boolean =>
   groupFilledFacesForRendering(getRenderedVectorNode(node)).every(({ paint }) => paint.every(isPlainPaint));
 
 export const canExportVectorNodeAsVector = (node: TVectorNode, nodesById: Record<string, TSceneNode>): boolean =>
-  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+  isOwnStyleSupported(node) && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, false);

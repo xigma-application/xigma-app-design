@@ -6,4 +6,4 @@ import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedN
 import { isSafeAncestorChain } from '../isSafeAncestorChain';
 
 export const canExportLineAsVector = (node: TLineNode, nodesById: Record<string, TSceneNode>): boolean =>
-  !node.hidden && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true);
+  !node.hidden && isSafeAncestorChain(getRotatedNodeBounds(node), node.parentId, nodesById, true, false);
