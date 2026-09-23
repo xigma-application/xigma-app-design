@@ -4,67 +4,48 @@ import { RefObject } from 'react';
 import { MIN_SHAPE_SIZE } from 'components/Design/Canvas/constants';
 
 // store
-import { addNode, setActiveTool } from 'store/design/slice';
+import { deleteNode, setActiveTool, updateNode } from 'store/design/slice';
 import { endHistoryGesture } from 'store/history/actions';
-import { AppDispatch, AppStore } from 'store';
+import { AppDispatch } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TLineEndpointStyle, TViewport } from 'types/design/types';
 import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
+import { TViewport } from 'types/design/types';
 
 // utils
 import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
-import { selectLastCreatedNode } from 'components/Design/Canvas/utils/selectLastCreatedNode';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   dispatch: AppDispatch,
-  appStore: AppStore,
   canvasRefs: TCanvasRefs,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  nodeIdRef: RefObject<string | null>,
   dropTargetRef: RefObject<TNewNodeDropTarget | null>,
-  endPoint: TLineEndpointStyle,
-  startPoint: TLineEndpointStyle,
-  stroke: string,
-  name: string,
 ): void => {
-  if (startRef.current) {
+  if (startRef.current && nodeIdRef.current) {
     const current = screenToWorld(getPointerPosition(canvas, event), viewport);
     const { point } = getAngleSnappedVectorPoint(startRef.current, current, viewport.zoom, event.shiftKey);
     const length = Math.hypot(point.x - startRef.current.x, point.y - startRef.current.y);
 
     if (length >= MIN_SHAPE_SIZE) {
-      dispatch(
-        addNode(
-          {
-            endPoint,
-            name,
-            parentId: dropTargetRef.current?.parentId ?? null,
-            startPoint,
-            stroke,
-            type: NodeType.line,
-            x1: Math.round(startRef.current.x),
-            x2: Math.round(point.x),
-            y1: Math.round(startRef.current.y),
-            y2: Math.round(point.y),
-          },
-          dropTargetRef.current?.targetIndex,
-        ),
-      );
-      selectLastCreatedNode(dispatch, appStore);
+      dispatch(updateNode({ changes: { x2: Math.round(point.x), y2: Math.round(point.y) }, id: nodeIdRef.current }));
+    } else {
+      dispatch(deleteNode(nodeIdRef.current));
     }
 
     startRef.current = null;
+    nodeIdRef.current = null;
     dropTargetRef.current = null;
-    canvasRefs.draftRef.current = null;
+    canvasRefs.drawing.cancelDrawRef.current = null;
     clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
     dispatch(setActiveTool(ToolName.default));

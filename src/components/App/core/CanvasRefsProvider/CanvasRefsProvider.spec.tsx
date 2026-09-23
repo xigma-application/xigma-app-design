@@ -28,6 +28,7 @@ describe('CanvasRefsProvider behaviors', () => {
         starCornerRadiusDragRef: { current: null },
       },
       draftRef: { current: null },
+      drawing: { cancelDrawRef: { current: null } },
       ellipseArc: {
         ellipseArcDragRef: { current: null },
         ellipseArcRatioDragRef: { current: null },

@@ -19,6 +19,9 @@ export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   switch (true) {
+    case refs.drawing.cancelDrawRef.current !== null:
+      refs.drawing.cancelDrawRef.current();
+      break;
     case penActiveVertexId !== null:
       handleEscapePenActiveVertex(dispatch);
       clearPenPreviewRefs(refs);

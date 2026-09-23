@@ -600,6 +600,10 @@ export type TFrameNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
 
+export type TDrawingRefs = {
+  cancelDrawRef: RefObject<(() => void) | null>;
+};
+
 export type TGuideDragState = {
   axis: TGuideAxis;
   frameId: string | null;
@@ -675,6 +679,7 @@ export type TCanvasRefs = {
   colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
   cornerRadius: TCornerRadiusRefs;
   draftRef: RefObject<TDraftEntity | null>;
+  drawing: TDrawingRefs;
   ellipseArc: TEllipseArcRefs;
   exportRenderRequestRef: RefObject<TExportRenderRequest | null>;
   frameName: TFrameNameRefs;

@@ -1,7 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
+
+const readNodeIds = (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return Object.keys(pages[activePageId].nodes);
+  });
 
 test('pressing Enter on a selected text node enters edit mode with all its content selected, same as double-clicking it', async ({
   page,
@@ -198,14 +206,15 @@ test('pressing Escape while drawing fresh text with no content discards it, same
   await designPage.goto('e2e-test-text-escape-discard-empty');
   await expect(designPage.canvas).toBeVisible();
 
-  const before = await designPage.canvas.screenshot();
+  // the text node is now created live in the tree the moment the drag starts, so "discarded" is
+  // asserted against the store directly rather than a pixel-exact screenshot — see the equivalent
+  // assertion in create-text.spec.ts for why
+  const nodeIdsBefore = await readNodeIds(page);
 
   await designPage.drawTextBox(900, 300, 1100, 340);
   await page.keyboard.press('Escape');
 
-  const afterEscape = await designPage.canvas.screenshot();
-
-  expect(afterEscape.equals(before)).toBe(true);
+  expect(await readNodeIds(page)).toEqual(nodeIdsBefore);
 });
 
 test('pressing Escape while re-editing an existing text node exits editing and selects it; a second Escape then deselects it', async ({

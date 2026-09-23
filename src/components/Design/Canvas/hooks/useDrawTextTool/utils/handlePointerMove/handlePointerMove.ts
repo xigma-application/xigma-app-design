@@ -3,8 +3,11 @@ import { RefObject } from 'react';
 // others
 import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
+// store
+import { updateNode } from 'store/design/slice';
+import { AppDispatch } from 'store';
+
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -19,20 +22,21 @@ import { toDraftRect } from 'components/Design/Canvas/utils/toDraftRect';
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
+  dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  nodeIdRef: RefObject<string | null>,
   candidateShapesRef: RefObject<TCandidateShape[]>,
 ): void => {
-  const { draftRef } = canvasRefs;
   const { alignmentGuideRef } = canvasRefs.transform;
 
-  if (startRef.current) {
+  if (startRef.current && nodeIdRef.current) {
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
     const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
     const rect = toDraftRect(startRef.current, snap.point);
 
-    draftRef.current = { ...rect, type: NodeType.text };
+    dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
     alignmentGuideRef.current = snap.guide;
   }
 };

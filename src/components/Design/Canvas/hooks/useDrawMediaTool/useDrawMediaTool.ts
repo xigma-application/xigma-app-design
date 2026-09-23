@@ -23,13 +23,14 @@ export type TMediaToolConfig = {
 };
 
 export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolConfig): void => {
-  const { canvasRef, draftRef } = refs;
+  const { canvasRef } = refs;
   const { aspectRatioLockGuideRef } = refs.transform;
   const { armedRef, queueRef } = refs.media;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const nodeIdRef = useRef<string | null>(null);
   const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const handleFileChange = (event: Event): void => {
@@ -48,9 +49,9 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
     if (canvas && activeTool === tool) {
       const input = document.createElement('input');
       const onPointerDown = (event: PointerEvent): void =>
-        handlePointerDown(canvas, event, appStore, refs, armedRef, startRef, dropTargetRef);
+        handlePointerDown(canvas, event, dispatch, appStore, refs, armedRef, startRef, nodeIdRef, dropTargetRef, queueRef, name);
       const onPointerMove = (event: PointerEvent): void =>
-        handlePointerMove(canvas, event, appStore, armedRef, startRef, draftRef, aspectRatioLockGuideRef);
+        handlePointerMove(canvas, event, dispatch, appStore, armedRef, startRef, nodeIdRef, aspectRatioLockGuideRef);
       const onPointerUp = (event: PointerEvent): void =>
         handlePointerUp(
           canvas,
@@ -61,10 +62,9 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
           refs,
           armedRef,
           startRef,
+          nodeIdRef,
           dropTargetRef,
-          draftRef,
           queueRef,
-          name,
           aspectRatioLockGuideRef,
         );
 
@@ -87,11 +87,10 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
         startRef.current = null;
         armedRef.current = null;
         queueRef.current = [];
-        draftRef.current = null;
         aspectRatioLockGuideRef.current = null;
         canvas.style.cursor = '';
         dispatch(setMediaToolArmed(false));
       };
     }
-  }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, draftRef, name, refs, tool]);
+  }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, name, refs, tool]);
 };

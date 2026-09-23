@@ -1,9 +1,11 @@
 import { RefObject } from 'react';
 
+// store
+import { AppDispatch } from 'store';
+
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
-import { TLineEndpointStyle, TViewport } from 'types/design/types';
 import { TPoint } from 'types/canvas';
+import { TViewport } from 'types/design/types';
 
 // utils
 import { handlePointerMove } from '../handlePointerMove/handlePointerMove';
@@ -11,13 +13,11 @@ import { handlePointerMove } from '../handlePointerMove/handlePointerMove';
 export const handleShiftKeyChange = (
   canvas: HTMLCanvasElement,
   event: KeyboardEvent,
-  canvasRefs: TCanvasRefs,
+  dispatch: AppDispatch,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  nodeIdRef: RefObject<string | null>,
   lastPointerClientPositionRef: RefObject<TPoint | null>,
-  endPoint: TLineEndpointStyle,
-  startPoint: TLineEndpointStyle,
-  stroke: string,
 ): void => {
   if (event.key === 'Shift' && startRef.current && lastPointerClientPositionRef.current) {
     const { x, y } = lastPointerClientPositionRef.current;
@@ -25,13 +25,11 @@ export const handleShiftKeyChange = (
     handlePointerMove(
       canvas,
       new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }),
-      canvasRefs,
+      dispatch,
       viewport,
       startRef,
+      nodeIdRef,
       lastPointerClientPositionRef,
-      endPoint,
-      startPoint,
-      stroke,
     );
   }
 };

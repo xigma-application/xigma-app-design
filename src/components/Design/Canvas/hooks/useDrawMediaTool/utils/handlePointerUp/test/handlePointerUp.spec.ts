@@ -1,15 +1,14 @@
 import { RefObject } from 'react';
 
 // store
-import { setActiveTool, setViewport } from 'store/design/slice';
-import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
+import { addNode, setActiveTool, setViewport } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TArmedMedia } from '../../loadArmedMedia';
-import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
+import { TAspectRatioLockGuide, TDraftRect, TPoint } from 'types/canvas';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -28,13 +27,20 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 
 const createArmedRef = (armed: TArmedMedia | null): RefObject<TArmedMedia | null> => ({ current: armed });
 const createStartRef = (point: TPoint | null): RefObject<TPoint | null> => ({ current: point });
-const createDraftRef = (): RefObject<TDraftEntity | null> => ({ current: null });
 const createQueueRef = (files: File[] = []): RefObject<File[]> => ({ current: files });
 const createAspectRatioLockGuideRef = (): RefObject<TAspectRatioLockGuide | null> => ({
   current: { height: 1, rotation: 0, width: 1, x: 0, y: 0 },
 });
 
 const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
+
+const createMediaNode = (rect: TDraftRect): string => {
+  const { payload } = store.dispatch(
+    addNode({ ...rect, flipX: false, flipY: false, name: 'Image', parentId: null, rotation: 0, src: armed.src, type: NodeType.media }),
+  );
+
+  return payload.id;
+};
 
 describe('handlePointerUp', () => {
   beforeEach(() => {
@@ -45,6 +51,7 @@ describe('handlePointerUp', () => {
     // mock
     const canvas = createCanvas();
     const canvasRef = { current: canvas };
+    const nodeId = createMediaNode({ height: 1, width: 1, x: 0, y: 0 });
 
     // before
     handlePointerUp(
@@ -56,10 +63,9 @@ describe('handlePointerUp', () => {
       createCanvasRefs(),
       createArmedRef(null),
       createStartRef({ x: 0, y: 0 }),
+      { current: nodeId },
       { current: null },
-      createDraftRef(),
       createQueueRef(),
-      'Image',
       createAspectRatioLockGuideRef(),
     );
 
@@ -83,9 +89,8 @@ describe('handlePointerUp', () => {
       createArmedRef(armed),
       createStartRef(null),
       { current: null },
-      createDraftRef(),
+      { current: null },
       createQueueRef(),
-      'Image',
       createAspectRatioLockGuideRef(),
     );
 
@@ -93,15 +98,13 @@ describe('handlePointerUp', () => {
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
   });
 
-  it('should place the armed file at its natural size centered on a plain click, reset drag state, and revert to the default tool when the queue is empty', () => {
-    // mock
+  it('should leave the already-centered node untouched on a plain click, reset drag state, and revert to the default tool when the queue is empty', () => {
+    // mock — the node was already created centered on (10,10) by handlePointerDown
     const canvas = createCanvas();
     const canvasRef = { current: canvas };
-    const draftRef = createDraftRef();
     const startRef = createStartRef({ x: 10, y: 10 });
     const aspectRatioLockGuideRef = createAspectRatioLockGuideRef();
-
-    draftRef.current = { height: 1, src: 'stale', type: NodeType.media, width: 1, x: 0, y: 0 };
+    const nodeId = createMediaNode({ height: 100, width: 200, x: -90, y: -40 });
 
     // before
     handlePointerUp(
@@ -113,21 +116,18 @@ describe('handlePointerUp', () => {
       createCanvasRefs(),
       createArmedRef(armed),
       startRef,
+      { current: nodeId },
       { current: null },
-      draftRef,
       createQueueRef(),
-      'Image',
       aspectRatioLockGuideRef,
     );
 
-    // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
+    // result
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
-    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
 
-    expect(placed).toMatchObject({ height: 100, name: 'Image', src: 'blob:mock-url', type: NodeType.media, width: 200, x: -90, y: -40 });
+    expect(page.nodes[nodeId]).toMatchObject({ height: 100, src: 'blob:mock-url', type: NodeType.media, width: 200, x: -90, y: -40 });
     expect(startRef.current).toBeNull();
-    expect(draftRef.current).toBeNull();
     expect(aspectRatioLockGuideRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(design.activeTool).toBe(ToolName.default);
@@ -137,6 +137,7 @@ describe('handlePointerUp', () => {
     // mock
     const canvas = createCanvas();
     const canvasRef = { current: canvas };
+    const nodeId = createMediaNode({ height: 1, width: 1, x: 0, y: 0 });
 
     // before
     handlePointerUp(
@@ -148,75 +149,14 @@ describe('handlePointerUp', () => {
       createCanvasRefs(),
       createArmedRef(armed),
       createStartRef({ x: 0, y: 0 }),
+      { current: nodeId },
       { current: null },
-      createDraftRef(),
       createQueueRef(),
-      'Image',
       createAspectRatioLockGuideRef(),
     );
 
     // result — the raw 50x50 drag does not match the armed file's 2:1 ratio, so it must be locked
-    const { design } = store.getState();
-    const page = design.pages[design.activePageId];
-    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
-
-    expect(placed).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
-  });
-
-  it('should add each newly placed file to the selection, keeping earlier files from the same queue selected too', () => {
-    // mock
-    const canvas = createCanvas();
-    const canvasRef = { current: canvas };
-
-    store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
-
-    const selectedBefore = selectSelectedIds(store.getState()).length;
-
-    // before — place the first file
-    handlePointerUp(
-      canvas,
-      pointerEvent(10, 10),
-      store.dispatch,
-      store,
-      canvasRef,
-      createCanvasRefs(),
-      createArmedRef(armed),
-      createStartRef({ x: 10, y: 10 }),
-      { current: null },
-      createDraftRef(),
-      createQueueRef(),
-      'Image',
-      createAspectRatioLockGuideRef(),
-    );
-
-    const rootOrderAfterFirst = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
-    const firstId = rootOrderAfterFirst[rootOrderAfterFirst.length - 1];
-
-    expect(selectSelectedIds(store.getState()).slice(selectedBefore)).toEqual([firstId]);
-
-    // action — place a second file from the same queue
-    handlePointerUp(
-      canvas,
-      pointerEvent(40, 40),
-      store.dispatch,
-      store,
-      canvasRef,
-      createCanvasRefs(),
-      createArmedRef(armed),
-      createStartRef({ x: 40, y: 40 }),
-      { current: null },
-      createDraftRef(),
-      createQueueRef(),
-      'Image',
-      createAspectRatioLockGuideRef(),
-    );
-
-    const { rootOrder } = selectActivePage(store.getState());
-    const selectedIds = selectSelectedIds(store.getState());
-    const secondId = rootOrder[rootOrder.length - 1];
-
-    // result — both files end up selected together, not just the most recent one
-    expect(selectedIds.slice(selectedBefore)).toEqual([firstId, secondId]);
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
   });
 
   it('should arm the next queued file and stay on the media tool instead of reverting to default', () => {
@@ -225,6 +165,7 @@ describe('handlePointerUp', () => {
     const canvasRef = { current: canvas };
     const armedRef = createArmedRef(armed);
     const nextFile = new File(['x'], 'next.png', { type: 'image/png' });
+    const nodeId = createMediaNode({ height: 100, width: 200, x: -90, y: -40 });
 
     store.dispatch(setActiveTool(ToolName.media));
 
@@ -238,10 +179,9 @@ describe('handlePointerUp', () => {
       createCanvasRefs(),
       armedRef,
       createStartRef({ x: 10, y: 10 }),
+      { current: nodeId },
       { current: null },
-      createDraftRef(),
       createQueueRef([nextFile]),
-      'Image',
       createAspectRatioLockGuideRef(),
     );
 
@@ -250,10 +190,11 @@ describe('handlePointerUp', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.media);
   });
 
-  it('should convert the pointer position through the current viewport, not a stale one', () => {
+  it('should determine a click vs. a drag using a freshly read viewport, not a stale one', () => {
     // mock
     const canvas = createCanvas();
     const canvasRef = { current: canvas };
+    const nodeId = createMediaNode({ height: 100, width: 200, x: -240, y: -130 });
 
     store.dispatch(setViewport({ x: 150, y: 90, zoom: 1 }));
 
@@ -268,20 +209,16 @@ describe('handlePointerUp', () => {
       createCanvasRefs(),
       createArmedRef(armed),
       createStartRef({ x: -140, y: -80 }),
+      { current: nodeId },
       { current: null },
-      createDraftRef(),
       createQueueRef(),
-      'Image',
       createAspectRatioLockGuideRef(),
     );
 
     // result — screen (10,10) under viewport {x:150,y:90} converts to world (-140,-80), exactly
-    // matching the recorded start point (zero delta), so this resolves as a click, centered on
-    // that world point — proving the viewport was read fresh at call time, not a stale one
-    const { design } = store.getState();
-    const page = design.pages[design.activePageId];
-    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
-
-    expect(placed).toMatchObject({ x: -240, y: -130 });
+    // matching the recorded start point (zero delta), so this resolves as a click and the node's
+    // already-centered rect from pointer-down is left untouched — proving the viewport was read
+    // fresh at call time, not a stale one
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x: -240, y: -130 });
   });
 });

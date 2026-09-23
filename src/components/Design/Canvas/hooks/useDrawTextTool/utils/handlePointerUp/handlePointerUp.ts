@@ -5,16 +5,19 @@ import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 import { DEFAULT_SHAPE_SIZE } from 'components/Design/Canvas/constants';
 
 // store
-import { setActiveTool, startTextEdit } from 'store/design/slice';
+import { setActiveTool, startTextEdit, updateNode } from 'store/design/slice';
+import { endHistoryGesture } from 'store/history/actions';
 import { AppDispatch } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getPointAlignmentSnap } from 'components/Design/Canvas/utils/getPointAlignmentSnap';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -28,21 +31,29 @@ export const handlePointerUp = (
   canvasRefs: TCanvasRefs,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  nodeIdRef: RefObject<string | null>,
   candidateShapesRef: RefObject<TCandidateShape[]>,
+  dropTargetRef: RefObject<TNewNodeDropTarget | null>,
 ): void => {
-  const { draftRef } = canvasRefs;
   const { alignmentGuideRef } = canvasRefs.transform;
 
-  if (startRef.current) {
+  if (startRef.current && nodeIdRef.current) {
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
     const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
     const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, false, viewport.zoom);
 
-    dispatch(startTextEdit({ box: { ...rect, flipX: false, flipY: false, rotation: 0 } }));
+    dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
+    dispatch(startTextEdit({ box: { ...rect, flipX: false, flipY: false, rotation: 0 }, id: nodeIdRef.current }));
+
     startRef.current = null;
-    draftRef.current = null;
+    nodeIdRef.current = null;
+    dropTargetRef.current = null;
     alignmentGuideRef.current = null;
+    canvasRefs.drawing.cancelDrawRef.current = null;
+    clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
     dispatch(setActiveTool(ToolName.default));
   }
+
+  dispatch(endHistoryGesture());
 };

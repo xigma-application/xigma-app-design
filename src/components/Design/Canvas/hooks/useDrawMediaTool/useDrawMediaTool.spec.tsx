@@ -10,12 +10,11 @@ import { useDrawMediaTool, TMediaToolConfig } from './useDrawMediaTool';
 // store
 import designReducer, { setActiveTool, setSelection, setViewport } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TDraftEntity } from 'types/design/types';
 
 type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
 
@@ -96,12 +95,8 @@ const armMedia = (input: HTMLInputElement, getLastImage: () => TFakeImage, natur
 const pointerEvent = (type: string, x: number, y: number, button = 0): PointerEvent =>
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
-const renderMediaTool = (
-  canvasRef: RefObject<HTMLCanvasElement | null>,
-  draftRef: RefObject<TDraftEntity | null>,
-  store: EnhancedStore<{ design: TDesignState }>,
-): TCanvasRefs => {
-  const refs = createCanvasRefs({ canvasRef, draftRef });
+const renderMediaTool = (canvasRef: RefObject<HTMLCanvasElement | null>, store: EnhancedStore<{ design: TDesignState }>): TCanvasRefs => {
+  const refs = createCanvasRefs({ canvasRef });
 
   renderHook(() => useDrawMediaTool(refs, CONFIG), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
 
@@ -122,11 +117,10 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getInput } = captureInput();
 
     // before
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // result
     expect(() => getInput()).toThrow();
@@ -136,13 +130,12 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
 
     // before
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // result
     const input = getInput();
@@ -155,11 +148,10 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // action
     act(() => getInput().dispatchEvent(new Event('cancel')));
@@ -172,11 +164,10 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // action
     selectFile(getInput(), null);
@@ -191,30 +182,28 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     captureInput();
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 60));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should ignore a non-primary button press once armed', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
@@ -222,18 +211,17 @@ describe('useDrawMediaTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 60, 1));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should not crash when arming a file while the canvas ref is unavailable', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     const canvas = canvasRef.current;
 
@@ -249,7 +237,6 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getImages, getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
@@ -257,7 +244,7 @@ describe('useDrawMediaTool behaviors', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,mock');
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
     armMedia(getInput(), getLastImage, 200, 100);
 
     const [, crosshairImage, thumbnailImage] = getImages();
@@ -276,7 +263,6 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getImages, getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
     const drawImage = vi.fn();
@@ -290,7 +276,7 @@ describe('useDrawMediaTool behaviors', () => {
     Object.defineProperty(canvasRef.current, 'style', { configurable: true, value: { cursor: '' }, writable: true });
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // before
     armMedia(getInput(), getLastImage, 200, 100);
@@ -310,25 +296,34 @@ describe('useDrawMediaTool behaviors', () => {
     expect(drawImage).toHaveBeenCalledTimes(2);
   });
 
-  it('should show a live aspect-ratio-locked draft while dragging', () => {
+  it('should create the node immediately at pointer-down, centered at its natural size, and resize it to a live aspect-ratio-locked size while dragging', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    const refs = renderMediaTool(canvasRef, draftRef, store);
+    const refs = renderMediaTool(canvasRef, store);
 
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 50, 50));
 
     // result — raw 50x50 drag locked to a 2:1 ratio, driven by the taller raw axis
-    expect(draftRef.current).toEqual({ height: 50, src: 'blob:mock-url', type: NodeType.media, width: 100, x: 0, y: 0 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
+      height: 50,
+      src: 'blob:mock-url',
+      type: NodeType.media,
+      width: 100,
+      x: 0,
+      y: 0,
+    });
     // the lock is shown unconditionally for Media — no Shift needed
     expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 100, x: 0, y: 0 });
   });
@@ -337,12 +332,11 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    const refs = renderMediaTool(canvasRef, draftRef, store);
+    const refs = renderMediaTool(canvasRef, store);
 
     armMedia(getInput(), getLastImage, 200, 100);
 
@@ -367,7 +361,6 @@ describe('useDrawMediaTool behaviors', () => {
       y: -40,
     });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(draftRef.current).toBeNull();
     expect(refs.transform.aspectRatioLockGuideRef.current).toBeNull();
   });
 
@@ -375,12 +368,11 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
@@ -401,12 +393,11 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // before — pick two files at once
     selectFile(getInput(), [new File(['a'], 'first.png', { type: 'image/png' }), new File(['b'], 'second.png', { type: 'image/png' })]);
@@ -458,13 +449,12 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setSelection(['stale-node']));
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
 
     // before — pick two files at once; picking must clear the stale pre-existing selection
     selectFile(getInput(), [new File(['a'], 'first.png', { type: 'image/png' }), new File(['b'], 'second.png', { type: 'image/png' })]);
@@ -513,12 +503,11 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action — panning (or scroll-zooming) dispatches setViewport while a file is still armed
@@ -544,12 +533,11 @@ describe('useDrawMediaTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
     const { getLastImage } = stubImageConstructor();
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    renderMediaTool(canvasRef, store);
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
@@ -560,5 +548,30 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
+  });
+
+  it('should arm a cancel callback on the shared drawing ref that Escape (via handleLeave) uses to delete the in-progress node and reset the tool', () => {
+    // mock
+    const store = createTestStore();
+    const canvasRef = createCanvasRef();
+    const { getLastImage } = stubImageConstructor();
+    const { getInput } = captureInput();
+
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const refs = renderMediaTool(canvasRef, store);
+
+    armMedia(getInput(), getLastImage, 200, 100);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 50, 50));
+      refs.drawing.cancelDrawRef.current?.();
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 });

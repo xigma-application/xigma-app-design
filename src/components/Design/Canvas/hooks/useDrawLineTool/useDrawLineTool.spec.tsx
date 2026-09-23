@@ -10,11 +10,10 @@ import { useDrawLineTool, TLineToolConfig } from './useDrawLineTool';
 // store
 import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDraftEntity } from 'types/design/types';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
@@ -41,10 +40,9 @@ describe('useDrawLineTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -53,29 +51,31 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 20));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
-  it('should update the draft line, preserving drag direction, while dragging', () => {
+  it('should create the line immediately at pointer-down and update its far endpoint, preserving drag direction, while dragging', () => {
     // mock
     const store = createTestStore();
 
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 60, 40));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10, 10));
 
     // result — unlike a box tool, the endpoints keep the exact order they were dragged in
-    expect(draftRef.current).toEqual({
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
       endPoint: CONFIG.endPoint,
       startPoint: CONFIG.startPoint,
       stroke: CONFIG.stroke,
@@ -94,28 +94,21 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 60.4, 40.6));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10.2, 10.8));
 
     // result
-    expect(draftRef.current).toEqual({
-      endPoint: CONFIG.endPoint,
-      startPoint: CONFIG.startPoint,
-      stroke: CONFIG.stroke,
-      type: NodeType.line,
-      x1: 60,
-      x2: 10,
-      y1: 41,
-      y2: 11,
-    });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 60, x2: 10, y1: 41, y2: 11 });
   });
 
   it('should snap the line to the nearest 15° increment while Shift is held, reusing the same angle-snap the Pen tool uses when placing a point', () => {
@@ -125,20 +118,22 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action — raw angle ~11.3deg off horizontal from (0,0), well outside the un-shifted soft-snap
     // tolerance but within a 15deg increment's own tolerance once Shift forces the full snap
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(new PointerEvent('pointermove', { clientX: 100, clientY: 20, shiftKey: true }));
 
     // result — locked onto the 15deg line through the origin, not the raw (100,20) endpoint
-    expect(draftRef.current).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
   });
 
   it('should commit the Shift-snapped endpoint, not the raw pointer position, on pointer up', () => {
@@ -148,10 +143,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -175,43 +169,47 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action — ~1.9deg off horizontal, within the un-shifted 5deg magnet tolerance
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 150, 5));
 
     // result — snapped flat, without Shift held at all
-    expect(draftRef.current).toMatchObject({ x1: 0, x2: 150, y1: 0, y2: 0 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 0, x2: 150, y1: 0, y2: 0 });
   });
 
-  it('should re-evaluate the draft immediately when Shift is pressed, without waiting for a further pointermove', () => {
+  it('should re-evaluate the in-progress line immediately when Shift is pressed, without waiting for a further pointermove', () => {
     // mock
     const store = createTestStore();
 
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before — a diagonal well outside the un-shifted magnet tolerance
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
     });
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 100, 20));
     });
 
-    expect(draftRef.current).toMatchObject({ x2: 100, y2: 20 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 100, y2: 20 });
 
     // action — Shift held, no further pointer movement
     act(() => {
@@ -219,7 +217,7 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result — hard-constrained to the nearest 15deg increment right away
-    expect(draftRef.current).toMatchObject({ x2: 98, y2: 26 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
   });
 
   it('should re-evaluate again on keyup once Shift is released, dropping the hard constraint', () => {
@@ -229,15 +227,17 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
     });
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 100, 20));
     });
@@ -245,7 +245,7 @@ describe('useDrawLineTool behaviors', () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
     });
 
-    expect(draftRef.current).toMatchObject({ x2: 98, y2: 26 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
 
     // action — Shift released, still no further pointer movement
     act(() => {
@@ -253,7 +253,7 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result — back to the raw, unsnapped position
-    expect(draftRef.current).toMatchObject({ x2: 100, y2: 20 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 100, y2: 20 });
   });
 
   it('should ignore non-Shift keys and do nothing before a drag has started', () => {
@@ -263,9 +263,8 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -278,7 +277,7 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should commit a line node with the configured stroke and switch back to the default tool on pointer up', () => {
@@ -288,10 +287,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -320,7 +318,6 @@ describe('useDrawLineTool behaviors', () => {
     });
     expect(design.activeTool).toBe(ToolName.default);
     expect(page.selectedIds).toEqual([page.rootOrder[0]]);
-    expect(draftRef.current).toBeNull();
   });
 
   it('should commit an arrow-configured line with an arrow endPoint but a default startPoint', () => {
@@ -330,10 +327,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(ARROW_CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), ARROW_CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), ARROW_CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -351,7 +347,7 @@ describe('useDrawLineTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ endPoint: 'arrow', startPoint: 'default' });
   });
 
-  it('should clear any existing selection once drawing actually starts, not just on tool switch', () => {
+  it('should select the newly created line immediately at pointer-down, replacing any existing selection', () => {
     // mock
     const store = createTestStore();
 
@@ -359,10 +355,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -373,7 +368,9 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(selectSelectedIds(store.getState())).toEqual([]);
+    const page = selectActivePage(store.getState());
+
+    expect(selectSelectedIds(store.getState())).toEqual([page.rootOrder[0]]);
   });
 
   it('should ignore a non-primary button press', () => {
@@ -383,10 +380,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -395,7 +391,7 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should not add a node when the drag is shorter than the minimum shape size', () => {
@@ -405,10 +401,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -433,10 +428,9 @@ describe('useDrawLineTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawLineTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -445,5 +439,31 @@ describe('useDrawLineTool behaviors', () => {
 
     // result
     expect(store.getState().design.activeTool).toBe(CONFIG.tool);
+  });
+
+  it('should arm a cancel callback on the shared drawing ref that Escape (via handleLeave) uses to delete the in-progress line and reset the tool', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    // before
+    renderHook(() => useDrawLineTool(refs, CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 100, 20));
+      refs.drawing.cancelDrawRef.current?.();
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 });

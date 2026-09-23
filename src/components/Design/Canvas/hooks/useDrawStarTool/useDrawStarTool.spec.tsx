@@ -14,7 +14,6 @@ import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDraftEntity } from 'types/design/types';
 
 const CONFIG: TStarToolConfig = { fill: '#D9D9D9', name: 'Star', points: 5, ratio: 0.382, tool: ToolName.star };
 
@@ -40,10 +39,9 @@ describe('useDrawStarTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -52,29 +50,31 @@ describe('useDrawStarTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 20));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
-  it('should update the draft star with its points and ratio while dragging', () => {
+  it('should create the star immediately at pointer-down and resize it with its points and ratio live while dragging', () => {
     // mock
     const store = createTestStore();
 
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result
-    expect(draftRef.current).toEqual({
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
       fill: CONFIG.fill,
       height: 30,
       points: CONFIG.points,
@@ -93,18 +93,20 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
-    const refs = createCanvasRefs({ canvasRef, draftRef });
+    const refs = createCanvasRefs({ canvasRef });
 
     // before
     renderHook(() => useDrawStarTool(refs, CONFIG), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder[0];
+
     canvasRef.current?.dispatchEvent(new PointerEvent('pointermove', { clientX: 60, clientY: 40, shiftKey: true }));
 
     // result — width (50) drives, since it exceeds height (30)
-    expect(draftRef.current).toMatchObject({ height: 50, width: 50, x: 10, y: 10 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 50, width: 50, x: 10, y: 10 });
     expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 50, x: 10, y: 10 });
   });
 
@@ -115,10 +117,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -147,10 +148,9 @@ describe('useDrawStarTool behaviors', () => {
     });
     expect(design.activeTool).toBe(ToolName.default);
     expect(page.selectedIds).toEqual([page.rootOrder[0]]);
-    expect(draftRef.current).toBeNull();
   });
 
-  it('should clear any existing selection once drawing actually starts, not just on tool switch', () => {
+  it('should select the newly created star immediately at pointer-down, replacing any existing selection', () => {
     // mock
     const store = createTestStore();
 
@@ -158,10 +158,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -172,7 +171,9 @@ describe('useDrawStarTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(selectSelectedIds(store.getState())).toEqual([]);
+    const page = selectActivePage(store.getState());
+
+    expect(selectSelectedIds(store.getState())).toEqual([page.rootOrder[0]]);
   });
 
   it('should ignore a non-primary button press', () => {
@@ -182,10 +183,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -194,7 +194,7 @@ describe('useDrawStarTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should add a default-sized node centered on the start point when only one dimension meets the minimum shape size', () => {
@@ -204,10 +204,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -231,10 +230,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -258,10 +256,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -279,10 +276,9 @@ describe('useDrawStarTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -301,10 +297,36 @@ describe('useDrawStarTool behaviors', () => {
     expect(design.activeTool).toBe(ToolName.default);
     expect(page.selectedIds).toEqual([page.rootOrder[0]]);
   });
+
+  it('should arm a cancel callback on the shared drawing ref that Escape (via handleLeave) uses to delete the in-progress star and reset the tool', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    // before
+    renderHook(() => useDrawStarTool(refs, CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+      refs.drawing.cancelDrawRef.current?.();
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
 });
 
 describe('useDrawStarTool alignment snap', () => {
-  it('should snap the drafted star onto a nearby existing shape while dragging, populating the alignment guide', () => {
+  it('should snap the in-progress star onto a nearby existing shape while dragging, populating the alignment guide', () => {
     // mock — a candidate rect whose left edge (63) sits 3px past the raw drag endpoint (60), within tolerance
     const store = createTestStore();
 
@@ -324,8 +346,7 @@ describe('useDrawStarTool alignment snap', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
-    const refs = createCanvasRefs({ canvasRef, draftRef });
+    const refs = createCanvasRefs({ canvasRef });
 
     // before
     renderHook(() => useDrawStarTool(refs, CONFIG), {
@@ -334,10 +355,13 @@ describe('useDrawStarTool alignment snap', () => {
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result — corrected so the right edge lands flush at 63 (width 53), and the guide is populated
-    expect(draftRef.current).toMatchObject({ width: 53, x: 10 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ width: 53, x: 10 });
     expect(refs.transform.alignmentGuideRef.current).not.toBeNull();
   });
 
@@ -361,8 +385,7 @@ describe('useDrawStarTool alignment snap', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
-    const refs = createCanvasRefs({ canvasRef, draftRef });
+    const refs = createCanvasRefs({ canvasRef });
 
     // before
     renderHook(() => useDrawStarTool(refs, CONFIG), {

@@ -33,8 +33,10 @@ describe('handlePointerDown', () => {
     // mock
     const canvas = createCanvas();
     const startRef = { current: null };
+    const nodeIdRef = { current: null };
     const candidateShapesRef = { current: [] };
     const dropTargetRef = { current: null };
+    const before = Object.keys(selectActivePage(store.getState()).nodes).length;
 
     // before
     handlePointerDown(
@@ -45,21 +47,30 @@ describe('handlePointerDown', () => {
       createCanvasRefs(),
       IDENTITY_VIEWPORT,
       startRef,
+      nodeIdRef,
       candidateShapesRef,
       dropTargetRef,
+      '#ff0000',
+      'Star',
+      5,
+      0.5,
     );
 
     // result
     expect(startRef.current).toBeNull();
+    expect(nodeIdRef.current).toBeNull();
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
+    expect(Object.keys(selectActivePage(store.getState()).nodes)).toHaveLength(before);
   });
 
-  it('should clear the selection, snapshot the pointer-down point, and capture the pointer', () => {
+  it('should create the star immediately at the pointer-down point, select it, and capture the pointer', () => {
     // mock
     store.dispatch(setSelection(['stale-id']));
 
     const canvas = createCanvas();
+    const refs = createCanvasRefs();
     const startRef = { current: null };
+    const nodeIdRef: { current: string | null } = { current: null };
     const candidateShapesRef = { current: [] };
     const dropTargetRef = { current: null };
 
@@ -69,20 +80,30 @@ describe('handlePointerDown', () => {
       pointerEvent(50, 60),
       store.dispatch,
       store,
-      createCanvasRefs(),
+      refs,
       IDENTITY_VIEWPORT,
       startRef,
+      nodeIdRef,
       candidateShapesRef,
       dropTargetRef,
+      '#ff0000',
+      'Star',
+      6,
+      0.4,
     );
 
     // result
-    expect(selectActivePage(store.getState()).selectedIds).toEqual([]);
+    const page = selectActivePage(store.getState());
+
     expect(startRef.current).toEqual({ x: 50, y: 60 });
+    expect(nodeIdRef.current).not.toBeNull();
+    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({ points: 6, ratio: 0.4, type: NodeType.star, x: 50, y: 60 });
+    expect(page.selectedIds).toEqual([nodeIdRef.current]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(refs.drawing.cancelDrawRef.current).not.toBeNull();
   });
 
-  it('should collect every other node as an alignment-snap candidate', () => {
+  it('should collect every other node — but not the one just created — as an alignment-snap candidate', () => {
     // mock
     store.dispatch(
       addNode({
@@ -100,8 +121,10 @@ describe('handlePointerDown', () => {
 
     const canvas = createCanvas();
     const startRef = { current: null };
+    const nodeIdRef: { current: string | null } = { current: null };
     const candidateShapesRef = { current: [] };
     const dropTargetRef = { current: null };
+    const preexistingCount = Object.keys(selectActivePage(store.getState()).nodes).length;
 
     // before
     handlePointerDown(
@@ -112,11 +135,16 @@ describe('handlePointerDown', () => {
       createCanvasRefs(),
       IDENTITY_VIEWPORT,
       startRef,
+      nodeIdRef,
       candidateShapesRef,
       dropTargetRef,
+      '#ff0000',
+      'Star',
+      5,
+      0.5,
     );
 
-    // result
-    expect(candidateShapesRef.current.length).toBeGreaterThan(0);
+    // result — the just-created node itself must be excluded from its own snap candidates
+    expect(candidateShapesRef.current.length).toBe(preexistingCount);
   });
 });

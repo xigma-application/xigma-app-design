@@ -312,29 +312,88 @@ next to its sibling `getVectorChainPositionAtFraction.ts` in `vectorNetwork/`, s
 ## 7. Canvas interaction (the actual drag gesture)
 
 - `Canvas/Canvas.tsx` — one `useDraw*Tool(refs, <TOOL>_SETTINGS)` call per tool, where `refs` is the
-  single `TCanvasRefs` object from `useCanvasRefs()` (`canvas-rendering-pipeline.md` §1) — the hook
-  destructures just the `canvasRef`/`draftRef` pair it needs off it. Multiple tools can share the
-  **same hook** with different config objects (Arrow and Line both call `useDrawLineTool`, each
-  gated internally on its own `config.tool === activeTool`) — check whether an existing hook's
-  geometry already matches the new tool before writing a new one.
+  single `TCanvasRefs` object from `useCanvasRefs()` (`canvas-rendering-pipeline.md` §1). Multiple
+  tools can share the **same hook** with different config objects (Arrow and Line both call
+  `useDrawLineTool`, each gated internally on its own `config.tool === activeTool`) — check whether
+  an existing hook's geometry already matches the new tool before writing a new one.
 - `Canvas/toolSettings.ts` — the `<TOOL>_TOOL_SETTINGS` config objects consumed above.
 - `Canvas/hooks/useDraw<X>Tool/` — the actual `pointerdown`/`pointermove`/`pointerup` native
-  listeners (attached only while `activeTool === tool`), building the live draft object into a
-  `useRef` (never Redux — the render loop reads it directly every frame so dragging doesn't dispatch
-  per pixel) and dispatching `addNode` on release. `useDrawShapeTool` is the shared hook for any
-  plain `{x,y,width,height}` box (Frame/Section/Rectangle/Ellipse); anything with different geometry
-  (Line, Polygon, Star, Media, Text) gets its own hook.
+  listeners (attached only while `activeTool === tool`). `useDrawShapeTool` is the shared hook for
+  any plain `{x,y,width,height}` box (Frame/Section/Rectangle/Ellipse); Line/Arrow, Polygon, Star,
+  Media, and Text each get their own hook with the same three-listener shape. Pen and Pencil are
+  deliberately excluded from all of this (genuinely multi-step interaction — many clicks/strokes
+  building up one path, no single drag-then-commit point — matches Figma).
+- **The node is created for real at `pointerdown`, not on release.** `handlePointerDown` dispatches
+  `addNode` immediately (a minimal `MIN_SHAPE_SIZE` box, or — for Line — a zero-length segment
+  anchored at the start point), selects it (`setSelection`/`appendLastCreatedNodeToSelection` for
+  Media's multi-file queue), and stores the new id in a `nodeIdRef`. Every subsequent `pointermove`
+  dispatches `updateNode({ id: nodeIdRef.current, changes })` with the recomputed box/endpoint —
+  there is no separate "draft" object and no `draftRef` for these tools (`draftRef` still exists, but
+  only Pen/Pencil write to it now). This is deliberate: `handleUpdateNode`
+  (`store/design/utils/handleUpdateNode/handleUpdateNode.ts`) unconditionally calls
+  `syncAutoLayoutChildren` on the updated node and its parent as part of every `updateNode`, so
+  resizing the in-progress shape while it's already parented into an auto-layout/grid frame makes
+  siblings reflow **live, mid-drag** — see [[auto-layout]] — for free, with no new rendering code.
+  `pointerup` does one final `updateNode` (falling back to `DEFAULT_SHAPE_SIZE` centered on the point
+  if the drag never cleared `MIN_DRAG_DISTANCE_PX`) and clears the tool's local refs; Line instead
+  `deleteNode`s the in-progress node if the final length is under `MIN_SHAPE_SIZE`, since a
+  zero-length line isn't a valid fallback shape the way a default-sized box is.
+- **Text is the one exception to "pointerup finalizes the node".** `useDrawTextTool`'s
+  `handlePointerDown` creates a real `TTextNode` with `content: ''` exactly like every other tool
+  above (parented via `resolveNewNodeDropTarget`, selected, resized live via `updateNode` on
+  `pointermove`), but `pointerup` doesn't stop there — it dispatches `startTextEdit({ box, id:
+  nodeIdRef.current })` to hand the already-created node straight into the existing text-editing
+  overlay (`TextEditOverlay/`, see §"Text editing" below) instead of ending the gesture as "done".
+  The box-drag itself still gets its own `beginHistoryGesture`/`endHistoryGesture` pair at
+  `pointerdown`/`pointerup` (so drawing the empty box is one undo step, same as every other tool),
+  but the later content commit — when the user finishes typing and blurs — goes through
+  `TextEditOverlay/hooks/useCommitTextEdit.ts`'s own **separate** `beginHistoryGesture`/
+  `endHistoryGesture` pair (unchanged, pre-existing code, see below). This deliberately stays two
+  separate gestures rather than one merged one: `createHistoryStack.beginGesture` resets its
+  "already pushed" flag on every call, so leaving the draw-phase gesture open across the typing
+  phase and letting `useCommitTextEdit` re-`beginHistoryGesture` on top of it would silently corrupt
+  which snapshot gets pushed as "past" (the pre-mutation snapshot captured at commit-time, deep
+  into the flow, rather than the true pre-draw one) — undoing would then land on a half-restored
+  state instead of cleanly removing the whole text. The accepted trade-off: undoing a freshly
+  drawn-and-typed text currently takes **two** undos (first removes the typed content back to an
+  empty box, second removes the box itself) rather than Figma's single undo. Fixing that for real
+  would mean making `createHistoryStack.beginGesture` idempotent while a gesture is already open —
+  a reasonable, small, generally-correct change in isolation, but `beginHistoryGesture`/
+  `endHistoryGesture` are independently called from 40+ sites across the codebase (right-panel drag
+  sliders, vector-edit tools, paste/duplicate/delete, ...), so it was deliberately left alone rather
+  than risk a subtle behavior change to that shared, load-bearing piece of infrastructure for a
+  UX nicety.
 - Drawing over a frame — every tool above except Section resolves a target frame once, at
   `pointerdown`, via `Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget.ts` (nesting-aware,
   reuses `getFrameAtWorldPoint`), caches the result in its own `dropTargetRef`, and passes
-  `{ parentId, targetIndex }` through to `addNode(node, targetIndex)` on `pointerup` (`addNode`'s
-  payload carries `targetIndex` as a sibling field next to the node's own fields, stripped off again
-  inside `handleAddNode`). For a hor/vert/grid frame this also arms the same live drop-indicator
-  refs (`dropTargetFrameIdRef`/`autoLayoutDropTargetRef`/`gridDropTargetRef`) that drag-and-drop
-  reparenting uses, so the preview renders through the existing `drawDropTargetFrameOutline`/
-  `drawAutoLayoutDropIndicator`/`drawGridDropTarget` — see [[auto-layout]] for the insertion-index/
-  grid-slot math this reuses. Pen, Pencil, and Text are deliberately excluded (multi-step interaction,
-  no single drag-then-commit point — matches Figma).
+  `{ parentId, targetIndex }` straight into the `pointerdown` `addNode(node, targetIndex)` call
+  above (`addNode`'s payload carries `targetIndex` as a sibling field next to the node's own fields,
+  stripped off again inside `handleAddNode`). For a hor/vert/grid frame this also arms the same live
+  drop-indicator refs (`dropTargetFrameIdRef`/`autoLayoutDropTargetRef`/`gridDropTargetRef`) that
+  drag-and-drop reparenting uses, so the preview renders through the existing
+  `drawDropTargetFrameOutline`/`drawAutoLayoutDropIndicator`/`drawGridDropTarget`; for grid, the
+  cell/occupant-shift itself already happens synchronously inside `handleAddNode`
+  (`applyNewNodeGridPlacement`) at `pointerdown`, since grid children get `SizingMode.fill` and don't
+  actually resize during the drag the way a hor/vert child's main-axis size does.
+- **Escape mid-drag** — cancelling a draw gesture (before it commits) must delete the
+  just-created node rather than leave it orphaned. This is **not** wired as a per-tool
+  `window.addEventListener('keydown', ...)` — the app already has exactly one global Escape handler
+  (`useKeyboardShortcuts/utils/handleLeave.ts`, reached via the app-wide keys map in
+  `useKeyboardShortcuts.ts`), and a second, tool-local listener races it unpredictably (confirmed by
+  a failing e2e run: a real browser's listener/library ordering does not match jsdom's, so a
+  same-file synthetic `window.dispatchEvent` unit test can pass while the real Escape key does
+  nothing). Instead, every draw tool's `handlePointerDown` arms a single shared ref,
+  `refs.drawing.cancelDrawRef` (`TCanvasRefs.drawing`, `types/design/canvas/types.ts`), with a
+  closure that deletes its own `nodeIdRef.current`, ends the history gesture, and resets its own
+  local refs (mirroring each tool's own `handleEscape.ts`, called the same way from `pointerup` on
+  success — both paths converge on the same ref resets). `handleLeave`'s `switch (true)` checks
+  `refs.drawing.cancelDrawRef.current !== null` as its first case and just invokes it; `pointerup`
+  (or the cancel callback itself) always clears the ref back to `null` once the gesture ends, so a
+  later, unrelated Escape press doesn't re-invoke a stale closure. This is the same "arm a ref at
+  the start of a gesture, one generic handler invokes/clears it" shape as the pen-vertex-cancel case
+  already in `handleLeave` (`handleEscapePenActiveVertex`/`clearPenPreviewRefs`) — new interaction
+  modes that need Escape-to-cancel should extend `handleLeave`'s switch the same way, not add
+  another `window`-level listener.
 
 ## 8. Rendering (WebGL)
 
@@ -343,7 +402,10 @@ Two independent render passes, both need updating for a visual change to show up
 - `drawScene/drawSceneNodes.ts` — the committed-node pass, one `switch (node.type)` case per
   `NodeType`, called every frame for every node currently on the scene.
 - `drawScene/drawFrame.ts` (dispatcher, despite the name) → `drawDraft<X>.ts` — the **live**,
-  in-progress drag preview, reading the `draftRef` from §7.
+  in-progress drag preview, reading the `draftRef` from §7. Only Pen/Pencil still go through this
+  path; Frame/Section/Rectangle/Ellipse/Line/Arrow/Polygon/Star/Media/Text are real, committed nodes
+  from `pointerdown` onward (see §7), so the normal `drawSceneNodes.ts` pass already renders them
+  while they're being drawn — no separate draft-preview code needed for those.
 - `drawScene/drawPerNodeSelectionOutlines.ts` — the extra overlay drawn **on top** for selected
   nodes (outline + handles). Only needs a change if the new visual should differ specifically while
   selected — a plain content addition (like Arrow's arrowhead) usually only touches the two passes
@@ -394,8 +456,10 @@ Two independent render passes, both need updating for a visual change to show up
    `useToolbarShortcuts.ts` — the shortcut, in all three places.
 8. `Canvas/toolSettings.ts` + `Canvas/Canvas.tsx` — a new `<TOOL>_TOOL_SETTINGS` config and hook
    registration (reusing the existing hook if geometry matches).
-9. Rendering — extend the relevant `drawSceneNodes.ts` case and the matching `drawDraft*.ts`, adding
-   a new `utils/canvas/` primitive only if nothing existing composes into the new visual.
+9. Rendering — extend the relevant `drawSceneNodes.ts` case (and, only for Pen/Pencil, the matching
+   `drawDraft*.ts` — every other draw tool creates a real node at `pointerdown`, per §7, so
+   `drawSceneNodes.ts` alone already covers the in-progress drag). Add a new `utils/canvas/` primitive
+   only if nothing existing composes into the new visual.
 10. `docs/ROADMAP.md` — a bullet under the etap that owns tool additions (Etap 6 in this codebase),
     describing what's reused vs. genuinely new, plus a forward-reference note in whichever future
     etap will eventually build UI for any new fields (Etap 8 for line-style fields → future
@@ -408,9 +472,15 @@ The Arrow tool (`XG-APP: add Arrow tool`, see `git log`) is the concrete instanc
 above: `ToolName.arrow`, `TLineNode.startPoint`/`endPoint` (optional, `'default' | 'arrow'`),
 `ARROW_TOOL_SETTINGS` reusing `useDrawLineTool`, joining Line's slot in the Rectangle dropdown,
 `Shift+L`, a new `drawArrowhead.ts` primitive composed from `drawLine`/`drawEllipse`, wired into
-`drawSceneNodes.ts` and `drawDraftLine.ts` via a shared `drawLineEndpointArrowheads.ts` helper, zero
-changes to hit-testing, and `e2e/design/draw/create-arrow.spec.ts`. Read that commit's diff
-alongside this doc for the concrete shape of every piece described here.
+`drawSceneNodes.ts` and (at the time) `drawDraftLine.ts` via a shared `drawLineEndpointArrowheads.ts`
+helper, zero changes to hit-testing, and `e2e/design/draw/create-arrow.spec.ts`. Read that commit's
+diff alongside this doc for the concrete shape of every piece described here — with one caveat: the
+live-node-creation change in §7 (node created at `pointerdown`, no `draftRef` writes for Line/Arrow
+anymore) landed after this example, so `drawDraftLine.ts` (and its dispatch case in `drawFrame.ts`)
+is now unreachable dead code in practice — `draftRef` is simply never populated with a line-shaped
+draft anymore. It was left in place rather than deleted (out of scope for that change); a future
+cleanup pass could remove it along with the equivalent dead cases for every other tool this doc's §7
+now describes as live-node-creation (Frame/Section/Rectangle/Ellipse/Polygon/Star/Media).
 
 ## A one-shot tool that doesn't fit this checklist: Comment
 

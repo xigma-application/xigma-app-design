@@ -1,5 +1,12 @@
+// store
+import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
 // utils
-import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handleShiftKeyChange } from '../handleShiftKeyChange';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -14,100 +21,103 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const keyboardEvent = (key: string, shiftKey = true): KeyboardEvent => new KeyboardEvent('keydown', { key, shiftKey });
 
+const createLineNode = (): string => {
+  const { payload } = store.dispatch(
+    addNode({
+      endPoint: 'default',
+      name: 'Line',
+      parentId: null,
+      startPoint: 'default',
+      stroke: '#000000',
+      type: NodeType.line,
+      x1: 0,
+      x2: 0,
+      y1: 0,
+      y2: 0,
+    }),
+  );
+
+  return payload.id;
+};
+
 describe('handleShiftKeyChange', () => {
   it('should ignore a non-Shift key', () => {
     // mock
+    const nodeId = createLineNode();
     const canvas = createCanvas();
     const startRef = { current: { x: 0, y: 0 } };
     const lastPointerClientPositionRef = { current: { x: 100, y: 20 } };
-    const refs = createCanvasRefs();
 
     // before
     handleShiftKeyChange(
       canvas,
       keyboardEvent('Alt'),
-      refs,
+      store.dispatch,
       IDENTITY_VIEWPORT,
       startRef,
+      { current: nodeId },
       lastPointerClientPositionRef,
-      'default',
-      'default',
-      '#000000',
     );
 
     // result
-    expect(refs.draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 0, y2: 0 });
   });
 
   it('should do nothing when no drag has started yet', () => {
-    // mock
-    const canvas = createCanvas();
-    const startRef = { current: null };
-    const lastPointerClientPositionRef = { current: { x: 100, y: 20 } };
-    const refs = createCanvasRefs();
-
-    // before
-    handleShiftKeyChange(
-      canvas,
-      keyboardEvent('Shift'),
-      refs,
-      IDENTITY_VIEWPORT,
-      startRef,
-      lastPointerClientPositionRef,
-      'default',
-      'default',
-      '#000000',
-    );
-
-    // result
-    expect(refs.draftRef.current).toBeNull();
+    // before & result — must not throw with no in-progress drag
+    expect(() =>
+      handleShiftKeyChange(
+        createCanvas(),
+        keyboardEvent('Shift'),
+        store.dispatch,
+        IDENTITY_VIEWPORT,
+        { current: null },
+        { current: null },
+        { current: { x: 100, y: 20 } },
+      ),
+    ).not.toThrow();
   });
 
   it('should do nothing when the pointer has never moved over the canvas', () => {
     // mock
-    const canvas = createCanvas();
-    const startRef = { current: { x: 0, y: 0 } };
-    const lastPointerClientPositionRef = { current: null };
-    const refs = createCanvasRefs();
+    const nodeId = createLineNode();
 
-    // before
-    handleShiftKeyChange(
-      canvas,
-      keyboardEvent('Shift'),
-      refs,
-      IDENTITY_VIEWPORT,
-      startRef,
-      lastPointerClientPositionRef,
-      'default',
-      'default',
-      '#000000',
-    );
+    // before & result — must not throw with no known pointer position
+    expect(() =>
+      handleShiftKeyChange(
+        createCanvas(),
+        keyboardEvent('Shift'),
+        store.dispatch,
+        IDENTITY_VIEWPORT,
+        { current: { x: 0, y: 0 } },
+        { current: nodeId },
+        { current: null },
+      ),
+    ).not.toThrow();
 
     // result
-    expect(refs.draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 0, y2: 0 });
   });
 
-  it('should re-evaluate the draft at the last known pointer position, hard-snapping to the nearest 15° increment', () => {
+  it('should re-evaluate the in-progress line at the last known pointer position, hard-snapping to the nearest 15° increment', () => {
     // mock — same (0,0) -> (100,20) drag used by the hook-level test, re-triggered via Shift alone
+    const nodeId = createLineNode();
     const canvas = createCanvas();
     const startRef = { current: { x: 0, y: 0 } };
     const lastPointerClientPositionRef = { current: { x: 100, y: 20 } };
-    const refs = createCanvasRefs();
 
     // before
     handleShiftKeyChange(
       canvas,
       keyboardEvent('Shift', true),
-      refs,
+      store.dispatch,
       IDENTITY_VIEWPORT,
       startRef,
+      { current: nodeId },
       lastPointerClientPositionRef,
-      'default',
-      'default',
-      '#000000',
     );
 
     // result
-    expect(refs.draftRef.current).toMatchObject({ x2: 98, y2: 26 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
   });
 });

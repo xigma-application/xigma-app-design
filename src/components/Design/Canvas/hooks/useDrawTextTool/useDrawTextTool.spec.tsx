@@ -10,11 +10,10 @@ import { useDrawTextTool } from './useDrawTextTool';
 // store
 import designReducer, { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectEditingNodeId, selectEditingTextBox, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDraftEntity } from 'types/design/types';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
@@ -38,10 +37,9 @@ describe('useDrawTextTool behaviors', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -50,42 +48,53 @@ describe('useDrawTextTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 20));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
-  it('should update the draft rect while dragging', () => {
+  it('should create an empty text node immediately at pointer-down and resize it live while dragging', () => {
     // mock
     const store = createTestStore();
 
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+
+    const page = selectActivePage(store.getState());
+
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result
-    expect(draftRef.current).toEqual({ height: 30, type: 'text', width: 50, x: 10, y: 10 });
+    expect(selectActivePage(store.getState()).nodes[page.rootOrder[0]]).toMatchObject({
+      content: '',
+      height: 30,
+      type: NodeType.text,
+      width: 50,
+      x: 10,
+      y: 10,
+    });
   });
 
-  it('should start text editing and switch back to the default tool on pointer up, without adding a node', () => {
+  it('should start text editing on the already-created node and switch back to the default tool on pointer up', () => {
     // mock
     const store = createTestStore();
 
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -100,13 +109,22 @@ describe('useDrawTextTool behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(page.rootOrder).toHaveLength(0);
-    expect(design.editingTextBox).toEqual({ flipX: false, flipY: false, height: 30, rotation: 0, width: 50, x: 10, y: 10 });
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: '', height: 30, type: NodeType.text, width: 50, x: 10, y: 10 });
+    expect(selectEditingNodeId(store.getState())).toBe(page.rootOrder[0]);
+    expect(selectEditingTextBox(store.getState())).toEqual({
+      flipX: false,
+      flipY: false,
+      height: 30,
+      rotation: 0,
+      width: 50,
+      x: 10,
+      y: 10,
+    });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(draftRef.current).toBeNull();
   });
 
-  it('should clear any existing selection once drawing actually starts, not just on tool switch', () => {
+  it('should select the newly created text node immediately at pointer-down, replacing any existing selection', () => {
     // mock
     const store = createTestStore();
 
@@ -114,10 +132,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -128,7 +145,9 @@ describe('useDrawTextTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(selectSelectedIds(store.getState())).toEqual([]);
+    const page = selectActivePage(store.getState());
+
+    expect(selectSelectedIds(store.getState())).toEqual([page.rootOrder[0]]);
   });
 
   it('should ignore a non-primary button press', () => {
@@ -138,10 +157,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -150,7 +168,7 @@ describe('useDrawTextTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result
-    expect(draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
   it('should start text editing with a default-sized, top-left-anchored box when only one dimension meets the minimum shape size', () => {
@@ -160,10 +178,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -174,7 +191,7 @@ describe('useDrawTextTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
+    expect(selectEditingTextBox(store.getState())).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
   });
 
   it('should start text editing with a default-sized, top-left-anchored box when only the other dimension meets the minimum shape size', () => {
@@ -184,10 +201,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -198,7 +214,7 @@ describe('useDrawTextTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
+    expect(selectEditingTextBox(store.getState())).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
   });
 
   it('should ignore a pointer-up that was not preceded by a pointer-down', () => {
@@ -208,10 +224,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -229,10 +244,9 @@ describe('useDrawTextTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -245,13 +259,82 @@ describe('useDrawTextTool behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
+    expect(selectEditingTextBox(store.getState())).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
     expect(design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should parent the new text node into the frame under the cursor', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [],
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 400,
+        x: 0,
+        y: 0,
+      }),
+    );
+    store.dispatch(setActiveTool(ToolName.text));
+
+    const canvasRef = createCanvasRef();
+    const frameId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    // before
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef })), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 50, 60));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 50, 60));
+    });
+
+    // result
+    const page = selectActivePage(store.getState());
+    const textId = selectEditingNodeId(store.getState()) as string;
+
+    expect(page.nodes[textId].parentId).toBe(frameId);
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toContain(textId);
+  });
+
+  it('should delete the in-progress text node and reset the tool when Escape is pressed mid-drag', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(ToolName.text));
+
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    // before
+    renderHook(() => useDrawTextTool(refs), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+      refs.drawing.cancelDrawRef.current?.();
+    });
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 });
 
 describe('useDrawTextTool alignment snap', () => {
-  it('should snap the drafted text box onto a nearby existing shape while dragging, populating the alignment guide', () => {
+  it('should snap the in-progress text box onto a nearby existing shape while dragging, populating the alignment guide', () => {
     // mock — a candidate rect whose left edge (63) sits 3px past the raw drag endpoint (60), within tolerance
     const store = createTestStore();
 
@@ -271,8 +354,7 @@ describe('useDrawTextTool alignment snap', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
-    const refs = createCanvasRefs({ canvasRef, draftRef });
+    const refs = createCanvasRefs({ canvasRef });
 
     // before
     renderHook(() => useDrawTextTool(refs), {
@@ -281,10 +363,13 @@ describe('useDrawTextTool alignment snap', () => {
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+
+    const nodeId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
 
     // result — corrected so the right edge lands flush at 63 (width 53), and the guide is populated
-    expect(draftRef.current).toMatchObject({ width: 53, x: 10 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ width: 53, x: 10 });
     expect(refs.transform.alignmentGuideRef.current).not.toBeNull();
   });
 
@@ -308,8 +393,7 @@ describe('useDrawTextTool alignment snap', () => {
     store.dispatch(setActiveTool(ToolName.text));
 
     const canvasRef = createCanvasRef();
-    const draftRef: RefObject<TDraftEntity | null> = { current: null };
-    const refs = createCanvasRefs({ canvasRef, draftRef });
+    const refs = createCanvasRefs({ canvasRef });
 
     // before
     renderHook(() => useDrawTextTool(refs), {
@@ -324,7 +408,7 @@ describe('useDrawTextTool alignment snap', () => {
     });
 
     // result
-    expect(store.getState().design.editingTextBox).toMatchObject({ width: 53, x: 10 });
+    expect(selectEditingTextBox(store.getState())).toMatchObject({ width: 53, x: 10 });
     expect(refs.transform.alignmentGuideRef.current).toBeNull();
   });
 });

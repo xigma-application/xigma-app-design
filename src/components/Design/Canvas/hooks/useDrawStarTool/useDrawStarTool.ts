@@ -34,17 +34,12 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const nodeIdRef = useRef<string | null>(null);
   const candidateShapesRef = useRef<TCandidateShape[]>([]);
   const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef, dropTargetRef);
-
-  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerMove(canvas, event, refs, viewport, startRef, candidateShapesRef, fill, points, ratio);
-
-  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerUp(
+    handlePointerDown(
       canvas,
       event,
       dispatch,
@@ -52,6 +47,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
       refs,
       viewport,
       startRef,
+      nodeIdRef,
       candidateShapesRef,
       dropTargetRef,
       fill,
@@ -59,6 +55,12 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
       points,
       ratio,
     );
+
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerMove(canvas, event, dispatch, refs, viewport, startRef, nodeIdRef, candidateShapesRef);
+
+  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerUp(canvas, event, dispatch, refs, viewport, startRef, nodeIdRef, candidateShapesRef, dropTargetRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;

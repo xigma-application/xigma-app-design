@@ -62,6 +62,23 @@ describe('handleLeave', () => {
     expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
+  it('should call the in-progress draw tool’s cancel callback instead of the default reset, when one is armed', () => {
+    // mock
+    const store = createTestStore();
+    const refs = createCanvasRefs();
+    const cancelDraw = vi.fn();
+
+    store.dispatch(setActiveTool(ToolName.rectangle));
+    refs.drawing.cancelDrawRef.current = cancelDraw;
+
+    // action
+    handleLeave(store.dispatch, refs);
+
+    // result — the tool-owned cancel callback ran instead of the generic default-tool reset
+    expect(cancelDraw).toHaveBeenCalledTimes(1);
+    expect(store.getState().design.activeTool).toBe(ToolName.rectangle);
+  });
+
   it('should cancel an open comment draft', () => {
     // mock
     const store = createTestStore();

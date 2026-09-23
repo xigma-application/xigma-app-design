@@ -1,3 +1,8 @@
+// store
+import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { NodeType } from 'types/design/enums';
 
@@ -18,32 +23,87 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1, ...options });
 
+const createTextNode = (): string => {
+  const { payload } = store.dispatch(
+    addNode({
+      content: '',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter MSDF',
+      fontSize: 14,
+      height: 1,
+      name: 'Text',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.text,
+      width: 1,
+      x: 20,
+      y: 20,
+    }),
+  );
+
+  return payload.id;
+};
+
 describe('handlePointerMove', () => {
   it('should do nothing when the drag has not started', () => {
     // mock
     const refs = createCanvasRefs();
+    const nodeId = createTextNode();
 
     // before
-    handlePointerMove(createCanvas(), pointerEvent(50, 50), refs, IDENTITY_VIEWPORT, { current: null }, { current: [] });
+    handlePointerMove(
+      createCanvas(),
+      pointerEvent(50, 50),
+      store.dispatch,
+      refs,
+      IDENTITY_VIEWPORT,
+      { current: null },
+      { current: nodeId },
+      {
+        current: [],
+      },
+    );
 
     // result
-    expect(refs.draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 1, width: 1 });
   });
 
-  it('should update the draft text box and alignment guide as the pointer moves', () => {
+  it('should do nothing when there is no node id to resize', () => {
+    // before & result — must not throw with no in-progress node
+    expect(() =>
+      handlePointerMove(
+        createCanvas(),
+        pointerEvent(50, 50),
+        store.dispatch,
+        createCanvasRefs(),
+        IDENTITY_VIEWPORT,
+        { current: { x: 20, y: 20 } },
+        { current: null },
+        { current: [] },
+      ),
+    ).not.toThrow();
+  });
+
+  it('should resize the in-progress text box and update the alignment guide as the pointer moves', () => {
     // mock
     const refs = createCanvasRefs();
+    const nodeId = createTextNode();
 
     // before
-    handlePointerMove(createCanvas(), pointerEvent(120, 130), refs, IDENTITY_VIEWPORT, { current: { x: 20, y: 20 } }, { current: [] });
+    handlePointerMove(
+      createCanvas(),
+      pointerEvent(120, 130),
+      store.dispatch,
+      refs,
+      IDENTITY_VIEWPORT,
+      { current: { x: 20, y: 20 } },
+      { current: nodeId },
+      { current: [] },
+    );
 
     // result
-    expect(refs.draftRef.current).toMatchObject({
-      height: 110,
-      type: NodeType.text,
-      width: 100,
-      x: 20,
-      y: 20,
-    });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 110, width: 100, x: 20, y: 20 });
   });
 });

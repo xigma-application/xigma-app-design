@@ -3,6 +3,9 @@ import { setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
+// types
+import { NodeType } from 'types/design/enums';
+
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
@@ -26,12 +29,14 @@ describe('handlePointerDown', () => {
     store.dispatch(setSelection([]));
   });
 
-  it('should track the pointer’s client position even for a non-primary button', () => {
+  it('should track the pointer’s client position even for a non-primary button, without creating a node', () => {
     // mock
     const canvas = createCanvas();
     const startRef = { current: null };
+    const nodeIdRef = { current: null };
     const lastPointerClientPositionRef = { current: null };
     const dropTargetRef = { current: null };
+    const before = selectActivePage(store.getState()).rootOrder.length;
 
     // before
     handlePointerDown(
@@ -42,22 +47,31 @@ describe('handlePointerDown', () => {
       createCanvasRefs(),
       IDENTITY_VIEWPORT,
       startRef,
+      nodeIdRef,
       lastPointerClientPositionRef,
       dropTargetRef,
+      'default',
+      'default',
+      '#000000',
+      'Line',
     );
 
     // result
     expect(lastPointerClientPositionRef.current).toEqual({ x: 10, y: 10 });
     expect(startRef.current).toBeNull();
+    expect(nodeIdRef.current).toBeNull();
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
+    expect(selectActivePage(store.getState()).rootOrder).toHaveLength(before);
   });
 
-  it('should clear the selection, snapshot the pointer-down point, and capture the pointer on a primary press', () => {
+  it('should create a zero-length line at the pointer-down point, select it, and capture the pointer on a primary press', () => {
     // mock
     store.dispatch(setSelection(['stale-id']));
 
     const canvas = createCanvas();
+    const refs = createCanvasRefs();
     const startRef = { current: null };
+    const nodeIdRef: { current: string | null } = { current: null };
     const lastPointerClientPositionRef = { current: null };
     const dropTargetRef = { current: null };
 
@@ -67,16 +81,26 @@ describe('handlePointerDown', () => {
       pointerEvent(50, 60),
       store.dispatch,
       store,
-      createCanvasRefs(),
+      refs,
       IDENTITY_VIEWPORT,
       startRef,
+      nodeIdRef,
       lastPointerClientPositionRef,
       dropTargetRef,
+      'default',
+      'default',
+      '#000000',
+      'Line',
     );
 
     // result
-    expect(selectActivePage(store.getState()).selectedIds).toEqual([]);
+    const page = selectActivePage(store.getState());
+
     expect(startRef.current).toEqual({ x: 50, y: 60 });
+    expect(nodeIdRef.current).not.toBeNull();
+    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({ type: NodeType.line, x1: 50, x2: 50, y1: 60, y2: 60 });
+    expect(page.selectedIds).toEqual([nodeIdRef.current]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(refs.drawing.cancelDrawRef.current).not.toBeNull();
   });
 });

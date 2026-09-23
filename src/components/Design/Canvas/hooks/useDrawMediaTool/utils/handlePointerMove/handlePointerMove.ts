@@ -1,14 +1,13 @@
 import { RefObject } from 'react';
 
 // store
+import { updateNode } from 'store/design/slice';
 import { selectViewport } from 'store/design/selectors';
-import { AppStore } from 'store';
+import { AppDispatch, AppStore } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TArmedMedia } from '../loadArmedMedia';
 import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
 
 // utils
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
@@ -19,19 +18,20 @@ import { screenToWorld } from 'utils/transform/screenToWorld';
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
+  dispatch: AppDispatch,
   appStore: AppStore,
   armedRef: RefObject<TArmedMedia | null>,
   startRef: RefObject<TPoint | null>,
-  draftRef: RefObject<TDraftEntity | null>,
+  nodeIdRef: RefObject<string | null>,
   aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>,
 ): void => {
   const armed = armedRef.current;
 
-  if (armed && startRef.current) {
+  if (armed && startRef.current && nodeIdRef.current) {
     const current = screenToWorld(getPointerPosition(canvas, event), selectViewport(appStore.getState()));
     const rect = roundRect(getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight));
 
-    draftRef.current = { ...rect, src: armed.src, type: NodeType.media };
+    dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
     aspectRatioLockGuideRef.current = { ...rect, rotation: 0 };
   }
 };

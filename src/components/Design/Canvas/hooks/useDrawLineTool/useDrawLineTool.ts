@@ -35,20 +35,36 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const nodeIdRef = useRef<string | null>(null);
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
   const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, lastPointerClientPositionRef, dropTargetRef);
+    handlePointerDown(
+      canvas,
+      event,
+      dispatch,
+      appStore,
+      refs,
+      viewport,
+      startRef,
+      nodeIdRef,
+      lastPointerClientPositionRef,
+      dropTargetRef,
+      endPoint,
+      startPoint,
+      stroke,
+      name,
+    );
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerMove(canvas, event, refs, viewport, startRef, lastPointerClientPositionRef, endPoint, startPoint, stroke);
+    handlePointerMove(canvas, event, dispatch, viewport, startRef, nodeIdRef, lastPointerClientPositionRef);
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, dropTargetRef, endPoint, startPoint, stroke, name);
+    handlePointerUp(canvas, event, dispatch, refs, viewport, startRef, nodeIdRef, dropTargetRef);
 
   const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void =>
-    handleShiftKeyChange(canvas, event, refs, viewport, startRef, lastPointerClientPositionRef, endPoint, startPoint, stroke);
+    handleShiftKeyChange(canvas, event, dispatch, viewport, startRef, nodeIdRef, lastPointerClientPositionRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;

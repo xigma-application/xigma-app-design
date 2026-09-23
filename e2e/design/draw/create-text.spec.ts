@@ -1,7 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
+
+const readNodeIds = (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return Object.keys(pages[activePageId].nodes);
+  });
 
 test('draws a new text node on the canvas using the Text tool', async ({ page }) => {
   const designPage = new DesignPage(page);
@@ -116,7 +124,12 @@ test('discards the text node when no content is entered before clicking away', a
 
   const box = await designPage.canvasSafeArea();
 
-  const before = await designPage.canvas.screenshot();
+  // the text node is now created live in the tree the moment the drag starts (so auto-layout
+  // reflow is visible while drawing, same as every other shape tool), rather than only appearing
+  // once content is committed — so "discarded" is asserted against the store directly rather than
+  // a pixel-exact screenshot, since the live selection handles rendered mid-drag can leave a
+  // GPU-level rendering difference too small to see but large enough to break byte-equality
+  const nodeIdsBefore = await readNodeIds(page);
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -126,6 +139,5 @@ test('discards the text node when no content is entered before clicking away', a
   await designPage.drawTextBox(startX, startY, endX, endY);
   await designPage.click(box.x + box.width * 0.9, box.y + box.height * 0.9);
 
-  const after = await designPage.canvas.screenshot();
-  expect(after.equals(before)).toBe(true);
+  expect(await readNodeIds(page)).toEqual(nodeIdsBefore);
 });

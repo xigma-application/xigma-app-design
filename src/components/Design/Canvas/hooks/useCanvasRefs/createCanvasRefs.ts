@@ -1,6 +1,7 @@
 // hooks
 import { createBlendModeRefs } from './hooks/useBlendModeRefs/createBlendModeRefs';
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
+import { createDrawingRefs } from './hooks/useDrawingRefs/createDrawingRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
 import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
 import { createProgressiveBlurRefs } from './hooks/useProgressiveBlurRefs/createProgressiveBlurRefs';
@@ -43,6 +44,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   ...overrides,
   blendMode: createBlendModeRefs(overrides.blendMode),
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
+  drawing: createDrawingRefs(overrides.drawing),
   ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
   frameName: createFrameNameRefs(overrides.frameName),
   gradientEndpointMove: createGradientEndpointMoveRefs(overrides.gradientEndpointMove),

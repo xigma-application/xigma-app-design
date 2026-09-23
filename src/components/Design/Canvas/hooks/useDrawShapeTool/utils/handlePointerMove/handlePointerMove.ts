@@ -3,8 +3,11 @@ import { RefObject } from 'react';
 // others
 import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
+// store
+import { updateNode } from 'store/design/slice';
+import { AppDispatch } from 'store';
+
 // types
-import { NodeType } from 'types/design/enums';
 import { TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
@@ -19,19 +22,19 @@ import { screenToWorld } from 'utils/transform/screenToWorld';
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
+  dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  nodeIdRef: RefObject<string | null>,
   candidateShapesRef: RefObject<TCandidateShape[]>,
-  fill: string,
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
 ): void => {
-  if (startRef.current) {
+  if (startRef.current && nodeIdRef.current) {
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
     const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
     const rect = getShapeDraftRect(startRef.current, snap.point, event.shiftKey);
 
-    canvasRefs.draftRef.current = { ...rect, fill, type };
+    dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
     canvasRefs.transform.alignmentGuideRef.current = snap.guide;
     canvasRefs.transform.aspectRatioLockGuideRef.current = event.shiftKey ? { ...rect, rotation: 0 } : null;
   }

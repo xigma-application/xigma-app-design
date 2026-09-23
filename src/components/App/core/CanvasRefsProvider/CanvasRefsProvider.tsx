@@ -10,6 +10,7 @@ import { useVectorEraseRefs } from 'components/Design/Canvas/hooks/useCanvasRefs
 import { useVectorMultiSelectRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorMultiSelectRefs/useVectorMultiSelectRefs';
 import { useBlendModeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useBlendModeRefs/useBlendModeRefs';
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
+import { useDrawingRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useDrawingRefs/useDrawingRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
 import { useProgressiveBlurRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useProgressiveBlurRefs/useProgressiveBlurRefs';
@@ -47,6 +48,7 @@ import { TPatternThumbnailRequest } from 'utils/canvas/patternThumbnail/types';
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const blendModeRefs = useBlendModeRefs();
   const cornerRadiusRefs = useCornerRadiusRefs();
+  const drawingRefs = useDrawingRefs();
   const ellipseArcRefs = useEllipseArcRefs();
   const frameNameRefs = useFrameNameRefs();
   const gradientEndpointMoveRefs = useGradientEndpointMoveRefs();
@@ -89,6 +91,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       colorSampleRequestRef,
       cornerRadius: cornerRadiusRefs,
       draftRef,
+      drawing: drawingRefs,
       ellipseArc: ellipseArcRefs,
       exportRenderRequestRef,
       frameName: frameNameRefs,
@@ -124,6 +127,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
     [
       blendModeRefs,
       cornerRadiusRefs,
+      drawingRefs,
       ellipseArcRefs,
       frameNameRefs,
       gradientEndpointMoveRefs,

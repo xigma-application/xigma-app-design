@@ -1,3 +1,8 @@
+// store
+import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { NodeType } from 'types/design/enums';
 
@@ -18,62 +23,108 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1, ...options });
 
+const createFrameNode = (): string => {
+  const { payload } = store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fills: [],
+      height: 1,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 1,
+      x: 20,
+      y: 20,
+    }),
+  );
+
+  return payload.id;
+};
+
 describe('handlePointerMove', () => {
   it('should do nothing when the drag has not started', () => {
     // mock
     const refs = createCanvasRefs();
+    const nodeId = createFrameNode();
 
     // before
     handlePointerMove(
       createCanvas(),
       pointerEvent(50, 50),
+      store.dispatch,
       refs,
       IDENTITY_VIEWPORT,
       { current: null },
-      { current: [] },
-      '#ff0000',
-      NodeType.rectangle,
+      { current: nodeId },
+      {
+        current: [],
+      },
     );
 
     // result
-    expect(refs.draftRef.current).toBeNull();
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 1, width: 1 });
   });
 
-  it('should update the draft shape and alignment guide as the pointer moves', () => {
+  it('should do nothing when there is no node id to resize', () => {
     // mock
     const refs = createCanvasRefs();
+
+    // before & result — must not throw with no in-progress node
+    expect(() =>
+      handlePointerMove(
+        createCanvas(),
+        pointerEvent(50, 50),
+        store.dispatch,
+        refs,
+        IDENTITY_VIEWPORT,
+        { current: { x: 20, y: 20 } },
+        { current: null },
+        {
+          current: [],
+        },
+      ),
+    ).not.toThrow();
+  });
+
+  it('should resize the in-progress node and update the alignment guide as the pointer moves', () => {
+    // mock
+    const refs = createCanvasRefs();
+    const nodeId = createFrameNode();
 
     // before
     handlePointerMove(
       createCanvas(),
       pointerEvent(120, 130),
+      store.dispatch,
       refs,
       IDENTITY_VIEWPORT,
       { current: { x: 20, y: 20 } },
+      { current: nodeId },
       { current: [] },
-      '#00ff00',
-      NodeType.frame,
     );
 
     // result
-    expect(refs.draftRef.current).toMatchObject({ fill: '#00ff00', height: 110, type: NodeType.frame, width: 100, x: 20, y: 20 });
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ height: 110, width: 100, x: 20, y: 20 });
     expect(refs.transform.aspectRatioLockGuideRef.current).toBeNull();
   });
 
   it('should set a square aspect-ratio-lock guide while Shift is held', () => {
     // mock
     const refs = createCanvasRefs();
+    const nodeId = createFrameNode();
 
     // before
     handlePointerMove(
       createCanvas(),
       pointerEvent(120, 130, { shiftKey: true }),
+      store.dispatch,
       refs,
       IDENTITY_VIEWPORT,
       { current: { x: 20, y: 20 } },
+      { current: nodeId },
       { current: [] },
-      '#00ff00',
-      NodeType.frame,
     );
 
     // result
