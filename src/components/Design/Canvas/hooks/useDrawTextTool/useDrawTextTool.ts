@@ -37,7 +37,7 @@ export const useDrawTextTool = (refs: TCanvasRefs): void => {
     handlePointerMove(canvas, event, dispatch, refs, viewport, startRef, nodeIdRef, candidateShapesRef);
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerUp(canvas, event, dispatch, refs, viewport, startRef, nodeIdRef, candidateShapesRef, dropTargetRef);
+    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, nodeIdRef, candidateShapesRef, dropTargetRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;

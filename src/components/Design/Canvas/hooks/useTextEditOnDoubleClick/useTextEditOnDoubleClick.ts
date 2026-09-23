@@ -1,5 +1,5 @@
 // store
-import { selectEditingTextBox, selectOrderedNodes, selectViewport } from 'store/design/selectors';
+import { selectEditingTextBox, selectRenderOrderedNodes, selectViewport } from 'store/design/selectors';
 import { setSelection, startTextEdit } from 'store/design/slice';
 import { RootState, useAppDispatch, useAppSelector } from 'store';
 
@@ -19,7 +19,7 @@ export const useTextEditOnDoubleClick = (refs: TCanvasRefs): void => {
   const dispatch = useAppDispatch();
 
   const getTarget = (point: TPoint, state: RootState): TTextNode | null =>
-    getDoubleClickedTextNode(point, selectOrderedNodes(state), selectViewport(state));
+    getDoubleClickedTextNode(point, selectRenderOrderedNodes(state), selectViewport(state));
 
   const handleHit = (target: TTextNode): void => {
     dispatch(setSelection([target.id]));

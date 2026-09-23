@@ -217,6 +217,31 @@ test('pressing Escape while drawing fresh text with no content discards it, same
   expect(await readNodeIds(page)).toEqual(nodeIdsBefore);
 });
 
+test('double-clicking a text node parented inside a frame enters edit mode, not just top-level text', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // useTextEditOnDoubleClick used to hit-test against only root-level nodes, which never mattered
+  // while Text always stayed unparented — now that it can land inside a frame, the hit-test must
+  // walk the full render-ordered tree instead of missing frame children entirely
+  await designPage.goto('e2e-test-edit-text-inside-frame');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(700, 100, 1300, 500);
+  await designPage.drawTextBox(750, 150, 950, 190);
+  await designPage.typeText('HELLO');
+  await designPage.click(1550, 600); // commit, deselected
+
+  await designPage.doubleClick(755, 160); // on the rendered "H" glyph
+
+  const editingNodeId = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.editingNodeId;
+  });
+
+  expect(editingNodeId).not.toBeNull();
+});
+
 test('pressing Escape while re-editing an existing text node exits editing and selects it; a second Escape then deselects it', async ({
   page,
 }) => {

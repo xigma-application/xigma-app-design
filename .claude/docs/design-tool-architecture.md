@@ -363,6 +363,27 @@ next to its sibling `getVectorChainPositionAtFraction.ts` in `vectorNetwork/`, s
   sliders, vector-edit tools, paste/duplicate/delete, ...), so it was deliberately left alone rather
   than risk a subtle behavior change to that shared, load-bearing piece of infrastructure for a
   UX nicety.
+- **Two gotchas from Text now being parentable, both fixed the same way: read the store back
+  instead of trusting a value computed before the parenting/hierarchy took effect.**
+  - `handlePointerUp`'s final `updateNode({ changes: rect, ... })` can trigger
+    `syncAutoLayoutChildren` (same as any other tool's live resize, see above) — but unlike the
+    other tools, Text's `pointerup` also opens `TextEditOverlay` immediately via `startTextEdit({
+    box, ... })`. That `box` must be the node's **resolved** position (post-sync), not the raw
+    `rect` just computed from the drag, or the overlay opens wherever the cursor physically was
+    instead of the auto-layout slot the node actually landed in — visibly wrong for exactly one
+    frame, since the very next store read (e.g. re-selecting it) shows the correct, synced spot.
+    Fixed by `startTextEditAtResolvedPosition` (`useDrawTextTool/utils/handlePointerUp/
+    handlePointerUp.ts`) reading the node back out of `appStore.getState()` after the `updateNode`
+    dispatch resolves, instead of reusing the pre-sync `rect`.
+  - `useTextEditOnDoubleClick` hit-tests via `getNodeAtPoint`, which needs every node in paint
+    order including nested children. It was built (like most double-click/hover code, back when
+    Text was always root-level) against `selectOrderedNodes` — which only maps `page.rootOrder`,
+    i.e. **top-level nodes only**. A Text node parented into a frame is invisible to that selector
+    entirely, so double-clicking it silently no-ops instead of entering edit mode. Fixed by
+    switching to `selectRenderOrderedNodes` (the same flattened, paint-ordered list
+    `useSelectionTool`'s own hit-testing already uses for frame children generally — see
+    `getRenderOrderedNodes.ts`). Any new hit-test/selector work on the canvas should default to
+    `selectRenderOrderedNodes` unless there's a specific reason to stay root-level-only.
 - Drawing over a frame — every tool above except Section resolves a target frame once, at
   `pointerdown`, via `Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget.ts` (nesting-aware,
   reuses `getFrameAtWorldPoint`), caches the result in its own `dropTargetRef`, and passes

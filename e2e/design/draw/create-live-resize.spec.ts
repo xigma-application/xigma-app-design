@@ -203,4 +203,39 @@ test.describe('Design draw tools — live node creation while drawing', () => {
 
     expect(textNode.parentId).toBe(frameId);
   });
+
+  test('the text edit overlay opens at the auto-layout-resolved position, not the raw drag rect, once the drag ends', async ({ page }) => {
+    const designPage = new DesignPage(page);
+    await designPage.goto('e2e-test-text-edit-overlay-autolayout-position');
+    await expect(designPage.canvas).toBeVisible();
+
+    const beforeFrame = await readNodeIds(page);
+    await designPage.drawFrame(700, 100, 1300, 300);
+    const frameId = await readNewNodeId(page, beforeFrame);
+    await setLayoutMode(page, frameId, { layoutMode: 'horizontal' });
+
+    const beforeSibling = await readNodeIds(page);
+    await designPage.drawRectangle(750, 150, 800, 200);
+    await readNewNodeId(page, beforeSibling); // occupies the left slot, pushing later siblings right
+
+    // draw the text box back over the sibling's own raw drag coordinates — if the edit overlay ever
+    // used those raw coordinates directly, this would prove it instead of the resolved layout slot
+    const beforeText = await readNodeIds(page);
+
+    await designPage.selectTool('text');
+    await designPage.pointerDown(710, 150);
+    await designPage.pointerMove(760, 200);
+    await designPage.pointerUp();
+
+    const textId = await readNewNodeId(page, beforeText);
+    const node = (await readNode(page, textId)) as { x: number; y: number };
+    const editingTextBox = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.editingTextBox;
+    });
+
+    expect(node.x).not.toBe(710);
+    expect(editingTextBox).toMatchObject({ x: node.x, y: node.y });
+  });
 });
