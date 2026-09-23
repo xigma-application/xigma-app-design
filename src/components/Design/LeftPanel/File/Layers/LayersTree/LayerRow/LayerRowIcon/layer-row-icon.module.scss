@@ -5,8 +5,19 @@
 }
 
 .LayerRowIcon {
+  display: inline-flex;
+  position: relative;
+
   &__spinner {
     animation: animation-layer-row-icon-spin 800ms linear infinite;
     display: inline-flex;
+  }
+
+  &__overlay {
+    align-items: center;
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    position: absolute;
   }
 }

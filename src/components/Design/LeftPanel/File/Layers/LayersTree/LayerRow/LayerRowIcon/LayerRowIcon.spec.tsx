@@ -166,6 +166,26 @@ describe('LayerRowIcon', () => {
     vi.useRealTimers();
   });
 
+  it('should not render the overlay icon for a node that is not ignoring auto layout', () => {
+    // before
+    const { queryAllByTestId } = render(<LayerRowIcon isMask={false} node={rectangleNode} size={10} />);
+
+    // result
+    expect(queryAllByTestId('generic-icon').some((element) => element.getAttribute('data-name') === 'Overlay')).toBe(false);
+  });
+
+  it('should render the overlay icon on top of the shape icon for a node ignoring auto layout', () => {
+    // before
+    const { getAllByTestId, getByTestId } = render(
+      <LayerRowIcon isMask={false} node={{ ...rectangleNode, ignoreAutoLayout: true }} size={10} />,
+    );
+
+    // result
+    expect(getByTestId('shape-icon')).toBeInTheDocument();
+    const overlayIcon = getAllByTestId('generic-icon').find((element) => element.getAttribute('data-name') === 'Overlay');
+    expect(overlayIcon).toHaveAttribute('data-size', '10');
+  });
+
   it('should keep showing the previous shape and only redraw 1 second after the same node’s geometry changes', () => {
     // mock
     vi.useFakeTimers();
