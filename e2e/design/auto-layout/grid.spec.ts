@@ -2696,4 +2696,157 @@ test.describe('auto-layout — Grid flow', () => {
     expect(await readColumnTrack(page, 1)).toMatchObject({ mode: 'hug' });
     await expect(page.getByText('Hug contents')).not.toBeVisible();
   });
+
+  test('pressing an arrow key moves a selected grid child into the free adjacent slot', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-grid-arrow-move-free-slot');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // two children, reading order fills (0,0) then (1,0) in a 3-column grid, leaving column 2 free
+    for (const targetY of [250, 320]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    });
+
+    const columnWidth = (FRAME.x2 - FRAME.x1) / 3;
+    const cellPoint = (column: number): { x: number; y: number } => ({ x: FRAME.x1 + columnWidth * column + 20, y: FRAME.y1 + 15 });
+    const before = await readGridState(page);
+
+    // select the child sitting at column 1 (index 1, reading order) — moving it right lands on the
+    // still-empty column 2
+    await designPage.click(cellPoint(1).x, cellPoint(1).y);
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(150);
+
+    const after = await readGridState(page);
+
+    expect(after.anchors[0]).toEqual(before.anchors[0]); // the other child never moved
+    expect(after.anchors[1]).toEqual([2, 0]); // the selected child landed in the free slot
+  });
+
+  test('pressing an arrow key on a multi-selection is blocked entirely when an unselected item sits in the gap between the selected items', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-grid-arrow-move-blocked-gap');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // four children, reading order fills a full first row (0,0)(1,0)(2,0) plus one alone at (0,1)
+    for (const targetY of [250, 320, 390, 460]) {
+      await designPage.drawRectangle(1400, targetY, 1450, targetY + 40);
+      await dragInto(page, { x: 1425, y: targetY + 20 }, { x: 800, y: 400 });
+    }
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    });
+
+    const columnWidth = (FRAME.x2 - FRAME.x1) / 3;
+    const cellPoint = (column: number): { x: number; y: number } => ({ x: FRAME.x1 + columnWidth * column + 20, y: FRAME.y1 + 15 });
+
+    const before = await readGridState(page);
+
+    // select the two ends of row 0, leaving the middle child (the gap) unselected
+    await designPage.click(cellPoint(0).x, cellPoint(0).y);
+    await designPage.click(cellPoint(2).x, cellPoint(2).y, { shift: true });
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(150);
+
+    const after = await readGridState(page);
+
+    // the whole gesture is a no-op — not even the middle (unselected) item moved
+    expect(after.anchors).toEqual(before.anchors);
+  });
+
+  test('pressing an arrow key that would push a selected grid child past the grid’s edge is blocked', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-grid-arrow-move-blocked-edge');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+    await expect(flowGroup(page)).toBeVisible();
+
+    // a single child, reading order places it at (0,0) in a 3-column grid
+    await designPage.drawRectangle(1400, 250, 1450, 290);
+    await dragInto(page, { x: 1425, y: 270 }, { x: 800, y: 400 });
+
+    await selectFrameRow(page);
+    await setFlow(page, 'Grid');
+    await page.locator('[data-test-grid-area]').click();
+
+    const columnsField = page.getByLabel('Columns', { exact: true });
+
+    await columnsField.fill('3');
+    await columnsField.blur();
+    await expect.poll(() => readColumnCount(page)).toBe(3);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [frameId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { gridAutoPlacement: false }, id: frameId }));
+    });
+
+    const before = await readGridState(page);
+
+    // moving up from row 0 is immediately out of bounds — negative index, no row above to grow into
+    await designPage.click(FRAME.x1 + 20, FRAME.y1 + 15);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+
+    const after = await readGridState(page);
+
+    expect(after.anchors).toEqual(before.anchors);
+  });
 });

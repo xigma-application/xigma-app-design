@@ -200,8 +200,8 @@ describe('handlePointerUp', () => {
     );
 
     // result
-    const resolvedNode = selectActivePage(store.getState()).nodes[nodeId];
-    const sibling = selectActivePage(store.getState()).nodes[siblingId];
+    const resolvedNode = selectActivePage(store.getState()).nodes[nodeId] as { width: number; x: number; y: number };
+    const sibling = selectActivePage(store.getState()).nodes[siblingId] as { width: number; x: number };
 
     expect(resolvedNode.x).not.toBe(500);
     expect(resolvedNode.x).toBeGreaterThanOrEqual(sibling.x + sibling.width);

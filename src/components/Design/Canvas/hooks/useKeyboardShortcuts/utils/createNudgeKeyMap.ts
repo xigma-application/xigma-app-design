@@ -9,7 +9,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TShortcut } from '../types';
 
 // utils
-import { handleNudgeSelection } from './handleNudgeSelection';
+import { handleNudgeSelection } from './handleNudgeSelection/handleNudgeSelection';
 
 export const createNudgeKeyMap = (
   dispatch: AppDispatch,

@@ -1,5 +1,5 @@
 // store
-import { addNode, addNodes, createMaskGroup, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, addNodes, createMaskGroup, groupNodes, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
@@ -8,7 +8,7 @@ import { store } from 'store';
 import { LayoutMode, NodeType } from 'types/design/enums';
 
 // utils
-import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handleNudgeSelection } from '../handleNudgeSelection';
 
 let seq = 0;
@@ -87,6 +87,70 @@ const addFrameWithChild = (options: { childAbsolute?: boolean; layoutMode?: Layo
   );
 
   return { childId, frameId };
+};
+
+const addAnchoredGridFrameWithChildren = (): { childIdA: string; childIdB: string; frameId: string } => {
+  seq += 1;
+
+  const frameId = `nudge-grid-frame-${seq}`;
+  const childIdA = `nudge-grid-child-a-${seq}`;
+  const childIdB = `nudge-grid-child-b-${seq}`;
+
+  store.dispatch(
+    addNodes({
+      nodes: [
+        {
+          childIds: [childIdA, childIdB],
+          clipContent: true,
+          fill: '#fff',
+          gridAutoPlacement: false,
+          gridColumnCount: 3,
+          gridRowCount: 2,
+          height: 200,
+          id: frameId,
+          layoutMode: LayoutMode.grid,
+          name: 'Frame',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.frame,
+          width: 200,
+          x: 0,
+          y: 0,
+        },
+        {
+          fill: '#000',
+          gridColumnAnchorIndex: 0,
+          gridRowAnchorIndex: 0,
+          height: 20,
+          id: childIdA,
+          name: 'Rectangle',
+          parentId: frameId,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 20,
+          x: 0,
+          y: 0,
+        },
+        {
+          fill: '#000',
+          gridColumnAnchorIndex: 1,
+          gridRowAnchorIndex: 0,
+          height: 20,
+          id: childIdB,
+          name: 'Rectangle',
+          parentId: frameId,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 20,
+          x: 20,
+          y: 0,
+        },
+      ] as any,
+      rootIds: [frameId],
+    }),
+  );
+
+  return { childIdA, childIdB, frameId };
 };
 
 const addFrameNode = (x: number, y: number): string => {
@@ -276,5 +340,38 @@ describe('handleNudgeSelection', () => {
     // result
     expect(node(childIds[0])).toMatchObject({ x: before[0].x - 3, y: before[0].y + 4 });
     expect(node(childIds[1])).toMatchObject({ x: before[1].x - 3, y: before[1].y + 4 });
+  });
+
+  it('should move a selection of anchored grid children by one grid slot instead of nudging pixels', () => {
+    // mock
+    const { childIdA, frameId } = addAnchoredGridFrameWithChildren();
+
+    store.dispatch(setSelection([childIdA]));
+    const before = { x: node(childIdA).x, y: node(childIdA).y };
+
+    // action
+    handleNudgeSelection(store.dispatch, createCanvasRefs(), 0, 1);
+
+    // result — the grid anchor moved down a row, not a plain pixel-nudge of x/y
+    expect(node(childIdA)).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 1 });
+    expect(node(frameId)).toBeTruthy();
+    expect(node(childIdA).y).not.toBe(before.y);
+  });
+
+  it('should fall back to the pixel-nudge path when the selection mixes a grid child with a non-grid-managed node', () => {
+    // mock — childIdA is a real grid-managed child, childIdB was force-detached via ignoreAutoLayout,
+    // so the selection is no longer "entirely grid children of one anchored grid frame"
+    const { childIdA, childIdB } = addAnchoredGridFrameWithChildren();
+
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childIdB }));
+    store.dispatch(setSelection([childIdA, childIdB]));
+
+    // action
+    handleNudgeSelection(store.dispatch, createCanvasRefs(), 0, 1);
+
+    // result — the grid-managed child is skipped entirely (as it already is today, pre-feature),
+    // while the ignoreAutoLayout node still gets the plain pixel nudge
+    expect(node(childIdA)).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 });
+    expect(node(childIdB)).toMatchObject({ y: 1 });
   });
 });

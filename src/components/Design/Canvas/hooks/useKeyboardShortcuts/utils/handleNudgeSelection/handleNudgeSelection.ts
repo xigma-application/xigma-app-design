@@ -6,7 +6,7 @@ import { updateNode } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectNodes, selectSelectedIds } from 'store/design/selectors';
-import { AppDispatch, store } from 'store';
+import { AppDispatch, RootState, store } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
@@ -14,12 +14,19 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
-import { collectNudgeSubtreeNodes } from './collectNudgeSubtreeNodes';
-import { handleNudgeVectorEdit } from './handleNudgeVectorEdit';
+import { collectNudgeSubtreeNodes } from '../collectNudgeSubtreeNodes';
+import { getGridSlotMoveFrame } from './getGridSlotMoveFrame';
+import { handleGridSlotMove } from './handleGridSlotMove';
+import { handleNudgeVectorEdit } from '../handleNudgeVectorEdit';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
-import { isNudgeableNode } from './isNudgeableNode';
+import { isNudgeableNode } from '../isNudgeableNode';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
-import { updateNudgeDistanceGuide } from './updateNudgeDistanceGuide';
+import { updateNudgeDistanceGuide } from '../updateNudgeDistanceGuide';
+
+const getSelectedNodes = (state: RootState, nodes: Record<string, TSceneNode>): TSceneNode[] =>
+  selectSelectedIds(state)
+    .map((id) => nodes[id])
+    .filter((node): node is TSceneNode => node !== undefined);
 
 const nudgeSubtreeNodes = (dispatch: AppDispatch, subtreeNodes: TSceneNode[], deltaX: number, deltaY: number): void => {
   subtreeNodes.forEach((node) => {
@@ -37,19 +44,23 @@ export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, d
   if (vectorEditingNodeIds.length > 0) {
     handleNudgeVectorEdit(dispatch, refs, deltaX, deltaY, altKey);
   } else {
-    const selectedIds = selectSelectedIds(state);
     const nodes = selectNodes(state);
-    const nodesToMove = selectedIds
-      .map((id) => nodes[id])
-      .filter((node): node is TSceneNode => node !== undefined && isNudgeableNode(node, nodes));
+    const selectedNodes = getSelectedNodes(state, nodes);
+    const gridFrame = getGridSlotMoveFrame(selectedNodes, nodes);
 
-    if (nodesToMove.length > 0) {
-      const subtreeNodes = collectNudgeSubtreeNodes(nodesToMove, nodes);
+    if (gridFrame) {
+      handleGridSlotMove(dispatch, refs, gridFrame, selectedNodes, nodes, deltaX, deltaY);
+    } else {
+      const nodesToMove = selectedNodes.filter((node) => isNudgeableNode(node, nodes));
 
-      dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-      nudgeSubtreeNodes(dispatch, subtreeNodes, deltaX, deltaY);
-      dispatch(endHistoryGesture());
-      updateNudgeDistanceGuide(store.getState(), refs, altKey);
+      if (nodesToMove.length > 0) {
+        const subtreeNodes = collectNudgeSubtreeNodes(nodesToMove, nodes);
+
+        dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
+        nudgeSubtreeNodes(dispatch, subtreeNodes, deltaX, deltaY);
+        dispatch(endHistoryGesture());
+        updateNudgeDistanceGuide(store.getState(), refs, altKey);
+      }
     }
   }
 };

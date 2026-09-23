@@ -915,6 +915,69 @@ just the selection size and their own old cells are simply excluded from occupan
 moved node) — that parity only holds under manual placement; under automatic placement the two
 cases diverge exactly as described above.
 
+### Canvas — arrow-key move
+
+Plain arrow-key nudging (`useKeyboardShortcuts/utils/handleNudgeSelection/`) is normally a no-op for
+a grid child — `isNudgeableNode` blocks any managed-layout child that isn't `ignoreAutoLayout`
+(§"Not covered yet" used to list this as "arrow-key reorder"). Grid children now get a real
+replacement behaviour instead of staying inert: arrow keys move the whole selection one grid slot
+at a time, updating `gridColumnAnchorIndex`/`gridRowAnchorIndex` directly rather than nudging
+pixels.
+
+`handleNudgeSelection.ts` was promoted from a flat file to its own folder (module-structure
+"function promotion" — siblings flat in the new folder, spec moved to a nested `test/`) once this
+branch needed real logic:
+
+- **`getGridSlotMoveFrame(selectedNodes, nodesById)`** — the scope gate, checked before the
+  existing pixel-nudge filtering runs at all. Returns the shared `TFrameNode` only if every
+  selected node has the *same* parent, that parent is `layoutMode: grid`, the frame's
+  `gridAutoPlacement` is explicitly `false` (not the `?? true` default — see below for why), and no
+  selected node has `ignoreAutoLayout` (those are already pixel-nudgeable, mixing them in falls the
+  whole key press back to the ordinary pixel-nudge path, unchanged).
+- **`getGridMoveStep(deltaX, deltaY)`** — reads only the *sign* of whichever nudge delta is
+  non-zero (`{ axis: 'column' | 'row', step: 1 | -1 }`). The Shift/Alt "large step" nudge variants
+  (`NUDGE_STEP_LARGE`) still route through the same `nudgeMap`/`createNudgeKeyMap` wiring
+  unchanged, but their magnitude is deliberately ignored here — every arrow variant moves exactly
+  one slot.
+- **`handleGridSlotMove(dispatch, refs, frame, selectedNodes, nodesById, deltaX, deltaY)`** — the
+  algorithm, atomic and all-or-nothing:
+  1. `placeGridCells(getGridPlacementInputs(frame.childIds, nodesById), columnCount, false)` once,
+     over *every* child (not just the selection) — this resolves each child's current cell even if
+     it never got an explicit anchor (see the `gridAutoPlacement` note below), reusing the exact
+     same resolver the drag-drop path (§"Canvas — drag a child into a cell") and the render sync
+     both already depend on.
+  2. Builds an `occupied` set (`occupyGridRegion`) from every placement **except** the selection's
+     own — the moving nodes must never block each other, and since they all shift by the identical
+     step their relative non-overlap is preserved automatically, so no selected-vs-selected check is
+     needed.
+  3. **`getGridSlotMoveCandidate`** (one per selected node) shifts that node's own current placement
+     by the step on the given axis, then checks: `rowStart/columnStart >= 0`, `rowStart + rowSpan <=
+     rowCount` (the row upper bound — `isGridRegionFree` only checks the *column* bound, so this is
+     added explicitly), and `isGridRegionFree(occupied, ...)` for the collision + column bound.
+     `rowCount` comes from `getGridAxisTrackCount(frame, nodesById, 'row')` — **the grid never
+     auto-grows for this feature**, unlike a new-node drop past the edge.
+  4. Only if `candidates.every(candidate => candidate !== null)` does anything get dispatched — one
+     `updateNode({ changes: { gridColumnAnchorIndex, gridRowAnchorIndex } })` per selected node,
+     bracketed in the usual single `beginHistoryGesture`/`endHistoryGesture` pair (one undo step for
+     the whole key press, exactly like the pixel-nudge path). A single blocked candidate blocks
+     every candidate — there is deliberately no look-ahead ("would 2 slots work"), only the
+     immediate next slot is ever checked.
+
+**Why the gate requires `gridAutoPlacement === false` explicitly.** Under auto-placement, a child
+has no stable "current slot" to step from without first deciding whether to freeze every sibling's
+reading-order position too (a materially bigger, cascading-reflow feature — see
+`commitGridAutoPlacementFreeze`, History #27, which is exactly what the real "Toggle automatic
+positioning" button already does on its OFF transition). So arrow keys stay a no-op for a still
+auto-placing grid, same as today. In practice this costs nothing: dragging any element into a grid
+already flips `gridAutoPlacement: false` (`applyGridDrop`/`applyNewNodeGridPlacement`), so a
+manually-arranged grid already qualifies by the time a user would reach for arrow keys. One
+subtlety confirmed while building this: `placeGridCells` in step 1 above still resolves a sensible
+*current* cell for a child that has no explicit anchor fields even once `gridAutoPlacement` is
+`false` (it falls back to its own internal auto-flow cursor per-child, same as
+`getAutoFlowGridPlacement` does elsewhere) — so the feature degrades gracefully even for the
+edge case of a raw `gridAutoPlacement: false` flip that bypassed the real toggle's freeze step,
+though that combination shouldn't arise through normal UI use.
+
 ### Canvas — the grid drag ghost (dragging an already-placed grid child)
 
 Reordering *inside* a grid has one problem the "fresh drop" case never hits: the dragged node is
@@ -1007,8 +1070,9 @@ On-canvas track pills / drag-a-track-edge-to-fixed-px (the panel now covers per-
 Fixed/Hug/Fill sizing, add, delete and reorder — § "Panel — the dedicated Grid settings panel";
 the canvas overlay is still the last phase), `gridAutoPlacement` toggle UI, occupied-vs-empty
 cell styling, span edge-handles (canvas resize-to-span), auto-placement obstruction reflow,
-arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wired
-(`ColumnGridChildSpan`); the engine already honours spans and manual anchors when set in code.
+⌘D-into-next-cell. The Column span / Row span fields are wired (`ColumnGridChildSpan`); the
+engine already honours spans and manual anchors when set in code. Arrow-key move is covered —
+§ "Canvas — arrow-key move".
 
 ## Tests
 
@@ -1075,6 +1139,14 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
   its `hooks/utils/{commitAlignmentConstraint,moveNodeToAlignment,setGridChild{Horizontal,Vertical}Align}`
   — the grid-branch cases specifically); `store/design/utils/autoLayout/test/getGridPlacementInputs.spec.ts`
   (the `ignoreAutoLayout` exclusion).
+- **Unit — grid arrow-key move (§13 "Canvas — arrow-key move"):**
+  `useKeyboardShortcuts/utils/handleNudgeSelection/test/` — `getGridSlotMoveFrame` (the scope
+  gate), `getGridMoveStep` (delta-sign → axis/step), `getGridSlotMoveCandidate` (per-node
+  bounds/collision check, spanning items), `handleGridSlotMove` (integration-style against the
+  real store — blocked-by-neighbor, blocked-at-edge, atomic multi-select, the gap-between-selected-
+  items scenario, undo as a single step), plus `handleNudgeSelection.spec.ts`'s own delegation
+  cases (grid selection routes here instead of pixel-nudging; a mixed selection falls back to the
+  plain pixel-nudge path untouched).
 - **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
   `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
   select, reflow on column-count change), dragging an element into a cell (hover highlight + dim,
@@ -1083,7 +1155,9 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
   absolute-position grid child dragging freely instead of snapping back, and (§13's dedicated
   panel) opening it / resizing / adding / deleting a track, dragging a track by its handle to
   reorder (including the span-break rejection), and undo/redo from inside a panel field resetting
-  a stale track selection — driving the engine + canvas + panel together.
+  a stale track selection — driving the engine + canvas + panel together; and arrow-key move (a
+  free adjacent slot, the whole multi-select blocked by an unselected item in the gap, blocked past
+  the grid's edge).
 
 ## History (so it isn't repeated)
 
@@ -1535,3 +1609,15 @@ arrow-key reorder, ⌘D-into-next-cell. The Column span / Row span fields are wi
     already needed no code (the engine just stops reading anchors), but the OFF transition needs to
     *create* the anchors the rest of manual mode assumes exist, not wait for the user's first drag
     to establish them one child at a time.
+28. **2026-09-23 — grid flow, arrow-key move (§13 "Canvas — arrow-key move").** Plain arrow-key
+    nudging was a permanent no-op for grid children (`isNudgeableNode`); this replaced that dead end
+    with a real one-slot-per-key-press move, atomic across a multi-selection (one blocked candidate
+    blocks the whole gesture — deliberately no look-ahead past the immediate next slot). Reused
+    `placeGridCells`/`getGridPlacementInputs`/`isGridRegionFree`/`occupyGridRegion` wholesale from
+    the drag-drop path (entry #9) rather than reimplementing grid collision math — the only new
+    checks are the row-upper-bound (`isGridRegionFree` only checks the column bound) and the
+    negative-index guard, both things the drag-drop path never needed since it lets the grid grow
+    instead of blocking. Deliberately gated on `gridAutoPlacement === false` explicitly, so a still
+    auto-placing grid keeps ignoring arrow keys rather than needing a cascading-reflow feature of
+    its own — `commitGridAutoPlacementFreeze` (entry #27) already makes real manual-mode grids the
+    common case.

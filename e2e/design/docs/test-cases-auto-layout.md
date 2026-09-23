@@ -89,6 +89,9 @@ repainting — same rationale as the Flow section above.
 | 49  | Dragging an already-placed grid child while automatic positioning is on is a no-op — the layout stays untouched; the exact same drag repositions the child once automatic positioning is toggled off                                                                                                                                                                                                                                                                                                    |  ✅  | ✅ `grid.spec.ts` |
 | 50  | Dropping a brand-new element into a grid while automatic positioning is on inserts it by reading-order position (a plain `childIds` reorder, still stretched to fill its cell) instead of anchoring it and flipping the frame to manual, unlike the same drop under manual placement                                                                                                                                                                                                                    |  ✅  | ✅ `grid.spec.ts` |
 | 51  | Turning automatic positioning off freezes every child's current auto-flowed cell into an explicit anchor (not just a bare flag flip) — otherwise a child that was only ever auto-placed has no anchor for a later track reorder to carry along, and appears stuck as if automatic positioning were still on                                                                                                                                                                                             |  ✅  | ✅ `grid.spec.ts` |
+| 52  | Pressing an arrow key on a selected grid child moves it one slot in that direction (`gridColumnAnchorIndex`/`gridRowAnchorIndex`), instead of the plain pixel-nudge every other node gets                                                                                                                                                                                                                                                                                                                 |  ✅  | ✅ `grid.spec.ts` |
+| 53  | Arrow-key move on a multi-selection is atomic: if an unselected item sits in the target slot of even one selected item, the whole gesture is blocked — nothing moves, including the other selected items whose own target slots were free                                                                                                                                                                                                                                                               |  ✅  | ✅ `grid.spec.ts` |
+| 54  | Arrow-key move is blocked at the grid's edge (negative index, or past the current column/row track count) — the grid never grows to make room, unlike a new-node drop                                                                                                                                                                                                                                                                                                                                     |  ✅  | ✅ `grid.spec.ts` |
 
 #6–#10 stay unit-only: there is no UI to drive per-track sizing / manual placement in a
 browser yet (deferred to the last phase), and the geometry is asserted exactly by
@@ -174,7 +177,15 @@ asserts screenshot inequality across one / two / no selected columns. #41's geom
 the `gridSlots/**` unit suite (non-uniform `getGridSlotRect`, `getGridTrackOffset` /
 `getGridTrackIndexAt`, `getGridResolvedTrackSizes`, and every `resolveGridDropHover` branch on
 non-uniform layouts); the one e2e proves the slot overlay actually repaints when a real panel
-commit changes a track's mode — a WebGL paint a unit test can't observe.
+commit changes a track's mode — a WebGL paint a unit test can't observe. #52–#54 are arrow-key
+move (`.claude/docs/auto-layout.md` §"Canvas — arrow-key move"): the collision/bounds algorithm
+itself (`getGridSlotMoveFrame`, `getGridMoveStep`, `getGridSlotMoveCandidate(s)`,
+`handleGridSlotMove`) is exhaustive against the real store in
+`useKeyboardShortcuts/utils/handleNudgeSelection/test/`, including the exact #53 gap scenario and
+#54's edge/negative-index cases — the e2e trio proves the real global `keydown` listener
+(`useKeyboardHandler`, same focus/bubbling caveat as #31) actually reaches this new branch of
+`handleNudgeSelection` end to end, against grid state built through the real drag-drop UI rather
+than a synthetic `updateNode`.
 
 ## Reordering a child within its own frame
 
