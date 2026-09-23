@@ -40,6 +40,25 @@ const selectFrameRow = async (page: Page): Promise<void> => {
   await page.locator('[class*="Tree__row_"]').filter({ hasText: 'Frame' }).first().click();
 };
 
+const readChildIds = async (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+    const frame = activePage.nodes[activePage.rootOrder[0]] as { childIds: string[] };
+
+    return frame.childIds;
+  });
+
+const readNodePosition = async (page: Page, nodeId: string): Promise<{ x: number; y: number }> =>
+  page.evaluate(async (id) => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const node = pages[activePageId].nodes[id] as { x: number; y: number };
+
+    return { x: node.x, y: node.y };
+  }, nodeId);
+
 test.describe('auto-layout — Flow (Horizontal / Vertical)', () => {
   test('switching Flow reflows the frame’s children, and switching back restores the same layout', async ({ page }) => {
     const designPage = new DesignPage(page);
@@ -397,5 +416,284 @@ test.describe('auto-layout — Flow (Horizontal / Vertical)', () => {
     expect(nodeC.x).toBe(nodeD.x);
     expect(nodeC.x).toBeGreaterThan(nodeA.x);
     expect(nodeD.y).toBeGreaterThan(nodeC.y);
+  });
+
+  test('pressing the cross-axis key on a Horizontal+Wrap frame moves a child to become the first item of the next row', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-cross-horizontal');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 220px-wide frame fits exactly two 100px children per row before wrapping
+    await designPage.drawFrame(600, 150, 820, 550);
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 710, y: 300 });
+    }
+
+    const before = await readChildIds(page);
+    const rowY = await readNodePosition(page, before[0]).then((position) => position.y);
+
+    // click the first child of row 0 (top-left cell) and press Down to cross into row 1. Once it's
+    // excluded, the second child of row 0 (200px total) still fits alongside the third — so row 0
+    // reabsorbs the third child, and the moved one lands right after it, genuinely starting row 1
+    await designPage.click(650, 200);
+    await page.keyboard.press('ArrowDown');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+    const movedPosition = await readNodePosition(page, before[0]);
+
+    expect(after).toEqual([before[1], before[2], before[0], before[3]]);
+    // the real regression this guards: childIds reordering alone doesn't prove a visual row
+    // change — the moved child must actually end up lower on screen, not just shuffled sideways
+    // within the same row
+    expect(movedPosition.y).toBeGreaterThan(rowY);
+  });
+
+  test('pressing Up on a Horizontal+Wrap frame moves a child up into the previous row when that row genuinely has room', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-cross-up-with-slack');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 220px-wide frame: row 0 = two 100px children (200/220px, 20px of slack left); row 1 = a
+    // 100px child (didn't fit in row 0) plus a 15px child (small enough to fit row 0's slack)
+    await designPage.drawFrame(600, 150, 820, 550);
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    await designPage.drawRectangle(1400, 160, 1500, 260);
+    await dragInto(page, { x: 1450, y: 210 }, { x: 710, y: 300 });
+    await designPage.drawRectangle(1400, 300, 1500, 400);
+    await dragInto(page, { x: 1450, y: 350 }, { x: 710, y: 300 });
+    await designPage.drawRectangle(1400, 440, 1500, 540);
+    await dragInto(page, { x: 1450, y: 490 }, { x: 710, y: 300 });
+    await designPage.drawRectangle(1400, 580, 1415, 680);
+    await dragInto(page, { x: 1407, y: 630 }, { x: 710, y: 300 });
+
+    const before = await readChildIds(page);
+    const rowY = await readNodePosition(page, before[0]).then((position) => position.y);
+
+    // click the small (last, 15px-wide) child of row 1 and press Up — it should cross into row 0
+    await designPage.click(707, 300);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+    const movedPosition = await readNodePosition(page, before[3]);
+
+    expect(after).toEqual([before[0], before[1], before[3], before[2]]);
+    expect(movedPosition.y).toBe(rowY);
+  });
+
+  test('pressing Up on a Horizontal+Wrap frame evicts row 0’s trailing item to make room when the row is exactly full', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-cross-up-evicts');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 220px-wide frame fits exactly two 100px children per row before wrapping — zero slack
+    await designPage.drawFrame(600, 150, 820, 550);
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 710, y: 300 });
+    }
+
+    const before = await readChildIds(page);
+    const rowY = await readNodePosition(page, before[0]).then((position) => position.y);
+
+    // click the last child of row 1 and press Up — row 0 has no slack on its own, but evicting its
+    // trailing item (pushed forward to join row 1's remainder) makes room, mirroring how Down
+    // already benefits from the vacated row reabsorbing a trailing sibling
+    await designPage.click(750, 300);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+    const movedPosition = await readNodePosition(page, before[3]);
+
+    expect(after).toEqual([before[0], before[3], before[1], before[2]]);
+    expect(movedPosition.y).toBe(rowY);
+  });
+
+  test('pressing Up on a Horizontal+Wrap frame is blocked when the child itself is wider than the whole row, even after evicting everything', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-cross-up-blocked');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 220px-wide frame; row 0 = one 100px child; row 1 = one 300px child — far too wide to ever
+    // fit in row 0, no matter what gets evicted from it
+    await designPage.drawFrame(600, 150, 820, 550);
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    await designPage.drawRectangle(1400, 160, 1500, 260);
+    await dragInto(page, { x: 1450, y: 210 }, { x: 710, y: 300 });
+    await designPage.drawRectangle(1400, 300, 1700, 400);
+    await dragInto(page, { x: 1550, y: 350 }, { x: 710, y: 300 });
+
+    const before = await readChildIds(page);
+
+    // click the (only) child of row 1 and press Up — it can never fit into row 0
+    await designPage.click(750, 300);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+
+    expect(after).toEqual(before);
+  });
+
+  test('pressing Up swaps the block into the previous row at the SAME index it occupies in its own row, not the row’s tail', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-up-swaps-by-index');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 300px-wide frame: row 0 fits exactly three 100px children (300/300px, zero slack); row 1 has
+    // just one more 100px child, alone
+    await designPage.drawFrame(600, 150, 900, 550);
+    await setFlow(page, 'Horizontal');
+    await clickWrapToggle(page);
+
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 710, y: 300 });
+    }
+
+    const before = await readChildIds(page);
+    const rowY = await readNodePosition(page, before[0]).then((position) => position.y);
+
+    // click the (only) child of row 1 — it sits at index 0 of its own row — and press Up. It
+    // should swap with row 0's index-0 item ('a'), not get evicted from row 0's tail ('c')
+    await designPage.click(650, 300);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+    const movedPosition = await readNodePosition(page, before[3]);
+
+    expect(after).toEqual([before[3], before[1], before[2], before[0]]);
+    expect(movedPosition.y).toBe(rowY);
+  });
+
+  test('pressing the cross-axis key on a Vertical+Wrap frame moves a child to become the first item of the next column (opposite key mapping)', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-cross-vertical');
+    await expect(designPage.canvas).toBeVisible();
+
+    // 220px-tall frame fits exactly two 100px children per column before wrapping
+    await designPage.drawFrame(600, 150, 900, 370);
+    await setFlow(page, 'Vertical');
+    await clickWrapToggle(page);
+
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 700, y: 200 });
+    }
+
+    const before = await readChildIds(page);
+    const columnX = await readNodePosition(page, before[0]).then((position) => position.x);
+
+    // click the first child of column 0 (top-left cell) and press Right (not Down) to cross
+    // columns — same reabsorption as the Horizontal+Down case (mirrored to the other axis)
+    await designPage.click(650, 200);
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+    const movedPosition = await readNodePosition(page, before[0]);
+
+    expect(after).toEqual([before[1], before[2], before[0], before[3]]);
+    // the real regression this guards: childIds reordering alone doesn't prove a visual column
+    // change — the moved child must actually end up further right on screen
+    expect(movedPosition.x).toBeGreaterThan(columnX);
+  });
+
+  test('pressing the primary-axis key at the edge of a Horizontal frame’s row is blocked', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-primary-blocked');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 150, 820, 350);
+    await setFlow(page, 'Horizontal');
+
+    for (let index = 0; index < 2; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 710, y: 250 });
+    }
+
+    const before = await readChildIds(page);
+
+    // click the last (rightmost) child and press Right — it's already at the end of its only row
+    await designPage.click(750, 200);
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+
+    expect(after).toEqual(before);
+  });
+
+  test('pressing the cross-axis key on a non-contiguous multi-selection is blocked entirely', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-arrow-non-contiguous-blocked');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 150, 920, 350);
+    await setFlow(page, 'Horizontal');
+
+    for (let index = 0; index < 3; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 710, y: 250 });
+    }
+
+    const before = await readChildIds(page);
+
+    // select the first and third children, leaving the middle one unselected — a gap in the
+    // selection's own flow order, not just in the press direction
+    await designPage.click(650, 200);
+    await designPage.click(850, 200, { shift: true });
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(150);
+
+    const after = await readChildIds(page);
+
+    expect(after).toEqual(before);
   });
 });

@@ -153,6 +153,65 @@ const addAnchoredGridFrameWithChildren = (): { childIdA: string; childIdB: strin
   return { childIdA, childIdB, frameId };
 };
 
+const addFlowFrameWithChildren = (
+  layoutMode: LayoutMode.horizontal | LayoutMode.vertical,
+): { childIdA: string; childIdB: string; frameId: string } => {
+  seq += 1;
+
+  const frameId = `nudge-flow-frame-${seq}`;
+  const childIdA = `nudge-flow-child-a-${seq}`;
+  const childIdB = `nudge-flow-child-b-${seq}`;
+
+  store.dispatch(
+    addNodes({
+      nodes: [
+        {
+          childIds: [childIdA, childIdB],
+          clipContent: true,
+          fill: '#fff',
+          height: 200,
+          id: frameId,
+          layoutMode,
+          name: 'Frame',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.frame,
+          width: 200,
+          x: 0,
+          y: 0,
+        },
+        {
+          fill: '#000',
+          height: 20,
+          id: childIdA,
+          name: 'Rectangle',
+          parentId: frameId,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 20,
+          x: 0,
+          y: 0,
+        },
+        {
+          fill: '#000',
+          height: 20,
+          id: childIdB,
+          name: 'Rectangle',
+          parentId: frameId,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 20,
+          x: 20,
+          y: 0,
+        },
+      ] as any,
+      rootIds: [frameId],
+    }),
+  );
+
+  return { childIdA, childIdB, frameId };
+};
+
 const addFrameNode = (x: number, y: number): string => {
   store.dispatch(
     addNode({
@@ -373,5 +432,39 @@ describe('handleNudgeSelection', () => {
     // while the ignoreAutoLayout node still gets the plain pixel nudge
     expect(node(childIdA)).toMatchObject({ gridColumnAnchorIndex: 0, gridRowAnchorIndex: 0 });
     expect(node(childIdB)).toMatchObject({ y: 1 });
+  });
+
+  it('should reorder flow children of a horizontal/vertical frame instead of nudging pixels', () => {
+    // mock
+    const { childIdA, childIdB, frameId } = addFlowFrameWithChildren(LayoutMode.horizontal);
+
+    store.dispatch(setSelection([childIdA]));
+    const before = { x: node(childIdA).x };
+
+    // action — swaps childIdA forward past childIdB in reading order
+    handleNudgeSelection(store.dispatch, createCanvasRefs(), 1, 0);
+
+    // result — reading order changed, and the engine resync (not a plain pixel-nudge) moved x
+    expect(node(frameId).childIds).toEqual([childIdB, childIdA]);
+    expect(node(childIdA).x).not.toBe(before.x);
+  });
+
+  it('should fall back to the pixel-nudge path when the selection mixes a flow child with a non-flow-managed node', () => {
+    // mock — childIdA is a real flow-managed child, childIdB was force-detached via ignoreAutoLayout,
+    // so the selection is no longer "entirely flow children of one horizontal/vertical frame"
+    const { childIdA, childIdB } = addFlowFrameWithChildren(LayoutMode.horizontal);
+
+    store.dispatch(updateNode({ changes: { ignoreAutoLayout: true }, id: childIdB }));
+    store.dispatch(setSelection([childIdA, childIdB]));
+
+    const beforeA = { x: node(childIdA).x, y: node(childIdA).y };
+
+    // action
+    handleNudgeSelection(store.dispatch, createCanvasRefs(), 1, 0);
+
+    // result — the flow-managed child is skipped entirely (as it already is today, pre-feature),
+    // while the ignoreAutoLayout node still gets the plain pixel nudge
+    expect(node(childIdA)).toMatchObject(beforeA);
+    expect(node(childIdB)).toMatchObject({ x: 21 });
   });
 });

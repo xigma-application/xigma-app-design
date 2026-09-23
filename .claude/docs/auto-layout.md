@@ -994,6 +994,119 @@ subtlety confirmed while building this: `placeGridCells` in step 1 above still r
 edge case of a raw `gridAutoPlacement: false` flip that bypassed the real toggle's freeze step,
 though that combination shouldn't arise through normal UI use.
 
+### Canvas — arrow-key move (linear flow)
+
+The same `isNudgeableNode` no-op applied to children of a plain `horizontal`/`vertical` (non-grid)
+managed frame too. Arrow keys now reorder them — this is a **different** kind of move from the grid
+one above, because linear flow has no anchor fields at all: `childIds` order *is* position. So the
+apply step dispatches `moveNodes` (the same same-parent-reorder action the real drag-drop reorder
+already uses — `commitDropIntoFrame.ts`), not `updateNode`.
+
+`handleFlowReorderMove` was promoted to its own folder (module-structure "function promotion") once
+it grew a real forward/backward split: `handleFlowReorderMove/handleFlowReorderMove.ts` (entry
+point — builds the shared context once: `sizesById`, `flowIds`, `lineGroups`, `orderedSelectedIds`
+— then branches), `handleForwardOrPrimaryReorder.ts` (primary-axis moves and forward cross),
+`handleBackwardCrossReorder.ts` (backward cross — structurally different enough to need its own
+file, see below), `dispatchFlowReorder.ts` (the single-`moveNodes`-call shape shared by the first
+two). Siblings one level up in `handleNudgeSelection/`: `getFlowReorderFrame.ts` (the scope gate,
+mirrors `getGridSlotMoveFrame.ts`), `getFlowAxisMove.ts`, `getFlowWrapSizingConfig.ts` (shared
+`isHorizontal`/`itemSpacing`/`availablePrimary` derivation), `getFlowLineGroupsForOrder.ts` (see
+below), `getFlowReorderSelectionLine.ts` (contiguity + current-line lookup, shared by both
+directions), `getFlowReorderCandidate.ts` (primary + forward), `getFlowBackwardCrossCandidateIds.ts`
+(backward's own candidate builder), `getFlowReorderTargetIndex.ts`, `buildFlowReorderCandidateIds.ts`,
+`isFlowReorderCandidateValid.ts`.
+
+**Axis mapping swaps with `layoutMode` (`getFlowAxisMove`).** For a Horizontal frame, Left/Right is
+the *primary* axis (reorder within the current line) and Up/Down is the *cross* axis (jump to the
+next/previous wrap line). For a Vertical frame this is the mirror image: Up/Down is primary,
+Left/Right is cross — pressing Down on a vertical child reorders it within its own column, pressing
+Right crosses into the next column. Encoded as `{ kind: 'primary' | 'cross'; direction: 1 | -1 }`,
+reading only the *sign* of whichever nudge delta is non-zero (same "ignore the Shift/Alt large-step
+magnitude" stance as the grid feature's `getGridMoveStep`).
+
+**Why reading order alone (no pixel geometry) is enough to know wrap-line membership
+(`getFlowLineGroupsForOrder`).** `groupAutoLayoutChildrenIntoLines` (the same function the real wrap
+engine uses to lay out a wrapped frame) is a pure, single-pass greedy partition of `childIds` order
+— it never reads x/y, only order + primary-axis size + gap + available primary space. That makes
+"which line is child *i* on" fully derivable without re-running any layout math beyond what the
+frame already needs for a normal render. `getFlowLineGroupsForOrder(frame, sizesById, orderedIds)`
+is the one canonical primitive for this — it takes an **explicit id order** (not necessarily
+`frame.childIds`'s own order) and a pre-built `sizesById` lookup, so the same function serves three
+different needs from one orchestrator-built context: the frame's current line partition
+(`orderedIds = flowIds`), the siblings-only partition used by forward crossing
+(`orderedIds = flowIds` minus the selection), and re-simulating a *candidate* arrangement for
+verification (`orderedIds = candidateFlowIds`). When `layoutWrap` is off it skips the wrap math
+entirely and returns the whole given order as one line — this is what makes both "primary move can
+span the whole frame" and "cross move is always blocked" fall out for free, no separate no-wrap
+branch anywhere else in the algorithm.
+
+**Primary-axis moves are simple neighbor swaps** (`getFlowReorderCandidate`), blocked the instant
+the neighbor belongs to a different line (the edge of the child's own line) — never auto-crossing;
+only the cross-axis key does that. This part was correct from the start and never needed revisiting.
+
+**Forward crossing gets reabsorption for free; backward crossing does not — and that asymmetry was
+the whole story of getting this feature right.** Bin-packing only ever flows left-to-right, so:
+
+- *Forward* (`getFlowReorderCandidate`'s `'cross-1'` case): once the selection is excluded from its
+  line, whatever used to trail it may get pulled backward into the vacated line (reabsorbed) —
+  `getFlowLineGroupsForOrder` on the **siblings-only** order (selection excluded) reveals exactly
+  where that recomputed line actually ends, and the selection lands right after it, which reliably
+  starts a fresh line **every time**, regardless of item sizes. (Regression #1, live: the very first
+  version anchored against the *original*, pre-exclusion next line instead — the selection would
+  get silently reabsorbed into its own old line, visually just reordering sideways instead of
+  crossing down at all.)
+- *Backward* (`handleBackwardCrossReorder`/`getFlowBackwardCrossCandidateIds`): there is no
+  equivalent free reabsorption — nothing downstream ever backfills a *previous* line for us. Two
+  attempts, in order: (1) the selection simply joins the end of the previous line unchanged, if it
+  already has slack; (2) otherwise, it **evicts** items from the previous line, pushed forward to
+  join whatever's left of the current line, until there's room. This is a real design difference
+  from the grid feature's "block, don't cascade" stance — here, *not* cascading would leave Up
+  essentially non-functional for the single most common case (a wrap row already packed edge to
+  edge, i.e. zero slack), which is exactly what live testing surfaced (Regression #2: "Down works,
+  Up doesn't" — for uniformly-sized items packed N-per-row, the previous row generically has zero
+  slack, so a naive "does it already fit" check blocks nearly every real Up press).
+
+**Eviction starts at the selection's own index within its current line, not the previous line's
+tail** (Regression #3, live, screenshot-driven: a user with 3 items in row 0 and 1 alone in row 1
+pressed Up and it swapped with row 0's *last* item instead of the *first* — "it should trade places
+with item 1, not item 3"). The fix: `blockIndexInOwnLine = selectionLine.firstIndex -
+selectionLine.lineStart` (how far into its own line the selection starts) becomes the target index
+into the *previous* line too, clamped to `previousLine.length - 1`. Eviction grows from that index
+toward the line's own end only as far as needed — for a selection alone in its line (index 0), this
+means it swaps directly with the previous line's index-0 item, matching the visual "trade places
+with whatever's directly above" expectation, not an arbitrary tail-eviction.
+
+**The evicted item(s) and the moved selection land in two different, non-adjacent raw positions —
+one `moveNodes` call can't do that.** `moveNodes` relocates exactly one contiguous group to one
+target index; once eviction targets the *middle* of the previous line (not just its tail), the
+selection is inserted mid-line while the evicted item(s) end up much further along (right before
+whatever follows the previous line). `handleBackwardCrossReorder` dispatches this as **two**
+`moveNodes` calls inside one `beginHistoryGesture`/`endHistoryGesture` pair (still one undo step):
+the selection's own move first (its anchor — `getFlowBackwardCrossCandidateIds`'s returned
+`blockAnchorId` — is an untouched sibling, so it's safe to compute against the pre-dispatch
+`childIds`), then a **live re-read** of `childIds` (`getLiveChildIds`, provably safe: synchronous,
+nothing else can run between the two dispatches) before computing the evicted item(s)' own move,
+since their destination shifts once the selection has already relocated.
+
+**Verification (`isFlowReorderCandidateValid`) had to be relaxed for backward, once eviction could
+place the selection anywhere in its landing line.** It still requires the selection to end up
+*intact* in exactly one line (never split across two — the capacity math that drives both forward's
+and backward's candidate search is total-sum-based, which guarantees this by construction, but
+verification is the cheap defensive backstop in case that invariant is ever violated by a future
+change). For **forward** it additionally still requires the selection to be the exact *prefix* of
+its landing line, since forward's whole mechanism depends on genuinely starting a fresh line. For
+**backward** that positional requirement is dropped — since eviction may legitimately swap the
+selection into the *middle* of its landing line (trading places with whatever was evicted), require
+only that it landed intact, not at any particular edge.
+
+**Multi-selection is atomic, generalizing grid's "gap blocks" rule to 1D.** The grid feature blocks
+the whole gesture if an unselected node sits between two selected ones in the press direction;
+here that becomes "the selection must be a *contiguous run* in flow order" (no unselected sibling
+sandwiched between the first and last selected item) **and** that whole run must currently sit
+inside one line — a selection straddling two lines already (e.g. the last item of line 0 plus the
+first item of line 1, which are flow-order-adjacent but not co-line) also blocks. Any violation is a
+silent no-op, same all-or-nothing philosophy as the grid feature: never a partial move.
+
 ### Canvas — the grid drag ghost (dragging an already-placed grid child)
 
 Reordering *inside* a grid has one problem the "fresh drop" case never hits: the dragged node is
@@ -1163,6 +1276,36 @@ engine already honours spans and manual anchors when set in code. Arrow-key move
   items scenario, undo as a single step), plus `handleNudgeSelection.spec.ts`'s own delegation
   cases (grid selection routes here instead of pixel-nudging; a mixed selection falls back to the
   plain pixel-nudge path untouched).
+- **Unit — linear-flow arrow-key reorder (§13 "Canvas — arrow-key move (linear flow)"):**
+  `useKeyboardShortcuts/utils/handleNudgeSelection/test/` — `getFlowReorderFrame` (the scope gate),
+  `getFlowAxisMove` (delta-sign × `layoutMode` → primary/cross + direction, both axis mappings),
+  `getFlowWrapSizingConfig`, `getFlowLineGroupsForOrder` (no-wrap collapses to one line,
+  horizontal/vertical wrap partitioning for an arbitrary given order, `ignoreAutoLayout` exclusion, a
+  missing-size defensive case), `getFlowReorderSelectionLine` (contiguity + current-line lookup, incl.
+  non-contiguous and spans-two-lines rejection), `getFlowReorderCandidate` (primary forward/backward
+  mid-line and at-edge, sibling-recomputed cross-forward incl. the reabsorption regression case,
+  contiguous multi-select as one block, the defensive unreachable-combination default — cross-backward
+  always returns null here, delegated instead), `getFlowBackwardCrossCandidateIds` (zero-eviction
+  join, index-aligned eviction incl. the "swap with the wrong item" regression case, evicting the
+  whole previous line, the block-too-wide-to-ever-fit null case, item-spacing accounting, the
+  vertical height-vs-width branch, an empty-previous-line defensive case), `getFlowReorderTargetIndex`
+  (before/after math against the post-removal array, unaffected by an interleaved `ignoreAutoLayout`
+  sibling, the undefined-anchor "append at the end" case), `buildFlowReorderCandidateIds`,
+  `isFlowReorderCandidateValid` (forward's strict prefix requirement vs. backward's relaxed
+  "intact in one line" requirement, split-across-lines rejection for both directions); and under
+  `handleFlowReorderMove/test/` — `dispatchFlowReorder`, `handleForwardOrPrimaryReorder`,
+  `handleBackwardCrossReorder`, and `handleFlowReorderMove` itself (integration-style against the
+  real store — single/multi moves both directions, every blocked case, the eviction and
+  swap-by-index regression cases, undo as a single step), plus `handleNudgeSelection.spec.ts`'s own
+  delegation cases.
+- **e2e — linear-flow arrow-key reorder:** `e2e/design/auto-layout/flow.spec.ts` — cross-forward
+  (Down) into the next row/column for both Horizontal+Wrap and Vertical+Wrap (opposite key mapping),
+  asserting the moved child's actual on-screen row position changed, not just `childIds` order;
+  primary-axis blocked at a line's edge; a non-contiguous multi-selection blocked entirely; Up
+  crossing backward with genuine slack (no eviction needed); Up evicting the previous row's item at
+  its own index (the "swap with the wrong item" regression, driven by the exact screenshot scenario
+  reported live); Up blocked outright when the child itself is too wide to ever fit, even after
+  evicting everything.
 - **e2e — grid:** `e2e/design/auto-layout/grid.spec.ts` — the Flow toggle's Grid button, the
   `GridArea` popover's Columns field + 12×8 pick matrix, the on-canvas cell slots (appear on
   select, reflow on column-count change), dragging an element into a cell (hover highlight + dim,
@@ -1655,3 +1798,55 @@ engine already honours spans and manual anchors when set in code. Arrow-key move
     (`isGrid || !isHorizontal || isWrap`) — only the horizontal one was missing the `|| isWrap` term.
     Fixed by adding it, so a vertical+wrap frame now shows both gap fields, same as a horizontal+wrap
     frame already did.
+30. **2026-09-23 — linear-flow arrow-key reorder, wrap-aware, through three live-found regressions
+    (§13 "Canvas — arrow-key move (linear flow)").** User: "add arrow-key movement for hor and ver
+    too, and when wrap is on the perpendicular key should cross lines (opposite axis mapping for
+    vertical)." Extends the grid arrow-key-move feature (entry #28) to plain `horizontal`/`vertical`
+    frames — structurally different under the hood since linear flow has no anchor fields
+    (`childIds` order *is* position), so the apply step dispatches `moveNodes` (the same action
+    `commitDropIntoFrame.ts`'s drag-drop reorder already uses) instead of `updateNode`. Locked via
+    AskUserQuestion before implementing: primary-axis key blocks at its own line's edge rather than
+    auto-crossing; multi-select is fully atomic, generalizing grid's "unselected item between two
+    selected ones blocks the move" rule to a 1D "selection must be a contiguous run, entirely within
+    one line" requirement; a non-wrap frame blocks the cross-axis key outright (only one line
+    exists). The initial cross-axis design (landing at the crossed line's literal boundary, "first
+    of next line" / "last of previous line") turned out wrong in three separate ways, each found
+    live by the user rather than caught by the first pass of unit/e2e tests — see §13's full writeup
+    for the final, correct mechanics of each:
+
+    - **Regression #1 ("sideways instead of down"):** the forward-cross anchor was computed against
+      the *original* (pre-exclusion) next line. Once the selection is actually spliced out, its old
+      line can reabsorb what used to start the next line, so anchoring against the stale next line
+      just re-inserted the selection back into its own old line — no visible crossing at all, only a
+      sideways reorder. Fixed by recomputing the target line on the **siblings-only** order
+      (`getFlowLineGroupsForOrder` with the selection excluded) instead of trusting the pre-exclusion
+      partition.
+    - **Regression #2 ("Down works, Up doesn't"):** backward crossing has no equivalent to forward's
+      free reabsorption (bin-packing only flows left-to-right, nothing backfills a *previous* line
+      for us) — so a naive "does the previous line already have room" check blocks Up almost always
+      for the single most common real layout (a wrap row already packed edge-to-edge with
+      similarly-sized items, i.e. zero slack). Fixed by making backward **evict** items from the
+      previous line, pushed forward into what's left of the current line, until there's room —
+      `getFlowBackwardCrossCandidateIds`, a genuine design difference from grid's "block, don't
+      cascade" stance, deliberately accepted here since the alternative left Up practically
+      non-functional.
+    - **Regression #3 ("swapped with the wrong item"):** the eviction in #2 initially always pulled
+      from the previous line's *tail*, regardless of where the selection sat in its own line. A user
+      screenshot showed a selection alone in row 1 (index 0) swapping with row 0's *last* item
+      instead of its *first* — visually wrong, since the selection should trade places with whatever
+      sits directly above it. Fixed by starting eviction at `blockIndexInOwnLine` (the selection's
+      own index within its current line) instead of always the tail — which also meant the evicted
+      item(s) and the selection now land in two different, non-adjacent raw positions, needing two
+      sequential `moveNodes` dispatches (one history gesture) instead of one, and relaxing
+      `isFlowReorderCandidateValid`'s backward check (the selection may now legitimately land
+      mid-line, not just at an edge).
+
+    `handleFlowReorderMove` was promoted to its own folder mid-implementation once the
+    forward/backward split grew real branching (module-structure "function promotion"):
+    `handleFlowReorderMove/{handleFlowReorderMove,handleForwardOrPrimaryReorder,
+    handleBackwardCrossReorder,dispatchFlowReorder}.ts`, siblings `getFlowReorderFrame.ts`,
+    `getFlowAxisMove.ts`, `getFlowWrapSizingConfig.ts`, `getFlowLineGroupsForOrder.ts`,
+    `getFlowReorderSelectionLine.ts`, `getFlowReorderCandidate.ts`,
+    `getFlowBackwardCrossCandidateIds.ts`, `getFlowReorderTargetIndex.ts`,
+    `buildFlowReorderCandidateIds.ts`, `isFlowReorderCandidateValid.ts` — wired into
+    `handleNudgeSelection.ts` as a new branch between the grid one and the pixel-nudge fallback.

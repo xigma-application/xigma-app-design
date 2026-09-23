@@ -15,7 +15,9 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { collectNudgeSubtreeNodes } from '../collectNudgeSubtreeNodes';
+import { getFlowReorderFrame } from './getFlowReorderFrame';
 import { getGridSlotMoveFrame } from './getGridSlotMoveFrame';
+import { handleFlowReorderMove } from './handleFlowReorderMove/handleFlowReorderMove';
 import { handleGridSlotMove } from './handleGridSlotMove';
 import { handleNudgeVectorEdit } from '../handleNudgeVectorEdit';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
@@ -47,9 +49,12 @@ export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, d
     const nodes = selectNodes(state);
     const selectedNodes = getSelectedNodes(state, nodes);
     const gridFrame = getGridSlotMoveFrame(selectedNodes, nodes);
+    const flowFrame = gridFrame ? null : getFlowReorderFrame(selectedNodes, nodes);
 
     if (gridFrame) {
       handleGridSlotMove(dispatch, refs, gridFrame, selectedNodes, nodes, deltaX, deltaY);
+    } else if (flowFrame) {
+      handleFlowReorderMove(dispatch, refs, flowFrame, selectedNodes, nodes, deltaX, deltaY);
     } else {
       const nodesToMove = selectedNodes.filter((node) => isNudgeableNode(node, nodes));
 
