@@ -7,6 +7,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { drawGroupSelectionOutline } from './drawGroupSelectionOutline';
 import { drawPerNodeSelectionOutlines } from './drawPerNodeSelectionOutlines/drawPerNodeSelectionOutlines';
+import { getSelectionGroups } from '../../../../utils/getSelectionGroups';
 import { isGroupSelection } from '../../../../utils/isGroupSelection';
 import { isSmartSelectionSwapDragActive } from '../../../../utils/isSmartSelectionSwapDragActive';
 
@@ -23,22 +24,24 @@ export const drawSelectionOutline = (
   const nonVectorEditingNodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
 
   if (!isSmartSelectionSwapDragActive(refs)) {
-    if (isGroupSelection(nonVectorEditingNodes)) {
-      drawGroupSelectionOutline(gl, program, buffer, nonVectorEditingNodes, canvasWidth, canvasHeight, viewport);
-    } else {
-      drawPerNodeSelectionOutlines(
-        gl,
-        program,
-        buffer,
-        nonVectorEditingNodes,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        vectorEditingNodeIds,
-        nodesById,
-        imageEditor,
-        editingPathId,
-      );
-    }
+    getSelectionGroups(nonVectorEditingNodes).forEach((group) => {
+      if (isGroupSelection(group)) {
+        drawGroupSelectionOutline(gl, program, buffer, group, canvasWidth, canvasHeight, viewport);
+      } else {
+        drawPerNodeSelectionOutlines(
+          gl,
+          program,
+          buffer,
+          group,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          vectorEditingNodeIds,
+          nodesById,
+          imageEditor,
+          editingPathId,
+        );
+      }
+    });
   }
 };

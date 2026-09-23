@@ -554,3 +554,24 @@ nested inside a top-level frame. Lives in `e2e/design/selection/select-matching-
 | 527 | A layer with no match (different depth / missing sibling) keeps the selection and shows the "No matching layers to select on page" snackbar |  ✅  | ✅ `select-matching-layers.spec.ts` |
 | 528 | Frames in a section only match frames in the same section                                                                                   |  ✅  |                  —                  |
 | 529 | The button is hidden while a top-level frame is selected                                                                                    |  ✅  | ✅ `select-matching-layers.spec.ts` |
+
+## Selections that span several parents
+
+Selected items that live under different parents are split into one isolated group per parent
+(`getSelectionGroups.ts`). Only the grabbed group reparents, reorders or ghosts; the others follow —
+loose and free-form items live, auto-layout and grid items by the same number of slots on release.
+Lives in `e2e/design/selection/multi-parent-selection.spec.ts`; write-up in
+`.claude/docs/selection-and-manipulation.md` §32.
+
+| #   | Scenario                                                                                                                                  | Unit |                 E2E                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------------: |
+| 530 | Each parent group draws its own selection outline instead of one combined box                                                             |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 531 | Dragging loose rects (A) moves them and the free-form frame's children (B) by the same delta, nothing is reparented                       |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 532 | Dragging free-form children (B) moves them and the loose rects (A) by the same delta                                                      |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 533 | Dragging a vertical-list child (C) reorders C live, reorders the horizontal list (D) only on release, and moves A and B by the same delta |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 534 | Dragging a horizontal-list child (D) reorders D live, reorders the vertical list (C) only on release, and moves A and B by the same delta |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 535 | Dragging a grid child (E) on automatic positioning returns it to its slot; A and B still follow the delta                                 |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 536 | With every child of every frame selected, a drag never clones or reparents any node                                                       |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 537 | One Ctrl+Z reverts every group touched by the drag                                                                                        |  —   | ✅ `multi-parent-selection.spec.ts` |
+| 538 | A 5x5 grid child follows a 1x2 grid child by exactly one cell, not by the same pixel distance                                             |  ✅  | ✅ `multi-parent-selection.spec.ts` |
+| 539 | A horizontal-list child follows a vertical-list child by the same number of slots whatever the child sizes                                |  ✅  | ✅ `multi-parent-selection.spec.ts` |

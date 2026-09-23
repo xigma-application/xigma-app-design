@@ -386,4 +386,57 @@ describe('updateAutoLayoutReorderGhostPosition', () => {
     });
     expect(state.dispatchThrottle.run).toBeNull();
   });
+
+  it('should still move a live free-form follower while the grabbed grid child is only ghosted', () => {
+    // mock — grabbed 'r1' lives in a grid (ghost, no dispatch); the follower is a root rect that must move live
+    const refs = createCanvasRefs();
+    const nodesById: Record<string, TSceneNode> = { 'frame-1': gridFrame() };
+    const followerId = addRect(100, 100);
+    const node = rect();
+    const state = dragState({ [followerId]: { x: 100, y: 100 }, r1: { x: 10, y: 20 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, nodesById);
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    expect(refs.transform.gridDragGhostRef.current).toEqual({ nodeIds: ['r1'], offset: { x: 5, y: 5 } });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[followerId]).toMatchObject({ x: 105, y: 105 });
+  });
+
+  it('should still move a live free-form follower while the grabbed child tracks a reorder preview', () => {
+    // mock
+    const refs = createCanvasRefs({
+      transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'frame-1', positions: {} } } },
+    });
+    const followerId = addRect(100, 100);
+    const node = rect();
+    const state = dragState({ [followerId]: { x: 100, y: 100 }, r1: { x: 10, y: 20 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, {});
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[followerId]).toMatchObject({ x: 105, y: 105 });
+  });
+
+  it('should not move a deferred (auto-layout / grid) follower live', () => {
+    // mock
+    const refs = createCanvasRefs();
+    const deferredId = addRect(100, 100);
+    const grabbedId = addRect(200, 200);
+    const node = rect({ id: grabbedId });
+    const state = dragState({ [deferredId]: { x: 100, y: 100 }, [grabbedId]: { x: 200, y: 200 } });
+
+    // action
+    updateAutoLayoutReorderGhostPosition(refs, [node], store.dispatch, state, null, 5, 5, {}, new Set([deferredId]));
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(nodes[grabbedId]).toMatchObject({ x: 205, y: 205 });
+    expect(nodes[deferredId]).toMatchObject({ x: 100, y: 100 });
+  });
 });

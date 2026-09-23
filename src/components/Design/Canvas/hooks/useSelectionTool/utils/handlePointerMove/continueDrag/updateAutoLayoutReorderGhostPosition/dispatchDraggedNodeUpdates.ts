@@ -45,11 +45,12 @@ const dispatchNodeOriginUpdates = (
   snapshots: Map<string, TVectorNodeDragSnapshot> | null,
   deltaX: number,
   deltaY: number,
+  excludedIds: ReadonlySet<string>,
 ): void => {
   const nodes = selectNodes(store.getState());
 
   Object.entries(nodeOrigins).forEach(([id, origin]) => {
-    if (!snapshots?.has(id)) {
+    if (!snapshots?.has(id) && !excludedIds.has(id)) {
       updateDraggedNodeOrigin(dispatch, nodes, id, origin, deltaX, deltaY);
     }
   });
@@ -61,9 +62,13 @@ export const dispatchDraggedNodeUpdates = (
   snapshots: Map<string, TVectorNodeDragSnapshot> | null,
   deltaX: number,
   deltaY: number,
+  excludedIds: ReadonlySet<string> = new Set(),
 ): void => {
   scheduleThrottledDispatch(dragState.dispatchThrottle, () => {
-    dispatchNodeOriginUpdates(dispatch, dragState.nodeOrigins, snapshots, deltaX, deltaY);
-    resyncGroupAutoLayoutAncestors(dispatch, Object.keys(dragState.nodeOrigins));
+    dispatchNodeOriginUpdates(dispatch, dragState.nodeOrigins, snapshots, deltaX, deltaY, excludedIds);
+    resyncGroupAutoLayoutAncestors(
+      dispatch,
+      Object.keys(dragState.nodeOrigins).filter((id) => !excludedIds.has(id)),
+    );
   });
 };

@@ -33,4 +33,15 @@ describe('initDraggedNodeIds', () => {
     // result
     expect(refs.transform.draggedNodeIdsRef.current).toBe(existing);
   });
+
+  it('should leave the excluded (deferred) ids out of the dragged set', () => {
+    // mock
+    const refs = canvasRefs(null);
+
+    // action
+    initDraggedNodeIds(refs, dragState(), new Set(['b']));
+
+    // result
+    expect(refs.transform.draggedNodeIdsRef.current).toEqual(new Set(['a']));
+  });
 });

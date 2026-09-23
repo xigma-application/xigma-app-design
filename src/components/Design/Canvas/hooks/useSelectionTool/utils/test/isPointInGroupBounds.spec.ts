@@ -51,13 +51,22 @@ describe('isPointInGroupBounds', () => {
     expect(isPointInGroupBounds({ x: 5, y: 5 }, [a])).toBe(false);
   });
 
-  it('should return true for a point in the gap between two selected nodes with different parents too', () => {
-    // mock — e.g. a group child selected alongside a top-level sibling; the combined-bounds drag
-    // continuation applies to any multi-selection, not just ones that happen to share a parentId
+  it('should return false for a point in the gap between two selected nodes with different parents, since each parent has its own group', () => {
+    // mock
     const a = buildNode({ id: 'a', parentId: 'frame-1', x: 0, y: 0 });
     const b = buildNode({ id: 'b', parentId: 'frame-2', x: 40, y: 0 });
 
     // result
-    expect(isPointInGroupBounds({ x: 25, y: 5 }, [a, b])).toBe(true);
+    expect(isPointInGroupBounds({ x: 25, y: 5 }, [a, b])).toBe(false);
+  });
+
+  it('should return true for a point in the gap of one same-parent group even when another group is selected too', () => {
+    // mock
+    const a = buildNode({ id: 'a', parentId: 'frame-1', x: 0, y: 0 });
+    const b = buildNode({ id: 'b', parentId: 'frame-1', x: 40, y: 0 });
+    const c = buildNode({ id: 'c', parentId: 'frame-2', x: 200, y: 0 });
+
+    // result
+    expect(isPointInGroupBounds({ x: 25, y: 5 }, [a, b, c])).toBe(true);
   });
 });

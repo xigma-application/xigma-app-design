@@ -28,6 +28,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { getHoverLeafNodes } from './getHoverLeafNodes';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { getSelectionGroupHit } from '../../../../utils/getSelectionGroupHit';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
 import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover';
@@ -90,7 +91,7 @@ export const resolveToolHover = (
     point,
     refs,
     resizableSelectedNodes,
-    resizeHandleHit: getResizeHandleAtPoint(point, resizableSelectedNodes, viewport),
+    resizeHandleHit: getSelectionGroupHit(resizableSelectedNodes, (group) => getResizeHandleAtPoint(point, group, viewport)),
     selectedNodes,
     smartSelectionNodes: selectSmartSelectionNodes(state),
     vectorMultiSelectBox,

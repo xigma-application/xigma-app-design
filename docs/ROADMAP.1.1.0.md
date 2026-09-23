@@ -379,6 +379,20 @@ Fill/Stroke/Effects. Below the rows sits an Export button and a live preview thu
       SVG/PDF/PNG/JPEG files, even though it looked correct on the canvas — exports now render blur
       and other effects the same way the canvas does
 
+## Stage 33 — Selecting items from different parents
+
+When you select items that live in different places (loose on the canvas, inside a plain frame,
+inside a horizontal, vertical or grid auto layout), each place is now its own separate group. Each
+group gets its own selection box, size label and resize/rotate handles. Dragging one group only
+changes that group: nothing gets moved into another frame, and no stray copies appear. Full
+write-up: `.claude/docs/selection-and-manipulation.md` §32.
+
+- [x] one selection box per group instead of one big box around everything
+- [x] the group you grab is the only one that can drop into a new place or reorder live
+- [x] loose and plain-frame items follow the drag live
+- [x] auto layout and grid items follow by the same number of slots you moved, applied when you let go
+- [x] one undo brings everything back
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.

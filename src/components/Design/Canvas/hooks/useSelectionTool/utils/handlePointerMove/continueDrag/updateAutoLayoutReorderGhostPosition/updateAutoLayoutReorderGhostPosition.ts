@@ -1,4 +1,5 @@
 // store
+import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 import { AppDispatch } from 'store';
 
 // types
@@ -12,6 +13,9 @@ import { getDraggedNodeGhostPositions } from './getDraggedNodeGhostPositions/get
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { isGridFrame } from '../updateDragDropTarget/isGridFrame';
 
+const getGhostedIds = (selectedNodes: TSceneNode[], nodesById: Record<string, TSceneNode>, deferredIds: ReadonlySet<string>): Set<string> =>
+  new Set([...deferredIds, ...getRigidTransformNodes(selectedNodes, nodesById).map((node) => node.id)]);
+
 export const updateAutoLayoutReorderGhostPosition = (
   canvasRefs: TCanvasRefs,
   selectedNodes: TSceneNode[],
@@ -21,6 +25,7 @@ export const updateAutoLayoutReorderGhostPosition = (
   deltaX: number,
   deltaY: number,
   nodesById: Record<string, TSceneNode>,
+  deferredIds: ReadonlySet<string> = new Set(),
 ): void => {
   const previewRef = canvasRefs.transform.autoLayoutReorderPreviewRef;
   const preview = previewRef.current;
@@ -33,10 +38,12 @@ export const updateAutoLayoutReorderGhostPosition = (
     const { positions, tween } = getDraggedNodeGhostPositions(previewRef, selectedNodes, preview, deltaX, deltaY);
     previewRef.current = { ...preview, draggedOffsetTween: tween, positions: { ...preview.positions, ...positions } };
     canvasRefs.transform.gridDragGhostRef.current = null;
+    dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY, getGhostedIds(selectedNodes, nodesById, deferredIds));
   } else if (isGridFrame(originParent) && !isAbsoluteChild) {
     canvasRefs.transform.gridDragGhostRef.current = { nodeIds: selectedNodes.map((node) => node.id), offset: { x: deltaX, y: deltaY } };
+    dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY, getGhostedIds(selectedNodes, nodesById, deferredIds));
   } else {
     canvasRefs.transform.gridDragGhostRef.current = null;
-    dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY);
+    dispatchDraggedNodeUpdates(dispatch, dragState, snapshots, deltaX, deltaY, deferredIds);
   }
 };

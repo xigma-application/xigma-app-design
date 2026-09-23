@@ -8,9 +8,10 @@ import { TArmContext } from '../types';
 // utils
 import { armRotateDrag } from '../armRotateDrag';
 import { getRotateHandleAtPoint } from '../../../../../utils/getRotateHandleAtPoint';
+import { getSelectionGroupHit } from '../../../../../utils/getSelectionGroupHit';
 
 export const armRotateOnPointerDown = ({ canvas, canvasRefs, event, point, selectedNodes, viewport }: TArmContext): true | undefined => {
-  const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
+  const rotateHandleHit = getSelectionGroupHit(selectedNodes, (group) => getRotateHandleAtPoint(point, group, viewport));
 
   if (rotateHandleHit) {
     const imageEditor = selectImageEditor(store.getState());
@@ -24,7 +25,7 @@ export const armRotateOnPointerDown = ({ canvas, canvasRefs, event, point, selec
         canvas,
         event,
         canvasRefs.transform.rotateDragRef,
-        selectedNodes,
+        rotateHandleHit.group,
         rotateHandleHit.bounds,
         rotateHandleHit.rotation,
         point,

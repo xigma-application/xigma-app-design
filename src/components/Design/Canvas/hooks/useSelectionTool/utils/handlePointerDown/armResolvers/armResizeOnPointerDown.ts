@@ -8,6 +8,7 @@ import { TArmContext } from '../types';
 // utils
 import { armResizeDrag } from '../armResizeDrag/armResizeDrag';
 import { getResizeHandleAtPoint } from '../../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { getSelectionGroupHit } from '../../../../../utils/getSelectionGroupHit';
 import { seedImageCropIfNeeded } from 'components/Design/Canvas/utils/seedImageCropIfNeeded';
 
 export const armResizeOnPointerDown = ({
@@ -20,7 +21,7 @@ export const armResizeOnPointerDown = ({
   selectionRefs,
   viewport,
 }: TArmContext): true | undefined => {
-  const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
+  const resizeHandleHit = getSelectionGroupHit(selectedNodes, (group) => getResizeHandleAtPoint(point, group, viewport));
 
   if (resizeHandleHit) {
     const imageEditor = selectImageEditor(store.getState());
@@ -35,7 +36,15 @@ export const armResizeOnPointerDown = ({
         );
       }
 
-      armResizeDrag(canvas, event, selectionRefs.resizeDragRef, selectedNodes, resizeHandleHit.handle, resizeHandleHit.bounds, canvasRefs);
+      armResizeDrag(
+        canvas,
+        event,
+        selectionRefs.resizeDragRef,
+        resizeHandleHit.group,
+        resizeHandleHit.handle,
+        resizeHandleHit.bounds,
+        canvasRefs,
+      );
 
       return true;
     }

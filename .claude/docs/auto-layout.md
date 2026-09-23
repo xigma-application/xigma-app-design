@@ -369,6 +369,9 @@ independent fixes, each undoing a single-node-only or order-blind assumption:
 None is optional — fixing only (1) still looks broken from (2); fixing (1)+(2) still mis-orders from
 (3). Each needed its own e2e reproduction.
 
+When the selection spans **several parents**, only the grabbed node's own group takes part in the reorder;
+the other groups are moved by the same number of slots on release — see `selection-and-manipulation.md` §32.
+
 ## 12. Reflowing an auto-layout ancestor when a nested group's box changes
 
 `syncAutoLayoutChildren` measures a frame's **direct** children. When a child is a group/mask and

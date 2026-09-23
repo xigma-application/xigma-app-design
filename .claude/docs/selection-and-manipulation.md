@@ -2063,6 +2063,69 @@ every render-loop frame): the guide line keeps drawing for the side being edited
 drag), but `drawAutoLayoutPaddingLabel` suppresses its own value-badge text for that exact
 frame+side so the DOM popup's number doesn't double up with a second one drawn behind it.
 
+## 32. Selections that span several parents — one isolated group per parent
+
+A selection whose nodes live under different parents (root rects + children of a free-form frame +
+children of a vertical / horizontal / grid frame) is split into **groups by `parentId`**
+(`Canvas/utils/getSelectionGroups.ts`; root is its own "parent"). Every group is isolated — the old
+code took `selectedNodes[0].parentId` as *the* parent of the whole selection, so the drop-target /
+ghost / reparent machinery treated foreign children as members of the first node's frame (the
+"clone of an element from another parent" bug).
+
+**Visuals + hit-testing are per group.** `drawSelectionOutline` and `drawSelectionSizeLabel` loop the
+groups (a 2+ group gets `drawGroupSelectionOutline`, a single-node group the per-node outline);
+`isPointInGroupBounds` is true only inside *one* group's own bounds (no gap-drag across parents);
+`armResizeOnPointerDown` / `armRotateOnPointerDown` / hover resolve the handle through
+`getSelectionGroupHit(selectedNodes, group => getResizeHandleAtPoint(point, group, viewport))` and arm
+the drag with **only the hit group** (`hit.group`), so resize/rotate never touch another parent's nodes.
+
+**Drag: one grabbed group, the rest are followers** (`useSelectionTool/utils/dragGroups/`).
+`getGrabbedDragGroup(selectedNodes, dragState.grabbedNodeId)` = the selected nodes sharing the grabbed
+node's parent. `continueDrag` feeds **only that group** to `updateDragDropTarget` (reparent, grid /
+auto-layout drop target, slot highlight) and to `updateAutoLayoutReorderGhostPosition` (ghost). Every
+other selected node is classified by `isFlowManagedNode` (parent is a linear/grid frame and the node is
+not `ignoreAutoLayout`):
+
+- **not flow-managed** (root, free-form child, absolute child, group child): a *live follower* — the
+  same `dispatchDraggedNodeUpdates` x/y delta as the grabbed group, every pointermove.
+- **flow-managed** (`getDeferredDragNodes` / `getDeferredDragIds`): *deferred* — no ghost, no live
+  dispatch (a store x/y write would just be stomped by `syncAutoLayoutChildren`), excluded from
+  `draggedNodeIdsRef` and the vector-snapshot deltas. Its result appears on drop.
+
+`dragState.delta` (post-snap) is stored every move for the drop.
+
+**Drop** (`commitDropIntoFrame`): `getGrabbedSlotDelta` is read *before* anything is committed (it needs
+the grabbed node's original cell / index), then `commitGroupDrop` (the old commit body, now taking the
+grabbed ids) runs for the grabbed group only, then `commitDeferredGroupDrops` moves each deferred group
+(grouped by parent again) **inside its own parent, never reparenting**. Everything is inside the same
+history gesture → one undo step.
+
+**Followers move by the same number of *slots*, not the same pixels.** A 5x5 grid child next to a 1x2 grid
+child must move one cell when the 1x2 child moved one cell, not `pixelDelta / smallCellSize`
+cells. `getGrabbedSlotDelta` returns a `TSlotDelta = { x, y, steps }`:
+- grabbed in a grid: cell delta between the child's original placement (`getGridPlacementsById` — the real
+  `placeGridCells`) and the hovered cell (or the insert indicator's reading-order index), `steps: null`;
+- grabbed in a linear frame: `activeIndex` (reorder preview) or the drop indicator's `index` minus the
+  block's original index (`getAutoLayoutOriginalIndex`) — `steps` is that count, mirrored onto x
+  (horizontal) or y (vertical);
+- anything else (grabbed group is root / free-form / dropped into another frame): `null` → followers fall
+  back to the pixel delta (`armDeferredGroupDropTarget`: group centre + `dragState.delta`, clamped into
+  the follower's own frame, arms the normal auto-layout / grid drop target, then `commitGroupDrop`).
+
+`applyDeferredSlotDelta` applies it per follower: linear → `applyLinearSlotDelta` (`steps ?? axis
+component`, clamped to `[0, remaining siblings]`, one `moveNodes`; so a vertical grabbed group moves a
+horizontal follower by the same number of slots); grid → `applyGridSlotDelta` (cell + delta, column
+clamped into the grid, row ≥ 0, skipped if it lands on another child's cell or nothing changes, and a
+no-op while the follower grid is on **automatic positioning** — its children snap back to their own cell,
+same as a normal drag inside such a grid).
+
+`reorderModeAbandoned` (Ctrl/Cmd pulled the grabbed group out of reorder mode) skips the deferred commits.
+
+Tests: unit specs next to each file (`dragGroups/test/`, `disarmDrag/test/` with the shared
+`multiParentFixtures.ts`) and `e2e/design/selection/multi-parent-selection.spec.ts` (A/B/C/D/E scenarios,
+all-children-selected no-clone check, per-group outline pixel check, single-undo, and the two
+"same number of slots" regressions).
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

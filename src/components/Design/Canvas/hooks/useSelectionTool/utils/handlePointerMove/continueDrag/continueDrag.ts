@@ -17,9 +17,11 @@ import { armDragSnapGuides } from './armDragSnapGuides';
 import { convertCtrlDragToMarquee } from './convertCtrlDragToMarquee';
 import { getAxisLockedPoint } from 'utils/math/axis/getAxisLockedPoint';
 import { getChainGapDragSnap } from './getChainGapDragSnap';
+import { getDeferredDragIds } from '../../dragGroups/getDeferredDragIds';
 import { getDominantAxis } from 'utils/math/axis/getDominantAxis';
 import { getDragAlignmentSnap } from './getDragAlignmentSnap';
 import { getDragCursorClassName } from './getDragCursorClassName';
+import { getGrabbedDragGroup } from '../../dragGroups/getGrabbedDragGroup';
 import { getMatchedPairDragGuides } from './getMatchedPairDragGuides';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { initDraggedNodeIds } from './initDraggedNodeIds';
@@ -65,13 +67,16 @@ export const continueDrag = (
     const centreToleranceWorldUnits = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
     const matchedPairGuides = getMatchedPairDragGuides(nodes, dragState, delta, sizeToleranceWorldUnits, centreToleranceWorldUnits);
     const selectedNodes = selectSelectedNodes(state);
+    const grabbedGroup = getGrabbedDragGroup(selectedNodes, dragState.grabbedNodeId ?? null);
+    const deferredIds = getDeferredDragIds(selectedNodes, grabbedGroup, nodes);
     const renderOrderedNodes = selectRenderOrderedNodes(state);
 
     markDragAsMoved(dragState);
+    dragState.delta = delta;
     updateDragDropTarget(
       dispatch,
       state,
-      selectedNodes,
+      grabbedGroup,
       rawPoint,
       renderOrderedNodes,
       nodes,
@@ -81,9 +86,9 @@ export const continueDrag = (
       dragState,
     );
     armDragSnapGuides(canvasRefs, isAutoLayoutDropTargetActive(canvasRefs), axisLock, guide, chainGapSnap.guides, matchedPairGuides);
-    setClassName(getDragCursorClassName(canvasRefs, dragState, selectedNodes, isReorderModifierHeld, axisLock));
-    initDraggedNodeIds(canvasRefs, dragState);
-    updateDragSnapshotDeltas(snapshots, deltaX, deltaY);
-    updateAutoLayoutReorderGhostPosition(canvasRefs, selectedNodes, dispatch, dragState, snapshots, deltaX, deltaY, nodes);
+    setClassName(getDragCursorClassName(canvasRefs, dragState, grabbedGroup, isReorderModifierHeld, axisLock));
+    initDraggedNodeIds(canvasRefs, dragState, deferredIds);
+    updateDragSnapshotDeltas(snapshots, deltaX, deltaY, deferredIds);
+    updateAutoLayoutReorderGhostPosition(canvasRefs, grabbedGroup, dispatch, dragState, snapshots, deltaX, deltaY, nodes, deferredIds);
   }
 };

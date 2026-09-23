@@ -31,4 +31,25 @@ describe('updateDragSnapshotDeltas', () => {
     // action / result — just shouldn't throw
     expect(() => updateDragSnapshotDeltas(null, 5, -3)).not.toThrow();
   });
+
+  it('should leave excluded (deferred) snapshots untouched', () => {
+    // mock
+    const a = snapshot();
+    const b = snapshot();
+
+    // action
+    updateDragSnapshotDeltas(
+      new Map([
+        ['a', a],
+        ['b', b],
+      ]),
+      5,
+      -3,
+      new Set(['b']),
+    );
+
+    // result
+    expect(a).toMatchObject({ deltaX: 5, deltaY: -3 });
+    expect(b).toMatchObject({ deltaX: 0, deltaY: 0 });
+  });
 });

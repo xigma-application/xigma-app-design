@@ -230,4 +230,24 @@ describe('dispatchDraggedNodeUpdates', () => {
     // result — unchanged
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toMatchObject({ x: 100, y: 100 });
   });
+
+  it('should skip excluded (deferred) node ids, moving only the rest', () => {
+    // mock
+    const moved = addRect(10, 10);
+    const deferred = addRect(50, 50);
+    const state = {
+      dispatchThrottle: { frameId: null, run: null },
+      nodeOrigins: { [deferred]: { x: 50, y: 50 }, [moved]: { x: 10, y: 10 } },
+    } as unknown as TDragState;
+
+    // action
+    dispatchDraggedNodeUpdates(store.dispatch, state, null, 5, 5, new Set([deferred]));
+    flushThrottledDispatch(state.dispatchThrottle);
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(nodes[moved]).toMatchObject({ x: 15, y: 15 });
+    expect(nodes[deferred]).toMatchObject({ x: 50, y: 50 });
+  });
 });
