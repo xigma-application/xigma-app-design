@@ -1,6 +1,7 @@
 // types
 import { TImageRenderContext } from '../../types';
 import { TImageFilterQuality, TPoint } from 'types/canvas';
+import { SizingMode } from 'types/design/enums';
 import { TViewport } from 'types/design/types';
 
 export type TDrawContext = {
@@ -31,3 +32,5 @@ export type TStrokeRing = {
 };
 
 export type TStrokeRingSample = { mid: TPoint; tangent: TPoint; vec: TPoint };
+
+export type TSizeLabelSizingModes = { height?: SizingMode; width?: SizingMode };

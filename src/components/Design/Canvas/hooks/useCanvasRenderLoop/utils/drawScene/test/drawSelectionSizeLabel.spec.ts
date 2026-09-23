@@ -2,7 +2,7 @@
 import { SELECTION_SIZE_LABEL_EDGE_GAP_PX, SIZE_LABEL_FILL } from 'constant/canvas';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, SizingMode } from 'types/design/enums';
 import { TBoxSceneNode, TSceneNode } from 'types/design/types';
 
 // utils
@@ -303,5 +303,40 @@ describe('drawSelectionSizeLabel', () => {
     expect(anchor.x).toBeCloseTo(200, 5);
     expect(anchor.y).toBeCloseTo(100, 5);
     expect(options.angleDeg).toBeCloseTo(0, 5);
+  });
+
+  it("should append the sizing mode label after a single node's hug/fill dimension", () => {
+    // before
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [buildNode({ heightSizingMode: SizingMode.fixed, widthSizingMode: SizingMode.hug })],
+      [],
+      createCanvasRefs(),
+    );
+
+    // result
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('200 Hug x 100');
+  });
+
+  it('should not append a sizing mode label for a multi-selection, since it is ambiguous across nodes', () => {
+    // before
+    const nodes = [
+      buildNode({ id: 'a', widthSizingMode: SizingMode.hug, x: 0 }),
+      buildNode({ id: 'b', widthSizingMode: SizingMode.fill, x: 300 }),
+    ];
+
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      [],
+      createCanvasRefs(),
+    );
+
+    // result — bounds span x:[0,500], y:[0,100]
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('500 x 100');
   });
 });

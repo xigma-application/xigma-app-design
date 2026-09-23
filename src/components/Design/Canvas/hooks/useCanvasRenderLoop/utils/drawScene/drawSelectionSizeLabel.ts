@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawLineSizeLabel } from './drawLineSizeLabel';
 import { drawRectSizeLabel } from './drawRectSizeLabel';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
+import { getSizeLabelSizingModes } from './getSizeLabelSizingModes';
 import { getStrokePaddings } from 'utils/design/stroke/getStrokePaddings';
 import { getSelectionBounds } from '../../../../utils/getSelectionBounds';
 import { isSmartSelectionGapHandleActive } from '../../../../utils/isSmartSelectionGapHandleActive';
@@ -45,7 +46,9 @@ export const drawSelectionSizeLabel = (
     if (nodes.length === 1 && singleNode.type === NodeType.line) {
       drawLineSizeLabel(context, singleNode.x1, singleNode.y1, singleNode.x2, singleNode.y2);
     } else if (nodes.length > 0) {
-      drawRectSizeLabel(context, getSizeLabelRect(nodes));
+      const sizingModes = nodes.length === 1 ? getSizeLabelSizingModes(singleNode) : undefined;
+
+      drawRectSizeLabel(context, getSizeLabelRect(nodes), sizingModes);
     }
   }
 };
