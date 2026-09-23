@@ -15,6 +15,7 @@ import { TSceneNode } from 'types/design/types';
 import { TToggleExpand } from 'shared/UI/Tree/types';
 
 // utils
+import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
 
 export type TLayerRowProps = {
@@ -29,6 +30,7 @@ export type TLayerRowProps = {
 const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, maskConnectorInfo, node, onToggleExpand }) => {
   const nodes = useAppSelector(selectNodes);
   const isMask = getIsMaskChild(node, nodes);
+  const isParentManagedLayout = isManagedLayoutFrame(node.parentId ? nodes[node.parentId] : undefined);
 
   return (
     <TreeItem
@@ -38,7 +40,7 @@ const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, maskConne
       isSelected={isSelected}
       node={node}
       onToggleExpand={onToggleExpand}
-      renderIcon={(item): ReactNode => <LayerRowIcon isMask={isMask} node={item} />}
+      renderIcon={(item): ReactNode => <LayerRowIcon isMask={isMask} isParentManagedLayout={isParentManagedLayout} node={item} />}
       renderMenu={(params): ReactNode => (params.isOpen ? <LayerContextMenu {...params} node={node} /> : null)}
     >
       <LayerRowMaskDecorations isMask={isMask} maskConnectorLines={maskConnectorInfo} />

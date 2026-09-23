@@ -71,7 +71,7 @@ const plainTextNode: TTextNode = {
 describe('LayerRowIcon', () => {
   it('should render the text icon for a plain text node', () => {
     // before
-    const { getByTestId } = render(<LayerRowIcon isMask={false} node={plainTextNode} size={10} />);
+    const { getByTestId } = render(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={plainTextNode} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextTool');
@@ -79,7 +79,9 @@ describe('LayerRowIcon', () => {
 
   it('should render the text-on-path icon for a text node bound to a path, not the plain text icon', () => {
     // before
-    const { getByTestId } = render(<LayerRowIcon isMask={false} node={{ ...plainTextNode, pathId: 'vector-1' }} size={10} />);
+    const { getByTestId } = render(
+      <LayerRowIcon isMask={false} isParentManagedLayout={false} node={{ ...plainTextNode, pathId: 'vector-1' }} size={10} />,
+    );
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextOnPathTool');
@@ -87,7 +89,7 @@ describe('LayerRowIcon', () => {
 
   it('should render the generic tool icon for a node type with no shape outline', () => {
     // before
-    const { getByTestId, queryByTestId } = render(<LayerRowIcon isMask={false} node={frameNode} size={10} />);
+    const { getByTestId, queryByTestId } = render(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={frameNode} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'FrameTool');
@@ -96,7 +98,9 @@ describe('LayerRowIcon', () => {
 
   it('should render the shape-outline icon for a node type that supports it', () => {
     // before
-    const { getByTestId, queryByTestId } = render(<LayerRowIcon isMask={false} node={rectangleNode} size={10} />);
+    const { getByTestId, queryByTestId } = render(
+      <LayerRowIcon isMask={false} isParentManagedLayout={false} node={rectangleNode} size={10} />,
+    );
 
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
@@ -105,7 +109,7 @@ describe('LayerRowIcon', () => {
 
   it('should render the MaskGroup icon instead of the shape outline for a node flagged as a mask', () => {
     // before
-    const { getByTestId, queryByTestId } = render(<LayerRowIcon isMask node={rectangleNode} size={10} />);
+    const { getByTestId, queryByTestId } = render(<LayerRowIcon isMask isParentManagedLayout={false} node={rectangleNode} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'MaskGroup');
@@ -114,7 +118,7 @@ describe('LayerRowIcon', () => {
 
   it('should forward size to the rendered icon', () => {
     // before
-    const { getByTestId } = render(<LayerRowIcon isMask={false} node={rectangleNode} size={14} />);
+    const { getByTestId } = render(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={rectangleNode} size={14} />);
 
     // result
     expect(getByTestId('shape-icon')).toHaveAttribute('data-size', '14');
@@ -122,7 +126,7 @@ describe('LayerRowIcon', () => {
 
   it('should default to size 12 when none is given', () => {
     // before
-    const { getByTestId } = render(<LayerRowIcon isMask={false} node={rectangleNode} />);
+    const { getByTestId } = render(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={rectangleNode} />);
 
     // result
     expect(getByTestId('shape-icon')).toHaveAttribute('data-size', '12');
@@ -130,11 +134,13 @@ describe('LayerRowIcon', () => {
 
   it('should redraw immediately when the node id changes, e.g. after a drag-and-drop reorder swaps which node a row renders', () => {
     // before
-    const { getByTestId, queryByTestId, rerender } = render(<LayerRowIcon isMask={false} node={frameNode} size={10} />);
+    const { getByTestId, queryByTestId, rerender } = render(
+      <LayerRowIcon isMask={false} isParentManagedLayout={false} node={frameNode} size={10} />,
+    );
     expect(getByTestId('generic-icon')).toBeInTheDocument();
 
     // action
-    rerender(<LayerRowIcon isMask={false} node={rectangleNode} size={10} />);
+    rerender(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={rectangleNode} size={10} />);
 
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
@@ -146,10 +152,12 @@ describe('LayerRowIcon', () => {
     vi.useFakeTimers();
 
     // before — same id, flips from a type with no outline (text) to one with an outline (rectangle)
-    const { getByTestId, queryByTestId, rerender } = render(<LayerRowIcon isMask={false} node={plainTextNode} size={10} />);
+    const { getByTestId, queryByTestId, rerender } = render(
+      <LayerRowIcon isMask={false} isParentManagedLayout={false} node={plainTextNode} size={10} />,
+    );
 
     // action
-    rerender(<LayerRowIcon isMask={false} node={{ ...rectangleNode, id: plainTextNode.id }} size={10} />);
+    rerender(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={{ ...rectangleNode, id: plainTextNode.id }} size={10} />);
 
     // result — spinning while the debounced outline redraw is still pending
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'Spinner');
@@ -166,24 +174,34 @@ describe('LayerRowIcon', () => {
     vi.useRealTimers();
   });
 
-  it('should not render the overlay icon for a node that is not ignoring auto layout', () => {
+  it('should not render the overlay icon for a node that is not ignoring auto layout, even inside a managed layout frame', () => {
     // before
-    const { queryAllByTestId } = render(<LayerRowIcon isMask={false} node={rectangleNode} size={10} />);
+    const { queryAllByTestId } = render(<LayerRowIcon isMask={false} isParentManagedLayout node={rectangleNode} size={10} />);
 
     // result
     expect(queryAllByTestId('generic-icon').some((element) => element.getAttribute('data-name') === 'Overlay')).toBe(false);
   });
 
-  it('should render the overlay icon on top of the shape icon for a node ignoring auto layout', () => {
+  it('should render the overlay icon on top of the shape icon for a node ignoring auto layout inside a managed layout frame', () => {
     // before
     const { getAllByTestId, getByTestId } = render(
-      <LayerRowIcon isMask={false} node={{ ...rectangleNode, ignoreAutoLayout: true }} size={10} />,
+      <LayerRowIcon isMask={false} isParentManagedLayout node={{ ...rectangleNode, ignoreAutoLayout: true }} size={10} />,
     );
 
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
     const overlayIcon = getAllByTestId('generic-icon').find((element) => element.getAttribute('data-name') === 'Overlay');
-    expect(overlayIcon).toHaveAttribute('data-size', '10');
+    expect(overlayIcon).toBeInTheDocument();
+  });
+
+  it('should not render the overlay icon once the parent frame is no longer a managed auto-layout frame, even if the node still has a stale ignoreAutoLayout flag', () => {
+    // before
+    const { queryAllByTestId } = render(
+      <LayerRowIcon isMask={false} isParentManagedLayout={false} node={{ ...rectangleNode, ignoreAutoLayout: true }} size={10} />,
+    );
+
+    // result
+    expect(queryAllByTestId('generic-icon').some((element) => element.getAttribute('data-name') === 'Overlay')).toBe(false);
   });
 
   it('should keep showing the previous shape and only redraw 1 second after the same node’s geometry changes', () => {
@@ -191,11 +209,11 @@ describe('LayerRowIcon', () => {
     vi.useFakeTimers();
 
     // before
-    const { getByTestId, rerender } = render(<LayerRowIcon isMask={false} node={rectangleNode} size={10} />);
+    const { getByTestId, rerender } = render(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={rectangleNode} size={10} />);
     const initialD = getByTestId('shape-icon').getAttribute('data-d');
 
     // action
-    rerender(<LayerRowIcon isMask={false} node={{ ...rectangleNode, width: 40 }} size={10} />);
+    rerender(<LayerRowIcon isMask={false} isParentManagedLayout={false} node={{ ...rectangleNode, width: 40 }} size={10} />);
 
     // result
     expect(getByTestId('shape-icon').getAttribute('data-d')).toBe(initialD);

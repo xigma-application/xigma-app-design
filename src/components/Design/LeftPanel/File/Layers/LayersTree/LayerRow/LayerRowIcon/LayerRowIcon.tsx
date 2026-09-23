@@ -21,6 +21,7 @@ import { getNodeTypeIconName } from './utils/getNodeTypeIconName';
 
 export type TLayerRowIconProps = {
   isMask: boolean;
+  isParentManagedLayout: boolean;
   node: TSceneNode;
   size?: number;
 };
@@ -47,13 +48,13 @@ const getLayerRowIconContent = (
   return <BaseNodeIcon name={getNodeTypeIconName(node, isMask)} size={size} />;
 };
 
-const LayerRowIcon: FC<TLayerRowIconProps> = ({ isMask, node, size = 12 }) => {
+const LayerRowIcon: FC<TLayerRowIconProps> = ({ isMask, isParentManagedLayout, node, size = 12 }) => {
   const { isOutlinePending, outline } = useNodeOutlineState(node);
 
   return (
     <span className={styles.LayerRowIcon}>
       {getLayerRowIconContent(node, isMask, size, isOutlinePending, outline)}
-      {isBoxSceneNode(node) && node.ignoreAutoLayout && (
+      {isParentManagedLayout && isBoxSceneNode(node) && node.ignoreAutoLayout && (
         <span className={styles.LayerRowIcon__overlay}>
           <Icon name="Overlay" size={16} />
         </span>
