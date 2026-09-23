@@ -62,6 +62,7 @@ export const shortcuts = {
   redo: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.z },
   resizeToFit: { primaryKeys: [CONTROL_PRIMARY_KEY, 'alt', 'shift'], secondaryKey: KeyboardKeys.r },
   selectAll: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.a },
+  selectMatchingLayers: { primaryKeys: [CONTROL_PRIMARY_KEY, 'alt'], secondaryKey: KeyboardKeys.a },
   sendToBack: { secondaryKey: KeyboardKeys.bracketLeft },
   toggleLayoutGuides: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.g },
   toggleRulers: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.r },

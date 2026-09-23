@@ -10,7 +10,15 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 import { ZOOM_ANIMATION_DURATION_MS } from '../../constants';
 
 // store
-import designReducer, { addNode, deleteNode, setActiveTool, setSelection, setVectorEditingNodeIds, setViewport } from 'store/design/slice';
+import designReducer, {
+  addNode,
+  addNodes,
+  deleteNode,
+  setActiveTool,
+  setSelection,
+  setVectorEditingNodeIds,
+  setViewport,
+} from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, undo } from 'store/history/actions';
 import { createHistoryMiddleware } from 'store/history/historyMiddleware';
 import { createHistoryStack } from 'store/history/createHistoryStack';
@@ -20,6 +28,9 @@ import { selectActivePage, selectSelectedIds, selectViewport } from 'store/desig
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+
+// utils
+import { matchingNodes, matchingRootOrder } from 'store/design/utils/matchingLayers/test/matchingLayersFixtures';
 
 const createTestStore = (): AppStore => {
   const historyStack = createHistoryStack();
@@ -748,6 +759,23 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(selectSelectedIds(realStore.getState())).toEqual(
       realStore.getState().design.pages[realStore.getState().design.activePageId].rootOrder,
     );
+  });
+
+  it('should select the matching layers on "Alt+Cmd+A"', () => {
+    // mock
+    realStore.dispatch(addNodes({ nodes: matchingNodes, rootIds: matchingRootOrder }));
+    realStore.dispatch(setSelection(['titleA']));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { altKey: true, code: 'KeyA', metaKey: true });
+
+    // result
+    expect(selectSelectedIds(realStore.getState())).toEqual(['titleA', 'titleB']);
   });
 
   it('should duplicate the selected node on "Cmd+D"', () => {

@@ -31,6 +31,7 @@ import { TGuide, TGuideLine } from 'types/design/guides/types';
 import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
+import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchingLayers';
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
 import { getAllGuideLines } from './utils/getAllGuideLines';
 import { getFrameGuideLines } from './utils/getFrameGuideLines';
@@ -183,6 +184,8 @@ export const selectSelectedIds = createSelector([selectActivePage], (page): stri
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
   selectedIds.map((id) => nodes[id]),
 );
+
+export const selectCanSelectMatchingLayers = createSelector([selectSelectedIds, selectNodes], canSelectMatchingLayers);
 
 export const selectSelectedParentIds = createSelector([selectSelectedNodes], (selectedNodes) =>
   selectedNodes.filter(Boolean).map((node) => node.parentId),

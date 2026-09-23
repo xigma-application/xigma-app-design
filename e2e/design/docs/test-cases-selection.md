@@ -538,3 +538,19 @@ the frame. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
 | 382 | The guide lines and centre `×` marker follow a rotated parent frame                                           |  ✅  | ✅ `frame-child-constraints.spec.ts` |
 | 383 | Arrow-key nudge moves a freeform-frame / absolute child; a plain auto-layout flow child is left to the engine |  ✅  | ✅ `frame-child-constraints.spec.ts` |
 | 384 | Arrow-key nudge of a selected group / mask group moves every child with it, not just the group box            |  ✅  |       ✅ `group-nodes.spec.ts`       |
+
+## Select matching layers
+
+The `MatchingLayers` button in the RightPanel header (and `⌥⌘A` / `Alt+Ctrl+A`) adds to the
+selection every layer that sits at the same name path in the other top-level frames — same layer
+name, same ancestor names, same depth; same-named siblings match by their order. Frames inside a
+section only match other frames in that section. The button only shows while every selected node is
+nested inside a top-level frame. Lives in `e2e/design/selection/select-matching-layers.spec.ts`.
+
+| #   | Scenario                                                                                                                                    | Unit |                 E2E                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------------: |
+| 525 | The header button adds the same-name-path layer from other top-level frames                                                                 |  ✅  | ✅ `select-matching-layers.spec.ts` |
+| 526 | `Alt+Ctrl+A` does the same from the keyboard                                                                                                |  ✅  | ✅ `select-matching-layers.spec.ts` |
+| 527 | A layer with no match (different depth / missing sibling) keeps the selection and shows the "No matching layers to select on page" snackbar |  ✅  | ✅ `select-matching-layers.spec.ts` |
+| 528 | Frames in a section only match frames in the same section                                                                                   |  ✅  |                  —                  |
+| 529 | The button is hidden while a top-level frame is selected                                                                                    |  ✅  | ✅ `select-matching-layers.spec.ts` |

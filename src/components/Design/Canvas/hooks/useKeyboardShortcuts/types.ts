@@ -44,6 +44,7 @@ export type TStandardKeyboardShortcuts = {
   redo: TShortcut;
   resizeToFit: TShortcut;
   selectAll: TShortcut;
+  selectMatchingLayers: TShortcut;
   sendToBack: TShortcut;
   toggleLayoutGuides: TShortcut;
   toggleRulers: TShortcut;

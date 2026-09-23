@@ -19,7 +19,19 @@ node's folder. Today:
 - `Common/PanelHeader/` — `PanelHeader` wraps `UITools.ComponentHeader`. Given a `menu` prop it
   renders the label inside a `UITools.ButtonMenu` trigger (chevron + dropdown); without one it
   renders a plain label span. `PanelHeaderComponentButton` is the shared "Create component" button
-  (`common.panelHeader.*` i18n).
+  (`common.panelHeader.*` i18n). `PanelHeaderMatchingLayersButton` ("Select matching layers",
+  `MatchingLayers` icon, `⌥⌘A`) renders only while `selectCanSelectMatchingLayers` is true (every
+  selected node nested below a top-level frame, or below a frame sitting directly in a section).
+  Click and the `selectMatchingLayers` keyboard shortcut both go through
+  `useKeyboardShortcuts/utils/handleSelectMatchingLayers`, which extends the selection with
+  `store/design/utils/matchingLayers/getMatchingLayerIds` — Figma's rules: same layer name, same
+  ancestor names and depth below the top frame, same-named siblings matched by occurrence index,
+  candidates limited to the other non-section containers sharing the top frame's parent (root or
+  the same section). When nothing new gets added (no matches, or the selection isn't eligible) it
+  keeps the selection and shows `DesignHint`'s snackbar with `design.toolbar.matchingLayersHint.none`
+  ("No matching layers to select on page"). Text layers are matched by name only (Figma's text-style fallback isn't
+  implemented). Note new layers get numbered names (`Rectangle (1)`), so freshly drawn shapes only
+  match once renamed.
 - `Common/PositionSection/` — Alignment, Position, Rotation, plus the ignore-auto-layout toggle.
   Its hooks (`useColumnPosition`, `useColumnAlignment`, `useColumnRotation`,
   `buildRotationButtons`) gate on `isBoxSceneNode(selectedNode)` rather than
