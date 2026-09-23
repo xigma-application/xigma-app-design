@@ -83,15 +83,7 @@ describe('renderNodeIdsAtScale', () => {
     renderNodeIdsAtScale(context, null, ['r1'], nodesById, refs, 2, boundsOverride, backgroundColor);
 
     // result
-    expect(renderExportTargetMock).toHaveBeenCalledWith(
-      context,
-      null,
-      nodesById,
-      2,
-      boundsOverride,
-      expect.any(Function),
-      backgroundColor,
-    );
+    expect(renderExportTargetMock).toHaveBeenCalledWith(context, null, nodesById, 2, boundsOverride, expect.any(Function), backgroundColor);
   });
 
   it('should render only the top-level ids within the given set (filtering out any id whose ancestor is also in the set), through the real per-node effect dispatch', () => {

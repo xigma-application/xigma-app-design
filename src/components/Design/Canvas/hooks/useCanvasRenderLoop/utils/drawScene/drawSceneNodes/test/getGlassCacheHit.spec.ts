@@ -18,7 +18,14 @@ describe('getGlassCacheHit', () => {
 
   it('should return the entry when the nodes state and the size both match, even at a different position', () => {
     // mock — a pure pan moved the shape's screen rect, the cached content is still correct
-    const entry = { framebuffer: {} as WebGLFramebuffer, maskFramebuffer: {} as WebGLFramebuffer, maskTexture: {} as WebGLTexture, nodesState: NODES_STATE, texture: {} as WebGLTexture, ...RECT };
+    const entry = {
+      framebuffer: {} as WebGLFramebuffer,
+      maskFramebuffer: {} as WebGLFramebuffer,
+      maskTexture: {} as WebGLTexture,
+      nodesState: NODES_STATE,
+      texture: {} as WebGLTexture,
+      ...RECT,
+    };
 
     glassCaches.set(gl, new Map([['r1', entry]]));
 
@@ -28,7 +35,14 @@ describe('getGlassCacheHit', () => {
 
   it('should be undefined when the nodes state changed, even if the size is identical', () => {
     // mock
-    const entry = { framebuffer: {} as WebGLFramebuffer, maskFramebuffer: {} as WebGLFramebuffer, maskTexture: {} as WebGLTexture, nodesState: NODES_STATE, texture: {} as WebGLTexture, ...RECT };
+    const entry = {
+      framebuffer: {} as WebGLFramebuffer,
+      maskFramebuffer: {} as WebGLFramebuffer,
+      maskTexture: {} as WebGLTexture,
+      nodesState: NODES_STATE,
+      texture: {} as WebGLTexture,
+      ...RECT,
+    };
 
     glassCaches.set(gl, new Map([['r1', entry]]));
 
@@ -38,7 +52,14 @@ describe('getGlassCacheHit', () => {
 
   it('should be undefined when the size changed, like from a zoom change, even with the same nodes state', () => {
     // mock
-    const entry = { framebuffer: {} as WebGLFramebuffer, maskFramebuffer: {} as WebGLFramebuffer, maskTexture: {} as WebGLTexture, nodesState: NODES_STATE, texture: {} as WebGLTexture, ...RECT };
+    const entry = {
+      framebuffer: {} as WebGLFramebuffer,
+      maskFramebuffer: {} as WebGLFramebuffer,
+      maskTexture: {} as WebGLTexture,
+      nodesState: NODES_STATE,
+      texture: {} as WebGLTexture,
+      ...RECT,
+    };
 
     glassCaches.set(gl, new Map([['r1', entry]]));
 
@@ -48,7 +69,14 @@ describe('getGlassCacheHit', () => {
 
   it('should still hit when the size flickers by one pixel from a fractional pan, but not by more', () => {
     // mock
-    const entry = { framebuffer: {} as WebGLFramebuffer, maskFramebuffer: {} as WebGLFramebuffer, maskTexture: {} as WebGLTexture, nodesState: NODES_STATE, texture: {} as WebGLTexture, ...RECT };
+    const entry = {
+      framebuffer: {} as WebGLFramebuffer,
+      maskFramebuffer: {} as WebGLFramebuffer,
+      maskTexture: {} as WebGLTexture,
+      nodesState: NODES_STATE,
+      texture: {} as WebGLTexture,
+      ...RECT,
+    };
 
     glassCaches.set(gl, new Map([['r1', entry]]));
 
@@ -59,7 +87,14 @@ describe('getGlassCacheHit', () => {
 
   it('should never hit for a rect cut by the screen edge, since it only shows part of the shape', () => {
     // mock
-    const entry = { framebuffer: {} as WebGLFramebuffer, maskFramebuffer: {} as WebGLFramebuffer, maskTexture: {} as WebGLTexture, nodesState: NODES_STATE, texture: {} as WebGLTexture, ...RECT };
+    const entry = {
+      framebuffer: {} as WebGLFramebuffer,
+      maskFramebuffer: {} as WebGLFramebuffer,
+      maskTexture: {} as WebGLTexture,
+      nodesState: NODES_STATE,
+      texture: {} as WebGLTexture,
+      ...RECT,
+    };
 
     glassCaches.set(gl, new Map([['r1', entry]]));
 

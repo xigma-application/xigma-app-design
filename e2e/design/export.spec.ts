@@ -81,7 +81,10 @@ const exportSelectedNode = async (page: Page, scale?: '2x'): Promise<PNG> => {
   }
 
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { exact: false, name: /^Export / }).last().click();
+  await page
+    .getByRole('button', { exact: false, name: /^Export / })
+    .last()
+    .click();
   const download = await downloadPromise;
 
   return downloadToPng(download);
@@ -93,7 +96,10 @@ const exportSelectedNodeAsSvg = async (page: Page): Promise<string> => {
   await page.getByText('SVG', { exact: true }).click();
 
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { exact: false, name: /^Export / }).last().click();
+  await page
+    .getByRole('button', { exact: false, name: /^Export / })
+    .last()
+    .click();
   const download = await downloadPromise;
   const stream = await download.createReadStream();
   const chunks: Buffer[] = [];

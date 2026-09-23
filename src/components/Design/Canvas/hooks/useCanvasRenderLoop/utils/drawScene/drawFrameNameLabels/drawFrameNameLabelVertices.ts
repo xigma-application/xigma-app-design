@@ -23,6 +23,18 @@ export const drawFrameNameLabelVertices = (
     const fontSize = FRAME_NAME_LABEL_FONT_SIZE_PX / viewport.zoom;
     const texture = getMsdfAtlasTexture(gl, imageContext.cache);
 
-    drawMsdfGlyphs(gl, imageContext.msdfProgram, imageContext.msdfBuffer, texture, MSDF_ATLAS_JSON, vertices, fill, fontSize, canvasWidth, canvasHeight, viewport);
+    drawMsdfGlyphs(
+      gl,
+      imageContext.msdfProgram,
+      imageContext.msdfBuffer,
+      texture,
+      MSDF_ATLAS_JSON,
+      vertices,
+      fill,
+      fontSize,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
   }
 };

@@ -11,7 +11,8 @@ import { hasRealBlendMode } from './hasRealBlendMode';
 
 const SAFETY_PX = 1;
 
-const hasVisibleEffect = (node: TSceneNode): boolean => 'effects' in node && (node.effects ?? []).some((effect) => effect.visible !== false);
+const hasVisibleEffect = (node: TSceneNode): boolean =>
+  'effects' in node && (node.effects ?? []).some((effect) => effect.visible !== false);
 
 const getChildBounds = (child: TSceneNode): TDraftRect => {
   const strokeWidth = 'strokeWidth' in child ? (child.strokeWidth ?? 0) : 0;
@@ -24,7 +25,15 @@ const getChildBounds = (child: TSceneNode): TDraftRect => {
   return { height: Math.max(...ys) + strokeWidth + SAFETY_PX - y, width: Math.max(...xs) + strokeWidth + SAFETY_PX - x, x, y };
 };
 
-const isCornerClear = (pointX: number, pointY: number, centerX: number, centerY: number, radius: number, towardX: number, towardY: number): boolean =>
+const isCornerClear = (
+  pointX: number,
+  pointY: number,
+  centerX: number,
+  centerY: number,
+  radius: number,
+  towardX: number,
+  towardY: number,
+): boolean =>
   radius <= 0 ||
   !(towardX * (pointX - centerX) > 0 && towardY * (pointY - centerY) > 0) ||
   Math.hypot(pointX - centerX, pointY - centerY) <= radius;
@@ -57,6 +66,8 @@ export const canSkipFrameClip = (renderer: TMaskRenderer, frame: TFrameNode): bo
 
   return (
     subtree !== null &&
-    subtree.every((child) => !hasVisibleEffect(child) && !hasRealBlendMode(child, renderer.refs) && isInsideFrame(frame, getChildBounds(child)))
+    subtree.every(
+      (child) => !hasVisibleEffect(child) && !hasRealBlendMode(child, renderer.refs) && isInsideFrame(frame, getChildBounds(child)),
+    )
   );
 };

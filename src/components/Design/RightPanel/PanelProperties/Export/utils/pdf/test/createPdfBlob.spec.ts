@@ -157,14 +157,12 @@ describe('createPdfBlob', () => {
     expect(pdf.getPageCount()).toBe(1);
     expect(pdf.getPage(0).getSize()).toEqual({ height: 80, width: 120 });
     expect(renderNodeForExportMock).toHaveBeenCalledTimes(1);
-    expect(renderNodeForExportMock).toHaveBeenCalledWith(
-      'pdf-frame',
-      2,
-      true,
-      ExportImageResampling.basic,
-      new Set(['pdf-frame']),
-      { height: 80, width: 120, x: 0, y: 0 },
-    );
+    expect(renderNodeForExportMock).toHaveBeenCalledWith('pdf-frame', 2, true, ExportImageResampling.basic, new Set(['pdf-frame']), {
+      height: 80,
+      width: 120,
+      x: 0,
+      y: 0,
+    });
     expect(createImageBlobFromPixelsMock.mock.calls[0][3]).toBe('image/png');
   });
 

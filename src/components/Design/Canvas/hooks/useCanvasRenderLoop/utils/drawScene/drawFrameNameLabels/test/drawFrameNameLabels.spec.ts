@@ -93,7 +93,15 @@ describe('drawFrameNameLabels', () => {
     );
 
     // result
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, expect.any(Float32Array), FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      expect.any(Float32Array),
+      FRAME_NAME_LABEL_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should draw a selected frame in the selection blue', () => {
@@ -110,7 +118,15 @@ describe('drawFrameNameLabels', () => {
     );
 
     // result
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, expect.any(Float32Array), FRAME_NAME_LABEL_SELECTED_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      expect.any(Float32Array),
+      FRAME_NAME_LABEL_SELECTED_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should skip the frame currently being renamed inline', () => {
@@ -144,7 +160,15 @@ describe('drawFrameNameLabels', () => {
     );
 
     // result
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, expect.any(Float32Array), FRAME_NAME_LABEL_SELECTED_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      expect.any(Float32Array),
+      FRAME_NAME_LABEL_SELECTED_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should skip a frame whose direct parent is another frame', () => {
@@ -163,7 +187,15 @@ describe('drawFrameNameLabels', () => {
 
     // result — only the top-level frame gets a label, the one nested inside it does not
     expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledTimes(1);
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, expect.any(Float32Array), FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      expect.any(Float32Array),
+      FRAME_NAME_LABEL_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should still draw the label for a frame whose direct parent is a section, not a frame', () => {
@@ -187,7 +219,15 @@ describe('drawFrameNameLabels', () => {
     );
 
     // result
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, expect.any(Float32Array), FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      expect.any(Float32Array),
+      FRAME_NAME_LABEL_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should draw all labels of the same colour in one call, and the highlighted ones in a second', () => {
@@ -207,7 +247,23 @@ describe('drawFrameNameLabels', () => {
 
     // result
     expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledTimes(2);
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, new Float32Array([1, 3]), FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
-    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(gl, imageContext, new Float32Array([2]), FRAME_NAME_LABEL_SELECTED_FILL, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      new Float32Array([1, 3]),
+      FRAME_NAME_LABEL_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+    expect(drawFrameNameLabelVerticesMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      new Float32Array([2]),
+      FRAME_NAME_LABEL_SELECTED_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 });

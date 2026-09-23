@@ -694,12 +694,14 @@ describe('createSvgBlob', () => {
     );
 
     // action
-    const text = await readSvgText(
-      await createSvgBlob('svg-outline-text', 2, true, ExportImageResampling.basic, JPEG_QUALITY, true),
-    );
+    const text = await readSvgText(await createSvgBlob('svg-outline-text', 2, true, ExportImageResampling.basic, JPEG_QUALITY, true));
 
     // result
-    expect(getTextFlattenVectorMock).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ id: 'svg-outline-text' }), undefined);
+    expect(getTextFlattenVectorMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ id: 'svg-outline-text' }),
+      undefined,
+    );
     expect(text).toContain('<path d="M');
     expect(text).not.toContain('<text');
     expect(text).not.toContain('<tspan');

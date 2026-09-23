@@ -22,9 +22,7 @@ const getThumbnailSource = (
     case null: {
       const bounds = getPageExportBounds(rootOrder, nodesById);
 
-      return bounds
-        ? { bounds, nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden) }
-        : null;
+      return bounds ? { bounds, nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden) } : null;
     }
     default: {
       const sourceNode = nodesById[sourceNodeId];
