@@ -46,8 +46,11 @@ void main() {
   float radius = min(u_cornerRadius, min(u_halfSize.x, u_halfSize.y));
 
   // the corner seam-smoothing stays tiny and fixed — it only exists to avoid the SDF's derivative
-  // kink along a corner's diagonal bisector, it must never grow large enough to change the shape
-  float cornerSmoothing = max(radius * 0.08, 1.5);
+  // kink along a corner's diagonal bisector, it must never grow large enough to change the shape.
+  // Its floor is scaled to grooveWidth below: a floor bigger than the groove itself flattens dist's
+  // gradient over a wider area right at the corner than along a straight edge, which reads as a
+  // soft haze exactly where the groove's highlight is brightest
+  float cornerSmoothing = max(radius * 0.08, 0.3);
   float dist = sdBoxSmooth(local, u_halfSize, radius, cornerSmoothing);
 
   float eps = max(cornerSmoothing, 0.75);
@@ -82,16 +85,17 @@ void main() {
   // the border, then a shadow line right at it — like a picture-frame bevel. Its width stays a
   // small, fixed size regardless of Depth: every Figma reference shows this crisp bevel at the
   // same thickness whether the dome is shallow or covers the whole shape
-  float grooveWidth = 5.0;
+  float grooveWidth = 0.5;
   float highlight = exp(-pow(dist + grooveWidth * 0.7, 2.0) / (2.0 * pow(grooveWidth * 0.9, 2.0)));
   float shadowLine = exp(-pow(dist - grooveWidth * 0.1, 2.0) / (2.0 * pow(grooveWidth * 0.6, 2.0)));
 
   vec2 lightDirection = vec2(sin(u_lightAngle), -cos(u_lightAngle));
   float facing = dot(normal, lightDirection);
-  float spread = mix(0.35, 0.9, u_splay);
+  float spread = mix(0.75, 0.95, u_splay);
   float lightFactor = mix(1.0 - spread, 1.0, facing * 0.5 + 0.5);
 
-  vec3 lit = mix(refracted, vec3(1.0), highlight * u_lightIntensity * lightFactor);
+  float highlightBoost = 1.5;
+  vec3 lit = mix(refracted, vec3(1.0), highlight * u_lightIntensity * lightFactor * highlightBoost);
 
   lit = mix(lit, vec3(0.0), shadowLine * mix(0.55, 0.3, lightFactor));
 
