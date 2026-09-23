@@ -4,6 +4,9 @@ import { ReactElement } from 'react';
 // components
 import LayerRowIcon from './LayerRowIcon';
 
+// others
+import { NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS } from './constants';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TRectangleNode, TTextNode } from 'types/design/types';
@@ -136,6 +139,31 @@ describe('LayerRowIcon', () => {
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
     expect(queryByTestId('generic-icon')).not.toBeInTheDocument();
+  });
+
+  it('should show a spinning icon while waiting for the debounced outline of a node whose type just changed to one with no prior outline, e.g. flattening a text node', () => {
+    // mock
+    vi.useFakeTimers();
+
+    // before — same id, flips from a type with no outline (text) to one with an outline (rectangle)
+    const { getByTestId, queryByTestId, rerender } = render(<LayerRowIcon isMask={false} node={plainTextNode} size={10} />);
+
+    // action
+    rerender(<LayerRowIcon isMask={false} node={{ ...rectangleNode, id: plainTextNode.id }} size={10} />);
+
+    // result — spinning while the debounced outline redraw is still pending
+    expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'Spinner');
+    expect(queryByTestId('shape-icon')).not.toBeInTheDocument();
+
+    // action
+    act(() => vi.advanceTimersByTime(NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS));
+
+    // result — the traced outline takes over once the debounce fires
+    expect(getByTestId('shape-icon')).toBeInTheDocument();
+    expect(queryByTestId('generic-icon')).not.toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
   });
 
   it('should keep showing the previous shape and only redraw 1 second after the same node’s geometry changes', () => {

@@ -1,0 +1,12 @@
+@keyframes animation-layer-row-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.LayerRowIcon {
+  &__spinner {
+    animation: animation-layer-row-icon-spin 800ms linear infinite;
+    display: inline-flex;
+  }
+}

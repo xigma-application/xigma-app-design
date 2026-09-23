@@ -1,18 +1,19 @@
-import debounce from 'lodash/debounce';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC } from 'react';
 
 // components
 import BaseNodeIcon from './BaseNodeIcon/BaseNodeIcon';
 import NodeShapeIcon from './NodeShapeIcon/NodeShapeIcon';
 
-// others
-import { NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS } from './constants';
+// hooks
+import { useNodeOutlineState } from './hooks/useNodeOutlineState';
+
+// styles
+import styles from './layer-row-icon.module.scss';
 
 // types
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodeOutlinePath } from './utils/getNodeOutlinePath';
 import { getNodeTypeIconName } from './utils/getNodeTypeIconName';
 
 export type TLayerRowIconProps = {
@@ -22,28 +23,21 @@ export type TLayerRowIconProps = {
 };
 
 const LayerRowIcon: FC<TLayerRowIconProps> = ({ isMask, node, size = 12 }) => {
-  const [outline, setOutline] = useState(() => getNodeOutlinePath(node));
-  const previousNodeIdRef = useRef(node.id);
+  const { isOutlinePending, outline } = useNodeOutlineState(node);
 
-  useEffect(() => {
-    const isSameNode = node.id === previousNodeIdRef.current;
-    previousNodeIdRef.current = node.id;
+  if (outline && !isMask) {
+    return <NodeShapeIcon outline={outline} size={size} />;
+  }
 
-    if (isSameNode) {
-      const debouncedSetOutline = debounce(() => setOutline(getNodeOutlinePath(node)), NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS);
-      debouncedSetOutline();
+  if (isOutlinePending && !isMask) {
+    return (
+      <span className={styles.LayerRowIcon__spinner}>
+        <BaseNodeIcon name="Spinner" size={size} />
+      </span>
+    );
+  }
 
-      return (): void => debouncedSetOutline.cancel();
-    }
-
-    setOutline(getNodeOutlinePath(node));
-  }, [node]);
-
-  return outline && !isMask ? (
-    <NodeShapeIcon outline={outline} size={size} />
-  ) : (
-    <BaseNodeIcon name={getNodeTypeIconName(node, isMask)} size={size} />
-  );
+  return <BaseNodeIcon name={getNodeTypeIconName(node, isMask)} size={size} />;
 };
 
 export default LayerRowIcon;
