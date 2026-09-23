@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { NodeType, ToolName } from 'types/design/enums';
+import { TNewNodeDropTarget } from '../../utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -33,15 +34,16 @@ export const useDrawShapeTool = (refs: TCanvasRefs, { fill, name, tool, type }: 
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
   const candidateShapesRef = useRef<TCandidateShape[]>([]);
+  const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef);
+    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef, dropTargetRef, type);
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
     handlePointerMove(canvas, event, refs, viewport, startRef, candidateShapesRef, fill, type);
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef, fill, name, type);
+    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, candidateShapesRef, dropTargetRef, fill, name, type);
 
   useEffect(() => {
     const canvas = canvasRef.current;

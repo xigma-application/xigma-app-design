@@ -10,6 +10,7 @@ import { TArmedMedia } from '../../loadArmedMedia';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -41,7 +42,7 @@ describe('handlePointerDown', () => {
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10, 1), store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10, 1), store, createCanvasRefs(), createArmedRef(armed), startRef, { current: null });
 
     // result
     expect(startRef.current).toBeNull();
@@ -54,7 +55,7 @@ describe('handlePointerDown', () => {
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(null), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createCanvasRefs(), createArmedRef(null), startRef, { current: null });
 
     // result
     expect(startRef.current).toBeNull();
@@ -67,7 +68,7 @@ describe('handlePointerDown', () => {
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createCanvasRefs(), createArmedRef(armed), startRef, { current: null });
 
     // result — a prior file placed earlier in the same multi-file queue must stay selected
     expect(selectSelectedIds(store.getState())).toEqual(['already-placed']);
@@ -83,7 +84,7 @@ describe('handlePointerDown', () => {
     store.dispatch(setViewport({ x: 150, y: 90, zoom: 1 }));
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createCanvasRefs(), createArmedRef(armed), startRef, { current: null });
 
     // result — screen (10,10) under viewport {x:150,y:90} is world (-140,-80)
     expect(startRef.current).toEqual({ x: -140, y: -80 });

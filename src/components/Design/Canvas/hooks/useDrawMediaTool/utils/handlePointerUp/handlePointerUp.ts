@@ -14,11 +14,14 @@ import { AppDispatch, AppStore } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 import { TArmedMedia } from '../loadArmedMedia';
 import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDraftEntity, TNewSceneNode } from 'types/design/types';
+import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 
 // utils
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
 import { armNextFile } from '../armNextFile';
+import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getMediaPlacementRect } from './utils/getMediaPlacementRect';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -29,8 +32,10 @@ export const handlePointerUp = (
   dispatch: AppDispatch,
   appStore: AppStore,
   canvasRef: RefObject<HTMLCanvasElement | null>,
+  canvasRefs: TCanvasRefs,
   armedRef: RefObject<TArmedMedia | null>,
   startRef: RefObject<TPoint | null>,
+  dropTargetRef: RefObject<TNewNodeDropTarget | null>,
   draftRef: RefObject<TDraftEntity | null>,
   queueRef: RefObject<File[]>,
   name: string,
@@ -42,15 +47,19 @@ export const handlePointerUp = (
     const current = screenToWorld(getPointerPosition(canvas, event), selectViewport(appStore.getState()));
     const isClick = Math.abs(current.x - startRef.current.x) < MIN_SHAPE_SIZE && Math.abs(current.y - startRef.current.y) < MIN_SHAPE_SIZE;
     const rect = getMediaPlacementRect(isClick, startRef.current, current, armed.naturalWidth, armed.naturalHeight);
+    const parentId = dropTargetRef.current?.parentId ?? null;
+    const node = { ...rect, flipX: false, flipY: false, name, parentId, rotation: 0, src: armed.src, type: NodeType.media };
 
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
+    dispatch(addNode(node as TNewSceneNode, dropTargetRef.current?.targetIndex));
     appendLastCreatedNodeToSelection(dispatch, appStore);
     dispatch(endHistoryGesture());
 
     startRef.current = null;
+    dropTargetRef.current = null;
     draftRef.current = null;
     aspectRatioLockGuideRef.current = null;
+    clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
 
     if (queueRef.current.length > 0) {

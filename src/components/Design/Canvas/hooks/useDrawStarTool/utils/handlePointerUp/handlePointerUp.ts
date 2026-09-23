@@ -12,10 +12,12 @@ import { AppDispatch, AppStore } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getPointAlignmentSnap } from 'components/Design/Canvas/utils/getPointAlignmentSnap';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -32,6 +34,7 @@ export const handlePointerUp = (
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
   candidateShapesRef: RefObject<TCandidateShape[]>,
+  dropTargetRef: RefObject<TNewNodeDropTarget | null>,
   fill: string,
   name: string,
   points: number,
@@ -46,16 +49,18 @@ export const handlePointerUp = (
     const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
     const flip = { flipX: false, flipY: false };
     const nodeType = NodeType.star as const;
-    const rest = { name, parentId: null, points, ratio, rotation: 0 };
+    const rest = { name, parentId: dropTargetRef.current?.parentId ?? null, points, ratio, rotation: 0 };
     const data = { ...rect, ...flip, ...rest, fill, type: nodeType };
 
-    dispatch(addNode(data));
+    dispatch(addNode(data, dropTargetRef.current?.targetIndex));
     selectLastCreatedNode(dispatch, appStore);
 
     startRef.current = null;
+    dropTargetRef.current = null;
     draftRef.current = null;
     alignmentGuideRef.current = null;
     aspectRatioLockGuideRef.current = null;
+    clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
     dispatch(setActiveTool(ToolName.default));
   }

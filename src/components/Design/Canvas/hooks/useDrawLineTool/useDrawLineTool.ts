@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 import { TLineEndpointStyle } from 'types/design/types';
+import { TNewNodeDropTarget } from '../../utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -35,15 +36,16 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);
+  const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerDown(canvas, event, dispatch, refs, viewport, startRef, lastPointerClientPositionRef);
+    handlePointerDown(canvas, event, dispatch, appStore, refs, viewport, startRef, lastPointerClientPositionRef, dropTargetRef);
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
     handlePointerMove(canvas, event, refs, viewport, startRef, lastPointerClientPositionRef, endPoint, startPoint, stroke);
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
-    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, endPoint, startPoint, stroke, name);
+    handlePointerUp(canvas, event, dispatch, appStore, refs, viewport, startRef, dropTargetRef, endPoint, startPoint, stroke, name);
 
   const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void =>
     handleShiftKeyChange(canvas, event, refs, viewport, startRef, lastPointerClientPositionRef, endPoint, startPoint, stroke);

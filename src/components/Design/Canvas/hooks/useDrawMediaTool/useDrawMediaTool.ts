@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
+import { TNewNodeDropTarget } from '../../utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -29,6 +30,7 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const dropTargetRef = useRef<TNewNodeDropTarget | null>(null);
 
   const handleFileChange = (event: Event): void => {
     dispatch(setSelection([]));
@@ -45,7 +47,8 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
 
     if (canvas && activeTool === tool) {
       const input = document.createElement('input');
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, appStore, armedRef, startRef);
+      const onPointerDown = (event: PointerEvent): void =>
+        handlePointerDown(canvas, event, appStore, refs, armedRef, startRef, dropTargetRef);
       const onPointerMove = (event: PointerEvent): void =>
         handlePointerMove(canvas, event, appStore, armedRef, startRef, draftRef, aspectRatioLockGuideRef);
       const onPointerUp = (event: PointerEvent): void =>
@@ -55,8 +58,10 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
           dispatch,
           appStore,
           canvasRef,
+          refs,
           armedRef,
           startRef,
+          dropTargetRef,
           draftRef,
           queueRef,
           name,
@@ -88,5 +93,5 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
         dispatch(setMediaToolArmed(false));
       };
     }
-  }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, draftRef, name, tool]);
+  }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, draftRef, name, refs, tool]);
 };

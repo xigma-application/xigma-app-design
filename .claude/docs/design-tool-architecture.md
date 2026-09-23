@@ -324,6 +324,17 @@ next to its sibling `getVectorChainPositionAtFraction.ts` in `vectorNetwork/`, s
   per pixel) and dispatching `addNode` on release. `useDrawShapeTool` is the shared hook for any
   plain `{x,y,width,height}` box (Frame/Section/Rectangle/Ellipse); anything with different geometry
   (Line, Polygon, Star, Media, Text) gets its own hook.
+- Drawing over a frame — every tool above except Section resolves a target frame once, at
+  `pointerdown`, via `Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget.ts` (nesting-aware,
+  reuses `getFrameAtWorldPoint`), caches the result in its own `dropTargetRef`, and passes
+  `{ parentId, targetIndex }` through to `addNode(node, targetIndex)` on `pointerup` (`addNode`'s
+  payload carries `targetIndex` as a sibling field next to the node's own fields, stripped off again
+  inside `handleAddNode`). For a hor/vert/grid frame this also arms the same live drop-indicator
+  refs (`dropTargetFrameIdRef`/`autoLayoutDropTargetRef`/`gridDropTargetRef`) that drag-and-drop
+  reparenting uses, so the preview renders through the existing `drawDropTargetFrameOutline`/
+  `drawAutoLayoutDropIndicator`/`drawGridDropTarget` — see [[auto-layout]] for the insertion-index/
+  grid-slot math this reuses. Pen, Pencil, and Text are deliberately excluded (multi-step interaction,
+  no single drag-then-commit point — matches Figma).
 
 ## 8. Rendering (WebGL)
 
@@ -423,3 +434,6 @@ reducer conventions, the ref-vs-Redux split §7 only touches briefly).
 selection, drag/resize/rotate.
 [[vector-network]] — the Pen tool / Vector Network, a genuinely different "shape" of tool this doc's
 8-concern checklist only partially covers (multi-click, multi-session, no draft-then-commit).
+[[auto-layout]] — the insertion-index (hor/vert) and grid-slot resolution §7's "drawing over a frame"
+paragraph reuses from the drag-and-drop reparenting system, applied to a brand-new node instead of
+an existing one.

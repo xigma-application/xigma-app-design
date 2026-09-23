@@ -34,6 +34,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -45,6 +46,8 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
+      NodeType.rectangle,
     );
 
     // result
@@ -59,6 +62,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -70,6 +74,8 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
+      NodeType.rectangle,
     );
 
     // result
@@ -97,6 +103,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -108,9 +115,94 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
+      NodeType.rectangle,
     );
 
     // result
     expect(candidateShapesRef.current.length).toBeGreaterThan(0);
+  });
+
+  it('should resolve and remember the frame under the cursor for a non-section shape', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 400,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const startRef = { current: null };
+    const candidateShapesRef = { current: [] };
+    const dropTargetRef: { current: { parentId: string | null; targetIndex: number } | null } = { current: null };
+    const frameId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(50, 60),
+      store.dispatch,
+      store,
+      createCanvasRefs(),
+      IDENTITY_VIEWPORT,
+      startRef,
+      candidateShapesRef,
+      dropTargetRef,
+      NodeType.rectangle,
+    );
+
+    // result
+    expect(dropTargetRef.current).toEqual({ parentId: frameId, targetIndex: 0 });
+  });
+
+  it('should never resolve a frame target for a section', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 400,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const startRef = { current: null };
+    const candidateShapesRef = { current: [] };
+    const dropTargetRef: { current: { parentId: string | null; targetIndex: number } | null } = { current: null };
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(50, 60),
+      store.dispatch,
+      store,
+      createCanvasRefs(),
+      IDENTITY_VIEWPORT,
+      startRef,
+      candidateShapesRef,
+      dropTargetRef,
+      NodeType.section,
+    );
+
+    // result
+    expect(dropTargetRef.current).toBeNull();
   });
 });

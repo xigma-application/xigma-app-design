@@ -31,16 +31,19 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const lastPointerClientPositionRef = { current: null };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
       canvas,
       pointerEvent(10, 10, { button: 1 }),
       store.dispatch,
+      store,
       createCanvasRefs(),
       IDENTITY_VIEWPORT,
       startRef,
       lastPointerClientPositionRef,
+      dropTargetRef,
     );
 
     // result
@@ -56,16 +59,19 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const lastPointerClientPositionRef = { current: null };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
       canvas,
       pointerEvent(50, 60),
       store.dispatch,
+      store,
       createCanvasRefs(),
       IDENTITY_VIEWPORT,
       startRef,
       lastPointerClientPositionRef,
+      dropTargetRef,
     );
 
     // result

@@ -12,9 +12,11 @@ import { AppDispatch, AppStore } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TLineEndpointStyle, TViewport } from 'types/design/types';
+import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -28,6 +30,7 @@ export const handlePointerUp = (
   canvasRefs: TCanvasRefs,
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
+  dropTargetRef: RefObject<TNewNodeDropTarget | null>,
   endPoint: TLineEndpointStyle,
   startPoint: TLineEndpointStyle,
   stroke: string,
@@ -40,24 +43,29 @@ export const handlePointerUp = (
 
     if (length >= MIN_SHAPE_SIZE) {
       dispatch(
-        addNode({
-          endPoint,
-          name,
-          parentId: null,
-          startPoint,
-          stroke,
-          type: NodeType.line,
-          x1: Math.round(startRef.current.x),
-          x2: Math.round(point.x),
-          y1: Math.round(startRef.current.y),
-          y2: Math.round(point.y),
-        }),
+        addNode(
+          {
+            endPoint,
+            name,
+            parentId: dropTargetRef.current?.parentId ?? null,
+            startPoint,
+            stroke,
+            type: NodeType.line,
+            x1: Math.round(startRef.current.x),
+            x2: Math.round(point.x),
+            y1: Math.round(startRef.current.y),
+            y2: Math.round(point.y),
+          },
+          dropTargetRef.current?.targetIndex,
+        ),
       );
       selectLastCreatedNode(dispatch, appStore);
     }
 
     startRef.current = null;
+    dropTargetRef.current = null;
     canvasRefs.draftRef.current = null;
+    clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
     dispatch(setActiveTool(ToolName.default));
   }

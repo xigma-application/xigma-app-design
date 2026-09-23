@@ -1,12 +1,33 @@
 import { omit } from 'lodash';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { LayoutMode, NodeType, SizingMode, ToolName } from 'types/design/enums';
+import { TDesignPage, TDesignState } from '../../types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { handleAddNode } from '../handleAddNode';
+
+const buildState = (page: TDesignPage): TDesignState =>
+  ({
+    activePageId: page.id,
+    activeTool: ToolName.default,
+    lastFrameTool: ToolName.frame,
+    lastMouseTool: ToolName.default,
+    lastPenTool: ToolName.pen,
+    lastShapeTool: ToolName.rectangle,
+    lastTextTool: ToolName.text,
+    pages: { [page.id]: page },
+    preferences: {
+      areAdditionalLabelsVisible: true,
+      areFrameOutlinesVisible: false,
+      areLayoutGuidesVisible: true,
+      areMaskOutlinesVisible: false,
+      areRulersVisible: false,
+    },
+    revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
+    vectorEditingNodeIds: [],
+  }) as unknown as TDesignState;
 
 const node: TSceneNode = {
   childIds: [],
@@ -475,5 +496,139 @@ describe('handleAddNode', () => {
 
     // result
     expect(state.pages[state.activePageId].rootOrder).toEqual(['existing', node.id]);
+  });
+
+  it('should insert a new node into a freeform frame at the given target index instead of the page root', () => {
+    // mock
+    const frame = { ...node, childIds: ['existing-child'], id: 'frame-1', name: 'Frame' };
+    const child = { ...node, id: 'existing-child', name: 'Existing', parentId: 'frame-1' };
+    const state = buildState({
+      backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      comments: {},
+      guides: [],
+      id: 'page-1',
+      name: 'Page 1',
+      nodes: { 'existing-child': child, 'frame-1': frame },
+      paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      rootOrder: ['frame-1'],
+      selectedIds: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDesignPage);
+    const newNode: TSceneNode = { ...node, id: 'new-child', name: 'New', parentId: 'frame-1' };
+
+    // before
+    handleAddNode(state, newNode);
+
+    // result
+    const page = state.pages['page-1'];
+
+    expect(page.rootOrder).toEqual(['frame-1']);
+    expect((page.nodes['frame-1'] as { childIds: string[] }).childIds).toEqual(['existing-child', 'new-child']);
+  });
+
+  it('should reflow siblings when a new node is added into a horizontal auto-layout frame', () => {
+    // mock
+    const frame = {
+      childIds: ['left'],
+      clipContent: true,
+      fills: [],
+      height: 100,
+      horizontalGap: 0,
+      id: 'frame-1',
+      layoutMode: LayoutMode.horizontal,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 300,
+      x: 0,
+      y: 0,
+    };
+    const left = { ...node, height: 50, id: 'left', name: 'Left', parentId: 'frame-1', width: 50, x: 0, y: 0 };
+    const state = buildState({
+      backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      comments: {},
+      guides: [],
+      id: 'page-1',
+      name: 'Page 1',
+      nodes: { 'frame-1': frame, left },
+      paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      rootOrder: ['frame-1'],
+      selectedIds: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDesignPage);
+    const newNode: TSceneNode = { ...node, height: 50, id: 'right', name: 'Right', parentId: 'frame-1', width: 50, x: 200, y: 0 };
+
+    // before — inserted after the existing child, at index 1
+    handleAddNode(state, { ...newNode, targetIndex: 1 });
+
+    // result — auto-layout sync must have repositioned the new child right after "left", touching it
+    const page = state.pages['page-1'];
+
+    expect((page.nodes['frame-1'] as { childIds: string[] }).childIds).toEqual(['left', 'right']);
+    expect((page.nodes.right as { x: number }).x).toBe(50);
+  });
+
+  it('should anchor a new node into an explicit grid cell and switch the frame off auto-placement', () => {
+    // mock
+    const frame = {
+      childIds: ['occupant'],
+      clipContent: true,
+      fills: [],
+      gridAutoPlacement: true,
+      gridColumnCount: 2,
+      height: 200,
+      id: 'frame-1',
+      layoutMode: LayoutMode.grid,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+    const occupant = {
+      ...node,
+      gridColumnAnchorIndex: 0,
+      gridRowAnchorIndex: 0,
+      height: 100,
+      id: 'occupant',
+      name: 'Occupant',
+      parentId: 'frame-1',
+      width: 100,
+    };
+    const state = buildState({
+      backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      comments: {},
+      guides: [],
+      id: 'page-1',
+      name: 'Page 1',
+      nodes: { 'frame-1': frame, occupant },
+      paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
+      rootOrder: ['frame-1'],
+      selectedIds: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDesignPage);
+    const newNode: TSceneNode = { ...node, height: 100, id: 'new-cell', name: 'New', parentId: 'frame-1', width: 100 };
+
+    // before — inserted at index 0, pushing the occupant to the next cell
+    handleAddNode(state, { ...newNode, targetIndex: 0 });
+
+    // result
+    const page = state.pages['page-1'];
+    const newCell = page.nodes['new-cell'] as unknown as {
+      gridColumnAnchorIndex: number;
+      gridRowAnchorIndex: number;
+      widthSizingMode: SizingMode;
+    };
+    const shiftedOccupant = page.nodes.occupant as unknown as { gridColumnAnchorIndex: number; gridRowAnchorIndex: number };
+
+    expect((page.nodes['frame-1'] as { gridAutoPlacement: boolean }).gridAutoPlacement).toBe(false);
+    expect(newCell.gridColumnAnchorIndex).toBe(0);
+    expect(newCell.gridRowAnchorIndex).toBe(0);
+    expect(newCell.widthSizingMode).toBe(SizingMode.fill);
+    expect(shiftedOccupant.gridColumnAnchorIndex).toBe(1);
+    expect(shiftedOccupant.gridRowAnchorIndex).toBe(0);
   });
 });

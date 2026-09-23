@@ -13,10 +13,12 @@ import { AppDispatch, AppStore } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { dispatchShapeNode } from './dispatchShapeNode';
 import { getPointAlignmentSnap } from '../../../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
@@ -33,6 +35,7 @@ export const handlePointerUp = (
   viewport: TViewport,
   startRef: RefObject<TPoint | null>,
   candidateShapesRef: RefObject<TCandidateShape[]>,
+  dropTargetRef: RefObject<TNewNodeDropTarget | null>,
   fill: string,
   name: string,
   type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
@@ -42,13 +45,15 @@ export const handlePointerUp = (
     const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
     const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
-    dispatchShapeNode(dispatch, rect, fill, name, type);
+    dispatchShapeNode(dispatch, rect, fill, name, type, dropTargetRef.current);
     selectLastCreatedNode(dispatch, appStore);
 
     startRef.current = null;
+    dropTargetRef.current = null;
     canvasRefs.draftRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
     canvasRefs.transform.aspectRatioLockGuideRef.current = null;
+    clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);
     dispatch(setActiveTool(ToolName.default));
   }

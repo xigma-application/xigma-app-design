@@ -169,8 +169,10 @@ const designSlice = createSlice({
       reducer: (state, action: PayloadAction<TAddGuidePayload>) => handleAddGuide(state, action.payload),
     },
     addNode: {
-      prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
-      reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
+      prepare: (node: TNewSceneNode, targetIndex?: number) => ({
+        payload: { ...node, id: nanoid(), targetIndex } as TSceneNode & { targetIndex?: number },
+      }),
+      reducer: (state, action: PayloadAction<TSceneNode & { targetIndex?: number }>) => handleAddNode(state, action.payload),
     },
     addNodes: (state, action: PayloadAction<TAddNodesPayload>) => handleAddNodes(state, action.payload),
     addPage: {

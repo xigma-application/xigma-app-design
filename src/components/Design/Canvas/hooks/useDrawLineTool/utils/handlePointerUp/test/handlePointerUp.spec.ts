@@ -29,6 +29,7 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const refs = createCanvasRefs();
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerUp(
@@ -39,6 +40,7 @@ describe('handlePointerUp', () => {
       refs,
       IDENTITY_VIEWPORT,
       startRef,
+      dropTargetRef,
       'default',
       'default',
       '#000000',
@@ -54,6 +56,7 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const startRef = { current: { x: 10, y: 10 } };
     const refs = createCanvasRefs();
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerUp(
@@ -64,6 +67,7 @@ describe('handlePointerUp', () => {
       refs,
       IDENTITY_VIEWPORT,
       startRef,
+      dropTargetRef,
       'arrow',
       'default',
       '#00ff00',
@@ -94,6 +98,7 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const startRef = { current: { x: 10, y: 10 } };
     const refs = createCanvasRefs();
+    const dropTargetRef = { current: null };
     const before = selectActivePage(store.getState()).rootOrder.length;
 
     // before
@@ -105,6 +110,7 @@ describe('handlePointerUp', () => {
       refs,
       IDENTITY_VIEWPORT,
       startRef,
+      dropTargetRef,
       'default',
       'default',
       '#000000',

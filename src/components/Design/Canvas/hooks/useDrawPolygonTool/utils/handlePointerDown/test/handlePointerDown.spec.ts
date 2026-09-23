@@ -34,6 +34,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -45,6 +46,7 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
     );
 
     // result
@@ -59,6 +61,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -70,6 +73,7 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
     );
 
     // result
@@ -97,6 +101,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const startRef = { current: null };
     const candidateShapesRef = { current: [] };
+    const dropTargetRef = { current: null };
 
     // before
     handlePointerDown(
@@ -108,6 +113,7 @@ describe('handlePointerDown', () => {
       IDENTITY_VIEWPORT,
       startRef,
       candidateShapesRef,
+      dropTargetRef,
     );
 
     // result
