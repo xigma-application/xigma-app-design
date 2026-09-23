@@ -6,6 +6,7 @@ import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
 import { ToolName } from 'types/design/enums';
+import { TToolIconScale } from './types';
 
 export const translationNameSpace = `${parentNameSpace}.toolbar`;
 
@@ -20,7 +21,7 @@ export const TOOL_ICON: Record<ToolName, TIconProps['name']> = {
   [ToolName.hand]: 'HandTool',
   [ToolName.lasso]: 'LassoTool',
   [ToolName.line]: 'LineTool',
-  [ToolName.media]: 'FileTool',
+  [ToolName.media]: 'Image',
   [ToolName.move]: 'MoveVectorTool',
   [ToolName.paint]: 'PaintTool',
   [ToolName.pen]: 'PenTool',
@@ -36,6 +37,24 @@ export const TOOL_ICON: Record<ToolName, TIconProps['name']> = {
   [ToolName.textOnPath]: 'TextOnPathTool',
   [ToolName.variableWidth]: 'VariableWidthTool',
   [ToolName.comment]: 'CommentTool',
+};
+
+export const TOOL_ICON_SCALE: Partial<Record<ToolName, TToolIconScale>> = {
+  [ToolName.arrow]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.default]: { x: 17 / 13, y: 17 / 13 },
+  [ToolName.ellipse]: { x: 18 / 14, y: 18 / 14 },
+  [ToolName.frame]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.hand]: { x: 17.12 / 12, y: 17.86 / 13 },
+  [ToolName.line]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.media]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.pen]: { x: 18 / 14, y: 18 / 14 },
+  [ToolName.pencil]: { x: 16.09 / 12.79, y: 16.09 / 12.79 },
+  [ToolName.polygon]: { x: 16.86 / 13.17, y: 15 / 11.73 },
+  [ToolName.rectangle]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.scale]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.section]: { x: 16 / 12, y: 16 / 12 },
+  [ToolName.slice]: { x: 18.27 / 13.58, y: 15.5 / 11.52 },
+  [ToolName.star]: { x: 19.68 / 14.48, y: 19.18 / 13.65 },
 };
 
 export const TOOL_LABEL: Record<ToolName, string> = {
@@ -81,22 +100,6 @@ export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
   ],
   [ToolName.text]: [ToolName.text, ToolName.textOnPath],
   [ToolName.pen]: [ToolName.pen, ToolName.pencil],
-};
-
-export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
-  [ToolName.default]: 24,
-  [ToolName.comment]: 17,
-  [ToolName.pen]: 24,
-  [ToolName.pencil]: 24,
-  [ToolName.polygon]: 17,
-  [ToolName.slice]: 18,
-  [ToolName.star]: 20,
-};
-
-export const TOOL_DROPDOWN_ICON_SIZE: Partial<Record<ToolName, number>> = {
-  [ToolName.default]: 18,
-  [ToolName.pen]: 21,
-  [ToolName.pencil]: 21,
 };
 
 export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text, ToolName.pen];

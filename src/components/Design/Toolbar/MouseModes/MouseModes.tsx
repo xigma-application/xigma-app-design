@@ -1,5 +1,5 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { FC, useRef } from 'react';
+import { CSSProperties, FC, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -12,7 +12,7 @@ import { useSelectTool } from './hooks/useSelectTool';
 
 // others
 import { KEYBOARD_SHORTCUTS } from '../../keys';
-import { TOOL_ICON, TOOL_ICON_SIZE, TOOL_LABEL, TOOLBAR_ORDER, TOOLS_WITH_DROPDOWN } from '../constants';
+import { TOOL_ICON, TOOL_ICON_SCALE, TOOL_LABEL, TOOLBAR_ORDER, TOOLS_WITH_DROPDOWN } from '../constants';
 
 // store
 import {
@@ -70,7 +70,17 @@ const MouseModes: FC = () => {
             >
               <span className={styles.MouseModes__trigger}>
                 <ToggleGroupPrimitive.Item aria-label={displayedTool} className={styles.MouseModes__button} value={displayedTool}>
-                  <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={TOOL_ICON[displayedTool]} size={TOOL_ICON_SIZE[displayedTool]} />
+                  <Icon
+                    color={isActive ? 'onBlue1' : 'neutral1'}
+                    name={TOOL_ICON[displayedTool]}
+                    size={24}
+                    style={
+                      {
+                        '--icon-scale-x': TOOL_ICON_SCALE[displayedTool]?.x,
+                        '--icon-scale-y': TOOL_ICON_SCALE[displayedTool]?.y,
+                      } as CSSProperties
+                    }
+                  />
                 </ToggleGroupPrimitive.Item>
               </span>
             </Tooltip>

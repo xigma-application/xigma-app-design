@@ -32,6 +32,12 @@
     &[data-state='on'] {
       background-color: var(--color-blue-1);
     }
+
+    :global(.Icon path) {
+      transform: scale(var(--icon-scale-x, 1), var(--icon-scale-y, 1));
+      transform-box: fill-box;
+      transform-origin: center;
+    }
   }
 
   &__shortcut {

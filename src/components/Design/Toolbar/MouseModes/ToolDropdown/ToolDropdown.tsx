@@ -9,7 +9,7 @@ import { useSelectGroupTool } from './hooks/useSelectGroupTool';
 
 // others
 import { KEYBOARD_SHORTCUTS } from '../../../keys';
-import { TOOL_DROPDOWN_ICON_SIZE, TOOL_GROUP_ITEMS, TOOL_ICON, TOOL_LABEL } from '../../constants';
+import { TOOL_GROUP_ITEMS, TOOL_ICON, TOOL_LABEL } from '../../constants';
 
 // store
 import {
@@ -57,7 +57,7 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
         <PopoverItem
           className={styles.ToolDropdown__item}
           icon={TOOL_ICON[groupTool]}
-          iconSize={TOOL_DROPDOWN_ICON_SIZE[groupTool]}
+          iconSize={24}
           key={groupTool}
           label={t(TOOL_LABEL[groupTool])}
           onClick={handleSelectGroupTool(groupTool)}
