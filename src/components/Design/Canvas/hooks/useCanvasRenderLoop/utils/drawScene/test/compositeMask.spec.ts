@@ -23,6 +23,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     getAttribLocation: vi.fn(() => 3),
     getUniformLocation: vi.fn((_program: WebGLProgram, name: string) => ({ name })),
     uniform1i: vi.fn(),
+    uniform4f: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
@@ -58,7 +59,19 @@ describe('compositeMask', () => {
     expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, mask);
     expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_content' }, 0);
     expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_mask' }, 1);
+    expect(gl.uniform4f).toHaveBeenCalledWith({ name: 'u_uvTransform' }, 1, 1, 0, 0);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+  });
+
+  it('should pass a custom uv transform through to the shader', () => {
+    // mock
+    const gl = createGlMock();
+
+    // action
+    compositeMask(buildContext(gl), {} as WebGLTexture, {} as WebGLTexture, [0.5, 0.25, 0.1, 0.2]);
+
+    // result
+    expect(gl.uniform4f).toHaveBeenCalledWith({ name: 'u_uvTransform' }, 0.5, 0.25, 0.1, 0.2);
   });
 
   it('should re-upload the full-screen quad geometry every call', () => {

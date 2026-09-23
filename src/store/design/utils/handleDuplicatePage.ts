@@ -25,6 +25,10 @@ const cloneNodeWithRemappedIds = (node: TSceneNode, nodeIdMap: Record<string, st
     clone.parentId = remapNodeId(clone.parentId, nodeIdMap);
   }
 
+  if ('childIds' in clone) {
+    clone.childIds = clone.childIds.map((childId) => remapNodeId(childId, nodeIdMap));
+  }
+
   if (clone.type === NodeType.text && clone.pathId) {
     clone.pathId = remapNodeId(clone.pathId, nodeIdMap);
   }

@@ -9,6 +9,7 @@ import { TFrameNode, TRectangleNode } from 'types/design/types';
 import { TImagePaint } from 'types/design/paint/types';
 
 // utils
+import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { rotateNodesRigidly } from '../rotateNodesRigidly';
 
 const addFrameNode = (): TFrameNode => {
@@ -48,9 +49,7 @@ const addRectangleNode = (parentId: string | null): string => {
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 describe('rotateNodesRigidly', () => {

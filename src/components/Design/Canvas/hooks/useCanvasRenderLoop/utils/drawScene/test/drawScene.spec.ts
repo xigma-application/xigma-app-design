@@ -91,6 +91,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
 describe('drawScene', () => {
   beforeEach(() => {
     store.dispatch(setBackgroundPaint(DEFAULT_PAINT));
+    store.dispatch(setSelection([]));
   });
 
   it('should re-enable alpha writes for the background clear, then lock them for foreground drawing', () => {

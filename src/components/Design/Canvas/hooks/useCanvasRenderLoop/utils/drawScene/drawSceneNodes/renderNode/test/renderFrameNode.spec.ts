@@ -5,11 +5,13 @@ import { TMaskRenderer } from '../../types';
 
 // utils
 import { bindTarget } from '../../bindTarget';
+import { canSkipFrameClip } from '../../canSkipFrameClip';
 import { renderClippedFrame } from '../../renderClippedFrame';
 import { renderFrameNode } from '../renderFrameNode';
 import { renderIds } from '../../renderIds';
 
 vi.mock('../../bindTarget', () => ({ bindTarget: vi.fn() }));
+vi.mock('../../canSkipFrameClip', () => ({ canSkipFrameClip: vi.fn(() => false) }));
 vi.mock('../../renderIds', () => ({ renderIds: vi.fn() }));
 vi.mock('../../renderClippedFrame', () => ({ renderClippedFrame: vi.fn() }));
 
@@ -45,6 +47,19 @@ describe('renderFrameNode', () => {
     expect(renderer.paintLeaf).toHaveBeenCalledWith(frame, 'fill');
     expect(renderClippedFrame).toHaveBeenCalledWith(renderer, frame, null);
     expect(renderIds).not.toHaveBeenCalled();
+  });
+
+  it('should recurse into children directly when the clip can be skipped', () => {
+    const renderer = buildRenderer();
+    const frame = buildFrame({ childIds: ['child-a'], clipContent: true });
+
+    vi.mocked(canSkipFrameClip).mockReturnValueOnce(true);
+
+    renderFrameNode(renderer, frame, null);
+
+    expect(canSkipFrameClip).toHaveBeenCalledWith(renderer, frame);
+    expect(renderIds).toHaveBeenCalledWith(renderer, ['child-a'], null);
+    expect(renderClippedFrame).not.toHaveBeenCalled();
   });
 
   it('should recurse into children directly when clip content is off', () => {

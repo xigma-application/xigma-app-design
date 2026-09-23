@@ -111,6 +111,7 @@ describe('design slice', () => {
       imageEditor: null,
       imageFillPickerFocus: null,
       isActionsPanelOpen: false,
+      isExporting: false,
       isGridSettingsPanelOpen: false,
       isMediaToolArmed: false,
       isPatternSourcePicking: false,
@@ -546,7 +547,7 @@ describe('design slice', () => {
     const withFrame = slice(initial, addNode(frameNodePayload));
     const [frameId] = withFrame.pages[sourceId].rootOrder;
     const withChild = slice(withFrame, addNode({ ...frameNodePayload, name: 'Child', parentId: frameId }));
-    const childId = withChild.pages[sourceId].rootOrder[1];
+    const [childId] = (withChild.pages[sourceId].nodes[frameId] as { childIds: string[] }).childIds;
 
     // before
     const state = slice(
@@ -558,9 +559,10 @@ describe('design slice', () => {
     expect(Object.keys(state.pages)).toEqual([sourceId, 'copy-1']);
     expect(state.activePageId).toBe('copy-1');
     expect(state.pages['copy-1'].name).toBe('Page 1 copy');
-    expect(state.pages['copy-1'].rootOrder).toEqual(['frame-copy', 'child-copy']);
+    expect(state.pages['copy-1'].rootOrder).toEqual(['frame-copy']);
+    expect((state.pages['copy-1'].nodes['frame-copy'] as { childIds: string[] }).childIds).toEqual(['child-copy']);
     expect(state.pages['copy-1'].nodes['child-copy'].parentId).toBe('frame-copy');
-    expect(state.pages[sourceId].rootOrder).toEqual([frameId, childId]);
+    expect(state.pages[sourceId].rootOrder).toEqual([frameId]);
   });
 
   it('should set the paint', () => {

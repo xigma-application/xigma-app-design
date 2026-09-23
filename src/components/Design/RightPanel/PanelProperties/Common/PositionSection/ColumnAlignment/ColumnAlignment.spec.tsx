@@ -13,6 +13,9 @@ import { store } from 'store';
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
 
+// utils
+import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
+
 const renderColumnAlignment = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
@@ -40,9 +43,7 @@ const addFrameNode = (parentId: string | null, layoutMode?: LayoutMode): string 
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 describe('ColumnAlignment snapshots', () => {

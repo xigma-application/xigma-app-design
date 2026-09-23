@@ -23,6 +23,7 @@ const createGlMock = (): WebGL2RenderingContext =>
   ({
     COLOR_BUFFER_BIT: 16384,
     FRAMEBUFFER: 36160,
+    FRAMEBUFFER_BINDING: 36006,
     LINES: 1,
     LINE_LOOP: 2,
     ONE: 1,
@@ -60,6 +61,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     enableVertexAttribArray: vi.fn(),
     generateMipmap: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
+    getParameter: vi.fn(() => null),
     getUniformLocation: vi.fn(() => ({})),
     scissor: vi.fn(),
     texImage2D: vi.fn(),
@@ -67,6 +69,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     uniform1f: vi.fn(),
     uniform1i: vi.fn(),
     uniform2f: vi.fn(),
+    uniform4f: vi.fn(),
     uniform4fv: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),

@@ -12,6 +12,7 @@ import { TResizeDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { continueResizeDrag } from '../continueResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
@@ -54,17 +55,13 @@ const addFrameNode = (x: number, y: number, width: number, height: number, paren
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addMediaNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
@@ -72,9 +69,7 @@ const addMediaNode = (x: number, y: number, width: number, height: number, paren
     addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation, src: 'a.png', type: NodeType.media, width, x, y }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addAutoLayoutFrameNode = (x: number, y: number, width: number, height: number): string => {
@@ -95,9 +90,7 @@ const addAutoLayoutFrameNode = (x: number, y: number, width: number, height: num
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addVectorNode = (x: number, y: number, width: number, height: number, rotation = 0): string => {
@@ -122,9 +115,7 @@ const addVectorNode = (x: number, y: number, width: number, height: number, rota
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 describe('continueResizeDrag', () => {

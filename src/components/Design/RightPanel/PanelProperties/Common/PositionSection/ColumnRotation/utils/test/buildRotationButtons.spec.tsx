@@ -13,6 +13,7 @@ import { TImagePaint } from 'types/design/paint/types';
 import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 // utils
+import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { buildRotationButtons } from '../buildRotationButtons';
 
 const t = i18n.t;
@@ -54,9 +55,7 @@ const addRectangleNode = (parentId: string | null, x = 0, y = 0): string => {
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addEllipseNode = (): string => {
@@ -76,9 +75,7 @@ const addEllipseNode = (): string => {
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 describe('buildRotationButtons', () => {

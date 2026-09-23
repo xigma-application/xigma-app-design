@@ -12,6 +12,7 @@ import { TRotateDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { continueRotateDrag } from '../continueRotateDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
@@ -46,9 +47,7 @@ const addFrameNode = (x: number, y: number, width: number, height: number, rotat
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addImageRectangleNode = (
@@ -72,17 +71,13 @@ const addImageRectangleNode = (
     }),
   );
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = selectActivePage(store.getState());
-
-  return rootOrder[rootOrder.length - 1];
+  return getLastAddedNodeId(store.getState());
 };
 
 describe('continueRotateDrag', () => {
