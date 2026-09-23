@@ -61,4 +61,21 @@ describe('TreeItemToggle', () => {
     // result
     expect(onToggleExpand).toHaveBeenCalledWith({ recursive: true });
   });
+
+  it('should not rotate the chevron when collapsed', () => {
+    // before
+    const { container } = render(<TreeItemToggle isExpandable isExpanded={false} onToggleExpand={vi.fn()} />);
+
+    // result
+    expect(container.querySelector('svg')?.className.baseVal).toMatch(/toggle-icon/);
+    expect(container.querySelector('svg')?.className.baseVal).not.toMatch(/toggle-icon--expanded/);
+  });
+
+  it('should rotate the chevron when expanded', () => {
+    // before
+    const { container } = render(<TreeItemToggle isExpandable isExpanded onToggleExpand={vi.fn()} />);
+
+    // result
+    expect(container.querySelector('svg')?.className.baseVal).toMatch(/toggle-icon--expanded/);
+  });
 });

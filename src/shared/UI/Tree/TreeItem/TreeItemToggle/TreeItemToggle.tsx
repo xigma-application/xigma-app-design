@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import cx from 'classnames';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -31,11 +32,16 @@ const TreeItemToggle: FC<TTreeItemToggleProps> = ({ isExpandable, isExpanded, on
       {isExpandable && (
         <button
           aria-label={t(isExpanded ? NODE_ROW_COLLAPSE_ARIA_LABEL_KEY : NODE_ROW_EXPAND_ARIA_LABEL_KEY)}
-          className={styles.TreeItem__toggleButton}
+          className={styles['TreeItem__toggle-button']}
           onClick={handleToggleExpandClick}
           type="button"
         >
-          <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={24} />
+          <Icon
+            className={cx(styles['TreeItem__toggle-icon'], isExpanded && styles['TreeItem__toggle-icon--expanded'])}
+            color="neutral2"
+            name="ChevronRight"
+            size={16}
+          />
         </button>
       )}
     </div>

@@ -40,7 +40,7 @@
   }
 
   &__lead {
-    @include svg-color.svg-color(var(--color-ramp-300));
+    @include svg-color.svg-color(var(--color-ramp-300), true);
 
     bottom: -2.5px;
     left: 27px;
