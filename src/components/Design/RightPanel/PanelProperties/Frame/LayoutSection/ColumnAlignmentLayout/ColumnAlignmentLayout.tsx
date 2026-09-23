@@ -66,7 +66,7 @@ const ColumnAlignmentLayout: FC = () => {
             value={alignment}
           />
         )}
-        {(isGrid || isHorizontal) && (
+        {(isGrid || isHorizontal || isWrap) && (
           <GapField
             isGrid={isGrid}
             isHorizontal

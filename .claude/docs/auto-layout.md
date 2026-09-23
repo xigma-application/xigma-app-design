@@ -449,9 +449,25 @@ consumes.
 
 The Flow row already had one extension point next to its `ToggleButtonGroup` — `buttonsIcon`
 (`UITools.SectionColumn`'s separate slot, not a 5th member of the mutually-exclusive group) — used
-for the horizontal-only Wrap button. `ColumnFlowButtonIcons` now branches on `value` (the current
-flow) with a `switch`: `'horizontal'` → Wrap (unchanged), `'grid'` → a new `FollowPath`-icon toggle
-button (`Toggle automatic positioning`, matching Figma's own tooltip text), anything else → `[]`.
+for the Wrap button. `ColumnFlowButtonIcons` branches on `value` (the current flow) with a
+`switch`: `'horizontal'`/`'vertical'` (fallthrough, same `Wrap`-icon button and `onWrapChange`
+handler for both) → Wrap, `'grid'` → a `FollowPath`-icon toggle button (`Toggle automatic
+positioning`, matching Figma's own tooltip text), anything else → `[]`.
+
+Wrap was horizontal-only at first because the button was only ever rendered for `'horizontal'` —
+the underlying `computeAutoLayoutWrappedPositions` engine (§ engine, above) was already fully
+axis-generic (`isHorizontal` swaps which axis is primary/wrap-triggering vs. counter/hugging: for a
+**vertical** wrapped frame, `layoutWrap` wraps into new *columns* once content exceeds the frame's
+**height** — `heightSizingMode` is the gate/measure axis, `isAutoLayoutWrapEnabled` /
+`getAutoLayoutWrapAvailablePrimarySpace`, mirroring `widthSizingMode` for horizontal — and `width`
+is the counter axis that hugs, mirroring height for horizontal) and unit-tested for vertical the
+whole time; only the UI toggle was gated to horizontal. Exposing it for vertical was a pure
+UI-wiring change — `getFrameLayoutIconName.ts` (Layers-panel row icon) reuses the same
+`LayoutHorizontalWrap` icon for a wrapped vertical frame rather than adding a new
+`LayoutVerticalWrap` icon. `useColumnFlow`'s `onChange` still resets `layoutWrap: false` on *every*
+flow switch (horizontal↔vertical included, not just into/out of grid/freeForm) — unchanged,
+intentional, pre-existing behaviour: a flow switch always starts unwrapped, the user re-enables
+Wrap via the now-visible button.
 `useColumnFlow` exposes `gridAutoPlacement` (`frameNode?.gridAutoPlacement ?? true`) and
 `onGridAutoPlacementChange` alongside the existing `wrap`/`onWrapChange`, and the button's
 `selected` prop mirrors it (pressed = on).
@@ -1621,3 +1637,21 @@ engine already honours spans and manual anchors when set in code. Arrow-key move
     auto-placing grid keeps ignoring arrow keys rather than needing a cascading-reflow feature of
     its own — `commitGridAutoPlacementFreeze` (entry #27) already makes real manual-mode grids the
     common case.
+29. **2026-09-23 — Wrap button exposed for vertical flow (§13 "Panel — the Flow row's
+    automatic-positioning toggle").** User report: "it turns out vertical also has wrap" — the
+    `computeAutoLayoutWrappedPositions` engine was already fully axis-generic and unit-tested for
+    vertical frames (wrapping into new columns once content exceeds the frame's *height*, mirroring
+    horizontal's width), but `ColumnFlowButtonIcons` only ever rendered the Wrap toggle for
+    `'horizontal'`, so there was no UI path to reach it. Fixed by making the `'vertical'` case fall
+    through to the same branch as `'horizontal'` — no new icon, no engine change, no change to
+    `useColumnFlow`'s existing per-flow-switch wrap reset. `getFrameLayoutIconName.ts` reuses the
+    same `LayoutHorizontalWrap` icon for a wrapped vertical frame in the Layers panel rather than
+    adding a `LayoutVerticalWrap` icon.
+
+    Follow-up, same session: the horizontal `GapField` (the gap *between wrapped columns* — the
+    counter axis for a vertical frame) was still unreachable once Wrap was on, because
+    `ColumnAlignmentLayout.tsx`'s render gate for it was `isGrid || isHorizontal`, never checking
+    `isWrap`. The mirrored vertical-`GapField` gate already had this right
+    (`isGrid || !isHorizontal || isWrap`) — only the horizontal one was missing the `|| isWrap` term.
+    Fixed by adding it, so a vertical+wrap frame now shows both gap fields, same as a horizontal+wrap
+    frame already did.

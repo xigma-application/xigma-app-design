@@ -11,15 +11,16 @@ this session.
 
 ## Flow (Horizontal / Vertical)
 
-| #   | Scenario                                                                                             | Unit |                        E2E                        |
-| --- | ---------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------------------: |
-| 1   | Switching a frame's Flow between Horizontal and Vertical reflows its children on the canvas          |  ✅  |        ✅ `flow.spec.ts` (round-trip test)        |
-| 2   | Switching back to a previously-used Flow direction restores a pixel-identical layout                 |  —   |        ✅ `flow.spec.ts` (round-trip test)        |
-| 3   | A child dragged into an already-Horizontal frame joins the row live, no re-toggle needed             |  —   |     ✅ `flow.spec.ts` (horizontal-grows test)     |
-| 4   | Vertical flow arranges mixed node types (rectangle, ellipse, line) as boxes, same as Horizontal      |  ✅  |     ✅ `flow.spec.ts` (mixed-node-types test)     |
-| 5   | Setting Flow to Vertical for the first time spreads out children that were freely overlapping        |  —   |   ✅ `flow.spec.ts` (vertical-cold-start test)    |
-| 6   | Deleting a child from a Horizontal-flow frame closes the gap live for the remaining children         |  ✅  |    ✅ `flow.spec.ts` (delete-closes-gap test)     |
-| 7   | Horizontal flow packs five children into a single row, not just the two or three the other tests use |  —   | ✅ `flow.spec.ts` (horizontal-five-children test) |
+| #   | Scenario                                                                                                                                                                                                             | Unit |                        E2E                        |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------------------: |
+| 1   | Switching a frame's Flow between Horizontal and Vertical reflows its children on the canvas                                                                                                                          |  ✅  |        ✅ `flow.spec.ts` (round-trip test)        |
+| 2   | Switching back to a previously-used Flow direction restores a pixel-identical layout                                                                                                                                 |  —   |        ✅ `flow.spec.ts` (round-trip test)        |
+| 3   | A child dragged into an already-Horizontal frame joins the row live, no re-toggle needed                                                                                                                             |  —   |     ✅ `flow.spec.ts` (horizontal-grows test)     |
+| 4   | Vertical flow arranges mixed node types (rectangle, ellipse, line) as boxes, same as Horizontal                                                                                                                      |  ✅  |     ✅ `flow.spec.ts` (mixed-node-types test)     |
+| 5   | Setting Flow to Vertical for the first time spreads out children that were freely overlapping                                                                                                                        |  —   |   ✅ `flow.spec.ts` (vertical-cold-start test)    |
+| 6   | Deleting a child from a Horizontal-flow frame closes the gap live for the remaining children                                                                                                                         |  ✅  |    ✅ `flow.spec.ts` (delete-closes-gap test)     |
+| 7   | Horizontal flow packs five children into a single row, not just the two or three the other tests use                                                                                                                 |  —   | ✅ `flow.spec.ts` (horizontal-five-children test) |
+| 8   | The Wrap toggle is also available for Vertical flow, not just Horizontal — shrinking a comfortably-fitting Vertical+Wrap frame's height pushes the trailing children onto a new column, still laid out top-to-bottom |  ✅  |   ✅ `flow.spec.ts` (vertical-wrap-resize test)   |
 
 Each test builds its frame by dragging children in from outside the frame's own bounds — drawing a
 shape directly over a frame's area does **not** auto-parent it (only a real drag through the

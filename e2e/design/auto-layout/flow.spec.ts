@@ -15,7 +15,7 @@ const setFlow = async (page: Page, direction: 'Horizontal' | 'Vertical'): Promis
   await flowGroup(page).getByLabel(direction, { exact: true }).click();
 };
 
-// the Wrap toggle only renders next to the Flow group while it's set to Horizontal
+// the Wrap toggle renders next to the Flow group for both Horizontal and Vertical
 const clickWrapToggle = async (page: Page): Promise<void> => {
   await page.getByLabel('Wrap', { exact: true }).click();
 };
@@ -329,5 +329,73 @@ test.describe('auto-layout — Flow (Horizontal / Vertical)', () => {
     // the shorter child's own bottom edge must land flush with the taller child's bottom edge —
     // not flush with its top, which is what the code did before this fix
     expect(short.y + short.height).toBe(tall.y + tall.height);
+  });
+
+  test('shrinking a comfortably-fitting Vertical+Wrap frame to half its height pushes the trailing children onto a new column, still laid out top-to-bottom', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-auto-layout-flow-vertical-wrap-resize');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2); // 500x550
+    await setFlow(page, 'Vertical');
+    await clickWrapToggle(page);
+
+    // four 100x100 children — comfortably fit in a single column before the resize below
+    for (let index = 0; index < 4; index += 1) {
+      const y = 160 + index * 140;
+
+      await designPage.drawRectangle(1400, y, 1500, y + 100);
+      await dragInto(page, { x: 1450, y: y + 50 }, { x: 700, y: 300 });
+    }
+
+    const before = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const frame = activePage.nodes[activePage.rootOrder[0]] as { childIds: string[] };
+
+      return { childIds: frame.childIds, nodes: activePage.nodes };
+    });
+
+    const [idA, idB, idC, idD] = before.childIds;
+    const columnX = (before.nodes[idA] as { x: number }).x;
+
+    // confirm the starting point really is a single, uncramped column before touching the resize
+    expect((before.nodes[idB] as { x: number }).x).toBe(columnX);
+    expect((before.nodes[idC] as { x: number }).x).toBe(columnX);
+    expect((before.nodes[idD] as { x: number }).x).toBe(columnX);
+
+    // grab the frame's own south (bottom-middle) resize handle and drag it to the frame's own
+    // vertical midpoint, roughly halving its height from 550px to 275px
+    await selectFrameRow(page);
+    const frameMidX = (FRAME.x1 + FRAME.x2) / 2;
+    const frameMidY = (FRAME.y1 + FRAME.y2) / 2;
+
+    await designPage.pointerDown(frameMidX, FRAME.y2);
+    await designPage.pointerMove(frameMidX, frameMidY);
+    await page.waitForTimeout(150);
+    await designPage.pointerUp();
+
+    const after = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].nodes;
+    });
+
+    const nodeA = after[idA] as { x: number; y: number };
+    const nodeB = after[idB] as { x: number; y: number };
+    const nodeC = after[idC] as { x: number; y: number };
+    const nodeD = after[idD] as { x: number; y: number };
+
+    // a and b (200px, still within the shrunk ~275px height) stay in the first column; c and d
+    // both wrap onto a second column, and within that column they still lie top-to-bottom
+    expect(nodeB.x).toBe(nodeA.x);
+    expect(nodeC.x).toBe(nodeD.x);
+    expect(nodeC.x).toBeGreaterThan(nodeA.x);
+    expect(nodeD.y).toBeGreaterThan(nodeC.y);
   });
 });

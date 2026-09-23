@@ -17,6 +17,7 @@ export const ColumnFlowButtonIcons = (
 ): ReactNode[] => {
   switch (value) {
     case 'horizontal':
+    case 'vertical':
       return [
         <Tooltip content={t(`${translationNameSpace}.wrapTooltip`)} key="wrap">
           <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.wrapAriaLabel`)} name="Wrap" onClick={onWrapChange} selected={wrap} />

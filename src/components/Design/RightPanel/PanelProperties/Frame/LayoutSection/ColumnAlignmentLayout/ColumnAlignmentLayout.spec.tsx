@@ -130,6 +130,33 @@ describe('ColumnAlignmentLayout behaviors', () => {
     expect(screen.getByLabelText('Gap')).toHaveValue(24);
   });
 
+  it('should render only the vertical gap field for a vertical frame without wrap', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderColumnAlignmentLayout();
+
+    // result
+    expect(screen.getAllByLabelText('Gap')).toHaveLength(1);
+  });
+
+  it('should also render the horizontal gap field for a vertical frame with wrap enabled', () => {
+    // mock
+    const frameId = addFrameNode(LayoutMode.vertical);
+
+    store.dispatch(updateNode({ changes: { layoutWrap: true }, id: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderColumnAlignmentLayout();
+
+    // result
+    expect(screen.getAllByLabelText('Gap')).toHaveLength(2);
+  });
+
   it('should reflect the selected frame’s own wrap flag, instead of always rendering as non-wrapped', () => {
     // mock
     const frameId = addFrameNode(LayoutMode.horizontal);

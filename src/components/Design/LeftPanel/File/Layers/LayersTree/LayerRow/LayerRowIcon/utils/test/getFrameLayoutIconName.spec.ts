@@ -42,6 +42,10 @@ describe('getFrameLayoutIconName', () => {
     expect(getFrameLayoutIconName(buildFrame({ layoutMode: LayoutMode.horizontal, layoutWrap: true }))).toBe('LayoutHorizontalWrap');
   });
 
+  it('should return LayoutHorizontalWrap for a vertical frame with wrap', () => {
+    expect(getFrameLayoutIconName(buildFrame({ layoutMode: LayoutMode.vertical, layoutWrap: true }))).toBe('LayoutHorizontalWrap');
+  });
+
   it('should return LayoutGrid for a grid frame', () => {
     expect(getFrameLayoutIconName(buildFrame({ layoutMode: LayoutMode.grid }))).toBe('LayoutGrid');
   });

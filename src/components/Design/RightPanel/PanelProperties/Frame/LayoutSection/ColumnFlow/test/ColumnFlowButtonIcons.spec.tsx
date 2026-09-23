@@ -16,17 +16,17 @@ describe('ColumnFlowButtonIcons', () => {
     expect(buttonsIcon).toHaveLength(0);
   });
 
-  it('should return an empty array when the flow is "vertical"', () => {
-    // action
-    const buttonsIcon = ColumnFlowButtonIcons('vertical', false, vi.fn(), t, true, vi.fn());
-
-    // result
-    expect(buttonsIcon).toHaveLength(0);
-  });
-
   it('should return the wrap button when the flow is "horizontal"', () => {
     // action
     const buttonsIcon = ColumnFlowButtonIcons('horizontal', false, vi.fn(), t, true, vi.fn());
+
+    // result
+    expect(buttonsIcon).toHaveLength(1);
+  });
+
+  it('should return the wrap button when the flow is "vertical"', () => {
+    // action
+    const buttonsIcon = ColumnFlowButtonIcons('vertical', false, vi.fn(), t, true, vi.fn());
 
     // result
     expect(buttonsIcon).toHaveLength(1);
