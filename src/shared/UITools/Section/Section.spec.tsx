@@ -215,4 +215,75 @@ describe('Section behaviors', () => {
     // result
     expect(container.querySelector('[class*="Section--empty"]')).toBeNull();
   });
+
+  it('should call onAdd when clicking anywhere in an empty section container', () => {
+    // mock
+    const onAdd = vi.fn();
+
+    // before
+    const { container } = renderSection(<Section hasContent={false} label="Fill" onAdd={onAdd} />);
+
+    // action
+    fireEvent.click(container.querySelector('[class*="Section"]') as Element);
+
+    // result
+    expect(onAdd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onAdd twice when clicking the add button inside an empty section', () => {
+    // mock
+    const onAdd = vi.fn();
+
+    // before
+    renderSection(<Section addAriaLabel="Add fill" hasContent={false} label="Fill" onAdd={onAdd} />);
+
+    // action
+    fireEvent.click(screen.getByLabelText('Add fill'));
+
+    // result
+    expect(onAdd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onAdd when clicking the trailing component in an empty section', () => {
+    // mock
+    const onAdd = vi.fn();
+
+    // before
+    const { getByLabelText } = renderSection(
+      <Section
+        component={
+          <button aria-label="Styles and variables" type="button">
+            styles
+          </button>
+        }
+        hasContent={false}
+        label="Fill"
+        onAdd={onAdd}
+      />,
+    );
+
+    // action
+    fireEvent.click(getByLabelText('Styles and variables'));
+
+    // result
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it('should not call onAdd when clicking a non-empty section without onAdd wired to the container', () => {
+    // mock
+    const onAdd = vi.fn();
+
+    // before
+    const { container } = renderSection(
+      <Section label="Fill" onAdd={onAdd}>
+        <span>row</span>
+      </Section>,
+    );
+
+    // action
+    fireEvent.click(container.querySelector('[class*="Section"]') as Element);
+
+    // result
+    expect(onAdd).not.toHaveBeenCalled();
+  });
 });

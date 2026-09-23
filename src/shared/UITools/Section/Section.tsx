@@ -9,6 +9,10 @@ import { Tooltip } from '@xigma/components';
 import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
 import { UITools } from 'shared';
 
+// hooks
+import { useHandleEmptySectionClick } from './hooks/useHandleEmptySectionClick';
+import { useStopSectionActionsPropagation } from './hooks/useStopSectionActionsPropagation';
+
 // styles
 import styles from './section.module.scss';
 
@@ -47,6 +51,9 @@ export const Section = <TItem,>({
   separator = true,
 }: TSectionProps<TItem>): ReactElement => {
   const hasContent = hasContentProp ?? (isArray(items) && isRenderItem<TItem>(children) ? items.length > 0 : Boolean(children));
+  const isEmptyWithAdd = !hasContent && Boolean(onAdd);
+  const handleEmptySectionClick = useHandleEmptySectionClick(onAdd);
+  const handleStopActionsPropagation = useStopSectionActionsPropagation();
 
   return (
     <E2EDataAttribute type={E2EAttribute.section} value={e2eValue}>
@@ -56,12 +63,13 @@ export const Section = <TItem,>({
           [styles['Section--muted']]: mutedWhenEmpty && !hasContent,
           [styles['Section--noSeparator']]: !separator,
         })}
+        onClick={isEmptyWithAdd ? handleEmptySectionClick : undefined}
       >
         {label && (
           <div className={cx(styles.Section__header)}>
             <span className={styles.Section__label}>{label}</span>
             {(component || onAdd) && (
-              <div className={cx(styles.Section__component)}>
+              <div className={cx(styles.Section__component)} onClick={handleStopActionsPropagation}>
                 {component}
                 {onAdd && (
                   <Tooltip align="end" content={addTooltip}>
