@@ -92,12 +92,12 @@ describe('useNotifyVideoPanelState', () => {
     // before
     const { rerender } = renderHook(
       ({ videoUrl, onVideoChange }) => useNotifyVideoPanelState(videoPanelFor({ videoUrl }), undefined, onVideoChange),
-      { initialProps: { videoUrl: null as string | null, onVideoChange: onVideoChangeFirst } },
+      { initialProps: { onVideoChange: onVideoChangeFirst, videoUrl: null as string | null } },
     );
 
     // action — the url is picked for real, then a later render swaps only the callback identity
-    rerender({ videoUrl: 'blob:asset-1', onVideoChange: onVideoChangeFirst });
-    rerender({ videoUrl: 'blob:asset-1', onVideoChange: onVideoChangeSecond });
+    rerender({ onVideoChange: onVideoChangeFirst, videoUrl: 'blob:asset-1' });
+    rerender({ onVideoChange: onVideoChangeSecond, videoUrl: 'blob:asset-1' });
 
     // result
     expect(onVideoChangeFirst).toHaveBeenCalledTimes(1);
