@@ -18,7 +18,7 @@ export type TBlendModeButtonProps = {
   ariaLabel?: string;
   onChange?: TFunc<[BlendMode]>;
   onPreview?: TFunc<[BlendMode | null]>;
-  value: BlendMode;
+  value: BlendMode | undefined;
 };
 
 export const BlendModeButton: FC<TBlendModeButtonProps> = ({ ariaLabel, onChange, onPreview, value }) => {

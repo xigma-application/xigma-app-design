@@ -18,6 +18,7 @@ import { useEffectSettingsPanel } from './hooks/useEffectSettingsPanel/useEffect
 
 // others
 import { EFFECT_FIELD_MAX, EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // styles
 import styles from './effect-settings-panel.module.scss';
@@ -26,36 +27,43 @@ import styles from './effect-settings-panel.module.scss';
 import { getEffectNoise } from 'utils/design/effects/getEffectNoise';
 import { getEffectTexture } from 'utils/design/effects/getEffectTexture';
 import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
-import { getEffectPanelLayout } from './utils/getEffectPanelLayout';
 
 // types
-import { BlendMode, EffectType } from 'types/design/enums';
+import { BlendMode, EffectBlurType, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
+import { TEffectNumberField } from '../types';
+import { TEffectPanelLayout } from './utils/getEffectPanelLayout';
 
 export type TEffectSettingsPanelProps = {
   disabledTypes: EffectType[];
   effect: TEffect;
+  layout: TEffectPanelLayout;
+  mixedKeys: Set<keyof TEffect>;
   onBlendModePreview: TFunc<[BlendMode | null]>;
-  onChange: TFunc<[TEffect]>;
+  onChange: TFunc<[Partial<TEffect>]>;
   onClose: TFunc;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onFieldScrub: TFunc<[TEffectNumberField, number, number]>;
 };
 
 export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
   disabledTypes,
   effect,
+  layout,
+  mixedKeys,
   onBlendModePreview,
   onChange,
   onClose,
   onDragEnd,
   onDragStart,
+  onFieldScrub,
 }) => {
   const { t } = useTranslation();
   const noise = getEffectNoise(effect);
 
   const { fields, hasBlendMode, hasBlurModeToggle, hasClipToShape, hasColor, hasGlassControls, hasNoiseTypeToggle, hasSecondaryColor } =
-    getEffectPanelLayout(effect);
+    layout;
 
   const {
     onBlur,
@@ -66,32 +74,38 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
     onPickerChange,
     onScrub,
     onSecondaryPickerChange,
-  } = useEffectSettingsPanel(effect, onChange);
+  } = useEffectSettingsPanel(effect, mixedKeys, onChange, onFieldScrub);
 
   return (
     <div className={styles.EffectSettingsPanel}>
       <EffectSettingsHeader
-        blendMode={effect.blendMode ?? BlendMode.normal}
+        blendMode={mixedKeys.has('blendMode') ? undefined : (effect.blendMode ?? BlendMode.normal)}
         disabledTypes={disabledTypes}
         hasBlendMode={hasBlendMode}
-        onBlendModeChange={(blendMode): void => onChange({ ...effect, blendMode })}
+        onBlendModeChange={(blendMode): void => onChange({ blendMode })}
         onBlendModePreview={onBlendModePreview}
         onClose={onClose}
-        onTypeChange={(type): void => onChange({ ...effect, type })}
+        onTypeChange={(type): void => onChange({ type })}
         type={effect.type}
       />
       <div className={styles.EffectSettingsPanel__body}>
         {hasBlurModeToggle && (
-          <EffectBlurModeToggle blurType={effect.blurType} onChange={(blurType): void => onChange({ ...effect, blurType })} />
+          <EffectBlurModeToggle
+            blurType={mixedKeys.has('blurType') ? undefined : (effect.blurType ?? EffectBlurType.uniform)}
+            onChange={(blurType): void => onChange({ blurType })}
+          />
         )}
         {hasNoiseTypeToggle && (
-          <EffectNoiseTypeToggle noiseType={effect.noiseType} onChange={(noiseType): void => onChange({ ...effect, noiseType })} />
+          <EffectNoiseTypeToggle
+            noiseType={mixedKeys.has('noiseType') ? undefined : noise.noiseType}
+            onChange={(noiseType): void => onChange({ noiseType })}
+          />
         )}
         {fields.map(({ adornmentLabel, ariaKey, icon, isReadOnly, key, labelKey, min, unit }) => (
           <UITools.Field
             Component={UITools.TextField}
             aria-label={t(`${translationNameSpace}.settings.fields.${ariaKey ?? key}`)}
-            defaultValue={`${getEffectFieldValue(effect, key)}${unit ?? ''}`}
+            defaultValue={mixedKeys.has(key) ? MIXED_LABEL : `${getEffectFieldValue(effect, key)}${unit ?? ''}`}
             disabled={isReadOnly}
             e2eValue={`effect-${key}`}
             key={`${key}-${adornmentLabel ?? ''}`}
@@ -116,8 +130,10 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
         {hasColor && (
           <EffectColorField
             alpha={effect.opacity}
+            alphaDisplayValue={mixedKeys.has('opacity') ? MIXED_LABEL : undefined}
             e2eValue="effect"
             hex={effect.color}
+            hexDisplayValue={mixedKeys.has('color') ? MIXED_LABEL : undefined}
             label={t(`${translationNameSpace}.settings.labels.${hasSecondaryColor ? 'colors' : 'color'}`)}
             onCommitAlpha={onCommitAlpha}
             onCommitHex={onCommitHex}
@@ -127,18 +143,22 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
             triggerAriaLabel={t(`${translationNameSpace}.settings.colorTriggerAriaLabel`)}
           />
         )}
-        {hasGlassControls && <EffectGlassControls effect={effect} onChange={onChange} onDragEnd={onDragEnd} onDragStart={onDragStart} />}
+        {hasGlassControls && (
+          <EffectGlassControls effect={effect} mixedKeys={mixedKeys} onChange={onChange} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+        )}
         {hasClipToShape && (
           <EffectClipToShapeField
-            onChange={(clipToShape): void => onChange({ ...effect, clipToShape })}
-            value={getEffectTexture(effect).clipToShape}
+            onChange={(clipToShape): void => onChange({ clipToShape })}
+            value={!mixedKeys.has('clipToShape') && getEffectTexture(effect).clipToShape}
           />
         )}
         {hasSecondaryColor && (
           <EffectColorField
             alpha={noise.secondaryOpacity}
+            alphaDisplayValue={mixedKeys.has('secondaryOpacity') ? MIXED_LABEL : undefined}
             e2eValue="effect-secondary"
             hex={noise.secondaryColor}
+            hexDisplayValue={mixedKeys.has('secondaryColor') ? MIXED_LABEL : undefined}
             onCommitAlpha={onCommitSecondaryAlpha}
             onCommitHex={onCommitSecondaryHex}
             onDragEnd={onDragEnd}

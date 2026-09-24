@@ -35,6 +35,7 @@ import { TVideoPanelChange } from '../ColorPicker/Body/VideoPanel/types';
 export type TColorPickerInputProps = {
   align?: TColorPickerProps['align'];
   alpha: number;
+  alphaDisplayValue?: string;
   availableTabs?: TColorPickerProps['availableTabs'];
   blendMode?: BlendMode;
   className?: string;
@@ -93,6 +94,7 @@ export type TColorPickerInputProps = {
 export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   align = 'end',
   alpha,
+  alphaDisplayValue,
   availableTabs,
   blendMode,
   className = '',
@@ -150,7 +152,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const onBlurHex = useHexCommit(hex, onCommitHex);
   const onKeyDownHex = useHexStepKeyDown(onCommitHex);
-  const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha);
+  const onBlurAlpha = useAlphaCommit(alpha, onCommitAlpha, alphaDisplayValue);
   const rounded = Math.round(alpha);
   const [pickedImageUrl, setPickedImageUrl] = useState<string | null>(null);
   const thumbnailUrl = usePatternThumbnail(isPattern ? patternSourceNodeId : null) ?? pickedImageUrl ?? imageUrl ?? videoUrl;
@@ -231,7 +233,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
         />
         <TextFieldWrapper
           className={styles.ColorPickerInput__alpha}
-          defaultValue={rounded}
+          defaultValue={alphaDisplayValue ?? rounded}
           e2eValue={`${e2eValue}-alpha`}
           endAdornment={
             <ScrubbableInput max={100} min={0} onChange={onCommitAlpha} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={rounded}>
@@ -243,7 +245,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
           min={0}
           onBlur={onBlurAlpha}
           stepNumbers={{ max: 100, min: 0 }}
-          type="number"
+          type={alphaDisplayValue ? 'text' : 'number'}
         />
       </FieldGroup>
       {onToggleVisibility && (

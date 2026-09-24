@@ -4,7 +4,7 @@ import { FocusEvent } from 'react';
 import { clamp } from 'utils/math/clamp';
 
 export const useAlphaCommit =
-  (alpha: number, onCommit: TFunc<[number]>): TFunc<[FocusEvent<HTMLInputElement>]> =>
+  (alpha: number, onCommit: TFunc<[number]>, displayValue?: string): TFunc<[FocusEvent<HTMLInputElement>]> =>
   (event): void => {
     const raw = event.target.value.trim();
     const parsed = Number(raw);
@@ -12,6 +12,6 @@ export const useAlphaCommit =
     if (raw !== '' && !Number.isNaN(parsed)) {
       onCommit(clamp(parsed, 0, 100));
     } else {
-      event.target.value = String(Math.round(alpha));
+      event.target.value = displayValue ?? String(Math.round(alpha));
     }
   };

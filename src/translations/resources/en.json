@@ -568,6 +568,7 @@
   "design.rightPanel.panelProperties.common.effectsSection.applyStylesAriaLabel": "Apply effect styles and variables",
   "design.rightPanel.panelProperties.common.effectsSection.applyStylesTooltip": "Apply styles and variables",
   "design.rightPanel.panelProperties.common.effectsSection.label": "Effects",
+  "design.rightPanel.panelProperties.common.effectsSection.mixedContent": "Click + to replace mixed content",
   "design.rightPanel.panelProperties.common.effectsSection.row.deleteAriaLabel": "Delete effect",
   "design.rightPanel.panelProperties.common.effectsSection.row.deleteTooltip": "Delete effect",
   "design.rightPanel.panelProperties.common.effectsSection.row.hideAriaLabel": "Hide effect",

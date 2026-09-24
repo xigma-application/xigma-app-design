@@ -11,6 +11,7 @@ import { useGlassNumberBlur } from './hooks/useGlassNumberBlur';
 
 export type TEffectGlassNumberFieldProps = {
   ariaLabel: string;
+  displayValue?: string;
   e2eValue: string;
   max: number;
   min: number;
@@ -24,6 +25,7 @@ export type TEffectGlassNumberFieldProps = {
 
 export const EffectGlassNumberField: FC<TEffectGlassNumberFieldProps> = ({
   ariaLabel,
+  displayValue,
   e2eValue,
   max,
   min,
@@ -34,13 +36,13 @@ export const EffectGlassNumberField: FC<TEffectGlassNumberFieldProps> = ({
   unit,
   value,
 }) => {
-  const onBlur = useGlassNumberBlur(min, max, value, unit, onChange);
+  const onBlur = useGlassNumberBlur(min, max, displayValue === undefined ? value : undefined, unit, onChange);
 
   return (
     <Tooltip content={tooltip}>
       <UITools.TextField
         aria-label={ariaLabel}
-        defaultValue={`${value}${unit}`}
+        defaultValue={displayValue ?? `${value}${unit}`}
         e2eValue={e2eValue}
         onBlur={onBlur}
         startAdornment={

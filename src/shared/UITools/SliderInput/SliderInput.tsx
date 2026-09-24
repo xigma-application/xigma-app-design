@@ -18,6 +18,7 @@ import styles from './slider-input.module.scss';
 export type TSliderInputProps = {
   ariaLabel: string;
   className?: string;
+  displayValue?: string;
   e2eValue?: string;
   max: number;
   min: number;
@@ -32,6 +33,7 @@ export type TSliderInputProps = {
 export const SliderInput: FC<TSliderInputProps> = ({
   ariaLabel,
   className = '',
+  displayValue,
   e2eValue = '',
   max,
   min,
@@ -42,7 +44,7 @@ export const SliderInput: FC<TSliderInputProps> = ({
   tooltip = '',
   value,
 }) => {
-  const onBlur = useSliderInputBlur(min, max, value, onChange);
+  const onBlur = useSliderInputBlur(min, max, value, onChange, displayValue);
 
   return (
     <div className={cx(styles.SliderInput, className)}>
@@ -62,7 +64,7 @@ export const SliderInput: FC<TSliderInputProps> = ({
         <TextFieldWrapper
           aria-label={ariaLabel}
           className={styles.SliderInput__input}
-          defaultValue={`${value}`}
+          defaultValue={displayValue ?? `${value}`}
           e2eValue={e2eValue}
           onBlur={onBlur}
           startAdornment={

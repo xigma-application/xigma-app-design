@@ -16,7 +16,7 @@ const { PopoverItem, PopoverSeparator } = PopoverCompound;
 export type TBlendModeMenuProps = {
   onPreview?: TFunc<[BlendMode | null]>;
   onSelect: (blendMode: BlendMode) => TFunc;
-  value: BlendMode;
+  value: BlendMode | undefined;
 };
 
 export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ onPreview, onSelect, value }) => {

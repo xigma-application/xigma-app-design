@@ -20,18 +20,24 @@ import styles from './effect-row.module.scss';
 // types
 import { BlendMode, EffectType } from 'types/design/enums';
 import { TEffect } from 'types/design/types';
+import { TEffectNumberField } from '../types';
+import { TEffectPanelLayout } from '../EffectSettingsPanel/utils/getEffectPanelLayout';
 
 export type TEffectRowProps = {
   canDrag: boolean;
   disabledTypes: EffectType[];
   effect: TEffect;
   isDragging: boolean;
+  isHidden: boolean;
   isOpen: boolean;
   isSelected: boolean;
+  layout: TEffectPanelLayout;
+  mixedKeys: Set<keyof TEffect>;
   onBlendModePreview: TFunc<[BlendMode | null]>;
-  onChange: TFunc<[TEffect]>;
+  onChange: TFunc<[Partial<TEffect>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onFieldScrub: TFunc<[TEffectNumberField, number, number]>;
   onOpenChange: TFunc<[boolean]>;
   onRemove: TFunc;
   onStartDrag: TFunc<[ReactPointerEvent]>;
@@ -44,12 +50,16 @@ export const EffectRow: FC<TEffectRowProps> = ({
   disabledTypes,
   effect,
   isDragging,
+  isHidden,
   isOpen,
   isSelected,
+  layout,
+  mixedKeys,
   onBlendModePreview,
   onChange,
   onDragEnd,
   onDragStart,
+  onFieldScrub,
   onOpenChange,
   onRemove,
   onStartDrag,
@@ -61,7 +71,7 @@ export const EffectRow: FC<TEffectRowProps> = ({
   const sideOffset = usePanelEdgeSideOffset(triggerRef, isOpen);
   const onInteractOutside = useIgnoreProgressiveBlurInteractOutside();
   const { markUserClose, onClose, onCloseAutoFocus } = useReturnFocusOnUserClose(onOpenChange);
-  const isVisible = effect.visible !== false;
+  const isVisible = !isHidden;
   const isActive = isOpen || isSelected || isDragging;
 
   return (
@@ -102,11 +112,14 @@ export const EffectRow: FC<TEffectRowProps> = ({
         <EffectSettingsPanel
           disabledTypes={disabledTypes}
           effect={effect}
+          layout={layout}
+          mixedKeys={mixedKeys}
           onBlendModePreview={onBlendModePreview}
           onChange={onChange}
           onClose={onClose}
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
+          onFieldScrub={onFieldScrub}
         />
       </UITools.Popover>
       <Tooltip align="end" content={t(`${translationNameSpace}.row.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}>

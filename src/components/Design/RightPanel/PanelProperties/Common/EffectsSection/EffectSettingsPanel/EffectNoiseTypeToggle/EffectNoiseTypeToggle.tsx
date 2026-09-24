@@ -23,7 +23,7 @@ export type TEffectNoiseTypeToggleProps = {
   onChange: TFunc<[EffectNoiseType]>;
 };
 
-export const EffectNoiseTypeToggle: FC<TEffectNoiseTypeToggleProps> = ({ noiseType = EffectNoiseType.mono, onChange }) => {
+export const EffectNoiseTypeToggle: FC<TEffectNoiseTypeToggleProps> = ({ noiseType, onChange }) => {
   const { t } = useTranslation();
   const onSelect = useSelectNoiseType(onChange);
 
@@ -33,7 +33,7 @@ export const EffectNoiseTypeToggle: FC<TEffectNoiseTypeToggleProps> = ({ noiseTy
       e2eValue="effect-noise-type"
       onChange={onSelect}
       toggleButtons={NOISE_TYPES.map((type) => ({ label: t(`${translationNameSpace}.settings.noiseType.${type}`), value: type }))}
-      value={noiseType}
+      value={noiseType ?? ''}
     />
   );
 };

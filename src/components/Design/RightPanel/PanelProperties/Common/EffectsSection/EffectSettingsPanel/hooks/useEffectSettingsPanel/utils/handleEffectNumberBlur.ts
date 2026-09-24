@@ -6,24 +6,25 @@ import { TEffectNumberField } from '../../../../types';
 
 // others
 import { EFFECT_FIELD_MAX } from '../../../../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // utils
-import { getEffectFieldValue } from 'utils/design/effects/getEffectFieldValue';
 import { getEffectNumberFromInput } from 'utils/design/effects/getEffectNumberFromInput';
 
 export const handleEffectNumberBlur = (
   event: FocusEvent<HTMLInputElement>,
   field: TEffectNumberField,
   min: number,
-  effect: TEffect,
-  onChange: TFunc<[TEffect]>,
+  current: number | undefined,
+  onChange: TFunc<[Partial<TEffect>]>,
   unit = '',
 ): void => {
   const next = getEffectNumberFromInput(event.target.value, min, EFFECT_FIELD_MAX[field]);
+  const value = next ?? current;
 
-  if (next !== undefined && next !== getEffectFieldValue(effect, field)) {
-    onChange({ ...effect, [field]: next });
+  if (next !== undefined && next !== current) {
+    onChange({ [field]: next });
   }
 
-  event.target.value = `${next ?? getEffectFieldValue(effect, field)}${unit}`;
+  event.target.value = value === undefined ? MIXED_LABEL : `${value}${unit}`;
 };

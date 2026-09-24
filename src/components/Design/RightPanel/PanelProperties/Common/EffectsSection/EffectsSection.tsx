@@ -26,6 +26,10 @@ export const EffectsSection: FC = () => {
     containerRef,
     dropIndicatorOffset,
     effects,
+    getLayout,
+    getMixedKeys,
+    isHidden,
+    isMixed,
     isRowDragging,
     isRowSelected,
     onAdd,
@@ -33,6 +37,7 @@ export const EffectsSection: FC = () => {
     onChange,
     onDragEnd,
     onDragStart,
+    onFieldScrub,
     onOpenChange,
     onRemove,
     onStartDrag,
@@ -53,10 +58,11 @@ export const EffectsSection: FC = () => {
         </Fragment>
       }
       e2eValue="effects"
-      hasContent={effects.length > 0}
+      hasContent={effects.length > 0 || isMixed}
       label={t(`${translationNameSpace}.label`)}
       mutedWhenEmpty
     >
+      {isMixed && <UITools.SectionHint label={t(`${translationNameSpace}.mixedContent`)} />}
       <div className={styles.EffectsSection__rows} ref={containerRef}>
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {effects.map((effect, index) => (
@@ -65,13 +71,17 @@ export const EffectsSection: FC = () => {
             disabledTypes={getDisabledBlurTypes(effects, index)}
             effect={effect}
             isDragging={isRowDragging(index)}
+            isHidden={isHidden(index)}
             isOpen={openIndex === index}
             isSelected={isRowSelected(index)}
             key={index}
+            layout={getLayout(index)}
+            mixedKeys={getMixedKeys(index)}
             onBlendModePreview={(blendMode): void => onBlendModePreview(index, blendMode)}
             onChange={(next): void => onChange(index, next)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
+            onFieldScrub={(field, min, value): void => onFieldScrub(index, field, min, value)}
             onOpenChange={(isOpen): void => onOpenChange(index, isOpen)}
             onRemove={(): void => onRemove(index)}
             onStartDrag={(event): void => onStartDrag(index, event)}

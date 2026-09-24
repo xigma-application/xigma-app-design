@@ -16,11 +16,8 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <CanvasRef
 
 type TPreviewHook = { preview: TUseEffectBlendModePreviewResult; refs: TCanvasRefs };
 
-const renderPreview = (
-  nodeId: string | undefined,
-  openIndex: number | null,
-): RenderHookResult<TPreviewHook, { openIndex: number | null }> =>
-  renderHook(({ openIndex: index }) => ({ preview: useEffectBlendModePreview(nodeId, index), refs: useCanvasRefsContext() }), {
+const renderPreview = (nodeIds: string[], openIndex: number | null): RenderHookResult<TPreviewHook, { openIndex: number | null }> =>
+  renderHook(({ openIndex: index }) => ({ preview: useEffectBlendModePreview(nodeIds, index), refs: useCanvasRefsContext() }), {
     initialProps: { openIndex },
     wrapper,
   });
@@ -28,7 +25,7 @@ const renderPreview = (
 describe('useEffectBlendModePreview', () => {
   it('should write the hovered blend mode with the node id and effect index, and clear it on null', () => {
     // before
-    const { result } = renderPreview('node-1', 0);
+    const { result } = renderPreview(['node-1'], 0);
 
     // action
     act(() => result.current.preview.onBlendModePreview(1, BlendMode.multiply));
@@ -37,7 +34,7 @@ describe('useEffectBlendModePreview', () => {
     expect(result.current.refs.blendMode.effectPreviewRef.current).toEqual({
       blendMode: BlendMode.multiply,
       effectIndex: 1,
-      nodeId: 'node-1',
+      nodeIds: ['node-1'],
     });
 
     // action
@@ -49,7 +46,7 @@ describe('useEffectBlendModePreview', () => {
 
   it('should not write a preview without a node', () => {
     // before
-    const { result } = renderPreview(undefined, null);
+    const { result } = renderPreview([], null);
 
     // action
     act(() => result.current.preview.onBlendModePreview(0, BlendMode.screen));
@@ -60,7 +57,7 @@ describe('useEffectBlendModePreview', () => {
 
   it('should drop a lingering preview when the open panel changes', () => {
     // before
-    const { rerender, result } = renderPreview('node-1', 0);
+    const { rerender, result } = renderPreview(['node-1'], 0);
 
     act(() => result.current.preview.onBlendModePreview(0, BlendMode.screen));
 

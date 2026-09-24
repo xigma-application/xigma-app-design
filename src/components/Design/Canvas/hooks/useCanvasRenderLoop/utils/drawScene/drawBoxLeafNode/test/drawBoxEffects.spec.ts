@@ -92,7 +92,7 @@ describe('drawBoxEffects', () => {
     const node = { ...baseNode, effects: [multiplied, plain] };
     const previewRefs = createCanvasRefs({
       blendMode: {
-        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeId: 'r1' } },
+        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeIds: ['r1'] } },
         previewRef: { current: null },
       },
     });

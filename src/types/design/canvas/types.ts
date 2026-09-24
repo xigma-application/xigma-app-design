@@ -589,7 +589,7 @@ export type TShapeBuilderRefs = {
 
 export type TBlendModePreview = { blendMode: BlendMode; nodeIds: string[] };
 
-export type TEffectBlendModePreview = { blendMode: BlendMode; effectIndex: number; nodeId: string };
+export type TEffectBlendModePreview = { blendMode: BlendMode; effectIndex: number; nodeIds: string[] };
 
 export type TBlendModeRefs = {
   effectPreviewRef: RefObject<TEffectBlendModePreview | null>;

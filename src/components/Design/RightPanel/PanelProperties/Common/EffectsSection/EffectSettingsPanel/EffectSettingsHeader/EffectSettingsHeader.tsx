@@ -16,7 +16,7 @@ import styles from './effect-settings-header.module.scss';
 import { BlendMode, EffectType } from 'types/design/enums';
 
 export type TEffectSettingsHeaderProps = {
-  blendMode: BlendMode;
+  blendMode: BlendMode | undefined;
   disabledTypes: EffectType[];
   hasBlendMode: boolean;
   onBlendModeChange: TFunc<[BlendMode]>;

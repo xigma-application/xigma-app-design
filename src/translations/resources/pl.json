@@ -580,6 +580,7 @@
   "design.rightPanel.panelProperties.common.effectsSection.applyStylesAriaLabel": "Zastosuj style i zmienne efektów",
   "design.rightPanel.panelProperties.common.effectsSection.applyStylesTooltip": "Zastosuj style i zmienne",
   "design.rightPanel.panelProperties.common.effectsSection.label": "Efekty",
+  "design.rightPanel.panelProperties.common.effectsSection.mixedContent": "Kliknij +, aby zastąpić mieszaną zawartość",
   "design.rightPanel.panelProperties.common.effectsSection.row.deleteAriaLabel": "Usuń efekt",
   "design.rightPanel.panelProperties.common.effectsSection.row.deleteTooltip": "Usuń efekt",
   "design.rightPanel.panelProperties.common.effectsSection.row.hideAriaLabel": "Ukryj efekt",

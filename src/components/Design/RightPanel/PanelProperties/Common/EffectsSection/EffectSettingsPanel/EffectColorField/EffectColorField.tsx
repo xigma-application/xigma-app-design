@@ -11,8 +11,10 @@ import { TColorPickerValue } from 'shared/UITools/ColorPicker/types';
 
 export type TEffectColorFieldProps = {
   alpha: number;
+  alphaDisplayValue?: string;
   e2eValue: string;
   hex: string;
+  hexDisplayValue?: string;
   label?: string;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
@@ -24,8 +26,10 @@ export type TEffectColorFieldProps = {
 
 export const EffectColorField: FC<TEffectColorFieldProps> = ({
   alpha,
+  alphaDisplayValue,
   e2eValue,
   hex,
+  hexDisplayValue,
   label,
   onCommitAlpha,
   onCommitHex,
@@ -38,9 +42,11 @@ export const EffectColorField: FC<TEffectColorFieldProps> = ({
     Component={UITools.ColorPickerInput}
     align="start"
     alpha={alpha}
+    alphaDisplayValue={alphaDisplayValue}
     className={styles.EffectSettingsPanel__color}
     e2eValue={e2eValue}
     hex={hex}
+    hexDisplayValue={hexDisplayValue}
     label={label}
     onCommitAlpha={onCommitAlpha}
     onCommitHex={onCommitHex}

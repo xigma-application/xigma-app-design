@@ -17,10 +17,10 @@ describe('handleEffectNumberBlur', () => {
     const event = createEvent(' 8.256 ');
 
     // Step 2: Blur with a new value
-    handleEffectNumberBlur(event, 'blur', 0, effect, onChange);
+    handleEffectNumberBlur(event, 'blur', 0, effect.blur, onChange);
 
     // Step 3: Assert
-    expect(onChange).toHaveBeenCalledWith({ ...effect, blur: 8.26 });
+    expect(onChange).toHaveBeenCalledWith({ blur: 8.26 });
     expect(event.target.value).toBe('8.26');
   });
 
@@ -30,10 +30,10 @@ describe('handleEffectNumberBlur', () => {
     const onChange = vi.fn();
 
     // Step 2: Blur with a negative blur
-    handleEffectNumberBlur(createEvent('-3'), 'blur', 0, effect, onChange);
+    handleEffectNumberBlur(createEvent('-3'), 'blur', 0, effect.blur, onChange);
 
     // Step 3: Assert
-    expect(onChange).toHaveBeenCalledWith({ ...effect, blur: 0 });
+    expect(onChange).toHaveBeenCalledWith({ blur: 0 });
   });
 
   it('should allow negative values for fields without a minimum', () => {
@@ -42,10 +42,10 @@ describe('handleEffectNumberBlur', () => {
     const onChange = vi.fn();
 
     // Step 2: Blur with a negative offset
-    handleEffectNumberBlur(createEvent('-6'), 'x', Number.NEGATIVE_INFINITY, effect, onChange);
+    handleEffectNumberBlur(createEvent('-6'), 'x', Number.NEGATIVE_INFINITY, effect.x, onChange);
 
     // Step 3: Assert
-    expect(onChange).toHaveBeenCalledWith({ ...effect, x: -6 });
+    expect(onChange).toHaveBeenCalledWith({ x: -6 });
   });
 
   it('should not commit an unchanged value and should restore the input on invalid text', () => {
@@ -55,11 +55,22 @@ describe('handleEffectNumberBlur', () => {
     const invalid = createEvent('abc');
 
     // Step 2: Blur unchanged then invalid
-    handleEffectNumberBlur(createEvent('4'), 'y', Number.NEGATIVE_INFINITY, effect, onChange);
-    handleEffectNumberBlur(invalid, 'y', Number.NEGATIVE_INFINITY, effect, onChange);
+    handleEffectNumberBlur(createEvent('4'), 'y', Number.NEGATIVE_INFINITY, effect.y, onChange);
+    handleEffectNumberBlur(invalid, 'y', Number.NEGATIVE_INFINITY, effect.y, onChange);
 
     // Step 3: Assert
     expect(onChange).not.toHaveBeenCalled();
     expect(invalid.target.value).toBe('4');
+  });
+
+  it('should restore Mixed on invalid text for a mixed field', () => {
+    // mock
+    const invalid = createEvent('abc');
+
+    // action
+    handleEffectNumberBlur(invalid, 'y', Number.NEGATIVE_INFINITY, undefined, vi.fn());
+
+    // result
+    expect(invalid.target.value).toBe('Mixed');
   });
 });

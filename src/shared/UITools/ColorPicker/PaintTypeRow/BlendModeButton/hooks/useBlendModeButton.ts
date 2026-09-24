@@ -14,7 +14,7 @@ export type TUseBlendModeButtonResult = {
 };
 
 export const useBlendModeButton = (
-  value: BlendMode,
+  value: BlendMode | undefined,
   onChange?: TFunc<[BlendMode]>,
   onPreview?: TFunc<[BlendMode | null]>,
 ): TUseBlendModeButtonResult => {

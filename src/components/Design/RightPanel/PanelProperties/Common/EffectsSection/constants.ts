@@ -2,6 +2,7 @@
 import { TIconProps } from '@xigma/components';
 
 // types
+import { TEffect } from 'types/design/types';
 import { TEffectField, TEffectNumberField } from './types';
 
 // others
@@ -74,3 +75,5 @@ export const EFFECT_GLASS_SLIDERS: readonly { key: 'depth' | 'dispersion' | 'fro
   ];
 
 export const EFFECT_FIELD_MAX: Partial<Record<TEffectNumberField, number>> = { density: 100, opacity: 100 };
+
+export const NO_EFFECTS: TEffect[] = [];

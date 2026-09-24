@@ -10,7 +10,7 @@ describe('getEffectBlendModePreview', () => {
     // mock
     const refs = createCanvasRefs({
       blendMode: {
-        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeId: 'node-1' } },
+        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeIds: ['node-1'] } },
         previewRef: { current: null },
       },
     });
@@ -23,7 +23,7 @@ describe('getEffectBlendModePreview', () => {
     // mock
     const refs = createCanvasRefs({
       blendMode: {
-        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeId: 'node-1' } },
+        effectPreviewRef: { current: { blendMode: BlendMode.screen, effectIndex: 1, nodeIds: ['node-1'] } },
         previewRef: { current: null },
       },
     });

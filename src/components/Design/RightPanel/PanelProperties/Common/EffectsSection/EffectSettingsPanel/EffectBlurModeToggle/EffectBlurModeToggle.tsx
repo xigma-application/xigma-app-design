@@ -18,7 +18,7 @@ export type TEffectBlurModeToggleProps = {
   onChange: TFunc<[EffectBlurType]>;
 };
 
-export const EffectBlurModeToggle: FC<TEffectBlurModeToggleProps> = ({ blurType = EffectBlurType.uniform, onChange }) => {
+export const EffectBlurModeToggle: FC<TEffectBlurModeToggleProps> = ({ blurType, onChange }) => {
   const { t } = useTranslation();
 
   return (
@@ -30,7 +30,7 @@ export const EffectBlurModeToggle: FC<TEffectBlurModeToggleProps> = ({ blurType 
         { label: t(`${translationNameSpace}.settings.blurMode.uniform`), value: EffectBlurType.uniform },
         { label: t(`${translationNameSpace}.settings.blurMode.progressive`), value: EffectBlurType.progressive },
       ]}
-      value={blurType}
+      value={blurType ?? ''}
     />
   );
 };

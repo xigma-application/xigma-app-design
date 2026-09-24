@@ -10,7 +10,7 @@ export type TUseEffectBlendModePreviewResult = {
   onBlendModePreview: (index: number, blendMode: BlendMode | null) => void;
 };
 
-export const useEffectBlendModePreview = (nodeId: string | undefined, openIndex: number | null): TUseEffectBlendModePreviewResult => {
+export const useEffectBlendModePreview = (nodeIds: string[], openIndex: number | null): TUseEffectBlendModePreviewResult => {
   const { blendMode } = useCanvasRefsContext();
   const { effectPreviewRef } = blendMode;
 
@@ -22,7 +22,8 @@ export const useEffectBlendModePreview = (nodeId: string | undefined, openIndex:
 
   return {
     onBlendModePreview: (index, previewBlendMode): void => {
-      effectPreviewRef.current = nodeId && previewBlendMode ? { blendMode: previewBlendMode, effectIndex: index, nodeId } : null;
+      effectPreviewRef.current =
+        nodeIds.length > 0 && previewBlendMode ? { blendMode: previewBlendMode, effectIndex: index, nodeIds } : null;
     },
   };
 };

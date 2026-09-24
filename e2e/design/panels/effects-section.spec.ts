@@ -1151,4 +1151,61 @@ test.describe('Design panels — Effects section', () => {
     // result
     expect((await readNode(page, id)).effects?.map((effect) => effect.type)).toEqual(['innerShadow']);
   });
+
+  test('with two frames selected, the same effect types show one row whose differing X shows Mixed and a typed X is set on both, while different types show the mixed content hint', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-effects-section-multi');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const setEffects = (secondType: string): Promise<string[]> =>
+      page.evaluate(async (type) => {
+        const { store } = await import('/src/store/index.ts');
+        const { setSelection, updateNodes } = await import('/src/store/design/slice.ts');
+        const { activePageId, pages } = store.getState().design;
+        const [firstId, secondId] = pages[activePageId].rootOrder;
+        const shadow = { blur: 4, color: '#000000', opacity: 25, spread: 0, type: 'dropShadow', x: 2, y: 4 };
+
+        store.dispatch(
+          updateNodes([
+            { changes: { effects: [shadow] } as never, id: firstId },
+            { changes: { effects: [{ ...shadow, type, x: 8 }] } as never, id: secondId },
+          ]),
+        );
+        store.dispatch(setSelection([firstId, secondId]));
+
+        return [firstId, secondId];
+      }, secondType);
+
+    const ids = await setEffects('dropShadow');
+
+    // action
+    await page.locator('[class*="EffectRow__trigger"]').click();
+
+    const xInput = page.locator('[data-test-text-field-input="effect-x"]');
+
+    // result
+    await expect(xInput).toHaveValue('Mixed');
+
+    // action
+    await xInput.click();
+    await xInput.fill('5');
+    await xInput.press('Enter');
+
+    // result
+    expect([(await readNode(page, ids[0])).effects?.[0].x, (await readNode(page, ids[1])).effects?.[0].x]).toEqual([5, 5]);
+
+    // action
+    await page.keyboard.press('Escape');
+    await setEffects('innerShadow');
+
+    // result
+    await expect(page.getByText('Click + to replace mixed content')).toBeVisible();
+    await expect(page.locator('[class*="EffectRow__trigger"]')).toHaveCount(0);
+  });
 });
