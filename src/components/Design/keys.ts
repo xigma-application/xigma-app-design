@@ -46,6 +46,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   distributeHorizontalSpacing: [CTRL, ALT, 'H'],
   distributeVerticalSpacing: [CTRL, ALT, 'V'],
   duplicate: [CONTROL, 'D'],
+  editObject: ['↵'],
   [ToolName.ellipse]: ['O'],
   [ToolName.erase]: [SHIFT, 'E'],
   export: [SHIFT, CONTROL, 'E'],
