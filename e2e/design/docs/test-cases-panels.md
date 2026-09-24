@@ -75,6 +75,8 @@ children of a top-level free-form frame with 3+ children; Tidy up is disabled fo
 | 552 | The Distribute menu shows only once the free-form frame has children and lists its three items                                         |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 | 553 | A nested free-form frame with children aligns itself inside its parent, not its children                                               |  ✅  | — (same button click as #551, only the target differs; `useColumnAlignment.spec.tsx` asserts both positions exactly) |
 | 554 | Distribute horizontal spacing on a top-level free-form frame evens out the gaps between its three children, keeping the outermost ones |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 555 | With two frames selected, Align left moves both to the selection's left edge; their children keep their place inside                   |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 556 | A multi-selection spanning several parents aligns each parent's group only against itself; auto-layout children stay put               |  ✅  | — (pure per-group arithmetic on the same button click as #555; `useColumnAlignment.spec.tsx` asserts every position) |
 
 ## Layers panel — lock/visibility
 

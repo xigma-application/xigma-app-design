@@ -40,6 +40,15 @@ node's folder. Today:
   `buildRotationButtons`) gate on `isBoxSceneNode(selectedNode)` rather than
   `type === NodeType.frame`, so they work for any box scene node. `rotateNodesRigidly` takes a
   `TBoxSceneNode` for the same reason.
+- `Common/PositionSection/ColumnAlignment` with **2+ selected nodes**: the selection is split into
+  per-parent groups (`getSelectionGroups`, same split as the multi-parent outline/drag) after dropping
+  auto-layout/grid-managed nodes (`isNudgeableNode`); each group with 2+ members aligns against its
+  own rotated bounding box (`getSelectionBounds`) — left/right/top/bottom edge-to-edge, center to the
+  box's center line (`getAlignmentOffset`). Nodes move with their whole subtree through
+  `Canvas/utils/translateNodes` (shared with arrow-key nudge), no constraints are written, one undo
+  step (`alignSelectionGroups`). The buttons are disabled when no group has two movable members. A
+  selected frame never switches to child alignment in a multi-selection, and the More actions menu
+  is hidden for now.
 - `Common/PositionSection/ColumnAlignment` — for a **top-level free-form frame with children**
   (`hooks/utils/canAlignFrameChildren`: frame, no `parentId`, `layoutMode` free-form/unset, at
   least one child) the buttons are enabled and align the frame's **children**, each one on its own

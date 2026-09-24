@@ -12,7 +12,10 @@ const box = (id: string, x: number, y: number, width: number, height: number): T
   ({ childIds: [], height, id, rotation: 0, type: NodeType.frame, width, x, y }) as unknown as TSceneNode;
 
 const updatedChanges = (dispatch: ReturnType<typeof vi.fn>): unknown[] =>
-  dispatch.mock.calls.map(([action]) => action).filter((action) => action.type === 'design/updateNode').map((action) => action.payload);
+  dispatch.mock.calls
+    .map(([action]) => action)
+    .filter((action) => action.type === 'design/updateNode')
+    .map((action) => action.payload);
 
 describe('distributeFrameChildren', () => {
   it('should dispatch nothing without a frame', () => {

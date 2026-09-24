@@ -21,8 +21,9 @@ export type TUseDistributeMenuResult = {
 export const useDistributeMenu = (): TUseDistributeMenuResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const frame = canAlignFrameChildren(selectedNode) ? selectedNode : undefined;
+  const selectedNodes = useAppSelector(selectSelectedNodes);
+  const [selectedNode] = selectedNodes;
+  const frame = selectedNodes.length === 1 && canAlignFrameChildren(selectedNode) ? selectedNode : undefined;
   const canDistribute = frame !== undefined && getFrameBoxChildren(nodes, frame).length >= DISTRIBUTE_MIN_CHILDREN;
 
   return {

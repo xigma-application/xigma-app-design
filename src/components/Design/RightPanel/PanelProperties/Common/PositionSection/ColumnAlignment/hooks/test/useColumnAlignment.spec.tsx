@@ -171,6 +171,108 @@ describe('useColumnAlignment', () => {
     expect(renderUseColumnAlignment().result.current.showDistribute).toBe(false);
   });
 
+  describe('multi-selection', () => {
+    // top-level frames at the given x/y, each sized as given
+    const placedFrame = (x: number, y: number, width: number, height: number, layoutMode?: LayoutMode): string => {
+      const id = addFrame(null, width, height, layoutMode);
+
+      store.dispatch(updateNode({ changes: { x, y }, id }));
+
+      return id;
+    };
+
+    it("should align every selected top-level frame to the selection's left edge", () => {
+      const firstId = placedFrame(100, 0, 40, 40);
+      const secondId = placedFrame(300, 200, 80, 60);
+
+      store.dispatch(setSelection([firstId, secondId]));
+
+      const { result } = renderUseColumnAlignment();
+
+      act(() => result.current.onSelectHorizontal(AlignmentHorizontal.left));
+
+      expect(positionOf(firstId)).toEqual({ x: 100, y: 0 });
+      expect(positionOf(secondId)).toEqual({ x: 100, y: 200 });
+    });
+
+    it("should center every selected frame on the selection's vertical center line without writing constraints", () => {
+      const firstId = placedFrame(0, 0, 40, 40);
+      const secondId = placedFrame(0, 100, 40, 100);
+
+      store.dispatch(setSelection([firstId, secondId]));
+
+      const { result } = renderUseColumnAlignment();
+
+      act(() => result.current.onSelectVertical(AlignmentVertical.center));
+
+      expect(positionOf(firstId).y).toBe(100 - 20);
+      expect(positionOf(secondId).y).toBe(100 - 50);
+      expect(alignmentOf(firstId)).toBeUndefined();
+    });
+
+    it('should move a selected frame together with its children instead of aligning the children', () => {
+      const { firstId: childId, frameId } = frameWithChildren();
+      const otherId = placedFrame(600, 0, 40, 40);
+
+      store.dispatch(setSelection([frameId, otherId]));
+
+      const { result } = renderUseColumnAlignment();
+
+      act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+
+      expect(positionOf(frameId).x).toBe(640 - 400);
+      expect(positionOf(childId)).toEqual({ x: 240 + 10, y: 20 });
+      expect(result.current.showDistribute).toBe(false);
+    });
+
+    it("should align each parent's selected children only against each other", () => {
+      const { childId: leftChildId, parentId: leftParentId } = nested();
+      const { childId: rightChildId } = nested();
+      const siblingId = addFrame(null, 40, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [siblingId], targetIndex: 0, targetParentId: leftParentId }));
+      store.dispatch(updateNode({ changes: { x: 100 }, id: siblingId }));
+      store.dispatch(setSelection([leftChildId, siblingId, rightChildId]));
+
+      const rightBefore = positionOf(rightChildId);
+      const { result } = renderUseColumnAlignment();
+
+      act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+
+      expect(positionOf(leftChildId).x).toBe(100);
+      expect(positionOf(siblingId).x).toBe(100);
+      expect(positionOf(rightChildId)).toEqual(rightBefore);
+    });
+
+    it('should leave auto-layout children in place and be disabled when no parent group has two movable layers', () => {
+      const parentId = addFrame(null, 400, 300, LayoutMode.horizontal);
+      const firstId = addFrame(null, 40, 40);
+      const secondId = addFrame(null, 40, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [firstId, secondId], targetIndex: 0, targetParentId: parentId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      expect(renderUseColumnAlignment().result.current.disabled).toBe(true);
+    });
+
+    it('should undo aligning the whole selection in a single step', () => {
+      const firstId = placedFrame(100, 0, 40, 40);
+      const secondId = placedFrame(300, 200, 80, 60);
+
+      store.dispatch(setSelection([firstId, secondId]));
+
+      const { result } = renderUseColumnAlignment();
+
+      act(() => result.current.onSelectHorizontal(AlignmentHorizontal.center));
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      expect(positionOf(firstId)).toEqual({ x: 100, y: 0 });
+      expect(positionOf(secondId)).toEqual({ x: 300, y: 200 });
+    });
+  });
+
   it('should be disabled when the parent uses auto layout and the child does not ignore it', () => {
     const parentId = addFrame(null, 400, 300, LayoutMode.horizontal);
     const childId = addFrame(null, 40, 40);

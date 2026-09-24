@@ -104,3 +104,40 @@ test('Distribute horizontal spacing on a top-level free-form frame evens out the
   expect(right).toBe(beforeRight);
   expect(middle - (left + 40)).toBeCloseTo(right - (middle + 40));
 });
+
+test('with two frames selected, Align left moves both frames to the selection’s left edge and leaves their children where they sit inside them', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-align-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 200, 800, 300);
+  await designPage.drawRectangle(700, 220, 740, 260); // a child inside the first frame
+  await designPage.drawFrame(900, 400, 1000, 500);
+  await designPage.click(615, 188); // the first frame's label
+  await designPage.click(915, 388, { shift: true }); // the second frame's label
+
+  const readRootFrames = (): Promise<{ childX: number; frames: TRect[] }> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+      const frames = activePage.rootOrder.map((id) => activePage.nodes[id] as unknown as TRect & { childIds: string[] });
+      const child = activePage.nodes[frames[0].childIds[0]] as unknown as TRect;
+
+      return { childX: child.x, frames: frames.map((frame) => ({ height: frame.height, width: frame.width, x: frame.x, y: frame.y })) };
+    });
+
+  const before = await readRootFrames();
+
+  await page.getByLabel('Align left', { exact: true }).click();
+
+  const after = await readRootFrames();
+
+  expect(after.frames[0].x).toBe(before.frames[0].x);
+  expect(after.frames[1].x).toBe(before.frames[0].x);
+  expect(after.frames[1].y).toBe(before.frames[1].y);
+  expect(after.childX).toBe(before.childX);
+});
