@@ -15,35 +15,34 @@ import { BlendMode } from 'types/design/enums';
 import { isAppearanceNode } from '../../../types';
 
 // utils
-import { commitBlendModeChange } from './utils/commitBlendModeChange';
+import { commitBlendModeToNodes } from './utils/commitBlendModeToNodes';
+import { getSharedBlendMode } from './utils/getSharedBlendMode';
 
 export type TUseBlendModeButtonResult = {
   icon: TIconProps['name'];
   isDefault: boolean;
-  nodeId: string;
+  nodeIds: string[];
   onOpenChange: TFunc<[boolean]>;
   open: boolean;
   selectBlendMode: (blendMode: BlendMode) => TFunc;
-  value: BlendMode;
+  value: BlendMode | undefined;
 };
 
 export const useBlendModeButton = (): TUseBlendModeButtonResult => {
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const id = node?.id ?? '';
-  const value = node?.blendMode ?? BlendMode.passThrough;
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const value = getSharedBlendMode(nodes);
   const isDefault = value === BlendMode.passThrough;
 
   return {
     icon: isDefault ? 'DropEmpty' : 'DropFilled',
     isDefault,
-    nodeId: id,
+    nodeIds: nodes.map((node) => node.id),
     onOpenChange: (nextOpen): void => {
       if (nextOpen && !isDefault) {
-        commitBlendModeChange(dispatch, id, BlendMode.passThrough);
+        commitBlendModeToNodes(dispatch, nodes, BlendMode.passThrough);
       } else {
         setOpen(nextOpen);
 
@@ -53,7 +52,7 @@ export const useBlendModeButton = (): TUseBlendModeButtonResult => {
       }
     },
     open,
-    selectBlendMode: (blendMode: BlendMode) => (): void => commitBlendModeChange(dispatch, id, blendMode),
+    selectBlendMode: (blendMode: BlendMode) => (): void => commitBlendModeToNodes(dispatch, nodes, blendMode),
     value,
   };
 };

@@ -1,3 +1,6 @@
+// others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
+
 // store
 import { selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -8,28 +11,34 @@ import { TUseOpacityResult } from './types';
 
 // utils
 import { clampOpacity } from './utils/clampOpacity';
+import { commitOnNodes } from '../../utils/commitOnNodes';
 import { commitOpacityChange } from './utils/commitOpacityChange';
+import { getOpacityPercentage } from './utils/getOpacityPercentage';
 
 export const useOpacity = (): TUseOpacityResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const id = node?.id ?? '';
-  const value = clampOpacity((node?.opacity ?? 1) * 100);
-  const commit = (percentage: number): void => commitOpacityChange(dispatch, id, clampOpacity(percentage));
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const [firstNode] = nodes;
+  const value = getOpacityPercentage(firstNode);
+  const isMixed = nodes.some((node) => getOpacityPercentage(node) !== value);
+  const displayValue = isMixed ? MIXED_LABEL : `${value}%`;
 
   return {
+    displayValue,
     onBlur: (event): void => {
       const stripped = event.target.value.trim().replace(/[^\d.-]/g, '');
       const parsed = Number(stripped);
 
       if (stripped !== '' && !Number.isNaN(parsed)) {
-        commit(parsed);
+        commitOnNodes(dispatch, nodes, (node) => commitOpacityChange(dispatch, node.id, clampOpacity(parsed)));
       } else {
-        event.target.value = `${value}%`;
+        event.target.value = displayValue;
       }
     },
-    onScrub: commit,
+    onScrub: (next): void =>
+      commitOnNodes(dispatch, nodes, (node) =>
+        commitOpacityChange(dispatch, node.id, clampOpacity(getOpacityPercentage(node) + next - value)),
+      ),
     value,
   };
 };

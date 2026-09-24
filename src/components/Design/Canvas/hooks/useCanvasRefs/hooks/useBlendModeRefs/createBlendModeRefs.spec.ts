@@ -15,7 +15,7 @@ describe('createBlendModeRefs behaviors', () => {
 
   it('should apply overrides on top of the defaults', () => {
     // mock
-    const previewRef = { current: { blendMode: BlendMode.multiply, nodeId: 'node-1' } };
+    const previewRef = { current: { blendMode: BlendMode.multiply, nodeIds: ['node-1'] } };
 
     // before
     const refs = createBlendModeRefs({ previewRef });

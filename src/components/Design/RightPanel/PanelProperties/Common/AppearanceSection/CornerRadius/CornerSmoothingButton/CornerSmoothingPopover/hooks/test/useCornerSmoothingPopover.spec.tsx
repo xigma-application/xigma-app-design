@@ -127,4 +127,24 @@ describe('useCornerSmoothingPopover', () => {
 
     expect(read(id).cornerSmoothing).toBe(0.2);
   });
+
+  it('should show Mixed with the slider at 0 for differing smoothing and commit a slider value to every node', () => {
+    // mock
+    const firstId = addRectangle({ cornerSmoothing: 0.2 });
+    const secondId = addRectangle({ cornerSmoothing: 0.6 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerSmoothingPopover();
+
+    // result
+    expect(result.current).toMatchObject({ displayValue: 'Mixed', value: 0 });
+
+    // action
+    act(() => result.current.onSliderChange(40));
+
+    // result
+    expect([read(firstId).cornerSmoothing, read(secondId).cornerSmoothing]).toEqual([0.4, 0.4]);
+  });
 });

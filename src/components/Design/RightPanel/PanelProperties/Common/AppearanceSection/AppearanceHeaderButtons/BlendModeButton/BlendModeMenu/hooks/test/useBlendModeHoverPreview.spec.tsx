@@ -19,7 +19,7 @@ describe('useBlendModeHoverPreview', () => {
     const { result } = renderHook(
       () => {
         const refs = useCanvasRefsContext();
-        const preview = useBlendModeHoverPreview('node-1');
+        const preview = useBlendModeHoverPreview(['node-1']);
 
         return { preview, refs };
       },
@@ -30,7 +30,7 @@ describe('useBlendModeHoverPreview', () => {
     act(() => result.current.preview.onOptionMouseEnter(BlendMode.multiply)());
 
     // result
-    expect(result.current.refs.blendMode.previewRef.current).toEqual({ blendMode: BlendMode.multiply, nodeId: 'node-1' });
+    expect(result.current.refs.blendMode.previewRef.current).toEqual({ blendMode: BlendMode.multiply, nodeIds: ['node-1'] });
   });
 
   it('should clear the preview ref on mouse leave', () => {
@@ -38,7 +38,7 @@ describe('useBlendModeHoverPreview', () => {
     const { result } = renderHook(
       () => {
         const refs = useCanvasRefsContext();
-        const preview = useBlendModeHoverPreview('node-1');
+        const preview = useBlendModeHoverPreview(['node-1']);
 
         return { preview, refs };
       },

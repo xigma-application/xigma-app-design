@@ -10,31 +10,31 @@ import { BlendMode } from 'types/design/enums';
 import { isAppearanceNode } from '../../types';
 
 // utils
-import { commitBlendModeChange } from '../../AppearanceHeaderButtons/BlendModeButton/hooks/utils/commitBlendModeChange';
+import { commitBlendModeToNodes } from '../../AppearanceHeaderButtons/BlendModeButton/hooks/utils/commitBlendModeToNodes';
+import { getSharedBlendMode } from '../../AppearanceHeaderButtons/BlendModeButton/hooks/utils/getSharedBlendMode';
 
 export type TUseBlendModeRowResult = {
   isActive: boolean;
   onHover: TFunc<[BlendMode | null]>;
   onRemove: TFunc;
   onSelect: TFunc<[BlendMode]>;
-  value: BlendMode;
+  value: BlendMode | undefined;
 };
 
 export const useBlendModeRow = (): TUseBlendModeRowResult => {
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const id = node?.id ?? '';
-  const value = node?.blendMode ?? BlendMode.passThrough;
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodeIds = nodes.map((node) => node.id);
+  const value = getSharedBlendMode(nodes);
 
   return {
-    isActive: value !== BlendMode.passThrough,
+    isActive: nodes.length > 0 && value !== BlendMode.passThrough,
     onHover: (blendMode): void => {
-      blendModeRefs.previewRef.current = blendMode ? { blendMode, nodeId: id } : null;
+      blendModeRefs.previewRef.current = blendMode ? { blendMode, nodeIds } : null;
     },
-    onRemove: (): void => commitBlendModeChange(dispatch, id, BlendMode.passThrough),
-    onSelect: (blendMode): void => commitBlendModeChange(dispatch, id, blendMode),
+    onRemove: (): void => commitBlendModeToNodes(dispatch, nodes, BlendMode.passThrough),
+    onSelect: (blendMode): void => commitBlendModeToNodes(dispatch, nodes, blendMode),
     value,
   };
 };

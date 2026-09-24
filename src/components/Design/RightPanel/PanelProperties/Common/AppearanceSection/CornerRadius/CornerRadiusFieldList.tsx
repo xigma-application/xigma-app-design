@@ -20,7 +20,7 @@ const CornerRadiusFieldList: FC<TCornerRadiusFieldListProps> = ({ fields }) => (
         key={field.e2eValue}
         onCommit={field.onCommit}
         onScrub={field.onScrub}
-        scrubValue={field.value}
+        scrubValue={field.scrubValue}
         tooltip={field.tooltip}
         value={field.value}
       />

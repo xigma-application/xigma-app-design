@@ -11,6 +11,7 @@ import { UITools } from 'shared';
 import { useBlendModeRow } from './hooks/useBlendModeRow';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { getBlendModeOptions } from './utils/getBlendModeOptions';
 import { translationNameSpace } from '../constants';
 
@@ -39,6 +40,7 @@ const BlendModeRow: FC = () => {
         onHoverOption={onHover}
         onSelect={onSelect}
         options={options}
+        placeholder={MIXED_LABEL}
         textAlign="left"
         value={value}
         variant="outline"

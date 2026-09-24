@@ -126,7 +126,7 @@ describe('useBlendModeButton', () => {
 
     act(() => result.current.button.onOpenChange(true));
 
-    result.current.refs.blendMode.previewRef.current = { blendMode: BlendMode.screen, nodeId: id };
+    result.current.refs.blendMode.previewRef.current = { blendMode: BlendMode.screen, nodeIds: [id] };
 
     // action
     act(() => result.current.button.onOpenChange(false));
@@ -149,5 +149,26 @@ describe('useBlendModeButton', () => {
 
     // result
     expect(read(id).blendMode).toBe(BlendMode.screen);
+  });
+
+  it('should show the filled icon for differing modes and reset every node to Pass through instead of opening', () => {
+    // mock
+    const firstId = addRectangle({ blendMode: BlendMode.multiply });
+    const secondId = addRectangle();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseBlendModeButton();
+
+    // result
+    expect(result.current).toMatchObject({ icon: 'DropFilled', isDefault: false, nodeIds: [firstId, secondId], value: undefined });
+
+    // action
+    act(() => result.current.onOpenChange(true));
+
+    // result
+    expect(result.current.open).toBe(false);
+    expect([read(firstId).blendMode, read(secondId).blendMode]).toEqual([BlendMode.passThrough, BlendMode.passThrough]);
   });
 });

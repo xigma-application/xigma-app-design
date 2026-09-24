@@ -13,19 +13,20 @@ import { translationNameSpace } from '../constants';
 import { UITools } from 'shared';
 
 export type TOpacityFieldProps = {
+  displayValue: string;
   onBlur: (event: FocusEvent<HTMLInputElement>) => void;
   onScrub: (next: number) => void;
   value: number;
 };
 
-const OpacityField: FC<TOpacityFieldProps> = ({ onBlur, onScrub, value }) => {
+const OpacityField: FC<TOpacityFieldProps> = ({ displayValue, onBlur, onScrub, value }) => {
   const { t } = useTranslation();
 
   return (
     <Tooltip content={t(`${translationNameSpace}.opacity.tooltip`)}>
       <TextFieldWrapper
         aria-label={t(`${translationNameSpace}.opacity.ariaLabel`)}
-        defaultValue={`${value}%`}
+        defaultValue={displayValue}
         e2eValue="opacity"
         onBlur={onBlur}
         stepNumbers={{ max: OPACITY_MAX, min: OPACITY_MIN }}

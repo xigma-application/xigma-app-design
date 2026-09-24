@@ -22,7 +22,7 @@ export type TCornerSmoothingPopoverProps = {
 
 export const CornerSmoothingPopover: FC<TCornerSmoothingPopoverProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { onBlur, onSliderChange, value } = useCornerSmoothingPopover();
+  const { displayValue, onBlur, onSliderChange, value } = useCornerSmoothingPopover();
 
   return (
     <div className={styles.CornerSmoothingPopover}>
@@ -40,7 +40,7 @@ export const CornerSmoothingPopover: FC<TCornerSmoothingPopoverProps> = ({ onClo
         <TextFieldWrapper
           aria-label={t(`${translationNameSpace}.cornerRadius.smoothingValueAriaLabel`)}
           className={styles.CornerSmoothingPopover__input}
-          defaultValue={`${value}%`}
+          defaultValue={displayValue}
           e2eValue="corner-smoothing"
           onBlur={onBlur}
           stepNumbers={{ max: SMOOTHING_MAX, min: SMOOTHING_MIN }}

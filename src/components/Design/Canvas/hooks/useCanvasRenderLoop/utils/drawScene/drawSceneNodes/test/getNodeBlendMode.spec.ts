@@ -26,7 +26,7 @@ describe('getNodeBlendMode', () => {
   it('should prefer a live hover preview over the committed blendMode', () => {
     // before
     const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
-    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-1' } } } });
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeIds: ['node-1'] } } } });
 
     // result
     expect(getNodeBlendMode(node, refs)).toBe(BlendMode.screen);
@@ -35,7 +35,7 @@ describe('getNodeBlendMode', () => {
   it('should ignore a preview meant for a different node', () => {
     // before
     const node = { blendMode: BlendMode.multiply, id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
-    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-2' } } } });
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeIds: ['node-2'] } } } });
 
     // result
     expect(getNodeBlendMode(node, refs)).toBe(BlendMode.multiply);

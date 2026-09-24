@@ -13,7 +13,7 @@ import { translationNameSpace } from '../../constants';
 
 const BlendModeButton: FC = () => {
   const { t } = useTranslation();
-  const { icon, isDefault, nodeId, onOpenChange, open, selectBlendMode, value } = useBlendModeButton();
+  const { icon, isDefault, nodeIds, onOpenChange, open, selectBlendMode, value } = useBlendModeButton();
 
   return (
     <UITools.Popover
@@ -23,7 +23,7 @@ const BlendModeButton: FC = () => {
       trigger={<UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.blendMode.ariaLabel`)} name={icon} selected={open} />}
       triggerTooltip={t(`${translationNameSpace}.tooltip.${isDefault ? 'addBlendMode' : 'removeBlendMode'}`)}
     >
-      <BlendModeMenu nodeId={nodeId} onSelect={selectBlendMode} value={value} />
+      <BlendModeMenu nodeIds={nodeIds} onSelect={selectBlendMode} value={value} />
     </UITools.Popover>
   );
 };

@@ -86,4 +86,33 @@ describe('useBlendModeRow', () => {
     // result
     expect((selectActivePage(store.getState()).nodes[id] as { blendMode?: BlendMode }).blendMode).toBe(BlendMode.passThrough);
   });
+
+  it('should be active with no value for differing modes and apply a chosen mode or remove it on every node', () => {
+    // mock
+    const firstId = addAndSelect(BlendMode.multiply);
+    const secondId = addAndSelect();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readBlendMode = (id: string): BlendMode | undefined =>
+      (selectActivePage(store.getState()).nodes[id] as { blendMode?: BlendMode }).blendMode;
+
+    // before
+    const { result } = renderHook(() => useBlendModeRow(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ isActive: true, value: undefined });
+
+    // action
+    act(() => result.current.onSelect(BlendMode.screen));
+
+    // result
+    expect([readBlendMode(firstId), readBlendMode(secondId)]).toEqual([BlendMode.screen, BlendMode.screen]);
+
+    // action
+    act(() => result.current.onRemove());
+
+    // result
+    expect([readBlendMode(firstId), readBlendMode(secondId)]).toEqual([BlendMode.passThrough, BlendMode.passThrough]);
+  });
 });

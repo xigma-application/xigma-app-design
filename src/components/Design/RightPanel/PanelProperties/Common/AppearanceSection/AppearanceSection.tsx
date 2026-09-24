@@ -32,7 +32,7 @@ const AppearanceSection: FC = () => {
         labels={[t(`${translationNameSpace}.opacity.ariaLabel`), t(`${translationNameSpace}.cornerRadius.ariaLabel`)]}
         withBottomMargin={cornerRadius.isIndividual}
       >
-        <OpacityField onBlur={opacity.onBlur} onScrub={opacity.onScrub} value={opacity.value} />
+        <OpacityField displayValue={opacity.displayValue} onBlur={opacity.onBlur} onScrub={opacity.onScrub} value={opacity.value} />
         <CornerRadiusInput
           ariaLabel={t(`${translationNameSpace}.cornerRadius.ariaLabel`)}
           e2eValue="corner-radius"

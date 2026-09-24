@@ -72,4 +72,31 @@ describe('useVisibilityToggle', () => {
 
     expect(read(id).hidden).toBe(true);
   });
+
+  it('should hide every node when only some are hidden, and show all of them when all are hidden', () => {
+    // mock
+    const firstId = addRectangle({ hidden: true });
+    const secondId = addRectangle();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseVisibilityToggle();
+
+    // result
+    expect(result.current.hidden).toBe(false);
+
+    // action
+    act(() => result.current.onToggle());
+
+    // result
+    expect([read(firstId).hidden, read(secondId).hidden]).toEqual([true, true]);
+    expect(result.current.hidden).toBe(true);
+
+    // action
+    act(() => result.current.onToggle());
+
+    // result
+    expect([Boolean(read(firstId).hidden), Boolean(read(secondId).hidden)]).toEqual([false, false]);
+  });
 });

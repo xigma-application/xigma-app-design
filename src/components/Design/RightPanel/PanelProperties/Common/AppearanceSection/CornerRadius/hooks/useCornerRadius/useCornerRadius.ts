@@ -12,97 +12,87 @@ import { TUseCornerRadiusResult } from './types';
 // utils
 import { clamp } from './utils/clamp';
 import { commitCornerRadiusChange } from './utils/commitCornerRadiusChange';
+import { commitOnNodes } from '../../../utils/commitOnNodes';
 import { cornerField } from './utils/cornerField';
-import { getMixedOrValue } from '../../../../utils/getMixedOrValue';
+import { getNodeMergedCornerRadius } from './utils/getNodeMergedCornerRadius';
+import { getShiftedCornerRadiusChanges } from './utils/getShiftedCornerRadiusChanges';
+import { getUniformCornerRadiusChanges } from './utils/getUniformCornerRadiusChanges';
 import { translationNameSpace } from '../../../constants';
 
 export const useCornerRadius = (): TUseCornerRadiusResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const [isIndividual, setIsIndividual] = useState(false);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const id = node?.id ?? '';
-  const base = node?.cornerRadius ?? 0;
-  const topLeft = node?.cornerRadiusTopLeft ?? base;
-  const topRight = node?.cornerRadiusTopRight ?? base;
-  const bottomLeft = node?.cornerRadiusBottomLeft ?? base;
-  const bottomRight = node?.cornerRadiusBottomRight ?? base;
-  const mixedOrValue = getMixedOrValue([topLeft, topRight, bottomLeft, bottomRight]);
-  const isMixed = mixedOrValue === 'mixed';
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const [individualOverride, setIndividualOverride] = useState<boolean>();
+  const [firstNode] = nodes;
+  const mergedValues = nodes.map(getNodeMergedCornerRadius);
+  const firstMergedValue = getNodeMergedCornerRadius(firstNode);
+  const isMixed = mergedValues.some((mergedValue) => mergedValue === 'mixed' || mergedValue !== firstMergedValue);
+  const hasUnevenCorners = nodes.length > 1 && mergedValues.includes('mixed');
+  const isIndividual = individualOverride ?? hasUnevenCorners;
+  const mergedValue = firstMergedValue === 'mixed' ? (firstNode?.cornerRadius ?? 0) : firstMergedValue;
+
+  const commitUniform = (value: number): void =>
+    commitOnNodes(dispatch, nodes, (node) => commitCornerRadiusChange(dispatch, node.id, getUniformCornerRadiusChanges(value)));
 
   return {
     individualFields: [
       cornerField(
         dispatch,
-        id,
+        nodes,
         'cornerRadiusTopLeft',
         t(`${translationNameSpace}.cornerRadius.ariaLabelTopLeft`),
         'corner-radius-top-left',
         'BorderRadiusL',
         t(`${translationNameSpace}.cornerRadius.tooltipTopLeft`),
-        topLeft,
       ),
       cornerField(
         dispatch,
-        id,
+        nodes,
         'cornerRadiusTopRight',
         t(`${translationNameSpace}.cornerRadius.ariaLabelTopRight`),
         'corner-radius-top-right',
         'BorderRadiusT',
         t(`${translationNameSpace}.cornerRadius.tooltipTopRight`),
-        topRight,
       ),
       cornerField(
         dispatch,
-        id,
+        nodes,
         'cornerRadiusBottomLeft',
         t(`${translationNameSpace}.cornerRadius.ariaLabelBottomLeft`),
         'corner-radius-bottom-left',
         'BorderRadiusR',
         t(`${translationNameSpace}.cornerRadius.tooltipBottomLeft`),
-        bottomLeft,
       ),
       cornerField(
         dispatch,
-        id,
+        nodes,
         'cornerRadiusBottomRight',
         t(`${translationNameSpace}.cornerRadius.ariaLabelBottomRight`),
         'corner-radius-bottom-right',
         'BorderRadiusB',
         t(`${translationNameSpace}.cornerRadius.tooltipBottomRight`),
-        bottomRight,
       ),
     ],
     isIndividual,
     isMixed,
-    mergedValue: isMixed ? base : mixedOrValue,
+    mergedValue,
     onMergedCommit: (raw): void => {
       const parsed = parseInt(raw.replace(/[^\d]/g, ''), 10);
 
       if (!Number.isNaN(parsed)) {
-        const next = clamp(parsed);
-
-        commitCornerRadiusChange(dispatch, id, {
-          cornerRadius: next,
-          cornerRadiusBottomLeft: next,
-          cornerRadiusBottomRight: next,
-          cornerRadiusTopLeft: next,
-          cornerRadiusTopRight: next,
-        });
+        commitUniform(clamp(parsed));
       }
     },
     onMergedScrub: (next): void => {
-      const value = clamp(next);
-
-      commitCornerRadiusChange(dispatch, id, {
-        cornerRadius: value,
-        cornerRadiusBottomLeft: value,
-        cornerRadiusBottomRight: value,
-        cornerRadiusTopLeft: value,
-        cornerRadiusTopRight: value,
-      });
+      if (nodes.length > 1) {
+        commitOnNodes(dispatch, nodes, (node) =>
+          commitCornerRadiusChange(dispatch, node.id, getShiftedCornerRadiusChanges(node, next - mergedValue)),
+        );
+      } else {
+        commitUniform(clamp(next));
+      }
     },
-    toggleIndividual: (): void => setIsIndividual((previous) => !previous),
+    toggleIndividual: (): void => setIndividualOverride(!isIndividual),
   };
 };

@@ -150,4 +150,98 @@ describe('useCornerRadius', () => {
     act(() => result.current.toggleIndividual());
     expect(result.current.isIndividual).toBe(true);
   });
+
+  it('should show Mixed and stay merged when every node has even corners but the values differ', () => {
+    // mock
+    const firstId = addRectangle({ cornerRadius: 4 });
+    const secondId = addRectangle({ cornerRadius: 8 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerRadius();
+
+    // result
+    expect(result.current).toMatchObject({ isIndividual: false, isMixed: true });
+  });
+
+  it('should open the individual fields when a node has uneven corners, showing Mixed only where the corners differ', () => {
+    // mock
+    const firstId = addRectangle({ cornerRadius: 5 });
+    const secondId = addRectangle({
+      cornerRadiusBottomLeft: 3,
+      cornerRadiusBottomRight: 4,
+      cornerRadiusTopLeft: 5,
+      cornerRadiusTopRight: 2,
+    });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerRadius();
+
+    // result
+    expect(result.current.isIndividual).toBe(true);
+    expect(result.current.individualFields.map((field) => field.value)).toEqual([5, 'Mixed', 'Mixed', 'Mixed']);
+  });
+
+  it('should commit a merged value to every corner of every node', () => {
+    // mock
+    const firstId = addRectangle({ cornerRadius: 4 });
+    const secondId = addRectangle({ cornerRadiusTopLeft: 1 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerRadius();
+
+    // action
+    act(() => result.current.onMergedCommit('10'));
+
+    // result
+    [firstId, secondId].forEach((id) =>
+      expect(read(id)).toMatchObject({
+        cornerRadius: 10,
+        cornerRadiusBottomLeft: 10,
+        cornerRadiusBottomRight: 10,
+        cornerRadiusTopLeft: 10,
+        cornerRadiusTopRight: 10,
+      }),
+    );
+  });
+
+  it('should scrub the merged field by the same delta on every corner of every node', () => {
+    // mock
+    const firstId = addRectangle({ cornerRadius: 4 });
+    const secondId = addRectangle({ cornerRadius: 10, cornerRadiusTopLeft: 2 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerRadius();
+
+    // action
+    act(() => result.current.onMergedScrub(7));
+
+    // result
+    expect(read(firstId)).toMatchObject({ cornerRadius: 7, cornerRadiusTopLeft: 7, cornerRadiusTopRight: 7 });
+    expect(read(secondId)).toMatchObject({ cornerRadius: 13, cornerRadiusTopLeft: 5, cornerRadiusTopRight: 13 });
+  });
+
+  it('should commit an individual corner to every node', () => {
+    // mock
+    const firstId = addRectangle({ cornerRadius: 4 });
+    const secondId = addRectangle({ cornerRadius: 8 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseCornerRadius();
+
+    // action
+    act(() => fieldFor(result.current.individualFields, 'corner-radius-top-left').onCommit('6'));
+
+    // result
+    expect([read(firstId).cornerRadiusTopLeft, read(secondId).cornerRadiusTopLeft]).toEqual([6, 6]);
+  });
 });

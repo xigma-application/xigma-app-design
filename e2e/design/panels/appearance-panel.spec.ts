@@ -344,4 +344,52 @@ test.describe('Design panels — Appearance section', () => {
     expect((await readNode(page, id)).blendMode).toBe('passThrough');
     await expect(page.getByLabel('Remove blend mode')).toHaveCount(0);
   });
+
+  test('with two frames selected, differing opacity, blend mode and uneven corners show Mixed and the individual corner fields, and a typed opacity sets both', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-appearance-multi');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { blendMode: 'multiply', cornerRadius: 5, opacity: 0.4 } as never, id: firstId }));
+      store.dispatch(
+        updateNode({
+          changes: { cornerRadiusBottomLeft: 3, cornerRadiusBottomRight: 4, cornerRadiusTopLeft: 1, cornerRadiusTopRight: 2, opacity: 0.8 },
+          id: secondId,
+        }),
+      );
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    });
+
+    const opacityInput = page.locator('[data-test-text-field-input="opacity"]');
+
+    // result
+    await expect(opacityInput).toHaveValue('Mixed');
+    await expect(page.locator('[data-test-text-field-input="corner-radius"]')).toHaveValue('Mixed');
+    await expect(page.locator('[data-test-text-field-input="corner-radius-top-left"]')).toHaveValue('Mixed');
+    await expect(page.getByLabel('Remove blend mode')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Mixed' })).toBeVisible();
+
+    // action
+    await opacityInput.click();
+    await opacityInput.fill('50');
+    await opacityInput.press('Enter');
+
+    // result
+    expect([(await readNode(page, ids[0])).opacity, (await readNode(page, ids[1])).opacity]).toEqual([0.5, 0.5]);
+    await expect(opacityInput).toHaveValue('50%');
+  });
 });

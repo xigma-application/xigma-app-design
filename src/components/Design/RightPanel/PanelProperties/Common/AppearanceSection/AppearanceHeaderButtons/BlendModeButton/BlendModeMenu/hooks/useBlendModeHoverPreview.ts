@@ -9,12 +9,12 @@ export type TUseBlendModeHoverPreviewResult = {
   onOptionMouseLeave: TFunc;
 };
 
-export const useBlendModeHoverPreview = (nodeId: string): TUseBlendModeHoverPreviewResult => {
+export const useBlendModeHoverPreview = (nodeIds: string[]): TUseBlendModeHoverPreviewResult => {
   const { blendMode } = useCanvasRefsContext();
 
   return {
     onOptionMouseEnter: (mode: BlendMode) => (): void => {
-      blendMode.previewRef.current = { blendMode: mode, nodeId };
+      blendMode.previewRef.current = { blendMode: mode, nodeIds };
     },
     onOptionMouseLeave: (): void => {
       blendMode.previewRef.current = null;

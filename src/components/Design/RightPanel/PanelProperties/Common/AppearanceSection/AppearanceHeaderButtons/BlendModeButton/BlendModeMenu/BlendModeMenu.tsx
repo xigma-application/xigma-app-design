@@ -17,14 +17,14 @@ import { BlendMode } from 'types/design/enums';
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
 export type TBlendModeMenuProps = {
-  nodeId: string;
+  nodeIds: string[];
   onSelect: (blendMode: BlendMode) => TFunc;
-  value: BlendMode;
+  value: BlendMode | undefined;
 };
 
-export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ nodeId, onSelect, value }) => {
+export const BlendModeMenu: FC<TBlendModeMenuProps> = ({ nodeIds, onSelect, value }) => {
   const { t } = useTranslation();
-  const { onOptionMouseEnter, onOptionMouseLeave } = useBlendModeHoverPreview(nodeId);
+  const { onOptionMouseEnter, onOptionMouseLeave } = useBlendModeHoverPreview(nodeIds);
 
   return (
     <Fragment>

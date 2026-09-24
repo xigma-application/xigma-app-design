@@ -9,8 +9,9 @@ export type TCornerRadiusField = {
   iconName: TIconProps['name'];
   onCommit: (raw: string) => void;
   onScrub: (next: number) => void;
+  scrubValue: number;
   tooltip: string;
-  value: number;
+  value: number | string;
 };
 
 export type TUseCornerRadiusResult = {

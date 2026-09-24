@@ -29,7 +29,7 @@ const renderBlendModeMenu = (
     <CanvasRefsProvider>
       <RefsProbe />
       <PopoverPrimitive.Root open>
-        <BlendModeMenu nodeId="node-1" onSelect={onSelect} value={value} />
+        <BlendModeMenu nodeIds={['node-1']} onSelect={onSelect} value={value} />
       </PopoverPrimitive.Root>
     </CanvasRefsProvider>,
   );
@@ -108,7 +108,7 @@ describe('BlendModeMenu behaviors', () => {
     fireEvent.mouseEnter(screen.getByText('Multiply').closest('div')!.parentElement!.parentElement!);
 
     // result
-    expect(capturedPreviewRef?.current).toEqual({ blendMode: BlendMode.multiply, nodeId: 'node-1' });
+    expect(capturedPreviewRef?.current).toEqual({ blendMode: BlendMode.multiply, nodeIds: ['node-1'] });
   });
 
   it('should clear the preview when the pointer leaves the option', () => {

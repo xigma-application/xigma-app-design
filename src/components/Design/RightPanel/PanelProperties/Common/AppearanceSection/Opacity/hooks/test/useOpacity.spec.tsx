@@ -9,6 +9,7 @@ import { useOpacity } from '../useOpacity';
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -113,5 +114,47 @@ describe('useOpacity', () => {
 
     expect(read(id).opacity).toBe(0.5);
     expect(input.value).toBe('50%');
+  });
+
+  it('should show Mixed for differing opacities and commit a typed value to every node in one undo step', () => {
+    // mock
+    const firstId = addRectangle({ opacity: 0.4 });
+    const secondId = addRectangle({ opacity: 0.8 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseOpacity();
+
+    // action
+    act(() => result.current.onBlur(focusEventFor('50%')));
+
+    // result
+    expect(result.current.displayValue).toBe('50%');
+    expect([read(firstId).opacity, read(secondId).opacity]).toEqual([0.5, 0.5]);
+
+    act(() => {
+      store.dispatch(undo());
+    });
+
+    expect(result.current.displayValue).toBe('Mixed');
+    expect([read(firstId).opacity, read(secondId).opacity]).toEqual([0.4, 0.8]);
+  });
+
+  it('should scrub every node by the same delta', () => {
+    // mock
+    const firstId = addRectangle({ opacity: 0.4 });
+    const secondId = addRectangle({ opacity: 0.8 });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseOpacity();
+
+    // action
+    act(() => result.current.onScrub(50));
+
+    // result
+    expect([read(firstId).opacity, read(secondId).opacity]).toEqual([0.5, 0.9]);
   });
 });

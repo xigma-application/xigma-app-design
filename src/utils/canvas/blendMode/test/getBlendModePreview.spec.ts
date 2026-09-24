@@ -15,13 +15,13 @@ describe('getBlendModePreview', () => {
   });
 
   it('should return the previewed blend mode for the matching node', () => {
-    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-1' } } } });
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeIds: ['node-1'] } } } });
 
     expect(getBlendModePreview(refs, 'node-1')).toBe(BlendMode.screen);
   });
 
   it('should return undefined for a node that is not the one being previewed', () => {
-    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-1' } } } });
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeIds: ['node-1'] } } } });
 
     expect(getBlendModePreview(refs, 'node-2')).toBeUndefined();
   });

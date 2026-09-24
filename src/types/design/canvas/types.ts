@@ -587,7 +587,7 @@ export type TShapeBuilderRefs = {
   vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
 };
 
-export type TBlendModePreview = { blendMode: BlendMode; nodeId: string };
+export type TBlendModePreview = { blendMode: BlendMode; nodeIds: string[] };
 
 export type TEffectBlendModePreview = { blendMode: BlendMode; effectIndex: number; nodeId: string };
 

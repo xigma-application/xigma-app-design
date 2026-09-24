@@ -33,7 +33,7 @@ describe('hasRealBlendMode', () => {
 
   it('should be true when a live hover preview overrides an unset/Pass-through blendMode', () => {
     const node = { id: 'node-1', type: NodeType.rectangle } as unknown as TSceneNode;
-    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeId: 'node-1' } } } });
+    const refs = createCanvasRefs({ blendMode: { previewRef: { current: { blendMode: BlendMode.screen, nodeIds: ['node-1'] } } } });
 
     expect(hasRealBlendMode(node, refs)).toBe(true);
   });

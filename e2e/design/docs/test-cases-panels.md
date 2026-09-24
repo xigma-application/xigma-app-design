@@ -90,6 +90,7 @@ multi-selections only.
 | 572 | With several frames selected, a typed W/H keeps each frame's aspect-ratio lock and clamps to its own min/max; min/max rows show Mixed and set every frame, a bound only some frames have is disabled |  ✅  | — (per-frame arithmetic on the same field as #571; `useColumnDimensions.spec.tsx`/`useColumnMinMaxDimensions.spec.tsx` assert every frame) |
 | 573 | With two auto-layout frames selected, horizontal padding shows Mixed, a typed value sets it on both and the field shows it, Ctrl+Z restores both in one step                                         |  ✅  |                                                         ✅ `multi-layout.spec.ts`                                                          |
 | 574 | With two grid frames selected, the grid area shows Mixed without Open grid settings, a picked cell gives both the grid grown to fit the frame with the most children, one undo step                  |  ✅  |                                                         ✅ `multi-layout.spec.ts`                                                          |
+| 575 | With two frames selected, differing opacity, blend mode and uneven corners show Mixed (blend row with Mixed, individual corner fields open), a typed opacity sets both                               |  ✅  |                                                       ✅ `appearance-panel.spec.ts`                                                        |
 
 ## Layers panel — lock/visibility
 
