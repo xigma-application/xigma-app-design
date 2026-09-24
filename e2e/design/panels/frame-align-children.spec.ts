@@ -209,3 +209,34 @@ test('with two frames selected, a size preset from the header menu resizes both 
     { height: 874, width: 402 },
   ]);
 });
+
+test('a free-form frame with two children side by side shows only horizontal Spacing under Dimensions and a typed value moves the children', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-children-spacing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 200, 1000, 500);
+  await designPage.drawRectangle(650, 250, 750, 350);
+  await designPage.drawRectangle(800, 250, 900, 350);
+  await designPage.click(615, 188); // the frame's name label, just above its top-left corner
+
+  const horizontal = page.locator('[data-test-text-field-input="spacing-horizontal"]');
+
+  await expect(horizontal).toHaveValue('50');
+  await expect(page.locator('[data-test-text-field-input="spacing-vertical"]')).toHaveCount(0);
+
+  const before = await readFrameAndChildren(page);
+
+  await horizontal.click();
+  await horizontal.fill('20');
+  await horizontal.press('Enter');
+
+  const after = await readFrameAndChildren(page);
+  const [first, second] = [...after.children].sort((childA, childB) => childA.x - childB.x);
+
+  expect(second.x - (first.x + first.width)).toBe(20);
+  expect(after.frame).toEqual(before.frame);
+});

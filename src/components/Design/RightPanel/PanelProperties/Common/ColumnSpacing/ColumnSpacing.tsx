@@ -17,6 +17,8 @@ const ColumnSpacing: FC = () => {
     displayHorizontal,
     displayVertical,
     horizontal,
+    isHorizontalVisible,
+    isVerticalVisible,
     isVisible,
     onBlurHorizontal,
     onBlurVertical,
@@ -34,30 +36,34 @@ const ColumnSpacing: FC = () => {
         labels={[t(`${translationNameSpace}.label`)]}
         withBottomMargin
       >
-        <ColumnSpacingField
-          ariaLabel={t(`${translationNameSpace}.ariaLabelHorizontal`)}
-          displayValue={displayHorizontal}
-          e2eValue="spacing-horizontal"
-          icon="SpacingHorizontal"
-          onBlur={onBlurHorizontal}
-          onDragEnd={onDragEnd}
-          onDragStart={onDragStart}
-          onScrub={onScrubHorizontal}
-          tooltip={t(`${translationNameSpace}.tooltipHorizontal`)}
-          value={horizontal}
-        />
-        <ColumnSpacingField
-          ariaLabel={t(`${translationNameSpace}.ariaLabelVertical`)}
-          displayValue={displayVertical}
-          e2eValue="spacing-vertical"
-          icon="SpacingVertical"
-          onBlur={onBlurVertical}
-          onDragEnd={onDragEnd}
-          onDragStart={onDragStart}
-          onScrub={onScrubVertical}
-          tooltip={t(`${translationNameSpace}.tooltipVertical`)}
-          value={vertical}
-        />
+        {isHorizontalVisible && (
+          <ColumnSpacingField
+            ariaLabel={t(`${translationNameSpace}.ariaLabelHorizontal`)}
+            displayValue={displayHorizontal}
+            e2eValue="spacing-horizontal"
+            icon="SpacingHorizontal"
+            onBlur={onBlurHorizontal}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onScrub={onScrubHorizontal}
+            tooltip={t(`${translationNameSpace}.tooltipHorizontal`)}
+            value={horizontal}
+          />
+        )}
+        {isVerticalVisible && (
+          <ColumnSpacingField
+            ariaLabel={t(`${translationNameSpace}.ariaLabelVertical`)}
+            displayValue={displayVertical}
+            e2eValue="spacing-vertical"
+            icon="SpacingVertical"
+            onBlur={onBlurVertical}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onScrub={onScrubVertical}
+            tooltip={t(`${translationNameSpace}.tooltipVertical`)}
+            value={vertical}
+          />
+        )}
       </UITools.SectionColumn>
     );
   }

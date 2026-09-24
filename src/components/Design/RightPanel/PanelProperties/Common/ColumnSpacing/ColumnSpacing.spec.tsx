@@ -11,21 +11,38 @@ import { selectNodes } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { LayoutMode, NodeType } from 'types/design/enums';
+import { TFrameNode, TRectangleNode } from 'types/design/types';
 
-const makeRectangle = (id: string, x: number): TRectangleNode => ({
+const makeRectangle = (id: string, x: number, parentId: string | null = null): TRectangleNode => ({
   fills: [],
   height: 20,
   id,
   name: id,
-  parentId: null,
+  parentId,
   rotation: 0,
   type: NodeType.rectangle,
   width: 20,
   x,
   y: 0,
 });
+
+const makeFrame = (): TFrameNode =>
+  ({
+    childIds: ['childA', 'childB'],
+    clipContent: false,
+    fills: [],
+    height: 100,
+    id: 'freeFrame',
+    layoutMode: LayoutMode.freeForm,
+    name: 'freeFrame',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 200,
+    x: 300,
+    y: 0,
+  }) as TFrameNode;
 
 const renderColumnSpacing = (): ReturnType<typeof render> =>
   render(
@@ -39,8 +56,15 @@ const renderColumnSpacing = (): ReturnType<typeof render> =>
 beforeAll(() => {
   store.dispatch(
     addNodes({
-      nodes: [makeRectangle('colA', 0), makeRectangle('colB', 30), makeRectangle('colC', 90)],
-      rootIds: ['colA', 'colB', 'colC'],
+      nodes: [
+        makeRectangle('colA', 0),
+        makeRectangle('colB', 30),
+        makeRectangle('colC', 90),
+        makeFrame(),
+        makeRectangle('childA', 310, 'freeFrame'),
+        makeRectangle('childB', 340, 'freeFrame'),
+      ],
+      rootIds: ['colA', 'colB', 'colC', 'freeFrame'],
     }),
   );
 });
@@ -89,5 +113,17 @@ describe('ColumnSpacing behaviors', () => {
     const nodes = selectNodes(store.getState()) as Record<string, TRectangleNode>;
 
     expect([nodes.colA.x, nodes.colB.x, nodes.colC.x]).toEqual([0, 25, 50]);
+  });
+
+  it('should show the gap between the children of a selected free-form frame on the axis they are apart', () => {
+    // mock
+    store.dispatch(setSelection(['freeFrame']));
+
+    // before
+    renderColumnSpacing();
+
+    // result
+    expect((screen.getByLabelText('Horizontal spacing') as HTMLInputElement).value).toBe('10');
+    expect(screen.queryByLabelText('Vertical spacing')).not.toBeInTheDocument();
   });
 });

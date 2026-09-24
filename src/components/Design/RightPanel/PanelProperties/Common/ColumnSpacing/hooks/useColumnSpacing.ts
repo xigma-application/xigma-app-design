@@ -15,13 +15,16 @@ import { TSpacingAxis } from '../types';
 import { applySelectionSpacing } from './utils/applySelectionSpacing';
 import { getSelectionSpacing } from './utils/getSelectionSpacing';
 import { handleSpacingBlur } from './utils/handleSpacingBlur';
+import { getColumnSpacingAxes } from './utils/getColumnSpacingAxes';
+import { getColumnSpacingItems } from './utils/getColumnSpacingItems';
 import { startSpacingDrag } from './utils/startSpacingDrag';
-import { isNudgeableNode } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/isNudgeableNode';
 
 export type TUseColumnSpacingResult = {
   displayHorizontal: number | string;
   displayVertical: number | string;
   horizontal: number;
+  isHorizontalVisible: boolean;
+  isVerticalVisible: boolean;
   isVisible: boolean;
   onBlurHorizontal: TFunc<[FocusEvent<HTMLInputElement>]>;
   onBlurVertical: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -35,11 +38,12 @@ export type TUseColumnSpacingResult = {
 export const useColumnSpacing = (): TUseColumnSpacingResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const items = useAppSelector(selectSelectedNodes).filter((node) => isNudgeableNode(node, nodes));
+  const selectedNodes = useAppSelector(selectSelectedNodes);
+  const items = getColumnSpacingItems(selectedNodes, nodes);
+  const axes = getColumnSpacingAxes(selectedNodes.length, items);
   const orderRef = useRef<Record<TSpacingAxis, string[][]>>({ horizontal: [], vertical: [] });
-  const isVisible = items.length > 1;
-  const horizontalSpacing = isVisible ? getSelectionSpacing(items, 'horizontal') : 0;
-  const verticalSpacing = isVisible ? getSelectionSpacing(items, 'vertical') : 0;
+  const horizontalSpacing = axes.horizontal ? getSelectionSpacing(items, 'horizontal') : 0;
+  const verticalSpacing = axes.vertical ? getSelectionSpacing(items, 'vertical') : 0;
   const displayHorizontal = horizontalSpacing === 'mixed' ? MIXED_LABEL : horizontalSpacing;
   const displayVertical = verticalSpacing === 'mixed' ? MIXED_LABEL : verticalSpacing;
 
@@ -47,7 +51,9 @@ export const useColumnSpacing = (): TUseColumnSpacingResult => {
     displayHorizontal,
     displayVertical,
     horizontal: horizontalSpacing === 'mixed' ? 0 : horizontalSpacing,
-    isVisible,
+    isHorizontalVisible: axes.horizontal,
+    isVerticalVisible: axes.vertical,
+    isVisible: axes.horizontal || axes.vertical,
     onBlurHorizontal: handleSpacingBlur(dispatch, items, 'horizontal', displayHorizontal),
     onBlurVertical: handleSpacingBlur(dispatch, items, 'vertical', displayVertical),
     onDragEnd: (): void => {
