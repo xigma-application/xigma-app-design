@@ -19,22 +19,30 @@ import { translationNameSpace } from '../constants';
 import { GapMode } from 'types/design/enums';
 
 export type TGapFieldProps = {
+  displayValue?: string;
   isGrid?: boolean;
   isHorizontal: boolean;
   mode: GapMode;
   modeDisabled?: boolean;
   onCommit: TFunc<[number]>;
+  onDragEnd?: TFunc;
+  onDragStart?: TFunc;
+  onScrub?: TFunc<[number]>;
   onSelectAuto: TFunc;
   onSelectFixed: TFunc;
   value: number;
 };
 
 export const GapField: FC<TGapFieldProps> = ({
+  displayValue,
   isGrid = false,
   isHorizontal,
   mode,
   modeDisabled = false,
   onCommit,
+  onDragEnd,
+  onDragStart,
+  onScrub = onCommit,
   onSelectAuto,
   onSelectFixed,
   value,
@@ -42,13 +50,14 @@ export const GapField: FC<TGapFieldProps> = ({
   const { t } = useTranslation();
   const isAuto = mode === GapMode.auto;
   const autoLabel = t(`${translationNameSpace}.gapModeToggleLabel`);
-  const handleBlur = useGapCommit(isAuto, autoLabel, value, onCommit);
+  const shownValue = displayValue ?? (isAuto ? autoLabel : value);
+  const handleBlur = useGapCommit(shownValue, onCommit);
 
   return (
     <Tooltip content={t(`${translationNameSpace}.gapTooltip.${isHorizontal ? 'horizontal' : 'vertical'}`)}>
       <UITools.TextField
         aria-label={t(`${translationNameSpace}.gapAriaLabel`)}
-        defaultValue={isAuto ? autoLabel : value}
+        defaultValue={shownValue}
         e2eValue="gap"
         endAdornment={
           isGrid ? undefined : (
@@ -69,11 +78,11 @@ export const GapField: FC<TGapFieldProps> = ({
         onBlur={handleBlur}
         stepNumbers={{ max: GAP_MAX, min: GAP_MIN }}
         startAdornment={
-          <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onCommit} value={value}>
+          <ScrubbableInput max={GAP_MAX} min={GAP_MIN} onChange={onScrub} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value}>
             <UITools.InputAdornment icon={isHorizontal ? 'GapColumns' : 'GapRows'} />
           </ScrubbableInput>
         }
-        type={isAuto ? 'text' : 'number'}
+        type={typeof shownValue === 'number' ? 'number' : 'text'}
       />
     </Tooltip>
   );

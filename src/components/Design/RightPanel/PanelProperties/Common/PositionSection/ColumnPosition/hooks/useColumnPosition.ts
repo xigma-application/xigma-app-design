@@ -1,11 +1,10 @@
 import { FocusEvent, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // hooks
 import { usePositionCommit } from './usePositionCommit';
 
 // others
-import { translationNameSpace } from '../../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -45,7 +44,6 @@ export type TUseColumnPositionResult = {
 };
 
 export const useColumnPosition = (): TUseColumnPositionResult => {
-  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingBoxSceneNode);
@@ -56,13 +54,12 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
   const id = node?.id ?? '';
   const x = entry?.x ?? 0;
   const y = entry?.y ?? 0;
-  const mixedLabel = t(`${translationNameSpace}.mixed`);
   const mixedX = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.x)) : x;
   const mixedY = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.y)) : y;
   const managed = isManagedLayoutFrame(node?.parentId ? nodes[node.parentId] : undefined);
   const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
-  const displayX = mixedX === 'mixed' ? mixedLabel : mixedX;
-  const displayY = mixedY === 'mixed' ? mixedLabel : mixedY;
+  const displayX = mixedX === 'mixed' ? MIXED_LABEL : mixedX;
+  const displayY = mixedY === 'mixed' ? MIXED_LABEL : mixedY;
   const scrubStartRef = useRef<TPositionScrubStart>({ entries: [], x: 0, y: 0 });
 
   const commitX = (nextX: number): void =>
@@ -108,7 +105,7 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
       .map((boxNode) => getPositionEntry(boxNode, freshNodes, imageCrop));
     const mixedOrValue = getMixedOrValue(freshEntries.map((item) => item[axis]));
 
-    return mixedOrValue === 'mixed' ? mixedLabel : mixedOrValue;
+    return mixedOrValue === 'mixed' ? MIXED_LABEL : mixedOrValue;
   };
 
   const commitOnBlur =

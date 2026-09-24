@@ -9,6 +9,7 @@ import { useColumnAlignmentLayout } from '../useColumnAlignmentLayout';
 import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { AlignmentLayout, AlignTextBaseline, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
@@ -459,5 +460,99 @@ describe('useColumnAlignmentLayout', () => {
     // result
     expect(result.current.isVerticalGapModeDisabled).toBe(true);
     expect(result.current.isHorizontalGapModeDisabled).toBe(false);
+  });
+
+  describe('multi-selection', () => {
+    const renderHookFor = renderUseColumnAlignmentLayout;
+
+    const twoHorizontalFrames = (firstGap: number, secondGap: number): [string, string] => {
+      const firstId = addFrameNode(LayoutMode.horizontal);
+      const secondId = addFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { horizontalGap: firstGap }, id: firstId }));
+      store.dispatch(updateNode({ changes: { horizontalGap: secondGap }, id: secondId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    };
+
+    it('should show Mixed while the gaps differ and nothing while they match', () => {
+      // mock
+      twoHorizontalFrames(8, 16);
+
+      // before
+      const { result } = renderHookFor();
+
+      // result
+      expect(result.current.horizontalGapDisplay).toBe('Mixed');
+
+      // mock
+      twoHorizontalFrames(8, 8);
+
+      // before
+      const { result: matching } = renderHookFor();
+
+      // result
+      expect(matching.current.horizontalGapDisplay).toBeUndefined();
+    });
+
+    it('should set a typed gap on every frame in one undo step', () => {
+      // mock
+      const [firstId, secondId] = twoHorizontalFrames(8, 16);
+
+      // before
+      const { result } = renderHookFor();
+
+      // action
+      act(() => result.current.onCommitHorizontalGap(24));
+
+      // result
+      expect([readNode(firstId).horizontalGap, readNode(secondId).horizontalGap]).toEqual([24, 24]);
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect([readNode(firstId).horizontalGap, readNode(secondId).horizontalGap]).toEqual([8, 16]);
+    });
+
+    it("should change every frame's gap by the same scrubbed delta", () => {
+      // mock
+      const [firstId, secondId] = twoHorizontalFrames(8, 16);
+
+      // before
+      const { result } = renderHookFor();
+
+      // action
+      act(() => result.current.onGapDragStart());
+      act(() => result.current.onScrubHorizontalGap(10));
+      act(() => result.current.onScrubHorizontalGap(12));
+      act(() => result.current.onGapDragEnd());
+
+      // result
+      expect([readNode(firstId).horizontalGap, readNode(secondId).horizontalGap]).toEqual([12, 20]);
+    });
+
+    it('should switch every frame to auto gap and back to a fixed gap', () => {
+      // mock
+      const [firstId, secondId] = twoHorizontalFrames(8, 16);
+
+      // before
+      const { result } = renderHookFor();
+
+      // action
+      act(() => result.current.onSelectHorizontalGapAuto());
+
+      // result
+      expect([readNode(firstId).horizontalGapMode, readNode(secondId).horizontalGapMode]).toEqual([GapMode.auto, GapMode.auto]);
+
+      // action
+      act(() => result.current.onSelectHorizontalGapFixed());
+
+      // result
+      expect([readNode(firstId).horizontalGapMode, readNode(secondId).horizontalGapMode]).toEqual([undefined, undefined]);
+    });
   });
 });

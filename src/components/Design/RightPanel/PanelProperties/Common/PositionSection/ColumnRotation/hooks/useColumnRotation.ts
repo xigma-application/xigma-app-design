@@ -8,7 +8,7 @@ import { rotateNodesRigidly } from 'components/Design/Canvas/hooks/useSelectionT
 import { useRotationCommit } from './useRotationCommit';
 
 // others
-import { translationNameSpace } from '../../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -45,7 +45,7 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
   const [node] = boxNodes;
   const rotation = imageCrop ? imageCrop.crop.rotation : (node?.rotation ?? 0);
   const mixedOrRotation = !imageCrop && boxNodes.length > 1 ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.rotation)) : rotation;
-  const displayRotation = mixedOrRotation === 'mixed' ? t(`${translationNameSpace}.mixed`) : `${mixedOrRotation}°`;
+  const displayRotation = mixedOrRotation === 'mixed' ? MIXED_LABEL : `${mixedOrRotation}°`;
 
   const commitRotation = (nextRotation: number): void => {
     if (imageCrop) {

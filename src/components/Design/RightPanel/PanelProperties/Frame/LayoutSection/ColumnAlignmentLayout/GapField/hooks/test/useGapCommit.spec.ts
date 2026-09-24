@@ -13,7 +13,7 @@ describe('useGapCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: '24' });
 
     // action
-    useGapCommit(false, 'Auto', 0, onCommit)(focusEventFor(input));
+    useGapCommit(0, onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).toHaveBeenCalledWith(24);
@@ -25,7 +25,7 @@ describe('useGapCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: '   ' });
 
     // action
-    useGapCommit(false, 'Auto', 42, onCommit)(focusEventFor(input));
+    useGapCommit(42, onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).not.toHaveBeenCalled();
@@ -38,7 +38,7 @@ describe('useGapCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: 'not a number' });
 
     // action
-    useGapCommit(true, 'Auto', 42, onCommit)(focusEventFor(input));
+    useGapCommit('Auto', onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).not.toHaveBeenCalled();

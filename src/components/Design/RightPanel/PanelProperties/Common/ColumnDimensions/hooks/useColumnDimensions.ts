@@ -1,5 +1,4 @@
 import { FocusEvent, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // hooks
 import { useCommitColumnDimensions } from './useCommitColumnDimensions';
@@ -9,7 +8,7 @@ import { useToggleColumnLock } from './useToggleColumnLock';
 import { useToggleColumnMinMax } from './useToggleColumnMinMax';
 
 // others
-import { translationNameSpace } from '../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -74,7 +73,6 @@ export type TUseColumnDimensionsResult = {
 };
 
 export const useColumnDimensions = (): TUseColumnDimensionsResult => {
-  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const selectedNodes = useAppSelector(selectSelectedNodes);
@@ -102,13 +100,12 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(id, frameNode, nodes, locked);
   const toggleLock = useToggleColumnLock(id, locked, widthSizingMode, heightSizingMode);
   const isMultiSelection = !imageCrop && boxNodes.length > 1;
-  const mixedLabel = t(`${translationNameSpace}.mixed`);
   const filteredBoxNodes = boxNodes.filter((boxNode) => boxNode.type === NodeType.frame);
-  const minMax = useToggleColumnMinMax(filteredBoxNodes, mixedLabel);
+  const minMax = useToggleColumnMinMax(filteredBoxNodes, MIXED_LABEL);
   const mixedWidth = isMultiSelection ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.width)) : width;
   const mixedHeight = isMultiSelection ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.height)) : height;
-  const displayWidth = mixedWidth === 'mixed' ? mixedLabel : mixedWidth;
-  const displayHeight = mixedHeight === 'mixed' ? mixedLabel : mixedHeight;
+  const displayWidth = mixedWidth === 'mixed' ? MIXED_LABEL : mixedWidth;
+  const displayHeight = mixedHeight === 'mixed' ? MIXED_LABEL : mixedHeight;
   const scrubStartRef = useRef<TDimensionsScrubStart>({ height: 0, sizes: {}, width: 0 });
 
   const commitWidth = (nextWidth: number): void => commitColumnWidth(dispatch, imageCrop, height, _cW, nextWidth);
@@ -119,7 +116,7 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
 
   const getCommittedDisplayValue = (axis: 'height' | 'width'): number | string => {
     const mixedOrValue = getMixedOrValue(getFreshBoxNodes().map((boxNode) => boxNode[axis]));
-    return mixedOrValue === 'mixed' ? mixedLabel : mixedOrValue;
+    return mixedOrValue === 'mixed' ? MIXED_LABEL : mixedOrValue;
   };
 
   const commitEachDimension = (axis: 'height' | 'width', value: number): void => {

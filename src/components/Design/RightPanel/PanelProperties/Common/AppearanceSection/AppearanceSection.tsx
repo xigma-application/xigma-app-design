@@ -16,6 +16,7 @@ import { useCornerRadius } from './CornerRadius/hooks/useCornerRadius/useCornerR
 import { useOpacity } from './Opacity/hooks/useOpacity';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
 const AppearanceSection: FC = () => {
@@ -40,7 +41,7 @@ const AppearanceSection: FC = () => {
           onScrub={cornerRadius.onMergedScrub}
           scrubValue={cornerRadius.mergedValue}
           tooltip={t(`${translationNameSpace}.cornerRadius.tooltip`)}
-          value={cornerRadius.isMixed ? t(`${translationNameSpace}.cornerRadius.mixed`) : cornerRadius.mergedValue}
+          value={cornerRadius.isMixed ? MIXED_LABEL : cornerRadius.mergedValue}
         />
       </UITools.SectionColumn>
       {cornerRadius.isIndividual && (

@@ -23,6 +23,7 @@ const ColumnAlignmentLayout: FC = () => {
     alignment,
     gridArea,
     horizontalGap,
+    horizontalGapDisplay,
     horizontalGapMode,
     isBaselineAligned,
     isGrid,
@@ -34,12 +35,17 @@ const ColumnAlignmentLayout: FC = () => {
     onChangeAlignment,
     onCommitHorizontalGap,
     onCommitVerticalGap,
+    onGapDragEnd,
+    onGapDragStart,
     onRemoveBaselineAlignment,
+    onScrubHorizontalGap,
+    onScrubVerticalGap,
     onSelectHorizontalGapAuto,
     onSelectHorizontalGapFixed,
     onSelectVerticalGapAuto,
     onSelectVerticalGapFixed,
     verticalGap,
+    verticalGapDisplay,
     verticalGapMode,
   } = useColumnAlignmentLayout();
 
@@ -72,7 +78,11 @@ const ColumnAlignmentLayout: FC = () => {
             isHorizontal
             mode={horizontalGapMode}
             modeDisabled={isHorizontalGapModeDisabled}
+            displayValue={horizontalGapDisplay}
             onCommit={onCommitHorizontalGap}
+            onDragEnd={onGapDragEnd}
+            onDragStart={onGapDragStart}
+            onScrub={onScrubHorizontalGap}
             onSelectAuto={onSelectHorizontalGapAuto}
             onSelectFixed={onSelectHorizontalGapFixed}
             value={horizontalGap}
@@ -84,7 +94,11 @@ const ColumnAlignmentLayout: FC = () => {
             isHorizontal={false}
             mode={verticalGapMode}
             modeDisabled={isVerticalGapModeDisabled}
+            displayValue={verticalGapDisplay}
             onCommit={onCommitVerticalGap}
+            onDragEnd={onGapDragEnd}
+            onDragStart={onGapDragStart}
+            onScrub={onScrubVerticalGap}
             onSelectAuto={onSelectVerticalGapAuto}
             onSelectFixed={onSelectVerticalGapFixed}
             value={verticalGap}

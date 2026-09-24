@@ -1,10 +1,8 @@
-import { useTranslation } from 'react-i18next';
-
 // hooks
 import { useAppDispatch, useAppSelector } from 'store';
 
 // others
-import { translationNameSpace } from '../constants';
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -53,17 +51,15 @@ export type TUseColumnMinMaxDimensionsResult = {
 const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
 
 export const useColumnMinMaxDimensions = (): TUseColumnMinMaxDimensionsResult => {
-  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const frames = useAppSelector(selectSelectedNodes).filter(isFrameNode);
   const revealed = useAppSelector(selectRevealedMinMax);
   const [frameNode] = frames;
   const isFrame = frameNode !== undefined;
-  const mixedLabel = t(`${translationNameSpace}.mixed`);
 
   const getDisplayValue = (bound: keyof TRevealedMinMax): number | string | undefined => {
     const mixedOrValue = frames.length > 1 ? getMixedOrValue(frames.map((frame) => frame[bound] ?? 0)) : frameNode?.[bound];
-    return mixedOrValue === 'mixed' ? mixedLabel : mixedOrValue;
+    return mixedOrValue === 'mixed' ? MIXED_LABEL : mixedOrValue;
   };
 
   const isPartlySet = (bound: keyof TRevealedMinMax): boolean =>

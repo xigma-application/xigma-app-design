@@ -12,6 +12,7 @@ import { UITools } from 'shared';
 import { useStrokeSettingsRow } from './hooks/useStrokeSettingsRow';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { getStrokeAlignOptions } from './utils/getStrokeAlignOptions';
 import { translationNameSpace } from '../constants';
 
@@ -61,7 +62,7 @@ const StrokeSettingsRow: FC = () => {
       />
       <StrokeWeightField
         ariaLabel={t(`${translationNameSpace}.weight.ariaLabel`)}
-        displayValue={isWeightMixed ? t(`${translationNameSpace}.weight.mixed`) : `${weight}`}
+        displayValue={isWeightMixed ? MIXED_LABEL : `${weight}`}
         onBlur={onWeightBlur}
         onDragEnd={onWeightDragEnd}
         onDragStart={onWeightDragStart}
