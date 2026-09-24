@@ -4,6 +4,7 @@ import { FocusEvent } from 'react';
 import { TCommitStrokeDynamicChanges, TStrokeDynamicField } from '../../../types';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { STROKE_DYNAMIC_LIMITS } from '../../../constants';
 
 // utils
@@ -12,7 +13,7 @@ import { getStrokeDynamicValueFromInput } from 'utils/design/stroke/getStrokeDyn
 export const handleStrokeDynamicBlur = (
   event: FocusEvent<HTMLInputElement>,
   field: TStrokeDynamicField,
-  current: number,
+  current: number | undefined,
   commit: TCommitStrokeDynamicChanges,
 ): void => {
   const { max, min, nodeKey } = STROKE_DYNAMIC_LIMITS[field];
@@ -22,5 +23,7 @@ export const handleStrokeDynamicBlur = (
     commit({ [nodeKey]: next });
   }
 
-  event.target.value = `${next ?? current}%`;
+  const value = next ?? current;
+
+  event.target.value = value === undefined ? MIXED_LABEL : `${value}%`;
 };

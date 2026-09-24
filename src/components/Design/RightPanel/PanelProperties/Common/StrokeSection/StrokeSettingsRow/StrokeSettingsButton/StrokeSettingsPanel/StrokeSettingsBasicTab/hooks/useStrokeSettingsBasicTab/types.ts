@@ -24,6 +24,21 @@ export type TStrokeSettingsValues = {
   style: StrokeStyle;
 };
 
+export type TSharedStrokeSettings = {
+  dash: number | undefined;
+  dashCap: StrokeDashCap | undefined;
+  dashes: number[] | undefined;
+  gap: number | undefined;
+  hasDashes: boolean;
+  isCustom: boolean;
+  isDashed: boolean;
+  isMiter: boolean;
+  isWidthProfileDisabled: boolean;
+  join: StrokeJoin | undefined;
+  miterAngle: number | undefined;
+  style: StrokeStyle | undefined;
+};
+
 export type TStrokeSettingsValuesSource = {
   strokeAlign?: StrokeAlign;
   strokeDash?: number;
@@ -35,7 +50,7 @@ export type TStrokeSettingsValuesSource = {
   strokeStyle?: StrokeStyle;
 };
 
-export type TUseStrokeSettingsBasicTabResult = TStrokeSettingsValues & {
+export type TUseStrokeSettingsBasicTabResult = TSharedStrokeSettings & {
   onDashBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDashCapSelect: TFunc<[string]>;
   onDashScrub: TFunc<[number]>;
@@ -55,4 +70,5 @@ export type TUseStrokeSettingsBasicTabResult = TStrokeSettingsValues & {
   onScrubDragEnd: TFunc;
   onScrubDragStart: TFunc;
   onStyleSelect: TFunc<[StrokeStyle]>;
+  scrubValues: TStrokeSettingsValues;
 };

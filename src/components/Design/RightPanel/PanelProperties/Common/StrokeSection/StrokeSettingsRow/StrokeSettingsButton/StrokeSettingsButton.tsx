@@ -15,7 +15,11 @@ import { translationNameSpace } from '../../constants';
 // styles
 import styles from './stroke-settings-button.module.scss';
 
-export const StrokeSettingsButton: FC = () => {
+export type TStrokeSettingsButtonProps = {
+  disabled?: boolean;
+};
+
+export const StrokeSettingsButton: FC<TStrokeSettingsButtonProps> = ({ disabled = false }) => {
   const { t } = useTranslation();
   const { onClose, onOpenChange, open } = useStrokeSettingsButton();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -28,15 +32,16 @@ export const StrokeSettingsButton: FC = () => {
       className={styles.StrokeSettingsButtonPopover}
       moveable
       onOpenChange={onOpenChange}
-      open={open}
+      open={open && !disabled}
       side="left"
       sideOffset={sideOffset}
       trigger={
         <UITools.ButtonIcon
           ariaLabel={t(`${translationNameSpace}.advancedSettingsAriaLabel`)}
+          disabled={disabled}
           name="Properties"
           ref={triggerRef}
-          selected={open}
+          selected={open && !disabled}
         />
       }
       triggerTooltip={t(`${translationNameSpace}.advancedSettingsTooltip`)}

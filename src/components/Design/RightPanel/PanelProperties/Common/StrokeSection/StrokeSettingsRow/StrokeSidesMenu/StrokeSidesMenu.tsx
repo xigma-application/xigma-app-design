@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { getStrokeSidesIcon } from '../utils/getStrokeSidesIcon';
 import { getStrokeSidesTriggerIcon } from '../utils/getStrokeSidesTriggerIcon';
 import { STROKE_SIDES_ORDER } from '../constants';
@@ -20,7 +21,7 @@ import { StrokeSides } from 'types/design/enums';
 export type TStrokeSidesMenuProps = {
   hidden?: boolean;
   onSelect: TFunc<[StrokeSides]>;
-  sides: StrokeSides;
+  sides: StrokeSides | undefined;
 };
 
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
@@ -40,12 +41,18 @@ const StrokeSidesMenu: FC<TStrokeSidesMenuProps> = ({ hidden = false, onSelect, 
           className={cx({ [styles['StrokeSidesMenu__trigger--hidden']]: hidden })}
           disabled={hidden}
           ariaLabel={t(`${translationNameSpace}.individualStrokesAriaLabel`)}
-          name={getStrokeSidesTriggerIcon(sides)}
+          name={getStrokeSidesTriggerIcon(sides ?? StrokeSides.all)}
           selected={isOpen}
         />
       }
       triggerTooltip={t(`${translationNameSpace}.individualStrokesTooltip`)}
     >
+      {sides === undefined && (
+        <>
+          <PopoverItem disabled icon={getStrokeSidesIcon(StrokeSides.all)} label={MIXED_LABEL} selected />
+          <PopoverSeparator />
+        </>
+      )}
       {STROKE_SIDES_ORDER.map((option) => (
         <div key={option}>
           {option === StrokeSides.custom && <PopoverSeparator />}

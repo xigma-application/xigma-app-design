@@ -45,7 +45,7 @@ export const StrokeSettingsPanel: FC<TStrokeSettingsPanelProps> = ({ onClose }) 
     <div className={styles.StrokeSettingsPanel} ref={containerRef}>
       <StrokeSettingsPanelHeader onClose={onClose} />
       <div className={styles.StrokeSettingsPanel__body}>
-        <UITools.ToggleButtonGroup onChange={onTabChange} toggleButtons={tabButtons} value={activeTab} />
+        <UITools.ToggleButtonGroup onChange={onTabChange} toggleButtons={tabButtons} value={activeTab ?? ''} />
         {activeTab === StrokeMode.basic && <StrokeSettingsBasicTab />}
         {activeTab === StrokeMode.dynamic && <StrokeSettingsDynamicTab />}
         {activeTab === StrokeMode.brush && (

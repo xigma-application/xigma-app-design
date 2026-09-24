@@ -129,4 +129,37 @@ describe('StrokeSection', () => {
     expect(readNode(id).strokes).toEqual([]);
     expect(readNode(id).fills).toHaveLength(1);
   });
+
+  it('should show the mixed content hint above the settings row when the selected layers have different strokes', () => {
+    // mock
+    const firstId = addRectangle({ strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] });
+    const secondId = addRectangle();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderStrokeSection();
+
+    // result
+    expect(screen.getByText('Click + to replace mixed content')).toBeInTheDocument();
+    expect(screen.getByText('Position')).toBeInTheDocument();
+  });
+
+  it('should replace every stroke with one new stroke on add when the strokes are mixed', () => {
+    // mock
+    const firstId = addRectangle({ strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
+    const secondId = addRectangle();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderStrokeSection();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Add stroke'));
+
+    // result
+    expect(readNode(firstId).strokes).toEqual([{ color: '#000000', opacity: 100, type: 'solid' }]);
+    expect(readNode(secondId).strokes).toEqual(readNode(firstId).strokes);
+  });
 });

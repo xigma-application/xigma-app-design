@@ -6,6 +6,7 @@ import StrokeScatterBrushInput from './StrokeScatterBrushInput/StrokeScatterBrus
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import {
   STROKE_SCATTER_BRUSH_FIELD_ICONS,
   STROKE_SCATTER_BRUSH_FIELDS,
@@ -16,7 +17,7 @@ import { translationNameSpace } from '../../../../../constants';
 
 export type TStrokeScatterBrushFieldsProps = {
   onBlur: (field: TStrokeScatterBrushField) => TFunc<[FocusEvent<HTMLInputElement>]>;
-  values: Record<TStrokeScatterBrushField, number>;
+  values: Record<TStrokeScatterBrushField, number | undefined>;
 };
 
 export const StrokeScatterBrushFields: FC<TStrokeScatterBrushFieldsProps> = ({ onBlur, values }) => {
@@ -33,7 +34,7 @@ export const StrokeScatterBrushFields: FC<TStrokeScatterBrushFieldsProps> = ({ o
             Component={StrokeScatterBrushInput}
             aria-label={label}
             controlWidth={128}
-            defaultValue={`${values[field]}${STROKE_SCATTER_BRUSH_LIMITS[field].unit}`}
+            defaultValue={values[field] === undefined ? MIXED_LABEL : `${values[field]}${STROKE_SCATTER_BRUSH_LIMITS[field].unit}`}
             e2eValue={`stroke-brush-${field}`}
             key={field}
             label={label}

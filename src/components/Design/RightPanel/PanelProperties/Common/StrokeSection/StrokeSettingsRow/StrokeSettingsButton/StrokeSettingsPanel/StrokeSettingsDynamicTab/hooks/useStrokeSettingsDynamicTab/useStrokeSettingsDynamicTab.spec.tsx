@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { useStrokeSettingsDynamicTab } from './useStrokeSettingsDynamicTab';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -55,5 +55,29 @@ describe('useStrokeSettingsDynamicTab', () => {
 
     // result
     expect((selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeDynamicWiggle).toBe(80);
+  });
+
+  it('should show a mixed frequency and write a typed one to every node', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeDynamicFrequency: 10 }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readFrequency = (id: string): number | undefined =>
+      (selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeDynamicFrequency;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsDynamicTab(), { wrapper });
+
+    // result
+    expect(result.current.values.frequency).toBeUndefined();
+
+    // action
+    act(() => result.current.onBlur('frequency')({ target: { value: '30%' } } as FocusEvent<HTMLInputElement>));
+
+    // result
+    expect([readFrequency(firstId), readFrequency(secondId)]).toEqual([30, 30]);
   });
 });

@@ -1,14 +1,19 @@
 // types
-import { TApplyStrokeBrushChanges } from '../types';
+import { TApplyStrokeBrushChanges, TOriginalStrokeBrush } from '../types';
+import { TStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 
 export const handleStrokeBrushCommit = (
   nextBrush: string,
-  originalBrush: string,
-  update: TApplyStrokeBrushChanges,
+  originalBrushes: TOriginalStrokeBrush[] | null,
+  valuesList: TStrokeBrushValues[],
+  onBrushRevert: TFunc,
   commit: TApplyStrokeBrushChanges,
 ): void => {
-  if (nextBrush !== originalBrush) {
-    update({ strokeBrush: originalBrush });
+  const brushes = originalBrushes?.map(({ brush }) => brush) ?? valuesList.map((values) => values.brush);
+
+  onBrushRevert();
+
+  if (brushes.some((currentBrush) => currentBrush !== nextBrush)) {
     commit({ strokeBrush: nextBrush });
   }
 };

@@ -11,12 +11,17 @@ export type TStrokeBrushChanges = Parameters<typeof updateNode>[0]['changes'];
 
 export type TApplyStrokeBrushChanges = TFunc<[TStrokeBrushChanges]>;
 
+export type TOriginalStrokeBrush = { brush: string; id: string };
+
 export type TUseStrokeSettingsBrushTabResult = {
-  brush: string;
-  direction: StrokeBrushDirection;
-  onBrushCommit: TFunc<[string, string]>;
-  onBrushSelect: TFunc<[string]>;
+  brush: string | undefined;
+  direction: StrokeBrushDirection | undefined;
+  isDirectionBrush: boolean;
+  isScatterBrush: boolean;
+  onBrushCommit: TFunc<[string]>;
+  onBrushPreview: TFunc<[string]>;
+  onBrushRevert: TFunc;
   onDirectionChange: TFunc<[string]>;
   onScatterBlur: (field: TStrokeScatterBrushField) => TFunc<[FocusEvent<HTMLInputElement>]>;
-  scatterValues: Record<TStrokeScatterBrushField, number>;
+  scatterValues: Record<TStrokeScatterBrushField, number | undefined>;
 };

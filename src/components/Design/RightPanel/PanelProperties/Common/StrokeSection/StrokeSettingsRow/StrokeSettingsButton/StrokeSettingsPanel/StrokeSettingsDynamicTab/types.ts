@@ -13,5 +13,5 @@ export type TCommitStrokeDynamicChanges = TFunc<[TStrokeDynamicChanges]>;
 
 export type TUseStrokeSettingsDynamicTabResult = {
   onBlur: (field: TStrokeDynamicField) => TFunc<[FocusEvent<HTMLInputElement>]>;
-  values: Record<TStrokeDynamicField, number>;
+  values: Record<TStrokeDynamicField, number | undefined>;
 };

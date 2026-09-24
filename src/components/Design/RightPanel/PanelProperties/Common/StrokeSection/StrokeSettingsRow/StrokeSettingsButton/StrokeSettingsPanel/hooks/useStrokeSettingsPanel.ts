@@ -2,7 +2,7 @@
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
+import { updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -13,20 +13,20 @@ import { StrokeMode } from 'types/design/enums';
 import { getStrokeModeChange } from 'utils/design/stroke/getStrokeModeChange';
 
 export type TUseStrokeSettingsPanelResult = {
-  activeTab: StrokeMode;
+  activeTab: StrokeMode | undefined;
   onTabChange: TFunc<[string]>;
 };
 
 export const useStrokeSettingsPanel = (): TUseStrokeSettingsPanelResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const activeTab = node?.strokeMode ?? StrokeMode.basic;
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const modes = nodes.map((node) => node.strokeMode ?? StrokeMode.basic);
+  const activeTab = modes.every((mode) => mode === modes[0]) ? (modes[0] ?? StrokeMode.basic) : undefined;
 
   const onTabChange = (tab: string): void => {
-    if (node && tab !== activeTab) {
+    if (nodes.length > 0 && tab !== activeTab) {
       dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-      dispatch(updateNode({ changes: getStrokeModeChange(node, tab as StrokeMode), id: node.id }));
+      dispatch(updateNodes(nodes.map((node) => ({ changes: getStrokeModeChange(node, tab as StrokeMode), id: node.id }))));
       dispatch(endHistoryGesture());
     }
   };

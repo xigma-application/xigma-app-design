@@ -2,14 +2,15 @@
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
+import { updateNode, updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { isAppearanceNode } from '../../../../../../../AppearanceSection/types';
-import { TStrokeChanges, TUseStrokeSettingsBasicTabResult } from './types';
+import { TCommitStrokeChanges, TStrokeChanges, TStrokeSettingsValues, TUseStrokeSettingsBasicTabResult } from './types';
 
 // utils
+import { getSharedStrokeSettings } from './utils/getSharedStrokeSettings';
 import { getStrokeSettingsValues } from './utils/getStrokeSettingsValues';
 import { handleStrokeDashBlur } from './utils/handleStrokeDashBlur';
 import { handleStrokeDashCapSelect } from './utils/handleStrokeDashCapSelect';
@@ -29,44 +30,45 @@ import { handleStrokeStyleSelect } from './utils/handleStrokeStyleSelect';
 
 export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const values = getStrokeSettingsValues(node);
-
-  const update = (changes: TStrokeChanges): void => {
-    if (node) {
-      dispatch(updateNode({ changes, id: node.id }));
-    }
-  };
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const valuesList = nodes.length > 0 ? nodes.map(getStrokeSettingsValues) : [getStrokeSettingsValues(undefined)];
+  const [scrubValues] = valuesList;
+  const shared = getSharedStrokeSettings(valuesList);
 
   const commit = (changes: TStrokeChanges): void => {
-    if (node) {
+    if (nodes.length > 0) {
       dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-      update(changes);
+      dispatch(updateNodes(nodes.map((node) => ({ changes, id: node.id }))));
       dispatch(endHistoryGesture());
     }
   };
 
+  const scrubEach = (scrub: TFunc<[TStrokeSettingsValues, TCommitStrokeChanges]>): void =>
+    nodes.forEach((node, index) => scrub(valuesList[index], (changes) => dispatch(updateNode({ changes, id: node.id }))));
+
   return {
-    ...values,
-    onDashBlur: (event) => handleStrokeDashBlur(event, values.dash, commit),
-    onDashCapSelect: (value) => handleStrokeDashCapSelect(value, values.dashCap, commit),
-    onDashScrub: (value) => handleStrokeDashScrub(value, update),
-    onDashStep: (text) => handleStrokeDashStep(text, values.dash, commit),
-    onDashesBlur: (event) => handleStrokeDashesBlur(event, values.dashes, commit),
-    onDashesScrub: (value) => handleStrokeDashesScrub(value, values.dashes, update),
-    onDashesStep: (text) => handleStrokeDashesStep(text, values.dashes, commit),
-    onGapBlur: (event) => handleStrokeGapBlur(event, values.gap, commit),
-    onGapScrub: (value) => handleStrokeGapScrub(value, update),
-    onGapStep: (text) => handleStrokeGapStep(text, values.gap, commit),
-    onJoinSelect: (value) => handleStrokeJoinSelect(value, values.join, commit),
-    onMiterAngleBlur: (event) => handleStrokeMiterAngleBlur(event, values.miterAngle, commit),
+    ...shared,
+    onDashBlur: (event) => handleStrokeDashBlur(event, shared.dash, commit),
+    onDashCapSelect: (value) => handleStrokeDashCapSelect(value, shared.dashCap, commit),
+    onDashScrub: (value) => scrubEach((values, update) => handleStrokeDashScrub(values.dash + value - scrubValues.dash, update)),
+    onDashStep: (text) => handleStrokeDashStep(text, shared.dash, commit),
+    onDashesBlur: (event) => handleStrokeDashesBlur(event, shared.dashes, commit),
+    onDashesScrub: (value) =>
+      scrubEach((values, update) => handleStrokeDashesScrub(values.dashes[0] + value - scrubValues.dashes[0], values.dashes, update)),
+    onDashesStep: (text) => handleStrokeDashesStep(text, shared.dashes, commit),
+    onGapBlur: (event) => handleStrokeGapBlur(event, shared.gap, commit),
+    onGapScrub: (value) => scrubEach((values, update) => handleStrokeGapScrub(values.gap + value - scrubValues.gap, update)),
+    onGapStep: (text) => handleStrokeGapStep(text, shared.gap, commit),
+    onJoinSelect: (value) => handleStrokeJoinSelect(value, shared.join, commit),
+    onMiterAngleBlur: (event) => handleStrokeMiterAngleBlur(event, shared.miterAngle, commit),
     onMiterAngleDragEnd: () => dispatch(endHistoryGesture()),
     onMiterAngleDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
-    onMiterAngleScrub: (value) => handleStrokeMiterAngleScrub(value, update),
-    onMiterAngleStep: (text) => handleStrokeMiterAngleStep(text, values.miterAngle, commit),
+    onMiterAngleScrub: (value) =>
+      scrubEach((values, update) => handleStrokeMiterAngleScrub(values.miterAngle + value - scrubValues.miterAngle, update)),
+    onMiterAngleStep: (text) => handleStrokeMiterAngleStep(text, shared.miterAngle, commit),
     onScrubDragEnd: () => dispatch(endHistoryGesture()),
     onScrubDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
-    onStyleSelect: (nextStyle) => handleStrokeStyleSelect(nextStyle, values.style, commit),
+    onStyleSelect: (nextStyle) => handleStrokeStyleSelect(nextStyle, shared.style, commit),
+    scrubValues,
   };
 };

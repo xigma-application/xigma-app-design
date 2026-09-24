@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { STROKE_DYNAMIC_FIELDS, STROKE_DYNAMIC_ICONS, STROKE_DYNAMIC_LIMITS } from './constants';
 import { translationNameSpace } from '../../../../constants';
 import { useStrokeSettingsDynamicTab } from './hooks/useStrokeSettingsDynamicTab/useStrokeSettingsDynamicTab';
@@ -23,7 +24,7 @@ export const StrokeSettingsDynamicTab: FC = () => {
           Component={UITools.TextField}
           aria-label={t(`${translationNameSpace}.settings.dynamic.${field}.label`)}
           controlWidth={128}
-          defaultValue={`${values[field]}%`}
+          defaultValue={values[field] === undefined ? MIXED_LABEL : `${values[field]}%`}
           e2eValue={`stroke-${field}`}
           key={field}
           label={t(`${translationNameSpace}.settings.dynamic.${field}.label`)}

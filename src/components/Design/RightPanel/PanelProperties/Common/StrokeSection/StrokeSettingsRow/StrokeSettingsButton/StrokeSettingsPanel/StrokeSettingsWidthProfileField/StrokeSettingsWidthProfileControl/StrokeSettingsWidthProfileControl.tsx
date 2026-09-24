@@ -12,6 +12,7 @@ import { UITools } from 'shared';
 import { useStrokeSettingsWidthProfileField } from '../hooks/useStrokeSettingsWidthProfileField';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { getStrokeProfileOptions } from '../../StrokeSettingsBasicTab/utils/getStrokeProfileOptions';
 import { isStrokeProfileFlippable } from '../../StrokeSettingsBasicTab/utils/isStrokeProfileFlippable';
 import { translationNameSpace } from '../../../../../constants';
@@ -43,6 +44,7 @@ export const StrokeSettingsWidthProfileControl: FC<TStrokeSettingsWidthProfileCo
             disabled={disabled}
             onSelect={onProfileSelect}
             options={profileOptions}
+            placeholder={MIXED_LABEL}
             textAlign="left"
             value={profile}
             variant="outline"
@@ -52,7 +54,7 @@ export const StrokeSettingsWidthProfileControl: FC<TStrokeSettingsWidthProfileCo
       <Tooltip content={t(`${namespace}.widthProfile.flipTooltip`)}>
         <UITools.ButtonIcon
           ariaLabel={t(`${namespace}.widthProfile.flipAriaLabel`)}
-          disabled={disabled || !isStrokeProfileFlippable(profile)}
+          disabled={disabled || profile === undefined || !isStrokeProfileFlippable(profile)}
           name="FlipHorizontal"
           onClick={onFlipToggle}
           selected={flipped}

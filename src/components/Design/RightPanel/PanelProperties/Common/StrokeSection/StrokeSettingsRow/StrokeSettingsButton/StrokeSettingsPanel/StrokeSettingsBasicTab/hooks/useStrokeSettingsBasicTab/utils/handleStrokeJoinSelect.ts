@@ -5,7 +5,7 @@ import { TCommitStrokeChanges } from '../types';
 // others
 import { STROKE_JOINS } from '../../../constants';
 
-export const handleStrokeJoinSelect = (value: string, join: StrokeJoin, commit: TCommitStrokeChanges): void => {
+export const handleStrokeJoinSelect = (value: string, join: StrokeJoin | undefined, commit: TCommitStrokeChanges): void => {
   const nextJoin = STROKE_JOINS.find((option) => option === value);
 
   if (nextJoin && nextJoin !== join) {

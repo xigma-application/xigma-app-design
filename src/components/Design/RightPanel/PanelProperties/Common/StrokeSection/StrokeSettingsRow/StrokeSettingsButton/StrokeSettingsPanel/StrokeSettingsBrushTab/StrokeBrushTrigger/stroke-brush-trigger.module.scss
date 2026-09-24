@@ -26,4 +26,10 @@
     min-width: 0;
     overflow: hidden;
   }
+
+  &__label {
+    color: var(--color-neutral-1);
+    font-size: 11px;
+    padding-left: 3px;
+  }
 }

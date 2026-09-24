@@ -5,16 +5,22 @@ import { ReactNode } from 'react';
 import { useStrokeBrushPicker } from '../useStrokeBrushPicker';
 import { StrokeSettingsDockedPanelContext } from '../../../StrokeSettingsDockedPanelContext';
 
-describe('useStrokeBrushPicker', () => {
-  it('should dock the picker on toggle, select a brush through it, and close', () => {
-    // before
-    const setDockedPanel = vi.fn();
-    const onBrushSelect = vi.fn();
-    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
-    );
+const createWrapper =
+  (setDockedPanel: TFunc<[ReactNode]>) =>
+  ({ children }: { children: ReactNode }): ReactNode => (
+    <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
+  );
 
-    const { result } = renderHook(() => useStrokeBrushPicker('heist', onBrushSelect), { wrapper });
+describe('useStrokeBrushPicker', () => {
+  it('should dock the picker on toggle, commit a brush picked through it, and close', () => {
+    // mock
+    const setDockedPanel = vi.fn();
+    const onBrushCommit = vi.fn();
+
+    // before
+    const { result } = renderHook(() => useStrokeBrushPicker('heist', vi.fn(), vi.fn(), onBrushCommit), {
+      wrapper: createWrapper(setDockedPanel),
+    });
 
     // result
     expect(result.current.isPickerOpen).toBe(false);
@@ -26,43 +32,45 @@ describe('useStrokeBrushPicker', () => {
     expect(result.current.isPickerOpen).toBe(true);
     expect(setDockedPanel).toHaveBeenCalledWith(expect.anything());
 
-    // action: simulate selecting a brush from the docked picker's onSelect prop
-    const dockedPicker = setDockedPanel.mock.calls[0][0];
-
-    act(() => dockedPicker.props.onSelect('noir'));
+    // action
+    act(() => setDockedPanel.mock.calls[0][0].props.onSelect('noir'));
 
     // result
-    expect(onBrushSelect).toHaveBeenCalledWith('noir');
+    expect(onBrushCommit).toHaveBeenCalledWith('noir');
     expect(result.current.isPickerOpen).toBe(false);
     expect(setDockedPanel).toHaveBeenLastCalledWith(null);
   });
 
-  it('should close the picker on toggle when already open', () => {
-    // before
+  it('should close the picker on toggle when already open, reverting any preview', () => {
+    // mock
     const setDockedPanel = vi.fn();
-    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
-    );
+    const onBrushRevert = vi.fn();
 
-    const { result } = renderHook(() => useStrokeBrushPicker('heist', vi.fn()), { wrapper });
+    // before
+    const { result } = renderHook(() => useStrokeBrushPicker('heist', vi.fn(), onBrushRevert, vi.fn()), {
+      wrapper: createWrapper(setDockedPanel),
+    });
 
+    // action
     act(() => result.current.onTogglePicker());
     act(() => result.current.onTogglePicker());
 
     // result
     expect(result.current.isPickerOpen).toBe(false);
+    expect(onBrushRevert).toHaveBeenCalledTimes(1);
     expect(setDockedPanel).toHaveBeenLastCalledWith(null);
   });
 
   it('should preview a brush on hover and revert it once the hover ends without a click', () => {
-    // before
+    // mock
     const setDockedPanel = vi.fn();
-    const onBrushSelect = vi.fn();
-    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
-    );
+    const onBrushPreview = vi.fn();
+    const onBrushRevert = vi.fn();
 
-    const { result } = renderHook(() => useStrokeBrushPicker('heist', onBrushSelect), { wrapper });
+    // before
+    const { result } = renderHook(() => useStrokeBrushPicker('heist', onBrushPreview, onBrushRevert, vi.fn()), {
+      wrapper: createWrapper(setDockedPanel),
+    });
 
     act(() => result.current.onTogglePicker());
 
@@ -72,56 +80,29 @@ describe('useStrokeBrushPicker', () => {
     act(() => dockedPicker.props.onOptionHoverStart('noir'));
 
     // result
-    expect(onBrushSelect).toHaveBeenLastCalledWith('noir');
+    expect(onBrushPreview).toHaveBeenLastCalledWith('noir');
 
     // action
     act(() => dockedPicker.props.onOptionHoverEnd());
 
     // result
-    expect(onBrushSelect).toHaveBeenLastCalledWith('heist');
+    expect(onBrushRevert).toHaveBeenCalledTimes(1);
     expect(result.current.isPickerOpen).toBe(true);
   });
 
-  it('should revert to the original brush when the picker is cancelled after a hover preview', () => {
-    // before
+  it('should highlight no brush in the picker for a mixed selection', () => {
+    // mock
     const setDockedPanel = vi.fn();
-    const onBrushSelect = vi.fn();
-    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
-    );
 
-    const { result } = renderHook(() => useStrokeBrushPicker('heist', onBrushSelect), { wrapper });
-
-    act(() => result.current.onTogglePicker());
-
-    const dockedPicker = setDockedPanel.mock.calls[0][0];
-
-    act(() => dockedPicker.props.onOptionHoverStart('noir'));
+    // before
+    const { result } = renderHook(() => useStrokeBrushPicker(undefined, vi.fn(), vi.fn(), vi.fn()), {
+      wrapper: createWrapper(setDockedPanel),
+    });
 
     // action
-    act(() => dockedPicker.props.onClose());
-
-    // result
-    expect(onBrushSelect).toHaveBeenLastCalledWith('heist');
-    expect(result.current.isPickerOpen).toBe(false);
-    expect(setDockedPanel).toHaveBeenLastCalledWith(null);
-  });
-
-  it('should commit through onBrushCommit with the brush that was active when the picker opened', () => {
-    // before
-    const setDockedPanel = vi.fn();
-    const onBrushCommit = vi.fn();
-    const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-      <StrokeSettingsDockedPanelContext.Provider value={setDockedPanel}>{children}</StrokeSettingsDockedPanelContext.Provider>
-    );
-    const { result } = renderHook(() => useStrokeBrushPicker('heist', vi.fn(), onBrushCommit), { wrapper });
-
     act(() => result.current.onTogglePicker());
 
-    // action
-    act(() => setDockedPanel.mock.calls[0][0].props.onSelect('noir'));
-
     // result
-    expect(onBrushCommit).toHaveBeenCalledWith('noir', 'heist');
+    expect(setDockedPanel.mock.calls[0][0].props.selectedBrushId).toBe('');
   });
 });

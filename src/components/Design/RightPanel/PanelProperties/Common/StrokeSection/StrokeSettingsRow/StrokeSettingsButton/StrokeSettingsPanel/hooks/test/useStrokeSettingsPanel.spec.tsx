@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { useStrokeSettingsPanel } from '../useStrokeSettingsPanel';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -60,5 +60,28 @@ describe('useStrokeSettingsPanel', () => {
 
     // result
     expect((selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeMode).toBeUndefined();
+  });
+
+  it('should select no tab for mixed stroke modes and switch every node to a clicked tab', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeMode: StrokeMode.dynamic }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readMode = (id: string): StrokeMode | undefined => (selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeMode;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsPanel(), { wrapper });
+
+    // result
+    expect(result.current.activeTab).toBeUndefined();
+
+    // action
+    act(() => result.current.onTabChange(StrokeMode.brush));
+
+    // result
+    expect([readMode(firstId), readMode(secondId)]).toEqual([StrokeMode.brush, StrokeMode.brush]);
   });
 });

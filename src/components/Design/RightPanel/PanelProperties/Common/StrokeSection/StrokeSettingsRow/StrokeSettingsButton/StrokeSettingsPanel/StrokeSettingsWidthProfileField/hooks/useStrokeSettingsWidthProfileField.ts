@@ -2,7 +2,7 @@
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
+import { updateNode, updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -16,20 +16,20 @@ export type TUseStrokeSettingsWidthProfileFieldResult = {
   flipped: boolean;
   onFlipToggle: TFunc;
   onProfileSelect: TFunc<[StrokeProfile]>;
-  profile: StrokeProfile;
+  profile: StrokeProfile | undefined;
 };
 
 export const useStrokeSettingsWidthProfileField = (): TUseStrokeSettingsWidthProfileFieldResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const profile = node?.strokeProfile ?? STROKE_PROFILE_DEFAULT;
-  const flipped = node?.strokeProfileFlipped ?? false;
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const profiles = nodes.map((node) => node.strokeProfile ?? STROKE_PROFILE_DEFAULT);
+  const profile = profiles.every((nodeProfile) => nodeProfile === profiles[0]) ? (profiles[0] ?? STROKE_PROFILE_DEFAULT) : undefined;
+  const flipped = nodes.length > 0 && nodes.every((node) => node.strokeProfileFlipped ?? false);
 
   const commitWithHistory = (changes: Parameters<typeof updateNode>[0]['changes']): void => {
-    if (node) {
+    if (nodes.length > 0) {
       dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-      dispatch(updateNode({ changes, id: node.id }));
+      dispatch(updateNodes(nodes.map((node) => ({ changes, id: node.id }))));
       dispatch(endHistoryGesture());
     }
   };

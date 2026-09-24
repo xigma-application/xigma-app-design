@@ -1,32 +1,41 @@
 // utils
+import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 import { handleStrokeBrushCommit } from '../handleStrokeBrushCommit';
 
 describe('handleStrokeBrushCommit', () => {
-  it('should restore the original brush silently and then commit the new one', () => {
-    // before
-    const calls: string[] = [];
-    const update = vi.fn(() => calls.push('update'));
-    const commit = vi.fn(() => calls.push('commit'));
-
-    // action
-    handleStrokeBrushCommit('noir', 'heist', update, commit);
-
-    // result
-    expect(update).toHaveBeenCalledWith({ strokeBrush: 'heist' });
-    expect(commit).toHaveBeenCalledWith({ strokeBrush: 'noir' });
-    expect(calls).toEqual(['update', 'commit']);
-  });
-
-  it('should do nothing when the brush did not change', () => {
-    // before
-    const update = vi.fn();
+  it('should revert the preview and commit a brush that differs from the originals', () => {
+    // mock
+    const onBrushRevert = vi.fn();
     const commit = vi.fn();
 
     // action
-    handleStrokeBrushCommit('heist', 'heist', update, commit);
+    handleStrokeBrushCommit('noir', [{ brush: 'heist', id: 'a' }], [getStrokeBrushValues(undefined)], onBrushRevert, commit);
 
     // result
-    expect(update).not.toHaveBeenCalled();
+    expect(onBrushRevert).toHaveBeenCalled();
+    expect(commit).toHaveBeenCalledWith({ strokeBrush: 'noir' });
+  });
+
+  it('should compare against the originals rather than the previewed values', () => {
+    // mock
+    const commit = vi.fn();
+    const previewed = [{ ...getStrokeBrushValues(undefined), brush: 'noir' }];
+
+    // action
+    handleStrokeBrushCommit('noir', [{ brush: 'heist', id: 'a' }], previewed, vi.fn(), commit);
+
+    // result
+    expect(commit).toHaveBeenCalledWith({ strokeBrush: 'noir' });
+  });
+
+  it('should not commit when every node already has the picked brush', () => {
+    // mock
+    const commit = vi.fn();
+
+    // action
+    handleStrokeBrushCommit('heist', null, [getStrokeBrushValues(undefined)], vi.fn(), commit);
+
+    // result
     expect(commit).not.toHaveBeenCalled();
   });
 });

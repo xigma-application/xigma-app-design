@@ -91,7 +91,7 @@ export const FillSection: FC<TFillSectionProps> = ({ footer, property = 'fills' 
           />
         ))}
       </div>
-      {fills.length > 0 && footer}
+      {(fills.length > 0 || isMixed) && footer}
     </UITools.Section>
   );
 };

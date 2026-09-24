@@ -889,4 +889,241 @@ test.describe('Design panels — Stroke section', () => {
     expect(moved.strokes![0].crop!.y).toBe(seeded.strokes![0].crop!.y + 20);
     expect(moved.fills![0].crop).toBeUndefined();
   });
+
+  test('with two frames selected, differing strokes show the mixed content hint above the settings row and + gives both one shared stroke', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-multi-mixed');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+
+      store.dispatch(
+        updateNode({ changes: { strokeWidth: 1, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] }, id: firstId }),
+      );
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    });
+
+    // result
+    await expect(page.getByText('Click + to replace mixed content')).toBeVisible();
+    await expect(page.locator('[data-test-section="stroke"]').getByText('Position', { exact: true })).toBeVisible();
+
+    // action
+    await page.getByLabel('Add stroke').click();
+
+    // result
+    await expect(page.getByText('Click + to replace mixed content')).toHaveCount(0);
+
+    const strokes = await page.evaluate(async (nodeIds) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return nodeIds.map((id) => (pages[activePageId].nodes[id] as unknown as { strokes?: unknown[] }).strokes);
+    }, ids);
+
+    expect(strokes[0]).toHaveLength(1);
+    expect(strokes[1]).toEqual(strokes[0]);
+  });
+
+  test('with two frames selected, a mixed Solid and Dashed style shows Mixed and hides Dash and Gap, and picking Dashed sets both and reveals them', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-multi-style');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+      const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+
+      store.dispatch(
+        updateNodes([
+          { changes: { strokeWidth: 1, strokes }, id: firstId },
+          { changes: { strokeStyle: 'dashed', strokeWidth: 1, strokes } as never, id: secondId },
+        ]),
+      );
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    });
+
+    // action
+    await page.getByLabel('Advanced stroke settings').click();
+
+    // result
+    await expect(page.getByRole('button', { name: 'Mixed' })).toBeVisible();
+    await expect(page.locator('[data-test-text-field-input="stroke-dash"]')).toHaveCount(0);
+    await expect(page.locator('[data-test-text-field-input="stroke-gap"]')).toHaveCount(0);
+
+    // action
+    await page.getByRole('button', { name: 'Mixed' }).click();
+    await page.locator('[class*="DropdownOption__label"]', { hasText: 'Dashed' }).click();
+
+    // result
+    await expect(page.locator('[data-test-text-field-input="stroke-dash"]')).toBeVisible();
+
+    const styles = await page.evaluate(async (nodeIds) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return nodeIds.map((id) => (pages[activePageId].nodes[id] as unknown as { strokeStyle?: string }).strokeStyle);
+    }, ids);
+
+    expect(styles).toEqual(['dashed', 'dashed']);
+  });
+
+  test('with two frames selected, a typed stroke weight is set on both, not only the first', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-multi-weight');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+      const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+
+      store.dispatch(
+        updateNodes([
+          { changes: { strokeWidth: 1, strokes }, id: firstId },
+          { changes: { strokeWidth: 4, strokes }, id: secondId },
+        ]),
+      );
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    });
+
+    const weightInput = page.locator('[data-test-text-field-input="stroke-weight"]');
+
+    // result
+    await expect(weightInput).toHaveValue('Mixed');
+
+    // action
+    await weightInput.click();
+    await weightInput.fill('6');
+    await weightInput.press('Enter');
+
+    // result
+    const widths = await page.evaluate(async (nodeIds) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return nodeIds.map((id) => (pages[activePageId].nodes[id] as unknown as { strokeWidth?: number }).strokeWidth);
+    }, ids);
+
+    expect(widths).toEqual([6, 6]);
+    await expect(weightInput).toHaveValue('6');
+  });
+
+  test('with a basic and a dynamic stroke selected, the stroke settings button and the position dropdown are disabled and the sides menu is gone', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-multi-mode');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNodes } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+      const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+
+      store.dispatch(
+        updateNodes([
+          { changes: { strokeWidth: 1, strokes }, id: firstId },
+          { changes: { strokeAlign: 'center', strokeMode: 'dynamic', strokeWidth: 4, strokes } as never, id: secondId },
+        ]),
+      );
+      store.dispatch(setSelection([firstId, secondId]));
+    });
+
+    const strokeSection = page.locator('[data-test-section="stroke"]');
+
+    // result
+    await expect(page.getByLabel('Advanced stroke settings')).toBeDisabled();
+    await expect(strokeSection.getByRole('button', { name: 'Mixed' })).toBeDisabled();
+    await expect(page.getByLabel('Individual strokes')).toBeDisabled();
+  });
+
+  test('with two frames selected, a single-side stroke shows a locked Mixed in the sides menu, while All plus Custom shows the four side fields with Mixed on differing sides', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-stroke-section-multi-sides');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const setSecondStroke = (changes: Record<string, unknown>): Promise<void> =>
+      page.evaluate(async (secondChanges) => {
+        const { store } = await import('/src/store/index.ts');
+        const { setSelection, updateNodes } = await import('/src/store/design/slice.ts');
+        const { activePageId, pages } = store.getState().design;
+        const [firstId, secondId] = pages[activePageId].rootOrder;
+        const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+
+        store.dispatch(
+          updateNodes([
+            { changes: { strokeWidth: 5, strokes }, id: firstId },
+            { changes: { strokes, ...secondChanges } as never, id: secondId },
+          ]),
+        );
+        store.dispatch(setSelection([firstId, secondId]));
+      }, changes);
+
+    // action
+    await setSecondStroke({ strokeSides: 'top', strokeWidth: 1 });
+    await page.getByLabel('Individual strokes').click();
+
+    // result
+    const mixedItem = page.locator('[class*="PopoverItem"]', { hasText: 'Mixed' }).first();
+
+    await expect(mixedItem).toBeVisible();
+    await expect(mixedItem).toHaveClass(/PopoverItem--disabled/);
+
+    // action
+    await page.keyboard.press('Escape');
+    await setSecondStroke({
+      strokeBottomWidth: 5,
+      strokeLeftWidth: 5,
+      strokeRightWidth: 5,
+      strokeSides: 'custom',
+      strokeTopWidth: 1,
+      strokeWidth: 5,
+    });
+
+    // result
+    await expect(page.locator('[data-test-text-field-input="stroke-weight-top"]')).toHaveValue('Mixed');
+    await expect(page.locator('[data-test-text-field-input="stroke-weight-left"]')).toHaveValue('5');
+  });
 });

@@ -15,6 +15,7 @@ import { useStepNumbersOnKeyDown } from 'hooks';
 import { StrokeStyle } from 'types/design/enums';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { STROKE_DASH_MAX_LENGTH } from 'constant/strokeDash';
 import { STROKE_MITER_ANGLE_MAX, STROKE_MITER_ANGLE_MIN } from 'constant/strokeMiterAngle';
 import { STROKE_STYLE_ICONS, STROKE_STYLE_MENU_WIDTH_PX } from './constants';
@@ -38,6 +39,7 @@ export const StrokeSettingsBasicTab: FC = () => {
     isCustom,
     isDashed,
     isMiter,
+    isWidthProfileDisabled,
     join,
     miterAngle,
     onDashBlur,
@@ -59,6 +61,7 @@ export const StrokeSettingsBasicTab: FC = () => {
     onScrubDragEnd,
     onScrubDragStart,
     onStyleSelect,
+    scrubValues,
     style,
   } = useStrokeSettingsBasicTab();
   const onDashKeyDown = useStepNumbersOnKeyDown({ min: 0, onStep: onDashStep });
@@ -81,10 +84,11 @@ export const StrokeSettingsBasicTab: FC = () => {
         controlWidth={128}
         label={t(`${namespace}.style.label`)}
         bypassGlobalShortcuts={false}
-        icon={STROKE_STYLE_ICONS[style]}
+        icon={style && STROKE_STYLE_ICONS[style]}
         menuWidth={STROKE_STYLE_MENU_WIDTH_PX}
         onSelect={onStyleSelect}
         options={styleOptions}
+        placeholder={MIXED_LABEL}
         textAlign="left"
         value={style}
         variant="outline"
@@ -96,7 +100,7 @@ export const StrokeSettingsBasicTab: FC = () => {
             controlWidth={128}
             label={t(`${namespace}.dash.label`)}
             aria-label={t(`${namespace}.dash.label`)}
-            defaultValue={String(dash)}
+            defaultValue={String(dash ?? MIXED_LABEL)}
             e2eValue="stroke-dash"
             keepMountedWhileFocused
             onBlur={onDashBlur}
@@ -108,7 +112,7 @@ export const StrokeSettingsBasicTab: FC = () => {
                 onChange={onDashScrub}
                 onDragEnd={onScrubDragEnd}
                 onDragStart={onScrubDragStart}
-                value={dash}
+                value={scrubValues.dash}
               />
             }
             type="text"
@@ -118,7 +122,7 @@ export const StrokeSettingsBasicTab: FC = () => {
             controlWidth={128}
             label={t(`${namespace}.gap.label`)}
             aria-label={t(`${namespace}.gap.label`)}
-            defaultValue={String(gap)}
+            defaultValue={String(gap ?? MIXED_LABEL)}
             e2eValue="stroke-gap"
             keepMountedWhileFocused
             onBlur={onGapBlur}
@@ -130,7 +134,7 @@ export const StrokeSettingsBasicTab: FC = () => {
                 onChange={onGapScrub}
                 onDragEnd={onScrubDragEnd}
                 onDragStart={onScrubDragStart}
-                value={gap}
+                value={scrubValues.gap}
               />
             }
             type="text"
@@ -143,7 +147,7 @@ export const StrokeSettingsBasicTab: FC = () => {
           controlWidth={128}
           label={t(`${namespace}.dashes.label`)}
           aria-label={t(`${namespace}.dashes.label`)}
-          defaultValue={dashes.join(', ')}
+          defaultValue={dashes?.join(', ') ?? MIXED_LABEL}
           e2eValue="stroke-dashes"
           keepMountedWhileFocused
           onBlur={onDashesBlur}
@@ -155,7 +159,7 @@ export const StrokeSettingsBasicTab: FC = () => {
               onChange={onDashesScrub}
               onDragEnd={onScrubDragEnd}
               onDragStart={onScrubDragStart}
-              value={dashes[0] ?? 0}
+              value={scrubValues.dashes[0] ?? 0}
             />
           }
           type="text"
@@ -169,18 +173,18 @@ export const StrokeSettingsBasicTab: FC = () => {
             label={t(`${namespace}.dashCap.label`)}
             onChange={onDashCapSelect}
             toggleButtons={dashCapButtons}
-            value={dashCap}
+            value={dashCap ?? ''}
           />
         </>
       )}
-      <StrokeSettingsWidthProfileField disabled={hasDashes} />
+      <StrokeSettingsWidthProfileField disabled={isWidthProfileDisabled} />
       <UITools.Field
         Component={UITools.ToggleButtonGroup}
         controlWidth={128}
         label={t(`${namespace}.join.label`)}
         onChange={onJoinSelect}
         toggleButtons={joinButtons}
-        value={join}
+        value={join ?? ''}
       />
       {isMiter && (
         <UITools.Field
@@ -188,7 +192,7 @@ export const StrokeSettingsBasicTab: FC = () => {
           controlWidth={128}
           label={t(`${namespace}.miterAngle.label`)}
           aria-label={t(`${namespace}.miterAngle.ariaLabel`)}
-          defaultValue={`${miterAngle}°`}
+          defaultValue={miterAngle === undefined ? MIXED_LABEL : `${miterAngle}°`}
           e2eValue="stroke-miter-angle"
           keepMountedWhileFocused
           onBlur={onMiterAngleBlur}
@@ -200,7 +204,7 @@ export const StrokeSettingsBasicTab: FC = () => {
               onChange={onMiterAngleScrub}
               onMouseDown={onMiterAngleDragStart}
               onMouseUp={onMiterAngleDragEnd}
-              value={miterAngle}
+              value={scrubValues.miterAngle}
             >
               <UITools.InputAdornment icon="Protractor" />
             </ScrubbableInput>

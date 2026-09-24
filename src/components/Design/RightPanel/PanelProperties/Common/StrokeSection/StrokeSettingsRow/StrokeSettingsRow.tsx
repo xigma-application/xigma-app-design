@@ -23,6 +23,7 @@ const StrokeSettingsRow: FC = () => {
   const { t } = useTranslation();
   const {
     isNonBasicMode,
+    isStrokeModeMixed,
     isWeightMixed,
     onPositionSelect,
     onSideBlur,
@@ -33,6 +34,7 @@ const StrokeSettingsRow: FC = () => {
     onWeightDragStart,
     onWeightScrub,
     position,
+    sideScrubValues,
     sideWeights,
     sides,
     weight,
@@ -42,7 +44,7 @@ const StrokeSettingsRow: FC = () => {
   return (
     <UITools.SectionColumn
       buttonsIcon={[
-        <StrokeSettingsButton key="advanced" />,
+        <StrokeSettingsButton disabled={isStrokeModeMixed} key="advanced" />,
         <StrokeSidesMenu hidden={isNonBasicMode} key="individual" onSelect={onSidesSelect} sides={sides} />,
       ]}
       gridColumnType={UITools.GridColumnType.twoInputs}
@@ -55,9 +57,10 @@ const StrokeSettingsRow: FC = () => {
         disabled={isNonBasicMode}
         onSelect={onPositionSelect}
         options={options}
+        placeholder={MIXED_LABEL}
         textAlign="left"
         truncate={false}
-        value={isNonBasicMode ? StrokeAlign.center : position}
+        value={position}
         variant="outline"
       />
       <StrokeWeightField
@@ -75,6 +78,7 @@ const StrokeSettingsRow: FC = () => {
           onDragStart={onWeightDragStart}
           onSideBlur={onSideBlur}
           onSideScrub={onSideScrub}
+          sideScrubValues={sideScrubValues}
           sideWeights={sideWeights}
         />
       )}

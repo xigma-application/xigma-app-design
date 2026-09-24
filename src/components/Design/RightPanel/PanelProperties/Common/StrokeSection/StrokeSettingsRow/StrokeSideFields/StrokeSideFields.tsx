@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import StrokeWeightField from '../StrokeWeightField/StrokeWeightField';
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { getStrokeSidesIcon } from '../utils/getStrokeSidesIcon';
 import { translationNameSpace } from '../../constants';
 
@@ -18,10 +19,18 @@ export type TStrokeSideFieldsProps = {
   onDragStart: TFunc;
   onSideBlur: (side: TStrokeSide) => TFunc<[FocusEvent<HTMLInputElement>]>;
   onSideScrub: (side: TStrokeSide) => TFunc<[number]>;
-  sideWeights: TStrokeSideWidths;
+  sideScrubValues: TStrokeSideWidths;
+  sideWeights: Record<TStrokeSide, number | undefined>;
 };
 
-const StrokeSideFields: FC<TStrokeSideFieldsProps> = ({ onDragEnd, onDragStart, onSideBlur, onSideScrub, sideWeights }) => {
+const StrokeSideFields: FC<TStrokeSideFieldsProps> = ({
+  onDragEnd,
+  onDragStart,
+  onSideBlur,
+  onSideScrub,
+  sideScrubValues,
+  sideWeights,
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -29,7 +38,7 @@ const StrokeSideFields: FC<TStrokeSideFieldsProps> = ({ onDragEnd, onDragStart, 
       {SIDES.map((side) => (
         <StrokeWeightField
           ariaLabel={t(`${translationNameSpace}.sides.weightAriaLabel.${side}`)}
-          displayValue={`${sideWeights[side]}`}
+          displayValue={sideWeights[side] === undefined ? MIXED_LABEL : `${sideWeights[side]}`}
           e2eValue={`stroke-weight-${side}`}
           icon={getStrokeSidesIcon(StrokeSides[side])}
           key={side}
@@ -37,7 +46,7 @@ const StrokeSideFields: FC<TStrokeSideFieldsProps> = ({ onDragEnd, onDragStart, 
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
           onScrub={onSideScrub(side)}
-          scrubValue={sideWeights[side]}
+          scrubValue={sideScrubValues[side]}
         />
       ))}
     </>

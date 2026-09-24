@@ -14,54 +14,37 @@ export type TUseStrokeBrushPickerResult = {
 };
 
 export const useStrokeBrushPicker = (
-  brush: string,
-  onBrushSelect: TFunc<[string]>,
-  onBrushCommit?: TFunc<[string, string]>,
+  brush: string | undefined,
+  onBrushPreview: TFunc<[string]>,
+  onBrushRevert: TFunc,
+  onBrushCommit: TFunc<[string]>,
 ): TUseStrokeBrushPickerResult => {
   const setDockedPanel = useContext(StrokeSettingsDockedPanelContext);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const originalBrushRef = useRef(brush);
-
-  const previewBrush = (nextBrush: string): void => {
-    onBrushSelect(nextBrush);
-  };
-
-  const revertPreview = (): void => {
-    onBrushSelect(originalBrushRef.current);
-  };
 
   const cancelPicker = (): void => {
-    revertPreview();
+    onBrushRevert();
     setDockedPanel?.(null);
     setIsPickerOpen(false);
   };
 
-  const commitBrush = (nextBrush: string): void => {
-    if (onBrushCommit) {
-      onBrushCommit(nextBrush, originalBrushRef.current);
-    } else {
-      onBrushSelect(nextBrush);
-    }
-  };
-
   const handleSelect = (nextBrush: string): void => {
-    commitBrush(nextBrush);
+    onBrushCommit(nextBrush);
     setDockedPanel?.(null);
     setIsPickerOpen(false);
   };
 
   const openPicker = (): void => {
-    originalBrushRef.current = brush;
     setDockedPanel?.(
       <StrokeBrushPicker
         onClose={cancelPicker}
-        onOptionHoverEnd={revertPreview}
-        onOptionHoverStart={previewBrush}
+        onOptionHoverEnd={onBrushRevert}
+        onOptionHoverStart={onBrushPreview}
         onSelect={handleSelect}
         ref={pickerRef}
-        selectedBrushId={brush}
+        selectedBrushId={brush ?? ''}
       />,
     );
     setIsPickerOpen(true);

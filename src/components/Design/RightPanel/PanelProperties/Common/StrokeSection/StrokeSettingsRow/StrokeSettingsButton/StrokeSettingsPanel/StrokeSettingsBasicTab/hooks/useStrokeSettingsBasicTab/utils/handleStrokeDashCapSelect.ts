@@ -5,7 +5,7 @@ import { TCommitStrokeChanges } from '../types';
 // others
 import { STROKE_DASH_CAPS } from '../../../constants';
 
-export const handleStrokeDashCapSelect = (value: string, dashCap: StrokeDashCap, commit: TCommitStrokeChanges): void => {
+export const handleStrokeDashCapSelect = (value: string, dashCap: StrokeDashCap | undefined, commit: TCommitStrokeChanges): void => {
   const nextCap = STROKE_DASH_CAPS.find((option) => option === value);
 
   if (nextCap && nextCap !== dashCap) {

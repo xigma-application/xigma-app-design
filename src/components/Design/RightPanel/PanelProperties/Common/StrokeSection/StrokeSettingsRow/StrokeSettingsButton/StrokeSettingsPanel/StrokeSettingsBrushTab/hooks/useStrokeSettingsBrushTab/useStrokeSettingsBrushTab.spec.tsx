@@ -2,11 +2,14 @@ import { act, renderHook } from '@testing-library/react';
 import { FocusEvent, ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
+// @xigma
+import { BRUSH_CATEGORIES } from '@xigma/utils';
+
 // hooks
 import { useStrokeSettingsBrushTab } from './useStrokeSettingsBrushTab';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -48,19 +51,26 @@ describe('useStrokeSettingsBrushTab', () => {
     expect(result.current.scatterValues).toMatchObject({ angularJitter: 180, gap: 45, rotation: 179, sizeJitter: 0, wiggle: 0 });
   });
 
-  it('should write the previewed brush without history and keep the original brush for the commit', () => {
+  it('should write the previewed brush, restore it on revert and keep a committed brush', () => {
     // before
     const id = addAndSelect();
     const { result } = renderHook(() => useStrokeSettingsBrushTab(), { wrapper });
 
     // action
-    act(() => result.current.onBrushSelect('noir'));
+    act(() => result.current.onBrushPreview('noir'));
 
     // result
     expect(readNode(id).strokeBrush).toBe('noir');
 
     // action
-    act(() => result.current.onBrushCommit('noir', 'heist'));
+    act(() => result.current.onBrushRevert());
+
+    // result
+    expect(readNode(id).strokeBrush ?? 'heist').toBe('heist');
+
+    // action
+    act(() => result.current.onBrushPreview('noir'));
+    act(() => result.current.onBrushCommit('noir'));
 
     // result
     expect(readNode(id).strokeBrush).toBe('noir');
@@ -78,5 +88,47 @@ describe('useStrokeSettingsBrushTab', () => {
 
     // result
     expect(readNode(id)).toMatchObject({ strokeBrushDirection: StrokeBrushDirection.left, strokeBrushGap: 500, strokeBrushRotation: -180 });
+  });
+
+  it('should show no brush for a mixed selection, hide both the scatter fields and the direction, and commit a picked brush to all', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+    const scatterBrush = BRUSH_CATEGORIES.find((category) => category.id === 'scatter')?.brushes[0].id ?? '';
+
+    store.dispatch(updateNode({ changes: { strokeBrush: scatterBrush }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBrushTab(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ brush: undefined, isDirectionBrush: false, isScatterBrush: false });
+
+    // action
+    act(() => result.current.onBrushPreview('noir'));
+    act(() => result.current.onBrushCommit('noir'));
+
+    // result
+    expect([readNode(firstId).strokeBrush, readNode(secondId).strokeBrush]).toEqual(['noir', 'noir']);
+  });
+
+  it('should restore each node its own brush when a preview over a mixed selection is reverted', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeBrush: 'noir' }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBrushTab(), { wrapper });
+
+    // action
+    act(() => result.current.onBrushPreview('heist'));
+    act(() => result.current.onBrushRevert());
+
+    // result
+    expect([readNode(firstId).strokeBrush, readNode(secondId).strokeBrush]).toEqual(['heist', 'noir']);
   });
 });

@@ -177,4 +177,103 @@ describe('useStrokeSettingsBasicTab', () => {
     // result
     expect(result.current.isMiter).toBe(false);
   });
+
+  it('should hide the dash fields and cap for a mixed Solid and Dashed selection, and apply a picked style to all', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeStyle: StrokeStyle.dashed }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readStyle = (id: string): StrokeStyle | undefined => (selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeStyle;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({
+      hasDashes: false,
+      isCustom: false,
+      isDashed: false,
+      isWidthProfileDisabled: true,
+      style: undefined,
+    });
+
+    // action
+    act(() => result.current.onStyleSelect(StrokeStyle.dashed));
+
+    // result
+    expect([readStyle(firstId), readStyle(secondId)]).toEqual([StrokeStyle.dashed, StrokeStyle.dashed]);
+  });
+
+  it('should keep the dash cap for a mixed Dashed and Custom selection but hide Dash, Gap and Dashes', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeStyle: StrokeStyle.dashed }, id: firstId }));
+    store.dispatch(updateNode({ changes: { strokeStyle: StrokeStyle.custom }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ hasDashes: true, isCustom: false, isDashed: false });
+  });
+
+  it('should show a mixed dash, write a typed dash to every node and scrub each by the same delta', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeDash: 4, strokeGap: 4, strokeStyle: StrokeStyle.dashed }, id: firstId }));
+    store.dispatch(updateNode({ changes: { strokeDash: 10, strokeGap: 4, strokeStyle: StrokeStyle.dashed }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readDash = (id: string): number | undefined => (selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeDash;
+    const blur = (value: string): FocusEvent<HTMLInputElement> => ({ target: { value } }) as FocusEvent<HTMLInputElement>;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ dash: undefined, gap: 4, isDashed: true });
+
+    // action
+    act(() => result.current.onDashScrub(6));
+
+    // result
+    expect([readDash(firstId), readDash(secondId)]).toEqual([6, 12]);
+
+    // action
+    act(() => result.current.onDashBlur(blur('4')));
+
+    // result
+    expect([readDash(firstId), readDash(secondId)]).toEqual([4, 4]);
+  });
+
+  it('should show no join for a mixed join and set the clicked join on every node', () => {
+    // mock
+    const firstId = addAndSelect();
+    const secondId = addAndSelect();
+
+    store.dispatch(updateNode({ changes: { strokeJoin: StrokeJoin.round }, id: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    const readJoin = (id: string): StrokeJoin | undefined => (selectActivePage(store.getState()).nodes[id] as TRectangleNode).strokeJoin;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+
+    // result
+    expect(result.current.join).toBeUndefined();
+
+    // action
+    act(() => result.current.onJoinSelect(StrokeJoin.bevel));
+
+    // result
+    expect([readJoin(firstId), readJoin(secondId)]).toEqual([StrokeJoin.bevel, StrokeJoin.bevel]);
+  });
 });

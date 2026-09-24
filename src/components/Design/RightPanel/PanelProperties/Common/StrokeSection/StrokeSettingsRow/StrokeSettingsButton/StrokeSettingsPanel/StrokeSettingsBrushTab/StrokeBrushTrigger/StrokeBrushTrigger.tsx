@@ -17,7 +17,7 @@ import styles from './stroke-brush-trigger.module.scss';
 
 export type TStrokeBrushTriggerProps = {
   ariaLabel: string;
-  brushId: string;
+  brushId: string | undefined;
   brushLabel: string;
   isOpen: boolean;
   onClick: TFunc;
@@ -25,7 +25,7 @@ export type TStrokeBrushTriggerProps = {
 };
 
 export const StrokeBrushTrigger: FC<TStrokeBrushTriggerProps> = ({ ariaLabel, brushId, brushLabel, isOpen, onClick, ref }) => {
-  const brush = getBrushById(brushId);
+  const brush = brushId === undefined ? undefined : getBrushById(brushId);
 
   return (
     <button
@@ -37,7 +37,11 @@ export const StrokeBrushTrigger: FC<TStrokeBrushTriggerProps> = ({ ariaLabel, br
       type="button"
     >
       <span className={styles.StrokeBrushTrigger__preview} style={{ height: STROKE_BRUSH_TRIGGER_PREVIEW_HEIGHT_PX }}>
-        {brush && <StrokeBrushPreview label={brushLabel} src={getBrushImageUrl(brush.imageFile)} />}
+        {brush ? (
+          <StrokeBrushPreview label={brushLabel} src={getBrushImageUrl(brush.imageFile)} />
+        ) : (
+          <span className={styles.StrokeBrushTrigger__label}>{brushLabel}</span>
+        )}
       </span>
       <Icon name="ChevronDown" size={24} />
     </button>

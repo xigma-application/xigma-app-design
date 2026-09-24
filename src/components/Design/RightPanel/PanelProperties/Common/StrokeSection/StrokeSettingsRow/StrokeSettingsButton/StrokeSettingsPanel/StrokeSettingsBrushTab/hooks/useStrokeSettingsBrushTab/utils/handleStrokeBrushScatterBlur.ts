@@ -4,6 +4,7 @@ import { FocusEvent } from 'react';
 import { TApplyStrokeBrushChanges } from '../types';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { STROKE_SCATTER_BRUSH_LIMITS, TStrokeScatterBrushField } from '../../../constants';
 
 // utils
@@ -12,7 +13,7 @@ import { getStrokeBrushValueFromInput } from 'utils/design/stroke/getStrokeBrush
 export const handleStrokeBrushScatterBlur = (
   event: FocusEvent<HTMLInputElement>,
   field: TStrokeScatterBrushField,
-  current: number,
+  current: number | undefined,
   commit: TApplyStrokeBrushChanges,
 ): void => {
   const { max, min, nodeKey, unit } = STROKE_SCATTER_BRUSH_LIMITS[field];
@@ -22,5 +23,6 @@ export const handleStrokeBrushScatterBlur = (
     commit({ [nodeKey]: next });
   }
 
-  event.target.value = `${next ?? current}${unit}`;
+  const value = next ?? current;
+  event.target.value = value === undefined ? MIXED_LABEL : `${value}${unit}`;
 };
