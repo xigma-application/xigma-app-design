@@ -21,7 +21,7 @@ import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame'
 import { useColumnGridArea, TUseColumnGridAreaResult } from './useColumnGridArea';
 
 export type TUseColumnAlignmentLayoutResult = {
-  alignment: AlignmentLayout;
+  alignment: AlignmentLayout | undefined;
   gridArea: TUseColumnGridAreaResult;
   horizontalGap: number;
   horizontalGapDisplay: string | undefined;
@@ -65,7 +65,6 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const isHorizontal = layoutMode === LayoutMode.horizontal;
   const isGrid = layoutMode === LayoutMode.grid;
   const isBaselineAligned = isHorizontal && frameNode?.alignTextBaseline === AlignTextBaseline.on;
-  const alignment = frameNode?.layoutAlignment ?? AlignmentLayout.topLeft;
   const horizontalGapMode = frameNode?.horizontalGapMode ?? GapMode.fixed;
   const verticalGapMode = frameNode?.verticalGapMode ?? GapMode.fixed;
   const children: TSceneNode[] = frameNode?.childIds.map((childId) => nodes[childId]).filter(Boolean) ?? [];
@@ -74,8 +73,9 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const rawVerticalGap = frameNode?.verticalGap ?? (isHorizontal ? rawHorizontalGap : 0);
   const horizontalGap = horizontalGapMode === GapMode.auto ? effectiveGaps.horizontal : rawHorizontalGap;
   const verticalGap = verticalGapMode === GapMode.auto ? effectiveGaps.vertical : rawVerticalGap;
-
   const gapTargets = isMultiSelection ? gapFrames : frameNode ? [frameNode] : [];
+  const alignments = gapTargets.map((frame) => frame.layoutAlignment ?? AlignmentLayout.topLeft);
+  const alignment = alignments.every((item) => item === alignments[0]) ? (alignments[0] ?? AlignmentLayout.topLeft) : undefined;
 
   const getGapDisplay = (axis: 'horizontal' | 'vertical'): string | undefined => {
     const states = gapFrames.map((frame) => getFrameGapState(frame, nodes, axis));
@@ -154,7 +154,11 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     isVerticalGapModeDisabled: isGrid || (frameNode?.heightSizingMode ?? SizingMode.fixed) === SizingMode.hug,
     isVisible: isGrid || layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical,
     isWrap: Boolean(frameNode?.layoutWrap),
-    onChangeAlignment: (nextAlignment) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id })),
+    onChangeAlignment: (nextAlignment): void => {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      gapTargets.forEach((frame) => dispatch(updateNode({ changes: { layoutAlignment: nextAlignment }, id: frame.id })));
+      dispatch(endHistoryGesture());
+    },
     onCommitHorizontalGap: (nextGap) => commitGap('horizontal', nextGap),
     onCommitVerticalGap: (nextGap) => commitGap('vertical', nextGap),
     onGapDragEnd: () => dispatch(endHistoryGesture()),

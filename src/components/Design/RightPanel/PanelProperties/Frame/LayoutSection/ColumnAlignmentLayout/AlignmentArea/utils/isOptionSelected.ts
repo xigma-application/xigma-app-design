@@ -6,14 +6,14 @@ import { AlignmentLayout } from 'types/design/enums';
 
 export const isOptionSelected = (
   alignment: AlignmentLayout,
-  value: AlignmentLayout,
+  value: AlignmentLayout | undefined,
   isGapAutoVertical: boolean,
   isGapAutoHorizontal: boolean,
   isHorizontal: boolean,
 ): boolean => {
   const isGapAuto = isHorizontal ? isGapAutoHorizontal : isGapAutoVertical;
 
-  if (isGapAuto) {
+  if (value !== undefined && isGapAuto) {
     const crossAxisAlignment = isHorizontal ? HORIZONTAL_CROSS_AXIS_ALIGNMENT : VERTICAL_CROSS_AXIS_ALIGNMENT;
     return crossAxisAlignment[alignment] === crossAxisAlignment[value];
   }

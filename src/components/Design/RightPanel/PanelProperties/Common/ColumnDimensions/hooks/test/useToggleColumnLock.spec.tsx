@@ -46,7 +46,7 @@ describe('useToggleColumnLock', () => {
     const frameId = addFrameNode();
 
     // before
-    const { result } = renderHook(() => useToggleColumnLock(frameId, false, SizingMode.fixed, SizingMode.fixed), { wrapper });
+    const { result } = renderHook(() => useToggleColumnLock([readNode(frameId)], false), { wrapper });
 
     // action
     act(() => result.current());
@@ -60,7 +60,9 @@ describe('useToggleColumnLock', () => {
     const frameId = addFrameNode();
 
     // before
-    const { result } = renderHook(() => useToggleColumnLock(frameId, false, SizingMode.hug, SizingMode.fixed), { wrapper });
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fixed, widthSizingMode: SizingMode.hug }, id: frameId }));
+
+    const { result } = renderHook(() => useToggleColumnLock([readNode(frameId)], false), { wrapper });
 
     // action
     act(() => result.current());
@@ -78,7 +80,9 @@ describe('useToggleColumnLock', () => {
     const frameId = addFrameNode();
 
     // before
-    const { result } = renderHook(() => useToggleColumnLock(frameId, false, SizingMode.fixed, SizingMode.hug), { wrapper });
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.hug, widthSizingMode: SizingMode.fixed }, id: frameId }));
+
+    const { result } = renderHook(() => useToggleColumnLock([readNode(frameId)], false), { wrapper });
 
     // action
     act(() => result.current());
@@ -96,7 +100,7 @@ describe('useToggleColumnLock', () => {
     const frameId = addFrameNode();
 
     // before
-    const { result } = renderHook(() => useToggleColumnLock(frameId, false, SizingMode.fixed, SizingMode.fixed), { wrapper });
+    const { result } = renderHook(() => useToggleColumnLock([readNode(frameId)], false), { wrapper });
 
     // action
     act(() => result.current());
@@ -116,7 +120,9 @@ describe('useToggleColumnLock', () => {
     store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.hug, widthSizingMode: SizingMode.hug }, id: frameId }));
 
     // before
-    const { result } = renderHook(() => useToggleColumnLock(frameId, true, SizingMode.hug, SizingMode.hug), { wrapper });
+    store.dispatch(updateNode({ changes: { heightSizingMode: SizingMode.hug, widthSizingMode: SizingMode.hug }, id: frameId }));
+
+    const { result } = renderHook(() => useToggleColumnLock([readNode(frameId)], true), { wrapper });
 
     // action
     act(() => result.current());

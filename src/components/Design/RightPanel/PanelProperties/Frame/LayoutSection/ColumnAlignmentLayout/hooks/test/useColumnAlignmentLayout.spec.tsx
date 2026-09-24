@@ -555,4 +555,30 @@ describe('useColumnAlignmentLayout', () => {
       expect([readNode(firstId).horizontalGapMode, readNode(secondId).horizontalGapMode]).toEqual([undefined, undefined]);
     });
   });
+
+  describe('multi-selection alignment', () => {
+    it('should select no alignment while the frames differ and set the picked alignment on every frame', () => {
+      // mock
+      const firstId = addFrameNode(LayoutMode.horizontal);
+      const secondId = addFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { layoutAlignment: AlignmentLayout.center }, id: secondId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnAlignmentLayout();
+
+      // result
+      expect(result.current.alignment).toBeUndefined();
+
+      // action
+      act(() => result.current.onChangeAlignment(AlignmentLayout.bottomRight));
+
+      // result
+      expect([readNode(firstId).layoutAlignment, readNode(secondId).layoutAlignment]).toEqual([
+        AlignmentLayout.bottomRight,
+        AlignmentLayout.bottomRight,
+      ]);
+    });
+  });
 });

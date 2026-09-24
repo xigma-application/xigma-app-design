@@ -794,4 +794,58 @@ describe('useColumnDimensions', () => {
       expect(readNode(secondId).minWidth).toBeUndefined();
     });
   });
+
+  describe('multi-selection lock and sizing modes', () => {
+    it('should show the lock on only while every frame is locked and set the toggled lock on every frame', () => {
+      // mock
+      const lockedId = addFrameNode(100, 40, true);
+      const freeId = addFrameNode(60, 40);
+      store.dispatch(setSelection([lockedId, freeId]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.locked).toBe(false);
+
+      // action
+      act(() => result.current.onToggleLock());
+
+      // result
+      expect([readNode(lockedId).lockedAspectRatio, readNode(freeId).lockedAspectRatio]).toEqual([true, true]);
+    });
+
+    it('should report no sizing mode while the frames differ and set the picked mode on every frame', () => {
+      // mock
+      const hugId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+      const fixedId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { widthSizingMode: SizingMode.hug }, id: hugId }));
+      store.dispatch(setSelection([hugId, fixedId]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.widthSizingMode).toBeUndefined();
+      expect(result.current.canHug).toBe(true);
+
+      // action
+      act(() => result.current.onSelectWidthSizingMode(SizingMode.hug));
+
+      // result
+      expect([readNode(hugId).widthSizingMode, readNode(fixedId).widthSizingMode]).toEqual([SizingMode.hug, SizingMode.hug]);
+    });
+
+    it('should not offer Hug unless every selected frame is an auto layout', () => {
+      // mock
+      store.dispatch(setSelection([addAutoLayoutFrameNode(LayoutMode.horizontal), addFrameNode(60, 40)]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.canHug).toBe(false);
+    });
+  });
 });

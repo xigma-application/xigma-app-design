@@ -1,12 +1,16 @@
 // hooks
 import { useAppDispatch } from 'store';
 
+// others
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
+
 // store
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { updateNode } from 'store/design/slice';
 
 // types
-import { SizingMode } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
+import { NodeType, SizingMode } from 'types/design/enums';
+import { TBoxSceneNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { getChildrenFillResetChanges } from 'store/design/utils/autoLayout/getChildrenFillResetChanges';
@@ -17,36 +21,35 @@ export type TUseSelectColumnSizingModeResult = {
 };
 
 export const useSelectColumnSizingMode = (
-  id: string,
-  frameNode: TFrameNode | undefined,
-  nodes: Record<string, TSceneNode>,
-  locked: boolean,
+  nodes: TBoxSceneNode[],
+  nodesById: Record<string, TSceneNode>,
 ): TUseSelectColumnSizingModeResult => {
   const dispatch = useAppDispatch();
 
-  const selectWidthSizingMode = (mode: SizingMode): void => {
-    const lockChanges = mode !== SizingMode.fixed && locked ? { lockedAspectRatio: false } : {};
+  const selectSizingMode = (axis: 'height' | 'width', mode: SizingMode): void => {
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    nodes.forEach((node) => {
+      const lockChanges = mode !== SizingMode.fixed && node.lockedAspectRatio ? { lockedAspectRatio: false } : {};
+      const modeChanges = axis === 'width' ? { widthSizingMode: mode } : { heightSizingMode: mode };
 
-    dispatch(updateNode({ changes: { widthSizingMode: mode, ...lockChanges }, id }));
+      dispatch(updateNode({ changes: { ...modeChanges, ...lockChanges }, id: node.id }));
 
-    if (mode === SizingMode.hug && frameNode) {
-      getChildrenFillResetChanges(frameNode, 'width', nodes).forEach((childId) => {
-        dispatch(updateNode({ changes: { widthSizingMode: SizingMode.fixed }, id: childId }));
-      });
-    }
+      if (mode === SizingMode.hug && node.type === NodeType.frame) {
+        getChildrenFillResetChanges(node, axis, nodesById).forEach((childId) => {
+          dispatch(
+            updateNode({
+              changes: axis === 'width' ? { widthSizingMode: SizingMode.fixed } : { heightSizingMode: SizingMode.fixed },
+              id: childId,
+            }),
+          );
+        });
+      }
+    });
+    dispatch(endHistoryGesture());
   };
 
-  const selectHeightSizingMode = (mode: SizingMode): void => {
-    const lockChanges = mode !== SizingMode.fixed && locked ? { lockedAspectRatio: false } : {};
-
-    dispatch(updateNode({ changes: { heightSizingMode: mode, ...lockChanges }, id }));
-
-    if (mode === SizingMode.hug && frameNode) {
-      getChildrenFillResetChanges(frameNode, 'height', nodes).forEach((childId) => {
-        dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fixed }, id: childId }));
-      });
-    }
+  return {
+    selectHeightSizingMode: (mode) => selectSizingMode('height', mode),
+    selectWidthSizingMode: (mode) => selectSizingMode('width', mode),
   };
-
-  return { selectHeightSizingMode, selectWidthSizingMode };
 };

@@ -13,11 +13,11 @@ import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectNodes, selectSelectedNodes, selectSelectedParentNode } from 'store/design/selectors';
+import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { NodeType, SizingMode } from 'types/design/enums';
 import { TBoxSceneNode } from 'types/design/types';
 import { TDimensionsScrubStart } from '../types';
 
@@ -28,7 +28,8 @@ import { commitNodeDimension } from './utils/commitNodeDimension';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
 import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
-import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
+import { canFillAxis } from './utils/canFillAxis';
+import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 export type TUseColumnDimensionsResult = {
@@ -42,7 +43,7 @@ export type TUseColumnDimensionsResult = {
   hasMinHeightValue: boolean;
   hasMinWidthValue: boolean;
   height: number;
-  heightSizingMode: SizingMode;
+  heightSizingMode: SizingMode | undefined;
   lockDisabled: boolean;
   locked: boolean;
   maxHeightShown: boolean;
@@ -69,7 +70,7 @@ export type TUseColumnDimensionsResult = {
   onSelectWidthSizingMode: TFunc<[SizingMode]>;
   onToggleLock: TFunc;
   width: number;
-  widthSizingMode: SizingMode;
+  widthSizingMode: SizingMode | undefined;
 };
 
 export const useColumnDimensions = (): TUseColumnDimensionsResult => {
@@ -78,27 +79,24 @@ export const useColumnDimensions = (): TUseColumnDimensionsResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const [selectedNode] = selectedNodes;
   const boxNodes = selectedNodes.filter(isExistingBoxSceneNode);
-  const parentNode = useAppSelector(selectSelectedParentNode);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
   const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
-  const frameNode = node?.type === NodeType.frame ? node : undefined;
   const id = node?.id ?? '';
   const width = imageCrop ? imageCrop.crop.width : (node?.width ?? 0);
   const height = imageCrop ? imageCrop.crop.height : (node?.height ?? 0);
-  const locked = imageCrop ? true : (node?.lockedAspectRatio ?? false);
-  const layoutMode = frameNode?.layoutMode;
-  const canHug = !imageCrop && (layoutMode === LayoutMode.horizontal || layoutMode === LayoutMode.vertical);
-  const parentFrame = parentNode?.type === NodeType.frame ? parentNode : undefined;
-  const parentIsAutoLayout = isManagedLayoutFrame(parentFrame);
-  const parentWidthMode = parentFrame?.widthSizingMode ?? SizingMode.fixed;
-  const parentHeightMode = parentFrame?.heightSizingMode ?? SizingMode.fixed;
-  const canFillWidth = !imageCrop && parentIsAutoLayout && parentWidthMode !== SizingMode.hug;
-  const canFillHeight = !imageCrop && parentIsAutoLayout && parentHeightMode !== SizingMode.hug;
-  const widthSizingMode = node?.widthSizingMode ?? SizingMode.fixed;
-  const heightSizingMode = node?.heightSizingMode ?? SizingMode.fixed;
+  const sizingNodes = imageCrop ? [] : boxNodes;
+  const hasSizingNodes = sizingNodes.length > 0;
+  const locked = imageCrop ? true : hasSizingNodes && sizingNodes.every((boxNode) => boxNode.lockedAspectRatio ?? false);
+  const canHug = hasSizingNodes && sizingNodes.every(isAutoLayoutFrame);
+  const canFillWidth = hasSizingNodes && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'width'));
+  const canFillHeight = hasSizingNodes && sizingNodes.every((boxNode) => canFillAxis(boxNode, nodes, 'height'));
+  const widthModes = sizingNodes.map((boxNode) => boxNode.widthSizingMode ?? SizingMode.fixed);
+  const heightModes = sizingNodes.map((boxNode) => boxNode.heightSizingMode ?? SizingMode.fixed);
+  const widthSizingMode = widthModes.every((mode) => mode === widthModes[0]) ? (widthModes[0] ?? SizingMode.fixed) : undefined;
+  const heightSizingMode = heightModes.every((mode) => mode === heightModes[0]) ? (heightModes[0] ?? SizingMode.fixed) : undefined;
   const { commitHeight: _ch, commitWidth: _cW } = useCommitColumnDimensions(id, selectedNode, width, height, locked);
-  const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(id, frameNode, nodes, locked);
-  const toggleLock = useToggleColumnLock(id, locked, widthSizingMode, heightSizingMode);
+  const { selectHeightSizingMode, selectWidthSizingMode } = useSelectColumnSizingMode(sizingNodes, nodes);
+  const toggleLock = useToggleColumnLock(sizingNodes, locked);
   const isMultiSelection = !imageCrop && boxNodes.length > 1;
   const filteredBoxNodes = boxNodes.filter((boxNode) => boxNode.type === NodeType.frame);
   const minMax = useToggleColumnMinMax(filteredBoxNodes, MIXED_LABEL);

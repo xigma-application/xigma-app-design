@@ -12,13 +12,14 @@ import { translationNameSpace } from './constants';
 
 const ColumnClipContent: FC = () => {
   const { t } = useTranslation();
-  const { clipContent, onChange } = useColumnClipContent();
+  const { clipContent, isMixed, onChange } = useColumnClipContent();
 
   return (
     <UITools.SectionColumn withBottomMargin withTopMargin>
       <UITools.Checkbox
         color="secondary"
         e2eValue="clip-content"
+        isMixed={isMixed}
         label={t(`${translationNameSpace}.label`)}
         onChange={onChange}
         value={clipContent}

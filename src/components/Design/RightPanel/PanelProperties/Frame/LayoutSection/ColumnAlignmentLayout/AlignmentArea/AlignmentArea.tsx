@@ -35,7 +35,7 @@ export type TAlignmentAreaProps = {
   isWrap?: boolean;
   onClick: TFunc<[AlignmentLayout]>;
   onRemoveBaselineAlignment?: TFunc;
-  value: AlignmentLayout;
+  value: AlignmentLayout | undefined;
 };
 
 export const AlignmentArea: FC<TAlignmentAreaProps> = ({

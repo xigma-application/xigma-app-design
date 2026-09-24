@@ -13,5 +13,5 @@ const MAIN_AXIS_ALIGNMENT: Record<AlignmentLayout, AlignmentLayout> = {
   [AlignmentLayout.topRight]: AlignmentLayout.right,
 };
 
-export const isBaselineOptionSelected = (alignment: AlignmentLayout, value: AlignmentLayout, isLocked = false): boolean =>
-  isLocked || MAIN_AXIS_ALIGNMENT[value] === alignment;
+export const isBaselineOptionSelected = (alignment: AlignmentLayout, value: AlignmentLayout | undefined, isLocked = false): boolean =>
+  isLocked || (value !== undefined && MAIN_AXIS_ALIGNMENT[value] === alignment);

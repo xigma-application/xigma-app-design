@@ -55,7 +55,7 @@ describe('useSelectColumnSizingMode', () => {
     const { nodes } = selectActivePage(store.getState());
 
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode(frameId, frameNode, nodes, false), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([frameNode], nodes), { wrapper });
 
     // action
     act(() => result.current.selectWidthSizingMode(SizingMode.hug));
@@ -67,11 +67,14 @@ describe('useSelectColumnSizingMode', () => {
   it('should unlock the aspect ratio when switching the height axis away from fixed while locked', () => {
     // mock
     const frameId = addAutoLayoutFrameNode();
+
+    store.dispatch(updateNode({ changes: { lockedAspectRatio: true }, id: frameId }));
+
     const frameNode = readNode(frameId);
     const { nodes } = selectActivePage(store.getState());
 
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode(frameId, frameNode, nodes, true), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([frameNode], nodes), { wrapper });
 
     // action
     act(() => result.current.selectHeightSizingMode(SizingMode.hug));
@@ -90,7 +93,7 @@ describe('useSelectColumnSizingMode', () => {
     const { nodes } = selectActivePage(store.getState());
 
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode(frameId, frameNode, nodes, true), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([frameNode], nodes), { wrapper });
 
     // action
     act(() => result.current.selectWidthSizingMode(SizingMode.fixed));
@@ -111,7 +114,7 @@ describe('useSelectColumnSizingMode', () => {
     const { nodes } = selectActivePage(store.getState());
 
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode(parentId, parentNode, nodes, false), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([parentNode], nodes), { wrapper });
 
     // action
     act(() => result.current.selectWidthSizingMode(SizingMode.hug));
@@ -133,7 +136,7 @@ describe('useSelectColumnSizingMode', () => {
     const { nodes } = selectActivePage(store.getState());
 
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode(parentId, parentNode, nodes, false), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([parentNode], nodes), { wrapper });
 
     // action
     act(() => result.current.selectHeightSizingMode(SizingMode.hug));
@@ -145,7 +148,7 @@ describe('useSelectColumnSizingMode', () => {
 
   it('should not try to reset any children when there is no frame node', () => {
     // before
-    const { result } = renderHook(() => useSelectColumnSizingMode('missing-id', undefined, {}, false), { wrapper });
+    const { result } = renderHook(() => useSelectColumnSizingMode([], {}), { wrapper });
 
     // action / result
     expect(() => act(() => result.current.selectWidthSizingMode(SizingMode.hug))).not.toThrow();

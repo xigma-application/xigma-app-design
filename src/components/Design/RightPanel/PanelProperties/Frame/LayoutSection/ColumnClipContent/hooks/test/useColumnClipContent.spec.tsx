@@ -9,6 +9,7 @@ import { useColumnClipContent } from '../useColumnClipContent';
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -83,5 +84,34 @@ describe('useColumnClipContent', () => {
 
     // result
     expect(readNode(frameId).clipContent).toBe(true);
+  });
+
+  describe('multi-selection', () => {
+    it('should show the checkbox as mixed while only some frames clip and turn clipping on for every frame in one undo step', () => {
+      // mock
+      const clippedId = addFrameNode(true);
+      const openId = addFrameNode(false);
+      store.dispatch(setSelection([clippedId, openId]));
+
+      // before
+      const { result } = renderUseColumnClipContent();
+
+      // result
+      expect(result.current).toMatchObject({ clipContent: false, isMixed: true });
+
+      // action
+      act(() => result.current.onChange());
+
+      // result
+      expect([readNode(clippedId).clipContent, readNode(openId).clipContent]).toEqual([true, true]);
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect(readNode(openId).clipContent).toBe(false);
+    });
   });
 });
