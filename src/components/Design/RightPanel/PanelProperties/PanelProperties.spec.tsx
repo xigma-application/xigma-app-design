@@ -198,11 +198,34 @@ describe('PanelProperties behaviors', () => {
     store.dispatch(setSelection([]));
   });
 
-  it('should render nothing while a frame and a rectangle are selected together', () => {
+  it('should show the Mixed panel with only the common sections while a frame and a rectangle are selected together', () => {
     // mock
     const frameId = addFrameNode();
     const rectangleId = addRectangleNode();
     store.dispatch(setSelection([frameId, rectangleId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(screen.getByText('Fill')).toBeInTheDocument();
+    expect(screen.getByLabelText('Create component')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Wrap in new section')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Boolean operations')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should render nothing while a rectangle and a layer without a panel are selected together', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    store.dispatch(
+      addNode({ fill: '#ffffff', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rectangleId, rootOrder[rootOrder.length - 1]]));
 
     // before
     const { container } = renderPanelProperties();

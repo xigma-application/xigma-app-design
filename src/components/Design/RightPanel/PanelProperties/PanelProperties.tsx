@@ -6,6 +6,7 @@ import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
 import ImageCrop from './ImageCrop/ImageCrop';
+import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
 import Rectangle from './Rectangle/Rectangle';
 
@@ -20,6 +21,9 @@ import { useAppSelector } from 'store';
 
 // types
 import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
+
+// utils
+import { isPanelTypeSelection } from './Mixed/utils/isPanelTypeSelection';
 
 const PanelProperties: FC = () => {
   const activeTool = useAppSelector(selectActiveTool);
@@ -49,6 +53,8 @@ const PanelProperties: FC = () => {
       return <Rectangle />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.boolean:
       return <BooleanPanel />;
+    case isPanelTypeSelection(selectedNodes):
+      return <Mixed />;
     default:
       return null;
   }

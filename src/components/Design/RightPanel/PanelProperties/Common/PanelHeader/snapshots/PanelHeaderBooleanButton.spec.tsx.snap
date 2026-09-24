@@ -3,12 +3,12 @@
 exports[`PanelHeaderBooleanButton snapshots > should render the boolean operations split button 1`] = `
 <DocumentFragment>
   <div
-    class="_PanelHeader__boolean_8adac9"
+    class="_PanelHeader__split_8adac9"
   >
     <button
       aria-label="Boolean operations"
       aria-pressed="false"
-      class="_ButtonIcon_2062db _PanelHeader__boolean-button_8adac9"
+      class="_ButtonIcon_2062db _PanelHeader__split-button_8adac9"
       data-state="closed"
       type="button"
     >
@@ -50,7 +50,7 @@ exports[`PanelHeaderBooleanButton snapshots > should render the boolean operatio
       aria-expanded="false"
       aria-haspopup="dialog"
       aria-label="Boolean operations options"
-      class="_ButtonMenu_7516ba _PanelHeader__boolean-options_8adac9"
+      class="_ButtonMenu_7516ba _PanelHeader__split-options_8adac9"
       data-state="closed"
       type="button"
     >

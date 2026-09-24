@@ -59,3 +59,34 @@ test('the Edit object button turns the rectangle into a vector and starts editin
     )
     .toEqual({ isEditing: true, type: 'vector' });
 });
+
+test('with several rectangles selected, Edit objects in the More actions menu turns them all into vectors and starts editing them', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-rectangle-more-actions');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 800, 300);
+  await designPage.drawRectangle(900, 200, 1000, 300);
+  await designPage.click(750, 250, { shift: true });
+
+  await page.locator('[data-test-component-header="rectangle"]').getByLabel('More actions', { exact: true }).click();
+  await page.getByText('Edit objects', { exact: true }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
+        const { nodes, rootOrder } = pages[activePageId];
+
+        return rootOrder.map((id) => ({ isEditing: vectorEditingNodeIds.includes(id), type: nodes[id].type }));
+      }),
+    )
+    .toEqual([
+      { isEditing: true, type: 'vector' },
+      { isEditing: true, type: 'vector' },
+    ]);
+});

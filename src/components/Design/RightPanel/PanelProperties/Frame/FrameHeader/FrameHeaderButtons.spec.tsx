@@ -6,7 +6,12 @@ import FrameHeaderButtons from './FrameHeaderButtons';
 import { TooltipProvider } from 'shared';
 
 // store
+import { addNodes, setSelection } from 'store/design/slice';
 import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 
 const renderFrameHeaderButtons = (): ReturnType<typeof render> =>
   render(
@@ -16,6 +21,29 @@ const renderFrameHeaderButtons = (): ReturnType<typeof render> =>
       </TooltipProvider>
     </Provider>,
   );
+
+const makeFrame = (id: string): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fills: [],
+  height: 20,
+  id,
+  name: id,
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 20,
+  x: 0,
+  y: 0,
+});
+
+beforeAll(() => {
+  store.dispatch(addNodes({ nodes: [makeFrame('headerFrameA'), makeFrame('headerFrameB')], rootIds: ['headerFrameA', 'headerFrameB'] }));
+});
+
+beforeEach(() => {
+  store.dispatch(setSelection([]));
+});
 
 describe('FrameHeaderButtons snapshots', () => {
   it('should render the html tag and component buttons', () => {
@@ -58,5 +86,21 @@ describe('FrameHeaderButtons behaviors', () => {
 
     // result
     expect(screen.queryByLabelText('Use as mask')).not.toBeInTheDocument();
+  });
+
+  it('should show the html tag, component split button, mask and wrap in section buttons while several frames are selected', () => {
+    // mock
+    store.dispatch(setSelection(['headerFrameA', 'headerFrameB']));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // result
+    expect(screen.getByLabelText('Toggle ready for dev status')).toBeInTheDocument();
+    expect(screen.getByLabelText('Create component')).toBeInTheDocument();
+    expect(screen.getByLabelText('Component options')).toBeInTheDocument();
+    expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Select matching layers')).not.toBeInTheDocument();
   });
 });

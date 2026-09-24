@@ -1,10 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`RectangleHeader snapshots > should render the Rectangle label with the create component button 1`] = `
+exports[`MixedHeader snapshots > should render the selected count label with every header button 1`] = `
 <DocumentFragment>
   <div
     class="_ComponentHeader_163cd5"
-    data-test-component-header="rectangle"
+    data-test-component-header="mixed"
   >
     <div
       class="_ComponentHeader__label_163cd5"
@@ -12,7 +12,7 @@ exports[`RectangleHeader snapshots > should render the Rectangle label with the 
       <span
         class="_PanelHeader__label_8adac9"
       >
-        Rectangle
+        2 selected
       </span>
     </div>
     <div

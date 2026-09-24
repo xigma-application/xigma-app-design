@@ -22,18 +22,18 @@ export const PanelHeaderBooleanButton: FC = () => {
   const { onApply, onFlatten, operation } = useBooleanOperation();
 
   return (
-    <div className={styles.PanelHeader__boolean}>
+    <div className={styles.PanelHeader__split}>
       <Tooltip align="end" content={t(`${translationNameSpace}.booleanTooltip`)}>
         <UITools.ButtonIcon
           ariaLabel={t(`${translationNameSpace}.booleanAriaLabel`)}
-          className={styles['PanelHeader__boolean-button']}
+          className={styles['PanelHeader__split-button']}
           name={BOOLEAN_OPERATION_ICON[operation]}
           onClick={onApply(operation)}
         />
       </Tooltip>
       <UITools.ButtonMenu
         align="end"
-        className={styles['PanelHeader__boolean-options']}
+        className={styles['PanelHeader__split-options']}
         trigger={<Icon name="ChevronDown" size={24} />}
         triggerAriaLabel={t(`${translationNameSpace}.booleanMenuAriaLabel`)}
       >

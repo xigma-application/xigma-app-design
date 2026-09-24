@@ -8,22 +8,28 @@ import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComp
 import PanelHeaderEditObjectButton from '../../Common/PanelHeader/PanelHeaderEditObjectButton';
 import PanelHeaderMaskButton from '../../Common/PanelHeader/PanelHeaderMaskButton';
 import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeaderMatchingLayersButton';
+import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMoreActionsButton';
 
 // others
 import { translationNameSpace } from './constants';
 
+// store
+import { selectSelectedIds } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 const RectangleHeader: FC = () => {
   const { t } = useTranslation();
+  const isMultiple = useAppSelector(selectSelectedIds).length > 1;
 
   return (
     <PanelHeader
       buttons={
         <Fragment>
           <PanelHeaderMatchingLayersButton />
-          <PanelHeaderComponentButton />
+          {!isMultiple && <PanelHeaderComponentButton />}
           <PanelHeaderMaskButton />
           <PanelHeaderBooleanButton />
-          <PanelHeaderEditObjectButton />
+          {isMultiple ? <PanelHeaderMoreActionsButton /> : <PanelHeaderEditObjectButton />}
         </Fragment>
       }
       e2eValue="rectangle"
