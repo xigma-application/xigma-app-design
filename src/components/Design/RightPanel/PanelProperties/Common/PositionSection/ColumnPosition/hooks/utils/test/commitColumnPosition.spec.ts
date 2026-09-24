@@ -1,5 +1,5 @@
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, addNodes, groupNodes, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -36,6 +36,32 @@ const readNode = (id: string): { x: number; y: number } => {
   const node = selectActivePage(store.getState()).nodes[id] as { x: number; y: number };
 
   return { x: node.x, y: node.y };
+};
+
+const addGroupOfTwo = (): { groupId: string; ids: string[] } => {
+  const ids = ['group-child-a', 'group-child-b'];
+
+  store.dispatch(
+    addNodes({
+      nodes: ids.map((id, index) => ({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }],
+        height: 40,
+        id,
+        name: id,
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle as const,
+        width: 40,
+        x: 1000 + index * 60,
+        y: 1000,
+      })),
+      rootIds: ids,
+    }),
+  );
+  store.dispatch(setSelection(ids));
+  store.dispatch(groupNodes());
+
+  return { groupId: selectActivePage(store.getState()).selectedIds[0], ids };
 };
 
 describe('commitColumnPosition', () => {
@@ -105,5 +131,20 @@ describe('commitColumnPosition', () => {
 
     expect(node).toMatchObject({ x: 30, y: 40 });
     expect(node.fills[0].crop).toEqual({ height: 20, rotation: 0, width: 20, x: 30, y: 40 });
+  });
+
+  it('should move the children of a group along with it, since a group box follows its children', () => {
+    // mock
+    const { groupId, ids } = addGroupOfTwo();
+
+    // action
+    commitColumnPosition(store.dispatch, groupId, undefined, 1100, 1050);
+
+    // result
+    expect(readNode(groupId)).toEqual({ x: 1100, y: 1050 });
+    expect(ids.map(readNode)).toEqual([
+      { x: 1100, y: 1050 },
+      { x: 1160, y: 1050 },
+    ]);
   });
 });

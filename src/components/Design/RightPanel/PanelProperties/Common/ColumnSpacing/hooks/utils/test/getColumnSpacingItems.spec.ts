@@ -1,6 +1,6 @@
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { getColumnSpacingItems } from '../getColumnSpacingItems';
@@ -52,6 +52,26 @@ describe('getColumnSpacingItems', () => {
 
     // action / result
     expect(getColumnSpacingItems([frame], nodes).map((node) => node.id)).toEqual(['frame']);
+  });
+
+  it('should return the children of a single group', () => {
+    // mock
+    const group: TGroupNode = {
+      childIds: ['a', 'b'],
+      height: 20,
+      id: 'group',
+      name: 'group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const nodes: Record<string, TSceneNode> = { a: makeRectangle('a', 'group'), b: makeRectangle('b', 'group'), group };
+
+    // action / result
+    expect(getColumnSpacingItems([group], nodes).map((node) => node.id)).toEqual(['a', 'b']);
   });
 
   it('should return the selected layers for several selected layers', () => {

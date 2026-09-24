@@ -1,7 +1,7 @@
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -19,7 +19,7 @@ export type TUseStrokeSettingsPanelResult = {
 
 export const useStrokeSettingsPanel = (): TUseStrokeSettingsPanelResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const modes = nodes.map((node) => node.strokeMode ?? StrokeMode.basic);
   const activeTab = modes.every((mode) => mode === modes[0]) ? (modes[0] ?? StrokeMode.basic) : undefined;
 

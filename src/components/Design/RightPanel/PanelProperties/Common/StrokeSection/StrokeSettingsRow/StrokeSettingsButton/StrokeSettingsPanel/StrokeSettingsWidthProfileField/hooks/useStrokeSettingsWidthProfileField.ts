@@ -1,7 +1,7 @@
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { updateNode, updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -21,7 +21,7 @@ export type TUseStrokeSettingsWidthProfileFieldResult = {
 
 export const useStrokeSettingsWidthProfileField = (): TUseStrokeSettingsWidthProfileFieldResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const profiles = nodes.map((node) => node.strokeProfile ?? STROKE_PROFILE_DEFAULT);
   const profile = profiles.every((nodeProfile) => nodeProfile === profiles[0]) ? (profiles[0] ?? STROKE_PROFILE_DEFAULT) : undefined;
   const flipped = nodes.length > 0 && nodes.every((node) => node.strokeProfileFlipped ?? false);

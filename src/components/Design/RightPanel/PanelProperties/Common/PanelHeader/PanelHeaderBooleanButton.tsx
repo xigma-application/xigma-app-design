@@ -15,12 +15,20 @@ import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 // styles
 import styles from './panel-header.module.scss';
 
+// types
+import { BooleanOperation } from 'types/design/enums';
+
 const { PopoverItem } = UITools.PopoverCompound;
 
-export const PanelHeaderBooleanButton: FC = () => {
+export type TPanelHeaderBooleanButtonProps = {
+  onApply?: (operation: BooleanOperation) => TFunc;
+};
+
+export const PanelHeaderBooleanButton: FC<TPanelHeaderBooleanButtonProps> = ({ onApply: onApplyOverride }) => {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { onApply, onFlatten, operation } = useBooleanOperation();
+  const { onApply: onApplyToSelection, onFlatten, operation } = useBooleanOperation();
+  const onApply = onApplyOverride ?? onApplyToSelection;
 
   return (
     <div className={styles.PanelHeader__split}>

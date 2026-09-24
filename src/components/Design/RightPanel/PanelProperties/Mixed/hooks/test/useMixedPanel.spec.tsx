@@ -11,7 +11,7 @@ import { store } from 'store';
 
 // types
 import { BooleanOperation, NodeType } from 'types/design/enums';
-import { TBooleanNode, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TBooleanNode, TEllipseNode, TFrameNode, TGroupNode, TRectangleNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -36,8 +36,38 @@ const booleanNode: TBooleanNode = {
   type: NodeType.boolean,
 };
 
+const groupedRectangle: TRectangleNode = {
+  ...baseNode,
+  fills: [],
+  id: 'groupedRectangle',
+  name: 'Rectangle',
+  parentId: 'rectangleGroup',
+  type: NodeType.rectangle,
+};
+const groupedEllipse = {
+  ...baseNode,
+  fill: '#ffffff',
+  id: 'groupedEllipse',
+  name: 'Ellipse',
+  parentId: 'ellipseGroup',
+  type: NodeType.ellipse,
+} as TEllipseNode;
+const rectangleGroup: TGroupNode = {
+  ...baseNode,
+  childIds: [groupedRectangle.id],
+  id: 'rectangleGroup',
+  name: 'Group',
+  type: NodeType.group,
+};
+const ellipseGroup: TGroupNode = { ...baseNode, childIds: [groupedEllipse.id], id: 'ellipseGroup', name: 'Group', type: NodeType.group };
+
 beforeAll(() => {
-  store.dispatch(addNodes({ nodes: [frame, rectangle, booleanNode], rootIds: [frame.id, rectangle.id, booleanNode.id] }));
+  store.dispatch(
+    addNodes({
+      nodes: [frame, rectangle, booleanNode, rectangleGroup, groupedRectangle, ellipseGroup, groupedEllipse],
+      rootIds: [frame.id, rectangle.id, booleanNode.id, rectangleGroup.id, ellipseGroup.id],
+    }),
+  );
 });
 
 describe('useMixedPanel', () => {
@@ -63,5 +93,28 @@ describe('useMixedPanel', () => {
 
     // result
     expect(result.current.sections).not.toContain('cornerRadius');
+  });
+
+  it('should take the fill and corner radius of a group from its children when a group and a frame are selected', () => {
+    // mock
+    store.dispatch(setSelection([rectangleGroup.id, frame.id]));
+
+    // before
+    const { result } = renderHook(() => useMixedPanel(), { wrapper });
+
+    // result
+    expect(result.current.sections).toEqual(expect.arrayContaining(['position', 'layout', 'fill', 'cornerRadius', 'selectionColors']));
+    expect(result.current.sections).not.toContain('layoutGuide');
+  });
+
+  it('should drop the child sections when a selected group holds a layer without them', () => {
+    // mock
+    store.dispatch(setSelection([rectangleGroup.id, ellipseGroup.id]));
+
+    // before
+    const { result } = renderHook(() => useMixedPanel(), { wrapper });
+
+    // result
+    expect(result.current.sections).toEqual(['position', 'layout', 'selectionColors', 'export']);
   });
 });

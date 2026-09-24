@@ -7,11 +7,9 @@ import { TDesignState } from '../../types';
 
 // utils
 import { getActivePage } from '../getActivePage';
-import { getNodePaintStyle } from '../getNodePaintStyle';
+import { handleConvertGroupToBoolean } from './handleConvertGroupToBoolean';
 import { handleGroupNodes } from '../handleGroupNodes/handleGroupNodes';
 import { isBooleanOperandNode } from '../nodeHierarchy/isBooleanOperandNode';
-import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
-import { syncGroupBounds } from '../syncGroupBounds';
 
 export type TBooleanNodesPayload = { groupId: string; operation: BooleanOperation };
 
@@ -30,22 +28,6 @@ export const handleBooleanNodes = (state: TDesignState, { groupId, operation }: 
     };
   } else if (selectedNodes.length > 0 && selectedNodes.every((node) => isBooleanOperandNode(node, page.nodes))) {
     handleGroupNodes(state, groupId);
-    const group = page.nodes[groupId];
-
-    if (group?.type === NodeType.group) {
-      const { childIds, ...groupFields } = group;
-
-      page.nodes[groupId] = {
-        ...groupFields,
-        ...getNodePaintStyle(page.nodes[childIds[childIds.length - 1]]),
-        booleanOperation: operation,
-        childIds,
-        name: DEFAULT_BOOLEAN_NAME[operation],
-        type: NodeType.boolean,
-      };
-      page.selectedIds = [groupId];
-      syncGroupBounds(state, groupId);
-      syncAutoLayoutChildren(state, group.parentId);
-    }
+    handleConvertGroupToBoolean(state, { groupId, operation });
   }
 };

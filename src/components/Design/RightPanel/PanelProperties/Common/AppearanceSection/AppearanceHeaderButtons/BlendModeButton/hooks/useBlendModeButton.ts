@@ -7,7 +7,7 @@ import { TIconProps } from '@xigma/components';
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -32,7 +32,7 @@ export const useBlendModeButton = (): TUseBlendModeButtonResult => {
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const value = getSharedBlendMode(nodes);
   const isDefault = value === BlendMode.passThrough;
 

@@ -2,7 +2,7 @@
 import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -17,7 +17,7 @@ import { getOpacityPercentage } from './utils/getOpacityPercentage';
 
 export const useOpacity = (): TUseOpacityResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const [firstNode] = nodes;
   const value = getOpacityPercentage(firstNode);
   const isMixed = nodes.some((node) => getOpacityPercentage(node) !== value);

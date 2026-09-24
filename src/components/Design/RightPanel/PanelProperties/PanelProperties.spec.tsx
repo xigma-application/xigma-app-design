@@ -9,7 +9,7 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
+import { addNode, groupNodes, setActiveTool, setGridSettingsPanelOpen, setImageEditor, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -98,6 +98,13 @@ const addRectangleNode = (): string => {
   const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
+};
+
+const groupSelection = (ids: string[]): string => {
+  store.dispatch(setSelection(ids));
+  store.dispatch(groupNodes());
+
+  return selectActivePage(store.getState()).selectedIds[0];
 };
 
 describe('PanelProperties behaviors', () => {
@@ -213,6 +220,67 @@ describe('PanelProperties behaviors', () => {
     expect(screen.getByLabelText('Component options')).toBeInTheDocument();
     expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
     expect(screen.queryByLabelText('Use as mask')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should show the Group panel with the children fill while a group of rectangles is selected, and its Mask button turns the group into a mask', () => {
+    // mock
+    const groupId = groupSelection([addRectangleNode(), addRectangleNode()]);
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Group')).toBeInTheDocument();
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
+    expect(screen.getByText('Fill')).toBeInTheDocument();
+
+    // action
+    act(() => screen.getByLabelText('Use as mask').click());
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[groupId].type).toBe(NodeType.mask);
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should show the Group panel while several groups are selected', () => {
+    // mock
+    const firstGroupId = groupSelection([addRectangleNode(), addRectangleNode()]);
+    const secondGroupId = groupSelection([addRectangleNode(), addRectangleNode()]);
+    store.dispatch(setSelection([firstGroupId, secondGroupId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Group')).toBeInTheDocument();
+    expect(screen.getByLabelText('Boolean operations')).toBeInTheDocument();
+    expect(screen.queryByText('2 selected')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should hide Fill in the Group panel while a child has no fill section', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    store.dispatch(
+      addNode({ fill: '#ffffff', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    groupSelection([rectangleId, rootOrder[rootOrder.length - 1]]);
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Group')).toBeInTheDocument();
+    expect(screen.getByText('Dimensions')).toBeInTheDocument();
+    expect(screen.queryByText('Fill')).not.toBeInTheDocument();
 
     // cleanup
     store.dispatch(setSelection([]));

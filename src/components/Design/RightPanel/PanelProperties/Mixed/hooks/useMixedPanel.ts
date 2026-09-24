@@ -1,16 +1,15 @@
 // others
-import { PANEL_SECTIONS } from '../constants';
+import { CHILD_PANEL_SECTIONS, PANEL_SECTIONS } from '../constants';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes, selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
 import { TPanelSection } from '../types';
 
 // utils
-import { getCommonPanelItems } from '../utils/getCommonPanelItems';
-import { isPanelNodeType } from '../utils/isPanelNodeType';
+import { getNodesPanelSections } from '../utils/getNodesPanelSections';
 
 export type TUseMixedPanelResult = {
   count: number;
@@ -19,12 +18,12 @@ export type TUseMixedPanelResult = {
 
 export const useMixedPanel = (): TUseMixedPanelResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
-  const types = [...new Set(selectedNodes.map((node) => node?.type))].filter(
-    (type): type is keyof typeof PANEL_SECTIONS => type !== undefined && isPanelNodeType(type),
-  );
+  const childSections = getNodesPanelSections(useAppSelector(selectAppearanceNodes), PANEL_SECTIONS);
 
   return {
     count: selectedNodes.length,
-    sections: getCommonPanelItems(PANEL_SECTIONS, types),
+    sections: getNodesPanelSections(selectedNodes, PANEL_SECTIONS).filter(
+      (section) => !CHILD_PANEL_SECTIONS.includes(section) || childSections.includes(section),
+    ),
   };
 };

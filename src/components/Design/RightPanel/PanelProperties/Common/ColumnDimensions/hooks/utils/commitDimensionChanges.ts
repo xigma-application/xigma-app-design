@@ -13,6 +13,8 @@ import {
 import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
 import { getDimensionChangeCropFills } from './getDimensionChangeCropFills';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
+import { scaleGroupLikeNode } from './scaleGroupLikeNode';
 
 const getSizingModeChanges = (
   selectedNode: TSceneNode | undefined,
@@ -65,5 +67,9 @@ export const commitDimensionChanges = (
   height: number,
   dimensionChanges: { height: number; width: number },
 ): void => {
-  dispatch(updateNode({ changes: getDimensionUpdateChanges(selectedNode, width, height, dimensionChanges), id }));
+  if (selectedNode && isGroupLikeNode(selectedNode)) {
+    scaleGroupLikeNode(dispatch, id, dimensionChanges);
+  } else {
+    dispatch(updateNode({ changes: getDimensionUpdateChanges(selectedNode, width, height, dimensionChanges), id }));
+  }
 };

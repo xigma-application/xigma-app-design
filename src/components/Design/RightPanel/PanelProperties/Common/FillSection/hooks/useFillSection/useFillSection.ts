@@ -3,7 +3,7 @@ import { useRef } from 'react';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectImageEditor, selectImageFillPickerFocus, selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes, selectImageEditor, selectImageFillPickerFocus } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // others
@@ -34,7 +34,7 @@ import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerInde
 
 export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const [node] = nodes;
   const isMultiSelection = nodes.length > 1;
   const isMixed = hasMixedPaints(nodes, property);

@@ -1,7 +1,7 @@
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { updateNode, updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -30,7 +30,7 @@ import { handleStrokeStyleSelect } from './utils/handleStrokeStyleSelect';
 
 export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeSettingsValues) : [getStrokeSettingsValues(undefined)];
   const [scrubValues] = valuesList;
   const shared = getSharedStrokeSettings(valuesList);

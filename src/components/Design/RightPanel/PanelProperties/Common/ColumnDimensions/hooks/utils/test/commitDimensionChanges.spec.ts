@@ -1,5 +1,5 @@
 // store
-import { addNode, updateNode } from 'store/design/slice';
+import { addNode, addNodes, groupNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -35,6 +35,32 @@ const addFrameNode = (width: number, height: number, widthSizingMode?: SizingMod
 };
 
 const readNode = (id: string): TFrameNode => selectActivePage(store.getState()).nodes[id] as TFrameNode;
+
+const addGroupOfTwo = (): { groupId: string; ids: string[] } => {
+  const ids = ['group-child-a', 'group-child-b'];
+
+  store.dispatch(
+    addNodes({
+      nodes: ids.map((id, index) => ({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }],
+        height: 40,
+        id,
+        name: id,
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle as const,
+        width: 40,
+        x: 1000 + index * 60,
+        y: 1000,
+      })),
+      rootIds: ids,
+    }),
+  );
+  store.dispatch(setSelection(ids));
+  store.dispatch(groupNodes());
+
+  return { groupId: selectActivePage(store.getState()).selectedIds[0], ids };
+};
 
 describe('commitDimensionChanges', () => {
   it('should dispatch the given dimension changes as-is when there is no selected node', () => {
@@ -111,5 +137,21 @@ describe('commitDimensionChanges', () => {
 
     expect(updated.width).toBe(200);
     expect((updated.fills[0] as TImagePaint).crop).toEqual({ height: 25, rotation: 0, width: 100, x: 50, y: 12.5 });
+  });
+
+  it('should scale the children of a group from its top left corner instead of only resizing its box', () => {
+    // mock
+    const { groupId, ids } = addGroupOfTwo();
+    const group = selectActivePage(store.getState()).nodes[groupId];
+
+    // action
+    commitDimensionChanges(store.dispatch, groupId, group, 100, 40, { height: 80, width: 200 });
+
+    // result
+    expect(readNode(groupId)).toMatchObject({ height: 80, width: 200, x: 1000, y: 1000 });
+    expect(ids.map(readNode).map(({ height, width, x, y }) => ({ height, width, x, y }))).toEqual([
+      { height: 80, width: 80, x: 1000, y: 1000 },
+      { height: 80, width: 80, x: 1120, y: 1000 },
+    ]);
   });
 });

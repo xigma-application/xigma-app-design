@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { setImageEditor, setImageFillPickerFocus } from 'store/design/slice';
 import { store, useAppDispatch } from 'store';
 
@@ -44,7 +44,7 @@ export const useSyncImageEditor = (
 
   useEffect(() => {
     return (): void => {
-      const isNodeStillSelected = Boolean(nodeId) && selectSelectedNodes(store.getState()).some((node) => node.id === nodeId);
+      const isNodeStillSelected = Boolean(nodeId) && selectAppearanceNodes(store.getState()).some((node) => node.id === nodeId);
 
       if (wasActiveRef.current && !isNodeStillSelected) {
         clearOwnedImageEditorState(dispatch, nodeId, paintIndex, property);

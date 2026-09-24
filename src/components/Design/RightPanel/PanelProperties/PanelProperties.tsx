@@ -5,6 +5,7 @@ import BooleanPanel from './Boolean/Boolean';
 import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
+import Group from './Group/Group';
 import ImageCrop from './ImageCrop/ImageCrop';
 import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
@@ -35,6 +36,7 @@ const PanelProperties: FC = () => {
   const isEditingImageCrop = useIsEditingImageCrop();
   const isEveryFrameSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.frame);
   const isEveryRectangleSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.rectangle);
+  const isEveryGroupSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.group);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
 
@@ -53,6 +55,8 @@ const PanelProperties: FC = () => {
       return <Rectangle />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.boolean:
       return <BooleanPanel />;
+    case isEveryGroupSelected:
+      return <Group />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

@@ -14,7 +14,7 @@ import { collectSelectionColorGroups } from '../../utils/collectSelectionColorGr
 import { commitSelectionColorChange } from '../../utils/commitSelectionColorChange';
 import { getNextOpenGroup } from './utils/getNextOpenGroup';
 import { getSelectionColorSelectionNodeIds } from '../../utils/getSelectionColorSelectionNodeIds';
-import { isFrameNode } from 'utils/canvas/signals/isFrameNode';
+import { isSelectionColorsRootNode } from '../../utils/isSelectionColorsRootNode';
 
 const NO_GROUPS: TSelectionColorGroup[] = [];
 
@@ -22,12 +22,12 @@ export const useSelectionColorsSection = (): TUseSelectionColorsSectionResult =>
   const dispatch = useAppDispatch();
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const nodesById = useAppSelector(selectNodes);
-  const frames = useMemo(() => selectedNodes.filter(isFrameNode), [selectedNodes]);
-  const hasChildren = frames.length > 1 || frames.some((frame) => frame.childIds.length > 0);
+  const rootNodes = useMemo(() => selectedNodes.filter(isSelectionColorsRootNode), [selectedNodes]);
+  const hasChildren = rootNodes.length > 1 || rootNodes.some((rootNode) => rootNode.childIds.length > 0);
   const [openGroup, setOpenGroup] = useState<TOpenSelectionColorGroup | null>(null);
   const groups = useMemo(
-    () => (frames.length > 0 ? collectSelectionColorGroups(frames, nodesById, openGroup?.occurrences ?? null) : NO_GROUPS),
-    [frames, nodesById, openGroup],
+    () => (rootNodes.length > 0 ? collectSelectionColorGroups(rootNodes, nodesById, openGroup?.occurrences ?? null) : NO_GROUPS),
+    [rootNodes, nodesById, openGroup],
   );
 
   return {

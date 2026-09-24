@@ -33,6 +33,7 @@ import { TPaint, TSolidPaint } from 'types/design/paint/types';
 // utils
 import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchingLayers';
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
+import { expandGroupNodes } from './utils/nodeHierarchy/expandGroupNodes';
 import { getAllGuideLines } from './utils/getAllGuideLines';
 import { getFrameGuideLines } from './utils/getFrameGuideLines';
 import { getIncrementalRenderOrderedNodes } from './utils/getIncrementalRenderOrderedNodes';
@@ -183,6 +184,10 @@ export const selectSelectedIds = createSelector([selectActivePage], (page): stri
 
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
   selectedIds.map((id) => nodes[id]),
+);
+
+export const selectAppearanceNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
+  expandGroupNodes(selectedNodes.filter(Boolean), nodes),
 );
 
 export const selectCanSelectMatchingLayers = createSelector([selectSelectedIds, selectNodes], canSelectMatchingLayers);

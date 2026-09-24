@@ -7,7 +7,9 @@ import { updateNode } from 'store/design/slice';
 import { getCropPaintChanges } from 'components/Design/Canvas/utils/getCropPaintChanges';
 import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';
+import { isGroupLikeNode } from 'store/design/utils/nodeHierarchy/isGroupLikeNode';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
+import { translateNodeSubtree } from '../../../ColumnAlignment/hooks/utils/translateNodeSubtree';
 
 type TParent = Parameters<typeof getNodeAbsoluteFromParentPosition>[1];
 
@@ -21,9 +23,15 @@ export const commitColumnPosition = (
   const absolute = parent ? getNodeAbsoluteFromParentPosition({ x: nextX, y: nextY }, parent) : { x: nextX, y: nextY };
   const x = parent ? Math.round(absolute.x) : absolute.x;
   const y = parent ? Math.round(absolute.y) : absolute.y;
-  const node = selectNodes(store.getState())[id];
-  const cropChanges =
-    node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};
+  const nodes = selectNodes(store.getState());
+  const node = nodes[id];
 
-  dispatch(updateNode({ changes: { ...cropChanges, x, y }, id }));
+  if (node && isGroupLikeNode(node)) {
+    translateNodeSubtree(dispatch, nodes, node, x - node.x, y - node.y);
+  } else {
+    const cropChanges =
+      node && isAppearanceNode(node) ? getCropPaintChanges(node, (paints) => translateFillsCrop(paints, x - node.x, y - node.y)) : {};
+
+    dispatch(updateNode({ changes: { ...cropChanges, x, y }, id }));
+  }
 };

@@ -60,6 +60,8 @@ import { handleBooleanSelection } from './utils/handleBooleanNodes/handleBoolean
 import { TBooleanNodesPayload } from './utils/handleBooleanNodes/handleBooleanNodes';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
 import { handleCloseOpenPropertyPanel } from './utils/handleCloseOpenPropertyPanel';
+import { handleConvertGroupToBoolean } from './utils/handleBooleanNodes/handleConvertGroupToBoolean';
+import { handleConvertGroupToMask } from './utils/handleUseNodesAsMask/handleConvertGroupToMask';
 import { handleDeleteAllGuides } from './utils/handleDeleteAllGuides';
 import { handleDeleteGuide } from './utils/handleDeleteGuide';
 import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
@@ -193,6 +195,8 @@ const designSlice = createSlice({
       state.commentDraftPosition = null;
     },
     closeOpenPropertyPanel: (state, action: PayloadAction<TOpenPropertyPanel>) => handleCloseOpenPropertyPanel(state, action.payload),
+    convertGroupToBoolean: (state, action: PayloadAction<TBooleanNodesPayload>) => handleConvertGroupToBoolean(state, action.payload),
+    convertGroupToMask: (state, action: PayloadAction<string>) => handleConvertGroupToMask(state, action.payload),
     createMaskGroup: {
       prepare: () => ({ payload: { groupId: nanoid() } }),
       reducer: (state, action: PayloadAction<{ groupId: string }>) =>
@@ -358,6 +362,8 @@ export const {
   bringSelectionToFront,
   cancelCommentDraft,
   closeOpenPropertyPanel,
+  convertGroupToBoolean,
+  convertGroupToMask,
   createMaskGroup,
   deleteAllGuides,
   deleteComment,

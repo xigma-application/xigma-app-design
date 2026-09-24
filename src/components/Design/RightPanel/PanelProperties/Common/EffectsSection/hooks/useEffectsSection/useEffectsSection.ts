@@ -12,7 +12,7 @@ import { NO_EFFECTS } from '../../constants';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -37,7 +37,7 @@ import { handleEffectOpenChange } from './utils/handleEffectOpenChange';
 
 export const useEffectsSection = (): TUseEffectsSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const [node] = nodes;
   const isMixed = !hasMatchingItemTypes(nodes.map((selected) => selected.effects ?? NO_EFFECTS));
   const effects = isMixed ? NO_EFFECTS : (node?.effects ?? NO_EFFECTS);

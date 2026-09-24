@@ -2,7 +2,7 @@
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -24,7 +24,7 @@ export type TUseBlendModeRowResult = {
 export const useBlendModeRow = (): TUseBlendModeRowResult => {
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const nodeIds = nodes.map((node) => node.id);
   const value = getSharedBlendMode(nodes);
 

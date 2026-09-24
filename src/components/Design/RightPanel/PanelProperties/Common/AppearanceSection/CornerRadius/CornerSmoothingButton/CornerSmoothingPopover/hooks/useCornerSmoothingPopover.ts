@@ -2,7 +2,7 @@
 import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -17,7 +17,7 @@ import { getSmoothingPercentage } from './utils/getSmoothingPercentage';
 
 export const useCornerSmoothingPopover = (): TUseCornerSmoothingPopoverResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const value = getSmoothingPercentage(nodes[0]);
   const isMixed = nodes.some((node) => getSmoothingPercentage(node) !== value);
   const displayValue = isMixed ? MIXED_LABEL : `${value}%`;

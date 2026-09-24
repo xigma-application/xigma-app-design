@@ -3,7 +3,7 @@ import { useRef } from 'react';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -25,7 +25,7 @@ import { handleStrokeBrushScatterBlur } from './utils/handleStrokeBrushScatterBl
 
 export const useStrokeSettingsBrushTab = (): TUseStrokeSettingsBrushTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeBrushValues) : [getStrokeBrushValues(undefined)];
   const originalBrushesRef = useRef<TOriginalStrokeBrush[] | null>(null);
   const brush = getSharedStrokeBrushValue(valuesList, 'brush');

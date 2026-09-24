@@ -3,7 +3,7 @@ import { FocusEvent } from 'react';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { updateNodes } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -47,7 +47,7 @@ export type TUseStrokeSettingsRowResult = {
 
 export const useStrokeSettingsRow = (): TUseStrokeSettingsRowResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const [firstNode] = nodes;
   const weight = firstNode?.strokeWidth ?? 1;
   const weightDisplay = nodes.length > 0 ? getSharedValue(nodes.map(getStrokeWeightDisplay)) : weight;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // store
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -22,7 +22,7 @@ import { translationNameSpace } from '../../../constants';
 export const useCornerRadius = (): TUseCornerRadiusResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
   const [individualOverride, setIndividualOverride] = useState<boolean>();
   const [firstNode] = nodes;
   const mergedValues = nodes.map(getNodeMergedCornerRadius);

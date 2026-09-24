@@ -21,5 +21,8 @@ export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
     'layoutGuide',
     'export',
   ],
+  [NodeType.group]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'selectionColors', 'export'],
   [NodeType.rectangle]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'export'],
 };
+
+export const CHILD_PANEL_SECTIONS: TPanelSection[] = ['appearance', 'cornerRadius', 'fill', 'stroke', 'effects'];

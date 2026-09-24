@@ -14,7 +14,11 @@ import { translationNameSpace } from './constants';
 // styles
 import styles from './panel-header.module.scss';
 
-export const PanelHeaderMaskButton: FC = () => {
+export type TPanelHeaderMaskButtonProps = {
+  onClick?: TFunc;
+};
+
+export const PanelHeaderMaskButton: FC<TPanelHeaderMaskButtonProps> = ({ onClick }) => {
   const { t } = useTranslation();
   const handleUseAsMask = useUseSelectionAsMask();
 
@@ -28,7 +32,7 @@ export const PanelHeaderMaskButton: FC = () => {
         </Fragment>
       }
     >
-      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.maskAriaLabel`)} name="Mask" onClick={handleUseAsMask} />
+      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.maskAriaLabel`)} name="Mask" onClick={onClick ?? handleUseAsMask} />
     </Tooltip>
   );
 };
