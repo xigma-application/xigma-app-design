@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
 // components
+import BooleanPanel from './Boolean/Boolean';
 import Frame from './Frame/Frame';
 import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
@@ -45,6 +46,8 @@ const PanelProperties: FC = () => {
       return <Frame />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.rectangle:
       return <Rectangle />;
+    case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.boolean:
+      return <BooleanPanel />;
     default:
       return null;
   }

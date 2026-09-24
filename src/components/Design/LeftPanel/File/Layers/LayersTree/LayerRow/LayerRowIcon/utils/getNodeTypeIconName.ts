@@ -2,6 +2,7 @@
 import { TIconProps } from '@xigma/components';
 
 // others
+import { BOOLEAN_OPERATION_ICON } from 'utils/design/booleanOperation/constants';
 import { getFrameLayoutIconName } from './getFrameLayoutIconName';
 import { NODE_TYPE_ICON } from '../constants';
 
@@ -38,6 +39,6 @@ export const getNodeTypeIconName = (node: TSceneNode, isMask: boolean): TIconPro
     case 'textOnPath':
       return 'TextOnPathTool';
     default:
-      return NODE_TYPE_ICON[node.type];
+      return node.type === NodeType.boolean ? BOOLEAN_OPERATION_ICON[node.booleanOperation] : NODE_TYPE_ICON[node.type];
   }
 };

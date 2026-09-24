@@ -37,7 +37,7 @@ import {
   TUpdateGuidePayload,
   TUpdateNodesPayload,
 } from './types';
-import { BlendMode, ToolName } from 'types/design/enums';
+import { BlendMode, BooleanOperation, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
 import {
   TGridSectionHighlight,
@@ -56,6 +56,7 @@ import { handleAddGuide } from './utils/handleAddGuide';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
+import { handleBooleanNodes, TBooleanNodesPayload } from './utils/handleBooleanNodes/handleBooleanNodes';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
 import { handleCloseOpenPropertyPanel } from './utils/handleCloseOpenPropertyPanel';
 import { handleDeleteAllGuides } from './utils/handleDeleteAllGuides';
@@ -180,6 +181,10 @@ const designSlice = createSlice({
     addPage: {
       prepare: () => ({ payload: { id: nanoid() } }),
       reducer: (state, action: PayloadAction<{ id: string }>) => handleAddPage(state, action.payload.id),
+    },
+    booleanNodes: {
+      prepare: (operation: BooleanOperation) => ({ payload: { groupId: nanoid(), operation } }),
+      reducer: (state, action: PayloadAction<TBooleanNodesPayload>) => handleBooleanNodes(state, action.payload),
     },
     bringSelectionToFront: (state) => handleBringSelectionToFront(state),
     cancelCommentDraft: (state) => {
@@ -346,6 +351,7 @@ export const {
   addNode,
   addNodes,
   addPage,
+  booleanNodes,
   bringSelectionToFront,
   cancelCommentDraft,
   closeOpenPropertyPanel,

@@ -33,6 +33,13 @@ export enum AutoSpacing {
   evenly = 'evenly',
 }
 
+export enum BooleanOperation {
+  exclude = 'exclude',
+  intersect = 'intersect',
+  subtract = 'subtract',
+  union = 'union',
+}
+
 export enum BlendMode {
   color = 'color',
   colorBurn = 'colorBurn',
@@ -103,6 +110,7 @@ export enum LayoutGuideRowsAlign {
 }
 
 export enum NodeType {
+  boolean = 'boolean',
   ellipse = 'ellipse',
   frame = 'frame',
   group = 'group',

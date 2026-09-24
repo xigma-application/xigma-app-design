@@ -15,6 +15,7 @@ export const pruneParentGroup = (state: TDesignState, parentId: string | null, d
     parent.childIds = parent.childIds.filter((childId) => childId !== deletedChildId);
 
     switch (parent.type) {
+      case NodeType.boolean:
       case NodeType.group:
       case NodeType.mask:
         pruneGroupOrMaskParent(state, parent);

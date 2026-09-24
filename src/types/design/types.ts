@@ -6,6 +6,7 @@ import {
   AlignmentVertical,
   AutoSpacing,
   BlendMode,
+  BooleanOperation,
   CanvasStacking,
   EffectBlurType,
   EffectNoiseType,
@@ -154,6 +155,12 @@ export type TBaseNode = {
   y: number;
 };
 
+export type TBooleanNode = Omit<TRectangleNode, 'type'> & {
+  booleanOperation: BooleanOperation;
+  childIds: string[];
+  type: NodeType.boolean;
+};
+
 export type TEllipseNode = TBaseNode & {
   arcEndAngle?: number;
   arcRatio?: number;
@@ -248,7 +255,7 @@ export type TMaskNode = TBaseNode & {
   type: NodeType.mask;
 };
 
-export type TGroupLikeNode = TGroupNode | TMaskNode;
+export type TGroupLikeNode = TBooleanNode | TGroupNode | TMaskNode;
 
 export type TMediaNode = TBaseNode & {
   flipX: boolean;
@@ -418,6 +425,7 @@ export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
 export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
 export type TBoxSceneNode =
+  | TBooleanNode
   | TEllipseNode
   | TFrameNode
   | TGroupNode
@@ -433,6 +441,7 @@ export type TBoxSceneNode =
 export type TSceneNode = TBoxSceneNode | TLineNode | TVectorNode;
 
 export type TNewSceneNode =
+  | Omit<TBooleanNode, 'id'>
   | Omit<TEllipseNode, 'id'>
   | Omit<TFrameNode, 'id'>
   | Omit<TGroupNode, 'id'>
@@ -448,6 +457,7 @@ export type TNewSceneNode =
   | Omit<TVectorNode, 'id'>;
 
 export type TSceneNodeChanges =
+  | Partial<TBooleanNode>
   | Partial<TEllipseNode>
   | Partial<TFrameNode>
   | Partial<TGroupNode>

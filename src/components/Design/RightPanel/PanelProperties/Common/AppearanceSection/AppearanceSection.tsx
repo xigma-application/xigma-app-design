@@ -19,7 +19,11 @@ import { useOpacity } from './Opacity/hooks/useOpacity';
 import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
-const AppearanceSection: FC = () => {
+export type TAppearanceSectionProps = {
+  withCornerRadius?: boolean;
+};
+
+const AppearanceSection: FC<TAppearanceSectionProps> = ({ withCornerRadius = true }) => {
   const { t } = useTranslation();
   const opacity = useOpacity();
   const cornerRadius = useCornerRadius();
@@ -27,24 +31,30 @@ const AppearanceSection: FC = () => {
   return (
     <UITools.Section component={<AppearanceHeaderButtons />} e2eValue="appearance" label={t(`${translationNameSpace}.label`)}>
       <UITools.SectionColumn
-        buttonsIcon={CornerRadiusButtonIcons(cornerRadius.isIndividual, cornerRadius.toggleIndividual, t)}
+        buttonsIcon={withCornerRadius ? CornerRadiusButtonIcons(cornerRadius.isIndividual, cornerRadius.toggleIndividual, t) : undefined}
         gridColumnType={UITools.GridColumnType.twoInputs}
-        labels={[t(`${translationNameSpace}.opacity.ariaLabel`), t(`${translationNameSpace}.cornerRadius.ariaLabel`)]}
-        withBottomMargin={cornerRadius.isIndividual}
+        labels={
+          withCornerRadius
+            ? [t(`${translationNameSpace}.opacity.ariaLabel`), t(`${translationNameSpace}.cornerRadius.ariaLabel`)]
+            : [t(`${translationNameSpace}.opacity.ariaLabel`)]
+        }
+        withBottomMargin={withCornerRadius && cornerRadius.isIndividual}
       >
         <OpacityField displayValue={opacity.displayValue} onBlur={opacity.onBlur} onScrub={opacity.onScrub} value={opacity.value} />
-        <CornerRadiusInput
-          ariaLabel={t(`${translationNameSpace}.cornerRadius.ariaLabel`)}
-          e2eValue="corner-radius"
-          iconName="Corners"
-          onCommit={cornerRadius.onMergedCommit}
-          onScrub={cornerRadius.onMergedScrub}
-          scrubValue={cornerRadius.mergedValue}
-          tooltip={t(`${translationNameSpace}.cornerRadius.tooltip`)}
-          value={cornerRadius.isMixed ? MIXED_LABEL : cornerRadius.mergedValue}
-        />
+        {withCornerRadius && (
+          <CornerRadiusInput
+            ariaLabel={t(`${translationNameSpace}.cornerRadius.ariaLabel`)}
+            e2eValue="corner-radius"
+            iconName="Corners"
+            onCommit={cornerRadius.onMergedCommit}
+            onScrub={cornerRadius.onMergedScrub}
+            scrubValue={cornerRadius.mergedValue}
+            tooltip={t(`${translationNameSpace}.cornerRadius.tooltip`)}
+            value={cornerRadius.isMixed ? MIXED_LABEL : cornerRadius.mergedValue}
+          />
+        )}
       </UITools.SectionColumn>
-      {cornerRadius.isIndividual && (
+      {withCornerRadius && cornerRadius.isIndividual && (
         <UITools.SectionColumn
           buttonsIcon={[<CornerSmoothingButton key="corner-smoothing" />]}
           gridColumnType={UITools.GridColumnType.twoInputs}

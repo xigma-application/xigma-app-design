@@ -1,6 +1,6 @@
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
-import { TFrameNode, TMaskNode, TTextNode } from 'types/design/types';
+import { BooleanOperation, LayoutMode, NodeType } from 'types/design/enums';
+import { TBooleanNode, TFrameNode, TMaskNode, TTextNode } from 'types/design/types';
 
 // utils
 import { getNodeTypeIconName } from '../getNodeTypeIconName';
@@ -76,5 +76,18 @@ describe('getNodeTypeIconName', () => {
     // isMask here answers "is this row itself the masked child of its parent" — false for the
     // container row, since the container isn't masked by anything above it
     expect(getNodeTypeIconName(maskContainer, false)).toBe('Mask');
+  });
+
+  it.each([
+    [BooleanOperation.union, 'BooleanUnion'],
+    [BooleanOperation.subtract, 'BooleanSubtract'],
+    [BooleanOperation.intersect, 'BooleanIntersect'],
+    [BooleanOperation.exclude, 'BooleanExclude'],
+  ])('should return the %s operation icon for a boolean node', (booleanOperation, iconName) => {
+    // mock
+    const booleanNode = { ...frameNode, booleanOperation, type: NodeType.boolean } as unknown as TBooleanNode;
+
+    // action / result
+    expect(getNodeTypeIconName(booleanNode, false)).toBe(iconName);
   });
 });

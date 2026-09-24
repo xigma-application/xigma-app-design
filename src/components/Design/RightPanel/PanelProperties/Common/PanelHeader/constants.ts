@@ -1,12 +1,21 @@
 // others
 import { translationNameSpace as parentNameSpace } from '../constants';
 
+// types
+import { BooleanOperation } from 'types/design/enums';
+
 export const translationNameSpace = `${parentNameSpace}.panelHeader`;
 
+export const BOOLEAN_OPERATION_LABEL_KEY: Record<BooleanOperation, string> = {
+  [BooleanOperation.exclude]: `${translationNameSpace}.booleanExclude`,
+  [BooleanOperation.intersect]: `${translationNameSpace}.booleanIntersect`,
+  [BooleanOperation.subtract]: `${translationNameSpace}.booleanSubtract`,
+  [BooleanOperation.union]: `${translationNameSpace}.booleanUnion`,
+};
+
 export const BOOLEAN_OPERATION_ITEMS = [
-  { icon: 'BooleanUnion', labelKey: `${translationNameSpace}.booleanUnion`, shortcutKey: 'booleanUnion' },
-  { icon: 'BooleanSubtract', labelKey: `${translationNameSpace}.booleanSubtract`, shortcutKey: 'booleanSubtract' },
-  { icon: 'BooleanIntersect', labelKey: `${translationNameSpace}.booleanIntersect`, shortcutKey: 'booleanIntersect' },
-  { icon: 'BooleanExclude', labelKey: `${translationNameSpace}.booleanExclude`, shortcutKey: 'booleanExclude' },
-  { icon: 'Flatten', labelKey: `${translationNameSpace}.flatten`, shortcutKey: 'flatten' },
+  { operation: BooleanOperation.union, shortcutKey: 'booleanUnion' },
+  { operation: BooleanOperation.subtract, shortcutKey: 'booleanSubtract' },
+  { operation: BooleanOperation.intersect, shortcutKey: 'booleanIntersect' },
+  { operation: BooleanOperation.exclude, shortcutKey: 'booleanExclude' },
 ] as const;

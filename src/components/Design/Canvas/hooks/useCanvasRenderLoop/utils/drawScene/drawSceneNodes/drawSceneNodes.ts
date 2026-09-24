@@ -2,6 +2,7 @@
 import { bindTarget } from './bindTarget';
 import { drawBatchedSceneNodes } from './drawBatchedSceneNodes';
 import { drawLeafNode } from '../drawLeafNode';
+import { getBooleanOperandFreeNodes } from './getBooleanOperandFreeNodes';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
 import { getNodeBackgroundBlur } from './getNodeBackgroundBlur';
@@ -53,7 +54,7 @@ export const drawSceneNodes = (
         getNodeBackgroundBlur(node) > 0,
     )
   ) {
-    drawBatchedSceneNodes(context, sceneNodes, nodesById, refs, paintLeaf);
+    drawBatchedSceneNodes(context, getBooleanOperandFreeNodes(sceneNodes, nodesById), nodesById, refs, paintLeaf);
   } else {
     const { gl, imageContext } = context;
     const sceneNodeById = new Map(sceneNodes.map((node) => [node.id, node]));

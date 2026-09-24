@@ -4,6 +4,7 @@ import { TDesignState, TMoveNodesPayload } from '../../types';
 // utils
 import { getActivePage } from '../getActivePage';
 import { getIsDescendantOfMovedNodes } from './getIsDescendantOfMovedNodes';
+import { getIsInvalidBooleanDrop } from './getIsInvalidBooleanDrop';
 import { getIsNestingSection } from './getIsNestingSection';
 import { insertNodesIntoContainer } from './insertNodesIntoContainer';
 import { pruneEmptySourceGroup } from './pruneEmptySourceGroup';
@@ -17,8 +18,9 @@ export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, tar
   const page = getActivePage(state);
   const isNestingSection = getIsNestingSection(targetParentId, nodeIds, page.nodes);
   const isCycle = getIsDescendantOfMovedNodes(targetParentId, nodeIds, page.nodes);
+  const isInvalidBooleanDrop = getIsInvalidBooleanDrop(targetParentId, nodeIds, page.nodes);
 
-  if (!isCycle && !isNestingSection) {
+  if (!isCycle && !isNestingSection && !isInvalidBooleanDrop) {
     const sourceParentId = page.nodes[nodeIds[0]]?.parentId ?? null;
     const isReparenting = sourceParentId !== targetParentId;
 

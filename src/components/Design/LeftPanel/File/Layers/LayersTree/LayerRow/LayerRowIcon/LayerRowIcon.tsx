@@ -18,6 +18,7 @@ import { TNodeOutline } from './types';
 // utils
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { getNodeTypeIconName } from './utils/getNodeTypeIconName';
+import { hasNodeShapeOutline } from './utils/hasNodeShapeOutline';
 
 export type TLayerRowIconProps = {
   isMask: boolean;
@@ -37,7 +38,7 @@ const getLayerRowIconContent = (
     return <NodeShapeIcon outline={outline} size={size} />;
   }
 
-  if (isOutlinePending && !isMask) {
+  if (isOutlinePending && !isMask && hasNodeShapeOutline(node)) {
     return (
       <span className={styles.LayerRowIcon__spinner}>
         <BaseNodeIcon name="Spinner" size={size} />

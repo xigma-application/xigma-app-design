@@ -6,6 +6,7 @@ import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { drawBooleanLeafNode } from './drawBooleanLeafNode';
 import { drawBoxLeafNode } from './drawBoxLeafNode/drawBoxLeafNode';
 import { drawEllipseLeafNode } from './drawEllipseLeafNode/drawEllipseLeafNode';
 import { drawLineLeafNode } from './drawLineLeafNode';
@@ -34,6 +35,9 @@ export const drawLeafNode = (
   const opacity = getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(refs, node.id);
 
   switch (node.type) {
+    case NodeType.boolean:
+      drawBooleanLeafNode(context, node, nodesById);
+      break;
     case NodeType.ellipse:
       drawEllipseLeafNode(context, node, opacity);
       break;

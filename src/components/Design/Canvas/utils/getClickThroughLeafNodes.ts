@@ -26,6 +26,7 @@ export const getClickThroughLeafNodes = (renderOrderedNodes: TSceneNode[], nodes
     switch (node.type) {
       case NodeType.frame:
         return node.childIds.length === 0 || isNestedFrame(node, nodesById);
+      case NodeType.boolean:
       case NodeType.group:
       case NodeType.mask:
         return node.childIds.length === 0 && isLeafReachable(node, nodesById);

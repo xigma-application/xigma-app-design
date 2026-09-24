@@ -13,6 +13,7 @@ export const NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS = 1000;
 export const BASE_NODE_ICON_MAX_CONTENT_SIZE = 10;
 
 export const NODE_TYPE_ICON: Record<NodeType, TIconProps['name']> = {
+  [NodeType.boolean]: 'BooleanUnion',
   [NodeType.ellipse]: 'EllipseTool',
   [NodeType.frame]: 'FrameTool',
   [NodeType.group]: 'Group',
