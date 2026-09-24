@@ -45,7 +45,7 @@ const nodesById: Record<string, TSceneNode> = { child, frame, 'hidden-child': hi
 describe('collectSelectionColorGroups', () => {
   it('should merge the frame’s own fill with its child’s identical fill into one group', () => {
     // result
-    const groups = collectSelectionColorGroups(frame, nodesById);
+    const groups = collectSelectionColorGroups([frame], nodesById);
 
     expect(groups).toHaveLength(1);
     expect(groups[0].occurrences).toEqual([
@@ -56,14 +56,14 @@ describe('collectSelectionColorGroups', () => {
 
   it('should exclude a hidden child’s colors', () => {
     // result
-    const groups = collectSelectionColorGroups(frame, nodesById);
+    const groups = collectSelectionColorGroups([frame], nodesById);
 
     expect(groups.some((group) => group.paint.type === 'solid' && group.paint.color === '#00ff00')).toBe(false);
   });
 
   it('should keep a pinned occurrence from merging with a match it otherwise would', () => {
     // result
-    const groups = collectSelectionColorGroups(frame, nodesById, [{ index: 0, nodeId: 'frame', property: 'fills' }]);
+    const groups = collectSelectionColorGroups([frame], nodesById, [{ index: 0, nodeId: 'frame', property: 'fills' }]);
 
     expect(groups).toHaveLength(2);
   });

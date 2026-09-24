@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { useSelectionColorsSection } from './useSelectionColorsSection';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -159,5 +159,50 @@ describe('useSelectionColorsSection', () => {
 
     expect(result.current.openGroupKey).toBeNull();
     expect(result.current.groups).toHaveLength(1);
+  });
+
+  it('should collect the colors of every selected frame and show the section for several frames without children', () => {
+    // mock
+    const redId = addFrameNode();
+    const blueId = addFrameNode({ fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }] });
+
+    store.dispatch(setSelection([redId, blueId]));
+
+    // before
+    const { result } = renderHook(() => useSelectionColorsSection(), { wrapper });
+
+    // result
+    expect(result.current.hasChildren).toBe(true);
+    expect(result.current.groups.map(({ paint }) => (paint.type === 'solid' ? paint.color : paint.type))).toEqual(['#ff0000', '#0000ff']);
+  });
+
+  it('should include the children of every selected frame and change a shared color on all of them', () => {
+    // mock
+    const firstId = addFrameNode({ fills: [] });
+    const secondId = addFrameNode({ fills: [] });
+    const firstChildId = addRectangleNode({ fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] });
+    const secondChildId = addRectangleNode({ fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }] });
+
+    store.dispatch(moveNodes({ nodeIds: [firstChildId], targetIndex: 0, targetParentId: firstId }));
+    store.dispatch(moveNodes({ nodeIds: [secondChildId], targetIndex: 0, targetParentId: secondId }));
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderHook(() => useSelectionColorsSection(), { wrapper });
+
+    // result
+    expect(result.current.groups).toHaveLength(1);
+    expect(result.current.groups[0].occurrences.map(({ nodeId }) => nodeId)).toEqual([firstChildId, secondChildId]);
+
+    // action
+    act(() => result.current.onChange(result.current.groups[0].occurrences, { color: '#123456', opacity: 100, type: 'solid' }));
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+
+    expect([(nodes[firstChildId] as TRectangleNode).fills[0], (nodes[secondChildId] as TRectangleNode).fills[0]]).toEqual([
+      { color: '#123456', opacity: 100, type: 'solid' },
+      { color: '#123456', opacity: 100, type: 'solid' },
+    ]);
   });
 });
