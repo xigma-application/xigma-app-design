@@ -36,7 +36,7 @@ export const useColumnSpacing = (): TUseColumnSpacingResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const items = useAppSelector(selectSelectedNodes).filter((node) => isNudgeableNode(node, nodes));
-  const orderRef = useRef<Record<TSpacingAxis, string[]>>({ horizontal: [], vertical: [] });
+  const orderRef = useRef<Record<TSpacingAxis, string[][]>>({ horizontal: [], vertical: [] });
   const isVisible = items.length > 1;
   const horizontalSpacing = isVisible ? getSelectionSpacing(items, 'horizontal') : 0;
   const verticalSpacing = isVisible ? getSelectionSpacing(items, 'vertical') : 0;

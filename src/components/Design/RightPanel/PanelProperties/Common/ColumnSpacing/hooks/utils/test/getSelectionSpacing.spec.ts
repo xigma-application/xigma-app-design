@@ -5,15 +5,15 @@ import { TRectangleNode } from 'types/design/types';
 // utils
 import { getSelectionSpacing } from '../getSelectionSpacing';
 
-const makeRectangle = (id: string, x: number, y: number): TRectangleNode => ({
+const makeRectangle = (id: string, x: number, y: number, size = 20): TRectangleNode => ({
   fills: [],
-  height: 20,
+  height: size,
   id,
   name: id,
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
-  width: 20,
+  width: size,
   x,
   y,
 });
@@ -41,5 +41,14 @@ describe('getSelectionSpacing', () => {
 
     // action / result
     expect(getSelectionSpacing(items, 'vertical')).toBe(-10);
+  });
+
+  it('should measure the gap between columns and rows of a grid', () => {
+    // mock
+    const items = [makeRectangle('a', 0, 0, 30), makeRectangle('b', 60, 0, 40), makeRectangle('c', 0, 70, 20)];
+
+    // action / result
+    expect(getSelectionSpacing(items, 'horizontal')).toBe(30);
+    expect(getSelectionSpacing(items, 'vertical')).toBe(30);
   });
 });

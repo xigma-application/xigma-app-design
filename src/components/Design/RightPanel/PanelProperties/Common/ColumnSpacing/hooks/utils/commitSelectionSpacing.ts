@@ -9,8 +9,8 @@ import { TSpacingAxis } from '../../types';
 // utils
 import { applySelectionSpacing } from './applySelectionSpacing';
 
-export const commitSelectionSpacing = (dispatch: AppDispatch, orderedIds: string[], axis: TSpacingAxis, gap: number): void => {
+export const commitSelectionSpacing = (dispatch: AppDispatch, groupIds: string[][], axis: TSpacingAxis, gap: number): void => {
   dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-  applySelectionSpacing(dispatch, orderedIds, axis, gap);
+  applySelectionSpacing(dispatch, groupIds, axis, gap);
   dispatch(endHistoryGesture());
 };

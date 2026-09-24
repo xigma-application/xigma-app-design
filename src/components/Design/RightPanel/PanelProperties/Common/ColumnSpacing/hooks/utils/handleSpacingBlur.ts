@@ -10,7 +10,7 @@ import { TSpacingAxis } from '../../types';
 // utils
 import { commitSelectionSpacing } from './commitSelectionSpacing';
 import { getSpacingBlurValue } from './getSpacingBlurValue';
-import { getSpacingOrder } from './getSpacingOrder';
+import { getSpacingGroupIds } from './getSpacingGroupIds';
 
 export const handleSpacingBlur =
   (dispatch: AppDispatch, items: TSceneNode[], axis: TSpacingAxis, displayValue: number | string) =>
@@ -18,12 +18,7 @@ export const handleSpacingBlur =
     const value = getSpacingBlurValue(event.target.value);
 
     if (value !== null && value !== displayValue) {
-      commitSelectionSpacing(
-        dispatch,
-        getSpacingOrder(items, axis).map((node) => node.id),
-        axis,
-        value,
-      );
+      commitSelectionSpacing(dispatch, getSpacingGroupIds(items, axis), axis, value);
     } else {
       event.target.value = `${displayValue}`;
     }

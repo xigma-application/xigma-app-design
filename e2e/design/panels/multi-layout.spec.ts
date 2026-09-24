@@ -176,3 +176,37 @@ test('with two rectangles selected, typing a horizontal Spacing moves the second
 
   expect(xs[1] - xs[0]).toBe(120);
 });
+
+test('with a grid of rectangles selected, Spacing shows the gap between columns and rows and a typed value moves whole columns', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-multi-layout-spacing-grid');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 800, 300);
+  await designPage.drawRectangle(900, 200, 1000, 300);
+  await designPage.drawRectangle(700, 400, 780, 480);
+  await designPage.click(750, 250, { shift: true });
+  await designPage.click(950, 250, { shift: true });
+
+  const horizontal = page.locator('[data-test-text-field-input="spacing-horizontal"]');
+  const vertical = page.locator('[data-test-text-field-input="spacing-vertical"]');
+
+  await expect(horizontal).toHaveValue('100');
+  await expect(vertical).toHaveValue('100');
+
+  await horizontal.click();
+  await horizontal.fill('50');
+  await horizontal.press('Enter');
+
+  const xs = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return rootOrder.map((id) => (nodes[id] as { x: number }).x);
+  });
+
+  expect(xs[1] - xs[0]).toBe(150);
+  expect(xs[2]).toBe(xs[0]);
+});

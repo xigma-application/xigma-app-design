@@ -10,16 +10,16 @@ import { TSceneNode } from 'types/design/types';
 import { TSpacingAxis } from '../../types';
 
 // utils
-import { getSpacingOrder } from './getSpacingOrder';
+import { getSpacingGroupIds } from './getSpacingGroupIds';
 
 export const startSpacingDrag = (
   dispatch: AppDispatch,
   items: TSceneNode[],
-  orderRef: MutableRefObject<Record<TSpacingAxis, string[]>>,
+  orderRef: MutableRefObject<Record<TSpacingAxis, string[][]>>,
 ): void => {
   orderRef.current = {
-    horizontal: getSpacingOrder(items, 'horizontal').map((node) => node.id),
-    vertical: getSpacingOrder(items, 'vertical').map((node) => node.id),
+    horizontal: getSpacingGroupIds(items, 'horizontal'),
+    vertical: getSpacingGroupIds(items, 'vertical'),
   };
   dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
 };
