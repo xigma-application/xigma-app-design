@@ -62,7 +62,7 @@ describe('computeBooleanVectorNode', () => {
     expect(Object.keys(result.segments)).toHaveLength(8);
     expect(result.filledFaceKeys).toHaveLength(1);
     expect(getEvenOddArea(result)).toBeCloseTo(17500);
-    expect(result.defaultFill).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
+    expect(Object.values(result.fillByKey ?? {})).toEqual([[{ color: '#00ff00', opacity: 100, type: 'solid' }]]);
   });
 
   it('should keep only the bottom shape minus the top one for a subtract', () => {

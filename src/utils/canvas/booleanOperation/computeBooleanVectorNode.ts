@@ -46,8 +46,9 @@ export const computeBooleanVectorNode = (node: TBooleanNode, operands: TVectorNo
       Object.entries(combined.segments).filter(([, segment]) => isBooleanBoundarySegment(base, segment, isInside)),
     );
     const result: TVectorNode = { ...base, segments, vertices: getRemainingVertices(combined.vertices, segments) };
+    const filledFaceKeys = getBooleanFilledFaceKeys(deriveVectorFaces(result), isInside);
 
-    return { ...result, filledFaceKeys: getBooleanFilledFaceKeys(deriveVectorFaces(result), isInside) };
+    return { ...result, fillByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, node.fills])), filledFaceKeys };
   }
 
   return null;

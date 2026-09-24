@@ -83,3 +83,22 @@ test('a frame dropped on a Union row stays outside it', async ({ page }) => {
   await expect(rows).toHaveCount(2);
   await expect(rows.filter({ hasText: 'Frame' })).toHaveCount(1);
 });
+
+test('wrapping a rectangle in a Union keeps its fill color on the canvas instead of a per-face placeholder color', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-fill-color');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+
+  const clip = { height: 100, width: 100, x: 710, y: 210 };
+  const before = await page.screenshot({ clip });
+
+  await page.getByLabel('Boolean operations', { exact: true }).click();
+  await expect(page.locator('[data-test-component-header="boolean"]')).toBeVisible();
+
+  const after = await page.screenshot({ clip });
+
+  expect(after.equals(before)).toBe(true);
+});
