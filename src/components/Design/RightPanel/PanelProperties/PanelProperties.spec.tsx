@@ -164,11 +164,28 @@ describe('PanelProperties behaviors', () => {
     store.dispatch(setSelection([]));
   });
 
-  it('should render nothing while multiple frames are selected', () => {
+  it('should show the Frame panel with the wrap in section button while multiple frames are selected', () => {
     // mock
     const firstFrameId = addFrameNode();
     const secondFrameId = addFrameNode();
     store.dispatch(setSelection([firstFrameId, secondFrameId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Frame')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should render nothing while a frame and a rectangle are selected together', () => {
+    // mock
+    const frameId = addFrameNode();
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([frameId, rectangleId]));
 
     // before
     const { container } = renderPanelProperties();

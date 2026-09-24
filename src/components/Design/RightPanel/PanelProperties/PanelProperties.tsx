@@ -28,6 +28,7 @@ const PanelProperties: FC = () => {
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
   const isGridFrameSelected = selectedNode?.type === NodeType.frame && selectedNode.layoutMode === LayoutMode.grid;
   const isEditingImageCrop = useIsEditingImageCrop();
+  const isEveryFrameSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.frame);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
 
@@ -40,7 +41,7 @@ const PanelProperties: FC = () => {
       return <ImageCrop />;
     case isGridFrameSelected && isGridSettingsPanelOpen:
       return <GridSettings />;
-    case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.frame:
+    case isEveryFrameSelected:
       return <Frame />;
     case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.rectangle:
       return <Rectangle />;

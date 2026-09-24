@@ -7,7 +7,7 @@ selection:
 | --- | --- |
 | frame tool active | `FrameTool/` |
 | nothing selected | `NoSelection/` (Page background, Styles, Export, MCP) |
-| single `NodeType.frame` | `Frame/` |
+| one or more `NodeType.frame` (every selected node a frame) | `Frame/` — multi-select reuses the single-frame sections, which read the first selected node |
 | single `NodeType.rectangle` | `Rectangle/` |
 | anything else | `null` |
 
@@ -32,6 +32,9 @@ node's folder. Today:
   ("No matching layers to select on page"). Text layers are matched by name only (Figma's text-style fallback isn't
   implemented). Note new layers get numbered names (`Rectangle (1)`), so freshly drawn shapes only
   match once renamed.
+  `PanelHeaderWrapInSectionButton` (`SectionTool` icon, "Wrap in new section" + `⌘S` tooltip) renders
+  only while more than one node is selected. **Visual only so far** — no click handler; the
+  `wrapInNewSection` action itself isn't implemented yet (ObjectMenu's item is still disabled).
 - `Common/PositionSection/` — Alignment, Position, Rotation, plus the ignore-auto-layout toggle.
   Its hooks (`useColumnPosition`, `useColumnAlignment`, `useColumnRotation`,
   `buildRotationButtons`) gate on `isBoxSceneNode(selectedNode)` rather than

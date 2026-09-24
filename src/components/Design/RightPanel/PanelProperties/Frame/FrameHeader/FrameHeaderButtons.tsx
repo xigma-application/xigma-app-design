@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComponentButton';
 import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeaderMatchingLayersButton';
+import PanelHeaderWrapInSectionButton from '../../Common/PanelHeader/PanelHeaderWrapInSectionButton';
 import { Tooltip, UITools } from 'shared';
 
 // others
@@ -22,6 +23,7 @@ const FrameHeaderButtons: FC = () => {
         <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.htmlTagAriaLabel`)} name="HtmlTag" />
       </Tooltip>
       <PanelHeaderComponentButton />
+      <PanelHeaderWrapInSectionButton />
     </div>
   );
 };

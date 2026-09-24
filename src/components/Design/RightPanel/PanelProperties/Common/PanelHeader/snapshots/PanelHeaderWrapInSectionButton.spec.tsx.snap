@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PanelHeaderWrapInSectionButton snapshots > should render the wrap in section button for a multi-selection 1`] = `
+<DocumentFragment>
+  <button
+    aria-label="Wrap in new section"
+    aria-pressed="false"
+    class="_ButtonIcon_2062db"
+    data-state="closed"
+    type="button"
+  >
+    <svg
+      class="Icon"
+      data-fpl-icon-size="24"
+      fill="none"
+      height="24"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 24 24"
+      width="24"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M13 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-6h5.25a.75.75 0 0 0 .75-.75zm-1 0H8a1 1 0 0 0-1 1v1h5zm.25-1H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8q0-.104.01-.204A2 2 0 0 1 8 6z"
+        data-svg-property="fill"
+        fill="white"
+        fill-rule="evenodd"
+      />
+    </svg>
+  </button>
+</DocumentFragment>
+`;

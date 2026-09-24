@@ -708,6 +708,8 @@
   "design.rightPanel.panelProperties.common.panelHeader.componentTooltip": "Utwórz komponent",
   "design.rightPanel.panelProperties.common.panelHeader.matchingLayersAriaLabel": "Zaznacz pasujące warstwy",
   "design.rightPanel.panelProperties.common.panelHeader.matchingLayersTooltip": "Zaznacz pasujące warstwy",
+  "design.rightPanel.panelProperties.common.panelHeader.wrapInSectionAriaLabel": "Zawiń w nowej sekcji",
+  "design.rightPanel.panelProperties.common.panelHeader.wrapInSectionTooltip": "Zawiń w nowej sekcji",
   "design.rightPanel.panelProperties.common.positionSection.columnAlignment.label": "Wyrównanie",
   "design.rightPanel.panelProperties.common.positionSection.columnConstraints.label": "Ograniczenia",
   "design.rightPanel.panelProperties.common.positionSection.columnConstraints.option.bottom": "Dół",
