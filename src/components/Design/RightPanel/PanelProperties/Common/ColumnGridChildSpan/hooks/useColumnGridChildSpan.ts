@@ -25,8 +25,9 @@ export type TUseColumnGridChildSpanResult = {
 export const useColumnGridChildSpan = (): TUseColumnGridChildSpanResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
+  const selectedNodes = useAppSelector(selectSelectedNodes);
+  const [selectedNode] = selectedNodes;
+  const node = selectedNodes.length === 1 && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
   const parentNode = node?.parentId ? nodes[node.parentId] : undefined;
   const frameNode = parentNode?.type === NodeType.frame && parentNode.layoutMode === LayoutMode.grid ? parentNode : undefined;
   const isGridChild = Boolean(frameNode);
@@ -36,33 +37,24 @@ export const useColumnGridChildSpan = (): TUseColumnGridChildSpanResult => {
   const columnSpan = Math.max(Math.round(node?.gridColumnSpan ?? 1), 1);
   const rowSpan = Math.max(Math.round(node?.gridRowSpan ?? 1), 1);
 
-  const onCommitColumnSpan = (raw: string): boolean => {
-    const next = clampGridChildSpan(raw, maxColumnSpan);
+  const createSpanCommit =
+    (maxSpan: number, currentSpan: number, commit: typeof commitGridChildColumnSpanChange) =>
+    (raw: string): boolean => {
+      const next = clampGridChildSpan(raw, maxSpan);
 
-    if (next === null) {
+      if (next !== null) {
+        if (next !== currentSpan) {
+          commit(dispatch, node, next);
+        }
+
+        return true;
+      }
+
       return false;
-    }
+    };
 
-    if (next !== columnSpan) {
-      commitGridChildColumnSpanChange(dispatch, node, next);
-    }
-
-    return true;
-  };
-
-  const onCommitRowSpan = (raw: string): boolean => {
-    const next = clampGridChildSpan(raw, maxRowSpan);
-
-    if (next === null) {
-      return false;
-    }
-
-    if (next !== rowSpan) {
-      commitGridChildRowSpanChange(dispatch, node, next);
-    }
-
-    return true;
-  };
+  const onCommitColumnSpan = createSpanCommit(maxColumnSpan, columnSpan, commitGridChildColumnSpanChange);
+  const onCommitRowSpan = createSpanCommit(maxRowSpan, rowSpan, commitGridChildRowSpanChange);
 
   return {
     columnSpan: String(columnSpan),

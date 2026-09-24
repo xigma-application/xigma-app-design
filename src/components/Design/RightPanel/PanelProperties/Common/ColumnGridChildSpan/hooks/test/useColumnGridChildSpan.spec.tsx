@@ -124,6 +124,23 @@ describe('useColumnGridChildSpan', () => {
     expect(result.current).toMatchObject({ columnSpan: '1', isGridChild: true, rowSpan: '1' });
   });
 
+  it('should not be a grid child when several grid children are selected', () => {
+    // mock
+    const frameId = addFrame(LayoutMode.grid);
+    const firstId = addRectangle();
+    const secondId = addRectangle();
+
+    moveIntoParent(firstId, frameId);
+    moveIntoParent(secondId, frameId);
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderUseColumnGridChildSpan();
+
+    // result
+    expect(result.current.isGridChild).toBe(false);
+  });
+
   it('should expose the explicit column and row span of a grid child', () => {
     // mock
     const frameId = addFrame(LayoutMode.grid);
