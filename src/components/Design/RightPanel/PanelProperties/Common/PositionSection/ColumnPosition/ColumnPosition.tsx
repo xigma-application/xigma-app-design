@@ -18,8 +18,9 @@ const ColumnPosition: FC = () => {
   const { t } = useTranslation();
   const [showConstraints, setShowConstraints] = useState(false);
   const { disabled: noParent, horizontal, isGridChild, vertical } = useColumnAlignment();
-  const { disabledX, disabledY, onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } = useColumnPosition();
   const hideConstraints = noParent || isGridChild;
+  const { disabledX, disabledY, displayX, displayY, onBlurX, onBlurY, onDragEnd, onDragStart, onScrubX, onScrubY, x, y } =
+    useColumnPosition();
 
   return (
     <Fragment>
@@ -34,6 +35,7 @@ const ColumnPosition: FC = () => {
         <ColumnPositionField
           ariaLabel={t(`${translationNameSpace}.ariaLabelX`)}
           disabled={disabledX}
+          displayValue={displayX}
           e2eValue="x"
           label="X"
           onBlur={onBlurX}
@@ -46,6 +48,7 @@ const ColumnPosition: FC = () => {
         <ColumnPositionField
           ariaLabel={t(`${translationNameSpace}.ariaLabelY`)}
           disabled={disabledY}
+          displayValue={displayY}
           e2eValue="y"
           label="Y"
           onBlur={onBlurY}

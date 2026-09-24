@@ -29,12 +29,12 @@ import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties
 const normalizeRotation = (rotation: number): number => Math.round(((((rotation + 90) % 360) + 360) % 360) * 1e4) / 1e4;
 
 export const buildRotationButtons = (
-  node: TBoxSceneNode | undefined,
+  nodes: TBoxSceneNode[],
   dispatch: AppDispatch,
   t: TFunction,
   imageCrop?: TSelectedImageCrop,
 ): TButtonGroup[] => {
-  const isFlipDisabled = imageCrop ? false : !node || node.type === NodeType.section;
+  const isFlipDisabled = imageCrop ? false : nodes.every((node) => node.type === NodeType.section);
 
   return [
     {
@@ -45,9 +45,9 @@ export const buildRotationButtons = (
           dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
           rotateImageCropRigidly(dispatch, imageCrop, normalizeRotation(imageCrop.crop.rotation));
           dispatch(endHistoryGesture());
-        } else if (node) {
+        } else if (nodes.length > 0) {
           dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-          rotateNodesRigidly(dispatch, node, normalizeRotation(node.rotation));
+          nodes.forEach((node) => rotateNodesRigidly(dispatch, node, normalizeRotation(node.rotation)));
           dispatch(endHistoryGesture());
         }
       },

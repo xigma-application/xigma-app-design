@@ -726,6 +726,7 @@
   "design.rightPanel.panelProperties.common.positionSection.columnPosition.tooltipY": "Pozycja Y",
   "design.rightPanel.panelProperties.common.positionSection.columnRotation.ariaLabel": "Obrót",
   "design.rightPanel.panelProperties.common.positionSection.columnRotation.label": "Obrót",
+  "design.rightPanel.panelProperties.common.positionSection.mixed": "Mixed",
   "design.rightPanel.panelProperties.common.positionSection.ignoreAutoLayoutAriaLabel": "Ignoruj auto layout",
   "design.rightPanel.panelProperties.common.positionSection.ignoreAutoLayoutTooltip": "Ignoruj auto layout",
   "design.rightPanel.panelProperties.common.positionSection.label": "Pozycja",

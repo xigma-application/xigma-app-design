@@ -14,6 +14,7 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
 export type TColumnRotationFieldProps = {
   ariaLabel: string;
+  displayValue: string;
   e2eValue: TE2EValue;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
@@ -24,6 +25,7 @@ export type TColumnRotationFieldProps = {
 
 export const ColumnRotationField: FC<TColumnRotationFieldProps> = ({
   ariaLabel,
+  displayValue,
   e2eValue,
   onBlur,
   onDragEnd,
@@ -33,7 +35,7 @@ export const ColumnRotationField: FC<TColumnRotationFieldProps> = ({
 }) => (
   <UITools.TextField
     aria-label={ariaLabel}
-    defaultValue={`${value}°`}
+    defaultValue={displayValue}
     e2eValue={e2eValue}
     onBlur={onBlur}
     stepNumbers={{ max: ROTATION_MAX, min: ROTATION_MIN }}

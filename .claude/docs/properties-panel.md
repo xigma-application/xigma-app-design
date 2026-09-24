@@ -84,6 +84,17 @@ node's folder. Today:
   The ⌃⌥T/V/H shortcuts are only shown in the menu, not wired up.
   Single-frame child alignment also goes through subtree translation now (so group children move
   with their members) and still writes each box child's constraint.
+- `Common/PositionSection` with **2+ selected layers**: X / Y (`useColumnPosition`, per-layer
+  `getPositionEntry`) and Rotation (`useColumnRotation`) show `positionSection.mixed` ("Mixed") when
+  the values differ (`getMixedOrValue`); the fields take a `displayValue` (the X/Y input switches to
+  `type="text"` for it) next to the numeric scrub `value`. A typed value is set on every layer (X/Y
+  skip layers whose axis is locked by auto layout or a constraint; the fields disable only when every
+  layer is locked), one undo step. Scrubbing moves/turns every layer by the same delta from where it
+  was at drag start (snapshotted in a ref on `onDragStart`, so the field stays Mixed). The rotate-90
+  button turns each layer on its own; the flip buttons (`buildRotationButtons` now takes the layer
+  list, disabled only when every layer is a section) run `handleFlipSelection`, which flips every
+  frame in the selection as a single frame (`flipFrameTree`) mirrored around the selection's centre,
+  so the layers swap places.
 - `Common/ColumnDimensions/` — the W/H row (and, for frames, the Fixed/Hug/Fill sizing menu and
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box

@@ -283,20 +283,19 @@ describe('handleFlipSelection', () => {
     expect(selectNodes(store.getState())).toEqual(before);
   });
 
-  it('should skip a frame but still flip the rest of a mixed selection', () => {
-    // mock
-    const frameId = addFrameNode({ x: 0, y: 0 });
+  it('should flip a frame inside a multi-selection as a single frame and swap its place with the rest of the selection', () => {
+    // mock: a 20px frame at 0 and a 20px rectangle at 80, so the shared box spans 0..100
+    const frameId = addFrameNode({ paddingLeft: 3, x: 0, y: 0 });
     const rectId = addRectangleNode({ x: 80, y: 0 });
     store.dispatch(setSelection([frameId, rectId]));
-    const frameBefore = selectNodes(store.getState())[frameId];
 
     // action
     handleFlipSelection(store.dispatch, 'horizontal');
 
-    // result — the frame is untouched, the rectangle mirrors around the shared bbox
+    // result
     const nodes = selectNodes(store.getState());
-    expect(nodes[frameId]).toEqual(frameBefore);
-    expect((nodes[rectId] as TRectangleNode).x).not.toBe(80);
+    expect(nodes[frameId]).toMatchObject({ paddingLeft: undefined, paddingRight: 3, x: 80 });
+    expect((nodes[rectId] as TRectangleNode).x).toBe(0);
   });
 
   it('should round-trip an image fill’s crop correctly across two consecutive flips, instead of reverting it to a stale pre-flip snapshot', () => {

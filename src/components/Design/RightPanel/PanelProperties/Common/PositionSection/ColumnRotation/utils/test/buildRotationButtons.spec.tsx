@@ -86,7 +86,7 @@ describe('buildRotationButtons', () => {
 
   it('should return one button for rotate and each flip axis', () => {
     // action
-    const buttons = buildRotationButtons(undefined, store.dispatch, t);
+    const buttons = buildRotationButtons([], store.dispatch, t);
 
     // result
     expect(buttons.map((button) => button.name)).toEqual(['ToggleRotate', 'FlipHorizontal', 'FlipVertical']);
@@ -94,7 +94,7 @@ describe('buildRotationButtons', () => {
 
   it('should render the translated rotate tooltip', () => {
     // action
-    const [rotateButton] = buildRotationButtons(undefined, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([], store.dispatch, t);
     render(<div>{rotateButton?.tooltip}</div>);
 
     // result
@@ -103,7 +103,7 @@ describe('buildRotationButtons', () => {
 
   it('should render the translated label and the keyboard shortcut in the flip tooltips', () => {
     // action
-    const [, flipHorizontalButton, flipVerticalButton] = buildRotationButtons(undefined, store.dispatch, t);
+    const [, flipHorizontalButton, flipVerticalButton] = buildRotationButtons([], store.dispatch, t);
     render(
       <div>
         <div>{flipHorizontalButton?.tooltip}</div>
@@ -120,7 +120,7 @@ describe('buildRotationButtons', () => {
 
   it('should do nothing on rotate click when no frame is selected', () => {
     // action
-    const [rotateButton] = buildRotationButtons(undefined, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([], store.dispatch, t);
 
     // result — no throw, nothing dispatched
     expect(() => rotateButton?.onClick()).not.toThrow();
@@ -131,7 +131,7 @@ describe('buildRotationButtons', () => {
     const frame = addFrameNode(20);
 
     // action
-    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([frame], store.dispatch, t);
     rotateButton?.onClick();
 
     // result
@@ -143,7 +143,7 @@ describe('buildRotationButtons', () => {
     const frame = addFrameNode(19.999999999999996);
 
     // action
-    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([frame], store.dispatch, t);
     rotateButton?.onClick();
 
     // result
@@ -155,7 +155,7 @@ describe('buildRotationButtons', () => {
     const frame = addFrameNode(315);
 
     // action
-    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([frame], store.dispatch, t);
     rotateButton?.onClick();
 
     // result
@@ -173,7 +173,7 @@ describe('buildRotationButtons', () => {
     const frame = selectNodes(store.getState())[staleFrame.id] as TFrameNode;
 
     // action
-    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t);
+    const [rotateButton] = buildRotationButtons([frame], store.dispatch, t);
     rotateButton?.onClick();
 
     // result — the child orbits the frame's own centre (10,10) by 90deg and tilts along with it
@@ -189,7 +189,7 @@ describe('buildRotationButtons', () => {
     store.dispatch(setSelection([id]));
 
     // action
-    const [, flipHorizontalButton] = buildRotationButtons(undefined, store.dispatch, t);
+    const [, flipHorizontalButton] = buildRotationButtons([], store.dispatch, t);
     flipHorizontalButton?.onClick();
 
     // result
@@ -202,7 +202,7 @@ describe('buildRotationButtons', () => {
     store.dispatch(setSelection([id]));
 
     // action
-    const [, , flipVerticalButton] = buildRotationButtons(undefined, store.dispatch, t);
+    const [, , flipVerticalButton] = buildRotationButtons([], store.dispatch, t);
     flipVerticalButton?.onClick();
 
     // result
@@ -214,7 +214,7 @@ describe('buildRotationButtons', () => {
     const frame = addFrameNode(0);
 
     // action
-    const [, flipHorizontal, flipVertical] = buildRotationButtons(frame, store.dispatch, t);
+    const [, flipHorizontal, flipVertical] = buildRotationButtons([frame], store.dispatch, t);
 
     // result
     expect(flipHorizontal.disabled).toBe(false);
@@ -226,7 +226,7 @@ describe('buildRotationButtons', () => {
     const section = { ...addFrameNode(0), type: NodeType.section } as unknown as TFrameNode;
 
     // action
-    const [, flipHorizontal, flipVertical] = buildRotationButtons(section, store.dispatch, t);
+    const [, flipHorizontal, flipVertical] = buildRotationButtons([section], store.dispatch, t);
 
     // result
     expect(flipHorizontal.disabled).toBe(true);
@@ -235,7 +235,7 @@ describe('buildRotationButtons', () => {
 
   it('should keep both flip buttons enabled while an image crop is being edited, even with no node selected', () => {
     // action
-    const buttons = buildRotationButtons(undefined, store.dispatch, t, {} as TSelectedImageCrop);
+    const buttons = buildRotationButtons([], store.dispatch, t, {} as TSelectedImageCrop);
 
     // result
     expect(buttons.find((button) => button.name === 'FlipHorizontal')?.disabled).toBe(false);
@@ -253,7 +253,7 @@ describe('buildRotationButtons', () => {
     const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
 
     // action
-    const [, flipHorizontalButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    const [, flipHorizontalButton] = buildRotationButtons([frame], store.dispatch, t, imageCrop);
     flipHorizontalButton?.onClick();
 
     // result — the paint's own flipX flipped, the frame's own geometry and flip state untouched
@@ -274,7 +274,7 @@ describe('buildRotationButtons', () => {
     const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
 
     // action
-    const [, , flipVerticalButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    const [, , flipVerticalButton] = buildRotationButtons([frame], store.dispatch, t, imageCrop);
     flipVerticalButton?.onClick();
 
     // result
@@ -294,7 +294,7 @@ describe('buildRotationButtons', () => {
     const imageCrop: TSelectedImageCrop = { crop, node: frame as never, paint, paintIndex: 0 };
 
     // action
-    const [rotateButton] = buildRotationButtons(frame, store.dispatch, t, imageCrop);
+    const [rotateButton] = buildRotationButtons([frame], store.dispatch, t, imageCrop);
     rotateButton?.onClick();
 
     // result — the crop rotated to 110° (20 + 90, wrapped like the frame's own rotate button), the frame itself untouched

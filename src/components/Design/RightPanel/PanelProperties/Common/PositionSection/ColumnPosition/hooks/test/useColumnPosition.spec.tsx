@@ -398,4 +398,92 @@ describe('useColumnPosition', () => {
     expect(readCrop(frameId)).toEqual({ height: 15, rotation: 0, width: 15, x: 40, y: 6 });
     expect(readNode(frameId)).toEqual({ x: 0, y: 0 });
   });
+
+  describe('multi-selection', () => {
+    const blurWith = (value: string): Parameters<ReturnType<typeof useColumnPosition>['onBlurX']>[0] =>
+      ({ target: { value } }) as unknown as Parameters<ReturnType<typeof useColumnPosition>['onBlurX']>[0];
+
+    it('should show Mixed for an axis whose values differ and the shared value for the other', () => {
+      // mock
+      store.dispatch(setSelection([addFrameNode(10, 5), addFrameNode(40, 5)]));
+
+      // before
+      const { result } = renderUseColumnPosition();
+
+      // result
+      expect(result.current.displayX).toBe('Mixed');
+      expect(result.current.displayY).toBe(5);
+    });
+
+    it('should set the same typed X on every selected layer, in a single undo step', () => {
+      // mock
+      const firstId = addFrameNode(10, 5);
+      const secondId = addFrameNode(40, 50);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnPosition();
+
+      // action
+      act(() => result.current.onBlurX(blurWith('100')));
+
+      // result
+      expect(readNode(firstId)).toEqual({ x: 100, y: 5 });
+      expect(readNode(secondId)).toEqual({ x: 100, y: 50 });
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect(readNode(firstId).x).toBe(10);
+      expect(readNode(secondId).x).toBe(40);
+    });
+
+    it('should move every selected layer by the same scrubbed delta from where it started, keeping the field Mixed', () => {
+      // mock
+      const firstId = addFrameNode(10, 5);
+      const secondId = addFrameNode(40, 5);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnPosition();
+
+      // action
+      act(() => result.current.onDragStart());
+      act(() => result.current.onScrubX(15));
+      act(() => result.current.onScrubX(20));
+      act(() => result.current.onDragEnd());
+
+      // result
+      expect(readNode(firstId).x).toBe(20);
+      expect(readNode(secondId).x).toBe(50);
+      expect(result.current.displayX).toBe('Mixed');
+    });
+
+    it('should skip a layer whose X is pinned by a constraint', () => {
+      // mock
+      const parentId = addFrameNode(0, 0);
+      const pinnedId = addFrameNode(5, 5);
+      const freeId = addFrameNode(200, 5);
+
+      nestFrame(pinnedId, parentId);
+      store.dispatch(updateNode({ changes: { alignment: { horizontal: AlignmentHorizontal.left } }, id: pinnedId }));
+      store.dispatch(setSelection([pinnedId, freeId]));
+
+      const pinnedBefore = readNode(pinnedId);
+
+      // before
+      const { result } = renderUseColumnPosition();
+
+      // action
+      act(() => result.current.onBlurX(blurWith('300')));
+
+      // result
+      expect(readNode(pinnedId)).toEqual(pinnedBefore);
+      expect(readNode(freeId).x).toBe(300);
+      expect(result.current.disabledX).toBe(false);
+    });
+  });
 });

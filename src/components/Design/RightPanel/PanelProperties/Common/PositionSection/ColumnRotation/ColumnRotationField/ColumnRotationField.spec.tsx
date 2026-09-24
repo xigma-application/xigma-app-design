@@ -12,6 +12,7 @@ const renderColumnRotationField = (overrides: Partial<Parameters<typeof ColumnRo
       onDragEnd={vi.fn()}
       onDragStart={vi.fn()}
       onScrub={vi.fn()}
+      displayValue="0°"
       value={0}
       {...overrides}
     />,
@@ -30,10 +31,18 @@ describe('ColumnRotationField snapshots', () => {
 describe('ColumnRotationField behaviors', () => {
   it('should render the current value in the input, suffixed with the degree sign', () => {
     // before
-    renderColumnRotationField({ value: 45 });
+    renderColumnRotationField({ displayValue: '45°', value: 45 });
 
     // result
     expect(screen.getByLabelText('Rotation')).toHaveValue('45°');
+  });
+
+  it('should render Mixed while the selected layers have different rotations', () => {
+    // before
+    renderColumnRotationField({ displayValue: 'Mixed', value: 45 });
+
+    // result
+    expect(screen.getByLabelText('Rotation')).toHaveValue('Mixed');
   });
 
   it('should call onBlur when the input loses focus', () => {

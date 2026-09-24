@@ -221,4 +221,71 @@ describe('useColumnRotation', () => {
     expect(readCrop(frameId)).toEqual({ height: 10, rotation: 90, width: 10, x: 5, y: 5 });
     expect(readRotation(frameId)).toBe(0);
   });
+
+  describe('multi-selection', () => {
+    it('should show Mixed while the selected layers have different rotations', () => {
+      // mock
+      store.dispatch(setSelection([addFrameNode(10), addFrameNode(30)]));
+
+      // before
+      const { result } = renderUseColumnRotation();
+
+      // result
+      expect(result.current.displayRotation).toBe('Mixed');
+    });
+
+    it('should set the same typed rotation on every selected layer', () => {
+      // mock
+      const firstId = addFrameNode(10);
+      const secondId = addFrameNode(30);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnRotation();
+
+      // action
+      act(() => result.current.onBlur({ target: { value: '45' } } as unknown as Parameters<typeof result.current.onBlur>[0]));
+
+      // result
+      expect(readRotation(firstId)).toBe(45);
+      expect(readRotation(secondId)).toBe(45);
+    });
+
+    it('should rotate every selected layer by the same scrubbed delta from its own starting angle', () => {
+      // mock
+      const firstId = addFrameNode(10);
+      const secondId = addFrameNode(30);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnRotation();
+
+      // action
+      act(() => result.current.onDragStart());
+      act(() => result.current.onScrub(15));
+      act(() => result.current.onScrub(25));
+      act(() => result.current.onDragEnd());
+
+      // result
+      expect(readRotation(firstId)).toBe(25);
+      expect(readRotation(secondId)).toBe(45);
+    });
+
+    it('should turn every selected layer 90 degrees on its own with the rotate button', () => {
+      // mock
+      const firstId = addFrameNode(10);
+      const secondId = addFrameNode(30);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnRotation();
+
+      // action
+      act(() => result.current.buttons[0].onClick());
+
+      // result
+      expect(readRotation(firstId)).toBe(100);
+      expect(readRotation(secondId)).toBe(120);
+    });
+  });
 });

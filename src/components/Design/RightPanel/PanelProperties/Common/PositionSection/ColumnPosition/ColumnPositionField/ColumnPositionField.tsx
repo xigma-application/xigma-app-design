@@ -15,6 +15,7 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 export type TColumnPositionFieldProps = {
   ariaLabel: string;
   disabled?: boolean;
+  displayValue: number | string;
   e2eValue: TE2EValue;
   label: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -28,6 +29,7 @@ export type TColumnPositionFieldProps = {
 export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
   ariaLabel,
   disabled = false,
+  displayValue,
   e2eValue,
   label,
   onBlur,
@@ -40,7 +42,7 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
   <Tooltip content={tooltip}>
     <UITools.TextField
       aria-label={ariaLabel}
-      defaultValue={value}
+      defaultValue={displayValue}
       disabled={disabled}
       e2eValue={e2eValue}
       onBlur={onBlur}
@@ -58,7 +60,7 @@ export const ColumnPositionField: FC<TColumnPositionFieldProps> = ({
           <UITools.InputAdornment label={label} />
         </ScrubbableInput>
       }
-      type="number"
+      type={typeof displayValue === 'number' ? 'number' : 'text'}
     />
   </Tooltip>
 );

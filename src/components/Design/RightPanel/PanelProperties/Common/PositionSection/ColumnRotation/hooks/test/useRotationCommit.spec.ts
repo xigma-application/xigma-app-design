@@ -13,7 +13,7 @@ describe('useRotationCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: '45°' });
 
     // action
-    useRotationCommit(0, onCommit)(focusEventFor(input));
+    useRotationCommit('0°', onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).toHaveBeenCalledWith(45);
@@ -25,7 +25,7 @@ describe('useRotationCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: '-90°' });
 
     // action
-    useRotationCommit(0, onCommit)(focusEventFor(input));
+    useRotationCommit('0°', onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).toHaveBeenCalledWith(-90);
@@ -37,7 +37,7 @@ describe('useRotationCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: '   ' });
 
     // action
-    useRotationCommit(42, onCommit)(focusEventFor(input));
+    useRotationCommit('42°', onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe('useRotationCommit', () => {
     const input = Object.assign(document.createElement('input'), { value: 'abc' });
 
     // action
-    useRotationCommit(7, onCommit)(focusEventFor(input));
+    useRotationCommit('7°', onCommit)(focusEventFor(input));
 
     // result
     expect(onCommit).not.toHaveBeenCalled();

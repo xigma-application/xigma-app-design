@@ -1,7 +1,11 @@
-import { FocusEvent } from 'react';
+import { FocusEvent, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // hooks
 import { usePositionCommit } from './usePositionCommit';
+
+// others
+import { translationNameSpace } from '../../constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -13,14 +17,17 @@ import { useAppDispatch, useAppSelector } from 'store';
 // utils
 import { commitColumnX } from './utils/commitColumnX';
 import { commitColumnY } from './utils/commitColumnY';
-import { getNodePositionInParent } from 'store/design/utils/getNodePositionInParent';
-import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
+import { getPositionEntry, TPositionEntry } from './utils/getPositionEntry';
+import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 export type TUseColumnPositionResult = {
   disabledX: boolean;
   disabledY: boolean;
+  displayX: number | string;
+  displayY: number | string;
   ignoresAutoLayout: boolean;
   onBlurX: TFunc<[FocusEvent<HTMLInputElement>]>;
   onBlurY: TFunc<[FocusEvent<HTMLInputElement>]>;
@@ -35,34 +42,81 @@ export type TUseColumnPositionResult = {
 };
 
 export const useColumnPosition = (): TUseColumnPositionResult => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingBoxSceneNode);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
-  const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
+  const entries = (imageCrop ? boxNodes.slice(0, 1) : boxNodes).map((boxNode) => getPositionEntry(boxNode, nodes, imageCrop));
+  const [node] = boxNodes;
+  const [entry] = entries;
   const id = node?.id ?? '';
-  const parentNode = node?.parentId ? nodes[node.parentId] : undefined;
-  const parent = parentNode && 'width' in parentNode ? parentNode : undefined;
-  const positionSource = imageCrop ? imageCrop.crop : node;
-  const local = positionSource && parent ? getNodePositionInParent(positionSource, parent) : undefined;
-  const x = local ? Math.round(local.x) : (positionSource?.x ?? 0);
-  const y = local ? Math.round(local.y) : (positionSource?.y ?? 0);
-  const managed = isManagedLayoutFrame(parent);
+  const x = entry?.x ?? 0;
+  const y = entry?.y ?? 0;
+  const mixedLabel = t(`${translationNameSpace}.mixed`);
+  const mixedX = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.x)) : x;
+  const mixedY = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.y)) : y;
+  const managed = isManagedLayoutFrame(entry?.parent);
   const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
+  const displayX = mixedX === 'mixed' ? mixedLabel : mixedX;
+  const displayY = mixedY === 'mixed' ? mixedLabel : mixedY;
 
-  const commitX = (nextX: number): void => commitColumnX(dispatch, imageCrop, id, parent, y, nextX);
-  const commitY = (nextY: number): void => commitColumnY(dispatch, imageCrop, id, parent, x, nextY);
+  const commitX = (nextX: number): void =>
+    entries.filter((item) => !item.disabledX).forEach((item) => commitColumnX(dispatch, imageCrop, item.id, item.parent, item.y, nextX));
+  const commitY = (nextY: number): void =>
+    entries.filter((item) => !item.disabledY).forEach((item) => commitColumnY(dispatch, imageCrop, item.id, item.parent, item.x, nextY));
+
+  const scrubStartRef = useRef<{ entries: TPositionEntry[]; x: number; y: number }>({ entries: [], x: 0, y: 0 });
+
+  const scrubX = (nextX: number): void => {
+    if (entries.length > 1) {
+      const start = scrubStartRef.current;
+
+      start.entries
+        .filter((item) => !item.disabledX)
+        .forEach((item) => commitColumnX(dispatch, imageCrop, item.id, item.parent, item.y, item.x + nextX - start.x));
+    } else {
+      commitX(nextX);
+    }
+  };
+
+  const scrubY = (nextY: number): void => {
+    if (entries.length > 1) {
+      const start = scrubStartRef.current;
+
+      start.entries
+        .filter((item) => !item.disabledY)
+        .forEach((item) => commitColumnY(dispatch, imageCrop, item.id, item.parent, item.x, item.y + nextY - start.y));
+    } else {
+      commitY(nextY);
+    }
+  };
+
+  const startScrub = (): void => {
+    scrubStartRef.current = { entries, x, y };
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+  };
+
+  const commitOnBlur =
+    (commit: TFunc<[number]>): TFunc<[number]> =>
+    (next): void => {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      commit(next);
+      dispatch(endHistoryGesture());
+    };
 
   return {
-    disabledX: !imageCrop && ((managed && !ignoresAutoLayout) || node?.alignment?.horizontal !== undefined),
-    disabledY: !imageCrop && ((managed && !ignoresAutoLayout) || node?.alignment?.vertical !== undefined),
+    disabledX: entries.length > 0 && entries.every((item) => item.disabledX),
+    disabledY: entries.length > 0 && entries.every((item) => item.disabledY),
+    displayX,
+    displayY,
     ignoresAutoLayout,
-    onBlurX: usePositionCommit(x, commitX),
-    onBlurY: usePositionCommit(y, commitY),
+    onBlurX: usePositionCommit(displayX, commitOnBlur(commitX)),
+    onBlurY: usePositionCommit(displayY, commitOnBlur(commitY)),
     onDragEnd: () => dispatch(endHistoryGesture()),
-    onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
-    onScrubX: commitX,
-    onScrubY: commitY,
+    onDragStart: startScrub,
+    onScrubX: scrubX,
+    onScrubY: scrubY,
     onToggleIgnoreAutoLayout: () => dispatch(updateNode({ changes: { ignoreAutoLayout: ignoresAutoLayout ? undefined : true }, id })),
     showIgnoreAutoLayoutToggle: managed && !imageCrop,
     x,

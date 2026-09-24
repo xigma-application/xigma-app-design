@@ -1,4 +1,4 @@
-import { FocusEvent } from 'react';
+import { FocusEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -6,6 +6,9 @@ import { rotateNodesRigidly } from 'components/Design/Canvas/hooks/useSelectionT
 
 // hooks
 import { useRotationCommit } from './useRotationCommit';
+
+// others
+import { translationNameSpace } from '../../constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -18,12 +21,14 @@ import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 
 // utils
 import { buildRotationButtons } from '../utils/buildRotationButtons';
-import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
+import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
 import { rotateImageCropRigidly } from 'components/Design/Canvas/hooks/useSelectionTool/utils/handlePointerMove/continueRotateDrag/rotateImageCropRigidly';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 export type TUseColumnRotationResult = {
   buttons: TButtonGroup[];
+  displayRotation: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
@@ -34,17 +39,38 @@ export type TUseColumnRotationResult = {
 export const useColumnRotation = (): TUseColumnRotationResult => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const boxNodes = useAppSelector(selectSelectedNodes).filter(isExistingBoxSceneNode);
   const imageCrop = useAppSelector(selectSelectedImageCrop);
-  const node = selectedNode && isBoxSceneNode(selectedNode) ? selectedNode : undefined;
+  const [node] = boxNodes;
   const rotation = imageCrop ? imageCrop.crop.rotation : (node?.rotation ?? 0);
+  const mixedOrRotation = !imageCrop && boxNodes.length > 1 ? getMixedOrValue(boxNodes.map((boxNode) => boxNode.rotation)) : rotation;
+  const displayRotation = mixedOrRotation === 'mixed' ? t(`${translationNameSpace}.mixed`) : `${mixedOrRotation}°`;
 
   const commitRotation = (nextRotation: number): void => {
     if (imageCrop) {
       rotateImageCropRigidly(dispatch, imageCrop, nextRotation);
-    } else if (node) {
-      rotateNodesRigidly(dispatch, node, nextRotation);
+    } else {
+      boxNodes.forEach((boxNode) => rotateNodesRigidly(dispatch, boxNode, nextRotation));
     }
+  };
+
+  const scrubStartRef = useRef<{ rotation: number; rotations: Record<string, number> }>({ rotation: 0, rotations: {} });
+
+  const scrubRotation = (nextRotation: number): void => {
+    if (!imageCrop && boxNodes.length > 1) {
+      const start = scrubStartRef.current;
+
+      boxNodes.forEach((boxNode) =>
+        rotateNodesRigidly(dispatch, boxNode, (start.rotations[boxNode.id] ?? boxNode.rotation) + nextRotation - start.rotation),
+      );
+    } else {
+      commitRotation(nextRotation);
+    }
+  };
+
+  const startScrub = (): void => {
+    scrubStartRef.current = { rotation, rotations: Object.fromEntries(boxNodes.map((boxNode) => [boxNode.id, boxNode.rotation])) };
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
   };
 
   const commitRotationOnBlur = (nextRotation: number): void => {
@@ -54,11 +80,12 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
   };
 
   return {
-    buttons: buildRotationButtons(node, dispatch, t, imageCrop),
-    onBlur: useRotationCommit(rotation, commitRotationOnBlur),
+    buttons: buildRotationButtons(boxNodes, dispatch, t, imageCrop),
+    displayRotation,
+    onBlur: useRotationCommit(displayRotation, commitRotationOnBlur),
     onDragEnd: () => dispatch(endHistoryGesture()),
-    onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
-    onScrub: commitRotation,
+    onDragStart: startScrub,
+    onScrub: scrubRotation,
     rotation,
   };
 };

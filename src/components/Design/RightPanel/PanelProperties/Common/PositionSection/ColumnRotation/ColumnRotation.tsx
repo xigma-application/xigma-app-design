@@ -13,12 +13,13 @@ import { translationNameSpace } from './constants';
 
 const ColumnRotation: FC = () => {
   const { t } = useTranslation();
-  const { buttons, onBlur, onDragEnd, onDragStart, onScrub, rotation } = useColumnRotation();
+  const { buttons, displayRotation, onBlur, onDragEnd, onDragStart, onScrub, rotation } = useColumnRotation();
 
   return (
     <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
       <ColumnRotationField
         ariaLabel={t(`${translationNameSpace}.ariaLabel`)}
+        displayValue={displayRotation}
         e2eValue="rotation"
         onBlur={onBlur}
         onDragEnd={onDragEnd}

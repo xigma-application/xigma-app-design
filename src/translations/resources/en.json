@@ -714,6 +714,7 @@
   "design.rightPanel.panelProperties.common.positionSection.columnPosition.tooltipY": "Y-position",
   "design.rightPanel.panelProperties.common.positionSection.columnRotation.ariaLabel": "Rotation",
   "design.rightPanel.panelProperties.common.positionSection.columnRotation.label": "Rotation",
+  "design.rightPanel.panelProperties.common.positionSection.mixed": "Mixed",
   "design.rightPanel.panelProperties.common.positionSection.ignoreAutoLayoutAriaLabel": "Ignore auto layout",
   "design.rightPanel.panelProperties.common.positionSection.ignoreAutoLayoutTooltip": "Ignore auto layout",
   "design.rightPanel.panelProperties.common.positionSection.label": "Position",
