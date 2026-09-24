@@ -20,6 +20,7 @@ const PresentOptionsMenu: FC = () => {
   return (
     <>
       <PopoverItem
+        iconSize={14}
         icon="Play"
         label={t(`${translationNameSpace}.present`)}
         onClick={selectPresentMode('present')}
@@ -27,6 +28,7 @@ const PresentOptionsMenu: FC = () => {
         shortcut={KEYBOARD_SHORTCUTS.present.join('')}
       />
       <PopoverItem
+        iconSize={14}
         icon="PreviewPlay"
         label={t(`${translationNameSpace}.preview`)}
         onClick={selectPresentMode('preview')}

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // others
-import { ICON_SIZE, MORE_TOOLS } from '../../constants';
+import { MORE_TOOLS } from '../../constants';
 
 const { PopoverItem } = UITools.PopoverCompound;
 
@@ -15,7 +15,7 @@ const ImageEditMoreDropdownItems: FC = () => {
   return (
     <Fragment>
       {MORE_TOOLS.map((tool) => (
-        <PopoverItem icon={tool.icon} iconSize={ICON_SIZE} key={tool.labelKey} label={t(tool.labelKey)} withCheck={false} />
+        <PopoverItem icon={tool.icon} key={tool.labelKey} label={t(tool.labelKey)} withCheck={false} />
       ))}
     </Fragment>
   );

@@ -29,7 +29,6 @@ const EffectTypeItems: FC<TEffectTypeItemsProps> = ({ disabledTypes = [], onSele
     <PopoverItem
       disabled={!isEffectSupported(type) || disabledTypes.includes(type)}
       icon={EFFECT_ICONS[type]}
-      iconSize={24}
       key={type}
       label={t(`${translationNameSpace}.menu.options.${type}`)}
       onClick={(): void => onSelect(type)}

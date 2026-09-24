@@ -33,7 +33,7 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
   className = '',
   disabled = false,
   icon,
-  iconSize = 14,
+  iconSize = 24,
   label,
   maxWidth,
   onClick,

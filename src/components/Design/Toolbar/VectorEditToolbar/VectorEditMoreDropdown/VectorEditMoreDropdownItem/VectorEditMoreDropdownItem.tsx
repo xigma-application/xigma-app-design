@@ -28,7 +28,6 @@ const VectorEditMoreDropdownItem: FC<TVectorEditMoreDropdownItemProps> = ({ sele
     <PopoverItem
       disabled={isDisabled}
       icon={TOOL_ICON[tool.toolName]}
-      iconSize={24}
       label={t(TOOL_LABEL[tool.toolName])}
       onClick={handleClick}
       selected={selected}

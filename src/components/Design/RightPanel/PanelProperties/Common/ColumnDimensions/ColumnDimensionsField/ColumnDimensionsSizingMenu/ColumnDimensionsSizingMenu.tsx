@@ -64,7 +64,6 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
     <>
       <PopoverItem
         icon={isWidth ? 'FixedWidth' : 'FixedHeight'}
-        iconSize={24}
         label={t(`${translationNameSpace}.${isWidth ? 'fixedWidth' : 'fixedHeight'}`, {
           value: typeof value === 'number' ? Math.round(value) : value,
         })}
@@ -74,7 +73,6 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
       {canHug && (
         <PopoverItem
           icon={isWidth ? 'AutoWidth' : 'AutoHeight'}
-          iconSize={24}
           label={t(`${translationNameSpace}.hug`)}
           onClick={() => onSelect(SizingMode.hug)}
           selected={mode === SizingMode.hug}
@@ -83,7 +81,6 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
       {canFill && (
         <PopoverItem
           icon={isWidth ? 'WidthRestricted' : 'HeightRestricted'}
-          iconSize={24}
           label={t(`${translationNameSpace}.${isWidth ? 'fillWidth' : 'fillHeight'}`)}
           onClick={() => onSelect(SizingMode.fill)}
           selected={mode === SizingMode.fill}
@@ -92,14 +89,13 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
       {canHug && (
         <Fragment>
           <PopoverSeparator />
-          <PopoverItem icon={isWidth ? 'MinWidth' : 'MinHeight'} iconSize={24} label={minLabel} onClick={onRevealMin} />
-          <PopoverItem icon={isWidth ? 'MaxWidth' : 'MaxHeight'} iconSize={24} label={maxLabel} onClick={onRevealMax} />
+          <PopoverItem icon={isWidth ? 'MinWidth' : 'MinHeight'} label={minLabel} onClick={onRevealMin} />
+          <PopoverItem icon={isWidth ? 'MaxWidth' : 'MaxHeight'} label={maxLabel} onClick={onRevealMax} />
           {(minShown || maxShown) && (
             <Fragment>
               <PopoverSeparator />
               <PopoverItem
                 icon="RemoveFit"
-                iconSize={24}
                 label={t(`${translationNameSpace}.${getRemoveBoundsLabelKey(isWidth, minShown, maxShown)}`)}
                 onClick={onRemoveBounds}
               />
@@ -108,7 +104,7 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
         </Fragment>
       )}
       <PopoverSeparator />
-      <PopoverItem icon="Variables" iconSize={24} label={t(`${translationNameSpace}.applyVariable`)} />
+      <PopoverItem icon="Variables" label={t(`${translationNameSpace}.applyVariable`)} />
     </>
   );
 };

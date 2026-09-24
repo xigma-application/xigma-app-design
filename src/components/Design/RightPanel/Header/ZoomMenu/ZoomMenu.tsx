@@ -79,18 +79,21 @@ const ZoomMenu: FC = () => {
       </div>
       <PopoverSeparator />
       <PopoverItem
+        iconSize={14}
         label={t(VIEW_MENU_ZOOM_IN_KEY)}
         onClick={handleZoomInClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomIn.join('')}
         withCheck={false}
       />
       <PopoverItem
+        iconSize={14}
         label={t(VIEW_MENU_ZOOM_OUT_KEY)}
         onClick={handleZoomOutClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomOut.join('')}
         withCheck={false}
       />
       <PopoverItem
+        iconSize={14}
         label={t(VIEW_MENU_ZOOM_TO_FIT_KEY)}
         onClick={handleZoomToFitClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomToFit.join('')}
@@ -106,7 +109,7 @@ const ZoomMenu: FC = () => {
         />
       ))}
       <PopoverSeparator />
-      <PopoverItem disabled label={t(VIEW_MENU_PIXEL_PREVIEW_KEY)} withCheck={false} />
+      <PopoverItem iconSize={14} disabled label={t(VIEW_MENU_PIXEL_PREVIEW_KEY)} withCheck={false} />
       <PopoverItem disabled label={t(VIEW_MENU_PIXEL_GRID_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.pixelGrid.join('')} />
       <PopoverItem
         disabled
@@ -126,7 +129,7 @@ const ZoomMenu: FC = () => {
         selected={areRulersVisible}
         shortcut={KEYBOARD_SHORTCUTS.rulers.join('')}
       />
-      <PopoverItem disabled label={t(VIEW_MENU_OUTLINES_KEY)} withCheck={false} />
+      <PopoverItem iconSize={14} disabled label={t(VIEW_MENU_OUTLINES_KEY)} withCheck={false} />
       <PopoverSeparator />
       <PopoverItem
         disabled

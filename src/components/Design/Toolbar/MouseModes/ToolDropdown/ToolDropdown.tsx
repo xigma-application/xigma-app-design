@@ -57,7 +57,6 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
         <PopoverItem
           className={styles.ToolDropdown__item}
           icon={TOOL_ICON[groupTool]}
-          iconSize={24}
           key={groupTool}
           label={t(TOOL_LABEL[groupTool])}
           onClick={handleSelectGroupTool(groupTool)}

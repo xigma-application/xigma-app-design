@@ -31,7 +31,6 @@ export const DistributeMenu: FC = () => {
         <PopoverItem
           disabled={!enabledActions[action]}
           icon={action === 'tidyUp' ? tidyUpIcon : name}
-          iconSize={24}
           key={labelKey}
           label={t(labelKey)}
           onClick={(): void => onAction(action)}

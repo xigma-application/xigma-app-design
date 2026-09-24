@@ -51,7 +51,6 @@ const StrokeSidesMenu: FC<TStrokeSidesMenuProps> = ({ hidden = false, onSelect, 
           {option === StrokeSides.custom && <PopoverSeparator />}
           <PopoverItem
             icon={getStrokeSidesIcon(option)}
-            iconSize={24}
             label={t(`${translationNameSpace}.sides.options.${option}`)}
             onClick={() => onSelect(option)}
             selected={option === sides}

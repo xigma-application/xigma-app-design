@@ -25,7 +25,6 @@ const LayoutGuideTypeItems: FC<TLayoutGuideTypeItemsProps> = ({ onSelect, select
       {LAYOUT_GUIDE_MENU_TYPES.map((type) => (
         <PopoverItem
           icon={LAYOUT_GUIDE_ICONS[type]}
-          iconSize={24}
           key={type}
           label={t(`${translationNameSpace}.menu.options.${type}`)}
           onClick={(): void => onSelect(type)}

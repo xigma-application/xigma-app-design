@@ -44,6 +44,7 @@ const FrameHeaderMenu: FC = () => {
           <PopoverSeparator />
           {group.presets.map((preset) => (
             <PopoverItem
+              iconSize={14}
               key={preset.label}
               label={preset.label}
               maxWidth={PRESET_ITEM_MAX_WIDTH_PX}
