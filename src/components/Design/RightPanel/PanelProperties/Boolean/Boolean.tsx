@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import BooleanHeader from './BooleanHeader/BooleanHeader';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
+import ColumnSpacing from '../Common/ColumnSpacing/ColumnSpacing';
 import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import Export from '../Export/Export';
 import FillSection from '../Common/FillSection/FillSection';
@@ -24,6 +25,7 @@ const BooleanPanel: FC = () => {
       <PositionSection />
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <ColumnDimensions />
+        <ColumnSpacing />
       </UITools.Section>
       <AppearanceSection withCornerRadius={false} />
       <FillSection />

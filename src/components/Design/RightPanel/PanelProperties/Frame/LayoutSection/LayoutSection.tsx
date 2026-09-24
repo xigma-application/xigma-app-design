@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ColumnAlignmentLayout from './ColumnAlignmentLayout/ColumnAlignmentLayout';
 import ColumnClipContent from './ColumnClipContent/ColumnClipContent';
 import ColumnDimensions from '../../Common/ColumnDimensions/ColumnDimensions';
+import ColumnSpacing from '../../Common/ColumnSpacing/ColumnSpacing';
 import ColumnFlow from './ColumnFlow/ColumnFlow';
 import ColumnGridChildSpan from '../../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import ColumnMinMaxDimensions from './ColumnMinMaxDimensions/ColumnMinMaxDimensions';
@@ -26,6 +27,7 @@ const LayoutSection: FC = () => {
     <UITools.Section component={<LayoutSectionButtons />} e2eValue="layout" label={t(`${translationNameSpace}.label`)}>
       <ColumnFlow />
       <ColumnDimensions />
+      <ColumnSpacing />
       <ColumnGridChildSpan />
       <ColumnMinMaxDimensions />
       {!isMixedLayout && <ColumnAlignmentLayout />}

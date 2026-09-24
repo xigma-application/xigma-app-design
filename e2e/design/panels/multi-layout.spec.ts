@@ -147,3 +147,32 @@ test.describe('Layout section with several frames selected', () => {
     ]);
   });
 });
+
+test('with two rectangles selected, typing a horizontal Spacing moves the second one to that gap after the first', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-multi-layout-spacing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 800, 300);
+  await designPage.drawRectangle(900, 200, 1000, 300);
+  await designPage.click(750, 250, { shift: true });
+
+  const spacing = page.locator('[data-test-text-field-input="spacing-horizontal"]');
+
+  await expect(spacing).toHaveValue('100');
+
+  await spacing.click();
+  await spacing.fill('20');
+  await spacing.press('Enter');
+
+  const xs = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return rootOrder.map((id) => (nodes[id] as { x: number }).x).sort((a, b) => a - b);
+  });
+
+  expect(xs[1] - xs[0]).toBe(120);
+});

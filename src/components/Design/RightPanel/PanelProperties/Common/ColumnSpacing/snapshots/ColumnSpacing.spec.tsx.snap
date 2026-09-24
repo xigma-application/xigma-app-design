@@ -1,0 +1,128 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnSpacing snapshots > should render the spacing fields for several layers 1`] = `
+<DocumentFragment>
+  <div
+    class="_SectionColumn_84b4eb _SectionColumn--with-bottom-margin_84b4eb"
+    data-test-section=""
+  >
+    <div
+      class="_SectionColumnLabels_ed28d5"
+      style="width: calc(100% - 32px);"
+    >
+      <span
+        class="_Label_f37f38 _Label--secondary_f37f38 _SectionColumnLabels__label_ed28d5"
+        style="font-size: 9px;"
+      >
+        Spacing
+      </span>
+    </div>
+    <div
+      class="_SectionColumn__row_84b4eb"
+    >
+      <div
+        class="_SectionColumnContent_e7fe0a _SectionColumnContent--two-inputs_e7fe0a"
+        style="width: calc(100% - 32px);"
+      >
+        <div
+          class="_TextField_bd2800"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="spacing-horizontal"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <div
+                class="_InputAdornment_bfc2de"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-2);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M12 6a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0v-11A.5.5 0 0 1 12 6M9 8a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zm0 2V9H7v6h2zm9-1a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1zm-1 0v6h-2V9z"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <input
+              aria-label="Horizontal spacing"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="spacing-horizontal"
+              type="number"
+              value="10"
+            />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
+          </div>
+        </div>
+        <div
+          class="_TextField_bd2800"
+        >
+          <div
+            class="_TextFieldWrapper_9a3a67 _TextFieldWrapper--filled_9a3a67"
+            data-test-text-field="spacing-vertical"
+          >
+            <div
+              class="ScrubbableInput"
+            >
+              <div
+                class="_InputAdornment_bfc2de"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="24"
+                  fill="none"
+                  height="24"
+                  style="color: var(--color-neutral-2);"
+                  viewBox="0 0 24 24"
+                  width="24"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M16 9a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1zm-2 0h1V7H9v2zm4 2.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1 0-1h11a.5.5 0 0 1 .5.5M15 17a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1zm0-1H9v-2h6z"
+                    data-svg-property="fill"
+                    fill="white"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <input
+              aria-label="Vertical spacing"
+              class="_TextFieldWrapper__input_9a3a67"
+              data-state="closed"
+              data-test-bypass-global-shortcuts="true"
+              data-test-text-field-input="spacing-vertical"
+              type="number"
+              value="-20"
+            />
+            <span
+              class="_TextFieldWrapper__endAdornment_9a3a67"
+            />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="_SectionColumnButtonIcons_71f71e"
+        />
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

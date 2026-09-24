@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 // components
 import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
+import ColumnSpacing from '../Common/ColumnSpacing/ColumnSpacing';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import Export from '../Export/Export';
@@ -25,6 +26,7 @@ const Rectangle: FC = () => {
       <PositionSection />
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <ColumnDimensions />
+        <ColumnSpacing />
         <ColumnGridChildSpan />
       </UITools.Section>
       <AppearanceSection />
