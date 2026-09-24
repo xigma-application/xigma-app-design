@@ -23,14 +23,15 @@ export type TColumnDimensionsFieldProps = {
   axis: 'height' | 'width';
   canFill?: boolean;
   canHug?: boolean;
+  displayValue?: number | string;
   e2eValue: TE2EValue;
   hasMax?: boolean;
   hasMin?: boolean;
   label: string;
   maxShown?: boolean;
-  maxValue?: number;
+  maxValue?: number | string;
   minShown?: boolean;
-  minValue?: number;
+  minValue?: number | string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
@@ -50,6 +51,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   axis,
   canFill = false,
   canHug = false,
+  displayValue,
   e2eValue,
   hasMax = false,
   hasMin = false,
@@ -77,7 +79,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   return (
     <UITools.TextField
       aria-label={ariaLabel}
-      defaultValue={value}
+      defaultValue={displayValue ?? value}
       e2eValue={e2eValue}
       endAdornment={
         <ColumnDimensionsFieldEndAdornment
@@ -95,7 +97,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           onRevealMin={onRevealMin}
           onSelectSizingMode={onSelectSizingMode}
           sizingMode={sizingMode}
-          value={value}
+          value={displayValue ?? value}
         />
       }
       onBlur={onBlur}
@@ -114,7 +116,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
           {minMaxIcon ? <UITools.InputAdornment icon={minMaxIcon} /> : <UITools.InputAdornment label={label} />}
         </ScrubbableInput>
       }
-      type="number"
+      type={typeof (displayValue ?? value) === 'number' ? 'number' : 'text'}
     />
   );
 };

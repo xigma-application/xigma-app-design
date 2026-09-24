@@ -17,6 +17,7 @@ import { selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TRotationScrubStart } from '../types';
 import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
 
 // utils
@@ -54,7 +55,7 @@ export const useColumnRotation = (): TUseColumnRotationResult => {
     }
   };
 
-  const scrubStartRef = useRef<{ rotation: number; rotations: Record<string, number> }>({ rotation: 0, rotations: {} });
+  const scrubStartRef = useRef<TRotationScrubStart>({ rotation: 0, rotations: {} });
 
   const scrubRotation = (nextRotation: number): void => {
     if (!imageCrop && boxNodes.length > 1) {

@@ -18,6 +18,8 @@ import { TE2EValue } from 'shared/E2EDataAttributes/types';
 
 export type TColumnMinMaxDimensionsFieldProps = {
   ariaLabel: string;
+  disabled?: boolean;
+  displayValue?: number | string;
   e2eValue: TE2EValue;
   hintField: TDimensionHintField;
   icon: TIconProps['name'];
@@ -30,6 +32,8 @@ export type TColumnMinMaxDimensionsFieldProps = {
 
 export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> = ({
   ariaLabel,
+  disabled = false,
+  displayValue,
   e2eValue,
   hintField,
   icon,
@@ -49,7 +53,8 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
   return (
     <UITools.TextField
       aria-label={ariaLabel}
-      defaultValue={value}
+      defaultValue={displayValue ?? value}
+      disabled={disabled}
       e2eValue={e2eValue}
       inputRef={inputRef}
       onBlur={onBlur}
@@ -57,11 +62,19 @@ export const ColumnMinMaxDimensionsField: FC<TColumnMinMaxDimensionsFieldProps> 
       onMouseEnter={hintHover.onMouseEnter}
       onMouseLeave={hintHover.onMouseLeave}
       startAdornment={
-        <ScrubbableInput max={DIMENSIONS_MAX} min={0} onChange={onScrub} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value ?? 0}>
+        <ScrubbableInput
+          disabled={disabled}
+          max={DIMENSIONS_MAX}
+          min={0}
+          onChange={onScrub}
+          onMouseDown={onDragStart}
+          onMouseUp={onDragEnd}
+          value={value ?? 0}
+        >
           <UITools.InputAdornment icon={icon} />
         </ScrubbableInput>
       }
-      type="number"
+      type={typeof (displayValue ?? value) === 'string' ? 'text' : 'number'}
     />
   );
 };

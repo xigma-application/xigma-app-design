@@ -95,6 +95,22 @@ node's folder. Today:
   list, disabled only when every layer is a section) run `handleFlipSelection`, which flips every
   frame in the selection as a single frame (`flipFrameTree`) mirrored around the selection's centre,
   so the layers swap places.
+- `Common/ColumnDimensions` with **2+ selected layers**: W / H show `columnDimensions.mixed` when they
+  differ (fields take `displayValue`, switch to `type="text"`). A typed value goes through
+  `commitNodeDimension` per layer (its own `lockedAspectRatio` and min/max clamp, like Figma — the
+  bounds are clamped to, not removed), one undo step; scrubbing resizes each by the same delta from a
+  drag-start snapshot (`TDimensionsScrubStart`, `types.ts`). After a multi commit the input text is rewritten from
+  the store (`useDimensionsCommit` / `usePositionCommit`'s third argument), because the fields are
+  uncontrolled and a Mixed → Mixed result would otherwise leave the typed number showing. The W/H
+  menu's min/max state (`useToggleColumnMinMax(nodes, mixedLabel)`, helpers in `hooks/utils/`:
+  `getBoundDisplayValue`, `hasBoundOnSome`, `hasBoundOnEvery`) shows "Min width: Mixed" etc. for
+  differing or partly set bounds; the field's min/max icon replaces the W/H letter only when every
+  selected frame has that bound; a bound counts as present for reveal/remove when any frame has it, and
+  "remove bounds" clears it on every frame. `Frame/LayoutSection/ColumnMinMaxDimensions` shows the
+  shared bound or `columnMinMaxDimensions.mixed` (differing or partly unset). A bound only some frames
+  have is disabled (like Figma); differing values stay editable and a typed W/H is clamped per frame,
+  so min 15 / min 300 with W = 200 stays Mixed (200 and 300); otherwise a typed or scrubbed bound goes to every frame via `getMinMaxBoundChanges` (keeps min ≤ max, clamps the size). The
+  lock button and Fixed/Hug/Fill still act on the first layer only.
 - `Common/ColumnDimensions/` — the W/H row (and, for frames, the Fixed/Hug/Fill sizing menu and
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box

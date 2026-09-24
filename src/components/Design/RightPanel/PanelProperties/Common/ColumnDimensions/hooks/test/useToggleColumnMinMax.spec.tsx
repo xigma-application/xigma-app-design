@@ -55,7 +55,7 @@ describe('useToggleColumnMinMax', () => {
   it('should reveal an empty minWidth row without writing anything to the node', () => {
     // mock
     const frameId = addFrameNode();
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action
     act(() => result.current.onRevealMinWidth());
@@ -69,7 +69,7 @@ describe('useToggleColumnMinMax', () => {
   it('should hide the revealed-but-empty minWidth row on a second reveal toggle', () => {
     // mock
     const frameId = addFrameNode();
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action
     act(() => result.current.onRevealMinWidth());
@@ -86,7 +86,7 @@ describe('useToggleColumnMinMax', () => {
 
     store.dispatch(updateNode({ changes: { minWidth: 40 }, id: frameId }));
 
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action — reveal twice; the value must survive both
     act(() => result.current.onRevealMinWidth());
@@ -103,7 +103,7 @@ describe('useToggleColumnMinMax', () => {
 
     store.dispatch(updateNode({ changes: { maxHeight: 90 }, id: frameId }));
 
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // result
     expect(result.current.maxHeightValue).toBe(90);
@@ -120,7 +120,7 @@ describe('useToggleColumnMinMax', () => {
     store.dispatch(setMinMaxRevealed({ bound: 'minWidth', value: true }));
     store.dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: true }));
 
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action
     act(() => result.current.onRemoveWidthBounds());
@@ -138,7 +138,7 @@ describe('useToggleColumnMinMax', () => {
 
     store.dispatch(updateNode({ changes: { maxHeight: 90, minHeight: 10 }, id: frameId }));
 
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action
     act(() => result.current.onRemoveHeightBounds());
@@ -153,7 +153,7 @@ describe('useToggleColumnMinMax', () => {
   it('should reveal each empty bound row independently without writing to the node', () => {
     // mock
     const frameId = addFrameNode();
-    const { result } = renderHook(() => useToggleColumnMinMax(frameId, readNode(frameId)), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([readNode(frameId)], 'Mixed'), { wrapper });
 
     // action
     act(() => result.current.onRevealMaxWidth());
@@ -169,7 +169,7 @@ describe('useToggleColumnMinMax', () => {
 
   it('should not throw when there is no node', () => {
     // before
-    const { result } = renderHook(() => useToggleColumnMinMax('missing-id', undefined), { wrapper });
+    const { result } = renderHook(() => useToggleColumnMinMax([], 'Mixed'), { wrapper });
 
     // action / result
     expect(() => act(() => result.current.onRevealMinWidth())).not.toThrow();

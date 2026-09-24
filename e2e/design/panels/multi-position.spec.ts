@@ -81,4 +81,55 @@ test.describe('Position section with several frames selected', () => {
     expect(firstAfter.x).toBe(left + right - firstBefore.x - firstBefore.width);
     expect(secondAfter.x).toBe(left + right - secondBefore.x - secondBefore.width);
   });
+
+  test('W shows Mixed and a typed width resizes both frames to it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-multi-position-width');
+    await expect(designPage.canvas).toBeVisible();
+
+    await drawTwoFramesAndSelectBoth(designPage);
+
+    const widthInput = page.locator('[data-test-text-field-input="width"]');
+
+    await expect(widthInput).toHaveValue('Mixed');
+
+    await widthInput.click();
+    await widthInput.fill('150');
+    await widthInput.press('Enter');
+
+    const frames = await readRootFrames(page);
+
+    expect(frames.map((frame) => frame.width)).toEqual([150, 150]);
+  });
+
+  test("a typed width below one frame's min leaves the field on Mixed instead of the typed number", async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-multi-position-width-min');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 250, 900, 310);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      store.dispatch(updateNode({ changes: { minWidth: 10 }, id: pages[activePageId].rootOrder[1] }));
+    });
+    await designPage.click(615, 188);
+    await designPage.click(815, 238, { shift: true });
+
+    const widthInput = page.locator('[data-test-text-field-input="width"]');
+
+    await widthInput.click();
+    await widthInput.fill('5');
+    await widthInput.press('Enter');
+
+    const frames = await readRootFrames(page);
+
+    expect(frames.map((frame) => frame.width)).toEqual([5, 10]);
+    await expect(widthInput).toHaveValue('Mixed');
+  });
 });

@@ -1,5 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 // hooks
 import { useAppDispatch, useAppSelector } from 'store';
+
+// others
+import { translationNameSpace } from '../constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
@@ -9,11 +14,22 @@ import { setMinMaxRevealed, updateNode } from 'store/design/slice';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TFrameNode, TSceneNode } from 'types/design/types';
+import { TRevealedMinMax } from 'store/design/types';
 
 // utils
-import { clampAutoLayoutSize } from 'store/design/utils/autoLayout/clampAutoLayoutSize';
+import { getMinMaxBoundChanges } from './utils/getMinMaxBoundChanges';
+import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
 
 export type TUseColumnMinMaxDimensionsResult = {
+  disabledMaxHeight: boolean;
+  disabledMaxWidth: boolean;
+  disabledMinHeight: boolean;
+  disabledMinWidth: boolean;
+  displayMaxHeight: number | string | undefined;
+  displayMaxWidth: number | string | undefined;
+  displayMinHeight: number | string | undefined;
+  displayMinWidth: number | string | undefined;
   hasMaxHeight: boolean;
   hasMaxWidth: boolean;
   hasMinHeight: boolean;
@@ -22,6 +38,10 @@ export type TUseColumnMinMaxDimensionsResult = {
   maxWidth: number | undefined;
   minHeight: number | undefined;
   minWidth: number | undefined;
+  onBlurCommitMaxHeight: TFunc<[number]>;
+  onBlurCommitMaxWidth: TFunc<[number]>;
+  onBlurCommitMinHeight: TFunc<[number]>;
+  onBlurCommitMinWidth: TFunc<[number]>;
   onCommitMaxHeight: TFunc<[number]>;
   onCommitMaxWidth: TFunc<[number]>;
   onCommitMinHeight: TFunc<[number]>;
@@ -30,101 +50,66 @@ export type TUseColumnMinMaxDimensionsResult = {
   onDragStart: TFunc;
 };
 
+const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
+
 export const useColumnMinMaxDimensions = (): TUseColumnMinMaxDimensionsResult => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const frames = useAppSelector(selectSelectedNodes).filter(isFrameNode);
   const revealed = useAppSelector(selectRevealedMinMax);
-  const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const id = frameNode?.id ?? '';
-  const width = frameNode?.width ?? 0;
-  const height = frameNode?.height ?? 0;
-  const minWidth = frameNode?.minWidth;
-  const maxWidth = frameNode?.maxWidth;
-  const minHeight = frameNode?.minHeight;
-  const maxHeight = frameNode?.maxHeight;
+  const [frameNode] = frames;
   const isFrame = frameNode !== undefined;
+  const mixedLabel = t(`${translationNameSpace}.mixed`);
 
-  const onCommitMinWidth = (nextValue: number): void => {
-    if (nextValue <= 0) {
-      dispatch(updateNode({ changes: { minWidth: undefined, width: clampAutoLayoutSize(width, undefined, maxWidth) }, id }));
-      dispatch(setMinMaxRevealed({ bound: 'minWidth', value: false }));
-    } else {
-      const nextMaxWidth = maxWidth !== undefined && nextValue > maxWidth ? nextValue : maxWidth;
-      const maxWidthChanges = nextMaxWidth !== maxWidth ? { maxWidth: nextMaxWidth } : {};
+  const getDisplayValue = (bound: keyof TRevealedMinMax): number | string | undefined => {
+    const mixedOrValue = frames.length > 1 ? getMixedOrValue(frames.map((frame) => frame[bound] ?? 0)) : frameNode?.[bound];
+    return mixedOrValue === 'mixed' ? mixedLabel : mixedOrValue;
+  };
 
-      dispatch(
-        updateNode({
-          changes: { minWidth: nextValue, width: clampAutoLayoutSize(width, nextValue, nextMaxWidth), ...maxWidthChanges },
-          id,
-        }),
-      );
+  const isPartlySet = (bound: keyof TRevealedMinMax): boolean =>
+    frames.some((frame) => frame[bound] !== undefined) && frames.some((frame) => frame[bound] === undefined);
+
+  const commitBound = (bound: keyof TRevealedMinMax, value: number): void => {
+    frames.forEach((frame) => dispatch(updateNode({ changes: getMinMaxBoundChanges(frame, bound, value), id: frame.id })));
+
+    if (value <= 0) {
+      dispatch(setMinMaxRevealed({ bound, value: false }));
     }
   };
 
-  const onCommitMaxWidth = (nextValue: number): void => {
-    if (nextValue <= 0) {
-      dispatch(updateNode({ changes: { maxWidth: undefined, width: clampAutoLayoutSize(width, minWidth, undefined) }, id }));
-      dispatch(setMinMaxRevealed({ bound: 'maxWidth', value: false }));
-    } else {
-      const nextMinWidth = minWidth !== undefined && nextValue < minWidth ? nextValue : minWidth;
-      const minWidthChanges = nextMinWidth !== minWidth ? { minWidth: nextMinWidth } : {};
-
-      dispatch(
-        updateNode({
-          changes: { maxWidth: nextValue, width: clampAutoLayoutSize(width, nextMinWidth, nextValue), ...minWidthChanges },
-          id,
-        }),
-      );
-    }
-  };
-
-  const onCommitMinHeight = (nextValue: number): void => {
-    if (nextValue <= 0) {
-      dispatch(updateNode({ changes: { height: clampAutoLayoutSize(height, undefined, maxHeight), minHeight: undefined }, id }));
-      dispatch(setMinMaxRevealed({ bound: 'minHeight', value: false }));
-    } else {
-      const nextMaxHeight = maxHeight !== undefined && nextValue > maxHeight ? nextValue : maxHeight;
-      const maxHeightChanges = nextMaxHeight !== maxHeight ? { maxHeight: nextMaxHeight } : {};
-
-      dispatch(
-        updateNode({
-          changes: { height: clampAutoLayoutSize(height, nextValue, nextMaxHeight), minHeight: nextValue, ...maxHeightChanges },
-          id,
-        }),
-      );
-    }
-  };
-
-  const onCommitMaxHeight = (nextValue: number): void => {
-    if (nextValue <= 0) {
-      dispatch(updateNode({ changes: { height: clampAutoLayoutSize(height, minHeight, undefined), maxHeight: undefined }, id }));
-      dispatch(setMinMaxRevealed({ bound: 'maxHeight', value: false }));
-    } else {
-      const nextMinHeight = minHeight !== undefined && nextValue < minHeight ? nextValue : minHeight;
-      const minHeightChanges = nextMinHeight !== minHeight ? { minHeight: nextMinHeight } : {};
-
-      dispatch(
-        updateNode({
-          changes: { height: clampAutoLayoutSize(height, nextMinHeight, nextValue), maxHeight: nextValue, ...minHeightChanges },
-          id,
-        }),
-      );
-    }
-  };
+  const commitBoundOnBlur =
+    (bound: keyof TRevealedMinMax): TFunc<[number]> =>
+    (value): void => {
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+      commitBound(bound, value);
+      dispatch(endHistoryGesture());
+    };
 
   return {
+    disabledMaxHeight: isPartlySet('maxHeight'),
+    disabledMaxWidth: isPartlySet('maxWidth'),
+    disabledMinHeight: isPartlySet('minHeight'),
+    disabledMinWidth: isPartlySet('minWidth'),
+    displayMaxHeight: getDisplayValue('maxHeight'),
+    displayMaxWidth: getDisplayValue('maxWidth'),
+    displayMinHeight: getDisplayValue('minHeight'),
+    displayMinWidth: getDisplayValue('minWidth'),
     hasMaxHeight: isFrame && revealed.maxHeight,
     hasMaxWidth: isFrame && revealed.maxWidth,
     hasMinHeight: isFrame && revealed.minHeight,
     hasMinWidth: isFrame && revealed.minWidth,
-    maxHeight,
-    maxWidth,
-    minHeight,
-    minWidth,
-    onCommitMaxHeight,
-    onCommitMaxWidth,
-    onCommitMinHeight,
-    onCommitMinWidth,
+    maxHeight: frameNode?.maxHeight,
+    maxWidth: frameNode?.maxWidth,
+    minHeight: frameNode?.minHeight,
+    minWidth: frameNode?.minWidth,
+    onBlurCommitMaxHeight: commitBoundOnBlur('maxHeight'),
+    onBlurCommitMaxWidth: commitBoundOnBlur('maxWidth'),
+    onBlurCommitMinHeight: commitBoundOnBlur('minHeight'),
+    onBlurCommitMinWidth: commitBoundOnBlur('minWidth'),
+    onCommitMaxHeight: (value) => commitBound('maxHeight', value),
+    onCommitMaxWidth: (value) => commitBound('maxWidth', value),
+    onCommitMinHeight: (value) => commitBound('minHeight', value),
+    onCommitMinWidth: (value) => commitBound('minWidth', value),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
   };

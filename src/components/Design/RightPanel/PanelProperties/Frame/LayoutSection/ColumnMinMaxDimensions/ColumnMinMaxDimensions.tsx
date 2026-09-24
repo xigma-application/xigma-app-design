@@ -15,6 +15,14 @@ import { translationNameSpace } from './constants';
 const ColumnMinMaxDimensions: FC = () => {
   const { t } = useTranslation();
   const {
+    disabledMaxHeight,
+    disabledMaxWidth,
+    disabledMinHeight,
+    disabledMinWidth,
+    displayMaxHeight,
+    displayMaxWidth,
+    displayMinHeight,
+    displayMinWidth,
     hasMaxHeight,
     hasMaxWidth,
     hasMinHeight,
@@ -23,6 +31,10 @@ const ColumnMinMaxDimensions: FC = () => {
     maxWidth,
     minHeight,
     minWidth,
+    onBlurCommitMaxHeight,
+    onBlurCommitMaxWidth,
+    onBlurCommitMinHeight,
+    onBlurCommitMinWidth,
     onCommitMaxHeight,
     onCommitMaxWidth,
     onCommitMinHeight,
@@ -31,10 +43,10 @@ const ColumnMinMaxDimensions: FC = () => {
     onDragStart,
   } = useColumnMinMaxDimensions();
 
-  const onBlurMinWidth = useDimensionsCommit(minWidth ?? 0, onCommitMinWidth);
-  const onBlurMinHeight = useDimensionsCommit(minHeight ?? 0, onCommitMinHeight);
-  const onBlurMaxWidth = useDimensionsCommit(maxWidth ?? 0, onCommitMaxWidth);
-  const onBlurMaxHeight = useDimensionsCommit(maxHeight ?? 0, onCommitMaxHeight);
+  const onBlurMinWidth = useDimensionsCommit(displayMinWidth ?? 0, onBlurCommitMinWidth);
+  const onBlurMinHeight = useDimensionsCommit(displayMinHeight ?? 0, onBlurCommitMinHeight);
+  const onBlurMaxWidth = useDimensionsCommit(displayMaxWidth ?? 0, onBlurCommitMaxWidth);
+  const onBlurMaxHeight = useDimensionsCommit(displayMaxHeight ?? 0, onBlurCommitMaxHeight);
 
   if (!hasMinWidth && !hasMinHeight && !hasMaxWidth && !hasMaxHeight) {
     return null;
@@ -58,6 +70,8 @@ const ColumnMinMaxDimensions: FC = () => {
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               onScrub={onCommitMinWidth}
+              disabled={disabledMinWidth}
+              displayValue={displayMinWidth}
               value={minWidth}
             />
           )}
@@ -71,6 +85,8 @@ const ColumnMinMaxDimensions: FC = () => {
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               onScrub={onCommitMinHeight}
+              disabled={disabledMinHeight}
+              displayValue={displayMinHeight}
               value={minHeight}
             />
           )}
@@ -92,6 +108,8 @@ const ColumnMinMaxDimensions: FC = () => {
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               onScrub={onCommitMaxWidth}
+              disabled={disabledMaxWidth}
+              displayValue={displayMaxWidth}
               value={maxWidth}
             />
           )}
@@ -105,6 +123,8 @@ const ColumnMinMaxDimensions: FC = () => {
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
               onScrub={onCommitMaxHeight}
+              disabled={disabledMaxHeight}
+              displayValue={displayMaxHeight}
               value={maxHeight}
             />
           )}

@@ -406,4 +406,68 @@ describe('useColumnMinMaxDimensions', () => {
     // action / result
     expect(() => act(() => result.current.onCommitMinWidth(50))).not.toThrow();
   });
+
+  describe('multi-selection', () => {
+    it('should show a shared bound value, or Mixed when the frames differ or some have none, disabling a bound only some frames have', () => {
+      // mock
+      const firstId = addFrameNode();
+      const secondId = addFrameNode();
+
+      store.dispatch(updateNode({ changes: { maxWidth: 200, minWidth: 20 }, id: firstId }));
+      store.dispatch(updateNode({ changes: { maxWidth: 200 }, id: secondId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnMinMaxDimensions();
+
+      // result
+      expect(result.current.displayMaxWidth).toBe(200);
+      expect(result.current.displayMinWidth).toBe('Mixed');
+      expect(result.current.disabledMaxWidth).toBe(false);
+      expect(result.current.disabledMinWidth).toBe(true);
+    });
+
+    it('should keep a bound editable as Mixed when every frame has it with different values', () => {
+      // mock
+      const firstId = addFrameNode();
+      const secondId = addFrameNode();
+
+      store.dispatch(updateNode({ changes: { minWidth: 15 }, id: firstId }));
+      store.dispatch(updateNode({ changes: { minWidth: 300 }, id: secondId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnMinMaxDimensions();
+
+      // result
+      expect(result.current.displayMinWidth).toBe('Mixed');
+      expect(result.current.disabledMinWidth).toBe(false);
+    });
+
+    it('should set a typed bound on every frame and clamp each frame to it, in one undo step', () => {
+      // mock
+      const firstId = addFrameNode();
+      const secondId = addFrameNode();
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnMinMaxDimensions();
+
+      // action
+      act(() => result.current.onBlurCommitMaxWidth(80));
+
+      // result
+      expect(readNode(firstId)).toMatchObject({ maxWidth: 80, width: 80 });
+      expect(readNode(secondId)).toMatchObject({ maxWidth: 80, width: 80 });
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect(readNode(firstId).maxWidth).toBeUndefined();
+      expect(readNode(secondId).width).toBe(100);
+    });
+  });
 });

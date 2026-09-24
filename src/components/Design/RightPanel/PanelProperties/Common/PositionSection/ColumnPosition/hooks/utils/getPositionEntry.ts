@@ -1,22 +1,11 @@
 // types
 import { TBoxSceneNode, TSceneNode } from 'types/design/types';
+import { TPositionEntry } from '../../types';
 import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
 
 // utils
-import { getNodeAbsoluteFromParentPosition } from 'store/design/utils/getNodeAbsoluteFromParentPosition';
 import { getNodePositionInParent } from 'store/design/utils/getNodePositionInParent';
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
-
-type TParent = Parameters<typeof getNodeAbsoluteFromParentPosition>[1];
-
-export type TPositionEntry = {
-  disabledX: boolean;
-  disabledY: boolean;
-  id: string;
-  parent: TParent | undefined;
-  x: number;
-  y: number;
-};
 
 export const getPositionEntry = (
   node: TBoxSceneNode,

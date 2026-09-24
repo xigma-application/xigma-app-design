@@ -23,16 +23,16 @@ export type TColumnDimensionsFieldEndAdornmentProps = {
   canHug: boolean;
   isRevealed: boolean;
   maxShown: boolean;
-  maxValue?: number;
+  maxValue?: number | string;
   minShown: boolean;
-  minValue?: number;
+  minValue?: number | string;
   onMenuOpenChange: TFunc<[boolean]>;
   onRemoveBounds?: TFunc;
   onRevealMax?: TFunc;
   onRevealMin?: TFunc;
   onSelectSizingMode?: TFunc<[SizingMode]>;
   sizingMode?: SizingMode;
-  value: number;
+  value: number | string;
 };
 
 export const ColumnDimensionsFieldEndAdornment: FC<TColumnDimensionsFieldEndAdornmentProps> = ({

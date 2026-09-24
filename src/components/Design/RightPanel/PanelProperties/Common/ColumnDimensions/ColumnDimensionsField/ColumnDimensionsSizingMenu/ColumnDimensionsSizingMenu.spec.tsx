@@ -249,4 +249,14 @@ describe('ColumnDimensionsSizingMenu behaviors', () => {
     expect(screen.queryByText('Add max width…')).toBeNull();
     expect(screen.queryByText('Remove min width')).toBeNull();
   });
+
+  it('should show Mixed in the Fixed option and the bound labels for a multi-selection with differing values', () => {
+    // before
+    renderMenu({ maxValue: 'Mixed', minValue: 'Mixed', value: 'Mixed' });
+
+    // result
+    expect(screen.getByText('Fixed width (Mixed)')).toBeInTheDocument();
+    expect(screen.getByText('Min width: Mixed')).toBeInTheDocument();
+    expect(screen.getByText('Max width: Mixed')).toBeInTheDocument();
+  });
 });

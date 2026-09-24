@@ -12,13 +12,16 @@ import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
-import { useAppDispatch, useAppSelector } from 'store';
+import { store, useAppDispatch, useAppSelector } from 'store';
+
+// types
+import { TPositionScrubStart } from '../types';
 
 // utils
 import { commitColumnX } from './utils/commitColumnX';
 import { commitColumnY } from './utils/commitColumnY';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
-import { getPositionEntry, TPositionEntry } from './utils/getPositionEntry';
+import { getPositionEntry } from './utils/getPositionEntry';
 import { isExistingBoxSceneNode } from 'components/Design/Canvas/utils/isExistingBoxSceneNode';
 import { isManagedLayoutFrame } from 'utils/canvas/signals/isManagedLayoutFrame';
 import { selectSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
@@ -56,17 +59,17 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
   const mixedLabel = t(`${translationNameSpace}.mixed`);
   const mixedX = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.x)) : x;
   const mixedY = entries.length > 1 ? getMixedOrValue(entries.map((item) => item.y)) : y;
-  const managed = isManagedLayoutFrame(entry?.parent);
+  const managed = isManagedLayoutFrame(node?.parentId ? nodes[node.parentId] : undefined);
   const ignoresAutoLayout = Boolean(node?.ignoreAutoLayout);
   const displayX = mixedX === 'mixed' ? mixedLabel : mixedX;
   const displayY = mixedY === 'mixed' ? mixedLabel : mixedY;
+  const scrubStartRef = useRef<TPositionScrubStart>({ entries: [], x: 0, y: 0 });
 
   const commitX = (nextX: number): void =>
     entries.filter((item) => !item.disabledX).forEach((item) => commitColumnX(dispatch, imageCrop, item.id, item.parent, item.y, nextX));
+
   const commitY = (nextY: number): void =>
     entries.filter((item) => !item.disabledY).forEach((item) => commitColumnY(dispatch, imageCrop, item.id, item.parent, item.x, nextY));
-
-  const scrubStartRef = useRef<{ entries: TPositionEntry[]; x: number; y: number }>({ entries: [], x: 0, y: 0 });
 
   const scrubX = (nextX: number): void => {
     if (entries.length > 1) {
@@ -97,6 +100,17 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
   };
 
+  const getCommittedDisplayValue = (axis: 'x' | 'y'): number | string => {
+    const freshNodes = selectNodes(store.getState());
+    const freshEntries = boxNodes
+      .map((boxNode) => freshNodes[boxNode.id])
+      .filter(isExistingBoxSceneNode)
+      .map((boxNode) => getPositionEntry(boxNode, freshNodes, imageCrop));
+    const mixedOrValue = getMixedOrValue(freshEntries.map((item) => item[axis]));
+
+    return mixedOrValue === 'mixed' ? mixedLabel : mixedOrValue;
+  };
+
   const commitOnBlur =
     (commit: TFunc<[number]>): TFunc<[number]> =>
     (next): void => {
@@ -111,8 +125,16 @@ export const useColumnPosition = (): TUseColumnPositionResult => {
     displayX,
     displayY,
     ignoresAutoLayout,
-    onBlurX: usePositionCommit(displayX, commitOnBlur(commitX)),
-    onBlurY: usePositionCommit(displayY, commitOnBlur(commitY)),
+    onBlurX: usePositionCommit(
+      displayX,
+      commitOnBlur(commitX),
+      entries.length > 1 ? (): number | string => getCommittedDisplayValue('x') : undefined,
+    ),
+    onBlurY: usePositionCommit(
+      displayY,
+      commitOnBlur(commitY),
+      entries.length > 1 ? (): number | string => getCommittedDisplayValue('y') : undefined,
+    ),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: startScrub,
     onScrubX: scrubX,

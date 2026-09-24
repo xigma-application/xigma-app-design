@@ -635,4 +635,163 @@ describe('useColumnDimensions', () => {
     expect(readCrop(frameId)).toEqual({ height: 45, rotation: 0, width: 36, x: 3, y: 4 });
     expect(readNode(frameId)).toMatchObject({ height: 20, width: 20 });
   });
+
+  describe('multi-selection', () => {
+    const blurWith = (value: string): Parameters<ReturnType<typeof useColumnDimensions>['onBlurWidth']>[0] =>
+      ({ target: { value } }) as unknown as Parameters<ReturnType<typeof useColumnDimensions>['onBlurWidth']>[0];
+
+    it('should show Mixed for an axis whose values differ and the shared value for the other', () => {
+      // mock
+      store.dispatch(setSelection([addFrameNode(100, 40), addFrameNode(60, 40)]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.displayWidth).toBe('Mixed');
+      expect(result.current.displayHeight).toBe(40);
+    });
+
+    it("should set a typed width on every frame, keep each one's aspect ratio lock and clamp it to its own min/max, in one undo step", () => {
+      // mock
+      const freeId = addFrameNode(100, 40);
+      const lockedId = addFrameNode(50, 25, true);
+      const boundedId = addFrameNode(80, 40);
+
+      store.dispatch(updateNode({ changes: { maxWidth: 150 }, id: boundedId }));
+      store.dispatch(setSelection([freeId, lockedId, boundedId]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // action
+      act(() => result.current.onBlurWidth(blurWith('200')));
+
+      // result
+      expect(readNode(freeId)).toMatchObject({ height: 40, width: 200 });
+      expect(readNode(lockedId)).toMatchObject({ height: 100, width: 200 });
+      expect(readNode(boundedId)).toMatchObject({ maxWidth: 150, width: 150 });
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect(readNode(freeId).width).toBe(100);
+      expect(readNode(lockedId).width).toBe(50);
+    });
+
+    it("should clamp a typed width to each frame's own min, so min 15 and min 300 stay Mixed at 200 and match at 301", () => {
+      // mock
+      const lowMinId = addFrameNode(100, 40);
+      const highMinId = addFrameNode(320, 40);
+
+      store.dispatch(updateNode({ changes: { minWidth: 15 }, id: lowMinId }));
+      store.dispatch(updateNode({ changes: { minWidth: 300 }, id: highMinId }));
+      store.dispatch(setSelection([lowMinId, highMinId]));
+
+      // before
+      const { result, rerender } = renderUseColumnDimensions();
+
+      // action
+      act(() => result.current.onBlurWidth(blurWith('200')));
+      rerender();
+
+      // result
+      expect([readNode(lowMinId).width, readNode(highMinId).width]).toEqual([200, 300]);
+      expect(result.current.displayWidth).toBe('Mixed');
+
+      // action
+      act(() => result.current.onBlurWidth(blurWith('301')));
+      rerender();
+
+      // result
+      expect(result.current.displayWidth).toBe(301);
+    });
+
+    it("should set a typed width below one frame's min on the frame without a min and clamp the other, keeping the field Mixed", () => {
+      // mock
+      const noMinId = addFrameNode(100, 40);
+      const minId = addFrameNode(100, 40);
+
+      store.dispatch(updateNode({ changes: { minWidth: 10 }, id: minId }));
+      store.dispatch(setSelection([noMinId, minId]));
+
+      // before
+      const { result, rerender } = renderUseColumnDimensions();
+
+      // action
+      const event = blurWith('5');
+
+      act(() => result.current.onBlurWidth(event));
+      rerender();
+
+      // result
+      expect([readNode(noMinId).width, readNode(minId).width]).toEqual([5, 10]);
+      expect(result.current.displayWidth).toBe('Mixed');
+      expect(event.target.value).toBe('Mixed');
+    });
+
+    it('should resize every frame by the same scrubbed delta from its starting size', () => {
+      // mock
+      const firstId = addFrameNode(100, 40);
+      const secondId = addFrameNode(60, 40);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // action
+      act(() => result.current.onDragStart());
+      act(() => result.current.onScrubWidth(110));
+      act(() => result.current.onScrubWidth(120));
+      act(() => result.current.onDragEnd());
+
+      // result
+      expect(readNode(firstId).width).toBe(120);
+      expect(readNode(secondId).width).toBe(80);
+    });
+
+    it('should keep the plain W label, without the min/max icon, while any selected frame has no bound on that axis', () => {
+      // mock
+      const boundedId = addFrameNode(100, 40);
+      const freeId = addFrameNode(60, 40);
+
+      store.dispatch(updateNode({ changes: { minWidth: 20 }, id: boundedId }));
+      store.dispatch(setSelection([boundedId, freeId]));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.hasMinWidthValue).toBe(false);
+      expect(result.current.minWidthValue).toBe('Mixed');
+    });
+
+    it('should report a bound every selected frame has, and remove it from every frame', () => {
+      // mock
+      const firstId = addFrameNode(100, 40);
+      const secondId = addFrameNode(60, 40);
+
+      store.dispatch(updateNode({ changes: { minWidth: 20 }, id: firstId }));
+      store.dispatch(setSelection([firstId, secondId]));
+      store.dispatch(updateNode({ changes: { minWidth: 30 }, id: secondId }));
+
+      // before
+      const { result } = renderUseColumnDimensions();
+
+      // result
+      expect(result.current.hasMinWidthValue).toBe(true);
+      expect(result.current.minWidthValue).toBe('Mixed');
+      expect(result.current.maxWidthValue).toBeUndefined();
+
+      // action
+      act(() => result.current.onRemoveWidthBounds());
+
+      // result
+      expect(readNode(firstId).minWidth).toBeUndefined();
+      expect(readNode(secondId).minWidth).toBeUndefined();
+    });
+  });
 });

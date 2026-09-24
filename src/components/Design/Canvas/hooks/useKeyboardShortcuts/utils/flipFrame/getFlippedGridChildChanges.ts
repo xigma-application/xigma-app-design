@@ -7,6 +7,7 @@ import { TFlipAxis } from './types';
 import { TFrameNode, TSceneNode, TSceneNodeChanges } from 'types/design/types';
 
 // utils
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { getGridPlacementInputs } from 'store/design/utils/autoLayout/getGridPlacementInputs';
 import { placeGridCells } from 'store/design/utils/autoLayout/computeGridLayoutPositions/placeGridCells/placeGridCells';
 
@@ -21,17 +22,18 @@ export const getFlippedGridChildChanges = (
 
   return placements.map(({ columnSpan, columnStart, id, rowSpan, rowStart }) => {
     const child = nodesById[id];
+    const boxChild = isBoxSceneNode(child) ? child : undefined;
 
     return {
       changes:
         axis === 'horizontal'
           ? {
-              gridChildHorizontalAlign: MIRRORED_HORIZONTAL_ALIGN[child.gridChildHorizontalAlign ?? AlignmentHorizontal.left],
+              gridChildHorizontalAlign: MIRRORED_HORIZONTAL_ALIGN[boxChild?.gridChildHorizontalAlign ?? AlignmentHorizontal.left],
               gridColumnAnchorIndex: columnCount - columnStart - columnSpan,
               gridRowAnchorIndex: rowStart,
             }
           : {
-              gridChildVerticalAlign: MIRRORED_VERTICAL_ALIGN[child.gridChildVerticalAlign ?? AlignmentVertical.top],
+              gridChildVerticalAlign: MIRRORED_VERTICAL_ALIGN[boxChild?.gridChildVerticalAlign ?? AlignmentVertical.top],
               gridColumnAnchorIndex: columnStart,
               gridRowAnchorIndex: rowCount - rowStart - rowSpan,
             },

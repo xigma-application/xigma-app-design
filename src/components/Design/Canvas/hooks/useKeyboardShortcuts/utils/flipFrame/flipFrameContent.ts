@@ -16,6 +16,7 @@ import { getMirroredConstraint } from './getMirroredConstraint';
 import { getReversedWrapLineOrder } from './getReversedWrapLineOrder';
 import { getGroupLeafNodes } from 'store/design/utils/nodeHierarchy/getGroupLeafNodes';
 import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 import { isConstraintEligibleFrameChild } from 'utils/canvas/signals/isConstraintEligibleFrameChild';
 import { isLayoutContainerNode } from 'utils/canvas/signals/isLayoutContainerNode';
 import { isNudgeableNode } from '../isNudgeableNode';
@@ -44,8 +45,10 @@ const reverseWrapLines = (dispatch: AppDispatch, frame: TFrameNode, nodes: Recor
 };
 
 const mirrorConstraint = (dispatch: AppDispatch, child: TSceneNode, axis: TFlipAxis): void => {
-  if (isConstraintEligibleFrameChild(child, selectNodes(store.getState()))) {
-    dispatch(updateNode({ changes: { alignment: getMirroredConstraint(child.alignment, axis) }, id: child.id }));
+  if (isBoxSceneNode(child)) {
+    if (isConstraintEligibleFrameChild(child, selectNodes(store.getState()))) {
+      dispatch(updateNode({ changes: { alignment: getMirroredConstraint(child.alignment, axis) }, id: child.id }));
+    }
   }
 };
 

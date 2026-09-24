@@ -19,15 +19,15 @@ export type TColumnDimensionsSizingMenuProps = {
   canFill: boolean;
   canHug: boolean;
   maxShown: boolean;
-  maxValue?: number;
+  maxValue?: number | string;
   minShown: boolean;
-  minValue?: number;
+  minValue?: number | string;
   mode: SizingMode;
   onRemoveBounds?: TFunc;
   onRevealMax?: TFunc;
   onRevealMin?: TFunc;
   onSelect: TFunc<[SizingMode]>;
-  value: number;
+  value: number | string;
 };
 
 export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = ({
@@ -49,11 +49,15 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
   const isWidth = axis === 'width';
   const minLabel =
     minValue !== undefined
-      ? t(`${translationNameSpace}.${isWidth ? 'minWidthValue' : 'minHeightValue'}`, { value: Math.round(minValue) })
+      ? t(`${translationNameSpace}.${isWidth ? 'minWidthValue' : 'minHeightValue'}`, {
+          value: typeof minValue === 'number' ? Math.round(minValue) : minValue,
+        })
       : t(`${translationNameSpace}.${isWidth ? 'addMinWidth' : 'addMinHeight'}`);
   const maxLabel =
     maxValue !== undefined
-      ? t(`${translationNameSpace}.${isWidth ? 'maxWidthValue' : 'maxHeightValue'}`, { value: Math.round(maxValue) })
+      ? t(`${translationNameSpace}.${isWidth ? 'maxWidthValue' : 'maxHeightValue'}`, {
+          value: typeof maxValue === 'number' ? Math.round(maxValue) : maxValue,
+        })
       : t(`${translationNameSpace}.${isWidth ? 'addMaxWidth' : 'addMaxHeight'}`);
 
   return (
@@ -61,7 +65,9 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
       <PopoverItem
         icon={isWidth ? 'FixedWidth' : 'FixedHeight'}
         iconSize={24}
-        label={t(`${translationNameSpace}.${isWidth ? 'fixedWidth' : 'fixedHeight'}`, { value: Math.round(value) })}
+        label={t(`${translationNameSpace}.${isWidth ? 'fixedWidth' : 'fixedHeight'}`, {
+          value: typeof value === 'number' ? Math.round(value) : value,
+        })}
         onClick={() => onSelect(SizingMode.fixed)}
         selected={mode === SizingMode.fixed}
       />
@@ -93,6 +99,7 @@ export const ColumnDimensionsSizingMenu: FC<TColumnDimensionsSizingMenuProps> = 
               <PopoverSeparator />
               <PopoverItem
                 icon="RemoveFit"
+                iconSize={24}
                 label={t(`${translationNameSpace}.${getRemoveBoundsLabelKey(isWidth, minShown, maxShown)}`)}
                 onClick={onRemoveBounds}
               />

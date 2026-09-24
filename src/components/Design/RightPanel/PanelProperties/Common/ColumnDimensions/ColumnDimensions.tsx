@@ -19,6 +19,8 @@ const ColumnDimensions: FC = () => {
     canFillHeight,
     canFillWidth,
     canHug,
+    displayHeight,
+    displayWidth,
     hasMaxHeightValue,
     hasMaxWidthValue,
     hasMinHeightValue,
@@ -70,6 +72,7 @@ const ColumnDimensions: FC = () => {
         ariaLabel={t(`${translationNameSpace}.ariaLabelWidth`)}
         axis="width"
         canFill={canFillWidth}
+        displayValue={displayWidth}
         canHug={canHug}
         e2eValue="width"
         hasMax={hasMaxWidthValue}
@@ -96,6 +99,7 @@ const ColumnDimensions: FC = () => {
         ariaLabel={t(`${translationNameSpace}.ariaLabelHeight`)}
         axis="height"
         canFill={canFillHeight}
+        displayValue={displayHeight}
         canHug={canHug}
         e2eValue="height"
         hasMax={hasMaxHeightValue}
