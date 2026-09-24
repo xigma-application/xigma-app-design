@@ -1,20 +1,23 @@
 import { useTranslation } from 'react-i18next';
 
 // others
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { FLOW_OPTIONS, translationNameSpace } from '../constants';
 
 // store
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
+import { LayoutMode, NodeType } from 'types/design/enums';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
+import { commitFlowChange } from './utils/commitFlowChange';
 import { commitGridAutoPlacementFreeze } from 'store/design/utils/autoLayout/gridTracks/commitGridAutoPlacementFreeze';
-import { getChildrenFillResetChanges } from 'store/design/utils/autoLayout/getChildrenFillResetChanges';
 
 export type TUseColumnFlowResult = {
   gridAutoPlacement: boolean;
@@ -26,52 +29,45 @@ export type TUseColumnFlowResult = {
   wrap: boolean;
 };
 
+const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
+
 export const useColumnFlow = (): TUseColumnFlowResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const frames = useAppSelector(selectSelectedNodes).filter(isFrameNode);
   const nodes = useAppSelector(selectNodes);
-  const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const id = frameNode?.id ?? '';
-  const value = frameNode?.layoutMode ?? LayoutMode.freeForm;
-  const wrap = frameNode?.layoutWrap ?? false;
-  const gridAutoPlacement = frameNode?.gridAutoPlacement ?? true;
+  const modes = frames.map((frame) => frame.layoutMode ?? LayoutMode.freeForm);
+  const value = modes.every((mode) => mode === modes[0]) ? (modes[0] ?? LayoutMode.freeForm) : '';
+  const wrap = frames.length > 0 && frames.every((frame) => Boolean(frame.layoutWrap));
+  const gridAutoPlacement = frames.length === 0 || frames.every((frame) => frame.gridAutoPlacement ?? true);
 
-  const onChange = (nextValue: string): void => {
-    const isGrid = nextValue === LayoutMode.grid;
-    const seedGridColumns = isGrid && frameNode?.gridColumnCount === undefined;
-    const staysManaged = nextValue === LayoutMode.horizontal || nextValue === LayoutMode.vertical || isGrid;
+  const runOnFrames = (apply: TFunc<[TFrameNode]>): void => {
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    frames.forEach(apply);
+    dispatch(endHistoryGesture());
+  };
 
-    dispatch(
-      updateNode({
-        changes: { layoutMode: nextValue as LayoutMode, layoutWrap: false, ...(seedGridColumns ? { gridColumnCount: 2 } : {}) },
-        id,
-      }),
+  const onChange = (nextValue: string): void => runOnFrames((frame) => commitFlowChange(dispatch, frame, nodes, nextValue as LayoutMode));
+
+  const onGridAutoPlacementChange = (): void =>
+    runOnFrames((frame) => {
+      if (gridAutoPlacement) {
+        commitGridAutoPlacementFreeze(dispatch, frame, nodes);
+      }
+
+      dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement }, id: frame.id }));
+    });
+
+  const onWrapChange = (): void =>
+    runOnFrames((frame) =>
+      dispatch(updateNode({ changes: wrap ? { layoutWrap: false, verticalGap: 0 } : { layoutWrap: true }, id: frame.id })),
     );
-
-    if (!staysManaged && frameNode) {
-      getChildrenFillResetChanges(frameNode, 'width', nodes).forEach((childId) => {
-        dispatch(updateNode({ changes: { widthSizingMode: SizingMode.fixed }, id: childId }));
-      });
-      getChildrenFillResetChanges(frameNode, 'height', nodes).forEach((childId) => {
-        dispatch(updateNode({ changes: { heightSizingMode: SizingMode.fixed }, id: childId }));
-      });
-    }
-  };
-
-  const onGridAutoPlacementChange = (): void => {
-    if (gridAutoPlacement && frameNode) {
-      commitGridAutoPlacementFreeze(dispatch, frameNode, nodes);
-    }
-
-    dispatch(updateNode({ changes: { gridAutoPlacement: !gridAutoPlacement }, id }));
-  };
 
   return {
     gridAutoPlacement,
     onChange,
     onGridAutoPlacementChange,
-    onWrapChange: () => dispatch(updateNode({ changes: wrap ? { layoutWrap: false, verticalGap: 0 } : { layoutWrap: true }, id })),
+    onWrapChange,
     toggleButtons: FLOW_OPTIONS.map(({ icon, labelKey, value: optionValue }) => ({
       ariaLabel: t(`${translationNameSpace}.${labelKey}`),
       icon,

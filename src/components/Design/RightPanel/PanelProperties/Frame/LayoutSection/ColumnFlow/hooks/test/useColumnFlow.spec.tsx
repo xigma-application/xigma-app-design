@@ -9,6 +9,7 @@ import { useColumnFlow } from '../useColumnFlow';
 import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { LayoutMode, NodeType, SizingMode } from 'types/design/enums';
@@ -399,5 +400,55 @@ describe('useColumnFlow', () => {
     expect(readNode(parentId).layoutMode).toBe(LayoutMode.vertical);
     expect(readNode(childId).widthSizingMode).toBe(SizingMode.fill);
     expect(readNode(childId).heightSizingMode).toBe(SizingMode.fill);
+  });
+
+  describe('multi-selection', () => {
+    it('should highlight no flow option while the frames differ and set the picked flow on every frame in one undo step', () => {
+      // mock
+      const freeId = addFrameNode();
+      const horizontalId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+      store.dispatch(setSelection([freeId, horizontalId]));
+
+      // before
+      const { result } = renderUseColumnFlow();
+
+      // result
+      expect(result.current.value).toBe('');
+
+      // action
+      act(() => result.current.onChange(LayoutMode.vertical));
+
+      // result
+      expect([readNode(freeId).layoutMode, readNode(horizontalId).layoutMode]).toEqual([LayoutMode.vertical, LayoutMode.vertical]);
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect(readNode(horizontalId).layoutMode).toBe(LayoutMode.horizontal);
+    });
+
+    it('should show wrap on only while every frame wraps and set the toggled wrap on every frame', () => {
+      // mock
+      const firstId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+      const secondId = addAutoLayoutFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { layoutWrap: true }, id: firstId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnFlow();
+
+      // result
+      expect(result.current.wrap).toBe(false);
+
+      // action
+      act(() => result.current.onWrapChange());
+
+      // result
+      expect([readNode(firstId).layoutWrap, readNode(secondId).layoutWrap]).toEqual([true, true]);
+    });
   });
 });
