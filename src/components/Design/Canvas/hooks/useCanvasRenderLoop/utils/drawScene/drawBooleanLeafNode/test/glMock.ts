@@ -1,0 +1,23 @@
+export const createEffectGlMock = (): WebGL2RenderingContext =>
+  ({
+    BLEND_DST_ALPHA: 32970,
+    BLEND_DST_RGB: 32968,
+    BLEND_SRC_ALPHA: 32971,
+    BLEND_SRC_RGB: 32969,
+    COLOR_BUFFER_BIT: 16384,
+    FRAMEBUFFER: 36160,
+    FRAMEBUFFER_BINDING: 36006,
+    ONE: 1,
+    ONE_MINUS_SRC_ALPHA: 771,
+    SRC_ALPHA: 770,
+    STENCIL_BUFFER_BIT: 1024,
+    VIEWPORT: 2978,
+    ZERO: 0,
+    bindFramebuffer: vi.fn(),
+    blendFunc: vi.fn(),
+    blendFuncSeparate: vi.fn(),
+    clear: vi.fn(),
+    clearColor: vi.fn(),
+    getParameter: vi.fn((param: number) => (param === 2978 ? new Int32Array([1, 2, 300, 200]) : { tag: `p-${param}` })),
+    viewport: vi.fn(),
+  }) as unknown as WebGL2RenderingContext;

@@ -1,7 +1,8 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
-import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TBoxPaintsBounds } from './types';
+import { TSceneNode } from 'types/design/types';
 import { TPaint } from 'types/design/paint/types';
 import { TPathOutlineStyle } from '../getPathOutlineStyles';
 import { TPoint } from 'types/canvas';
@@ -25,7 +26,7 @@ const resolvePaintTiles = (
 ): (TResolvedPatternSourceTile | null)[] =>
   paints.map((paint) => resolvePatternPaintTile(context, paint, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth));
 
-const getBoxRotation = (node: TFrameNode | TRectangleNode): TBoxFillRotation => ({
+const getBoxRotation = (node: TBoxPaintsBounds): TBoxFillRotation => ({
   center: { x: node.x + node.width / 2, y: node.y + node.height / 2 },
   degrees: node.rotation,
   localBounds: { height: node.height, width: node.width, x: node.x, y: node.y },
@@ -50,7 +51,7 @@ const releasePaintTiles = (resolvedTiles: (TResolvedPatternSourceTile | null)[])
 
 export const drawBoxPaints = (
   context: TDrawSceneContext,
-  node: TFrameNode | TRectangleNode,
+  node: TBoxPaintsBounds,
   sourcePaints: TPaint[],
   polygons: TPoint[][],
   opacity: number,

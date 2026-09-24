@@ -6,7 +6,7 @@ import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { drawBooleanLeafNode } from './drawBooleanLeafNode';
+import { drawBooleanLeafNode } from './drawBooleanLeafNode/drawBooleanLeafNode';
 import { drawBoxLeafNode } from './drawBoxLeafNode/drawBoxLeafNode';
 import { drawEllipseLeafNode } from './drawEllipseLeafNode/drawEllipseLeafNode';
 import { drawLineLeafNode } from './drawLineLeafNode';
@@ -36,7 +36,7 @@ export const drawLeafNode = (
 
   switch (node.type) {
     case NodeType.boolean:
-      drawBooleanLeafNode(context, node, nodesById);
+      drawBooleanLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.ellipse:
       drawEllipseLeafNode(context, node, opacity);

@@ -146,4 +146,40 @@ describe('getBooleanVectorNode', () => {
     // result
     expect(areas[0] - areas[1]).toBeCloseTo(104 * 104 - 96 * 96, 0);
   });
+
+  it('should keep the geometry but restyle a copy of the boolean with other fills', () => {
+    // mock
+    const node = makeBoolean('restyled', ['ra', 'rb'], BooleanOperation.union);
+    const nodesById: Record<string, TSceneNode> = {
+      ra: makeRectangle('ra', 'restyled', 0),
+      rb: makeRectangle('rb', 'restyled', 50),
+      restyled: node,
+    };
+    const fills = [{ color: '#ffffff', opacity: 100, type: 'solid' as const }];
+
+    // action
+    const original = getBooleanVectorNode(node, nodesById);
+    const copy = getBooleanVectorNode({ ...node, fills }, nodesById);
+
+    // result
+    expect(copy?.segments).toBe(original?.segments);
+    expect(copy?.defaultFill).toBe(fills);
+  });
+
+  it('should recompute when the operation changes', () => {
+    // mock
+    const node = makeBoolean('switched', ['sa', 'sb'], BooleanOperation.union);
+    const nodesById: Record<string, TSceneNode> = {
+      sa: makeRectangle('sa', 'switched', 0),
+      sb: makeRectangle('sb', 'switched', 50),
+      switched: node,
+    };
+
+    // action
+    const union = getBooleanVectorNode(node, nodesById);
+    const subtract = getBooleanVectorNode({ ...node, booleanOperation: BooleanOperation.subtract }, nodesById);
+
+    // result
+    expect(subtract?.segments).not.toBe(union?.segments);
+  });
 });

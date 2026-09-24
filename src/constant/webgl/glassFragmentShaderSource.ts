@@ -19,6 +19,10 @@ uniform float u_lightIntensity;
 uniform float u_splay;
 uniform float u_useShapeMask;
 uniform float u_frostLod;
+uniform sampler2D u_sdf;
+uniform float u_useSdf;
+uniform vec2 u_sdfOrigin;
+uniform vec2 u_sdfSize;
 
 in vec2 v_texCoord;
 out vec4 outColor;
@@ -36,6 +40,17 @@ float sdBoxSmooth(vec2 point, vec2 halfSize, float radius, float smoothing) {
   return length(max(q, vec2(0.0))) + min(smax(q.x, q.y, smoothing), 0.0) - radius;
 }
 
+float shapeDistance(vec2 point, float radius, float smoothing) {
+  if (u_useSdf > 0.5) {
+    vec2 uv = (point + u_center - u_sdfOrigin) / u_sdfSize;
+    vec2 clamped = clamp(uv, 0.0, 1.0);
+
+    return texture(u_sdf, clamped).r + length((uv - clamped) * u_sdfSize);
+  }
+
+  return sdBoxSmooth(point, u_halfSize, radius, smoothing);
+}
+
 void main() {
   vec2 pixel = v_texCoord * u_size;
   vec2 screen = vec2(pixel.x, u_drawingBufferHeight - pixel.y) / u_pixelRatio;
@@ -51,12 +66,12 @@ void main() {
   // gradient over a wider area right at the corner than along a straight edge, which reads as a
   // soft haze exactly where the groove's highlight is brightest
   float cornerSmoothing = max(radius * 0.08, 0.3);
-  float dist = sdBoxSmooth(local, u_halfSize, radius, cornerSmoothing);
+  float dist = shapeDistance(local, radius, cornerSmoothing);
 
   float eps = max(cornerSmoothing, 0.75);
   vec2 normal = normalize(vec2(
-    sdBoxSmooth(local + vec2(eps, 0.0), u_halfSize, radius, cornerSmoothing) - sdBoxSmooth(local - vec2(eps, 0.0), u_halfSize, radius, cornerSmoothing),
-    sdBoxSmooth(local + vec2(0.0, eps), u_halfSize, radius, cornerSmoothing) - sdBoxSmooth(local - vec2(0.0, eps), u_halfSize, radius, cornerSmoothing)
+    shapeDistance(local + vec2(eps, 0.0), radius, cornerSmoothing) - shapeDistance(local - vec2(eps, 0.0), radius, cornerSmoothing),
+    shapeDistance(local + vec2(0.0, eps), radius, cornerSmoothing) - shapeDistance(local - vec2(0.0, eps), radius, cornerSmoothing)
   ));
 
   // Depth is "how far the curved (domed) region extends inward from the border" — at 0 it's a

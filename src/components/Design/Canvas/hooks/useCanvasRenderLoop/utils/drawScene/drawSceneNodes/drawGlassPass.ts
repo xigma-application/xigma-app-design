@@ -2,18 +2,40 @@
 import { EFFECT_FULLSCREEN_QUAD } from '../drawBoxLeafNode/constants';
 
 // types
-import { TMaskRenderer } from './types';
+import { TGlassShapeSdf, TMaskRenderer } from './types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
+import { NodeType } from 'types/design/enums';
 import { TEffect, TSceneNode } from 'types/design/types';
 
 // utils
 import { getDevicePixelHeight } from '../getDevicePixelHeight';
 import { getDevicePixelWidth } from '../getDevicePixelWidth';
 import { getEffectGlass } from 'utils/design/effects/getEffectGlass';
+import { getBooleanGlassSdf } from './getBooleanGlassSdf';
 import { getGlassProgram } from './getGlassProgram';
 import { getNodeBounds } from 'components/Design/Canvas/utils/getNodeBounds';
 import { getNodeCornerRadius } from './getNodeCornerRadius';
+import { getNodeGlassRotation } from './getNodeGlassRotation';
 import { resetEffectVertexAttributes } from '../drawBoxLeafNode/resetEffectVertexAttributes';
+
+const bindShapeSdf = (gl: WebGL2RenderingContext, program: WebGLProgram, shapeSdf: TGlassShapeSdf | null): void => {
+  if (shapeSdf) {
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, shapeSdf.texture);
+    gl.uniform1i(gl.getUniformLocation(program, 'u_sdf'), 1);
+    gl.uniform2f(gl.getUniformLocation(program, 'u_sdfOrigin'), shapeSdf.origin.x, shapeSdf.origin.y);
+    gl.uniform2f(gl.getUniformLocation(program, 'u_sdfSize'), shapeSdf.size.width, shapeSdf.size.height);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+};
+
+const unbindShapeSdf = (gl: WebGL2RenderingContext, shapeSdf: TGlassShapeSdf | null): void => {
+  if (shapeSdf) {
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+};
 
 export const drawGlassPass = (
   renderer: TMaskRenderer,
@@ -31,7 +53,8 @@ export const drawGlassPass = (
     const { program, buffer } = glassProgram;
     const { viewport } = context;
     const glass = getEffectGlass(effect);
-    const bounds = getNodeBounds(node);
+    const shapeSdf = node.type === NodeType.boolean ? getBooleanGlassSdf(renderer, node) : null;
+    const bounds = shapeSdf?.bounds ?? getNodeBounds(node);
     const positionLocation = gl.getAttribLocation(program, 'a_position');
     const setFloat = (name: string, value: number): void => gl.uniform1f(gl.getUniformLocation(program, name), value);
 
@@ -44,6 +67,7 @@ export const drawGlassPass = (
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, content.texture);
     gl.uniform1i(gl.getUniformLocation(program, 'u_content'), 0);
+    bindShapeSdf(gl, program, shapeSdf);
 
     gl.uniform2f(gl.getUniformLocation(program, 'u_size'), output.width, output.height);
     gl.uniform2f(gl.getUniformLocation(program, 'u_viewportOffset'), viewport.x, viewport.y);
@@ -53,7 +77,8 @@ export const drawGlassPass = (
     setFloat('u_zoom', viewport.zoom);
     setFloat('u_pixelRatio', context.canvasWidth > 0 ? getDevicePixelWidth(context, gl) / context.canvasWidth : 1);
     setFloat('u_drawingBufferHeight', getDevicePixelHeight(context, gl));
-    setFloat('u_rotation', ('rotation' in node ? node.rotation * Math.PI : 0) / 180);
+    setFloat('u_rotation', shapeSdf ? 0 : getNodeGlassRotation(node));
+    setFloat('u_useSdf', shapeSdf ? 1 : 0);
     setFloat('u_refraction', glass.refraction / 100);
     setFloat('u_depth', glass.depth / 100);
     setFloat('u_dispersion', glass.dispersion / 100);
@@ -65,5 +90,6 @@ export const drawGlassPass = (
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
+    unbindShapeSdf(gl, shapeSdf);
   }
 };

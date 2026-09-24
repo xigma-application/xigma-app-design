@@ -62,6 +62,7 @@ export const drawSceneNodes = (
       context,
       gl,
       hoistedIds: getHoistedDragIds(refs, sceneNodeById),
+      nodesById,
       paintLeaf: (node, phase) => {
         paintLeaf(node, phase);
         markNodeDrawnOverGlassBackdrop(renderer, node);

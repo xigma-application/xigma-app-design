@@ -1,28 +1,28 @@
 // types
-import { NodeType } from 'types/design/enums';
-import { TBooleanCacheEntry } from './types';
 import { TBooleanNode, TSceneNode, TVectorNode } from 'types/design/types';
+import { TBooleanStyleCacheEntry } from './types';
 
 // utils
-import { computeBooleanVectorNode } from './computeBooleanVectorNode';
-import { getBooleanOperandVector } from './getBooleanOperandVector';
-import { isBooleanCacheHit } from './isBooleanCacheHit';
+import { applyBooleanStyle } from './applyBooleanStyle';
+import { getBooleanGeometry } from './getBooleanGeometry';
 
-const cache = new WeakMap<TBooleanNode, TBooleanCacheEntry>();
+const cache = new WeakMap<TBooleanNode, TBooleanStyleCacheEntry>();
 
 export const getBooleanVectorNode = (node: TBooleanNode, nodesById: Record<string, TSceneNode>): TVectorNode | null => {
-  const operands = node.childIds.map((childId) => (nodesById[childId] ? getBooleanOperandVector(nodesById[childId], nodesById) : null));
-  const cached = cache.get(node);
+  const geometry = getBooleanGeometry(node, nodesById);
 
-  if (!isBooleanCacheHit(cached, operands)) {
-    const result = computeBooleanVectorNode(
-      node,
-      operands.filter((operand): operand is TVectorNode => operand !== null && operand.type === NodeType.vector),
-    );
+  if (geometry) {
+    const cached = cache.get(node);
 
-    cache.set(node, { operands, result });
-    return result;
+    if (cached?.geometry === geometry) {
+      return cached.styled;
+    }
+
+    const styled = applyBooleanStyle(geometry, node);
+
+    cache.set(node, { geometry, styled });
+    return styled;
   }
 
-  return cached.result;
+  return null;
 };

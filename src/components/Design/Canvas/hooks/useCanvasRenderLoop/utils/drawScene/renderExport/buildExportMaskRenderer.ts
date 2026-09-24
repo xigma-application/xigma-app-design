@@ -19,6 +19,7 @@ export const buildExportMaskRenderer = (
     context: renderContext,
     gl: renderContext.gl,
     hoistedIds: getHoistedDragIds(refs, sceneNodeById),
+    nodesById,
     paintLeaf: (node, phase) => {
       drawLeafNode(renderContext, node, new Map(), refs, nodesById, null, 0, phase);
       markNodeDrawnOverGlassBackdrop(renderer, node);

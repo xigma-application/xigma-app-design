@@ -3,12 +3,15 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TBoxPaintPhase, TDrawSceneContext } from '../types';
 import { TRectChunk } from 'utils/canvas/drawRectBatch/types';
 import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
+import { TBooleanShape } from '../drawBooleanLeafNode/types';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 export type TMaskRenderer = {
   context: TDrawSceneContext;
   gl: WebGL2RenderingContext;
   hoistedIds: Set<string>;
+  nodesById?: Record<string, TSceneNode>;
   paintLeaf: (node: TSceneNode, phase?: TBoxPaintPhase) => void;
   pool: TRenderTargetPool;
   refs: TCanvasRefs;
@@ -60,3 +63,12 @@ export type TGlassCacheEntry = {
 };
 
 export type TRectSegment = { chunk: TRectChunk } | { node: TSceneNode };
+
+export type TGlassShapeSdf = {
+  bounds: TDraftRect;
+  origin: TPoint;
+  size: { height: number; width: number };
+  texture: WebGLTexture;
+};
+
+export type TGlassShapeSdfCacheEntry = TGlassShapeSdf & { shape: TBooleanShape };

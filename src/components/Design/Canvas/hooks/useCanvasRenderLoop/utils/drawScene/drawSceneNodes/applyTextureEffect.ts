@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TMaskRenderer, TScissorRect } from './types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TSceneNode } from 'types/design/types';
@@ -43,7 +44,7 @@ export const applyTextureEffect = (renderer: TMaskRenderer, node: TSceneNode, co
     const clearRect = rect && expandScissorRect(context, gl, rect, TEXTURE_CLEAR_PADDING_PX);
     const shape = clipToShape ? pool.acquire() : null;
     const output = pool.acquire();
-    const hasChildren = 'childIds' in node && node.childIds.length > 0;
+    const hasChildren = node.type !== NodeType.boolean && 'childIds' in node && node.childIds.length > 0;
 
     if (shape) {
       renderIntoTarget(renderer, shape, () => paintLeaf(node, 'fill'), clearRect);
