@@ -17,7 +17,7 @@ export type TPopoverAutoLayoutSettingsAlignTextBaselineProps = {
   onMouseEnter: TFunc;
   onMouseLeave: TFunc;
   toggleButtons: TToggleButton[];
-  value: TAlignTextBaseline;
+  value: TAlignTextBaseline | undefined;
 };
 
 export const PopoverAutoLayoutSettingsAlignTextBaseline: FC<TPopoverAutoLayoutSettingsAlignTextBaselineProps> = ({
@@ -40,7 +40,7 @@ export const PopoverAutoLayoutSettingsAlignTextBaseline: FC<TPopoverAutoLayoutSe
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       toggleButtons={toggleButtons}
-      value={value}
+      value={value ?? ''}
     />
   );
 };

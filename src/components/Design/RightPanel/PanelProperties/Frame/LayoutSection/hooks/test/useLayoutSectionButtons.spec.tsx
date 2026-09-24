@@ -154,4 +154,42 @@ describe('useLayoutSectionButtons', () => {
     // action & result — should not throw
     expect(() => act(() => result.current.onToggleAutoLayout())).not.toThrow();
   });
+
+  describe('multi-selection', () => {
+    it('should show auto layout as on only when every frame has it, and add it only to the frames without it', () => {
+      // mock
+      const freeId = addFrameNode();
+      const verticalId = addFrameNode({ layoutMode: LayoutMode.vertical });
+      store.dispatch(setSelection([freeId, verticalId]));
+
+      // before
+      const { result } = renderUseLayoutSectionButtons();
+
+      // result
+      expect(result.current.isAutoLayoutSelected).toBe(false);
+      expect(result.current.isResizeToFitVisible).toBe(false);
+
+      // action
+      act(() => result.current.onToggleAutoLayout());
+
+      // result
+      expect([readNode(freeId).layoutMode, readNode(verticalId).layoutMode]).toEqual([LayoutMode.horizontal, LayoutMode.vertical]);
+    });
+
+    it('should remove auto layout from every frame when all of them have it', () => {
+      // mock
+      const horizontalId = addFrameNode({ layoutMode: LayoutMode.horizontal });
+      const verticalId = addFrameNode({ layoutMode: LayoutMode.vertical });
+      store.dispatch(setSelection([horizontalId, verticalId]));
+
+      // before
+      const { result } = renderUseLayoutSectionButtons();
+
+      // action
+      act(() => result.current.onToggleAutoLayout());
+
+      // result
+      expect([readNode(horizontalId).layoutMode, readNode(verticalId).layoutMode]).toEqual([LayoutMode.freeForm, LayoutMode.freeForm]);
+    });
+  });
 });

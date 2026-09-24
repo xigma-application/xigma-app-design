@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip, UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
 // types
@@ -18,7 +19,7 @@ export type TPopoverAutoLayoutSettingsAutoSpacingProps = {
   onMouseLeave: TFunc;
   onSelect: TFunc<[TAutoSpacing]>;
   options: TDropdownOption<TAutoSpacing>[];
-  value: TAutoSpacing;
+  value: TAutoSpacing | undefined;
 };
 
 export const PopoverAutoLayoutSettingsAutoSpacing: FC<TPopoverAutoLayoutSettingsAutoSpacingProps> = ({
@@ -46,6 +47,7 @@ export const PopoverAutoLayoutSettingsAutoSpacing: FC<TPopoverAutoLayoutSettings
           onMouseLeave={onMouseLeave}
           onSelect={onSelect}
           options={options}
+          placeholder={MIXED_LABEL}
           value={value}
           variant="outline"
         />

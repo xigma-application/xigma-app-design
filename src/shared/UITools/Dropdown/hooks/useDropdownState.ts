@@ -8,7 +8,7 @@ import { clamp } from 'utils/math/clamp';
 
 const ARROW_KEY_STEP: Record<string, number> = { ArrowDown: 1, ArrowUp: -1 };
 
-const getInitialHighlightedIndex = <TValue extends string>(options: TDropdownOption<TValue>[], value: TValue): number =>
+const getInitialHighlightedIndex = <TValue extends string>(options: TDropdownOption<TValue>[], value: TValue | undefined): number =>
   Math.max(
     0,
     options.findIndex((option) => option.value === value),
@@ -24,7 +24,7 @@ export type TUseDropdownStateResult = {
 
 export const useDropdownState = <TValue extends string>(
   options: TDropdownOption<TValue>[],
-  value: TValue,
+  value: TValue | undefined,
   onSelect: TFunc<[TValue]>,
 ): TUseDropdownStateResult => {
   const [isOpen, setIsOpen] = useState(false);

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
 // types
@@ -18,7 +19,7 @@ export type TPopoverAutoLayoutSettingsInsideStrokeProps = {
   onMouseLeave: TFunc;
   onSelect: TFunc<[TInsideStroke]>;
   options: TDropdownOption<TInsideStroke>[];
-  value: TInsideStroke;
+  value: TInsideStroke | undefined;
 };
 
 export const PopoverAutoLayoutSettingsInsideStroke: FC<TPopoverAutoLayoutSettingsInsideStrokeProps> = ({
@@ -43,6 +44,7 @@ export const PopoverAutoLayoutSettingsInsideStroke: FC<TPopoverAutoLayoutSetting
       onMouseLeave={onMouseLeave}
       onSelect={onSelect}
       options={options}
+      placeholder={MIXED_LABEL}
       value={value}
       variant="outline"
     />

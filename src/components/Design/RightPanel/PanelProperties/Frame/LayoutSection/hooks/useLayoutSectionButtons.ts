@@ -3,14 +3,15 @@ import { useResizeToFitSelection } from 'components/Design/Menu/hooks/useResizeT
 
 // store
 import { selectSelectedNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
+import { NodeType } from 'types/design/enums';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { isFreeformFrame } from 'utils/canvas/signals/isFreeformFrame';
+import { toggleFramesAutoLayout } from './utils/toggleFramesAutoLayout';
 
 export type TUseLayoutSectionButtonsResult = {
   isAutoLayoutSelected: boolean;
@@ -19,21 +20,18 @@ export type TUseLayoutSectionButtonsResult = {
   onToggleAutoLayout: TFunc;
 };
 
+const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
+
 export const useLayoutSectionButtons = (): TUseLayoutSectionButtonsResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
+  const frames = useAppSelector(selectSelectedNodes).filter(isFrameNode);
   const onResizeToFit = useResizeToFitSelection();
-  const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const isFreeform = !frameNode || isFreeformFrame(frameNode);
+  const isAutoLayoutSelected = frames.length > 0 && frames.every((frame) => !isFreeformFrame(frame));
 
   return {
-    isAutoLayoutSelected: !isFreeform,
-    isResizeToFitVisible: isFreeform,
+    isAutoLayoutSelected,
+    isResizeToFitVisible: frames.every(isFreeformFrame),
     onResizeToFit,
-    onToggleAutoLayout: (): void => {
-      if (frameNode) {
-        dispatch(updateNode({ changes: { layoutMode: isFreeform ? LayoutMode.horizontal : LayoutMode.freeForm }, id: frameNode.id }));
-      }
-    },
+    onToggleAutoLayout: (): void => toggleFramesAutoLayout(dispatch, frames, isAutoLayoutSelected),
   };
 };

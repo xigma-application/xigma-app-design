@@ -200,4 +200,12 @@ describe('Dropdown size', () => {
     // result
     expect(screen.getByRole('button').className).toContain('Dropdown--large');
   });
+
+  it('should show the placeholder in the trigger while no option matches the value', () => {
+    // before
+    render(<Dropdown onSelect={vi.fn()} options={options} placeholder="Mixed" value={undefined} />);
+
+    // result
+    expect(screen.getByText('Mixed')).toBeInTheDocument();
+  });
 });

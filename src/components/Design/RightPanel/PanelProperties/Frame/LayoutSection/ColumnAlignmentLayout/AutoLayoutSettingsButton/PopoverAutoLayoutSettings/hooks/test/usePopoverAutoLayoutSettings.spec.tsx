@@ -625,4 +625,45 @@ describe('usePopoverAutoLayoutSettings', () => {
     // result
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  describe('multi-selection', () => {
+    it('should leave a setting unset while the frames differ and apply a picked value to every frame', () => {
+      // mock
+      const firstId = addFrame({ canvasStacking: CanvasStacking.firstOnTop });
+      const secondId = addFrame({ canvasStacking: CanvasStacking.lastOnTop });
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderSettings();
+
+      // result
+      expect(result.current.canvasStackingValue).toBeUndefined();
+      expect(result.current.insideStrokeValue).toBe(InsideStroke.included);
+
+      // action
+      act(() => result.current.onSelectCanvasStacking(CanvasStacking.firstOnTop));
+
+      // result
+      expect([read(firstId).canvasStacking, read(secondId).canvasStacking]).toEqual([CanvasStacking.firstOnTop, CanvasStacking.firstOnTop]);
+
+      // cleanup
+      store.dispatch(setSelection([]));
+    });
+
+    it('should keep auto spacing enabled only while every frame has an auto gap on its main axis', () => {
+      // mock
+      const autoId = addFrame({ horizontalGapMode: GapMode.auto });
+      const fixedId = addFrame();
+      store.dispatch(setSelection([autoId, fixedId]));
+
+      // before
+      const { result } = renderSettings();
+
+      // result
+      expect(result.current.autoSpacingDisabled).toBe(true);
+
+      // cleanup
+      store.dispatch(setSelection([]));
+    });
+  });
 });

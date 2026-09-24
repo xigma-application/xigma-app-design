@@ -31,10 +31,11 @@ export type TDropdownProps<TValue extends string> = {
   onHoverOption?: TFunc<[TValue | null]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
+  placeholder?: string;
   size?: TDropdownSize;
   textAlign?: 'center' | 'left';
   truncate?: boolean;
-  value: TValue;
+  value: TValue | undefined;
   variant?: TDropdownVariant;
 };
 
@@ -48,6 +49,7 @@ export const Dropdown = <TValue extends string>({
   onHoverOption,
   onSelect,
   options,
+  placeholder,
   size = 'default',
   textAlign = 'center',
   truncate = true,
@@ -75,7 +77,7 @@ export const Dropdown = <TValue extends string>({
           [styles['Dropdown__label--no-truncate']]: !truncate,
         })}
       >
-        {selectedOption?.content ?? selectedOption?.triggerLabel ?? selectedOption?.label}
+        {selectedOption?.content ?? selectedOption?.triggerLabel ?? selectedOption?.label ?? placeholder}
       </span>
       <Icon name="ChevronDown" size={24} />
     </PopoverPrimitive.Trigger>

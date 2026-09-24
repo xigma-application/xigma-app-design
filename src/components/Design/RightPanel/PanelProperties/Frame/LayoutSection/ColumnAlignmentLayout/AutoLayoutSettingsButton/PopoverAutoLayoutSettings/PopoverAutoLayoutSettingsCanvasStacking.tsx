@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
 // types
@@ -17,7 +18,7 @@ export type TPopoverAutoLayoutSettingsCanvasStackingProps = {
   onMouseLeave: TFunc;
   onSelect: TFunc<[TCanvasStacking]>;
   options: TDropdownOption<TCanvasStacking>[];
-  value: TCanvasStacking;
+  value: TCanvasStacking | undefined;
 };
 
 export const PopoverAutoLayoutSettingsCanvasStacking: FC<TPopoverAutoLayoutSettingsCanvasStackingProps> = ({
@@ -40,6 +41,7 @@ export const PopoverAutoLayoutSettingsCanvasStacking: FC<TPopoverAutoLayoutSetti
       onMouseLeave={onMouseLeave}
       onSelect={onSelect}
       options={options}
+      placeholder={MIXED_LABEL}
       value={value}
       variant="outline"
     />

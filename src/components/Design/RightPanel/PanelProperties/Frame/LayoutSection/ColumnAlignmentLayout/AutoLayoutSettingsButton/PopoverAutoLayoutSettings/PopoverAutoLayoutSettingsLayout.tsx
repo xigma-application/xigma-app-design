@@ -6,6 +6,7 @@ import PopoverAutoLayoutSettingsLayoutControl from './PopoverAutoLayoutSettingsL
 import { UITools } from 'shared';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
 // types
@@ -18,7 +19,7 @@ export type TPopoverAutoLayoutSettingsLayoutProps = {
   onMouseLeave: TFunc;
   onSelect: TFunc<[TLayoutVersion]>;
   options: TDropdownOption<TLayoutVersion>[];
-  value: TLayoutVersion;
+  value: TLayoutVersion | undefined;
 };
 
 export const PopoverAutoLayoutSettingsLayout: FC<TPopoverAutoLayoutSettingsLayoutProps> = ({
@@ -41,6 +42,7 @@ export const PopoverAutoLayoutSettingsLayout: FC<TPopoverAutoLayoutSettingsLayou
       onMouseLeave={onMouseLeave}
       onSelect={onSelect}
       options={options}
+      placeholder={MIXED_LABEL}
       value={value}
     />
   );

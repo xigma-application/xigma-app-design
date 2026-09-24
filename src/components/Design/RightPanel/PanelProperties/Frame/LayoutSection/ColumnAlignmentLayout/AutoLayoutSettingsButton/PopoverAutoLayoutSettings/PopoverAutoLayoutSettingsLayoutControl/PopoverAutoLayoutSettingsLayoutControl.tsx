@@ -17,7 +17,7 @@ import { TDropdownProps } from 'shared/UITools/Dropdown/Dropdown';
 
 export type TPopoverAutoLayoutSettingsLayoutControlProps = Pick<
   TDropdownProps<TLayoutVersion>,
-  'onHoverOption' | 'onSelect' | 'options' | 'value'
+  'onHoverOption' | 'onSelect' | 'options' | 'placeholder' | 'value'
 > & { className?: string };
 
 export const PopoverAutoLayoutSettingsLayoutControl: FC<TPopoverAutoLayoutSettingsLayoutControlProps> = ({
@@ -25,6 +25,7 @@ export const PopoverAutoLayoutSettingsLayoutControl: FC<TPopoverAutoLayoutSettin
   onHoverOption,
   onSelect,
   options,
+  placeholder,
   value,
 }) => {
   const { t } = useTranslation();
@@ -48,6 +49,7 @@ export const PopoverAutoLayoutSettingsLayoutControl: FC<TPopoverAutoLayoutSettin
         onHoverOption={onHoverOption}
         onSelect={onSelect}
         options={options}
+        placeholder={placeholder}
         value={value}
         variant="outline"
       />

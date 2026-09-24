@@ -16,17 +16,9 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TAlignTextBaseline, TAutoSpacing, TCanvasStacking, TInsideStroke, TLayoutVersion } from '../types';
-import {
-  AlignTextBaseline,
-  AutoSpacing,
-  CanvasStacking,
-  GapMode,
-  InsideStroke,
-  LayoutMode,
-  LayoutVersion,
-  NodeType,
-} from 'types/design/enums';
+import { AlignTextBaseline, AutoSpacing, CanvasStacking, InsideStroke, LayoutVersion, NodeType } from 'types/design/enums';
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
+import { TFrameNode } from 'types/design/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
@@ -35,26 +27,29 @@ import { commitAutoSpacingChange } from './utils/commitAutoSpacingChange';
 import { commitCanvasStackingChange } from './utils/commitCanvasStackingChange';
 import { commitInsideStrokeChange } from './utils/commitInsideStrokeChange';
 import { commitLayoutVersionChange } from './utils/commitLayoutVersionChange';
+import { commitOnFrames } from './utils/commitOnFrames';
 import { getAlignTextBaselineToggleButtons } from './utils/getAlignTextBaselineToggleButtons';
+import { getSharedValue } from './utils/getSharedValue';
+import { isAutoSpacingDisabled } from './utils/isAutoSpacingDisabled';
 
 export type TUsePopoverAutoLayoutSettingsResult = {
   alignTextBaselinePreviewValue: TAlignTextBaseline | null;
   alignTextBaselineToggleButtons: TToggleButton[];
-  alignTextBaselineValue: TAlignTextBaseline;
+  alignTextBaselineValue: TAlignTextBaseline | undefined;
   autoSpacingDisabled: boolean;
   autoSpacingOptions: TDropdownOption<TAutoSpacing>[];
   autoSpacingPreviewValue: TAutoSpacing | null;
-  autoSpacingValue: TAutoSpacing;
+  autoSpacingValue: TAutoSpacing | undefined;
   canvasStackingOptions: TDropdownOption<TCanvasStacking>[];
   canvasStackingPreviewValue: TCanvasStacking | null;
-  canvasStackingValue: TCanvasStacking;
+  canvasStackingValue: TCanvasStacking | undefined;
   handleClose: TFunc;
   insideStrokeOptions: TDropdownOption<TInsideStroke>[];
   insideStrokePreviewValue: TInsideStroke | null;
-  insideStrokeValue: TInsideStroke;
+  insideStrokeValue: TInsideStroke | undefined;
   layoutOptions: TDropdownOption<TLayoutVersion>[];
   layoutPreviewValue: TLayoutVersion | null;
-  layoutValue: TLayoutVersion;
+  layoutValue: TLayoutVersion | undefined;
   onChangeAlignTextBaseline: TFunc<[string]>;
   onHoverAlignTextBaselineOption: TFunc<[string | null]>;
   onHoverAutoSpacingOption: TFunc<[TAutoSpacing | null]>;
@@ -80,16 +75,13 @@ export type TUsePopoverAutoLayoutSettingsResult = {
 export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLayoutSettingsResult => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const frameNode = selectedNode?.type === NodeType.frame ? selectedNode : undefined;
-  const insideStroke = frameNode?.insideStroke ?? InsideStroke.included;
-  const canvasStacking = frameNode?.canvasStacking ?? CanvasStacking.lastOnTop;
-  const alignTextBaseline = frameNode?.alignTextBaseline ?? AlignTextBaseline.off;
-  const autoSpacing = frameNode?.autoSpacing ?? AutoSpacing.between;
-  const layoutVersion = frameNode?.layoutVersion ?? LayoutVersion.updated;
-  const isHorizontal = frameNode?.layoutMode === LayoutMode.horizontal;
-  const primaryGapMode = isHorizontal ? frameNode?.horizontalGapMode : frameNode?.verticalGapMode;
-  const autoSpacingDisabled = primaryGapMode !== GapMode.auto;
+  const frames = useAppSelector(selectSelectedNodes).filter((node): node is TFrameNode => node?.type === NodeType.frame);
+  const insideStroke = getSharedValue(frames, (frame) => frame.insideStroke ?? InsideStroke.included, InsideStroke.included);
+  const canvasStacking = getSharedValue(frames, (frame) => frame.canvasStacking ?? CanvasStacking.lastOnTop, CanvasStacking.lastOnTop);
+  const alignTextBaseline = getSharedValue(frames, (frame) => frame.alignTextBaseline ?? AlignTextBaseline.off, AlignTextBaseline.off);
+  const autoSpacing = getSharedValue(frames, (frame) => frame.autoSpacing ?? AutoSpacing.between, AutoSpacing.between);
+  const layoutVersion = getSharedValue(frames, (frame) => frame.layoutVersion ?? LayoutVersion.updated, LayoutVersion.updated);
+  const autoSpacingDisabled = isAutoSpacingDisabled(frames);
   const [isPreviewingInsideStroke, setIsPreviewingInsideStroke] = useState(false);
   const [hoveredInsideStrokeOption, setHoveredInsideStrokeOption] = useState<TInsideStroke | null>(null);
   const [isPreviewingCanvasStacking, setIsPreviewingCanvasStacking] = useState(false);
@@ -105,24 +97,25 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
     values.map((value) => ({ label: t(`${translationNameSpace}.${group}.option.${value}`), value }));
 
   return {
-    alignTextBaselinePreviewValue: hoveredAlignTextBaselineOption ?? (isPreviewingAlignTextBaseline ? alignTextBaseline : null),
+    alignTextBaselinePreviewValue: hoveredAlignTextBaselineOption ?? (isPreviewingAlignTextBaseline ? (alignTextBaseline ?? null) : null),
     alignTextBaselineToggleButtons: getAlignTextBaselineToggleButtons(t),
     alignTextBaselineValue: alignTextBaseline,
     autoSpacingDisabled,
     autoSpacingOptions: toOptions('autoSpacing', AUTO_SPACING_VALUES),
-    autoSpacingPreviewValue: hoveredAutoSpacingOption ?? (isPreviewingAutoSpacing ? autoSpacing : null),
+    autoSpacingPreviewValue: hoveredAutoSpacingOption ?? (isPreviewingAutoSpacing ? (autoSpacing ?? null) : null),
     autoSpacingValue: autoSpacing,
     canvasStackingOptions: toOptions('canvasStacking', CANVAS_STACKING_VALUES),
-    canvasStackingPreviewValue: hoveredCanvasStackingOption ?? (isPreviewingCanvasStacking ? canvasStacking : null),
+    canvasStackingPreviewValue: hoveredCanvasStackingOption ?? (isPreviewingCanvasStacking ? (canvasStacking ?? null) : null),
     canvasStackingValue: canvasStacking,
     handleClose: () => onClose(),
     insideStrokeOptions: toOptions('insideStroke', INSIDE_STROKE_VALUES),
-    insideStrokePreviewValue: hoveredInsideStrokeOption ?? (isPreviewingInsideStroke ? insideStroke : null),
+    insideStrokePreviewValue: hoveredInsideStrokeOption ?? (isPreviewingInsideStroke ? (insideStroke ?? null) : null),
     insideStrokeValue: insideStroke,
     layoutOptions: toOptions('layout', LAYOUT_VERSION_VALUES),
-    layoutPreviewValue: hoveredLayoutOption ?? (isPreviewingLayout ? layoutVersion : null),
+    layoutPreviewValue: hoveredLayoutOption ?? (isPreviewingLayout ? (layoutVersion ?? null) : null),
     layoutValue: layoutVersion,
-    onChangeAlignTextBaseline: (value: string) => commitAlignTextBaselineChange(dispatch, frameNode, value as TAlignTextBaseline),
+    onChangeAlignTextBaseline: (value: string) =>
+      commitOnFrames(dispatch, frames, (frame) => commitAlignTextBaselineChange(dispatch, frame, value as TAlignTextBaseline)),
     onHoverAlignTextBaselineOption: (value: string | null) => setHoveredAlignTextBaselineOption(value as TAlignTextBaseline | null),
     onHoverAutoSpacingOption: (value: TAutoSpacing | null) => setHoveredAutoSpacingOption(value),
     onHoverCanvasStackingOption: (value: TCanvasStacking | null) => setHoveredCanvasStackingOption(value),
@@ -138,9 +131,13 @@ export const usePopoverAutoLayoutSettings = (onClose: TFunc): TUsePopoverAutoLay
     onMouseLeaveCanvasStacking: () => setIsPreviewingCanvasStacking(false),
     onMouseLeaveInsideStroke: () => setIsPreviewingInsideStroke(false),
     onMouseLeaveLayout: () => setIsPreviewingLayout(false),
-    onSelectAutoSpacing: (value: TAutoSpacing) => commitAutoSpacingChange(dispatch, frameNode, value),
-    onSelectCanvasStacking: (value: TCanvasStacking) => commitCanvasStackingChange(dispatch, frameNode, value),
-    onSelectInsideStroke: (value: TInsideStroke) => commitInsideStrokeChange(dispatch, frameNode, value),
-    onSelectLayout: (value: TLayoutVersion) => commitLayoutVersionChange(dispatch, frameNode, value),
+    onSelectAutoSpacing: (value: TAutoSpacing) =>
+      commitOnFrames(dispatch, frames, (frame) => commitAutoSpacingChange(dispatch, frame, value)),
+    onSelectCanvasStacking: (value: TCanvasStacking) =>
+      commitOnFrames(dispatch, frames, (frame) => commitCanvasStackingChange(dispatch, frame, value)),
+    onSelectInsideStroke: (value: TInsideStroke) =>
+      commitOnFrames(dispatch, frames, (frame) => commitInsideStrokeChange(dispatch, frame, value)),
+    onSelectLayout: (value: TLayoutVersion) =>
+      commitOnFrames(dispatch, frames, (frame) => commitLayoutVersionChange(dispatch, frame, value)),
   };
 };

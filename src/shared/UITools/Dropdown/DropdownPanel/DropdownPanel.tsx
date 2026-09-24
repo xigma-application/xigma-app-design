@@ -20,7 +20,7 @@ export type TDropdownPanelProps<TValue extends string> = {
   onHighlight: TFunc<[number]>;
   onSelect: TFunc<[TValue]>;
   options: TDropdownOption<TValue>[];
-  value: TValue;
+  value: TValue | undefined;
 };
 
 export const DropdownPanel = <TValue extends string>({
