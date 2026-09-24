@@ -48,7 +48,14 @@ node's folder. Today:
   still aligns itself inside its parent, even with children. `DistributeMenu` (trigger icon
   `DistributeVerticalSpacing`; items Tidy up ⌃⌥T / Distribute vertical spacing ⌃⌥V / Distribute
   horizontal spacing ⌃⌥H) shows in the row's `buttonsIcon` for any free-form frame with children
-  (`isFreeFormFrameWithChildren`, nested or not). **Items have no actions yet.**
+  (`isFreeFormFrameWithChildren`, nested or not). Distribute vertical/horizontal spacing
+  (`useDistributeMenu` → `hooks/utils/distributeFrameChildren`) works only in the same
+  top-level-free-form-frame case as child alignment, with at least `DISTRIBUTE_MIN_CHILDREN` (3) box
+  children (disabled otherwise). It sorts the children by their start on that axis, keeps the
+  outermost span (min start … max end) and places them one after another with equal gaps, in one
+  undo step, based on unrotated `x`/`width` (`y`/`height`). Tidy up is always disabled for now
+  (Figma runs it on a 2+ layer selection, still to be done with multi-select). Keyboard shortcuts
+  (⌃⌥T/V/H) are only shown in the menu, not wired up.
 - `Common/ColumnDimensions/` — the W/H row (and, for frames, the Fixed/Hug/Fill sizing menu and
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box

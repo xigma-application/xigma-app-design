@@ -14,8 +14,10 @@ export type TAlignmentOption = {
   shortcutKey: keyof TKeyboardShortcuts;
 };
 
+export type TDistributeAxis = 'horizontal' | 'vertical';
+
 export type TDistributeOption = {
-  disabled?: boolean;
+  axis?: TDistributeAxis;
   labelKey: string;
   name: TIconProps['name'];
   shortcutKey: keyof TKeyboardShortcuts;

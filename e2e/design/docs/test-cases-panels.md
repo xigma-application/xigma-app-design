@@ -66,14 +66,15 @@ row (`Common/ColumnGridChildSpan`, display-only for now), none of the auto-layou
 A top-level free-form frame with children enables the Alignment buttons and aligns each child on its
 own against the frame's edges, writing that child's constraint too, in one undo step. A nested frame
 still aligns itself inside its parent. The Distribute menu (Tidy up, Distribute vertical/horizontal
-spacing) shows next to Alignment for any free-form frame with children; its items have no actions
-yet.
+spacing) shows next to Alignment for any free-form frame with children. Distribute works on the
+children of a top-level free-form frame with 3+ children; Tidy up is disabled for now.
 
-| #   | Scenario                                                                                                     | Unit |                                                         E2E                                                          |
-| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :------------------------------------------------------------------------------------------------------------------: |
-| 551 | Align right on a top-level free-form frame moves every child to the frame's right edge; Ctrl+Z undoes it all |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
-| 552 | The Distribute menu shows only once the free-form frame has children and lists its three items               |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
-| 553 | A nested free-form frame with children aligns itself inside its parent, not its children                     |  ✅  | — (same button click as #551, only the target differs; `useColumnAlignment.spec.tsx` asserts both positions exactly) |
+| #   | Scenario                                                                                                                               | Unit |                                                         E2E                                                          |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------------------------------------------------------------------------------------------------: |
+| 551 | Align right on a top-level free-form frame moves every child to the frame's right edge; Ctrl+Z undoes it all                           |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 552 | The Distribute menu shows only once the free-form frame has children and lists its three items                                         |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 553 | A nested free-form frame with children aligns itself inside its parent, not its children                                               |  ✅  | — (same button click as #551, only the target differs; `useColumnAlignment.spec.tsx` asserts both positions exactly) |
+| 554 | Distribute horizontal spacing on a top-level free-form frame evens out the gaps between its three children, keeping the outermost ones |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 
 ## Layers panel — lock/visibility
 

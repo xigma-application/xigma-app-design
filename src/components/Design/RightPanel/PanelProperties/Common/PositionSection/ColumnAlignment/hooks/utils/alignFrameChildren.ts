@@ -6,13 +6,11 @@ import { AppDispatch } from 'store';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 
 // types
-import { TBoxSceneNode, TFrameNode, TNodeAlignment, TSceneNode } from 'types/design/types';
+import { TFrameNode, TNodeAlignment, TSceneNode } from 'types/design/types';
 
 // utils
-import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { getFrameBoxChildren } from './getFrameBoxChildren';
 import { moveNodeToAlignment } from './moveNodeToAlignment';
-
-const isExistingBoxSceneNode = (node: TSceneNode | undefined): node is TBoxSceneNode => node !== undefined && isBoxSceneNode(node);
 
 export const alignFrameChildren = (
   dispatch: AppDispatch,
@@ -22,10 +20,7 @@ export const alignFrameChildren = (
 ): void => {
   if (frame) {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    frame.childIds
-      .map((id) => nodes[id])
-      .filter(isExistingBoxSceneNode)
-      .forEach((child) => moveNodeToAlignment(dispatch, child, frame, { ...child.alignment, ...next }));
+    getFrameBoxChildren(nodes, frame).forEach((child) => moveNodeToAlignment(dispatch, child, frame, { ...child.alignment, ...next }));
     dispatch(endHistoryGesture());
   }
 };

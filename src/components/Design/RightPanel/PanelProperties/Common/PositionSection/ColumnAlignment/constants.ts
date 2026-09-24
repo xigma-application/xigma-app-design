@@ -41,11 +41,19 @@ export const VERTICAL_ALIGNMENT_OPTIONS: TAlignmentOption[] = [
 ];
 
 export const DISTRIBUTE_OPTIONS: TDistributeOption[] = [
-  { disabled: true, labelKey: ARRANGE_MENU_TIDY_UP_KEY, name: 'TidyUp', shortcutKey: 'tidyUp' },
-  { labelKey: ARRANGE_MENU_DISTRIBUTE_VERTICAL_SPACING_KEY, name: 'DistributeVerticalSpacing', shortcutKey: 'distributeVerticalSpacing' },
+  { labelKey: ARRANGE_MENU_TIDY_UP_KEY, name: 'TidyUp', shortcutKey: 'tidyUp' },
   {
+    axis: 'vertical',
+    labelKey: ARRANGE_MENU_DISTRIBUTE_VERTICAL_SPACING_KEY,
+    name: 'DistributeVerticalSpacing',
+    shortcutKey: 'distributeVerticalSpacing',
+  },
+  {
+    axis: 'horizontal',
     labelKey: ARRANGE_MENU_DISTRIBUTE_HORIZONTAL_SPACING_KEY,
     name: 'DistributeHorizontalSpacing',
     shortcutKey: 'distributeHorizontalSpacing',
   },
 ];
+
+export const DISTRIBUTE_MIN_CHILDREN = 3;

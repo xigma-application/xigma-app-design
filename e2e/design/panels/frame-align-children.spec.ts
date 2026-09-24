@@ -76,3 +76,31 @@ test('the More actions menu next to Alignment shows its tooltip and lists Tidy u
   await expect(page.getByText('Distribute vertical spacing', { exact: true })).toBeVisible();
   await expect(page.getByText('Distribute horizontal spacing', { exact: true })).toBeVisible();
 });
+
+test('Distribute horizontal spacing on a top-level free-form frame evens out the gaps between its three children, keeping the outermost ones in place', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-distribute-children');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 200, 1000, 500);
+  await designPage.drawRectangle(620, 250, 660, 290);
+  await designPage.drawRectangle(680, 250, 720, 290);
+  await designPage.drawRectangle(900, 250, 940, 290);
+  await designPage.click(615, 188); // the frame's name label
+
+  const before = await readFrameAndChildren(page);
+  const sortedLeftEdges = (children: TRect[]): number[] => children.map((child) => child.x).sort((a, b) => a - b);
+
+  await page.getByLabel('More actions').click();
+  await page.getByText('Distribute horizontal spacing', { exact: true }).click();
+
+  const [left, middle, right] = sortedLeftEdges((await readFrameAndChildren(page)).children);
+  const [beforeLeft, , beforeRight] = sortedLeftEdges(before.children);
+
+  expect(left).toBe(beforeLeft);
+  expect(right).toBe(beforeRight);
+  expect(middle - (left + 40)).toBeCloseTo(right - (middle + 40));
+});
