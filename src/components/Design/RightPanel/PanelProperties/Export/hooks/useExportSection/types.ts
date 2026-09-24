@@ -7,6 +7,7 @@ export type TUseExportSectionResult = {
   containerRef: RefObject<HTMLDivElement | null>;
   dropIndicatorOffset: number | null;
   exportTarget: TExportTarget;
+  exportTargets: TExportTarget[];
   isRowDragging: (index: number) => boolean;
   isRowSelected: (index: number) => boolean;
   onAdd: TFunc;
@@ -16,4 +17,5 @@ export type TUseExportSectionResult = {
   onStartDrag: (index: number, event: ReactPointerEvent) => void;
   registerRow: (index: number) => (element: HTMLElement | null) => void;
   settings: TExportSetting[];
+  zipName: string;
 };

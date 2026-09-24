@@ -61,6 +61,21 @@ describe('useExportSection', () => {
     expect(result.current.exportTarget.id).toBe(frameId);
   });
 
+  it('should target every selected layer and zip under the page name when several are selected', () => {
+    // mock
+    const firstId = addFrameNode();
+    const secondId = addFrameNode();
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    const { result } = renderHook(() => useExportSection(), { wrapper });
+
+    // result
+    expect(result.current.exportTargets.map(({ id }) => id)).toEqual([firstId, secondId]);
+    expect(result.current.zipName).toBe(selectActivePage(store.getState()).name);
+  });
+
   it('should add a default export setting on add', () => {
     // before
     const { result } = renderHook(() => useExportSection(), { wrapper });

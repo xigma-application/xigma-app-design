@@ -859,6 +859,7 @@
   "design.rightPanel.panelProperties.export.addAriaLabel": "Dodaj ustawienie eksportu",
   "design.rightPanel.panelProperties.export.addTooltip": "Dodaj ustawienia eksportu",
   "design.rightPanel.panelProperties.export.exportButton": "Eksportuj {{name}}",
+  "design.rightPanel.panelProperties.export.exportLayersButton": "Eksportuj warstwy: {{count}}",
   "design.rightPanel.panelProperties.export.preview.label": "Podgląd",
   "design.rightPanel.panelProperties.export.row.deleteAriaLabel": "Usuń ustawienie eksportu",
   "design.rightPanel.panelProperties.export.row.deleteTooltip": "Usuń",

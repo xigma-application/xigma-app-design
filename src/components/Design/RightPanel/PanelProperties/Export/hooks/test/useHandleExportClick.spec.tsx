@@ -15,9 +15,9 @@ import { store } from 'store';
 // types
 import { TExportTarget } from '../../types';
 
-const exportNodeMock = vi.fn();
+const exportNodesMock = vi.fn();
 
-vi.mock('../../utils/exportNode', () => ({ exportNode: (...args: unknown[]): unknown => exportNodeMock(...args) }));
+vi.mock('../../utils/exportNodes', () => ({ exportNodes: (...args: unknown[]): unknown => exportNodesMock(...args) }));
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -25,7 +25,7 @@ const exportTarget: TExportTarget = { id: 'r1', name: 'Rectangle' };
 
 describe('useHandleExportClick', () => {
   beforeEach(() => {
-    exportNodeMock.mockReset();
+    exportNodesMock.mockReset();
   });
 
   it('should export the whole page (id null) when there is no selected node', async () => {
@@ -33,13 +33,13 @@ describe('useHandleExportClick', () => {
     const pageTarget: TExportTarget = { id: null, name: 'Page 1' };
 
     // before
-    const { result } = renderHook(() => useHandleExportClick(pageTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick([pageTarget], [DEFAULT_EXPORT_SETTING], 'Page 1'), { wrapper });
 
     // action
     await act(() => result.current());
 
     // result
-    expect(exportNodeMock).toHaveBeenCalledWith(null, 'Page 1', [DEFAULT_EXPORT_SETTING]);
+    expect(exportNodesMock).toHaveBeenCalledWith([pageTarget], [DEFAULT_EXPORT_SETTING], 'Page 1');
   });
 
   it('should mark exporting while the export runs, then clear it once done', async () => {
@@ -49,9 +49,9 @@ describe('useHandleExportClick', () => {
       resolveExport = resolve;
     });
 
-    exportNodeMock.mockReturnValue(exportPromise);
+    exportNodesMock.mockReturnValue(exportPromise);
 
-    const { result } = renderHook(() => useHandleExportClick(exportTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick([exportTarget], [DEFAULT_EXPORT_SETTING], 'Rectangle'), { wrapper });
 
     // action
     let clickPromise: Promise<void> = Promise.resolve();
@@ -62,7 +62,7 @@ describe('useHandleExportClick', () => {
 
     // result — flagged as exporting immediately, with the right node bounds forwarded
     expect(selectIsExporting(store.getState())).toBe(true);
-    expect(exportNodeMock).toHaveBeenCalledWith('r1', 'Rectangle', [DEFAULT_EXPORT_SETTING]);
+    expect(exportNodesMock).toHaveBeenCalledWith([exportTarget], [DEFAULT_EXPORT_SETTING], 'Rectangle');
 
     // action
     await act(async () => {
@@ -76,9 +76,9 @@ describe('useHandleExportClick', () => {
 
   it('should clear the exporting flag even when the export throws', async () => {
     // mock
-    exportNodeMock.mockRejectedValue(new Error('boom'));
+    exportNodesMock.mockRejectedValue(new Error('boom'));
 
-    const { result } = renderHook(() => useHandleExportClick(exportTarget, [DEFAULT_EXPORT_SETTING]), { wrapper });
+    const { result } = renderHook(() => useHandleExportClick([exportTarget], [DEFAULT_EXPORT_SETTING], 'Rectangle'), { wrapper });
 
     // action
     await act(async () => {

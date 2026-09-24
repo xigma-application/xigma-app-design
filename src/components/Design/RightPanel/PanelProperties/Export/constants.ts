@@ -3,6 +3,7 @@ import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
 import { ExportColorProfile, ExportFormat, ExportImageResampling, ExportQuality, ExportScale } from './enums';
+import { TDraftRect } from 'types/canvas';
 import { TExportSetting } from './types';
 
 export const translationNameSpace = `${parentNameSpace}.export`;
@@ -67,3 +68,5 @@ export const DEFAULT_EXPORT_SETTING: TExportSetting = {
   scale: ExportScale.one,
   suffix: '',
 };
+
+export const EMPTY_EXPORT_BOUNDS: TDraftRect = { height: 0, width: 0, x: 0, y: 0 };

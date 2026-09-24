@@ -19,8 +19,10 @@ import { resolveFillDragIndices } from '../../../Common/FillSection/hooks/useFil
 export const useExportSection = (): TUseExportSectionResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const activePage = useAppSelector(selectActivePage);
-  const node = selectedNodes.length === 1 ? selectedNodes[0] : undefined;
-  const exportTarget: TExportTarget = { id: node?.id ?? null, name: node?.name ?? activePage.name };
+  const exportTargets: TExportTarget[] =
+    selectedNodes.length > 0 ? selectedNodes.map(({ id, name }) => ({ id, name })) : [{ id: null, name: activePage.name }];
+  const [exportTarget] = exportTargets;
+  const exportTargetsKey = exportTargets.map(({ id }) => id).join(',');
   const [settings, setSettings] = useState<TExportSetting[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -30,12 +32,13 @@ export const useExportSection = (): TUseExportSectionResult => {
 
   useEffect(() => {
     setSettings([]);
-  }, [exportTarget.id]);
+  }, [exportTargetsKey]);
 
   return {
     containerRef,
     dropIndicatorOffset: dragState?.hasMoved ? dragState.dropOffset : null,
     exportTarget,
+    exportTargets,
     isRowDragging: (index): boolean => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index): boolean => selectedIndices.includes(index),
     onAdd: (): void => setSettings((previous) => [...previous, createExportSetting()]),
@@ -45,5 +48,6 @@ export const useExportSection = (): TUseExportSectionResult => {
     onStartDrag: (index, event): void => beginDrag(resolveFillDragIndices(selectedIndices, setSelectedIndices, index), index, event),
     registerRow,
     settings,
+    zipName: selectedNodes.length === 1 ? exportTarget.name : activePage.name,
   };
 };

@@ -13,6 +13,15 @@ const readLastNodeId = (page: Page): Promise<string> =>
     return order[order.length - 1];
   });
 
+const readLastChildId = (page: Page, parentId: string): Promise<string> =>
+  page.evaluate(async (id) => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { childIds } = pages[activePageId].nodes[id] as unknown as { childIds: string[] };
+
+    return childIds[childIds.length - 1];
+  }, parentId);
+
 const addNoiseEffect = (page: Page, nodeId: string): Promise<void> =>
   page.evaluate(async (id) => {
     const { store } = await import('/src/store/index.ts');
@@ -40,17 +49,6 @@ const setFill = (page: Page, nodeId: string, hex: string, opacity = 100): Promis
       store.dispatch(updateNode({ changes: { fills: [{ color: hex, opacity, type: 'solid' }] } as never, id: nodeId }));
     },
     { hex, nodeId, opacity },
-  );
-
-const reparent = (page: Page, nodeId: string, parentId: string, targetIndex: number): Promise<void> =>
-  page.evaluate(
-    async ({ nodeId, parentId, targetIndex }) => {
-      const { store } = await import('/src/store/index.ts');
-      const { moveNodes } = await import('/src/store/design/slice.ts');
-
-      store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex, targetParentId: parentId } as never));
-    },
-    { nodeId, parentId, targetIndex },
   );
 
 const selectNode = (page: Page, nodeId: string): Promise<void> =>
@@ -172,20 +170,17 @@ test.describe('Design panels — Export', () => {
     const frameId = await readLastNodeId(page);
 
     await designPage.drawRectangle(700, 200, 850, 450);
-    const redId = await readLastNodeId(page);
+    const redId = await readLastChildId(page, frameId);
     await setFill(page, redId, '#ff0000');
-    await reparent(page, redId, frameId, 0);
 
     await designPage.drawRectangle(850, 200, 1000, 450);
-    const blueId = await readLastNodeId(page);
+    const blueId = await readLastChildId(page, frameId);
     await setFill(page, blueId, '#0000ff');
-    await reparent(page, blueId, frameId, 1);
 
     await designPage.drawRectangle(750, 275, 950, 375);
-    const glassId = await readLastNodeId(page);
+    const glassId = await readLastChildId(page, frameId);
     await setFill(page, glassId, '#808080', 10);
     await addGlassEffect(page, glassId);
-    await reparent(page, glassId, frameId, 2);
     await page.waitForTimeout(300);
 
     await selectNode(page, frameId);
@@ -223,20 +218,17 @@ test.describe('Design panels — Export', () => {
     const frameId = await readLastNodeId(page);
 
     await designPage.drawRectangle(700, 200, 850, 400);
-    const redId = await readLastNodeId(page);
+    const redId = await readLastChildId(page, frameId);
     await setFill(page, redId, '#ff0000');
-    await reparent(page, redId, frameId, 0);
 
     await designPage.drawRectangle(850, 200, 1000, 400);
-    const blueId = await readLastNodeId(page);
+    const blueId = await readLastChildId(page, frameId);
     await setFill(page, blueId, '#0000ff');
-    await reparent(page, blueId, frameId, 1);
 
     await designPage.drawRectangle(750, 250, 950, 350);
-    const glassId = await readLastNodeId(page);
+    const glassId = await readLastChildId(page, frameId);
     await setFill(page, glassId, '#808080', 10);
     await addGlassEffect(page, glassId);
-    await reparent(page, glassId, frameId, 2);
     await page.waitForTimeout(300);
 
     await selectNode(page, frameId);
@@ -260,5 +252,52 @@ test.describe('Design panels — Export', () => {
     expect(overBlue.alpha).toBeGreaterThan(200);
     expect(overRed.r - overRed.b).toBeGreaterThan(20);
     expect(overBlue.b - overBlue.r).toBeGreaterThan(20);
+  });
+
+  test('with two frames selected, the button reads Export 2 layers and downloads one zip with a file per frame', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-export-multi');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      store.dispatch(setSelection(pages[activePageId].rootOrder));
+    });
+
+    // action
+    await page.getByRole('button', { name: 'Add export setting' }).click();
+
+    const exportButton = page.getByRole('button', { name: 'Export 2 layers' });
+
+    // result
+    await expect(exportButton).toBeVisible();
+
+    // action
+    const downloadPromise = page.waitForEvent('download');
+
+    await exportButton.click();
+
+    const download = await downloadPromise;
+
+    // result
+    expect(download.suggestedFilename()).toMatch(/\.zip$/);
+
+    const stream = await download.createReadStream();
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(chunk as Buffer);
+    }
+
+    const { default: JSZip } = await import('jszip');
+    const zip = await JSZip.loadAsync(Buffer.concat(chunks));
+
+    expect(Object.keys(zip.files).sort()).toEqual(['Frame (1).png', 'Frame (2).png']);
   });
 });

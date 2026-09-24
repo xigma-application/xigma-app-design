@@ -13,6 +13,7 @@ import { TExportSetting } from '../../types';
 
 // utils
 import { exportNode } from '../exportNode';
+import { exportNodes } from '../exportNodes';
 
 const createExportFileMock = vi.fn();
 const createExportZipBlobMock = vi.fn();
@@ -299,5 +300,34 @@ describe('exportNode', () => {
 
     // result
     expect(createExportFileMock.mock.calls[0][8]).toEqual({ height: 0, width: 0, x: 0, y: 0 });
+  });
+
+  it('should zip the files of several layers together, numbering names that repeat', async () => {
+    // mock
+    const firstId = addRectangle();
+    const secondId = addRectangle();
+    const zipBlob = { size: 8, type: 'application/zip' } as Blob;
+
+    createExportFileMock.mockImplementation((_nodeId, _format, _scale, fileName: string) =>
+      Promise.resolve({ blob: { size: 4, type: 'image/png' } as Blob, fileName }),
+    );
+    createExportZipBlobMock.mockResolvedValue(zipBlob);
+
+    // action
+    await exportNodes(
+      [
+        { id: firstId, name: 'Icon' },
+        { id: secondId, name: 'Icon' },
+      ],
+      [setting({ format: ExportFormat.png })],
+      'Page 1',
+    );
+
+    // result
+    expect(createExportZipBlobMock.mock.calls[0][0].map(({ fileName }: { fileName: string }) => fileName)).toEqual([
+      'Icon.png',
+      'Icon (2).png',
+    ]);
+    expect(downloadBlobMock).toHaveBeenCalledWith(zipBlob, 'Page 1.zip');
   });
 });

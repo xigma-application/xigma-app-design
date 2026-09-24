@@ -27,6 +27,7 @@ const Export: FC = () => {
     containerRef,
     dropIndicatorOffset,
     exportTarget,
+    exportTargets,
     isRowDragging,
     isRowSelected,
     onAdd,
@@ -36,9 +37,10 @@ const Export: FC = () => {
     onStartDrag,
     registerRow,
     settings,
+    zipName,
   } = useExportSection();
   const isExporting = useAppSelector(selectIsExporting);
-  const handleExportClick = useHandleExportClick(exportTarget, settings);
+  const handleExportClick = useHandleExportClick(exportTargets, settings, zipName);
 
   return (
     <UITools.Section
@@ -76,9 +78,11 @@ const Export: FC = () => {
             onClick={handleExportClick}
             variant="outline"
           >
-            {t(`${translationNameSpace}.exportButton`, { name: exportTarget.name })}
+            {exportTargets.length > 1
+              ? t(`${translationNameSpace}.exportLayersButton`, { count: exportTargets.length })
+              : t(`${translationNameSpace}.exportButton`, { name: exportTarget.name })}
           </UITools.Button>
-          <ExportPreview nodeId={exportTarget.id} />
+          {exportTargets.length === 1 && <ExportPreview nodeId={exportTarget.id} />}
         </div>
       )}
     </UITools.Section>

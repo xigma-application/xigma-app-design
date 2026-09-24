@@ -6,16 +6,20 @@ import { useAppDispatch } from 'store';
 import { TExportSetting, TExportTarget } from '../types';
 
 // utils
-import { exportNode } from '../utils/exportNode';
+import { exportNodes } from '../utils/exportNodes';
 
-export const useHandleExportClick = (exportTarget: TExportTarget, settings: TExportSetting[]): TFunc<[], Promise<void>> => {
+export const useHandleExportClick = (
+  exportTargets: TExportTarget[],
+  settings: TExportSetting[],
+  zipName: string,
+): TFunc<[], Promise<void>> => {
   const dispatch = useAppDispatch();
 
   return async (): Promise<void> => {
     dispatch(setIsExporting(true));
 
     try {
-      await exportNode(exportTarget.id, exportTarget.name, settings);
+      await exportNodes(exportTargets, settings, zipName);
     } finally {
       dispatch(setIsExporting(false));
     }
