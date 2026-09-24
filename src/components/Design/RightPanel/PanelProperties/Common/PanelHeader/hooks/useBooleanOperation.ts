@@ -1,3 +1,6 @@
+// others
+import { handleFlattenSelection } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/handleFlattenSelection';
+
 // store
 import { booleanNodes } from 'store/design/slice';
 import { selectSelectedNodes } from 'store/design/selectors';
@@ -8,6 +11,7 @@ import { BooleanOperation, NodeType } from 'types/design/enums';
 
 export type TBooleanOperationState = {
   onApply: (operation: BooleanOperation) => TFunc;
+  onFlatten: TFunc;
   operation: BooleanOperation;
 };
 
@@ -21,6 +25,9 @@ export const useBooleanOperation = (): TBooleanOperationState => {
   return {
     onApply: (nextOperation) => (): void => {
       dispatch(booleanNodes(nextOperation));
+    },
+    onFlatten: (): void => {
+      handleFlattenSelection(dispatch);
     },
     operation,
   };

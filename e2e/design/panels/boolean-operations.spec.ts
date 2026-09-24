@@ -102,3 +102,37 @@ test('wrapping a rectangle in a Union keeps its fill color on the canvas instead
 
   expect(after.equals(before)).toBe(true);
 });
+
+test('Flatten from the Boolean menu turns a Union into a single vector without children and keeps its look', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-flatten');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await page.getByLabel('Boolean operations', { exact: true }).click();
+  await designPage.drawRectangle(760, 260, 880, 380);
+  await designPage.click(1500, 600);
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await dragRowOnto(rows.filter({ hasText: 'Rectangle' }), rows.filter({ hasText: 'Union' }));
+  await designPage.click(1500, 600);
+
+  const clip = { height: 200, width: 200, x: 690, y: 190 };
+  const before = await page.screenshot({ clip });
+
+  await rows.filter({ hasText: 'Union' }).click();
+  await page.getByLabel('Boolean operations options').click();
+  await page.getByText('Flatten', { exact: true }).click();
+
+  await expect(page.getByRole('button', { name: 'Expand layer' })).toHaveCount(0);
+  await expect(page.locator('[data-test-component-header="boolean"]')).toHaveCount(0);
+
+  await designPage.click(1500, 600);
+
+  const after = await page.screenshot({ clip });
+
+  expect(after.equals(before)).toBe(true);
+});

@@ -7,7 +7,7 @@ import { TDesignState } from '../../types';
 
 // utils
 import { getActivePage } from '../getActivePage';
-import { getBooleanStyleFromNode } from './getBooleanStyleFromNode';
+import { getNodePaintStyle } from '../getNodePaintStyle';
 import { handleGroupNodes } from '../handleGroupNodes/handleGroupNodes';
 import { isBooleanOperandNode } from '../nodeHierarchy/isBooleanOperandNode';
 import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
@@ -37,7 +37,7 @@ export const handleBooleanNodes = (state: TDesignState, { groupId, operation }: 
 
       page.nodes[groupId] = {
         ...groupFields,
-        ...getBooleanStyleFromNode(page.nodes[childIds[childIds.length - 1]]),
+        ...getNodePaintStyle(page.nodes[childIds[childIds.length - 1]]),
         booleanOperation: operation,
         childIds,
         name: DEFAULT_BOOLEAN_NAME[operation],

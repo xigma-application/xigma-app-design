@@ -254,3 +254,32 @@ test.describe('Flatten — text', () => {
     expect(node.filledFaceKeys?.length ?? 0).toBeGreaterThan(0);
   });
 });
+
+test.describe('Flatten — several layers', () => {
+  test('flattens two overlapping Rectangles into one vector with pixel-identical appearance', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-flatten-several');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(900, 300, 1000, 400);
+    await designPage.drawRectangle(950, 350, 1050, 450);
+    await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+    await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+    const before = await page.screenshot({ clip: SHAPE_REGION });
+
+    await designPage.click(920, 320);
+    await designPage.click(1030, 430, { shift: true });
+    await page.keyboard.press(FLATTEN_SHORTCUT);
+    await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+    await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+    const after = await page.screenshot({ clip: SHAPE_REGION });
+
+    expect(countMismatchedPixels(after, before)).toBe(0);
+
+    const state = await readDesignState(page);
+
+    expect(state.rootOrder).toHaveLength(1);
+    expect(state.nodes[state.rootOrder[0]].type).toBe('vector');
+  });
+});

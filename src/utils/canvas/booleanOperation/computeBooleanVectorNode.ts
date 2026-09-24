@@ -4,6 +4,7 @@ import { TBooleanNode, TVectorNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { combineVectorNetworks } from './combineVectorNetworks';
 import { deriveVectorFaces } from '../vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getBooleanFilledFaceKeys } from './getBooleanFilledFaceKeys';
 import { getBooleanStrokeColor } from './getBooleanStrokeColor';
@@ -12,8 +13,6 @@ import { getVectorRegionPolygons } from './getVectorRegionPolygons';
 import { isBooleanBoundarySegment } from './isBooleanBoundarySegment';
 import { isInsideBooleanResult } from './isInsideBooleanResult';
 import { isPointInEvenOddPolygons } from './isPointInEvenOddPolygons';
-import { persistVectorNetworkCrossings } from '../vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
-import { snapVectorNetworkJunctions } from './snapVectorNetworkJunctions';
 
 export const computeBooleanVectorNode = (node: TBooleanNode, operands: TVectorNode[]): TVectorNode | null => {
   if (operands.length !== 0) {
@@ -23,11 +22,7 @@ export const computeBooleanVectorNode = (node: TBooleanNode, operands: TVectorNo
         node.booleanOperation,
         regions.map((polygons) => isPointInEvenOddPolygons(point, polygons)),
       );
-    const snapped = snapVectorNetworkJunctions(
-      Object.assign({}, ...operands.map((operand) => operand.segments)),
-      Object.assign({}, ...operands.map((operand) => operand.vertices)),
-    );
-    const combined = persistVectorNetworkCrossings(snapped.segments, snapped.vertices);
+    const combined = combineVectorNetworks(operands);
     const base: TVectorNode = {
       defaultFill: node.fills,
       filledFaceKeys: [],

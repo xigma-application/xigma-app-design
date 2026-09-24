@@ -19,7 +19,7 @@ const { PopoverItem } = UITools.PopoverCompound;
 
 export const PanelHeaderBooleanButton: FC = () => {
   const { t } = useTranslation();
-  const { onApply, operation } = useBooleanOperation();
+  const { onApply, onFlatten, operation } = useBooleanOperation();
 
   return (
     <div className={styles.PanelHeader__boolean}>
@@ -50,6 +50,7 @@ export const PanelHeaderBooleanButton: FC = () => {
         <PopoverItem
           icon="Flatten"
           label={t(`${translationNameSpace}.flatten`)}
+          onClick={onFlatten}
           shortcut={KEYBOARD_SHORTCUTS.flatten.join('')}
           withCheck={false}
         />
