@@ -6,6 +6,8 @@ export type TPaddingSide = 'paddingBottom' | 'paddingLeft' | 'paddingRight' | 'p
 
 export type TPaddingPatch = Partial<Pick<TFrameNode, TPaddingSide>>;
 
+export type TPaddingTarget = { id: string; values: Record<TPaddingSide, number> };
+
 export type TPaddingField = {
   e2eValue: string;
   iconName: TIconProps['name'];

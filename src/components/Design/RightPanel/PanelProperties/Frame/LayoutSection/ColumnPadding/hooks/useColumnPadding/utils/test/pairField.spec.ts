@@ -20,14 +20,12 @@ const createPaddingGuideRef = (): RefObject<TRightPanelPaddingGuideState | null>
 const build = (firstValue: number, secondValue: number, paddingGuideRef = createPaddingGuideRef()): ReturnType<typeof pairField> =>
   pairField(
     vi.fn(),
-    'frame-1',
+    [{ id: 'frame-1', values: { paddingBottom: 0, paddingLeft: firstValue, paddingRight: secondValue, paddingTop: 0 } }],
     'horizontal',
     'padding-horizontal',
     'PaddingLR',
     'paddingLeft',
-    firstValue,
     'paddingRight',
-    secondValue,
     paddingGuideRef,
     ['left', 'right'],
   );

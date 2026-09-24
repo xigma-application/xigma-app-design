@@ -12,6 +12,7 @@ import { useColumnPadding } from './useColumnPadding';
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { LayoutMode, NodeType } from 'types/design/enums';
@@ -151,5 +152,61 @@ describe('useColumnPadding', () => {
     expect(result.current.isIndividual).toBe(false);
     act(() => result.current.toggleIndividual());
     expect(result.current.isIndividual).toBe(true);
+  });
+
+  describe('multi-selection', () => {
+    it('should show Mixed for a padding that differs between the frames and the shared value otherwise', () => {
+      // mock
+      store.dispatch(setSelection([addFrame({ paddingLeft: 8, paddingTop: 4 }), addFrame({ paddingLeft: 16, paddingTop: 4 })]));
+
+      // before
+      const { result } = renderUseColumnPadding();
+
+      // result
+      expect(byLabel(result.current.individualFields, 'left').value).toBe('Mixed');
+      expect(byLabel(result.current.individualFields, 'top').value).toBe(4);
+      expect(byLabel(result.current.mergedFields, 'horizontal').value).toBe('Mixed');
+    });
+
+    it('should set a typed padding on every frame in one undo step', () => {
+      // mock
+      const firstId = addFrame({ paddingLeft: 8 });
+      const secondId = addFrame({ paddingLeft: 16 });
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnPadding();
+
+      // action
+      act(() => byLabel(result.current.individualFields, 'left').onCommit('24'));
+
+      // result
+      expect([read(firstId).paddingLeft, read(secondId).paddingLeft]).toEqual([24, 24]);
+
+      // action
+      act(() => {
+        store.dispatch(undo());
+      });
+
+      // result
+      expect([read(firstId).paddingLeft, read(secondId).paddingLeft]).toEqual([8, 16]);
+    });
+
+    it("should move every frame's padding by the same scrubbed delta", () => {
+      // mock
+      const firstId = addFrame({ paddingLeft: 8, paddingRight: 8 });
+      const secondId = addFrame({ paddingLeft: 16, paddingRight: 20 });
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnPadding();
+
+      // action
+      act(() => byLabel(result.current.mergedFields, 'horizontal').onScrub(12));
+
+      // result
+      expect([read(firstId).paddingLeft, read(firstId).paddingRight]).toEqual([12, 12]);
+      expect([read(secondId).paddingLeft, read(secondId).paddingRight]).toEqual([20, 24]);
+    });
   });
 });

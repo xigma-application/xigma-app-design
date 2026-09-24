@@ -4,6 +4,7 @@ import { RefObject } from 'react';
 import { updateNode } from 'store/design/slice';
 
 // types
+import { TPaddingTarget } from '../../types';
 import { TRightPanelPaddingGuideState } from 'types/design/canvas/types';
 
 // utils
@@ -17,13 +18,27 @@ vi.mock('store/design/slice', async () => {
 
 const createPaddingGuideRef = (): RefObject<TRightPanelPaddingGuideState | null> => ({ current: null });
 
+const target = (key: 'paddingBottom' | 'paddingLeft' | 'paddingRight' | 'paddingTop', value: number): TPaddingTarget => ({
+  id: 'frame-1',
+  values: Object.assign({ paddingBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0 }, { [key]: value }),
+});
+
 describe('sideField', () => {
   it('should build a field carrying the given label, icon, e2e value and value', () => {
     // mock
     const dispatch = vi.fn();
 
     // action
-    const field = sideField(dispatch, 'frame-1', 'left', 'padding-left', 'PaddingL', 'paddingLeft', 12, createPaddingGuideRef(), 'left');
+    const field = sideField(
+      dispatch,
+      [target('paddingLeft', 12)],
+      'left',
+      'padding-left',
+      'PaddingL',
+      'paddingLeft',
+      createPaddingGuideRef(),
+      'left',
+    );
 
     // result
     expect(field).toMatchObject({ e2eValue: 'padding-left', iconName: 'PaddingL', labelKey: 'left', scrubValue: 12, value: 12 });
@@ -32,7 +47,16 @@ describe('sideField', () => {
   it('should commit the clamped parsed number on commit', () => {
     // mock
     const dispatch = vi.fn();
-    const field = sideField(dispatch, 'frame-1', 'left', 'padding-left', 'PaddingL', 'paddingLeft', 12, createPaddingGuideRef(), 'left');
+    const field = sideField(
+      dispatch,
+      [target('paddingLeft', 12)],
+      'left',
+      'padding-left',
+      'PaddingL',
+      'paddingLeft',
+      createPaddingGuideRef(),
+      'left',
+    );
 
     // action
     field.onCommit('8px');
@@ -44,7 +68,16 @@ describe('sideField', () => {
   it('should not commit when the parsed value is not a number', () => {
     // mock
     const dispatch = vi.fn();
-    const field = sideField(dispatch, 'frame-1', 'left', 'padding-left', 'PaddingL', 'paddingLeft', 12, createPaddingGuideRef(), 'left');
+    const field = sideField(
+      dispatch,
+      [target('paddingLeft', 12)],
+      'left',
+      'padding-left',
+      'PaddingL',
+      'paddingLeft',
+      createPaddingGuideRef(),
+      'left',
+    );
 
     // action
     field.onCommit('abc');
@@ -56,7 +89,16 @@ describe('sideField', () => {
   it('should commit the clamped next value on scrub', () => {
     // mock
     const dispatch = vi.fn();
-    const field = sideField(dispatch, 'frame-1', 'left', 'padding-left', 'PaddingL', 'paddingLeft', 12, createPaddingGuideRef(), 'left');
+    const field = sideField(
+      dispatch,
+      [target('paddingLeft', 12)],
+      'left',
+      'padding-left',
+      'PaddingL',
+      'paddingLeft',
+      createPaddingGuideRef(),
+      'left',
+    );
 
     // action
     field.onScrub(20);
@@ -69,7 +111,7 @@ describe('sideField', () => {
     // mock
     const dispatch = vi.fn();
     const paddingGuideRef = createPaddingGuideRef();
-    const field = sideField(dispatch, 'frame-1', 'top', 'padding-top', 'PaddingT', 'paddingTop', 12, paddingGuideRef, 'top');
+    const field = sideField(dispatch, [target('paddingTop', 12)], 'top', 'padding-top', 'PaddingT', 'paddingTop', paddingGuideRef, 'top');
 
     // action
     field.onHoverStart();
@@ -82,7 +124,7 @@ describe('sideField', () => {
     // mock
     const dispatch = vi.fn();
     const paddingGuideRef = createPaddingGuideRef();
-    const field = sideField(dispatch, 'frame-1', 'top', 'padding-top', 'PaddingT', 'paddingTop', 12, paddingGuideRef, 'top');
+    const field = sideField(dispatch, [target('paddingTop', 12)], 'top', 'padding-top', 'PaddingT', 'paddingTop', paddingGuideRef, 'top');
 
     paddingGuideRef.current = { frameId: 'frame-1', sides: ['top'] };
 
