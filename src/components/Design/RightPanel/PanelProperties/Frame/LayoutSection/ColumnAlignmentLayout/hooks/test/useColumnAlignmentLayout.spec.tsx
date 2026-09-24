@@ -581,4 +581,36 @@ describe('useColumnAlignmentLayout', () => {
       ]);
     });
   });
+
+  describe('multi-selection alignment panel shape', () => {
+    it('should flag the alignment panel as mixed when the frames differ in baseline alignment or gap mode', () => {
+      // mock
+      const baselineId = addFrameNode(LayoutMode.horizontal);
+      const plainId = addFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { alignTextBaseline: AlignTextBaseline.on }, id: baselineId }));
+      store.dispatch(setSelection([baselineId, plainId]));
+
+      // result
+      expect(renderUseColumnAlignmentLayout().result.current.isAlignmentMixed).toBe(true);
+
+      // mock
+      const autoGapId = addFrameNode(LayoutMode.horizontal);
+      const fixedGapId = addFrameNode(LayoutMode.horizontal);
+
+      store.dispatch(updateNode({ changes: { horizontalGapMode: GapMode.auto }, id: autoGapId }));
+      store.dispatch(setSelection([autoGapId, fixedGapId]));
+
+      // result
+      expect(renderUseColumnAlignmentLayout().result.current.isAlignmentMixed).toBe(true);
+    });
+
+    it('should keep the regular alignment panel when the frames share baseline and gap modes', () => {
+      // mock
+      store.dispatch(setSelection([addFrameNode(LayoutMode.horizontal), addFrameNode(LayoutMode.horizontal)]));
+
+      // result
+      expect(renderUseColumnAlignmentLayout().result.current.isAlignmentMixed).toBe(false);
+    });
+  });
 });

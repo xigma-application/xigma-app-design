@@ -25,6 +25,7 @@ const ColumnAlignmentLayout: FC = () => {
     horizontalGap,
     horizontalGapDisplay,
     horizontalGapMode,
+    isAlignmentMixed,
     isBaselineAligned,
     isGrid,
     isHorizontal,
@@ -63,6 +64,7 @@ const ColumnAlignmentLayout: FC = () => {
         ) : (
           <AlignmentArea
             isBaselineAligned={isBaselineAligned}
+            isMixed={isAlignmentMixed}
             isGapAutoHorizontal={horizontalGapMode === GapMode.auto}
             isGapAutoVertical={verticalGapMode === GapMode.auto}
             isHorizontal={isHorizontal}

@@ -270,4 +270,17 @@ describe('AlignmentArea baseline mode', () => {
     // result
     expect(onRemoveBaselineAlignment).toHaveBeenCalledTimes(1);
   });
+
+  it('should show a centered Mixed label instead of the options while the selected frames build different panels', () => {
+    // before
+    render(
+      <TooltipProvider>
+        <AlignmentArea isGapAutoHorizontal={false} isGapAutoVertical={false} isHorizontal isMixed onClick={vi.fn()} value={undefined} />
+      </TooltipProvider>,
+    );
+
+    // result
+    expect(screen.getByText('Mixed')).toBeInTheDocument();
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
 });

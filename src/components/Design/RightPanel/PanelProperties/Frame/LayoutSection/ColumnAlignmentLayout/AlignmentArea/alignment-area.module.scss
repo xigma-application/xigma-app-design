@@ -11,6 +11,40 @@
   justify-content: center;
   width: 100%;
 
+  &--mixed {
+    position: relative;
+  }
+
+  &__mixed-dot {
+    height: 100%;
+    position: relative;
+    width: 100%;
+
+    &::before {
+      background-color: var(--color-neutral-2);
+      border-radius: 50%;
+      content: '';
+      height: 2.5px;
+      left: 50%;
+      opacity: 0.5;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.5px;
+    }
+  }
+
+  &__mixed-label {
+    background-color: var(--color-surface);
+    color: var(--color-neutral-1);
+    font-size: 11px;
+    left: 50%;
+    padding: 0 4px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
   &--baseline {
     border-color: var(--color-selected);
     grid-template-rows: 1fr 1fr;

@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { AlignmentLayout, AlignTextBaseline, GapMode, LayoutMode, NodeType, SizingMode } from 'types/design/enums';
-import { TSceneNode } from 'types/design/types';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { getAutoLayoutEffectiveGaps } from 'store/design/utils/autoLayout/getAutoLayoutGapHandles/getAutoLayoutEffectiveGaps';
@@ -26,6 +26,7 @@ export type TUseColumnAlignmentLayoutResult = {
   horizontalGap: number;
   horizontalGapDisplay: string | undefined;
   horizontalGapMode: GapMode;
+  isAlignmentMixed: boolean;
   isBaselineAligned: boolean;
   isGrid: boolean;
   isHorizontal: boolean;
@@ -74,6 +75,13 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
   const horizontalGap = horizontalGapMode === GapMode.auto ? effectiveGaps.horizontal : rawHorizontalGap;
   const verticalGap = verticalGapMode === GapMode.auto ? effectiveGaps.vertical : rawVerticalGap;
   const gapTargets = isMultiSelection ? gapFrames : frameNode ? [frameNode] : [];
+  const getAlignmentPanelKey = (frame: TFrameNode): string =>
+    [
+      frame.layoutMode === LayoutMode.horizontal && frame.alignTextBaseline === AlignTextBaseline.on,
+      frame.horizontalGapMode ?? GapMode.fixed,
+      frame.verticalGapMode ?? GapMode.fixed,
+    ].join(':');
+  const isAlignmentMixed = gapTargets.some((frame) => getAlignmentPanelKey(frame) !== getAlignmentPanelKey(gapTargets[0]));
   const alignments = gapTargets.map((frame) => frame.layoutAlignment ?? AlignmentLayout.topLeft);
   const alignment = alignments.every((item) => item === alignments[0]) ? (alignments[0] ?? AlignmentLayout.topLeft) : undefined;
 
@@ -147,6 +155,7 @@ export const useColumnAlignmentLayout = (): TUseColumnAlignmentLayoutResult => {
     horizontalGap,
     horizontalGapDisplay: getGapDisplay('horizontal'),
     horizontalGapMode,
+    isAlignmentMixed,
     isBaselineAligned,
     isGrid,
     isHorizontal,

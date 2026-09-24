@@ -11,6 +11,7 @@ import { Icon, Tooltip } from 'shared';
 import { useColumnHover } from './hooks/useColumnHover';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { ALIGNMENT_OPTIONS, BASELINE_ALIGNMENT_OPTIONS } from './constants';
 import { translationNameSpace } from '../constants';
 
@@ -29,6 +30,7 @@ import { isOptionSelected } from './utils/isOptionSelected';
 export type TAlignmentAreaProps = {
   e2eValue?: TE2EValue;
   isBaselineAligned?: boolean;
+  isMixed?: boolean;
   isGapAutoHorizontal?: boolean;
   isGapAutoVertical?: boolean;
   isHorizontal: boolean;
@@ -41,6 +43,7 @@ export type TAlignmentAreaProps = {
 export const AlignmentArea: FC<TAlignmentAreaProps> = ({
   e2eValue = '',
   isBaselineAligned = false,
+  isMixed = false,
   isGapAutoHorizontal = false,
   isGapAutoVertical = false,
   isHorizontal,
@@ -56,6 +59,19 @@ export const AlignmentArea: FC<TAlignmentAreaProps> = ({
     isGapAutoHorizontal,
     isHorizontal,
   );
+
+  if (isMixed) {
+    return (
+      <E2EDataAttribute type={E2EAttribute.alignmentArea} value={e2eValue}>
+        <div className={cx(styles.AlignmentArea, styles['AlignmentArea--mixed'])}>
+          {ALIGNMENT_OPTIONS.map((alignment) => (
+            <span aria-hidden className={styles['AlignmentArea__mixed-dot']} key={alignment} />
+          ))}
+          <span className={styles['AlignmentArea__mixed-label']}>{MIXED_LABEL}</span>
+        </div>
+      </E2EDataAttribute>
+    );
+  }
 
   if (isBaselineAligned) {
     const removeLabel = t(`${translationNameSpace}.removeBaselineAlignment`);
