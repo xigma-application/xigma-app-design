@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import DistributeMenu from './DistributeMenu/DistributeMenu';
 import { UITools } from 'shared';
 
 // hooks
@@ -18,12 +19,18 @@ import { buildAlignmentButtons } from './utils/buildAlignmentButtons';
 
 const ColumnAlignment: FC = () => {
   const { t } = useTranslation();
-  const { disabled, gridHorizontal, gridVertical, isGridChild, onSelectHorizontal, onSelectVertical } = useColumnAlignment();
+  const { disabled, gridHorizontal, gridVertical, isGridChild, onSelectHorizontal, onSelectVertical, showDistribute } =
+    useColumnAlignment();
   const displayHorizontal = isGridChild ? gridHorizontal : undefined;
   const displayVertical = isGridChild ? gridVertical : undefined;
 
   return (
-    <UITools.SectionColumn gridColumnType={UITools.GridColumnType.twoInputs} labels={[t(`${translationNameSpace}.label`)]} withBottomMargin>
+    <UITools.SectionColumn
+      buttonsIcon={showDistribute ? [<DistributeMenu key="distribute" />] : undefined}
+      gridColumnType={UITools.GridColumnType.twoInputs}
+      labels={[t(`${translationNameSpace}.label`)]}
+      withBottomMargin
+    >
       <UITools.ButtonGroup
         buttons={buildAlignmentButtons(HORIZONTAL_ALIGNMENT_OPTIONS, disabled, displayHorizontal, onSelectHorizontal, t)}
         className={styles.ColumnAlignment__buttons}

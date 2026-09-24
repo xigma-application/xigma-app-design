@@ -92,6 +92,21 @@ describe('ColumnAlignment behaviors', () => {
 
     // result
     expect(screen.getByLabelText('Align left')).toBeDisabled();
+    expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
+  });
+
+  it('should enable every button and show the distribute menu for a top-level free-form frame with children', () => {
+    // mock
+    const parentId = addFrameNode(null);
+    addFrameNode(parentId);
+    store.dispatch(setSelection([parentId]));
+
+    // before
+    renderColumnAlignment();
+
+    // result
+    expect(screen.getByLabelText('Align left')).not.toBeDisabled();
+    expect(screen.getByLabelText('More actions')).toBeInTheDocument();
   });
 
   it('should enable every button when the selected frame has a parent', () => {

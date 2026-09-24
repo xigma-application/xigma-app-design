@@ -6,12 +6,15 @@ import {
   ARRANGE_MENU_ALIGN_RIGHT_KEY,
   ARRANGE_MENU_ALIGN_TOP_KEY,
   ARRANGE_MENU_ALIGN_VERTICAL_CENTERS_KEY,
+  ARRANGE_MENU_DISTRIBUTE_HORIZONTAL_SPACING_KEY,
+  ARRANGE_MENU_DISTRIBUTE_VERTICAL_SPACING_KEY,
+  ARRANGE_MENU_TIDY_UP_KEY,
 } from 'components/Design/LeftPanel/NavRail/LogoMenu/ArrangeMenu/constants';
 import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
 import { AlignmentHorizontal, AlignmentVertical } from 'types/design/enums';
-import { TAlignmentOption } from './types';
+import { TAlignmentOption, TDistributeOption } from './types';
 
 export const translationNameSpace = `${parentNameSpace}.columnAlignment`;
 
@@ -35,4 +38,14 @@ export const VERTICAL_ALIGNMENT_OPTIONS: TAlignmentOption[] = [
     shortcutKey: 'alignVerticalCenters',
   },
   { key: AlignmentVertical.bottom, labelKey: ARRANGE_MENU_ALIGN_BOTTOM_KEY, name: 'AlignVerticalBottom', shortcutKey: 'alignBottom' },
+];
+
+export const DISTRIBUTE_OPTIONS: TDistributeOption[] = [
+  { disabled: true, labelKey: ARRANGE_MENU_TIDY_UP_KEY, name: 'TidyUp', shortcutKey: 'tidyUp' },
+  { labelKey: ARRANGE_MENU_DISTRIBUTE_VERTICAL_SPACING_KEY, name: 'DistributeVerticalSpacing', shortcutKey: 'distributeVerticalSpacing' },
+  {
+    labelKey: ARRANGE_MENU_DISTRIBUTE_HORIZONTAL_SPACING_KEY,
+    name: 'DistributeHorizontalSpacing',
+    shortcutKey: 'distributeHorizontalSpacing',
+  },
 ];

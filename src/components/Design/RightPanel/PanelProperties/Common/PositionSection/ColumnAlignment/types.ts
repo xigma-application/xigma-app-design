@@ -13,3 +13,10 @@ export type TAlignmentOption = {
   name: TIconProps['name'];
   shortcutKey: keyof TKeyboardShortcuts;
 };
+
+export type TDistributeOption = {
+  disabled?: boolean;
+  labelKey: string;
+  name: TIconProps['name'];
+  shortcutKey: keyof TKeyboardShortcuts;
+};

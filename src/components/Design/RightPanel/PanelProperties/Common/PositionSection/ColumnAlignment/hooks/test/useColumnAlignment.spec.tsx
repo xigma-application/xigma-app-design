@@ -9,6 +9,7 @@ import { useColumnAlignment } from '../useColumnAlignment';
 import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'types/design/enums';
@@ -67,6 +68,107 @@ describe('useColumnAlignment', () => {
     store.dispatch(setSelection([addFrame(null)]));
 
     expect(renderUseColumnAlignment().result.current.disabled).toBe(true);
+  });
+
+  // a top-level 400x300 free-form frame holding a 40x40 and a 100x60 child, both at (10, 20)
+  const frameWithChildren = (layoutMode?: LayoutMode): { firstId: string; frameId: string; secondId: string } => {
+    const frameId = addFrame(null, 400, 300, layoutMode);
+    const firstId = addFrame(null, 40, 40);
+    const secondId = addFrame(null, 100, 60);
+
+    store.dispatch(moveNodes({ nodeIds: [firstId, secondId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(updateNode({ changes: { x: 10, y: 20 }, id: firstId }));
+    store.dispatch(updateNode({ changes: { x: 10, y: 20 }, id: secondId }));
+    store.dispatch(setSelection([frameId]));
+
+    return { firstId, frameId, secondId };
+  };
+
+  it('should not be disabled for a top-level free-form frame with children', () => {
+    frameWithChildren();
+
+    expect(renderUseColumnAlignment().result.current.disabled).toBe(false);
+  });
+
+  it('should align every child of a top-level free-form frame on its own, keeping the other axis', () => {
+    const { firstId, frameId, secondId } = frameWithChildren();
+    const { result } = renderUseColumnAlignment();
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+
+    expect(positionOf(firstId)).toEqual({ x: 400 - 40, y: 20 });
+    expect(positionOf(secondId)).toEqual({ x: 400 - 100, y: 20 });
+    expect(alignmentOf(firstId)).toEqual({ horizontal: AlignmentHorizontal.right });
+    expect(alignmentOf(secondId)).toEqual({ horizontal: AlignmentHorizontal.right });
+    expect(positionOf(frameId)).toEqual({ x: 0, y: 0 });
+  });
+
+  it("should align every child vertically and keep each child's horizontal constraint", () => {
+    const { firstId, secondId } = frameWithChildren();
+    const { result } = renderUseColumnAlignment();
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.left));
+    act(() => result.current.onSelectVertical(AlignmentVertical.bottom));
+
+    expect(positionOf(firstId)).toEqual({ x: 0, y: 300 - 40 });
+    expect(positionOf(secondId)).toEqual({ x: 0, y: 300 - 60 });
+    expect(alignmentOf(firstId)).toEqual({ horizontal: AlignmentHorizontal.left, vertical: AlignmentVertical.bottom });
+  });
+
+  it('should undo aligning all children in a single step', () => {
+    const { firstId, secondId } = frameWithChildren();
+    const { result } = renderUseColumnAlignment();
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.center));
+    act(() => {
+      store.dispatch(undo());
+    });
+
+    expect(positionOf(firstId)).toEqual({ x: 10, y: 20 });
+    expect(positionOf(secondId)).toEqual({ x: 10, y: 20 });
+  });
+
+  it('should align a nested free-form frame with children inside its own parent, not its children', () => {
+    const { firstId, frameId } = frameWithChildren();
+    const outerId = addFrame(null, 800, 600);
+
+    store.dispatch(moveNodes({ nodeIds: [frameId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnAlignment();
+    const childBefore = positionOf(firstId);
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+
+    expect(alignmentOf(frameId)).toEqual({ horizontal: AlignmentHorizontal.right });
+    expect(positionOf(frameId).x).toBe(800 - 400);
+    expect(positionOf(firstId).x - positionOf(frameId).x).toBe(childBefore.x);
+  });
+
+  it('should show the distribute menu for a free-form frame with children, nested or not', () => {
+    const { frameId } = frameWithChildren();
+    const outerId = addFrame(null, 800, 600);
+
+    expect(renderUseColumnAlignment().result.current.showDistribute).toBe(true);
+
+    store.dispatch(moveNodes({ nodeIds: [frameId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([frameId]));
+
+    expect(renderUseColumnAlignment().result.current.showDistribute).toBe(true);
+  });
+
+  it('should hide the distribute menu and stay disabled for a top-level auto-layout frame with children', () => {
+    frameWithChildren(LayoutMode.vertical);
+    const { result } = renderUseColumnAlignment();
+
+    expect(result.current.showDistribute).toBe(false);
+    expect(result.current.disabled).toBe(true);
+  });
+
+  it('should hide the distribute menu for a frame without children', () => {
+    store.dispatch(setSelection([addFrame(null)]));
+
+    expect(renderUseColumnAlignment().result.current.showDistribute).toBe(false);
   });
 
   it('should be disabled when the parent uses auto layout and the child does not ignore it', () => {

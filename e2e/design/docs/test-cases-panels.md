@@ -61,6 +61,20 @@ row (`Common/ColumnGridChildSpan`, display-only for now), none of the auto-layou
 | 2   | Editing the width field in the Rectangle panel resizes the shape on the canvas                        |  —   |                                       ✅ `rectangle-panel.spec.ts`                                        |
 | 3   | The Column span / Row span row shows only while the selection is a child of a `LayoutMode.grid` frame |  ✅  | — (pure conditional render, no canvas interaction; `useColumnGridChildSpan.spec.tsx` covers every branch) |
 
+## Position section — Alignment on a frame with children
+
+A top-level free-form frame with children enables the Alignment buttons and aligns each child on its
+own against the frame's edges, writing that child's constraint too, in one undo step. A nested frame
+still aligns itself inside its parent. The Distribute menu (Tidy up, Distribute vertical/horizontal
+spacing) shows next to Alignment for any free-form frame with children; its items have no actions
+yet.
+
+| #   | Scenario                                                                                                     | Unit |                                                         E2E                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :------------------------------------------------------------------------------------------------------------------: |
+| 551 | Align right on a top-level free-form frame moves every child to the frame's right edge; Ctrl+Z undoes it all |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 552 | The Distribute menu shows only once the free-form frame has children and lists its three items               |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 553 | A nested free-form frame with children aligns itself inside its parent, not its children                     |  ✅  | — (same button click as #551, only the target differs; `useColumnAlignment.spec.tsx` asserts both positions exactly) |
+
 ## Layers panel — lock/visibility
 
 The Layers panel (`LeftPanel/File/Layers`) lists the active page's nodes in root order (flat, no

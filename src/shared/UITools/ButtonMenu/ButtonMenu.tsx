@@ -7,7 +7,7 @@ import Popover, { TPopoverProps } from '../Popover/Popover';
 // styles
 import styles from './button-menu.module.scss';
 
-export type TButtonMenuProps = Pick<TPopoverProps, 'align' | 'scrollable' | 'side' | 'sideOffset'> & {
+export type TButtonMenuProps = Pick<TPopoverProps, 'align' | 'scrollable' | 'side' | 'sideOffset' | 'triggerTooltip'> & {
   children?: ReactNode;
   className?: string;
   onOpenChange?: TFunc<[boolean]>;
@@ -25,6 +25,7 @@ export const ButtonMenu: FC<TButtonMenuProps> = ({
   sideOffset,
   trigger,
   triggerAriaLabel,
+  triggerTooltip,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,6 +44,7 @@ export const ButtonMenu: FC<TButtonMenuProps> = ({
       trigger={typeof trigger === 'function' ? trigger(isOpen) : trigger}
       triggerAriaLabel={triggerAriaLabel}
       triggerClassName={cx(styles.ButtonMenu, className)}
+      triggerTooltip={triggerTooltip}
     >
       {children}
     </Popover>

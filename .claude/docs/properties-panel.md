@@ -40,6 +40,15 @@ node's folder. Today:
   `buildRotationButtons`) gate on `isBoxSceneNode(selectedNode)` rather than
   `type === NodeType.frame`, so they work for any box scene node. `rotateNodesRigidly` takes a
   `TBoxSceneNode` for the same reason.
+- `Common/PositionSection/ColumnAlignment` — for a **top-level free-form frame with children**
+  (`hooks/utils/canAlignFrameChildren`: frame, no `parentId`, `layoutMode` free-form/unset, at
+  least one child) the buttons are enabled and align the frame's **children**, each one on its own
+  against the frame's edges (`alignFrameChildren` → `moveNodeToAlignment` per child, which also
+  writes that child's `alignment` constraint, other axis kept), in one undo step. A nested frame
+  still aligns itself inside its parent, even with children. `DistributeMenu` (trigger icon
+  `DistributeVerticalSpacing`; items Tidy up ⌃⌥T / Distribute vertical spacing ⌃⌥V / Distribute
+  horizontal spacing ⌃⌥H) shows in the row's `buttonsIcon` for any free-form frame with children
+  (`isFreeFormFrameWithChildren`, nested or not). **Items have no actions yet.**
 - `Common/ColumnDimensions/` — the W/H row (and, for frames, the Fixed/Hug/Fill sizing menu and
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box
