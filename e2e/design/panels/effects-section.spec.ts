@@ -800,26 +800,43 @@ test.describe('Design panels — Effects section', () => {
     await page.mouse.move(1750, 900);
 
     const clip = { height: 200, width: 300, x: 700, y: 200 };
-    const readCornerBrightness = async (): Promise<{ bottomRight: number; topLeft: number }> => {
+    const deselect = (): Promise<void> =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { setSelection } = await import('/src/store/design/slice.ts');
+
+        store.dispatch(setSelection([]));
+      });
+    const readEdgeBrightness = async (): Promise<{ bottom: number; top: number }> => {
       const { PNG } = await import('pngjs');
       const png = PNG.sync.read(await page.screenshot({ clip }));
       const at = (x: number, y: number): number => png.data[(y * png.width + x) * 4];
 
-      return { bottomRight: at(clip.width - 6, clip.height - 6), topLeft: at(6, 6) };
+      return { bottom: at(clip.width / 2, clip.height - 1), top: at(clip.width / 2, 0) };
     };
 
-    // result — a flat translucent fill over a plain background has no corner shading
-    const before = await readCornerBrightness();
+    // result — a flat translucent fill over a plain background has no edge shading
+    await deselect();
 
-    expect(Math.abs(before.topLeft - before.bottomRight)).toBeLessThan(3);
+    const before = await readEdgeBrightness();
 
-    // action — the default light points to the top-left (-45°)
+    expect(Math.abs(before.top - before.bottom)).toBeLessThan(3);
+
+    // action — the default light points to the top-left (-45°); the bevel is a thin rim on the
+    // shape's outermost pixels, so the selection outline is cleared before reading it
+    await page.evaluate(async (nodeId) => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(setSelection([nodeId]));
+    }, id);
     await addEffect(page, 'Glass');
+    await deselect();
     await page.mouse.move(1750, 900);
 
-    // result — the corner facing the light is beveled brighter than the one facing away
+    // result — the edge facing the light is beveled brighter than the one facing away
     await expect
-      .poll(async () => (await readCornerBrightness()).topLeft - (await readCornerBrightness()).bottomRight, { timeout: 15000 })
+      .poll(async () => (await readEdgeBrightness()).top - (await readEdgeBrightness()).bottom, { timeout: 15000 })
       .toBeGreaterThan(10);
   });
 
@@ -871,23 +888,18 @@ test.describe('Design panels — Effects section', () => {
     // the glass shape, nested as the frame's child, straddling the red/blue seam
     await designPage.drawRectangle(750, 250, 950, 350);
 
-    const rectId = await page.evaluate(async () => {
+    // drawing inside the frame nests the shape in it straight away
+    const rectId = await page.evaluate(async (id) => {
       const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
       const { activePageId, pages } = store.getState().design;
+      const { childIds } = pages[activePageId].nodes[id] as unknown as { childIds: string[] };
+      const nodeId = childIds[childIds.length - 1];
 
-      return pages[activePageId].rootOrder[pages[activePageId].rootOrder.length - 1];
-    });
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#808080', opacity: 10, type: 'solid' }] }, id: nodeId }));
 
-    await page.evaluate(
-      async ({ frameId: id, rectId: nodeId }) => {
-        const { store } = await import('/src/store/index.ts');
-        const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
-
-        store.dispatch(moveNodes({ nodeIds: [nodeId], targetIndex: 0, targetParentId: id }));
-        store.dispatch(updateNode({ changes: { fills: [{ color: '#808080', opacity: 10, type: 'solid' }] }, id: nodeId }));
-      },
-      { frameId, rectId },
-    );
+      return nodeId;
+    }, frameId);
 
     // action — minimal warp/frost so the two backdrop halves stay cleanly separated for the assertion below
     await addEffect(page, 'Glass');
