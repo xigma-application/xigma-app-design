@@ -52,20 +52,21 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
       class="_PopoverAutoLayoutSettings__rows_12cf0b"
     >
       <div
-        class="_PopoverAutoLayoutSettingsRow_af31be"
+        class="_Field_888602"
       >
         <span
-          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+          class="_Field__label_888602"
         >
           Inside stroke
         </span>
         <div
-          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+          class="_Field__control_888602"
+          style="flex: 0 0 112px; width: 112px;"
         >
           <button
             aria-expanded="false"
             aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _Field__component_888602"
             data-state="closed"
             data-test-bypass-global-shortcuts="true"
             type="button"
@@ -96,20 +97,21 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
         </div>
       </div>
       <div
-        class="_PopoverAutoLayoutSettingsRow_af31be"
+        class="_Field_888602"
       >
         <span
-          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+          class="_Field__label_888602"
         >
           Canvas stacking
         </span>
         <div
-          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+          class="_Field__control_888602"
+          style="flex: 0 0 112px; width: 112px;"
         >
           <button
             aria-expanded="false"
             aria-haspopup="dialog"
-            class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+            class="_Dropdown_cc217a _Dropdown--outline_cc217a _Field__component_888602"
             data-state="closed"
             data-test-bypass-global-shortcuts="true"
             type="button"
@@ -140,18 +142,19 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
         </div>
       </div>
       <div
-        class="_PopoverAutoLayoutSettingsRow_af31be"
+        class="_Field_888602"
       >
         <span
-          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+          class="_Field__label_888602"
         >
           Align text baseline
         </span>
         <div
-          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+          class="_Field__control_888602"
+          style="flex: 0 0 48px; width: 48px;"
         >
           <div
-            class="_ToggleButtonGroup_d11681 _PopoverAutoLayoutSettings__toggle_12cf0b"
+            class="_ToggleButtonGroup_d11681 _Field__component_888602"
             data-test-toggle-button-group=""
           >
             <button
@@ -205,24 +208,25 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
           </div>
         </div>
       </div>
-      <div
-        class="_PopoverAutoLayoutSettingsRow_af31be _PopoverAutoLayoutSettingsRow--disabled_af31be"
+      <span
+        data-state="closed"
       >
-        <span
-          class="_PopoverAutoLayoutSettingsRow__label_af31be"
-        >
-          Auto spacing
-        </span>
         <div
-          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+          class="_Field_888602 _Field--dimmed_888602"
         >
           <span
-            data-state="closed"
+            class="_Field__label_888602"
+          >
+            Auto spacing
+          </span>
+          <div
+            class="_Field__control_888602"
+            style="flex: 0 0 112px; width: 112px;"
           >
             <button
               aria-expanded="false"
               aria-haspopup="dialog"
-              class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _Field__component_888602"
               data-state="closed"
               data-test-bypass-global-shortcuts="true"
               disabled=""
@@ -251,22 +255,23 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
                 />
               </svg>
             </button>
-          </span>
+          </div>
         </div>
-      </div>
+      </span>
       <div
-        class="_PopoverAutoLayoutSettingsRow_af31be"
+        class="_Field_888602"
       >
         <span
-          class="_PopoverAutoLayoutSettingsRow__label_af31be"
+          class="_Field__label_888602"
         >
           Layout
         </span>
         <div
-          class="_PopoverAutoLayoutSettingsRow__control_af31be"
+          class="_Field__control_888602"
+          style="flex: 0 0 132px; width: 132px;"
         >
           <div
-            class="_PopoverAutoLayoutSettings__layout-options_12cf0b"
+            class="_PopoverAutoLayoutSettingsLayoutControl_c0f837 _Field__component_888602"
           >
             <svg
               class="Icon"
@@ -287,7 +292,7 @@ exports[`PopoverAutoLayoutSettings snapshots > should render the full panel 1`] 
             <button
               aria-expanded="false"
               aria-haspopup="dialog"
-              class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettings__dropdown_12cf0b"
+              class="_Dropdown_cc217a _Dropdown--outline_cc217a _PopoverAutoLayoutSettingsLayoutControl__dropdown_c0f837"
               data-state="closed"
               data-test-bypass-global-shortcuts="true"
               type="button"

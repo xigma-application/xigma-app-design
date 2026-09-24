@@ -8,8 +8,11 @@ export type TFieldOwnProps<TComponent extends ElementType> = {
   Component: TComponent;
   className?: string;
   controlWidth?: number;
+  dimmed?: boolean;
   label?: string;
   labelInside?: boolean;
+  onMouseEnter?: TFunc;
+  onMouseLeave?: TFunc;
 };
 
 export type TFieldProps<TComponent extends ElementType> = TFieldOwnProps<TComponent> &
@@ -19,14 +22,17 @@ export const Field = <TComponent extends ElementType>({
   Component,
   className,
   controlWidth,
+  dimmed = false,
   label,
   labelInside = false,
+  onMouseEnter,
+  onMouseLeave,
   ...componentProps
 }: TFieldProps<TComponent>): ReactElement => {
   const Control: ElementType = Component;
 
   return (
-    <div className={styles.Field}>
+    <div className={cx(styles.Field, { [styles['Field--dimmed']]: dimmed })} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {!labelInside && <span className={styles.Field__label}>{label}</span>}
       <div
         className={cx(styles.Field__control, { [styles['Field__control--inside']]: labelInside })}

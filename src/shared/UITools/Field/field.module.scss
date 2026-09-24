@@ -1,8 +1,14 @@
+@use '@xigma/scss/mixins/disabled';
+
 .Field {
   align-items: center;
   column-gap: 8px;
   display: flex;
   height: 32px;
+
+  &--dimmed {
+    @include disabled.disabled;
+  }
 
   &__label {
     color: var(--color-neutral-2);

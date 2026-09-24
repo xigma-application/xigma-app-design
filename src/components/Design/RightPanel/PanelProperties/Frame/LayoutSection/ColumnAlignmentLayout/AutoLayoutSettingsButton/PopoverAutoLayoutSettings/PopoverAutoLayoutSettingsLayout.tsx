@@ -2,14 +2,11 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import PopoverAutoLayoutSettingsRow from './PopoverAutoLayoutSettingsRow/PopoverAutoLayoutSettingsRow';
-import { Icon, Tooltip, UITools } from 'shared';
+import PopoverAutoLayoutSettingsLayoutControl from './PopoverAutoLayoutSettingsLayoutControl/PopoverAutoLayoutSettingsLayoutControl';
+import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
-
-// styles
-import styles from './popover-auto-layout-settings.module.scss';
 
 // types
 import { TLayoutVersion } from './types';
@@ -35,30 +32,17 @@ export const PopoverAutoLayoutSettingsLayout: FC<TPopoverAutoLayoutSettingsLayou
   const { t } = useTranslation();
 
   return (
-    <PopoverAutoLayoutSettingsRow label={t(`${translationNameSpace}.layout.label`)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-      <div className={styles['PopoverAutoLayoutSettings__layout-options']}>
-        <Tooltip
-          content={
-            <span className={styles['PopoverAutoLayoutSettings__tooltip-content']}>
-              {t(`${translationNameSpace}.layout.infoTooltip`)}{' '}
-              <span className={styles['PopoverAutoLayoutSettings__tooltip-link']}>
-                {t(`${translationNameSpace}.layout.infoTooltipLink`)}
-              </span>
-            </span>
-          }
-        >
-          <Icon name="Info" size={16} />
-        </Tooltip>
-        <UITools.Dropdown
-          className={styles.PopoverAutoLayoutSettings__dropdown}
-          onHoverOption={onHoverOption}
-          onSelect={onSelect}
-          options={options}
-          value={value}
-          variant="outline"
-        />
-      </div>
-    </PopoverAutoLayoutSettingsRow>
+    <UITools.Field
+      Component={PopoverAutoLayoutSettingsLayoutControl}
+      controlWidth={132}
+      label={t(`${translationNameSpace}.layout.label`)}
+      onHoverOption={onHoverOption}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onSelect={onSelect}
+      options={options}
+      value={value}
+    />
   );
 };
 

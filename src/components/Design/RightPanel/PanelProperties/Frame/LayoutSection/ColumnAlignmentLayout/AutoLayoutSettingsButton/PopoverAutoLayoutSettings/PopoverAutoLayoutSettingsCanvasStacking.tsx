@@ -2,14 +2,10 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import PopoverAutoLayoutSettingsRow from './PopoverAutoLayoutSettingsRow/PopoverAutoLayoutSettingsRow';
 import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
-
-// styles
-import styles from './popover-auto-layout-settings.module.scss';
 
 // types
 import { TCanvasStacking } from './types';
@@ -35,20 +31,18 @@ export const PopoverAutoLayoutSettingsCanvasStacking: FC<TPopoverAutoLayoutSetti
   const { t } = useTranslation();
 
   return (
-    <PopoverAutoLayoutSettingsRow
+    <UITools.Field
+      Component={UITools.Dropdown<TCanvasStacking>}
+      controlWidth={112}
       label={t(`${translationNameSpace}.canvasStacking.label`)}
+      onHoverOption={onHoverOption}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-    >
-      <UITools.Dropdown
-        className={styles.PopoverAutoLayoutSettings__dropdown}
-        onHoverOption={onHoverOption}
-        onSelect={onSelect}
-        options={options}
-        value={value}
-        variant="outline"
-      />
-    </PopoverAutoLayoutSettingsRow>
+      onSelect={onSelect}
+      options={options}
+      value={value}
+      variant="outline"
+    />
   );
 };
 

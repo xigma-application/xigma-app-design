@@ -2,14 +2,10 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import PopoverAutoLayoutSettingsRow from './PopoverAutoLayoutSettingsRow/PopoverAutoLayoutSettingsRow';
 import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from './constants';
-
-// styles
-import styles from './popover-auto-layout-settings.module.scss';
 
 // types
 import { TAlignTextBaseline } from './types';
@@ -35,19 +31,17 @@ export const PopoverAutoLayoutSettingsAlignTextBaseline: FC<TPopoverAutoLayoutSe
   const { t } = useTranslation();
 
   return (
-    <PopoverAutoLayoutSettingsRow
+    <UITools.Field
+      Component={UITools.ToggleButtonGroup}
+      controlWidth={48}
       label={t(`${translationNameSpace}.alignTextBaseline.label`)}
+      onChange={onChange}
+      onHoverOption={onHoverOption}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-    >
-      <UITools.ToggleButtonGroup
-        className={styles.PopoverAutoLayoutSettings__toggle}
-        onChange={onChange}
-        onHoverOption={onHoverOption}
-        toggleButtons={toggleButtons}
-        value={value}
-      />
-    </PopoverAutoLayoutSettingsRow>
+      toggleButtons={toggleButtons}
+      value={value}
+    />
   );
 };
 

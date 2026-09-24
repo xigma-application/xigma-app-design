@@ -86,4 +86,37 @@ describe('Field behaviors', () => {
     // result
     expect(container.querySelector('.custom')).not.toBeNull();
   });
+
+  it('should not apply the dimmed modifier by default', () => {
+    // before
+    const { container } = render(<Field Component={TextField} defaultValue="abc" label="Suffix" />);
+
+    // result
+    expect(container.querySelector('[class*="--dimmed"]')).toBeNull();
+  });
+
+  it('should apply the dimmed modifier when dimmed', () => {
+    // before
+    const { container } = render(<Field Component={TextField} defaultValue="abc" dimmed label="Suffix" />);
+
+    // result
+    expect(container.querySelector('[class*="--dimmed"]')).not.toBeNull();
+  });
+
+  it('should call onMouseEnter and onMouseLeave when the pointer crosses the row', () => {
+    // mock
+    const onMouseEnter = vi.fn();
+    const onMouseLeave = vi.fn();
+
+    // before
+    render(<Field Component={TextField} defaultValue="abc" label="Suffix" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />);
+
+    // action
+    fireEvent.mouseEnter(screen.getByText('Suffix').parentElement!);
+    fireEvent.mouseLeave(screen.getByText('Suffix').parentElement!);
+
+    // result
+    expect(onMouseEnter).toHaveBeenCalledTimes(1);
+    expect(onMouseLeave).toHaveBeenCalledTimes(1);
+  });
 });
