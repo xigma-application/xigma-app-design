@@ -53,6 +53,7 @@ export type TStandardKeyboardShortcuts = {
   undo: TShortcut;
   ungroup: TShortcut;
   useAsMask: TShortcut;
+  wrapInNewSection: TShortcut;
   zoomIn: TShortcut;
   zoomInNumpad: TShortcut;
   zoomOut: TShortcut;

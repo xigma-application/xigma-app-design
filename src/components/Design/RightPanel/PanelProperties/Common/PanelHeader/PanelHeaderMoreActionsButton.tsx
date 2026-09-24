@@ -8,10 +8,15 @@ import { Icon, UITools } from 'shared';
 // hooks
 import { useEditObject } from './hooks/useEditObject';
 import { useIsSelectionFromOneParent } from './hooks/useIsSelectionFromOneParent';
+import { useWrapSelectionInSection } from 'components/Design/Menu/hooks/useWrapSelectionInSection';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from './constants';
+
+// store
+import { selectCanWrapInSection } from 'store/design/selectors';
+import { useAppSelector } from 'store';
 
 const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 
@@ -23,6 +28,8 @@ export const PanelHeaderMoreActionsButton: FC<TPanelHeaderMoreActionsButtonProps
   const { t } = useTranslation();
   const handleEditObjects = useEditObject();
   const isFromOneParent = useIsSelectionFromOneParent();
+  const canWrapInSection = useAppSelector(selectCanWrapInSection);
+  const handleWrapInSection = useWrapSelectionInSection();
 
   return (
     <UITools.ButtonMenu
@@ -32,18 +39,21 @@ export const PanelHeaderMoreActionsButton: FC<TPanelHeaderMoreActionsButtonProps
       triggerTooltip={t(`${translationNameSpace}.moreActions`)}
     >
       <PanelHeaderComponentMenuItems />
-      {isFromOneParent && (
+      {isFromOneParent && (withEditObjects || canWrapInSection) && (
         <Fragment>
           <PopoverSeparator />
           {withEditObjects && (
             <PopoverItem icon="EditObject" label={t(`${translationNameSpace}.editObjects`)} onClick={handleEditObjects} withCheck={false} />
           )}
-          <PopoverItem
-            icon="SectionTool"
-            label={t(`${translationNameSpace}.wrapInSectionTooltip`)}
-            shortcut={KEYBOARD_SHORTCUTS.wrapInNewSection.join('')}
-            withCheck={false}
-          />
+          {canWrapInSection && (
+            <PopoverItem
+              icon="SectionTool"
+              label={t(`${translationNameSpace}.wrapInSectionTooltip`)}
+              onClick={handleWrapInSection}
+              shortcut={KEYBOARD_SHORTCUTS.wrapInNewSection.join('')}
+              withCheck={false}
+            />
+          )}
         </Fragment>
       )}
     </UITools.ButtonMenu>

@@ -32,6 +32,7 @@ import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
 import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchingLayers';
+import { canWrapInSection } from './utils/handleWrapInSection/canWrapInSection';
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
 import { expandGroupNodes } from './utils/nodeHierarchy/expandGroupNodes';
 import { getAllGuideLines } from './utils/getAllGuideLines';
@@ -189,6 +190,8 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
 export const selectAppearanceNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
   expandGroupNodes(selectedNodes.filter(Boolean), nodes),
 );
+
+export const selectCanWrapInSection = createSelector([selectSelectedNodes], canWrapInSection);
 
 export const selectCanSelectMatchingLayers = createSelector([selectSelectedIds, selectNodes], canSelectMatchingLayers);
 

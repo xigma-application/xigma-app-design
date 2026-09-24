@@ -67,6 +67,7 @@ export const shortcuts = {
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
   ungroup: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.g },
   useAsMask: { primaryKeys: [CONTROL_PRIMARY_KEY, MASK_MODIFIER_KEY], secondaryKey: KeyboardKeys.m },
+  wrapInNewSection: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.s },
   zoomIn: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.plus },
   zoomInNumpad: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.numpadAdd },
   zoomOut: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.minus },

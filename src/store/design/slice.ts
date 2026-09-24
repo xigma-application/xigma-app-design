@@ -90,6 +90,7 @@ import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
 import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
 import { handleSelectionPerParent } from './utils/handleSelectionPerParent/handleSelectionPerParent';
 import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
+import { handleWrapInSection } from './utils/handleWrapInSection/handleWrapInSection';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateGuide } from './utils/handleUpdateGuide';
@@ -349,6 +350,10 @@ const designSlice = createSlice({
     updateNodes: (state, action: PayloadAction<TUpdateNodesPayload>) => handleUpdateNodes(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => handleUpdateTextEditContent(state, action.payload),
     updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
+    wrapInSection: {
+      prepare: () => ({ payload: { sectionId: nanoid() } }),
+      reducer: (state, action: PayloadAction<{ sectionId: string }>) => handleWrapInSection(state, action.payload.sectionId),
+    },
   },
 });
 
@@ -434,6 +439,7 @@ export const {
   updateNodes,
   updateTextEditContent,
   updateTextEditSelection,
+  wrapInSection,
 } = designSlice.actions;
 
 export default designSlice.reducer;

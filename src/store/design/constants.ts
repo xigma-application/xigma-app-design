@@ -18,6 +18,8 @@ export const DEFAULT_VIEWPORT: TViewport = { x: 0, y: 0, zoom: 1 };
 export const DEFAULT_PAGE_NAME = 'Page 1';
 export const DEFAULT_GROUP_NAME = 'Group';
 export const DEFAULT_MASK_GROUP_NAME = 'Mask group';
+
+export const WRAP_IN_SECTION_PADDING = 25;
 export const DEFAULT_BOOLEAN_NAME: Record<BooleanOperation, string> = {
   [BooleanOperation.exclude]: 'Exclude',
   [BooleanOperation.intersect]: 'Intersect',

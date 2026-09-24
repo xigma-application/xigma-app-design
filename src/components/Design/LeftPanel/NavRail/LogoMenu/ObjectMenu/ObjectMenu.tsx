@@ -10,6 +10,7 @@ import { MenuCompound } from 'shared';
 
 // hooks
 import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
+import { useWrapSelectionInSection } from 'components/Design/Menu/hooks/useWrapSelectionInSection';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
@@ -55,7 +56,7 @@ import {
 } from './constants';
 
 // store
-import { selectNodes, selectSelectedIds } from 'store/design/selectors';
+import { selectCanWrapInSection, selectNodes, selectSelectedIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -70,6 +71,8 @@ const ObjectMenu: FC = () => {
   const hasSelection = selectedIds.length > 0;
   const everySelectedIsFrame = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.frame);
   const everySelectedIsSection = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.section);
+  const canWrapInSection = useAppSelector(selectCanWrapInSection);
+  const onWrapInSection = useWrapSelectionInSection();
   const {
     onBringToFront,
     onConvertToFrame,
@@ -103,8 +106,9 @@ const ObjectMenu: FC = () => {
       />
       <MenuSeparator />
       <MenuItem
-        disabled
+        disabled={!canWrapInSection}
         label={t(OBJECT_MENU_WRAP_IN_NEW_SECTION_KEY)}
+        onClick={onWrapInSection}
         shortcut={KEYBOARD_SHORTCUTS.wrapInNewSection.join('')}
         withCheck={false}
       />

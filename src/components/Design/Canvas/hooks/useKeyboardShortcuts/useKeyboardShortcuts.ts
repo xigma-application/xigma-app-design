@@ -40,6 +40,7 @@ import { handleToggleRulers } from './utils/handleToggleRulers';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
 import { handleUseSelectionAsMask } from './utils/handleUseSelectionAsMask';
+import { handleWrapSelectionInSection } from './utils/handleWrapSelectionInSection';
 import { handleZoomIn } from './utils/handleZoomIn';
 import { handleZoomOut } from './utils/handleZoomOut';
 import { handleZoomTo100 } from './utils/handleZoomTo100';
@@ -92,6 +93,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleGroupSelection(dispatch), ...shortcuts.group },
       { action: (): any => handleUngroupSelection(dispatch), ...shortcuts.ungroup },
       { action: (): any => handleUseSelectionAsMask(dispatch), ...shortcuts.useAsMask },
+      { action: (): any => handleWrapSelectionInSection(dispatch), ...shortcuts.wrapInNewSection },
       { action: (): any => handleFlattenSelection(dispatch), ...shortcuts.flatten },
       { action: (): any => handleFlipSelection(dispatch, 'horizontal'), ...shortcuts.flipHorizontal },
       { action: (): any => handleFlipSelection(dispatch, 'vertical'), ...shortcuts.flipVertical },

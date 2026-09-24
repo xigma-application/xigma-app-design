@@ -59,6 +59,9 @@ describe('PanelHeaderMoreActionsButton snapshots', () => {
 
 describe('PanelHeaderMoreActionsButton behaviors', () => {
   it('should list the component, edit and section actions when the menu opens', () => {
+    // mock
+    store.dispatch(setSelection(['moreA']));
+
     // before
     renderButton();
 
@@ -98,6 +101,21 @@ describe('PanelHeaderMoreActionsButton behaviors', () => {
     // result
     expect(screen.getByText('Create component')).toBeInTheDocument();
     expect(screen.queryByText('Edit objects')).not.toBeInTheDocument();
+    expect(screen.queryByText('Wrap in new section')).not.toBeInTheDocument();
+  });
+
+  it('should leave out wrap in section for a layer inside another layer', () => {
+    // mock
+    store.dispatch(setSelection(['moreB']));
+
+    // before
+    renderButton();
+
+    // action
+    fireEvent.click(screen.getByLabelText('More actions'));
+
+    // result
+    expect(screen.getByText('Edit objects')).toBeInTheDocument();
     expect(screen.queryByText('Wrap in new section')).not.toBeInTheDocument();
   });
 
