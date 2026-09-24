@@ -1,3 +1,6 @@
+// @xigma
+import { TIconProps } from '@xigma/components';
+
 // others
 import {
   ARRANGE_MENU_ALIGN_BOTTOM_KEY,
@@ -14,7 +17,7 @@ import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
 import { AlignmentHorizontal, AlignmentVertical } from 'types/design/enums';
-import { TAlignmentOption, TDistributeOption } from './types';
+import { TAlignmentOption, TDistributeOption, TTidyUpKind } from './types';
 
 export const translationNameSpace = `${parentNameSpace}.columnAlignment`;
 
@@ -41,15 +44,15 @@ export const VERTICAL_ALIGNMENT_OPTIONS: TAlignmentOption[] = [
 ];
 
 export const DISTRIBUTE_OPTIONS: TDistributeOption[] = [
-  { labelKey: ARRANGE_MENU_TIDY_UP_KEY, name: 'TidyUp', shortcutKey: 'tidyUp' },
+  { action: 'tidyUp', labelKey: ARRANGE_MENU_TIDY_UP_KEY, name: 'TidyUpVertical', shortcutKey: 'tidyUp' },
   {
-    axis: 'vertical',
+    action: 'vertical',
     labelKey: ARRANGE_MENU_DISTRIBUTE_VERTICAL_SPACING_KEY,
     name: 'DistributeVerticalSpacing',
     shortcutKey: 'distributeVerticalSpacing',
   },
   {
-    axis: 'horizontal',
+    action: 'horizontal',
     labelKey: ARRANGE_MENU_DISTRIBUTE_HORIZONTAL_SPACING_KEY,
     name: 'DistributeHorizontalSpacing',
     shortcutKey: 'distributeHorizontalSpacing',
@@ -57,3 +60,17 @@ export const DISTRIBUTE_OPTIONS: TDistributeOption[] = [
 ];
 
 export const DISTRIBUTE_MIN_CHILDREN = 3;
+
+export const TIDY_UP_MIN_LAYERS = 2;
+
+export const TIDY_UP_MAX_LAYERS = 99;
+
+export const TIDY_UP_POSITION_EPSILON = 0.01;
+
+export const DISTRIBUTE_MENU_TRIGGER_ICON: TIconProps['name'] = 'DistributeVerticalSpacing';
+
+export const TIDY_UP_ICONS: Record<TTidyUpKind, TIconProps['name']> = {
+  column: 'TidyUpVertical',
+  grid: 'TidyUpGrid',
+  row: 'TidyUpHorizontal',
+};

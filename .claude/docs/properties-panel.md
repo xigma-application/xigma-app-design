@@ -57,14 +57,33 @@ node's folder. Today:
   still aligns itself inside its parent, even with children. `DistributeMenu` (trigger icon
   `DistributeVerticalSpacing`; items Tidy up ⌃⌥T / Distribute vertical spacing ⌃⌥V / Distribute
   horizontal spacing ⌃⌥H) shows in the row's `buttonsIcon` for any free-form frame with children
-  (`isFreeFormFrameWithChildren`, nested or not). Distribute vertical/horizontal spacing
-  (`useDistributeMenu` → `hooks/utils/distributeFrameChildren`) works only in the same
-  top-level-free-form-frame case as child alignment, with at least `DISTRIBUTE_MIN_CHILDREN` (3) box
-  children (disabled otherwise). It sorts the children by their start on that axis, keeps the
-  outermost span (min start … max end) and places them one after another with equal gaps, in one
-  undo step, based on unrotated `x`/`width` (`y`/`height`). Tidy up is always disabled for now
-  (Figma runs it on a 2+ layer selection, still to be done with multi-select). Keyboard shortcuts
-  (⌃⌥T/V/H) are only shown in the menu, not wired up.
+  (`isFreeFormFrameWithChildren`, nested or not) and for any multi-selection. `useDistributeMenu`
+  works on "arrange groups": the non-auto-layout children of a single selected top-level free-form
+  frame, or the per-parent groups of a multi-selection (`getAlignableSelectionGroups`). Every
+  action uses rotated bounds and moves layers with their whole subtree (`translateNodeSubtree` →
+  `Canvas/utils/translateNodes`), one undo step per click.
+  - Distribute vertical/horizontal spacing (`distributeNodes`): groups with 3+ layers; sorts by start
+    on the axis, keeps the outermost span, equal gaps.
+  - Tidy up (`hooks/utils/tidyUp/`): multi-selection only (disabled for a single frame's children,
+    like Figma), groups of 2–99 layers, and only while tidying would actually move something
+    (`isTidyableGroup`), so it disables itself right after a click. All math runs on pixel-rounded
+    rotated bounds (`getTidyUpRect`: position and size rounded separately) because the move itself
+    rounds `x`/`y`, otherwise every click drifted the layers apart. `getTidyUpKind`: all bounds
+    overlap one horizontal line → `row`, one vertical line → `column`, both → none (piled up), else
+    `grid`. Row/column (`getLineTidyTargets`): first layer stays, the rest follow at the most common
+    gap (`getModeGap`, ties → smaller, clamped ≥ 0), cross axis untouched. Grid
+    (`getGridTidyTargets`): rows from vertical overlap (`getGridRows`), reading order; column count =
+    the detected row length when rows are regular, else ceil(√n) (`getGridColumnCount`); column
+    width / row height = largest member; one shared gap (mode of all horizontal and vertical gaps);
+    laid out from the group's top-left, each layer at its cell's top-left. **Open question:** a wide
+    layer with a separately spaced row below it ("one big frame and two smaller ones with their own
+    gap") isn't a grid for the user — the right behaviour for that layout is not decided yet. The menu item's icon follows the detected kind
+    (`TIDY_UP_ICONS`: `TidyUpHorizontal` / `TidyUpVertical` / `TidyUpGrid`), the label stays "Tidy up".
+    While Tidy up is available the menu's trigger shows that same icon instead of
+    `DISTRIBUTE_MENU_TRIGGER_ICON`; the click still opens the menu.
+  The ⌃⌥T/V/H shortcuts are only shown in the menu, not wired up.
+  Single-frame child alignment also goes through subtree translation now (so group children move
+  with their members) and still writes each box child's constraint.
 - `Common/ColumnDimensions/` — the W/H row (and, for frames, the Fixed/Hug/Fill sizing menu and
   min/max reveal, which stay hidden for a plain shape because `canHug`/`canFill` are false and the
   frame-only sub-hooks receive `undefined`). `useColumnDimensions` reads base geometry off the box

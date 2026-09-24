@@ -16,8 +16,12 @@ export type TAlignmentOption = {
 
 export type TDistributeAxis = 'horizontal' | 'vertical';
 
+export type TTidyUpKind = 'column' | 'grid' | 'row';
+
+export type TArrangeAction = TDistributeAxis | 'tidyUp';
+
 export type TDistributeOption = {
-  axis?: TDistributeAxis;
+  action: TArrangeAction;
   labelKey: string;
   name: TIconProps['name'];
   shortcutKey: keyof TKeyboardShortcuts;

@@ -67,7 +67,8 @@ A top-level free-form frame with children enables the Alignment buttons and alig
 own against the frame's edges, writing that child's constraint too, in one undo step. A nested frame
 still aligns itself inside its parent. The Distribute menu (Tidy up, Distribute vertical/horizontal
 spacing) shows next to Alignment for any free-form frame with children. Distribute works on the
-children of a top-level free-form frame with 3+ children; Tidy up is disabled for now.
+children of a top-level free-form frame with 3+ children and on multi-selections; Tidy up works on
+multi-selections only.
 
 | #   | Scenario                                                                                                                               | Unit |                                                         E2E                                                          |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------------------------------------------------------------------------------------------------: |
@@ -77,6 +78,9 @@ children of a top-level free-form frame with 3+ children; Tidy up is disabled fo
 | 554 | Distribute horizontal spacing on a top-level free-form frame evens out the gaps between its three children, keeping the outermost ones |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 | 555 | With two frames selected, Align left moves both to the selection's left edge; their children keep their place inside                   |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 | 556 | A multi-selection spanning several parents aligns each parent's group only against itself; auto-layout children stay put               |  ✅  | — (pure per-group arithmetic on the same button click as #555; `useColumnAlignment.spec.tsx` asserts every position) |
+| 557 | Tidy up on a multi-selected row of frames evens out their gaps to the most common one                                                  |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
+| 558 | Tidy up picks row / column / grid from the layout (and the matching icon); grid packs rows and columns from the top-left corner        |  ✅  |             — (pure geometry; `tidyUp/test/*.spec.ts` cover every layout, #557 covers the browser flow)              |
+| 559 | Aligning a single frame's children moves a group child together with its members                                                       |  ✅  |             — (same button click as #551; `useColumnAlignment.spec.tsx` asserts the members' positions)              |
 
 ## Layers panel — lock/visibility
 

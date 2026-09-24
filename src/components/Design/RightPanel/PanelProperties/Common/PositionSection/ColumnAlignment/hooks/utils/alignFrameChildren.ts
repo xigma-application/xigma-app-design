@@ -9,8 +9,25 @@ import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { TFrameNode, TNodeAlignment, TSceneNode } from 'types/design/types';
 
 // utils
-import { getFrameBoxChildren } from './getFrameBoxChildren';
-import { moveNodeToAlignment } from './moveNodeToAlignment';
+import { alignNodeToRect } from './alignNodeToRect';
+import { commitAlignmentConstraint } from './commitAlignmentConstraint';
+import { getFrameChildNodes } from './getFrameChildNodes';
+import { getRotatedNodeBounds } from 'components/Design/Canvas/utils/getRotatedNodeBounds';
+import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+
+const alignChild = (
+  dispatch: AppDispatch,
+  nodes: Record<string, TSceneNode>,
+  frame: TFrameNode,
+  child: TSceneNode,
+  next: TNodeAlignment,
+): void => {
+  alignNodeToRect(dispatch, nodes, child, getRotatedNodeBounds(frame), next);
+
+  if (isBoxSceneNode(child)) {
+    commitAlignmentConstraint(dispatch, child, { ...child.alignment, ...next });
+  }
+};
 
 export const alignFrameChildren = (
   dispatch: AppDispatch,
@@ -20,7 +37,7 @@ export const alignFrameChildren = (
 ): void => {
   if (frame) {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    getFrameBoxChildren(nodes, frame).forEach((child) => moveNodeToAlignment(dispatch, child, frame, { ...child.alignment, ...next }));
+    getFrameChildNodes(nodes, frame).forEach((child) => alignChild(dispatch, nodes, frame, child, next));
     dispatch(endHistoryGesture());
   }
 };

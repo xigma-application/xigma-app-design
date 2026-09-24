@@ -141,3 +141,39 @@ test('with two frames selected, Align left moves both frames to the selection’
   expect(after.frames[1].y).toBe(before.frames[1].y);
   expect(after.childX).toBe(before.childX);
 });
+
+test('Tidy up on a multi-selected row of frames evens out their gaps to the most common one', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-tidy-up-row');
+  await expect(designPage.canvas).toBeVisible();
+
+  // four 40px frames in a row, gaps of 20, 20 and 100
+  await designPage.drawFrame(600, 300, 640, 340);
+  await designPage.drawFrame(660, 300, 700, 340);
+  await designPage.drawFrame(720, 300, 760, 340);
+  await designPage.drawFrame(860, 300, 900, 340);
+  await designPage.click(620, 320);
+  await designPage.click(680, 320, { shift: true });
+  await designPage.click(740, 320, { shift: true });
+  await designPage.click(880, 320, { shift: true });
+
+  const readLeftEdges = (): Promise<number[]> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const activePage = pages[activePageId];
+
+      return activePage.rootOrder.map((id) => (activePage.nodes[id] as unknown as { x: number }).x).sort((a, b) => a - b);
+    });
+
+  const before = await readLeftEdges();
+
+  await page.getByLabel('More actions').click();
+  await page.getByText('Tidy up', { exact: true }).click();
+
+  const after = await readLeftEdges();
+
+  expect(after[0]).toBe(before[0]);
+  expect(after.slice(1).map((x, index) => x - after[index])).toEqual([60, 60, 60]);
+});

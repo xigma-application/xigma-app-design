@@ -6,7 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnAlignment } from '../useColumnAlignment';
 
 // store
-import { addNode, moveNodes, setSelection, updateNode } from 'store/design/slice';
+import { addNode, groupNodes, moveNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
@@ -113,6 +113,22 @@ describe('useColumnAlignment', () => {
     expect(positionOf(firstId)).toEqual({ x: 0, y: 300 - 40 });
     expect(positionOf(secondId)).toEqual({ x: 0, y: 300 - 60 });
     expect(alignmentOf(firstId)).toEqual({ horizontal: AlignmentHorizontal.left, vertical: AlignmentVertical.bottom });
+  });
+
+  it("should align a group child of a top-level free-form frame together with the group's own children", () => {
+    const { firstId, frameId, secondId } = frameWithChildren();
+
+    store.dispatch(setSelection([firstId, secondId]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([frameId]));
+
+    const { result } = renderUseColumnAlignment();
+
+    act(() => result.current.onSelectHorizontal(AlignmentHorizontal.right));
+
+    // the wider 100px member lands on the frame's right edge, the 40px one keeps its offset inside the group
+    expect(positionOf(secondId).x).toBe(400 - 100);
+    expect(positionOf(firstId).x).toBe(400 - 100);
   });
 
   it('should undo aligning all children in a single step', () => {
@@ -222,7 +238,7 @@ describe('useColumnAlignment', () => {
 
       expect(positionOf(frameId).x).toBe(640 - 400);
       expect(positionOf(childId)).toEqual({ x: 240 + 10, y: 20 });
-      expect(result.current.showDistribute).toBe(false);
+      expect(result.current.showDistribute).toBe(true);
     });
 
     it("should align each parent's selected children only against each other", () => {

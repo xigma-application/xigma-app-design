@@ -18,23 +18,23 @@ const { PopoverItem } = UITools.PopoverCompound;
 
 export const DistributeMenu: FC = () => {
   const { t } = useTranslation();
-  const { canDistribute, onDistribute } = useDistributeMenu();
+  const { enabledActions, onAction, tidyUpIcon, triggerIcon } = useDistributeMenu();
 
   return (
     <UITools.ButtonMenu
       align="end"
-      trigger={<Icon name="DistributeVerticalSpacing" size={24} />}
+      trigger={<Icon name={triggerIcon} size={24} />}
       triggerAriaLabel={t(`${translationNameSpace}.moreActions`)}
       triggerTooltip={t(`${translationNameSpace}.moreActions`)}
     >
-      {DISTRIBUTE_OPTIONS.map(({ axis, labelKey, name, shortcutKey }) => (
+      {DISTRIBUTE_OPTIONS.map(({ action, labelKey, name, shortcutKey }) => (
         <PopoverItem
-          disabled={axis === undefined || !canDistribute}
-          icon={name}
+          disabled={!enabledActions[action]}
+          icon={action === 'tidyUp' ? tidyUpIcon : name}
           iconSize={24}
           key={labelKey}
           label={t(labelKey)}
-          onClick={axis ? (): void => onDistribute(axis) : undefined}
+          onClick={(): void => onAction(action)}
           shortcut={KEYBOARD_SHORTCUTS[shortcutKey].join('')}
           withCheck={false}
         />

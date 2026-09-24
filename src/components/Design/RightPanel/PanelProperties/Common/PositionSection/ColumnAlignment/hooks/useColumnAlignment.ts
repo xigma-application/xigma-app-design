@@ -93,7 +93,7 @@ export const useColumnAlignment = (): TUseColumnAlignmentResult => {
     onSelectVertical,
     setHorizontal: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: value, vertical: alignment?.vertical }),
     setVertical: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: alignment?.horizontal, vertical: value }),
-    showDistribute: !isMultiSelection && isFreeFormFrameWithChildren(selectedNode),
+    showDistribute: isMultiSelection || isFreeFormFrameWithChildren(selectedNode),
     vertical: alignment?.vertical,
   };
 };

@@ -59,7 +59,18 @@ const frameWithChildrenAt = (xs: number[]): { childIds: string[]; frameId: strin
   return { childIds, frameId };
 };
 
+// top-level 20x20 frames at the given positions, all selected
+const selectedFramesAt = (positions: { x: number; y: number }[]): string[] => {
+  const ids = positions.map(() => addFrame(20, 20));
+
+  ids.forEach((id, index) => store.dispatch(updateNode({ changes: positions[index], id })));
+  store.dispatch(setSelection(ids));
+
+  return ids;
+};
+
 const xOf = (id: string): number => (selectActivePage(store.getState()).nodes[id] as TFrameNode).x;
+const yOf = (id: string): number => (selectActivePage(store.getState()).nodes[id] as TFrameNode).y;
 
 const isItemDisabled = (label: string): boolean => screen.getByText(label).closest('[class*="PopoverItem--disabled"]') !== null;
 
@@ -147,5 +158,136 @@ describe('DistributeMenu behaviors', () => {
 
     // result
     expect(childIds.map(xOf)).toEqual([0, 50, 300]);
+  });
+
+  it('should tidy up a multi-selected row with the most common gap, in a single undo step', () => {
+    // mock: gaps of 10, 10 and 40
+    const ids = selectedFramesAt([
+      { x: 0, y: 0 },
+      { x: 30, y: 2 },
+      { x: 60, y: 0 },
+      { x: 120, y: 1 },
+    ]);
+
+    // before
+    renderDistributeMenu();
+
+    // action
+    openMenu();
+    fireEvent.click(screen.getByText('Tidy up'));
+
+    // result
+    expect(ids.map(xOf)).toEqual([0, 30, 60, 90]);
+    expect(ids.map(yOf)).toEqual([0, 2, 0, 1]);
+
+    // action
+    act(() => {
+      store.dispatch(undo());
+    });
+
+    // result
+    expect(xOf(ids[3])).toBe(120);
+  });
+
+  it('should distribute the vertical spacing of a multi-selection, keeping the outermost layers', () => {
+    // mock
+    const ids = selectedFramesAt([
+      { x: 0, y: 0 },
+      { x: 0, y: 30 },
+      { x: 0, y: 200 },
+    ]);
+
+    // before
+    renderDistributeMenu();
+
+    // action
+    openMenu();
+    fireEvent.click(screen.getByText('Distribute vertical spacing'));
+
+    // result
+    expect(ids.map(yOf)).toEqual([0, 100, 200]);
+  });
+
+  it('should keep Tidy up disabled for piled-up layers and both distribute items disabled below three layers', () => {
+    // mock
+    selectedFramesAt([
+      { x: 0, y: 0 },
+      { x: 2, y: 2 },
+    ]);
+
+    // before
+    renderDistributeMenu();
+
+    // action
+    openMenu();
+
+    // result
+    expect(isItemDisabled('Tidy up')).toBe(true);
+    expect(isItemDisabled('Distribute horizontal spacing')).toBe(true);
+  });
+
+  const tidyUpTwice = (ids: string[]): { afterFirst: number[][]; afterSecond: number[][]; disabledAfterFirst: boolean } => {
+    const positions = (): number[][] => ids.map((id) => [xOf(id), yOf(id)]);
+    const { unmount } = renderDistributeMenu();
+
+    openMenu();
+    fireEvent.click(screen.getByText('Tidy up'));
+
+    const afterFirst = positions();
+
+    unmount();
+    renderDistributeMenu();
+    openMenu();
+
+    const disabledAfterFirst = isItemDisabled('Tidy up');
+
+    fireEvent.click(screen.getByText('Tidy up'));
+
+    return { afterFirst, afterSecond: positions(), disabledAfterFirst };
+  };
+
+  it('should settle after one Tidy up on fractional sizes and then disable Tidy up', () => {
+    // mock: 40.5px wide frames with gaps of 10, 10 and 50
+    const ids = selectedFramesAt([
+      { x: 0, y: 0 },
+      { x: 50.5, y: 0 },
+      { x: 101, y: 0 },
+      { x: 191.5, y: 0 },
+    ]);
+
+    ids.forEach((id) => store.dispatch(updateNode({ changes: { width: 40.5 }, id })));
+
+    // action
+    const { afterFirst, afterSecond, disabledAfterFirst } = tidyUpTwice(ids);
+
+    // result
+    expect(disabledAfterFirst).toBe(true);
+    expect(afterSecond).toEqual(afterFirst);
+  });
+
+  it('should reflow a 1000px wide frame and three frames below it into a two-column grid and then disable Tidy up', () => {
+    // mock
+    const ids = selectedFramesAt([
+      { x: 0, y: 0 },
+      { x: 0, y: 300 },
+      { x: 140, y: 310 },
+      { x: 400, y: 300 },
+    ]);
+
+    store.dispatch(updateNode({ changes: { height: 200, width: 1000 }, id: ids[0] }));
+    ids.slice(1).forEach((id) => store.dispatch(updateNode({ changes: { height: 100, width: 100 }, id })));
+
+    // action
+    const { afterFirst, afterSecond, disabledAfterFirst } = tidyUpTwice(ids);
+
+    // result
+    expect(afterFirst).toEqual([
+      [0, 0],
+      [1040, 0],
+      [0, 240],
+      [1040, 240],
+    ]);
+    expect(disabledAfterFirst).toBe(true);
+    expect(afterSecond).toEqual(afterFirst);
   });
 });
