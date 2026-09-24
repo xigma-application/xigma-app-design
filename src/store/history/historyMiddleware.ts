@@ -31,6 +31,7 @@ import {
   ungroupNodes,
   updateGuide,
   updateNode,
+  updateNodes,
 } from 'store/design/slice';
 import { RootState } from 'store';
 
@@ -70,6 +71,7 @@ const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   ungroupNodes.type,
   updateGuide.type,
   updateNode.type,
+  updateNodes.type,
 ]);
 
 export const createHistoryMiddleware = (historyStack: THistoryStack): Middleware<object, RootState> => {

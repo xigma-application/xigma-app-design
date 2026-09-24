@@ -104,3 +104,26 @@ describe('getHoverLeafNodes', () => {
     expect(leafNodes.map((node) => node.id)).not.toContain(outerId);
   });
 });
+
+describe('getHoverLeafNodes caching', () => {
+  it('should return the very same list while the scene and modifier are unchanged, and rebuild when either changes', () => {
+    // mock
+    addRectNode(0, 0);
+
+    const state = store.getState();
+    const nodesById = selectActivePage(state).nodes;
+
+    // before
+    const first = getHoverLeafNodes(state, nodesById, false);
+
+    // result
+    expect(getHoverLeafNodes(state, nodesById, false)).toBe(first);
+    expect(getHoverLeafNodes(state, nodesById, true)).not.toBe(first);
+
+    addRectNode(50, 50);
+
+    const nextState = store.getState();
+
+    expect(getHoverLeafNodes(nextState, selectActivePage(nextState).nodes, true)).not.toBe(first);
+  });
+});

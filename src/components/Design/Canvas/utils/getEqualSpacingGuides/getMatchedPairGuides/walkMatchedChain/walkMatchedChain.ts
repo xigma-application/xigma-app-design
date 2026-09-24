@@ -5,6 +5,7 @@ import { TMatchedChainAxis } from './types';
 
 // utils
 import { getAxisEdges } from './getAxisEdges';
+import { getMatchingChainCandidates } from './getMatchingChainCandidates';
 import { pickNextChainLink } from './pickNextChainLink';
 
 export const walkMatchedChain = (
@@ -17,11 +18,12 @@ export const walkMatchedChain = (
   centreToleranceWorldUnits: number,
 ): TEdges[] => {
   const activeMetrics = getAxisEdges(active, axis);
+  const matching = getMatchingChainCandidates(candidates, activeMetrics, axis, sizeToleranceWorldUnits, centreToleranceWorldUnits);
   const run: TEdges[] = [];
   let cursor = active;
 
   for (;;) {
-    const link = pickNextChainLink(cursor, activeMetrics, candidates, used, axis, sign, sizeToleranceWorldUnits, centreToleranceWorldUnits);
+    const link = pickNextChainLink(cursor, activeMetrics, matching, used, axis, sign, sizeToleranceWorldUnits, centreToleranceWorldUnits);
 
     if (!link) {
       return run;

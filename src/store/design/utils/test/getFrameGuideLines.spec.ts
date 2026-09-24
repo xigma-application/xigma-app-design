@@ -65,4 +65,44 @@ describe('getFrameGuideLines', () => {
     // result
     expect(getFrameGuideLines(nodes)).toEqual([]);
   });
+
+  it('should hand back the very same lines when only a non-frame node changed', () => {
+    // mock
+    const rectangle = (x: number): TSceneNode => ({ id: 'r', type: NodeType.rectangle, x }) as unknown as TSceneNode;
+    const guided = { ...frame('guided'), guides: [{ axis: 'x' as const, id: 'g', position: 1 }] };
+    const first = { guided, r: rectangle(0) };
+    const second = { guided, r: rectangle(5) };
+
+    // before
+    const lines = getFrameGuideLines(first);
+
+    // result
+    expect(getFrameGuideLines(second)).toBe(lines);
+    expect(getFrameGuideLines(second)).toBe(lines);
+  });
+
+  it('should recompute when a frame changed', () => {
+    // mock
+    const first = { guided: { ...frame('guided'), guides: [{ axis: 'x' as const, id: 'g', position: 1 }] } };
+    const second = { guided: { ...frame('guided'), guides: [{ axis: 'x' as const, id: 'g', position: 9 }] } };
+
+    // before
+    const lines = getFrameGuideLines(first);
+
+    // result
+    expect(getFrameGuideLines(second)).not.toBe(lines);
+    expect(getFrameGuideLines(second)[0].worldPosition).toBe(19);
+  });
+
+  it('should recompute when too many nodes changed to track', () => {
+    // mock
+    const many = (x: number): Record<string, TSceneNode> =>
+      Object.fromEntries(
+        Array.from({ length: 100 }, (_, index) => [`n${index}`, { id: `n${index}`, type: NodeType.rectangle, x } as unknown as TSceneNode]),
+      );
+    const lines = getFrameGuideLines(many(0));
+
+    // result
+    expect(getFrameGuideLines(many(1))).not.toBe(lines);
+  });
 });

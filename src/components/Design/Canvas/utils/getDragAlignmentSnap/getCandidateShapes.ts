@@ -12,10 +12,13 @@ export type TCandidateShape = {
   points: TPoint[];
 };
 
-export const getCandidateShapes = (nodes: Record<string, TSceneNode>, excludedIds: string[]): TCandidateShape[] =>
-  Object.values(nodes)
-    .filter((node) => !excludedIds.includes(node.id) && isContactGuideEligibleNode(node))
+export const getCandidateShapes = (nodes: Record<string, TSceneNode>, excludedIds: string[]): TCandidateShape[] => {
+  const excludedIdSet = new Set(excludedIds);
+
+  return Object.values(nodes)
+    .filter((node) => !excludedIdSet.has(node.id) && isContactGuideEligibleNode(node))
     .map((node) => {
       const bounds = getStrokedRotatedNodeBounds(node);
       return { bounds, points: getShapeSnapPoints(bounds) };
     });
+};

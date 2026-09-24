@@ -61,6 +61,10 @@ const createGlMock = (): WebGL2RenderingContext =>
     clear: vi.fn(),
     clearColor: vi.fn(),
     colorMask: vi.fn(),
+    createBuffer: vi.fn(() => null),
+    createProgram: vi.fn(() => null),
+    createShader: vi.fn(() => null),
+    getExtension: vi.fn(() => null),
   }) as unknown as WebGL2RenderingContext;
 
 const createFullGlMock = (): WebGL2RenderingContext =>
@@ -79,6 +83,9 @@ const createFullGlMock = (): WebGL2RenderingContext =>
     clear: vi.fn(),
     clearColor: vi.fn(),
     colorMask: vi.fn(),
+    createBuffer: vi.fn(() => null),
+    createProgram: vi.fn(() => null),
+    createShader: vi.fn(() => null),
     createTexture: vi.fn(() => ({})),
     disable: vi.fn(),
     drawArrays: vi.fn(),
@@ -86,6 +93,7 @@ const createFullGlMock = (): WebGL2RenderingContext =>
     enableVertexAttribArray: vi.fn(),
     generateMipmap: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
+    getExtension: vi.fn(() => null),
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),

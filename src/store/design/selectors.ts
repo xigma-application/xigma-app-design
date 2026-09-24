@@ -35,7 +35,7 @@ import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchin
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
 import { getAllGuideLines } from './utils/getAllGuideLines';
 import { getFrameGuideLines } from './utils/getFrameGuideLines';
-import { getRenderOrderedNodes } from './utils/getRenderOrderedNodes';
+import { getIncrementalRenderOrderedNodes } from './utils/getIncrementalRenderOrderedNodes';
 import { getSelectedParentNode } from './utils/getSelectedParentNode';
 import { getSmartSelectionNodes } from './utils/nodeHierarchy/getSmartSelectionNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
@@ -160,7 +160,7 @@ export const selectRootOrder = createSelector([selectActivePage], (page): string
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
 export const selectRenderOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) =>
-  getRenderOrderedNodes(rootOrder, nodes),
+  getIncrementalRenderOrderedNodes(rootOrder, nodes),
 );
 
 export const selectTopLevelFrameNodes = createSelector([selectRenderOrderedNodes], (nodes): TFrameNode[] =>

@@ -6,6 +6,7 @@ uniform vec4 u_secondaryColor;
 uniform int u_duo;
 uniform int u_multi;
 uniform sampler2D u_mask;
+uniform int u_useMask;
 uniform vec2 u_maskSize;
 uniform vec2 u_viewportOffset;
 uniform float u_zoom;
@@ -66,7 +67,7 @@ void main() {
 
   vec4 duoOrMono = vec4((u_color.rgb * primary + u_secondaryColor.rgb * secondary) / max(primary + secondary, 0.0001), alpha);
 
-  float mask = texture(u_mask, gl_FragCoord.xy / u_maskSize).a;
+  float mask = u_useMask == 1 ? texture(u_mask, gl_FragCoord.xy / u_maskSize).a : 1.0;
   vec4 painted = u_multi == 1 ? vec4(multiColor(point), primary) : duoOrMono;
 
   outColor = vec4(painted.rgb, painted.a * mask);

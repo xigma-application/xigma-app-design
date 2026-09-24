@@ -155,4 +155,25 @@ describe('dispatchSmartSelectionSwapUpdates', () => {
     expect(nodes()[idA]).toMatchObject({ x: 12, y: -8 });
     expect(nodes()[idB]).toMatchObject({ x: 100, y: 0 });
   });
+
+  it('should not dispatch anything when no slot carries a node id', () => {
+    // mock
+    const dispatch = vi.fn();
+    const dragState: TSmartSelectionSwapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: true,
+      nodeOrigins: {},
+      pointerStart: { x: 0, y: 0 },
+      slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: null }],
+      targetIndex: 0,
+    };
+
+    // action
+    dispatchSmartSelectionSwapUpdates(dispatch, dragState, 10, 10);
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
+    // result
+    expect(dispatch).not.toHaveBeenCalled();
+  });
 });

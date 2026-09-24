@@ -25,7 +25,8 @@ const resetOpenPropertyPanelIfSelectionChanged = (state: TDesignState, selection
 export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[]): void => {
   const page = getActivePage(state);
   const normalizedIds = dropTextPathGuides(dropDescendantsOfSelected(nextSelectedIds, page.nodes), page.nodes);
-  const deselectedIds = page.selectedIds.filter((id) => !normalizedIds.includes(id));
+  const normalizedIdSet = new Set(normalizedIds);
+  const deselectedIds = page.selectedIds.filter((id) => !normalizedIdSet.has(id));
   const selectionChanged =
     normalizedIds.length !== page.selectedIds.length || normalizedIds.some((id, index) => id !== page.selectedIds[index]);
 

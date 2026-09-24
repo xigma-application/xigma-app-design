@@ -6,6 +6,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { findLastNode } from './findLastNode';
 import { getFrameNameLabelRects } from '../getFrameNameLabelRects';
 import { getNodesById } from './getNodesById';
 import { getSectionNameLabelRects } from '../getSectionNameLabelRects';
@@ -34,7 +35,7 @@ export const getNodeAtPoint = (
   const frameNameLabelRects = getFrameNameLabelRects(nodes, viewport.zoom);
   const sectionNameLabelRects = getSectionNameLabelRects(nodes, viewport.zoom);
 
-  const hit = [...nodes].reverse().find((node) => {
+  const isHit = (node: TSceneNode): boolean => {
     if (!node.hidden && !node.locked) {
       const hitStatus =
         !ignoreClip && isPointClippedFromNode(point, node, clipAncestorsById)
@@ -63,7 +64,7 @@ export const getNodeAtPoint = (
     }
 
     return false;
-  });
+  };
 
-  return hit ?? null;
+  return findLastNode(nodes, isHit);
 };

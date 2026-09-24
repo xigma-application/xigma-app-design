@@ -66,7 +66,7 @@ describe('drawSectionNameLabel', () => {
   beforeEach(() => {
     buildGlyphQuadsMock.mockClear().mockReturnValue([]);
     getGlyphQuadBoundsMock.mockClear().mockReturnValue(BOUNDS);
-    getSectionNameLabelBadgeRectMock.mockClear().mockReturnValue(BADGE);
+    getSectionNameLabelBadgeRectMock.mockClear().mockReturnValue({ ...BADGE });
     translateGlyphVerticesMock.mockClear().mockReturnValue(new Float32Array());
     getMsdfAtlasTextureMock.mockClear().mockReturnValue({});
     drawMsdfGlyphsMock.mockClear();

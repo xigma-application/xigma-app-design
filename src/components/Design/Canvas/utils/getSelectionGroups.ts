@@ -1,4 +1,3 @@
-// types
 import { TSceneNode } from 'types/design/types';
 
 export const getSelectionGroups = (nodes: TSceneNode[]): TSceneNode[][] => {
@@ -6,7 +5,13 @@ export const getSelectionGroups = (nodes: TSceneNode[]): TSceneNode[][] => {
 
   nodes.forEach((node) => {
     const key = node.parentId ?? null;
-    groups.set(key, [...(groups.get(key) ?? []), node]);
+    const group = groups.get(key);
+
+    if (group) {
+      group.push(node);
+    } else {
+      groups.set(key, [node]);
+    }
   });
 
   return [...groups.values()];

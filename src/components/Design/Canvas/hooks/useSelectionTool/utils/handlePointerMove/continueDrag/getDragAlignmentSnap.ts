@@ -10,6 +10,21 @@ import { getGroupAlignmentGuide, type TAlignmentGuide } from 'components/Design/
 import { getStrokedRotatedNodeBounds } from 'components/Design/Canvas/utils/getStrokedRotatedNodeBounds';
 import { getShapeSnapPoints } from 'components/Design/Canvas/utils/getShapeSnapPoints';
 
+const pointsByCandidates = new WeakMap<TDragState['candidateShapes'], TPoint[]>();
+
+const getCandidatePoints = (candidateShapes: TDragState['candidateShapes']): TPoint[] => {
+  const cached = pointsByCandidates.get(candidateShapes);
+
+  if (!cached) {
+    const points = candidateShapes.flatMap((candidate) => candidate.points);
+    pointsByCandidates.set(candidateShapes, points);
+
+    return points;
+  }
+
+  return cached;
+};
+
 export type TDragAlignmentSnap = {
   delta: TPoint;
   guide: TAlignmentGuide | null;
@@ -29,7 +44,7 @@ export const getDragAlignmentSnap = (
     const draggedPoints = eligibleDraggedEntries.flatMap(({ node, origin }) =>
       getShapeSnapPoints(getStrokedRotatedNodeBounds({ ...node, x: origin.x + rawDelta.x, y: origin.y + rawDelta.y } as TSceneNode)),
     );
-    const candidatePoints = candidateShapes.flatMap((candidate) => candidate.points);
+    const candidatePoints = getCandidatePoints(candidateShapes);
     const { deltaCorrection, guide } = getGroupAlignmentGuide(draggedPoints, candidatePoints, toleranceWorldUnits);
 
     return {

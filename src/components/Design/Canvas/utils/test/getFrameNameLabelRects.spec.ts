@@ -122,3 +122,33 @@ describe('isPointInFrameNameLabelRect', () => {
     expect(isPointInFrameNameLabelRect({ x: 26, y: -11 }, rect)).toBe(false);
   });
 });
+
+describe('getFrameNameLabelRects caching', () => {
+  beforeEach(() => {
+    getFrameNameLabelAnchorMock.mockReturnValue({ maxWidth: 100, point: { x: 0, y: 0 } });
+    truncateTextToWidthMock.mockReturnValue('Frame 1');
+    getGlyphQuadBoundsMock.mockReturnValue({ maxX: 10, maxY: 5, minX: 0, minY: 0 });
+  });
+
+  it('should return the very same rect list for the same node array and zoom', () => {
+    // mock
+    const nodes = [buildFrame({ id: 'cache-frame' })];
+
+    // before
+    const first = getFrameNameLabelRects(nodes, 1);
+
+    // result
+    expect(getFrameNameLabelRects(nodes, 1)).toBe(first);
+  });
+
+  it('should rebuild the list when the zoom changes', () => {
+    // mock
+    const nodes = [buildFrame({ id: 'zoom-frame' })];
+
+    // before
+    const first = getFrameNameLabelRects(nodes, 1);
+
+    // result
+    expect(getFrameNameLabelRects(nodes, 2)).not.toBe(first);
+  });
+});

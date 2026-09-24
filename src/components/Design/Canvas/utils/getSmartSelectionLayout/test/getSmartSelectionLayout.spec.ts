@@ -78,3 +78,20 @@ describe('getSmartSelectionLayout', () => {
     expect(getSmartSelectionLayout(nodes, VIEWPORT, { 'frame-1': parent })).toBeNull();
   });
 });
+
+describe('getSmartSelectionLayout caching', () => {
+  it('should hand back the very same layout for the same nodes, nodes record and zoom, and recompute when any changes', () => {
+    // mock
+    const nodes = [rect('cache-a', 0, 0), rect('cache-b', 100, 0)];
+    const nodesById = Object.fromEntries(nodes.map((node) => [node.id, node]));
+
+    // before
+    const first = getSmartSelectionLayout(nodes, { x: 0, y: 0, zoom: 1 }, nodesById);
+
+    // result
+    expect(first).not.toBeNull();
+    expect(getSmartSelectionLayout(nodes, { x: 50, y: 50, zoom: 1 }, nodesById)).toBe(first);
+    expect(getSmartSelectionLayout(nodes, { x: 0, y: 0, zoom: 2 }, nodesById)).not.toBe(first);
+    expect(getSmartSelectionLayout(nodes, { x: 0, y: 0, zoom: 2 }, { ...nodesById })).not.toBe(first);
+  });
+});

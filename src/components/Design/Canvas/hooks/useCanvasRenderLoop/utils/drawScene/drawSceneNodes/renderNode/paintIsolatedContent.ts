@@ -35,6 +35,7 @@ const paintAndCacheContent = (
 ): void => {
   dispatchNodeType(renderer, node, contentTarget);
   blurIsolatedNode(renderer, node, contentTarget, rect);
+  applyTextureEffect(renderer, node, contentTarget, rect);
 
   if (key && rect) {
     storeBlurCacheEntry(renderer.gl, node.id, key, contentTarget, rect, renderer.context.viewport.zoom);
@@ -59,6 +60,4 @@ export const paintIsolatedContent = (
   } else {
     paintAndCacheContent(renderer, node, contentTarget, rect, key);
   }
-
-  applyTextureEffect(renderer, node, contentTarget, rect);
 };

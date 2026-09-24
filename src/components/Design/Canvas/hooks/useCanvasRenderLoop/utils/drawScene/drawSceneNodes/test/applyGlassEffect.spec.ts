@@ -15,6 +15,7 @@ const getIsolatedScissorRectMock = vi.fn();
 const markGlassBackdropDirtyMock = vi.fn();
 const renderDirectGlassMock = vi.fn();
 const renderFreshGlassMock = vi.fn();
+const refreshGlassCacheEntryMock = vi.fn();
 
 const RECT = { clipped: false, height: 80, offscreen: false, originX: 0, originY: 0, rawHeight: 80, rawWidth: 100, width: 100, x: 0, y: 0 };
 const NODES_STATE = { tag: 'nodes-state' };
@@ -34,6 +35,9 @@ vi.mock('../getIsolatedScissorRect', () => ({
 }));
 vi.mock('../markGlassBackdropDirty', () => ({
   markGlassBackdropDirty: (...args: unknown[]): unknown => markGlassBackdropDirtyMock(...args),
+}));
+vi.mock('../refreshGlassCacheEntry', () => ({
+  refreshGlassCacheEntry: (...args: unknown[]): unknown => refreshGlassCacheEntryMock(...args),
 }));
 vi.mock('../renderDirectGlass', () => ({ renderDirectGlass: (...args: unknown[]): unknown => renderDirectGlassMock(...args) }));
 vi.mock('../renderFreshGlass', () => ({ renderFreshGlass: (...args: unknown[]): unknown => renderFreshGlassMock(...args) }));
@@ -67,6 +71,7 @@ describe('applyGlassEffect', () => {
     applyGlassEffect(renderer, node, null);
 
     // result
+    expect(refreshGlassCacheEntryMock).toHaveBeenCalledWith(renderer, 'r1', NODES_STATE, RECT);
     expect(getGlassCacheHitMock).toHaveBeenCalledWith(renderer.gl, 'r1', NODES_STATE, RECT);
     expect(bindTargetMock).toHaveBeenCalledWith(renderer, null);
     expect(renderFreshGlassMock).toHaveBeenCalledWith(renderer, node, node.effects![0], null, RECT, NODES_STATE);

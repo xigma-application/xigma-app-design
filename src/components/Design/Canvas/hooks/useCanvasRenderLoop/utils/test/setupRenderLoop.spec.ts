@@ -26,7 +26,11 @@ const createGlMock = (): WebGL2RenderingContext =>
     clear: vi.fn(),
     clearColor: vi.fn(),
     colorMask: vi.fn(),
+    createBuffer: vi.fn(() => null),
+    createProgram: vi.fn(() => null),
+    createShader: vi.fn(() => null),
     enable: vi.fn(),
+    getExtension: vi.fn(() => null),
   }) as unknown as WebGL2RenderingContext;
 
 describe('setupRenderLoop', () => {

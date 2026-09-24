@@ -59,4 +59,13 @@ describe('getBoxFillPolygon', () => {
     // result
     expect(points.length).toBeGreaterThan(4);
   });
+
+  it('should return the very same polygon for the same node object so downstream buffers can be reused', () => {
+    // mock
+    const node = rect({ cornerRadius: 4, rotation: 20 });
+
+    // result
+    expect(getBoxFillPolygon(node)).toBe(getBoxFillPolygon(node));
+    expect(getBoxFillPolygon({ ...node })).not.toBe(getBoxFillPolygon(node));
+  });
 });

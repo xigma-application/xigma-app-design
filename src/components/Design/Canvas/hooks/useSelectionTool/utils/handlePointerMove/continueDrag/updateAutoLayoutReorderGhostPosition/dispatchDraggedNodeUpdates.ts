@@ -1,11 +1,12 @@
 // store
 import { selectImageEditor, selectNodes } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
+import { updateNodes } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
 import { TDragState, TNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
+import { TUpdateNodesPayload } from 'store/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
@@ -17,14 +18,13 @@ import { resyncGroupAutoLayoutAncestors } from '../../../handlePointerUp/resyncG
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { translateFillsCrop } from 'components/Design/Canvas/utils/translateFillsCrop';
 
-const updateDraggedNodeOrigin = (
-  dispatch: AppDispatch,
+const getDraggedNodeUpdate = (
   nodes: Record<string, TSceneNode>,
   id: string,
   origin: TNodeOrigin,
   deltaX: number,
   deltaY: number,
-): void => {
+): TUpdateNodesPayload[number] => {
   const node = nodes[id];
   const geometryChanges = getGeometryDeltaChanges(origin, deltaX, deltaY);
   const imageEditor = selectImageEditor(store.getState());
@@ -36,7 +36,7 @@ const updateDraggedNodeOrigin = (
         )
       : {};
 
-  dispatch(updateNode({ changes: { ...geometryChanges, ...cropChanges }, id }));
+  return { changes: { ...geometryChanges, ...cropChanges }, id };
 };
 
 const dispatchNodeOriginUpdates = (
@@ -49,11 +49,13 @@ const dispatchNodeOriginUpdates = (
 ): void => {
   const nodes = selectNodes(store.getState());
 
-  Object.entries(nodeOrigins).forEach(([id, origin]) => {
-    if (!snapshots?.has(id) && !excludedIds.has(id)) {
-      updateDraggedNodeOrigin(dispatch, nodes, id, origin, deltaX, deltaY);
-    }
-  });
+  const updates = Object.entries(nodeOrigins)
+    .filter(([id]) => !snapshots?.has(id) && !excludedIds.has(id))
+    .map(([id, origin]) => getDraggedNodeUpdate(nodes, id, origin, deltaX, deltaY));
+
+  if (updates.length > 0) {
+    dispatch(updateNodes(updates));
+  }
 };
 
 export const dispatchDraggedNodeUpdates = (

@@ -1,5 +1,6 @@
 // utils
 import { bindTarget } from './bindTarget';
+import { drawBatchedSceneNodes } from './drawBatchedSceneNodes';
 import { drawLeafNode } from '../drawLeafNode';
 import { getGridTrackAffordanceDragSceneNodes } from '../getGridTrackAffordanceDragSceneNodes';
 import { getHoistedDragIds } from './getHoistedDragIds';
@@ -14,6 +15,8 @@ import { markNodeDrawnOverGlassBackdrop } from './markNodeDrawnOverGlassBackdrop
 import { releaseGlassBackdrop } from './releaseGlassBackdrop';
 import { renderHoistedIds } from './renderHoistedIds';
 import { renderIds } from './renderIds';
+import { sweepFaceBuffers } from 'utils/canvas/faceBufferCache/sweepFaceBuffers';
+import { sweepRectChunks } from 'utils/canvas/drawRectBatch/sweepRectChunks';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -50,7 +53,7 @@ export const drawSceneNodes = (
         getNodeBackgroundBlur(node) > 0,
     )
   ) {
-    sceneNodes.forEach((node) => paintLeaf(node));
+    drawBatchedSceneNodes(context, sceneNodes, nodesById, refs, paintLeaf);
   } else {
     const { gl, imageContext } = context;
     const sceneNodeById = new Map(sceneNodes.map((node) => [node.id, node]));
@@ -74,4 +77,7 @@ export const drawSceneNodes = (
     bindTarget(renderer, null);
     releaseGlassBackdrop(renderer);
   }
+
+  sweepRectChunks(context.gl);
+  sweepFaceBuffers(context.gl);
 };

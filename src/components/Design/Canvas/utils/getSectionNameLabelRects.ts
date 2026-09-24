@@ -17,28 +17,37 @@ export type TSectionNameLabelRect = {
   y: number;
 };
 
+const rectsBySource = new WeakMap<TSceneNode[], { rects: TSectionNameLabelRect[]; zoom: number }>();
+
 export const getSectionNameLabelRects = (nodes: TSceneNode[], zoom: number): TSectionNameLabelRect[] => {
-  const rects: TSectionNameLabelRect[] = [];
+  const cached = rectsBySource.get(nodes);
 
-  nodes.forEach((node) => {
-    if (node.type === NodeType.section && node.name.length > 0) {
-      const badge = getSectionNameLabelBadgeRect(node, zoom);
+  if (!cached || cached.zoom !== zoom) {
+    const rects: TSectionNameLabelRect[] = [];
 
-      if (badge) {
-        const padding = FRAME_NAME_LABEL_HIT_PADDING_PX / zoom;
+    nodes.forEach((node) => {
+      if (node.type === NodeType.section && node.name.length > 0) {
+        const badge = getSectionNameLabelBadgeRect(node, zoom);
 
-        rects.push({
-          height: badge.height + padding * 2,
-          nodeId: node.id,
-          width: badge.width + padding * 2,
-          x: badge.x - padding,
-          y: badge.y - padding,
-        });
+        if (badge) {
+          const padding = FRAME_NAME_LABEL_HIT_PADDING_PX / zoom;
+
+          rects.push({
+            height: badge.height + padding * 2,
+            nodeId: node.id,
+            width: badge.width + padding * 2,
+            x: badge.x - padding,
+            y: badge.y - padding,
+          });
+        }
       }
-    }
-  });
+    });
+    rectsBySource.set(nodes, { rects, zoom });
 
-  return rects;
+    return rects;
+  }
+
+  return cached.rects;
 };
 
 export const isPointInSectionNameLabelRect = (point: TPoint, rect: TSectionNameLabelRect): boolean =>

@@ -7,6 +7,6 @@ export type TFrameNameLabelCacheEntry = {
   zoom: number;
 };
 
-export const FRAME_NAME_LABEL_CACHE_MAX_ENTRIES = 256;
+export const FRAME_NAME_LABEL_CACHE_MAX_ENTRIES = 8192;
 
 export const frameNameLabelCache = new Map<string, TFrameNameLabelCacheEntry>();

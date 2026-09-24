@@ -93,4 +93,29 @@ describe('getSectionNameLabelBadgeRect', () => {
     // result
     expect(getSectionNameLabelBadgeRect(buildSection({ name: '' }), 1)).toBeNull();
   });
+
+  it('should return the very same badge for the same node object and zoom, and rebuild it for another zoom', () => {
+    // mock
+    const node = {
+      childIds: [],
+      fill: '#444444',
+      height: 100,
+      id: 's',
+      name: 'Memo',
+      parentId: null,
+      rotation: 0,
+      type: 'section',
+      width: 200,
+      x: 0,
+      y: 0,
+    } as unknown as TSectionNode;
+
+    // before
+    const first = getSectionNameLabelBadgeRect(node, 1);
+
+    // result
+    expect(getSectionNameLabelBadgeRect(node, 1)).toBe(first);
+    expect(getSectionNameLabelBadgeRect(node, 2)).not.toBe(first);
+    expect(getSectionNameLabelBadgeRect({ ...node }, 1)).not.toBe(first);
+  });
 });

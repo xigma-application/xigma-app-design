@@ -6,6 +6,7 @@ import { TMatchedChainAxis } from './types';
 
 // utils
 import { getEdges } from '../../../getDistanceGuides/getEdges';
+import { isChainCandidateMatch } from './isChainCandidateMatch';
 
 export type TChainLink = {
   candidate: TEqualSpacingCandidate;
@@ -30,13 +31,13 @@ export const pickNextChainLink = (
     if (!used.has(candidate)) {
       const edges = getEdges(candidate.bounds);
       const metrics = getAxisEdges(edges, axis);
-      const sameSize =
-        Math.abs(metrics.length - activeMetrics.length) <= sizeToleranceWorldUnits &&
-        Math.abs(metrics.breadth - activeMetrics.breadth) <= sizeToleranceWorldUnits;
-      const centred = Math.abs(metrics.centre - activeMetrics.centre) <= centreToleranceWorldUnits;
       const distance = sign === -1 ? cursorMetrics.near - metrics.far : metrics.near - cursorMetrics.far;
 
-      if (sameSize && centred && distance > 0 && distance < pickedDistance) {
+      if (
+        isChainCandidateMatch(metrics, activeMetrics, sizeToleranceWorldUnits, centreToleranceWorldUnits) &&
+        distance > 0 &&
+        distance < pickedDistance
+      ) {
         picked = { candidate, edges };
         pickedDistance = distance;
       }

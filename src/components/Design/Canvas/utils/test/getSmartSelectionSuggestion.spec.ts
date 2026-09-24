@@ -70,3 +70,28 @@ describe('getSmartSelectionSuggestion', () => {
     expect(getSmartSelectionSuggestion(nodes, VIEWPORT, {})?.type).toBe('grid-append');
   });
 });
+
+describe('getSmartSelectionSuggestion caching and limits', () => {
+  it('should hand back the very same suggestion for the same nodes, nodes record and zoom, and recompute when any changes', () => {
+    // mock
+    const nodes = [rect('cache-a', 0, 0), rect('cache-b', 90, 0), rect('cache-c', 230, 0)];
+    const nodesById = {};
+
+    // before
+    const first = getSmartSelectionSuggestion(nodes, VIEWPORT, nodesById);
+
+    // result
+    expect(first?.type).toBe('equalize');
+    expect(getSmartSelectionSuggestion(nodes, { x: 30, y: 30, zoom: 1 }, nodesById)).toBe(first);
+    expect(getSmartSelectionSuggestion(nodes, { x: 0, y: 0, zoom: 2 }, nodesById)).not.toBe(first);
+    expect(getSmartSelectionSuggestion(nodes, { x: 0, y: 0, zoom: 2 }, {})).not.toBe(first);
+  });
+
+  it('should not suggest anything for a selection larger than the limit, however uneven it is', () => {
+    // mock
+    const nodes = Array.from({ length: 301 }, (_, index) => rect(`big${index}`, index * 90 + (index % 2) * 7, 0));
+
+    // result
+    expect(getSmartSelectionSuggestion(nodes, VIEWPORT, {})).toBeNull();
+  });
+});

@@ -9,15 +9,19 @@ export const getBakedVectorEditingNodes = (
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
 ): Record<string, TSceneNode> => {
-  const bakedNodes = { ...nodes };
+  if (vectorEditingNodeIds.length > 0) {
+    const bakedNodes = { ...nodes };
 
-  vectorEditingNodeIds.forEach((nodeId) => {
-    const editingNode = getVectorEditingNode(nodes, nodeId);
+    vectorEditingNodeIds.forEach((nodeId) => {
+      const editingNode = getVectorEditingNode(nodes, nodeId);
 
-    if (editingNode) {
-      bakedNodes[nodeId] = getRenderedVectorNode(editingNode);
-    }
-  });
+      if (editingNode) {
+        bakedNodes[nodeId] = getRenderedVectorNode(editingNode);
+      }
+    });
 
-  return bakedNodes;
+    return bakedNodes;
+  }
+
+  return nodes;
 };

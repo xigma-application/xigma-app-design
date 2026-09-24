@@ -93,7 +93,7 @@ describe('drawBoxLeafNode', () => {
     expect(getBoxFillPolygonMock).toHaveBeenCalledWith(node);
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [{ color: '#fff', opacity: 25, type: 'solid' }],
@@ -123,7 +123,7 @@ describe('drawBoxLeafNode', () => {
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       1,
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [{ color: '#222222', opacity: 100, type: 'solid' }],
@@ -133,7 +133,7 @@ describe('drawBoxLeafNode', () => {
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       2,
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [{ color: '#111111', opacity: 100, type: 'solid' }],
@@ -169,7 +169,7 @@ describe('drawBoxLeafNode', () => {
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       1,
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [bottomFill],
@@ -179,7 +179,7 @@ describe('drawBoxLeafNode', () => {
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       2,
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [topFill],
@@ -216,7 +216,7 @@ describe('drawBoxLeafNode', () => {
     expect(resolvePatternSourceTileMock).toHaveBeenCalledWith(context, 'source-1', nodesById, pathOutlineStyles, refs, editingPathId, 0);
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [pattern],
@@ -263,7 +263,7 @@ describe('drawBoxLeafNode', () => {
     );
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [pattern],
@@ -321,7 +321,15 @@ describe('drawBoxLeafNode', () => {
 
     // result
     expect(resolvePatternSourceTileMock).not.toHaveBeenCalled();
-    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(context, null, null, [[{ x: 0, y: 0 }]], [pattern], [null], DEFAULT_BOX_ROTATION);
+    expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
+      context,
+      expect.any(Object),
+      null,
+      [[{ x: 0, y: 0 }]],
+      [pattern],
+      [null],
+      DEFAULT_BOX_ROTATION,
+    );
   });
 
   it('should pass the node’s own rotation, center, and unrotated local bounds through as boxRotation, so a rotated pattern fill can stay attached to the shape', () => {
@@ -335,7 +343,7 @@ describe('drawBoxLeafNode', () => {
     // result
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [[{ x: 0, y: 0 }]],
       [{ color: '#fff', opacity: 100, type: 'solid' }],

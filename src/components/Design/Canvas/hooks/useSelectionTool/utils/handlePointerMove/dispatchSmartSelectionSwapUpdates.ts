@@ -1,5 +1,5 @@
 // store
-import { updateNode } from 'store/design/slice';
+import { updateNodes } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
@@ -10,6 +10,31 @@ import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeome
 import { getReorderedSwapPositions } from 'components/Design/Canvas/utils/getReorderedSwapPositions';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 
+const dispatchNonEmptyUpdates = (dispatch: AppDispatch, updates: Parameters<typeof updateNodes>[0]): void => {
+  if (updates.length > 0) {
+    dispatch(updateNodes(updates));
+  }
+};
+
+const getSwapUpdates = (
+  dragState: TSmartSelectionSwapDragState,
+  draggedId: string | null,
+  positions: ReturnType<typeof getReorderedSwapPositions>,
+  draggedDeltaX: number,
+  draggedDeltaY: number,
+): Parameters<typeof updateNodes>[0] =>
+  dragState.slots.flatMap(({ id, bounds }) => {
+    if (id !== null) {
+      const isDragged = id === draggedId;
+      const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
+      const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
+
+      return [{ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }];
+    }
+
+    return [];
+  });
+
 export const dispatchSmartSelectionSwapUpdates = (
   dispatch: AppDispatch,
   dragState: TSmartSelectionSwapDragState,
@@ -19,15 +44,8 @@ export const dispatchSmartSelectionSwapUpdates = (
   scheduleThrottledDispatch(dragState.dispatchThrottle, () => {
     const draggedId = dragState.slots[dragState.fromIndex].id;
     const positions = getReorderedSwapPositions(dragState.slots, dragState.fromIndex, dragState.targetIndex);
+    const updates = getSwapUpdates(dragState, draggedId, positions, draggedDeltaX, draggedDeltaY);
 
-    dragState.slots.forEach(({ id, bounds }) => {
-      if (id !== null) {
-        const isDragged = id === draggedId;
-        const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
-        const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
-
-        dispatch(updateNode({ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }));
-      }
-    });
+    dispatchNonEmptyUpdates(dispatch, updates);
   });
 };

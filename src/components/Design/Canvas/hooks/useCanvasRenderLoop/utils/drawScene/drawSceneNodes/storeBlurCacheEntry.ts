@@ -1,16 +1,11 @@
 // types
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
-import { TBlurCacheEntry, TScissorRect } from './types';
+import { TScissorRect } from './types';
 
 // utils
-import { BLUR_CACHE_MAX_ENTRIES, blurCaches } from './blurCaches';
+import { BLUR_CACHE_BYTES_PER_PIXEL, blurCaches } from './blurCaches';
 import { deleteBlurCacheEntry } from './deleteBlurCacheEntry';
-
-const evictOldestBlurCacheEntry = (gl: WebGL2RenderingContext, cache: Map<string, TBlurCacheEntry>): void => {
-  if (cache.size >= BLUR_CACHE_MAX_ENTRIES) {
-    deleteBlurCacheEntry(gl, cache.keys().next().value as string);
-  }
-};
+import { evictBlurCacheEntries } from './evictBlurCacheEntries';
 
 export const storeBlurCacheEntry = (
   gl: WebGL2RenderingContext,
@@ -26,7 +21,7 @@ export const storeBlurCacheEntry = (
 
   blurCaches.set(gl, cache);
   deleteBlurCacheEntry(gl, nodeId);
-  evictOldestBlurCacheEntry(gl, cache);
+  evictBlurCacheEntries(gl, cache, rect.width * rect.height * BLUR_CACHE_BYTES_PER_PIXEL);
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rect.width, rect.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

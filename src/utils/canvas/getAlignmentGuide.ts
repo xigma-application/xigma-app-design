@@ -7,25 +7,29 @@ export type TPointAlignmentMatch = {
   vertical: TPoint | null;
 };
 
-type TClosestMatch = { distance: number; point: TPoint } | null;
+export const getAlignmentGuide = (point: TPoint, candidates: TPoint[], toleranceWorldUnits: number): TPointAlignmentMatch => {
+  let horizontal: TPoint | null = null;
+  let horizontalDistance = Infinity;
+  let vertical: TPoint | null = null;
+  let verticalDistance = Infinity;
 
-const getClosestMatch = (current: TClosestMatch, candidate: TPoint, distance: number, toleranceWorldUnits: number): TClosestMatch => {
-  if (distance <= toleranceWorldUnits && (!current || distance < current.distance)) {
-    return { distance, point: candidate };
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+    const distanceY = Math.abs(candidate.y - point.y);
+    const distanceX = Math.abs(candidate.x - point.x);
+
+    if (distanceY <= toleranceWorldUnits && distanceY < horizontalDistance) {
+      horizontal = candidate;
+      horizontalDistance = distanceY;
+    }
+
+    if (distanceX <= toleranceWorldUnits && distanceX < verticalDistance) {
+      vertical = candidate;
+      verticalDistance = distanceX;
+    }
   }
 
-  return current;
-};
+  const snappedPoint: TPoint = { x: vertical ? vertical.x : point.x, y: horizontal ? horizontal.y : point.y };
 
-export const getAlignmentGuide = (point: TPoint, candidates: TPoint[], toleranceWorldUnits: number): TPointAlignmentMatch => {
-  const { horizontal, vertical } = candidates.reduce(
-    (acc, candidate) => ({
-      horizontal: getClosestMatch(acc.horizontal, candidate, Math.abs(candidate.y - point.y), toleranceWorldUnits),
-      vertical: getClosestMatch(acc.vertical, candidate, Math.abs(candidate.x - point.x), toleranceWorldUnits),
-    }),
-    { horizontal: null as TClosestMatch, vertical: null as TClosestMatch },
-  );
-  const snappedPoint: TPoint = { x: vertical ? vertical.point.x : point.x, y: horizontal ? horizontal.point.y : point.y };
-
-  return { horizontal: horizontal?.point ?? null, point: snappedPoint, vertical: vertical?.point ?? null };
+  return { horizontal, point: snappedPoint, vertical };
 };

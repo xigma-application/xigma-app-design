@@ -21,6 +21,7 @@ export type TFrameNameLabelRect = {
 };
 
 const rectCache = new WeakMap<TFrameNode, { rect: TFrameNameLabelRect | null; zoom: number }>();
+const rectsBySource = new WeakMap<TSceneNode[], { rects: TFrameNameLabelRect[]; zoom: number }>();
 
 const buildFrameNameLabelRect = (node: TFrameNode, zoom: number): TFrameNameLabelRect | null => {
   const fontSize = FRAME_NAME_LABEL_FONT_SIZE_PX / zoom;
@@ -43,20 +44,17 @@ const buildFrameNameLabelRect = (node: TFrameNode, zoom: number): TFrameNameLabe
 const getCachedFrameNameLabelRect = (node: TFrameNode, zoom: number): TFrameNameLabelRect | null => {
   const cached = rectCache.get(node);
 
-  if (cached && cached.zoom === zoom) {
-    return cached.rect;
+  if (!cached || cached.zoom !== zoom) {
+    const rect = buildFrameNameLabelRect(node, zoom);
+    rectCache.set(node, { rect, zoom });
+
+    return rect;
   }
 
-  const rect = buildFrameNameLabelRect(node, zoom);
-
-  rectCache.set(node, { rect, zoom });
-
-  return rect;
+  return cached.rect;
 };
 
-export const getFrameNameLabelRects = (nodes: TSceneNode[], zoom: number): TFrameNameLabelRect[] => {
-  const rects: TFrameNameLabelRect[] = [];
-
+const collectFrameNameLabelRects = (nodes: TSceneNode[], zoom: number, rects: TFrameNameLabelRect[]): void => {
   nodes.forEach((node) => {
     if (node.type === NodeType.frame && node.name.length > 0) {
       const rect = getCachedFrameNameLabelRect(node, zoom);
@@ -66,8 +64,21 @@ export const getFrameNameLabelRects = (nodes: TSceneNode[], zoom: number): TFram
       }
     }
   });
+};
 
-  return rects;
+export const getFrameNameLabelRects = (nodes: TSceneNode[], zoom: number): TFrameNameLabelRect[] => {
+  const cached = rectsBySource.get(nodes);
+
+  if (!cached || cached.zoom !== zoom) {
+    const rects: TFrameNameLabelRect[] = [];
+    collectFrameNameLabelRects(nodes, zoom, rects);
+
+    rectsBySource.set(nodes, { rects, zoom });
+
+    return rects;
+  }
+
+  return cached.rects;
 };
 
 export const isPointInFrameNameLabelRect = (point: TPoint, rect: TFrameNameLabelRect): boolean =>

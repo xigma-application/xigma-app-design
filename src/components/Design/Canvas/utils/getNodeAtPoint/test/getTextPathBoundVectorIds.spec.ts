@@ -69,3 +69,16 @@ describe('getTextPathBoundVectorIds', () => {
     expect(getTextPathBoundVectorIds([first, second])).toEqual(new Set(['vector-1']));
   });
 });
+
+describe('getTextPathBoundVectorIds caching', () => {
+  it('should return the very same set for the same node array', () => {
+    // mock
+    const nodes: TSceneNode[] = [];
+
+    // before
+    const first = getTextPathBoundVectorIds(nodes);
+
+    // result
+    expect(getTextPathBoundVectorIds(nodes)).toBe(first);
+  });
+});

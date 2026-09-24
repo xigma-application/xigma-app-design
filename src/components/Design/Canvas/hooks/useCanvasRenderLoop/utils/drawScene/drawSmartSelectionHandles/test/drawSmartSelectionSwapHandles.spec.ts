@@ -4,10 +4,12 @@ import { TSmartSelectionNode } from 'types/design/smartSelection/types';
 // utils
 import { drawSmartSelectionSwapHandles } from '../drawSmartSelectionSwapHandles';
 
-const drawSwapHandleDotMock = vi.fn();
+const drawSwapHandleDotsMock = vi.fn();
 const drawSwapHandleRingMock = vi.fn();
 
-vi.mock('../drawSwapHandleDot', () => ({ drawSwapHandleDot: (...args: unknown[]): void => drawSwapHandleDotMock(...args) }));
+vi.mock('../drawSwapHandleDots/drawSwapHandleDots', () => ({
+  drawSwapHandleDots: (...args: unknown[]): void => drawSwapHandleDotsMock(...args),
+}));
 vi.mock('../drawSwapHandleRing', () => ({ drawSwapHandleRing: (...args: unknown[]): void => drawSwapHandleRingMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -18,7 +20,7 @@ const node = (id: string, x: number, y: number): TSmartSelectionNode => ({ bound
 
 describe('drawSmartSelectionSwapHandles', () => {
   beforeEach(() => {
-    drawSwapHandleDotMock.mockClear();
+    drawSwapHandleDotsMock.mockClear();
     drawSwapHandleRingMock.mockClear();
   });
 
@@ -27,7 +29,7 @@ describe('drawSmartSelectionSwapHandles', () => {
 
     drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, null, 200, 200, IDENTITY_VIEWPORT);
 
-    expect(drawSwapHandleDotMock).not.toHaveBeenCalled();
+    expect(drawSwapHandleDotsMock).not.toHaveBeenCalled();
     expect(drawSwapHandleRingMock).toHaveBeenCalledTimes(2);
     expect(drawSwapHandleRingMock).toHaveBeenCalledWith(gl, program, buffer, 20, 20, false, 200, 200, IDENTITY_VIEWPORT);
   });
@@ -60,13 +62,21 @@ describe('drawSmartSelectionSwapHandles', () => {
     expect(drawSwapHandleRingMock).toHaveBeenNthCalledWith(2, gl, program, buffer, 120, 20, true, 200, 200, IDENTITY_VIEWPORT);
   });
 
-  it('should draw the bordered dot per node instead of the ring while the box is not active', () => {
+  it('should draw all the bordered dots in one batch instead of rings while the box is not active', () => {
     const layout = { gaps: [], nodes: [node('a', 0, 0), node('b', 100, 0)], type: 'row' as const };
 
     drawSmartSelectionSwapHandles(gl, program, buffer, layout, false, null, 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawSwapHandleRingMock).not.toHaveBeenCalled();
-    expect(drawSwapHandleDotMock).toHaveBeenCalledTimes(2);
-    expect(drawSwapHandleDotMock).toHaveBeenCalledWith(gl, program, buffer, 20, 20, 200, 200, IDENTITY_VIEWPORT);
+    expect(drawSwapHandleDotsMock).toHaveBeenCalledTimes(1);
+    expect(drawSwapHandleDotsMock).toHaveBeenCalledWith(gl, layout, 200, 200, IDENTITY_VIEWPORT);
+  });
+
+  it('should skip the ring of a node that is entirely off the canvas', () => {
+    const layout = { gaps: [], nodes: [node('a', 0, 0), node('b', 5000, 0)], type: 'row' as const };
+
+    drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, null, 200, 200, IDENTITY_VIEWPORT);
+
+    expect(drawSwapHandleRingMock).toHaveBeenCalledTimes(1);
   });
 });

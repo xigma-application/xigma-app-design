@@ -10,6 +10,7 @@ import { drawBoxEffects } from './drawBoxEffects';
 import { drawBoxPaints } from './drawBoxPaints';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { getBoxFillPolygon } from '../getBoxFillPolygon';
+import { getFaceBufferCache } from 'utils/canvas/faceBufferCache/getFaceBufferCache';
 
 export const drawBoxLeafNodeFill = (
   context: TDrawSceneContext,
@@ -36,6 +37,7 @@ export const drawBoxLeafNodeFill = (
       refs,
       editingPathId,
       patternSourceDepth,
+      getFaceBufferCache(gl),
     );
     drawBoxEffects(context, node, opacity, refs, EffectType.innerShadow);
   } else {

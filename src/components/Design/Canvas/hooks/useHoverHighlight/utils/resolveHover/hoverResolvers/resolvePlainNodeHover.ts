@@ -1,50 +1,54 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { THoverResolverContext, THoverResult } from '../types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getNodeAtPoint } from '../../../../../utils/getNodeAtPoint/getNodeAtPoint';
+import { getNodeValues } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getNodeValues';
 import { getTopLevelAncestor } from 'store/design/utils/nodeHierarchy/getTopLevelAncestor';
 import { isAncestorNode } from 'store/design/utils/nodeHierarchy/isAncestorNode';
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
 import { isPointOnFrameNameLabel } from '../../../../../utils/isPointOnFrameNameLabel';
 import { isSelectionInsideGroup } from '../../../../../utils/isSelectionInsideGroup';
 
-export const resolvePlainNodeHover = ({
-  isControlPressed,
-  leafNodes,
-  nodesById,
-  point,
-  selectedNodes,
-  viewport,
-}: THoverResolverContext): THoverResult => {
-  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true });
-  const frameLabelHit = Object.values(nodesById).find(
+const toHoverResult = (nodeId: string | null): THoverResult => ({ className: null, cursor: '', nodeId });
+
+const findFrameLabelHit = ({ nodesById, point, viewport }: THoverResolverContext): TSceneNode | undefined =>
+  getNodeValues(nodesById).find(
     (node) => node.type === NodeType.frame && isClickThroughFrame(node, nodesById) && isPointOnFrameNameLabel(point, node, viewport.zoom),
   );
 
-  if (!frameLabelHit) {
-    const hit = getNodeAtPoint(point, leafNodes, viewport, { clipNodesById: nodesById });
+const getPlainNodeId = (hit: TSceneNode, { isControlPressed, nodesById, selectedNodes }: THoverResolverContext): string => {
+  const ancestor = getTopLevelAncestor(hit, nodesById);
+  const isHitTargeted =
+    (hit.type === NodeType.frame && ancestor.type === NodeType.section) ||
+    isControlPressed ||
+    isClickThroughFrame(ancestor, nodesById) ||
+    isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById);
 
-    if (hit) {
-      const ancestor = getTopLevelAncestor(hit, nodesById);
-      const plainNodeId =
-        (hit.type === NodeType.frame && ancestor.type === NodeType.section) ||
-        isControlPressed ||
-        isClickThroughFrame(ancestor, nodesById) ||
-        isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById)
-          ? hit.id
-          : ancestor.id;
+  return isHitTargeted ? hit.id : ancestor.id;
+};
 
-      if (selectedHit && (plainNodeId === selectedHit.id || isAncestorNode(plainNodeId, selectedHit, nodesById))) {
-        return { className: null, cursor: '', nodeId: selectedHit.id };
-      }
+const resolveHitHover = (hit: TSceneNode, selectedHit: ReturnType<typeof getNodeAtPoint>, context: THoverResolverContext): THoverResult => {
+  const plainNodeId = getPlainNodeId(hit, context);
 
-      return { className: null, cursor: '', nodeId: plainNodeId };
-    }
-
-    return { className: null, cursor: '', nodeId: selectedHit?.id ?? null };
+  if (selectedHit && (plainNodeId === selectedHit.id || isAncestorNode(plainNodeId, selectedHit, context.nodesById))) {
+    return toHoverResult(selectedHit.id);
   }
 
-  return { className: null, cursor: '', nodeId: frameLabelHit.id };
+  return toHoverResult(plainNodeId);
+};
+
+export const resolvePlainNodeHover = (context: THoverResolverContext): THoverResult => {
+  const { leafNodes, nodesById, point, selectedNodes, viewport } = context;
+  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true });
+  const frameLabelHit = findFrameLabelHit(context);
+
+  if (!frameLabelHit) {
+    const hit = getNodeAtPoint(point, leafNodes, viewport, { clipNodesById: nodesById });
+    return hit ? resolveHitHover(hit, selectedHit, context) : toHoverResult(selectedHit?.id ?? null);
+  }
+
+  return toHoverResult(frameLabelHit.id);
 };

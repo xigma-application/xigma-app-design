@@ -35,3 +35,16 @@ describe('getNodesById', () => {
     expect(getNodesById([])).toEqual({});
   });
 });
+
+describe('getNodesById caching', () => {
+  it('should return the very same record for the same node array', () => {
+    // mock
+    const nodes = [buildNode('a')];
+
+    // before
+    const first = getNodesById(nodes);
+
+    // result
+    expect(getNodesById(nodes)).toBe(first);
+  });
+});

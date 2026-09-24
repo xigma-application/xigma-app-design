@@ -99,3 +99,20 @@ describe('getMarqueeCandidateNodes', () => {
     expect(getMarqueeCandidateNodes(['missing'], {})).toEqual([]);
   });
 });
+
+describe('getMarqueeCandidateNodes caching', () => {
+  it('should return the very same list for the same root order and nodes record, and rebuild otherwise', () => {
+    // mock
+    const rect = { id: 'cache-rect', parentId: null, type: 'rectangle', x: 0, y: 0 } as unknown as TSceneNode;
+    const rootOrder = ['cache-rect'];
+    const nodesById = { 'cache-rect': rect };
+
+    // before
+    const first = getMarqueeCandidateNodes(rootOrder, nodesById);
+
+    // result
+    expect(getMarqueeCandidateNodes(rootOrder, nodesById)).toBe(first);
+    expect(getMarqueeCandidateNodes(rootOrder, { ...nodesById })).not.toBe(first);
+    expect(getMarqueeCandidateNodes([...rootOrder], nodesById)).not.toBe(first);
+  });
+});

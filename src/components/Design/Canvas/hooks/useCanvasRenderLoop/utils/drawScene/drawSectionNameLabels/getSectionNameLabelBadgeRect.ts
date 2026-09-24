@@ -24,7 +24,11 @@ export type TSectionNameLabelBadgeRect = {
   y: number;
 };
 
-export const getSectionNameLabelBadgeRect = (node: TSectionNode, zoom: number): TSectionNameLabelBadgeRect | null => {
+type TBadgeMemo = { badge: TSectionNameLabelBadgeRect | null; zoom: number };
+
+const badgeByNode = new WeakMap<TSectionNode, TBadgeMemo>();
+
+const buildBadgeRect = (node: TSectionNode, zoom: number): TSectionNameLabelBadgeRect | null => {
   const fontSize = FRAME_NAME_LABEL_FONT_SIZE_PX / zoom;
   const paddingX = SECTION_NAME_LABEL_PADDING_X_PX / zoom;
   const paddingY = SECTION_NAME_LABEL_PADDING_Y_PX / zoom;
@@ -43,4 +47,17 @@ export const getSectionNameLabelBadgeRect = (node: TSectionNode, zoom: number): 
   }
 
   return null;
+};
+
+export const getSectionNameLabelBadgeRect = (node: TSectionNode, zoom: number): TSectionNameLabelBadgeRect | null => {
+  const cached = badgeByNode.get(node);
+
+  if (!cached || cached.zoom !== zoom) {
+    const badge = buildBadgeRect(node, zoom);
+    badgeByNode.set(node, { badge, zoom });
+
+    return badge;
+  }
+
+  return cached.badge;
 };

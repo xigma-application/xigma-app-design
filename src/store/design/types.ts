@@ -2,7 +2,7 @@
 import { ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
-import { TComment, TSceneNode, TViewport } from 'types/design/types';
+import { TComment, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 import {
   TGridSectionHighlight,
   TGridTrackModeMenuRequest,
@@ -136,6 +136,8 @@ export type TDesignSnapshot = {
   pages: Record<string, TDesignPage>;
   panelGridTrackSelection?: TGridTrackSelection | null;
 };
+
+export type TUpdateNodesPayload = { changes: TSceneNodeChanges; id: string }[];
 
 export type TReorderPayload = {
   fromIndex: number;

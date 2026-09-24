@@ -124,4 +124,68 @@ describe('drawNoiseShape', () => {
     expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_duo' }, 1);
     expect(gl.uniform4f).toHaveBeenCalledWith({ name: 'u_secondaryColor' }, 0, 1, 0, 0.3);
   });
+
+  it('should draw straight over the fill shape without a mask when the node has no stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const release = vi.fn();
+    const context = {
+      buffer: {},
+      canvasHeight: 1200,
+      canvasWidth: 1000,
+      gl,
+      imageContext: { noiseProgram: {}, renderTargetPool: { release } } as unknown as TImageRenderContext,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDrawSceneContext;
+
+    // action
+    drawNoiseShape(context, node, createEffect(EffectType.noise), 1);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_useMask' }, 0);
+    expect(gl.bindTexture).not.toHaveBeenCalled();
+    expect(release).not.toHaveBeenCalled();
+  });
+
+  it('should sample the stroke-aware mask and release it when the node has a stroke', () => {
+    // mock
+    const gl = createGlMock();
+    const release = vi.fn();
+    const context = {
+      buffer: {},
+      canvasHeight: 1200,
+      canvasWidth: 1000,
+      gl,
+      imageContext: { noiseProgram: {}, renderTargetPool: { release } } as unknown as TImageRenderContext,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDrawSceneContext;
+
+    // action
+    drawNoiseShape(context, { ...node, strokeColor: '#000000', strokeWidth: 2 }, createEffect(EffectType.noise), 1);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_useMask' }, 1);
+    expect(gl.bindTexture).toHaveBeenCalledWith(gl.TEXTURE_2D, { tag: 'mask' });
+    expect(gl.uniform2f).toHaveBeenCalledWith({ name: 'u_maskSize' }, 2000, 2400);
+    expect(release).toHaveBeenCalledWith({ height: 2400, texture: { tag: 'mask' }, width: 2000 });
+  });
+
+  it('should switch the shader to multi-color grain for a multi noise', () => {
+    // mock
+    const gl = createGlMock();
+    const context = {
+      buffer: {},
+      canvasHeight: 1200,
+      canvasWidth: 1000,
+      gl,
+      imageContext: { noiseProgram: {}, renderTargetPool: { release: vi.fn() } } as unknown as TImageRenderContext,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    } as unknown as TDrawSceneContext;
+
+    // action
+    drawNoiseShape(context, node, { ...createEffect(EffectType.noise), noiseType: EffectNoiseType.multi }, 1);
+
+    // result
+    expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'u_multi' }, 1);
+  });
 });

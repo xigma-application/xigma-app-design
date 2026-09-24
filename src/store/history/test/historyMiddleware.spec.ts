@@ -20,6 +20,7 @@ import {
   toggleNodeLocked,
   ungroupNodes,
   updateGuide,
+  updateNodes,
 } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { DEFAULT_PAINT } from 'store/design/constants';
@@ -387,5 +388,30 @@ describe('historyMiddleware', () => {
       { axis: 'x', id: expect.any(String), position: 10 },
       { axis: 'y', id: expect.any(String), position: 20 },
     ]);
+  });
+
+  it('should undo a batched updateNodes as a single step', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(100, 0);
+
+    // before
+    store.dispatch(
+      updateNodes([
+        { changes: { x: 40 }, id: idA },
+        { changes: { x: 140 }, id: idB },
+      ]),
+    );
+
+    const moved = selectActivePage(store.getState()).nodes as Record<string, { x: number }>;
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    const restored = selectActivePage(store.getState()).nodes as Record<string, { x: number }>;
+
+    expect([moved[idA].x, moved[idB].x]).toEqual([40, 140]);
+    expect([restored[idA].x, restored[idB].x]).toEqual([0, 100]);
   });
 });

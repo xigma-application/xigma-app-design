@@ -1,5 +1,5 @@
 // store
-import { getIsDescendantOfMovedNodes } from 'store/design/utils/handleMoveNodes/getIsDescendantOfMovedNodes';
+import { getIsDescendantOfMovedIdSet } from 'store/design/utils/handleMoveNodes/getIsDescendantOfMovedIdSet';
 import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -9,6 +9,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getContactGuideCandidate } from '../../../../utils/getContactGuideCandidate';
 import { getStrokedRotatedNodeBounds } from '../../../../utils/getStrokedRotatedNodeBounds';
 import { getShapeContactGuides, isContactGuideEligibleNode } from '../../../../utils/getShapeContactGuides';
 import { isAutoLayoutDropTargetActive } from 'utils/canvas/signals/isAutoLayoutDropTargetActive';
@@ -31,6 +32,14 @@ const getActiveContactNodeIds = (event: PointerEvent, selectionRefs: TSelectionT
 
 const isEligibleNode = (node: TSceneNode | undefined): node is TSceneNode => node !== undefined && isContactGuideEligibleNode(node);
 
+const getContactCandidates = (
+  nodes: Record<string, TSceneNode>,
+  activeIds: ReadonlySet<string>,
+): ReturnType<typeof getContactGuideCandidate>[] =>
+  Object.values(nodes)
+    .filter((node) => !getIsDescendantOfMovedIdSet(node.id, activeIds, nodes) && isContactGuideEligibleNode(node))
+    .map(getContactGuideCandidate);
+
 export const resolveShapeContactGuides = (event: PointerEvent, canvasRefs: TCanvasRefs, selectionRefs: TSelectionToolRefs): void => {
   if (isAutoLayoutDropTargetActive(canvasRefs)) {
     canvasRefs.transform.contactGuidesRef.current = null;
@@ -41,10 +50,8 @@ export const resolveShapeContactGuides = (event: PointerEvent, canvasRefs: TCanv
       .filter(isEligibleNode);
 
     if (activeNodes.length > 0) {
-      const activeIds = activeNodes.map((node) => node.id);
-      const candidates = Object.values(nodes)
-        .filter((node) => !getIsDescendantOfMovedNodes(node.id, activeIds, nodes) && isContactGuideEligibleNode(node))
-        .map((node) => ({ bounds: getStrokedRotatedNodeBounds(node), id: node.id }));
+      const activeIds = new Set(activeNodes.map((node) => node.id));
+      const candidates = getContactCandidates(nodes, activeIds);
       const guides = activeNodes.flatMap((activeNode) => getShapeContactGuides(getStrokedRotatedNodeBounds(activeNode), candidates));
 
       canvasRefs.transform.contactGuidesRef.current = guides.length > 0 ? guides : null;

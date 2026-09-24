@@ -1,5 +1,5 @@
 // others
-import { ALIGNMENT_SNAP_TOLERANCE_PX, EQUAL_SPACING_SNAP_TOLERANCE_PX } from 'constant/canvas';
+import { ALIGNMENT_SNAP_TOLERANCE_PX, EQUAL_SPACING_SNAP_TOLERANCE_PX, SMART_SELECTION_SUGGESTION_MAX_NODES } from 'constant/canvas';
 
 // types
 import { TSceneNode, TViewport } from 'types/design/types';
@@ -14,12 +14,26 @@ import { getSmartSelectionGridEqualizeSuggestion } from './getSmartSelectionGrid
 import { getSmartSelectionLayout } from './getSmartSelectionLayout/getSmartSelectionLayout';
 import { isEligibleForSmartSelection } from './getSmartSelectionLayout/isEligibleForSmartSelection';
 
-export const getSmartSelectionSuggestion = (
+type TSuggestionCache = {
+  nodes: TSceneNode[];
+  nodesById: Record<string, TSceneNode>;
+  suggestion: TSmartSelectionSuggestion | null;
+  zoom: number;
+};
+
+let cache: TSuggestionCache | null = null;
+
+const computeSmartSelectionSuggestion = (
   nodes: TSceneNode[],
   viewport: TViewport,
   nodesById: Record<string, TSceneNode>,
 ): TSmartSelectionSuggestion | null => {
-  if (nodes.length >= 3 && isEligibleForSmartSelection(nodes, nodesById) && getSmartSelectionLayout(nodes, viewport, nodesById) === null) {
+  if (
+    nodes.length >= 3 &&
+    nodes.length <= SMART_SELECTION_SUGGESTION_MAX_NODES &&
+    isEligibleForSmartSelection(nodes, nodesById) &&
+    getSmartSelectionLayout(nodes, viewport, nodesById) === null
+  ) {
     const bounds = getAxisAlignedNodeBounds(nodes);
     const alignmentTolerance = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
     const gapTolerance = EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom;
@@ -33,4 +47,19 @@ export const getSmartSelectionSuggestion = (
   }
 
   return null;
+};
+
+export const getSmartSelectionSuggestion = (
+  nodes: TSceneNode[],
+  viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
+): TSmartSelectionSuggestion | null => {
+  if (!cache || cache.nodes !== nodes || cache.nodesById !== nodesById || cache.zoom !== viewport.zoom) {
+    const suggestion = computeSmartSelectionSuggestion(nodes, viewport, nodesById);
+    cache = { nodes, nodesById, suggestion, zoom: viewport.zoom };
+
+    return suggestion;
+  }
+
+  return cache.suggestion;
 };

@@ -40,7 +40,9 @@ const createGlCanvasRef = (): TGlCanvasRef => {
     ONE_MINUS_SRC_ALPHA: 771,
     SRC_ALPHA: 770,
     attachShader: vi.fn(),
+    bindFramebuffer: vi.fn(),
     blendFunc: vi.fn(),
+    blendFuncSeparate: vi.fn(),
     clear,
     clearColor,
     colorMask,
@@ -49,14 +51,18 @@ const createGlCanvasRef = (): TGlCanvasRef => {
     createProgram: vi.fn(() => ({})),
     createShader: vi.fn(() => ({})),
     deleteBuffer: vi.fn(),
+    deleteFramebuffer: vi.fn(),
     deleteProgram,
     enable: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
+    getExtension: vi.fn(() => null),
+    getParameter: vi.fn(() => new Int32Array([0, 0, 1, 1])),
     getProgramParameter: vi.fn(() => true),
     getShaderParameter: vi.fn(() => true),
     getUniformLocation: vi.fn(() => ({})),
     linkProgram: vi.fn(),
     shaderSource: vi.fn(),
+    viewport: vi.fn(),
   } as unknown as WebGL2RenderingContext);
 
   return { canvasRef: { current: canvas }, clear, clearColor, colorMask, deleteProgram };

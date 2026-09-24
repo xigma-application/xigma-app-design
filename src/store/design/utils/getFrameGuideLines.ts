@@ -4,9 +4,14 @@ import { TGuideLine } from 'types/design/guides/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getChangedNodes } from './getChangedNodes';
 import { getFrameGuideSpan } from './getFrameGuideSpan';
 
-export const getFrameGuideLines = (nodes: Record<string, TSceneNode>): TGuideLine[] => {
+type TNodesById = Record<string, TSceneNode>;
+
+let memo: { lines: TGuideLine[]; nodes: TNodesById } | null = null;
+
+const buildFrameGuideLines = (nodes: TNodesById): TGuideLine[] => {
   const lines: TGuideLine[] = [];
 
   Object.values(nodes).forEach((node) => {
@@ -24,4 +29,25 @@ export const getFrameGuideLines = (nodes: Record<string, TSceneNode>): TGuideLin
   });
 
   return lines;
+};
+
+const isUnaffectedByChanges = (previous: TNodesById, nodes: TNodesById): boolean => {
+  const changed = getChangedNodes(previous, nodes);
+  return !changed.all && !changed.nodes.some((node) => node.type === NodeType.frame);
+};
+
+const rebuildFrameGuideLines = (nodes: TNodesById): TGuideLine[] => {
+  const lines = buildFrameGuideLines(nodes);
+  memo = { lines, nodes };
+
+  return lines;
+};
+
+export const getFrameGuideLines = (nodes: TNodesById): TGuideLine[] => {
+  if (!memo || (memo.nodes !== nodes && !isUnaffectedByChanges(memo.nodes, nodes))) {
+    return rebuildFrameGuideLines(nodes);
+  }
+
+  memo = { lines: memo.lines, nodes };
+  return memo.lines;
 };

@@ -35,6 +35,7 @@ import {
   TStartTextEditPayload,
   TTextEditSelection,
   TUpdateGuidePayload,
+  TUpdateNodesPayload,
 } from './types';
 import { BlendMode, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState, TAutoLayoutPaddingSide } from 'utils/canvas/autoLayoutPadding/types';
@@ -88,6 +89,7 @@ import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateGuide } from './utils/handleUpdateGuide';
 import { handleUpdateNode } from './utils/handleUpdateNode/handleUpdateNode';
+import { handleUpdateNodes } from './utils/handleUpdateNodes/handleUpdateNodes';
 import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 
@@ -332,6 +334,7 @@ const designSlice = createSlice({
       handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
     updateGuide: (state, action: PayloadAction<TUpdateGuidePayload>) => handleUpdateGuide(state, action.payload),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
+    updateNodes: (state, action: PayloadAction<TUpdateNodesPayload>) => handleUpdateNodes(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => handleUpdateTextEditContent(state, action.payload),
     updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
   },
@@ -413,6 +416,7 @@ export const {
   updateEditingTextBoxPathStartOffset,
   updateGuide,
   updateNode,
+  updateNodes,
   updateTextEditContent,
   updateTextEditSelection,
 } = designSlice.actions;

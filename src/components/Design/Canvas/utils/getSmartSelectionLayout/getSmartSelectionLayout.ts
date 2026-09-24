@@ -12,7 +12,16 @@ import { getHorizontalLayout } from './getHorizontalLayout';
 import { getVerticalLayout } from './getVerticalLayout';
 import { isEligibleForSmartSelection } from './isEligibleForSmartSelection';
 
-export const getSmartSelectionLayout = (
+type TLayoutCache = {
+  layout: TSmartSelectionLayout | null;
+  nodes: TSceneNode[];
+  nodesById: Record<string, TSceneNode>;
+  zoom: number;
+};
+
+let cache: TLayoutCache | null = null;
+
+const computeSmartSelectionLayout = (
   nodes: TSceneNode[],
   viewport: TViewport,
   nodesById: Record<string, TSceneNode>,
@@ -30,4 +39,19 @@ export const getSmartSelectionLayout = (
   }
 
   return null;
+};
+
+export const getSmartSelectionLayout = (
+  nodes: TSceneNode[],
+  viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
+): TSmartSelectionLayout | null => {
+  if (!cache || cache.nodes !== nodes || cache.nodesById !== nodesById || cache.zoom !== viewport.zoom) {
+    const layout = computeSmartSelectionLayout(nodes, viewport, nodesById);
+    cache = { layout, nodes, nodesById, zoom: viewport.zoom };
+
+    return layout;
+  }
+
+  return cache.layout;
 };

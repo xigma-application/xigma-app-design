@@ -2,11 +2,9 @@
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawShapeContactGuides } from '../drawShapeContactGuides';
 
-const drawLineMock = vi.fn();
-const drawXMarkerMock = vi.fn();
+const drawLineBatchMock = vi.fn();
 
-vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
-vi.mock('utils/canvas/drawXMarker', () => ({ drawXMarker: (...args: unknown[]): void => drawXMarkerMock(...args) }));
+vi.mock('utils/canvas/drawLineBatch', () => ({ drawLineBatch: (...args: unknown[]): void => drawLineBatchMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
@@ -15,8 +13,7 @@ const buffer = {} as WebGLBuffer;
 
 describe('drawShapeContactGuides', () => {
   beforeEach(() => {
-    drawLineMock.mockClear();
-    drawXMarkerMock.mockClear();
+    drawLineBatchMock.mockClear();
   });
 
   it('should draw nothing when there are no guides', () => {
@@ -27,11 +24,10 @@ describe('drawShapeContactGuides', () => {
     );
 
     // result
-    expect(drawLineMock).not.toHaveBeenCalled();
-    expect(drawXMarkerMock).not.toHaveBeenCalled();
+    expect(drawLineBatchMock).not.toHaveBeenCalled();
   });
 
-  it('should draw one line plus an X marker at each end of every guide', () => {
+  it('should batch every guide with an X marker at each end into a single draw', () => {
     // before
     drawShapeContactGuides(
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
@@ -48,34 +44,15 @@ describe('drawShapeContactGuides', () => {
     );
 
     // result
-    expect(drawLineMock).toHaveBeenCalledTimes(2);
-    expect(drawXMarkerMock).toHaveBeenCalledTimes(4);
-    expect(drawLineMock).toHaveBeenNthCalledWith(
-      1,
-      gl,
-      program,
-      buffer,
-      { x1: 100, x2: 100, y1: 0, y2: 100 },
-      '#cd7259',
-      1,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-    );
-    expect(drawXMarkerMock).toHaveBeenNthCalledWith(1, gl, program, buffer, { x: 100, y: 0 }, 2, '#cd7259', 1, 200, 150, IDENTITY_VIEWPORT);
-    expect(drawXMarkerMock).toHaveBeenNthCalledWith(
-      2,
-      gl,
-      program,
-      buffer,
-      { x: 100, y: 100 },
-      2,
-      '#cd7259',
-      1,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-    );
+    expect(drawLineBatchMock).toHaveBeenCalledTimes(1);
+
+    const [, , , segments, color, strokeWidth, canvasWidth, canvasHeight, viewport] = drawLineBatchMock.mock.calls[0];
+
+    expect(segments).toHaveLength(10);
+    expect(segments[0]).toEqual({ x1: 100, x2: 100, y1: 0, y2: 100 });
+    expect(segments[1]).toEqual({ x1: 98, x2: 102, y1: -2, y2: 2 });
+    expect(segments[3]).toEqual({ x1: 98, x2: 102, y1: 98, y2: 102 });
+    expect([color, strokeWidth, canvasWidth, canvasHeight, viewport]).toEqual(['#cd7259', 1, 200, 150, IDENTITY_VIEWPORT]);
   });
 
   it('should scale the stroke width and marker size down with zoom', () => {
@@ -86,8 +63,9 @@ describe('drawShapeContactGuides', () => {
     );
 
     // result
-    expect(drawLineMock.mock.calls[0][5]).toBe(0.5);
-    expect(drawXMarkerMock.mock.calls[0][4]).toBe(1);
-    expect(drawXMarkerMock.mock.calls[0][6]).toBe(0.5);
+    const [, , , segments, , strokeWidth] = drawLineBatchMock.mock.calls[0];
+
+    expect(strokeWidth).toBe(0.5);
+    expect(segments[1]).toEqual({ x1: -1, x2: 1, y1: -1, y2: 1 });
   });
 });

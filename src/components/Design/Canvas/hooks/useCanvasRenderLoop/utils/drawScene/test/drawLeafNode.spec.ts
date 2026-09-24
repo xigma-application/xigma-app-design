@@ -102,7 +102,7 @@ describe('drawLeafNode', () => {
     // result
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
@@ -130,7 +130,7 @@ describe('drawLeafNode', () => {
     // result — the fill is dimmed, but the stroke outline still draws at full opacity (not covered by this scope)
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.5),
@@ -155,7 +155,7 @@ describe('drawLeafNode', () => {
 
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(previewNode)],
       getScaledFillPaints(previewNode.fills, 1),
@@ -175,7 +175,7 @@ describe('drawLeafNode', () => {
     // result
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
@@ -202,7 +202,7 @@ describe('drawLeafNode', () => {
     // result
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 1),
@@ -237,7 +237,7 @@ describe('drawLeafNode', () => {
     // result
     expect(drawVectorFillGroupMock).toHaveBeenCalledWith(
       context,
-      null,
+      expect.any(Object),
       null,
       [getBoxFillPolygon(node as TRectangleNode)],
       getScaledFillPaints((node as TRectangleNode).fills, 0.25),

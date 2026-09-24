@@ -1635,3 +1635,228 @@ Glass (`applyGlassEffect`, gated by `getNodeGlass` in `renderNode` and the `draw
 `getIsolatedScissorRect`'s glass margin does not require `subtree` to resolve (unlike blur/texture, whose combined path needs every descendant to be measurable, `getIsolatedSubtree`): Glass never touches descendant pixels at all, it only samples the external backdrop, so a frame with an ordinary Text or Vector child — which makes `subtree` null and blocks the blur/texture path — must not also fall back to a full, unscissored capture for Glass. `getIsolatedScissorRect` has a second branch, gated on `isBox && glass` alone, that computes the glass-only margin directly off the node's own bounds.
 
 The backdrop capture is still the expensive part (`captureBackdropTexture`'s GPU copy forces a driver sync), and the render loop redraws the whole scene unconditionally on every `requestAnimationFrame` tick regardless of whether anything changed — so an idle canvas with a visible Glass shape paid that cost 60 times a second for no reason. `applyGlassEffect` now keeps a small per-node GPU cache (`glassCaches.ts`, a `WeakMap<gl, Map<nodeId, TGlassCacheEntry>>`, capped and LRU-evicted like the blur cache) of the warped-and-frosted result, and skips capture + the warp shader pass + the frost blur entirely on a hit, replacing them with one cheap `blitFramebuffer` (`blitGlassCacheEntry`, GPU-to-GPU, no driver sync) straight into the pooled `warped` target before the unchanged mask/composite step. The cache key (`getGlassCacheHit`) is `selectNodes(store.getState())`'s reference — the specific page's `nodes` dict, which Immer only gives a new reference when a node anywhere actually changes, and which stays referentially stable across a pure pan or zoom (those live on the page's separate `viewport` field) or across any unrelated redraw — plus the scissor rect's `width`/`height` (catches a zoom or geometry change, which resizes the rect). The rect's `x`/`y` are deliberately **not** compared: a pure pan moves the shape and everything behind it together, so the previously-captured content is still exactly correct, just needs to be blitted at the shape's new screen position — `blitGlassCacheEntry` always blits into the *current* rect's position regardless of where the entry was originally captured, so this works with no extra repositioning logic. `storeGlassCacheEntry` blits the freshly-rendered `warped` target's rect region **and the node-shape mask's** into two dedicated (non-pooled) textures+framebuffers sized to just that rect (`copyTargetRectToTexture`), mirroring `storeBlurCacheEntry`'s GPU-resource shape, so a hit skips the mask draw (a full-canvas clear plus a rounded-rect polygon built from `getRoundedRectPoints`) as well; on a miss the mask clear and paint are scissored to the same rect. `getTextWidth` is memoized per (font size, text) because hit-tests and label truncation call it on every pointer move.
+
+## Rect batching (flat scenes, 100k+ rectangles)
+
+Profiled with 25k/100k plain rectangles (with the `@xigma/utils` gpuTimer, `installGpuTimer` /
+`beginGpuFrame` / `beginGpuSection`, which is no longer hooked up: re-add those three calls in
+`useCanvasRenderLoop`, `startRenderLoop` and around `drawSceneNodes` in `drawScene` to time GPU frames again). Before this work each rectangle took the vector-fill path (stencil even-odd
+fan + cover quad, ~2 draw calls and a `bufferData` per node): 25k rects ran at ~640 ms/frame, and
+`stencilOp` alone was ~63% of the profile.
+
+- `drawSceneNodes`' *simple* branch (no mask / clipping frame / blend / blur / glass / texture in the
+  scene) calls `drawBatchedSceneNodes` instead of `paintLeaf` per node. The complex branch batches
+  too: `renderIds` gathers consecutive `isBatchableRenderRect` children (batchable shape, no real blend
+  mode, no drag-preview override, no tracked glass backdrop) into a run and draws it via
+  `renderRectRun`, so rects inside clipping frames / masks / effect-isolated subtrees also render as
+  chunks (measured: 25k rects inside a `clipContent` frame, 60 fps, ~39% busy).
+- A node is batchable when `isBatchableShape`: a `NodeType.rectangle` with a `fills` array of only solid,
+  non-blend paints, no stroke, no effects (corner radii and smoothing are allowed), or a full
+  `NodeType.ellipse` with a string `fill`, no stroke, no arc and no ratio hole. Verdict cached per node
+  object. `appendShapeTriangles` writes the geometry: square rectangles as quads (`appendRectangleQuads`),
+  rounded rectangles as a triangle fan over `getBoxFillPolygon` per solid fill (`appendRoundedRectFan`),
+  ellipses as a 64-segment fan (`appendEllipseFan`), all through `pushPolygonFan`. Rounded rectangles
+  and ellipses at 10k nodes went from 68 / 94 ms to one 60 fps frame. A rounded rectangle is
+  pixel-identical to the stencil path (e2e twin test); the edge of a stroked or arc ellipse still goes
+  through the regular path.
+- `utils/canvas/drawRectBatch/*` owns the GL side: one lazily-created program per context (per-vertex
+  colour, no stencil, `constant/webgl/rectBatch*ShaderSource`), interleaved `x,y,r,g,b,a` quads.
+- **Retained chunks**: runs of same-parent plain rects, at most `RECT_CHUNK_MAX_RECTS` (512) each,
+  are uploaded as static VBOs and kept in a per-context cache (`getRectChunkCache`). `acquireRectChunk`
+  reuses a chunk iff every node reference in the run is unchanged (Immer keeps untouched nodes) **and**
+  the parent chain's effective opacity (`baseOpacity`) is unchanged, so editing one rect rebuilds one
+  chunk. Chunks touched during a frame are kept; `drawSceneNodes` calls `sweepRectChunks` at the end
+  to delete the rest (that is the GC — there is no other place buffers are freed). The simple branch
+  also memoises its segment list on `sceneNodes`/`nodesById` identity (`getRectSegments`), touching
+  the chunks on a memo hit. Chunks outside the viewport are skipped by AABB (`drawRectChunk`).
+- Anything that is not a plain rect calls `paintLeaf`/`renderNode`, flushing the pending run first to
+  keep z-order. In the simple branch, while a drag preview override is active, plain rects go through
+  a per-frame dynamic batch (`pushRectangleToBatch`, CPU-culled) instead of retained chunks.
+- While a grid/auto-layout drag preview is active (`hasRectRenderOverrides`) retained chunks are
+  bypassed, because those refs rewrite node geometry/opacity per frame.
+- If the batch program fails to compile, `drawBatchedSceneNodes` falls back to `paintLeaf` per node.
+- Per-frame O(N) work removed from the hot path: `getVisibleRenderNodes`/`getNodeValues` memoise the
+  hidden-filter and `Object.values`, `getPreviewSceneNodes` returns the input when nothing is being
+  edited, `getBakedVectorEditingNodes` no longer spreads all nodes when nothing is vector-edited,
+  `getSelectionBounds` is a single loop (the old `Math.min(...spread)` was O(N) per frame in the
+  scrollbars loop and throws `RangeError` around 100k nodes).
+- Measured (headless Chromium, software GL, 1352×660): 25k rects 638 ms → 60 fps (main thread ~25%
+  busy); 125k rects 60 fps (~50% busy). Remaining known per-frame O(N): `getPathOutlineStyles`, the
+  layer passes that scan `filteredNodes` (frame/section labels, layout guides).
+
+## Interaction cost at 25k nodes (hover / drag)
+
+Measured on a flat 25k-rect grid in the dev server (Chromium, main-thread busy % per event stream).
+None of these change results — each is a memoisation or a hoisted invariant.
+
+- **Hover** (`resolveHover`): 82% → 31% busy. `getHoverLeafNodes` is memoised on the render-ordered array +
+  `nodesById` + Ctrl, which is what makes the downstream WeakMap memos hit: `getNodesById`,
+  `getTextPathBoundVectorIds`, `getFrameNameLabelRects` / `getSectionNameLabelRects` (also keyed by zoom),
+  and `getNodeValues` in `resolvePlainNodeHover`. `getNodeAtPoint` scans from the end with `findLastNode`
+  instead of copying and reversing the array. A miss (pointer between shapes) is still a linear scan.
+- **Selection reducer**: `dropTextPathGuides` scans every draft node only when a selected node is a path or
+  vector (the only types a text can be bound to); `handleSetSelection` uses a `Set` instead of `includes`;
+  `getMarqueeCandidateNodes` is memoised on `rootOrder` + `nodesById`.
+- **Smart guides during a move-drag**: `pickNextChainLink` used to scan and allocate `getEdges` for every
+  candidate at every link of the matched chain (47% of the drag). `walkMatchedChain` now filters candidates
+  once per walk with `getMatchingChainCandidates` (the size/centre predicate does not depend on the cursor).
+  `getAlignmentGuide` is a plain allocation-free loop. Guide lines and × markers are drawn in one call by
+  `drawLineBatch` (`getXMarkerSegments` turns a marker into two segments). `getShapeContactGuides` rejects
+  candidates with no edge pair within tolerance (`hasNearbyContactEdge`), candidates are cached per node
+  reference (`getContactGuideCandidate`), and the flattened alignment candidate points are cached per
+  `candidateShapes` array in `getDragAlignmentSnap`.
+- **Known remaining cost** (per pointer move, inherent to the shape of the store): iterating all nodes in
+  `resolveShapeContactGuides`, Immer copying the 25k-key `nodes` dictionary on every `updateNode`, and the
+  linear `getAlignmentGuide` loop over ~9×N candidate points. React and Immer figures in the dev server are
+  inflated by dev-only work (`jsxDEV`, prop diffing, freezing), so re-measure on a production build before
+  chasing them.
+
+## Effects cost at scale (shadows, noise, blur)
+
+Measured in the dev server at zoom 0.3 (rectangles 60x40 with one effect, frame interval in headless Chromium).
+None of these change the picture (pixel-diffed against the previous render; only the 1 px edge of a noise
+without stroke differs, see below).
+
+- **`gl.getParameter` was the hottest call.** Every offscreen effect (shadows, noise mask, isolated blend,
+  backdrop capture, pattern tiles, export) saved the framebuffer binding, viewport and four blend factors with
+  `getParameter`, each a synchronous round trip to the GPU process (84% of the main thread with 500 noise nodes).
+  `cacheGlState` (folder `utils/cacheGlState/`, installed with `cacheProgramLocations` in `getCachedGlContext`;
+  one file per concern: `createTrackedGlState`, `trackFramebuffer`, `trackViewport`, `trackBlendFunc`,
+  `serveTrackedParameters`) wraps `bindFramebuffer`,
+  `deleteFramebuffer`, `viewport`, `blendFunc` and `blendFuncSeparate` on the context, records what they set, and
+  serves `getParameter` for `FRAMEBUFFER_BINDING`, `VIEWPORT` and the four `BLEND_*` enums from that record
+  (everything else is forwarded). State changed through other entry points (`bindFramebuffer` with the read
+  target) is not tracked on purpose; do not add a second way of changing these four states outside the `gl` object.
+- **Shadow textures are cached, not re-rendered per frame.** `drawBoxDropShadow` / `drawBoxInnerShadow` used to
+  create two or three targets and run the blur passes for every node every frame. The blurred texture now comes
+  from `getCachedEffectTexture` (`utils/canvas/effectTextureCache/`): an LRU `Map` per context keyed by
+  `getBoxEffectTextureKey` (effect type, node width/height, all corner radii and smoothing, effect color, blur,
+  spread, x, y). Position, rotation and effect opacity are not in the key, so a moved, rotated or re-faded node
+  and every identical copy reuse one texture; `renderDropShadowTexture` / `renderInnerShadowTexture` build it on
+  a miss and the cache keeps only the texture (framebuffer and stencil are deleted). Budget: 128 MB of pixels,
+  oldest evicted first, the newest entry is always kept. 1000 shadowed rectangles went from 1.1 s to one 60 fps
+  frame, 10000 to about 170 ms.
+- **Noise without a stroke skips the mask target.** `hasNoiseStroke` decides; without a stroke `drawNoiseShape`
+  draws the noise straight over the fill polygon (`getBoxFillPolygon`) with `u_useMask = 0`. Measured against the masked path (twin node with a
+  hairline stroke): identical inside, different only on the 1 px outline (the default framebuffer is multisampled,
+  the mask target is not).
+- **Background blur is scissored to the node.** `getBackgroundBlurRect` (rotated bounds plus twice the radius plus
+  4 px, via `getDeviceScissorRect`) limits the backdrop copy, both blur passes, the mask clear and the composite;
+  an off-screen node is skipped. Pixel-identical to the full-canvas version. Roughly 10x cheaper per node.
+- **Layer blur cache is budgeted by bytes** (`evictBlurCacheEntries`: 4096 entries or 128 MB, least recently used
+  first) instead of 256 entries, which made a scene with more blurred nodes than that miss on every frame.
+- **Glass cache is budgeted by bytes too** (`evictGlassCacheEntries`: 4096 entries or 128 MB, counting the content
+  and mask textures), instead of 254 entries. 1000 glass nodes went from 504 ms to 37 ms per frame; the cache key
+  and hit logic are unchanged. Progressive blur cost is not changed.
+- e2e: `e2e/design/selection/effect-textures.spec.ts` (shadow follows a moved node, an edited effect is redrawn,
+  identical shadows share a texture but edit independently).
+- **Glass and background blur caches survive edits elsewhere.** The glass cache used to be valid only while the
+  `nodes` dictionary was the same object, so any edit anywhere (dragging one shape) invalidated every glass node.
+  `refreshGlassCacheEntry` now compares the entry's `nodesState` with the current one (`getChangedNodes`, memoised
+  for the last pair; more than 64 changed nodes means "everything changed") and keeps the entry when the node
+  itself is unchanged and no changed node (old and new version, rotated bounds grown by `getNodeChangeMargin`:
+  shadows, blur, texture radius, glass reach, stroke) overlaps the entry's device rect (`isGlassRectAffected`).
+  Background blur uses the same entry type under the key `getBackgroundBlurCacheKey(id)`: the blurred backdrop
+  and shape mask are stored once the rect was stable for two frames and composited with `compositeGlassCacheEntry`
+  on a hit. Measured with 200 nodes and one being dragged: glass 99 -> 23 ms, background blur 100 -> 21 ms; 1000
+  background blurs idle 16.6 ms, dragging one 30 ms. Known limit (shared with glass): a backdrop change that does
+  not touch the nodes dictionary (page background color, reordering roots) does not invalidate; zoom changes miss.
+- **Zoom no longer re-blurs every background blur.** While `isBlurZoomChanging` holds, `applyBackgroundBlur` stretches
+  the last unclipped cache entry of the same nodes state (`getStretchableGlassCacheEntry`, composited by
+  `compositeGlassCacheEntry`, which already scales by the raw rect ratio) instead of capturing and blurring; the
+  sharp blur is rendered again once the zoom settles (200 ms). 300 background blurs while zooming: 105 -> 17 ms.
+- **The Texture effect result is cached with the blur entry.** `paintIsolatedContent` now applies
+  `applyTextureEffect` before `storeBlurCacheEntry`, so a cache hit blits the finished (blurred and textured)
+  content and skips the texture pass; before, the texture pass ran on every frame for every node (46 -> 23 ms with
+  300 textured nodes, identical pixels for a fresh render and a cache hit).
+
+## Box fills, images and frame labels at scale
+
+Measured with 5000-8000 nodes (headless Chromium, software GL, zoom 0.1-1). Nothing here changes the picture (an 8000
+node image scene is pixel-identical before and after).
+
+- **Fill polygons and their GL buffers are reused.** `getBoxFillPolygon` returns the same array for the same node
+  object (`WeakMap` keyed by the Immer node). `drawBoxLeafNodeFill` passes `getFaceBufferCache(gl)` (a
+  `TrackedFaceBufferCache`, `utils/canvas/faceBufferCache/`) to `drawBoxPaints`, so `getOrCreateFaceBuffer` keeps one
+  persistent buffer per polygon instead of a `flatMap` + `Float32Array` + `bufferData` per fill per frame. The cache
+  is a `WeakMap` subclass that records which faces were read or written during the frame; `drawSceneNodes` calls
+  `sweepFaceBuffers(gl)` after `sweepRectChunks(gl)` and deletes the buffers that were not used (a nested call only
+  costs a rebuild, never a dead buffer, because swept entries leave the map). Only fills use it: the stroke ring
+  polygons are new arrays every frame and would create and delete a buffer per frame. 8000 image-filled rectangles
+  went from 57 to 46 ms per frame, gradient rectangles at 5000 are 25 ms.
+- **Frame name labels** (`getFrameNameLabelVertices`) are cached per frame node and zoom; the cap was 256 entries, so
+  with more frames than that every label was rebuilt (glyph quads, text width) on every frame (56% of the frame with
+  5000 frames). The cap is 8192 now: 5000 frames idle 56 -> 27 ms. Zoom still rebuilds them (their size depends on it).
+- Measured and fine, unchanged: 8000 text nodes are one 60 fps frame (edit of one text ~50 ms, the shared Immer cost);
+  2000 image-filled rectangles are one 60 fps frame.
+- Known remaining cost: an image fill still costs two draws per node (stencil fan + image quad), a full-framebuffer
+  stencil clear, 13 uniform uploads and four `texParameteri`; batching image rectangles with per-vertex UVs would
+  remove that but has to handle every scale mode, crop, flip and adjustment. 
+
+## Box fills, images and frame labels at scale
+
+Measured with 5000-8000 nodes (headless Chromium, software GL, zoom 0.1-1). Nothing here changes the picture (an 8000
+node image scene is pixel-identical before and after).
+
+- **Fill polygons and their GL buffers are reused.** `getBoxFillPolygon` returns the same array for the same node
+  object (`WeakMap` keyed by the Immer node). `drawBoxLeafNodeFill` passes `getFaceBufferCache(gl)` (a
+  `TrackedFaceBufferCache`, `utils/canvas/faceBufferCache/`) to `drawBoxPaints`, so `getOrCreateFaceBuffer` keeps one
+  persistent buffer per polygon instead of a `flatMap` + `Float32Array` + `bufferData` per fill per frame. The cache
+  is a `WeakMap` subclass that records which faces were read or written during the frame; `drawSceneNodes` calls
+  `sweepFaceBuffers(gl)` after `sweepRectChunks(gl)` and deletes the buffers that were not used (a nested call only
+  costs a rebuild, never a dead buffer, because swept entries leave the map). Only fills use it: the stroke ring
+  polygons are new arrays every frame and would create and delete a buffer per frame. 8000 image-filled rectangles
+  went from 57 to 46 ms per frame, gradient rectangles at 5000 are 25 ms.
+- **Frame name labels** (`getFrameNameLabelVertices`) are cached per frame node and zoom; the cap was 256 entries, so
+  with more frames than that every label was rebuilt (glyph quads, text width) on every frame (56% of the frame with
+  5000 frames). The cap is 8192 now: 5000 frames idle 56 -> 27 ms. Zoom still rebuilds them (their size depends on it).
+- Measured and fine, unchanged: 8000 text nodes are one 60 fps frame (edit of one text ~50 ms, the shared Immer cost);
+  2000 image-filled rectangles are one 60 fps frame.
+- Known remaining cost: an image fill still costs two draws per node (stencil fan + image quad), a full-framebuffer
+  stencil clear, 13 uniform uploads and four `texParameteri`; batching image rectangles with per-vertex UVs would
+  remove that but has to handle every scale mode, crop, flip and adjustment. 
+
+- **Stroked rectangles are batched too.** `hasBatchableStroke` accepts a rectangle whose strokes are only solid,
+  non-blend paints (no legacy `strokeColor`), a uniform ring (`getRingMode` = `uniform`, all sides, no dash) thinner
+  than half the smaller side, and outer/inner outlines with the same point count. `appendRectangleStroke` writes the
+  ring from `getUniformRingPolygons` as a quad strip (`pushRingStrip`, paints bottom first, alpha = paint opacity x node
+  opacity) right after the fills, so z-order with the neighbouring nodes is the same as the stencil path; chunk bounds
+  and the dynamic-batch culling grow by the stroke width (`getShapeStrokeReach`). Inside / center / outside,
+  rounded, rotated, translucent and multi-paint strokes are pixel-identical to the regular path (e2e twin test).
+  10000 stroked rectangles: ~140 -> 16.8 ms. Dashed, gradient, brush/dynamic/profile, per-side and legacy
+  `strokeColor` strokes keep the regular path.
+- **Ellipse and ring geometry** got cheaper on the regular path: `getEllipsePoints` reads a cached cos/sin table per
+  segment count and `getRingVertices` writes one preallocated array (a stroked ellipse re-computed both for the fill,
+  the outer and the inner ring every frame): 4000 stroked ellipses 136 -> 69 ms.
+
+- **Section name labels are cached.** `getSectionNameLabelBadgeRect` is memoised per section node object and zoom, and
+  `getSectionNameLabelVertices` keeps the glyph vertices per badge and zoom, so a section no longer re-truncates its
+  name and rebuilds glyph quads on every frame (3000 sections idle: ~100 -> ~25 ms). The badge rect and the text are still
+  two draw calls per section.
+- **Not done, on purpose: batching image fills with per-vertex UVs.** 2000 image-filled rectangles are already one 60 fps
+  frame and 8000 cost ~46 ms, so it only pays off for thousands of images. It would need a textured batch program,
+  per-texture runs, cover/fit/tile/crop UV maths, and invalidation when an image finishes loading (the size cache
+  fills asynchronously and the segment and verdict caches are keyed by node identity only).
+
+## Editing one node in a huge scene (production build)
+
+Measured on a `NODE_ENV=production` Vite server (production React and JSX runtime; the dev server is about 2x slower
+for the same edit because of `jsxDEV` and prop diffing), headless Chromium, software GL. 25000 rectangles, one
+`updateNode` per frame: 59 ms (dev) / 32.5 ms (prod) -> 20.5 ms (prod) after this section. 100000 rectangles: idle and
+zoom 16.7 ms, edit 79 ms. 10000 nodes in 100 clipping frames: edit and move-frame 17 ms.
+
+- **Selectors that walked every node after every change are incremental.** `getChangedNodes(from, to)`
+  (`store/design/utils/getChangedNodes.ts`) diffs two `nodes` dictionaries by reference (one `for..in`, the key count
+  of a state is remembered so removals are detected without a second pass, more than 64 changed nodes returns
+  `all: true` and stops early, the last pair is memoised). `getFrameGuideLines` and `resolveMaskConnectorRoles` return
+  the previous result object when no changed node (old or new version) is a frame / a group or mask;
+  `getNodeValues` and `getIncrementalRenderOrderedNodes` (behind `selectRenderOrderedNodes`) copy the previous array and
+  patch the replaced nodes by index (the index map is built lazily once) unless a node was added or removed, or, for the
+  render order, the root order or a container changed. Anything they cannot prove falls back to the old full
+  computation, so the results are identical.
+- **Chunks are 512 rectangles** (`RECT_CHUNK_MAX_RECTS`, was 4096). Editing one rectangle rebuilds its whole chunk
+  (`pushPolygonFan` was ~12% of the edit with rounded rectangles); the draw call count stays trivial (25000 rectangles
+  = 49 chunks).
+- What is left in the profile is Immer copying the 25000-key dictionary (~29%), the reference diff itself (~9%) and
+  React rendering of the layers tree.
+

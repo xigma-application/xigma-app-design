@@ -2,6 +2,7 @@
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
 // utils
+import { BLUR_CACHE_MAX_ENTRIES } from '../blurCaches';
 import { blitBlurCacheEntry } from '../blitBlurCacheEntry';
 import { deleteBlurCacheEntry } from '../deleteBlurCacheEntry';
 import { getBlurCacheEntry } from '../getBlurCacheEntry';
@@ -93,7 +94,7 @@ describe('blur cache eviction', () => {
     // mock
     const gl = createGl();
 
-    for (let i = 0; i < 256; i += 1) {
+    for (let i = 0; i < BLUR_CACHE_MAX_ENTRIES; i += 1) {
       storeBlurCacheEntry(gl, `lru-${i}`, 'key', source, rect, 1);
     }
 
@@ -105,5 +106,21 @@ describe('blur cache eviction', () => {
     expect(getBlurCacheEntry(gl, 'lru-0', 'key')).not.toBeNull();
     expect(getBlurCacheEntry(gl, 'lru-1', 'key')).toBeNull();
     expect(getBlurCacheEntry(gl, 'lru-new', 'key')).not.toBeNull();
+  });
+
+  it('should evict the oldest entries when the stored pixels exceed the memory budget', () => {
+    // mock
+    const gl = createGl();
+    const large = { height: 2000, width: 4000, x: 0, y: 0 };
+
+    // action — each entry is 32 MB, the budget is 128 MB
+    for (let i = 0; i < 5; i += 1) {
+      storeBlurCacheEntry(gl, `big-${i}`, 'key', source, large, 1);
+    }
+
+    // result
+    expect(getBlurCacheEntry(gl, 'big-0', 'key')).toBeNull();
+    expect(getBlurCacheEntry(gl, 'big-1', 'key')).not.toBeNull();
+    expect(getBlurCacheEntry(gl, 'big-4', 'key')).not.toBeNull();
   });
 });

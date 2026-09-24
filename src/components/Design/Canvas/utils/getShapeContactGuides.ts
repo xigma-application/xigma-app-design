@@ -7,6 +7,7 @@ import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { hasNearbyContactEdge } from './hasNearbyContactEdge';
 import { isAxisAlignedRotation } from './isAxisAlignedRotation';
 
 export type TShapeContactGuide = {
@@ -113,4 +114,4 @@ const getPairContactGuides = (active: TDraftRect, candidate: TContactGuideCandid
 };
 
 export const getShapeContactGuides = (active: TDraftRect, candidates: TContactGuideCandidate[]): TShapeContactGuide[] =>
-  candidates.flatMap((candidate) => getPairContactGuides(active, candidate));
+  candidates.flatMap((candidate) => (hasNearbyContactEdge(active, candidate.bounds) ? getPairContactGuides(active, candidate) : []));

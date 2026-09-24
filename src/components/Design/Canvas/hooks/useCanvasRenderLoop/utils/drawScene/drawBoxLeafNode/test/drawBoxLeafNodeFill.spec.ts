@@ -4,6 +4,7 @@ import { TDrawSceneContext } from '../../types';
 import { TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
+import { getFaceBufferCache } from 'utils/canvas/faceBufferCache/getFaceBufferCache';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawBoxLeafNodeFill } from '../drawBoxLeafNodeFill';
 
@@ -52,7 +53,19 @@ describe('drawBoxLeafNodeFill', () => {
     drawBoxLeafNodeFill(context, node, 0.5, {}, new Map(), refs, null, 0);
 
     // result
-    expect(drawBoxPaintsMock).toHaveBeenCalledWith(context, node, node.fills, [[{ x: 0, y: 0 }]], 0.5, {}, expect.any(Map), refs, null, 0);
+    expect(drawBoxPaintsMock).toHaveBeenCalledWith(
+      context,
+      node,
+      node.fills,
+      [[{ x: 0, y: 0 }]],
+      0.5,
+      {},
+      expect.any(Map),
+      refs,
+      null,
+      0,
+      getFaceBufferCache(context.gl),
+    );
     expect(drawRectMock).not.toHaveBeenCalled();
   });
 

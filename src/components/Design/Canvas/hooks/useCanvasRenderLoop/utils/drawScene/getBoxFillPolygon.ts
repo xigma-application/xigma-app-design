@@ -9,9 +9,20 @@ import { ROUNDED_RECT_CORNER_SEGMENTS } from 'constant/canvas';
 import { getRoundedRectPoints } from 'utils/canvas/shapes/getRoundedRectPoints';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-export const getBoxFillPolygon = (node: TFrameNode | TRectangleNode): TPoint[] => {
-  const center = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-  const points = getRoundedRectPoints({ ...node, cornerRadius: node.cornerRadius ?? 0 }, ROUNDED_RECT_CORNER_SEGMENTS);
+const polygonByNode = new WeakMap<TFrameNode | TRectangleNode, TPoint[]>();
 
-  return points.map((point) => rotatePoint(point, center, node.rotation));
+export const getBoxFillPolygon = (node: TFrameNode | TRectangleNode): TPoint[] => {
+  const cached = polygonByNode.get(node);
+
+  if (!cached) {
+    const center = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const points = getRoundedRectPoints({ ...node, cornerRadius: node.cornerRadius ?? 0 }, ROUNDED_RECT_CORNER_SEGMENTS);
+    const polygon = points.map((point) => rotatePoint(point, center, node.rotation));
+
+    polygonByNode.set(node, polygon);
+
+    return polygon;
+  }
+
+  return cached;
 };

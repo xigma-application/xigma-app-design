@@ -88,13 +88,26 @@ with nothing cached across calls.
 
 ## Stage 3 — Performance: large documents (many shapes)
 
-Goal: handle documents with tens of thousands of shapes as smoothly as Figma does. Today the app
-already slows down well before that — clicking, hovering, and rendering all check or draw every
-shape on the page, even the ones far outside the visible area, so everything gets slower the more
-shapes a document has. Not yet started (2026-09-03).
+Goal: handle documents with tens of thousands of shapes as smoothly as Figma does. Worked on in
+2026-09 — write-up in `.claude/docs/canvas-rendering-pipeline.md`.
 
-- [ ] Skip shapes that are off-screen instead of drawing them every frame.
-- [ ] Speed up click/hover detection so it stays fast no matter how many shapes are on the page.
+**Done.** Thousands of rectangles, rounded rectangles, stroked rectangles and ellipses are now drawn
+together instead of one by one: 25,000 shapes draw at a smooth 60 fps and 100,000 still do. Hover,
+selection, dragging and smart guides no longer slow down as the page grows. Effects got much faster
+too — shadows, noise, blur, background blur, glass and texture on hundreds or thousands of shapes
+are now close to free, also while dragging or zooming. Editing one shape in a 25,000-shape file
+takes about 20 ms in a production build.
+
+**Still to do.**
+
+- [ ] Editing one shape in a very big file (20+ ms at 25,000 shapes) — the remaining cost is how the
+      document is stored; needs a bigger rework, not a quick fix.
+- [ ] Images: 8,000 image-filled shapes take about 46 ms per frame (2,000 are fine). Drawing them
+      together would help, but needs care so images that finish loading later still show up.
+- [ ] Frames with a fill or stroke, and their name labels while zooming, are still drawn one by one.
+- [ ] Glass and background blur do not notice a changed page background or layer order until the
+      shape under them is edited.
+- [ ] Skip shapes that are off-screen entirely, and keep click/hover detection fast at any size.
 
 ## Related
 

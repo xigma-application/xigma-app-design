@@ -103,3 +103,31 @@ describe('isPointInSectionNameLabelRect', () => {
     expect(isPointInSectionNameLabelRect({ x: 30, y: -31 }, rect)).toBe(false);
   });
 });
+
+describe('getSectionNameLabelRects caching', () => {
+  beforeEach(() => {
+    getSectionNameLabelBadgeRectMock.mockReturnValue({ height: 10, width: 20, x: 0, y: 0 });
+  });
+
+  it('should return the very same rect list for the same node array and zoom', () => {
+    // mock
+    const nodes = [buildSection()];
+
+    // before
+    const first = getSectionNameLabelRects(nodes, 1);
+
+    // result
+    expect(getSectionNameLabelRects(nodes, 1)).toBe(first);
+  });
+
+  it('should rebuild the list when the zoom changes', () => {
+    // mock
+    const nodes = [buildSection()];
+
+    // before
+    const first = getSectionNameLabelRects(nodes, 1);
+
+    // result
+    expect(getSectionNameLabelRects(nodes, 2)).not.toBe(first);
+  });
+});

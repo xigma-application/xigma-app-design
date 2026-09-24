@@ -96,10 +96,12 @@ import { drawVectorWidthPointsPreview } from './drawVectorWidthPointsPreview/dra
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getEraseAwareNodesById } from './getEraseAwareNodesById';
 import { getErasePreviewNodes } from './getErasePreviewNodes';
+import { getNodeValues } from './getNodeValues';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { getPreviewSceneNodes } from './getPreviewSceneNodes';
 import { getShapeBuilderPreviewFaces } from './getShapeBuilderPreviewFaces';
 import { getVisibleHoveredNode } from './getVisibleHoveredNode';
+import { getVisibleRenderNodes } from './getVisibleRenderNodes';
 import { getVisibleSelectedNodes } from './getVisibleSelectedNodes';
 
 export const drawScene = (
@@ -129,7 +131,7 @@ export const drawScene = (
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const shapeBuilderPreviewFaces = getShapeBuilderPreviewFaces(refs);
   const penActiveVertexId = selectPenActiveVertexId(state);
-  const filteredNodes = selectRenderOrderedNodes(state).filter((node) => !node.hidden);
+  const filteredNodes = getVisibleRenderNodes(selectRenderOrderedNodes(state));
   const previewSceneNodes = getPreviewSceneNodes(filteredNodes, editingNodeId, refs);
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
@@ -140,7 +142,7 @@ export const drawScene = (
   const gridTrackSelection = selectGridTrackSelection(state);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
-  const valuesNodeByid = Object.values(nodesById);
+  const valuesNodeByid = getNodeValues(nodesById);
   const editingPathNode = editingTextBox?.pathId ? nodesById[editingTextBox.pathId] : undefined;
   const rootOrder = state.design.pages[state.design.activePageId].rootOrder;
   const pathId = editingTextBox?.pathId;

@@ -1,0 +1,2 @@
+export const DOT_CIRCLE_SEGMENTS = 12;
+export const SCREEN_CELL_STRIDE = 100003;

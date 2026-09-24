@@ -124,3 +124,19 @@ describe('getDragAlignmentSnap', () => {
     expect(result).toEqual({ delta: { x: 5, y: 7 }, guide: null });
   });
 });
+
+describe('getDragAlignmentSnap caching', () => {
+  it('should give the same result for repeated moves over the same candidate shapes', () => {
+    // mock
+    const nodes = { a: rect('a', 0, 0), b: rect('b', 300, 0) };
+    const state = dragState({ a: { x: 0, y: 0 } }, getCandidateShapes(nodes, ['a']));
+
+    // before
+    const first = getDragAlignmentSnap(nodes, state, { x: 297, y: 40 }, 5);
+    const second = getDragAlignmentSnap(nodes, state, { x: 297, y: 40 }, 5);
+
+    // result
+    expect(second).toEqual(first);
+    expect(first.delta.x).toBe(300);
+  });
+});

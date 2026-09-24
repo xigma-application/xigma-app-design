@@ -1,6 +1,7 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TBoxPaintPhase, TDrawSceneContext } from '../types';
+import { TRectChunk } from 'utils/canvas/drawRectBatch/types';
 import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TSceneNode } from 'types/design/types';
 
@@ -57,3 +58,5 @@ export type TGlassCacheEntry = {
   validTop: number;
   width: number;
 };
+
+export type TRectSegment = { chunk: TRectChunk } | { node: TSceneNode };
