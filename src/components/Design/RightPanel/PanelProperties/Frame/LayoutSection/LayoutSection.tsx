@@ -12,11 +12,15 @@ import ColumnPadding from './ColumnPadding/ColumnPadding';
 import LayoutSectionButtons from './LayoutSectionButtons';
 import { UITools } from 'shared';
 
+// hooks
+import { useIsMixedLayoutSelection } from './hooks/useIsMixedLayoutSelection';
+
 // others
 import { translationNameSpace } from './constants';
 
 const LayoutSection: FC = () => {
   const { t } = useTranslation();
+  const isMixedLayout = useIsMixedLayoutSelection();
 
   return (
     <UITools.Section component={<LayoutSectionButtons />} e2eValue="layout" label={t(`${translationNameSpace}.label`)}>
@@ -24,8 +28,8 @@ const LayoutSection: FC = () => {
       <ColumnDimensions />
       <ColumnGridChildSpan />
       <ColumnMinMaxDimensions />
-      <ColumnAlignmentLayout />
-      <ColumnPadding />
+      {!isMixedLayout && <ColumnAlignmentLayout />}
+      {!isMixedLayout && <ColumnPadding />}
       <ColumnClipContent />
     </UITools.Section>
   );
