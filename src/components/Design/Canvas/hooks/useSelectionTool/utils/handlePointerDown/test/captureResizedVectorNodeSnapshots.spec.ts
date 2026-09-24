@@ -44,7 +44,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const canvasRefs = createCanvasRefs();
 
     // before
-    captureResizedVectorNodeSnapshots([frameNode], canvasRefs);
+    captureResizedVectorNodeSnapshots([frameNode], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
@@ -56,7 +56,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const node = buildVectorNode();
 
     // before
-    captureResizedVectorNodeSnapshots([node], canvasRefs);
+    captureResizedVectorNodeSnapshots([node], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
@@ -70,7 +70,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const node = buildVectorNode({ rotation: 45 });
 
     // before
-    captureResizedVectorNodeSnapshots([node], canvasRefs);
+    captureResizedVectorNodeSnapshots([node], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
@@ -85,7 +85,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const otherNode = buildVectorNode({ id: 'vector-2' });
 
     // before
-    captureResizedVectorNodeSnapshots([rotatedNode, otherNode], canvasRefs);
+    captureResizedVectorNodeSnapshots([rotatedNode, otherNode], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')?.rotation).toBe(0);
@@ -98,7 +98,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const node = buildVectorNode({ widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } } });
 
     // before
-    captureResizedVectorNodeSnapshots([node], canvasRefs);
+    captureResizedVectorNodeSnapshots([node], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
@@ -110,10 +110,23 @@ describe('captureResizedVectorNodeSnapshots', () => {
     const vectorNode = buildVectorNode();
 
     // before
-    captureResizedVectorNodeSnapshots([frameNode, vectorNode], canvasRefs);
+    captureResizedVectorNodeSnapshots([frameNode, vectorNode], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.size).toBe(1);
     expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.has('vector-1')).toBe(true);
+  });
+
+  it('should skip a vector inside a boolean so the boolean follows it live', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const node = { ...buildVectorNode(), parentId: 'boolean-1' };
+    const nodes = { 'boolean-1': { id: 'boolean-1', parentId: null, type: NodeType.boolean } as unknown as TSceneNode, [node.id]: node };
+
+    // before
+    captureResizedVectorNodeSnapshots([node], canvasRefs, nodes);
+
+    // result
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
   });
 });

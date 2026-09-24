@@ -136,3 +136,146 @@ test('Flatten from the Boolean menu turns a Union into a single vector without c
 
   expect(after.equals(before)).toBe(true);
 });
+
+test('dragging a Union that contains a vector moves the vector part live instead of leaving it behind until release', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-vector-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+  await page.keyboard.press('Alt+Shift+F');
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+
+  const vectorOnlyArea = { height: 30, width: 30, x: 840, y: 340 };
+  const emptyArea = { height: 30, width: 30, x: 1300, y: 700 };
+  const blank = await page.screenshot({ clip: emptyArea });
+
+  await page.mouse.move(790, 290);
+  await page.mouse.down();
+  await page.mouse.move(1090, 590, { steps: 5 });
+
+  const duringDrag = await page.screenshot({ clip: vectorOnlyArea });
+
+  await page.mouse.up();
+
+  expect(duringDrag.equals(blank)).toBe(true);
+});
+
+test('a selected unfilled vector inside a Union can be grabbed anywhere within its frame and moves on its own', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-vector-grab');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+  await page.keyboard.press('Alt+Shift+F');
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
+
+    store.dispatch(updateNode({ changes: { filledFaceKeys: [] }, id: rootOrder[1] }));
+    store.dispatch(setSelection(rootOrder));
+    store.dispatch(booleanNodes('union'));
+    store.dispatch(setSelection([rootOrder[1]]));
+  });
+
+  await page.mouse.move(850, 350);
+  await page.mouse.down();
+  await page.mouse.move(950, 450, { steps: 5 });
+  await page.mouse.up();
+
+  const positions = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, selectedIds } = pages[activePageId];
+    const rectangle = Object.values(nodes).find((node) => node.type === 'rectangle') as { x: number; y: number };
+
+    return { rectangle: { x: rectangle.x, y: rectangle.y }, selectedType: nodes[selectedIds[0]].type };
+  });
+
+  expect(positions.selectedType).toBe('vector');
+  expect(positions.rectangle).toEqual({ x: 700, y: 200 });
+});
+
+test('an unfilled vector dropped into a Union is drawn as its stroke shape in the Union fill, not in its own stroke color', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-stroke-shape');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 900, 380);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNodes } = await import('/src/store/design/slice.ts');
+    const vertices = {
+      a: { id: 'a', x: 950, y: 500 },
+      b: { id: 'b', x: 1150, y: 500 },
+      c: { id: 'c', x: 1150, y: 700 },
+      d: { id: 'd', x: 950, y: 700 },
+    };
+    const segments = Object.fromEntries(
+      [
+        ['a', 'b'],
+        ['b', 'c'],
+        ['c', 'd'],
+        ['d', 'a'],
+      ].map(([startId, endId], index) => [`s${index}`, { endId, id: `s${index}`, startId, tangentEnd: null, tangentStart: null }]),
+    );
+
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            defaultFill: null,
+            filledFaceKeys: [],
+            id: 'outlineVector',
+            name: 'Vector',
+            parentId: null,
+            rotation: 0,
+            segments,
+            strokeColor: '#ff0000',
+            strokeWidth: 6,
+            type: 'vector',
+            vertexHandleModes: {},
+            vertices,
+          },
+        ],
+        rootIds: ['outlineVector'],
+      } as never),
+    );
+  });
+  await designPage.click(1500, 900);
+
+  const edge = { height: 6, width: 40, x: 1030, y: 497 };
+  const before = await page.screenshot({ clip: edge });
+
+  await designPage.click(800, 290);
+  await page.getByLabel('Boolean operations', { exact: true }).click();
+  await designPage.click(1500, 900);
+
+  const rows = page.locator('[class*="LayersTree"]').first().locator('[class*="Tree__row_"]');
+
+  await dragRowOnto(rows.filter({ hasText: 'Vector' }), rows.filter({ hasText: 'Union' }));
+  await expect(rows).toHaveCount(1);
+  await designPage.click(1500, 900);
+
+  const after = await page.screenshot({ clip: edge });
+  const rectangleFill = await page.screenshot({ clip: { height: 6, width: 40, x: 780, y: 287 } });
+
+  expect(after.equals(before)).toBe(false);
+  expect(after.equals(rectangleFill)).toBe(true);
+});

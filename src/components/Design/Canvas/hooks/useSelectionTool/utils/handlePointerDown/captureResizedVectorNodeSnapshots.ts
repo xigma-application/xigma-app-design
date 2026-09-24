@@ -1,14 +1,18 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TVectorNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { captureVectorNodeResizeSnapshot } from 'utils/canvas/drawVectorNode/captureVectorNodeResizeSnapshot';
+import { isSnapshotVectorNode } from '../isSnapshotVectorNode';
 
-export const captureResizedVectorNodeSnapshots = (selectedNodes: TSceneNode[], canvasRefs: TCanvasRefs): void => {
+export const captureResizedVectorNodeSnapshots = (
+  selectedNodes: TSceneNode[],
+  canvasRefs: TCanvasRefs,
+  nodes: Record<string, TSceneNode>,
+): void => {
   const isSingleSelection = selectedNodes.length === 1;
-  const vectorNodes = selectedNodes.filter((node): node is TVectorNode => node.type === NodeType.vector && !node.widthProfile);
+  const vectorNodes = selectedNodes.filter((node) => isSnapshotVectorNode(node, nodes));
 
   if (vectorNodes.length > 0) {
     canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map(

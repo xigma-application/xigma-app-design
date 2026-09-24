@@ -320,6 +320,7 @@ describe('disarmResizeDrag', () => {
       captureResizedVectorNodeSnapshots(
         [store.getState().design.pages[store.getState().design.activePageId].nodes[idSnapshotted] as TVectorNode],
         snapshotCanvasRefs,
+        store.getState().design.pages[store.getState().design.activePageId].nodes,
       );
       continueResizeDrag(
         snapshotCanvas,

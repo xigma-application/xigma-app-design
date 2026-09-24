@@ -45,6 +45,6 @@ export const armPlainResizeDrag = (
     handle,
     nodeOrigins,
   };
-  captureResizedVectorNodeSnapshots(targetNodes, canvasRefs);
+  captureResizedVectorNodeSnapshots(targetNodes, canvasRefs, nodes);
   canvas.setPointerCapture(event.pointerId);
 };

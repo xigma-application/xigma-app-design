@@ -1,15 +1,13 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TVectorNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { captureVectorNodeDragSnapshot } from 'utils/canvas/drawVectorNode/captureVectorNodeDragSnapshot';
+import { isSnapshotVectorNode } from '../../isSnapshotVectorNode';
 
 export const captureDraggedVectorNodeSnapshots = (armIds: string[], nodes: Record<string, TSceneNode>, canvasRefs: TCanvasRefs): void => {
-  const vectorNodes = armIds
-    .map((id) => nodes[id])
-    .filter((node): node is TVectorNode => node.type === NodeType.vector && !node.widthProfile);
+  const vectorNodes = armIds.map((id) => nodes[id]).filter((node) => isSnapshotVectorNode(node, nodes));
 
   if (vectorNodes.length > 0) {
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map(

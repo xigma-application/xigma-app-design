@@ -51,5 +51,5 @@ export const armRotateDrag = (
   const nodeOrigins = getRotateNodeOrigins(targetNodes);
 
   commitRotateDragState(canvas, event, rotateDragRef, point, bounds, rotation, pivot, nodeOrigins);
-  captureRotatedVectorNodeSnapshot(targetNodes, canvasRefs);
+  captureRotatedVectorNodeSnapshot(targetNodes, canvasRefs, selectActivePage(store.getState()).nodes);
 };

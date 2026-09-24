@@ -12,6 +12,7 @@ import { TSelectionHitContext } from './types';
 
 // utils
 import { getNodeAtPoint } from '../../../../../utils/getNodeAtPoint/getNodeAtPoint';
+import { getSelectedBooleanOperandAtPoint } from './getSelectedBooleanOperandAtPoint';
 import { isPointClippedFromNode } from '../../../../../utils/getNodeAtPoint/isPointClippedFromNode';
 
 export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {
@@ -24,7 +25,9 @@ export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[]
     hit,
     nodesById,
     point,
-    selectedHit: getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true }),
+    selectedHit:
+      getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true }) ??
+      getSelectedBooleanOperandAtPoint(point, selectedNodes, nodesById),
     selectedNodes,
     viewport,
   };

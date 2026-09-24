@@ -45,7 +45,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     const node = buildVectorNode();
 
     // before
-    captureRotatedVectorNodeSnapshot([node], canvasRefs);
+    captureRotatedVectorNodeSnapshot([node], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
@@ -58,7 +58,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     const canvasRefs = createCanvasRefs();
 
     // before
-    captureRotatedVectorNodeSnapshot([frameNode], canvasRefs);
+    captureRotatedVectorNodeSnapshot([frameNode], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
@@ -71,7 +71,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     const nodeB = buildVectorNode({ id: 'vector-2' });
 
     // before
-    captureRotatedVectorNodeSnapshot([nodeA, nodeB], canvasRefs);
+    captureRotatedVectorNodeSnapshot([nodeA, nodeB], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
@@ -83,7 +83,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     const node = buildVectorNode({ widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } } });
 
     // before
-    captureRotatedVectorNodeSnapshot([node], canvasRefs);
+    captureRotatedVectorNodeSnapshot([node], canvasRefs, {});
 
     // result
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
@@ -94,7 +94,20 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     const canvasRefs = createCanvasRefs();
 
     // before
-    captureRotatedVectorNodeSnapshot([], canvasRefs);
+    captureRotatedVectorNodeSnapshot([], canvasRefs, {});
+
+    // result
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+  });
+
+  it('should skip a vector inside a boolean so the boolean follows it live', () => {
+    // mock
+    const canvasRefs = createCanvasRefs();
+    const node = { ...buildVectorNode(), parentId: 'boolean-1' };
+    const nodes = { 'boolean-1': { id: 'boolean-1', parentId: null, type: NodeType.boolean } as unknown as TSceneNode, [node.id]: node };
+
+    // before
+    captureRotatedVectorNodeSnapshot([node], canvasRefs, nodes);
 
     // result
     expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
