@@ -1,6 +1,9 @@
 // hooks
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
+
 // store
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { setActiveTool, setViewport } from 'store/design/slice';
@@ -70,6 +73,7 @@ describe('placeAllArmedMedia', () => {
       media: { armedRef: { current: armed }, queueRef: { current: [bigFile] } },
     });
 
+    OBJECT_URLS_BY_FILE_HASH.clear();
     URL.createObjectURL = vi.fn(() => 'blob:big');
 
     const { getLastImage } = stubImageConstructor();
@@ -80,6 +84,9 @@ describe('placeAllArmedMedia', () => {
 
     // action — start placing, then resolve the queued file's async image decode
     const placing = placeAllArmedMedia(canvas, store.dispatch, store, refs, 'Image');
+
+    await vi.waitFor(() => expect(getLastImage().src).toBe('blob:big'));
+
     const image = getLastImage();
 
     image.naturalWidth = 200;

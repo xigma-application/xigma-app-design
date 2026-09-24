@@ -61,6 +61,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   className = '',
   contrastBackgroundColor,
   contrastUnsupportedReason,
+  disabledFillModes,
   freezePositionOnGrow,
   headerExtra,
   imageAdjustments,
@@ -205,6 +206,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
             alpha={value.alpha}
             colorModel={colorModel}
             contrastChecker={isContrastCheckerAvailable ? contrastChecker : undefined}
+            disabledFillModes={disabledFillModes}
             gradientPanel={gradientPanel}
             imageAdjustments={imageAdjustments}
             imagePanel={imagePanel}

@@ -189,4 +189,20 @@ describe('freezePatternConsumersOfNode', () => {
     expect((getActivePage(state).nodes.a as TRectangleNode).fills[0]).toMatchObject({ sourceNodeId: null });
     expect((getActivePage(state).nodes.b as TRectangleNode).fills[0]).toMatchObject({ sourceNodeId: null });
   });
+
+  it('should freeze a pattern used as a stroke too', () => {
+    // mock
+    const source = sourceRect('source-1');
+    const { fills: strokes } = patternRect('stroke-pattern', 'source-1');
+    const consumer = sourceRect('consumer', { strokes });
+    const state = buildState({ consumer, 'source-1': source });
+
+    // before
+    freezePatternConsumersOfNode(state, 'source-1');
+
+    // result
+    const stroke = (getActivePage(state).nodes.consumer as TRectangleNode).strokes?.[0];
+
+    expect(stroke).toMatchObject({ frozenSourceSnapshot: [source], sourceNodeId: null });
+  });
 });

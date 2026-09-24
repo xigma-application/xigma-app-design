@@ -13,6 +13,7 @@ import styles from './dropdown-option.module.scss';
 
 export type TDropdownOptionProps = {
   content?: ReactNode;
+  disabled?: boolean;
   highlighted: boolean;
   icon?: TIconProps['name'];
   iconSize?: number;
@@ -24,6 +25,7 @@ export type TDropdownOptionProps = {
 
 export const DropdownOption: FC<TDropdownOptionProps> = ({
   content,
+  disabled = false,
   highlighted,
   icon,
   iconSize = 12,
@@ -31,11 +33,15 @@ export const DropdownOption: FC<TDropdownOptionProps> = ({
   onClick,
   onMouseEnter,
   selected,
-}) => (
-  <PopoverPrimitive.Close asChild>
+}) => {
+  const option = (
     <div
-      className={cx(styles.DropdownOption, { [styles['DropdownOption--highlighted']]: highlighted })}
-      onClick={onClick}
+      aria-disabled={disabled || undefined}
+      className={cx(styles.DropdownOption, {
+        [styles['DropdownOption--disabled']]: disabled,
+        [styles['DropdownOption--highlighted']]: highlighted && !disabled,
+      })}
+      onClick={disabled ? undefined : onClick}
       onMouseEnter={onMouseEnter}
     >
       <span className={styles.DropdownOption__check} style={{ opacity: selected ? 1 : 0 }}>
@@ -48,7 +54,9 @@ export const DropdownOption: FC<TDropdownOptionProps> = ({
       )}
       <span className={styles.DropdownOption__label}>{content ?? label}</span>
     </div>
-  </PopoverPrimitive.Close>
-);
+  );
+
+  return disabled ? option : <PopoverPrimitive.Close asChild>{option}</PopoverPrimitive.Close>;
+};
 
 export default DropdownOption;

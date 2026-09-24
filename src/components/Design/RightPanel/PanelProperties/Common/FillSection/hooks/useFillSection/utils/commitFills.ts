@@ -1,6 +1,6 @@
 // store
 import { AppDispatch } from 'store/store';
-import { updateNode } from 'store/design/slice';
+import { updateNode, updateNodes } from 'store/design/slice';
 
 // types
 import { StrokeAlign } from 'types/design/enums';
@@ -13,6 +13,8 @@ const DEFAULT_STROKE_WIDTH = 1;
 const DEFAULT_STROKE_ALIGN = StrokeAlign.inside;
 
 export type TStrokeSettings = { strokeAlign?: StrokeAlign; strokeWidth?: number };
+
+export type TFillTarget = TStrokeSettings & { id: string };
 
 const getStrokeDefaults = (property: TPaintProperty, current: TStrokeSettings): TStrokeSettings => {
   if (property === 'strokes') {
@@ -27,14 +29,18 @@ const getStrokeDefaults = (property: TPaintProperty, current: TStrokeSettings): 
 
 export const commitFills = (
   dispatch: AppDispatch,
-  nodeId: string | undefined,
+  targets: TFillTarget[],
   nextFills: TPaint[],
   property: TPaintProperty = 'fills',
-  currentStroke: TStrokeSettings = {},
 ): void => {
-  if (nodeId) {
-    dispatch(
-      updateNode({ changes: { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, currentStroke) }, id: nodeId }),
-    );
+  const updates = targets.map(({ id, ...stroke }) => ({
+    changes: { ...getPaintsChange(property, nextFills), ...getStrokeDefaults(property, stroke) },
+    id,
+  }));
+
+  if (updates.length === 1) {
+    dispatch(updateNode(updates[0]));
+  } else if (updates.length > 1) {
+    dispatch(updateNodes(updates));
   }
 };

@@ -63,3 +63,26 @@ test('Place all places every picked file at once and reverts to the default tool
   const after = await designPage.canvas.screenshot();
   expect(after.equals(before)).toBe(false);
 });
+
+test('picking the same file twice places two layers that share one image source', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.pickMediaFile(FIXTURE_PATH);
+  await designPage.placeMediaAtNaturalSize(700, 100);
+  await designPage.pickMediaFile(FIXTURE_PATH);
+  await designPage.placeMediaAtNaturalSize(900, 100);
+
+  const sources = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return rootOrder.slice(-2).map((id) => JSON.stringify(nodes[id]).match(/blob:[^"]+/)?.[0]);
+  });
+
+  expect(sources[0]).toBeTruthy();
+  expect(sources[1]).toBe(sources[0]);
+});

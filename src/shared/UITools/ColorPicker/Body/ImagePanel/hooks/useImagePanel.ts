@@ -13,6 +13,7 @@ import { TImageFillMode, TImagePanelState } from '../types';
 
 // utils
 import { getFileExtension } from '../utils/getFileExtension';
+import { getFileObjectUrl } from 'utils/media/getFileObjectUrl';
 import { isSupportedImageFile } from '../utils/isSupportedImageFile';
 
 export type TUseImagePanelResult = TImagePanelState & {
@@ -31,13 +32,7 @@ export const useImagePanel = (initialImageUrl?: string, initialFillMode?: TImage
 
   const setImage = (file: File): void => {
     if (isSupportedImageFile(file)) {
-      setState((previous) => {
-        if (previous.imageUrl) {
-          URL.revokeObjectURL(previous.imageUrl);
-        }
-
-        return { ...previous, imageUrl: URL.createObjectURL(file) };
-      });
+      void getFileObjectUrl(file).then((imageUrl) => setState((previous) => ({ ...previous, imageUrl })));
     } else {
       dispatch(setDesignHintLabelKey(t(`${translationNameSpace}.unsupportedFileTypeError`, { extension: getFileExtension(file.name) })));
     }

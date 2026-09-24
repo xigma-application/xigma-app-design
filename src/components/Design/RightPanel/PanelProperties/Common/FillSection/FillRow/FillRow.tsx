@@ -41,6 +41,7 @@ import styles from './fill-row.module.scss';
 
 // types
 import { BlendMode } from 'types/design/enums';
+import { TImageFillMode } from 'shared/UITools/ColorPicker/Body/ImagePanel/types';
 import { TPaint, TPaintProperty } from 'types/design/paint/types';
 
 // utils
@@ -56,9 +57,11 @@ import { getImagePaintAdjustments } from 'utils/design/paint/getImagePaintAdjust
 
 export type TFillRowProps = {
   canDrag: boolean;
+  disabledFillModes?: TImageFillMode[];
   isDragging: boolean;
   isSelected: boolean;
   nodeId: string | undefined;
+  nodeIds: string[];
   onChange: TFunc<[TPaint]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
@@ -76,9 +79,11 @@ export type TFillRowProps = {
 
 export const FillRow: FC<TFillRowProps> = ({
   canDrag,
+  disabledFillModes,
   isDragging,
   isSelected,
   nodeId,
+  nodeIds,
   onChange,
   onDragEnd,
   onDragStart,
@@ -134,7 +139,7 @@ export const FillRow: FC<TFillRowProps> = ({
   useDeactivateImageTabOnPickerClose(isPickerOpen, setIsVideoTabActive);
   useSyncGradientEditor(nodeId, paintIndex, property, isPickerOpen, gradientPanelState);
   useSyncImageEditor(nodeId, paintIndex, property, isPickerOpen, isMediaTabActive, initialMode, skipInitialImageEditorArmRef.current);
-  useSyncPatternSourcePickTarget(nodeId, paintIndex, property, isPickerOpen, isPattern);
+  useSyncPatternSourcePickTarget(nodeIds, paintIndex, property, isPickerOpen, isPattern);
 
   return (
     <div
@@ -163,6 +168,7 @@ export const FillRow: FC<TFillRowProps> = ({
           className={styles.FillRow__color}
           contrastBackgroundColor={contrastBackground.color}
           contrastUnsupportedReason={getContrastUnsupportedReason(paint, contrastNode) ?? contrastBackground.reason}
+          disabledFillModes={disabledFillModes}
           hex={value.hex}
           hexDisplayValue={hexDisplayValue}
           imageAdjustments={imageAdjustments}

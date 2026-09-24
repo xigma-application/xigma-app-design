@@ -46,8 +46,11 @@ export const useDropdownState = <TValue extends string>(
       setHighlightedIndex(clamp(highlightedIndex + step, 0, options.length - 1));
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      onSelect(options[highlightedIndex].value);
-      setIsOpen(false);
+
+      if (!options[highlightedIndex].disabled) {
+        onSelect(options[highlightedIndex].value);
+        setIsOpen(false);
+      }
     }
   };
 

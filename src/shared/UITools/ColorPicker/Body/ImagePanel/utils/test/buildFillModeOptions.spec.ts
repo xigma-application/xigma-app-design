@@ -18,4 +18,12 @@ describe('buildFillModeOptions', () => {
       { label: 'Tile', value: 'tile' },
     ]);
   });
+
+  it('should mark the given fill modes as disabled', () => {
+    // action
+    const options = buildFillModeOptions(t, ['crop', 'tile']);
+
+    // result
+    expect(options.map((option) => option.disabled)).toEqual([undefined, undefined, true, true]);
+  });
 });

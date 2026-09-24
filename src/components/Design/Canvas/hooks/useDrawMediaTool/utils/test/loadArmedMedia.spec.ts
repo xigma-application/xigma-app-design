@@ -1,3 +1,6 @@
+// others
+import { OBJECT_URLS_BY_FILE_HASH, VIDEO_FRAMES_BY_FILE_HASH } from 'utils/media/constants';
+
 // utils
 import { loadArmedMedia } from '../loadArmedMedia';
 
@@ -37,12 +40,17 @@ const stubVideoConstructor = (naturalWidth: number, naturalHeight: number): { ge
 };
 
 describe('loadArmedMedia', () => {
+  beforeEach(() => {
+    OBJECT_URLS_BY_FILE_HASH.clear();
+    VIDEO_FRAMES_BY_FILE_HASH.clear();
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
-  it('should report the object URL and natural dimensions once the image loads', () => {
+  it('should report the object URL and natural dimensions once the image loads', async () => {
     // mock
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
@@ -52,6 +60,8 @@ describe('loadArmedMedia', () => {
 
     // before
     loadArmedMedia(file, onLoad);
+
+    await vi.waitFor(() => expect(getLastImage().src).toBe('blob:mock-url'));
 
     const image = getLastImage();
 
@@ -66,7 +76,7 @@ describe('loadArmedMedia', () => {
     expect(onLoad).toHaveBeenCalledWith({ naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
   });
 
-  it('should extract a video frame instead of loading the file as an image', () => {
+  it('should extract a video frame instead of loading the file as an image', async () => {
     // mock
     const drawImage = vi.fn();
     const file = new File(['x'], 'clip.mp4', { type: 'video/mp4' });
@@ -83,6 +93,8 @@ describe('loadArmedMedia', () => {
 
     // before
     loadArmedMedia(file, onLoad);
+
+    await vi.waitFor(() => expect(getLastVideo().onloadeddata).not.toBeNull());
 
     // action
     getLastVideo().onloadeddata?.(new Event('loadeddata'));

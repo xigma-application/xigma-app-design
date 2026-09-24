@@ -45,6 +45,7 @@ export const DropdownPanel = <TValue extends string>({
           {option.separatorBefore && <div className={styles.DropdownPanel__separator} />}
           <DropdownOption
             content={option.content}
+            disabled={option.disabled}
             highlighted={index === highlightedIndex}
             icon={option.icon}
             iconSize={option.iconSize}

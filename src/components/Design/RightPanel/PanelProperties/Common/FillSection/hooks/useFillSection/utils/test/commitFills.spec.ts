@@ -1,5 +1,5 @@
 // store
-import { updateNode } from 'store/design/slice';
+import { updateNode, updateNodes } from 'store/design/slice';
 
 // types
 import { StrokeAlign } from 'types/design/enums';
@@ -8,24 +8,24 @@ import { StrokeAlign } from 'types/design/enums';
 import { commitFills } from '../commitFills';
 
 describe('commitFills', () => {
-  it('should dispatch updateNode when a nodeId is present', () => {
+  it('should dispatch updateNode for a single target', () => {
     // mock
     const dispatch = vi.fn();
     const fills = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
 
     // before
-    commitFills(dispatch, 'node-1', fills);
+    commitFills(dispatch, [{ id: 'node-1' }], fills);
 
     // result
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { fills }, id: 'node-1' }));
   });
 
-  it('should not dispatch when there is no nodeId', () => {
+  it('should not dispatch when there are no targets', () => {
     // mock
     const dispatch = vi.fn();
 
     // before
-    commitFills(dispatch, undefined, []);
+    commitFills(dispatch, [], []);
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe('commitFills', () => {
     const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
 
     // before
-    commitFills(dispatch, 'node-1', strokes, 'strokes');
+    commitFills(dispatch, [{ id: 'node-1' }], strokes, 'strokes');
 
     // result
     expect(dispatch).toHaveBeenCalledWith(
@@ -51,11 +51,28 @@ describe('commitFills', () => {
     const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
 
     // before
-    commitFills(dispatch, 'node-1', strokes, 'strokes', { strokeAlign: StrokeAlign.center, strokeWidth: 4 });
+    commitFills(dispatch, [{ id: 'node-1', strokeAlign: StrokeAlign.center, strokeWidth: 4 }], strokes, 'strokes');
 
     // result
     expect(dispatch).toHaveBeenCalledWith(
       updateNode({ changes: { strokeAlign: StrokeAlign.center, strokeWidth: 4, strokes }, id: 'node-1' }),
+    );
+  });
+
+  it('should write the same paints to every target in one updateNodes, keeping each stroke setting', () => {
+    // mock
+    const dispatch = vi.fn();
+    const strokes = [{ color: '#000000', opacity: 100, type: 'solid' as const }];
+
+    // before
+    commitFills(dispatch, [{ id: 'node-1' }, { id: 'node-2', strokeAlign: StrokeAlign.center, strokeWidth: 4 }], strokes, 'strokes');
+
+    // result
+    expect(dispatch).toHaveBeenCalledWith(
+      updateNodes([
+        { changes: { strokeAlign: StrokeAlign.inside, strokeWidth: 1, strokes }, id: 'node-1' },
+        { changes: { strokeAlign: StrokeAlign.center, strokeWidth: 4, strokes }, id: 'node-2' },
+      ]),
     );
   });
 });

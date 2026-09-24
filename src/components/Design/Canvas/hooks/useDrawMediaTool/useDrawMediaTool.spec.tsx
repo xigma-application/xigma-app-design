@@ -7,6 +7,9 @@ import { RefObject } from 'react';
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawMediaTool, TMediaToolConfig } from './useDrawMediaTool';
 
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
+
 // store
 import designReducer, { setActiveTool, setSelection, setViewport } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
@@ -82,10 +85,26 @@ const selectFile = (input: HTMLInputElement, files: File[] | null): void => {
   input.dispatchEvent(new Event('change'));
 };
 
-const armMedia = (input: HTMLInputElement, getLastImage: () => TFakeImage, naturalWidth: number, naturalHeight: number): void => {
+const waitForNextImage = (getLastImage: () => TFakeImage | undefined, previous?: TFakeImage): Promise<TFakeImage> =>
+  vi.waitFor(() => {
+    const image = getLastImage();
+
+    if (!image?.src || image === previous) {
+      throw new Error('the next media image has not been created yet');
+    }
+
+    return image;
+  });
+
+const armMedia = async (
+  input: HTMLInputElement,
+  getLastImage: () => TFakeImage,
+  naturalWidth: number,
+  naturalHeight: number,
+): Promise<void> => {
   selectFile(input, [new File(['x'], 'photo.png', { type: 'image/png' })]);
 
-  const image = getLastImage();
+  const image = await waitForNextImage(getLastImage);
 
   image.naturalWidth = naturalWidth;
   image.naturalHeight = naturalHeight;
@@ -105,6 +124,7 @@ const renderMediaTool = (canvasRef: RefObject<HTMLCanvasElement | null>, store: 
 
 describe('useDrawMediaTool behaviors', () => {
   beforeEach(() => {
+    OBJECT_URLS_BY_FILE_HASH.clear();
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
   });
 
@@ -195,7 +215,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(selectActivePage(store.getState()).rootOrder).toHaveLength(0);
   });
 
-  it('should ignore a non-primary button press once armed', () => {
+  it('should ignore a non-primary button press once armed', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -204,7 +224,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     store.dispatch(setActiveTool(CONFIG.tool));
     renderMediaTool(canvasRef, store);
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10, 1));
@@ -245,7 +265,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     store.dispatch(setActiveTool(CONFIG.tool));
     renderMediaTool(canvasRef, store);
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     const [, crosshairImage, thumbnailImage] = getImages();
 
@@ -279,7 +299,7 @@ describe('useDrawMediaTool behaviors', () => {
     renderMediaTool(canvasRef, store);
 
     // before
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // result — no composite yet, only the plain crosshair CSS class applies so far
     expect(canvasRef.current?.style.cursor).toBe('');
@@ -296,7 +316,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(drawImage).toHaveBeenCalledTimes(2);
   });
 
-  it('should create the node immediately at pointer-down, centered at its natural size, and resize it to a live aspect-ratio-locked size while dragging', () => {
+  it('should create the node immediately at pointer-down, centered at its natural size, and resize it to a live aspect-ratio-locked size while dragging', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -306,7 +326,7 @@ describe('useDrawMediaTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
     const refs = renderMediaTool(canvasRef, store);
 
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
@@ -328,7 +348,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 100, x: 0, y: 0 });
   });
 
-  it('should place the image at its natural size centered on a plain click', () => {
+  it('should place the image at its natural size centered on a plain click', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -338,7 +358,7 @@ describe('useDrawMediaTool behaviors', () => {
     store.dispatch(setActiveTool(CONFIG.tool));
     const refs = renderMediaTool(canvasRef, store);
 
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     act(() => {
@@ -364,7 +384,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(refs.transform.aspectRatioLockGuideRef.current).toBeNull();
   });
 
-  it('should place an aspect-ratio-locked custom size on a drag', () => {
+  it('should place an aspect-ratio-locked custom size on a drag', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -373,7 +393,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     store.dispatch(setActiveTool(CONFIG.tool));
     renderMediaTool(canvasRef, store);
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     act(() => {
@@ -389,7 +409,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
   });
 
-  it('should place a click natural-size image, then an aspect-locked dragged image, from a multi-file selection', () => {
+  it('should place a click natural-size image, then an aspect-locked dragged image, from a multi-file selection', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -402,11 +422,13 @@ describe('useDrawMediaTool behaviors', () => {
     // before — pick two files at once
     selectFile(getInput(), [new File(['a'], 'first.png', { type: 'image/png' }), new File(['b'], 'second.png', { type: 'image/png' })]);
 
-    const firstImage = getLastImage();
+    const firstImage = await waitForNextImage(getLastImage);
 
     firstImage.naturalWidth = 200;
     firstImage.naturalHeight = 100;
     firstImage.onload?.();
+
+    const imageBeforeSecondFile = getLastImage();
 
     // action — place the first file with a plain click
     act(() => {
@@ -418,7 +440,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(1);
     expect(store.getState().design.activeTool).toBe(ToolName.media);
 
-    const secondImage = getLastImage();
+    const secondImage = await waitForNextImage(getLastImage, imageBeforeSecondFile);
 
     secondImage.naturalWidth = 50;
     secondImage.naturalHeight = 100;
@@ -445,7 +467,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(page.selectedIds).toEqual([page.rootOrder[0], page.rootOrder[1]]);
   });
 
-  it('should clear a pre-existing selection once when files are picked, then keep every placed file selected as more are placed', () => {
+  it('should clear a pre-existing selection once when files are picked, then keep every placed file selected as more are placed', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -461,11 +483,13 @@ describe('useDrawMediaTool behaviors', () => {
 
     expect(selectSelectedIds(store.getState())).toEqual([]);
 
-    const firstImage = getLastImage();
+    const firstImage = await waitForNextImage(getLastImage);
 
     firstImage.naturalWidth = 200;
     firstImage.naturalHeight = 100;
     firstImage.onload?.();
+
+    const imageBeforeSecondFile = getLastImage();
 
     // action — place the first file
     act(() => {
@@ -479,7 +503,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     expect(selectedAfterFirst).toEqual([rootOrderAfterFirst[0]]);
 
-    const secondImage = getLastImage();
+    const secondImage = await waitForNextImage(getLastImage, imageBeforeSecondFile);
 
     secondImage.naturalWidth = 200;
     secondImage.naturalHeight = 100;
@@ -499,7 +523,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(selectedIds).toEqual([rootOrder[0], rootOrder[1]]);
   });
 
-  it('should not reopen the file picker or lose the armed file when the viewport changes (e.g. panning) while armed', () => {
+  it('should not reopen the file picker or lose the armed file when the viewport changes (e.g. panning) while armed', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -508,7 +532,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     store.dispatch(setActiveTool(CONFIG.tool));
     renderMediaTool(canvasRef, store);
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action — panning (or scroll-zooming) dispatches setViewport while a file is still armed
     act(() => store.dispatch(setViewport({ x: 150, y: 90, zoom: 1 })));
@@ -529,7 +553,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ x: -240, y: -130 });
   });
 
-  it('should not place a stale armed file after the tool is deactivated and reactivated without picking a new one', () => {
+  it('should not place a stale armed file after the tool is deactivated and reactivated without picking a new one', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -538,7 +562,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     store.dispatch(setActiveTool(CONFIG.tool));
     renderMediaTool(canvasRef, store);
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     act(() => store.dispatch(setActiveTool(ToolName.default)));
@@ -550,7 +574,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
   });
 
-  it('should arm a cancel callback on the shared drawing ref that Escape (via handleLeave) uses to delete the in-progress node and reset the tool', () => {
+  it('should arm a cancel callback on the shared drawing ref that Escape (via handleLeave) uses to delete the in-progress node and reset the tool', async () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -561,7 +585,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     const refs = renderMediaTool(canvasRef, store);
 
-    armMedia(getInput(), getLastImage, 200, 100);
+    await armMedia(getInput(), getLastImage, 200, 100);
 
     // action
     act(() => {

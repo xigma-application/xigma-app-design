@@ -1,10 +1,12 @@
 // utils
-import { extractVideoFrame, TExtractedVideoFrame } from 'utils/canvas/extractVideoFrame';
+import { getFileObjectUrl } from 'utils/media/getFileObjectUrl';
+import { getFileVideoFrame } from 'utils/media/getFileVideoFrame';
+import { TExtractedVideoFrame } from 'utils/canvas/extractVideoFrame';
 
 export type TArmedMedia = TExtractedVideoFrame;
 
-const loadArmedImage = (file: File, onLoad: (armed: TArmedMedia) => void): void => {
-  const src = URL.createObjectURL(file);
+const loadArmedImage = async (file: File, onLoad: (armed: TArmedMedia) => void): Promise<void> => {
+  const src = await getFileObjectUrl(file);
   const image = new Image();
 
   image.onload = (): void => {
@@ -15,8 +17,8 @@ const loadArmedImage = (file: File, onLoad: (armed: TArmedMedia) => void): void 
 
 export const loadArmedMedia = (file: File, onLoad: (armed: TArmedMedia) => void): void => {
   if (file.type.startsWith('video/')) {
-    extractVideoFrame(file, onLoad);
+    void getFileVideoFrame(file, onLoad);
   } else {
-    loadArmedImage(file, onLoad);
+    void loadArmedImage(file, onLoad);
   }
 };

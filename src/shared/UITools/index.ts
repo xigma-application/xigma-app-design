@@ -20,6 +20,7 @@ import SearchInput from './SearchInput/SearchInput';
 import ScrubbableEdge from './ScrubbableEdge/ScrubbableEdge';
 import Section from './Section/Section';
 import SectionColumn from './SectionColumn/SectionColumn';
+import SectionHint from './SectionHint/SectionHint';
 import Slider from './Slider/Slider';
 import SliderInput from './SliderInput/SliderInput';
 import Tabs from './Tabs/Tabs';
@@ -52,6 +53,7 @@ export const UITools = {
   SearchInput,
   Section,
   SectionColumn,
+  SectionHint,
   Slider,
   SliderInput,
   Tabs,

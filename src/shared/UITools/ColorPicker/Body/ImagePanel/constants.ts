@@ -1,5 +1,5 @@
 // types
-import { TImagePanelState } from './types';
+import { TImageFillMode, TImagePanelState } from './types';
 
 export const translationNameSpace = 'colorPicker.image';
 
@@ -12,3 +12,5 @@ export const DEFAULT_IMAGE_PANEL_STATE: TImagePanelState = {
 };
 
 export const UNSUPPORTED_IMAGE_MIME_TYPES = ['image/svg+xml'];
+
+export const IMAGE_FILL_MODES: TImageFillMode[] = ['fill', 'fit', 'crop', 'tile'];

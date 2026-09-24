@@ -17,6 +17,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     alpha,
     colorModel,
     contrastChecker,
+    disabledFillModes,
     gradientPanel,
     imageAdjustments,
     imagePanel,
@@ -56,6 +57,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
       return (
         <ImagePanel
           adjustments={imageAdjustments}
+          disabledFillModes={disabledFillModes}
           imagePanel={imagePanel}
           onAdjustmentChange={onImageAdjustmentChange}
           onRotate={onImageRotate}
@@ -67,6 +69,7 @@ export const renderBody = (props: TBodyProps): ReactNode => {
     case ColorPickerTab.video:
       return (
         <VideoPanel
+          disabledFillModes={disabledFillModes}
           onRotate={onVideoRotate}
           onScaleModeChange={onVideoScaleModeChange}
           onTileScaleChange={onVideoTileScaleChange}

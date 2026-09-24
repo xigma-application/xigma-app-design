@@ -21,6 +21,7 @@ import { DEFAULT_IMAGE_ADJUSTMENTS } from 'constant/canvas';
 
 export type TImagePanelProps = {
   adjustments?: TImageAdjustments;
+  disabledFillModes?: TImageFillMode[];
   imagePanel: TUseImagePanelResult;
   onAdjustmentChange?: TFunc<[keyof TImageAdjustments, number]>;
   onRotate?: TFunc;
@@ -31,6 +32,7 @@ export type TImagePanelProps = {
 
 export const ImagePanel: FC<TImagePanelProps> = ({
   adjustments = DEFAULT_IMAGE_ADJUSTMENTS,
+  disabledFillModes,
   imagePanel,
   onAdjustmentChange,
   onRotate,
@@ -43,6 +45,7 @@ export const ImagePanel: FC<TImagePanelProps> = ({
   return (
     <div className={styles.ImagePanel}>
       <ImageFillModeRow
+        disabledFillModes={disabledFillModes}
         fillMode={imagePanel.fillMode}
         onRotate={onRotate}
         onTileScaleChange={onTileScaleChange}

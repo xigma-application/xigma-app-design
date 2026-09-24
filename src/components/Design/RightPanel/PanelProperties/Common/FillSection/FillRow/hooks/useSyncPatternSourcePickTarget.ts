@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // store
 import { selectPatternSourcePickTarget } from 'store/design/selectors';
@@ -9,25 +9,33 @@ import { store, useAppDispatch } from 'store';
 import { TPaintProperty } from 'types/design/paint/types';
 
 export const useSyncPatternSourcePickTarget = (
-  nodeId: string | undefined,
+  nodeIds: string[],
   paintIndex: number,
   property: TPaintProperty,
   isPickerOpen: boolean,
   isPattern: boolean,
 ): void => {
   const dispatch = useAppDispatch();
+  const nodeIdsRef = useRef(nodeIds);
+  const nodeIdsKey = nodeIds.join(',');
+  nodeIdsRef.current = nodeIds;
 
   useEffect(() => {
-    if (nodeId && isPickerOpen && isPattern) {
-      dispatch(setPatternSourcePickTarget({ nodeId, paintIndex, property }));
+    if (nodeIdsKey && isPickerOpen && isPattern) {
+      dispatch(setPatternSourcePickTarget({ nodeIds: nodeIdsRef.current, paintIndex, property }));
     }
 
     return (): void => {
       const current = selectPatternSourcePickTarget(store.getState());
 
-      if (current && current.nodeId === nodeId && current.paintIndex === paintIndex && (current.property ?? 'fills') === property) {
+      if (
+        current &&
+        current.nodeIds.join(',') === nodeIdsKey &&
+        current.paintIndex === paintIndex &&
+        (current.property ?? 'fills') === property
+      ) {
         dispatch(setPatternSourcePickTarget(null));
       }
     };
-  }, [dispatch, isPattern, isPickerOpen, nodeId, paintIndex, property]);
+  }, [dispatch, isPattern, isPickerOpen, nodeIdsKey, paintIndex, property]);
 };

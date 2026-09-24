@@ -68,7 +68,7 @@ export type TImageEditorState = {
 
 export type TImageFillPickerFocus = { nodeId: string; paintIndex: number; property?: TPaintProperty };
 
-export type TPatternSourcePickTarget = { nodeId: string; paintIndex: number; property?: TPaintProperty };
+export type TPatternSourcePickTarget = { nodeIds: string[]; paintIndex: number; property?: TPaintProperty };
 
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;

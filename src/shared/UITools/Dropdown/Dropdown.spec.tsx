@@ -208,4 +208,22 @@ describe('Dropdown size', () => {
     // result
     expect(screen.getByText('Mixed')).toBeInTheDocument();
   });
+
+  it('should not select a disabled option by click or by Enter', () => {
+    // mock
+    const onSelect = vi.fn();
+
+    // before
+    render(<Dropdown onSelect={onSelect} options={[options[0], { ...options[1], disabled: true }]} value="hex" />);
+    fireEvent.click(screen.getByText('Hex'));
+
+    // action
+    fireEvent.click(screen.getByText('RGB'));
+    fireEvent.keyDown(screen.getByText('RGB'), { key: 'ArrowDown' });
+    fireEvent.keyDown(screen.getByText('RGB'), { key: 'Enter' });
+
+    // result
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(screen.getByText('RGB').closest('[aria-disabled]')).toHaveAttribute('aria-disabled', 'true');
+  });
 });

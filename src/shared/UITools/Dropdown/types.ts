@@ -5,6 +5,7 @@ import { TIconProps } from '@xigma/components';
 
 export type TDropdownOption<TValue extends string> = {
   content?: ReactNode;
+  disabled?: boolean;
   icon?: TIconProps['name'];
   iconSize?: number;
   label: string;

@@ -30,6 +30,7 @@ export type TColorPickerProps = {
   className?: string;
   contrastBackgroundColor?: string;
   contrastUnsupportedReason?: TContrastUnsupportedReason;
+  disabledFillModes?: TImageFillMode[];
   freezePositionOnGrow?: TPopoverProps['freezePositionOnGrow'];
   headerExtra?: ReactNode;
   imageAdjustments?: TImageAdjustments;

@@ -21,6 +21,7 @@ import styles from './video-panel.module.scss';
 import { TImageFillMode } from '../ImagePanel/types';
 
 export type TVideoPanelProps = {
+  disabledFillModes?: TImageFillMode[];
   onRotate?: TFunc;
   onScaleModeChange?: TFunc<[TImageFillMode]>;
   onTileScaleChange?: TFunc<[number]>;
@@ -28,7 +29,14 @@ export type TVideoPanelProps = {
   videoPanel: TUseVideoPanelResult;
 };
 
-export const VideoPanel: FC<TVideoPanelProps> = ({ onRotate, onScaleModeChange, onTileScaleChange, tileScale, videoPanel }) => {
+export const VideoPanel: FC<TVideoPanelProps> = ({
+  disabledFillModes,
+  onRotate,
+  onScaleModeChange,
+  onTileScaleChange,
+  tileScale,
+  videoPanel,
+}) => {
   const { t } = useTranslation();
   const handleFillModeChange = useHandleFillModeChange(videoPanel.setFillMode, onScaleModeChange);
   const player = useVideoPlayer();
@@ -36,6 +44,7 @@ export const VideoPanel: FC<TVideoPanelProps> = ({ onRotate, onScaleModeChange, 
   return (
     <div className={styles.VideoPanel}>
       <ImageFillModeRow
+        disabledFillModes={disabledFillModes}
         fillMode={videoPanel.fillMode}
         onRotate={onRotate}
         onTileScaleChange={onTileScaleChange}

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactNode, useRef } from 'react';
 import { Provider } from 'react-redux';
 
@@ -7,6 +7,9 @@ import VideoSourcePreview from './VideoSourcePreview';
 
 // hooks
 import { useVideoPanel } from '../hooks/useVideoPanel';
+
+// others
+import { OBJECT_URLS_BY_FILE_HASH, VIDEO_FRAMES_BY_FILE_HASH } from 'utils/media/constants';
 
 // store
 import { selectDesignHintLabelKey } from 'store/design/selectors';
@@ -69,8 +72,10 @@ describe('VideoSourcePreview behaviors', () => {
     expect(container.querySelector('[class*="VideoSourcePreview__overlay"]')).toBeNull();
   });
 
-  it('should show a live, playable video element with the raw file and wrap the buttons in the hover overlay', () => {
+  it('should show a live, playable video element with the raw file and wrap the buttons in the hover overlay', async () => {
     // mock
+    OBJECT_URLS_BY_FILE_HASH.clear();
+    VIDEO_FRAMES_BY_FILE_HASH.clear();
     extractVideoFrameMock.mockImplementation((_file, onLoad) => onLoad({ naturalHeight: 180, naturalWidth: 320, src: 'blob:frame-url' }));
     URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
 
@@ -85,6 +90,8 @@ describe('VideoSourcePreview behaviors', () => {
     });
 
     // result
+    await waitFor(() => expect(container.querySelector('video')).toHaveAttribute('poster', 'blob:frame-url'));
+
     const overlay = container.querySelector('[class*="VideoSourcePreview__overlay"]');
     const video = container.querySelector('video') as HTMLVideoElement;
 

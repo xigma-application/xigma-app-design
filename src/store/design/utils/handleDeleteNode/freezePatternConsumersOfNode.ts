@@ -17,7 +17,7 @@ export const freezePatternConsumersOfNode = (state: TDesignState, sourceId: stri
 
     Object.values(page.nodes).forEach((consumer) => {
       if ('fills' in consumer) {
-        consumer.fills.forEach((paint) => {
+        [...consumer.fills, ...(consumer.strokes ?? [])].forEach((paint) => {
           if (paint.type === 'pattern' && paint.sourceNodeId === sourceId) {
             paint.frozenSourceSnapshot = snapshot;
             paint.sourceNodeId = null;

@@ -90,7 +90,7 @@ describe('handlePatternSourcePick', () => {
     const targetId = addPatternRectangle(100, 100);
 
     addSourceFrame(200, 200);
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -117,7 +117,7 @@ describe('handlePatternSourcePick', () => {
     const targetId = addPatternRectangle(300, 300);
     const sourceId = addSourceFrame(400, 400);
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -132,7 +132,7 @@ describe('handlePatternSourcePick', () => {
     // mock
     const targetId = addPatternRectangle(500, 500);
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -147,7 +147,7 @@ describe('handlePatternSourcePick', () => {
     // mock — click lands back on the target rectangle itself
     const targetId = addPatternRectangle(600, 600);
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -164,13 +164,13 @@ describe('handlePatternSourcePick', () => {
     const otherSourceId = addSourceFrame(750, 750);
     const chainedConsumerId = addPatternRectangle(800, 800);
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: chainedConsumerId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [chainedConsumerId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
     handlePatternSourcePick(createCanvas(), pointerEvent(755, 755), store.dispatch);
 
     expect(getFills(chainedConsumerId)[0]).toMatchObject({ sourceNodeId: otherSourceId });
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before — target tries to pick the already-a-consumer rectangle as its own source
@@ -231,7 +231,7 @@ describe('handlePatternSourcePick', () => {
       }),
     );
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before — click lands on the frame itself (its own fill is plain solid), not the nested rectangle
@@ -245,7 +245,7 @@ describe('handlePatternSourcePick', () => {
   it('should disarm without throwing when the pick target points at a node that no longer exists', () => {
     // mock — a real node sits under the click point, but the target itself is stale
     addSourceFrame(1000, 1000);
-    store.dispatch(setPatternSourcePickTarget({ nodeId: 'missing-node', paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: ['missing-node'], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -289,7 +289,7 @@ describe('handlePatternSourcePick', () => {
     const targetId = rootOrder[rootOrder.length - 1];
     const sourceId = addSourceFrame(1200, 1200);
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 1 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 1 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -322,7 +322,7 @@ describe('handlePatternSourcePick', () => {
     const { rootOrder } = selectActivePage(store.getState());
     const solidId = rootOrder[rootOrder.length - 1];
 
-    store.dispatch(setPatternSourcePickTarget({ nodeId: solidId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [solidId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -346,7 +346,7 @@ describe('handlePatternSourcePick', () => {
     const groupId = nodes[childId].parentId;
 
     store.dispatch(setSelection([]));
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -365,7 +365,7 @@ describe('handlePatternSourcePick', () => {
     store.dispatch(setSelection([childId, siblingId]));
     store.dispatch(groupNodes());
     store.dispatch(setSelection([]));
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0 }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0 }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -393,7 +393,7 @@ describe('handlePatternSourcePick', () => {
     };
 
     store.dispatch(updateNode({ changes: { strokes: [strokePattern] }, id: targetId }));
-    store.dispatch(setPatternSourcePickTarget({ nodeId: targetId, paintIndex: 0, property: 'strokes' }));
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [targetId], paintIndex: 0, property: 'strokes' }));
     store.dispatch(setPatternSourcePicking(true));
 
     // before
@@ -404,5 +404,22 @@ describe('handlePatternSourcePick', () => {
 
     expect(node.strokes?.[0]).toMatchObject({ sourceNodeId: sourceId, type: 'pattern' });
     expect(node.fills[0]).not.toHaveProperty('sourceNodeId');
+  });
+
+  it('should set the picked source on every target node in one step', () => {
+    // mock
+    const firstId = addPatternRectangle(500, 500);
+    const secondId = addPatternRectangle(520, 520);
+    const sourceId = addSourceFrame(600, 600);
+
+    store.dispatch(setPatternSourcePickTarget({ nodeIds: [firstId, secondId], paintIndex: 0 }));
+    store.dispatch(setPatternSourcePicking(true));
+
+    // before
+    handlePatternSourcePick(createCanvas(), pointerEvent(605, 605), store.dispatch);
+
+    // result
+    expect(getFills(firstId)[0]).toMatchObject({ sourceNodeId: sourceId });
+    expect(getFills(secondId)[0]).toMatchObject({ sourceNodeId: sourceId });
   });
 });

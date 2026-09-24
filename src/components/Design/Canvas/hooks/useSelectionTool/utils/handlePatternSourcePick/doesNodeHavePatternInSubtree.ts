@@ -6,5 +6,6 @@ import { TSceneNode } from 'types/design/types';
 
 export const doesNodeHavePatternInSubtree = (node: TSceneNode, nodesById: Record<string, TSceneNode>): boolean =>
   getGroupSubtreeNodes(node, nodesById).some(
-    (subtreeNode) => 'fills' in subtreeNode && subtreeNode.fills.some((fill) => fill.type === 'pattern'),
+    (subtreeNode) =>
+      'fills' in subtreeNode && [...subtreeNode.fills, ...(subtreeNode.strokes ?? [])].some((paint) => paint.type === 'pattern'),
   );

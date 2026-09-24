@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Locator, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
@@ -3048,6 +3048,77 @@ test.describe('Design panels — Fill section', () => {
     // result — the paint is frozen: no more live sourceNodeId, but the render is untouched
     expect(node.fills![0].sourceNodeId).toBeFalsy();
     expect(await readPixelColor(page, 710, 210)).toEqual([0, 0, 255]);
+  });
+
+  test('deleting the source of a pattern used as a stroke freezes that stroke too instead of dropping it', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-pattern-stroke-freeze-on-delete');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 200, 900, 360);
+    await designPage.drawRectangle(1000, 200, 1020, 220);
+
+    const [targetId, sourceId] = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [consumerId, patternSourceId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }] }, id: patternSourceId }));
+      store.dispatch(
+        updateNode({
+          changes: {
+            fills: [],
+            strokeAlign: 'inside',
+            strokeWidth: 20,
+            strokes: [
+              {
+                alignmentIndex: 0,
+                direction: 'horizontal',
+                offsetX: 0,
+                offsetY: 0,
+                opacity: 100,
+                scale: 100,
+                sourceNodeId: patternSourceId,
+                spacingX: 0,
+                spacingY: 0,
+                tileType: 'rectangular',
+                type: 'pattern',
+              },
+            ],
+          } as never,
+          id: consumerId,
+        }),
+      );
+
+      return [consumerId, patternSourceId];
+    });
+
+    expect(await readPixelColor(page, 705, 280)).toEqual([0, 0, 255]);
+
+    // action — delete the source rectangle
+    await page.evaluate(async (id) => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(setSelection([id]));
+    }, sourceId);
+    await page.keyboard.press('Delete');
+
+    const stroke = await page.evaluate(async (id) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [paint] = (
+        pages[activePageId].nodes[id] as unknown as { strokes: { frozenSourceSnapshot?: unknown[]; sourceNodeId?: string }[] }
+      ).strokes;
+
+      return { hasSnapshot: Boolean(paint.frozenSourceSnapshot?.length), sourceNodeId: paint.sourceNodeId };
+    }, targetId);
+
+    // result — the stroke keeps a frozen copy of the source and still renders it
+    expect(stroke).toEqual({ hasSnapshot: true, sourceNodeId: null });
+    expect(await readPixelColor(page, 705, 280)).toEqual([0, 0, 255]);
   });
 
   test('a pattern fill with no source renders a placeholder dot grid on the shape instead of nothing', async ({ page }) => {
@@ -6244,5 +6315,121 @@ test.describe('Design panels — Fill section', () => {
     await expect.poll(() => readPixelColor(page, 705, 280)).toEqual([255, 0, 0]);
     expect(await readPixelColor(page, 780, 280)).toEqual([255, 255, 255]);
     expect(await readPixelColor(page, 695, 280)).not.toEqual([255, 0, 0]);
+  });
+
+  test('with two frames selected, differing fills show the mixed content hint and + replaces both with one shared fill', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-multi-mixed');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const [firstId, secondId] = pages[activePageId].rootOrder;
+
+      store.dispatch(updateNode({ changes: { fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }] }, id: firstId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    });
+
+    // result
+    await expect(page.getByText('Click + to replace mixed content')).toBeVisible();
+
+    // action
+    await page.getByRole('button', { name: 'Add fill' }).click();
+
+    // result
+    await expect(page.getByText('Click + to replace mixed content')).toHaveCount(0);
+
+    const [first, second] = [await readNode(page, ids[0]), await readNode(page, ids[1])];
+
+    expect(first.fills).toHaveLength(1);
+    expect(second.fills).toEqual(first.fills);
+  });
+
+  test('with two frames selected, a shared image fill offers Fill and Fit but disables Crop and Tile', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-multi-image-modes');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawFrame(600, 200, 700, 300);
+    await designPage.drawFrame(800, 200, 900, 300);
+    await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      store.dispatch(setSelection(pages[activePageId].rootOrder));
+    });
+
+    // action
+    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Image').click();
+
+    const panel = page.locator('[class*="ColorPicker_"]').first();
+
+    await panel.locator('[class*="ImageFillModeRow__dropdown"]').click();
+
+    // result
+    const option = (label: string): Locator => page.locator('[class*="DropdownOption_"]', { hasText: label }).first();
+
+    await expect(option('Fit')).not.toHaveAttribute('aria-disabled');
+    await expect(option('Crop')).toHaveAttribute('aria-disabled', 'true');
+    await expect(option('Tile')).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  test('the same image file uploaded separately into two frames counts as one shared fill once both are selected', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-fill-section-multi-same-image');
+    await expect(designPage.canvas).toBeVisible();
+
+    const buffer = await createSolidColorPngBuffer(40, 40, [255, 0, 0]);
+
+    await designPage.drawFrame(600, 200, 700, 300);
+
+    const uploadImage = async (name: string): Promise<void> => {
+      await page.getByLabel('Hex color').click();
+      await page.getByLabel('Image').click();
+      await page.locator('input[type="file"]').setInputFiles({ buffer, mimeType: 'image/png', name });
+      await page.keyboard.press('Escape');
+    };
+
+    await uploadImage('first.png');
+    await designPage.drawFrame(800, 200, 900, 300);
+    await uploadImage('second.png');
+
+    const ids = await page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].rootOrder;
+    });
+
+    await expect.poll(async () => (await readNode(page, ids[1])).fills![0].type).toBe('image');
+
+    const [first, second] = [await readNode(page, ids[0]), await readNode(page, ids[1])];
+
+    // result — both uploads point at one object URL, so selecting both shows the shared fill
+    expect(second.fills![0].ref).toBe(first.fills![0].ref);
+
+    await page.evaluate(async (nodeIds) => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(setSelection(nodeIds));
+    }, ids);
+
+    await expect(page.getByText('Click + to replace mixed content')).toHaveCount(0);
+    await expect(page.getByLabel('Hex color')).toHaveCount(1);
   });
 });

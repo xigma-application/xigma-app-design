@@ -1,12 +1,15 @@
 import { TFunction } from 'i18next';
 
+// others
+import { IMAGE_FILL_MODES } from '../constants';
+
 // types
 import { TDropdownOption } from 'shared/UITools/Dropdown/types';
 import { TImageFillMode } from '../types';
 
-export const buildFillModeOptions = (t: TFunction): TDropdownOption<TImageFillMode>[] => [
-  { label: t('colorPicker.image.fillMode.fill'), value: 'fill' },
-  { label: t('colorPicker.image.fillMode.fit'), value: 'fit' },
-  { label: t('colorPicker.image.fillMode.crop'), value: 'crop' },
-  { label: t('colorPicker.image.fillMode.tile'), value: 'tile' },
-];
+export const buildFillModeOptions = (t: TFunction, disabledFillModes: TImageFillMode[] = []): TDropdownOption<TImageFillMode>[] =>
+  IMAGE_FILL_MODES.map((fillMode) => ({
+    disabled: disabledFillModes.includes(fillMode) || undefined,
+    label: t(`colorPicker.image.fillMode.${fillMode}`),
+    value: fillMode,
+  }));

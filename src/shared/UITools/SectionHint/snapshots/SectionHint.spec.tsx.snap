@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionHint snapshots > should render the label 1`] = `
+<DocumentFragment>
+  <p
+    class="_SectionHint_9fc59a"
+  >
+    Click + to replace mixed content
+  </p>
+</DocumentFragment>
+`;

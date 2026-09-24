@@ -15,6 +15,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -257,5 +258,71 @@ describe('FillSection behaviors', () => {
 
     // result
     expect(container.querySelector('[class*="Section--empty"]')).not.toBeNull();
+  });
+
+  it('should show the shared fills of several nodes and write an edit to every one of them in one undo step', () => {
+    // mock
+    const fills: TRectangleNode['fills'] = [{ color: '#111111', opacity: 100, type: 'solid' }];
+    const firstId = addRectangle({ fills });
+    const secondId = addRectangle({ fills });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderFillSection();
+
+    // action
+    fireEvent.blur(screen.getByDisplayValue('111111'), { target: { value: '333333' } });
+
+    // result
+    expect([read(firstId).fills[0], read(secondId).fills[0]]).toEqual([
+      { color: '#333333', opacity: 100, type: 'solid' },
+      { color: '#333333', opacity: 100, type: 'solid' },
+    ]);
+
+    store.dispatch(undo());
+
+    expect([read(firstId).fills[0], read(secondId).fills[0]]).toEqual([fills[0], fills[0]]);
+  });
+
+  it('should show the mixed content hint when the fill count differs, and replace every fill with one new fill on add', () => {
+    // mock
+    const firstId = addRectangle();
+    const secondId = addRectangle({
+      fills: [
+        { color: '#ff0000', opacity: 100, type: 'solid' },
+        { color: '#00ff00', opacity: 100, type: 'solid' },
+      ],
+    });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderFillSection();
+
+    // result
+    expect(screen.getByText('Click + to replace mixed content')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('FF0000')).not.toBeInTheDocument();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Add fill' }));
+
+    // result
+    expect(read(firstId).fills).toHaveLength(1);
+    expect(read(secondId).fills).toEqual(read(firstId).fills);
+  });
+
+  it('should treat fills with the same count but different settings as mixed', () => {
+    // mock
+    const firstId = addRectangle({ fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
+    const secondId = addRectangle({ fills: [{ color: '#ff0000', opacity: 50, type: 'solid' }] });
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderFillSection();
+
+    // result
+    expect(screen.getByText('Click + to replace mixed content')).toBeInTheDocument();
   });
 });

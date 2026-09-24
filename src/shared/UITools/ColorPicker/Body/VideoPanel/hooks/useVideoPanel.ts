@@ -13,8 +13,9 @@ import { TImageFillMode } from '../../ImagePanel/types';
 import { TVideoPanelState } from '../types';
 
 // utils
-import { extractVideoFrame } from 'utils/canvas/extractVideoFrame';
 import { getFileExtension } from '../utils/getFileExtension';
+import { getFileObjectUrl } from 'utils/media/getFileObjectUrl';
+import { getFileVideoFrame } from 'utils/media/getFileVideoFrame';
 import { isSupportedVideoFile } from '../utils/isSupportedVideoFile';
 import { videoSrcUrlCache } from '../utils/videoSrcUrlCache';
 
@@ -35,26 +36,13 @@ export const useVideoPanel = (initialVideoUrl?: string, initialFillMode?: TImage
 
   const setVideo = (file: File): void => {
     if (isSupportedVideoFile(file)) {
-      const rawSrcUrl = URL.createObjectURL(file);
+      void getFileObjectUrl(file).then((videoSrcUrl) => {
+        setState((previous) => ({ ...previous, videoSrcUrl }));
 
-      extractVideoFrame(file, ({ src }) => {
-        videoSrcUrlCache.set(src, rawSrcUrl);
-
-        setState((previous) => {
-          if (previous.videoUrl) {
-            URL.revokeObjectURL(previous.videoUrl);
-          }
-
-          return { ...previous, videoUrl: src };
+        void getFileVideoFrame(file, ({ src }) => {
+          videoSrcUrlCache.set(src, videoSrcUrl);
+          setState((previous) => ({ ...previous, videoUrl: src }));
         });
-      });
-
-      setState((previous) => {
-        if (previous.videoSrcUrl) {
-          URL.revokeObjectURL(previous.videoSrcUrl);
-        }
-
-        return { ...previous, videoSrcUrl: rawSrcUrl };
       });
     } else {
       dispatch(setDesignHintLabelKey(t(`${translationNameSpace}.unsupportedFileTypeError`, { extension: getFileExtension(file.name) })));

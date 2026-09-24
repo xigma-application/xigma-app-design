@@ -9,6 +9,9 @@ import { TooltipProvider } from 'shared';
 // hooks
 import { useVideoPanel } from './hooks/useVideoPanel';
 
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
+
 // store
 import { store } from 'store';
 
@@ -104,8 +107,9 @@ describe('VideoPanel behaviors', () => {
     expect(screen.queryByRole('slider', { name: 'Seek' })).not.toBeInTheDocument();
   });
 
-  it('should render the VideoPlayer controls once a supported video file is picked', () => {
+  it('should render the VideoPlayer controls once a supported video file is picked', async () => {
     // mock
+    OBJECT_URLS_BY_FILE_HASH.clear();
     URL.createObjectURL = vi.fn(() => 'blob:raw-video-url');
 
     // before
@@ -117,7 +121,7 @@ describe('VideoPanel behaviors', () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     // result
-    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Play' })).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: 'Seek' })).toBeInTheDocument();
   });
 });

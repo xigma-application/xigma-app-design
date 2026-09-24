@@ -1,9 +1,12 @@
-import { act, renderHook, RenderHookResult } from '@testing-library/react';
+import { act, renderHook, RenderHookResult, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
 // hooks
 import { TUseImagePanelResult, useImagePanel } from '../useImagePanel';
+
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
 
 // store
 import { selectDesignHintLabelKey } from 'store/design/selectors';
@@ -20,6 +23,10 @@ const renderImagePanelWithInitial = (
 ): RenderHookResult<TUseImagePanelResult, unknown> => renderHook(() => useImagePanel(initialImageUrl, initialFillMode), { wrapper });
 
 describe('useImagePanel behaviors', () => {
+  beforeEach(() => {
+    OBJECT_URLS_BY_FILE_HASH.clear();
+  });
+
   afterEach(() => {
     store.dispatch(setDesignHintLabelKey(null));
   });
@@ -51,7 +58,7 @@ describe('useImagePanel behaviors', () => {
     expect(result.current.imageUrl).toBeNull();
   });
 
-  it('should set imageUrl from a supported image file', () => {
+  it('should set imageUrl from a supported image file', async () => {
     // mock
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
@@ -63,27 +70,27 @@ describe('useImagePanel behaviors', () => {
     act(() => result.current.setImage(file));
 
     // result
+    await waitFor(() => expect(result.current.imageUrl).toBe('blob:mock-url'));
     expect(URL.createObjectURL).toHaveBeenCalledWith(file);
-    expect(result.current.imageUrl).toBe('blob:mock-url');
     expect(selectDesignHintLabelKey(store.getState())).toBeNull();
   });
 
-  it('should revoke the previous object URL when a new image replaces it', () => {
+  it('should reuse the object URL of an earlier file with the same content instead of creating a second one', async () => {
     // mock
     URL.createObjectURL = vi.fn().mockReturnValueOnce('blob:first').mockReturnValueOnce('blob:second');
-    URL.revokeObjectURL = vi.fn();
 
     // before
     const { result } = renderImagePanel();
 
-    act(() => result.current.setImage(new File(['content'], 'first.png', { type: 'image/png' })));
+    act(() => result.current.setImage(new File(['same content'], 'first.png', { type: 'image/png' })));
+    await waitFor(() => expect(result.current.imageUrl).toBe('blob:first'));
 
     // action
-    act(() => result.current.setImage(new File(['content'], 'second.png', { type: 'image/png' })));
+    act(() => result.current.setImage(new File(['same content'], 'second.png', { type: 'image/png' })));
 
     // result
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:first');
-    expect(result.current.imageUrl).toBe('blob:second');
+    await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(1));
+    expect(result.current.imageUrl).toBe('blob:first');
   });
 
   it('should dispatch a design hint naming the extension of an unsupported file, without setting imageUrl', () => {
@@ -129,7 +136,7 @@ describe('useImagePanel behaviors', () => {
     expect(result.current.fillMode).toBe('fill');
   });
 
-  it('should not touch imageUrl when a later valid file follows an unsupported one', () => {
+  it('should not touch imageUrl when a later valid file follows an unsupported one', async () => {
     // mock
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
@@ -143,6 +150,6 @@ describe('useImagePanel behaviors', () => {
     act(() => result.current.setImage(new File(['content'], 'photo.png', { type: 'image/png' })));
 
     // result
-    expect(result.current.imageUrl).toBe('blob:mock-url');
+    await waitFor(() => expect(result.current.imageUrl).toBe('blob:mock-url'));
   });
 });

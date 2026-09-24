@@ -67,6 +67,7 @@ const ControlledFillRow = ({ initialPaint }: { initialPaint: TPaint }): ReturnTy
       isDragging={false}
       isSelected={false}
       nodeId="node-1"
+      nodeIds={['node-1']}
       onChange={setPaint}
       onDragEnd={vi.fn()}
       onDragStart={vi.fn()}
@@ -91,6 +92,7 @@ const renderFillRow = (overrides: Partial<TFillRowProps> = {}): ReturnType<typeo
         isDragging={false}
         isSelected={false}
         nodeId="node-1"
+        nodeIds={['node-1']}
         onChange={vi.fn()}
         onDragEnd={vi.fn()}
         onDragStart={vi.fn()}

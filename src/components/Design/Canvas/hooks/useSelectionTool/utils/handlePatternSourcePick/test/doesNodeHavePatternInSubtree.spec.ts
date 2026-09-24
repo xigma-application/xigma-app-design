@@ -123,4 +123,15 @@ describe('doesNodeHavePatternInSubtree', () => {
     // result
     expect(result).toBe(false);
   });
+
+  it('should return true when the node has a pattern stroke', () => {
+    // mock
+    const node: TRectangleNode = { ...SOLID_RECTANGLE, strokes: PATTERN_RECTANGLE.fills };
+
+    // before
+    const result = doesNodeHavePatternInSubtree(node, { [node.id]: node });
+
+    // result
+    expect(result).toBe(true);
+  });
 });

@@ -6,6 +6,9 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectImageEditor, selectImageFillPickerFocus, selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
+// others
+import { MULTI_SELECTION_DISABLED_FILL_MODES } from '../../constants';
+
 // types
 import { isAppearanceNode } from '../../../AppearanceSection/types';
 import { TPaint, TPaintProperty } from 'types/design/paint/types';
@@ -13,6 +16,8 @@ import { TUseFillSectionResult } from './types';
 
 // utils
 import { commitFills } from './utils/commitFills';
+import { getFillTargets } from './utils/getFillTargets';
+import { hasMixedPaints } from './utils/hasMixedPaints';
 import { getDefaultPaintColor } from './utils/getDefaultPaintColor';
 import { getInitialOpenPickerIndex } from './utils/getInitialOpenPickerIndex';
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
@@ -29,21 +34,23 @@ import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerInde
 
 export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
-  const [selectedNode] = useAppSelector(selectSelectedNodes);
-  const node = isAppearanceNode(selectedNode) ? selectedNode : undefined;
-  const fills = node ? getNodePaints(node, property) : [];
-  const nodeId = node?.id;
+  const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
+  const [node] = nodes;
+  const isMultiSelection = nodes.length > 1;
+  const isMixed = hasMixedPaints(nodes, property);
+  const fills = node && !isMixed ? getNodePaints(node, property) : [];
+  const panelNodeId = node?.id;
+  const nodeId = isMultiSelection ? undefined : panelNodeId;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { clearSelection, onSelectRow, selectedIndices, setSelection } = useFillSelection(fills.length, property);
   const imageFillPickerFocus = useAppSelector(selectImageFillPickerFocus);
   const initialIndex = getInitialOpenPickerIndex(property, imageFillPickerFocus, nodeId);
-  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(nodeId, property, initialIndex);
+  const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(panelNodeId, property, initialIndex);
   const imageEditor = useAppSelector(selectImageEditor);
   const isImageEditorActive = imageEditor !== null && (imageEditor.property ?? 'fills') === property;
   const handleExitImageEditor = useHandleExitImageEditor();
   const handleClosePicker = useHandleClosePicker(openPickerIndex, onPickerOpenChange);
-  const stroke = { strokeAlign: node?.strokeAlign, strokeWidth: node?.strokeWidth };
-  const commit = (nextFills: TPaint[]): void => commitFills(dispatch, nodeId, nextFills, property, stroke);
+  const commit = (nextFills: TPaint[]): void => commitFills(dispatch, getFillTargets(nodes), nextFills, property);
   const { beginDrag, dragState, registerRow } = useItemsReorderDrag(fills, commit, setSelection, containerRef);
 
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, clearSelection);
@@ -51,11 +58,14 @@ export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSect
 
   return {
     containerRef,
+    disabledFillModes: isMultiSelection ? MULTI_SELECTION_DISABLED_FILL_MODES : undefined,
     dropIndicatorOffset: dragState?.hasMoved ? dragState.dropOffset : null,
     fills,
+    isMixed,
     isRowDragging: (index) => (dragState?.sourceIndices ?? []).includes(index),
     isRowSelected: (index) => selectedIndices.includes(index),
     nodeId,
+    nodeIds: nodes.map((selected) => selected.id),
     onAdd: (): void => {
       commit([...fills, makeSolidPaint(getDefaultPaintColor(property))]);
       onPickerOpenChange(fills.length, true);

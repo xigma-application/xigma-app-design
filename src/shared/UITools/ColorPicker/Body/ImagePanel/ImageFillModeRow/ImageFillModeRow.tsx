@@ -20,6 +20,7 @@ import { buildFillModeOptions } from '../utils/buildFillModeOptions';
 import { useCommitTileScalePercent } from './hooks/useCommitTileScalePercent';
 
 export type TImageFillModeRowProps = {
+  disabledFillModes?: TImageFillMode[];
   fillMode: TImageFillMode;
   onRotate?: TFunc;
   onTileScaleChange?: TFunc<[number]>;
@@ -27,7 +28,14 @@ export type TImageFillModeRowProps = {
   tileScale?: number;
 };
 
-export const ImageFillModeRow: FC<TImageFillModeRowProps> = ({ fillMode, onRotate, onTileScaleChange, setFillMode, tileScale = 1 }) => {
+export const ImageFillModeRow: FC<TImageFillModeRowProps> = ({
+  disabledFillModes = [],
+  fillMode,
+  onRotate,
+  onTileScaleChange,
+  setFillMode,
+  tileScale = 1,
+}) => {
   const { t } = useTranslation();
   const percent = Math.round(tileScale * 100);
   const commitTileScalePercent = useCommitTileScalePercent(onTileScaleChange);
@@ -38,7 +46,7 @@ export const ImageFillModeRow: FC<TImageFillModeRowProps> = ({ fillMode, onRotat
         <UITools.Dropdown
           className={styles.ImageFillModeRow__dropdown}
           onSelect={setFillMode}
-          options={buildFillModeOptions(t)}
+          options={buildFillModeOptions(t, disabledFillModes)}
           value={fillMode}
           variant="outline"
         />

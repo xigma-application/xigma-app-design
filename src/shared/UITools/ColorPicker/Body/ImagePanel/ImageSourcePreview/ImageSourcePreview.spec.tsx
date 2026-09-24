@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
@@ -7,6 +7,9 @@ import ImageSourcePreview from './ImageSourcePreview';
 
 // hooks
 import { useImagePanel } from '../hooks/useImagePanel';
+
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
 
 // store
 import { selectDesignHintLabelKey } from 'store/design/selectors';
@@ -66,8 +69,9 @@ describe('ImageSourcePreview behaviors', () => {
     expect(container.querySelector('[class*="ImageSourcePreview__overlay"]')).toBeNull();
   });
 
-  it('should show the picked image as the background and wrap the buttons in the hover overlay', () => {
+  it('should show the picked image as the background and wrap the buttons in the hover overlay', async () => {
     // mock
+    OBJECT_URLS_BY_FILE_HASH.clear();
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
     // before
@@ -82,6 +86,8 @@ describe('ImageSourcePreview behaviors', () => {
 
     // result — the photo sits centered and proportionally contained above the still-tiled texture,
     // so the texture stays visible in any letterboxed gap around a non-matching aspect ratio
+    await waitFor(() => expect(container.querySelector('[class*="ImageSourcePreview__overlay"]')).not.toBeNull());
+
     const overlay = container.querySelector('[class*="ImageSourcePreview__overlay"]');
     const preview = container.querySelector('[class*="ImageSourcePreview"]') as HTMLElement;
 

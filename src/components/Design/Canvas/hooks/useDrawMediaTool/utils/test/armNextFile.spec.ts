@@ -1,3 +1,6 @@
+// others
+import { OBJECT_URLS_BY_FILE_HASH } from 'utils/media/constants';
+
 // store
 import { setMediaToolArmed } from 'store/design/slice';
 
@@ -64,6 +67,7 @@ describe('armNextFile', () => {
 
   it('should arm the next file from the queue and set a composite cursor once it loads', async () => {
     // mock
+    OBJECT_URLS_BY_FILE_HASH.clear();
     URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
     const canvas = document.createElement('canvas');
@@ -90,6 +94,8 @@ describe('armNextFile', () => {
 
     // action — resolve the source image first (loadArmedMedia), which is what triggers
     // createArmedCursor to construct the crosshair+thumbnail images in turn
+    await vi.waitFor(() => expect(getImages()).toHaveLength(1));
+
     const [sourceImage] = getImages();
 
     sourceImage.naturalWidth = 200;

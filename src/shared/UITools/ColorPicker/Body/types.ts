@@ -11,6 +11,7 @@ import { TUseVideoPanelResult } from './VideoPanel/hooks/useVideoPanel';
 
 export type TBodyProps = TSolidPanelProps & {
   activeTab: ColorPickerTab;
+  disabledFillModes?: TImageFillMode[];
   gradientPanel: TUseGradientPanelResult;
   imageAdjustments?: TImageAdjustments;
   imagePanel: TUseImagePanelResult;

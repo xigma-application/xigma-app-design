@@ -26,11 +26,14 @@ export const FillSection: FC<TFillSectionProps> = ({ footer, property = 'fills' 
   const translationNameSpace = getPaintTranslationNamespace(property);
   const {
     containerRef,
+    disabledFillModes,
     dropIndicatorOffset,
     fills,
+    isMixed,
     isRowDragging,
     isRowSelected,
     nodeId,
+    nodeIds,
     onAdd,
     onChange,
     onDragEnd,
@@ -55,20 +58,23 @@ export const FillSection: FC<TFillSectionProps> = ({ footer, property = 'fills' 
         />
       }
       e2eValue={property === 'strokes' ? 'stroke' : 'fill'}
-      hasContent={fills.length > 0}
+      hasContent={fills.length > 0 || isMixed}
       label={t(`${translationNameSpace}.label`)}
       mutedWhenEmpty
       onAdd={onAdd}
     >
+      {isMixed && <UITools.SectionHint label={t(`${translationNameSpace}.mixedContent`)} />}
       <div className={styles.FillSection__rows} ref={containerRef}>
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {fills.map((paint, index) => (
           <FillRow
             canDrag={fills.length > 1}
+            disabledFillModes={disabledFillModes}
             isDragging={isRowDragging(index)}
             isSelected={isRowSelected(index)}
             key={`${nodeId}-${index}`}
             nodeId={nodeId}
+            nodeIds={nodeIds}
             onChange={(paint): void => onChange(index, paint)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}

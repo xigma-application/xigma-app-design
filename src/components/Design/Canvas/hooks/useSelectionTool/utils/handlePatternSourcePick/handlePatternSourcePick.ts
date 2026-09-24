@@ -10,7 +10,7 @@ import { screenToWorld } from 'utils/transform/screenToWorld';
 
 // store
 import { selectNodes, selectOrderedNodes, selectPatternSourcePickTarget, selectViewport } from 'store/design/selectors';
-import { setPatternSourcePicking, updateNode } from 'store/design/slice';
+import { setPatternSourcePicking, updateNodes } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -30,10 +30,9 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
       const hit = controlHit ?? getSelectionHitAtPoint(point, selectOrderedNodes(state), viewport);
 
       if (hit && !doesNodeHavePatternInSubtree(hit, nodesById)) {
-        const targetNode = nodesById[target.nodeId];
-
-        if (targetNode && 'fills' in targetNode) {
-          const paints = getNodePaints(targetNode, target.property);
+        const updates = target.nodeIds.flatMap((nodeId) => {
+          const targetNode = nodesById[nodeId];
+          const paints = targetNode && 'fills' in targetNode ? getNodePaints(targetNode, target.property) : [];
           const paint = paints[target.paintIndex];
 
           if (paint && paint.type === 'pattern') {
@@ -41,8 +40,14 @@ export const handlePatternSourcePick = (canvas: HTMLCanvasElement, event: Pointe
               index === target.paintIndex ? { ...paint, frozenSourceSnapshot: null, sourceNodeId: hit.id } : entry,
             );
 
-            dispatch(updateNode({ changes: getPaintsChange(target.property, nextPaints), id: target.nodeId }));
+            return [{ changes: getPaintsChange(target.property, nextPaints), id: nodeId }];
           }
+
+          return [];
+        });
+
+        if (updates.length > 0) {
+          dispatch(updateNodes(updates));
         }
       }
 

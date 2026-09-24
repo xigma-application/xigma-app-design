@@ -40,6 +40,7 @@ export type TColorPickerInputProps = {
   className?: string;
   contrastBackgroundColor?: string;
   contrastUnsupportedReason?: TContrastUnsupportedReason;
+  disabledFillModes?: TImageFillMode[];
   e2eValue?: TE2EValue;
   hex: string;
   hexDisplayValue?: string;
@@ -97,6 +98,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
   className = '',
   contrastBackgroundColor,
   contrastUnsupportedReason,
+  disabledFillModes,
   e2eValue = '',
   hex,
   hexDisplayValue,
@@ -181,6 +183,7 @@ export const ColorPickerInput: FC<TColorPickerInputProps> = ({
                 blendMode={blendMode}
                 contrastBackgroundColor={contrastBackgroundColor}
                 contrastUnsupportedReason={contrastUnsupportedReason}
+                disabledFillModes={disabledFillModes}
                 imageAdjustments={imageAdjustments}
                 imageTileScale={imageTileScale}
                 initialActiveTab={initialActiveTab}
