@@ -164,6 +164,23 @@ describe('PanelProperties behaviors', () => {
     store.dispatch(setSelection([]));
   });
 
+  it('should show the Rectangle panel with the boolean operations button while several rectangles are selected', () => {
+    // mock
+    const firstRectangleId = addRectangleNode();
+    const secondRectangleId = addRectangleNode();
+    store.dispatch(setSelection([firstRectangleId, secondRectangleId]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Rectangle')).toBeInTheDocument();
+    expect(screen.getByLabelText('Boolean operations')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
   it('should show the Frame panel with the wrap in section button while multiple frames are selected', () => {
     // mock
     const firstFrameId = addFrameNode();

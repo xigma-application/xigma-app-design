@@ -279,3 +279,25 @@ test('an unfilled vector dropped into a Union is drawn as its stroke shape in th
   expect(after.equals(before)).toBe(false);
   expect(after.equals(rectangleFill)).toBe(true);
 });
+
+test('two selected rectangles show the Rectangle panel and its Boolean button wraps both in one Union', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-multi-rectangles');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+  await designPage.click(720, 220, { shift: true });
+
+  await expect(page.locator('[data-test-component-header="rectangle"]')).toBeVisible();
+
+  await page.getByLabel('Boolean operations', { exact: true }).click();
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+
+  await expect(rows).toHaveCount(1);
+  await page.getByRole('button', { name: 'Expand layer' }).click();
+  await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(2);
+});
