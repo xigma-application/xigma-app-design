@@ -18,20 +18,21 @@ import styles from './layout-guide-settings-panel.module.scss';
 // types
 import { LayoutGuideType } from 'types/design/enums';
 import { TLayoutGuide } from 'types/design/types';
+import { TLayoutGuideNumberField } from 'utils/design/layoutGuides/getLayoutGuideFieldValue';
 
 export type TLayoutGuideSettingsPanelProps = {
   guide: TLayoutGuide;
-  onChange: TFunc<[TLayoutGuide]>;
+  isStretchedOnAny: boolean;
+  mixedKeys: Set<keyof TLayoutGuide>;
+  onChange: TFunc<[Partial<TLayoutGuide>]>;
   onClose: TFunc;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onFieldScrub: TFunc<[TLayoutGuideNumberField, number, number]>;
 };
 
 const renderTypeFields = (
-  guide: TLayoutGuide,
-  onChange: TFunc<[TLayoutGuide]>,
-  onDragEnd: TFunc,
-  onDragStart: TFunc,
+  { guide, isStretchedOnAny, mixedKeys, onChange, onDragEnd, onDragStart }: TLayoutGuideSettingsPanelProps,
   panel: TUseLayoutGuideSettingsPanelResult,
 ): ReactElement => {
   const { onBlur, onCommitAlpha, onCommitHex, onPickerChange, onScrub } = panel;
@@ -41,6 +42,8 @@ const renderTypeFields = (
       return (
         <LayoutGuideColumnsFields
           guide={guide}
+          isStretchedOnAny={isStretchedOnAny}
+          mixedKeys={mixedKeys}
           onBlur={onBlur}
           onChange={onChange}
           onCommitAlpha={onCommitAlpha}
@@ -55,6 +58,8 @@ const renderTypeFields = (
       return (
         <LayoutGuideRowsFields
           guide={guide}
+          isStretchedOnAny={isStretchedOnAny}
+          mixedKeys={mixedKeys}
           onBlur={onBlur}
           onChange={onChange}
           onCommitAlpha={onCommitAlpha}
@@ -69,6 +74,7 @@ const renderTypeFields = (
       return (
         <LayoutGuideGridFields
           guide={guide}
+          mixedKeys={mixedKeys}
           onBlur={onBlur}
           onCommitAlpha={onCommitAlpha}
           onCommitHex={onCommitHex}
@@ -81,13 +87,14 @@ const renderTypeFields = (
   }
 };
 
-export const LayoutGuideSettingsPanel: FC<TLayoutGuideSettingsPanelProps> = ({ guide, onChange, onClose, onDragEnd, onDragStart }) => {
-  const panel = useLayoutGuideSettingsPanel(guide, onChange);
+export const LayoutGuideSettingsPanel: FC<TLayoutGuideSettingsPanelProps> = (props) => {
+  const { guide, mixedKeys, onChange, onClose, onFieldScrub } = props;
+  const panel = useLayoutGuideSettingsPanel(guide, mixedKeys, onChange, onFieldScrub);
 
   return (
     <div className={styles.LayoutGuideSettingsPanel}>
-      <LayoutGuideSettingsHeader onClose={onClose} onTypeChange={(type): void => onChange({ ...guide, type })} type={guide.type} />
-      <div className={styles.LayoutGuideSettingsPanel__body}>{renderTypeFields(guide, onChange, onDragEnd, onDragStart, panel)}</div>
+      <LayoutGuideSettingsHeader onClose={onClose} onTypeChange={(type): void => onChange({ type })} type={guide.type} />
+      <div className={styles.LayoutGuideSettingsPanel__body}>{renderTypeFields(props, panel)}</div>
     </div>
   );
 };

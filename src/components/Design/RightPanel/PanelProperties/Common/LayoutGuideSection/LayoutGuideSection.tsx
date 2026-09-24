@@ -20,13 +20,18 @@ export const LayoutGuideSection: FC = () => {
   const {
     containerRef,
     dropIndicatorOffset,
+    getMixedKeys,
     guides,
+    isHidden,
+    isMixed,
     isRowDragging,
     isRowSelected,
+    isStretchedOnAny,
     onAdd,
     onChange,
     onDragEnd,
     onDragStart,
+    onFieldScrub,
     onOpenChange,
     onRemove,
     onSelectRow,
@@ -41,11 +46,12 @@ export const LayoutGuideSection: FC = () => {
       addAriaLabel={t(`${translationNameSpace}.addAriaLabel`)}
       addTooltip={t(`${translationNameSpace}.addTooltip`)}
       e2eValue="layout-guide"
-      hasContent={guides.length > 0}
+      hasContent={guides.length > 0 || isMixed}
       label={t(`${translationNameSpace}.label`)}
       mutedWhenEmpty
       onAdd={onAdd}
     >
+      {isMixed && <UITools.SectionHint label={t(`${translationNameSpace}.mixedContent`)} />}
       <div className={styles.LayoutGuideSection__rows} ref={containerRef}>
         {dropIndicatorOffset !== null && <FillDropIndicator offset={dropIndicatorOffset} />}
         {guides.map((guide, index) => (
@@ -53,12 +59,16 @@ export const LayoutGuideSection: FC = () => {
             canDrag={guides.length > 1}
             guide={guide}
             isDragging={isRowDragging(index)}
+            isHidden={isHidden(index)}
             isOpen={openIndex === index}
             isSelected={isRowSelected(index)}
+            isStretchedOnAny={isStretchedOnAny(index)}
             key={index}
+            mixedKeys={getMixedKeys(index)}
             onChange={(next): void => onChange(index, next)}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
+            onFieldScrub={(field, min, value): void => onFieldScrub(index, field, min, value)}
             onOpenChange={(isOpen): void => onOpenChange(index, isOpen)}
             onRemove={(): void => onRemove(index)}
             onSelect={(): void => onSelectRow(index)}

@@ -3,9 +3,13 @@ import { FC, FocusEvent } from 'react';
 // components
 import { UITools } from 'shared';
 
+// utils
+import { getLayoutGuideNumberDisplayValue } from './utils/getLayoutGuideNumberDisplayValue';
+
 export type TLayoutGuideNumberFieldProps = {
   ariaLabel: string;
   disabled?: boolean;
+  isMixed?: boolean;
   label: string;
   max?: number;
   min: number;
@@ -19,6 +23,7 @@ export type TLayoutGuideNumberFieldProps = {
 export const LayoutGuideNumberField: FC<TLayoutGuideNumberFieldProps> = ({
   ariaLabel,
   disabled = false,
+  isMixed = false,
   label,
   max = Number.POSITIVE_INFINITY,
   min,
@@ -31,7 +36,7 @@ export const LayoutGuideNumberField: FC<TLayoutGuideNumberFieldProps> = ({
   <UITools.Field
     Component={UITools.TextField}
     aria-label={ariaLabel}
-    defaultValue={disabled ? '' : `${value}${unit}`}
+    defaultValue={getLayoutGuideNumberDisplayValue(disabled, isMixed, value, unit)}
     disabled={disabled}
     label={label}
     onBlur={onBlur}

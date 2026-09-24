@@ -21,25 +21,25 @@ import { TEffect } from 'types/design/types';
 import { TUseEffectsSectionResult } from './types';
 
 // utils
-import { closeOpenEffectPanel } from './utils/closeOpenEffectPanel';
+import { getItemsWithPatch } from '../../../utils/getItemsWithPatch';
+import { getReorderedItems } from '../../../utils/getReorderedItems';
+import { handleItemRemove } from '../../../utils/handleItemRemove';
+import { handleItemStartDrag } from '../../../utils/handleItemStartDrag';
+import { hasMatchingItemTypes } from '../../../utils/hasMatchingItemTypes';
+import { closeOpenItemPanel } from '../../../utils/closeOpenItemPanel';
 import { commitNodesEffects } from './utils/commitNodesEffects';
-import { getEffectsWithPatch } from './utils/getEffectsWithPatch';
 import { getEffectsWithScrub } from './utils/getEffectsWithScrub';
 import { getEffectsWithVisibility } from './utils/getEffectsWithVisibility';
 import { getMixedEffectKeys } from './utils/getMixedEffectKeys';
-import { getReorderedEffects } from './utils/getReorderedEffects';
 import { getSharedEffectPanelLayout } from '../../EffectSettingsPanel/utils/getSharedEffectPanelLayout';
 import { handleEffectAdd } from './utils/handleEffectAdd';
 import { handleEffectOpenChange } from './utils/handleEffectOpenChange';
-import { handleEffectRemove } from './utils/handleEffectRemove';
-import { handleEffectStartDrag } from './utils/handleEffectStartDrag';
-import { hasMatchingEffectTypes } from './utils/hasMatchingEffectTypes';
 
 export const useEffectsSection = (): TUseEffectsSectionResult => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectSelectedNodes).filter(isAppearanceNode);
   const [node] = nodes;
-  const isMixed = !hasMatchingEffectTypes(nodes);
+  const isMixed = !hasMatchingItemTypes(nodes.map((selected) => selected.effects ?? NO_EFFECTS));
   const effects = isMixed ? NO_EFFECTS : (node?.effects ?? NO_EFFECTS);
   const nodeIds = nodes.map((selected) => selected.id);
   const getEffectsAt = (index: number): TEffect[] => nodes.map((selected) => (selected.effects ?? NO_EFFECTS)[index]);
@@ -48,10 +48,10 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
   const { onPickerOpenChange, openPickerIndex } = useOpenPickerIndex(node?.id, 'effects', null);
   const { onBlendModePreview } = useEffectBlendModePreview(nodeIds, openPickerIndex);
   const commit = (getEffects: TFunc<[TEffect[]], TEffect[]>): void => commitNodesEffects(dispatch, nodes, getEffects);
-  const commitReorder = (reordered: TEffect[]): void => commit((nodeEffects) => getReorderedEffects(nodeEffects, effects, reordered));
+  const commitReorder = (reordered: TEffect[]): void => commit((nodeEffects) => getReorderedItems(nodeEffects, effects, reordered));
   const { beginDrag, dragState, registerRow } = useItemsReorderDrag(effects, commitReorder, setSelectedIndices, containerRef);
   const isHidden = (index: number): boolean => getEffectsAt(index).every((effect) => effect.visible === false);
-  const closeOpenPanel = (): void => closeOpenEffectPanel(openPickerIndex, onPickerOpenChange);
+  const closeOpenPanel = (): void => closeOpenItemPanel(openPickerIndex, onPickerOpenChange);
 
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, () => setSelectedIndices([]));
 
@@ -67,15 +67,14 @@ export const useEffectsSection = (): TUseEffectsSectionResult => {
     isRowSelected: (index) => selectedIndices.includes(index),
     onAdd: (type): void => handleEffectAdd(type, isMixed, effects.length, commit, setSelectedIndices, onPickerOpenChange),
     onBlendModePreview,
-    onChange: (index, patch): void => commit((nodeEffects) => getEffectsWithPatch(nodeEffects, index, () => patch)),
+    onChange: (index, patch): void => commit((nodeEffects) => getItemsWithPatch(nodeEffects, index, () => patch)),
     onDragEnd: () => dispatch(endHistoryGesture()),
     onDragStart: () => dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT)),
     onFieldScrub: (index, field, min, value): void =>
       commit((nodeEffects) => getEffectsWithScrub(nodeEffects, index, effects[index], field, min, value)),
     onOpenChange: (index, isOpen): void => handleEffectOpenChange(index, isOpen, setSelectedIndices, onPickerOpenChange),
-    onRemove: (index): void => handleEffectRemove(index, closeOpenPanel, setSelectedIndices, commit),
-    onStartDrag: (index, event): void =>
-      handleEffectStartDrag(index, event, closeOpenPanel, selectedIndices, setSelectedIndices, beginDrag),
+    onRemove: (index): void => handleItemRemove(index, closeOpenPanel, setSelectedIndices, commit),
+    onStartDrag: (index, event): void => handleItemStartDrag(index, event, closeOpenPanel, selectedIndices, setSelectedIndices, beginDrag),
     onToggleVisible: (index): void => commit((nodeEffects) => getEffectsWithVisibility(nodeEffects, index, isHidden(index))),
     openIndex: openPickerIndex,
     registerRow,

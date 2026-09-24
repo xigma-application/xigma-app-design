@@ -1,9 +1,9 @@
 import { PointerEvent as ReactPointerEvent } from 'react';
 
 // utils
-import { resolveFillDragIndices } from '../../../../FillSection/hooks/useFillSection/utils/resolveFillDragIndices';
+import { resolveFillDragIndices } from '../FillSection/hooks/useFillSection/utils/resolveFillDragIndices';
 
-export const handleEffectStartDrag = (
+export const handleItemStartDrag = (
   index: number,
   event: ReactPointerEvent,
   closeOpenPanel: TFunc,

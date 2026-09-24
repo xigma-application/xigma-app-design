@@ -3,7 +3,7 @@ import { TEffect } from 'types/design/types';
 import { TEffectNumberField } from '../../../types';
 
 // utils
-import { getEffectsWithPatch } from './getEffectsWithPatch';
+import { getItemsWithPatch } from '../../../../utils/getItemsWithPatch';
 import { getScrubbedEffectPatch } from './getScrubbedEffectPatch';
 
 export const getEffectsWithScrub = (
@@ -13,4 +13,4 @@ export const getEffectsWithScrub = (
   field: TEffectNumberField,
   min: number,
   value: number,
-): TEffect[] => getEffectsWithPatch(effects, index, (effect) => getScrubbedEffectPatch(effect, baseEffect, field, min, value));
+): TEffect[] => getItemsWithPatch(effects, index, (effect) => getScrubbedEffectPatch(effect, baseEffect, field, min, value));

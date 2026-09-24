@@ -635,6 +635,7 @@
   "design.rightPanel.panelProperties.common.layoutGuideSection.addAriaLabel": "Add layout guide",
   "design.rightPanel.panelProperties.common.layoutGuideSection.addTooltip": "Add layout guide",
   "design.rightPanel.panelProperties.common.layoutGuideSection.label": "Layout guide",
+  "design.rightPanel.panelProperties.common.layoutGuideSection.mixedContent": "Click + to replace mixed content",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.reorderAriaLabel": "Reorder layout guide",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.settingsTooltip": "Layout guide settings",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.hideAriaLabel": "Hide layout guide",

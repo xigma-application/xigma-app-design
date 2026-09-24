@@ -7,10 +7,10 @@ import LayoutGuideAlignField from '../LayoutGuideAlignField/LayoutGuideAlignFiel
 import LayoutGuideNumberField from '../LayoutGuideNumberField/LayoutGuideNumberField';
 
 // others
+import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from '../../constants';
 
 // types
-import { LayoutGuideRowsAlign } from 'types/design/enums';
 import { TColorPickerValue } from 'shared/UITools/ColorPicker/types';
 import { TLayoutGuide } from 'types/design/types';
 
@@ -21,8 +21,10 @@ import { getLayoutGuideRowsAlignOptions } from '../utils/getLayoutGuideRowsAlign
 
 export type TLayoutGuideRowsFieldsProps = {
   guide: TLayoutGuide;
+  isStretchedOnAny?: boolean;
+  mixedKeys: Set<keyof TLayoutGuide>;
   onBlur: (field: TLayoutGuideNumberField, min: number, unit?: string) => TFunc<[FocusEvent<HTMLInputElement>]>;
-  onChange: TFunc<[TLayoutGuide]>;
+  onChange: TFunc<[Partial<TLayoutGuide>]>;
   onCommitAlpha: TFunc<[number]>;
   onCommitHex: TFunc<[string]>;
   onDragEnd: TFunc;
@@ -33,6 +35,8 @@ export type TLayoutGuideRowsFieldsProps = {
 
 export const LayoutGuideRowsFields: FC<TLayoutGuideRowsFieldsProps> = ({
   guide,
+  isStretchedOnAny = false,
+  mixedKeys,
   onBlur,
   onChange,
   onCommitAlpha,
@@ -51,14 +55,17 @@ export const LayoutGuideRowsFields: FC<TLayoutGuideRowsFieldsProps> = ({
         ariaLabel={t(`${translationNameSpace}.settings.fields.count`)}
         label={t(`${translationNameSpace}.settings.labels.count`)}
         min={1}
+        isMixed={mixedKeys.has('count')}
         onBlur={onBlur('count', 1)}
         onScrub={onScrub('count', 1)}
         value={getLayoutGuideFieldValue(guide, 'count')}
       />
       <EffectColorField
         alpha={guide.opacity}
+        alphaDisplayValue={mixedKeys.has('opacity') ? MIXED_LABEL : undefined}
         e2eValue="layout-guide"
         hex={guide.color}
+        hexDisplayValue={mixedKeys.has('color') ? MIXED_LABEL : undefined}
         label={t(`${translationNameSpace}.settings.labels.color`)}
         onCommitAlpha={onCommitAlpha}
         onCommitHex={onCommitHex}
@@ -69,15 +76,16 @@ export const LayoutGuideRowsFields: FC<TLayoutGuideRowsFieldsProps> = ({
       />
       <LayoutGuideAlignField
         label={t(`${translationNameSpace}.settings.labels.type`)}
-        onSelect={(rowsAlign): void => onChange({ ...guide, rowsAlign })}
+        onSelect={(rowsAlign): void => onChange({ rowsAlign })}
         options={getLayoutGuideRowsAlignOptions((option) => t(`${translationNameSpace}.settings.rowsAlign.options.${option}`))}
-        value={align}
+        value={mixedKeys.has('rowsAlign') ? undefined : align}
       />
       <LayoutGuideNumberField
         ariaLabel={t(`${translationNameSpace}.settings.fields.height`)}
-        disabled={align === LayoutGuideRowsAlign.stretch}
+        disabled={isStretchedOnAny}
         label={t(`${translationNameSpace}.settings.labels.height`)}
         min={1}
+        isMixed={mixedKeys.has('height')}
         onBlur={onBlur('height', 1)}
         onScrub={onScrub('height', 1)}
         placeholder={t(`${translationNameSpace}.settings.autoPlaceholder`)}
@@ -87,6 +95,7 @@ export const LayoutGuideRowsFields: FC<TLayoutGuideRowsFieldsProps> = ({
         ariaLabel={t(`${translationNameSpace}.settings.fields.margin`)}
         label={t(`${translationNameSpace}.settings.labels.margin`)}
         min={0}
+        isMixed={mixedKeys.has('margin')}
         onBlur={onBlur('margin', 0)}
         onScrub={onScrub('margin', 0)}
         value={getLayoutGuideFieldValue(guide, 'margin')}
@@ -95,6 +104,7 @@ export const LayoutGuideRowsFields: FC<TLayoutGuideRowsFieldsProps> = ({
         ariaLabel={t(`${translationNameSpace}.settings.fields.gutter`)}
         label={t(`${translationNameSpace}.settings.labels.gutter`)}
         min={0}
+        isMixed={mixedKeys.has('gutter')}
         onBlur={onBlur('gutter', 0)}
         onScrub={onScrub('gutter', 0)}
         value={getLayoutGuideFieldValue(guide, 'gutter')}

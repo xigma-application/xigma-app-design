@@ -1,12 +1,20 @@
 // types
 import { AppDispatch } from 'store/store';
-import { TLayoutGuide } from 'types/design/types';
+import { TFrameNode, TLayoutGuide } from 'types/design/types';
 
 // others
-import { updateNode } from 'store/design/slice';
+import { updateNode, updateNodes } from 'store/design/slice';
 
-export const commitLayoutGuides = (dispatch: AppDispatch, nodeId: string | undefined, layoutGuides: TLayoutGuide[]): void => {
-  if (nodeId) {
-    dispatch(updateNode({ changes: { layoutGuides }, id: nodeId }));
+export const commitLayoutGuides = (
+  dispatch: AppDispatch,
+  nodes: TFrameNode[],
+  getGuides: TFunc<[TLayoutGuide[]], TLayoutGuide[]>,
+): void => {
+  const updates = nodes.map((node) => ({ changes: { layoutGuides: getGuides(node.layoutGuides ?? []) }, id: node.id }));
+
+  if (updates.length === 1) {
+    dispatch(updateNode(updates[0]));
+  } else if (updates.length > 1) {
+    dispatch(updateNodes(updates));
   }
 };

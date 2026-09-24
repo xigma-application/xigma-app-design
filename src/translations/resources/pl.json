@@ -647,6 +647,7 @@
   "design.rightPanel.panelProperties.common.layoutGuideSection.addAriaLabel": "Dodaj siatkę pomocniczą",
   "design.rightPanel.panelProperties.common.layoutGuideSection.addTooltip": "Dodaj siatkę pomocniczą",
   "design.rightPanel.panelProperties.common.layoutGuideSection.label": "Siatka pomocnicza",
+  "design.rightPanel.panelProperties.common.layoutGuideSection.mixedContent": "Kliknij +, aby zastąpić mieszaną zawartość",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.reorderAriaLabel": "Zmień kolejność siatki pomocniczej",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.settingsTooltip": "Ustawienia siatki pomocniczej",
   "design.rightPanel.panelProperties.common.layoutGuideSection.row.hideAriaLabel": "Ukryj siatkę pomocniczą",

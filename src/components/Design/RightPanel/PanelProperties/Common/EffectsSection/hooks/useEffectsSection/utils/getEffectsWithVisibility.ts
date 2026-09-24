@@ -2,7 +2,7 @@
 import { TEffect } from 'types/design/types';
 
 // utils
-import { getEffectsWithPatch } from './getEffectsWithPatch';
+import { getItemsWithPatch } from '../../../../utils/getItemsWithPatch';
 
 export const getEffectsWithVisibility = (effects: TEffect[], index: number, isHidden: boolean): TEffect[] =>
-  getEffectsWithPatch(effects, index, () => ({ visible: isHidden ? undefined : false }));
+  getItemsWithPatch(effects, index, () => ({ visible: isHidden ? undefined : false }));

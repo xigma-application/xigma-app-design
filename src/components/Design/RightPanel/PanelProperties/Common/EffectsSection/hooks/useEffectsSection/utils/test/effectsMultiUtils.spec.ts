@@ -7,18 +7,18 @@ import { TEffect } from 'types/design/types';
 import { updateNode, updateNodes } from 'store/design/slice';
 
 // utils
-import { closeOpenEffectPanel } from '../closeOpenEffectPanel';
+import { closeOpenItemPanel } from '../../../../../utils/closeOpenItemPanel';
 import { commitNodesEffects } from '../commitNodesEffects';
 import { createEffect } from 'utils/design/effects/createEffect';
 import { getEffectsWithScrub } from '../getEffectsWithScrub';
 import { getEffectsWithVisibility } from '../getEffectsWithVisibility';
 import { getMixedEffectKeys } from '../getMixedEffectKeys';
-import { getReorderedEffects } from '../getReorderedEffects';
+import { getReorderedItems } from '../../../../../utils/getReorderedItems';
 import { handleEffectAdd } from '../handleEffectAdd';
 import { handleEffectOpenChange } from '../handleEffectOpenChange';
-import { handleEffectRemove } from '../handleEffectRemove';
-import { handleEffectStartDrag } from '../handleEffectStartDrag';
-import { hasMatchingEffectTypes } from '../hasMatchingEffectTypes';
+import { handleItemRemove } from '../../../../../utils/handleItemRemove';
+import { handleItemStartDrag } from '../../../../../utils/handleItemStartDrag';
+import { hasMatchingItemTypes } from '../../../../../utils/hasMatchingItemTypes';
 
 const nodeWith = (id: string, effects?: TEffect[]): TAppearanceNode => ({ effects, id }) as TAppearanceNode;
 
@@ -29,10 +29,20 @@ describe('effects multi-selection utils', () => {
     const blur = createEffect(EffectType.layerBlur);
 
     // result
-    expect(hasMatchingEffectTypes([nodeWith('a', [shadow, blur]), nodeWith('b', [{ ...shadow, x: 9 }, blur])])).toBe(true);
-    expect(hasMatchingEffectTypes([nodeWith('a', [shadow, blur]), nodeWith('b', [blur, shadow])])).toBe(false);
-    expect(hasMatchingEffectTypes([nodeWith('a', [shadow]), nodeWith('b')])).toBe(false);
-    expect(hasMatchingEffectTypes([nodeWith('a'), nodeWith('b', [])])).toBe(true);
+    expect(
+      hasMatchingItemTypes([
+        [shadow, blur],
+        [{ ...shadow, x: 9 }, blur],
+      ]),
+    ).toBe(true);
+    expect(
+      hasMatchingItemTypes([
+        [shadow, blur],
+        [blur, shadow],
+      ]),
+    ).toBe(false);
+    expect(hasMatchingItemTypes([[shadow], []])).toBe(false);
+    expect(hasMatchingItemTypes([[], []])).toBe(true);
   });
 
   it('should report only the keys whose effective values differ, treating defaults as set', () => {
@@ -55,7 +65,7 @@ describe('effects multi-selection utils', () => {
     ];
 
     // result
-    expect(getReorderedEffects(own, shown, [shown[1], shown[0]])).toEqual([own[1], own[0]]);
+    expect(getReorderedItems(own, shown, [shown[1], shown[0]])).toEqual([own[1], own[0]]);
   });
 
   it('should write one updateNode for a single node and one updateNodes for several', () => {
@@ -123,10 +133,10 @@ describe('effects multi-selection utils', () => {
 
     // action
     handleEffectOpenChange(1, true, setSelectedIndices, onPickerOpenChange);
-    handleEffectRemove(0, closeOpenPanel, setSelectedIndices, commit);
-    handleEffectStartDrag(2, {} as never, closeOpenPanel, [], setSelectedIndices, beginDrag);
-    closeOpenEffectPanel(3, onPickerOpenChange);
-    closeOpenEffectPanel(null, onPickerOpenChange);
+    handleItemRemove(0, closeOpenPanel, setSelectedIndices, commit);
+    handleItemStartDrag(2, {} as never, closeOpenPanel, [], setSelectedIndices, beginDrag);
+    closeOpenItemPanel(3, onPickerOpenChange);
+    closeOpenItemPanel(null, onPickerOpenChange);
 
     // result
     expect(setSelectedIndices).toHaveBeenCalledWith([1]);

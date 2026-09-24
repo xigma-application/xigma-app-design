@@ -20,6 +20,7 @@ import styles from './layout-guide-row.module.scss';
 
 // types
 import { TLayoutGuide } from 'types/design/types';
+import { TLayoutGuideNumberField } from 'utils/design/layoutGuides/getLayoutGuideFieldValue';
 
 // utils
 import { getLayoutGuideRowLabel } from './utils/getLayoutGuideRowLabel';
@@ -28,11 +29,15 @@ export type TLayoutGuideRowProps = {
   canDrag: boolean;
   guide: TLayoutGuide;
   isDragging: boolean;
+  isHidden: boolean;
   isOpen: boolean;
   isSelected: boolean;
-  onChange: TFunc<[TLayoutGuide]>;
+  isStretchedOnAny: boolean;
+  mixedKeys: Set<keyof TLayoutGuide>;
+  onChange: TFunc<[Partial<TLayoutGuide>]>;
   onDragEnd: TFunc;
   onDragStart: TFunc;
+  onFieldScrub: TFunc<[TLayoutGuideNumberField, number, number]>;
   onOpenChange: TFunc<[boolean]>;
   onRemove: TFunc;
   onSelect: TFunc;
@@ -45,11 +50,15 @@ export const LayoutGuideRow: FC<TLayoutGuideRowProps> = ({
   canDrag,
   guide,
   isDragging,
+  isHidden,
   isOpen,
   isSelected,
+  isStretchedOnAny,
+  mixedKeys,
   onChange,
   onDragEnd,
   onDragStart,
+  onFieldScrub,
   onOpenChange,
   onRemove,
   onSelect,
@@ -63,7 +72,7 @@ export const LayoutGuideRow: FC<TLayoutGuideRowProps> = ({
   const { markUserClose, onClose, onCloseAutoFocus } = useReturnFocusOnUserClose(onOpenChange);
   const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false);
   const handleRowClick = useSelectLayoutGuideRow(onSelect);
-  const isVisible = guide.visible !== false;
+  const isVisible = !isHidden;
   const isAnyPopoverOpen = isOpen || isTypeMenuOpen;
 
   return (
@@ -106,7 +115,16 @@ export const LayoutGuideRow: FC<TLayoutGuideRowProps> = ({
         }
         triggerTooltip={t(`${translationNameSpace}.row.settingsTooltip`)}
       >
-        <LayoutGuideSettingsPanel guide={guide} onChange={onChange} onClose={onClose} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+        <LayoutGuideSettingsPanel
+          guide={guide}
+          isStretchedOnAny={isStretchedOnAny}
+          mixedKeys={mixedKeys}
+          onChange={onChange}
+          onClose={onClose}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+          onFieldScrub={onFieldScrub}
+        />
       </UITools.Popover>
       <UITools.Popover
         align="start"
@@ -123,7 +141,7 @@ export const LayoutGuideRow: FC<TLayoutGuideRowProps> = ({
           </button>
         }
       >
-        <LayoutGuideTypeItems onSelect={(type): void => onChange({ ...guide, type })} selectedType={guide.type} />
+        <LayoutGuideTypeItems onSelect={(type): void => onChange({ type })} selectedType={guide.type} />
       </UITools.Popover>
       <Tooltip align="end" content={t(`${translationNameSpace}.row.${isVisible ? 'hideTooltip' : 'showTooltip'}`)}>
         <UITools.ButtonIcon
