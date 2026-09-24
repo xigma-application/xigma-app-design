@@ -73,8 +73,8 @@ test.describe('Design panels — Effects section', () => {
     await expect(page.getByLabel('Effect spread')).toHaveValue('0');
     await expect(page.getByLabel('Effect color').locator('..').getByRole('textbox').first()).toHaveValue('000000');
     await expect(panel.getByText('Position')).toHaveCount(1);
-    expect((await panel.locator('[class*="EffectSettingsField_"]').first().boundingBox())?.height).toBe(32);
-    expect((await panel.locator('[class*="EffectSettingsField__control"]').first().boundingBox())?.width).toBe(136);
+    expect((await panel.locator('[class*="Field__control"]').first().locator('..').boundingBox())?.height).toBe(32);
+    expect((await panel.locator('[class*="Field__control"]').first().boundingBox())?.width).toBe(136);
 
     // action
     await page.getByLabel('Effect Y offset').fill('8');

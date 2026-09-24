@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { ScrubbableInput } from '@xigma/components';
 
 // components
-import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
@@ -26,7 +25,6 @@ import { useStrokeSettingsBasicTab } from './hooks/useStrokeSettingsBasicTab/use
 import { translationNameSpace } from '../../../../constants';
 
 // styles
-import fieldStyles from '../StrokeSettingsField/stroke-settings-field.module.scss';
 import styles from './stroke-settings-basic-tab.module.scss';
 
 export const StrokeSettingsBasicTab: FC = () => {
@@ -78,137 +76,137 @@ export const StrokeSettingsBasicTab: FC = () => {
 
   return (
     <div className={styles.StrokeSettingsBasicTab}>
-      <StrokeSettingsField label={t(`${namespace}.style.label`)}>
-        <UITools.Dropdown<StrokeStyle>
-          bypassGlobalShortcuts={false}
-          className={fieldStyles.StrokeSettingsField__input}
-          icon={STROKE_STYLE_ICONS[style]}
-          menuWidth={STROKE_STYLE_MENU_WIDTH_PX}
-          onSelect={onStyleSelect}
-          options={styleOptions}
-          textAlign="left"
-          value={style}
-          variant="outline"
-        />
-      </StrokeSettingsField>
+      <UITools.Field
+        Component={UITools.Dropdown<StrokeStyle>}
+        controlWidth={128}
+        label={t(`${namespace}.style.label`)}
+        bypassGlobalShortcuts={false}
+        icon={STROKE_STYLE_ICONS[style]}
+        menuWidth={STROKE_STYLE_MENU_WIDTH_PX}
+        onSelect={onStyleSelect}
+        options={styleOptions}
+        textAlign="left"
+        value={style}
+        variant="outline"
+      />
       {isDashed && (
         <>
-          <StrokeSettingsField label={t(`${namespace}.dash.label`)}>
-            <UITools.TextField
-              aria-label={t(`${namespace}.dash.label`)}
-              className={fieldStyles.StrokeSettingsField__input}
-              defaultValue={String(dash)}
-              e2eValue="stroke-dash"
-              keepMountedWhileFocused
-              onBlur={onDashBlur}
-              onKeyDown={onDashKeyDown}
-              startAdornment={
-                <UITools.ScrubbableEdge
-                  max={STROKE_DASH_MAX_LENGTH}
-                  min={0}
-                  onChange={onDashScrub}
-                  onDragEnd={onScrubDragEnd}
-                  onDragStart={onScrubDragStart}
-                  value={dash}
-                />
-              }
-              type="text"
-            />
-          </StrokeSettingsField>
-          <StrokeSettingsField label={t(`${namespace}.gap.label`)}>
-            <UITools.TextField
-              aria-label={t(`${namespace}.gap.label`)}
-              className={fieldStyles.StrokeSettingsField__input}
-              defaultValue={String(gap)}
-              e2eValue="stroke-gap"
-              keepMountedWhileFocused
-              onBlur={onGapBlur}
-              onKeyDown={onGapKeyDown}
-              startAdornment={
-                <UITools.ScrubbableEdge
-                  max={STROKE_DASH_MAX_LENGTH}
-                  min={0}
-                  onChange={onGapScrub}
-                  onDragEnd={onScrubDragEnd}
-                  onDragStart={onScrubDragStart}
-                  value={gap}
-                />
-              }
-              type="text"
-            />
-          </StrokeSettingsField>
-        </>
-      )}
-      {isCustom && (
-        <StrokeSettingsField label={t(`${namespace}.dashes.label`)}>
-          <UITools.TextField
-            aria-label={t(`${namespace}.dashes.label`)}
-            className={fieldStyles.StrokeSettingsField__input}
-            defaultValue={dashes.join(', ')}
-            e2eValue="stroke-dashes"
+          <UITools.Field
+            Component={UITools.TextField}
+            controlWidth={128}
+            label={t(`${namespace}.dash.label`)}
+            aria-label={t(`${namespace}.dash.label`)}
+            defaultValue={String(dash)}
+            e2eValue="stroke-dash"
             keepMountedWhileFocused
-            onBlur={onDashesBlur}
-            onKeyDown={onDashesKeyDown}
+            onBlur={onDashBlur}
+            onKeyDown={onDashKeyDown}
             startAdornment={
               <UITools.ScrubbableEdge
                 max={STROKE_DASH_MAX_LENGTH}
                 min={0}
-                onChange={onDashesScrub}
+                onChange={onDashScrub}
                 onDragEnd={onScrubDragEnd}
                 onDragStart={onScrubDragStart}
-                value={dashes[0] ?? 0}
+                value={dash}
               />
             }
             type="text"
           />
-        </StrokeSettingsField>
-      )}
-      {hasDashes && (
-        <>
-          <StrokeSettingsField label={t(`${namespace}.dashCap.label`)}>
-            <UITools.ToggleButtonGroup
-              className={fieldStyles.StrokeSettingsField__input}
-              onChange={onDashCapSelect}
-              toggleButtons={dashCapButtons}
-              value={dashCap}
-            />
-          </StrokeSettingsField>
-        </>
-      )}
-      <StrokeSettingsWidthProfileField disabled={hasDashes} />
-      <StrokeSettingsField label={t(`${namespace}.join.label`)}>
-        <UITools.ToggleButtonGroup
-          className={fieldStyles.StrokeSettingsField__input}
-          onChange={onJoinSelect}
-          toggleButtons={joinButtons}
-          value={join}
-        />
-      </StrokeSettingsField>
-      {isMiter && (
-        <StrokeSettingsField label={t(`${namespace}.miterAngle.label`)}>
-          <UITools.TextField
-            aria-label={t(`${namespace}.miterAngle.ariaLabel`)}
-            className={fieldStyles.StrokeSettingsField__input}
-            defaultValue={`${miterAngle}°`}
-            e2eValue="stroke-miter-angle"
+          <UITools.Field
+            Component={UITools.TextField}
+            controlWidth={128}
+            label={t(`${namespace}.gap.label`)}
+            aria-label={t(`${namespace}.gap.label`)}
+            defaultValue={String(gap)}
+            e2eValue="stroke-gap"
             keepMountedWhileFocused
-            onBlur={onMiterAngleBlur}
-            onKeyDown={onMiterAngleKeyDown}
+            onBlur={onGapBlur}
+            onKeyDown={onGapKeyDown}
             startAdornment={
-              <ScrubbableInput
-                max={STROKE_MITER_ANGLE_MAX}
-                min={STROKE_MITER_ANGLE_MIN}
-                onChange={onMiterAngleScrub}
-                onMouseDown={onMiterAngleDragStart}
-                onMouseUp={onMiterAngleDragEnd}
-                value={miterAngle}
-              >
-                <UITools.InputAdornment icon="Protractor" />
-              </ScrubbableInput>
+              <UITools.ScrubbableEdge
+                max={STROKE_DASH_MAX_LENGTH}
+                min={0}
+                onChange={onGapScrub}
+                onDragEnd={onScrubDragEnd}
+                onDragStart={onScrubDragStart}
+                value={gap}
+              />
             }
             type="text"
           />
-        </StrokeSettingsField>
+        </>
+      )}
+      {isCustom && (
+        <UITools.Field
+          Component={UITools.TextField}
+          controlWidth={128}
+          label={t(`${namespace}.dashes.label`)}
+          aria-label={t(`${namespace}.dashes.label`)}
+          defaultValue={dashes.join(', ')}
+          e2eValue="stroke-dashes"
+          keepMountedWhileFocused
+          onBlur={onDashesBlur}
+          onKeyDown={onDashesKeyDown}
+          startAdornment={
+            <UITools.ScrubbableEdge
+              max={STROKE_DASH_MAX_LENGTH}
+              min={0}
+              onChange={onDashesScrub}
+              onDragEnd={onScrubDragEnd}
+              onDragStart={onScrubDragStart}
+              value={dashes[0] ?? 0}
+            />
+          }
+          type="text"
+        />
+      )}
+      {hasDashes && (
+        <>
+          <UITools.Field
+            Component={UITools.ToggleButtonGroup}
+            controlWidth={128}
+            label={t(`${namespace}.dashCap.label`)}
+            onChange={onDashCapSelect}
+            toggleButtons={dashCapButtons}
+            value={dashCap}
+          />
+        </>
+      )}
+      <StrokeSettingsWidthProfileField disabled={hasDashes} />
+      <UITools.Field
+        Component={UITools.ToggleButtonGroup}
+        controlWidth={128}
+        label={t(`${namespace}.join.label`)}
+        onChange={onJoinSelect}
+        toggleButtons={joinButtons}
+        value={join}
+      />
+      {isMiter && (
+        <UITools.Field
+          Component={UITools.TextField}
+          controlWidth={128}
+          label={t(`${namespace}.miterAngle.label`)}
+          aria-label={t(`${namespace}.miterAngle.ariaLabel`)}
+          defaultValue={`${miterAngle}°`}
+          e2eValue="stroke-miter-angle"
+          keepMountedWhileFocused
+          onBlur={onMiterAngleBlur}
+          onKeyDown={onMiterAngleKeyDown}
+          startAdornment={
+            <ScrubbableInput
+              max={STROKE_MITER_ANGLE_MAX}
+              min={STROKE_MITER_ANGLE_MIN}
+              onChange={onMiterAngleScrub}
+              onMouseDown={onMiterAngleDragStart}
+              onMouseUp={onMiterAngleDragEnd}
+              value={miterAngle}
+            >
+              <UITools.InputAdornment icon="Protractor" />
+            </ScrubbableInput>
+          }
+          type="text"
+        />
       )}
     </div>
   );

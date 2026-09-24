@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 // components
 import EffectGlassLight from './EffectGlassLight/EffectGlassLight';
 import EffectGlassNumberField from './EffectGlassNumberField/EffectGlassNumberField';
-import EffectSettingsField from '../EffectSettingsField/EffectSettingsField';
 import { UITools } from 'shared';
 
 // others
@@ -73,19 +72,20 @@ export const EffectGlassControls: FC<TEffectGlassControlsProps> = ({ effect, onC
       <div className={styles.EffectGlassControls__divider} />
       <div className={styles.EffectGlassControls__settings}>
         {EFFECT_GLASS_SLIDERS.map(({ key, max, min }) => (
-          <EffectSettingsField key={key} label={t(`${translationNameSpace}.settings.labels.${key}`)}>
-            <UITools.SliderInput
-              ariaLabel={t(`${translationNameSpace}.settings.fields.${key}`)}
-              e2eValue={`effect-${key}`}
-              max={max}
-              min={min}
-              onChange={(value): void => onChange({ ...effect, [key]: value })}
-              onDragEnd={onDragEnd}
-              onDragStart={onDragStart}
-              tooltip={t(`${translationNameSpace}.settings.labels.${key}`)}
-              value={glass[key]}
-            />
-          </EffectSettingsField>
+          <UITools.Field
+            Component={UITools.SliderInput}
+            ariaLabel={t(`${translationNameSpace}.settings.fields.${key}`)}
+            e2eValue={`effect-${key}`}
+            key={key}
+            label={t(`${translationNameSpace}.settings.labels.${key}`)}
+            max={max}
+            min={min}
+            onChange={(value): void => onChange({ ...effect, [key]: value })}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            tooltip={t(`${translationNameSpace}.settings.labels.${key}`)}
+            value={glass[key]}
+          />
         ))}
       </div>
     </Fragment>

@@ -4,12 +4,9 @@
   flex-direction: column;
   padding-top: 8px;
 
-  &__row {
-    align-items: center;
-    display: grid;
-    grid-template-columns: 1fr 136px;
-    height: 32px;
-    justify-content: space-between;
+  &__rows {
+    display: flex;
+    flex-direction: column;
     padding: 0 16px;
   }
 
@@ -27,7 +24,6 @@
     grid-template-columns: 1fr 136px;
     height: 72px;
     justify-content: space-between;
-    padding: 0 16px;
 
     .PatternSettings__label {
       align-items: center;

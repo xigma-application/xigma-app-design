@@ -225,7 +225,7 @@ test.describe('Design panels — Stroke section', () => {
     await expect(page.getByText('Dynamic')).toBeVisible();
     await expect(page.getByText('Brush')).toBeVisible();
 
-    const rows = page.locator('[class*="StrokeSettingsField__row"]');
+    const rows = page.locator('[class*="Field__control"]').locator('..');
 
     await expect(rows).toHaveCount(3);
     await expect(page.getByLabel('Miter angle', { exact: true })).toHaveCount(0);
@@ -235,9 +235,7 @@ test.describe('Design panels — Stroke section', () => {
     }
 
     const panelBox = await page.locator('[class*="StrokeSettingsPanel__body"]').boundingBox();
-    const inputBoxes = await Promise.all(
-      [0, 1, 2].map((index) => rows.nth(index).locator('[class*="StrokeSettingsField__control"]').boundingBox()),
-    );
+    const inputBoxes = await Promise.all([0, 1, 2].map((index) => rows.nth(index).locator('[class*="Field__control"]').boundingBox()));
 
     for (const box of inputBoxes) {
       expect(box?.width).toBe(128);
@@ -293,7 +291,7 @@ test.describe('Design panels — Stroke section', () => {
       await expect.poll(async () => Number(await field.inputValue()), { timeout: 10000 }).toBeGreaterThan(20);
     }
 
-    const widthProfileRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' });
+    const widthProfileRow = page.locator('[class*="Field__control"]').locator('..').filter({ hasText: 'Width profile' });
 
     await expect(widthProfileRow.locator('button').first()).toBeDisabled();
     await expect(page.getByLabel('Flip width profile')).toBeDisabled();
@@ -456,7 +454,7 @@ test.describe('Design panels — Stroke section', () => {
     await weight.blur();
     await page.getByLabel('Advanced stroke settings').click();
 
-    const rows = page.locator('[class*="StrokeSettingsField__row"]');
+    const rows = page.locator('[class*="Field__control"]').locator('..');
     const widthProfileRow = rows.filter({ hasText: 'Width profile' });
 
     // result
@@ -602,7 +600,7 @@ test.describe('Design panels — Stroke section', () => {
     await weight.blur();
     await page.getByLabel('Advanced stroke settings').click();
 
-    const styleRow = page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Style' });
+    const styleRow = page.locator('[class*="Field__control"]').locator('..').filter({ hasText: 'Style' });
 
     // result
     const solidScreenshot = await designPage.canvas.screenshot();
@@ -691,7 +689,7 @@ test.describe('Design panels — Stroke section', () => {
     const id = await readFirstNodeId(page);
 
     await page.getByLabel('Advanced stroke settings').click();
-    await page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Style' }).locator('button').first().click();
+    await page.locator('[class*="Field__control"]').locator('..').filter({ hasText: 'Style' }).locator('button').first().click();
     await page.locator('[class*="DropdownOption__label"]', { hasText: 'Custom' }).click();
 
     const dashes = page.getByLabel('Dashes');
@@ -814,7 +812,7 @@ test.describe('Design panels — Stroke section', () => {
     // action: the width profile reshapes the brush stroke too
     const heistLeft = await designPage.canvas.screenshot();
 
-    await page.locator('[class*="StrokeSettingsField__row"]').filter({ hasText: 'Width profile' }).locator('button').first().click();
+    await page.locator('[class*="Field__control"]').locator('..').filter({ hasText: 'Width profile' }).locator('button').first().click();
     await page.getByAltText('Wedge').click();
 
     // result

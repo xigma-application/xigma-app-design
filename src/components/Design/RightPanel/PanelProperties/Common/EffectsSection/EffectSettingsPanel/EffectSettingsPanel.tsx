@@ -10,7 +10,6 @@ import EffectClipToShapeField from './EffectClipToShapeField/EffectClipToShapeFi
 import EffectColorField from './EffectColorField/EffectColorField';
 import EffectNoiseTypeToggle from './EffectNoiseTypeToggle/EffectNoiseTypeToggle';
 import EffectBlurModeToggle from './EffectBlurModeToggle/EffectBlurModeToggle';
-import EffectSettingsField from './EffectSettingsField/EffectSettingsField';
 import EffectSettingsHeader from './EffectSettingsHeader/EffectSettingsHeader';
 import { UITools } from 'shared';
 
@@ -21,7 +20,6 @@ import { useEffectSettingsPanel } from './hooks/useEffectSettingsPanel/useEffect
 import { EFFECT_FIELD_MAX, EFFECT_SCRUB_LIMIT, translationNameSpace } from '../constants';
 
 // styles
-import fieldStyles from './EffectSettingsField/effect-settings-field.module.scss';
 import styles from './effect-settings-panel.module.scss';
 
 // utils
@@ -90,33 +88,30 @@ export const EffectSettingsPanel: FC<TEffectSettingsPanelProps> = ({
           <EffectNoiseTypeToggle noiseType={effect.noiseType} onChange={(noiseType): void => onChange({ ...effect, noiseType })} />
         )}
         {fields.map(({ adornmentLabel, ariaKey, icon, isReadOnly, key, labelKey, min, unit }) => (
-          <EffectSettingsField
+          <UITools.Field
+            Component={UITools.TextField}
+            aria-label={t(`${translationNameSpace}.settings.fields.${ariaKey ?? key}`)}
+            defaultValue={`${getEffectFieldValue(effect, key)}${unit ?? ''}`}
+            disabled={isReadOnly}
+            e2eValue={`effect-${key}`}
             key={`${key}-${adornmentLabel ?? ''}`}
             label={labelKey && t(`${translationNameSpace}.settings.labels.${labelKey}`)}
-          >
-            <UITools.TextField
-              aria-label={t(`${translationNameSpace}.settings.fields.${ariaKey ?? key}`)}
-              className={fieldStyles.EffectSettingsField__input}
-              defaultValue={`${getEffectFieldValue(effect, key)}${unit ?? ''}`}
-              disabled={isReadOnly}
-              e2eValue={`effect-${key}`}
-              onBlur={onBlur(key, min, unit)}
-              startAdornment={
-                <ScrubbableInput
-                  max={Math.min(EFFECT_FIELD_MAX[key] ?? EFFECT_SCRUB_LIMIT, EFFECT_SCRUB_LIMIT)}
-                  min={Math.max(min, -EFFECT_SCRUB_LIMIT)}
-                  onChange={onScrub(key, min)}
-                  onMouseDown={onDragStart}
-                  onMouseUp={onDragEnd}
-                  value={getEffectFieldValue(effect, key)}
-                >
-                  <UITools.InputAdornment icon={icon} label={adornmentLabel} />
-                </ScrubbableInput>
-              }
-              stepNumbers={{ max: EFFECT_FIELD_MAX[key], min }}
-              type="text"
-            />
-          </EffectSettingsField>
+            onBlur={onBlur(key, min, unit)}
+            startAdornment={
+              <ScrubbableInput
+                max={Math.min(EFFECT_FIELD_MAX[key] ?? EFFECT_SCRUB_LIMIT, EFFECT_SCRUB_LIMIT)}
+                min={Math.max(min, -EFFECT_SCRUB_LIMIT)}
+                onChange={onScrub(key, min)}
+                onMouseDown={onDragStart}
+                onMouseUp={onDragEnd}
+                value={getEffectFieldValue(effect, key)}
+              >
+                <UITools.InputAdornment icon={icon} label={adornmentLabel} />
+              </ScrubbableInput>
+            }
+            stepNumbers={{ max: EFFECT_FIELD_MAX[key], min }}
+            type="text"
+          />
         ))}
         {hasColor && (
           <EffectColorField

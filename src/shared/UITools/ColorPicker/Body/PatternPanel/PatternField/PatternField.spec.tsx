@@ -14,7 +14,7 @@ describe('PatternField behaviors', () => {
 
   it('should show a text label instead of an icon when no icon is given', () => {
     // before
-    render(<PatternField ariaLabel="Spacing X" e2eValue="spacing-x" label="X" onChange={vi.fn()} value={0} />);
+    render(<PatternField ariaLabel="Spacing X" e2eValue="spacing-x" adornmentLabel="X" onChange={vi.fn()} value={0} />);
 
     // result
     expect(screen.getByText('X')).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('PatternField behaviors', () => {
 
   it('should use a custom suffix instead of "%" when given one', () => {
     // before
-    render(<PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" onChange={vi.fn()} suffix="px" value={0} />);
+    render(<PatternField ariaLabel="Offset X" e2eValue="offset-x" adornmentLabel="X" onChange={vi.fn()} suffix="px" value={0} />);
 
     // result
     expect(screen.getByDisplayValue('0px')).toBeInTheDocument();
@@ -83,7 +83,16 @@ describe('PatternField behaviors', () => {
 
     // before
     render(
-      <PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" max={500} min={-500} onChange={onChange} suffix="px" value={0} />,
+      <PatternField
+        ariaLabel="Offset X"
+        e2eValue="offset-x"
+        adornmentLabel="X"
+        max={500}
+        min={-500}
+        onChange={onChange}
+        suffix="px"
+        value={0}
+      />,
     );
     const input = screen.getByDisplayValue('0px');
 
@@ -101,7 +110,16 @@ describe('PatternField behaviors', () => {
 
     // before
     render(
-      <PatternField ariaLabel="Offset X" e2eValue="offset-x" label="X" max={500} min={-500} onChange={onChange} suffix="px" value={0} />,
+      <PatternField
+        ariaLabel="Offset X"
+        e2eValue="offset-x"
+        adornmentLabel="X"
+        max={500}
+        min={-500}
+        onChange={onChange}
+        suffix="px"
+        value={0}
+      />,
     );
     const input = screen.getByDisplayValue('0px');
 

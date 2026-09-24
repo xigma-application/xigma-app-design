@@ -1,7 +1,6 @@
 import { FC } from 'react';
 
 // components
-import EffectSettingsField from '../EffectSettingsField/EffectSettingsField';
 import { UITools } from 'shared';
 
 // styles
@@ -35,23 +34,23 @@ export const EffectColorField: FC<TEffectColorFieldProps> = ({
   onPickerChange,
   triggerAriaLabel,
 }) => (
-  <EffectSettingsField label={label}>
-    <UITools.ColorPickerInput
-      align="start"
-      alpha={alpha}
-      className={styles.EffectSettingsPanel__color}
-      e2eValue={e2eValue}
-      hex={hex}
-      onCommitAlpha={onCommitAlpha}
-      onCommitHex={onCommitHex}
-      onDragEnd={onDragEnd}
-      onDragStart={onDragStart}
-      onPickerChange={onPickerChange}
-      side="left"
-      simple
-      triggerAriaLabel={triggerAriaLabel}
-    />
-  </EffectSettingsField>
+  <UITools.Field
+    Component={UITools.ColorPickerInput}
+    align="start"
+    alpha={alpha}
+    className={styles.EffectSettingsPanel__color}
+    e2eValue={e2eValue}
+    hex={hex}
+    label={label}
+    onCommitAlpha={onCommitAlpha}
+    onCommitHex={onCommitHex}
+    onDragEnd={onDragEnd}
+    onDragStart={onDragStart}
+    onPickerChange={onPickerChange}
+    side="left"
+    simple
+    triggerAriaLabel={triggerAriaLabel}
+  />
 );
 
 export default EffectColorField;

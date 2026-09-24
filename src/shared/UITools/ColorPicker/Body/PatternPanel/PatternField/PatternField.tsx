@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 
 // @xigma
@@ -18,9 +19,10 @@ const FIELD_MIN = 0;
 
 export type TPatternFieldProps = {
   ariaLabel: string;
+  className?: string;
   e2eValue: string;
   icon?: TIconProps['name'];
-  label?: string;
+  adornmentLabel?: string;
   max?: number;
   min?: number;
   onChange: TFunc<[number]>;
@@ -32,9 +34,10 @@ export type TPatternFieldProps = {
 
 export const PatternField: FC<TPatternFieldProps> = ({
   ariaLabel,
+  className,
   e2eValue,
+  adornmentLabel,
   icon,
-  label,
   max = FIELD_MAX,
   min = FIELD_MIN,
   onChange,
@@ -48,7 +51,7 @@ export const PatternField: FC<TPatternFieldProps> = ({
   return (
     <TextFieldWrapper
       aria-label={ariaLabel}
-      className={styles.PatternField}
+      className={cx(styles.PatternField, className)}
       defaultValue={`${value}${suffix}`}
       e2eValue={e2eValue}
       onBlur={onBlur}
@@ -56,7 +59,7 @@ export const PatternField: FC<TPatternFieldProps> = ({
       onKeyDown={onKeyDown}
       startAdornment={
         <ScrubbableInput max={max} min={min} onChange={onChange} onMouseDown={onDragStart} onMouseUp={onDragEnd} value={value}>
-          {icon ? <InputAdornment icon={icon} /> : <InputAdornment label={label} />}
+          {icon ? <InputAdornment icon={icon} /> : <InputAdornment label={adornmentLabel} />}
         </ScrubbableInput>
       }
       type="text"

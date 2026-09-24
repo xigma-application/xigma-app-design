@@ -2,7 +2,6 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import EffectSettingsField from '../../../Common/EffectsSection/EffectSettingsPanel/EffectSettingsField/EffectSettingsField';
 import { Tooltip, UITools } from 'shared';
 
 // others
@@ -46,79 +45,79 @@ export const ExportSettingsPanel: FC<TExportSettingsPanelProps> = ({ onChange, o
         </div>
       </div>
       <div className={styles.ExportSettingsPanel__body}>
-        <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.suffix`)}>
-          <UITools.TextField
-            aria-label={t(`${translationNameSpace}.settings.fields.suffix`)}
-            className={styles.ExportSettingsPanel__input}
-            defaultValue={setting.suffix}
-            onBlur={(event): void => onChange({ ...setting, suffix: event.target.value })}
-            placeholder={t(`${translationNameSpace}.settings.suffixPlaceholder`)}
-            type="text"
-          />
-        </EffectSettingsField>
-        <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.colorProfile`)}>
-          <UITools.Dropdown<ExportColorProfile>
-            className={styles.ExportSettingsPanel__input}
-            onSelect={(colorProfile): void => onChange({ ...setting, colorProfile })}
-            options={colorProfileOptions}
-            textAlign="left"
-            value={setting.colorProfile}
-            variant="outline"
-          />
-        </EffectSettingsField>
+        <UITools.Field
+          Component={UITools.TextField}
+          aria-label={t(`${translationNameSpace}.settings.fields.suffix`)}
+          controlWidth={100}
+          defaultValue={setting.suffix}
+          label={t(`${translationNameSpace}.settings.labels.suffix`)}
+          onBlur={(event): void => onChange({ ...setting, suffix: event.target.value })}
+          placeholder={t(`${translationNameSpace}.settings.suffixPlaceholder`)}
+          type="text"
+        />
+        <UITools.Field
+          Component={UITools.Dropdown<ExportColorProfile>}
+          controlWidth={100}
+          label={t(`${translationNameSpace}.settings.labels.colorProfile`)}
+          onSelect={(colorProfile): void => onChange({ ...setting, colorProfile })}
+          options={colorProfileOptions}
+          textAlign="left"
+          value={setting.colorProfile}
+          variant="outline"
+        />
         {(setting.format === ExportFormat.jpeg || setting.format === ExportFormat.pdf) && (
-          <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.quality`)}>
-            <UITools.Dropdown<ExportQuality>
-              className={styles.ExportSettingsPanel__input}
-              onSelect={(quality): void => onChange({ ...setting, quality })}
-              options={qualityOptions}
-              textAlign="left"
-              value={setting.quality}
-              variant="outline"
-            />
-          </EffectSettingsField>
-        )}
-        <EffectSettingsField controlWidth={100} label={t(`${translationNameSpace}.settings.labels.imageResampling`)}>
-          <UITools.Dropdown<ExportImageResampling>
-            className={styles.ExportSettingsPanel__input}
-            onSelect={(imageResampling): void => onChange({ ...setting, imageResampling })}
-            options={imageResamplingOptions}
+          <UITools.Field
+            Component={UITools.Dropdown<ExportQuality>}
+            controlWidth={100}
+            label={t(`${translationNameSpace}.settings.labels.quality`)}
+            onSelect={(quality): void => onChange({ ...setting, quality })}
+            options={qualityOptions}
             textAlign="left"
-            value={setting.imageResampling}
+            value={setting.quality}
             variant="outline"
           />
-        </EffectSettingsField>
-        <div className={styles['ExportSettingsPanel__checkbox-row']}>
-          <UITools.Checkbox
-            label={t(`${translationNameSpace}.settings.labels.ignoreOverlappingLayers`)}
-            onChange={(ignoreOverlappingLayers): void => onChange({ ...setting, ignoreOverlappingLayers })}
-            value={setting.ignoreOverlappingLayers}
-          />
-        </div>
-        <div className={styles['ExportSettingsPanel__checkbox-row']}>
-          <UITools.Checkbox
-            label={t(`${translationNameSpace}.settings.labels.includeBoundingBox`)}
-            onChange={(includeBoundingBox): void => onChange({ ...setting, includeBoundingBox })}
-            value={setting.includeBoundingBox}
-          />
-        </div>
+        )}
+        <UITools.Field
+          Component={UITools.Dropdown<ExportImageResampling>}
+          controlWidth={100}
+          label={t(`${translationNameSpace}.settings.labels.imageResampling`)}
+          onSelect={(imageResampling): void => onChange({ ...setting, imageResampling })}
+          options={imageResamplingOptions}
+          textAlign="left"
+          value={setting.imageResampling}
+          variant="outline"
+        />
+        <UITools.Field
+          Component={UITools.Checkbox}
+          label={t(`${translationNameSpace}.settings.labels.ignoreOverlappingLayers`)}
+          labelInside
+          onChange={(ignoreOverlappingLayers): void => onChange({ ...setting, ignoreOverlappingLayers })}
+          value={setting.ignoreOverlappingLayers}
+        />
+        <UITools.Field
+          Component={UITools.Checkbox}
+          label={t(`${translationNameSpace}.settings.labels.includeBoundingBox`)}
+          labelInside
+          onChange={(includeBoundingBox): void => onChange({ ...setting, includeBoundingBox })}
+          value={setting.includeBoundingBox}
+        />
         {(setting.format === ExportFormat.svg || setting.format === ExportFormat.pdf) && (
-          <div className={styles['ExportSettingsPanel__checkbox-row']}>
-            <UITools.Checkbox
-              label={t(`${translationNameSpace}.settings.labels.outlineText`)}
-              onChange={(outlineText): void => onChange({ ...setting, outlineText })}
-              value={setting.outlineText}
-            />
-          </div>
+          <UITools.Field
+            Component={UITools.Checkbox}
+            label={t(`${translationNameSpace}.settings.labels.outlineText`)}
+            labelInside
+            onChange={(outlineText): void => onChange({ ...setting, outlineText })}
+            value={setting.outlineText}
+          />
         )}
         {setting.format === ExportFormat.svg && (
-          <div className={styles['ExportSettingsPanel__checkbox-row']}>
-            <UITools.Checkbox
-              label={t(`${translationNameSpace}.settings.labels.includeIdAttribute`)}
-              onChange={(includeIdAttribute): void => onChange({ ...setting, includeIdAttribute })}
-              value={setting.includeIdAttribute}
-            />
-          </div>
+          <UITools.Field
+            Component={UITools.Checkbox}
+            label={t(`${translationNameSpace}.settings.labels.includeIdAttribute`)}
+            labelInside
+            onChange={(includeIdAttribute): void => onChange({ ...setting, includeIdAttribute })}
+            value={setting.includeIdAttribute}
+          />
         )}
       </div>
     </div>

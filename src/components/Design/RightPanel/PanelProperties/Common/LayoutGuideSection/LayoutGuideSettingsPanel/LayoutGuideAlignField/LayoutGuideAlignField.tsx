@@ -1,7 +1,6 @@
 import { ReactElement } from 'react';
 
 // components
-import EffectSettingsField from '../../../EffectsSection/EffectSettingsPanel/EffectSettingsField/EffectSettingsField';
 import { UITools } from 'shared';
 
 // types
@@ -20,17 +19,17 @@ export const LayoutGuideAlignField = <TAlign extends string>({
   options,
   value,
 }: TLayoutGuideAlignFieldProps<TAlign>): ReactElement => (
-  <EffectSettingsField label={label}>
-    <UITools.Dropdown<TAlign>
-      bypassGlobalShortcuts={false}
-      onSelect={onSelect}
-      options={options}
-      textAlign="left"
-      truncate={false}
-      value={value}
-      variant="outline"
-    />
-  </EffectSettingsField>
+  <UITools.Field
+    Component={UITools.Dropdown<TAlign>}
+    bypassGlobalShortcuts={false}
+    label={label}
+    onSelect={onSelect}
+    options={options}
+    textAlign="left"
+    truncate={false}
+    value={value}
+    variant="outline"
+  />
 );
 
 export default LayoutGuideAlignField;

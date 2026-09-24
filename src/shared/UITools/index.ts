@@ -12,6 +12,7 @@ import ColorPickerInput from './ColorPickerInput/ColorPickerInput';
 import ComponentHeader from './ComponentHeader/ComponentHeader';
 import Dropdown from './Dropdown/Dropdown';
 import EditableInput from './EditableInput/EditableInput';
+import Field from './Field/Field';
 import FieldGroup from './FieldGroup/FieldGroup';
 import InputAdornment from './InputAdornment/InputAdornment';
 import Popover, { PopoverCompound } from './Popover/Popover';
@@ -41,6 +42,7 @@ export const UITools = {
   ComponentHeader,
   Dropdown,
   EditableInput,
+  Field,
   FieldGroup,
   GridColumnType,
   InputAdornment,

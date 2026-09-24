@@ -1,4 +1,4 @@
-.EffectSettingsField {
+.Field {
   align-items: center;
   column-gap: 8px;
   display: flex;
@@ -21,9 +21,14 @@
     height: 32px;
     min-width: 0;
     width: 136px;
+
+    &--inside {
+      flex: 1 1 auto;
+      width: auto;
+    }
   }
 
-  &__input.EffectSettingsField__input {
+  &__component.Field__component {
     flex: 1;
     min-width: 0;
   }

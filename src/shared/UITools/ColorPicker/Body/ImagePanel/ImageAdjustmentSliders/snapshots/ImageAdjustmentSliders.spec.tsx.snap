@@ -6,282 +6,317 @@ exports[`ImageAdjustmentSliders snapshots > should render ImageAdjustmentSliders
     class="_ImageAdjustmentSliders_8f3b7b"
   >
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Exposure
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Exposure"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Exposure"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Contrast
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Contrast"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Contrast"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Saturation
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Saturation"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Saturation"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Temperature
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Temperature"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Temperature"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Tint
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Tint"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Tint"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Highlights
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Highlights"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Highlights"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>
     <div
-      class="_ImageAdjustmentSliders__row_8f3b7b"
+      class="_Field_888602"
     >
       <span
-        class="_ImageAdjustmentSliders__label_8f3b7b"
+        class="_Field__label_888602"
       >
         Shadows
       </span>
       <div
-        class="_Slider_8f9d96"
+        class="_Field__control_888602"
+        style="flex: 0 0 128px; width: 128px;"
       >
         <div
-          aria-label="Shadows"
-          aria-valuemax="100"
-          aria-valuemin="-100"
-          aria-valuenow="0"
-          class="_SliderTrack_5e04e4"
-          data-no-drag="true"
-          role="slider"
-          tabindex="0"
+          class="_Slider_8f9d96 _Field__component_888602"
         >
           <div
-            class="_SliderTrack__rail_5e04e4"
+            aria-label="Shadows"
+            aria-valuemax="100"
+            aria-valuemin="-100"
+            aria-valuenow="0"
+            class="_SliderTrack_5e04e4"
+            data-no-drag="true"
+            role="slider"
+            tabindex="0"
           >
             <div
-              class="_SliderTrack__fill_5e04e4"
-              style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
-            />
+              class="_SliderTrack__rail_5e04e4"
+            >
+              <div
+                class="_SliderTrack__fill_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px)); right: calc(100% - calc(7px + 0.5 * (100% - 14px)));"
+              />
+              <div
+                class="_SliderTrack__baseDot_5e04e4"
+                style="left: calc(7px + 0.5 * (100% - 14px));"
+              />
+            </div>
             <div
-              class="_SliderTrack__baseDot_5e04e4"
+              class="_SliderTrack__thumb_5e04e4"
               style="left: calc(7px + 0.5 * (100% - 14px));"
             />
           </div>
-          <div
-            class="_SliderTrack__thumb_5e04e4"
-            style="left: calc(7px + 0.5 * (100% - 14px));"
-          />
         </div>
       </div>
     </div>

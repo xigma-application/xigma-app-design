@@ -1,0 +1,16 @@
+.StrokeSettingsWidthProfileControl {
+  align-items: center;
+  column-gap: 4px;
+  display: flex;
+
+  &__tooltipTarget {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__dropdown.StrokeSettingsWidthProfileControl__dropdown {
+    flex: 1;
+    min-width: 0;
+  }
+}

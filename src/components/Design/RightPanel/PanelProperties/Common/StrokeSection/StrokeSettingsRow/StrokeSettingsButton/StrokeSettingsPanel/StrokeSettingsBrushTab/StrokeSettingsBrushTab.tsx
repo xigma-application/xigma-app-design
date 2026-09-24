@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 // components
 import StrokeBrushTrigger from './StrokeBrushTrigger/StrokeBrushTrigger';
 import StrokeScatterBrushFields from './StrokeScatterBrushFields/StrokeScatterBrushFields';
-import StrokeSettingsField from '../StrokeSettingsField/StrokeSettingsField';
 import StrokeSettingsWidthProfileField from '../StrokeSettingsWidthProfileField/StrokeSettingsWidthProfileField';
 import { UITools } from 'shared';
 
@@ -19,7 +18,6 @@ import { getStrokeDirectionButtons } from './utils/getStrokeDirectionButtons';
 import { translationNameSpace } from '../../../../constants';
 
 // styles
-import fieldStyles from '../StrokeSettingsField/stroke-settings-field.module.scss';
 import styles from './stroke-settings-brush-tab.module.scss';
 
 export const StrokeSettingsBrushTab: FC = () => {
@@ -46,14 +44,14 @@ export const StrokeSettingsBrushTab: FC = () => {
       {isScatterBrush ? (
         <StrokeScatterBrushFields onBlur={onScatterBlur} values={scatterValues} />
       ) : (
-        <StrokeSettingsField label={t(`${namespace}.brush.direction.label`)}>
-          <UITools.ToggleButtonGroup
-            className={fieldStyles.StrokeSettingsField__input}
-            onChange={onDirectionChange}
-            toggleButtons={directionButtons}
-            value={direction}
-          />
-        </StrokeSettingsField>
+        <UITools.Field
+          Component={UITools.ToggleButtonGroup}
+          controlWidth={128}
+          label={t(`${namespace}.brush.direction.label`)}
+          onChange={onDirectionChange}
+          toggleButtons={directionButtons}
+          value={direction}
+        />
       )}
       <div className={styles.StrokeSettingsBrushTab__divider} />
       <StrokeSettingsWidthProfileField />

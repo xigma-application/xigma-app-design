@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import AlignmentGrid from '../AlignmentGrid/AlignmentGrid';
+import Field from 'shared/UITools/Field/Field';
 import PatternField from '../PatternField/PatternField';
 import ToggleButtonGroup from 'shared/UITools/ToggleButtonGroup/ToggleButtonGroup';
 
@@ -50,27 +51,29 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
 
   return (
     <div className={styles.PatternSettings}>
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.tileTypeLabel`)}</span>
-        <ToggleButtonGroup
+      <div className={styles.PatternSettings__rows}>
+        <Field
+          Component={ToggleButtonGroup}
+          controlWidth={136}
+          label={t(`${translationNameSpace}.tileTypeLabel`)}
           onChange={(value): void => setTileType(value as TPatternTileType)}
           toggleButtons={buildTileTypeButtons(t)}
           value={tileType}
         />
-      </div>
-      {tileType === 'hexagonal' && (
-        <div className={styles.PatternSettings__row}>
-          <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.directionLabel`)}</span>
-          <ToggleButtonGroup
+        {tileType === 'hexagonal' && (
+          <Field
+            Component={ToggleButtonGroup}
+            controlWidth={136}
+            label={t(`${translationNameSpace}.directionLabel`)}
             onChange={(value): void => setDirection(value as TPatternDirection)}
             toggleButtons={buildDirectionButtons(t)}
             value={direction}
           />
-        </div>
-      )}
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.scaleLabel`)}</span>
-        <PatternField
+        )}
+        <Field
+          Component={PatternField}
+          controlWidth={136}
+          label={t(`${translationNameSpace}.scaleLabel`)}
           ariaLabel={t(`${translationNameSpace}.scaleLabel`)}
           e2eValue="pattern-scale"
           icon="ScaleTool"
@@ -79,37 +82,36 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
           onDragStart={onDragStart}
           value={scale}
         />
-      </div>
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.spacingLabel`)}</span>
-        <PatternField
+        <Field
+          Component={PatternField}
+          controlWidth={136}
+          label={t(`${translationNameSpace}.spacingLabel`)}
           ariaLabel={`${t(`${translationNameSpace}.spacingLabel`)} X`}
           e2eValue="pattern-spacing-x"
-          label="X"
+          adornmentLabel="X"
           onChange={setSpacingX}
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
           value={spacingX}
         />
-      </div>
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label} />
-        <PatternField
+        <Field
+          Component={PatternField}
+          controlWidth={136}
           ariaLabel={`${t(`${translationNameSpace}.spacingLabel`)} Y`}
           e2eValue="pattern-spacing-y"
-          label="Y"
+          adornmentLabel="Y"
           onChange={setSpacingY}
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
           value={spacingY}
         />
-      </div>
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label}>{t(`${translationNameSpace}.offsetLabel`)}</span>
-        <PatternField
+        <Field
+          Component={PatternField}
+          controlWidth={136}
+          label={t(`${translationNameSpace}.offsetLabel`)}
           ariaLabel={`${t(`${translationNameSpace}.offsetLabel`)} X`}
           e2eValue="pattern-offset-x"
-          label="X"
+          adornmentLabel="X"
           max={OFFSET_MAX}
           min={OFFSET_MIN}
           onChange={setOffsetX}
@@ -118,13 +120,12 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
           suffix="px"
           value={offsetX}
         />
-      </div>
-      <div className={styles.PatternSettings__row}>
-        <span className={styles.PatternSettings__label} />
-        <PatternField
+        <Field
+          Component={PatternField}
+          controlWidth={136}
           ariaLabel={`${t(`${translationNameSpace}.offsetLabel`)} Y`}
           e2eValue="pattern-offset-y"
-          label="Y"
+          adornmentLabel="Y"
           max={OFFSET_MAX}
           min={OFFSET_MIN}
           onChange={setOffsetY}
@@ -133,10 +134,10 @@ export const PatternSettings: FC<TPatternSettingsProps> = ({ onDragEnd, onDragSt
           suffix="px"
           value={offsetY}
         />
-      </div>
-      <div className={styles['PatternSettings__aligment-wrapper']}>
-        <div className={styles.PatternSettings__label}>{t(`${translationNameSpace}.alignmentLabel`)}</div>
-        <AlignmentGrid onChange={setAlignmentIndex} selectedIndex={alignmentIndex} />
+        <div className={styles['PatternSettings__aligment-wrapper']}>
+          <div className={styles.PatternSettings__label}>{t(`${translationNameSpace}.alignmentLabel`)}</div>
+          <AlignmentGrid onChange={setAlignmentIndex} selectedIndex={alignmentIndex} />
+        </div>
       </div>
     </div>
   );

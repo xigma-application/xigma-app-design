@@ -1,11 +1,7 @@
 import { FC, FocusEvent } from 'react';
 
 // components
-import EffectSettingsField from '../../../EffectsSection/EffectSettingsPanel/EffectSettingsField/EffectSettingsField';
 import { UITools } from 'shared';
-
-// styles
-import fieldStyles from '../../../EffectsSection/EffectSettingsPanel/EffectSettingsField/effect-settings-field.module.scss';
 
 export type TLayoutGuideNumberFieldProps = {
   ariaLabel: string;
@@ -32,19 +28,18 @@ export const LayoutGuideNumberField: FC<TLayoutGuideNumberFieldProps> = ({
   unit = '',
   value,
 }) => (
-  <EffectSettingsField label={label}>
-    <UITools.TextField
-      aria-label={ariaLabel}
-      className={fieldStyles.EffectSettingsField__input}
-      defaultValue={disabled ? '' : `${value}${unit}`}
-      disabled={disabled}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      startAdornment={!disabled && <UITools.ScrubbableEdge max={max} min={min} onChange={onScrub} value={value} />}
-      stepNumbers={{ max, min }}
-      type="text"
-    />
-  </EffectSettingsField>
+  <UITools.Field
+    Component={UITools.TextField}
+    aria-label={ariaLabel}
+    defaultValue={disabled ? '' : `${value}${unit}`}
+    disabled={disabled}
+    label={label}
+    onBlur={onBlur}
+    placeholder={placeholder}
+    startAdornment={!disabled && <UITools.ScrubbableEdge max={max} min={min} onChange={onScrub} value={value} />}
+    stepNumbers={{ max, min }}
+    type="text"
+  />
 );
 
 export default LayoutGuideNumberField;

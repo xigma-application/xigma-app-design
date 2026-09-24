@@ -37,17 +37,18 @@ export const ImageAdjustmentSliders: FC<TImageAdjustmentSlidersProps> = ({
   return (
     <div className={styles.ImageAdjustmentSliders}>
       {rows.map((row) => (
-        <div className={styles.ImageAdjustmentSliders__row} key={row.id}>
-          <span className={styles.ImageAdjustmentSliders__label}>{row.label}</span>
-          <UITools.Slider
-            ariaLabel={row.label}
-            baseValue={0}
-            max={ADJUSTMENT_SLIDER_MAX}
-            min={ADJUSTMENT_SLIDER_MIN}
-            onChange={(value): void => onAdjustmentChange?.(row.id, value)}
-            value={adjustments[row.id]}
-          />
-        </div>
+        <UITools.Field
+          Component={UITools.Slider}
+          ariaLabel={row.label}
+          baseValue={0}
+          controlWidth={128}
+          key={row.id}
+          label={row.label}
+          max={ADJUSTMENT_SLIDER_MAX}
+          min={ADJUSTMENT_SLIDER_MIN}
+          onChange={(value): void => onAdjustmentChange?.(row.id, value)}
+          value={adjustments[row.id]}
+        />
       ))}
     </div>
   );
