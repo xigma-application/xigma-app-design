@@ -7,17 +7,14 @@ import { selectSelectedNodes } from 'store/design/selectors';
 import { toggleFrameClipContent, updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
-// types
-import { NodeType } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
+// utils
+import { isFrameNode } from 'utils/canvas/signals/isFrameNode';
 
 export type TUseColumnClipContentResult = {
   clipContent: boolean;
   isMixed: boolean;
   onChange: TFunc;
 };
-
-const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
 
 export const useColumnClipContent = (): TUseColumnClipContentResult => {
   const dispatch = useAppDispatch();

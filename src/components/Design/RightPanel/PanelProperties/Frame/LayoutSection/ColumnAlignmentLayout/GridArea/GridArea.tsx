@@ -42,7 +42,7 @@ export const GridArea: FC<TGridAreaProps> = ({ grid }) => {
       sideOffset={-TRIGGER_HEIGHT}
       trigger={
         <button aria-label={label} className={styles.GridArea} type="button" {...getAttributes(E2EAttribute.gridArea, '')}>
-          <GridAreaPreview columns={grid.columns} rows={grid.rows} />
+          <GridAreaPreview columns={grid.columns} isMixed={grid.isMixed} rows={grid.rows} />
         </button>
       }
       triggerTooltip={label}

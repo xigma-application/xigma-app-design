@@ -11,11 +11,12 @@ import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { LayoutMode, NodeType } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
+import { LayoutMode } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 import { TToggleButton } from 'shared/UITools/ToggleButtonGroup/types';
 
 // utils
+import { isFrameNode } from 'utils/canvas/signals/isFrameNode';
 import { commitFlowChange } from './utils/commitFlowChange';
 import { commitGridAutoPlacementFreeze } from 'store/design/utils/autoLayout/gridTracks/commitGridAutoPlacementFreeze';
 
@@ -28,8 +29,6 @@ export type TUseColumnFlowResult = {
   value: string;
   wrap: boolean;
 };
-
-const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
 
 export const useColumnFlow = (): TUseColumnFlowResult => {
   const { t } = useTranslation();

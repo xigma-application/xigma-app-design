@@ -35,18 +35,20 @@ export const GridAreaPopover: FC<TGridAreaPopoverProps> = ({ close, grid }) => {
         rows={grid.rows}
       />
       <CellsInput close={close} columns={grid.columns} onClickCell={grid.onClickCell} rows={grid.rows} />
-      <UITools.Button
-        className={styles['GridAreaPopover__settings-button']}
-        color="secondary"
-        onClick={() => {
-          grid.onOpenSettings();
-          close();
-        }}
-        size="medium"
-        variant="outline"
-      >
-        {t(`${translationNameSpace}.grid.openSettings`)}
-      </UITools.Button>
+      {grid.canOpenSettings && (
+        <UITools.Button
+          className={styles['GridAreaPopover__settings-button']}
+          color="secondary"
+          onClick={() => {
+            grid.onOpenSettings();
+            close();
+          }}
+          size="medium"
+          variant="outline"
+        >
+          {t(`${translationNameSpace}.grid.openSettings`)}
+        </UITools.Button>
+      )}
     </div>
   );
 };

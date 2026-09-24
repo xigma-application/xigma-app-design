@@ -209,4 +209,37 @@ describe('useColumnPadding', () => {
       expect([read(secondId).paddingLeft, read(secondId).paddingRight]).toEqual([20, 24]);
     });
   });
+
+  describe('multi-selection individual padding', () => {
+    it('should switch to the individual view with Mixed sides when a frame has uneven padding', () => {
+      // mock
+      const evenId = addFrame({ paddingBottom: 10, paddingLeft: 10, paddingRight: 10, paddingTop: 10 });
+      const unevenId = addFrame({ paddingBottom: 3, paddingLeft: 4, paddingRight: 2, paddingTop: 1 });
+      store.dispatch(setSelection([evenId, unevenId]));
+
+      // before
+      const { result } = renderUseColumnPadding();
+
+      // result
+      expect(result.current.isIndividual).toBe(true);
+      expect(result.current.individualFields.map((field) => field.value)).toEqual(['Mixed', 'Mixed', 'Mixed', 'Mixed']);
+
+      // action
+      act(() => result.current.toggleIndividual());
+
+      // result
+      expect(result.current.isIndividual).toBe(false);
+    });
+
+    it('should keep the merged view while every frame has even pairs', () => {
+      // mock
+      store.dispatch(setSelection([addFrame({ paddingLeft: 10, paddingRight: 10 }), addFrame({ paddingLeft: 20, paddingRight: 20 })]));
+
+      // before
+      const { result } = renderUseColumnPadding();
+
+      // result
+      expect(result.current.isIndividual).toBe(false);
+    });
+  });
 });

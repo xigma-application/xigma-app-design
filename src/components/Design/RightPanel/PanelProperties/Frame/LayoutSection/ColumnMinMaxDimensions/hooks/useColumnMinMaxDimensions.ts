@@ -11,11 +11,10 @@ import { selectRevealedMinMax, selectSelectedNodes } from 'store/design/selector
 import { setMinMaxRevealed, updateNode } from 'store/design/slice';
 
 // types
-import { NodeType } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
 import { TRevealedMinMax } from 'store/design/types';
 
 // utils
+import { isFrameNode } from 'utils/canvas/signals/isFrameNode';
 import { getMinMaxBoundChanges } from './utils/getMinMaxBoundChanges';
 import { getMixedOrValue } from 'components/Design/RightPanel/PanelProperties/Common/utils/getMixedOrValue';
 
@@ -47,8 +46,6 @@ export type TUseColumnMinMaxDimensionsResult = {
   onDragEnd: TFunc;
   onDragStart: TFunc;
 };
-
-const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
 
 export const useColumnMinMaxDimensions = (): TUseColumnMinMaxDimensionsResult => {
   const dispatch = useAppDispatch();

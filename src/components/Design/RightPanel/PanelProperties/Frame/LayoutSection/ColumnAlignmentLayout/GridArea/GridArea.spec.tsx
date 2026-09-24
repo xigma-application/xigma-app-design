@@ -8,7 +8,9 @@ import { TooltipProvider } from 'shared';
 import { TUseColumnGridAreaResult } from '../hooks/useColumnGridArea';
 
 const grid = (overrides: Partial<TUseColumnGridAreaResult> = {}): TUseColumnGridAreaResult => ({
+  canOpenSettings: true,
   columns: '2',
+  isMixed: false,
   isRowsAuto: false,
   onClickCell: vi.fn(),
   onCommitColumns: vi.fn(),

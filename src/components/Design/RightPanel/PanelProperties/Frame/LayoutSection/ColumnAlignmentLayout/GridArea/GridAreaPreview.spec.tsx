@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 // components
 import GridAreaPreview from './GridAreaPreview';
@@ -24,5 +24,14 @@ describe('GridAreaPreview', () => {
   it('should draw nothing when either count is not a number', () => {
     expect(render(<GridAreaPreview columns="" rows="2" />).container.querySelectorAll('[class*="GridAreaPreview__cell"]')).toHaveLength(0);
     expect(render(<GridAreaPreview columns="2" rows="" />).container.querySelectorAll('[class*="GridAreaPreview__cell"]')).toHaveLength(0);
+  });
+
+  it('should show Mixed over a neutral 2×2 grid while the selected frames differ', () => {
+    // before
+    const { container } = render(<GridAreaPreview columns="Mixed" isMixed rows="1" />);
+
+    // result
+    expect(screen.getByText('Mixed')).toBeInTheDocument();
+    expect(container.querySelectorAll('[class*="GridAreaPreview__cell"]')).toHaveLength(4);
   });
 });

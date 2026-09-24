@@ -17,7 +17,7 @@ export const useColumnPadding = (): TUseColumnPaddingResult => {
   const dispatch = useAppDispatch();
   const { hover } = useCanvasRefsContext();
   const selectedNodes = useAppSelector(selectSelectedNodes);
-  const [isIndividual, setIsIndividual] = useState(false);
+  const [individualOverride, setIndividualOverride] = useState<boolean | null>(null);
   const frames = selectedNodes.filter(isManagedLayoutFrame);
   const targets: TPaddingTarget[] = frames.map((frame) => ({
     id: frame.id,
@@ -29,6 +29,10 @@ export const useColumnPadding = (): TUseColumnPaddingResult => {
     },
   }));
   const guideRef = hover.rightPanelPaddingGuideRef;
+  const hasUnevenPadding =
+    targets.length > 1 &&
+    targets.some(({ values }) => values.paddingLeft !== values.paddingRight || values.paddingTop !== values.paddingBottom);
+  const isIndividual = individualOverride ?? hasUnevenPadding;
 
   return {
     individualFields: [
@@ -46,6 +50,6 @@ export const useColumnPadding = (): TUseColumnPaddingResult => {
       ]),
       pairField(dispatch, targets, 'vertical', 'padding-vertical', 'PaddingTB', 'paddingTop', 'paddingBottom', guideRef, ['top', 'bottom']),
     ],
-    toggleIndividual: () => setIsIndividual((previous) => !previous),
+    toggleIndividual: () => setIndividualOverride(!isIndividual),
   };
 };

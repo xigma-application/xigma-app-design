@@ -365,4 +365,64 @@ describe('useColumnGridArea', () => {
     expect(result.current.isRowsAuto).toBe(true);
     expect(readFrame(frameId).gridRowCount).toBeUndefined();
   });
+
+  describe('multi-selection', () => {
+    const twoGridFrames = (firstColumns: number, secondColumns: number): [string, string] => {
+      const firstId = addGridFrame();
+      const secondId = addGridFrame();
+
+      store.dispatch(updateNode({ changes: { gridColumnCount: firstColumns, gridRowCount: 1 }, id: firstId }));
+      store.dispatch(updateNode({ changes: { gridColumnCount: secondColumns, gridRowCount: 1 }, id: secondId }));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      return [firstId, secondId];
+    };
+
+    it('should show Mixed for differing columns and never offer the grid settings panel', () => {
+      // mock
+      twoGridFrames(2, 3);
+
+      // before
+      const { result } = renderUseColumnGridArea();
+
+      // result
+      expect(result.current).toMatchObject({ canOpenSettings: false, columns: 'Mixed', isMixed: true, rows: '1' });
+    });
+
+    it('should grow the picked grid so the frame with the most children fits, and give every frame the same grid', () => {
+      // mock
+      const [firstId, secondId] = twoGridFrames(2, 5);
+
+      Array.from({ length: 5 }).forEach(() => addChild(secondId));
+      addChild(firstId);
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnGridArea();
+
+      // action
+      act(() => result.current.onClickCell({ columns: 2, rows: 1 }));
+
+      // result
+      expect([readFrame(firstId).gridColumnCount, readFrame(firstId).gridRowCount]).toEqual([2, 3]);
+      expect([readFrame(secondId).gridColumnCount, readFrame(secondId).gridRowCount]).toEqual([2, 3]);
+    });
+
+    it('should grow the columns instead when the rows are typed', () => {
+      // mock
+      const [firstId, secondId] = twoGridFrames(1, 1);
+
+      Array.from({ length: 4 }).forEach(() => addChild(secondId));
+      store.dispatch(setSelection([firstId, secondId]));
+
+      // before
+      const { result } = renderUseColumnGridArea();
+
+      // action
+      act(() => result.current.onCommitRows('2'));
+
+      // result
+      expect([readFrame(secondId).gridColumnCount, readFrame(secondId).gridRowCount]).toEqual([2, 2]);
+    });
+  });
 });

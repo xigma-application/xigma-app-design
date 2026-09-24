@@ -5,11 +5,8 @@ import { useResizeToFitSelection } from 'components/Design/Menu/hooks/useResizeT
 import { selectSelectedNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
-// types
-import { NodeType } from 'types/design/enums';
-import { TFrameNode, TSceneNode } from 'types/design/types';
-
 // utils
+import { isFrameNode } from 'utils/canvas/signals/isFrameNode';
 import { isFreeformFrame } from 'utils/canvas/signals/isFreeformFrame';
 import { toggleFramesAutoLayout } from './utils/toggleFramesAutoLayout';
 
@@ -19,8 +16,6 @@ export type TUseLayoutSectionButtonsResult = {
   onResizeToFit: TFunc;
   onToggleAutoLayout: TFunc;
 };
-
-const isFrameNode = (node: TSceneNode | undefined): node is TFrameNode => node?.type === NodeType.frame;
 
 export const useLayoutSectionButtons = (): TUseLayoutSectionButtonsResult => {
   const dispatch = useAppDispatch();
