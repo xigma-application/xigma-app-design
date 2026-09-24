@@ -5,15 +5,20 @@ import { Provider } from 'react-redux';
 import RectangleHeader from './RectangleHeader';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 const renderRectangleHeader = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <RectangleHeader />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <RectangleHeader />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

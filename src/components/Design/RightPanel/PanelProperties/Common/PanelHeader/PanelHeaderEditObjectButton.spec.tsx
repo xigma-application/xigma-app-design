@@ -1,14 +1,30 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import PanelHeaderEditObjectButton from './PanelHeaderEditObjectButton';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
+// store
+import { addNodes, setSelection } from 'store/design/slice';
+import { selectNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
 const renderButton = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <PanelHeaderEditObjectButton />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <PanelHeaderEditObjectButton />
+        </TooltipProvider>
+      </CanvasRefsProvider>
+    </Provider>,
   );
 
 describe('PanelHeaderEditObjectButton snapshots', () => {
@@ -30,15 +46,37 @@ describe('PanelHeaderEditObjectButton behaviors', () => {
     expect(screen.getByLabelText('Edit object')).toBeInTheDocument();
   });
 
-  it('should do nothing yet when clicked', () => {
+  it('should turn the selected rectangle into a vector and start editing its points when clicked', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            fills: [],
+            height: 40,
+            id: 'editRect',
+            name: 'editRect',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.rectangle,
+            width: 40,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['editRect'],
+      }),
+    );
+    store.dispatch(setSelection(['editRect']));
+
     // before
     renderButton();
-    const button = screen.getByLabelText('Edit object');
 
     // action
-    fireEvent.click(button);
+    fireEvent.click(screen.getByLabelText('Edit object'));
 
     // result
-    expect(button).toBeInTheDocument();
+    await waitFor(() => expect(selectVectorEditingNodeIds(store.getState())).toEqual(['editRect']));
+    expect(selectNodes(store.getState()).editRect.type).toBe(NodeType.vector);
   });
 });

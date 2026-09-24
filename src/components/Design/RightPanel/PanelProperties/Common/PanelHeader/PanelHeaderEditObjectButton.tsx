@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 // components
 import { Tooltip, UITools } from 'shared';
 
+// hooks
+import { useEditObject } from './hooks/useEditObject';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from './constants';
@@ -13,6 +16,7 @@ import styles from './panel-header.module.scss';
 
 export const PanelHeaderEditObjectButton: FC = () => {
   const { t } = useTranslation();
+  const handleClick = useEditObject();
 
   return (
     <Tooltip
@@ -24,7 +28,7 @@ export const PanelHeaderEditObjectButton: FC = () => {
         </Fragment>
       }
     >
-      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.editObjectAriaLabel`)} name="EditObject" />
+      <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.editObjectAriaLabel`)} name="EditObject" onClick={handleClick} />
     </Tooltip>
   );
 };

@@ -37,3 +37,25 @@ test('editing the width field from the Rectangle panel resizes the shape on the 
 
   expect(after.equals(before)).toBe(false);
 });
+
+test('the Edit object button turns the rectangle into a vector and starts editing its points', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-rectangle-edit-object');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await page.getByLabel('Edit object', { exact: true }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
+        const [id] = pages[activePageId].rootOrder;
+
+        return { isEditing: vectorEditingNodeIds.includes(id), type: pages[activePageId].nodes[id].type };
+      }),
+    )
+    .toEqual({ isEditing: true, type: 'vector' });
+});
