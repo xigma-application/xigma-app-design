@@ -807,6 +807,7 @@
   "design.rightPanel.panelProperties.common.strokeSection.settings.brush.angularJitter.label": "Losowość kąta",
   "design.rightPanel.panelProperties.common.strokeSection.settings.brush.rotation.label": "Obrót",
   "design.rightPanel.panelProperties.mixed.header.label": "Zaznaczono: {{count}}",
+  "design.toolbar.componentHint.nonMatching": "Nie można utworzyć komponentu i instancji z niepasującego zaznaczenia",
   "shared.brushes.categories.stretch": "Pędzle rozciągane",
   "shared.brushes.categories.scatter": "Pędzle rozpraszane",
   "shared.brushes.names.heist": "Heist",

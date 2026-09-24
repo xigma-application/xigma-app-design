@@ -41,7 +41,7 @@ beforeAll(() => {
 });
 
 describe('useMixedPanel', () => {
-  it('should return the sections and header buttons a frame and a rectangle share', () => {
+  it('should return the sections a frame and a rectangle share', () => {
     // mock
     store.dispatch(setSelection([frame.id, rectangle.id]));
 
@@ -51,11 +51,10 @@ describe('useMixedPanel', () => {
     // result
     expect(result.current.sections).toContain('cornerRadius');
     expect(result.current.sections).not.toContain('selectionColors');
-    expect(result.current.buttons).toEqual(['matchingLayers', 'component']);
     expect(result.current.count).toBe(2);
   });
 
-  it('should drop the corner radius and keep the boolean button for a rectangle and a boolean', () => {
+  it('should drop the corner radius for a rectangle and a boolean', () => {
     // mock
     store.dispatch(setSelection([rectangle.id, booleanNode.id]));
 
@@ -64,6 +63,5 @@ describe('useMixedPanel', () => {
 
     // result
     expect(result.current.sections).not.toContain('cornerRadius');
-    expect(result.current.buttons).toEqual(['component', 'mask', 'boolean']);
   });
 });

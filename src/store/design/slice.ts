@@ -56,7 +56,8 @@ import { handleAddGuide } from './utils/handleAddGuide';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
-import { handleBooleanNodes, TBooleanNodesPayload } from './utils/handleBooleanNodes/handleBooleanNodes';
+import { handleBooleanSelection } from './utils/handleBooleanNodes/handleBooleanSelection';
+import { TBooleanNodesPayload } from './utils/handleBooleanNodes/handleBooleanNodes';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
 import { handleCloseOpenPropertyPanel } from './utils/handleCloseOpenPropertyPanel';
 import { handleDeleteAllGuides } from './utils/handleDeleteAllGuides';
@@ -85,6 +86,7 @@ import { handleToggleFrameClipContent } from './utils/handleToggleFrameClipConte
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
 import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
 import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
+import { handleSelectionPerParent } from './utils/handleSelectionPerParent/handleSelectionPerParent';
 import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
@@ -184,7 +186,7 @@ const designSlice = createSlice({
     },
     booleanNodes: {
       prepare: (operation: BooleanOperation) => ({ payload: { groupId: nanoid(), operation } }),
-      reducer: (state, action: PayloadAction<TBooleanNodesPayload>) => handleBooleanNodes(state, action.payload),
+      reducer: (state, action: PayloadAction<TBooleanNodesPayload>) => handleBooleanSelection(state, action.payload),
     },
     bringSelectionToFront: (state) => handleBringSelectionToFront(state),
     cancelCommentDraft: (state) => {
@@ -193,7 +195,8 @@ const designSlice = createSlice({
     closeOpenPropertyPanel: (state, action: PayloadAction<TOpenPropertyPanel>) => handleCloseOpenPropertyPanel(state, action.payload),
     createMaskGroup: {
       prepare: () => ({ payload: { groupId: nanoid() } }),
-      reducer: (state, action: PayloadAction<{ groupId: string }>) => handleUseNodesAsMask(state, action.payload.groupId),
+      reducer: (state, action: PayloadAction<{ groupId: string }>) =>
+        handleSelectionPerParent(state, action.payload.groupId, handleUseNodesAsMask),
     },
     deleteAllGuides: (state, action: PayloadAction<TDeleteAllGuidesPayload>) => handleDeleteAllGuides(state, action.payload),
     deleteComment: (state, action: PayloadAction<string>) => {

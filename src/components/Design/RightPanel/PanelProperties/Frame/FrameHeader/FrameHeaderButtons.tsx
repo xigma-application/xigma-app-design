@@ -9,6 +9,9 @@ import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeade
 import PanelHeaderWrapInSectionButton from '../../Common/PanelHeader/PanelHeaderWrapInSectionButton';
 import { Tooltip, UITools } from 'shared';
 
+// hooks
+import { useIsSelectionFromOneParent } from '../../Common/PanelHeader/hooks/useIsSelectionFromOneParent';
+
 // others
 import { translationNameSpace } from './constants';
 
@@ -22,6 +25,7 @@ import styles from './frame-header-buttons.module.scss';
 const FrameHeaderButtons: FC = () => {
   const { t } = useTranslation();
   const isMultiple = useAppSelector(selectSelectedIds).length > 1;
+  const isFromOneParent = useIsSelectionFromOneParent();
   const htmlTagButton = (
     <Tooltip align="end" content={t(`${translationNameSpace}.htmlTagTooltip`)}>
       <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.htmlTagAriaLabel`)} name="HtmlTag" />
@@ -32,10 +36,10 @@ const FrameHeaderButtons: FC = () => {
     <div className={styles.FrameHeaderButtons}>
       {isMultiple ? (
         <Fragment>
-          {htmlTagButton}
+          {isFromOneParent ? htmlTagButton : <PanelHeaderMatchingLayersButton />}
           <PanelHeaderComponentSplitButton />
-          <PanelHeaderMaskButton />
-          <PanelHeaderWrapInSectionButton />
+          {isFromOneParent && <PanelHeaderMaskButton />}
+          {isFromOneParent && <PanelHeaderWrapInSectionButton />}
         </Fragment>
       ) : (
         <Fragment>

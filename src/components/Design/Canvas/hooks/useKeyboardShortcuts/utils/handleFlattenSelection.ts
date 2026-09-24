@@ -9,6 +9,7 @@ import { AppDispatch } from 'store';
 import { deleteFlattenedTextPaths } from './flattenSelection/deleteFlattenedTextPaths';
 import { flattenEntries } from './flattenSelection/flattenEntries';
 import { getFlattenEntries } from './flattenSelection/getFlattenEntries';
+import { getFlattenEntryGroups } from './flattenSelection/getFlattenEntryGroups';
 import { getTextFlattenTargets } from './getTextFlattenTargets';
 
 export const handleFlattenSelection = async (dispatch: AppDispatch): Promise<void> => {
@@ -16,7 +17,7 @@ export const handleFlattenSelection = async (dispatch: AppDispatch): Promise<voi
 
   if (entries.length > 0) {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
-    flattenEntries(dispatch, entries);
+    getFlattenEntryGroups(entries).forEach((group) => flattenEntries(dispatch, group));
     deleteFlattenedTextPaths(dispatch, entries);
     dispatch(endHistoryGesture());
   }

@@ -1,14 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import PanelHeaderComponentMenuItems from './PanelHeaderComponentMenuItems';
 import { UITools } from 'shared';
 
+// store
+import { store } from 'store';
+
 const renderItems = (): ReturnType<typeof render> =>
   render(
-    <UITools.ButtonMenu trigger="open" triggerAriaLabel="Open menu">
-      <PanelHeaderComponentMenuItems />
-    </UITools.ButtonMenu>,
+    <Provider store={store}>
+      <UITools.ButtonMenu trigger="open" triggerAriaLabel="Open menu">
+        <PanelHeaderComponentMenuItems />
+      </UITools.ButtonMenu>
+    </Provider>,
   );
 
 describe('PanelHeaderComponentMenuItems behaviors', () => {

@@ -23,11 +23,11 @@ import { translationNameSpace } from '../Common/constants';
 
 const Mixed: FC = () => {
   const { t } = useTranslation();
-  const { buttons, count, sections } = useMixedPanel();
+  const { count, sections } = useMixedPanel();
 
   return (
     <Fragment>
-      <MixedHeader buttons={buttons} count={count} />
+      <MixedHeader count={count} />
       {sections.includes('position') && <PositionSection />}
       {sections.includes('layout') && (
         <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>

@@ -5,5 +5,3 @@ export type TPanelNodeType = NodeType.boolean | NodeType.frame | NodeType.rectan
 
 export type TPanelSection =
   'appearance' | 'cornerRadius' | 'effects' | 'export' | 'fill' | 'layout' | 'layoutGuide' | 'position' | 'selectionColors' | 'stroke';
-
-export type TPanelHeaderButton = 'boolean' | 'component' | 'editObject' | 'mask' | 'matchingLayers' | 'wrapInSection';

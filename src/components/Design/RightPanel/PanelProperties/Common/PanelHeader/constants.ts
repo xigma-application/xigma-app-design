@@ -19,3 +19,5 @@ export const BOOLEAN_OPERATION_ITEMS = [
   { operation: BooleanOperation.intersect, shortcutKey: 'booleanIntersect' },
   { operation: BooleanOperation.exclude, shortcutKey: 'booleanExclude' },
 ] as const;
+
+export const COMPONENT_NON_MATCHING_HINT_LABEL_KEY = 'design.toolbar.componentHint.nonMatching';

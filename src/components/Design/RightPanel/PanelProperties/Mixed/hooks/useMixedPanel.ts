@@ -1,19 +1,18 @@
 // others
-import { PANEL_HEADER_BUTTONS, PANEL_SECTIONS } from '../constants';
+import { PANEL_SECTIONS } from '../constants';
 
 // store
 import { selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
-import { TPanelHeaderButton, TPanelSection } from '../types';
+import { TPanelSection } from '../types';
 
 // utils
 import { getCommonPanelItems } from '../utils/getCommonPanelItems';
 import { isPanelNodeType } from '../utils/isPanelNodeType';
 
 export type TUseMixedPanelResult = {
-  buttons: TPanelHeaderButton[];
   count: number;
   sections: TPanelSection[];
 };
@@ -25,7 +24,6 @@ export const useMixedPanel = (): TUseMixedPanelResult => {
   );
 
   return {
-    buttons: getCommonPanelItems(PANEL_HEADER_BUTTONS, types),
     count: selectedNodes.length,
     sections: getCommonPanelItems(PANEL_SECTIONS, types),
   };

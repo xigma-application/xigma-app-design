@@ -41,7 +41,12 @@ const makeRectangle = (id: string): TRectangleNode => ({
 });
 
 beforeAll(() => {
-  store.dispatch(addNodes({ nodes: [makeRectangle('headerA'), makeRectangle('headerB')], rootIds: ['headerA', 'headerB'] }));
+  store.dispatch(
+    addNodes({
+      nodes: [makeRectangle('headerA'), makeRectangle('headerB'), { ...makeRectangle('headerNested'), parentId: 'headerB' }],
+      rootIds: ['headerA', 'headerB'],
+    }),
+  );
 });
 
 beforeEach(() => {
@@ -97,5 +102,18 @@ describe('RectangleHeader behaviors', () => {
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();
     expect(screen.queryByLabelText('Create component')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Edit object')).not.toBeInTheDocument();
+  });
+
+  it('should keep the header buttons while rectangles from different parents are selected', () => {
+    // mock
+    store.dispatch(setSelection(['headerA', 'headerNested']));
+
+    // before
+    renderRectangleHeader();
+
+    // result
+    expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
+    expect(screen.getByLabelText('Boolean operations')).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -19,11 +19,12 @@ const { PopoverItem } = UITools.PopoverCompound;
 
 export const PanelHeaderBooleanButton: FC = () => {
   const { t } = useTranslation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { onApply, onFlatten, operation } = useBooleanOperation();
 
   return (
     <div className={styles.PanelHeader__split}>
-      <Tooltip align="end" content={t(`${translationNameSpace}.booleanTooltip`)}>
+      <Tooltip align="end" content={isMenuOpen ? undefined : t(`${translationNameSpace}.booleanTooltip`)}>
         <UITools.ButtonIcon
           ariaLabel={t(`${translationNameSpace}.booleanAriaLabel`)}
           className={styles['PanelHeader__split-button']}
@@ -34,6 +35,7 @@ export const PanelHeaderBooleanButton: FC = () => {
       <UITools.ButtonMenu
         align="end"
         className={styles['PanelHeader__split-options']}
+        onOpenChange={setIsMenuOpen}
         trigger={<Icon name="ChevronDown" size={24} />}
         triggerAriaLabel={t(`${translationNameSpace}.booleanMenuAriaLabel`)}
       >

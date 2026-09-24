@@ -210,9 +210,9 @@ describe('PanelProperties behaviors', () => {
     // result
     expect(screen.getByText('2 selected')).toBeInTheDocument();
     expect(screen.getByText('Fill')).toBeInTheDocument();
-    expect(screen.getByLabelText('Create component')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Wrap in new section')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Boolean operations')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Component options')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Use as mask')).not.toBeInTheDocument();
 
     // cleanup
     store.dispatch(setSelection([]));

@@ -38,7 +38,16 @@ const makeFrame = (id: string): TFrameNode => ({
 });
 
 beforeAll(() => {
-  store.dispatch(addNodes({ nodes: [makeFrame('headerFrameA'), makeFrame('headerFrameB')], rootIds: ['headerFrameA', 'headerFrameB'] }));
+  store.dispatch(
+    addNodes({
+      nodes: [
+        makeFrame('headerFrameA'),
+        { ...makeFrame('headerFrameB'), childIds: ['headerFrameInner'] },
+        { ...makeFrame('headerFrameInner'), parentId: 'headerFrameB' },
+      ],
+      rootIds: ['headerFrameA', 'headerFrameB'],
+    }),
+  );
 });
 
 beforeEach(() => {
@@ -102,5 +111,19 @@ describe('FrameHeaderButtons behaviors', () => {
     expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
     expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
     expect(screen.queryByLabelText('Select matching layers')).not.toBeInTheDocument();
+  });
+
+  it('should keep only matching layers and the component split button while frames from different parents are selected', () => {
+    // mock
+    store.dispatch(setSelection(['headerFrameA', 'headerFrameInner']));
+
+    // before
+    renderFrameHeaderButtons();
+
+    // result
+    expect(screen.getByLabelText('Component options')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Toggle ready for dev status')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Use as mask')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Wrap in new section')).not.toBeInTheDocument();
   });
 });

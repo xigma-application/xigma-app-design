@@ -1,14 +1,26 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import PanelHeaderMaskButton from './PanelHeaderMaskButton';
 import { TooltipProvider } from 'shared';
 
+// store
+import { addNodes, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+import { TRectangleNode } from 'types/design/types';
+
 const renderButton = (): ReturnType<typeof render> =>
   render(
-    <TooltipProvider>
-      <PanelHeaderMaskButton />
-    </TooltipProvider>,
+    <Provider store={store}>
+      <TooltipProvider>
+        <PanelHeaderMaskButton />
+      </TooltipProvider>
+    </Provider>,
   );
 
 describe('PanelHeaderMaskButton snapshots', () => {
@@ -30,15 +42,33 @@ describe('PanelHeaderMaskButton behaviors', () => {
     expect(screen.getByLabelText('Use as mask')).toBeInTheDocument();
   });
 
-  it('should do nothing yet when clicked', () => {
+  it('should use the selection as a mask when clicked, like the Use as mask shortcut', () => {
+    // mock
+    const makeRectangle = (id: string): TRectangleNode => ({
+      fills: [],
+      height: 10,
+      id,
+      name: id,
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    });
+
+    store.dispatch(addNodes({ nodes: [makeRectangle('maskA'), makeRectangle('maskB')], rootIds: ['maskA', 'maskB'] }));
+    store.dispatch(setSelection(['maskA', 'maskB']));
+
     // before
     renderButton();
-    const button = screen.getByLabelText('Use as mask');
 
     // action
-    fireEvent.click(button);
+    fireEvent.click(screen.getByLabelText('Use as mask'));
 
     // result
-    expect(button).toBeInTheDocument();
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(nodes[nodes.maskA.parentId as string]?.type).toBe(NodeType.mask);
   });
 });

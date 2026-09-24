@@ -217,6 +217,31 @@ describe('handleFlattenSelection', () => {
     expect(Object.values(vector.fillByKey ?? {})).toEqual(Array(3).fill([{ color: '#00ff00', opacity: 100, type: 'solid' }]));
   });
 
+  it('should flatten shapes from different parents separately instead of merging them', async () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          { ...buildRectangle('splitFrame', 200, '#ffffff'), childIds: ['splitInner'], clipContent: true, type: NodeType.frame },
+          { ...buildRectangle('splitInner', 210, '#ff0000'), parentId: 'splitFrame' },
+          buildRectangle('splitRoot', 0, '#00ff00'),
+        ] as never,
+        rootIds: ['splitFrame', 'splitRoot'],
+      }),
+    );
+    store.dispatch(setSelection(['splitInner', 'splitRoot']));
+
+    // action
+    await handleFlattenSelection(store.dispatch);
+
+    // result
+    const page = selectActivePage(store.getState());
+
+    expect(page.nodes.splitInner.type).toBe(NodeType.vector);
+    expect(page.nodes.splitRoot.type).toBe(NodeType.vector);
+    expect(page.nodes.splitInner.parentId).toBe('splitFrame');
+  });
+
   it('should leave a single selected vector untouched', async () => {
     // mock
     store.dispatch(addNodes({ nodes: [{ ...buildFlattenedVector(), id: 'loneVector' }], rootIds: ['loneVector'] }));
