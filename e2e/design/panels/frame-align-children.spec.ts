@@ -177,3 +177,35 @@ test('Tidy up on a multi-selected row of frames evens out their gaps to the most
   expect(after[0]).toBe(before[0]);
   expect(after.slice(1).map((x, index) => x - after[index])).toEqual([60, 60, 60]);
 });
+
+test('with two frames selected, a size preset from the header menu resizes both frames', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-header-preset-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 200, 700, 300);
+  await designPage.drawFrame(900, 200, 960, 260);
+  await designPage.click(615, 188); // the first frame's label
+  await designPage.click(915, 188, { shift: true }); // the second frame's label
+
+  await page.getByLabel('Element type').click();
+  await page.getByText('iPhone 17', { exact: true }).click();
+
+  const sizes = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return activePage.rootOrder.map((id) => {
+      const node = activePage.nodes[id] as unknown as { height: number; width: number };
+
+      return { height: node.height, width: node.width };
+    });
+  });
+
+  expect(sizes).toEqual([
+    { height: 874, width: 402 },
+    { height: 874, width: 402 },
+  ]);
+});

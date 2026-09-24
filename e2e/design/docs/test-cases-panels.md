@@ -81,6 +81,7 @@ multi-selections only.
 | 557 | Tidy up on a multi-selected row of frames evens out their gaps to the most common one                                                  |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 | 558 | Tidy up picks row / column / grid from the layout (and the matching icon); grid packs rows and columns from the top-left corner        |  ✅  |             — (pure geometry; `tidyUp/test/*.spec.ts` cover every layout, #557 covers the browser flow)              |
 | 559 | Aligning a single frame's children moves a group child together with its members                                                       |  ✅  |             — (same button click as #551; `useColumnAlignment.spec.tsx` asserts the members' positions)              |
+| 560 | With two frames selected, a size preset from the Frame header menu resizes both, one undo step                                         |  ✅  |                                          ✅ `frame-align-children.spec.ts`                                           |
 
 ## Layers panel — lock/visibility
 

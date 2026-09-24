@@ -9,6 +9,7 @@ import FrameHeaderMenu from './FrameHeaderMenu';
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
+import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -95,6 +96,35 @@ describe('FrameHeaderMenu behaviors', () => {
     // result
     const node = selectActivePage(store.getState()).nodes[frameId];
     expect(node).toMatchObject({ height: 874, width: 402 });
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should resize every selected frame with a size preset and undo them all in one step', () => {
+    // mock
+    const firstId = addFrameNode();
+    const secondId = addFrameNode();
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderFrameHeaderMenu();
+
+    // action
+    fireEvent.click(screen.getByText('iPhone 17'));
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+    expect(nodes[firstId]).toMatchObject({ height: 874, width: 402 });
+    expect(nodes[secondId]).toMatchObject({ height: 874, width: 402 });
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    const { nodes: undoneNodes } = selectActivePage(store.getState());
+    expect(undoneNodes[firstId]).toMatchObject({ height: 20, width: 20 });
+    expect(undoneNodes[secondId]).toMatchObject({ height: 20, width: 20 });
 
     // cleanup
     store.dispatch(setSelection([]));

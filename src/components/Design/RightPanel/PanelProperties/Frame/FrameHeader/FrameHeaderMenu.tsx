@@ -8,10 +8,12 @@ import { UITools } from 'shared';
 import { useConvertSelectionToSection } from 'components/Design/Menu/hooks/useConvertSelectionToSection';
 
 // others
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { FRAME_PRESET_GROUPS } from '../../framePresetGroups';
 import { translationNameSpace } from './constants';
 
 // store
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { selectSelectedIds } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -25,10 +27,11 @@ const FrameHeaderMenu: FC = () => {
   const dispatch = useAppDispatch();
   const selectedIds = useAppSelector(selectSelectedIds);
   const onConvertToSection = useConvertSelectionToSection();
-  const [frameId] = selectedIds;
 
   const handleSelectPreset = (width: number, height: number) => (): void => {
-    dispatch(updateNode({ changes: { height, width }, id: frameId }));
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    selectedIds.forEach((id) => dispatch(updateNode({ changes: { height, width }, id })));
+    dispatch(endHistoryGesture());
   };
 
   return (
