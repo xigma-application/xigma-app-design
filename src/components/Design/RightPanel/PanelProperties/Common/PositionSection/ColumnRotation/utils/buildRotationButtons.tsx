@@ -22,11 +22,9 @@ import styles from '../column-rotation.module.scss';
 
 // types
 import { TButtonGroup } from 'shared/UITools/ButtonGroup/types';
+import { NodeType } from 'types/design/enums';
 import { TBoxSceneNode } from 'types/design/types';
 import { TSelectedImageCrop } from 'components/Design/RightPanel/PanelProperties/Common/utils/selectSelectedImageCrop';
-
-// utils
-import { isLayoutContainerNode } from 'utils/canvas/signals/isLayoutContainerNode';
 
 const normalizeRotation = (rotation: number): number => Math.round(((((rotation + 90) % 360) + 360) % 360) * 1e4) / 1e4;
 
@@ -36,7 +34,7 @@ export const buildRotationButtons = (
   t: TFunction,
   imageCrop?: TSelectedImageCrop,
 ): TButtonGroup[] => {
-  const isFlipDisabled = imageCrop ? false : !node || isLayoutContainerNode(node);
+  const isFlipDisabled = imageCrop ? false : !node || node.type === NodeType.section;
 
   return [
     {

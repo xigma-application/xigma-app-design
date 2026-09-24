@@ -586,3 +586,18 @@ Lives in `e2e/design/selection/multi-parent-selection.spec.ts`; write-up in
 | 548 | Batched ellipses keep their shape, opacity and rotation                                                                                                                                                                                        |  ✅  |     ✅ `rect-batching.spec.ts`      |
 | 549 | A glass effect refreshes when the shape under it changes and keeps its cache when something far away changes                                                                                                                                   |  ✅  |    ✅ `effect-textures.spec.ts`     |
 | 550 | A background blur refreshes when the shape behind it changes                                                                                                                                                                                   |  ✅  |    ✅ `effect-textures.spec.ts`     |
+
+## Flipping a single frame
+
+Flip used to skip frames. On a single selected frame it now mirrors the frame's settings instead of
+its geometry, and recurses into nested frames. Only through the Flip button / shortcut — resizing a
+frame past zero never flips it. Fills and effects are left as they are.
+
+| #   | Scenario                                                                                                                                                                                                                                      | Unit |           E2E           |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------: |
+| 561 | Flip on a single free-form frame (⇧H / ⇧V) keeps the frame in place, mirrors its children and their constraints inside it and swaps its left/right (top/bottom) corner radii, stroke widths, padding, layout guide alignment and frame guides |  ✅  | ✅ `frame-flip.spec.ts` |
+| 562 | Flip mirrors a nested frame's position inside its parent and flips the nested frame's own settings and children too                                                                                                                           |  ✅  | ✅ `frame-flip.spec.ts` |
+| 563 | Flip on an auto-layout frame flips its alignment (left↔right, top↔bottom) and keeps the children's order                                                                                                                                      |  ✅  | ✅ `frame-flip.spec.ts` |
+| 564 | Flip on a grid frame mirrors each child's cells by its whole column/row span, reverses the track sizes, mirrors cell alignment and turns auto placement off                                                                                   |  ✅  | ✅ `frame-flip.spec.ts` |
+| 565 | The right panel's Flip buttons are enabled for a frame (still disabled for a section); the whole frame flip undoes in one step                                                                                                                |  ✅  | ✅ `frame-flip.spec.ts` |
+| 566 | Flip vertical on a wrapping horizontal auto layout reverses its lines (last line on top) and keeps the order inside each line                                                                                                                 |  ✅  | ✅ `frame-flip.spec.ts` |

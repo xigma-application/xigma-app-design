@@ -4,7 +4,6 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { selectNodes, selectSelectedIds } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -13,34 +12,11 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { clearResizeOriginalFills } from '../../useSelectionTool/utils/handlePointerMove/continueResizeDrag/resizeNode/resizeOriginalFillsCache';
+import { flipFrameTree } from './flipFrame/flipFrameTree';
+import { flipLeafNode } from './flipFrame/flipLeafNode';
 import { getGroupLeafNodes } from 'store/design/utils/nodeHierarchy/getGroupLeafNodes';
 import { getNodesBoundingBox } from 'store/design/utils/getNodesBoundingBox';
-import { getResizeNodeOrigin } from '../../useSelectionTool/utils/handlePointerDown/armResizeDrag/getResizeNodeOrigin';
 import { isLayoutContainerNode } from 'utils/canvas/signals/isLayoutContainerNode';
-import { resizeNode } from '../../useSelectionTool/utils/handlePointerMove/continueResizeDrag/resizeNode/resizeNode';
-
-const normalizeFlippedLeafRotation = (dispatch: AppDispatch, leaf: TSceneNode): void => {
-  if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
-    dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
-  }
-};
-
-const flipLeafNode = (
-  dispatch: AppDispatch,
-  leaf: TSceneNode,
-  anchors: TPoint,
-  scaleX: number,
-  scaleY: number,
-  isSingleBoxOrigin: boolean,
-): void => {
-  const origin = getResizeNodeOrigin(leaf);
-
-  clearResizeOriginalFills(leaf.id);
-  resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
-  clearResizeOriginalFills(leaf.id);
-  normalizeFlippedLeafRotation(dispatch, leaf);
-};
 
 const flipLeaves = (
   dispatch: AppDispatch,
@@ -60,7 +36,11 @@ export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 
     .map((id) => nodes[id])
     .filter(Boolean);
 
-  if (selectedNodes.length !== 0) {
+  if (selectedNodes.length === 1 && selectedNodes[0].type === NodeType.frame) {
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    flipFrameTree(dispatch, selectedNodes[0].id, axis, null);
+    dispatch(endHistoryGesture());
+  } else if (selectedNodes.length !== 0) {
     const bounds = getNodesBoundingBox(selectedNodes);
     const anchors = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const scaleX = axis === 'horizontal' ? -1 : 1;

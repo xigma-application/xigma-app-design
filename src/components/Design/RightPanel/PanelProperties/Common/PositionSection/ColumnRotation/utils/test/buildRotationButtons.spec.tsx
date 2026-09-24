@@ -209,6 +209,30 @@ describe('buildRotationButtons', () => {
     expect((selectNodes(store.getState())[id] as TEllipseNode).flipY).toBe(true);
   });
 
+  it('should enable both flip buttons for a frame', () => {
+    // mock
+    const frame = addFrameNode(0);
+
+    // action
+    const [, flipHorizontal, flipVertical] = buildRotationButtons(frame, store.dispatch, t);
+
+    // result
+    expect(flipHorizontal.disabled).toBe(false);
+    expect(flipVertical.disabled).toBe(false);
+  });
+
+  it('should keep both flip buttons disabled for a section', () => {
+    // mock
+    const section = { ...addFrameNode(0), type: NodeType.section } as unknown as TFrameNode;
+
+    // action
+    const [, flipHorizontal, flipVertical] = buildRotationButtons(section, store.dispatch, t);
+
+    // result
+    expect(flipHorizontal.disabled).toBe(true);
+    expect(flipVertical.disabled).toBe(true);
+  });
+
   it('should keep both flip buttons enabled while an image crop is being edited, even with no node selected', () => {
     // action
     const buttons = buildRotationButtons(undefined, store.dispatch, t, {} as TSelectedImageCrop);

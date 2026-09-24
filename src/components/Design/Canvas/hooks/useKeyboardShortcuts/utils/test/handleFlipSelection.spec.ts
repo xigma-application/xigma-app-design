@@ -270,19 +270,6 @@ describe('handleFlipSelection', () => {
     expect(selectNodes(store.getState())).toEqual(before);
   });
 
-  it('should do nothing at all when the selection is a single frame', () => {
-    // mock
-    const id = addFrameNode();
-    store.dispatch(setSelection([id]));
-    const before = selectNodes(store.getState());
-
-    // action
-    handleFlipSelection(store.dispatch, 'horizontal');
-
-    // result — frame mirroring is unsupported; the node is left completely untouched
-    expect(selectNodes(store.getState())).toEqual(before);
-  });
-
   it('should do nothing at all when the selection is a single section', () => {
     // mock
     const id = addSectionNode();

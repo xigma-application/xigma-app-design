@@ -485,6 +485,29 @@ geometry: `utils/math/flipPoint.ts` (generic mirror around a center) is used by
 (`isPointInText.ts` calls `flipTextPoint` first; glyph rendering does a full mesh mirror around the
 node center). Media flips via UV-coordinate flipping in `drawImage.ts` instead of geometry.
 
+**Flipping a single frame** (`useKeyboardShortcuts/utils/flipFrame/`, entered from
+`handleFlipSelection` when exactly one frame is selected; multi-selections still skip frames and
+sections, sections are never flipped). The frame is not mirrored like geometry. `flipFrameTree`
+swaps its settings (`getFlippedFrameSettings`: corner radii, stroke side widths, padding,
+`layoutAlignment` via `MIRRORED_LAYOUT_ALIGNMENT`, layout guides' `columnsAlign`/`rowsAlign`
+(`getMirroredLayoutGuides`), frame guides' positions on the flipped axis (`getMirroredFrameGuides`),
+grid track sizes reversed, rotation negated) and,
+for a nested frame, mirrors its position inside the parent (`getMirroredPosition`). Then
+`flipFrameContent` goes through the children and mirrors the constraint of every
+`isConstraintEligibleFrameChild` child (`getMirroredConstraint`, see [[constraints]]: left↔right /
+top↔bottom on the flipped axis, an unset axis reads as left/top, center stays). Free children are flipped around the frame centre
+with the shared `flipLeafNode` (extracted from `handleFlipSelection`). A wrapping auto layout flipped across its flow (horizontal wrap + vertical flip, or the
+reverse) gets its lines reversed by reordering `childIds` (`getReversedWrapLineOrder`, lines found
+from the children's current overlap, order inside a line kept, absolute children keep their
+slots) — the wrap then re-breaks the lines itself, so uneven lines may split differently.
+Auto-layout/grid-managed
+children are flipped in place, because the layout places them. Nested frames recurse. On a grid,
+`getFlippedGridChildChanges` rewrites every child's anchor to the mirrored cell by its whole span
+(`count − start − span`), mirrors `gridChildHorizontalAlign`/`VerticalAlign`, and sets
+`gridAutoPlacement: false` so the anchors take effect. Fills and effects are untouched. The whole
+flip is one undo step. The right panel's flip buttons (`buildRotationButtons`) are enabled for frames
+and stay disabled only for sections.
+
 ## 9. Cursor feedback
 
 One shared primitive, `utils/canvas/createCursorRotator.ts` — lazily loads a cursor image, draws it
