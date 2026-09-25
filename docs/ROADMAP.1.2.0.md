@@ -128,3 +128,15 @@ effects work the same as on a rectangle: several fills, gradients, images, shado
       corners and a live preview that already shows the fill
 - [x] Flatten, Edit object and Offset vector keep the polygon's fill and stroke
 - [x] polygons show Fill and Stroke when selected together with other layers
+
+## Stage 16 — Star
+
+A star has its own panel like a polygon: Position, Layout, Appearance, Fill, Stroke, Effects and
+Export. Appearance has Opacity, Corner radius, Count, the number of points, and Ratio, how deep the
+points are cut in. Fills, strokes and effects work the same as on a rectangle.
+
+- [x] the stroke follows the real shape, including rounded corners, inside, in the centre or outside
+- [x] Offset vector in the "…" menu turns a star into a bigger shape around it, with a live preview
+      that already shows the fill
+- [x] Flatten, Edit object and Offset vector keep the star's fill and stroke
+- [x] stars show Fill and Stroke when selected together with other layers
