@@ -8,7 +8,17 @@ import { getResizeNodeOrigin } from '../getResizeNodeOrigin';
 describe('getResizeNodeOrigin', () => {
   it('should capture x1/y1/x2/y2 for a line node', () => {
     // mock
-    const line: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 5, y2: 15 };
+    const line: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 5,
+      y2: 15,
+    };
 
     // action & result
     expect(getResizeNodeOrigin(line)).toEqual({ x1: 0, x2: 10, y1: 5, y2: 15 });

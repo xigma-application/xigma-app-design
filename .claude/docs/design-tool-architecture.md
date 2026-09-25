@@ -26,7 +26,7 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
   to: `TSceneNode`, `TNewSceneNode` (`Omit<T, 'id'>`, what `addNode` accepts), `TSceneNodeChanges`
   (`Partial<T>`, what `updateNode` accepts).
 - **Adding an optional field to an existing node type** (like Arrow's `startPoint`/`endPoint` on
-  `TLineNode`) is far cheaper than it looks: make it optional (`startPoint?: TLineEndpointStyle`),
+  `TLineNode`) is far cheaper than it looks: make it optional (`startPoint?: LineEndpoint`),
   and every existing test fixture/mock across the codebase that builds that node type as an object
   literal keeps compiling untouched, since TS doesn't require optional fields. Making it
   **required** instead forces you to touch every file that ever constructs that node type as a
@@ -433,10 +433,9 @@ Two independent render passes, both need updating for a visual change to show up
   selected — a plain content addition (like Arrow's arrowhead) usually only touches the two passes
   above, since the base pass already draws for every node regardless of selection.
 - `src/utils/canvas/*` — the actual low-level WebGL primitives (`drawRect`, `drawLine`, `drawEllipse`,
-  `drawPolygon`, `drawArrowhead`, ...). Check here first before writing new vertex/buffer boilerplate
-  — a new primitive can usually be composed from existing ones (`drawArrowhead` is just two
-  `drawLine` calls for the wings plus three `drawEllipse` calls for round caps/joints, since there's
-  no dedicated rounded-polyline primitive).
+  `drawPolygon`, ...). Check here first before writing new vertex/buffer boilerplate — a new shape
+  can usually be one polygon filled by an existing primitive (lines and their endpoints are a single
+  outline polygon filled through `drawBoxPaints`).
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 
@@ -491,11 +490,11 @@ Two independent render passes, both need updating for a visual change to show up
 ## Full worked example
 
 The Arrow tool (`XG-APP: add Arrow tool`, see `git log`) is the concrete instance of every step
-above: `ToolName.arrow`, `TLineNode.startPoint`/`endPoint` (optional, `'default' | 'arrow'`),
+above: `ToolName.arrow`, `TLineNode.startPoint`/`endPoint` (optional, now the `LineEndpoint` enum:
+none, round, square, line/triangle/reversed-triangle/circle/diamond arrow),
 `ARROW_TOOL_SETTINGS` reusing `useDrawLineTool`, joining Line's slot in the Rectangle dropdown,
-`Shift+L`, a new `drawArrowhead.ts` primitive composed from `drawLine`/`drawEllipse`, wired into
-`drawSceneNodes.ts` and (at the time) `drawDraftLine.ts` via a shared `drawLineEndpointArrowheads.ts`
-helper, zero changes to hit-testing, and `e2e/design/draw/create-arrow.spec.ts`. Read that commit's
+`Shift+L`, the arrowhead drawn as part of the line's one outline polygon
+(`getLineEndOutlinePoints/`, originally a separate `drawArrowhead.ts` primitive), zero changes to hit-testing, and `e2e/design/draw/create-arrow.spec.ts`. Read that commit's
 diff alongside this doc for the concrete shape of every piece described here — with one caveat: the
 live-node-creation change in §7 (node created at `pointerdown`, no `draftRef` writes for Line/Arrow
 anymore) landed after this example, so `drawDraftLine.ts` (and its dispatch case in `drawFrame.ts`)

@@ -18,6 +18,7 @@ import {
   LayoutGuideType,
   LayoutMode,
   LayoutVersion,
+  LineEndpoint,
   NodeType,
   PathType,
   SizingMode,
@@ -404,18 +405,16 @@ export type TVectorNode = {
   widthProfile?: TVectorWidthProfile | null;
 };
 
-export type TLineEndpointStyle = 'arrow' | 'default';
-
 export type TLineNode = {
-  endPoint?: TLineEndpointStyle;
+  endPoint?: LineEndpoint;
   hidden?: boolean;
   id: string;
   locked?: boolean;
   name: string;
   parentId: string | null;
-  startPoint?: TLineEndpointStyle;
-  stroke: string;
+  startPoint?: LineEndpoint;
   strokeWidth?: number;
+  strokes: TPaint[];
   type: NodeType.line;
   x1: number;
   x2: number;

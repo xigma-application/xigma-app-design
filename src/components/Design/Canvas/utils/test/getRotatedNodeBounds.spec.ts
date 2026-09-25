@@ -77,7 +77,17 @@ describe('getRotatedNodeBounds', () => {
 
   it('should ignore rotation for line nodes, which have no rotation field', () => {
     // mock
-    const line: TLineNode = { id: '1', name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 20 };
+    const line: TLineNode = {
+      id: '1',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 20,
+    };
 
     // result
     expect(getRotatedNodeBounds(line)).toEqual({ height: 20, width: 10, x: 0, y: 0 });

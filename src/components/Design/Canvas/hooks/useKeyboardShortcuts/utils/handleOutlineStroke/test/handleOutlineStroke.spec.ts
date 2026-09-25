@@ -132,7 +132,17 @@ describe('handleOutlineStroke', () => {
   it('should replace a line with its outline vector directly, since a line has no fill of its own', async () => {
     // mock
     store.dispatch(
-      addNode({ name: 'Line', parentId: null, stroke: '#000000', strokeWidth: 4, type: NodeType.line, x1: 0, x2: 100, y1: 0, y2: 0 }),
+      addNode({
+        name: 'Line',
+        parentId: null,
+        strokeWidth: 4,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        x1: 0,
+        x2: 100,
+        y1: 0,
+        y2: 0,
+      }),
     );
     const [lineId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([lineId]));

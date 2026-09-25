@@ -74,7 +74,7 @@ describe('getSelectionBounds', () => {
       id: 'line',
       name: 'Line',
       parentId: null,
-      stroke: '#000',
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 30,
       x2: 40,

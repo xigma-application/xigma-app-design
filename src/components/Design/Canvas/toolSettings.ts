@@ -18,12 +18,12 @@ import {
 } from './constants';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LineEndpoint, NodeType, ToolName } from 'types/design/enums';
 
 export const ARROW_TOOL_SETTINGS: TLineToolConfig = {
-  endPoint: 'arrow',
+  endPoint: LineEndpoint.lineArrow,
   name: 'Arrow',
-  startPoint: 'default',
+  startPoint: LineEndpoint.none,
   stroke: LINE_STROKE,
   tool: ToolName.arrow,
 };
@@ -35,9 +35,9 @@ export const ELLIPSE_TOOL_SETTINGS: TShapeToolConfig = {
 };
 export const FRAME_TOOL_SETTINGS: TShapeToolConfig = { fill: FRAME_FILL, name: 'Frame', tool: ToolName.frame, type: NodeType.frame };
 export const LINE_TOOL_SETTINGS: TLineToolConfig = {
-  endPoint: 'default',
+  endPoint: LineEndpoint.none,
   name: 'Line',
-  startPoint: 'default',
+  startPoint: LineEndpoint.none,
   stroke: LINE_STROKE,
   tool: ToolName.line,
 };

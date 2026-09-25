@@ -20,7 +20,17 @@ const rect = (id: string): TSceneNode =>
   }) as TSceneNode;
 
 const line = (id: string): TSceneNode =>
-  ({ id, name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 }) as TSceneNode;
+  ({
+    id,
+    name: 'Line',
+    parentId: null,
+    strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+    type: NodeType.line,
+    x1: 0,
+    x2: 10,
+    y1: 0,
+    y2: 0,
+  }) as TSceneNode;
 
 describe('getEligibleDraggedEntries', () => {
   it('should include an eligible node with a plain {x,y} origin', () => {

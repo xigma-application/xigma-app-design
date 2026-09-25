@@ -51,7 +51,7 @@ export const drawLeafNode = (
       drawMediaLeafNode(context, node);
       break;
     case NodeType.line:
-      drawLineLeafNode(context, node, opacity);
+      drawLineLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.path:
       drawPathOutline(context, node, pathOutlineStyles.get(node.id));

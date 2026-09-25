@@ -72,7 +72,9 @@ describe('drawDraftSizeLabel', () => {
   it('should read an in-progress line draft by its own length, tilted along it, instead of its bounding box', () => {
     // mock
     const refs = createCanvasRefs({
-      draftRef: { current: { stroke: '#000000', type: NodeType.line, x1: 0, x2: 100, y1: 0, y2: 100 } },
+      draftRef: {
+        current: { strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], type: NodeType.line, x1: 0, x2: 100, y1: 0, y2: 100 },
+      },
     });
 
     // before

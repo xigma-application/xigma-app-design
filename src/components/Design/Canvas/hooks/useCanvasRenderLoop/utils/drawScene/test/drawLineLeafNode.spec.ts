@@ -1,33 +1,27 @@
-// others
-import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
-
 // types
 import { NodeType } from 'types/design/enums';
-import { TDrawContext } from '../types';
+import { TDrawSceneContext } from '../types';
 import { TLineNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { drawLineLeafNode } from '../drawLineLeafNode';
+import { getLineStrokeBox } from 'utils/canvas/shapes/getLineStrokeBox';
+import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
 
-const drawLineMock = vi.fn();
-const drawLineEndpointArrowheadsMock = vi.fn();
+const drawBoxPaintsMock = vi.fn();
 
-vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
-vi.mock('../drawLineEndpointArrowheads', () => ({
-  drawLineEndpointArrowheads: (...args: unknown[]): void => drawLineEndpointArrowheadsMock(...args),
+vi.mock('../drawBoxLeafNode/drawBoxPaints', () => ({
+  drawBoxPaints: (...args: unknown[]): unknown => drawBoxPaintsMock(...args),
 }));
 
-const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
-const gl = {} as WebGL2RenderingContext;
-const program = {} as WebGLProgram;
-const buffer = {} as WebGLBuffer;
-const context: TDrawContext = { buffer, canvasHeight: 150, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT };
+const context = { gl: {} } as TDrawSceneContext;
 
 const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'l1',
   name: 'Line',
   parentId: null,
-  stroke: '#222',
+  strokes: [{ color: '#222222', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 10,
@@ -38,40 +32,37 @@ const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
 
 describe('drawLineLeafNode', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    drawBoxPaintsMock.mockClear();
   });
 
-  it('should draw the line with the threaded opacity, defaulting the stroke width, and thread the endpoint arrowheads', () => {
+  it('should paint the stroke paints over the line outline, laid out along the line', () => {
     // mock
     const node = line();
+    const refs = createCanvasRefs();
 
     // action
-    drawLineLeafNode(context, node, 0.5);
+    drawLineLeafNode(context, node, 0.5, {}, new Map(), refs, null, 1);
 
     // result
-    expect(drawLineMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      node,
-      '#222',
-      LINE_RENDER_STROKE_WIDTH,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
+    expect(drawBoxPaintsMock).toHaveBeenCalledWith(
+      context,
+      getLineStrokeBox(node),
+      node.strokes,
+      [getLineStrokePolygon(node)],
       0.5,
+      {},
+      expect.any(Map),
+      refs,
+      null,
+      1,
     );
-    expect(drawLineEndpointArrowheadsMock).toHaveBeenCalledWith(context, node);
   });
 
-  it('should use an explicit stroke width instead of the default when one is set', () => {
-    // mock
-    const node = line({ strokeWidth: 4 });
-
+  it('should draw nothing for a zero-length line', () => {
     // action
-    drawLineLeafNode(context, node, 1);
+    drawLineLeafNode(context, line({ x2: 0 }), 1, {}, new Map(), createCanvasRefs(), null, 0);
 
     // result
-    expect(drawLineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#222', 4, 200, 150, IDENTITY_VIEWPORT, 1);
+    expect(drawBoxPaintsMock).not.toHaveBeenCalled();
   });
 });

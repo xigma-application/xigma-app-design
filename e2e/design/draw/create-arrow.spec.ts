@@ -118,7 +118,12 @@ test('Outline stroke on an arrow keeps its arrowhead in the outlined shape', asy
     const { updateNode } = await import('/src/store/design/slice.ts');
     const { activePageId, pages } = store.getState().design;
 
-    store.dispatch(updateNode({ changes: { endPoint: 'arrow', stroke: '#000000' }, id: pages[activePageId].rootOrder[0] }));
+    store.dispatch(
+      updateNode({
+        changes: { endPoint: 'lineArrow', strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] } as never,
+        id: pages[activePageId].rootOrder[0],
+      }),
+    );
   });
   await page.keyboard.press('Alt+Control+O');
   await designPage.click(1500, 900);
@@ -136,4 +141,44 @@ test('Outline stroke on an arrow keeps its arrowhead in the outlined shape', asy
 
   expect(type).toBe('vector');
   expect(wing.equals(blank)).toBe(false);
+});
+
+test('each filled line endpoint draws its shape around the line end, and None leaves it bare', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-line-endpoint-shapes');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawLine(780, 260, 1000, 260);
+  await designPage.click(1500, 900);
+
+  const setEndPoint = (endPoint: string): Promise<void> =>
+    page.evaluate(async (nextEndPoint) => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      store.dispatch(
+        updateNode({
+          changes: { endPoint: nextEndPoint, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] } as never,
+          id: pages[activePageId].rootOrder[0],
+        }),
+      );
+    }, endPoint);
+  const shapeAreas: Record<string, { height: number; width: number; x: number; y: number }> = {
+    circleArrow: { height: 2, width: 2, x: 999, y: 257 },
+    diamondArrow: { height: 1, width: 2, x: 999, y: 258 },
+    reversedTriangle: { height: 2, width: 2, x: 998, y: 257 },
+    triangleArrow: { height: 1, width: 2, x: 995, y: 258 },
+  };
+
+  for (const [endPoint, area] of Object.entries(shapeAreas)) {
+    await setEndPoint('none');
+    const bare = await page.screenshot({ clip: area });
+
+    await setEndPoint(endPoint);
+    const shaped = await page.screenshot({ clip: area });
+
+    expect(shaped.equals(bare), endPoint).toBe(false);
+  }
 });

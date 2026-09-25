@@ -39,7 +39,18 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 };
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
-  store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
+  store.dispatch(
+    addNode({
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1,
+      x2,
+      y1,
+      y2,
+    }),
+  );
 
   const { rootOrder } = selectActivePage(store.getState());
 

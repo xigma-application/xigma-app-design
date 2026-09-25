@@ -3,8 +3,11 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
 
 // utils
+import { drawDraftLine } from '../drawDraftLine';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawFrame } from '../drawFrame';
+
+vi.mock('../drawDraftLine', () => ({ drawDraftLine: vi.fn() }));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -82,20 +85,23 @@ describe('drawFrame', () => {
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const draft = {
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' as const }],
+      type: NodeType.line as const,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 10,
+    };
 
     // before
     drawFrame(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
-      createCanvasRefs({ draftRef: { current: { stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 } } }),
+      createCanvasRefs({ draftRef: { current: draft } }),
     );
 
-    // result — 1 segment fill + 2 endpoint-handle fills = 3 TRIANGLES draws, 2 endpoint-handle
-    // strokes = 2 LINE_LOOP draws
-    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
-    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
-
-    expect(trianglesDraws).toHaveLength(3);
-    expect(lineLoopDraws).toHaveLength(2);
+    // result
+    expect(drawDraftLine).toHaveBeenCalledWith(gl, program, buffer, draft, 100, 100, IDENTITY_VIEWPORT);
   });
 
   it('should delegate to drawDraftShape for a non-line draft', () => {

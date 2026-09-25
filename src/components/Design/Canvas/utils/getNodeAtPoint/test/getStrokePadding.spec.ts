@@ -55,7 +55,17 @@ describe('getStrokePadding', () => {
 
   it('should return 0 when the node has no strokeColor field at all', () => {
     // mock
-    const node: TSceneNode = { id: 'a', name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };
+    const node: TSceneNode = {
+      id: 'a',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 0,
+    };
 
     // result
     expect(getStrokePadding(node)).toBe(0);

@@ -13,7 +13,7 @@ import { TDesignState } from 'store/design/types';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LineEndpoint, NodeType, ToolName } from 'types/design/enums';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
@@ -32,8 +32,20 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const pointerEvent = (type: string, x: number, y: number, button = 0): PointerEvent =>
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
-const CONFIG: TLineToolConfig = { endPoint: 'default', name: 'Line', startPoint: 'default', stroke: '#000000', tool: ToolName.line };
-const ARROW_CONFIG: TLineToolConfig = { endPoint: 'arrow', name: 'Arrow', startPoint: 'default', stroke: '#000000', tool: ToolName.arrow };
+const CONFIG: TLineToolConfig = {
+  endPoint: LineEndpoint.none,
+  name: 'Line',
+  startPoint: LineEndpoint.none,
+  stroke: '#000000',
+  tool: ToolName.line,
+};
+const ARROW_CONFIG: TLineToolConfig = {
+  endPoint: LineEndpoint.lineArrow,
+  name: 'Arrow',
+  startPoint: LineEndpoint.none,
+  stroke: '#000000',
+  tool: ToolName.arrow,
+};
 
 describe('useDrawLineTool behaviors', () => {
   it('should not react to pointer events when the tool is not active', () => {
@@ -78,7 +90,7 @@ describe('useDrawLineTool behaviors', () => {
     expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({
       endPoint: CONFIG.endPoint,
       startPoint: CONFIG.startPoint,
-      stroke: CONFIG.stroke,
+      strokes: [{ color: CONFIG.stroke, opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 60,
       x2: 10,
@@ -309,7 +321,7 @@ describe('useDrawLineTool behaviors', () => {
       endPoint: CONFIG.endPoint,
       name: `${CONFIG.name} (1)`,
       startPoint: CONFIG.startPoint,
-      stroke: CONFIG.stroke,
+      strokes: [{ color: CONFIG.stroke, opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 10,
       x2: 60,
@@ -344,7 +356,7 @@ describe('useDrawLineTool behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ endPoint: 'arrow', startPoint: 'default' });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ endPoint: LineEndpoint.lineArrow, startPoint: LineEndpoint.none });
   });
 
   it('should select the newly created line immediately at pointer-down, replacing any existing selection', () => {

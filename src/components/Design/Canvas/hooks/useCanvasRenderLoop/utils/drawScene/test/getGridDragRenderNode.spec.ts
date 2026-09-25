@@ -27,7 +27,17 @@ describe('getGridDragRenderNode', () => {
 
   it('should translate a line node’s endpoints by the ghost’s offset', () => {
     // mock
-    const line: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#fff', type: NodeType.line, x1: 30, x2: 10, y1: 20, y2: 0 };
+    const line: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 30,
+      x2: 10,
+      y1: 20,
+      y2: 0,
+    };
     const refs = createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds: ['l'], offset: { x: 5, y: 5 } } } } });
 
     // result

@@ -21,7 +21,17 @@ const rect = (overrides: Partial<Omit<TRectangleNode, 'type'>> = {}): TSceneNode
   }) as TSceneNode;
 
 const line = (): TSceneNode =>
-  ({ id: 'l', name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 }) as TSceneNode;
+  ({
+    id: 'l',
+    name: 'Line',
+    parentId: null,
+    strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+    type: NodeType.line,
+    x1: 0,
+    x2: 10,
+    y1: 0,
+    y2: 0,
+  }) as TSceneNode;
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   childIds: [],

@@ -240,7 +240,18 @@ describe('handleFlipSelection', () => {
 
   it('should not touch rotation for a line node (it has none)', () => {
     // mock
-    store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 20, y1: 0, y2: 0 }));
+    store.dispatch(
+      addNode({
+        name: 'Line',
+        parentId: null,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        x1: 0,
+        x2: 20,
+        y1: 0,
+        y2: 0,
+      }),
+    );
     const { rootOrder } = selectActivePage(store.getState());
     const id = rootOrder[rootOrder.length - 1];
     store.dispatch(setSelection([id]));

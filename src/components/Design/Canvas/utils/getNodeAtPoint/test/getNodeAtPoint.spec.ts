@@ -129,7 +129,7 @@ describe('getNodeAtPoint', () => {
       id: 'a',
       name: 'Line',
       parentId: null,
-      stroke: '#000000',
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,
@@ -445,7 +445,17 @@ describe('getNodeAtPoint', () => {
 
   it('should widen the line hit-test tolerance in world units as the viewport zooms out', () => {
     // mock
-    const line: TSceneNode = { id: 'a', name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };
+    const line: TSceneNode = {
+      id: 'a',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 0,
+    };
 
     // result — 6 world units off the segment misses at zoom 1 (4px tolerance) but hits at zoom
     expect(getNodeAtPoint({ x: 5, y: 6 }, [line], IDENTITY_VIEWPORT)).toBeNull();
@@ -458,8 +468,8 @@ describe('getNodeAtPoint', () => {
       id: 'a',
       name: 'Line',
       parentId: null,
-      stroke: '#000000',
       strokeWidth: 16,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,

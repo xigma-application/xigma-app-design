@@ -405,7 +405,7 @@ test('an arrow joined into a Union with a rectangle keeps its arrowhead', async 
     const { nodes, rootOrder } = pages[activePageId];
     const line = Object.values(nodes).find((node) => node.type === 'line');
 
-    store.dispatch(updateNode({ changes: { endPoint: 'arrow' }, id: line?.id ?? '' }));
+    store.dispatch(updateNode({ changes: { endPoint: 'lineArrow' } as never, id: line?.id ?? '' }));
     store.dispatch(setSelection(rootOrder));
     store.dispatch(booleanNodes('union'));
   });
@@ -434,7 +434,7 @@ test('a Union with a gradient stroke draws that stroke around its shape', async 
       const { activePageId, pages } = store.getState().design;
       const union = Object.values(pages[activePageId].nodes).find((node) => node.type === 'boolean');
 
-      store.dispatch(updateNode({ changes: { strokes: nextStrokes, strokeWidth: 6 } as never, id: union?.id ?? '' }));
+      store.dispatch(updateNode({ changes: { strokeWidth: 6, strokes: nextStrokes } as never, id: union?.id ?? '' }));
       store.dispatch(setSelection([]));
     }, strokes);
 

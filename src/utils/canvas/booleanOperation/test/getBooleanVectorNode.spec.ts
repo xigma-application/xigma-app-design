@@ -1,5 +1,5 @@
 // types
-import { BooleanOperation, NodeType } from 'types/design/enums';
+import { BooleanOperation, LineEndpoint, NodeType } from 'types/design/enums';
 import { TBooleanNode, TLineNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
@@ -153,7 +153,7 @@ describe('getBooleanVectorNode', () => {
       id: 'line',
       name: 'line',
       parentId: 'union',
-      stroke: '#ffffff',
+      strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 50,
       x2: 300,
@@ -174,11 +174,11 @@ describe('getBooleanVectorNode', () => {
   it('should keep the arrowhead of an arrow joined with a rectangle', () => {
     // mock
     const arrow: TLineNode = {
-      endPoint: 'arrow',
+      endPoint: LineEndpoint.lineArrow,
       id: 'arrow',
       name: 'arrow',
       parentId: 'union',
-      stroke: '#ffffff',
+      strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 50,
       x2: 300,

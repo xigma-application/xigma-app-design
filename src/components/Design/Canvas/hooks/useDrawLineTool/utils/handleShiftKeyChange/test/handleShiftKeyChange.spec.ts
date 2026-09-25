@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 
 // utils
 import { handleShiftKeyChange } from '../handleShiftKeyChange';
@@ -24,11 +24,11 @@ const keyboardEvent = (key: string, shiftKey = true): KeyboardEvent => new Keybo
 const createLineNode = (): string => {
   const { payload } = store.dispatch(
     addNode({
-      endPoint: 'default',
+      endPoint: LineEndpoint.none,
       name: 'Line',
       parentId: null,
-      startPoint: 'default',
-      stroke: '#000000',
+      startPoint: LineEndpoint.none,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 0,

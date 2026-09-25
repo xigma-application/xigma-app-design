@@ -8,7 +8,17 @@ import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
 describe('getNodeAxisAlignedBounds', () => {
   it('should return the min/max box of a line’s two endpoints, regardless of their order', () => {
     // mock
-    const line: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#fff', type: NodeType.line, x1: 30, x2: 10, y1: 20, y2: 0 };
+    const line: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 30,
+      x2: 10,
+      y1: 20,
+      y2: 0,
+    };
 
     // result
     expect(getNodeAxisAlignedBounds(line)).toEqual({ height: 20, width: 20, x: 10, y: 0 });

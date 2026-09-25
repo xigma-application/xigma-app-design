@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 // utils
@@ -9,7 +9,7 @@ const buildLine = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'line-1',
   name: 'Line',
   parentId: null,
-  stroke: '#000000',
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 100,
@@ -43,7 +43,7 @@ describe('getLineStrokeOutlineLoops', () => {
 
   it('should grow the outline around an arrowhead at the end and at the start', () => {
     // before
-    const loops = getLineStrokeOutlineLoops(buildLine({ endPoint: 'arrow', startPoint: 'arrow' }), 0.5);
+    const loops = getLineStrokeOutlineLoops(buildLine({ endPoint: LineEndpoint.lineArrow, startPoint: LineEndpoint.lineArrow }), 0.5);
 
     // result
     const xs = loops?.outer.map((point) => point.x) ?? [];

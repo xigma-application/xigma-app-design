@@ -1,6 +1,3 @@
-// others
-import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
-
 // types
 import { TDraftRect } from 'types/canvas';
 import { TLineNode, TSceneNode } from 'types/design/types';
@@ -8,12 +5,16 @@ import { TLineNode, TSceneNode } from 'types/design/types';
 // utils
 import { drawSvgPolygons } from './drawSvgPolygons';
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
-import { getLineArrowheadPolygons } from 'utils/canvas/shapes/getLineArrowheadPolygons';
-import { getLineQuadPoints } from 'utils/canvas/shapes/getLineQuadPoints';
+import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
+import { getLineVectorStroke } from '../getLineVectorStroke';
 
 export const drawSvgLineShape = (elements: string[], node: TLineNode, nodesById: Record<string, TSceneNode>, bounds: TDraftRect): void => {
-  const strokeWidth = node.strokeWidth ?? LINE_RENDER_STROKE_WIDTH;
-  const polygons = [getLineQuadPoints(node, strokeWidth), ...getLineArrowheadPolygons(node)];
+  const polygon = getLineStrokePolygon(node);
+  const stroke = getLineVectorStroke(node);
 
-  drawSvgPolygons(elements, polygons, node.stroke, getEffectiveOpacity(node, nodesById), bounds);
+  if (polygon) {
+    if (stroke) {
+      drawSvgPolygons(elements, [polygon], stroke.color, (getEffectiveOpacity(node, nodesById) * stroke.opacity) / 100, bounds);
+    }
+  }
 };

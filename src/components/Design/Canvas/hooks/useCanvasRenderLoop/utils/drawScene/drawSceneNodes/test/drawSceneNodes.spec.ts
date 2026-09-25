@@ -1,5 +1,5 @@
 // types
-import { BlendMode, NodeType, PathType } from 'types/design/enums';
+import { BlendMode, LineEndpoint, NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../../types';
 import {
   TBoxSceneNode,
@@ -16,8 +16,11 @@ import {
 } from 'types/design/types';
 
 // utils
+import { drawLineLeafNode } from '../../drawLineLeafNode';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawSceneNodes } from '../drawSceneNodes';
+
+vi.mock('../../drawLineLeafNode', () => ({ drawLineLeafNode: vi.fn() }));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -538,16 +541,17 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
 
-  it('should draw a thin segment for a line node instead of a filled rect', () => {
+  it('should draw a line node through the line leaf drawer', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const line: TSceneNode = {
+      endPoint: LineEndpoint.lineArrow,
       id: 'a',
-      name: 'Line',
+      name: 'Arrow',
       parentId: null,
-      stroke: '#000000',
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,
@@ -566,40 +570,7 @@ describe('drawSceneNodes', () => {
     );
 
     // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
-  });
-
-  it('should also draw an arrowhead for a line node whose endPoint is set to arrow', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const line: TSceneNode = {
-      endPoint: 'arrow',
-      id: 'a',
-      name: 'Arrow',
-      parentId: null,
-      stroke: '#000000',
-      type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
-    };
-
-    // before
-    drawSceneNodes(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
-      [line],
-      [],
-      new Map(),
-      createCanvasRefs(),
-      {},
-    );
-
-    // result — 1 segment + (2 wing quads + 3 round-cap fills) for the single arrow endpoint
-    expect(gl.drawArrays).toHaveBeenCalledTimes(6);
+    expect(drawLineLeafNode).toHaveBeenCalledWith(expect.anything(), line, 1, {}, expect.any(Map), expect.anything(), undefined, 0);
   });
 
   it('should draw a stroked vector node from its segments', () => {

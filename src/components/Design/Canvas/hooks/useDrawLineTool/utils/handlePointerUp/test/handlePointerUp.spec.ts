@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { LineEndpoint, NodeType, ToolName } from 'types/design/enums';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -27,11 +27,11 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const createLineNode = (x1: number, y1: number): string => {
   const { payload } = store.dispatch(
     addNode({
-      endPoint: 'default',
+      endPoint: LineEndpoint.none,
       name: 'Line',
       parentId: null,
-      startPoint: 'default',
-      stroke: '#000000',
+      startPoint: LineEndpoint.none,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1,
       x2: x1,

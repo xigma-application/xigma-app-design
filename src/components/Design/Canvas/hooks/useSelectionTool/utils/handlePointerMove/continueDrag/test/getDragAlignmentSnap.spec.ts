@@ -32,7 +32,17 @@ const rect = (id: string, x: number, y: number, width = 100, height = 100): TSce
   }) as TSceneNode;
 
 const line = (id: string): TSceneNode =>
-  ({ id, name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 }) as TSceneNode;
+  ({
+    id,
+    name: 'Line',
+    parentId: null,
+    strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+    type: NodeType.line,
+    x1: 0,
+    x2: 10,
+    y1: 0,
+    y2: 0,
+  }) as TSceneNode;
 
 describe('getDragAlignmentSnap', () => {
   it('should return the raw delta and no guide when no dragged node is snap-eligible', () => {

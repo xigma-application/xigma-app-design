@@ -75,7 +75,9 @@ const addImageRectangleNode = (
 };
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
-  store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
+  store.dispatch(
+    addNode({ name: 'Line', parentId, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], type: NodeType.line, x1, x2, y1, y2 }),
+  );
 
   return getLastAddedNodeId(store.getState());
 };

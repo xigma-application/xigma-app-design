@@ -1,7 +1,7 @@
 import { PDFName } from 'pdf-lib';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode } from 'types/design/types';
 
 // utils
@@ -19,7 +19,7 @@ const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'l',
   name: 'l',
   parentId: null,
-  stroke: '#ff0000',
+  strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 20,
@@ -45,20 +45,21 @@ describe('drawPdfLineShape', () => {
     expect(drawPdfPolygonsMock.mock.calls[0][3]).toBe(1);
   });
 
-  it('should skip a zero-length line', () => {
+  it('should draw nothing for a zero-length line', () => {
     // action
     drawPdfLineShape(page, line({ x2: 0 }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock.mock.calls[0][1]).toEqual([[]]);
+    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
   });
 
-  it('should add arrowhead polygons at each end that has an arrow style', () => {
+  it('should draw one outline polygon wrapping the arrowheads at each end that has an arrow style', () => {
     // action
-    drawPdfLineShape(page, line({ endPoint: 'arrow', startPoint: 'arrow' }), {}, bounds, states);
+    drawPdfLineShape(page, line({ endPoint: LineEndpoint.lineArrow, startPoint: LineEndpoint.lineArrow }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock.mock.calls[0][1]).toHaveLength(11);
+    expect(drawPdfPolygonsMock.mock.calls[0][1]).toHaveLength(1);
+    expect(drawPdfPolygonsMock.mock.calls[0][1][0]).toHaveLength(14);
   });
 
   it('should multiply in the inherited ancestor opacity', () => {
@@ -92,5 +93,13 @@ describe('drawPdfLineShape', () => {
 
     // result
     expect(drawPdfPolygonsMock.mock.calls[0][1][0][0].y).toBeCloseTo(0.5);
+  });
+
+  it('should draw nothing when the line has no single solid stroke', () => {
+    // action
+    drawPdfLineShape(page, line({ strokes: [{ opacity: 100, stops: [], type: 'gradient-linear' } as never] }), {}, bounds, states);
+
+    // result
+    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
   });
 });

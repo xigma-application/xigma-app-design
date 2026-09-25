@@ -50,7 +50,7 @@ describe('getUnrotatedNodeQueryPoint', () => {
       id: 'a',
       name: 'Line',
       parentId: null,
-      stroke: '#000000',
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,

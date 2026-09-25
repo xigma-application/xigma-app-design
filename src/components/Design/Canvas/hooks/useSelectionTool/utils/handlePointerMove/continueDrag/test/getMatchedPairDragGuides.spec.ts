@@ -153,7 +153,18 @@ describe('getMatchedPairDragGuides', () => {
   });
 
   it('should return null for a line origin', () => {
-    store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 }));
+    store.dispatch(
+      addNode({
+        name: 'Line',
+        parentId: null,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        x1: 0,
+        x2: 10,
+        y1: 0,
+        y2: 0,
+      }),
+    );
 
     const { rootOrder } = selectActivePage(store.getState());
     const lineId = rootOrder[rootOrder.length - 1];

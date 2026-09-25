@@ -1,5 +1,8 @@
 import { RefObject } from 'react';
 
+// others
+import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
+
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { beginHistoryGesture } from 'store/history/actions';
@@ -9,15 +12,16 @@ import { AppDispatch, AppStore } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TLineEndpointStyle, TViewport } from 'types/design/types';
+import { TViewport } from 'types/design/types';
 import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
 // utils
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { handleEscape } from '../handleEscape/handleEscape';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { resolveNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
@@ -30,8 +34,8 @@ const createLineNode = (
   dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   point: TPoint,
-  endPoint: TLineEndpointStyle,
-  startPoint: TLineEndpointStyle,
+  endPoint: LineEndpoint,
+  startPoint: LineEndpoint,
   stroke: string,
   name: string,
   dropTarget: TNewNodeDropTarget,
@@ -46,7 +50,8 @@ const createLineNode = (
         name,
         parentId: dropTarget.parentId,
         startPoint,
-        stroke,
+        strokeWidth: LINE_RENDER_STROKE_WIDTH,
+        strokes: [makeSolidPaint(stroke)],
         type: NodeType.line,
         x1: Math.round(point.x),
         x2: Math.round(point.x),
@@ -74,8 +79,8 @@ export const handlePointerDown = (
   nodeIdRef: RefObject<string | null>,
   lastPointerClientPositionRef: RefObject<TPoint | null>,
   dropTargetRef: RefObject<TNewNodeDropTarget | null>,
-  endPoint: TLineEndpointStyle,
-  startPoint: TLineEndpointStyle,
+  endPoint: LineEndpoint,
+  startPoint: LineEndpoint,
   stroke: string,
   name: string,
 ): void => {

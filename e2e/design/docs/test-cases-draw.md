@@ -117,15 +117,16 @@ scenario #3 — a line's live draft is just the segment itself plus its two endp
 ## Arrow drawing
 
 Arrow is not a separate node type — it's the same `TLineNode` as Line, just drawn via a second
-`useDrawLineTool` registration (`ARROW_TOOL_SETTINGS`) whose config defaults `endPoint: 'arrow'`
-(`startPoint` stays `'default'`). It shares Line's toolbar slot inside the Rectangle dropdown
+`useDrawLineTool` registration (`ARROW_TOOL_SETTINGS`) whose config defaults `endPoint: LineEndpoint.lineArrow`
+(`startPoint` stays `LineEndpoint.none`). It shares Line's toolbar slot inside the Rectangle dropdown
 (`TOOL_GROUP_ITEMS[rectangle] = [rectangle, line, arrow, ellipse, polygon, star, media]`, right after
 Line), and its own "Shift+L" shortcut, distinct from Line's plain "L" (same
 modifier-vs-plain-key distinction as Section/Slice's "Shift+S"/"S"). `TLineNode.startPoint`/
-`endPoint` are optional `'default' | 'arrow'` fields — every other existing line-drawing/rendering
-code path treats a missing value the same as `'default'` (no arrowhead), so old/plain lines are
-unaffected. Rendering an arrowhead is pure presentation (`drawLineEndpointArrowheads.ts`, called from
-both the committed-node path and the live-draft path) — hit-testing/bounds (`isPointNearLine.ts`,
+`endPoint` are optional `LineEndpoint` fields (none, round, square, line arrow, triangle arrow,
+reversed triangle, circle arrow, diamond arrow); a missing value means none. A line's stroke is a
+`strokes` paint list, drawn as one outline polygon (body plus both endpoint shapes,
+`getLineEndOutlinePoints/`) through `drawBoxPaints`; the same polygon feeds SVG/PDF export, booleans
+and Outline stroke. Endpoints are pure presentation — hit-testing/bounds (`isPointNearLine.ts`,
 `getNodeBounds.ts`) deliberately stay keyed to the raw segment only, with no allowance for the
 arrowhead's visual overflow.
 
@@ -137,6 +138,7 @@ arrowhead's visual overflow.
 | 113 | Pressing "Shift+L" activates the Arrow tool, then dragging draws an arrow                                                                                                                                                                                                      |  —   |  ✅ `create-arrow.spec.ts`   |
 | 114 | Pressing a plain "L" (no Shift) still activates Line, not Arrow                                                                                                                                                                                                                |  —   |  ✅ `create-arrow.spec.ts`   |
 | 115 | Outline stroke (⌥⌘O) on an arrow keeps the arrowhead in the outlined vector (was: only the line body was outlined)                                                                                                                                                             |  ✅  |  ✅ `create-arrow.spec.ts`   |
+| 116 | Triangle arrow, Reversed triangle, Circle arrow and Diamond arrow each draw their filled shape around the line end, and None leaves it bare                                                                                                                                    |  ✅  |  ✅ `create-arrow.spec.ts`   |
 
 ## Select newly created shape nodes on creation
 

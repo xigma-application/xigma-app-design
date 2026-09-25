@@ -1,28 +1,38 @@
-// others
-import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
-
 // types
-import { TDrawContext } from './types';
-import { TLineNode } from 'types/design/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDrawSceneContext } from './types';
+import { TLineNode, TSceneNode } from 'types/design/types';
+import { TPathOutlineStyle } from './getPathOutlineStyles';
 
 // utils
-import { drawLine } from 'utils/canvas/drawLine';
-import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
+import { drawBoxPaints } from './drawBoxLeafNode/drawBoxPaints';
+import { getLineStrokeBox } from 'utils/canvas/shapes/getLineStrokeBox';
+import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
 
-export const drawLineLeafNode = (context: TDrawContext, node: TLineNode, opacity: number): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+export const drawLineLeafNode = (
+  context: TDrawSceneContext,
+  node: TLineNode,
+  opacity: number,
+  nodesById: Record<string, TSceneNode>,
+  pathOutlineStyles: Map<string, TPathOutlineStyle>,
+  refs: TCanvasRefs,
+  editingPathId: string | null | undefined,
+  patternSourceDepth: number,
+): void => {
+  const polygon = getLineStrokePolygon(node);
 
-  drawLine(
-    gl,
-    program,
-    buffer,
-    node,
-    node.stroke,
-    node.strokeWidth ?? LINE_RENDER_STROKE_WIDTH,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    opacity,
-  );
-  drawLineEndpointArrowheads(context, node);
+  if (polygon) {
+    drawBoxPaints(
+      context,
+      getLineStrokeBox(node),
+      node.strokes,
+      [polygon],
+      opacity,
+      nodesById,
+      pathOutlineStyles,
+      refs,
+      editingPathId,
+      patternSourceDepth,
+    );
+  }
 };

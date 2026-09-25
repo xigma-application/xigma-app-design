@@ -25,7 +25,7 @@ const line = (id: string): TLineNode => ({
   id,
   name: id,
   parentId: 'grid-1',
-  stroke: '#000000',
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 10,

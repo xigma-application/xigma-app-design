@@ -173,7 +173,7 @@ describe('createSvgBlob', () => {
             id: 'svg-line',
             name: 'Line',
             parentId: null,
-            stroke: '#0000ff',
+            strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
             type: NodeType.line,
             x1: 0,
             x2: 40,

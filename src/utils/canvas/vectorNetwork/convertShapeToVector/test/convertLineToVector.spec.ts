@@ -2,7 +2,7 @@
 import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 // utils
@@ -15,7 +15,7 @@ describe('convertLineToVector', () => {
       id: 'line-1',
       name: 'Line 1',
       parentId: null,
-      stroke: '#ff00ff',
+      strokes: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 50,
@@ -49,12 +49,12 @@ describe('convertLineToVector', () => {
   it('should drop the arrowhead style entirely, since TVectorNode has no equivalent field', () => {
     // mock
     const node: TLineNode = {
-      endPoint: 'arrow',
+      endPoint: LineEndpoint.lineArrow,
       id: 'arrow-1',
       name: 'Arrow 1',
       parentId: null,
-      startPoint: 'arrow',
-      stroke: '#000000',
+      startPoint: LineEndpoint.lineArrow,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,
@@ -69,5 +69,28 @@ describe('convertLineToVector', () => {
     expect(result).not.toHaveProperty('startPoint');
     expect(result).not.toHaveProperty('endPoint');
     expect(result.capStyle).toBeUndefined();
+  });
+
+  it('should keep the line stroke width and leave no stroke color for a line without strokes', () => {
+    // mock
+    const node: TLineNode = {
+      id: 'l',
+      name: 'l',
+      parentId: null,
+      strokeWidth: 3,
+      strokes: [],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 0,
+    };
+
+    // action
+    const result = convertLineToVector(node);
+
+    // result
+    expect(result.strokeWidth).toBe(3);
+    expect(result.strokeColor).toBe('');
   });
 });

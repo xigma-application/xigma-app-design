@@ -41,7 +41,17 @@ describe('getNodeWorldCorners', () => {
 
   it('should return the line’s own endpoint box, ignoring rotation entirely', () => {
     // mock
-    const line: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#fff', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 };
+    const line: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 10,
+    };
 
     // result — lines have no rotation field to speak of; corners come straight from their AABB
     expect(getNodeWorldCorners(line)).toEqual([

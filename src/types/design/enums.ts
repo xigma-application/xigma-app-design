@@ -143,6 +143,17 @@ export enum StrokeDashCap {
   square = 'square',
 }
 
+export enum LineEndpoint {
+  circleArrow = 'circleArrow',
+  diamondArrow = 'diamondArrow',
+  lineArrow = 'lineArrow',
+  none = 'none',
+  reversedTriangle = 'reversedTriangle',
+  round = 'round',
+  square = 'square',
+  triangleArrow = 'triangleArrow',
+}
+
 export enum StrokeJoin {
   bevel = 'bevel',
   miter = 'miter',

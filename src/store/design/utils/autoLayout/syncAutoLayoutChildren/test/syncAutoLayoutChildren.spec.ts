@@ -460,7 +460,7 @@ describe('syncAutoLayoutChildren', () => {
       id: 'b',
       name: 'Line',
       parentId: 'frame-1',
-      stroke: '#000',
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 20,

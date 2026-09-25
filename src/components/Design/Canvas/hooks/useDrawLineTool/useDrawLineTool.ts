@@ -9,8 +9,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { ToolName } from 'types/design/enums';
-import { TLineEndpointStyle } from 'types/design/types';
+import { LineEndpoint, ToolName } from 'types/design/enums';
 import { TNewNodeDropTarget } from '../../utils/resolveNewNodeDropTarget/types';
 import { TPoint } from 'types/canvas';
 
@@ -21,9 +20,9 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 import { handleShiftKeyChange } from './utils/handleShiftKeyChange/handleShiftKeyChange';
 
 export type TLineToolConfig = {
-  endPoint: TLineEndpointStyle;
+  endPoint: LineEndpoint;
   name: string;
-  startPoint: TLineEndpointStyle;
+  startPoint: LineEndpoint;
   stroke: string;
   tool: ToolName;
 };

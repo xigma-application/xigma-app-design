@@ -39,7 +39,7 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
         strokes: node.strokeWidth > 0 ? [makeSolidPaint(node.strokeColor)] : undefined,
       };
     case NodeType.line:
-      return { fills: [DEFAULT_VECTOR_PAINT], strokeWidth: node.strokeWidth, strokes: [makeSolidPaint(node.stroke)] };
+      return { fills: [DEFAULT_VECTOR_PAINT], strokeWidth: node.strokeWidth, strokes: node.strokes };
     default:
       return { fills: [DEFAULT_VECTOR_PAINT] };
   }

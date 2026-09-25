@@ -18,7 +18,17 @@ const rect = (rotation: number): TRectangleNode => ({
   y: 0,
 });
 
-const line: TLineNode = { id: 'b', name: 'Line', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 20, y1: 0, y2: 0 };
+const line: TLineNode = {
+  id: 'b',
+  name: 'Line',
+  parentId: null,
+  strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+  type: NodeType.line,
+  x1: 0,
+  x2: 20,
+  y1: 0,
+  y2: 0,
+};
 
 describe('getAutoLayoutChildLocalBounds', () => {
   it('should return the node’s plain (absolute-rotation) bounds when the frame itself has no rotation', () => {

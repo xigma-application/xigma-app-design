@@ -45,7 +45,7 @@ const line: TLineNode = {
   id: 'line-1',
   name: 'Line',
   parentId: null,
-  stroke: '#000000',
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 10,
   x2: 20,

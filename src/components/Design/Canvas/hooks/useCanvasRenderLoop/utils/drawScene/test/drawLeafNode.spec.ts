@@ -1,5 +1,5 @@
 // others
-import { ELLIPSE_DEFAULT_ARC_ANGLE, LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
+import { ELLIPSE_DEFAULT_ARC_ANGLE } from 'constant/canvas';
 
 // types
 import { NodeType, PathType } from 'types/design/enums';
@@ -19,8 +19,7 @@ const drawEllipseArcMock = vi.fn();
 const drawEllipseMock = vi.fn();
 const drawThickEllipseOutlineMock = vi.fn();
 const drawImageMock = vi.fn();
-const drawLineMock = vi.fn();
-const drawLineEndpointArrowheadsMock = vi.fn();
+const drawLineLeafNodeMock = vi.fn();
 const drawMsdfTextMock = vi.fn();
 const drawPathOutlineMock = vi.fn();
 const drawPolygonMock = vi.fn();
@@ -42,10 +41,7 @@ vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
   drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
 }));
 vi.mock('utils/canvas/drawImage', () => ({ drawImage: (...args: unknown[]): void => drawImageMock(...args) }));
-vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
-vi.mock('../drawLineEndpointArrowheads', () => ({
-  drawLineEndpointArrowheads: (...args: unknown[]): void => drawLineEndpointArrowheadsMock(...args),
-}));
+vi.mock('../drawLineLeafNode', () => ({ drawLineLeafNode: (...args: unknown[]): void => drawLineLeafNodeMock(...args) }));
 vi.mock('utils/canvas/text/drawMsdfText', () => ({ drawMsdfText: (...args: unknown[]): void => drawMsdfTextMock(...args) }));
 vi.mock('../drawPathOutline', () => ({ drawPathOutline: (...args: unknown[]): void => drawPathOutlineMock(...args) }));
 vi.mock('utils/canvas/drawPolygon/drawPolygon', () => ({ drawPolygon: (...args: unknown[]): void => drawPolygonMock(...args) }));
@@ -446,13 +442,13 @@ describe('drawLeafNode', () => {
     expect(drawImageMock).toHaveBeenCalledWith(gl, undefined, undefined, texture, node, 200, 150, IDENTITY_VIEWPORT, false, false, 0);
   });
 
-  it('should draw a line and its endpoint arrowheads with the threaded opacity, defaulting the stroke width', () => {
+  it('should draw a line through its paints with the threaded opacity', () => {
     // mock
     const node: TSceneNode = {
       id: 'l1',
       name: 'Line',
       parentId: null,
-      stroke: '#222',
+      strokes: [{ color: '#222', opacity: 100, type: 'solid' }],
       type: NodeType.line,
       x1: 0,
       x2: 10,
@@ -472,19 +468,7 @@ describe('drawLeafNode', () => {
     drawLeafNode(context, node, new Map(), refs, {});
 
     // result
-    expect(drawLineMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      node,
-      '#222',
-      LINE_RENDER_STROKE_WIDTH,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      0.5,
-    );
-    expect(drawLineEndpointArrowheadsMock).toHaveBeenCalledWith(context, node);
+    expect(drawLineLeafNodeMock).toHaveBeenCalledWith(context, node, 0.5, {}, expect.any(Map), refs, undefined, 0);
   });
 
   it('should draw a path outline using its resolved style', () => {

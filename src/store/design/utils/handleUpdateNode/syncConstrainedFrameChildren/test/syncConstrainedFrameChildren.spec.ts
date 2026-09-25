@@ -67,7 +67,18 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
   it('should skip a non-box child (a line has no x/y/width/height to constrain)', () => {
     const frameId = addFrame(100, 100, 400, 200);
 
-    store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 }));
+    store.dispatch(
+      addNode({
+        name: 'Line',
+        parentId: null,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        x1: 0,
+        x2: 10,
+        y1: 0,
+        y2: 10,
+      }),
+    );
 
     const lineId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
 
@@ -75,7 +86,7 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
 
     expect(() => store.dispatch(updateNode({ changes: { width: 500 }, id: frameId }))).not.toThrow();
     // updating the non-box node itself passes no previousBox, so the pass is a clean no-op
-    expect(() => store.dispatch(updateNode({ changes: { stroke: '#ffffff' }, id: lineId }))).not.toThrow();
+    expect(() => store.dispatch(updateNode({ changes: { strokeWidth: 3 }, id: lineId }))).not.toThrow();
   });
 
   it('should not move an unconstrained (default left/top) child when only the right edge moves', () => {

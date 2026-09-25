@@ -60,7 +60,17 @@ const STAR: TStarNode = {
   x: 0,
   y: 0,
 };
-const LINE: TLineNode = { id: 'l', name: 'L', parentId: null, stroke: '#000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 };
+const LINE: TLineNode = {
+  id: 'l',
+  name: 'L',
+  parentId: null,
+  strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+  type: NodeType.line,
+  x1: 0,
+  x2: 10,
+  y1: 0,
+  y2: 10,
+};
 const TEXT: TTextNode = {
   content: 'hi',
   fill: '#000',

@@ -29,7 +29,17 @@ describe('getAutoLayoutReorderRenderNode', () => {
 
   it('should translate a line node’s endpoints by the delta between its real and overridden position', () => {
     // mock — real bounds are x:10/y:0 (min of the two endpoints); overriding to x:20/y:10 is a +10/+10 shift
-    const line: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#fff', type: NodeType.line, x1: 30, x2: 10, y1: 20, y2: 0 };
+    const line: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 30,
+      x2: 10,
+      y1: 20,
+      y2: 0,
+    };
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { l: { x: 20, y: 10 } } } } },
     });

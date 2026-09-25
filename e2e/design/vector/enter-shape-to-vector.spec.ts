@@ -33,6 +33,8 @@ const readDesignState = (page: Page): Promise<TDesignSnapshot> =>
 const hasVertexNear = (vertices: Record<string, { x: number; y: number }> | undefined, x: number, y: number): boolean =>
   Object.values(vertices ?? {}).some((vertex) => Math.abs(vertex.x - x) < 3 && Math.abs(vertex.y - y) < 3);
 
+const RECTANGLE_AREA = { height: 220, width: 250, x: 850, y: 250 };
+
 test('pressing Enter on a selected Rectangle converts it into a genuinely editable vector node', async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -77,7 +79,7 @@ test('Ctrl+Z immediately after converting a Rectangle to a vector restores the o
 
   await designPage.drawRectangle(900, 300, 1050, 420);
   await designPage.pointerMove(1500, 700);
-  const beforeEnter = await designPage.canvas.screenshot();
+  const beforeEnter = await page.screenshot({ clip: RECTANGLE_AREA });
 
   await page.keyboard.press('Enter');
 
@@ -88,7 +90,7 @@ test('Ctrl+Z immediately after converting a Rectangle to a vector restores the o
 
   await page.keyboard.press('Control+z');
   await designPage.pointerMove(1500, 700);
-  const afterUndo = await designPage.canvas.screenshot();
+  const afterUndo = await page.screenshot({ clip: RECTANGLE_AREA });
 
   expect(afterUndo.equals(beforeEnter)).toBe(true);
 

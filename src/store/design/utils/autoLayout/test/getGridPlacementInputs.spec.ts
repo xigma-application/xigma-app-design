@@ -34,7 +34,17 @@ describe('getGridPlacementInputs', () => {
   });
 
   it('should leave the grid fields undefined for a non-box child', () => {
-    const line: TSceneNode = { id: 'l', name: 'Line', parentId: 'grid-1', stroke: '#000', type: NodeType.line, x1: 0, x2: 1, y1: 0, y2: 0 };
+    const line: TSceneNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: 'grid-1',
+      strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 1,
+      y1: 0,
+      y2: 0,
+    };
 
     expect(getGridPlacementInputs(['l'], byId([line]))).toEqual([
       { gridColumnAnchorIndex: undefined, gridColumnSpan: undefined, gridRowAnchorIndex: undefined, gridRowSpan: undefined, id: 'l' },

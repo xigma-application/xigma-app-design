@@ -4,7 +4,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 
 // utils
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -50,8 +50,8 @@ describe('handlePointerDown', () => {
       nodeIdRef,
       lastPointerClientPositionRef,
       dropTargetRef,
-      'default',
-      'default',
+      LineEndpoint.none,
+      LineEndpoint.none,
       '#000000',
       'Line',
     );
@@ -87,8 +87,8 @@ describe('handlePointerDown', () => {
       nodeIdRef,
       lastPointerClientPositionRef,
       dropTargetRef,
-      'default',
-      'default',
+      LineEndpoint.none,
+      LineEndpoint.none,
       '#000000',
       'Line',
     );
@@ -98,9 +98,26 @@ describe('handlePointerDown', () => {
 
     expect(startRef.current).toEqual({ x: 50, y: 60 });
     expect(nodeIdRef.current).not.toBeNull();
-    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({ type: NodeType.line, x1: 50, x2: 50, y1: 60, y2: 60 });
+    expect(page.nodes[nodeIdRef.current as string]).toMatchObject({
+      strokeWidth: 1,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 50,
+      x2: 50,
+      y1: 60,
+      y2: 60,
+    });
     expect(page.selectedIds).toEqual([nodeIdRef.current]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(refs.drawing.cancelDrawRef.current).not.toBeNull();
+
+    // mock
+    const createdId = nodeIdRef.current as unknown as string;
+
+    // action
+    refs.drawing.cancelDrawRef.current?.();
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[createdId]).toBeUndefined();
   });
 });

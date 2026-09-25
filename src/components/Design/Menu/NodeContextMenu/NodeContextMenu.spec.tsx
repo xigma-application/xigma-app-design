@@ -51,7 +51,7 @@ const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'node-1',
   name: 'Line',
   parentId: null,
-  stroke: '#000000',
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 100,
@@ -352,9 +352,9 @@ describe('NodeContextMenu', () => {
     expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
-  it('should keep Outline stroke disabled for a line node with no stroke color set', () => {
+  it('should keep Outline stroke disabled for a line node without strokes', () => {
     // before
-    renderNodeContextMenu({ node: buildLineNode({ stroke: '', strokeWidth: 2 }) });
+    renderNodeContextMenu({ node: buildLineNode({ strokeWidth: 2, strokes: [] }) });
 
     // result
     expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');

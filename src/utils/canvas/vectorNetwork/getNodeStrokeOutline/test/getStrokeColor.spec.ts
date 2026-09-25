@@ -20,12 +20,23 @@ const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode
 });
 
 describe('getStrokeColor', () => {
-  it("should read a line node's own `stroke` field", () => {
+  it("should read the color of a line node's stroke paint", () => {
     // mock
-    const node: TLineNode = { id: 'l', name: 'Line', parentId: null, stroke: '#abcdef', type: NodeType.line, x1: 0, x2: 1, y1: 0, y2: 0 };
+    const node: TLineNode = {
+      id: 'l',
+      name: 'Line',
+      parentId: null,
+      strokes: [{ color: '#abcdef', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      x1: 0,
+      x2: 1,
+      y1: 0,
+      y2: 0,
+    };
 
     // result
     expect(getStrokeColor(node)).toBe('#abcdef');
+    expect(getStrokeColor({ ...node, strokes: [] })).toBe('');
   });
 
   it("should read a non-line node's `strokeColor` field", () => {

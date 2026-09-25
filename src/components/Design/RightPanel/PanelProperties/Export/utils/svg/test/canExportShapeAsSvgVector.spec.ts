@@ -46,7 +46,17 @@ const ellipse: TEllipseNode = {
   y: 0,
 };
 
-const line: TLineNode = { id: 'l', name: 'l', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };
+const line: TLineNode = {
+  id: 'l',
+  name: 'l',
+  parentId: null,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  type: NodeType.line,
+  x1: 0,
+  x2: 10,
+  y1: 0,
+  y2: 0,
+};
 
 const vector: TVectorNode = {
   defaultFill: null,

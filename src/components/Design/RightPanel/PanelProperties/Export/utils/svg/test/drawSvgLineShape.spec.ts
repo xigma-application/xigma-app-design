@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode } from 'types/design/types';
 
 // utils
@@ -15,7 +15,7 @@ const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'l',
   name: 'l',
   parentId: null,
-  stroke: '#ff0000',
+  strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
   x1: 0,
   x2: 20,
@@ -39,16 +39,17 @@ describe('drawSvgLineShape', () => {
     expect(drawSvgPolygonsMock.mock.calls[0][3]).toBe(1);
   });
 
-  it('should skip a zero-length line', () => {
+  it('should draw nothing for a zero-length line', () => {
     drawSvgLineShape([], line({ x2: 0 }), {}, bounds);
 
-    expect(drawSvgPolygonsMock.mock.calls[0][1]).toEqual([[]]);
+    expect(drawSvgPolygonsMock).not.toHaveBeenCalled();
   });
 
-  it('should add arrowhead polygons at each end that has an arrow style', () => {
-    drawSvgLineShape([], line({ endPoint: 'arrow', startPoint: 'arrow' }), {}, bounds);
+  it('should draw one outline polygon wrapping the arrowheads at each end that has an arrow style', () => {
+    drawSvgLineShape([], line({ endPoint: LineEndpoint.lineArrow, startPoint: LineEndpoint.lineArrow }), {}, bounds);
 
-    expect(drawSvgPolygonsMock.mock.calls[0][1]).toHaveLength(11);
+    expect(drawSvgPolygonsMock.mock.calls[0][1]).toHaveLength(1);
+    expect(drawSvgPolygonsMock.mock.calls[0][1][0]).toHaveLength(14);
   });
 
   it('should multiply in the inherited ancestor opacity', () => {
@@ -77,5 +78,13 @@ describe('drawSvgLineShape', () => {
     drawSvgLineShape([], line({ strokeWidth: undefined }), {}, bounds);
 
     expect(drawSvgPolygonsMock.mock.calls[0][1][0][0].y).toBeCloseTo(0.5);
+  });
+
+  it('should draw nothing when the line has no single solid stroke', () => {
+    // action
+    drawSvgLineShape([], line({ strokes: [{ opacity: 100, stops: [], type: 'gradient-linear' } as never] }), {}, bounds);
+
+    // result
+    expect(drawSvgPolygonsMock).not.toHaveBeenCalled();
   });
 });

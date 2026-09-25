@@ -2,4 +2,8 @@
 import { NodeType } from 'types/design/enums';
 import { TStrokeableNode } from './types';
 
-export const getStrokeColor = (node: TStrokeableNode): string => (node.type === NodeType.line ? node.stroke : (node.strokeColor ?? ''));
+// utils
+import { getBooleanStrokeColor } from '../../booleanOperation/getBooleanStrokeColor';
+
+export const getStrokeColor = (node: TStrokeableNode): string =>
+  node.type === NodeType.line ? (getBooleanStrokeColor(node) ?? '') : (node.strokeColor ?? '');
