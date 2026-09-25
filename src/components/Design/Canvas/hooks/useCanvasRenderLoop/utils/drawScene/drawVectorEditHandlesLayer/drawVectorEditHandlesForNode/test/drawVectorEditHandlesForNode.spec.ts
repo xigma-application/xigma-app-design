@@ -372,8 +372,8 @@ describe('drawVectorEditHandlesForNode', () => {
     // world positions, not the raw stored coordinates
     const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_INNER_SIZE);
     const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === BASE_SIZE);
-    const [selectedCenter] = selectedInnerCall?.[4] as { x: number; y: number }[];
-    const [plainCenter] = plainCall?.[4] as { x: number; y: number }[];
+    const [selectedCenter] = selectedInnerCall![4] as { x: number; y: number }[];
+    const [plainCenter] = plainCall![4] as { x: number; y: number }[];
 
     expect(drawEllipseMock).not.toHaveBeenCalled();
     expect(selectedCenter.x).toBeCloseTo(5);

@@ -29,7 +29,7 @@ export const drawVertexCountHandlesLayer = (
   if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && hasVertexCount(selectedNode)) {
     const bounds = getNodeBounds(selectedNode);
 
-    // eslint-disable-next-line default-case -- hasVertexCount already guarantees one of the cases below matches, so a default arm would be dead code unreachable by any test
+    // oxlint-disable-next-line default-case -- hasVertexCount already guarantees one of the cases below matches, so a default arm would be dead code unreachable by any test
     switch (true) {
       case !shouldShowVertexCountHandle(bounds, viewport):
         break;

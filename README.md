@@ -140,7 +140,7 @@ to its branch first, then re-pulled here — there is no local symlink/workspace
 | `npm run test:coverage`                     | Run unit tests with the 100% coverage gate enforced     |
 | `npm run test:e2e`                          | Run the Playwright e2e suite (headless)                 |
 | `npm run test:e2e:ui`                       | Run e2e tests with Playwright's UI runner               |
-| `npm run lint` / `lint:fix`                 | ESLint check / autofix                                  |
+| `npm run lint` / `lint:fix`                 | Oxlint check / autofix                                  |
 | `npm run stylelint:check` / `stylelint:fix` | Stylelint check / autofix for `.scss`                   |
 | `npm run format:check` / `format:write`     | Oxfmt check / autofix                                   |
 | `npm run generate:font-atlas`               | Regenerate the MSDF font atlas from the source TTF      |
@@ -178,7 +178,7 @@ Two independent layers:
 
 ## Code quality gates
 
-ESLint, Stylelint (SCSS, BEM ordering), Oxfmt, and `tsc -b` are all expected to be clean before
+Oxlint, Stylelint (SCSS, BEM ordering), Oxfmt, and `tsc -b` are all expected to be clean before
 a change is considered done — see the scripts above for the check/fix commands for each.
 
 ## Roadmap

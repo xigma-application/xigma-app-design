@@ -722,7 +722,7 @@ test.describe('Design panels — Effects section', () => {
     await page.getByLabel('Effect splay', { exact: true }).press('Enter');
 
     // result
-    expect(((await readNode(page, id)).effects?.[0] as { splay?: number }).splay).toBe(35);
+    expect(((await readNode(page, id)).effects![0] as { splay?: number }).splay).toBe(35);
 
     // action — drag the dial to point the light to the right of its center
     const dial = page.getByLabel('Effect light direction');
@@ -740,7 +740,7 @@ test.describe('Design panels — Effects section', () => {
 
     // result — a light straight to the right is 90 degrees
     await expect(page.getByLabel('Effect light angle')).toHaveValue('90°');
-    expect(((await readNode(page, id)).effects?.[0] as { lightAngle?: number }).lightAngle).toBe(90);
+    expect(((await readNode(page, id)).effects![0] as { lightAngle?: number }).lightAngle).toBe(90);
 
     // action — drag a slider thumb to its far end
     const slider = page.getByLabel('Effect frost slider');

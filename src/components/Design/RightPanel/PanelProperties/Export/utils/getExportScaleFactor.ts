@@ -3,7 +3,7 @@ import { ExportScale } from '../enums';
 import { TDraftRect } from 'types/canvas';
 
 export const getExportScaleFactor = (scale: ExportScale, bounds: TDraftRect): number => {
-  // eslint-disable-next-line default-case -- every ExportScale member is handled below, so a default arm would be dead code unreachable by any test
+  // oxlint-disable-next-line default-case -- every ExportScale member is handled below, so a default arm would be dead code unreachable by any test
   switch (scale) {
     case ExportScale.half:
       return 0.5;

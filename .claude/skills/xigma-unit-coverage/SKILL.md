@@ -35,7 +35,7 @@ everything else, including every hook/util/component you touch, is held to the s
    taken the other way), the missing test is usually "the gesture/input that takes the *other*
    path," not a duplicate of an existing test.
 4. Re-run `npm run test:coverage` until clean, then run the plain `vitest run` suite once more (the
-   coverage instrumentation can occasionally mask a timing issue) plus `tsc -b`/`eslint`.
+   coverage instrumentation can occasionally mask a timing issue) plus `tsc -b`/`oxlint`.
 5. **Verify 100% per file, not just on the global run.** For every production file you added or
    edited, run a scoped check —
    `npx vitest run --coverage --coverage.include='<path/to/file.ts>' <its own spec(s)>` — and confirm

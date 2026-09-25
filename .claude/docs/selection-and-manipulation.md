@@ -837,8 +837,8 @@ hasStarCornerRadius(selectedNode): ... }` — a `hasAnyCornerRadius` type guard 
 in every branch without each one re-narrowing independently. There's deliberately **no `default`
 arm**: `hasAnyCornerRadius` already guarantees one of the three shape cases matches, so a `default`
 would be dead code no test could ever reach — v8's 100%-coverage gate treats an unreachable `default:
-break` as a real uncovered line, and ESLint's `default-case` rule wants one anyway, so the switch
-carries a targeted `// eslint-disable-next-line default-case` immediately above it explaining why.
+break` as a real uncovered line, and Oxlint's `default-case` rule wants one anyway, so the switch
+carries a targeted `// oxlint-disable-next-line default-case` immediately above it explaining why.
 
 ## 15. Corner-radius handle (Star)
 

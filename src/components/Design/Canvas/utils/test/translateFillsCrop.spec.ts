@@ -21,7 +21,7 @@ describe('translateFillsCrop', () => {
 
     const result = translateFillsCrop(fills, 3, -4);
 
-    expect((result?.[0] as TImagePaint).crop).toEqual({ height: 10, rotation: 15, width: 20, x: 8, y: 1 });
+    expect((result![0] as TImagePaint).crop).toEqual({ height: 10, rotation: 15, width: 20, x: 8, y: 1 });
   });
 
   it('should leave non-image fills and image fills without a crop untouched', () => {
@@ -34,7 +34,7 @@ describe('translateFillsCrop', () => {
 
     expect(result?.[0]).toEqual(solid);
     expect(result?.[1]).toEqual(uncropped);
-    expect((result?.[2] as TImagePaint).crop).toEqual({ ...crop, x: 10, y: 10 });
+    expect((result![2] as TImagePaint).crop).toEqual({ ...crop, x: 10, y: 10 });
   });
 
   it('should skip the fill at skipPaintIndex, treating it as if it had no crop', () => {
@@ -54,7 +54,7 @@ describe('translateFillsCrop', () => {
 
     const result = translateFillsCrop([fillA, fillB], 5, 5, 0);
 
-    expect((result?.[0] as TImagePaint).crop).toEqual(cropA);
-    expect((result?.[1] as TImagePaint).crop).toEqual({ ...cropB, x: 10, y: 10 });
+    expect((result![0] as TImagePaint).crop).toEqual(cropA);
+    expect((result![1] as TImagePaint).crop).toEqual({ ...cropB, x: 10, y: 10 });
   });
 });

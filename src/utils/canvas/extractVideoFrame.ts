@@ -67,7 +67,7 @@ export const extractVideoFrame = (file: File, onLoad: (frame: TExtractedVideoFra
 
   video.onerror = (): void => {
     cleanupVideoElement(video, videoSrc);
-    // eslint-disable-next-line no-console -- no error-reporting/toast channel reaches this handler, so surfacing the failure at all requires the console directly
+    // oxlint-disable-next-line no-console -- no error-reporting/toast channel reaches this handler, so surfacing the failure at all requires the console directly
     console.error('Failed to load video for frame extraction', file.name);
   };
 

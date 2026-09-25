@@ -23,7 +23,7 @@ describe('scaleFillsCrop', () => {
     const transform: TScaleFillsCropTransform = { newCenterX: 20, newCenterY: 20, oldCenterX: 10, oldCenterY: 10, scaleX: 2, scaleY: 2 };
 
     const result = scaleFillsCrop(fills, transform);
-    const updatedCrop = (result?.[0] as TImagePaint).crop;
+    const updatedCrop = (result![0] as TImagePaint).crop;
 
     // crop center was (10,10) == oldCenter, so it maps straight onto the new center, doubled in size
     expect(updatedCrop).toEqual({ height: 20, rotation: 0, width: 20, x: 10, y: 10 });
@@ -35,7 +35,7 @@ describe('scaleFillsCrop', () => {
     const transform: TScaleFillsCropTransform = { newCenterX: 5, newCenterY: 5, oldCenterX: 5, oldCenterY: 5, scaleX: 2, scaleY: 3 };
 
     const result = scaleFillsCrop(fills, transform);
-    const updatedCrop = (result?.[0] as TImagePaint).crop;
+    const updatedCrop = (result![0] as TImagePaint).crop;
 
     expect(updatedCrop).toEqual({ height: 30, rotation: 0, width: 20, x: -5, y: -10 });
   });
@@ -51,7 +51,7 @@ describe('scaleFillsCrop', () => {
 
     expect(result?.[0]).toEqual(solid);
     expect(result?.[1]).toEqual(uncropped);
-    expect((result?.[2] as TImagePaint).crop).not.toEqual(crop);
+    expect((result![2] as TImagePaint).crop).not.toEqual(crop);
   });
 
   it('should skip the fill at skipPaintIndex, treating it as if it had no crop', () => {
@@ -72,7 +72,7 @@ describe('scaleFillsCrop', () => {
 
     const result = scaleFillsCrop([fillA, fillB], transform, 0);
 
-    expect((result?.[0] as TImagePaint).crop).toEqual(cropA);
-    expect((result?.[1] as TImagePaint).crop).not.toEqual(cropB);
+    expect((result![0] as TImagePaint).crop).toEqual(cropA);
+    expect((result![1] as TImagePaint).crop).not.toEqual(cropB);
   });
 });

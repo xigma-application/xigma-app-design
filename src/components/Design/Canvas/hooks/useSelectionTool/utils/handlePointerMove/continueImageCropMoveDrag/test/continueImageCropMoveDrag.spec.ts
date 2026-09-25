@@ -250,7 +250,7 @@ describe('continueImageCropMoveDrag', () => {
     // result
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TRectangleNode;
 
-    expect((node.strokes?.[0] as TImagePaint).crop).toEqual({ height: 10, rotation: 0, width: 10, x: 65, y: 68 });
+    expect((node.strokes![0] as TImagePaint).crop).toEqual({ height: 10, rotation: 0, width: 10, x: 65, y: 68 });
     expect(node.fills[0]).toEqual({ color: '#ff0000', opacity: 100, type: 'solid' });
 
     store.dispatch(setImageEditor(null));

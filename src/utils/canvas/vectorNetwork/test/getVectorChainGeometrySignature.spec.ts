@@ -70,12 +70,12 @@ describe('getVectorChainGeometrySignature', () => {
     });
     // deliberately reversed insertion order vs. `node` above — the point of this test
     const reordered = buildNode({
+      // oxlint-disable-next-line sort-keys -- s2-before-s1 insertion order is the point of this test
       segments: {
         s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
-        // eslint-disable-next-line sort-keys -- s2-before-s1 insertion order is the point of this test
         s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
       },
-      // eslint-disable-next-line sort-keys -- c-before-b-before-a insertion order is the point of this test
+      // oxlint-disable-next-line sort-keys -- c-before-b-before-a insertion order is the point of this test
       vertices: { c: { id: 'c', x: 100, y: 100 }, b: { id: 'b', x: 100, y: 0 }, a: { id: 'a', x: 0, y: 0 } },
     });
 

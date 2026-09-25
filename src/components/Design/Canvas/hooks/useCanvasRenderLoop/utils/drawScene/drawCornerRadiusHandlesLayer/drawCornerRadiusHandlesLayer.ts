@@ -38,7 +38,7 @@ export const drawCornerRadiusHandlesLayer = (
     const cornerRadius = selectedNode.cornerRadius ?? 0;
     const canShowHandles = shouldShowCornerRadiusHandles(bounds, viewport, cornerRadius, isDraggingCornerRadius);
 
-    // eslint-disable-next-line default-case -- hasAnyCornerRadius already guarantees one of the cases below matches, so a default arm would be dead code unreachable by any test
+    // oxlint-disable-next-line default-case -- hasAnyCornerRadius already guarantees one of the cases below matches, so a default arm would be dead code unreachable by any test
     switch (true) {
       case !canShowHandles:
         break;
