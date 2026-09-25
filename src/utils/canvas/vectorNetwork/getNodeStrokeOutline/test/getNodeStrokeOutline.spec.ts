@@ -140,7 +140,7 @@ describe('getNodeStrokeOutline', () => {
     expect(result?.filledFaceKeys).toHaveLength(1);
   });
 
-  it('should return null for a line with no strokeWidth set', () => {
+  it('should outline a line with no strokeWidth at the 1px width the canvas draws it with', () => {
     // mock
     const node: TLineNode = {
       id: 'line-1',
@@ -155,7 +155,10 @@ describe('getNodeStrokeOutline', () => {
     };
 
     // result
-    expect(getNodeStrokeOutline(node)).toBeNull();
+    const ys = Object.values(getNodeStrokeOutline(node)?.vertices ?? {}).map((vertex) => vertex.y);
+
+    expect(Math.min(...ys)).toBe(-0.5);
+    expect(Math.max(...ys)).toBe(0.5);
   });
 
   it('should delegate to the general chain outline for a simple open vector path', () => {

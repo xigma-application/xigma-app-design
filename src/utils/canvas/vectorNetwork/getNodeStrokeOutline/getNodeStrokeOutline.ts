@@ -9,10 +9,11 @@ import { buildVectorNodeFromLoops } from 'utils/canvas/vectorNetwork/buildVector
 import { getStrokeAlignInset } from 'utils/canvas/getStrokeAlignInset/getStrokeAlignInset';
 import { getStrokeColor } from './getStrokeColor';
 import { getStrokeOutlineLoops } from './getStrokeOutlineLoops';
+import { getStrokeOutlineWidth } from './getStrokeOutlineWidth';
 
 export const getNodeStrokeOutline = (node: TStrokeableNode): TVectorNode | null => {
   const strokeColor = getStrokeColor(node);
-  const strokeWidth = node.strokeWidth ?? 0;
+  const strokeWidth = getStrokeOutlineWidth(node);
 
   if (strokeColor && strokeWidth > 0) {
     const strokeAlign = 'strokeAlign' in node ? node.strokeAlign : undefined;

@@ -1,6 +1,6 @@
 // types
 import { BooleanOperation, NodeType } from 'types/design/enums';
-import { TBooleanNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
+import { TBooleanNode, TLineNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getBooleanVectorNode } from '../getBooleanVectorNode';
@@ -145,6 +145,30 @@ describe('getBooleanVectorNode', () => {
 
     // result
     expect(areas[0] - areas[1]).toBeCloseTo(104 * 104 - 96 * 96, 0);
+  });
+
+  it('should join a line drawn without a stroke width as the 1px stroke shape the canvas draws', () => {
+    // mock
+    const line: TLineNode = {
+      id: 'line',
+      name: 'line',
+      parentId: 'union',
+      stroke: '#ffffff',
+      type: NodeType.line,
+      x1: 50,
+      x2: 300,
+      y1: 50,
+      y2: 50,
+    };
+    const node = makeBoolean('union', ['a', 'line'], BooleanOperation.union);
+
+    // action
+    const result = getBooleanVectorNode(node, { a: makeRectangle('a', 'union', 0), line, union: node });
+
+    // result
+    const xs = Object.values(result?.vertices ?? {}).map((vertex) => vertex.x);
+
+    expect(Math.max(...xs)).toBe(300);
   });
 
   it('should keep the geometry but restyle a copy of the boolean with other fills', () => {

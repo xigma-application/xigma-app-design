@@ -1,4 +1,4 @@
-import { test, expect, Locator } from '@playwright/test';
+import { test, expect, Locator, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from '../model/DesignPage';
@@ -300,4 +300,92 @@ test('two selected rectangles show the Rectangle panel and its Boolean button wr
   await expect(rows).toHaveCount(1);
   await page.getByRole('button', { name: 'Expand layer' }).click();
   await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(2);
+});
+
+const unionRectangleAndLine = async (page: Page, designPage: DesignPage): Promise<void> => {
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawLine(780, 260, 1000, 260);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+};
+
+const LINE_ONLY_AREA = { height: 20, width: 60, x: 900, y: 250 };
+const EMPTY_AREA = { height: 20, width: 60, x: 1300, y: 700 };
+
+test('a line joined into a Union with a rectangle stays visible as its stroke shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-line-visible');
+  await expect(designPage.canvas).toBeVisible();
+
+  await unionRectangleAndLine(page, designPage);
+  await designPage.click(1500, 900);
+
+  const blank = await page.screenshot({ clip: EMPTY_AREA });
+  const lineArea = await page.screenshot({ clip: LINE_ONLY_AREA });
+
+  expect(lineArea.equals(blank)).toBe(false);
+});
+
+test('dragging a Union that contains a line moves the line part live instead of leaving it behind until release', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-line-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await unionRectangleAndLine(page, designPage);
+
+  const blank = await page.screenshot({ clip: EMPTY_AREA });
+
+  await page.mouse.move(740, 240);
+  await page.mouse.down();
+  await page.mouse.move(1040, 540, { steps: 5 });
+
+  const duringDrag = await page.screenshot({ clip: LINE_ONLY_AREA });
+
+  await page.mouse.up();
+
+  expect(duringDrag.equals(blank)).toBe(true);
+});
+
+test('a selected line inside a Union can be grabbed on its stroke and moves on its own', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-line-grab');
+  await expect(designPage.canvas).toBeVisible();
+
+  await unionRectangleAndLine(page, designPage);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const line = Object.values(pages[activePageId].nodes).find((node) => node.type === 'line');
+
+    store.dispatch(setSelection([line?.id ?? '']));
+  });
+
+  await page.mouse.move(950, 260);
+  await page.mouse.down();
+  await page.mouse.move(950, 360, { steps: 5 });
+  await page.mouse.up();
+
+  const result = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, selectedIds } = pages[activePageId];
+    const rectangle = Object.values(nodes).find((node) => node.type === 'rectangle') as { x: number; y: number };
+    const line = Object.values(nodes).find((node) => node.type === 'line') as { y1: number };
+
+    return { lineY: line.y1, rectangle: { x: rectangle.x, y: rectangle.y }, selectedType: nodes[selectedIds[0]].type };
+  });
+
+  expect(result.selectedType).toBe('line');
+  expect(result.rectangle).toEqual({ x: 700, y: 200 });
+  expect(result.lineY).toBe(360);
 });
