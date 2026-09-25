@@ -30,7 +30,7 @@ const rectangle: TRectangleNode = {
 };
 const section: TSectionNode = {
   childIds: [],
-  fill: '#abc',
+  fills: [{ color: '#abc', opacity: 100, type: 'solid' }],
   height: 40,
   id: 's1',
   name: 'Section',

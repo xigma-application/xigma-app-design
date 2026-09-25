@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../types';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPaint } from 'types/design/paint/types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
@@ -15,7 +15,7 @@ import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 const MASK_PAINTS: TPaint[] = [{ color: '#ffffff', opacity: 100, type: 'solid' }];
 const MASK_REFS = createCanvasRefs();
 
-const drawMaskShapes = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode): void => {
+const drawMaskShapes = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode | TSectionNode): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const nodesById = {};
   const pathOutlineStyles = new Map();
@@ -44,7 +44,7 @@ const drawMaskShapes = (context: TDrawSceneContext, node: TFrameNode | TRectangl
   }
 };
 
-export const drawNoiseMask = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode): TRenderTarget => {
+export const drawNoiseMask = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode | TSectionNode): TRenderTarget => {
   const { gl, imageContext } = context;
   const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
   const previousViewport = gl.getParameter(gl.VIEWPORT) as Int32Array;

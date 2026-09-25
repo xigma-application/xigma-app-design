@@ -14,6 +14,7 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
   switch (node?.type) {
     case NodeType.boolean:
     case NodeType.rectangle:
+    case NodeType.section:
       return {
         effects: node.effects,
         fills: node.fills,

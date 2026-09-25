@@ -19,7 +19,7 @@ const makeFrame = (id: string, parentId: string | null): TFrameNode => ({
 const section: TSectionNode = {
   ...box,
   childIds: [],
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   id: 'section',
   name: 'Section',
   parentId: null,

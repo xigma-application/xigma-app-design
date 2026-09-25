@@ -1,8 +1,8 @@
 // types
 import { EffectType } from 'types/design/enums';
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
-export const getBoxEffectTextureKey = (type: EffectType, node: TFrameNode | TRectangleNode, effect: TEffect): string =>
+export const getBoxEffectTextureKey = (type: EffectType, node: TFrameNode | TRectangleNode | TSectionNode, effect: TEffect): string =>
   [
     type,
     node.width,

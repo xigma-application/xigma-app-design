@@ -113,12 +113,12 @@ describe('getClickThroughLeafNodes', () => {
     expect(getClickThroughLeafNodes([frame1, frame2, frame3], nodesById)).toEqual([frame2, frame3]);
   });
 
-  it('should exclude a plain node sitting directly inside a section — a section is never click-through', () => {
+  it('should reach a plain node sitting directly inside a section with children, which is click-through like a top-level frame', () => {
     const section = buildSection({ childIds: ['rect'] });
     const rect = buildRect({ parentId: 'section' });
     const nodesById = { [rect.id]: rect, [section.id]: section };
 
-    expect(getClickThroughLeafNodes([section, rect], nodesById)).toEqual([section]);
+    expect(getClickThroughLeafNodes([section, rect], nodesById)).toEqual([rect]);
   });
 
   it('should keep a plain node reachable when it sits inside a click-through frame that is itself inside a section', () => {
@@ -127,7 +127,7 @@ describe('getClickThroughLeafNodes', () => {
     const rect = buildRect({ parentId: 'frame' });
     const nodesById = { [frame.id]: frame, [rect.id]: rect, [section.id]: section };
 
-    expect(getClickThroughLeafNodes([section, frame, rect], nodesById)).toEqual([section, rect]);
+    expect(getClickThroughLeafNodes([section, frame, rect], nodesById)).toEqual([rect]);
   });
 
   it('should walk past a group ancestor up to the enclosing click-through frame and keep the leaf', () => {
@@ -168,6 +168,12 @@ describe('getClickThroughLeafNodes', () => {
     const rect = buildRect({ parentId: 'inner' });
     const nodesById = { [inner.id]: inner, [outer.id]: outer, [rect.id]: rect, [section.id]: section };
 
-    expect(getClickThroughLeafNodes([section, outer, inner, rect], nodesById)).toEqual([section, inner]);
+    expect(getClickThroughLeafNodes([section, outer, inner, rect], nodesById)).toEqual([inner]);
+  });
+
+  it('should keep an empty section as its own leaf', () => {
+    const section = buildSection({ childIds: [] });
+
+    expect(getClickThroughLeafNodes([section], { [section.id]: section })).toEqual([section]);
   });
 });

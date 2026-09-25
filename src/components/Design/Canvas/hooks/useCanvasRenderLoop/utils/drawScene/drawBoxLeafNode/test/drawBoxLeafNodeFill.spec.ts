@@ -66,14 +66,13 @@ describe('drawBoxLeafNodeFill', () => {
       0,
       getFaceBufferCache(context.gl),
     );
-    expect(drawRectMock).not.toHaveBeenCalled();
   });
 
-  it('should draw a section with the plain-color rect path', () => {
+  it('should draw a section fills through the same paint stack as a frame', () => {
     // mock
     const node: TSectionNode = {
       childIds: [],
-      fill: '#abc',
+      fills: [{ color: '#abc', opacity: 100, type: 'solid' }],
       height: 20,
       id: 's1',
       name: 'Section',
@@ -87,6 +86,40 @@ describe('drawBoxLeafNodeFill', () => {
 
     // action
     drawBoxLeafNodeFill(context, node, 0.5, {}, new Map(), refs, null, 0);
+
+    // result
+    expect(drawBoxPaintsMock).toHaveBeenCalledWith(
+      context,
+      node,
+      node.fills,
+      [[{ x: 0, y: 0 }]],
+      0.5,
+      {},
+      expect.any(Map),
+      refs,
+      null,
+      0,
+      getFaceBufferCache(context.gl),
+    );
+  });
+
+  it('should fall back to a plain rect for a node that carries no fills array', () => {
+    // mock
+    const node = {
+      fill: '#abc',
+      height: 20,
+      id: 'r2',
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+    };
+
+    // action
+    drawBoxLeafNodeFill(context, node as unknown as TRectangleNode, 0.5, {}, new Map(), refs, null, 0);
 
     // result
     expect(drawRectMock).toHaveBeenCalledWith(

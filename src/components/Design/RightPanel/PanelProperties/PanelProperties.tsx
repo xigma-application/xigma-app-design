@@ -10,6 +10,7 @@ import ImageCrop from './ImageCrop/ImageCrop';
 import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
 import Rectangle from './Rectangle/Rectangle';
+import Section from './Section/Section';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
@@ -37,6 +38,7 @@ const PanelProperties: FC = () => {
   const isEveryFrameSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.frame);
   const isEveryRectangleSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.rectangle);
   const isEveryGroupSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.group);
+  const isEverySectionSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.section);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
 
@@ -57,6 +59,8 @@ const PanelProperties: FC = () => {
       return <BooleanPanel />;
     case isEveryGroupSelected:
       return <Group />;
+    case isEverySectionSelected:
+      return <Section />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

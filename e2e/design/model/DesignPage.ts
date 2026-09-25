@@ -75,7 +75,7 @@ export class DesignPage {
 
   async selectToolFromDropdown(group: TToolName, label: string): Promise<void> {
     await this.page.getByRole('button', { name: `${group} options` }).click();
-    await this.page.getByText(label, { exact: true }).click();
+    await this.page.locator('[data-radix-popper-content-wrapper]').getByText(label, { exact: true }).click();
   }
 
   async drawFrame(x1: number, y1: number, x2: number, y2: number): Promise<void> {

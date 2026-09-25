@@ -14,7 +14,7 @@ import { resolveSectionDragReparentTarget } from '../resolveSectionDragReparentT
 
 const makeSection = (id: string, x: number, size: number): TSectionNode => ({
   childIds: [],
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: size,
   id,
   name: id,
@@ -37,7 +37,9 @@ describe('resolveSectionDragReparentTarget', () => {
   it('should highlight the section under the pointer and move the dragged section into it', () => {
     // mock
     const canvasRefs = createCanvasRefs();
-    store.dispatch(addNodes({ nodes: [makeSection('dropHost', 0, 400), makeSection('dragged', 1000, 50)], rootIds: ['dropHost', 'dragged'] }));
+    store.dispatch(
+      addNodes({ nodes: [makeSection('dropHost', 0, 400), makeSection('dragged', 1000, 50)], rootIds: ['dropHost', 'dragged'] }),
+    );
 
     // action
     resolve(canvasRefs, 'dragged', { x: 100, y: 100 });

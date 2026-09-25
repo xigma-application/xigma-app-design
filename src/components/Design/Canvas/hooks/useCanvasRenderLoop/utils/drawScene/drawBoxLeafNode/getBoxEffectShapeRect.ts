@@ -1,8 +1,8 @@
 // types
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TRoundedRect } from 'utils/canvas/shapes/getRoundedRectPoints';
 
-export const getBoxEffectShapeRect = (node: TFrameNode | TRectangleNode, margin: number): TRoundedRect => ({
+export const getBoxEffectShapeRect = (node: TFrameNode | TRectangleNode | TSectionNode, margin: number): TRoundedRect => ({
   cornerRadius: node.cornerRadius ?? 0,
   cornerRadiusBottomLeft: node.cornerRadiusBottomLeft,
   cornerRadiusBottomRight: node.cornerRadiusBottomRight,

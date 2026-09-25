@@ -88,7 +88,7 @@ const addSection = (x: number, y: number): string => {
   store.dispatch(
     addNode({
       childIds: [],
-      fill: '#000',
+      fills: [{ color: '#000', opacity: 100, type: 'solid' }],
       height: 20,
       name: 'Section',
       parentId: null,

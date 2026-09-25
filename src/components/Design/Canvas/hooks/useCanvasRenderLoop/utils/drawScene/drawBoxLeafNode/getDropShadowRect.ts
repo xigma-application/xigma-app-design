@@ -1,10 +1,10 @@
 // types
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TRoundedRect } from 'utils/canvas/shapes/getRoundedRectPoints';
 
 const growRadius = (radius: number | undefined, fallback: number, spread: number): number => Math.max(0, (radius ?? fallback) + spread);
 
-export const getDropShadowRect = (node: TFrameNode | TRectangleNode, effect: TEffect, margin: number): TRoundedRect => {
+export const getDropShadowRect = (node: TFrameNode | TRectangleNode | TSectionNode, effect: TEffect, margin: number): TRoundedRect => {
   const fallback = node.cornerRadius ?? 0;
 
   return {

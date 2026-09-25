@@ -1,21 +1,18 @@
 // others
-import {
-  FRAME_NAME_LABEL_FONT_SIZE_PX,
-  SECTION_NAME_LABEL_CORNER_RADIUS_PX,
-  SECTION_NAME_LABEL_FILL,
-  VALUE_LABEL_TEXT_FILL,
-} from 'constant/canvas';
+import { FRAME_NAME_LABEL_FONT_SIZE_PX, SECTION_NAME_LABEL_CORNER_RADIUS_PX } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // types
 import { TSectionNode, TViewport } from 'types/design/types';
 import { TImageRenderContext } from '../../../types';
+import { TSectionNameLabelStyle } from 'utils/canvas/sectionNameLabel/types';
 
 // utils
 import { drawMsdfGlyphs } from 'utils/canvas/text/drawMsdfGlyphs';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawSectionStroke } from '../drawBoxLeafNode/drawSectionStroke';
+import { drawSectionNameLabelStroke } from './drawSectionNameLabelStroke';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
+import { getSectionNameLabelStyle } from 'utils/canvas/sectionNameLabel/getSectionNameLabelStyle';
 import { getSectionNameLabelBadgeRect, TSectionNameLabelBadgeRect } from './getSectionNameLabelBadgeRect';
 import { getSectionNameLabelVertices } from './getSectionNameLabelVertices';
 
@@ -23,6 +20,7 @@ const drawSectionNameLabelText = (
   gl: WebGL2RenderingContext,
   imageContext: TImageRenderContext,
   badge: TSectionNameLabelBadgeRect,
+  textFill: string,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -40,7 +38,7 @@ const drawSectionNameLabelText = (
       texture,
       MSDF_ATLAS_JSON,
       vertices,
-      VALUE_LABEL_TEXT_FILL,
+      textFill,
       fontSize,
       canvasWidth,
       canvasHeight,
@@ -55,6 +53,7 @@ const drawSectionNameLabelBadge = (
   buffer: WebGLBuffer,
   imageContext: TImageRenderContext,
   badge: TSectionNameLabelBadgeRect | null,
+  style: TSectionNameLabelStyle,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -66,7 +65,7 @@ const drawSectionNameLabelBadge = (
       buffer,
       {
         cornerRadius: SECTION_NAME_LABEL_CORNER_RADIUS_PX / viewport.zoom,
-        fill: SECTION_NAME_LABEL_FILL,
+        fill: style.fill,
         height: badge.height,
         width: badge.width,
         x: badge.x,
@@ -77,14 +76,13 @@ const drawSectionNameLabelBadge = (
       viewport,
       0,
     );
-    drawSectionStroke(
+    drawSectionNameLabelStroke(
       { buffer, canvasHeight, canvasWidth, gl, program, viewport },
       { ...badge, cornerRadius: SECTION_NAME_LABEL_CORNER_RADIUS_PX / viewport.zoom },
-      0,
-      1,
+      style,
     );
 
-    drawSectionNameLabelText(gl, imageContext, badge, canvasWidth, canvasHeight, viewport);
+    drawSectionNameLabelText(gl, imageContext, badge, style.textFill, canvasWidth, canvasHeight, viewport);
   }
 };
 
@@ -97,10 +95,12 @@ export const drawSectionNameLabel = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  backgroundColor: string,
 ): void => {
   if (node.name.length !== 0) {
     const badge = getSectionNameLabelBadgeRect(node, viewport.zoom);
+    const style = getSectionNameLabelStyle(node, backgroundColor);
 
-    drawSectionNameLabelBadge(gl, program, buffer, imageContext, badge, canvasWidth, canvasHeight, viewport);
+    drawSectionNameLabelBadge(gl, program, buffer, imageContext, badge, style, canvasWidth, canvasHeight, viewport);
   }
 };

@@ -5,15 +5,14 @@ import CanvasNameLabelInput from '../CanvasNameLabelInput/CanvasNameLabelInput';
 
 // hooks
 import { useSectionNameLabelEditor } from './hooks/useSectionNameLabelEditor';
+import { useSectionNameLabelStyle } from './hooks/useSectionNameLabelStyle';
 
 // others
 import {
   FRAME_NAME_LABEL_FONT_SIZE_PX,
   SECTION_NAME_LABEL_CORNER_RADIUS_PX,
-  SECTION_NAME_LABEL_FILL,
   SECTION_NAME_LABEL_PADDING_X_PX,
   SECTION_NAME_LABEL_PADDING_Y_PX,
-  VALUE_LABEL_TEXT_FILL,
 } from 'constant/canvas';
 
 // pages
@@ -25,6 +24,7 @@ import { worldToScreen } from '../utils/worldToScreen';
 const SectionNameLabelEditOverlay: FC = () => {
   const refs = useCanvasRefsContext();
   const { cancel, commit, edit, viewport } = useSectionNameLabelEditor(refs);
+  const style = useSectionNameLabelStyle(edit?.nodeId);
 
   if (edit) {
     const left = worldToScreen({ x: edit.left, y: 0 }, viewport).x;
@@ -33,10 +33,10 @@ const SectionNameLabelEditOverlay: FC = () => {
     return (
       <CanvasNameLabelInput
         angleDeg={0}
-        background={SECTION_NAME_LABEL_FILL}
-        borderColor={SECTION_NAME_LABEL_FILL}
+        background={style.fill}
+        borderColor={style.fill}
         borderRadius={SECTION_NAME_LABEL_CORNER_RADIUS_PX}
-        color={VALUE_LABEL_TEXT_FILL}
+        color={style.textFill}
         fontSize={FRAME_NAME_LABEL_FONT_SIZE_PX}
         height={edit.height * viewport.zoom}
         initialValue={edit.value}

@@ -5,7 +5,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
-import { isPointOnFrameNameLabel } from '../../../../../utils/isPointOnFrameNameLabel';
+import { isPointOnNodeNameLabel } from '../../../../../utils/isPointOnNodeNameLabel';
 
 export const shouldDrillIntoSelectedFrame = (
   node: TSceneNode,
@@ -13,8 +13,8 @@ export const shouldDrillIntoSelectedFrame = (
   point: TPoint,
   zoom: number,
 ): boolean => {
-  if (node.type === NodeType.frame && node.childIds.length > 0) {
-    return isClickThroughFrame(node, nodesById) ? !isPointOnFrameNameLabel(point, node, zoom) : true;
+  if ((node.type === NodeType.frame || node.type === NodeType.section) && node.childIds.length > 0) {
+    return isClickThroughFrame(node, nodesById) ? !isPointOnNodeNameLabel(point, node, zoom) : true;
   }
 
   return false;

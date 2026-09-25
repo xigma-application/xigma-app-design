@@ -1,6 +1,6 @@
 // types
 import { StrokeProfile } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -14,7 +14,7 @@ const lerpPoint = (from: TPoint, to: TPoint, t: number): TPoint => ({
   y: from.y + (to.y - from.y) * t,
 });
 
-export const getBoxStrokeProfilePolygons = (node: TFrameNode | TRectangleNode): TPoint[][] => {
+export const getBoxStrokeProfilePolygons = (node: TFrameNode | TRectangleNode | TSectionNode): TPoint[][] => {
   const flipped = node.strokeProfileFlipped ?? false;
   const profile = node.strokeProfile ?? StrokeProfile.uniform;
   const width = node.strokeWidth ?? 0;

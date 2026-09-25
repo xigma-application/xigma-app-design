@@ -1,6 +1,6 @@
 // types
 import { StrokeProfile } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -12,7 +12,7 @@ import { getStrokeBrushCategory } from 'utils/design/stroke/getStrokeBrushCatego
 import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 import { memoizeBrushPolygons } from './memoizeBrushPolygons';
 
-const getKey = (node: TFrameNode | TRectangleNode, outer: TPoint[], inner: TPoint[], isTraced: boolean): string =>
+const getKey = (node: TFrameNode | TRectangleNode | TSectionNode, outer: TPoint[], inner: TPoint[], isTraced: boolean): string =>
   [
     isTraced,
     node.id,
@@ -23,7 +23,11 @@ const getKey = (node: TFrameNode | TRectangleNode, outer: TPoint[], inner: TPoin
     [...outer, ...inner].map((point) => `${point.x.toFixed(3)},${point.y.toFixed(3)}`).join(';'),
   ].join('|');
 
-export const getBoxBrushStrokePolygons = (node: TFrameNode | TRectangleNode, outer: TPoint[], inner: TPoint[]): TPoint[][] | null => {
+export const getBoxBrushStrokePolygons = (
+  node: TFrameNode | TRectangleNode | TSectionNode,
+  outer: TPoint[],
+  inner: TPoint[],
+): TPoint[][] | null => {
   const values = getStrokeBrushValues(node);
   const category = getStrokeBrushCategory(values.brush);
   const shape = category ? getBrushShape(values.brush) : null;

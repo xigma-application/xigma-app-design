@@ -27,7 +27,7 @@ export const rect = (id: string, name: string, parentId: string | null): TRectan
 export const section = (id: string, name: string, childIds: string[]): TSectionNode => ({
   ...box,
   childIds,
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   id,
   name,
   parentId: null,

@@ -1,5 +1,5 @@
 // types
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -11,7 +11,7 @@ import { getRingMode } from './getRingMode';
 import { getStrokeDashPattern } from 'utils/design/stroke/getStrokeDashPattern';
 import { getUniformRingPolygons } from './getUniformRingPolygons';
 
-export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode): TPoint[][] => {
+export const getBoxStrokeRingPolygons = (node: TFrameNode | TRectangleNode | TSectionNode): TPoint[][] => {
   const dashPattern = getStrokeDashPattern(node);
 
   switch (getRingMode(node, dashPattern)) {

@@ -44,7 +44,19 @@ const frame = (
   }) as TSceneNode;
 
 const section = (id: string, x: number, y: number, width: number, height: number, childIds: string[] = []): TSceneNode =>
-  ({ childIds, fill: '#444', height, id, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width, x, y }) as TSceneNode;
+  ({
+    childIds,
+    fills: [{ color: '#444', opacity: 100, type: 'solid' }],
+    height,
+    id,
+    name: 'Section',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.section,
+    width,
+    x,
+    y,
+  }) as TSceneNode;
 
 describe('getDragDropTargetFrame', () => {
   it('should return the frame under the pointer, anywhere inside its bounds', () => {

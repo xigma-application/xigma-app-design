@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../types';
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 
 // utils
@@ -18,7 +18,11 @@ import { getEffectHoleRect } from './getEffectHoleRect';
 import { hexToRgbFloat } from 'utils/canvas/hexToRgbFloat';
 import { setAlphaWriteEnabled } from 'utils/canvas/setAlphaWriteEnabled';
 
-export const renderInnerShadowTexture = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode, effect: TEffect): TRenderTarget => {
+export const renderInnerShadowTexture = (
+  context: TDrawSceneContext,
+  node: TFrameNode | TRectangleNode | TSectionNode,
+  effect: TEffect,
+): TRenderTarget => {
   const { gl, imageContext } = context;
   const margin = getBoxEffectMargin(effect.blur);
   const size = getBoxEffectTargetSize(node, margin);

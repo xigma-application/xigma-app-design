@@ -1,13 +1,13 @@
 // types
 import { StrokeDashCap } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
 import { getBoxDashedStrokePolygons } from '../getBoxDashedStrokePolygons';
 import { getUniformRingPolygons } from './getUniformRingPolygons';
 
-export const getDashedRingPolygons = (node: TFrameNode | TRectangleNode, dashPattern: number[] | null): TPoint[][] => {
+export const getDashedRingPolygons = (node: TFrameNode | TRectangleNode | TSectionNode, dashPattern: number[] | null): TPoint[][] => {
   const [outerLoop, innerLoop] = getUniformRingPolygons(node);
 
   return (

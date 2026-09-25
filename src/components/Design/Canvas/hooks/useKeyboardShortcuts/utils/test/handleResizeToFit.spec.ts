@@ -8,6 +8,7 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 import { handleResizeToFit } from '../handleResizeToFit';
 
 const addRectangleNode = (overrides: Partial<TRectangleNode> = {}): string => {
@@ -70,7 +71,7 @@ describe('handleResizeToFit', () => {
     expect(selectNodes(store.getState())).toEqual(before);
   });
 
-  it('should do nothing when the selected node is not a frame', () => {
+  it('should do nothing when the selected node is not a frame or a section', () => {
     // mock
     const id = addRectangleNode();
     store.dispatch(setSelection([id]));
@@ -175,5 +176,34 @@ describe('handleResizeToFit', () => {
     const frame = selectNodes(store.getState())[frameId] as TFrameNode;
     expect(frame.width).toBe(20);
     expect(frame.height).toBe(20);
+  });
+
+  it('should fit a section to the outermost bounds of its children', () => {
+    // mock
+    const childA = addRectangleNode({ height: 20, width: 20, x: 10, y: 10 });
+    const childB = addRectangleNode({ height: 50, width: 30, x: 60, y: 60 });
+    store.dispatch(
+      addNode({
+        ...getDefaultSectionStyle(),
+        childIds: [childA, childB],
+        height: 300,
+        name: 'Section',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.section,
+        width: 300,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const sectionId = rootOrder[rootOrder.length - 1];
+    store.dispatch(setSelection([sectionId]));
+
+    // action
+    handleResizeToFit(store.dispatch);
+
+    // result
+    expect(selectNodes(store.getState())[sectionId]).toMatchObject({ height: 100, width: 80, x: 10, y: 10 });
   });
 });

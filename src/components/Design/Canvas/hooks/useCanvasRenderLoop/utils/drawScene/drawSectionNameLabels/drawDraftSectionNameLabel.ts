@@ -9,15 +9,21 @@ import { TSceneNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { drawSectionNameLabel } from './drawSectionNameLabel';
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 
-export const drawDraftSectionNameLabel = (context: TDrawSceneContext, refs: TCanvasRefs, nodes: Record<string, TSceneNode>): void => {
+export const drawDraftSectionNameLabel = (
+  context: TDrawSceneContext,
+  refs: TCanvasRefs,
+  nodes: Record<string, TSceneNode>,
+  backgroundColor: string,
+): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape?.type === NodeType.section) {
     const draftSection: TSectionNode = {
+      ...getDefaultSectionStyle(draftShape.fill),
       childIds: [],
-      fill: draftShape.fill,
       height: draftShape.height,
       id: '',
       name: getNextSectionName(nodes),
@@ -29,6 +35,6 @@ export const drawDraftSectionNameLabel = (context: TDrawSceneContext, refs: TCan
       y: draftShape.y,
     };
 
-    drawSectionNameLabel(gl, program, buffer, imageContext, draftSection, canvasWidth, canvasHeight, viewport);
+    drawSectionNameLabel(gl, program, buffer, imageContext, draftSection, canvasWidth, canvasHeight, viewport, backgroundColor);
   }
 };

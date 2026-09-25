@@ -1,0 +1,27 @@
+// others
+import {
+  SECTION_NAME_LABEL_FILL,
+  SECTION_NAME_LABEL_LIGHT_FILL,
+  SECTION_NAME_LABEL_LIGHT_STROKE,
+  SECTION_NAME_LABEL_LIGHT_TEXT_FILL,
+  SECTION_STROKE,
+  SECTION_STROKE_OPACITY,
+  VALUE_LABEL_TEXT_FILL,
+} from 'constant/canvas';
+
+// types
+import { TSectionNameLabelStyle } from './types';
+
+export const SECTION_NAME_LABEL_DARK_STYLE: TSectionNameLabelStyle = {
+  fill: SECTION_NAME_LABEL_FILL,
+  stroke: SECTION_STROKE,
+  strokeOpacity: SECTION_STROKE_OPACITY / 100,
+  textFill: VALUE_LABEL_TEXT_FILL,
+};
+
+export const SECTION_NAME_LABEL_LIGHT_STYLE: TSectionNameLabelStyle = {
+  fill: SECTION_NAME_LABEL_LIGHT_FILL,
+  stroke: SECTION_NAME_LABEL_LIGHT_STROKE,
+  strokeOpacity: 1,
+  textFill: SECTION_NAME_LABEL_LIGHT_TEXT_FILL,
+};

@@ -16,6 +16,9 @@ import { store } from 'store';
 // types
 import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 
+// utils
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
+
 const renderPanelProperties = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
@@ -149,6 +152,36 @@ describe('PanelProperties behaviors', () => {
     // result
     expect(screen.getByText('Frame')).toBeInTheDocument();
     expect(screen.queryByText('Page')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should show the Section panel while every selected layer is a section', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        ...getDefaultSectionStyle(),
+        childIds: [],
+        height: 20,
+        name: 'Section',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.section,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByLabelText('Element type')).toHaveTextContent('Section');
+    expect(screen.queryByText('Rotation')).not.toBeInTheDocument();
 
     // cleanup
     store.dispatch(setSelection([]));

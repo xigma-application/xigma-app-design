@@ -1,5 +1,4 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TBackgroundFillLayer } from '../types';
 import { TPaint } from 'types/design/paint/types';
 import { TSceneNode } from 'types/design/types';
@@ -33,10 +32,6 @@ export const getBackgroundFillLayer = (node: TSceneNode): TBackgroundFillLayer =
     if (paint) {
       return getPaintLayer(paint);
     }
-  }
-
-  if (node.type === NodeType.section) {
-    return { alpha: 1, color: node.fill, kind: 'solid' };
   }
 
   return { kind: 'none' };

@@ -38,7 +38,7 @@ const addSection = (): { id: string; name: string } => {
   store.dispatch(
     addNode({
       childIds: [],
-      fill: '#444444',
+      fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
       height: 100,
       name: 'Section',
       parentId: null,

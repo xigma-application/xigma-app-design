@@ -1,15 +1,13 @@
-// others
-import { SECTION_CORNER_RADIUS } from 'constant/canvas';
-import { SECTION_FILL } from 'components/Design/Canvas/constants';
-
 // types
 import { NodeType } from 'types/design/enums';
 import { TGroupNode, TSectionNode } from 'types/design/types';
 
+// utils
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
+
 export const convertGroupToSection = (node: TGroupNode): TSectionNode => ({
+  ...getDefaultSectionStyle(),
   childIds: node.childIds,
-  cornerRadius: SECTION_CORNER_RADIUS,
-  fill: SECTION_FILL,
   height: node.height,
   hidden: node.hidden,
   id: node.id,

@@ -64,6 +64,7 @@ describe('drawSectionNameLabels', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [buildFrame()],
       refsWith(null),
+      '#535353',
     );
 
     // result
@@ -78,10 +79,21 @@ describe('drawSectionNameLabels', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [section],
       refsWith(null),
+      '#535353',
     );
 
     // result
-    expect(drawSectionNameLabelMock).toHaveBeenCalledWith(gl, program, buffer, imageContext, section, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawSectionNameLabelMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      imageContext,
+      section,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      '#535353',
+    );
   });
 
   it('should skip the section currently being renamed inline', () => {
@@ -92,6 +104,7 @@ describe('drawSectionNameLabels', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [section],
       refsWith(section.id),
+      '#535353',
     );
 
     // result

@@ -1,5 +1,5 @@
 // types
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -8,7 +8,7 @@ import { getCenteredRingLoops } from './getCenteredRingLoops';
 import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValues';
 import { getUniformRingPolygons } from './getUniformRingPolygons';
 
-export const getDynamicRingPolygons = (node: TFrameNode | TRectangleNode): TPoint[][] => {
+export const getDynamicRingPolygons = (node: TFrameNode | TRectangleNode | TSectionNode): TPoint[][] => {
   const [outerLoop, innerLoop] = getCenteredRingLoops(node);
 
   return (

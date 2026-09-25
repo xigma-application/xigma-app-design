@@ -177,7 +177,7 @@ describe('handleReplaceNode', () => {
 
     const section: TSectionNode = {
       childIds: ['child-a'],
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: frame.height,
       id: 'frame-1',
       name: frame.name,

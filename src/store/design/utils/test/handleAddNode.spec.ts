@@ -45,7 +45,11 @@ const node: TSceneNode = {
   y: 0,
 };
 
-const sectionNode: TSceneNode = { ...omit(node, 'fills'), fill: '#ff0000', type: NodeType.section };
+const sectionNode: TSceneNode = {
+  ...omit(node, 'fills'),
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+  type: NodeType.section,
+};
 
 const lineNode: TSceneNode = {
   id: 'line-1',

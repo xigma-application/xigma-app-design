@@ -39,7 +39,7 @@ const frame = (id: string, fills: TPaint[], parentId: string | null = null, blen
 
 const section = (id: string, fill: string, parentId: string | null = null): TSectionNode => ({
   childIds: [],
-  fill,
+  fills: [{ color: fill, opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: 'Section',

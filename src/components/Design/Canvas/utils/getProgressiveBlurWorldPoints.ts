@@ -1,5 +1,5 @@
 // types
-import { TBooleanNode, TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TBooleanNode, TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -9,7 +9,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 export type TProgressiveBlurWorldPoints = { end: TPoint; start: TPoint };
 
 export const getProgressiveBlurWorldPoints = (
-  node: TBooleanNode | TFrameNode | TRectangleNode,
+  node: TBooleanNode | TFrameNode | TRectangleNode | TSectionNode,
   effect: TEffect,
 ): TProgressiveBlurWorldPoints => {
   const { end, start } = getProgressiveBlur(effect);

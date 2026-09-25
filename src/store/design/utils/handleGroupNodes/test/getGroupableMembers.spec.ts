@@ -21,7 +21,7 @@ const buildRect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => (
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: [],
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'section-1',
   name: 'Section',

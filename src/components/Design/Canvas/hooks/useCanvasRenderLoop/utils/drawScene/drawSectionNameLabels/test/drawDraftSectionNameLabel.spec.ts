@@ -6,6 +6,7 @@ import { TImageRenderContext } from '../../../../types';
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawDraftSectionNameLabel } from '../drawDraftSectionNameLabel';
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 
 const drawSectionNameLabelMock = vi.fn();
 const getNextSectionNameMock = vi.fn();
@@ -38,6 +39,7 @@ describe('drawDraftSectionNameLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: draftSection } }),
       nodes,
+      '#535353',
     );
 
     // result
@@ -48,8 +50,8 @@ describe('drawDraftSectionNameLabel', () => {
       buffer,
       imageContext,
       {
+        ...getDefaultSectionStyle('#444444'),
         childIds: [],
-        fill: '#444444',
         height: 100,
         id: '',
         name: 'Section 3',
@@ -63,6 +65,7 @@ describe('drawDraftSectionNameLabel', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      '#535353',
     );
   });
 
@@ -72,6 +75,7 @@ describe('drawDraftSectionNameLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs(),
       nodes,
+      '#535353',
     );
 
     // result
@@ -84,6 +88,7 @@ describe('drawDraftSectionNameLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { ...draftSection, type: NodeType.frame } } }),
       nodes,
+      '#535353',
     );
 
     // result

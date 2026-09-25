@@ -1,12 +1,13 @@
 // store
 import { addNode, groupNodes, moveNodes, setSelection, setVectorEditingNodeIds, toggleFrameClipContent } from 'store/design/slice';
-import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
+import { selectActivePage, selectNodes, selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
 
 // utils
+import { getSectionNameLabelRects } from '../../../../../../utils/getSectionNameLabelRects';
 import { getSelectionHitAtPoint } from '../getSelectionHitAtPoint';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -492,7 +493,7 @@ describe('getSelectionHitAtPoint', () => {
       store.dispatch(
         addNode({
           childIds: [],
-          fill: '#444444',
+          fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
           height: size,
           name: 'Section',
           parentId: null,
@@ -535,32 +536,42 @@ describe('getSelectionHitAtPoint', () => {
       return { childId, sectionId };
     };
 
-    it('should select the section itself from a plain click on its empty body', () => {
-      const { sectionId } = buildSectionWithChild();
+    it('should select nothing from a plain click on the empty body of a section with children, like a top-level frame', () => {
+      buildSectionWithChild();
 
       const hit = getSelectionHitAtPoint({ x: 30300, y: 30300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
-      expect(hit?.id).toBe(sectionId);
+      expect(hit).toBeNull();
     });
 
-    it('should select the section, not the child, from a plain click directly on the child when nothing is entered yet', () => {
-      const { childId, sectionId } = buildSectionWithChild();
+    it('should select the child from a plain click directly on it, since a section with children is click-through', () => {
+      const { childId } = buildSectionWithChild();
 
       const hit = getSelectionHitAtPoint({ x: 30035, y: 30035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
-      expect(hit?.id).toBe(sectionId);
-      expect(hit?.id).not.toBe(childId);
+      expect(hit?.id).toBe(childId);
     });
 
-    it('should keep the section selected, not drill into its child, on a repeat click while the section itself is selected', () => {
-      // mirrors group semantics: selecting the container itself does not "enter" it — only a
-      // descendant selection (e.g. via Ctrl+click) does, per the next test below
+    it('should select the section from a plain click on its name label', () => {
       const { sectionId } = buildSectionWithChild();
+      const [labelRect] = getSectionNameLabelRects([selectNodes(store.getState())[sectionId]], IDENTITY_VIEWPORT.zoom);
+
+      const hit = getSelectionHitAtPoint(
+        { x: labelRect.x + labelRect.width / 2, y: labelRect.y + labelRect.height / 2 },
+        selectOrderedNodes(store.getState()),
+        IDENTITY_VIEWPORT,
+      );
+
+      expect(hit?.id).toBe(sectionId);
+    });
+
+    it('should drill into the child on a click while the section itself is selected', () => {
+      const { childId, sectionId } = buildSectionWithChild();
 
       store.dispatch(setSelection([sectionId]));
       const hit = getSelectionHitAtPoint({ x: 30035, y: 30035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
-      expect(hit?.id).toBe(sectionId);
+      expect(hit?.id).toBe(childId);
     });
 
     it('should drill to whatever sits under a new point once a descendant is already selected (already "entered")', () => {
@@ -610,14 +621,14 @@ describe('getSelectionHitAtPoint', () => {
       expect(hit?.id).toBe(frameId);
     });
 
-    it('should not let an already-selected section leak plain (non-frame) content on a further click', () => {
+    it('should keep an already-selected section selected on a click on its empty body', () => {
       const sectionId = addSectionNode(34000, 34000, 400);
       const rectId = addRectNodeIn(34020, 34020, 40);
 
       store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: sectionId }));
       store.dispatch(setSelection([sectionId]));
 
-      const hit = getSelectionHitAtPoint({ x: 34035, y: 34035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+      const hit = getSelectionHitAtPoint({ x: 34300, y: 34300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
       expect(hit?.id).toBe(sectionId);
     });

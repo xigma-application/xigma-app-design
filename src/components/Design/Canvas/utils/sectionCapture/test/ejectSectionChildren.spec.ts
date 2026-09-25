@@ -25,7 +25,7 @@ const makeRectangle = (id: string, x: number, parentId: string | null = null): T
 
 const makeSection = (id: string, x: number, width: number, childIds: string[] = []): TSectionNode => ({
   childIds,
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: 100,
   id,
   name: id,

@@ -14,6 +14,9 @@ vi.mock('components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext', () 
 vi.mock('./hooks/useSectionNameLabelEditor', () => ({
   useSectionNameLabelEditor: (): unknown => useSectionNameLabelEditorMock(),
 }));
+vi.mock('./hooks/useSectionNameLabelStyle', () => ({
+  useSectionNameLabelStyle: (): unknown => ({ fill: '#FFEE88', stroke: null, strokeOpacity: 0, textFill: '#000000' }),
+}));
 
 const IDLE = { cancel: vi.fn(), commit: vi.fn(), edit: null, viewport: { x: 0, y: 0, zoom: 1 } };
 
@@ -46,7 +49,7 @@ describe('SectionNameLabelEditOverlay', () => {
     expect(input).toHaveStyle({ height: '48px', left: '139px', top: '132px' });
   });
 
-  it('should style the input in the same dark colors as the badge, not the frame’s light-blue edit style', () => {
+  it('should style the input in the same colors as the section badge, not the frame’s light-blue edit style', () => {
     // mock
     useSectionNameLabelEditorMock.mockReturnValue({
       ...IDLE,
@@ -61,10 +64,10 @@ describe('SectionNameLabelEditOverlay', () => {
     // radius/padding reference the shared constants directly rather than hardcoded numbers, since
     // those are actively tuned design values
     expect(screen.getByRole('textbox')).toHaveStyle({
-      backgroundColor: 'rgb(38, 38, 38)',
-      borderColor: 'rgb(38, 38, 38)',
+      backgroundColor: 'rgb(255, 238, 136)',
+      borderColor: 'rgb(255, 238, 136)',
       borderRadius: `${SECTION_NAME_LABEL_CORNER_RADIUS_PX}px`,
-      color: 'rgb(255, 255, 255)',
+      color: 'rgb(0, 0, 0)',
       padding: `${SECTION_NAME_LABEL_PADDING_Y_PX}px ${SECTION_NAME_LABEL_PADDING_X_PX}px`,
     });
   });

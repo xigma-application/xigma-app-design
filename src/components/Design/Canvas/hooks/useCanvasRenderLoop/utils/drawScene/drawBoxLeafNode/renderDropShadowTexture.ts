@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../types';
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TRoundedRect } from 'utils/canvas/shapes/getRoundedRectPoints';
 
@@ -27,7 +27,11 @@ const drawShadowShape = (
   }
 };
 
-export const renderDropShadowTexture = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode, effect: TEffect): TRenderTarget => {
+export const renderDropShadowTexture = (
+  context: TDrawSceneContext,
+  node: TFrameNode | TRectangleNode | TSectionNode,
+  effect: TEffect,
+): TRenderTarget => {
   const { gl, imageContext } = context;
   const margin = getDropShadowMargin(effect);
   const size = getBoxEffectTargetSize(node, margin);

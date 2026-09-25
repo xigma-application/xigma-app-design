@@ -8,7 +8,7 @@ import { resolveSectionNewNodeTarget } from '../resolveSectionNewNodeTarget';
 
 const section = (id: string, x: number, childIds: string[] = []): TSectionNode => ({
   childIds,
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: 200,
   id,
   name: id,

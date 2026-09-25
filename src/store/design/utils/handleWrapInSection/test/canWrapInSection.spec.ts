@@ -22,7 +22,7 @@ const box = { height: 10, rotation: 0, width: 10, x: 0, y: 0 };
 const section: TSectionNode = {
   ...box,
   childIds: [],
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   id: 'section',
   name: 'Section',
   parentId: null,

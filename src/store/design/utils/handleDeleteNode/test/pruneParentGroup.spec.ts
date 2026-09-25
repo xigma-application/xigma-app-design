@@ -35,7 +35,7 @@ const group = (childIds: string[]): TGroupNode => ({
 
 const section = (childIds: string[]): TSectionNode => ({
   childIds,
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'section-1',
   name: 'Section',

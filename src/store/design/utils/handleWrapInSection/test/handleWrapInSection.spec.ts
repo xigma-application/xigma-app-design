@@ -1,6 +1,3 @@
-// others
-import { SECTION_FILL } from 'components/Design/Canvas/constants';
-
 // store
 import { addNodes, moveNodes, setSelection, wrapInSection } from 'store/design/slice';
 import { selectActivePage, selectNodes, selectSelectedIds } from 'store/design/selectors';
@@ -9,6 +6,9 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
+
+// utils
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 
 const makeRectangle = (id: string, x: number, y: number): TRectangleNode => ({
   fills: [],
@@ -60,8 +60,7 @@ describe('handleWrapInSection', () => {
     const [sectionId] = selectSelectedIds(store.getState());
     expect(selectNodes(store.getState())[sectionId]).toMatchObject({
       childIds: ['a', 'b'],
-      cornerRadius: 2,
-      fill: SECTION_FILL,
+      ...getDefaultSectionStyle(),
       height: 140,
       name: 'Section (1)',
       parentId: null,

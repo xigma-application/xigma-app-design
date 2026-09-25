@@ -14,7 +14,11 @@ import { useColumnPosition } from './ColumnPosition/hooks/useColumnPosition';
 // others
 import { translationNameSpace } from './constants';
 
-const PositionSection: FC = () => {
+type TPositionSectionProps = {
+  withRotation?: boolean;
+};
+
+const PositionSection: FC<TPositionSectionProps> = ({ withRotation = true }) => {
   const { t } = useTranslation();
   const { ignoresAutoLayout, onToggleIgnoreAutoLayout, showIgnoreAutoLayoutToggle } = useColumnPosition();
 
@@ -28,7 +32,7 @@ const PositionSection: FC = () => {
     >
       <ColumnAlignment />
       <ColumnPosition />
-      <ColumnRotation />
+      {withRotation && <ColumnRotation />}
     </UITools.Section>
   );
 };

@@ -9,15 +9,13 @@ import { getNodeValues } from 'components/Design/Canvas/hooks/useCanvasRenderLoo
 import { getTopLevelAncestor } from 'store/design/utils/nodeHierarchy/getTopLevelAncestor';
 import { isAncestorNode } from 'store/design/utils/nodeHierarchy/isAncestorNode';
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
-import { isPointOnFrameNameLabel } from '../../../../../utils/isPointOnFrameNameLabel';
+import { isPointOnNodeNameLabel } from '../../../../../utils/isPointOnNodeNameLabel';
 import { isSelectionInsideGroup } from '../../../../../utils/isSelectionInsideGroup';
 
 const toHoverResult = (nodeId: string | null): THoverResult => ({ className: null, cursor: '', nodeId });
 
 const findFrameLabelHit = ({ nodesById, point, viewport }: THoverResolverContext): TSceneNode | undefined =>
-  getNodeValues(nodesById).find(
-    (node) => node.type === NodeType.frame && isClickThroughFrame(node, nodesById) && isPointOnFrameNameLabel(point, node, viewport.zoom),
-  );
+  getNodeValues(nodesById).find((node) => isClickThroughFrame(node, nodesById) && isPointOnNodeNameLabel(point, node, viewport.zoom));
 
 const getPlainNodeId = (hit: TSceneNode, { isControlPressed, nodesById, selectedNodes }: THoverResolverContext): string => {
   const ancestor = getTopLevelAncestor(hit, nodesById);

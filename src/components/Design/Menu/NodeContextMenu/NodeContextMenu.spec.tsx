@@ -40,7 +40,12 @@ const buildFrameNode = (): TFrameNode => ({
   fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.frame,
 });
-const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, childIds: [], fill: '#000000', type: NodeType.section });
+const buildSectionNode = (): TSectionNode => ({
+  ...BASE_NODE,
+  childIds: [],
+  fills: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  type: NodeType.section,
+});
 const buildGroupNode = (): TGroupNode => ({ ...BASE_NODE, childIds: [], type: NodeType.group });
 const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'node-1',

@@ -14,7 +14,7 @@ export const handleResizeToFit = (dispatch: AppDispatch): void => {
   const state = store.getState();
   const [selectedNode, ...restSelectedNodes] = selectSelectedNodes(state);
 
-  if (selectedNode && restSelectedNodes.length === 0 && selectedNode.type === NodeType.frame) {
+  if (selectedNode && restSelectedNodes.length === 0 && (selectedNode.type === NodeType.frame || selectedNode.type === NodeType.section)) {
     const nodes = selectNodes(state);
     const children = selectedNode.childIds.map((childId) => nodes[childId]).filter(Boolean);
 

@@ -41,11 +41,11 @@ describe('drawBoxLeafNodeNoise', () => {
     expect(drawBoxEffectsMock).toHaveBeenCalledWith(context, node, 0.5, refs, EffectType.noise);
   });
 
-  it('should draw nothing for a section, which has no effects', () => {
+  it('should draw the noise effects of a section too, since it has fills like a frame', () => {
     // mock
     const section: TSectionNode = {
       childIds: [],
-      fill: '#abc',
+      fills: [{ color: '#abc', opacity: 100, type: 'solid' }],
       height: 40,
       id: 's1',
       name: 'Section',
@@ -61,6 +61,6 @@ describe('drawBoxLeafNodeNoise', () => {
     drawBoxLeafNodeNoise(context, section, 1, refs);
 
     // result
-    expect(drawBoxEffectsMock).not.toHaveBeenCalled();
+    expect(drawBoxEffectsMock).toHaveBeenCalledWith(context, section, 1, refs, EffectType.noise);
   });
 });

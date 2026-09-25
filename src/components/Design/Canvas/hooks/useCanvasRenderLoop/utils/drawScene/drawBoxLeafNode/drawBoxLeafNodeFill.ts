@@ -24,7 +24,7 @@ export const drawBoxLeafNodeFill = (
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
-  if ('fills' in node) {
+  if (Array.isArray(node.fills)) {
     drawBoxEffects(context, node, opacity, refs, EffectType.dropShadow);
     drawBoxPaints(
       context,

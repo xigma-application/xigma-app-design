@@ -19,7 +19,7 @@ import { getTextWidth } from 'utils/canvas/text/getTextWidth';
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: [],
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'section-1',
   name: 'Section 1',

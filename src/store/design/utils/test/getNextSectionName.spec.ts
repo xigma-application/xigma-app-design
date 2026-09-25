@@ -6,7 +6,19 @@ import { TSceneNode } from 'types/design/types';
 import { getNextSectionName } from '../getNextSectionName';
 
 const buildSection = (name: string): TSceneNode =>
-  ({ fill: '#fff', height: 10, id: name, name, parentId: null, rotation: 0, type: NodeType.section, width: 10, x: 0, y: 0 }) as TSceneNode;
+  ({
+    childIds: [],
+    fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
+    height: 10,
+    id: name,
+    name,
+    parentId: null,
+    rotation: 0,
+    type: NodeType.section,
+    width: 10,
+    x: 0,
+    y: 0,
+  }) as TSceneNode;
 
 const buildRect = (name: string): TSceneNode =>
   ({

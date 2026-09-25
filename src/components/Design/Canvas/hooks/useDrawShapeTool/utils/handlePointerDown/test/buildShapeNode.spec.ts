@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { buildShapeNode } from '../buildShapeNode';
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 
 const RECT = { height: 10, width: 10, x: 0, y: 0 };
 
@@ -16,12 +17,12 @@ describe('buildShapeNode', () => {
     expect(node).toHaveProperty('fills');
   });
 
-  it('should build a section with childIds but no clipContent, and a single fill string', () => {
+  it('should build a section with childIds but no clipContent, and the default section style in the drawn color', () => {
     // before
     const node = buildShapeNode(RECT, '#444444', 'Section', NodeType.section, 'parent-id');
 
     // result
-    expect(node).toMatchObject({ childIds: [], cornerRadius: 2, fill: '#444444', parentId: 'parent-id', type: NodeType.section });
+    expect(node).toMatchObject({ ...getDefaultSectionStyle('#444444'), childIds: [], parentId: 'parent-id', type: NodeType.section });
     expect(node).not.toHaveProperty('clipContent');
   });
 

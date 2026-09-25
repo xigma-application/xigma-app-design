@@ -18,7 +18,7 @@ const getNearestBoundaryAncestor = (node: TSceneNode, nodesById: Record<string, 
 
 const isLeafReachable = (node: TSceneNode, nodesById: Record<string, TSceneNode>): boolean => {
   const boundary = getNearestBoundaryAncestor(node, nodesById);
-  return !boundary || (boundary.type === NodeType.frame && isClickThroughFrame(boundary, nodesById));
+  return !boundary || isClickThroughFrame(boundary, nodesById);
 };
 
 export const getClickThroughLeafNodes = (renderOrderedNodes: TSceneNode[], nodesById: Record<string, TSceneNode>): TSceneNode[] =>
@@ -29,6 +29,7 @@ export const getClickThroughLeafNodes = (renderOrderedNodes: TSceneNode[], nodes
       case NodeType.boolean:
       case NodeType.group:
       case NodeType.mask:
+      case NodeType.section:
         return node.childIds.length === 0 && isLeafReachable(node, nodesById);
       default:
         return isLeafReachable(node, nodesById);

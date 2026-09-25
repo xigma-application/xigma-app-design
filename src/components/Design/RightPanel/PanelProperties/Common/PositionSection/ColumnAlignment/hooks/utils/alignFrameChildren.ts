@@ -6,7 +6,7 @@ import { AppDispatch } from 'store';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 
 // types
-import { TFrameNode, TNodeAlignment, TSceneNode } from 'types/design/types';
+import { TFrameNode, TNodeAlignment, TSceneNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { alignNodeToRect } from './alignNodeToRect';
@@ -18,7 +18,7 @@ import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 const alignChild = (
   dispatch: AppDispatch,
   nodes: Record<string, TSceneNode>,
-  frame: TFrameNode,
+  frame: TFrameNode | TSectionNode,
   child: TSceneNode,
   next: TNodeAlignment,
 ): void => {
@@ -32,7 +32,7 @@ const alignChild = (
 export const alignFrameChildren = (
   dispatch: AppDispatch,
   nodes: Record<string, TSceneNode>,
-  frame: TFrameNode | undefined,
+  frame: TFrameNode | TSectionNode | undefined,
   next: TNodeAlignment,
 ): void => {
   if (frame) {

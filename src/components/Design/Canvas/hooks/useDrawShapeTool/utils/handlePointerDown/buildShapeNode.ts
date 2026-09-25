@@ -1,12 +1,10 @@
-// others
-import { SECTION_CORNER_RADIUS } from 'constant/canvas';
-
 // types
 import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TNewSceneNode } from 'types/design/types';
 
 // utils
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 
 export const buildShapeNode = (
@@ -20,7 +18,7 @@ export const buildShapeNode = (
     case NodeType.frame:
       return { ...rect, childIds: [], clipContent: true, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
     case NodeType.section:
-      return { ...rect, childIds: [], cornerRadius: SECTION_CORNER_RADIUS, fill, name, parentId, rotation: 0, type };
+      return { ...rect, ...getDefaultSectionStyle(fill), childIds: [], name, parentId, rotation: 0, type };
     case NodeType.rectangle:
       return { ...rect, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
     default:

@@ -5,13 +5,10 @@ import { SECTION_CORNER_RADIUS } from 'constant/canvas';
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TSectionNode } from 'types/design/types';
 
-// utils
-import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
-
 export const convertFrameToSection = (node: TFrameNode): TSectionNode => ({
   childIds: node.childIds,
   cornerRadius: node.cornerRadius ?? SECTION_CORNER_RADIUS,
-  fill: getSolidPaintColor(node.fills) ?? '',
+  fills: node.fills,
   height: node.height,
   hidden: node.hidden,
   id: node.id,
@@ -19,6 +16,9 @@ export const convertFrameToSection = (node: TFrameNode): TSectionNode => ({
   name: node.name,
   parentId: node.parentId,
   rotation: node.rotation,
+  strokeAlign: node.strokeAlign,
+  strokeWidth: node.strokeWidth,
+  strokes: node.strokes,
   type: NodeType.section,
   width: node.width,
   x: node.x,

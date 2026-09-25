@@ -8,5 +8,5 @@ export const isClickThroughFrame = (node: TSceneNode, nodesById: Record<string, 
     return parent?.type !== NodeType.frame;
   }
 
-  return false;
+  return node.type === NodeType.section && node.childIds.length > 0;
 };

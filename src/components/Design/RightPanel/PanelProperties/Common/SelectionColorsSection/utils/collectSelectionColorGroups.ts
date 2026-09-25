@@ -1,7 +1,7 @@
 import { uniqBy } from 'lodash';
 
 // types
-import { TFrameNode, TGroupNode, TSceneNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TSelectionColorGroup, TSelectionColorOccurrence } from '../types';
 
 // utils
@@ -11,7 +11,7 @@ import { groupSelectionColorEntries } from './groupSelectionColorEntries';
 import { isAppearanceNode } from '../../AppearanceSection/types';
 
 export const collectSelectionColorGroups = (
-  nodes: (TFrameNode | TGroupNode)[],
+  nodes: (TFrameNode | TGroupNode | TSectionNode)[],
   nodesById: Record<string, TSceneNode>,
   pinnedOccurrences: TSelectionColorOccurrence[] | null = null,
 ): TSelectionColorGroup[] =>

@@ -4,6 +4,7 @@ import {
   selectAllGuideLines,
   selectAreLayoutGuidesVisible,
   selectAreRulersVisible,
+  selectBackgroundPaint,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -153,6 +154,7 @@ export const drawScene = (
   const selectionEnd = selectEditingSelectionEnd(state);
   const selectionChangedAt = selectEditingSelectionChangedAt(state);
   const vertexDotBufferCache = imageContext.vertexDotBufferCache;
+  const backgroundColor = selectBackgroundPaint(state).color;
   const ctx: TDrawSceneContext = {
     buffer,
     canvasHeight: clientHeight,
@@ -184,7 +186,7 @@ export const drawScene = (
   drawGridSectionHighlight(ctx, gridSectionHighlight, gridTrackSelection, refs, nodesById);
   drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById, gridTrackSelection);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
-  drawSectionNameLabels(ctx, filteredNodes, refs);
+  drawSectionNameLabels(ctx, filteredNodes, refs, backgroundColor);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVertexCountHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
   drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, refs);
@@ -195,7 +197,7 @@ export const drawScene = (
   drawFrame(ctx, refs);
   drawDraftSizeLabel(ctx, refs);
   drawDraftFrameNameLabel(ctx, refs, nodesById);
-  drawDraftSectionNameLabel(ctx, refs, nodesById);
+  drawDraftSectionNameLabel(ctx, refs, nodesById, backgroundColor);
   drawPenPreview(ctx, refs, nodesById, vectorEditingNodeIds[0] ?? null);
   drawPencilPreview(ctx, refs);
   drawEditingText(ctx, editingTextBox, editingTextContent, selectionStart, selectionEnd, selectionChangedAt, editingPathNode);

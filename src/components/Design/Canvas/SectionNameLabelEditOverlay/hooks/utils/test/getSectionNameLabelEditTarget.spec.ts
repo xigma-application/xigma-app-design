@@ -29,7 +29,7 @@ const addSection = (store: EnhancedStore<RootState>, overrides: { hidden?: boole
   store.dispatch(
     addNode({
       childIds: [],
-      fill: '#444444',
+      fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
       height: 100,
       hidden: overrides.hidden,
       name: 'Section',

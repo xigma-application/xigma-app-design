@@ -8,15 +8,17 @@ import { isSpacingContainerNode } from '../isSpacingContainerNode';
 const node = (overrides: object): TSceneNode => overrides as TSceneNode;
 
 describe('isSpacingContainerNode', () => {
-  it('should be true for a group or a free-form frame with children', () => {
+  it('should be true for a group, a section or a free-form frame with children', () => {
     // action / result
     expect(isSpacingContainerNode(node({ childIds: ['a'], type: NodeType.group }))).toBe(true);
+    expect(isSpacingContainerNode(node({ childIds: ['a'], type: NodeType.section }))).toBe(true);
     expect(isSpacingContainerNode(node({ childIds: ['a'], layoutMode: LayoutMode.freeForm, type: NodeType.frame }))).toBe(true);
   });
 
-  it('should be false for an empty group, an auto layout frame, another layer or nothing', () => {
+  it('should be false for an empty group or section, an auto layout frame, another layer or nothing', () => {
     // action / result
     expect(isSpacingContainerNode(node({ childIds: [], type: NodeType.group }))).toBe(false);
+    expect(isSpacingContainerNode(node({ childIds: [], type: NodeType.section }))).toBe(false);
     expect(isSpacingContainerNode(node({ childIds: ['a'], layoutMode: LayoutMode.horizontal, type: NodeType.frame }))).toBe(false);
     expect(isSpacingContainerNode(node({ type: NodeType.rectangle }))).toBe(false);
     expect(isSpacingContainerNode(undefined)).toBe(false);

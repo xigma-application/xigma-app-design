@@ -3,9 +3,6 @@ import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TDrawSceneContext } from '../../types';
 import { TRectangleNode, TSectionNode } from 'types/design/types';
 
-// others
-import { SECTION_STROKE, SECTION_STROKE_WIDTH_PX } from 'constant/canvas';
-
 // utils
 import { drawBoxLeafNodeStroke } from '../drawBoxLeafNodeStroke';
 
@@ -75,11 +72,11 @@ describe('drawBoxLeafNodeStroke', () => {
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
 
-  it('should outline a section with its default inside stroke at 10% of the node opacity', () => {
+  it('should leave a section outline to its strokes paints, drawing no legacy outline', () => {
     // mock
     const section: TSectionNode = {
       childIds: [],
-      fill: '#444444',
+      fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
       height: 100,
       id: 's1',
       name: 'Section',
@@ -95,19 +92,6 @@ describe('drawBoxLeafNodeStroke', () => {
     drawBoxLeafNodeStroke(context, section, 0.5);
 
     // result
-    expect(drawThickOutlineMock).toHaveBeenCalledWith(
-      context.gl,
-      context.program,
-      context.buffer,
-      section,
-      SECTION_STROKE,
-      SECTION_STROKE_WIDTH_PX,
-      200,
-      150,
-      viewport,
-      0,
-      StrokeAlign.inside,
-      0.05,
-    );
+    expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
 });

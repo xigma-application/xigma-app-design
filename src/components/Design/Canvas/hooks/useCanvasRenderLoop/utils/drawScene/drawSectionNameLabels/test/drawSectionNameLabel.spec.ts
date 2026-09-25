@@ -1,5 +1,5 @@
 // others
-import { SECTION_NAME_LABEL_FILL, VALUE_LABEL_TEXT_FILL } from 'constant/canvas';
+import { SECTION_NAME_LABEL_DARK_STYLE, SECTION_NAME_LABEL_LIGHT_STYLE } from 'utils/canvas/sectionNameLabel/constants';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -16,7 +16,7 @@ const translateGlyphVerticesMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
 const drawMsdfGlyphsMock = vi.fn();
 const drawRectMock = vi.fn();
-const drawSectionStrokeMock = vi.fn();
+const drawSectionNameLabelStrokeMock = vi.fn();
 
 vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
   buildGlyphQuads: (...args: unknown[]): unknown => buildGlyphQuadsMock(...args),
@@ -39,8 +39,8 @@ vi.mock('utils/canvas/text/drawMsdfGlyphs', () => ({
 vi.mock('utils/canvas/drawRect/drawRect', () => ({
   drawRect: (...args: unknown[]): void => drawRectMock(...args),
 }));
-vi.mock('../../drawBoxLeafNode/drawSectionStroke', () => ({
-  drawSectionStroke: (...args: unknown[]): void => drawSectionStrokeMock(...args),
+vi.mock('../drawSectionNameLabelStroke', () => ({
+  drawSectionNameLabelStroke: (...args: unknown[]): void => drawSectionNameLabelStrokeMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -49,11 +49,13 @@ const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 const imageContext = { cache: new Map(), msdfBuffer: {}, msdfProgram: {} } as unknown as TImageRenderContext;
 const BOUNDS = { maxX: 6, maxY: 9, minX: -6, minY: -9 };
+const DARK_PAGE = '#535353';
+const LIGHT_PAGE = '#F5F5F5';
 const BADGE = { height: 20, text: 'Section 1', width: 60, x: 10, y: -30 };
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: [],
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'section-1',
   name: 'Section 1',
@@ -75,18 +77,19 @@ describe('drawSectionNameLabel', () => {
     getMsdfAtlasTextureMock.mockClear().mockReturnValue({});
     drawMsdfGlyphsMock.mockClear();
     drawRectMock.mockClear();
+    drawSectionNameLabelStrokeMock.mockClear();
   });
 
-  it('should draw the badge as an unrotated rounded rect, in the section’s default fill', () => {
+  it('should draw the badge as an unrotated rounded rect, in the section’s solid fill', () => {
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
     expect(drawRectMock).toHaveBeenCalledWith(
       gl,
       program,
       buffer,
-      expect.objectContaining({ fill: SECTION_NAME_LABEL_FILL, height: 20, width: 60, x: 10, y: -30 }),
+      expect.objectContaining({ fill: '#444444', height: 20, width: 60, x: 10, y: -30 }),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -95,21 +98,45 @@ describe('drawSectionNameLabel', () => {
   });
 
   it('should outline the badge with the section stroke, following its rounded corners', () => {
+    // mock
+    const section = buildSection({ strokeWidth: 1, strokes: [{ color: '#FFFFFF', opacity: 10, type: 'solid' }] });
+
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, section, 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
-    expect(drawSectionStrokeMock).toHaveBeenCalledWith(
+    expect(drawSectionNameLabelStrokeMock).toHaveBeenCalledWith(
       expect.objectContaining({ buffer, canvasHeight: 150, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT }),
       expect.objectContaining({ cornerRadius: 5, height: 20, width: 60, x: 10, y: -30 }),
-      0,
-      1,
+      { fill: '#444444', stroke: '#FFFFFF', strokeOpacity: 0.1, textFill: '#ffffff' },
     );
+  });
+
+  it('should switch the badge to the light page style when the section fill is not solid and the page is light', () => {
+    // mock
+    const section = buildSection({ fills: [] });
+
+    // before
+    drawSectionNameLabel(gl, program, buffer, imageContext, section, 200, 150, IDENTITY_VIEWPORT, LIGHT_PAGE);
+
+    // result
+    expect(drawRectMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      expect.objectContaining({ fill: SECTION_NAME_LABEL_LIGHT_STYLE.fill }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      0,
+    );
+    expect(drawSectionNameLabelStrokeMock).toHaveBeenCalledWith(expect.anything(), expect.anything(), SECTION_NAME_LABEL_LIGHT_STYLE);
+    expect(drawMsdfGlyphsMock.mock.calls[0][6]).toBe(SECTION_NAME_LABEL_LIGHT_STYLE.textFill);
   });
 
   it('should draw the (possibly ellipsized) badge text in white, inset by the badge padding', () => {
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
     expect(buildGlyphQuadsMock).toHaveBeenCalledWith(expect.anything(), ['Section 1'], expect.any(Number), 0, 0);
@@ -120,7 +147,7 @@ describe('drawSectionNameLabel', () => {
       getMsdfAtlasTextureMock.mock.results[0].value,
       expect.anything(),
       translateGlyphVerticesMock.mock.results[0].value,
-      VALUE_LABEL_TEXT_FILL,
+      SECTION_NAME_LABEL_DARK_STYLE.textFill,
       expect.any(Number),
       200,
       150,
@@ -130,7 +157,7 @@ describe('drawSectionNameLabel', () => {
 
   it('should draw nothing when the name is empty', () => {
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection({ name: '' }), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection({ name: '' }), 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
     expect(getSectionNameLabelBadgeRectMock).not.toHaveBeenCalled();
@@ -142,7 +169,7 @@ describe('drawSectionNameLabel', () => {
     getSectionNameLabelBadgeRectMock.mockReturnValue(null);
 
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
     expect(drawRectMock).not.toHaveBeenCalled();
@@ -153,7 +180,7 @@ describe('drawSectionNameLabel', () => {
     getGlyphQuadBoundsMock.mockReturnValue(null);
 
     // before
-    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabel(gl, program, buffer, imageContext, buildSection(), 200, 150, IDENTITY_VIEWPORT, DARK_PAGE);
 
     // result
     expect(drawRectMock).toHaveBeenCalled();

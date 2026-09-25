@@ -1,6 +1,6 @@
 // types
 import { StrokeAlign } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -45,7 +45,7 @@ const subdivideRing = (outer: TPoint[], inner: TPoint[], targetSampleCount: numb
 };
 
 export const getQuarterTaperBoxStrokePolygons = (
-  node: TFrameNode | TRectangleNode,
+  node: TFrameNode | TRectangleNode | TSectionNode,
   width: number,
   strokeAlign: StrokeAlign | undefined,
   flipped: boolean,

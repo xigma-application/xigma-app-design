@@ -14,7 +14,7 @@ import { commitAlignmentConstraint } from './utils/commitAlignmentConstraint';
 import { getAlignableSelectionGroups } from './utils/getAlignableSelectionGroups';
 import { isAutoLayoutFrame } from 'utils/canvas/signals/isAutoLayoutFrame';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
-import { isFreeFormFrameWithChildren } from './utils/isFreeFormFrameWithChildren';
+import { isChildAlignmentContainer } from './utils/isChildAlignmentContainer';
 import { moveNodeToAlignment } from './utils/moveNodeToAlignment';
 import { setGridChildHorizontalAlign } from './utils/setGridChildHorizontalAlign';
 import { setGridChildVerticalAlign } from './utils/setGridChildVerticalAlign';
@@ -93,7 +93,7 @@ export const useColumnAlignment = (): TUseColumnAlignmentResult => {
     onSelectVertical,
     setHorizontal: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: value, vertical: alignment?.vertical }),
     setVertical: (value) => commitAlignmentConstraint(dispatch, node, { horizontal: alignment?.horizontal, vertical: value }),
-    showDistribute: isMultiSelection || isFreeFormFrameWithChildren(selectedNode),
+    showDistribute: isMultiSelection || isChildAlignmentContainer(selectedNode),
     vertical: alignment?.vertical,
   };
 };

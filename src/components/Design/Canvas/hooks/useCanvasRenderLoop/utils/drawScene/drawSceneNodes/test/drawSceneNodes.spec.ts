@@ -67,6 +67,9 @@ const createGlMock = (): WebGL2RenderingContext =>
     getParameter: vi.fn(() => null),
     getUniformLocation: vi.fn(() => ({})),
     scissor: vi.fn(),
+    stencilFunc: vi.fn(),
+    stencilMask: vi.fn(),
+    stencilOp: vi.fn(),
     texImage2D: vi.fn(),
     texParameteri: vi.fn(),
     uniform1f: vi.fn(),
@@ -1152,7 +1155,7 @@ describe('drawSceneNodes', () => {
       const sectionChild = buildNode({ id: 'section-child', parentId: 'section', type: NodeType.rectangle });
       const section: TSectionNode = {
         childIds: ['section-child'],
-        fill: '#222222',
+        fills: [{ color: '#222222', opacity: 100, type: 'solid' }],
         height: 40,
         id: 'section',
         name: 'Section 1',

@@ -1,9 +1,9 @@
 // types
 import { StrokeMode, StrokeProfile, StrokeSides } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TRingMode } from './types';
 
-export const getRingMode = (node: TFrameNode | TRectangleNode, dashPattern: number[] | null): TRingMode => {
+export const getRingMode = (node: TFrameNode | TRectangleNode | TSectionNode, dashPattern: number[] | null): TRingMode => {
   const hasWidth = Boolean(node.strokeWidth);
   const hasProfile =
     (node.strokeProfile ?? StrokeProfile.uniform) !== StrokeProfile.uniform && (node.strokeSides ?? StrokeSides.all) === StrokeSides.all;

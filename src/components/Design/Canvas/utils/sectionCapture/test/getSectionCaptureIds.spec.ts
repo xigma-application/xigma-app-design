@@ -26,7 +26,7 @@ const makeSection = (
 ): TSectionNode => ({
   ...box,
   childIds,
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   id,
   name: id,
   parentId,

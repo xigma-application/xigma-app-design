@@ -1,5 +1,5 @@
 // types
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // others
@@ -9,9 +9,9 @@ import { ROUNDED_RECT_CORNER_SEGMENTS } from 'constant/canvas';
 import { getRoundedRectPoints } from 'utils/canvas/shapes/getRoundedRectPoints';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-const polygonByNode = new WeakMap<TFrameNode | TRectangleNode, TPoint[]>();
+const polygonByNode = new WeakMap<TFrameNode | TRectangleNode | TSectionNode, TPoint[]>();
 
-export const getBoxFillPolygon = (node: TFrameNode | TRectangleNode): TPoint[] => {
+export const getBoxFillPolygon = (node: TFrameNode | TRectangleNode | TSectionNode): TPoint[] => {
   const cached = polygonByNode.get(node);
 
   if (!cached) {

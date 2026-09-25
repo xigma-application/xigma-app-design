@@ -1,6 +1,6 @@
 // types
 import { StrokeAlign, StrokeJoin } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 import { TStrokeSideWidths } from 'utils/design/stroke/types';
 
@@ -17,7 +17,13 @@ const POINTS_PER_CORNER = ROUNDED_RECT_CORNER_SEGMENTS + 1;
 const offsetRadius = (radius: number, firstDelta: number, secondDelta: number): number =>
   radius > 0 ? Math.max(0, radius + (firstDelta + secondDelta) / 2) : 0;
 
-const getOffsetRect = (node: TFrameNode | TRectangleNode, top: number, right: number, bottom: number, left: number): TRoundedRect => {
+const getOffsetRect = (
+  node: TFrameNode | TRectangleNode | TSectionNode,
+  top: number,
+  right: number,
+  bottom: number,
+  left: number,
+): TRoundedRect => {
   const uniform = node.cornerRadius ?? 0;
 
   return {
@@ -34,7 +40,7 @@ const getOffsetRect = (node: TFrameNode | TRectangleNode, top: number, right: nu
   };
 };
 
-const hasCornerRadius = (node: TFrameNode | TRectangleNode): boolean =>
+const hasCornerRadius = (node: TFrameNode | TRectangleNode | TSectionNode): boolean =>
   [node.cornerRadius, node.cornerRadiusBottomLeft, node.cornerRadiusBottomRight, node.cornerRadiusTopLeft, node.cornerRadiusTopRight].some(
     (radius) => (radius ?? 0) > 0,
   );
@@ -59,7 +65,7 @@ const bevelCorners = (points: TPoint[]): TPoint[] =>
   });
 
 export const getBoxStrokePolygons = (
-  node: TFrameNode | TRectangleNode,
+  node: TFrameNode | TRectangleNode | TSectionNode,
   widths: TStrokeSideWidths,
   strokeAlign: StrokeAlign | undefined,
   join: StrokeJoin = StrokeJoin.miter,

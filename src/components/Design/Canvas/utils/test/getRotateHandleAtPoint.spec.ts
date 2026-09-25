@@ -76,7 +76,11 @@ describe('getRotateHandleAtPoint', () => {
 
   it('should return null when the single selected node is a section — sections can’t be rotated', () => {
     // mock — same geometry/position as the frame ring test below, which does detect a hit
-    const section: TSceneNode = { ...omit(frame('section-1', 0, 0, 100, 100), 'fills'), fill: '#ff0000', type: NodeType.section };
+    const section: TSceneNode = {
+      ...omit(frame('section-1', 0, 0, 100, 100), 'fills'),
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      type: NodeType.section,
+    };
 
     // result
     expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [section], IDENTITY_VIEWPORT)).toBeNull();

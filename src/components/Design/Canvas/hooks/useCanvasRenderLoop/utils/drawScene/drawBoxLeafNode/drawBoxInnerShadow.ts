@@ -1,7 +1,7 @@
 // types
 import { BlendMode, EffectType } from 'types/design/enums';
 import { TDrawSceneContext } from '../types';
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { drawEffectTextureBlended } from './drawEffectTextureBlended';
@@ -13,7 +13,7 @@ import { renderInnerShadowTexture } from './renderInnerShadowTexture';
 
 export const drawBoxInnerShadow = (
   context: TDrawSceneContext,
-  node: TFrameNode | TRectangleNode,
+  node: TFrameNode | TRectangleNode | TSectionNode,
   effect: TEffect,
   opacity: number,
   blendMode?: BlendMode,

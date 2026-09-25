@@ -11,7 +11,7 @@ vi.mock('../../renderIds', () => ({ renderIds: vi.fn() }));
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: ['child-a', 'child-b'],
-  fill: '#222',
+  fills: [{ color: '#222', opacity: 100, type: 'solid' }],
   height: 40,
   id: 'section-1',
   name: 'Section 1',

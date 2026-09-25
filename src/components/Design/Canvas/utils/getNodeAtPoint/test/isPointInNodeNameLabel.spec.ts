@@ -25,7 +25,7 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: [],
-  fill: '#444444',
+  fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
   height: 50,
   id: 'section-a',
   name: 'Section 1',

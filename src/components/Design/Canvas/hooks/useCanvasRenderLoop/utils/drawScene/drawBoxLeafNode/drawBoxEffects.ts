@@ -1,7 +1,7 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { getBoxEffectDrawer, TDrawableBoxEffectType } from './getBoxEffectDrawer';
@@ -9,7 +9,7 @@ import { getEffectBlendModePreview } from 'utils/canvas/blendMode/getEffectBlend
 
 export const drawBoxEffects = (
   context: TDrawSceneContext,
-  node: TFrameNode | TRectangleNode,
+  node: TFrameNode | TRectangleNode | TSectionNode,
   opacity: number,
   refs: TCanvasRefs,
   effectType: TDrawableBoxEffectType,

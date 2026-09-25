@@ -54,4 +54,19 @@ describe('isClickThroughFrame', () => {
 
     expect(isClickThroughFrame(nested, { [nested.id]: nested, [outer.id]: outer })).toBe(false);
   });
+
+  it('should return true for a section with children, at the root or inside another section', () => {
+    const outer = { childIds: ['inner'], id: 'outer', parentId: null, type: NodeType.section } as unknown as TSceneNode;
+    const inner = { childIds: ['child-1'], id: 'inner', parentId: 'outer', type: NodeType.section } as unknown as TSceneNode;
+    const nodesById = { [inner.id]: inner, [outer.id]: outer };
+
+    expect(isClickThroughFrame(outer, nodesById)).toBe(true);
+    expect(isClickThroughFrame(inner, nodesById)).toBe(true);
+  });
+
+  it('should return false for an empty section', () => {
+    const section = { childIds: [], id: 'section-1', parentId: null, type: NodeType.section } as unknown as TSceneNode;
+
+    expect(isClickThroughFrame(section, { [section.id]: section })).toBe(false);
+  });
 });

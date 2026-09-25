@@ -426,31 +426,31 @@ of real-browser pointer-timing behavior a synthetic `PointerEvent` in the unit s
 sequential drag gestures, Ctrl/mouse-move interplay, and Layers-panel drag-and-drop reparenting all
 have to actually work together in a live render loop, not just in isolated function calls.
 
-## Section nesting — always opaque, Ctrl reach, drop restrictions
+## Section nesting — click-through like a frame, label selection, drop restrictions
 
-A Section is a real container (`childIds`), but unlike a Frame it is **never** click-through: a plain
-click or hover anywhere on a section's body — including directly over its own content — always
-resolves to the section itself, exactly like a Group or an already-nested Frame; only Ctrl (or an
-already-entered descendant) reaches the actual content. A Frame nested directly inside a Section
-keeps its own click-through status (its parent isn't a frame), so a plain click reaches content
-inside that frame directly. A Section can never be nested into any container — frame, group, or
-another section. Dragging a shape onto a section on the canvas reparents it, exactly like dropping
-onto a frame. All of this lives in `e2e/design/selection/section-nested.spec.ts`.
+A Section is a real container (`childIds`). A section with children is click-through, exactly like a
+top-level Frame with children: a plain click or hover on its content reaches that content directly, a
+plain click on its empty body selects nothing, and only its name label selects the section itself. An
+empty section is selected from its body. A Frame nested directly inside a Section keeps its own
+click-through status (its parent isn't a frame), so a plain click reaches content inside that frame
+directly. A Section can only sit on the page or inside another section — never in a frame or group.
+Dragging a shape onto a section on the canvas reparents it, exactly like dropping onto a frame. All
+of this lives in `e2e/design/selection/section-nested.spec.ts`.
 
-| #   | Scenario                                                                                                          | Unit |             E2E             |
-| --- | ----------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
-| 351 | A plain click on a section's own empty body selects the section                                                   |  ✅  | ✅ `section-nested.spec.ts` |
-| 352 | A plain click directly on non-frame content inside a section selects the section, not the content (always opaque) |  ✅  | ✅ `section-nested.spec.ts` |
-| 353 | Ctrl+click on that same content reaches it directly                                                               |  ✅  | ✅ `section-nested.spec.ts` |
-| 354 | Hovering a section's body and hovering its content without Control resolve to the identical highlighted node      |  ✅  | ✅ `section-nested.spec.ts` |
-| 355 | Holding Control while hovering that content highlights the content itself instead                                 |  ✅  | ✅ `section-nested.spec.ts` |
-| 356 | A plain click on content inside a frame that is itself nested in a section reaches that content directly          |  ✅  | ✅ `section-nested.spec.ts` |
-| 357 | A section cannot be dropped into a frame via the Layers panel — nothing changes                                   |  ✅  | ✅ `section-nested.spec.ts` |
-| 358 | A section cannot be dropped into another section via the Layers panel — nothing changes                           |  ✅  | ✅ `section-nested.spec.ts` |
-| 359 | Dragging a shape onto a section on the canvas reparents it into the section, same as a frame                      |  ✅  | ✅ `section-nested.spec.ts` |
+| #   | Scenario                                                                                                   | Unit |             E2E             |
+| --- | ---------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 351 | A plain click on the empty body of a section with children selects nothing                                |  ✅  | ✅ `section-nested.spec.ts` |
+| 352 | A plain click directly on content inside a section selects the content (click-through like a frame)        |  ✅  | ✅ `section-nested.spec.ts` |
+| 353 | A plain click on a section's name label selects the section                                                |  ✅  | ✅ `section-nested.spec.ts` |
+| 354 | Hovering a section's content highlights that content                                                       |  ✅  | ✅ `section-nested.spec.ts` |
+| 355 | Holding Control while hovering that content highlights the same content                                    |  ✅  | ✅ `section-nested.spec.ts` |
+| 356 | A plain click on content inside a frame that is itself nested in a section reaches that content directly   |  ✅  | ✅ `section-nested.spec.ts` |
+| 357 | A section cannot be dropped into a frame via the Layers panel — nothing changes                            |  ✅  | ✅ `section-nested.spec.ts` |
+| 358 | A section dropped onto another section via the Layers panel nests inside it                                |  ✅  | ✅ `section-nested.spec.ts` |
+| 359 | Dragging a shape onto a section on the canvas reparents it into the section, same as a frame               |  ✅  | ✅ `section-nested.spec.ts` |
 
 Every scenario here earns e2e coverage for the same reason the frame-nesting block above does: the
-section-opacity rule, the Ctrl-reach bypass, the Layers-panel drag rejection, and the canvas
+section click-through rule, the label selection, the Layers-panel drag rejection, and the canvas
 drag-drop reparenting all have real pointer/timing/live-render stakes that a synthetic unit-level
 `PointerEvent` cannot faithfully reproduce.
 

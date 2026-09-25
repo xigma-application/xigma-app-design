@@ -1,6 +1,6 @@
 // types
 import { StrokeBrushDirection } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // others
 import {
@@ -23,7 +23,7 @@ export type TStrokeBrushValues = {
 };
 
 export type TStrokeBrushSource = Pick<
-  TFrameNode | TRectangleNode,
+  TFrameNode | TRectangleNode | TSectionNode,
   | 'strokeBrush'
   | 'strokeBrushAngularJitter'
   | 'strokeBrushDirection'

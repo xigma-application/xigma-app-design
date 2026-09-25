@@ -843,7 +843,7 @@ describe('resolvePlainNodeHover', () => {
 
   const section: TSectionNode = {
     childIds: ['section-frame'],
-    fill: '#444444',
+    fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
     height: 300,
     id: 'section-1',
     name: 'Section',
@@ -865,11 +865,10 @@ describe('resolvePlainNodeHover', () => {
     ).toEqual({ className: null, cursor: '', nodeId: 'section-frame' });
   });
 
-  it('should highlight the section itself, not its plain rectangle child, when hovering that child without Ctrl', () => {
-    // unlike a frame, a section is always opaque — a click there matches this hover
+  it('should highlight the plain rectangle child of a section with children without Ctrl, since the section is click-through like a frame', () => {
     expect(
       resolvePlainNodeHover(createContext({ leafNodes: [sectionRect], nodesById: sectionNodesById, point: { x: 210, y: 30 } })),
-    ).toEqual({ className: null, cursor: '', nodeId: 'section-1' });
+    ).toEqual({ className: null, cursor: '', nodeId: 'section-rect' });
   });
 
   it('should bypass the section and hit-test its rectangle child directly when Ctrl is held', () => {

@@ -50,7 +50,9 @@ const buildSectionWithRect = async (designPage: DesignPage, page: Page): Promise
   await sectionRow.locator('[class*="TreeItem__toggle-button"]').click(); // reveal the nested rectangle's row
 };
 
-test('a plain click always selects the section itself, even over its own content — a section is never click-through', async ({ page }) => {
+test('a section with children is click-through like a top-level frame: its content takes a plain click, its empty body selects nothing and its label selects it', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-section-nested-plain-click');
@@ -61,23 +63,22 @@ test('a plain click always selects the section itself, even over its own content
   const sectionRow = rows.filter({ hasText: 'Section (1)' });
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
-  // clicking the section's own empty body selects the section
-  await designPage.click(650, 700);
-  await expect(sectionRow.locator('[aria-selected="true"]')).toHaveCount(1);
-
-  // a plain click directly on the rectangle still resolves to the section, not the rectangle —
-  // unlike a top-level frame, a section is always opaque
+  // a plain click on the rectangle reaches it directly, no Control needed
   await designPage.click(775, 275);
-  await expect(sectionRow.locator('[aria-selected="true"]')).toHaveCount(1);
-  await expect(rectRow.locator('[aria-selected="true"]')).toHaveCount(0);
-
-  // Ctrl+click on that same point reaches the rectangle directly
-  await designPage.click(775, 275, { ctrl: true });
   await expect(rectRow.locator('[aria-selected="true"]')).toHaveCount(1);
   await expect(sectionRow.locator('[aria-selected="true"]')).toHaveCount(0);
+
+  // a plain click on the section's empty body selects nothing
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+  await designPage.click(650, 700);
+  await expect(rows.locator('[aria-selected="true"]')).toHaveCount(0);
+
+  // the section's name label, just above its top-left corner, selects the section
+  await designPage.click(615, 80);
+  await expect(sectionRow.locator('[aria-selected="true"]')).toHaveCount(1);
 });
 
-test('hover matches click over a section’s content, and Control reaches the same content it would select', async ({ page }) => {
+test('hovering a section’s content highlights that content, the same with or without Control', async ({ page }) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-section-nested-hover');
@@ -86,24 +87,16 @@ test('hover matches click over a section’s content, and Control reaches the sa
 
   const safeArea = await designPage.canvasSafeArea();
 
-  // hovering the section's own empty body, and hovering the rectangle inside it without Control,
-  // both resolve to the same node (the section) — the highlight must look identical either way
-  await page.mouse.move(650, 700);
-  const hoverSectionBody = await page.screenshot({ clip: safeArea });
-
   await page.mouse.move(775, 275);
   const hoverRectNoCtrl = await page.screenshot({ clip: safeArea });
 
-  expect(hoverRectNoCtrl.equals(hoverSectionBody)).toBe(true);
-
-  // holding Control over the rectangle instead highlights the rectangle itself — a different result
   await page.keyboard.down('Control');
   await page.mouse.move(776, 276); // force a fresh move event
   await page.mouse.move(775, 275);
   const hoverRectCtrl = await page.screenshot({ clip: safeArea });
   await page.keyboard.up('Control');
 
-  expect(hoverRectCtrl.equals(hoverRectNoCtrl)).toBe(false);
+  expect(hoverRectCtrl.equals(hoverRectNoCtrl)).toBe(true);
 });
 
 test('a frame nested directly inside a section stays click-through, just like a top-level frame', async ({ page }) => {

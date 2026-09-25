@@ -60,7 +60,7 @@ const rect = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
 
 const section = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
   childIds: [],
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 's1',
   name: 'Section',
@@ -352,7 +352,7 @@ describe('drawBoxLeafNode', () => {
     );
   });
 
-  it('should draw a section fill via the plain-color drawRect path, since sections still use a single hex fill', () => {
+  it('should draw a section fill through the shared paint path, like a frame', () => {
     // mock
     const node = section();
 
@@ -360,8 +360,8 @@ describe('drawBoxLeafNode', () => {
     drawBoxLeafNode(context, node, 0.5, nodesById, pathOutlineStyles, refs, editingPathId);
 
     // result
-    expect(drawRectMock).toHaveBeenCalledWith(gl, program, buffer, { ...node, fillAlpha: 0.5 }, 200, 150, IDENTITY_VIEWPORT, 0);
-    expect(drawVectorFillGroupMock).not.toHaveBeenCalled();
+    expect(drawVectorFillGroupMock).toHaveBeenCalled();
+    expect(drawRectMock).not.toHaveBeenCalled();
   });
 
   it('should draw the stroke outline, forwarding the stroke alignment, when both strokeColor and strokeWidth are set', () => {

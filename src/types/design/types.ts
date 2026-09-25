@@ -319,10 +319,8 @@ export type TRectangleNode = TBaseNode & {
   type: NodeType.rectangle;
 };
 
-export type TSectionNode = TBaseNode & {
+export type TSectionNode = Omit<TRectangleNode, 'type'> & {
   childIds: string[];
-  cornerRadius?: number;
-  fill: string;
   type: NodeType.section;
 };
 

@@ -83,6 +83,20 @@ describe('PositionSection behaviors', () => {
     expect(screen.getByText('Rotation')).toBeInTheDocument();
   });
 
+  it('should leave out the rotation row when rotation is turned off', () => {
+    // before
+    render(
+      <Provider store={store}>
+        <TooltipProvider>
+          <PositionSection withRotation={false} />
+        </TooltipProvider>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.queryByText('Rotation')).not.toBeInTheDocument();
+  });
+
   it('should not show the ignore-auto-layout toggle when nothing is selected', () => {
     // before
     renderPositionSection();

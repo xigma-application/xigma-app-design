@@ -39,7 +39,7 @@ const frame = (id: string, x: number, y: number, width: number, height: number, 
 const section = (id: string, x: number, y: number, width: number, height: number): TSceneNode =>
   ({
     childIds: [],
-    fill: '#444',
+    fills: [{ color: '#444', opacity: 100, type: 'solid' }],
     height,
     id,
     name: 'Section',

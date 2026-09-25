@@ -1,6 +1,4 @@
 // others
-import { SECTION_CORNER_RADIUS } from 'constant/canvas';
-import { SECTION_FILL } from 'components/Design/Canvas/constants';
 import { WRAP_IN_SECTION_PADDING } from '../../constants';
 
 // types
@@ -11,6 +9,7 @@ import { TDesignState } from '../../types';
 import { canWrapInSection } from './canWrapInSection';
 import { finalizeGroupPlacement } from '../handleGroupNodes/finalizeGroupPlacement';
 import { getActivePage } from '../getActivePage';
+import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 import { getNextSectionName } from '../getNextSectionName';
 import { getNodesBoundingBox } from '../getNodesBoundingBox';
 import { isContainerNode } from '../nodeHierarchy/isContainerNode';
@@ -27,9 +26,8 @@ export const handleWrapInSection = (state: TDesignState, sectionId: string): voi
     const bounds = getNodesBoundingBox(memberIds.map((id) => page.nodes[id]));
 
     page.nodes[sectionId] = {
+      ...getDefaultSectionStyle(),
       childIds: memberIds,
-      cornerRadius: SECTION_CORNER_RADIUS,
-      fill: SECTION_FILL,
       height: bounds.height + WRAP_IN_SECTION_PADDING * 2,
       id: sectionId,
       name: getNextSectionName(page.nodes),

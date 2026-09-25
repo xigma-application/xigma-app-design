@@ -1,6 +1,6 @@
 // types
 import { TDrawSceneContext } from '../types';
-import { TEffect, TFrameNode, TRectangleNode } from 'types/design/types';
+import { TEffect, TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { drawNoiseMask } from './drawNoiseMask';
@@ -9,7 +9,12 @@ import { getBoxFillPolygon } from '../getBoxFillPolygon';
 import { getNoiseShapePoints } from './getNoiseShapePoints';
 import { hasNoiseStroke } from './hasNoiseStroke';
 
-export const drawNoiseShape = (context: TDrawSceneContext, node: TFrameNode | TRectangleNode, effect: TEffect, opacity: number): void => {
+export const drawNoiseShape = (
+  context: TDrawSceneContext,
+  node: TFrameNode | TRectangleNode | TSectionNode,
+  effect: TEffect,
+  opacity: number,
+): void => {
   const mask = hasNoiseStroke(node) ? drawNoiseMask(context, node) : null;
 
   drawNoisePolygon(
