@@ -27,3 +27,15 @@ export const makeSquareVector = (overrides: Partial<TVectorNode> = {}): TVectorN
   vertexHandleModes: {},
   ...overrides,
 });
+
+export const makeNetworkVector = (
+  points: Record<string, { x: number; y: number }>,
+  edges: [string, string][],
+  overrides: Partial<TVectorNode> = {},
+): TVectorNode => ({
+  ...makeSquareVector(overrides),
+  segments: Object.fromEntries(
+    edges.map(([startId, endId], index) => [`s${index}`, { endId, id: `s${index}`, startId, tangentEnd: null, tangentStart: null }]),
+  ),
+  vertices: Object.fromEntries(Object.entries(points).map(([id, point]) => [id, { id, ...point }])),
+});

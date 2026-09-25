@@ -82,7 +82,7 @@ describe('drawPdfVectorStroke', () => {
     // mock
     const polygons = [[{ x: 0, y: 0 }]];
 
-    getVectorStrokeShapeMock.mockReturnValueOnce({ fillRule: 'evenOdd', polygons });
+    getVectorStrokeShapeMock.mockReturnValueOnce([{ fillRule: 'evenOdd', polygons }]);
 
     // action
     drawPdfVectorStroke(page, node(), 1, bounds, states);

@@ -355,7 +355,7 @@ describe('drawVectorNode', () => {
       vertices: {},
     };
 
-    getVectorStrokeShapeMock.mockReturnValueOnce({ fillRule: 'evenOdd', polygons });
+    getVectorStrokeShapeMock.mockReturnValueOnce([{ fillRule: 'evenOdd', polygons }]);
 
     // before
     drawVectorNode(buildContext(gl, program, buffer, faceBufferCache, strokeBufferCache), node);

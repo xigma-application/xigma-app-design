@@ -74,11 +74,15 @@ describe('drawSvgVectorStroke', () => {
     expect(drawSvgPolygonsMock).not.toHaveBeenCalled();
   });
 
-  it('should draw a stroke mode shape even-odd instead of the plain stroke', () => {
+  it('should draw every stroke mode shape with its own fill rule instead of the plain stroke', () => {
     // mock
     const polygons = [[{ x: 0, y: 0 }]];
+    const dashes = [[{ x: 1, y: 1 }]];
 
-    getVectorStrokeShapeMock.mockReturnValueOnce({ fillRule: 'evenOdd', polygons });
+    getVectorStrokeShapeMock.mockReturnValueOnce([
+      { fillRule: 'evenOdd', polygons },
+      { fillRule: 'nonZero', polygons: dashes },
+    ]);
 
     // action
     drawSvgVectorStroke([], node(), 1, bounds);
@@ -86,5 +90,6 @@ describe('drawSvgVectorStroke', () => {
     // result
     expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
     expect(drawSvgPolygonsMock).toHaveBeenCalledWith([], polygons, '#000000', 1, bounds, 'evenodd');
+    expect(drawSvgPolygonsMock).toHaveBeenCalledWith([], dashes, '#000000', 1, bounds, 'nonzero');
   });
 });

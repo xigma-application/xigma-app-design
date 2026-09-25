@@ -18,10 +18,12 @@ export const drawPdfVectorStroke = (
   graphicsStates: Map<number, PDFName>,
 ): void => {
   if (renderedNode.strokeWidth > 0 && renderedNode.strokeColor) {
-    const shape = getVectorStrokeShape(renderedNode);
+    const shapes = getVectorStrokeShape(renderedNode);
 
-    if (shape) {
-      drawPdfPolygons(page, shape.polygons, renderedNode.strokeColor, opacity, bounds, graphicsStates, shape.fillRule);
+    if (shapes) {
+      shapes.forEach(({ fillRule, polygons }) => {
+        drawPdfPolygons(page, polygons, renderedNode.strokeColor, opacity, bounds, graphicsStates, fillRule);
+      });
     } else {
       const triangles = getStrokeTrianglePolygons(getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2));
       drawPdfPolygons(page, triangles, renderedNode.strokeColor, opacity, bounds, graphicsStates, 'nonZero');

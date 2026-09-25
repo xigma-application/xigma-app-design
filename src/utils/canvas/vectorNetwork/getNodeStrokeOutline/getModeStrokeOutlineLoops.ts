@@ -29,8 +29,8 @@ export const getModeStrokeOutlineLoops = (node: TStrokeableNode): TPoint[][] | n
       return null;
     }
     case NodeType.vector: {
-      const shape = getVectorStrokeShape(node);
-      return shape ? getNestingOrientedLoops(shape.polygons) : null;
+      const shapes = getVectorStrokeShape(node);
+      return shapes ? getNestingOrientedLoops(shapes.flatMap(({ polygons }) => polygons)) : null;
     }
     default:
       return null;

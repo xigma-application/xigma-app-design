@@ -1,21 +1,35 @@
 // types
-import { StrokeMode } from 'types/design/enums';
+import { StrokeMode, StrokeStyle } from 'types/design/enums';
 
 // utils
-import { getVectorStrokeShape } from '../getVectorStrokeShape';
 import { getVectorStrokeShapeFaces } from '../getVectorStrokeShapeFaces';
-import { makeSquareVector } from './fixtures';
+import { makeNetworkVector, makeSquareVector } from './fixtures';
+
+const paint = [{ color: '#ff0000', opacity: 100, type: 'solid' }];
 
 describe('getVectorStrokeShapeFaces', () => {
-  it('should paint the stroke shape in the stroke color', () => {
-    // mock
-    const node = makeSquareVector({ strokeMode: StrokeMode.dynamic });
-
+  it('should paint an even-odd shape as one face in the stroke color', () => {
     // before
-    const faces = getVectorStrokeShapeFaces(node);
+    const faces = getVectorStrokeShapeFaces(makeSquareVector({ strokeMode: StrokeMode.dynamic }));
 
     // result
-    expect(faces).toEqual([{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: getVectorStrokeShape(node)?.polygons }]);
+    expect(faces).toHaveLength(1);
+    expect(faces[0].paint).toEqual(paint);
+  });
+
+  it('should paint every polygon of a nonzero shape as its own face so overlapping dashes do not cancel out', () => {
+    // before
+    const faces = getVectorStrokeShapeFaces(
+      makeNetworkVector({ a: { x: 0, y: 0 }, b: { x: 100, y: 0 } }, [['a', 'b']], {
+        strokeDash: 10,
+        strokeGap: 10,
+        strokeStyle: StrokeStyle.dashed,
+      }),
+    );
+
+    // result
+    expect(faces).toHaveLength(5);
+    expect(faces.every((face) => face.points.length === 1)).toBe(true);
   });
 
   it('should return no faces for a plain stroke', () => {

@@ -10,10 +10,12 @@ import { getVectorNodeThickStrokeVertices } from 'utils/canvas/vectorNetwork/get
 
 export const drawSvgVectorStroke = (elements: string[], renderedNode: TVectorNode, opacity: number, bounds: TDraftRect): void => {
   if (renderedNode.strokeWidth > 0 && renderedNode.strokeColor) {
-    const shape = getVectorStrokeShape(renderedNode);
+    const shapes = getVectorStrokeShape(renderedNode);
 
-    if (shape) {
-      drawSvgPolygons(elements, shape.polygons, renderedNode.strokeColor, opacity, bounds, 'evenodd');
+    if (shapes) {
+      shapes.forEach(({ fillRule, polygons }) => {
+        drawSvgPolygons(elements, polygons, renderedNode.strokeColor, opacity, bounds, fillRule === 'nonZero' ? 'nonzero' : 'evenodd');
+      });
     } else {
       const triangles = getStrokeTrianglePolygons(getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2));
       drawSvgPolygons(elements, triangles, renderedNode.strokeColor, opacity, bounds, 'nonzero');

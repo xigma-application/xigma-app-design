@@ -458,10 +458,14 @@ Two independent render passes, both need updating for a visual change to show up
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
   Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via
   `getLineVectorStrokeSettings`; there is no vector UI for them yet). `utils/canvas/vector/stroke/getVectorStrokeShape`
-  draws a single closed path (`getSimpleVectorChain`) in its mode — brush, dynamic, dashed or a width
-  profile ring, filled even-odd — for the canvas, drag/resize/rotate snapshots (as a stroke-colored face),
-  SVG/PDF export and Outline stroke / booleans. Open or branching paths and Basic strokes keep the regular
-  vector stroke.
+  splits the network into paths between ends and junctions (`getVectorStrokePaths`; a junction-free loop
+  stays closed) and returns one `{ fillRule, polygons }` per path so overlapping paths never cancel out:
+  a closed path is a ring through the box brush / dynamic / dash functions or a profile ring (even-odd);
+  an open path runs along an open `TStrokeRing` built on its polyline (`buildOpenPolylineStrokeRing`,
+  mitred sides, `getStrokeRingPoint` carries on straight past the ends) with the line-style dynamic, dash
+  and profile ports (nonzero) or the brush (even-odd). Used by the canvas, drag/resize/rotate snapshots
+  (stroke-colored faces, one per nonzero polygon), SVG/PDF export and Outline stroke / booleans. Basic
+  strokes keep the regular vector stroke.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

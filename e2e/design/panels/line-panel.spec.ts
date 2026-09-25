@@ -316,6 +316,38 @@ test('Offset vector keeps a dynamic line stroke on the vector and draws it dynam
   await expect.poll(async () => (await page.screenshot({ clip: topEdge })).equals(dynamic)).toBe(false);
 });
 
+test('an offset vector keeps its brush stroke after a line is drawn onto it', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector-brush-edit');
+  await updateLastNode(page, { strokeMode: 'brush', strokeWidth: 10 });
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+  await page.getByLabel('Confirm').click();
+  await expect(page.getByText('Offset', { exact: true })).toHaveCount(0);
+  await new DesignPage(page).click(1500, 900);
+
+  const vector = await readLine(page);
+  const vertices = vector.vertices as Record<string, { id: string; x: number; y: number }>;
+  const [firstVertex] = Object.values(vertices);
+
+  await updateLastNode(page, {
+    segments: {
+      ...(vector.segments as Record<string, unknown>),
+      extra: { endId: 'extra', id: 'extra', startId: firstVertex.id, tangentEnd: null, tangentStart: null },
+    },
+    vertices: { ...vertices, extra: { id: 'extra', x: firstVertex.x - 100, y: firstVertex.y - 100 } },
+  });
+
+  expect(await readLine(page)).toMatchObject({ strokeMode: 'brush' });
+
+  const topEdge = { height: 30, width: 200, x: 800, y: 365 };
+  const brush = await page.screenshot({ clip: topEdge });
+
+  await updateLastNode(page, { strokeMode: 'basic' });
+
+  await expect.poll(async () => (await page.screenshot({ clip: topEdge })).equals(brush)).toBe(false);
+});
+
 test('Escape leaves Offset vector without adding anything', async ({ page }) => {
   await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector-escape');
 

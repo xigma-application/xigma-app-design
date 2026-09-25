@@ -19,28 +19,30 @@ export const drawVectorNode = (context: TDrawSceneContext, node: TVectorNode): v
   const { faceBufferCache, strokeBufferCache } = imageContext;
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
-  const strokeShape = getVectorStrokeShape(renderedNode);
+  const strokeShapes = getVectorStrokeShape(renderedNode);
 
   groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
     drawVectorFillGroup(context, faceBufferCache, nodeBounds, polygons, paint);
   });
 
-  if (strokeShape) {
-    drawVectorFill(
-      gl,
-      program,
-      buffer,
-      null,
-      null,
-      strokeShape.polygons,
-      renderedNode.strokeColor,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      imageContext.isAlphaWriteEnabled,
-      1,
-      strokeShape.fillRule,
-    );
+  if (strokeShapes) {
+    strokeShapes.forEach(({ fillRule, polygons }) => {
+      drawVectorFill(
+        gl,
+        program,
+        buffer,
+        null,
+        null,
+        polygons,
+        renderedNode.strokeColor,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        imageContext.isAlphaWriteEnabled,
+        1,
+        fillRule,
+      );
+    });
   } else if (renderedNode.widthProfile) {
     drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
   } else {
