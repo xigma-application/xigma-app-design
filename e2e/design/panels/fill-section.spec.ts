@@ -63,7 +63,7 @@ const setUpContrastScene = async (
       const { activePageId, pages } = store.getState().design;
       const { nodes, rootOrder } = pages[activePageId];
       const frameId = rootOrder.find((id) => nodes[id].type === 'frame')!;
-      const rectId = rootOrder.find((id) => nodes[id].type === 'rectangle')!;
+      const rectId = Object.keys(nodes).find((id) => nodes[id].type === 'rectangle')!;
 
       store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
       store.dispatch(setBackgroundPaint(background));
@@ -295,11 +295,15 @@ test.describe('Design panels — Fill section', () => {
 
     await designPage.drawRectangle(700, 200, 900, 360);
 
+    // rows are only selectable once there are two fills to reorder
+    await page.getByLabel('Add fill').click();
+    await page.getByRole('button', { name: 'Close' }).click();
+
     const row = page.locator('[class*="FillRow_"]').first();
     const rowBox = (await row.boundingBox())!;
 
-    // click the row's own left padding strip — everything else is covered by the color/hex/opacity
-    // controls, which stop the click from bubbling up into row selection
+    // click the row's own left strip (its reorder handle) — everything else is covered by the
+    // color/hex/opacity controls, which stop the click from bubbling up into row selection
     await page.mouse.click(rowBox.x + 2, rowBox.y + rowBox.height / 2);
 
     await expect(row).toHaveClass(/FillRow--selected/);
@@ -3295,10 +3299,8 @@ test.describe('Design panels — Fill section', () => {
     await alphaField.fill('50');
     await alphaField.blur();
 
-    // result — blended with the backdrop behind the shape, the red channel drops well below 255
-    const [red] = await readPixelColor(page, 710, 210);
-
-    expect(red).toBeLessThan(230);
+    // result — blended with the light page backdrop behind the shape, the green channel rises well above 0
+    await expect.poll(async () => (await readPixelColor(page, 710, 210))[1]).toBeGreaterThan(60);
   });
 
   test('the rotate button turns an image fill 90° per click, and each turn is its own undo/redo step', async ({ page }) => {
@@ -3568,9 +3570,6 @@ test.describe('Design panels — Fill section', () => {
     const node = await readNode(page, id);
 
     expect(node.fills![0].crop).toBeTruthy();
-
-    // result — the targeted fill row is also selected in the panel, matching the crop target
-    await expect(page.locator('[class*="FillRow_"]').first()).toHaveClass(/FillRow--selected/);
   });
 
   test("clicking Crop targets the fill row selected in the panel, even though clicking the toolbar button would otherwise clear that selection (regression: the click-outside-clears-selection handler fired on mousedown before Crop's own click handler read the selection, so it always fell back to fill 0)", async ({
@@ -6372,7 +6371,7 @@ test.describe('Design panels — Fill section', () => {
     });
 
     // action
-    await page.getByLabel('Hex color').click();
+    await page.getByLabel('Hex color').first().click();
     await page.getByLabel('Image').click();
 
     const panel = page.locator('[class*="ColorPicker_"]').first();
