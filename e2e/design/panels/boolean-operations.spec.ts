@@ -468,3 +468,50 @@ test('a Union with a gradient stroke draws that stroke around its shape', async 
 
   expect(withStroke.equals(withoutStroke)).toBe(false);
 });
+
+test('flattening a Union with a gradient stroke keeps a stroke in the gradient first color', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-flatten-gradient-stroke');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+
+    const union = Object.values(store.getState().design.pages[activePageId].nodes).find((node) => node.type === 'boolean');
+    const strokes = [
+      {
+        end: { x: 1, y: 0.5 },
+        opacity: 100,
+        start: { x: 0, y: 0.5 },
+        stops: [
+          { color: '#ff0000', opacity: 100, position: 0 },
+          { color: '#0000ff', opacity: 100, position: 1 },
+        ],
+        type: 'gradient-linear',
+      },
+    ];
+
+    store.dispatch(updateNode({ changes: { strokeWidth: 4, strokes } as never, id: union?.id ?? '' }));
+    store.dispatch(setSelection([union?.id ?? '']));
+  });
+  await page.keyboard.press('Alt+Shift+F');
+
+  const flattened = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+    const node = nodes[rootOrder[0]] as unknown as { strokeColor: string; strokeWidth: number; type: string };
+
+    return { strokeColor: node.strokeColor, strokeWidth: node.strokeWidth, type: node.type };
+  });
+
+  expect(flattened).toEqual({ strokeColor: '#ff0000', strokeWidth: 4, type: 'vector' });
+});
