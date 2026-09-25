@@ -72,11 +72,11 @@ import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes/drawSceneNodes';
 import { drawSectionNameLabels } from './drawSectionNameLabels/drawSectionNameLabels';
+import { drawSliceOutlines } from './drawSliceOutlines';
 import { drawSectionCaptureOutlines } from './drawSectionCaptureOutlines';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
 import { drawShapeContactGuides } from './drawShapeContactGuides';
-import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawSmartSelectionHandles } from './drawSmartSelectionHandles/drawSmartSelectionHandles';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawTransformAlignmentGuide } from './drawTransformAlignmentGuide';
@@ -116,7 +116,6 @@ export const drawScene = (
 ): void => {
   const marqueeRect = refs.lassoMarquee.marqueeRef.current;
   const hoveredNodeId = refs.hover.hoverRef.current;
-  const sliceRect = refs.slice.sliceRef.current;
   const state = store.getState();
   const activeTool = selectActiveTool(state);
   const viewport = selectViewport(state);
@@ -172,6 +171,7 @@ export const drawScene = (
   drawImageEditorCropOverflowPreview(ctx, nodesById, imageEditor);
   drawImageEditorTileOverflowPreview(ctx, nodesById, imageEditor);
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
+  drawSliceOutlines(ctx, sceneNodes, selectedIds);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSectionCaptureOutlines(ctx, refs, vectorEditingNodeIds, nodesById);
@@ -222,7 +222,6 @@ export const drawScene = (
   drawVectorEraseBrush(ctx, refs, activeTool);
   drawVectorWidthPointsPreview(ctx, nodesById, vectorEditingNodeIds, refs, activeTool);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
-  drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
   drawShapeContactGuides(ctx, refs);
   drawDistanceGuides(ctx, refs);
   drawDimensionHintGuides(ctx, refs);

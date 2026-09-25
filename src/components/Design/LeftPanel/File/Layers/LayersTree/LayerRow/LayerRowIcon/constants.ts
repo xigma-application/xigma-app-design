@@ -24,6 +24,7 @@ export const NODE_TYPE_ICON: Record<NodeType, TIconProps['name']> = {
   [NodeType.polygon]: 'PolygonTool',
   [NodeType.rectangle]: 'RectangleTool',
   [NodeType.section]: 'SectionTool',
+  [NodeType.slice]: 'SliceTool',
   [NodeType.star]: 'StarTool',
   [NodeType.text]: 'TextTool',
   [NodeType.vector]: 'PenTool',

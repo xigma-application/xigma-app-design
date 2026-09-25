@@ -9,6 +9,7 @@ import { TExportFile, TExportSetting } from '../types';
 import { createExportFile } from './createExportFile';
 import { getExportBounds } from './getExportBounds';
 import { getExportFileNames } from './getExportFileNames';
+import { getExportSourceId } from './getExportSourceId';
 import { getExportScaleFactor } from './getExportScaleFactor';
 import { isSupportedExportFormat } from './isSupportedExportFormat';
 
@@ -18,7 +19,9 @@ export const renderNodeExportFiles = async (
   settings: TExportSetting[],
 ): Promise<TExportFile[]> => {
   const state = store.getState();
-  const { contentBounds, fullBounds } = getExportBounds(nodeId, selectNodes(state), selectRootOrder(state));
+  const nodesById = selectNodes(state);
+  const { contentBounds, fullBounds } = getExportBounds(nodeId, nodesById, selectRootOrder(state));
+  const sourceId = getExportSourceId(nodeId, nodesById);
   const supportedSettings = settings.filter((setting) => isSupportedExportFormat(setting.format));
   const fileNames = getExportFileNames(nodeName, supportedSettings);
   const renderedFiles: (TExportFile | null)[] = [];
@@ -26,7 +29,7 @@ export const renderNodeExportFiles = async (
   for (const [index, setting] of supportedSettings.entries()) {
     const bounds = setting.includeBoundingBox ? fullBounds : contentBounds;
     const file = await createExportFile(
-      nodeId,
+      sourceId,
       setting.format,
       getExportScaleFactor(setting.scale, bounds),
       fileNames[index],

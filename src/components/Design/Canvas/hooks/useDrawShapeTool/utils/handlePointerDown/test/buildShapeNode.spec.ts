@@ -26,6 +26,14 @@ describe('buildShapeNode', () => {
     expect(node).not.toHaveProperty('clipContent');
   });
 
+  it('should build a slice on the page with no paints or children, even when a parent is given', () => {
+    // before
+    const node = buildShapeNode(RECT, '', 'Slice', NodeType.slice, 'parent-id');
+
+    // result
+    expect(node).toEqual({ ...RECT, name: 'Slice', parentId: null, rotation: 0, type: NodeType.slice });
+  });
+
   it('should build a rectangle with a solid fills array and no childIds', () => {
     // before
     const node = buildShapeNode(RECT, '#0000ff', 'Rectangle', NodeType.rectangle, null);

@@ -11,7 +11,7 @@ export const buildShapeNode = (
   rect: TDraftRect,
   fill: string,
   name: string,
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section | NodeType.slice,
   parentId: string | null,
 ): TNewSceneNode => {
   switch (type) {
@@ -19,6 +19,8 @@ export const buildShapeNode = (
       return { ...rect, childIds: [], clipContent: true, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
     case NodeType.section:
       return { ...rect, ...getDefaultSectionStyle(fill), childIds: [], name, parentId, rotation: 0, type };
+    case NodeType.slice:
+      return { ...rect, name, parentId: null, rotation: 0, type };
     case NodeType.rectangle:
       return { ...rect, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
     default:

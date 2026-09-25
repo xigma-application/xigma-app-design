@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
@@ -15,15 +16,21 @@ export const getExportBounds = (
   nodesById: Record<string, TSceneNode>,
   rootOrder: string[],
 ): { contentBounds: TDraftRect; fullBounds: TDraftRect } => {
-  if (nodeId === null) {
-    const pageBounds = getPageExportBounds(rootOrder, nodesById) ?? EMPTY_EXPORT_BOUNDS;
-    return { contentBounds: pageBounds, fullBounds: pageBounds };
+  const node = nodeId === null ? undefined : nodesById[nodeId];
+
+  switch (true) {
+    case nodeId === null: {
+      const pageBounds = getPageExportBounds(rootOrder, nodesById) ?? EMPTY_EXPORT_BOUNDS;
+      return { contentBounds: pageBounds, fullBounds: pageBounds };
+    }
+    case node?.type === NodeType.slice: {
+      const sliceBounds = getRotatedNodeBounds(node);
+      return { contentBounds: sliceBounds, fullBounds: sliceBounds };
+    }
+    default:
+      return {
+        contentBounds: getExportContentBounds(nodeId, nodesById),
+        fullBounds: node ? getRotatedNodeBounds(node) : EMPTY_EXPORT_BOUNDS,
+      };
   }
-
-  const node = nodesById[nodeId];
-
-  return {
-    contentBounds: getExportContentBounds(nodeId, nodesById),
-    fullBounds: node ? getRotatedNodeBounds(node) : EMPTY_EXPORT_BOUNDS,
-  };
 };

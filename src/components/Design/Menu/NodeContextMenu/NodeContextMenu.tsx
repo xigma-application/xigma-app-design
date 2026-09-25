@@ -144,7 +144,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuItem disabled label={t(NODE_MENU_COPY_PASTE_AS_KEY)} withCheck={false} />
-      {!flags.hasSection && !flags.hasTextOnPath && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
+      {!flags.hasSection && !flags.hasSlice && !flags.hasTextOnPath && (
+        <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />
+      )}
       {!flags.hasSection && <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />}
       <MenuSeparator />
       <MenuSub disabled={otherPages.length === 0} label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false}>
@@ -164,7 +166,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')}
         withCheck={false}
       />
-      <MenuSeparator />
+      {(!flags.hasSlice || onRename) && <MenuSeparator />}
       {flags.isFrameOrGroupSelection && (
         <MenuItem
           disabled={!flags.canConvertToSection}
@@ -176,7 +178,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       {flags.isSectionSelection && (
         <MenuItem disabled={!canConvertToFrame} label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />
       )}
-      {!flags.hasSection && (
+      {!flags.hasSection && !flags.hasSlice && (
         <MenuItem
           label={t(NODE_MENU_GROUP_SELECTION_KEY)}
           onClick={onGroupSelection}
@@ -184,7 +186,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!flags.hasSection && (
+      {!flags.hasSection && !flags.hasSlice && (
         <MenuItem
           disabled
           label={t(NODE_MENU_FRAME_SELECTION_KEY)}

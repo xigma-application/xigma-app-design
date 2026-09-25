@@ -121,6 +121,7 @@ export enum NodeType {
   polygon = 'polygon',
   rectangle = 'rectangle',
   section = 'section',
+  slice = 'slice',
   star = 'star',
   text = 'text',
   vector = 'vector',

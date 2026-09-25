@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -26,5 +27,10 @@ describe('getExportBounds', () => {
     // result
     expect(getExportBounds('n', { n: {} as TSceneNode }, [])).toEqual({ contentBounds: 'content', fullBounds: 'full' });
     expect(getExportBounds('missing', {}, [])).toEqual({ contentBounds: 'content', fullBounds: EMPTY });
+  });
+
+  it('should use the slice rectangle as both bounds for a slice export', () => {
+    // result
+    expect(getExportBounds('s', { s: { type: NodeType.slice } as TSceneNode }, [])).toEqual({ contentBounds: 'full', fullBounds: 'full' });
   });
 });

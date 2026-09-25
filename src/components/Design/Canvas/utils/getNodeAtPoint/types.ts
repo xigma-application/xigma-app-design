@@ -18,6 +18,7 @@ export type TSceneNodeHitContext = {
 export type TNodeHitContext = {
   clipAncestorsById: Record<string, TSceneNode>;
   frameNameLabelRects: TFrameNameLabelRect[];
+  hitSlices: boolean;
   ignoreClip: boolean;
   lineTolerance: number;
   nodesById: Record<string, TSceneNode>;

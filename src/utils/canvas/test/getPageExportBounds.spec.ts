@@ -51,4 +51,21 @@ describe('getPageExportBounds', () => {
 
     expect(getPageExportBounds(['hidden'], { hidden })).toBeNull();
   });
+
+  it('should leave a slice out of the page bounds', () => {
+    const slice = {
+      height: 500,
+      id: 'slice',
+      name: 'slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 500,
+      x: -1000,
+      y: -1000,
+    } as TSceneNode;
+    const visible = rect({ height: 10, id: 'visible', width: 10, x: 0, y: 0 });
+
+    expect(getPageExportBounds(['slice', 'visible'], { slice, visible })).toEqual({ height: 10, width: 10, x: 0, y: 0 });
+  });
 });

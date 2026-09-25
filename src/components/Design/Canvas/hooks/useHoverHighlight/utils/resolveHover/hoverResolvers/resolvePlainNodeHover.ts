@@ -42,7 +42,7 @@ const resolveHitHover = (hit: TSceneNode, selectedHit: ReturnType<typeof getNode
 
 export const resolvePlainNodeHover = (context: THoverResolverContext): THoverResult => {
   const { leafNodes, nodesById, point, selectedNodes, viewport } = context;
-  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true });
+  const selectedHit = getNodeAtPoint(point, selectedNodes, viewport, { hitSlices: true, ignoreClip: true });
   const frameLabelHit = findFrameLabelHit(context);
 
   if (!frameLabelHit) {

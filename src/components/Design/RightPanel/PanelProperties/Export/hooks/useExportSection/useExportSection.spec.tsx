@@ -6,7 +6,7 @@ import { PointerEvent as ReactPointerEvent, ReactElement, ReactNode } from 'reac
 import { useExportSection } from './useExportSection';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, addNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -212,5 +212,41 @@ describe('useExportSection', () => {
 
     // result
     expect(result.current.settings).toEqual([]);
+  });
+
+  it('should start a slice with one default export row, also after switching to it', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(
+      addNodes({
+        nodes: [
+          { height: 10, id: 'exportSlice', name: 'Slice (1)', parentId: null, rotation: 0, type: NodeType.slice, width: 10, x: 0, y: 0 },
+        ],
+        rootIds: ['exportSlice'],
+      }),
+    );
+    store.dispatch(setSelection(['exportSlice']));
+
+    // before
+    const { result } = renderHook(() => useExportSection(), { wrapper });
+
+    // result
+    expect(result.current.settings).toHaveLength(1);
+
+    // action
+    act(() => {
+      store.dispatch(setSelection([frameId]));
+    });
+
+    // result
+    expect(result.current.settings).toEqual([]);
+
+    // action
+    act(() => {
+      store.dispatch(setSelection(['exportSlice']));
+    });
+
+    // result
+    expect(result.current.settings).toHaveLength(1);
   });
 });

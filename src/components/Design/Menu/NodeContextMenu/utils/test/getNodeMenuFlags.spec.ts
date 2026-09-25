@@ -67,4 +67,17 @@ describe('getNodeMenuFlags', () => {
     // result
     expect(getNodeMenuFlags([rectangle, group], nodesById)).toMatchObject({ canFlatten: false, canOutlineStroke: false });
   });
+
+  it('should drop the group, flatten and mask items for a slice', () => {
+    // mock
+    const slice = { ...box, id: 'slice', name: 'slice', type: NodeType.slice } as TSceneNode;
+
+    // result
+    expect(getNodeMenuFlags([slice], nodesById)).toMatchObject({
+      hasSlice: true,
+      withFlatten: false,
+      withFlip: true,
+      withUseAsMask: false,
+    });
+  });
 });

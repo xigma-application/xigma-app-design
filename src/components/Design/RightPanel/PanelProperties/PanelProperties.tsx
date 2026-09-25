@@ -11,6 +11,7 @@ import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
 import Rectangle from './Rectangle/Rectangle';
 import Section from './Section/Section';
+import Slice from './Slice/Slice';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
@@ -61,6 +62,8 @@ const PanelProperties: FC = () => {
       return <Group />;
     case isEverySectionSelected:
       return <Section />;
+    case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.slice:
+      return <Slice />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

@@ -9,6 +9,7 @@ import { selectActivePage, selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TExportSetting, TExportTarget } from '../../types';
 import { TUseExportSectionResult } from './types';
 
@@ -23,7 +24,8 @@ export const useExportSection = (): TUseExportSectionResult => {
     selectedNodes.length > 0 ? selectedNodes.map(({ id, name }) => ({ id, name })) : [{ id: null, name: activePage.name }];
   const [exportTarget] = exportTargets;
   const exportTargetsKey = exportTargets.map(({ id }) => id).join(',');
-  const [settings, setSettings] = useState<TExportSetting[]>([]);
+  const isSliceTarget = selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.slice;
+  const [settings, setSettings] = useState<TExportSetting[]>(() => (isSliceTarget ? [createExportSetting()] : []));
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { beginDrag, dragState, registerRow } = useItemsReorderDrag(settings, setSettings, setSelectedIndices, containerRef);
@@ -31,8 +33,8 @@ export const useExportSection = (): TUseExportSectionResult => {
   useClearFillSelectionOnOutsideClick(containerRef, selectedIndices.length > 0, () => setSelectedIndices([]));
 
   useEffect(() => {
-    setSettings([]);
-  }, [exportTargetsKey]);
+    setSettings(isSliceTarget ? [createExportSetting()] : []);
+  }, [exportTargetsKey, isSliceTarget]);
 
   return {
     containerRef,

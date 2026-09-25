@@ -44,7 +44,6 @@ import { useRegisterColorPixelSampler } from './hooks/useRegisterColorPixelSampl
 import { useRegisterExportRenderer } from './hooks/useRegisterExportRenderer/useRegisterExportRenderer';
 import { useRegisterPatternThumbnailSampler } from './hooks/useRegisterPatternThumbnailSampler/useRegisterPatternThumbnailSampler';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
-import { useSliceTool } from './hooks/useSliceTool/useSliceTool';
 import { useStraightCaretEditing } from './hooks/useStraightCaretEditing/useStraightCaretEditing';
 import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTextEditOnDoubleClick';
 import { useVectorEditOnDoubleClick } from './hooks/useVectorEditOnDoubleClick/useVectorEditOnDoubleClick';
@@ -59,6 +58,7 @@ import {
   POLYGON_TOOL_SETTINGS,
   RECTANGLE_TOOL_SETTINGS,
   SECTION_TOOL_SETTINGS,
+  SLICE_TOOL_SETTINGS,
   STAR_TOOL_SETTINGS,
 } from './toolSettings';
 
@@ -80,6 +80,7 @@ const Canvas: FC = () => {
   useHandTool(refs);
   useDrawShapeTool(refs, FRAME_TOOL_SETTINGS);
   useDrawShapeTool(refs, SECTION_TOOL_SETTINGS);
+  useDrawShapeTool(refs, SLICE_TOOL_SETTINGS);
   useDrawShapeTool(refs, RECTANGLE_TOOL_SETTINGS);
   useDrawShapeTool(refs, ELLIPSE_TOOL_SETTINGS);
   useDrawPolygonTool(refs, POLYGON_TOOL_SETTINGS);
@@ -93,7 +94,6 @@ const Canvas: FC = () => {
   useDrawTextOnPathTool(refs);
   useCommentTool(refs);
   useSelectionTool(refs);
-  useSliceTool(refs);
   useTextEditOnDoubleClick(refs);
   useVectorEditOnDoubleClick(refs);
   useHoverHighlight(refs);

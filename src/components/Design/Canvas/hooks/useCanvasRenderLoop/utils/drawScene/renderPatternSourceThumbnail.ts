@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect } from 'types/canvas';
 import { TDrawSceneContext } from './types';
@@ -17,18 +18,27 @@ const getThumbnailSource = (
   sourceNodeId: string | null,
   nodesById: Record<string, TSceneNode>,
   rootOrder: string[],
-): { bounds: TDraftRect; nodes: TSceneNode[] } | null => {
+): { bounds: TDraftRect; isPageArea: boolean; nodes: TSceneNode[] } | null => {
   switch (sourceNodeId) {
     case null: {
       const bounds = getPageExportBounds(rootOrder, nodesById);
-
-      return bounds ? { bounds, nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden) } : null;
+      return bounds
+        ? { bounds, isPageArea: true, nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden) }
+        : null;
     }
     default: {
       const sourceNode = nodesById[sourceNodeId];
 
+      if (sourceNode?.type === NodeType.slice) {
+        return {
+          bounds: getRotatedNodeBounds(sourceNode),
+          isPageArea: true,
+          nodes: getRenderOrderedNodes(rootOrder, nodesById).filter((node) => !node.hidden),
+        };
+      }
+
       return sourceNode && !sourceNode.hidden
-        ? { bounds: getRotatedNodeBounds(sourceNode), nodes: collectPatternSourceSubtree(sourceNodeId, nodesById) }
+        ? { bounds: getRotatedNodeBounds(sourceNode), isPageArea: false, nodes: collectPatternSourceSubtree(sourceNodeId, nodesById) }
         : null;
     }
   }
@@ -61,7 +71,7 @@ export const renderPatternSourceThumbnail = (
         x: source.bounds.x,
         y: source.bounds.y,
       },
-      sourceNodeId === null ? backgroundColor : undefined,
+      source.isPageArea ? backgroundColor : undefined,
     );
   }
 

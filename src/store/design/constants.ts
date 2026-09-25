@@ -37,6 +37,7 @@ export const MOCK_COMMENT_AUTHOR = 'Xigma';
 export const TOOL_DEFAULT_NODE_NAMES: ReadonlySet<string> = new Set([
   'Frame',
   'Section',
+  'Slice',
   'Rectangle',
   'Ellipse',
   'Line',

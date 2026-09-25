@@ -60,6 +60,7 @@ export const SECTION_TOOL_SETTINGS: TShapeToolConfig = {
   tool: ToolName.section,
   type: NodeType.section,
 };
+export const SLICE_TOOL_SETTINGS: TShapeToolConfig = { fill: '', name: 'Slice', tool: ToolName.slice, type: NodeType.slice };
 export const STAR_TOOL_SETTINGS: TStarToolConfig = {
   fill: ELLIPSE_FILL,
   name: 'Star',

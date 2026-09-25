@@ -245,4 +245,58 @@ describe('handlePointerDown', () => {
 
     expect(page.nodes[nodeIdRef.current as string].parentId).toBeNull();
   });
+
+  it('should always draw a slice on the page, on top of a frame under the cursor, and let Escape cancel it', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fills: [],
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 400,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const refs = createCanvasRefs();
+    const nodeIdRef: { current: string | null } = { current: null };
+    const dropTargetRef: { current: { parentId: string | null; targetIndex: number } | null } = { current: null };
+
+    // before
+    handlePointerDown(
+      createCanvas(),
+      pointerEvent(50, 60),
+      store.dispatch,
+      store,
+      refs,
+      IDENTITY_VIEWPORT,
+      { current: null },
+      nodeIdRef,
+      { current: [] },
+      dropTargetRef,
+      '',
+      'Slice',
+      NodeType.slice,
+    );
+
+    // result
+    const sliceId = nodeIdRef.current as string;
+    const page = selectActivePage(store.getState());
+
+    expect(dropTargetRef.current).toBeNull();
+    expect(page.nodes[sliceId]).toMatchObject({ parentId: null, type: NodeType.slice });
+    expect(page.rootOrder[page.rootOrder.length - 1]).toBe(sliceId);
+
+    // action
+    refs.drawing.cancelDrawRef.current?.();
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[sliceId]).toBeUndefined();
+  });
 });

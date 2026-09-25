@@ -34,7 +34,7 @@ const createShapeNode = (
   point: TPoint,
   fill: string,
   name: string,
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section | NodeType.slice,
   dropTarget: TNewNodeDropTarget | null,
   startRef: RefObject<TPoint | null>,
   nodeIdRef: RefObject<string | null>,
@@ -55,15 +55,18 @@ const resolveShapeDropTarget = (
   canvasRefs: TCanvasRefs,
   appStore: AppStore,
   point: TPoint,
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section | NodeType.slice,
 ): TNewNodeDropTarget | null => {
   const state = appStore.getState();
 
-  if (type === NodeType.section) {
-    return resolveSectionNewNodeTarget(canvasRefs, point, selectRenderOrderedNodes(state));
+  switch (type) {
+    case NodeType.slice:
+      return null;
+    case NodeType.section:
+      return resolveSectionNewNodeTarget(canvasRefs, point, selectRenderOrderedNodes(state));
+    default:
+      return resolveNewNodeDropTarget(canvasRefs, point, selectRenderOrderedNodes(state), selectNodes(state), selectRootOrder(state));
   }
-
-  return resolveNewNodeDropTarget(canvasRefs, point, selectRenderOrderedNodes(state), selectNodes(state), selectRootOrder(state));
 };
 
 export const handlePointerDown = (
@@ -79,7 +82,7 @@ export const handlePointerDown = (
   dropTargetRef: RefObject<TNewNodeDropTarget | null>,
   fill: string,
   name: string,
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section,
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section | NodeType.slice,
 ): void => {
   if (event.button === MouseButton.primary) {
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(canvasRefs)));

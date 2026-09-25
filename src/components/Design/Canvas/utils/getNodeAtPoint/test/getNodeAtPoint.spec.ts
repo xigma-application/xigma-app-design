@@ -539,4 +539,25 @@ describe('getNodeAtPoint', () => {
       expect(getNodeAtPoint({ x: 112, y: 40 }, [outer, inner, grandChild], IDENTITY_VIEWPORT)?.id).toBe('outer');
     });
   });
+
+  it('should click through a slice unless slices are asked for, as for an already selected slice', () => {
+    // mock
+    const below = buildNode({ height: 100, id: 'below', width: 100 });
+    const slice = {
+      height: 100,
+      id: 'slice',
+      name: 'Slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TSceneNode;
+
+    // result
+    expect(getNodeAtPoint({ x: 50, y: 50 }, [below, slice], IDENTITY_VIEWPORT)).toEqual(below);
+    expect(getNodeAtPoint({ x: 50, y: 50 }, [slice], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getNodeAtPoint({ x: 50, y: 50 }, [below, slice], IDENTITY_VIEWPORT, { hitSlices: true })).toEqual(slice);
+  });
 });

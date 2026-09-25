@@ -2,7 +2,6 @@ import { FC, useMemo, useRef } from 'react';
 
 // hooks
 import { usePencilRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePencilRefs/usePencilRefs';
-import { useSliceRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSliceRefs/useSliceRefs';
 import { useStarRatioRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useStarRatioRefs/useStarRatioRefs';
 import { useVectorCutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorCutRefs/useVectorCutRefs';
 import { useVectorEditRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorEditRefs/useVectorEditRefs';
@@ -67,7 +66,6 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const transformRefs = useTransformRefs();
   const pencilRefs = usePencilRefs();
   const shapeBuilderRefs = useShapeBuilderRefs();
-  const sliceRefs = useSliceRefs();
   const smartSelectionRefs = useSmartSelectionRefs();
   const starRatioRefs = useStarRatioRefs();
   const vectorCutRefs = useVectorCutRefs();
@@ -111,7 +109,6 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       progressiveBlur: progressiveBlurRefs,
       sectionName: sectionNameRefs,
       shapeBuilder: shapeBuilderRefs,
-      slice: sliceRefs,
       smartSelection: smartSelectionRefs,
       starRatio: starRatioRefs,
       transform: transformRefs,
@@ -145,7 +142,6 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       progressiveBlurRefs,
       sectionNameRefs,
       shapeBuilderRefs,
-      sliceRefs,
       smartSelectionRefs,
       starRatioRefs,
       transformRefs,

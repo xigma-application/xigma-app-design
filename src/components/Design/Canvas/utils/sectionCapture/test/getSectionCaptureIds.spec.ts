@@ -63,4 +63,24 @@ describe('getSectionCaptureIds', () => {
     // action / result
     expect(getSectionCaptureIds(inner, nodes, ['outer', 'topLevel'])).toEqual(['child']);
   });
+
+  it('should never capture a slice, even one lying whole inside the section', () => {
+    // mock
+    const section = makeSection('section', { height: 200, width: 200, x: 0, y: 0 });
+    const slice = {
+      height: 50,
+      id: 'slice',
+      name: 'slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 50,
+      x: 10,
+      y: 10,
+    } as TSceneNode;
+    const nodes: Record<string, TSceneNode> = { inside: makeRectangle('inside', 100, 100), section, slice };
+
+    // result
+    expect(getSectionCaptureIds(section, nodes, ['slice', 'inside', 'section'])).toEqual(['inside']);
+  });
 });

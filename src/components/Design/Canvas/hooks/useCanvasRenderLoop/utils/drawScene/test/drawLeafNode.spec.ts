@@ -13,6 +13,7 @@ import { drawLeafNode } from '../drawLeafNode';
 import { getBoxFillPolygon } from '../getBoxFillPolygon';
 import { getScaledFillPaints } from '../getScaledFillPaints';
 
+const drawBooleanLeafNodeMock = vi.fn();
 const drawEllipseNodeMock = vi.fn();
 const drawEllipseArcMock = vi.fn();
 const drawEllipseMock = vi.fn();
@@ -31,6 +32,9 @@ const drawVectorNodeOrTextPathGuideMock = vi.fn();
 const getOrLoadTextureMock = vi.fn();
 const getMsdfAtlasTextureMock = vi.fn();
 
+vi.mock('../drawBooleanLeafNode/drawBooleanLeafNode', () => ({
+  drawBooleanLeafNode: (...args: unknown[]): void => drawBooleanLeafNodeMock(...args),
+}));
 vi.mock('../drawEllipseLeafNode/drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
 vi.mock('utils/canvas/drawEllipseArc', () => ({ drawEllipseArc: (...args: unknown[]): void => drawEllipseArcMock(...args) }));
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
@@ -550,6 +554,54 @@ describe('drawLeafNode', () => {
 
     // action / result
     expect(() => drawLeafNode(context, node, new Map(), createCanvasRefs(), {})).not.toThrow();
+  });
+
+  it('should draw nothing for a slice — only its dashed outline is drawn, by its own pass', () => {
+    // mock
+    const node: TSceneNode = {
+      height: 20,
+      id: 's1',
+      name: 'Slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 20,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawLeafNode(context, node, new Map(), createCanvasRefs(), {});
+
+    // result
+    expect(drawRectMock).not.toHaveBeenCalled();
+    expect(drawThickOutlineMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a boolean through its own boolean renderer with the threaded opacity', () => {
+    // mock
+    const node = {
+      booleanOperation: 'union',
+      childIds: [],
+      fills: [],
+      height: 20,
+      id: 'b1',
+      name: 'Union',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.boolean,
+      width: 20,
+      x: 0,
+      y: 0,
+    } as unknown as TSceneNode;
+
+    // before
+    drawLeafNode(context, node, new Map(), createCanvasRefs(), {});
+
+    // result
+    expect(drawBooleanLeafNodeMock).toHaveBeenCalledTimes(1);
+    expect(drawBooleanLeafNodeMock.mock.calls[0][1]).toBe(node);
+    expect(drawBooleanLeafNodeMock.mock.calls[0][2]).toBe(1);
   });
 
   it('should draw text through the MSDF pipeline, resolving its bound path node when present', () => {

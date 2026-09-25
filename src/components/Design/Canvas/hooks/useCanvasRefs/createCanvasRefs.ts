@@ -19,7 +19,6 @@ import { createPenRefs } from './hooks/usePenRefs/createPenRefs';
 import { createPencilRefs } from './hooks/usePencilRefs/createPencilRefs';
 import { createSectionNameRefs } from './hooks/useSectionNameRefs/createSectionNameRefs';
 import { createShapeBuilderRefs } from './hooks/useShapeBuilderRefs/createShapeBuilderRefs';
-import { createSliceRefs } from './hooks/useSliceRefs/createSliceRefs';
 import { createSmartSelectionRefs } from './hooks/useSmartSelectionRefs/createSmartSelectionRefs';
 import { createStarRatioRefs } from './hooks/useStarRatioRefs/createStarRatioRefs';
 import { createTransformRefs } from './hooks/useTransformRefs/createTransformRefs';
@@ -62,7 +61,6 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   progressiveBlur: createProgressiveBlurRefs(overrides.progressiveBlur),
   sectionName: createSectionNameRefs(overrides.sectionName),
   shapeBuilder: createShapeBuilderRefs(overrides.shapeBuilder),
-  slice: createSliceRefs(overrides.slice),
   smartSelection: createSmartSelectionRefs(overrides.smartSelection),
   starRatio: createStarRatioRefs(overrides.starRatio),
   transform: createTransformRefs(overrides.transform),

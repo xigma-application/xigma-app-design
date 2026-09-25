@@ -4,6 +4,7 @@ export type TNodeMenuFlags = {
   canOutlineStroke: boolean;
   canUngroup: boolean;
   hasSection: boolean;
+  hasSlice: boolean;
   hasTextOnPath: boolean;
   isContainerSelection: boolean;
   isFrameOrGroupSelection: boolean;

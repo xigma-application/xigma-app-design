@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TSceneNode, TSectionNode } from 'types/design/types';
 
 // utils
@@ -7,5 +8,6 @@ import { isNodeInsideBox } from './isNodeInsideBox';
 
 export const getSectionCaptureIds = (section: TSectionNode, nodesById: Record<string, TSceneNode>, rootOrder: string[]): string[] =>
   getSectionSiblingIds(section, nodesById, rootOrder).filter(
-    (id) => id !== section.id && nodesById[id] !== undefined && isNodeInsideBox(nodesById[id], section),
+    (id) =>
+      id !== section.id && nodesById[id] !== undefined && nodesById[id].type !== NodeType.slice && isNodeInsideBox(nodesById[id], section),
   );

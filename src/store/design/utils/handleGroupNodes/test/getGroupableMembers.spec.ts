@@ -84,4 +84,22 @@ describe('getGroupableMembers', () => {
     // action & result
     expect(getGroupableMembers([rect, section])).toBeNull();
   });
+
+  it('should return null when a slice is selected — a slice can never be nested', () => {
+    // mock
+    const slice = {
+      height: 10,
+      id: 'slice',
+      name: 'Slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 10,
+      x: 0,
+      y: 0,
+    } as const;
+
+    // action & result
+    expect(getGroupableMembers([buildRect({ id: 'a' }), slice])).toBeNull();
+  });
 });

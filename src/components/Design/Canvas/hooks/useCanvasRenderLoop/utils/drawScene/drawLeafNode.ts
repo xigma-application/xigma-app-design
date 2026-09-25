@@ -61,6 +61,7 @@ export const drawLeafNode = (
       break;
     case NodeType.group:
     case NodeType.mask:
+    case NodeType.slice:
       break;
     case NodeType.text:
       drawTextLeafNode(context, node, nodesById);

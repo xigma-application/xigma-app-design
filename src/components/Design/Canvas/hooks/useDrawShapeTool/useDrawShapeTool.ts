@@ -23,7 +23,7 @@ export type TShapeToolConfig = {
   fill: string;
   name: string;
   tool: ToolName;
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section;
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section | NodeType.slice;
 };
 
 export const useDrawShapeTool = (refs: TCanvasRefs, { fill, name, tool, type }: TShapeToolConfig): void => {

@@ -324,6 +324,10 @@ export type TSectionNode = Omit<TRectangleNode, 'type'> & {
   type: NodeType.section;
 };
 
+export type TSliceNode = TBaseNode & {
+  type: NodeType.slice;
+};
+
 export type TStarNode = TBaseNode & {
   cornerRadius?: number;
   fill: string;
@@ -434,6 +438,7 @@ export type TBoxSceneNode =
   | TPolygonNode
   | TRectangleNode
   | TSectionNode
+  | TSliceNode
   | TStarNode
   | TTextNode;
 
@@ -450,6 +455,7 @@ export type TNewSceneNode =
   | Omit<TPolygonNode, 'id'>
   | Omit<TRectangleNode, 'id'>
   | Omit<TSectionNode, 'id'>
+  | Omit<TSliceNode, 'id'>
   | Omit<TStarNode, 'id'>
   | Omit<TTextNode, 'id'>
   | Omit<TLineNode, 'id'>
@@ -466,6 +472,7 @@ export type TSceneNodeChanges =
   | Partial<TPolygonNode>
   | Partial<TRectangleNode>
   | Partial<TSectionNode>
+  | Partial<TSliceNode>
   | Partial<TStarNode>
   | Partial<TTextNode>
   | Partial<TLineNode>

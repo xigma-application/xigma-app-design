@@ -165,4 +165,43 @@ describe('renderPatternSourceThumbnail', () => {
     expect(result).toEqual({ height: 128, pixels: expect.any(Uint8Array), width: 256 });
     expect(result?.pixels).toHaveLength(256 * 128 * 4);
   });
+
+  it('should render the whole page over the page background, and nothing for an empty page', () => {
+    // mock
+    const gl = createGlMock();
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const visible = rect('p1', { height: 50, width: 100 });
+    const hidden = rect('p2', { hidden: true });
+    const background = [1, 0, 0, 1] as const;
+
+    createTargetMock.mockReturnValue({ framebuffer: {}, height: 1, texture: {}, width: 1 });
+
+    // before
+    const result = renderPatternSourceThumbnail(context, null, { p1: visible, p2: hidden }, refs, 100, ['p1', 'p2'], background);
+
+    // result
+    expect(result).toEqual({ height: 50, pixels: expect.any(Uint8Array), width: 100 });
+    expect(gl.clearColor).toHaveBeenCalledWith(...background);
+    expect(drawLeafNodeMock).toHaveBeenCalledTimes(1);
+    expect(renderPatternSourceThumbnail(context, null, {}, refs, 100, [], background)).toBeNull();
+  });
+
+  it('should render the page area under a slice over the page background', () => {
+    // mock
+    const gl = createGlMock();
+    const context = { gl, imageContext: { isAlphaWriteEnabled: false } } as unknown as TDrawSceneContext;
+    const shape = rect('p1', { height: 400, width: 400 });
+    const slice = rect('s1', { height: 20, type: NodeType.slice, width: 40, x: 10, y: 10 });
+    const background = [0, 1, 0, 1] as const;
+
+    createTargetMock.mockReturnValue({ framebuffer: {}, height: 1, texture: {}, width: 1 });
+
+    // before
+    const result = renderPatternSourceThumbnail(context, 's1', { p1: shape, s1: slice }, refs, 80, ['p1', 's1'], background);
+
+    // result
+    expect(result).toEqual({ height: 40, pixels: expect.any(Uint8Array), width: 80 });
+    expect(gl.clearColor).toHaveBeenCalledWith(...background);
+    expect(drawLeafNodeMock).toHaveBeenCalledTimes(2);
+  });
 });

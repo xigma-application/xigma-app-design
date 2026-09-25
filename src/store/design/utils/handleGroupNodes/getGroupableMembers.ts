@@ -8,13 +8,11 @@ export type TGroupableMembers = {
 };
 
 export const getGroupableMembers = (selectedNodes: TSceneNode[]): TGroupableMembers | null => {
-  if (selectedNodes.length === 0) {
-    return null;
+  switch (true) {
+    case selectedNodes.length === 0:
+    case selectedNodes.some((node) => node.type === NodeType.section || node.type === NodeType.slice):
+      return null;
+    default:
+      return { memberNodes: selectedNodes, parentId: selectedNodes[0].parentId };
   }
-
-  if (selectedNodes.some((node) => node.type === NodeType.section)) {
-    return null;
-  }
-
-  return { memberNodes: selectedNodes, parentId: selectedNodes[0].parentId };
 };

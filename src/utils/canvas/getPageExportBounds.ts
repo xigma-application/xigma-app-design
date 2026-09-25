@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
@@ -10,7 +11,7 @@ export const getPageExportBounds = (rootOrder: string[], nodesById: Record<strin
   rootOrder.reduce<TDraftRect | null>((accumulated, id) => {
     const node = nodesById[id];
 
-    if (node && !node.hidden) {
+    if (node && !node.hidden && node.type !== NodeType.slice) {
       return unionRects(accumulated, getExportContentBounds(id, nodesById));
     }
 

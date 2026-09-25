@@ -26,7 +26,7 @@ export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[]
     nodesById,
     point,
     selectedHit:
-      getNodeAtPoint(point, selectedNodes, viewport, { ignoreClip: true }) ??
+      getNodeAtPoint(point, selectedNodes, viewport, { hitSlices: true, ignoreClip: true }) ??
       getSelectedBooleanOperandAtPoint(point, selectedNodes, nodesById),
     selectedNodes,
     viewport,

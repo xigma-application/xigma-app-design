@@ -469,4 +469,30 @@ describe('handleMoveNodes', () => {
     expect(() => handleMoveNodes(state, { nodeIds: ['a', 'gone'], targetIndex: 2, targetParentId: null })).not.toThrow();
     expect(getActivePage(state).rootOrder).toEqual(['a', 'gone']);
   });
+
+  it('should no-op when a slice would be moved into any parent', () => {
+    // mock
+    const slice = {
+      height: 10,
+      id: 'slice',
+      name: 'Slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 10,
+      x: 0,
+      y: 0,
+    } as const;
+    const frame = buildFrame({ childIds: [], id: 'frame-1' });
+    const state = buildState({ nodes: { 'frame-1': frame, slice }, rootOrder: ['slice', 'frame-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['slice'], targetIndex: 0, targetParentId: 'frame-1' });
+
+    // result
+    const page = getActivePage(state);
+    expect(page.nodes.slice.parentId).toBeNull();
+    expect(page.rootOrder).toEqual(['slice', 'frame-1']);
+    expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual([]);
+  });
 });

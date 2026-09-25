@@ -199,8 +199,6 @@ export type TGradientRadiusRefs = {
   gradientRadiusDragRef: RefObject<TGradientRadiusDragState | null>;
 };
 
-export type TSliceDraft = TDraftRect & { rotation: number };
-
 export type TPenPreview = {
   from: TPoint;
   isSnapped: boolean;
@@ -288,10 +286,6 @@ export type TVectorNodeRotateSnapshot = {
   pivot: TPoint;
   strokeColor: string;
   strokeVertices: number[];
-};
-
-export type TSliceRefs = {
-  sliceRef: RefObject<TSliceDraft | null>;
 };
 
 export type TPencilRefs = {
@@ -700,7 +694,6 @@ export type TCanvasRefs = {
   progressiveBlur: TProgressiveBlurRefs;
   sectionName: TSectionNameRefs;
   shapeBuilder: TShapeBuilderRefs;
-  slice: TSliceRefs;
   smartSelection: TSmartSelectionRefs;
   starRatio: TStarRatioRefs;
   transform: TTransformRefs;

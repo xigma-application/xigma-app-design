@@ -66,4 +66,12 @@ describe('canWrapInSection', () => {
     expect(canWrapInSection([], nodes)).toBe(false);
     expect(canWrapInSection([undefined], nodes)).toBe(false);
   });
+
+  it('should not allow a selection that holds a slice', () => {
+    // mock
+    const slice = { ...box, id: 'slice', name: 'Slice', parentId: null, type: NodeType.slice } as const;
+
+    // action / result
+    expect(canWrapInSection([makeRectangle('a', null), slice], nodes)).toBe(false);
+  });
 });

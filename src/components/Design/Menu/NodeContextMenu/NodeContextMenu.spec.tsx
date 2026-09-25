@@ -13,7 +13,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
-import { TFrameNode, TGroupNode, TLineNode, TMaskNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TSceneNode, TLineNode, TMaskNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
@@ -631,6 +631,33 @@ describe('NodeContextMenu', () => {
     expect(selectActivePage(store.getState()).nodes[section.id].locked).toBe(true);
     expect(selectActivePage(store.getState()).nodes[rectangle.id].locked).toBe(true);
     store.dispatch(setSelection([]));
+  });
+
+  it('should show the slice menu without the group, frame, send to make, flatten and mask items, and no empty section', () => {
+    // mock
+    const slice = { ...BASE_NODE, id: 'context-slice', type: NodeType.slice } as TSceneNode;
+
+    // before
+    renderNodeContextMenu({ node: slice, onRename: undefined });
+
+    // result
+    [
+      'Copy',
+      'Paste to replace',
+      'Add motion',
+      'Move to page',
+      'Bring to front',
+      'Send to back',
+      'Add auto layout',
+      'Create component',
+    ].forEach((label) => expect(screen.getByText(label)).toBeInTheDocument());
+    ['Show/Hide', 'Lock/Unlock', 'Flip horizontal', 'Flip vertical'].forEach((label) =>
+      expect(screen.getByText(label)).toBeInTheDocument(),
+    );
+    ['Send to Make', 'Group selection', 'Frame selection', 'Flatten', 'Outline stroke', 'Use as mask'].forEach((label) =>
+      expect(screen.queryByText(label)).not.toBeInTheDocument(),
+    );
+    expect(screen.getAllByRole('separator')).toHaveLength(4);
   });
 
   it('should call onUngroupSelection on Ungroup click for a group node', async () => {

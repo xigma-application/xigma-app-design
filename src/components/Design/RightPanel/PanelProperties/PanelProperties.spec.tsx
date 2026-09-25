@@ -14,7 +14,7 @@ import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/se
 import { store } from 'store';
 
 // types
-import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
+import { BooleanOperation, LayoutMode, NodeType, ToolName } from 'types/design/enums';
 
 // utils
 import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
@@ -317,6 +317,47 @@ describe('PanelProperties behaviors', () => {
 
     // cleanup
     store.dispatch(setSelection([]));
+  });
+
+  it('should show the Boolean panel while a single boolean is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        booleanOperation: BooleanOperation.union,
+        childIds: [],
+        fills: [],
+        height: 20,
+        name: 'Union',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.boolean,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Union')).toBeInTheDocument();
+  });
+
+  it('should show the Slice panel while a single slice is selected', () => {
+    // mock
+    store.dispatch(addNode({ height: 20, name: 'Slice', parentId: null, rotation: 0, type: NodeType.slice, width: 20, x: 0, y: 0 }));
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Slice')).toBeInTheDocument();
+    expect(screen.queryByText('Fill')).not.toBeInTheDocument();
   });
 
   it('should render nothing while a rectangle and a layer without a panel are selected together', () => {

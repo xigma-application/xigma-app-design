@@ -20,13 +20,14 @@ import { isPointOnSceneNode } from './isPointOnSceneNode';
 
 export type TGetNodeAtPointOptions = {
   clipNodesById?: Record<string, TSceneNode>;
+  hitSlices?: boolean;
   ignoreClip?: boolean;
 };
 
 const isHit = (node: TSceneNode, context: TNodeHitContext): boolean => {
-  const { clipAncestorsById, frameNameLabelRects, ignoreClip, point, sectionNameLabelRects } = context;
+  const { clipAncestorsById, frameNameLabelRects, hitSlices, ignoreClip, point, sectionNameLabelRects } = context;
 
-  if (!node.hidden && !node.locked) {
+  if (!node.hidden && !node.locked && (hitSlices || node.type !== NodeType.slice)) {
     const hitStatus =
       !ignoreClip && isPointClippedFromNode(point, node, clipAncestorsById)
         ? 'clipped'
@@ -65,13 +66,14 @@ export const getNodeAtPoint = (
   point: TPoint,
   nodes: TSceneNode[],
   viewport: TViewport,
-  { clipNodesById, ignoreClip = false }: TGetNodeAtPointOptions = {},
+  { clipNodesById, hitSlices = false, ignoreClip = false }: TGetNodeAtPointOptions = {},
 ): TSceneNode | null => {
   const nodesById = getNodesById(nodes);
   const clipAncestorsById = clipNodesById ?? nodesById;
   const context: TNodeHitContext = {
     clipAncestorsById,
     frameNameLabelRects: getFrameNameLabelRects(nodes, viewport.zoom),
+    hitSlices,
     ignoreClip,
     lineTolerance: LINE_HIT_TOLERANCE_PX / viewport.zoom,
     nodesById,
