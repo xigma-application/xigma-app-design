@@ -13,6 +13,11 @@ const drawPdfPolygonsMock = vi.fn();
 vi.mock('utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices', () => ({
   getVectorNodeThickStrokeVertices: (...args: unknown[]): unknown => getVectorNodeThickStrokeVerticesMock(...args),
 }));
+const getVectorStrokeShapeMock = vi.fn<(...args: unknown[]) => unknown>(() => null);
+
+vi.mock('utils/canvas/vector/stroke/getVectorStrokeShape', () => ({
+  getVectorStrokeShape: (...args: unknown[]): unknown => getVectorStrokeShapeMock(...args),
+}));
 vi.mock('../drawPdfPolygons', () => ({ drawPdfPolygons: (...args: unknown[]): void => drawPdfPolygonsMock(...args) }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
@@ -71,5 +76,19 @@ describe('drawPdfVectorStroke', () => {
 
     // result
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a stroke mode shape with its fill rule instead of the plain stroke', () => {
+    // mock
+    const polygons = [[{ x: 0, y: 0 }]];
+
+    getVectorStrokeShapeMock.mockReturnValueOnce({ fillRule: 'evenOdd', polygons });
+
+    // action
+    drawPdfVectorStroke(page, node(), 1, bounds, states);
+
+    // result
+    expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
+    expect(drawPdfPolygonsMock).toHaveBeenCalledWith(page, polygons, '#000000', 1, bounds, states, 'evenOdd');
   });
 });

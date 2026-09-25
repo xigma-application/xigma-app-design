@@ -1,0 +1,1 @@
+export const VECTOR_PROFILE_SAMPLES = 256;

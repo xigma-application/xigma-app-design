@@ -9,6 +9,7 @@ import { getLineStrokeShape } from '../../line/stroke/getLineStrokeShape';
 import { getNestingOrientedLoops } from './getNestingOrientedLoops';
 import { getRingMode } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getBoxStrokeRingPolygons/getRingMode';
 import { getStrokeDashPattern } from 'utils/design/stroke/getStrokeDashPattern';
+import { getVectorStrokeShape } from '../../vector/stroke/getVectorStrokeShape';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const getModeStrokeOutlineLoops = (node: TStrokeableNode): TPoint[][] | null => {
@@ -26,6 +27,10 @@ export const getModeStrokeOutlineLoops = (node: TStrokeableNode): TPoint[][] | n
       }
 
       return null;
+    }
+    case NodeType.vector: {
+      const shape = getVectorStrokeShape(node);
+      return shape ? getNestingOrientedLoops(shape.polygons) : null;
     }
     default:
       return null;

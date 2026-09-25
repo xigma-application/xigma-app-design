@@ -7,6 +7,7 @@ import { buildClosedVectorLoop } from '../vectorNetwork/convertShapeToVector/uti
 import { getBooleanStrokeColor } from '../booleanOperation/getBooleanStrokeColor';
 import { getLineFrame } from './stroke/getLineFrame';
 import { getLineFramePoint } from './stroke/getLineFramePoint';
+import { getLineVectorStrokeSettings } from './getLineVectorStrokeSettings';
 
 export const getLineOffsetVector = (line: TLineNode, distance: number, join: StrokeJoin): Omit<TVectorNode, 'id'> => {
   const frame = getLineFrame(line);
@@ -18,6 +19,7 @@ export const getLineOffsetVector = (line: TLineNode, distance: number, join: Str
   ];
 
   return {
+    ...getLineVectorStrokeSettings(line),
     ...buildClosedVectorLoop(corners, join === StrokeJoin.round ? distance : 0),
     defaultFill: null,
     filledFaceKeys: [],

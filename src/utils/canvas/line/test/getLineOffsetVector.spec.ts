@@ -1,5 +1,5 @@
 // types
-import { NodeType, StrokeJoin } from 'types/design/enums';
+import { NodeType, StrokeJoin, StrokeMode } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 // utils
@@ -52,5 +52,13 @@ describe('getLineOffsetVector', () => {
   it('should fall back to a black stroke for a line without a solid stroke', () => {
     // result
     expect(getLineOffsetVector({ ...line, strokes: [] }, 10, StrokeJoin.miter).strokeColor).toBe('#000000');
+  });
+
+  it('should keep the line stroke mode and its settings on the vector', () => {
+    // before
+    const vector = getLineOffsetVector({ ...line, strokeDynamicWiggle: 40, strokeMode: StrokeMode.dynamic }, 10, StrokeJoin.miter);
+
+    // result
+    expect(vector).toMatchObject({ strokeDynamicWiggle: 40, strokeMode: StrokeMode.dynamic });
   });
 });

@@ -7,6 +7,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { drawPdfPolygons } from './drawPdfPolygons';
 import { getStrokeTrianglePolygons } from 'utils/canvas/vectorNetwork/getStrokeTrianglePolygons';
+import { getVectorStrokeShape } from 'utils/canvas/vector/stroke/getVectorStrokeShape';
 import { getVectorNodeThickStrokeVertices } from 'utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
 
 export const drawPdfVectorStroke = (
@@ -17,8 +18,13 @@ export const drawPdfVectorStroke = (
   graphicsStates: Map<number, PDFName>,
 ): void => {
   if (renderedNode.strokeWidth > 0 && renderedNode.strokeColor) {
-    const triangles = getStrokeTrianglePolygons(getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2));
+    const shape = getVectorStrokeShape(renderedNode);
 
-    drawPdfPolygons(page, triangles, renderedNode.strokeColor, opacity, bounds, graphicsStates, 'nonZero');
+    if (shape) {
+      drawPdfPolygons(page, shape.polygons, renderedNode.strokeColor, opacity, bounds, graphicsStates, shape.fillRule);
+    } else {
+      const triangles = getStrokeTrianglePolygons(getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2));
+      drawPdfPolygons(page, triangles, renderedNode.strokeColor, opacity, bounds, graphicsStates, 'nonZero');
+    }
   }
 };

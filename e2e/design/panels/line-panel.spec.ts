@@ -296,6 +296,26 @@ test('Offset vector previews the offset outline around the line and replaces the
   expect(Math.max(...xs)).toBeGreaterThan(1000 + 25);
 });
 
+test('Offset vector keeps a dynamic line stroke on the vector and draws it dynamic', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector-dynamic');
+  await updateLastNode(page, { strokeMode: 'dynamic', strokeWidth: 10 });
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+  await page.getByLabel('Confirm').click();
+  await expect(page.getByText('Offset', { exact: true })).toHaveCount(0);
+  await new DesignPage(page).click(1500, 900);
+
+  expect(await readLine(page)).toMatchObject({ strokeMode: 'dynamic', type: 'vector' });
+
+  const topEdge = { height: 30, width: 200, x: 800, y: 365 };
+  const dynamic = await page.screenshot({ clip: topEdge });
+
+  await updateLastNode(page, { strokeMode: 'basic' });
+
+  await expect.poll(async () => (await page.screenshot({ clip: topEdge })).equals(dynamic)).toBe(false);
+});
+
 test('Escape leaves Offset vector without adding anything', async ({ page }) => {
   await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector-escape');
 

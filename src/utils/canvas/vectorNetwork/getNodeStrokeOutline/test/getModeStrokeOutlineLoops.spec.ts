@@ -1,9 +1,10 @@
 // types
 import { NodeType, StrokeStyle } from 'types/design/enums';
-import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getModeStrokeOutlineLoops } from '../getModeStrokeOutlineLoops';
+import { makeSquareVector } from 'utils/canvas/vector/stroke/test/fixtures';
 
 const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   height: 0,
@@ -59,5 +60,14 @@ describe('getModeStrokeOutlineLoops', () => {
     // result
     expect(getModeStrokeOutlineLoops(rectangle())).toBeNull();
     expect(getModeStrokeOutlineLoops({ type: NodeType.vector } as TVectorNode)).toBeNull();
+    expect(getModeStrokeOutlineLoops({ type: NodeType.ellipse } as TEllipseNode)).toBeNull();
+  });
+
+  it('should outline a closed vector by its stroke mode shape', () => {
+    // before
+    const loops = getModeStrokeOutlineLoops(makeSquareVector({ strokeDash: 10, strokeGap: 10, strokeStyle: StrokeStyle.dashed })) ?? [];
+
+    // result
+    expect(loops.length).toBeGreaterThan(4);
   });
 });

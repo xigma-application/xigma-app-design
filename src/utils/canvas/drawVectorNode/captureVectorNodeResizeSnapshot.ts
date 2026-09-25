@@ -5,10 +5,25 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 // utils
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
+import { getVectorStrokeShapeFaces } from '../vector/stroke/getVectorStrokeShapeFaces';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
+const getFacesByPaint = (
+  node: TVectorNode,
+  strokeFaces: TVectorNodeResizeSnapshot['facesByPaint'],
+): TVectorNodeResizeSnapshot['facesByPaint'] => [
+  ...groupFilledFacesForRendering(node).map(({ paint, polygons }) => ({ paint, points: polygons })),
+  ...strokeFaces,
+];
+
+const getFlattenedSegments = (
+  node: TVectorNode,
+  strokeFaces: TVectorNodeResizeSnapshot['facesByPaint'],
+): TVectorNodeResizeSnapshot['flattenedSegments'] => (strokeFaces.length > 0 ? [] : flattenVectorSegments(node));
+
 export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: number): TVectorNodeResizeSnapshot => {
-  const facesByPaint = groupFilledFacesForRendering(node).map(({ paint, polygons }) => ({ paint, points: polygons }));
+  const strokeFaces = getVectorStrokeShapeFaces(node);
+  const facesByPaint = getFacesByPaint(node, strokeFaces);
   const bounds = getVectorNodeBounds(node);
   const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
@@ -16,7 +31,7 @@ export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: num
     anchorX: null,
     anchorY: null,
     facesByPaint,
-    flattenedSegments: flattenVectorSegments(node),
+    flattenedSegments: getFlattenedSegments(node, strokeFaces),
     pivot: center,
     rotation,
     scaleX: 1,

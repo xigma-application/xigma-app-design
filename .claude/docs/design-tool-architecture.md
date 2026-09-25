@@ -456,6 +456,12 @@ Two independent render passes, both need updating for a visual change to show up
   (`getNestingOrientedLoops`) because the loop assembler fills by nonzero winding.
   A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
+  Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via
+  `getLineVectorStrokeSettings`; there is no vector UI for them yet). `utils/canvas/vector/stroke/getVectorStrokeShape`
+  draws a single closed path (`getSimpleVectorChain`) in its mode — brush, dynamic, dashed or a width
+  profile ring, filled even-odd — for the canvas, drag/resize/rotate snapshots (as a stroke-colored face),
+  SVG/PDF export and Outline stroke / booleans. Open or branching paths and Basic strokes keep the regular
+  vector stroke.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

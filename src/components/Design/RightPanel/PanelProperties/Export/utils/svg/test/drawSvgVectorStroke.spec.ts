@@ -11,6 +11,11 @@ const drawSvgPolygonsMock = vi.fn();
 vi.mock('utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices', () => ({
   getVectorNodeThickStrokeVertices: (...args: unknown[]): unknown => getVectorNodeThickStrokeVerticesMock(...args),
 }));
+const getVectorStrokeShapeMock = vi.fn<(...args: unknown[]) => unknown>(() => null);
+
+vi.mock('utils/canvas/vector/stroke/getVectorStrokeShape', () => ({
+  getVectorStrokeShape: (...args: unknown[]): unknown => getVectorStrokeShapeMock(...args),
+}));
 vi.mock('../drawSvgPolygons', () => ({ drawSvgPolygons: (...args: unknown[]): void => drawSvgPolygonsMock(...args) }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
@@ -67,5 +72,19 @@ describe('drawSvgVectorStroke', () => {
 
     // result
     expect(drawSvgPolygonsMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a stroke mode shape even-odd instead of the plain stroke', () => {
+    // mock
+    const polygons = [[{ x: 0, y: 0 }]];
+
+    getVectorStrokeShapeMock.mockReturnValueOnce({ fillRule: 'evenOdd', polygons });
+
+    // action
+    drawSvgVectorStroke([], node(), 1, bounds);
+
+    // result
+    expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
+    expect(drawSvgPolygonsMock).toHaveBeenCalledWith([], polygons, '#000000', 1, bounds, 'evenodd');
   });
 });

@@ -24,6 +24,12 @@ vi.mock('../../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertic
   getThickVectorPathVertices: (...args: unknown[]): unknown => getThickVectorPathVerticesMock(...args),
 }));
 
+const getVectorStrokeShapeFacesMock = vi.fn<(...args: unknown[]) => unknown>(() => []);
+
+vi.mock('../../vector/stroke/getVectorStrokeShapeFaces', () => ({
+  getVectorStrokeShapeFaces: (...args: unknown[]): unknown => getVectorStrokeShapeFacesMock(...args),
+}));
+
 const baseNode: TVectorNode = {
   defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: ['s1,s2,s3'],
@@ -112,5 +118,21 @@ describe('captureVectorNodeDragSnapshot', () => {
     });
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
     expect(node.rotation).toBe(45);
+  });
+
+  it('should draw a stroke mode shape as a stroke-colored face instead of the plain stroke', () => {
+    // mock
+    const strokeFaces = [{ paint: [{ color: '#00ff00', opacity: 100, type: 'solid' }], points: [[{ x: 1, y: 1 }]] }];
+
+    groupFilledFacesForRenderingMock.mockReturnValue([]);
+    getVectorStrokeShapeFacesMock.mockReturnValueOnce(strokeFaces);
+
+    // before
+    const snapshot = captureVectorNodeDragSnapshot(baseNode);
+
+    // result
+    expect(snapshot.facesByPaint).toEqual(strokeFaces);
+    expect(snapshot.strokeVertices).toEqual([]);
+    expect(getThickVectorPathVerticesMock).not.toHaveBeenCalled();
   });
 });
