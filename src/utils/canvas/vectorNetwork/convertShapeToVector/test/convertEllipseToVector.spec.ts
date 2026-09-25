@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TEllipseNode } from 'types/design/types';
 
 // utils
@@ -80,5 +80,20 @@ describe('convertEllipseToVector', () => {
     // result
     expect(result.defaultFill).toBe(fills);
     expect(result.strokeColor).toBe('');
+  });
+
+  it('should keep the stroke with its position on the vector', () => {
+    // mock
+    const node = buildEllipse({
+      strokeAlign: StrokeAlign.outside,
+      strokeWidth: 6,
+      strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+    });
+
+    // action
+    const result = convertEllipseToVector(node);
+
+    // result
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeWidth: 6 });
   });
 });

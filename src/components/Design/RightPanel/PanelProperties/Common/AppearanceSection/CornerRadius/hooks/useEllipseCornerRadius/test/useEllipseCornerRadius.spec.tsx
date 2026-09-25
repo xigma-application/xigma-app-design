@@ -16,9 +16,10 @@ import { TEllipseNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
-const addEllipse = (cornerRadius?: number): string => {
+const addEllipse = (cornerRadius?: number, arcEndAngle?: number): string => {
   store.dispatch(
     addNode({
+      arcEndAngle,
       cornerRadius,
       fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
       height: 10,
@@ -101,5 +102,32 @@ describe('useEllipseCornerRadius', () => {
 
     // result
     expect(result.current.valueLabel).toBe(0);
+  });
+
+  it('should be disabled when no selected ellipse is cut', () => {
+    // mock
+    const id = addEllipse(6);
+
+    store.dispatch(setSelection([id]));
+
+    // before
+    const { result } = renderHook(() => useEllipseCornerRadius(), { wrapper });
+
+    // result
+    expect(result.current.isDisabled).toBe(true);
+  });
+
+  it('should be enabled when a selected ellipse is cut', () => {
+    // mock
+    const full = addEllipse(6);
+    const cut = addEllipse(6, 0);
+
+    store.dispatch(setSelection([full, cut]));
+
+    // before
+    const { result } = renderHook(() => useEllipseCornerRadius(), { wrapper });
+
+    // result
+    expect(result.current.isDisabled).toBe(false);
   });
 });

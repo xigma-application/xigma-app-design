@@ -1,5 +1,5 @@
 // types
-import { StrokeMode, StrokeProfile, StrokeStyle } from 'types/design/enums';
+import { StrokeAlign, StrokeMode, StrokeProfile, StrokeStyle } from 'types/design/enums';
 
 // utils
 import { getVectorStrokeShape } from '../getVectorStrokeShape';
@@ -54,5 +54,22 @@ describe('getVectorStrokeShape', () => {
     // result
     expect(getVectorStrokeShape(makeSquareVector({ strokeMode: StrokeMode.brush, strokeWidth: 0 }))).toBeNull();
     expect(getVectorStrokeShape(makeNetworkVector({}, [], { strokeMode: StrokeMode.brush }))).toBeNull();
+  });
+
+  it('should draw a plain stroke of a closed path inside it when aligned inside', () => {
+    // before
+    const shapes = getVectorStrokeShape(makeSquareVector({ strokeAlign: StrokeAlign.inside }));
+
+    // result
+    expect(shapes).toHaveLength(1);
+    expect(Math.min(...(shapes?.[0].polygons.flat().map(({ x }) => x) ?? []))).toBeCloseTo(0);
+  });
+
+  it('should leave a centred plain stroke to the stroke vertices', () => {
+    // before
+    const shapes = getVectorStrokeShape(makeSquareVector({ strokeAlign: StrokeAlign.center }));
+
+    // result
+    expect(shapes).toBeNull();
   });
 });

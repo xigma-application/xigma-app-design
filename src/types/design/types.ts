@@ -414,6 +414,7 @@ export type TVectorNode = {
   parentId: string | null;
   rotation: number;
   segments: Record<string, TVectorSegment>;
+  strokeAlign?: StrokeAlign;
   strokeBrush?: string;
   strokeBrushAngularJitter?: number;
   strokeBrushDirection?: StrokeBrushDirection;

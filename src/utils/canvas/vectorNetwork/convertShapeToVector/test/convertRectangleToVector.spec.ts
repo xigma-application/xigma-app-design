@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
@@ -77,5 +77,20 @@ describe('convertRectangleToVector', () => {
       expect(vertex.y).toBeGreaterThanOrEqual(-0.01);
       expect(vertex.y).toBeLessThanOrEqual(40.01);
     });
+  });
+
+  it('should keep the stroke with its position on the vector', () => {
+    // mock
+    const node = buildRectangle({
+      strokeAlign: StrokeAlign.outside,
+      strokeWidth: 6,
+      strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+    });
+
+    // action
+    const result = convertRectangleToVector(node);
+
+    // result
+    expect(result).toMatchObject({ strokeAlign: StrokeAlign.outside, strokeColor: '#ff0000', strokeWidth: 6 });
   });
 });

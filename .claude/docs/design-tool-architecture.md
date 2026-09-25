@@ -475,7 +475,12 @@ Two independent render passes, both need updating for a visual change to show up
   mitred sides, `getStrokeRingPoint` carries on straight past the ends) with the line-style dynamic, dash
   and profile ports (nonzero) or the brush (even-odd). Used by the canvas, drag/resize/rotate snapshots
   (stroke-colored faces, one per nonzero polygon), SVG/PDF export and Outline stroke / booleans. Basic
-  strokes keep the regular vector stroke.
+  centred strokes keep the regular vector stroke. A vector also has an optional `strokeAlign`: Flatten /
+  Edit object of a rectangle or ellipse copies its stroke color, weight, mode fields and position
+  (`getShapeVectorStrokeSettings`), and an Inside / Outside stroke puts every closed path through the shape
+  path above, as a band from `getAlignedStrokeBand` (the ellipse offsets) or a mode around the moved midline;
+  a closed path inside an odd number of others is a hole (`isVectorStrokePathHole`), so its band turns the
+  other way. Open paths stay centred.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

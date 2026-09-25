@@ -21,5 +21,6 @@ describe('EllipseCornerRadiusInput behaviors', () => {
 
     // result
     expect(screen.getByRole('textbox', { name: 'Corner radius' })).toHaveValue('0');
+    expect(screen.getByRole('textbox', { name: 'Corner radius' })).toBeDisabled();
   });
 });

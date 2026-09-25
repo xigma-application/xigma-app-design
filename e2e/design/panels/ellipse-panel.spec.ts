@@ -55,7 +55,9 @@ test('a selected ellipse shows the Ellipse panel, and typed Arc values cut and h
   await expect.poll(async () => (await page.screenshot({ clip: ellipseArea })).equals(full)).toBe(false);
 });
 
-test('a corner radius typed for an ellipse arc rounds its corners on the canvas', async ({ page }) => {
+test('the ellipse corner radius is disabled until the ellipse is cut, and a typed one rounds the arc corners on the canvas', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-ellipse-panel-corner-radius');
@@ -65,8 +67,12 @@ test('a corner radius typed for an ellipse arc rounds its corners on the canvas'
   const sweep = page.getByRole('textbox', { name: 'Sweep' });
   const cornerRadius = page.getByRole('textbox', { name: 'Corner radius' });
 
+  await expect(cornerRadius).toBeDisabled();
+
   await sweep.fill('25');
   await sweep.press('Tab');
+
+  await expect(cornerRadius).toBeEnabled();
   await designPage.click(1500, 900);
   const sharp = await page.screenshot({ clip: ellipseArea });
   await designPage.click(960, 340);

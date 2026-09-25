@@ -7,6 +7,7 @@ import { TEllipseNode, TVectorNode } from 'types/design/types';
 import { buildClosedLoopFromEdges, TLoopEdge } from './utils/buildClosedVectorLoop';
 import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
+import { getShapeVectorStrokeSettings } from './utils/getShapeVectorStrokeSettings';
 import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
 import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { flipPoint } from 'utils/math/flipPoint';
@@ -85,5 +86,5 @@ export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
     vertices,
   };
 
-  return { ...base, ...getFillDataForClosedLoop(base, fillColor) };
+  return { ...base, ...getFillDataForClosedLoop(base, fillColor), ...getShapeVectorStrokeSettings(node) };
 };

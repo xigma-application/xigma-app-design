@@ -6,6 +6,7 @@ import { TRectangleNode, TVectorNode } from 'types/design/types';
 // utils
 import { buildClosedVectorLoop } from './utils/buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
+import { getShapeVectorStrokeSettings } from './utils/getShapeVectorStrokeSettings';
 import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius';
 import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 
@@ -37,5 +38,5 @@ export const convertRectangleToVector = (node: TRectangleNode): TVectorNode => {
     vertices,
   };
 
-  return { ...base, ...getFillDataForClosedLoop(base, fillColor) };
+  return { ...base, ...getFillDataForClosedLoop(base, fillColor), ...getShapeVectorStrokeSettings(node) };
 };

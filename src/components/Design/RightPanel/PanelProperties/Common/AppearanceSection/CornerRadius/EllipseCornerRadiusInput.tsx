@@ -12,11 +12,12 @@ import { translationNameSpace } from '../constants';
 
 const EllipseCornerRadiusInput: FC = () => {
   const { t } = useTranslation();
-  const { onCommit, onScrub, value, valueLabel } = useEllipseCornerRadius();
+  const { isDisabled, onCommit, onScrub, value, valueLabel } = useEllipseCornerRadius();
 
   return (
     <CornerRadiusInput
       ariaLabel={t(`${translationNameSpace}.cornerRadius.ariaLabel`)}
+      disabled={isDisabled}
       e2eValue="corner-radius"
       iconName="Corners"
       onCommit={onCommit}

@@ -35,4 +35,26 @@ describe('CornerRadiusInput behaviors', () => {
     // result
     expect(onCommit).toHaveBeenCalledWith('12');
   });
+
+  it('should disable the field when disabled', () => {
+    // before
+    render(
+      <TooltipProvider>
+        <CornerRadiusInput
+          ariaLabel="Corner radius"
+          disabled
+          e2eValue="corner-radius"
+          iconName="Corners"
+          onCommit={vi.fn()}
+          onScrub={vi.fn()}
+          scrubValue={0}
+          tooltip="Corner radius"
+          value={0}
+        />
+      </TooltipProvider>,
+    );
+
+    // result
+    expect(screen.getByLabelText('Corner radius')).toBeDisabled();
+  });
 });

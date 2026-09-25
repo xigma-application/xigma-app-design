@@ -97,6 +97,46 @@ test.describe('Flatten — shapes', () => {
     expect(state.nodes[id].type).toBe('vector');
   });
 
+  for (const shape of ['Rectangle', 'Ellipse'] as const) {
+    test(`flattens a ${shape} with an inside stroke into a vector that keeps the stroke inside its outline`, async ({ page }) => {
+      const designPage = new DesignPage(page);
+
+      await designPage.goto(`e2e-test-flatten-${shape.toLowerCase()}-stroke`);
+      await expect(designPage.canvas).toBeVisible();
+
+      await (shape === 'Rectangle' ? designPage.drawRectangle(900, 300, 1050, 420) : designPage.drawEllipse(900, 300, 1050, 420));
+      await page.evaluate(async () => {
+        const { store } = await import('/src/store/index.ts');
+        const { updateNode } = await import('/src/store/design/slice.ts');
+        const { activePageId, pages } = store.getState().design;
+        const [id] = pages[activePageId].rootOrder;
+
+        store.dispatch(
+          updateNode({
+            changes: { strokeAlign: 'inside', strokeWidth: 12, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] } as never,
+            id,
+          }),
+        );
+      });
+      await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+      await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+      const before = await page.screenshot({ clip: SHAPE_REGION });
+
+      await designPage.click(975, 360);
+      await page.keyboard.press(FLATTEN_SHORTCUT);
+      await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
+      await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
+      const after = await page.screenshot({ clip: SHAPE_REGION });
+
+      expect(countMismatchedPixels(after, before)).toBeLessThan(40);
+
+      const state = await readDesignState(page);
+      const [id] = state.rootOrder;
+
+      expect(state.nodes[id]).toMatchObject({ strokeAlign: 'inside', strokeColor: '#ff0000', strokeWidth: 12, type: 'vector' });
+    });
+  }
+
   test('flattens a Line into a vector with pixel-identical appearance', async ({ page }) => {
     const designPage = new DesignPage(page);
 
