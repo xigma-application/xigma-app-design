@@ -116,3 +116,15 @@ images, shadows, blur and noise.
       strokes run around the shape
 - [x] ellipses show Fill and Stroke when selected together with other layers
 - [x] Flatten and Edit object keep the stroke of a rectangle or ellipse, including its Position
+
+## Stage 15 — Polygon
+
+A polygon has its own panel like an ellipse: Position, Layout, Appearance, Fill, Stroke, Effects and
+Export. Appearance has Opacity, Corner radius and Count, the number of sides. Fills, strokes and
+effects work the same as on a rectangle: several fills, gradients, images, shadows, blur and noise.
+
+- [x] the stroke follows the real shape, including rounded corners, inside, in the centre or outside
+- [x] Offset vector in the "…" menu turns a polygon into a bigger shape around it, with sharp or round
+      corners and a live preview that already shows the fill
+- [x] Flatten, Edit object and Offset vector keep the polygon's fill and stroke
+- [x] polygons show Fill and Stroke when selected together with other layers
