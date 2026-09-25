@@ -54,7 +54,7 @@ const buildNode = (
     x: 0,
     y: 0,
     ...overrides,
-  }) as TSceneNode;
+  }) as unknown as TSceneNode;
 
 describe('drawHoverOutline', () => {
   it('should draw nothing when no node is hovered', () => {

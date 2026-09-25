@@ -23,7 +23,7 @@ const buildNode = (
     x: 0,
     y: 0,
     ...overrides,
-  }) as TSceneNode;
+  }) as unknown as TSceneNode;
 
 describe('getSelectionBounds', () => {
   it('should return the bounds of a single node', () => {

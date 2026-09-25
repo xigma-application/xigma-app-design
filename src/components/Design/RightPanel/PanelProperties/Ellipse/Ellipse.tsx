@@ -6,8 +6,10 @@ import AppearanceSection from '../Common/AppearanceSection/AppearanceSection';
 import ColumnDimensions from '../Common/ColumnDimensions/ColumnDimensions';
 import ColumnGridChildSpan from '../Common/ColumnGridChildSpan/ColumnGridChildSpan';
 import ColumnSpacing from '../Common/ColumnSpacing/ColumnSpacing';
+import EffectsSection from '../Common/EffectsSection/EffectsSection';
 import EllipseHeader from './EllipseHeader/EllipseHeader';
 import Export from '../Export/Export';
+import FillSection from '../Common/FillSection/FillSection';
 import PositionSection from '../Common/PositionSection/PositionSection';
 import { UITools } from 'shared';
 
@@ -26,7 +28,9 @@ const Ellipse: FC = () => {
         <ColumnSpacing />
         <ColumnGridChildSpan />
       </UITools.Section>
-      <AppearanceSection withArc withBlendMode={false} withCornerRadius={false} withEllipseCornerRadius />
+      <AppearanceSection withArc withCornerRadius={false} withEllipseCornerRadius />
+      <FillSection />
+      <EffectsSection />
       <Export />
     </Fragment>
   );

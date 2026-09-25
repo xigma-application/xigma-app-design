@@ -93,14 +93,14 @@ describe('getNodeStrokeOutline', () => {
   it('should build a ring outline for an ellipse with a stroke', () => {
     // mock
     const node: TEllipseNode = {
-      fill: '#ffffff',
+      fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'ellipse-1',
       name: 'Ellipse',
       parentId: null,
       rotation: 0,
-      strokeColor: '#000000',
       strokeWidth: 4,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.ellipse,
       width: 20,
       x: 0,

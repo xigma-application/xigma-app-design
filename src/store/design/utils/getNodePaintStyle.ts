@@ -13,6 +13,7 @@ export type TNodePaintStyle = Pick<TBooleanNode, 'effects' | 'fills' | 'strokeAl
 export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle => {
   switch (node?.type) {
     case NodeType.boolean:
+    case NodeType.ellipse:
     case NodeType.rectangle:
     case NodeType.section:
       return {
@@ -21,12 +22,6 @@ export const getNodePaintStyle = (node: TSceneNode | undefined): TNodePaintStyle
         strokeAlign: node.strokeAlign,
         strokeWidth: node.strokeWidth,
         strokes: node.strokes,
-      };
-    case NodeType.ellipse:
-      return {
-        fills: [makeSolidPaint(node.fill)],
-        strokeWidth: node.strokeWidth,
-        strokes: node.strokeColor ? [makeSolidPaint(node.strokeColor)] : undefined,
       };
     case NodeType.polygon:
     case NodeType.star:

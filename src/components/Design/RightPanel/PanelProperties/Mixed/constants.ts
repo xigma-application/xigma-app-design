@@ -9,6 +9,7 @@ export const translationNameSpace = `${parentNameSpace}.mixed`;
 
 export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
   [NodeType.boolean]: ['position', 'rotation', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'export'],
+  [NodeType.ellipse]: ['position', 'rotation', 'layout', 'appearance', 'fill', 'effects', 'export'],
   [NodeType.frame]: [
     'position',
     'rotation',

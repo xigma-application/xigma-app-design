@@ -20,7 +20,13 @@ const RECTANGLE: TRectangleNode = {
   y: 0,
 };
 
-const ELLIPSE: TEllipseNode = { ...omit(RECTANGLE, 'fills'), fill: '#ffffff', id: 'ellipse-1', name: 'Ellipse', type: NodeType.ellipse };
+const ELLIPSE: TEllipseNode = {
+  ...omit(RECTANGLE, 'fills'),
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
+  id: 'ellipse-1',
+  name: 'Ellipse',
+  type: NodeType.ellipse,
+};
 
 const LINE: TLineNode = {
   height: 0,

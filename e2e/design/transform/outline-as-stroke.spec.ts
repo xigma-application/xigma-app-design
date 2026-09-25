@@ -87,7 +87,7 @@ test.describe('Outline as stroke', () => {
     await expect(designPage.canvas).toBeVisible();
 
     await designPage.drawEllipse(900, 300, 1050, 420);
-    await setStroke(page, { strokeColor: '#00AA00', strokeWidth: 8 });
+    await setStroke(page, { strokeWidth: 8, strokes: [{ color: '#00AA00', opacity: 100, type: 'solid' }] });
     await designPage.click(DESELECT_POINT.x, DESELECT_POINT.y);
     await designPage.pointerMove(DESELECT_POINT.x, DESELECT_POINT.y);
     const before = await page.screenshot({ clip: SHAPE_REGION });

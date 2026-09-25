@@ -20,7 +20,7 @@ const addEllipse = (cornerRadius?: number): string => {
   store.dispatch(
     addNode({
       cornerRadius,
-      fill: '#d9d9d9',
+      fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
       height: 10,
       name: 'Ellipse',
       parentId: null,

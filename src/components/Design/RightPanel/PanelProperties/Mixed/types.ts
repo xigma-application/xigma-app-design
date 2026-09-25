@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 export type TPanelNodeType =
   | NodeType.boolean
+  | NodeType.ellipse
   | NodeType.frame
   | NodeType.group
   | NodeType.line

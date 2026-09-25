@@ -36,7 +36,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
 // what makes the Start/rotate handle exist at all
 const cutEllipse: TEllipseNode = {
   arcEndAngle: 0,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'ellipse-1',
   name: 'Ellipse',

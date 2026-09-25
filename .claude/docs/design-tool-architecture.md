@@ -454,6 +454,10 @@ Two independent render passes, both need updating for a visual change to show up
   through `getNodeStrokeOutline` → `getModeStrokeOutlineLoops`: a line's stroke shape, or a rectangle's
   non-uniform drawn ring (turned back into its unrotated frame), wound by nesting depth
   (`getNestingOrientedLoops`) because the loop assembler fills by nonzero winding.
+  An ellipse is drawn like a line: `getEllipseShape` wraps its world outline (`getEllipseFillPoints` —
+  full ellipse, arc, ring or rounded corners — flipped and rotated) as a `TBooleanShape`, and
+  `drawEllipseLeafNode` runs `drawBoxPaints` over it between the boolean shadow / inner shadow / noise
+  drawers. The batched path only takes a full ellipse with solid, unblended fills and no stroke or effects.
   A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
   Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via

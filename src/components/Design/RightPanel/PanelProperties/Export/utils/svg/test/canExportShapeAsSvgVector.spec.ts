@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TLineNode, TMediaNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TMediaNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsSvgVector } from '../canExportShapeAsSvgVector';
@@ -34,7 +34,7 @@ const frame: TFrameNode = {
 };
 
 const ellipse: TEllipseNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'e',
   name: 'e',
@@ -100,7 +100,7 @@ describe('canExportShapeAsSvgVector', () => {
     expect(canExportShapeAsSvgVector({ ...frame, hidden: true }, {})).toBe(false);
   });
 
-  it('should route an ellipse/polygon/star through the simple-shape eligibility check', () => {
+  it('should route an ellipse through its own eligibility check', () => {
     expect(canExportShapeAsSvgVector(ellipse, {})).toBe(true);
     expect(canExportShapeAsSvgVector({ ...ellipse, hidden: true }, {})).toBe(false);
   });
@@ -118,5 +118,21 @@ describe('canExportShapeAsSvgVector', () => {
   it('should route a standalone media node through the media eligibility check', () => {
     expect(canExportShapeAsSvgVector(media, {})).toBe(true);
     expect(canExportShapeAsSvgVector({ ...media, src: '' }, {})).toBe(false);
+  });
+
+  it('should route a polygon through the simple-shape eligibility check', () => {
+    // mock
+    const polygon = {
+      ...ellipse,
+      fill: '#ff0000',
+      flipX: false,
+      flipY: false,
+      sides: 5,
+      type: NodeType.polygon,
+    } as unknown as TPolygonNode;
+
+    // result
+    expect(canExportShapeAsSvgVector(polygon, {})).toBe(true);
+    expect(canExportShapeAsSvgVector({ ...polygon, hidden: true }, {})).toBe(false);
   });
 });

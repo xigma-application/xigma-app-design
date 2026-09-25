@@ -5,6 +5,7 @@ import { TPdfShapeNode } from './types';
 
 // utils
 import { canExportBoxShapeAsVector } from './canExportBoxShapeAsVector';
+import { canExportEllipseAsVector } from './canExportEllipseAsVector';
 import { canExportLineAsVector } from './canExportLineAsVector';
 import { canExportSimpleShapeAsVector } from './canExportSimpleShapeAsVector';
 import { canExportVectorNodeAsVector } from './canExportVectorNodeAsVector';
@@ -14,6 +15,8 @@ export const canExportShapeAsVector = (node: TPdfShapeNode, nodesById: Record<st
     case NodeType.frame:
     case NodeType.rectangle:
       return canExportBoxShapeAsVector(node, nodesById);
+    case NodeType.ellipse:
+      return canExportEllipseAsVector(node, nodesById);
     case NodeType.line:
       return canExportLineAsVector(node, nodesById);
     case NodeType.vector:

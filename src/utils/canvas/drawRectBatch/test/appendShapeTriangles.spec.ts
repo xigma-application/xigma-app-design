@@ -47,7 +47,7 @@ describe('appendShapeTriangles', () => {
     // mock
     const batch = createRectBatch();
     const ellipse = {
-      fill: '#00ff00',
+      fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'e',
       name: 'e',

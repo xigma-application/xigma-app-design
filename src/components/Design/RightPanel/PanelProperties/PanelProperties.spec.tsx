@@ -302,7 +302,20 @@ describe('PanelProperties behaviors', () => {
     // mock
     const rectangleId = addRectangleNode();
     store.dispatch(
-      addNode({ fill: '#ffffff', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+      addNode({
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        height: 20,
+        name: 'Polygon',
+        parentId: null,
+        rotation: 0,
+        sides: 5,
+        type: NodeType.polygon,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     groupSelection([rectangleId, rootOrder[rootOrder.length - 1]]);
@@ -363,7 +376,17 @@ describe('PanelProperties behaviors', () => {
   it('should show the Ellipse panel with the Arc row while an ellipse is selected', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#d9d9d9', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+      addNode({
+        fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+        height: 20,
+        name: 'Ellipse',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.ellipse,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
@@ -436,7 +459,20 @@ describe('PanelProperties behaviors', () => {
     // mock
     const rectangleId = addRectangleNode();
     store.dispatch(
-      addNode({ fill: '#ffffff', height: 20, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 20, x: 0, y: 0 }),
+      addNode({
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        height: 20,
+        name: 'Polygon',
+        parentId: null,
+        rotation: 0,
+        sides: 5,
+        type: NodeType.polygon,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     store.dispatch(setSelection([rectangleId, rootOrder[rootOrder.length - 1]]));

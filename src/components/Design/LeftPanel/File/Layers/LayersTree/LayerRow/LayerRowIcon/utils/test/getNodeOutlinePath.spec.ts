@@ -44,7 +44,7 @@ describe('getNodeOutlinePath', () => {
   it('should return an outline for an ellipse node', () => {
     // mock
     const node: TEllipseNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 40,
       id: 'ellipse-1',
       name: 'Ellipse',

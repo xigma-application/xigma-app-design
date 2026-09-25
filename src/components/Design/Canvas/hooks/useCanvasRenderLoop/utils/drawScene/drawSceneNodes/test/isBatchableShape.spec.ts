@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { BlendMode, EffectType, NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -22,7 +22,7 @@ const createRectangle = (overrides: Record<string, unknown> = {}): TSceneNode =>
 
 const createEllipse = (overrides: Record<string, unknown> = {}): TSceneNode =>
   ({
-    fill: '#00ff00',
+    fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
     height: 10,
     id: 'ellipse',
     name: 'Ellipse',
@@ -135,8 +135,11 @@ describe('isBatchableShape ellipses', () => {
   });
 
   it.each([
-    ['no fill string', { fill: undefined }],
-    ['a stroke', { strokeColor: '#000000', strokeWidth: 2 }],
+    ['no fills array', { fills: undefined }],
+    ['a gradient fill', { fills: [{ opacity: 100, stops: [], type: 'gradient-linear' }] }],
+    ['a blended fill', { fills: [{ blendMode: BlendMode.multiply, color: '#00ff00', opacity: 100, type: 'solid' }] }],
+    ['an effect', { effects: [{ type: EffectType.dropShadow }] }],
+    ['a stroke', { strokeWidth: 2, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] }],
     ['an arc', { arcEndAngle: 180, arcStartAngle: 0 }],
     ['a ratio hole', { arcRatio: 0.5 }],
   ])('should reject an ellipse with %s', (_, overrides) => {
@@ -144,8 +147,8 @@ describe('isBatchableShape ellipses', () => {
     expect(isBatchableShape(createEllipse(overrides))).toBe(false);
   });
 
-  it('should accept an ellipse whose stroke color has no width', () => {
+  it('should accept an ellipse whose stroke has no width', () => {
     // result
-    expect(isBatchableShape(createEllipse({ strokeColor: '#000000', strokeWidth: 0 }))).toBe(true);
+    expect(isBatchableShape(createEllipse({ strokeWidth: 0, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] }))).toBe(true);
   });
 });

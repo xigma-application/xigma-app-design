@@ -8,7 +8,7 @@ import { buildClosedLoopFromEdges, TLoopEdge } from './utils/buildClosedVectorLo
 import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
-import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { flipPoint } from 'utils/math/flipPoint';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
@@ -69,20 +69,21 @@ export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
     ? getFullEllipseEdges(node.x + node.width / 2, node.y + node.height / 2, node.width / 2, node.height / 2)
     : getArcCutEdges(node, arcStartAngle, arcEndAngle);
   const { segments, vertices } = buildClosedLoopFromEdges(edges);
+  const fillColor = getSolidPaintColor(node.fills) ?? '';
   const base: TVectorNode = {
-    defaultFill: [makeSolidPaint(node.fill)],
+    defaultFill: node.fills,
     filledFaceKeys: [],
     id: node.id,
     name: node.name,
     parentId: node.parentId,
     rotation: node.rotation,
     segments,
-    strokeColor: node.fill,
+    strokeColor: fillColor,
     strokeWidth: SHAPE_VECTOR_STROKE_WIDTH,
     type: NodeType.vector,
     vertexHandleModes: {},
     vertices,
   };
 
-  return { ...base, ...getFillDataForClosedLoop(base, node.fill) };
+  return { ...base, ...getFillDataForClosedLoop(base, fillColor) };
 };

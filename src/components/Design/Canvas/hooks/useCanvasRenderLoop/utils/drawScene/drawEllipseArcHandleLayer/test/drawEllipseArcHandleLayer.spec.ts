@@ -36,7 +36,7 @@ vi.mock('../drawHoveredEllipseArcRatioValueLabel', () => ({
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'ellipse-1',
   name: 'Ellipse',

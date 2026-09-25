@@ -28,7 +28,7 @@ const renderEllipseHeader = (): ReturnType<typeof render> =>
   );
 
 const makeEllipse = (id: string): TEllipseNode => ({
-  fill: '#d9d9d9',
+  fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
   height: 20,
   id,
   name: id,

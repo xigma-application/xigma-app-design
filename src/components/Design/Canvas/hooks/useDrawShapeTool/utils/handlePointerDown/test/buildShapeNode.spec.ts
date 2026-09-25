@@ -44,12 +44,12 @@ describe('buildShapeNode', () => {
     expect(node).not.toHaveProperty('childIds');
   });
 
-  it('should build an ellipse with a single fill string, not a fills array', () => {
+  it('should build an ellipse with a single solid fill paint', () => {
     // before
     const node = buildShapeNode(RECT, '#00ff00', 'Ellipse', NodeType.ellipse, null);
 
     // result
-    expect(node).toMatchObject({ fill: '#00ff00', type: NodeType.ellipse });
-    expect(node).not.toHaveProperty('fills');
+    expect(node).toMatchObject({ fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }], type: NodeType.ellipse });
+    expect(node).not.toHaveProperty('fill');
   });
 });

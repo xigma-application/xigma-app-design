@@ -28,7 +28,7 @@ const context = {
 const node: TEllipseNode = {
   arcEndAngle: 0,
   arcRatio: 0.5,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'ellipse-1',
   name: 'Ellipse',

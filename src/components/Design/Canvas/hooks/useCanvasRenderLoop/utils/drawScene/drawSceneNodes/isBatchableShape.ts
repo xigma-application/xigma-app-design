@@ -25,8 +25,11 @@ const isBatchableRectangle = (node: TRectangleNode): boolean =>
   !getFaceGroupBlendMode(node.fills);
 
 const isBatchableEllipse = (node: TEllipseNode): boolean =>
-  typeof node.fill === 'string' &&
-  !(node.strokeColor && node.strokeWidth) &&
+  Array.isArray(node.fills) &&
+  node.fills.every((paint) => paint.type === 'solid') &&
+  !getFaceGroupBlendMode(node.fills) &&
+  !node.effects?.length &&
+  !(node.strokes?.length && node.strokeWidth) &&
   !hasEllipseArc(node.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE, node.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE) &&
   (node.arcRatio ?? 0) <= 0;
 

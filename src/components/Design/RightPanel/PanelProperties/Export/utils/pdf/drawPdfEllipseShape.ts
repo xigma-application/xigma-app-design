@@ -2,35 +2,43 @@ import { PDFName, PDFPage } from 'pdf-lib';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TEllipseNode } from 'types/design/types';
+import { TEllipseNode, TSceneNode } from 'types/design/types';
 
 // utils
-import { drawPdfPolygons } from './drawPdfPolygons';
+import { drawPdfPaintPolygons } from './drawPdfPaintPolygons';
 import { flipPoint } from 'utils/math/flipPoint';
-import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
+import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
 import { getEllipseStrokeRingPoints } from 'utils/canvas/shapes/getEllipseStrokeRingPoints';
+import { getEllipseWorldPoints } from 'utils/canvas/shapes/getEllipseWorldPoints';
+import { hasVectorStroke } from '../hasVectorStroke';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const drawPdfEllipseShape = (
   page: PDFPage,
   node: TEllipseNode,
-  opacity: number,
+  nodesById: Record<string, TSceneNode>,
   bounds: TDraftRect,
   graphicsStates: Map<number, PDFName>,
 ): void => {
+  const opacity = getEffectiveOpacity(node, nodesById);
   const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
   const toDesign = (point: TPoint): TPoint =>
     rotatePoint(flipPoint(point, center, node.flipX ?? false, node.flipY ?? false), center, node.rotation);
 
-  if (node.fill) {
-    drawPdfPolygons(page, [getEllipseFillPoints(node).map(toDesign)], node.fill, opacity, bounds, graphicsStates);
-  }
+  drawPdfPaintPolygons(
+    page,
+    node.fills,
+    [getEllipseWorldPoints(node, node.flipX ?? false, node.flipY ?? false, node.rotation)],
+    opacity,
+    bounds,
+    graphicsStates,
+  );
 
-  if (node.strokeColor && node.strokeWidth) {
-    drawPdfPolygons(
+  if (node.strokes && hasVectorStroke(node)) {
+    drawPdfPaintPolygons(
       page,
-      getEllipseStrokeRingPoints(node, node.strokeWidth).map((polygon) => polygon.map(toDesign)),
-      node.strokeColor,
+      node.strokes,
+      getEllipseStrokeRingPoints(node, node.strokeWidth as number).map((polygon) => polygon.map(toDesign)),
       opacity,
       bounds,
       graphicsStates,

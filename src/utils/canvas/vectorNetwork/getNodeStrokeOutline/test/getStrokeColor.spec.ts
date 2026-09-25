@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TLineNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { getStrokeColor } from '../getStrokeColor';
@@ -48,5 +48,25 @@ describe('getStrokeColor', () => {
   it('should fall back to an empty string when a non-line node has no strokeColor', () => {
     // result
     expect(getStrokeColor(buildRectangle())).toBe('');
+  });
+
+  it('should read an ellipse stroke from its first visible stroke paint, or nothing without one', () => {
+    // mock
+    const ellipse = {
+      fills: [],
+      height: 20,
+      id: 'e',
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width: 20,
+      x: 0,
+      y: 0,
+    } as TEllipseNode;
+
+    // result
+    expect(getStrokeColor({ ...ellipse, strokes: [{ color: '#123456', opacity: 100, type: 'solid' }] })).toBe('#123456');
+    expect(getStrokeColor(ellipse)).toBe('');
   });
 });

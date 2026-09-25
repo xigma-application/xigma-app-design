@@ -19,7 +19,7 @@ const rect: TSceneNode = {
 };
 
 const ellipse: TSceneNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'a',
   name: 'Ellipse',

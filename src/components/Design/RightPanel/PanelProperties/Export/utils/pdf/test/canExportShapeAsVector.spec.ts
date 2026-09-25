@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TPolygonNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { canExportShapeAsVector } from '../canExportShapeAsVector';
@@ -19,7 +19,7 @@ const rectangle: TRectangleNode = {
 };
 
 const ellipse: TEllipseNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'e',
   name: 'e',
@@ -65,7 +65,7 @@ describe('canExportShapeAsVector', () => {
     expect(canExportShapeAsVector({ ...rectangle, strokeColor: '#000000', strokeWidth: 2 }, {})).toBe(false);
   });
 
-  it('should route an ellipse/polygon/star through the simple-shape eligibility check', () => {
+  it('should route an ellipse through its own eligibility check', () => {
     expect(canExportShapeAsVector(ellipse, {})).toBe(true);
     expect(canExportShapeAsVector({ ...ellipse, hidden: true }, {})).toBe(false);
   });
@@ -78,5 +78,30 @@ describe('canExportShapeAsVector', () => {
   it('should route a pen-tool vector node through the vector-node eligibility check', () => {
     expect(canExportShapeAsVector(vector, {})).toBe(true);
     expect(canExportShapeAsVector({ ...vector, hidden: true }, {})).toBe(false);
+  });
+
+  it('should route a polygon through the simple-shape eligibility check', () => {
+    // mock
+    const polygon = {
+      ...ellipse,
+      fill: '#ff0000',
+      flipX: false,
+      flipY: false,
+      sides: 5,
+      type: NodeType.polygon,
+    } as unknown as TPolygonNode;
+
+    // result
+    expect(canExportShapeAsVector(polygon, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...polygon, hidden: true }, {})).toBe(false);
+  });
+
+  it('should route a frame through the box eligibility check', () => {
+    // mock
+    const frame = { ...rectangle, childIds: [], clipContent: false, type: NodeType.frame } as TFrameNode;
+
+    // result
+    expect(canExportShapeAsVector(frame, {})).toBe(true);
+    expect(canExportShapeAsVector({ ...frame, hidden: true }, {})).toBe(false);
   });
 });

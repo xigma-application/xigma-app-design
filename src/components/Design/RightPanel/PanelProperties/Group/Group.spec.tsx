@@ -75,12 +75,15 @@ describe('Group behaviors', () => {
         nodes: [
           {
             fill: '#ffffff',
+            flipX: false,
+            flipY: false,
             height: 20,
             id: 'panelEllipse',
-            name: 'Ellipse',
+            name: 'Polygon',
             parentId: null,
             rotation: 0,
-            type: NodeType.ellipse,
+            sides: 5,
+            type: NodeType.polygon,
             width: 20,
             x: 0,
             y: 0,

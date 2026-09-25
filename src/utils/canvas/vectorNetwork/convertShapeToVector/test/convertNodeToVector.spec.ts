@@ -19,7 +19,7 @@ const RECTANGLE: TRectangleNode = {
   y: 0,
 };
 const ELLIPSE: TEllipseNode = {
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'e',
   name: 'E',

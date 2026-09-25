@@ -6,6 +6,7 @@ import { TSvgShapeNode } from './types';
 
 // utils
 import { drawSvgBoxShape } from './drawSvgBoxShape';
+import { drawSvgEllipseShape } from './drawSvgEllipseShape';
 import { drawSvgLineShape } from './drawSvgLineShape';
 import { drawSvgMediaNodeShape } from './drawSvgMediaNodeShape';
 import { drawSvgSimpleShape } from './drawSvgSimpleShape';
@@ -22,6 +23,9 @@ export const drawSvgShape = async (
     case NodeType.frame:
     case NodeType.rectangle:
       await drawSvgBoxShape(elements, defs, node, nodesById, bounds);
+      break;
+    case NodeType.ellipse:
+      await drawSvgEllipseShape(elements, defs, node, nodesById, bounds);
       break;
     case NodeType.line:
       drawSvgLineShape(elements, node, nodesById, bounds);

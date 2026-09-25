@@ -21,9 +21,7 @@ export const buildShapeNode = (
       return { ...rect, ...getDefaultSectionStyle(fill), childIds: [], name, parentId, rotation: 0, type };
     case NodeType.slice:
       return { ...rect, name, parentId: null, rotation: 0, type };
-    case NodeType.rectangle:
-      return { ...rect, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
     default:
-      return { ...rect, fill, name, parentId, rotation: 0, type };
+      return { ...rect, fills: [makeSolidPaint(fill)], name, parentId, rotation: 0, type };
   }
 };

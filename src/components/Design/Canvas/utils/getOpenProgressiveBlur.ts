@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TBooleanNode, TEffect, TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
+import { TBooleanNode, TEffect, TEllipseNode, TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TOpenPropertyPanel } from 'store/design/types';
 
 // utils
@@ -9,7 +9,7 @@ import { isProgressiveBlur } from 'utils/design/effects/isProgressiveBlur';
 export type TOpenProgressiveBlur = {
   effect: TEffect;
   effectIndex: number;
-  node: TBooleanNode | TFrameNode | TRectangleNode | TSectionNode;
+  node: TBooleanNode | TEllipseNode | TFrameNode | TRectangleNode | TSectionNode;
 };
 
 export const getOpenProgressiveBlur = (

@@ -72,3 +72,29 @@ test('a corner radius typed for an ellipse arc rounds its corners on the canvas'
   await designPage.click(1500, 900);
   await expect.poll(async () => (await page.screenshot({ clip: ellipseArea })).equals(sharp)).toBe(false);
 });
+
+test('an ellipse takes a second fill and a drop shadow from its panel and draws both', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-ellipse-panel-paints');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawEllipse(800, 300, 1000, 500);
+
+  await expect(page.getByText('Fill', { exact: true })).toBeVisible();
+  await expect(page.getByText('Effects', { exact: true })).toBeVisible();
+
+  const shadowArea = { height: 20, width: 120, x: 840, y: 500 };
+  await designPage.click(1500, 900);
+  const plain = await page.screenshot({ clip: shadowArea });
+  await designPage.click(900, 400);
+
+  await page.getByLabel('Add fill').click();
+  await page.getByLabel('Add effect').click();
+  await page.getByText('Drop shadow', { exact: true }).last().click();
+
+  expect(await readEllipse(page)).toMatchObject({ effects: [{ type: 'dropShadow' }] });
+  expect(((await readEllipse(page)).fills as unknown[]).length).toBe(2);
+
+  await designPage.click(1500, 900);
+  await expect.poll(async () => (await page.screenshot({ clip: shadowArea })).equals(plain)).toBe(false);
+});

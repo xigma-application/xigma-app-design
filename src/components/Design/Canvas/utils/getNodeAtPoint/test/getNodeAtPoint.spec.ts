@@ -25,7 +25,7 @@ const buildNode = (
     x: 0,
     y: 0,
     ...overrides,
-  }) as TSceneNode;
+  }) as unknown as TSceneNode;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -503,8 +503,8 @@ describe('getNodeAtPoint', () => {
     const node = buildNode({
       height: 10,
       id: 'a',
-      strokeColor: '#000000',
       strokeWidth: 8,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.ellipse,
       width: 10,
       x: 0,

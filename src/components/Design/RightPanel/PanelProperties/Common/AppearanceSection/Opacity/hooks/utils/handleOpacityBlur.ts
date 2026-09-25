@@ -4,7 +4,6 @@ import { FocusEvent } from 'react';
 import { AppDispatch } from 'store';
 
 // types
-import { TEllipseNode } from 'types/design/types';
 import { TStyledNode } from '../../../types';
 
 // utils
@@ -15,7 +14,7 @@ import { commitOpacityChange } from './commitOpacityChange';
 export const handleOpacityBlur = (
   event: FocusEvent<HTMLInputElement>,
   dispatch: AppDispatch,
-  nodes: (TEllipseNode | TStyledNode)[],
+  nodes: TStyledNode[],
   displayValue: string,
 ): void => {
   const stripped = event.target.value.trim().replace(/[^\d.-]/g, '');

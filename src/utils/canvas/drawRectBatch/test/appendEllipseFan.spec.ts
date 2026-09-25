@@ -10,7 +10,7 @@ import { createRectBatch } from '../createRectBatch';
 
 const createNode = (overrides: Record<string, unknown> = {}): TEllipseNode =>
   ({
-    fill: '#ff0000',
+    fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     height: 20,
     id: 'e',
     name: 'e',
@@ -56,12 +56,35 @@ describe('appendEllipseFan', () => {
     expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(40, 3);
   });
 
+  it('should emit one fan per visible solid fill, scaling the node opacity by the paint opacity', () => {
+    // mock
+    const batch = createRectBatch();
+
+    // before
+    appendEllipseFan(
+      batch,
+      createNode({
+        fills: [
+          { color: '#00ff00', opacity: 50, type: 'solid' },
+          { color: '#0000ff', opacity: 100, type: 'solid', visible: false },
+          { color: '#ff0000', opacity: 100, type: 'solid' },
+        ],
+      }),
+      1,
+    );
+
+    // result
+    expect(batch.floatCount).toBe(ELLIPSE_SEGMENTS * 18 * 2);
+    expect(Array.from(batch.data.subarray(0, 6))).toEqual([120, 210, 1, 0, 0, 1]);
+    expect(Array.from(batch.data.subarray(ELLIPSE_SEGMENTS * 18, ELLIPSE_SEGMENTS * 18 + 6))).toEqual([120, 210, 0, 1, 0, 0.5]);
+  });
+
   it('should emit nothing without a fill', () => {
     // mock
     const batch = createRectBatch();
 
     // before
-    appendEllipseFan(batch, createNode({ fill: '' }), 1);
+    appendEllipseFan(batch, createNode({ fills: [] }), 1);
 
     // result
     expect(batch.floatCount).toBe(0);

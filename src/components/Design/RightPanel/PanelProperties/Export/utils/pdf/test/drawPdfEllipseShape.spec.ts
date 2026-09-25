@@ -1,22 +1,27 @@
 import { PDFName } from 'pdf-lib';
 
+// others
+import { ELLIPSE_SEGMENTS } from 'constant/canvas';
+
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { NodeType } from 'types/design/enums';
 import { TEllipseNode } from 'types/design/types';
 
 // utils
 import { drawPdfEllipseShape } from '../drawPdfEllipseShape';
 
-const drawPdfPolygonsMock = vi.fn();
+const drawPdfPaintPolygonsMock = vi.fn();
 
-vi.mock('../drawPdfPolygons', () => ({ drawPdfPolygons: (...args: unknown[]): void => drawPdfPolygonsMock(...args) }));
+vi.mock('../drawPdfPaintPolygons', () => ({ drawPdfPaintPolygons: (...args: unknown[]): void => drawPdfPaintPolygonsMock(...args) }));
 
 const bounds = { height: 100, width: 100, x: 0, y: 0 };
 const page = {} as never;
 const states = new Map<number, PDFName>();
+const fills = [{ color: '#ff0000', opacity: 100, type: 'solid' as const }];
+const strokes = [{ color: '#0000ff', opacity: 100, type: 'solid' as const }];
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#ff0000',
+  fills,
   height: 20,
   id: 'e',
   name: 'e',
@@ -31,73 +36,34 @@ const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
 
 describe('drawPdfEllipseShape', () => {
   beforeEach(() => {
-    drawPdfPolygonsMock.mockClear();
+    drawPdfPaintPolygonsMock.mockClear();
   });
 
-  it('should draw a full ellipse as one closed loop of the ellipse segment count', () => {
+  it('should draw the fill paints over the ellipse shape with the node opacity', () => {
     // action
-    drawPdfEllipseShape(page, ellipse(), 0.5, bounds, states);
+    drawPdfEllipseShape(page, ellipse({ opacity: 0.5 }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock).toHaveBeenCalledTimes(1);
-    expect(drawPdfPolygonsMock.mock.calls[0][2]).toBe('#ff0000');
-    expect(drawPdfPolygonsMock.mock.calls[0][3]).toBe(0.5);
-    expect(drawPdfPolygonsMock.mock.calls[0][1]).toHaveLength(1);
-    expect(drawPdfPolygonsMock.mock.calls[0][1][0]).toHaveLength(64);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][1]).toBe(fills);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][2][0]).toHaveLength(ELLIPSE_SEGMENTS);
+    expect(drawPdfPaintPolygonsMock.mock.calls[0][3]).toBe(0.5);
   });
 
-  it('should draw an arc as a fan from the center', () => {
+  it('should draw the stroke paints over the stroke ring', () => {
     // action
-    drawPdfEllipseShape(page, ellipse({ arcEndAngle: 180, arcStartAngle: 0 }), 1, bounds, states);
+    drawPdfEllipseShape(page, ellipse({ strokeWidth: 4, strokes }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock.mock.calls[0][1][0]).toHaveLength(34);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(2);
+    expect(drawPdfPaintPolygonsMock.mock.calls[1][1]).toBe(strokes);
   });
 
-  it('should draw a donut arc as an outer/inner ring outline', () => {
+  it('should skip the stroke without a stroke width', () => {
     // action
-    drawPdfEllipseShape(page, ellipse({ arcEndAngle: 180, arcRatio: 0.5, arcStartAngle: 0 }), 1, bounds, states);
+    drawPdfEllipseShape(page, ellipse({ strokes }), {}, bounds, states);
 
     // result
-    expect(drawPdfPolygonsMock.mock.calls[0][1][0]).toHaveLength(66);
-  });
-
-  it('should skip the fill draw when there is no fill color', () => {
-    // action
-    drawPdfEllipseShape(page, ellipse({ fill: '' }), 1, bounds, states);
-
-    // result
-    expect(drawPdfPolygonsMock).not.toHaveBeenCalled();
-  });
-
-  it('should draw a full-ellipse stroke ring after the fill regardless of an arc', () => {
-    // action
-    drawPdfEllipseShape(page, ellipse({ strokeColor: '#0000ff', strokeWidth: 4 }), 1, bounds, states);
-
-    // result
-    expect(drawPdfPolygonsMock).toHaveBeenCalledTimes(2);
-    expect(drawPdfPolygonsMock.mock.calls[1][2]).toBe('#0000ff');
-    expect(drawPdfPolygonsMock.mock.calls[1][1]).toHaveLength(2);
-    expect(drawPdfPolygonsMock.mock.calls[1][1][0]).toHaveLength(64);
-    expect(drawPdfPolygonsMock.mock.calls[1][1][1]).toHaveLength(64);
-  });
-
-  it('should respect the stroke align when insetting the ring', () => {
-    // action
-    drawPdfEllipseShape(page, ellipse({ strokeAlign: StrokeAlign.inside, strokeColor: '#0000ff', strokeWidth: 4 }), 1, bounds, states);
-
-    // result
-    const [outerPoints, innerPoints] = drawPdfPolygonsMock.mock.calls[1][1];
-
-    expect(outerPoints[0].x).toBeCloseTo(20);
-    expect(innerPoints[0].x).toBeCloseTo(16);
-  });
-
-  it('should skip the stroke draw when there is no stroke color or width', () => {
-    // action
-    drawPdfEllipseShape(page, ellipse({ strokeColor: '#0000ff' }), 1, bounds, states);
-
-    // result
-    expect(drawPdfPolygonsMock).toHaveBeenCalledTimes(1);
+    expect(drawPdfPaintPolygonsMock).toHaveBeenCalledTimes(1);
   });
 });

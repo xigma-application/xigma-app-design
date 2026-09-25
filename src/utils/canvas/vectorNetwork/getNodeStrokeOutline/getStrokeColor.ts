@@ -5,5 +5,12 @@ import { TStrokeableNode } from './types';
 // utils
 import { getBooleanStrokeColor } from '../../booleanOperation/getBooleanStrokeColor';
 
-export const getStrokeColor = (node: TStrokeableNode): string =>
-  node.type === NodeType.line ? (getBooleanStrokeColor(node) ?? '') : (node.strokeColor ?? '');
+export const getStrokeColor = (node: TStrokeableNode): string => {
+  switch (node.type) {
+    case NodeType.ellipse:
+    case NodeType.line:
+      return getBooleanStrokeColor(node) ?? '';
+    default:
+      return node.strokeColor ?? '';
+  }
+};

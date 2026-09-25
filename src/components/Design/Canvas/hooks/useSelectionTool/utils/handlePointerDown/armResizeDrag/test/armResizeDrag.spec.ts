@@ -163,7 +163,7 @@ describe('armResizeDrag', () => {
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef();
     const ellipse: TEllipseNode = {
-      fill: '#ff0000',
+      fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       height: 50,
       id: 'ellipse-1',
       name: 'Ellipse',

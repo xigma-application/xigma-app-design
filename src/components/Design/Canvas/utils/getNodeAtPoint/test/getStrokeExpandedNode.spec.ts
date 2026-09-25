@@ -22,7 +22,7 @@ const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode
 
 const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode =>
   ({
-    fill: '#ff0000',
+    fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     height: 10,
     id: 'a',
     name: 'Ellipse',
@@ -78,7 +78,7 @@ describe('getStrokeExpandedNode', () => {
 
   it('should treat a missing corner radius as zero before adding the padding', () => {
     // mock
-    const node = buildEllipse({ strokeColor: '#000000', strokeWidth: 8 });
+    const node = buildEllipse({ strokeWidth: 8, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] });
 
     // result
     expect(getStrokeExpandedNode(node)).toMatchObject({ cornerRadius: 4, height: 18, width: 18, x: -4, y: -4 });

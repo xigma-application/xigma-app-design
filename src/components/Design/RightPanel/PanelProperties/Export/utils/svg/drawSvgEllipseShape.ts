@@ -1,28 +1,46 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TEllipseNode } from 'types/design/types';
+import { TEllipseNode, TSceneNode } from 'types/design/types';
 
 // utils
-import { drawSvgPolygons } from './drawSvgPolygons';
+import { drawSvgPaintPolygons } from './drawSvgPaintPolygons';
 import { flipPoint } from 'utils/math/flipPoint';
-import { getEllipseFillPoints } from 'utils/canvas/shapes/getEllipseFillPoints';
+import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
 import { getEllipseStrokeRingPoints } from 'utils/canvas/shapes/getEllipseStrokeRingPoints';
+import { getEllipseWorldPoints } from 'utils/canvas/shapes/getEllipseWorldPoints';
+import { hasVectorStroke } from '../hasVectorStroke';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-export const drawSvgEllipseShape = (elements: string[], node: TEllipseNode, opacity: number, bounds: TDraftRect): void => {
+export const drawSvgEllipseShape = async (
+  elements: string[],
+  defs: string[],
+  node: TEllipseNode,
+  nodesById: Record<string, TSceneNode>,
+  bounds: TDraftRect,
+): Promise<void> => {
+  const opacity = getEffectiveOpacity(node, nodesById);
   const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+  const boxGeometry = { rect: { height: node.height, width: node.width, x: node.x, y: node.y }, rotation: node.rotation };
   const toDesign = (point: TPoint): TPoint =>
     rotatePoint(flipPoint(point, center, node.flipX ?? false, node.flipY ?? false), center, node.rotation);
 
-  if (node.fill) {
-    drawSvgPolygons(elements, [getEllipseFillPoints(node).map(toDesign)], node.fill, opacity, bounds);
-  }
+  await drawSvgPaintPolygons(
+    elements,
+    defs,
+    node.fills,
+    [getEllipseWorldPoints(node, node.flipX ?? false, node.flipY ?? false, node.rotation)],
+    opacity,
+    bounds,
+    null,
+    boxGeometry,
+  );
 
-  if (node.strokeColor && node.strokeWidth) {
-    drawSvgPolygons(
+  if (node.strokes && hasVectorStroke(node)) {
+    await drawSvgPaintPolygons(
       elements,
-      getEllipseStrokeRingPoints(node, node.strokeWidth).map((polygon) => polygon.map(toDesign)),
-      node.strokeColor,
+      defs,
+      node.strokes,
+      getEllipseStrokeRingPoints(node, node.strokeWidth as number).map((polygon) => polygon.map(toDesign)),
       opacity,
       bounds,
     );

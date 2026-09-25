@@ -844,6 +844,31 @@ exports[`Ellipse snapshots > should render the header, position, layout, appeara
             />
           </svg>
         </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Apply blend mode"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              d="M11.353 5.623a.91.91 0 0 1 1.295 0C14 6.978 17 10.29 17 13.001c0 3.5-2.5 5-5 5s-5-1.5-5-5c0-2.711 3-6.023 4.352-7.378m.647.77c-.658.663-1.663 1.75-2.507 2.977C8.597 10.673 8 11.965 8 13.001c0 1.49.522 2.453 1.218 3.057.72.623 1.72.943 2.782.943s2.063-.32 2.782-.943C15.478 15.454 16 14.492 16 13c0-1.036-.597-2.328-1.493-3.63-.844-1.227-1.85-2.315-2.507-2.978"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
       </div>
     </div>
     <div
@@ -1091,6 +1116,152 @@ exports[`Ellipse snapshots > should render the header, position, layout, appeara
         </div>
       </div>
     </div>
+  </div>
+  <div
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
+    data-test-section="fill"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Fill
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Apply styles and variables"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M8.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m7-1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5M14 15.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0m-1 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Add fill"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_FillSection__rows_172b23"
+    />
+  </div>
+  <div
+    class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"
+    data-test-section="effects"
+  >
+    <div
+      class="_Section__header_5940d2"
+    >
+      <span
+        class="_Section__label_5940d2"
+      >
+        Effects
+      </span>
+      <div
+        class="_Section__component_5940d2"
+      >
+        <button
+          aria-label="Apply effect styles and variables"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-section-idle-hidden="true"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M8.5 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m7-1a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5M14 15.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0m-1 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0M8.5 17a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m0 1a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Add effect"
+          aria-pressed="false"
+          class="_ButtonIcon_2062db"
+          data-state="closed"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="_EffectsSection__rows_8c7597"
+    />
   </div>
   <div
     class="_Section_5940d2 _Section--empty_5940d2 _Section--muted_5940d2"

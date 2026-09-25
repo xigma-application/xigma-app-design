@@ -93,7 +93,17 @@ const addRectangleNode = (): string => {
 
 const addEllipseNode = (): string => {
   store.dispatch(
-    addNode({ fill: '#0000ff', height: 30, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 30, x: 0, y: 0 }),
+    addNode({
+      fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
+      height: 30,
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width: 30,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

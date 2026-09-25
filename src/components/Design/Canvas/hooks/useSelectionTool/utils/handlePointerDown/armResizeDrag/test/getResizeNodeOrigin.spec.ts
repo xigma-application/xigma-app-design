@@ -69,7 +69,7 @@ describe('getResizeNodeOrigin', () => {
   it('should default flip to false/false for a flippable node with no flipX/flipY set', () => {
     // mock
     const ellipse: TEllipseNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 10,
       id: 'e',
       name: 'Ellipse',
@@ -88,7 +88,7 @@ describe('getResizeNodeOrigin', () => {
   it('should carry the current flipX/flipY for a flippable node', () => {
     // mock
     const ellipse: TEllipseNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       flipX: true,
       flipY: false,
       height: 10,

@@ -6,7 +6,7 @@ import { TEllipseNode } from 'types/design/types';
 import { getEllipseStrokeOutlineLoops } from '../getEllipseStrokeOutlineLoops';
 
 const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#ffffff',
+  fills: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   height: 20,
   id: 'ellipse-1',
   name: 'Ellipse',

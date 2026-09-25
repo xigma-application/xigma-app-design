@@ -310,7 +310,7 @@ test('rectangles inside a mask and inside a clipping frame with opacity match th
         y: 0,
       },
       {
-        fill: '#FFFFFF',
+        fills: solid('#FFFFFF'),
         height: 50,
         id: `${prefix}shape`,
         name: 'shape',
@@ -371,7 +371,7 @@ test('batched ellipses keep their shape, opacity and rotation', async ({ page })
   await expect(designPage.canvas).toBeVisible();
 
   const ellipse = (id: string, y: number, extra: Record<string, unknown>): Record<string, unknown> => ({
-    fill: '#FF3B30',
+    fills: solid('#FF3B30'),
     height: 40,
     id,
     name: id,

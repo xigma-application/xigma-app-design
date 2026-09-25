@@ -6,7 +6,7 @@ import { TEllipseNode } from 'types/design/types';
 import { convertEllipseToVector } from '../convertEllipseToVector';
 
 const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#0000ff',
+  fills: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
   height: 80,
   id: 'ellipse-1',
   name: 'Ellipse 1',
@@ -68,5 +68,17 @@ describe('convertEllipseToVector', () => {
 
     // result
     expect(Object.keys(rounded.vertices).length).toBeGreaterThan(Object.keys(sharp.vertices).length);
+  });
+
+  it('should keep the fill paints on the vector and leave the stroke color empty without a solid fill', () => {
+    // mock
+    const fills = [{ opacity: 100, stops: [], type: 'gradient-linear' }] as unknown as TEllipseNode['fills'];
+
+    // action
+    const result = convertEllipseToVector(buildEllipse({ fills }));
+
+    // result
+    expect(result.defaultFill).toBe(fills);
+    expect(result.strokeColor).toBe('');
   });
 });

@@ -59,7 +59,7 @@ const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
 });
 
 const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 10,
   id: 'ellipse-1',
   name: 'Ellipse',

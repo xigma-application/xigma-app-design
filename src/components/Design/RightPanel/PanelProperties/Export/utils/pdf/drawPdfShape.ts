@@ -8,6 +8,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawPdfBoxShape } from './drawPdfBoxShape';
+import { drawPdfEllipseShape } from './drawPdfEllipseShape';
 import { drawPdfLineShape } from './drawPdfLineShape';
 import { drawPdfSimpleShape } from './drawPdfSimpleShape';
 import { drawPdfVectorNodeShape } from './drawPdfVectorNodeShape';
@@ -23,6 +24,9 @@ export const drawPdfShape = (
     case NodeType.frame:
     case NodeType.rectangle:
       drawPdfBoxShape(page, node, nodesById, bounds, graphicsStates);
+      break;
+    case NodeType.ellipse:
+      drawPdfEllipseShape(page, node, nodesById, bounds, graphicsStates);
       break;
     case NodeType.line:
       drawPdfLineShape(page, node, nodesById, bounds, graphicsStates);

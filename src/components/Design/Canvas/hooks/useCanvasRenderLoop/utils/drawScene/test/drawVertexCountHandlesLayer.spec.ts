@@ -83,7 +83,7 @@ const star: TStarNode = {
 };
 
 const ellipse: TEllipseNode = {
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'ellipse-1',
   name: 'Ellipse',

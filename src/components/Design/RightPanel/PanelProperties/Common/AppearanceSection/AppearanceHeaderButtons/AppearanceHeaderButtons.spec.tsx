@@ -16,13 +16,4 @@ describe('AppearanceHeaderButtons snapshots', () => {
     expect(screen.getByText('visibility')).toBeInTheDocument();
     expect(screen.getByText('blend')).toBeInTheDocument();
   });
-
-  it('should leave out the blend mode button when asked', () => {
-    // before
-    render(<AppearanceHeaderButtons withBlendMode={false} />);
-
-    // result
-    expect(screen.getByText('visibility')).toBeInTheDocument();
-    expect(screen.queryByText('blend')).not.toBeInTheDocument();
-  });
 });

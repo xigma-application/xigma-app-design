@@ -141,7 +141,7 @@ describe('createSvgBlob', () => {
       addNodes({
         nodes: [
           {
-            fill: '#00ff00',
+            fills: [{ color: '#00ff00', opacity: 100, type: 'solid' }],
             height: 30,
             id: 'svg-ellipse',
             name: 'Ellipse',

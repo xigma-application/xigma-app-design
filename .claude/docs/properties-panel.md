@@ -983,9 +983,11 @@ per-side strokes stay on the `isAppearanceNode` shapes only.
 `ColumnGridChildSpan`) → `AppearanceSection withArc withBlendMode={false} withCornerRadius={false} withEllipseCornerRadius` (one Corner
 radius field next to Opacity through `useEllipseCornerRadius`, no individual corners; the row gets a bottom margin
 above Arc) →
-`Export`. Fill, Stroke and Effects are not there yet: an ellipse still stores `fill` / `strokeColor` as
-plain colors, not paints. Opacity reaches ellipses through `isOpacityNode` (`isStyledNode` or ellipse),
-kept separate from `isStyledNode` because the stroke and effects hooks rely on paint fields.
+`FillSection` → `EffectsSection` → `Export` (the Stroke section comes with the ellipse stroke drawing).
+An ellipse stores paints like a rectangle (`fills`, `strokes`, `effects` and the stroke mode fields), so
+`isStyledNode` includes it (opacity, blend mode, effects, stroke paints) and `isPaintPropertyNode` gives it
+fills (lines never). It is also a Mixed panel type (position, rotation, layout, appearance, fill, effects,
+export).
 `Common/AppearanceSection/Arc/ArcRow` is one `UITools.FieldGroup` of Start (°, with the `Arc` icon as
 the scrub handle), Sweep (%) and Ratio (%), read with the same helpers as the canvas arc labels
 (`getEllipseArcValues` → `getEllipseArcStartAngleDegrees` / `getEllipseArcSweepPercent`). Typing Start

@@ -207,13 +207,13 @@ describe('AppearanceSection behaviors', () => {
     expect(screen.getByLabelText('Apply blend mode')).toBeInTheDocument();
   });
 
-  it('should show the Arc row and hide blend mode when asked', () => {
+  it('should show the ellipse corner radius and Arc rows when asked', () => {
     // before
     render(
       <Provider store={store}>
         <CanvasRefsProvider>
           <TooltipProvider>
-            <AppearanceSection withArc withBlendMode={false} withCornerRadius={false} withEllipseCornerRadius />
+            <AppearanceSection withArc withCornerRadius={false} withEllipseCornerRadius />
           </TooltipProvider>
         </CanvasRefsProvider>
       </Provider>,
@@ -222,7 +222,6 @@ describe('AppearanceSection behaviors', () => {
     // result
     expect(screen.getByText('Arc')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Corner radius' })).toBeInTheDocument();
-    expect(screen.queryByLabelText('Apply blend mode')).not.toBeInTheDocument();
   });
 
   it('should label only the opacity field without any corner radius', () => {

@@ -39,7 +39,7 @@ export const drawLeafNode = (
       drawBooleanLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.ellipse:
-      drawEllipseLeafNode(context, node, opacity);
+      drawEllipseLeafNode(context, node, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
       break;
     case NodeType.polygon:
       drawPolygonLeafNode(context, node, opacity);

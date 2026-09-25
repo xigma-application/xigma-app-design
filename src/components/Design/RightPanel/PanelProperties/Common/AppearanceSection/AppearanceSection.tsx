@@ -23,27 +23,17 @@ import { translationNameSpace } from './constants';
 
 export type TAppearanceSectionProps = {
   withArc?: boolean;
-  withBlendMode?: boolean;
   withCornerRadius?: boolean;
   withEllipseCornerRadius?: boolean;
 };
 
-const AppearanceSection: FC<TAppearanceSectionProps> = ({
-  withArc = false,
-  withBlendMode = true,
-  withCornerRadius = true,
-  withEllipseCornerRadius = false,
-}) => {
+const AppearanceSection: FC<TAppearanceSectionProps> = ({ withArc = false, withCornerRadius = true, withEllipseCornerRadius = false }) => {
   const { t } = useTranslation();
   const opacity = useOpacity();
   const cornerRadius = useCornerRadius();
 
   return (
-    <UITools.Section
-      component={<AppearanceHeaderButtons withBlendMode={withBlendMode} />}
-      e2eValue="appearance"
-      label={t(`${translationNameSpace}.label`)}
-    >
+    <UITools.Section component={<AppearanceHeaderButtons />} e2eValue="appearance" label={t(`${translationNameSpace}.label`)}>
       <UITools.SectionColumn
         buttonsIcon={withCornerRadius ? CornerRadiusButtonIcons(cornerRadius.isIndividual, cornerRadius.toggleIndividual, t) : undefined}
         gridColumnType={UITools.GridColumnType.twoInputs}
@@ -79,7 +69,7 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({
         </UITools.SectionColumn>
       )}
       {withArc && <ArcRow />}
-      {withBlendMode && <BlendModeRow />}
+      <BlendModeRow />
     </UITools.Section>
   );
 };

@@ -21,7 +21,7 @@ describe('useEllipseArc', () => {
     store.dispatch(
       addNode({
         arcRatio: 0.5,
-        fill: '#d9d9d9',
+        fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
         height: 10,
         name: 'Ellipse',
         parentId: null,

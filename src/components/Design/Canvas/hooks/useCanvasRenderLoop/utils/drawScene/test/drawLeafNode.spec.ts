@@ -1,6 +1,3 @@
-// others
-import { ELLIPSE_DEFAULT_ARC_ANGLE } from 'constant/canvas';
-
 // types
 import { NodeType, PathType } from 'types/design/enums';
 import { TDrawSceneContext } from '../types';
@@ -14,10 +11,8 @@ import { getBoxFillPolygon } from '../getBoxFillPolygon';
 import { getScaledFillPaints } from '../getScaledFillPaints';
 
 const drawBooleanLeafNodeMock = vi.fn();
-const drawEllipseNodeMock = vi.fn();
-const drawEllipseArcMock = vi.fn();
+const drawEllipseLeafNodeMock = vi.fn();
 const drawEllipseMock = vi.fn();
-const drawThickEllipseOutlineMock = vi.fn();
 const drawImageMock = vi.fn();
 const drawLineLeafNodeMock = vi.fn();
 const drawMsdfTextMock = vi.fn();
@@ -34,12 +29,10 @@ const getMsdfAtlasTextureMock = vi.fn();
 vi.mock('../drawBooleanLeafNode/drawBooleanLeafNode', () => ({
   drawBooleanLeafNode: (...args: unknown[]): void => drawBooleanLeafNodeMock(...args),
 }));
-vi.mock('../drawEllipseLeafNode/drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
-vi.mock('utils/canvas/drawEllipseArc', () => ({ drawEllipseArc: (...args: unknown[]): void => drawEllipseArcMock(...args) }));
-vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
-vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
-  drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
+vi.mock('../drawEllipseLeafNode/drawEllipseLeafNode', () => ({
+  drawEllipseLeafNode: (...args: unknown[]): void => drawEllipseLeafNodeMock(...args),
 }));
+vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
 vi.mock('utils/canvas/drawImage', () => ({ drawImage: (...args: unknown[]): void => drawImageMock(...args) }));
 vi.mock('../drawLineLeafNode', () => ({ drawLineLeafNode: (...args: unknown[]): void => drawLineLeafNodeMock(...args) }));
 vi.mock('utils/canvas/text/drawMsdfText', () => ({ drawMsdfText: (...args: unknown[]): void => drawMsdfTextMock(...args) }));
@@ -252,10 +245,10 @@ describe('drawLeafNode', () => {
     );
   });
 
-  it('should draw an ellipse with the arc defaults and threaded opacity, skipping the stroke when unset', () => {
+  it('should hand an ellipse to its leaf drawer with the threaded opacity and the paint context', () => {
     // mock
     const node: TSceneNode = {
-      fill: '#fff',
+      fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
       height: 20,
       id: 'e1',
       name: 'Ellipse',
@@ -266,6 +259,7 @@ describe('drawLeafNode', () => {
       x: 0,
       y: 0,
     };
+    const pathOutlineStyles = new Map();
     const refs = createCanvasRefs({
       transform: {
         autoLayoutDropTargetRef: {
@@ -276,61 +270,10 @@ describe('drawLeafNode', () => {
     });
 
     // action
-    drawLeafNode(context, node, new Map(), refs, {});
+    drawLeafNode(context, node, pathOutlineStyles, refs, {});
 
     // result
-    expect(drawEllipseNodeMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      { ...node, arcEndAngle: ELLIPSE_DEFAULT_ARC_ANGLE, arcStartAngle: ELLIPSE_DEFAULT_ARC_ANGLE, fillAlpha: 0.5 },
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
-    expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
-  });
-
-  it('should draw an ellipse’s stroke outline when strokeColor and strokeWidth are both set', () => {
-    // mock
-    const node: TSceneNode = {
-      fill: '#fff',
-      flipX: true,
-      flipY: true,
-      height: 20,
-      id: 'e2',
-      name: 'Ellipse',
-      parentId: null,
-      rotation: 15,
-      strokeColor: '#111',
-      strokeWidth: 3,
-      type: NodeType.ellipse,
-      width: 20,
-      x: 0,
-      y: 0,
-    };
-    const refs = createCanvasRefs();
-
-    // action
-    drawLeafNode(context, node, new Map(), refs, {});
-
-    // result
-    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      node,
-      '#111',
-      3,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      15,
-      undefined,
-    );
+    expect(drawEllipseLeafNodeMock).toHaveBeenCalledWith(context, node, 0.5, {}, pathOutlineStyles, refs, undefined, 0);
   });
 
   it('should draw a polygon with the threaded opacity', () => {

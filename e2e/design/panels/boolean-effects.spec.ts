@@ -66,7 +66,7 @@ test('a pattern fill on a Union is drawn inside its shape', async ({ page }) => 
       addNodes({
         nodes: [
           {
-            fill: '#e24a4a',
+            fills: [{ color: '#e24a4a', opacity: 100, type: 'solid' }],
             height: 10,
             id: 'patternSource',
             name: 'Source',

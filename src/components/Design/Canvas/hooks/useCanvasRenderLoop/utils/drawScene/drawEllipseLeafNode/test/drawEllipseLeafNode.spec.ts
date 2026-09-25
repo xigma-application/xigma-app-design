@@ -1,18 +1,19 @@
 // types
-import { NodeType, StrokeAlign } from 'types/design/enums';
+import { EffectType, NodeType, StrokeAlign } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../../types';
 import { TEllipseNode } from 'types/design/types';
 
 // utils
 import { drawEllipseLeafNode } from '../drawEllipseLeafNode';
 
-const drawEllipseNodeMock = vi.fn();
+const drawBoxPaintsMock = vi.fn();
+const drawBooleanEffectsMock = vi.fn();
 const drawThickEllipseOutlineMock = vi.fn();
-const drawVectorFillMock = vi.fn();
 
-vi.mock('../drawEllipseNode', () => ({ drawEllipseNode: (...args: unknown[]): void => drawEllipseNodeMock(...args) }));
-vi.mock('utils/canvas/drawVectorNode/drawVectorFill', () => ({
-  drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args),
+vi.mock('../../drawBoxLeafNode/drawBoxPaints', () => ({ drawBoxPaints: (...args: unknown[]): void => drawBoxPaintsMock(...args) }));
+vi.mock('../../drawBooleanLeafNode/drawBooleanEffects', () => ({
+  drawBooleanEffects: (...args: unknown[]): void => drawBooleanEffectsMock(...args),
 }));
 vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
   drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
@@ -22,18 +23,13 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
-const context = {
-  buffer,
-  canvasHeight: 150,
-  canvasWidth: 200,
-  gl,
-  imageContext: { isAlphaWriteEnabled: false },
-  program,
-  viewport: IDENTITY_VIEWPORT,
-} as TDrawSceneContext;
+const refs = {} as TCanvasRefs;
+const pathOutlineStyles = new Map();
+const context = { buffer, canvasHeight: 150, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as TDrawSceneContext;
+const fills = [{ color: '#ffffff', opacity: 100, type: 'solid' as const }];
 
 const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#fff',
+  fills,
   height: 20,
   id: 'e1',
   name: 'Ellipse',
@@ -46,62 +42,48 @@ const ellipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   ...overrides,
 });
 
+const draw = (node: TEllipseNode): void => drawEllipseLeafNode(context, node, 0.5, {}, pathOutlineStyles, refs, null, 0);
+
 describe('drawEllipseLeafNode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should draw the ellipse with the threaded opacity, defaulting unset arc angles to the full-ellipse default', () => {
+  it('should draw the fill paints over the ellipse shape between the shadow and the inner effects', () => {
     // mock
     const node = ellipse();
 
     // action
-    drawEllipseLeafNode(context, node, 0.5);
+    draw(node);
 
     // result
-    expect(drawEllipseNodeMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      { ...node, arcEndAngle: 90, arcStartAngle: 90, fillAlpha: 0.5 },
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
+    expect(drawBoxPaintsMock).toHaveBeenCalledWith(context, node, fills, [expect.any(Array)], 0.5, {}, pathOutlineStyles, refs, null, 0);
+    expect(drawBooleanEffectsMock.mock.calls.map((call) => call[5])).toEqual([
+      EffectType.dropShadow,
+      EffectType.innerShadow,
+      EffectType.noise,
+    ]);
     expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
   });
 
-  it('should preserve explicit arc angles and flip flags instead of overriding them', () => {
+  it('should reuse the same shape for the same node', () => {
     // mock
-    const node = ellipse({ arcEndAngle: 270, arcStartAngle: 90, flipX: true, flipY: true });
+    const node = ellipse();
 
     // action
-    drawEllipseLeafNode(context, node, 1);
+    draw(node);
+    draw(node);
 
     // result
-    expect(drawEllipseNodeMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      { ...node, arcEndAngle: 270, arcStartAngle: 90, fillAlpha: 1 },
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      true,
-      true,
-      0,
-    );
+    expect(drawBoxPaintsMock.mock.calls[0][3]).toBe(drawBoxPaintsMock.mock.calls[1][3]);
   });
 
-  it('should draw the stroke outline, forwarding the stroke alignment, when both strokeColor and strokeWidth are set', () => {
+  it('should draw the outline in the first visible stroke color when the ellipse has a stroke width', () => {
     // mock
-    const node = ellipse({ strokeAlign: StrokeAlign.outside, strokeColor: '#000', strokeWidth: 2 });
+    const node = ellipse({ strokeAlign: StrokeAlign.inside, strokeWidth: 3, strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] });
 
     // action
-    drawEllipseLeafNode(context, node, 1);
+    draw(node);
 
     // result
     expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(
@@ -109,49 +91,21 @@ describe('drawEllipseLeafNode', () => {
       program,
       buffer,
       node,
-      '#000',
-      2,
+      '#00ff00',
+      3,
       200,
       150,
       IDENTITY_VIEWPORT,
       0,
-      StrokeAlign.outside,
+      StrokeAlign.inside,
     );
   });
 
-  it('should skip the stroke outline when strokeWidth is missing, even with a strokeColor set', () => {
-    // mock
-    const node = ellipse({ strokeColor: '#000' });
-
+  it('should skip the outline without a stroke width', () => {
     // action
-    drawEllipseLeafNode(context, node, 1);
+    draw(ellipse({ strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }));
 
     // result
     expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
-  });
-
-  it('should fill an arc with rounded corners through the stencil fill with the threaded opacity', () => {
-    // mock
-    const node = ellipse({ arcEndAngle: 180, cornerRadius: 4 });
-
-    // action
-    drawEllipseLeafNode(context, node, 0.5);
-
-    // result
-    expect(drawEllipseNodeMock).not.toHaveBeenCalled();
-    expect(drawVectorFillMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
-      null,
-      null,
-      [expect.any(Array)],
-      '#fff',
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-      false,
-      0.5,
-    );
   });
 });

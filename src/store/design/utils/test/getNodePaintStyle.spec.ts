@@ -38,25 +38,12 @@ describe('getNodePaintStyle', () => {
     });
   });
 
-  it('should turn the single fill and stroke colors of an ellipse into paints', () => {
-    // mock
-    const ellipse = { fill: '#111111', strokeColor: '#222222', strokeWidth: 2, type: NodeType.ellipse } as TSceneNode;
-
-    // result
-    expect(getNodePaintStyle(ellipse)).toEqual({
-      fills: [{ color: '#111111', opacity: 100, type: 'solid' }],
-      strokeWidth: 2,
-      strokes: [{ color: '#222222', opacity: 100, type: 'solid' }],
-    });
-    expect(getNodePaintStyle({ ...ellipse, strokeColor: undefined } as TSceneNode).strokes).toBeUndefined();
-  });
-
-  it('should read the same paint style from a rectangle and a boolean as from a section', () => {
+  it('should read the same paint style from a rectangle, a boolean and an ellipse as from a section', () => {
     // mock
     const style = { fills: [], strokeWidth: 1, strokes: [] };
 
     // result
-    [NodeType.rectangle, NodeType.boolean].forEach((type) => {
+    [NodeType.rectangle, NodeType.boolean, NodeType.ellipse].forEach((type) => {
       expect(getNodePaintStyle({ ...style, type } as unknown as TSceneNode)).toEqual({
         ...style,
         effects: undefined,

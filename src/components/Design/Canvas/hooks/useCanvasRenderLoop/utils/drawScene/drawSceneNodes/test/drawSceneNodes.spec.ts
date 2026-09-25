@@ -163,7 +163,7 @@ const buildNode = (
     x: 0,
     y: 0,
     ...overrides,
-  }) as TSceneNode;
+  }) as unknown as TSceneNode;
 
 describe('drawSceneNodes', () => {
   it('should draw nothing when there are no nodes', () => {
@@ -266,7 +266,7 @@ describe('drawSceneNodes', () => {
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const nodes = [buildNode({ id: 'a', type: NodeType.ellipse })];
+    const nodes = [buildNode({ fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }], id: 'a', type: NodeType.ellipse })];
 
     // before
     drawSceneNodes(
@@ -287,7 +287,15 @@ describe('drawSceneNodes', () => {
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const nodes = [buildNode({ id: 'a', strokeColor: '#000000', strokeWidth: 2, type: NodeType.ellipse })];
+    const nodes = [
+      buildNode({
+        fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        id: 'a',
+        strokeWidth: 2,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.ellipse,
+      }),
+    ];
 
     // before
     drawSceneNodes(
@@ -299,8 +307,8 @@ describe('drawSceneNodes', () => {
       {},
     );
 
-    // result — one fill + one thick-outline draw call
-    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    // result — stencil fill pass, covering quad, then the thick outline
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
   });
 
   it('should draw a filled polygon for a polygon node', () => {

@@ -39,7 +39,7 @@ const BOUNDS = { height: 100, width: 100, x: 0, y: 0 };
 const cutEllipse: TEllipseNode = {
   arcEndAngle: 0,
   arcRatio: 0.5,
-  fill: '#ff0000',
+  fills: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   height: 100,
   id: 'ellipse-1',
   name: 'Ellipse',

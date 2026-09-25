@@ -1,10 +1,11 @@
 // types
 import { TPaintProperty } from 'types/design/paint/types';
 import { TSceneNode } from 'types/design/types';
-import { TStyledNode, isAppearanceNode } from '../../../../AppearanceSection/types';
+import { NodeType } from 'types/design/enums';
+import { TStyledNode } from '../../../../AppearanceSection/types';
 
 // utils
 import { isStyledNode } from '../../../../AppearanceSection/utils/isStyledNode';
 
 export const isPaintPropertyNode = (node: TSceneNode | undefined, property: TPaintProperty): node is TStyledNode =>
-  property === 'strokes' ? isStyledNode(node) : isAppearanceNode(node);
+  isStyledNode(node) && (property === 'strokes' || node.type !== NodeType.line);

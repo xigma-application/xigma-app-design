@@ -6,7 +6,7 @@ import { TEllipseNode, TFrameNode, TGroupNode, TSceneNode } from 'types/design/t
 import { getRenderOrderedNodes } from '../getRenderOrderedNodes';
 
 const leaf = (id: string, overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
-  fill: '#fff',
+  fills: [{ color: '#fff', opacity: 100, type: 'solid' }],
   height: 10,
   id,
   name: id,

@@ -48,7 +48,13 @@ describe('isPointOnSceneNode', () => {
 
   it('should grow an ellipse’s hit area outward by half its stroke width', () => {
     // mock
-    const node = buildFrame({ height: 10, strokeColor: '#000000', strokeWidth: 8, type: NodeType.ellipse, width: 10 });
+    const node = buildFrame({
+      height: 10,
+      strokeWidth: 8,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.ellipse,
+      width: 10,
+    });
 
     // result — just past the inscribed ellipse's edge, on the stroke ring
     expect(isPointOnSceneNode(buildContext(node, { x: 8, y: 5 }))).toBe(true);
