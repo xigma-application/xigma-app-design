@@ -1,30 +1,43 @@
+// types
+import { TLineStrokeShape } from 'utils/canvas/line/types';
+
 // utils
 import { getLineShape } from '../getLineShape';
 
-const polygon = [
-  { x: 0, y: -1 },
-  { x: 10, y: -1 },
-  { x: 10, y: 1 },
-  { x: 0, y: 1 },
-];
+const strokeShape: TLineStrokeShape = {
+  fillRule: 'nonZero',
+  polygons: [
+    [
+      { x: 0, y: -1 },
+      { x: 10, y: -1 },
+      { x: 10, y: 1 },
+      { x: 0, y: 1 },
+    ],
+    [
+      { x: 10, y: -3 },
+      { x: 14, y: 0 },
+      { x: 10, y: 3 },
+    ],
+  ],
+};
 
 describe('getLineShape', () => {
-  it('should wrap the line outline in an effect shape with its bounds', () => {
+  it('should wrap every polygon of the line stroke in an effect shape spanning all of them', () => {
     // before
-    const shape = getLineShape(polygon);
+    const shape = getLineShape(strokeShape);
 
     // result
-    expect(shape.bounds).toEqual({ height: 2, width: 10, x: 0, y: -1 });
-    expect(shape.polygons).toEqual([polygon]);
+    expect(shape.bounds).toEqual({ height: 6, width: 14, x: 0, y: -3 });
+    expect(shape.polygons).toBe(strokeShape.polygons);
   });
 
-  it('should reuse the shape for the same outline', () => {
+  it('should reuse the shape for the same stroke shape', () => {
     // result
-    expect(getLineShape(polygon)).toBe(getLineShape(polygon));
+    expect(getLineShape(strokeShape)).toBe(getLineShape(strokeShape));
   });
 
-  it('should give a new outline a new key', () => {
+  it('should give a new stroke shape a new key', () => {
     // result
-    expect(getLineShape([...polygon]).key).not.toBe(getLineShape([...polygon]).key);
+    expect(getLineShape({ ...strokeShape }).key).not.toBe(getLineShape({ ...strokeShape }).key);
   });
 });

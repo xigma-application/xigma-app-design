@@ -1,9 +1,9 @@
 // types
 import { TPoint } from 'types/canvas';
+import { TStrokeRing } from '../types';
 import { TStretchBrushOptions } from './types';
 
 // utils
-import { buildStrokeRing } from '../buildStrokeRing';
 import { createSeededRandom } from 'utils/math/createSeededRandom';
 import { createStretchOctaves } from './createStretchOctaves';
 import { getBrushStretchPreset } from '../getBrushStretchPreset';
@@ -13,12 +13,9 @@ import { getStretchMultiplier } from './getStretchMultiplier';
 import { getStretchStep } from './getStretchStep';
 
 export const getBoxStretchBrushPolygons = (
-  outer: TPoint[],
-  inner: TPoint[],
+  ring: TStrokeRing,
   { direction, flipped, index, profile, seed, strokeWidth }: TStretchBrushOptions,
 ): TPoint[][] | null => {
-  const ring = buildStrokeRing(outer, inner);
-
   if (ring.perimeter > 0 && strokeWidth > 0) {
     const preset = getBrushStretchPreset(index);
     const random = createSeededRandom(seed);
@@ -35,8 +32,9 @@ export const getBoxStretchBrushPolygons = (
       getStretchStep(outerOctaves, ring.perimeter),
       getMultiplier,
     );
+    const holes = getStretchHoles(ring, preset.holes, strokeWidth, random, getMultiplier);
 
-    return [edges.outer, edges.inner, ...getStretchHoles(ring, preset.holes, strokeWidth, random, getMultiplier)];
+    return ring.closed ? [edges.outer, edges.inner, ...holes] : [[...edges.outer, ...[...edges.inner].reverse()], ...holes];
   }
 
   return null;

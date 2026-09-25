@@ -2,6 +2,7 @@
 import { StrokeBrushDirection, StrokeProfile } from 'types/design/enums';
 
 // utils
+import { buildStrokeRing } from '../../buildStrokeRing';
 import { getBoxScatterBrushPolygons } from '../getBoxScatterBrushPolygons';
 
 const outer = [
@@ -36,7 +37,7 @@ const countDots = (polygons: { x: number; y: number }[][]): number =>
 describe('getBoxScatterBrushPolygons', () => {
   it('should split the dots into chunks and cap the total dot count', () => {
     // action
-    const polygons = getBoxScatterBrushPolygons(outer, inner, options)!;
+    const polygons = getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), options)!;
 
     // result
     expect(polygons.length).toBeGreaterThan(50);
@@ -45,8 +46,8 @@ describe('getBoxScatterBrushPolygons', () => {
 
   it('should place far fewer stamps with a bigger Gap', () => {
     // action
-    const tight = getBoxScatterBrushPolygons(outer, inner, options)!;
-    const loose = getBoxScatterBrushPolygons(outer, inner, { ...options, gap: 500 })!;
+    const tight = getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), options)!;
+    const loose = getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), { ...options, gap: 500 })!;
 
     // result
     expect(countDots(loose)).toBeLessThan(countDots(tight) / 4);
@@ -54,8 +55,8 @@ describe('getBoxScatterBrushPolygons', () => {
 
   it('should spread the stamps further from the path with Wiggle', () => {
     // action
-    const flat = getBoxScatterBrushPolygons(outer, inner, { ...options, gap: 500 })!.flat();
-    const wiggled = getBoxScatterBrushPolygons(outer, inner, { ...options, gap: 500, wiggle: 200 })!.flat();
+    const flat = getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), { ...options, gap: 500 })!.flat();
+    const wiggled = getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), { ...options, gap: 500, wiggle: 200 })!.flat();
     const reach = (points: { x: number; y: number }[]): number => Math.max(...points.map((point) => Math.abs(point.y - 180)));
 
     // result
@@ -64,11 +65,20 @@ describe('getBoxScatterBrushPolygons', () => {
 
   it('should be deterministic for one seed', () => {
     // result
-    expect(getBoxScatterBrushPolygons(outer, inner, options)).toEqual(getBoxScatterBrushPolygons(outer, inner, options));
+    expect(getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), options)).toEqual(
+      getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), options),
+    );
   });
 
   it('should return null without a stroke width', () => {
     // result
-    expect(getBoxScatterBrushPolygons(outer, inner, { ...options, strokeWidth: 0 })).toBeNull();
+    expect(getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), { ...options, strokeWidth: 0 })).toBeNull();
+  });
+
+  it('should lay the stamps the other way round for a left direction', () => {
+    // result
+    expect(getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), { ...options, direction: StrokeBrushDirection.left })).not.toEqual(
+      getBoxScatterBrushPolygons(buildStrokeRing(outer, inner), options),
+    );
   });
 });

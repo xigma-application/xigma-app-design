@@ -182,3 +182,60 @@ test('an arrow selected with a plain line keeps the Line panel but is titled by 
   await expect(header.getByText('2 selected', { exact: true })).toBeVisible();
   await expect(page.getByText('Start point')).toBeVisible();
 });
+
+const updateLastNode = (page: Page, changes: Record<string, unknown>): Promise<void> =>
+  page.evaluate(async (nodeChanges) => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
+
+    store.dispatch(updateNode({ changes: nodeChanges, id: rootOrder[rootOrder.length - 1] }));
+  }, changes);
+
+test('an Inside position moves a line stroke to one side of the line', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-position');
+  await updateLastNode(page, { strokeWidth: 10 });
+
+  const aboveLine = { height: 4, width: 100, x: 850, y: 391 };
+  const centered = await page.screenshot({ clip: aboveLine });
+
+  await page.getByText('Center', { exact: true }).click();
+  await page.getByText('Inside', { exact: true }).click();
+
+  await expect.poll(async () => (await readLine(page)).strokeAlign).toBe('inside');
+  await expect.poll(async () => (await page.screenshot({ clip: aboveLine })).equals(centered)).toBe(false);
+});
+
+test('a line draws dashed, width profile, dynamic and brush strokes differently from a solid one', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-stroke-modes');
+  await updateLastNode(page, { strokeWidth: 10 });
+  await new DesignPage(page).click(1500, 900);
+
+  const lineArea = { height: 40, width: 220, x: 790, y: 380 };
+  const solid = await page.screenshot({ clip: lineArea });
+
+  for (const changes of [
+    { strokeDash: 10, strokeGap: 10, strokeStyle: 'dashed' },
+    { strokeProfile: 'wedge' },
+    { strokeMode: 'dynamic' },
+    { strokeMode: 'brush' },
+  ]) {
+    await updateLastNode(page, { strokeDash: undefined, strokeMode: 'basic', strokeProfile: 'uniform', strokeStyle: 'solid', ...changes });
+    await expect.poll(async () => (await page.screenshot({ clip: lineArea })).equals(solid)).toBe(false);
+  }
+});
+
+test('the line stroke settings open without a Join, and the Brush tab hides the start and end points', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-stroke-settings');
+
+  await page.getByLabel('Advanced stroke settings').click();
+
+  await expect(page.getByText('Width profile', { exact: true })).toBeVisible();
+  await expect(page.getByText('Join', { exact: true })).toHaveCount(0);
+
+  await page.getByText('Brush', { exact: true }).click();
+
+  await expect.poll(async () => (await readLine(page)).strokeMode).toBe('brush');
+  await expect(page.getByText('Start point')).toHaveCount(0);
+});

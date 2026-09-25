@@ -10,7 +10,7 @@ import { drawBooleanEffects } from './drawBooleanLeafNode/drawBooleanEffects';
 import { drawBoxPaints } from './drawBoxLeafNode/drawBoxPaints';
 import { getLineShape } from './getLineShape';
 import { getLineStrokeBox } from 'utils/canvas/shapes/getLineStrokeBox';
-import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
+import { getLineStrokeShape } from 'utils/canvas/line/stroke/getLineStrokeShape';
 
 export const drawLineLeafNode = (
   context: TDrawSceneContext,
@@ -22,23 +22,25 @@ export const drawLineLeafNode = (
   editingPathId: string | null | undefined,
   patternSourceDepth: number,
 ): void => {
-  const polygon = getLineStrokePolygon(node);
+  const strokeShape = getLineStrokeShape(node);
 
-  if (polygon) {
-    const shape = getLineShape(polygon);
+  if (strokeShape) {
+    const shape = getLineShape(strokeShape);
 
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.dropShadow);
     drawBoxPaints(
       context,
       getLineStrokeBox(node),
       node.strokes,
-      [polygon],
+      strokeShape.polygons,
       opacity,
       nodesById,
       pathOutlineStyles,
       refs,
       editingPathId,
       patternSourceDepth,
+      null,
+      strokeShape.fillRule,
     );
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.innerShadow);
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.noise);

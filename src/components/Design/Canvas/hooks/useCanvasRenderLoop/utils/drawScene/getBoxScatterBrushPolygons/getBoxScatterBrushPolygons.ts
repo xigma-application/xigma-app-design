@@ -1,10 +1,10 @@
 // types
 import { StrokeBrushDirection } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
+import { TStrokeRing } from '../types';
 import { TScatterBrushOptions, TScatterDot } from './types';
 
 // utils
-import { buildStrokeRing } from '../buildStrokeRing';
 import { createSeededRandom } from 'utils/math/createSeededRandom';
 import { getDotChunkPaths } from './getDotChunkPaths';
 import { getScatterLayout } from './getScatterLayout';
@@ -17,12 +17,9 @@ import { getStrokeProfileWidthMultiplier } from 'utils/design/stroke/getStrokePr
 import { sampleStrokeRing } from '../sampleStrokeRing';
 
 export const getBoxScatterBrushPolygons = (
-  outer: TPoint[],
-  inner: TPoint[],
+  ring: TStrokeRing,
   { angularJitter, direction, flipped, gap, index, profile, rotation, seed, sizeJitter, stats, strokeWidth, wiggle }: TScatterBrushOptions,
 ): TPoint[][] | null => {
-  const ring = buildStrokeRing(outer, inner);
-
   if (ring.perimeter > 0 && strokeWidth > 0 && gap > 0) {
     const preset = getScatterPreset(index, stats);
     const random = createSeededRandom(seed);

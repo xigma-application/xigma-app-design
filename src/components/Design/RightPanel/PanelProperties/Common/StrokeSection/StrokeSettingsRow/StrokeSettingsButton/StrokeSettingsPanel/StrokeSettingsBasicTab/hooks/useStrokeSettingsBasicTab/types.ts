@@ -51,6 +51,7 @@ export type TStrokeSettingsValuesSource = {
 };
 
 export type TUseStrokeSettingsBasicTabResult = TSharedStrokeSettings & {
+  hasJoin: boolean;
   onDashBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onDashCapSelect: TFunc<[string]>;
   onDashScrub: TFunc<[number]>;

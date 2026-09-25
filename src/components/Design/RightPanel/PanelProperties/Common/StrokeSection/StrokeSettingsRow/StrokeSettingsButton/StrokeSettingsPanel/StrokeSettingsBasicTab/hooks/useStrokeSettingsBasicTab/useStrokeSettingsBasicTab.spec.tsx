@@ -276,4 +276,36 @@ describe('useStrokeSettingsBasicTab', () => {
     // result
     expect([readJoin(firstId), readJoin(secondId)]).toEqual([StrokeJoin.bevel, StrokeJoin.bevel]);
   });
+
+  it('should write the dash, gap, dashes and miter angle stepped with the arrow keys', () => {
+    // before
+    const id = addAndSelect();
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+    const getNode = (): TRectangleNode => selectActivePage(store.getState()).nodes[id] as TRectangleNode;
+
+    // action
+    act(() => result.current.onDashStep('7'));
+    act(() => result.current.onGapStep('5'));
+    act(() => result.current.onDashesStep('3, 1'));
+    act(() => result.current.onMiterAngleStep('40'));
+
+    // result
+    expect(getNode()).toMatchObject({ strokeDash: 7, strokeDashes: [3, 1], strokeGap: 5, strokeMiterAngle: 40 });
+  });
+
+  it('should write nothing with nothing selected and report the join only for shapes that have one', () => {
+    // mock
+    store.dispatch(setSelection([]));
+    const before = selectActivePage(store.getState()).nodes;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBasicTab(), { wrapper });
+
+    // action
+    act(() => result.current.onStyleSelect(StrokeStyle.dashed));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes).toBe(before);
+    expect(result.current.hasJoin).toBe(false);
+  });
 });

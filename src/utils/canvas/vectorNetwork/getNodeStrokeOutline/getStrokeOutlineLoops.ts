@@ -16,7 +16,7 @@ export const getStrokeOutlineLoops = (node: TStrokeableNode, outer: number, inne
     case NodeType.ellipse:
       return getEllipseStrokeOutlineLoops(node, outer, inner);
     case NodeType.line:
-      return getLineStrokeOutlineLoops(node, outer);
+      return getLineStrokeOutlineLoops(node, (outer + inner) / 2);
     case NodeType.vector:
       return getVectorStrokeOutlineLoops(node, outer);
     // no default

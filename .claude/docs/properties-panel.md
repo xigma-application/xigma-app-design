@@ -957,8 +957,12 @@ Edit object, a separator and a disabled Offset vector placeholder, no component 
 when every selected line has an arrowhead (`isArrowLine`, any of the `ARROW_ENDPOINTS`) at either end, and "N selected" (the Mixed label) when arrows and plain lines are selected together (`getLineHeaderLabel`) → `PositionSection` → Layout (`ColumnDimensions isHeightDisabled`, since a
 line's height is always 0) → `AppearanceSection withCornerRadius={false}` → `FillSection
 property="strokes"` with `LineStrokeSettings` as its footer → `EffectsSection` → `Export`. No Fill.
-`LineStrokeSettings` shows a disabled Position dropdown fixed at Center, the Weight field and the
+`LineStrokeSettings` shows the Position dropdown, the Weight field and the
 Start point / End point dropdowns (`getLineEndpointOptions`; the End point icons are rotated 180°).
+Position is editable (Inside = left of the line's start→end direction, Outside = right; locked to Center
+outside the Basic mode) and the Properties button opens the shared stroke settings panel — its tab hooks
+select `isStyledNode`, and the Basic tab hides Join and Miter angle (`hasJoin`) when only lines are
+selected. The Start point / End point row is hidden while every selected line is in Brush mode.
 The shared hooks (opacity, blend mode, effects, stroke paints) accept lines through `isStyledNode`
 (`TAppearanceNode | TLineNode`); `useFillSection` uses `isPaintPropertyNode`, so lines take part in
 strokes but never in fills. Hooks for fields a line lacks (corner radius, stroke sides, advanced

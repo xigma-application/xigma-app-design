@@ -1,5 +1,5 @@
 // types
-import { LineEndpoint, NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType, StrokeStyle } from 'types/design/enums';
 import { TFrameNode, TLineNode } from 'types/design/types';
 
 // utils
@@ -87,5 +87,13 @@ describe('drawSvgLineShape', () => {
 
     // result
     expect(drawSvgPolygonsMock).not.toHaveBeenCalled();
+  });
+
+  it('should fill a dashed line by the nonzero rule', () => {
+    // before
+    drawSvgLineShape([], line({ strokeDash: 4, strokeGap: 4, strokeStyle: StrokeStyle.dashed }), {}, bounds);
+
+    // result
+    expect(drawSvgPolygonsMock.mock.calls[0][5]).toBe('nonzero');
   });
 });

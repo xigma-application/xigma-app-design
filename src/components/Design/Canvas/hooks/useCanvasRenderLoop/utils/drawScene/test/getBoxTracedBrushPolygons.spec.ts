@@ -2,6 +2,7 @@
 import { StrokeBrushDirection, StrokeProfile } from 'types/design/enums';
 
 // utils
+import { buildStrokeRing } from '../buildStrokeRing';
 import { getBoxTracedBrushPolygons } from '../getBoxTracedBrushPolygons';
 
 const outer = [
@@ -27,7 +28,7 @@ const band = [
 describe('getBoxTracedBrushPolygons', () => {
   it('should lay a contour along the top edge for a band covering the first quarter, going right', () => {
     // action
-    const polygons = getBoxTracedBrushPolygons(outer, inner, options, [band])!;
+    const polygons = getBoxTracedBrushPolygons(buildStrokeRing(outer, inner), options, [band])!;
     const points = polygons[0];
 
     // result
@@ -39,7 +40,9 @@ describe('getBoxTracedBrushPolygons', () => {
 
   it('should start on the left side when going left', () => {
     // action
-    const points = getBoxTracedBrushPolygons(outer, inner, { ...options, direction: StrokeBrushDirection.left }, [band])![0];
+    const points = getBoxTracedBrushPolygons(buildStrokeRing(outer, inner), { ...options, direction: StrokeBrushDirection.left }, [
+      band,
+    ])![0];
 
     // result
     expect(Math.min(...points.map((point) => point.x))).toBeCloseTo(-8, 0);
@@ -48,8 +51,8 @@ describe('getBoxTracedBrushPolygons', () => {
 
   it('should narrow the band with a Width profile', () => {
     // action
-    const uniform = getBoxTracedBrushPolygons(outer, inner, options, [band])![0];
-    const wedge = getBoxTracedBrushPolygons(outer, inner, { ...options, profile: StrokeProfile.wedge }, [band])![0];
+    const uniform = getBoxTracedBrushPolygons(buildStrokeRing(outer, inner), options, [band])![0];
+    const wedge = getBoxTracedBrushPolygons(buildStrokeRing(outer, inner), { ...options, profile: StrokeProfile.wedge }, [band])![0];
     const thickness = (points: { x: number; y: number }[]): number =>
       Math.max(...points.map((point) => point.y)) - Math.min(...points.map((point) => point.y));
 
@@ -59,6 +62,6 @@ describe('getBoxTracedBrushPolygons', () => {
 
   it('should return null without a stroke width', () => {
     // result
-    expect(getBoxTracedBrushPolygons(outer, inner, { ...options, strokeWidth: 0 }, [band])).toBeNull();
+    expect(getBoxTracedBrushPolygons(buildStrokeRing(outer, inner), { ...options, strokeWidth: 0 }, [band])).toBeNull();
   });
 });

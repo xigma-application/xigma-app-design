@@ -10,6 +10,7 @@ import { isAppearanceNode } from '../../../../../../../AppearanceSection/types';
 import { TCommitStrokeChanges, TStrokeChanges, TStrokeSettingsValues, TUseStrokeSettingsBasicTabResult } from './types';
 
 // utils
+import { isStyledNode } from '../../../../../../../AppearanceSection/utils/isStyledNode';
 import { getSharedStrokeSettings } from './utils/getSharedStrokeSettings';
 import { getStrokeSettingsValues } from './utils/getStrokeSettingsValues';
 import { handleStrokeDashBlur } from './utils/handleStrokeDashBlur';
@@ -30,7 +31,7 @@ import { handleStrokeStyleSelect } from './utils/handleStrokeStyleSelect';
 
 export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeSettingsValues) : [getStrokeSettingsValues(undefined)];
   const [scrubValues] = valuesList;
   const shared = getSharedStrokeSettings(valuesList);
@@ -48,6 +49,7 @@ export const useStrokeSettingsBasicTab = (): TUseStrokeSettingsBasicTabResult =>
 
   return {
     ...shared,
+    hasJoin: nodes.some(isAppearanceNode),
     onDashBlur: (event) => handleStrokeDashBlur(event, shared.dash, commit),
     onDashCapSelect: (value) => handleStrokeDashCapSelect(value, shared.dashCap, commit),
     onDashScrub: (value) => scrubEach((values, update) => handleStrokeDashScrub(values.dash + value - scrubValues.dash, update)),

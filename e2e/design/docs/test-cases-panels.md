@@ -1484,3 +1484,6 @@ There is no Fill section.
 | 638 | A line selected with a rectangle shows the Mixed panel without Fill, and a typed stroke weight applies to both                                                |  ✅  | ✅ `line-panel.spec.ts` |
 | 639 | An arrow shows the Line panel titled Arrow (every selected line has an arrowhead at an end), and turns back into Line once the arrowhead is removed           |  ✅  | ✅ `line-panel.spec.ts` |
 | 640 | An arrow selected with a plain line keeps the Line panel, titled by the layer count ("2 selected")                                                            |  ✅  | ✅ `line-panel.spec.ts` |
+| 641 | An Inside or Outside position moves a line stroke to one side of the line (left of its direction for Inside)                                                  |  ✅  | ✅ `line-panel.spec.ts` |
+| 642 | A line draws dashed (dash cap, arrowheads kept solid), width profile, dynamic and brush strokes                                                               |  ✅  | ✅ `line-panel.spec.ts` |
+| 643 | The line stroke settings open without Join and Miter angle, and the Brush tab hides Start point and End point                                                 |  ✅  | ✅ `line-panel.spec.ts` |

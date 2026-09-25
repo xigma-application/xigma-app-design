@@ -1,8 +1,8 @@
-import { noop } from 'lodash';
 import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import StrokeSettingsButton from '../../Common/StrokeSection/StrokeSettingsRow/StrokeSettingsButton/StrokeSettingsButton';
 import StrokeWeightField from '../../Common/StrokeSection/StrokeSettingsRow/StrokeWeightField/StrokeWeightField';
 import { UITools } from 'shared';
 
@@ -25,13 +25,18 @@ const LineStrokeSettings: FC = () => {
   const { t } = useTranslation();
   const {
     endPoint,
+    isBrush,
+    isNonBasicMode,
+    isStrokeModeMixed,
     isWeightMixed,
     onEndPointSelect,
+    onPositionSelect,
     onStartPointSelect,
     onWeightBlur,
     onWeightDragEnd,
     onWeightDragStart,
     onWeightScrub,
+    position,
     startPoint,
     weight,
   } = useLineStrokeSettings();
@@ -40,18 +45,21 @@ const LineStrokeSettings: FC = () => {
   return (
     <Fragment>
       <UITools.SectionColumn
+        buttonsIcon={[<StrokeSettingsButton disabled={isStrokeModeMixed} key="advanced" />]}
         gridColumnType={UITools.GridColumnType.twoInputs}
         labels={[t(`${strokeNameSpace}.position.label`), t(`${strokeNameSpace}.weight.label`)]}
+        withTopAlignedButtons
         withTopMargin
       >
         <UITools.Dropdown<StrokeAlign>
           bypassGlobalShortcuts={false}
-          disabled
-          onSelect={noop}
+          disabled={isNonBasicMode}
+          onSelect={onPositionSelect}
           options={getStrokeAlignOptions((strokeAlign) => t(`${strokeNameSpace}.position.options.${strokeAlign}`))}
+          placeholder={MIXED_LABEL}
           textAlign="left"
           truncate={false}
-          value={StrokeAlign.center}
+          value={position}
           variant="outline"
         />
         <StrokeWeightField
@@ -64,32 +72,34 @@ const LineStrokeSettings: FC = () => {
           scrubValue={weight}
         />
       </UITools.SectionColumn>
-      <UITools.SectionColumn
-        gridColumnType={UITools.GridColumnType.twoInputs}
-        labels={[t(`${translationNameSpace}.startPoint.label`), t(`${translationNameSpace}.endPoint.label`)]}
-        withTopMargin
-      >
-        <UITools.Dropdown<LineEndpoint>
-          bypassGlobalShortcuts={false}
-          onSelect={onStartPointSelect}
-          options={getLineEndpointOptions(getEndpointLabel, false)}
-          placeholder={MIXED_LABEL}
-          textAlign="left"
-          truncate={false}
-          value={startPoint}
-          variant="outline"
-        />
-        <UITools.Dropdown<LineEndpoint>
-          bypassGlobalShortcuts={false}
-          onSelect={onEndPointSelect}
-          options={getLineEndpointOptions(getEndpointLabel, true)}
-          placeholder={MIXED_LABEL}
-          textAlign="left"
-          truncate={false}
-          value={endPoint}
-          variant="outline"
-        />
-      </UITools.SectionColumn>
+      {!isBrush && (
+        <UITools.SectionColumn
+          gridColumnType={UITools.GridColumnType.twoInputs}
+          labels={[t(`${translationNameSpace}.startPoint.label`), t(`${translationNameSpace}.endPoint.label`)]}
+          withTopMargin
+        >
+          <UITools.Dropdown<LineEndpoint>
+            bypassGlobalShortcuts={false}
+            onSelect={onStartPointSelect}
+            options={getLineEndpointOptions(getEndpointLabel, false)}
+            placeholder={MIXED_LABEL}
+            textAlign="left"
+            truncate={false}
+            value={startPoint}
+            variant="outline"
+          />
+          <UITools.Dropdown<LineEndpoint>
+            bypassGlobalShortcuts={false}
+            onSelect={onEndPointSelect}
+            options={getLineEndpointOptions(getEndpointLabel, true)}
+            placeholder={MIXED_LABEL}
+            textAlign="left"
+            truncate={false}
+            value={endPoint}
+            variant="outline"
+          />
+        </UITools.SectionColumn>
+      )}
     </Fragment>
   );
 };

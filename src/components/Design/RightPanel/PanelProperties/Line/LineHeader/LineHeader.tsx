@@ -13,20 +13,15 @@ import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeade
 import { selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
-// types
-import { NodeType } from 'types/design/enums';
-import { TLineNode, TSceneNode } from 'types/design/types';
-
 // utils
+import { isLineNode } from 'utils/canvas/line/isLineNode';
 import { getLineHeaderLabel } from './utils/getLineHeaderLabel';
 import { isArrowLine } from './utils/isArrowLine';
 
 const LineHeader: FC = () => {
   const { t } = useTranslation();
   const isMultiple = useAppSelector(selectSelectedIds).length > 1;
-  const lines = useAppSelector(selectSelectedNodes).filter(
-    (node: TSceneNode | undefined): node is TLineNode => node?.type === NodeType.line,
-  );
+  const lines = useAppSelector(selectSelectedNodes).filter(isLineNode);
 
   return (
     <PanelHeader

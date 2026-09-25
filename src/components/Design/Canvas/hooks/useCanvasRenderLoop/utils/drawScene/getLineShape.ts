@@ -1,20 +1,25 @@
 // types
 import { TBooleanShape } from './drawBooleanLeafNode/types';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect } from 'types/canvas';
+import { TLineStrokeShape } from 'utils/canvas/line/types';
 
 // utils
 import { getNextBooleanShapeKey } from './drawBooleanLeafNode/getNextBooleanShapeKey';
 import { getPointsBounds } from 'components/Design/Canvas/utils/getVectorDistanceGuides/getPointsBounds';
 
-const cache = new WeakMap<TPoint[], TBooleanShape>();
+const cache = new WeakMap<TLineStrokeShape, TBooleanShape>();
 
-export const getLineShape = (polygon: TPoint[]): TBooleanShape => {
-  const cached = cache.get(polygon);
+export const getLineShape = (strokeShape: TLineStrokeShape): TBooleanShape => {
+  const cached = cache.get(strokeShape);
 
   if (!cached) {
-    const shape: TBooleanShape = { bounds: getPointsBounds(polygon) as TDraftRect, key: getNextBooleanShapeKey(), polygons: [polygon] };
+    const shape: TBooleanShape = {
+      bounds: getPointsBounds(strokeShape.polygons.flat()) as TDraftRect,
+      key: getNextBooleanShapeKey(),
+      polygons: strokeShape.polygons,
+    };
 
-    cache.set(polygon, shape);
+    cache.set(strokeShape, shape);
     return shape;
   }
 

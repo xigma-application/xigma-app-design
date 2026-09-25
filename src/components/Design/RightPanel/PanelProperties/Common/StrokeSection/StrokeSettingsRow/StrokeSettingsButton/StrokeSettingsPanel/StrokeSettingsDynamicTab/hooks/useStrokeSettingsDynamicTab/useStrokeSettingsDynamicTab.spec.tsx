@@ -80,4 +80,19 @@ describe('useStrokeSettingsDynamicTab', () => {
     // result
     expect([readFrequency(firstId), readFrequency(secondId)]).toEqual([30, 30]);
   });
+
+  it('should write nothing with nothing selected', () => {
+    // mock
+    store.dispatch(setSelection([]));
+    const before = selectActivePage(store.getState()).nodes;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsDynamicTab(), { wrapper });
+
+    // action
+    act(() => result.current.onBlur('wiggle')({ target: { value: '80%' } } as FocusEvent<HTMLInputElement>));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes).toBe(before);
+  });
 });

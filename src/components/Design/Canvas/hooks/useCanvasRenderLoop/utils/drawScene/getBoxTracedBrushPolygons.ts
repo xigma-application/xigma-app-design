@@ -2,9 +2,9 @@
 import { StrokeBrushDirection, StrokeProfile } from 'types/design/enums';
 import { TBrushContourPoint } from 'utils/brushes/types';
 import { TPoint } from 'types/canvas';
+import { TStrokeRing } from './types';
 
 // utils
-import { buildStrokeRing } from './buildStrokeRing';
 import { clamp } from 'utils/math/clamp';
 import { getStrokeProfileWidthMultiplier } from 'utils/design/stroke/getStrokeProfileWidthMultiplier';
 import { sampleStrokeRing } from './sampleStrokeRing';
@@ -26,13 +26,10 @@ const densify = (loop: TBrushContourPoint[], step: number): TBrushContourPoint[]
   });
 
 export const getBoxTracedBrushPolygons = (
-  outer: TPoint[],
-  inner: TPoint[],
+  ring: TStrokeRing,
   { direction, flipped, profile, strokeWidth }: TTracedBrushOptions,
   contours: TBrushContourPoint[][],
 ): TPoint[][] | null => {
-  const ring = buildStrokeRing(outer, inner);
-
   if (ring.perimeter > 0 && strokeWidth > 0) {
     const step = clamp((strokeWidth * 0.25) / ring.perimeter, MIN_STEP, MAX_STEP);
     const isRight = direction === StrokeBrushDirection.right;

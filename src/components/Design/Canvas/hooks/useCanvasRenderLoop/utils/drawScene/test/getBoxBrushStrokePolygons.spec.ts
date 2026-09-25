@@ -1,10 +1,28 @@
 // types
-import { NodeType, StrokeMode } from 'types/design/enums';
+import { NodeType, StrokeMode, StrokeProfile } from 'types/design/enums';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
+import { buildOpenStrokeRing } from '../buildOpenStrokeRing';
+import { buildStrokeRing } from '../buildStrokeRing';
 import { getBoxBrushStrokePolygons } from '../getBoxBrushStrokePolygons';
 import { memoizeBrushPolygons } from '../memoizeBrushPolygons';
+
+vi.mock('utils/brushes/brushShapeCache', () => ({
+  getBrushShape: (brushId: string): unknown =>
+    brushId === 'blockbuster'
+      ? {
+          contours: [
+            [
+              { u: 0, v: -1 },
+              { u: 1, v: -1 },
+              { u: 1, v: 1 },
+              { u: 0, v: 1 },
+            ],
+          ],
+        }
+      : null,
+}));
 
 const outer = [
   { x: -8, y: -8 },
@@ -33,7 +51,7 @@ const node = {
 } as unknown as TRectangleNode;
 
 const getBoxStrokePolygonsFor = (changes: Partial<TRectangleNode>): ReturnType<typeof getBoxBrushStrokePolygons> =>
-  getBoxBrushStrokePolygons({ ...node, ...changes }, outer, inner);
+  getBoxBrushStrokePolygons({ ...node, ...changes }, buildStrokeRing(outer, inner));
 
 describe('getBoxBrushStrokePolygons', () => {
   it('should draw a stretch brush as a ring with holes and a scatter brush as dot chunks', () => {
@@ -51,6 +69,26 @@ describe('getBoxBrushStrokePolygons', () => {
     // result
     expect(getBoxStrokePolygonsFor({ strokeBrush: 'nope' })).toBeNull();
     expect(getBoxStrokePolygonsFor({ strokeBrush: 'heist' })).toBe(getBoxStrokePolygonsFor({ strokeBrush: 'heist' }));
+  });
+  it('should trace a brush that has a loaded shape along the ring', () => {
+    // result
+    expect(getBoxStrokePolygonsFor({ strokeBrush: 'blockbuster' })).toHaveLength(1);
+  });
+
+  it('should honour a flipped width profile and fall back to no width', () => {
+    // result
+    expect(
+      getBoxStrokePolygonsFor({ strokeBrush: 'grindhouse', strokeProfile: StrokeProfile.taper, strokeProfileFlipped: true }),
+    ).not.toBeNull();
+    expect(getBoxStrokePolygonsFor({ strokeBrush: 'grindhouse', strokeWidth: undefined })).toBeNull();
+  });
+
+  it('should keep open and closed rings of the same points apart', () => {
+    // mock
+    const open = getBoxBrushStrokePolygons({ ...node, strokeBrush: 'heist' }, buildOpenStrokeRing({ x: 0, y: 0 }, { x: 100, y: 0 }, 8));
+
+    // result
+    expect(open).not.toBe(getBoxStrokePolygonsFor({ strokeBrush: 'heist' }));
   });
 });
 

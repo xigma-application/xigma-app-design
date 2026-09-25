@@ -3,6 +3,10 @@ import { Provider } from 'react-redux';
 
 // components
 import LineStrokeSettings from './LineStrokeSettings';
+import { TooltipProvider } from 'shared';
+
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
 import { addNodes, setSelection } from 'store/design/slice';
@@ -10,7 +14,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LineEndpoint, NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType, StrokeAlign, StrokeMode } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 const line: TLineNode = {
@@ -29,7 +33,7 @@ const line: TLineNode = {
 };
 
 describe('LineStrokeSettings behaviors', () => {
-  it('should show a fixed center position, the weight and both endpoints', () => {
+  it('should show a centered position by default, the weight and both endpoints', () => {
     // mock
     store.dispatch(addNodes({ nodes: [line], rootIds: [line.id] }));
     store.dispatch(setSelection([line.id]));
@@ -37,12 +41,16 @@ describe('LineStrokeSettings behaviors', () => {
     // before
     render(
       <Provider store={store}>
-        <LineStrokeSettings />
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineStrokeSettings />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 
     // result
-    expect(screen.getByText('Center').closest('button')).toBeDisabled();
+    expect(screen.getByText('Center').closest('button')).not.toBeDisabled();
     expect(screen.getByLabelText('Stroke weight')).toHaveValue('3');
     expect(screen.getByText('None')).toBeInTheDocument();
     expect(screen.getByText('Line arrow')).toBeInTheDocument();
@@ -64,7 +72,11 @@ describe('LineStrokeSettings behaviors', () => {
     // before
     render(
       <Provider store={store}>
-        <LineStrokeSettings />
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineStrokeSettings />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 
@@ -80,7 +92,11 @@ describe('LineStrokeSettings behaviors', () => {
     // before
     render(
       <Provider store={store}>
-        <LineStrokeSettings />
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineStrokeSettings />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 
@@ -90,5 +106,52 @@ describe('LineStrokeSettings behaviors', () => {
 
     // result
     expect((selectActivePage(store.getState()).nodes.settingsLinePick as TLineNode).startPoint).toBe(LineEndpoint.round);
+  });
+
+  it('should move the stroke to the side picked in Position', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [{ ...line, id: 'settingsLineAlign' }], rootIds: ['settingsLineAlign'] }));
+    store.dispatch(setSelection(['settingsLineAlign']));
+
+    // before
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineStrokeSettings />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // action
+    fireEvent.click(screen.getByText('Center'));
+    fireEvent.click(screen.getByText('Inside'));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes.settingsLineAlign as TLineNode).strokeAlign).toBe(StrokeAlign.inside);
+  });
+
+  it('should hide the endpoints and lock the position of a brush stroke', () => {
+    // mock
+    store.dispatch(
+      addNodes({ nodes: [{ ...line, id: 'settingsLineBrush', strokeMode: StrokeMode.brush }], rootIds: ['settingsLineBrush'] }),
+    );
+    store.dispatch(setSelection(['settingsLineBrush']));
+
+    // before
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineStrokeSettings />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.queryByText('Start point')).not.toBeInTheDocument();
+    expect(screen.getByText('Center').closest('button')).toBeDisabled();
   });
 });

@@ -23,6 +23,7 @@ export type TDrawSceneContext = TDrawContext & {
 };
 
 export type TStrokeRing = {
+  closed: boolean;
   cumulative: number[];
   inner: TPoint[];
   lengths: number[];

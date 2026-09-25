@@ -9,5 +9,5 @@ export const buildStrokeRing = (outer: TPoint[], inner: TPoint[]): TStrokeRing =
   );
   const cumulative = lengths.map((_, index) => lengths.slice(0, index).reduce((total, length) => total + length, 0));
 
-  return { cumulative, inner, lengths, mids, outer, perimeter: lengths.reduce((total, length) => total + length, 0) };
+  return { closed: true, cumulative, inner, lengths, mids, outer, perimeter: lengths.reduce((total, length) => total + length, 0) };
 };

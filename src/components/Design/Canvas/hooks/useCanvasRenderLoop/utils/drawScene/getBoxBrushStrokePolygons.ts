@@ -1,7 +1,8 @@
 // types
 import { StrokeProfile } from 'types/design/enums';
-import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
+import { TStrokeRing } from './types';
 
 // utils
 import { getBoxScatterBrushPolygons } from './getBoxScatterBrushPolygons/getBoxScatterBrushPolygons';
@@ -12,7 +13,7 @@ import { getStrokeBrushCategory } from 'utils/design/stroke/getStrokeBrushCatego
 import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 import { memoizeBrushPolygons } from './memoizeBrushPolygons';
 
-const getKey = (node: TFrameNode | TRectangleNode | TSectionNode, outer: TPoint[], inner: TPoint[], isTraced: boolean): string =>
+const getKey = (node: TFrameNode | TLineNode | TRectangleNode | TSectionNode, ring: TStrokeRing, isTraced: boolean): string =>
   [
     isTraced,
     node.id,
@@ -20,20 +21,20 @@ const getKey = (node: TFrameNode | TRectangleNode | TSectionNode, outer: TPoint[
     node.strokeWidth,
     node.strokeProfile,
     node.strokeProfileFlipped,
-    [...outer, ...inner].map((point) => `${point.x.toFixed(3)},${point.y.toFixed(3)}`).join(';'),
+    ring.closed,
+    [...ring.outer, ...ring.inner].map((point) => `${point.x.toFixed(3)},${point.y.toFixed(3)}`).join(';'),
   ].join('|');
 
 export const getBoxBrushStrokePolygons = (
-  node: TFrameNode | TRectangleNode | TSectionNode,
-  outer: TPoint[],
-  inner: TPoint[],
+  node: TFrameNode | TLineNode | TRectangleNode | TSectionNode,
+  ring: TStrokeRing,
 ): TPoint[][] | null => {
   const values = getStrokeBrushValues(node);
   const category = getStrokeBrushCategory(values.brush);
   const shape = category ? getBrushShape(values.brush) : null;
 
   if (category) {
-    return memoizeBrushPolygons(getKey(node, outer, inner, shape !== null), () => {
+    return memoizeBrushPolygons(getKey(node, ring, shape !== null), () => {
       const shared = {
         direction: values.direction,
         flipped: node.strokeProfileFlipped ?? false,
@@ -45,11 +46,11 @@ export const getBoxBrushStrokePolygons = (
 
       switch (true) {
         case category.category === 'scatter':
-          return getBoxScatterBrushPolygons(outer, inner, { ...shared, ...values, stats: shape?.scatter });
+          return getBoxScatterBrushPolygons(ring, { ...shared, ...values, stats: shape?.scatter });
         case shape !== null:
-          return getBoxTracedBrushPolygons(outer, inner, shared, shape?.contours ?? []);
+          return getBoxTracedBrushPolygons(ring, shared, shape.contours);
         default:
-          return getBoxStretchBrushPolygons(outer, inner, shared);
+          return getBoxStretchBrushPolygons(ring, shared);
       }
     });
   }

@@ -2,9 +2,11 @@
 import { TStrokeRing } from '../types';
 
 // utils
+import { buildOpenStrokeRing } from '../buildOpenStrokeRing';
 import { sampleStrokeRing } from '../sampleStrokeRing';
 
 const ring: TStrokeRing = {
+  closed: true,
   cumulative: [0, 10, 10, 20],
   inner: [],
   lengths: [10, 0, 10, 10],
@@ -79,5 +81,14 @@ describe('sampleStrokeRing', () => {
 
     // result
     expect(sampleStrokeRing(gap, 2).tangent).toEqual({ x: 0, y: 0 });
+  });
+
+  it('should clamp distances on an open ring instead of wrapping them around to the start', () => {
+    // mock
+    const open = buildOpenStrokeRing({ x: 0, y: 0 }, { x: 10, y: 0 }, 1);
+
+    // result
+    expect(sampleStrokeRing(open, 10).mid).toEqual({ x: 10, y: 0 });
+    expect(sampleStrokeRing(open, -5).mid).toEqual({ x: 0, y: 0 });
   });
 });

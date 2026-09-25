@@ -8,7 +8,7 @@ import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/c
 import { drawLineLeafNode } from '../drawLineLeafNode';
 import { getLineShape } from '../getLineShape';
 import { getLineStrokeBox } from 'utils/canvas/shapes/getLineStrokeBox';
-import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
+import { getLineStrokeShape } from 'utils/canvas/line/stroke/getLineStrokeShape';
 
 const drawBoxPaintsMock = vi.fn();
 const drawBooleanEffectsMock = vi.fn();
@@ -56,13 +56,15 @@ describe('drawLineLeafNode', () => {
       context,
       getLineStrokeBox(node),
       node.strokes,
-      [getLineStrokePolygon(node)],
+      getLineStrokeShape(node)?.polygons,
       0.5,
       {},
       expect.any(Map),
       refs,
       null,
       1,
+      null,
+      'evenOdd',
     );
   });
 
@@ -70,7 +72,7 @@ describe('drawLineLeafNode', () => {
     // mock
     const node = line();
     const refs = createCanvasRefs();
-    const shape = getLineShape(getLineStrokePolygon(node) ?? []);
+    const shape = getLineShape(getLineStrokeShape(node)!);
 
     // action
     drawLineLeafNode(context, node, 0.5, {}, new Map(), refs, null, 0);

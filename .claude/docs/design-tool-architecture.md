@@ -445,6 +445,12 @@ Two independent render passes, both need updating for a visual change to show up
   outline polygon filled through `drawBoxPaints`).
   Line effects reuse the boolean effect drawers: `getLineShape` wraps that polygon as a
   `TBooleanShape` (keys shared with booleans via `getNextBooleanShapeKey`) for `drawBooleanEffects`.
+  A line's stroke shape comes from `utils/canvas/line/stroke/getLineStrokeShape` (`{ fillRule, polygons }`,
+  used by the canvas, effects and SVG/PDF export): the plain outline for a uniform stroke, or per mode
+  dashes / width-profile band / dynamic band (plus solid arrowheads, all filled nonzero) or the brush
+  run along an open `TStrokeRing` (`buildOpenStrokeRing`, `closed: false`; the box brush functions take a
+  ring). Inside/Outside shift the whole shape by half the width. Booleans and Outline stroke still use
+  the plain outline.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

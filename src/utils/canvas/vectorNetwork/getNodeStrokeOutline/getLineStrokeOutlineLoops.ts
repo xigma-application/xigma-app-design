@@ -5,6 +5,8 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getLinePoints } from '../../line/getLinePoints';
 import { getLineEndOutlinePoints } from './getLineEndOutlinePoints/getLineEndOutlinePoints';
+import { getLineFrame } from '../../line/stroke/getLineFrame';
+import { getLineStrokeOffset } from '../../line/stroke/getLineStrokeOffset';
 import { getPolylineSegmentOffset } from 'utils/canvas/vectorNetwork/getPolylineSegmentOffset';
 import { TStrokeOutlineLoops } from 'utils/canvas/vectorNetwork/getStrokeOutlinePolygons/getStrokeOutlinePolygons';
 
@@ -24,8 +26,10 @@ export const getLineStrokeOutlineLoops = (node: TLineNode, halfWidth: number): T
     const direction = { x: unit.y, y: -unit.x };
     const endPoints = toWorld(end, direction, getLineEndOutlinePoints(node.endPoint, halfWidth));
     const startPoints = toWorld(start, { x: -direction.x, y: -direction.y }, getLineEndOutlinePoints(node.startPoint, halfWidth));
+    const offset = getLineStrokeOffset(node, { ...getLineFrame(node), halfWidth });
+    const outer = [...startPoints.slice(-1), ...endPoints, ...startPoints.slice(0, -1)];
 
-    return { inner: null, outer: [...startPoints.slice(-1), ...endPoints, ...startPoints.slice(0, -1)] };
+    return { inner: null, outer: outer.map((point) => ({ x: point.x + offset.x, y: point.y + offset.y })) };
   }
 
   return null;

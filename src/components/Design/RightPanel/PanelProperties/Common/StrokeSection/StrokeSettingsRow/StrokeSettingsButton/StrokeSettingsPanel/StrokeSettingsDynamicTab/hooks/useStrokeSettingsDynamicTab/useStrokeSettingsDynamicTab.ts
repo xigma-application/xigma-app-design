@@ -9,16 +9,16 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { STROKE_DYNAMIC_FIELDS } from '../../constants';
 
 // types
-import { isAppearanceNode } from '../../../../../../../AppearanceSection/types';
 import { TStrokeDynamicChanges, TUseStrokeSettingsDynamicTabResult } from '../../types';
 
 // utils
+import { isStyledNode } from '../../../../../../../AppearanceSection/utils/isStyledNode';
 import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValues';
 import { handleStrokeDynamicBlur } from './utils/handleStrokeDynamicBlur';
 
 export const useStrokeSettingsDynamicTab = (): TUseStrokeSettingsDynamicTabResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
   const valuesList = nodes.length > 0 ? nodes.map(getStrokeDynamicValues) : [getStrokeDynamicValues(undefined)];
   const values = Object.fromEntries(
     STROKE_DYNAMIC_FIELDS.map((field) => [

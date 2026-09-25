@@ -131,4 +131,20 @@ describe('useStrokeSettingsBrushTab', () => {
     // result
     expect([readNode(firstId).strokeBrush, readNode(secondId).strokeBrush]).toEqual(['heist', 'noir']);
   });
+
+  it('should write nothing with nothing selected and ignore a revert without a preview', () => {
+    // mock
+    store.dispatch(setSelection([]));
+    const before = selectActivePage(store.getState()).nodes;
+
+    // before
+    const { result } = renderHook(() => useStrokeSettingsBrushTab(), { wrapper });
+
+    // action
+    act(() => result.current.onDirectionChange('left'));
+    act(() => result.current.onBrushRevert());
+
+    // result
+    expect(selectActivePage(store.getState()).nodes).toBe(before);
+  });
 });

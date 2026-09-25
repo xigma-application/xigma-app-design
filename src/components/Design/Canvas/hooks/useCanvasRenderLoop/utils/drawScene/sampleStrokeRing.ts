@@ -1,4 +1,5 @@
 // types
+import { TPoint } from 'types/canvas';
 import { TStrokeRing, TStrokeRingSample } from './types';
 
 const findSegment = (ring: TStrokeRing, distance: number): number => {
@@ -18,22 +19,32 @@ const findSegment = (ring: TStrokeRing, distance: number): number => {
   return low;
 };
 
-export const sampleStrokeRing = (ring: TStrokeRing, distance: number): TStrokeRingSample => {
-  const wrapped = ((distance % ring.perimeter) + ring.perimeter) % ring.perimeter;
-  const count = ring.mids.length;
-  let index = findSegment(ring, wrapped);
+const getRingDistance = (ring: TStrokeRing, distance: number): number =>
+  ring.closed ? ((distance % ring.perimeter) + ring.perimeter) % ring.perimeter : Math.min(Math.max(distance, 0), ring.perimeter);
 
-  while (ring.lengths[index] === 0 && index < count - 1) {
+const skipEmptySegments = (ring: TStrokeRing, start: number): number => {
+  let index = start;
+
+  while (ring.lengths[index] === 0 && index < ring.mids.length - 1) {
     index += 1;
   }
 
+  return index;
+};
+
+const getSegmentMid = (ring: TStrokeRing, index: number, next: number, t: number): TPoint => ({
+  x: ring.mids[index].x + (ring.mids[next].x - ring.mids[index].x) * t,
+  y: ring.mids[index].y + (ring.mids[next].y - ring.mids[index].y) * t,
+});
+
+export const sampleStrokeRing = (ring: TStrokeRing, distance: number): TStrokeRingSample => {
+  const wrapped = getRingDistance(ring, distance);
+  const count = ring.mids.length;
+  const index = skipEmptySegments(ring, findSegment(ring, wrapped));
   const next = (index + 1) % count;
   const length = ring.lengths[index] || 1;
   const t = ring.lengths[index] > 0 ? (wrapped - ring.cumulative[index]) / length : 0;
-  const mid = {
-    x: ring.mids[index].x + (ring.mids[next].x - ring.mids[index].x) * t,
-    y: ring.mids[index].y + (ring.mids[next].y - ring.mids[index].y) * t,
-  };
+  const mid = getSegmentMid(ring, index, next, t);
   const outerX = ring.outer[index].x + (ring.outer[next].x - ring.outer[index].x) * t;
   const outerY = ring.outer[index].y + (ring.outer[next].y - ring.outer[index].y) * t;
 

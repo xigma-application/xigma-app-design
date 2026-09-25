@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { LineEndpoint, NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType, StrokeAlign, StrokeMode } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -140,5 +140,38 @@ describe('useLineStrokeSettings', () => {
     // result
     expect(getLine('strokeLineScrubA').strokeWidth).toBe(5);
     expect(getLine('strokeLineScrubB').strokeWidth).toBe(4);
+  });
+
+  it('should read the shared position and stroke modes and write a picked position to every line', () => {
+    // mock
+    selectLines([
+      makeLine('strokeLineModeA', { strokeAlign: StrokeAlign.outside, strokeMode: StrokeMode.brush }),
+      makeLine('strokeLineModeB', { strokeAlign: StrokeAlign.outside, strokeMode: StrokeMode.brush }),
+    ]);
+
+    // before
+    const { result } = renderHook(() => useLineStrokeSettings(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ isBrush: true, isNonBasicMode: true, isStrokeModeMixed: false, position: StrokeAlign.outside });
+
+    // action
+    act(() => {
+      result.current.onPositionSelect(StrokeAlign.inside);
+    });
+
+    // result
+    expect(getLine('strokeLineModeA').strokeAlign).toBe(StrokeAlign.inside);
+  });
+
+  it('should report mixed stroke modes and no brush for a brush and a plain line', () => {
+    // mock
+    selectLines([makeLine('strokeLineMixModeA', { strokeMode: StrokeMode.brush }), makeLine('strokeLineMixModeB')]);
+
+    // before
+    const { result } = renderHook(() => useLineStrokeSettings(), { wrapper });
+
+    // result
+    expect(result.current).toMatchObject({ isBrush: false, isStrokeModeMixed: true, position: StrokeAlign.center });
   });
 });

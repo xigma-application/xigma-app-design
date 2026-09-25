@@ -36,6 +36,7 @@ export const StrokeSettingsBasicTab: FC = () => {
     dashes,
     gap,
     hasDashes,
+    hasJoin,
     isCustom,
     isDashed,
     isMiter,
@@ -178,15 +179,17 @@ export const StrokeSettingsBasicTab: FC = () => {
         </>
       )}
       <StrokeSettingsWidthProfileField disabled={isWidthProfileDisabled} />
-      <UITools.Field
-        Component={UITools.ToggleButtonGroup}
-        controlWidth={128}
-        label={t(`${namespace}.join.label`)}
-        onChange={onJoinSelect}
-        toggleButtons={joinButtons}
-        value={join ?? ''}
-      />
-      {isMiter && (
+      {hasJoin && (
+        <UITools.Field
+          Component={UITools.ToggleButtonGroup}
+          controlWidth={128}
+          label={t(`${namespace}.join.label`)}
+          onChange={onJoinSelect}
+          toggleButtons={joinButtons}
+          value={join ?? ''}
+        />
+      )}
+      {hasJoin && isMiter && (
         <UITools.Field
           Component={UITools.TextField}
           controlWidth={128}

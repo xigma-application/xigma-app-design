@@ -52,7 +52,7 @@ const HANDLERS = {
 };
 
 const renderTab = (values: Record<string, unknown>): Record<string, unknown>[] => {
-  Object.assign(basicTab, HANDLERS, values);
+  Object.assign(basicTab, HANDLERS, { hasJoin: true }, values);
   const before = fieldProps.length;
 
   render(<StrokeSettingsBasicTab />);
@@ -137,5 +137,22 @@ describe('StrokeSettingsBasicTab behaviors', () => {
     expect(fields).toHaveLength(2);
     expect(fields[1].value).toBe(StrokeJoin.round);
     expect(widthProps.at(-1)).toEqual({ disabled: false });
+  });
+
+  it('should hide the join and miter angle for lines only', () => {
+    // before
+    const fields = renderTab({
+      hasDashes: false,
+      hasJoin: false,
+      isCustom: false,
+      isDashed: false,
+      isMiter: true,
+      isWidthProfileDisabled: false,
+      join: StrokeJoin.miter,
+      style: StrokeStyle.solid,
+    });
+
+    // result
+    expect(fields).toHaveLength(1);
   });
 });

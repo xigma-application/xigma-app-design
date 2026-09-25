@@ -2,6 +2,8 @@
 import { StrokeBrushDirection, StrokeProfile } from 'types/design/enums';
 
 // utils
+import { buildOpenStrokeRing } from '../../buildOpenStrokeRing';
+import { buildStrokeRing } from '../../buildStrokeRing';
 import { getBoxStretchBrushPolygons } from '../getBoxStretchBrushPolygons';
 
 const outer = [
@@ -38,7 +40,7 @@ const getThickness = (polygons: { x: number; y: number }[][], match: (point: { x
 describe('getBoxStretchBrushPolygons', () => {
   it('should return an outer and an inner loop plus small holes', () => {
     // action
-    const polygons = getBoxStretchBrushPolygons(outer, inner, options)!;
+    const polygons = getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), options)!;
 
     // result
     expect(polygons.length).toBeGreaterThan(2);
@@ -48,8 +50,8 @@ describe('getBoxStretchBrushPolygons', () => {
 
   it('should taper from thick at the start to thin at the end and mirror it for the other direction', () => {
     // action
-    const right = getBoxStretchBrushPolygons(outer, inner, options)!;
-    const left = getBoxStretchBrushPolygons(outer, inner, { ...options, direction: StrokeBrushDirection.left })!;
+    const right = getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), options)!;
+    const left = getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), { ...options, direction: StrokeBrushDirection.left })!;
     const onTop = (point: { x: number; y: number }): boolean => point.y < 30 && point.x > 50 && point.x < 350;
     const onBottom = (point: { x: number; y: number }): boolean => point.y > 330 && point.x > 50 && point.x < 350;
 
@@ -60,14 +62,27 @@ describe('getBoxStretchBrushPolygons', () => {
 
   it('should be deterministic for one seed and differ for another', () => {
     // result
-    expect(getBoxStretchBrushPolygons(outer, inner, options)).toEqual(getBoxStretchBrushPolygons(outer, inner, options));
-    expect(getBoxStretchBrushPolygons(outer, inner, { ...options, seed: 'other' })).not.toEqual(
-      getBoxStretchBrushPolygons(outer, inner, options),
+    expect(getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), options)).toEqual(
+      getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), options),
+    );
+    expect(getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), { ...options, seed: 'other' })).not.toEqual(
+      getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), options),
     );
   });
 
   it('should return null without a stroke width', () => {
     // result
-    expect(getBoxStretchBrushPolygons(outer, inner, { ...options, strokeWidth: 0 })).toBeNull();
+    expect(getBoxStretchBrushPolygons(buildStrokeRing(outer, inner), { ...options, strokeWidth: 0 })).toBeNull();
+  });
+
+  it('should draw an open ring as one band running from its start to its end, plus the holes', () => {
+    // before
+    const [band] = getBoxStretchBrushPolygons(buildOpenStrokeRing({ x: 0, y: 0 }, { x: 300, y: 0 }, 8), options) ?? [];
+    const xs = band.map((point) => point.x);
+
+    // result
+    expect(Math.min(...xs)).toBeLessThan(5);
+    expect(Math.max(...xs)).toBeGreaterThan(295);
+    expect(band.some((point) => point.y < 0) && band.some((point) => point.y > 0)).toBe(true);
   });
 });
