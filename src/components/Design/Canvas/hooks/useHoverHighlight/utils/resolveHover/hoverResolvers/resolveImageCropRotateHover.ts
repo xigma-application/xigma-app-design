@@ -2,8 +2,8 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getImageCropRect } from 'components/Design/Canvas/utils/getImageCropRect';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';

@@ -577,8 +577,7 @@ priority-guard chain — stop/endpoint-move/rotate/radius handles all still win 
 `getGradientEllipsePoint`, rather than a projected line point), and a new
 `getGradientAddStopPositionAtPoint.ts` wrapper that dispatches to it for angular paints and falls
 back to the existing line hit-test otherwise — replacing `getGradientLinePositionAtPoint` at its
-three call sites (`armAddGradientStopOnPointerDown`, `resolveGradientLineHover`,
-`resolveGradientLineHandleHover`) so the add-stop cursor, hover ref, and click handler all agree on
+two call sites (`armAddGradientStopOnPointerDown`, `resolveGradientLineHover`) so the add-stop cursor, hover ref, and click handler all agree on
 which guide applies. `drawGradientAddStopHoverPreview` also needed the angular branch: its ghost
 preview marker now samples the ellipse (`getGradientEllipsePoint`) instead of the line, and reuses
 the same outward-offset direction as the real stop markers.

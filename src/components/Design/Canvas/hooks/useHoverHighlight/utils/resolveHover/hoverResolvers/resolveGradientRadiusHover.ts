@@ -3,16 +3,17 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getGradientRadiusHandleAtPoint } from '../../../../../utils/getGradientRadiusHandleAtPoint';
+import { getHandleHoverResult } from '../getHandleHoverResult';
 
 export const resolveGradientRadiusHover = ({
   gradientEditor,
   point,
+  refs,
   selectedNodes,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const radiusHit = getGradientRadiusHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  const hit = getGradientRadiusHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  setRef(refs.hover, 'hoveredGradientRadiusHandleRef', hit?.nodeId ?? null);
 
-  if (radiusHit) {
-    return { className: 'positioning', cursor: '', nodeId: radiusHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'positioning');
 };

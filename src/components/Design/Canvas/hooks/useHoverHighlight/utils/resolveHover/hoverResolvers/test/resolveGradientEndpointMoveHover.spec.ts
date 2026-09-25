@@ -84,4 +84,60 @@ describe('resolveGradientEndpointMoveHover', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('should set the hovered endpoint when hovering the start handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientEndpointMoveHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 3, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientEndpointMoveRef.current).toBe('start');
+    expect(result?.className).toBe('positioning');
+  });
+
+  it('should set the hovered endpoint when hovering the end handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientEndpointMoveHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 97, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientEndpointMoveRef.current).toBe('end');
+    expect(result?.className).toBe('positioning');
+  });
+
+  it('should clear the ref when the point is outside the tight move radius', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientEndpointMoveHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 8, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientEndpointMoveRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when there is no active gradient editor', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientEndpointMoveHover(
+      createContext({ gradientEditor: null, point: { x: 0, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientEndpointMoveRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
 });

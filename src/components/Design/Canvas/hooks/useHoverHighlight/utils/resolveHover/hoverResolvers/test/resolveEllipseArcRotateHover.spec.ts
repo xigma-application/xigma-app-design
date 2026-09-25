@@ -1,12 +1,36 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TEllipseNode, TRectangleNode } from 'types/design/types';
+import { THoverResolverContext } from '../../types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { resolveEllipseArcRotateHandleHover } from '../resolveEllipseArcRotateHandleHover';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
+import { resolveEllipseArcRotateHover } from '../resolveEllipseArcRotateHover';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+
+const createContext = (overrides: Partial<THoverResolverContext>): THoverResolverContext => ({
+  activeTool: ToolName.default,
+  editingContent: '',
+  editingNodeId: null,
+  editingTextBox: null,
+  gradientEditor: null,
+  imageEditor: null,
+  isControlPressed: false,
+  leafNodes: [],
+  nodesById: {},
+  openPropertyPanel: null,
+  point: { x: 0, y: 0 },
+  refs: createCanvasRefs(),
+  resizableSelectedNodes: [],
+  resizeHandleHit: null,
+  selectedNodes: [],
+  smartSelectionNodes: [],
+  vectorMultiSelectBox: null,
+  vectorMultiSelectResizeHandle: null,
+  viewport: IDENTITY_VIEWPORT,
+  ...overrides,
+});
 
 // arcEndAngle: 0 (vs. the default arcStartAngle of 90) gives the shape an actual partial cut, which is
 // what makes the Start/rotate handle exist at all
@@ -39,16 +63,17 @@ const rectangle: TRectangleNode = {
   y: 0,
 };
 
-describe('resolveEllipseArcRotateHandleHover', () => {
+describe('resolveEllipseArcRotateHover', () => {
   it("should mark the ellipse's own id when the point sits precisely on its Start handle dot", () => {
     // mock — arcStartAngle stays at its default (90), whose rest position is (100, 50)
     const refs = createCanvasRefs();
 
     // before
-    resolveEllipseArcRotateHandleHover({ x: 100, y: 50 }, [cutEllipse], IDENTITY_VIEWPORT, refs);
+    const result = resolveEllipseArcRotateHover(createContext({ point: { x: 100, y: 50 }, refs, resizableSelectedNodes: [cutEllipse] }));
 
     // result
     expect(refs.hover.hoveredEllipseArcRotateHandleRef.current).toBe('ellipse-1');
+    expect(result?.className).toBe('radius');
   });
 
   it('should clear the ref for a hover elsewhere on the shape — only precisely on the dot counts', () => {
@@ -56,10 +81,11 @@ describe('resolveEllipseArcRotateHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before — dead center of the ellipse, far from the (100, 50) handle
-    resolveEllipseArcRotateHandleHover({ x: 50, y: 50 }, [cutEllipse], IDENTITY_VIEWPORT, refs);
+    const result = resolveEllipseArcRotateHover(createContext({ point: { x: 50, y: 50 }, refs, resizableSelectedNodes: [cutEllipse] }));
 
     // result
     expect(refs.hover.hoveredEllipseArcRotateHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
   });
 
   it('should clear the ref when the ellipse has no cut — the Start handle does not exist yet', () => {
@@ -67,10 +93,11 @@ describe('resolveEllipseArcRotateHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveEllipseArcRotateHandleHover({ x: 100, y: 50 }, [uncutEllipse], IDENTITY_VIEWPORT, refs);
+    const result = resolveEllipseArcRotateHover(createContext({ point: { x: 100, y: 50 }, refs, resizableSelectedNodes: [uncutEllipse] }));
 
     // result
     expect(refs.hover.hoveredEllipseArcRotateHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
   });
 
   it('should clear the ref when nothing (or something other than a single ellipse) is selected', () => {
@@ -78,9 +105,10 @@ describe('resolveEllipseArcRotateHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveEllipseArcRotateHandleHover({ x: 100, y: 50 }, [rectangle], IDENTITY_VIEWPORT, refs);
+    const result = resolveEllipseArcRotateHover(createContext({ point: { x: 100, y: 50 }, refs, resizableSelectedNodes: [rectangle] }));
 
     // result
     expect(refs.hover.hoveredEllipseArcRotateHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
   });
 });

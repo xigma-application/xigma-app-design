@@ -3,16 +3,17 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getGradientEndpointMoveHandleAtPoint } from '../../../../../utils/getGradientEndpointMoveHandleAtPoint';
+import { getHandleHoverResult } from '../getHandleHoverResult';
 
 export const resolveGradientEndpointMoveHover = ({
   gradientEditor,
   point,
+  refs,
   selectedNodes,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const moveHit = getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  const hit = getGradientEndpointMoveHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  setRef(refs.hover, 'hoveredGradientEndpointMoveRef', hit?.endpoint ?? null);
 
-  if (moveHit) {
-    return { className: 'positioning', cursor: '', nodeId: moveHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'positioning');
 };

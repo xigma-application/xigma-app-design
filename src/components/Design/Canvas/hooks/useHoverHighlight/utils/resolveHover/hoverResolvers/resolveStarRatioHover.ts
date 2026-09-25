@@ -2,12 +2,17 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getHandleHoverResult } from '../getHandleHoverResult';
 import { getStarRatioHandleAtPoint } from '../../../../../utils/getStarRatioHandleAtPoint';
 
-export const resolveStarRatioHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
-  const starRatioHandleHit = getStarRatioHandleAtPoint(point, resizableSelectedNodes, viewport);
+export const resolveStarRatioHover = ({
+  point,
+  refs,
+  resizableSelectedNodes,
+  viewport,
+}: THoverResolverContext): THoverResult | undefined => {
+  const hit = getStarRatioHandleAtPoint(point, resizableSelectedNodes, viewport);
+  setRef(refs.hover, 'hoveredStarRatioHandleRef', hit?.nodeId ?? null);
 
-  if (starRatioHandleHit) {
-    return { className: 'ratio', cursor: '', nodeId: starRatioHandleHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'ratio');
 };

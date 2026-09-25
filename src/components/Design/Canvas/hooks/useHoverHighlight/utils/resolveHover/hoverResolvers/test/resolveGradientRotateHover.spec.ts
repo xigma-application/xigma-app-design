@@ -102,4 +102,60 @@ describe('resolveGradientRotateHover', () => {
     // result
     expect(result).toEqual({ className: null, cursor: '', nodeId: 'rect-1' });
   });
+
+  it('should set the hovered endpoint and pointer position when hovering the start handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — 8px from the endpoint, past the 6px inner move zone, within the 10px outer ring
+    const result = resolveGradientRotateHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 8, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRotateEndpointRef.current).toEqual({ endpoint: 'start', pointerPosition: { x: 8, y: 50 } });
+    expect(result?.nodeId).toBe('rect-1');
+  });
+
+  it('should set the hovered endpoint when hovering the end handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRotateHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 92, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRotateEndpointRef.current?.endpoint).toBe('end');
+    expect(result?.nodeId).toBe('rect-1');
+  });
+
+  it('should clear the ref when the point is too far from either endpoint', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRotateHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 50, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRotateEndpointRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when there is no active gradient editor', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRotateHover(
+      createContext({ gradientEditor: null, point: { x: 0, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRotateEndpointRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
 });

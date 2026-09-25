@@ -1,11 +1,13 @@
-import { RefObject } from 'react';
+// store
+import { RootState } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorMultiSelectBox } from 'types/design/canvas/types';
+import { TCanvasRefs, TVectorHandleHover } from 'types/design/canvas/types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { getVectorMultiSelectBoxForHover } from '../getVectorMultiSelectBoxForHover';
 
 const node: TVectorNode = {
@@ -25,32 +27,34 @@ const node: TVectorNode = {
 
 const nodes: Record<string, TSceneNode> = { 'vector-1': node };
 
-const createVectorMultiSelectBoxRef = (box: TVectorMultiSelectBox | null = null): RefObject<TVectorMultiSelectBox | null> => ({
-  current: box,
-});
+const createState = (vectorEditingNodeIds: string[]): RootState =>
+  ({ design: { activePageId: 'page-1', pages: { 'page-1': { nodes } }, vectorEditingNodeIds } }) as unknown as RootState;
+
+const createRefs = (selectedVertexIds: string[], selectedHandles: TVectorHandleHover[] = []): TCanvasRefs => {
+  const refs = createCanvasRefs();
+
+  refs.vectorEdit.selectedVectorVertexIdsRef.current = selectedVertexIds;
+  refs.vectorEdit.selectedVectorHandlesRef.current = selectedHandles;
+
+  return refs;
+};
 
 describe('getVectorMultiSelectBoxForHover', () => {
   it('should return null when there is no vector-editing node, regardless of selection', () => {
     // result
-    expect(getVectorMultiSelectBoxForHover(nodes, [], ['v1', 'v2'], [], createVectorMultiSelectBoxRef())).toBeNull();
+    expect(getVectorMultiSelectBoxForHover(createState([]), createRefs(['v1', 'v2']))).toBeNull();
   });
 
   it('should return null when the selection is not eligible for a multi-select box (e.g. a tangent handle is selected)', () => {
     // result
     expect(
-      getVectorMultiSelectBoxForHover(
-        nodes,
-        ['vector-1'],
-        ['v1', 'v2'],
-        [{ end: 'start', segmentId: 's1' }],
-        createVectorMultiSelectBoxRef(),
-      ),
+      getVectorMultiSelectBoxForHover(createState(['vector-1']), createRefs(['v1', 'v2'], [{ end: 'start', segmentId: 's1' }])),
     ).toBeNull();
   });
 
   it('should compute and return the box when a node is being edited and the selection is eligible', () => {
     // result
-    expect(getVectorMultiSelectBoxForHover(nodes, ['vector-1'], ['v1', 'v2'], [], createVectorMultiSelectBoxRef())).toEqual({
+    expect(getVectorMultiSelectBoxForHover(createState(['vector-1']), createRefs(['v1', 'v2']))).toEqual({
       bounds: { height: 40, width: 100, x: 0, y: 0 },
       rotation: 0,
       selectionKey: 'v1,v2',

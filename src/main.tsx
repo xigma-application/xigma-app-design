@@ -14,6 +14,9 @@ import { initI18n } from 'translations';
 // store
 import { store } from 'store';
 
+// utils
+import { registerGlobalUtils } from 'utils/refs/registerGlobalUtils';
+
 // styles
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
@@ -23,6 +26,8 @@ import '@xigma/components/index.css';
 import 'styles/index.scss';
 
 const container = document.getElementById('root')!;
+
+registerGlobalUtils();
 
 initI18n().then(() => {
   createRoot(container).render(

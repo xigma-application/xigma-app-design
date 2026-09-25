@@ -3,6 +3,11 @@ import '@testing-library/jest-dom/vitest';
 // others
 import { DEFAULT_LANGUAGE, initI18n } from 'translations';
 
+// utils
+import { registerGlobalUtils } from 'utils/refs/registerGlobalUtils';
+
+registerGlobalUtils();
+
 // force macOS regardless of the machine/CI running the suite, so modifier-key symbols/matching stay deterministic
 vi.mock('react-device-detect', () => ({ isMacOs: true }));
 

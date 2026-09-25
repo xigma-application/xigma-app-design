@@ -3,25 +3,16 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getEllipseArcHandleAtPoint } from '../../../../../utils/getEllipseArcHandleAtPoint';
-import { getEllipseArcRatioHandleAtPoint } from '../../../../../utils/getEllipseArcRatioHandleAtPoint';
-import { getEllipseArcRotateHandleAtPoint } from '../../../../../utils/getEllipseArcRotateHandleAtPoint';
+import { getHandleHoverResult } from '../getHandleHoverResult';
 
-export const resolveEllipseArcHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
-  const ellipseArcHandleHit = getEllipseArcHandleAtPoint(point, resizableSelectedNodes, viewport);
+export const resolveEllipseArcHover = ({
+  point,
+  refs,
+  resizableSelectedNodes,
+  viewport,
+}: THoverResolverContext): THoverResult | undefined => {
+  const hit = getEllipseArcHandleAtPoint(point, resizableSelectedNodes, viewport);
+  setRef(refs.hover, 'hoveredEllipseArcHandleRef', hit?.nodeId ?? null);
 
-  if (ellipseArcHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: ellipseArcHandleHit.nodeId };
-  }
-
-  const ellipseArcRotateHandleHit = getEllipseArcRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
-
-  if (ellipseArcRotateHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: ellipseArcRotateHandleHit.nodeId };
-  }
-
-  const ellipseArcRatioHandleHit = getEllipseArcRatioHandleAtPoint(point, resizableSelectedNodes, viewport);
-
-  if (ellipseArcRatioHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: ellipseArcRatioHandleHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'radius');
 };

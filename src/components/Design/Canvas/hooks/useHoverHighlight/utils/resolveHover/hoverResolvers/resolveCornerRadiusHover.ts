@@ -3,30 +3,16 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getCornerRadiusHandleAtPoint } from '../../../../../utils/getCornerRadiusHandleAtPoint';
-import { getPolygonCornerRadiusHandleHit } from '../../getPolygonCornerRadiusHandleHit';
-import { getStarCornerRadiusHandleHit } from '../../getStarCornerRadiusHandleHit';
+import { getHandleHoverResult } from '../getHandleHoverResult';
 
 export const resolveCornerRadiusHover = ({
   point,
+  refs,
   resizableSelectedNodes,
   viewport,
-  resizeHandleHit,
 }: THoverResolverContext): THoverResult | undefined => {
-  const cornerRadiusHandleHit = getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
+  const hit = getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
+  setRef(refs.hover, 'hoveredCornerRadiusHandleRef', hit ? { corner: hit.corners[0], nodeId: hit.nodeId } : null);
 
-  if (cornerRadiusHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: cornerRadiusHandleHit.nodeId };
-  }
-
-  const polygonCornerRadiusHandleHit = getPolygonCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
-
-  if (polygonCornerRadiusHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: polygonCornerRadiusHandleHit.nodeId };
-  }
-
-  const starCornerRadiusHandleHit = getStarCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
-
-  if (starCornerRadiusHandleHit) {
-    return { className: 'radius', cursor: '', nodeId: starCornerRadiusHandleHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'radius');
 };

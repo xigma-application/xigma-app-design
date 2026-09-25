@@ -2,12 +2,17 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getHandleHoverResult } from '../getHandleHoverResult';
 import { getPolygonVertexCountHandleAtPoint } from '../../../../../utils/getPolygonVertexCountHandleAtPoint';
 
-export const resolvePolygonVertexHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
-  const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+export const resolvePolygonVertexHover = ({
+  point,
+  refs,
+  resizableSelectedNodes,
+  viewport,
+}: THoverResolverContext): THoverResult | undefined => {
+  const hit = getPolygonVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+  setRef(refs.hover, 'hoveredPolygonVertexCountHandleRef', hit?.nodeId ?? null);
 
-  if (polygonVertexCountHandleHit) {
-    return { className: 'vertices', cursor: '', nodeId: polygonVertexCountHandleHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'vertices');
 };

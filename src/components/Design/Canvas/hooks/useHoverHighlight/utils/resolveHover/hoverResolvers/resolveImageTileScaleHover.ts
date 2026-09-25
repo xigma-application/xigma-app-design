@@ -2,9 +2,9 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
-import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getImageCropResizeHandleAtPoint } from 'components/Design/Canvas/utils/getImageCropResizeHandleAtPoint';
 import { getImageTileRect } from 'components/Design/Canvas/utils/getImageTileRect';
+import { getNodePaints } from 'utils/design/paint/getNodePaints';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { isAppearanceNode } from 'components/Design/RightPanel/PanelProperties/Common/AppearanceSection/types';

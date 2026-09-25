@@ -9,13 +9,15 @@ import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotated
 export const resolveGradientRotateHover = ({
   gradientEditor,
   point,
+  refs,
   selectedNodes,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const rotateHit = getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  const hit = getGradientRotateHandleAtPoint(point, selectedNodes, viewport, gradientEditor);
+  setRef(refs.hover, 'hoveredGradientRotateEndpointRef', hit ? { endpoint: hit.endpoint, pointerPosition: point } : null);
 
-  if (rotateHit) {
-    const cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, rotateHit.bounds, rotateHit.rotation)) ?? '';
-    return { className: null, cursor, nodeId: rotateHit.nodeId };
+  if (hit) {
+    const cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, hit.bounds, hit.rotation)) ?? '';
+    return { className: null, cursor, nodeId: hit.nodeId };
   }
 };

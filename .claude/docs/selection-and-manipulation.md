@@ -524,15 +524,21 @@ into local space first).
 guarded by `event.buttons === 0` (inert mid-drag), delegating to `resolveHover.ts`
 (`utils/resolveHover/`), the exact same resolver-array pattern as §3's `handlePointerDown`/
 `ARM_RESOLVERS`: it builds one `THoverResolverContext`, then loops `HOVER_RESOLVERS`
-(`constants.ts`) — each entry a pure `resolveXHover(ctx): THoverResult | undefined` in
-`hoverResolvers.ts` — until one returns a `{ className, cursor, nodeId }` result, which is then
+(`constants.ts`) — each entry a `resolveXHover(ctx): THoverResult | undefined` in its own file under
+`hoverResolvers/` — until one returns a `{ className, cursor, nodeId }` result, which is then
 applied in one place via `setHoverState(canvas, hoverRef, setClassName, ...)`. Same order as
 `handlePointerDown`'s hit-test priority (line endpoint → path-offset handle → editing-text caret →
 vertex-count → Sweep/Start/Ratio (§19, all three `className: 'radius'`, same class as corner-radius)
 → resize handle → corner-radius → rotate handle → default node hover), plus one final resolver,
 `resolvePlainNodeHover`, that has no gate at all and always returns a result — the plain-node-hover
 fallback, which is *why* the loop never needs a separate post-loop branch: the last entry is
-guaranteed to match. The Scale-vs-plain-resize cursor swap is decided in `resolveResizeHover`:
+guaranteed to match. Every draggable handle (corner radius for rectangle/polygon/star, polygon/star
+vertex count, star ratio, ellipse Sweep/Start/Ratio, gradient stop/endpoint/radius/rotate/line,
+progressive blur) has exactly **one** resolver that hit-tests once, writes its own hover ref (read by
+the render loop) and returns the cursor result. Those are also listed in `HANDLE_HOVER_RESOLVERS`:
+`resolveToolHover` runs that whole list first on every move — so each handle's hover ref is always
+fresh, even when a higher-priority resolver wins — and the `HOVER_RESOLVERS` loop reuses those
+results instead of hit-testing the same handle a second time. The Scale-vs-plain-resize cursor swap is decided in `resolveResizeHover`:
 ```ts
 export const resolveResizeHover = ({ resizeHandleHit, activeTool }: THoverResolverContext): THoverResult | undefined => {
   if (resizeHandleHit) {
@@ -748,10 +754,8 @@ the projection itself with no explicit direction check needed.
 
 `getPolygonCornerRadiusHandleAtPoint.ts` lives in the shared `Canvas/utils/` (like
 `getCornerRadiusHandleAtPoint.ts`, per §1's note), not inside `handlePointerDown/`, since it's reused
-by both `handlePointerDown.ts` and `useHoverHighlight.ts` — the latter wraps it in its own small
-`getPolygonCornerRadiusHandleHit.ts` (`useHoverHighlight/utils/`) to keep the
-`resizeHandleHit ? null : ...` gating out of the hook body itself, following this repo's "named
-helper over inline closure" convention.
+by both `handlePointerDown.ts` and hover (`resolvePolygonCornerRadiusHover`). The hover needs no
+resize-handle gating of its own: `resolveResizeHover` sits ahead of it in `HOVER_RESOLVERS`.
 
 ## 13. Mid-drag render fix — don't snap to the zero-state offset while still dragging
 
@@ -849,8 +853,8 @@ same way on top of the shared `armSimpleDrag`/`continueShapeCornerRadiusDrag`/`d
 helpers (§12), just supplying `getStarPoints`/`getMaxStarCornerRadius` instead of Polygon's
 equivalents, and `TStarCornerRadiusDragState = { bounds, nodeId, points, ratio, rotation }`
 drag-state shape, same
-`hasStarCornerRadius.ts` guard, same `getStarCornerRadiusHandleAtPoint.ts` (`Canvas/utils/`) +
-`getStarCornerRadiusHandleHit.ts` (`useHoverHighlight/utils/`) split. The one substantive difference
+`hasStarCornerRadius.ts` guard, same `getStarCornerRadiusHandleAtPoint.ts` (`Canvas/utils/`), used by hover through
+`resolveStarCornerRadiusHover`. The one substantive difference
 from Polygon is geometric, not mechanical: a star's vertices alternate outer (convex, sharp tips) and
 inner (concave, the notches between points) — and this is the case that proves §12's shared math
 (`utils/math/getVertexAngles.ts`, `getMaxCornerRadiusForVertices.ts`, `getRoundedVertexPoints.ts`,

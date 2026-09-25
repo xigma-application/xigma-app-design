@@ -84,4 +84,46 @@ describe('resolveGradientRadiusHover', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('should set the hovered node when hovering the radius handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRadiusHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 0, y: 150 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRadiusHandleRef.current).toBe('rect-1');
+    expect(result?.className).toBe('positioning');
+  });
+
+  it('should clear the ref when the point is outside the handle tolerance', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRadiusHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 50, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRadiusHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when there is no active gradient editor', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientRadiusHover(
+      createContext({ gradientEditor: null, point: { x: 0, y: 150 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientRadiusHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
 });

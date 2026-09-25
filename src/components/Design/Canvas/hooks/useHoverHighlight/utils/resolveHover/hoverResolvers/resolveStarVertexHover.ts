@@ -2,12 +2,17 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getHandleHoverResult } from '../getHandleHoverResult';
 import { getStarVertexCountHandleAtPoint } from '../../../../../utils/getStarVertexCountHandleAtPoint';
 
-export const resolveStarVertexHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
-  const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+export const resolveStarVertexHover = ({
+  point,
+  refs,
+  resizableSelectedNodes,
+  viewport,
+}: THoverResolverContext): THoverResult | undefined => {
+  const hit = getStarVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+  setRef(refs.hover, 'hoveredStarVertexCountHandleRef', hit?.nodeId ?? null);
 
-  if (starVertexCountHandleHit) {
-    return { className: 'vertices', cursor: '', nodeId: starVertexCountHandleHit.nodeId };
-  }
+  return getHandleHoverResult(hit, 'vertices');
 };

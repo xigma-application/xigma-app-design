@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // others
-import { HOVER_RESOLVERS } from './constants';
+import { HANDLE_HOVER_RESOLVERS, HOVER_RESOLVERS } from './constants';
 
 // store
 import {
@@ -31,21 +31,6 @@ import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint
 import { getSelectionGroupHit } from '../../../../utils/getSelectionGroupHit';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
-import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover';
-import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
-import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandleHover';
-import { resolveEllipseArcRotateHandleHover } from './resolveEllipseArcRotateHandleHover';
-import { resolveGradientEndpointMoveHandleHover } from './resolveGradientEndpointMoveHandleHover';
-import { resolveGradientLineHandleHover } from './resolveGradientLineHandleHover';
-import { resolveGradientRadiusHandleHover } from './resolveGradientRadiusHandleHover';
-import { resolveGradientRotateHandleHover } from './resolveGradientRotateHandleHover';
-import { resolveGradientStopHandleHover } from './resolveGradientStopHandleHover';
-import { resolveProgressiveBlurHandleHover } from './resolveProgressiveBlurHandleHover';
-import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
-import { resolvePolygonVertexCountHandleHover } from './resolvePolygonVertexCountHandleHover';
-import { resolveStarCornerRadiusHandleHover } from './resolveStarCornerRadiusHandleHover';
-import { resolveStarRatioHandleHover } from './resolveStarRatioHandleHover';
-import { resolveStarVertexCountHandleHover } from './resolveStarVertexCountHandleHover';
 import { setHoverState } from '../setHoverState';
 
 export const resolveToolHover = (
@@ -67,16 +52,8 @@ export const resolveToolHover = (
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
-  const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
-  const selectedHandles = refs.vectorEdit.selectedVectorHandlesRef.current;
-  const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(
-    state.design.pages[state.design.activePageId].nodes,
-    vectorEditingNodeIds,
-    selectedVertexIds,
-    selectedHandles,
-    refs.vectorMultiSelect.vectorMultiSelectBoxRef,
-    refs.vectorEdit.selectedVectorSegmentIdsRef.current,
-  );
+  const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(state, refs);
+
   const ctx: THoverResolverContext = {
     activeTool,
     editingContent: selectEditingTextContent(state),
@@ -100,24 +77,10 @@ export const resolveToolHover = (
     viewport,
   };
 
-  resolveEllipseArcHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveEllipseArcRotateHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveEllipseArcRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveProgressiveBlurHandleHover(point, selectedNodes, viewport, ctx.openPropertyPanel, refs);
-  resolveGradientStopHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
-  resolveGradientEndpointMoveHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
-  resolveGradientRadiusHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
-  resolveGradientRotateHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
-  resolveGradientLineHandleHover(point, selectedNodes, viewport, ctx.gradientEditor, refs);
-  resolveCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolvePolygonCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolvePolygonVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveStarCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveStarRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
-  resolveStarVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);
+  const handleResults = new Map(HANDLE_HOVER_RESOLVERS.map((resolve) => [resolve, resolve(ctx)]));
 
   for (const resolve of HOVER_RESOLVERS) {
-    const result = resolve(ctx);
+    const result = handleResults.has(resolve) ? handleResults.get(resolve) : resolve(ctx);
 
     if (result) {
       return setHoverState(canvas, hoverRef, applyClassName, result.className, result.cursor, result.nodeId);

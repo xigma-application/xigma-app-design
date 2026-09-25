@@ -472,8 +472,8 @@ node's folder. Today:
   Hit-testing, hover, and drag-arming for these endpoints mirror the exact same
   refs-group/hover-prepass/arm-resolver/continue/disarm pattern the stop-drag and add-stop-on-line
   features already established (`getGradientRotateHandleAtPoint.ts`, a dedicated
-  `useGradientRotateRefs` folder holding `gradientRotateDragRef`, `resolveGradientRotateHandleHover`
-  + `resolveGradientRotateHover` wired into the same `HOVER_RESOLVERS`/pre-pass list, and
+  `useGradientRotateRefs` folder holding `gradientRotateDragRef`, `resolveGradientRotateHover`
+  (writes the hover ref and returns the cursor) wired into `HOVER_RESOLVERS`/`HANDLE_HOVER_RESOLVERS`, and
   `armGradientRotateOnPointerDown` inserted into `ARM_RESOLVERS` right after the stop resolver and
   before the add-stop-on-line one — stop > rotate > add-line is the full priority order now, each
   later hit-test explicitly bailing via the earlier one, same defensive double-encoding as before).

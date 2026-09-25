@@ -1,13 +1,37 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TPolygonNode, TStarNode } from 'types/design/types';
+import { THoverResolverContext } from '../../types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { getStarCornerRadiusHandlePosition } from 'utils/canvas/cornerRadius/star/getStarCornerRadiusHandlePosition';
-import { resolveStarCornerRadiusHandleHover } from '../resolveStarCornerRadiusHandleHover';
+import { resolveStarCornerRadiusHover } from '../resolveStarCornerRadiusHover';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+
+const createContext = (overrides: Partial<THoverResolverContext>): THoverResolverContext => ({
+  activeTool: ToolName.default,
+  editingContent: '',
+  editingNodeId: null,
+  editingTextBox: null,
+  gradientEditor: null,
+  imageEditor: null,
+  isControlPressed: false,
+  leafNodes: [],
+  nodesById: {},
+  openPropertyPanel: null,
+  point: { x: 0, y: 0 },
+  refs: createCanvasRefs(),
+  resizableSelectedNodes: [],
+  resizeHandleHit: null,
+  selectedNodes: [],
+  smartSelectionNodes: [],
+  vectorMultiSelectBox: null,
+  vectorMultiSelectResizeHandle: null,
+  viewport: IDENTITY_VIEWPORT,
+  ...overrides,
+});
 
 const star: TStarNode = {
   cornerRadius: 20,
@@ -53,16 +77,17 @@ const restHandlePosition = getStarCornerRadiusHandlePosition(
   false,
 );
 
-describe('resolveStarCornerRadiusHandleHover', () => {
+describe('resolveStarCornerRadiusHover', () => {
   it("should mark the star's own id when the point sits precisely on its corner-radius handle dot", () => {
     // mock
     const refs = createCanvasRefs();
 
     // before
-    resolveStarCornerRadiusHandleHover(restHandlePosition, [star], IDENTITY_VIEWPORT, refs);
+    const result = resolveStarCornerRadiusHover(createContext({ point: restHandlePosition, refs, resizableSelectedNodes: [star] }));
 
     // result
     expect(refs.hover.hoveredStarCornerRadiusHandleRef.current).toBe('star-1');
+    expect(result?.className).toBe('radius');
   });
 
   it('should clear the ref for a hover elsewhere on the shape — only precisely on the dot counts', () => {
@@ -70,10 +95,11 @@ describe('resolveStarCornerRadiusHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveStarCornerRadiusHandleHover({ x: 50, y: 50 }, [star], IDENTITY_VIEWPORT, refs);
+    const result = resolveStarCornerRadiusHover(createContext({ point: { x: 50, y: 50 }, refs, resizableSelectedNodes: [star] }));
 
     // result
     expect(refs.hover.hoveredStarCornerRadiusHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
   });
 
   it('should clear the ref when nothing (or something other than a star) is selected', () => {
@@ -81,9 +107,10 @@ describe('resolveStarCornerRadiusHandleHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveStarCornerRadiusHandleHover(restHandlePosition, [polygon], IDENTITY_VIEWPORT, refs);
+    const result = resolveStarCornerRadiusHover(createContext({ point: restHandlePosition, refs, resizableSelectedNodes: [polygon] }));
 
     // result
     expect(refs.hover.hoveredStarCornerRadiusHandleRef.current).toBeNull();
+    expect(result).toBeUndefined();
   });
 });

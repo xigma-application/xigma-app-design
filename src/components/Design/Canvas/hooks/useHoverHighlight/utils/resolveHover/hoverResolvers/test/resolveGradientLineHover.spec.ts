@@ -88,4 +88,60 @@ describe('resolveGradientLineHover', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('should set the hovered line position when the point sits on the line', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — the line runs world (0,50) -> (100,50)
+    const result = resolveGradientLineHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 50, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientLinePositionRef.current).toBeCloseTo(0.5);
+    expect(result?.className).toBe('drawing');
+  });
+
+  it('should clear the ref when the point is too far from the line', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientLineHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 50, y: 80 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientLinePositionRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when there is no active gradient editor', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientLineHover(
+      createContext({ gradientEditor: null, point: { x: 50, y: 50 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientLinePositionRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when the point is over an existing stop instead', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — the stop at position 0 sits at world (0, 50), offset up by 22 -> (0, 28)
+    const result = resolveGradientLineHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 0, y: 28 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientLinePositionRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
 });

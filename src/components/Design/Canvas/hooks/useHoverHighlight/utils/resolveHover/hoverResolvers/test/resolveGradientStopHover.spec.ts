@@ -82,4 +82,46 @@ describe('resolveGradientStopHover', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('should set the hovered stop index when the point sits on a stop', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before — stop 1 world position: (100, 50) offset up by 22 -> (100, 28)
+    const result = resolveGradientStopHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 100, y: 28 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientStopIndexRef.current).toBe(1);
+    expect(result?.className).toBe('positioning');
+  });
+
+  it('should clear the ref when the point is far from every stop', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientStopHover(
+      createContext({ gradientEditor: GRADIENT_EDITOR, point: { x: 50, y: 28 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientStopIndexRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
+
+  it('should clear the ref when there is no active gradient editor', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    const result = resolveGradientStopHover(
+      createContext({ gradientEditor: null, point: { x: 0, y: 28 }, refs, selectedNodes: [rectangle] }),
+    );
+
+    // result
+    expect(refs.hover.hoveredGradientStopIndexRef.current).toBeNull();
+    expect(result).toBeUndefined();
+  });
 });
