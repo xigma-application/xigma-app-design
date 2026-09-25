@@ -36,8 +36,9 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
 ## 2. Store (Redux, `store/design`)
 
 - `slice.ts` — the reducers (`addNode`, `updateNode`, `setActiveTool`, `setSelection`, ...). A new
-  tool rarely needs a new reducer unless it introduces genuinely new state shape (Slice did, because
-  it's deliberately never persisted to `nodes`). `setTemporaryActiveTool` is a deliberate second
+  tool rarely needs a new reducer unless it introduces genuinely new state shape. Slice didn't: it is
+  a plain `NodeType.slice` node drawn by `useDrawShapeTool`, kept on the page by central guards
+  (`getIsNestingSlice` in `handleMoveNodes`, `getGroupableMembers`, `canWrapInSection`). `setTemporaryActiveTool` is a deliberate second
   entry point into `state.activeTool`, sitting next to `setActiveTool`: a plain one-line assignment
   with **no** `handleSetActiveTool` side effect, used by `useHandTool`'s space-bar hold (see §3's
   toolbar note) so panning while Space is held doesn't corrupt `lastMouseTool`/`lastFrameTool`/etc.

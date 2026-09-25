@@ -33,7 +33,7 @@ orchestrators.
   `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (§19) are the odd six out:
   lifted to `useCanvasRefs()` instead and destructured off the shared `refs: TCanvasRefs` object the
   hook receives as its one parameter (same "parent-owned, ref-drilled" shape as
-  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
+  `marqueeRef`/`hoverRef` — see `canvas-rendering-pipeline.md` §2), specifically so
   `useCanvasRenderLoop` can also read them every frame. For the corner-radius three that's §13's
   "mid-drag zero" fix (needs to know whether a drag is *currently* in progress); for the ellipse-arc
   three it's simpler — `drawEllipseArcHandleLayer` reads `draggedHandlePosition` off each ref every
@@ -158,8 +158,7 @@ Per-`NodeType` tests (all `Canvas/utils/`):
   bounding box but outside a nonzero `cornerRadius`'s rounded corner (analytic circle test against
   each corner's own arc center, `getMaxCornerRadius`-clamped — no point-list approximation needed
   since a rect corner is always a plain quarter-circle). Used for rectangle/frame/media/default *and*
-  reused verbatim by `isPointInGroupBounds.ts`/`isPointInSelectedTextBounds.ts`/the Slice tool's own
-  hit-test — safe, since none of those ever pass an object with a `cornerRadius` field, so the
+  reused verbatim by `isPointInGroupBounds.ts`/`isPointInSelectedTextBounds.ts` — safe, since neither ever passes an object with a `cornerRadius` field, so the
   rounding branch is simply never taken there.
 - `isPointInEllipse.ts` — normalized `(x/rx)² + (y/ry)² ≤ 1` for a plain ellipse; ring-and-arc-aware
   once §19's `arcRatio`/cut fields are in play (own sub-cases: outside the outer bound → miss; ring
@@ -771,7 +770,7 @@ lifting `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` out of `useSelectionT
 private `useRef`s, invisible outside the hook) up to parent ownership, so the *same* ref objects
 reach both `useSelectionTool` (which still arms/disarms them exactly as before —
 `armCornerRadiusDrag.ts` et al. are unchanged) and `useCanvasRenderLoop` — the same "parent-owned,
-ref-drilled" shape already used for `marqueeRef`/`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md`
+ref-drilled" shape already used for `marqueeRef`/`hoverRef` (`canvas-rendering-pipeline.md`
 §2), just applied to refs that used to be selection-tool-private (a third, `starCornerRadiusDragRef`,
 joined the same way once Star's handle was added, §15). Parent ownership now means
 `Canvas/hooks/useCanvasRefs/useCanvasRefs.ts` — it creates all of these refs and returns them as one
@@ -2158,7 +2157,7 @@ separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nua
 `ellipseArcRotateDragRef`/`ellipseArcRatioDragRef`/`vectorMultiDragRef` — are now parent-owned like the
 ephemeral render refs rather than hook-private, per §13/§19/[[vector-network]] §35).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
-subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
+subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef` ref-drilling
 pattern is exactly what §13 extends to the three corner-radius drag refs.
 [[vector-network]] — §21 above in full: the Pen tool, the Vector Network data model, and the rest of
 Vector Edit Mode (double-click entry, Delete/Backspace, the Pen-tool-specific pointer handlers) that

@@ -55,7 +55,7 @@ visibly snap the handle out to that same offset the instant the dispatched radiu
 even while the pointer was still held down near the corner. `drawCornerRadiusHandlesLayer.ts` now
 takes an `isDraggingCornerRadius` flag (threaded from `Canvas.tsx`'s own `cornerRadiusDragRef`/
 `polygonCornerRadiusDragRef` — lifted out of `useSelectionTool.ts` and passed to both it and
-`useCanvasRenderLoop` the same way `hoverRef`/`marqueeRef`/`sliceRef` already are, then dereferenced
+`useCanvasRenderLoop` the same way `hoverRef`/`marqueeRef` already are, then dereferenced
 per-frame in `startRenderLoop.ts`'s `tick`) that forces `getCornerRadiusHandlePositions.ts`/
 `getPolygonCornerRadiusHandlePosition.ts` to use the literal radius (even 0, sitting right on the
 corner/vertex) instead of the zero-state fallback while a drag is actually in progress; the

@@ -243,3 +243,23 @@ test('a hidden slice has no export', async ({ page }) => {
   await expect(page.locator('[data-test-component-header="slice"]').getByText('Slice', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Export Slice (1)' })).toHaveCount(0);
 });
+
+test('right-clicking a slice in the layers tree shows its menu without the group, frame, flatten, outline and mask items', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-menu');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 900, 500);
+
+  await page.getByText('Slice (1)', { exact: true }).click({ button: 'right' });
+
+  await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Show/Hide' })).toBeVisible();
+
+  for (const name of ['Group selection', 'Frame selection', 'Flatten', 'Outline stroke', 'Use as mask', 'Send to Make']) {
+    await expect(page.getByRole('menuitem', { name })).toHaveCount(0);
+  }
+});

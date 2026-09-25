@@ -588,7 +588,7 @@ pair, since its own `handlePointerDown` dispatches nothing), and `TextEditOverla
 `useCommitTextEdit.ts` (around its whole commit body, since it's a blur-event handler, not a canvas
 pointer gesture — the abstraction doesn't require an actual pointer drag, just "make N dispatches inside
 this handler look like one undo step"). `useDrawTextTool.ts`'s pointerdown-only `setSelection([])`,
-`useSliceTool`'s single `setSelection([])`, `useCommentTool`, `useVectorEditOnDoubleClick`,
+`useCommentTool`, `useVectorEditOnDoubleClick`,
 `useTextEditOnDoubleClick` and the `handleLeave.ts` Escape handler were all confirmed to dispatch exactly
 one undoable action in their own scope (no `addNode`/`updateNode`/`deleteNode` alongside), so each is
 already safe as a standalone one-shot push, matching the pre-existing keyboard-Delete pattern — no wrap

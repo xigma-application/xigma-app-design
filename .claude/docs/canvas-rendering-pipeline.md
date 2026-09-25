@@ -10,7 +10,7 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 ## 1. Context setup
 
 - `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus every other ephemeral
-  interaction ref (`draftRef`/`sliceRef` and ~65 more), all assembled by
+  interaction ref (`draftRef`/`marqueeRef` and ~65 more), all assembled by
   `components/App/core/CanvasRefsProvider/CanvasRefsProvider.tsx` into one `TCanvasRefs` object
   (`types/design/canvas/types.ts` — the drag-state types themselves, e.g. `TCornerRadiusDragState`/
   `TEllipseArcDragState`, live there too, not under `components/`, since a type consumed from the
@@ -29,8 +29,9 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   `drawFrameNameLabels` (§2) which frame's WebGL label to skip while its DOM rename input is open,
   same "ref tells the renderer to suppress itself" shape as `vectorWidth.editingWidthLabelRef`. A
   handful of refs are genuinely cross-domain and get
-  imported across group boundaries by design — `refs.transform.rotateDragRef` is shared by both the
-  Selection tool and `useSliceTool`, and `refs.vectorEdit.vectorAlignmentGuideRef` is written by both
+  imported across group boundaries by design — `refs.hover.layersTreeHoverRef` is written by the layers tree
+  (`useTreeItemHover`, on row mouse enter/leave) and read by `drawSliceOutlines` to highlight a hovered
+  slice, and `refs.vectorEdit.vectorAlignmentGuideRef` is written by both
   vector-drag continuation and the Pen tool's own preview. `CanvasRefsProvider.tsx` calls each
   `use<Domain>Refs()` once and composes them into a single `refs` object via `useMemo`, which
   `Canvas.tsx` reads via `useCanvasRefsContext()` and passes into every tool hook and into
@@ -104,12 +105,12 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   drawEditingText(gl, program, buffer, imageContext, editingTextBox, ...);
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, w, h, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, w, h, viewport);
-  drawSliceDraft(gl, program, buffer, sliceRect, w, h, viewport);
   ```
   **background → committed nodes → hover outline → selection outline → selection size label →
   frame name labels → corner-radius handles → vertex-count handles → ellipse arc-cutting handles →
   in-progress draft → draft frame's own name label → editing-text overlay → path-text offset handle
-  → marquee → slice draft.**
+  → marquee.** Slice layers get their own dashed-outline pass (`drawSliceOutlines`, right after
+  `drawFrameOutlines`) — a slice draws nothing in `drawLeafNode`, so it never appears in an export.
   `drawFrameNameLabels/` (`drawFrameNameLabels.ts` iterating `filteredNodes` for `NodeType.frame`,
   `drawFrameNameLabel.ts` drawing one node's `name` via the MSDF pipeline straight — no badge, unlike
   `drawSelectionSizeLabel.ts` — and `getFrameNameLabelAnchor.ts` for the world-space anchor above the
@@ -208,7 +209,7 @@ plain-color row's own `dragSnapshotProgram` split (below), not a fully independe
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below), `drawVectorImageFill.ts` (the `image`-paint placeholder — a batched checkerboard, two draw calls, one per alternating color — used only when no texture has resolved yet; the real textured path uses the image/texture program instead, see below) |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect` — Section's fill only, see §5) , `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline` (every box node's stroke, Rectangle/Frame/Section alike — stroke didn't move), `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawDashedRectOutline` (slice outlines), `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive; also `drawVectorFill.ts` (solid vector faces **and**, since the Fill-section feature, solid Rectangle/Frame fills too — see §5), `drawVectorPatternFill.ts` (the `pattern`-paint placeholder — a batched dot grid, no background, see below), `drawVectorImageFill.ts` (the `image`-paint placeholder — a batched checkerboard, two draw calls, one per alternating color — used only when no texture has resolved yet; the real textured path uses the image/texture program instead, see below) |
 | plain-color, drag variant | `vectorDragVertexShaderSource.ts` (adds `u_translate`) | **same** `fragmentShaderSource.ts` | — | `drawVectorNodeDragSnapshot.ts` only — a live drag preview translates the already-uploaded face buffer on the GPU instead of re-uploading translated points every frame |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` (`u_opacity` uniform, `outColor = vec4(texColor.rgb, texColor.a * u_opacity)`) | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) and `drawVectorImageFill.ts` (`image`-type `TPaint`, below) — same program, no dedicated image-fill shader |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
@@ -957,7 +958,7 @@ frame:
 | `draftRef` (`TDraftEntity \| null`) | every `useDraw<X>Tool` hook | `drawFrame.ts` (dispatcher) → `drawDraftLine.ts` (Line/Arrow) or `drawDraftShape.ts` (switch: ellipse/polygon/star/media/text/path, default = box) |
 | `marqueeRef` (`TDraftRect \| null`) | `useSelectionTool`'s `armMarqueeDrag`/`continueMarqueeDrag`/`disarmMarqueeDrag` | `utils/canvas/drawMarquee.ts` |
 | `hoverRef` (`string \| null`, node id) | `useHoverHighlight.ts` | `drawScene/drawHoverOutline.ts` (per-`NodeType` dispatch) |
-| `sliceRef` (`TSliceDraft \| null`) | `useSliceTool.ts`'s own arm/continue/disarm set | `utils/canvas/drawSliceDraft.ts` |
+| `layersTreeHoverRef` (`string \| null`, node id) | `useTreeItemHover.ts` (layers tree row mouse enter/leave) | `drawScene/drawSliceOutlines.ts` (blue outline for a hovered slice) |
 | `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `arm*CornerRadiusDrag`/`disarm*CornerRadiusDrag` trio per shape | dereferenced to a single `isDraggingCornerRadius` boolean (OR of all three) by `drawScene/hasCornerRadiusDragMoved.ts`, called from `drawScene.ts` itself (not `startRenderLoop.ts`'s `tick`, which just forwards the whole `refs` object through unchanged), consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
 | `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armEllipseArc*Drag`/`disarmEllipseArc*Drag` trio per handle | each dereferenced to its own `.current?.draggedHandlePosition ?? null` directly inside `drawScene.ts`, passed straight through as one of `drawEllipseArcHandleLayer.ts`'s three optional position params — rendered directly (unlike the corner-radius boolean), since this is the live pointer-projected handle position itself, not just an in-progress flag (`selection-and-manipulation.md` §19) |
 
@@ -1578,7 +1579,7 @@ need.
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;
   ephemeral-ref targets: `utils/canvas/drawMarquee.ts`, `.../drawScene/drawHoverOutline.ts`,
-  `utils/canvas/drawSliceDraft.ts`, `.../drawScene/drawEditingText.ts` + `drawEditingCaretAndSelection/`
+  `.../drawScene/drawSliceOutlines.ts`, `.../drawScene/drawEditingText.ts` + `drawEditingCaretAndSelection/`
 - Frame name label: `.../drawScene/drawFrameNameLabels/{drawFrameNameLabels,drawFrameNameLabel,
   getFrameNameLabelAnchor,drawDraftFrameNameLabel}.ts`, hit-testing `Canvas/utils/getFrameNameLabelRects.ts`, the rename input
   overlay `Canvas/FrameNameLabelEditOverlay/{FrameNameLabelEditOverlay,hooks/useFrameNameLabelEditor}.ts`

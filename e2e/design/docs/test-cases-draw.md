@@ -32,26 +32,30 @@ own `lastFrameTool` store field (mirroring `lastShapeTool`/`lastMouseTool`).
 
 ## Slice drawing
 
-Slice marks an area intended for future export, but there's no side panel/export pipeline yet, so
-it's intentionally never persisted: it lives entirely in a `useSliceTool`-owned ref (`TSliceDraft`),
-never dispatched into the `design` store the way Frame/Section/Rectangle are. It shares Frame's
-dropdown, right after Section (`TOOL_GROUP_ITEMS[frame] = [frame, section, slice]`), with its own
-plain `"S"` shortcut (distinct from Section's `"Shift+S"`). Unlike every other draw tool, finishing
-the initial drag does **not** revert the active tool to `default` — the box stays live and the Slice
-tool stays selected so it can be resized/rotated/moved, all handled by a self-contained gesture state
-machine under `useSliceTool/utils/` (arm/continue/disarm trios mirroring `useSelectionTool`'s style,
-but scoped to a single box with no store dispatch). Clicking anywhere outside the box's bounds
-discards it and reverts to `default`, matching Frame/Section's usual "one shape then back to Move"
-feel despite the different underlying mechanism.
+Slice is a real layer (`NodeType.slice`) that marks a page area to export. The Slice tool (plain
+`"S"`, in Frame's dropdown after Section) draws it through `useDrawShapeTool` like any box shape, always
+on top of the page (`parentId: null`), selects it and reverts to `default`. On the canvas it is only a
+dashed outline (`drawSliceOutlines.ts`: `#3C3C3C`, blue while selected or hovered in the layers tree,
+the upright box around a rotated slice). Clicks pass through it (`getNodeAtPoint`'s `hitSlices` is on
+only for already-selected nodes), so it is picked from the layers tree or a marquee. It can never be
+nested (`getIsNestingSlice`, `getGroupableMembers`, `canWrapInSection`, section capture), exports the
+page area under it (`getExportBounds`/`getExportSourceId`), snaps like any box
+(`isContactGuideEligibleNode`), and a hidden slice has no export (`getExportTargets`).
 
-| #   | Scenario                                                                                                                                                                              | Unit |            E2E            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 1   | Picking "Slice" from the Frame dropdown draws a slice box, and the tool stays selected afterwards                                                                                     |  —   | ✅ `create-slice.spec.ts` |
-| 2   | Pressing the plain "S" shortcut (not "Shift+S") activates the Slice tool, then dragging draws a slice                                                                                 |  —   | ✅ `create-slice.spec.ts` |
-| 3   | Dragging a corner handle after the initial draw resizes the box in place                                                                                                              |  —   | ✅ `create-slice.spec.ts` |
-| 4   | Clicking outside the drawn box discards it and reverts the active tool to `default`, with the canvas returning to its exact pre-draw pixels (nothing was ever persisted to the store) |  —   | ✅ `create-slice.spec.ts` |
-| 5   | Rotating and moving the box, resize math for a rotated box, and per-handle hover cursors                                                                                              |  ✅  |             —             |
-| 6   | Releasing without dragging (a plain click) still places a default 100×100 slice centered on the click point, staying on the Slice tool                                                |  —   | ✅ `create-slice.spec.ts` |
+| #   | Scenario                                                                                                                    | Unit |            E2E            |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 1   | Drawing with the Slice tool adds a selected slice on top of the page, shows its panel and returns to Move                   |  ✅  | ✅ `create-slice.spec.ts` |
+| 2   | The plain "S" shortcut (not "Shift+S") picks the Slice tool, then dragging draws a slice                                    |  —   | ✅ `create-slice.spec.ts` |
+| 3   | A click on a slice passes through to the layer under it, or to nothing                                                      |  ✅  | ✅ `create-slice.spec.ts` |
+| 4   | A slice drawn over a frame stays on the page                                                                                |  ✅  | ✅ `create-slice.spec.ts` |
+| 5   | A slice selected from the layers tree can be dragged on the canvas                                                          |  —   | ✅ `create-slice.spec.ts` |
+| 6   | Dragging a slice onto a frame does not put it into the frame                                                                |  ✅  | ✅ `create-slice.spec.ts` |
+| 7   | Two slices picked with a marquee show the Slice panel ready to export both                                                  |  ✅  | ✅ `create-slice.spec.ts` |
+| 8   | Hovering a slice row in the layers tree highlights its outline until the pointer leaves                                     |  ✅  | ✅ `create-slice.spec.ts` |
+| 9   | A layer dragged next to a slice snaps to its edge                                                                           |  ✅  | ✅ `create-slice.spec.ts` |
+| 10  | A locked slice picked from the layers tree does not move when dragged on the canvas                                         |  ✅  | ✅ `create-slice.spec.ts` |
+| 11  | A hidden slice has no export                                                                                                |  ✅  | ✅ `create-slice.spec.ts` |
+| 12  | Right-clicking a slice in the layers tree hides Group/Frame selection, Flatten, Outline stroke, mask items and Send to Make |  ✅  | ✅ `create-slice.spec.ts` |
 
 ## Rectangle drawing (Etap 6)
 

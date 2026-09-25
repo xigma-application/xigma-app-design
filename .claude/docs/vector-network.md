@@ -2607,9 +2607,7 @@ derived-not-duplicated architecture §2 already established, just exercised by a
 
 **Hover preview — `resolveVectorPaintHover.ts` (pointermove) + `drawVectorPaintHoverPreview.ts`
 (render loop), plus three new cursor states, all via the existing `setClassName` mechanism, not
-`canvas.style.cursor`.** This codebase has two different cursor-update patterns in play
-(`useSliceTool`'s `updateHoverCursor.ts` sets `canvas.style.cursor` directly to a generated data-URI for
-continuously-varying rotation angles), but every Vector-Edit-Mode cursor — `resolveVectorSegmentHoverInNode.ts`'s
+`canvas.style.cursor`.** Every Vector-Edit-Mode cursor — `resolveVectorSegmentHoverInNode.ts`'s
 `'segment'`/`'bend'`/`'pen-extend'`, Lasso's `'lasso'` — goes through `setClassName(...)` toggling a BEM
 modifier class in `canvas.module.scss`, so Paint follows that convention: three new classes,
 `&--paint`/`&--paint-add`/`&--paint-remove`, each mapping to `drop.png`/`drop-add.png`/`drop-remove.png`
