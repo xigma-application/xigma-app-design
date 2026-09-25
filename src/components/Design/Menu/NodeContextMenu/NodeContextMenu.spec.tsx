@@ -592,6 +592,47 @@ describe('NodeContextMenu', () => {
     expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
+  it('should build the menu from the whole selection and hide or lock every selected layer', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onToggleHidden = vi.fn();
+    const onToggleLocked = vi.fn();
+    const section = { ...buildSectionNode(), id: 'context-multi-section' };
+    const rectangle = { ...buildRectangleNode(), id: 'context-multi-rectangle' };
+    store.dispatch(addNodes({ nodes: [section, rectangle], rootIds: [section.id, rectangle.id] }));
+    store.dispatch(setSelection([section.id, rectangle.id]));
+
+    // before
+    const { unmount } = renderNodeContextMenu({ node: rectangle, onToggleHidden, onToggleLocked });
+
+    // result
+    expect(screen.queryByText('Flatten')).not.toBeInTheDocument();
+    expect(screen.queryByText('Group selection')).not.toBeInTheDocument();
+    expect(screen.queryByText('Flip horizontal')).not.toBeInTheDocument();
+    expect(screen.queryByText('Convert to frame')).not.toBeInTheDocument();
+
+    // action
+    await user.click(screen.getByText('Show/Hide'));
+
+    // result
+    expect(onToggleHidden).not.toHaveBeenCalled();
+    expect(selectActivePage(store.getState()).nodes[section.id].hidden).toBe(true);
+    expect(selectActivePage(store.getState()).nodes[rectangle.id].hidden).toBe(true);
+
+    // before
+    unmount();
+    renderNodeContextMenu({ node: rectangle, onToggleHidden, onToggleLocked });
+
+    // action
+    await user.click(screen.getByText('Lock/Unlock'));
+
+    // result
+    expect(onToggleLocked).not.toHaveBeenCalled();
+    expect(selectActivePage(store.getState()).nodes[section.id].locked).toBe(true);
+    expect(selectActivePage(store.getState()).nodes[rectangle.id].locked).toBe(true);
+    store.dispatch(setSelection([]));
+  });
+
   it('should call onUngroupSelection on Ungroup click for a group node', async () => {
     // mock
     const user = userEvent.setup();

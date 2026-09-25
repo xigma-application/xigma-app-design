@@ -6,6 +6,7 @@ import { Menu, MenuCompound, TVirtualAnchor } from 'shared';
 
 // hooks
 import { useHandleRemoveMask } from '../hooks/useHandleRemoveMask';
+import { useNodeMenuNodes } from '../hooks/useNodeMenuNodes';
 import { usePreventMenuRefocus, useStopClickPropagation } from 'hooks';
 
 // others
@@ -45,19 +46,17 @@ import {
 // store
 import { selectCanConvertToFrame, selectNodes } from 'store/design/selectors';
 import { TDesignPage } from 'store/design/types';
-import { useAppSelector } from 'store';
+import { useAppDispatch, useAppSelector } from 'store';
 
 // styles
 import styles from './node-context-menu.module.scss';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { canHoldSection } from 'store/design/utils/nodeHierarchy/canHoldSection';
-import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
-import { isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
+import { getNodeMenuFlags } from './utils/getNodeMenuFlags';
+import { handleToggleNodesFlag } from '../utils/handleToggleNodesFlag';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
@@ -115,19 +114,15 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
+  const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const canConvertToFrame = useAppSelector(selectCanConvertToFrame);
-  const isMask = getIsMaskChild(node, nodes);
-  const isMaskContainer = node.type === NodeType.mask;
-  const isFrame = node.type === NodeType.frame;
-  const isGroup = node.type === NodeType.group;
-  const isSection = node.type === NodeType.section;
-  const canConvertToSection = canHoldSection(node.parentId, nodes);
-  const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
-  const canFlatten = isConvertibleToVectorNode(node) || node.type === NodeType.text;
-  const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
-  const hasStrokeColor = node.type === NodeType.line ? Boolean(node.stroke) : 'strokeColor' in node && Boolean(node.strokeColor);
-  const canOutlineStroke = node.type === NodeType.text ? true : hasStrokeWidth && hasStrokeColor;
+  const menuNodes = useNodeMenuNodes(node);
+  const menuNodeIds = menuNodes.map((menuNode) => menuNode.id);
+  const flags = getNodeMenuFlags(menuNodes, nodes);
+  const isMultiple = menuNodes.length > 1;
+  const handleToggleHidden = isMultiple ? (): void => handleToggleNodesFlag(dispatch, menuNodeIds, 'hidden') : onToggleHidden;
+  const handleToggleLocked = isMultiple ? (): void => handleToggleNodesFlag(dispatch, menuNodeIds, 'locked') : onToggleLocked;
   const handleRemoveMask = useHandleRemoveMask(node, onRemoveMask);
 
   return (
@@ -149,8 +144,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuItem disabled label={t(NODE_MENU_COPY_PASTE_AS_KEY)} withCheck={false} />
-      {!isSection && !isTextOnPath && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
-      {!isSection && <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />}
+      {!flags.hasSection && !flags.hasTextOnPath && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
+      {!flags.hasSection && <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />}
       <MenuSeparator />
       <MenuSub disabled={otherPages.length === 0} label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false}>
         {otherPages.map((page) => (
@@ -170,18 +165,18 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuSeparator />
-      {(isFrame || isGroup) && (
+      {flags.isFrameOrGroupSelection && (
         <MenuItem
-          disabled={!isFrame || !canConvertToSection}
+          disabled={!flags.canConvertToSection}
           label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)}
           onClick={onConvertToSection}
           withCheck={false}
         />
       )}
-      {isSection && (
+      {flags.isSectionSelection && (
         <MenuItem disabled={!canConvertToFrame} label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />
       )}
-      {!isSection && (
+      {!flags.hasSection && (
         <MenuItem
           label={t(NODE_MENU_GROUP_SELECTION_KEY)}
           onClick={onGroupSelection}
@@ -189,7 +184,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && (
+      {!flags.hasSection && (
         <MenuItem
           disabled
           label={t(NODE_MENU_FRAME_SELECTION_KEY)}
@@ -197,9 +192,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {(isFrame || isGroup || isSection) && (
+      {flags.isContainerSelection && (
         <MenuItem
-          disabled={!isGroup}
+          disabled={!flags.canUngroup}
           label={t(NODE_MENU_UNGROUP_KEY)}
           onClick={onUngroupSelection}
           shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')}
@@ -209,26 +204,26 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       {onRename && (
         <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
       )}
-      {!isFrame && !isSection && (
+      {flags.withFlatten && (
         <MenuItem
-          disabled={!canFlatten}
+          disabled={!flags.canFlatten}
           label={t(NODE_MENU_FLATTEN_KEY)}
           onClick={onFlatten}
           shortcut={KEYBOARD_SHORTCUTS.flatten.join('')}
           withCheck={false}
         />
       )}
-      {isTextOnPath && <MenuItem disabled label={t(NODE_MENU_CREATE_SEPARATE_LAYERS_KEY)} withCheck={false} />}
-      {!isFrame && !isSection && (
+      {flags.isTextOnPathSelection && <MenuItem disabled label={t(NODE_MENU_CREATE_SEPARATE_LAYERS_KEY)} withCheck={false} />}
+      {flags.withFlatten && (
         <MenuItem
-          disabled={!canOutlineStroke}
+          disabled={!flags.canOutlineStroke}
           label={t(NODE_MENU_OUTLINE_STROKE_KEY)}
           onClick={onOutlineStroke}
           shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')}
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && !isMask && !isMaskContainer && (
+      {flags.withUseAsMask && (
         <MenuItem
           label={t(NODE_MENU_USE_AS_MASK_KEY)}
           onClick={onUseAsMask}
@@ -236,7 +231,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && !isFrame && (isMask || isMaskContainer) && (
+      {flags.withRemoveMask && (
         <MenuItem
           label={t(NODE_MENU_REMOVE_MASK_KEY)}
           onClick={handleRemoveMask}
@@ -244,9 +239,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {(isFrame || isSection) && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
+      {flags.isFrameOrSectionSelection && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
       <MenuSeparator />
-      {!isSection && (
+      {!flags.hasSection && (
         <MenuItem
           disabled
           label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)}
@@ -254,8 +249,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {(isFrame || isGroup || isSection) && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
-      {!isSection && (
+      {flags.isContainerSelection && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
+      {!flags.hasSection && (
         <MenuItem
           disabled
           label={t(NODE_MENU_CREATE_COMPONENT_KEY)}
@@ -268,17 +263,17 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       <MenuSeparator />
       <MenuItem
         label={t(NODE_MENU_SHOW_HIDE_KEY)}
-        onClick={onToggleHidden}
+        onClick={handleToggleHidden}
         shortcut={KEYBOARD_SHORTCUTS.hideShowLayer.join('')}
         withCheck={false}
       />
       <MenuItem
         label={t(NODE_MENU_LOCK_UNLOCK_KEY)}
-        onClick={onToggleLocked}
+        onClick={handleToggleLocked}
         shortcut={KEYBOARD_SHORTCUTS.lockUnlockLayer.join('')}
         withCheck={false}
       />
-      {!isSection && !isFrame && (
+      {flags.withFlip && (
         <>
           <MenuSeparator />
           <MenuItem
