@@ -38,6 +38,21 @@ test('a star stroke is drawn inside its outline by default and outside when its 
   expect(await readPixelColor(page, 900, 430)).not.toEqual([255, 0, 0]);
 });
 
+test('a thick inside stroke fills the thin points of a many-pointed star and leaves its middle clean', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-thick-stroke');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawStar(800, 300, 1000, 500);
+  await updateStar(page, { points: 24, strokeWidth: 20, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
+  await designPage.click(1500, 900);
+
+  await expect.poll(() => readPixelColor(page, 900, 330)).toEqual([255, 0, 0]);
+  expect(await readPixelColor(page, 850, 400)).toEqual([255, 0, 0]);
+  expect(await readPixelColor(page, 900, 400)).not.toEqual([255, 0, 0]);
+  expect(await readPixelColor(page, 900, 392)).not.toEqual([255, 0, 0]);
+});
+
 test('a selected star shows the Star panel whose Count, Ratio and Corner radius reshape it on the canvas', async ({ page }) => {
   const designPage = new DesignPage(page);
   const starArea = { height: 200, width: 200, x: 800, y: 300 };

@@ -87,4 +87,28 @@ describe('getOffsetPolygon', () => {
       ),
     ).toBeNull();
   });
+
+  it('should give the biggest outline when shrinking splits the shape in two', () => {
+    // mock
+    const dumbbell: TPoint[] = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 45 },
+      { x: 120, y: 45 },
+      { x: 120, y: 0 },
+      { x: 180, y: 0 },
+      { x: 180, y: 60 },
+      { x: 120, y: 60 },
+      { x: 120, y: 55 },
+      { x: 100, y: 55 },
+      { x: 100, y: 100 },
+      { x: 0, y: 100 },
+    ];
+
+    // before
+    const inset = getOffsetPolygon(dumbbell, -10) ?? [];
+
+    // result
+    expect(getBounds(inset)).toEqual([10, 10, 90, 90]);
+  });
 });

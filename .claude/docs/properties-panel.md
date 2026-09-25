@@ -1020,7 +1020,7 @@ corner radius and stroke settings.
 Offset vector works for polygons and stars too (`isOffsetVectorNode` = line, polygon or star): `utils/canvas/offsetVector/getOffsetVector`
 picks `getLineOffsetVector` or `getPolygonOffsetVector` (cached per node, distance and join; a star goes the polygon
 way with its sharp star points and star max corner radius) — the polygon's sharp
-world corners pushed out by the distance (`getOffsetPolygon`, mitred) and rounded by the distance for Round, or by
+world corners pushed out by the distance (`getOffsetPolygon`, mitred, clean for concave shapes) and rounded by the distance for Round, or by
 corner radius + distance when the polygon is rounded; the vector keeps the polygon fills
 (`getClosedLoopPaintFillData`) and its stroke with Position. The preview draws that filled vector
 (`drawVectorNode`) under the magenta outline; ✓ / Enter replaces the polygon with it in one undo step. The toolbar

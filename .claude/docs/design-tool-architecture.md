@@ -460,8 +460,11 @@ Two independent render passes, both need updating for a visual change to show up
   drawers. The batched path only takes a full ellipse with solid, unblended fills and no stroke or effects.
   Its stroke (`getEllipseStrokeShapes`) runs along the same shape, one loop per outline (`getEllipseStrokeLoops`:
   the shape, or the outer edge and the hole of an uncut ring): Inside / Center / Outside build the band from
-  clean offsets of the loop (`getOffsetPolygon` drops edges that would fold back and bevels overlong miters,
-  so short arc segments at a cut corner leave no holes), and dashed, profile, dynamic and brush strokes run
+  clean offsets of the loop (`shapes/offsetLoops/getOffsetLoops`: a raw offset with mitred corners, bevelled
+  only where a growing corner's miter is too long and walked round the original vertex where a shrinking
+  corner's sides are too short, then cut at every crossing and touch and reduced to the pieces with the
+  shape's inside on exactly one side (winding), so concave shapes like stars and short arc segments at a cut
+  corner offset without folds or holes; `getOffsetPolygon` keeps the biggest of those loops), and dashed, profile, dynamic and brush strokes run
   around the offset midline through the closed-loop vector functions. The same shapes feed SVG/PDF export and
   Outline stroke / booleans (built already turned, so their outline rotation is 0).
   A polygon is drawn the same way: it stores `fills`, `strokes`, `effects` and the stroke settings like an
