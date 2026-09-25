@@ -70,4 +70,26 @@ describe('buildPasteOverNodes', () => {
     expect(freshRoot).toMatchObject({ parentId: null, type: NodeType.group, x: 50, y: 50 });
     expect(freshChild).toMatchObject({ parentId: freshRootId, x: 55, y: 55 });
   });
+
+  it('should land a pasted slice on the page even over a layer inside a frame', () => {
+    // mock
+    const clipboardRoot = {
+      height: 30,
+      id: 'clip-slice',
+      name: 'Slice',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.slice,
+      width: 20,
+      x: 0,
+      y: 0,
+    } as const;
+    const target = buildFrame({ id: 'target-1', parentId: 'parent-1', x: 100, y: 200 });
+
+    // action
+    const result = buildPasteOverNodes({ 'clip-slice': clipboardRoot }, clipboardRoot, target);
+
+    // result
+    expect(result.nodes[0]).toMatchObject({ parentId: null, type: NodeType.slice, x: 100, y: 200 });
+  });
 });

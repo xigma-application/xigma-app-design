@@ -40,6 +40,7 @@ const PanelProperties: FC = () => {
   const isEveryRectangleSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.rectangle);
   const isEveryGroupSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.group);
   const isEverySectionSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.section);
+  const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
 
@@ -62,7 +63,7 @@ const PanelProperties: FC = () => {
       return <Group />;
     case isEverySectionSelected:
       return <Section />;
-    case selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.slice:
+    case isEverySliceSelected:
       return <Slice />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;

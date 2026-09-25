@@ -10,21 +10,21 @@ import { useAppSelector } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TExportSetting, TExportTarget } from '../../types';
+import { TExportSetting } from '../../types';
 import { TUseExportSectionResult } from './types';
 
 // utils
 import { createExportSetting } from './utils/createExportSetting';
+import { getExportTargets } from './utils/getExportTargets';
 import { resolveFillDragIndices } from '../../../Common/FillSection/hooks/useFillSection/utils/resolveFillDragIndices';
 
 export const useExportSection = (): TUseExportSectionResult => {
   const selectedNodes = useAppSelector(selectSelectedNodes);
   const activePage = useAppSelector(selectActivePage);
-  const exportTargets: TExportTarget[] =
-    selectedNodes.length > 0 ? selectedNodes.map(({ id, name }) => ({ id, name })) : [{ id: null, name: activePage.name }];
+  const exportTargets = getExportTargets(selectedNodes, activePage.name);
   const [exportTarget] = exportTargets;
   const exportTargetsKey = exportTargets.map(({ id }) => id).join(',');
-  const isSliceTarget = selectedNodes.length === 1 && selectedNodes[0]?.type === NodeType.slice;
+  const isSliceTarget = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
   const [settings, setSettings] = useState<TExportSetting[]>(() => (isSliceTarget ? [createExportSetting()] : []));
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);

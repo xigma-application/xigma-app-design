@@ -72,3 +72,13 @@ section has: no rotation, effects or component button.
 Right-clicking a layer that is part of the selection builds the menu from the whole selection. An
 item shows only if it makes sense for every selected layer. Show/Hide and Lock/Unlock apply to all
 selected layers at once.
+
+## Stage 12 — Slice
+
+A slice marks an area of the page to export. It shows as a dashed outline and never hides what is
+under it: a click goes straight through, so you pick it from the layers panel or with a marquee. It
+always stays on the page and can't be put inside a frame, group or section. Exporting a slice saves
+everything visible in its area, including the page background.
+
+- [x] several slices export together, one file each
+- [x] a rotated slice exports the upright area around it

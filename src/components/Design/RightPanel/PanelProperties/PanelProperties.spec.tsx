@@ -532,4 +532,44 @@ describe('PanelProperties behaviors', () => {
     store.dispatch(setImageEditor(null));
     store.dispatch(setSelection([]));
   });
+
+  it('should show the Slice panel for several slices and the Mixed panel with only the slice sections for a slice and a rectangle', () => {
+    // mock
+    ['multiSliceA', 'multiSliceB'].forEach((name) =>
+      store.dispatch(addNode({ height: 20, name, parentId: null, rotation: 0, type: NodeType.slice, width: 20, x: 0, y: 0 })),
+    );
+    store.dispatch(
+      addNode({
+        fills: [],
+        height: 20,
+        name: 'multiRectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const [sliceA, sliceB, rectangle] = rootOrder.slice(-3);
+    store.dispatch(setSelection([sliceA, sliceB]));
+
+    // before
+    const { unmount } = renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Slice')).toBeInTheDocument();
+    expect(screen.getByText('Export 2 layers')).toBeInTheDocument();
+
+    // action
+    unmount();
+    store.dispatch(setSelection([sliceA, rectangle]));
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(screen.getByText('Rotation')).toBeInTheDocument();
+    expect(screen.queryByText('Fill')).not.toBeInTheDocument();
+  });
 });

@@ -132,3 +132,23 @@ test('dragging a slice onto a frame does not put it into the frame', async ({ pa
   expect(slice?.parentId).toBeNull();
   expect(slice?.x).toBeGreaterThan(1000);
 });
+
+test('two slices picked with a marquee show the Slice panel ready to export both', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 800, 400);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+  await designPage.drawSlice(900, 300, 1000, 400);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+
+  await designPage.pointerDown(650, 250);
+  await designPage.pointerMove(1050, 450);
+  await designPage.pointerUp();
+
+  expect((await readNodes(page)).selectedIds).toHaveLength(2);
+  await expect(page.locator('[data-test-component-header="slice"]').getByText('Slice', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export 2 layers' })).toBeVisible();
+});

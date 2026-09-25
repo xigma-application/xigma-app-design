@@ -267,4 +267,24 @@ describe('handlePasteToReplace', () => {
     // result
     expect(selectActivePage(store.getState()).nodes).toEqual(before);
   });
+
+  it('should leave a layer inside a frame as it is when the clipboard holds a slice', () => {
+    // mock
+    const frameId = addFrameNode();
+    store.dispatch(
+      addNode({ fills: [], height: 5, name: 'Inner', parentId: frameId, rotation: 0, type: NodeType.rectangle, width: 5, x: 6, y: 6 }),
+    );
+    const innerId = (selectActivePage(store.getState()).nodes[frameId] as TFrameNode).childIds[0];
+    setClipboardNodes(
+      [{ height: 10, id: 'clip-slice', name: 'Slice', parentId: null, rotation: 0, type: NodeType.slice, width: 10, x: 0, y: 0 }],
+      ['clip-slice'],
+    );
+    store.dispatch(setSelection([innerId]));
+
+    // action
+    handlePasteToReplace(store.dispatch);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[innerId]).toMatchObject({ parentId: frameId, type: NodeType.rectangle });
+  });
 });

@@ -12,6 +12,7 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 
 // utils
 import { buildReplacementNodes } from './buildReplacementNodes';
+import { canReplaceNodeWithClipboardRoot } from './canReplaceNodeWithClipboardRoot';
 import { canReplaceSelectionWithClipboard } from './canReplaceSelectionWithClipboard';
 import { forEachClipboardTargetPair } from './forEachClipboardTargetPair';
 import { getClipboardNodes } from './clipboard';
@@ -29,13 +30,15 @@ export const handlePasteToReplace = (dispatch: AppDispatch): void => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
 
     forEachClipboardTargetPair(selectedIds, clipboard.rootIds, clipboardNodesById, nodes, (target, clipboardRoot, targetId) => {
-      const { descendants, newRoot } = buildReplacementNodes(clipboardNodesById, clipboardRoot, target);
+      if (canReplaceNodeWithClipboardRoot(clipboardRoot, target)) {
+        const { descendants, newRoot } = buildReplacementNodes(clipboardNodesById, clipboardRoot, target);
 
-      if (descendants.length > 0) {
-        dispatch(addNodes({ nodes: descendants, rootIds: [] }));
+        if (descendants.length > 0) {
+          dispatch(addNodes({ nodes: descendants, rootIds: [] }));
+        }
+
+        dispatch(replaceNode({ id: targetId, node: newRoot }));
       }
-
-      dispatch(replaceNode({ id: targetId, node: newRoot }));
     });
 
     dispatch(endHistoryGesture());
