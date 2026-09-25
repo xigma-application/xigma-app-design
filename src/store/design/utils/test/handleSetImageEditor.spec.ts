@@ -66,6 +66,7 @@ const buildState = (nodes: TDesignPage['nodes'], imageEditor: TImageEditorState 
     areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
+    resolvedTheme: 'dark',
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],

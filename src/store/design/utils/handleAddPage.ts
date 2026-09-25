@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAINT, DEFAULT_VECTOR_PAINT, DEFAULT_VIEWPORT } from '../constants';
+import { DEFAULT_VECTOR_PAINT, DEFAULT_VIEWPORT } from '../constants';
 
 // types
 import { TDesignPage, TDesignState } from '../types';
@@ -9,7 +9,7 @@ import { getNextPageName } from './getNextPageName';
 
 export const handleAddPage = (state: TDesignState, id: string): void => {
   const newPage: TDesignPage = {
-    backgroundPaint: DEFAULT_PAINT,
+    backgroundPaint: state.pages[state.activePageId]?.backgroundPaint ?? null,
     comments: {},
     guides: [],
     id,

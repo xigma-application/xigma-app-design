@@ -1,5 +1,6 @@
 // types
 import { BooleanOperation, ToolName } from 'types/design/enums';
+import { TResolvedTheme } from './types';
 import { TSolidPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -18,6 +19,11 @@ export const DEFAULT_VIEWPORT: TViewport = { x: 0, y: 0, zoom: 1 };
 export const DEFAULT_PAGE_NAME = 'Page 1';
 export const DEFAULT_GROUP_NAME = 'Group';
 export const DEFAULT_MASK_GROUP_NAME = 'Mask group';
+
+export const PAGE_BACKGROUND_PAINT: Record<TResolvedTheme, TSolidPaint> = {
+  dark: { color: '#535353', opacity: 100, type: 'solid' },
+  light: { color: '#F5F5F5', opacity: 100, type: 'solid' },
+};
 
 export const WRAP_IN_SECTION_PADDING = 25;
 export const DEFAULT_BOOLEAN_NAME: Record<BooleanOperation, string> = {

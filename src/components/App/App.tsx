@@ -12,6 +12,7 @@ import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassN
 
 // hooks
 import { useSyncActivePageFromUrl } from './hooks/useSyncActivePageFromUrl';
+import { useSyncResolvedTheme } from './hooks/useSyncResolvedTheme';
 import { useTheme } from 'hooks';
 
 // styles
@@ -25,6 +26,7 @@ const App: FC = () => {
 
   useTheme();
   useSyncActivePageFromUrl();
+  useSyncResolvedTheme();
 
   return (
     <div className={styles.App} data-project-id={projectId ?? undefined}>

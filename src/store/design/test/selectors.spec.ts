@@ -1,3 +1,6 @@
+// others
+import { PAGE_BACKGROUND_PAINT } from '../constants';
+
 // selectors
 import {
   selectActivePage,
@@ -40,6 +43,7 @@ import {
   selectPaint,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
+  selectResolvedTheme,
   selectSelectedIds,
   selectSelectedLeafNodes,
   selectSelectedNodes,
@@ -300,6 +304,25 @@ describe('design selectors', () => {
   it('should select the background paint, independent of the vector paint tool paint', () => {
     // result
     expect(selectBackgroundPaint(state)).toEqual({ color: '#336699', opacity: 50, type: 'solid' });
+  });
+
+  it('should fall back to the theme default background when the page has none of its own', () => {
+    // mock
+    const pageId = state.design.activePageId;
+    const withTheme = (resolvedTheme: 'dark' | 'light'): typeof state =>
+      ({
+        ...state,
+        design: {
+          ...state.design,
+          pages: { ...state.design.pages, [pageId]: { ...state.design.pages[pageId], backgroundPaint: null } },
+          preferences: { ...state.design.preferences, resolvedTheme },
+        },
+      }) as typeof state;
+
+    // result
+    expect(selectBackgroundPaint(withTheme('dark'))).toEqual(PAGE_BACKGROUND_PAINT.dark);
+    expect(selectBackgroundPaint(withTheme('light'))).toEqual(PAGE_BACKGROUND_PAINT.light);
+    expect(selectResolvedTheme(withTheme('light'))).toBe('light');
   });
 
   it('should select the pen active vertex id', () => {

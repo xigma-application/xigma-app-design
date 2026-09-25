@@ -6,6 +6,7 @@ import ColumnBackground from './ColumnBackground';
 import { TooltipProvider } from 'shared';
 
 // store
+import { selectBackgroundPaint } from 'store/design/selectors';
 import { DEFAULT_PAINT } from 'store/design/constants';
 import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
@@ -19,7 +20,7 @@ const renderColumnBackground = (): ReturnType<typeof render> =>
     </Provider>,
   );
 
-const readPaint = (): typeof DEFAULT_PAINT => store.getState().design.pages[store.getState().design.activePageId].backgroundPaint;
+const readPaint = (): typeof DEFAULT_PAINT => selectBackgroundPaint(store.getState());
 
 describe('ColumnBackground snapshots', () => {
   beforeEach(() => {

@@ -68,6 +68,7 @@ const buildState = (pages: TDesignPage[], activePageId: string): TDesignState =>
     areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
+    resolvedTheme: 'dark',
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],

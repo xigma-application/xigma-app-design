@@ -13,7 +13,7 @@ import { TGuide, TGuideAxis } from 'types/design/guides/types';
 import { TPaint, TPaintProperty, TSolidPaint } from 'types/design/paint/types';
 
 export type TDesignPage = {
-  backgroundPaint: TSolidPaint;
+  backgroundPaint: TSolidPaint | null;
   comments: Record<string, TComment>;
   guides: TGuide[];
   id: string;
@@ -70,12 +70,15 @@ export type TImageFillPickerFocus = { nodeId: string; paintIndex: number; proper
 
 export type TPatternSourcePickTarget = { nodeIds: string[]; paintIndex: number; property?: TPaintProperty };
 
+export type TResolvedTheme = 'dark' | 'light';
+
 export type TPreferences = {
   areAdditionalLabelsVisible: boolean;
   areFrameOutlinesVisible: boolean;
   areLayoutGuidesVisible: boolean;
   areMaskOutlinesVisible: boolean;
   areRulersVisible: boolean;
+  resolvedTheme: TResolvedTheme;
 };
 
 export type TRevealedMinMax = {

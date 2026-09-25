@@ -6,6 +6,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useColumnBackgroundColor } from '../useColumnBackgroundColor';
 
 // store
+import { selectBackgroundPaint } from 'store/design/selectors';
 import { DEFAULT_PAINT } from 'store/design/constants';
 import { setBackgroundPaint } from 'store/design/slice';
 import { store } from 'store';
@@ -19,7 +20,7 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 const renderUseColumnBackgroundColor = (): ReturnType<typeof renderHook<ReturnType<typeof useColumnBackgroundColor>, unknown>> =>
   renderHook(() => useColumnBackgroundColor(), { wrapper });
 
-const readPaint = (): TSolidPaint => store.getState().design.pages[store.getState().design.activePageId].backgroundPaint;
+const readPaint = (): TSolidPaint => selectBackgroundPaint(store.getState());
 
 describe('useColumnBackgroundColor', () => {
   beforeEach(() => {

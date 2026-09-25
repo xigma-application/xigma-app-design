@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 // others
-import { EMPTY_SELECTED_INDICES } from './constants';
+import { EMPTY_SELECTED_INDICES, PAGE_BACKGROUND_PAINT } from './constants';
 
 // store
 import { RootState } from 'store';
@@ -17,6 +17,7 @@ import {
   TImageFillPickerFocus,
   TOpenPropertyPanel,
   TPatternSourcePickTarget,
+  TResolvedTheme,
   TRevealedMinMax,
 } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
@@ -152,7 +153,12 @@ export const selectAllGuideLines = createSelector([selectPageGuides, selectFrame
 
 export const selectPaint = createSelector([selectActivePage], (page): TPaint => page.paint);
 
-export const selectBackgroundPaint = createSelector([selectActivePage], (page): TSolidPaint => page.backgroundPaint);
+export const selectResolvedTheme = (state: RootState): TResolvedTheme => state.design.preferences.resolvedTheme;
+
+export const selectBackgroundPaint = createSelector(
+  [selectActivePage, selectResolvedTheme],
+  (page, resolvedTheme): TSolidPaint => page.backgroundPaint ?? PAGE_BACKGROUND_PAINT[resolvedTheme],
+);
 
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
 

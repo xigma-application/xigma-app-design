@@ -5,7 +5,6 @@ import {
   DEFAULT_FRAME_TOOL,
   DEFAULT_MOUSE_TOOL,
   DEFAULT_PAGE_NAME,
-  DEFAULT_PAINT,
   DEFAULT_PEN_TOOL,
   DEFAULT_SHAPE_TOOL,
   DEFAULT_TEXT_TOOL,
@@ -31,6 +30,7 @@ import {
   TMoveNodesToPagePayload,
   TPatternSourcePickTarget,
   TReorderPayload,
+  TResolvedTheme,
   TRevealedMinMax,
   TStartTextEditPayload,
   TTextEditSelection,
@@ -90,6 +90,7 @@ import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
 import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
 import { handleSelectionPerParent } from './utils/handleSelectionPerParent/handleSelectionPerParent';
 import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
+import { getResolvedTheme } from './utils/getResolvedTheme';
 import { handleWrapInSection } from './utils/handleWrapInSection/handleWrapInSection';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
@@ -137,7 +138,7 @@ const initialState: TDesignState = {
   openPropertyPanel: null,
   pages: {
     [initialPageId]: {
-      backgroundPaint: DEFAULT_PAINT,
+      backgroundPaint: null,
       comments: {},
       guides: [],
       id: initialPageId,
@@ -159,6 +160,7 @@ const initialState: TDesignState = {
     areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
+    resolvedTheme: getResolvedTheme(),
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
@@ -291,6 +293,9 @@ const designSlice = createSlice({
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
     },
+    setResolvedTheme: (state, action: PayloadAction<TResolvedTheme>) => {
+      state.preferences.resolvedTheme = action.payload;
+    },
     setSelectedFillIndices: (state, action: PayloadAction<number[]>) => {
       getActivePage(state).selectedFillIndices = action.payload;
     },
@@ -389,6 +394,7 @@ export const {
   setActivePage,
   setActiveTool,
   setBackgroundPaint,
+  setResolvedTheme,
   setDesignHintLabelKey,
   setGradientEditor,
   setGridSectionHighlight,

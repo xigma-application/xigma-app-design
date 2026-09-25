@@ -51,13 +51,14 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
     areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
+    resolvedTheme: 'dark',
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
 });
 
 describe('handleAddPage', () => {
-  it('should add an empty page named after the next free number and make it active', () => {
+  it('should add an empty page named after the next free number, carrying over the left page background, and make it active', () => {
     // mock
     const state = buildState(['Page 1'], 'Page 1');
 
@@ -66,7 +67,7 @@ describe('handleAddPage', () => {
 
     // result
     expect(state.pages['new-page']).toEqual({
-      backgroundPaint: { color: '#444444', opacity: 100, type: 'solid' },
+      backgroundPaint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
       comments: {},
       guides: [],
       id: 'new-page',
@@ -79,6 +80,18 @@ describe('handleAddPage', () => {
       viewport: { x: 0, y: 0, zoom: 1 },
     });
     expect(state.activePageId).toBe('new-page');
+  });
+
+  it('should keep the theme default background when the left page uses the theme default', () => {
+    // mock
+    const state = buildState(['Page 1'], 'Page 1');
+    state.pages['Page 1'].backgroundPaint = null;
+
+    // before
+    handleAddPage(state, 'new-page');
+
+    // result
+    expect(state.pages['new-page'].backgroundPaint).toBeNull();
   });
 
   it('should insert the new page right after the active page', () => {

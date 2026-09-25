@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAGE_NAME, DEFAULT_PAINT, DEFAULT_VECTOR_PAINT } from '../constants';
+import { DEFAULT_PAGE_NAME, DEFAULT_VECTOR_PAINT } from '../constants';
 
 // store
 import slice, {
@@ -126,7 +126,7 @@ describe('design slice', () => {
       openPropertyPanel: null,
       pages: {
         [activePageId]: {
-          backgroundPaint: DEFAULT_PAINT,
+          backgroundPaint: null,
           comments: {},
           guides: [],
           id: activePageId,
@@ -148,6 +148,7 @@ describe('design slice', () => {
         areLayoutGuidesVisible: true,
         areMaskOutlinesVisible: false,
         areRulersVisible: false,
+        resolvedTheme: 'dark',
       },
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],

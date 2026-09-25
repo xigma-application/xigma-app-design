@@ -64,6 +64,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
           areLayoutGuidesVisible: true,
           areMaskOutlinesVisible: false,
           areRulersVisible: false,
+          resolvedTheme: 'dark' as const,
         },
         revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
         vectorEditingNodeIds: [],

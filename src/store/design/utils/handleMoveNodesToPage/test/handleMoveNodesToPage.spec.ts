@@ -84,6 +84,7 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
     areLayoutGuidesVisible: true,
     areMaskOutlinesVisible: false,
     areRulersVisible: false,
+    resolvedTheme: 'dark',
   },
   revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
   vectorEditingNodeIds: [],
