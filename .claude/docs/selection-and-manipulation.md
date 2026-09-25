@@ -370,7 +370,8 @@ dimensions around the shape's center, confirming "edge handles are also locked" 
 plain resize where edges have no locking mechanism at all.
 
 **Per-node-type application** (`resizeNode/resizeNode.ts` branches only line-vs-box):
-- `resizeLineNode.ts` — `x1/y1/x2/y2` each transform independently:
+- `resizeLineNode.ts` — the line's endpoints (`getLinePoints`, written back as `x1/y1/x2/y2` and
+  normalized into the line box by the store) each transform independently:
   `transformCoord(coord, anchor, scale) = anchor + (coord - anchor) * scale`.
 - `resizeBoxNode.ts` — `axisScale` via `getResizeAxisScale.ts`, new position via
   `getResizedPosition.ts` (uses the rotated anchor solver when present), final `changes` via

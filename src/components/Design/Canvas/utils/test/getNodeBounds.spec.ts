@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodeBounds } from '../getNodeBounds';
 
 describe('getNodeBounds', () => {
@@ -25,7 +26,7 @@ describe('getNodeBounds', () => {
     expect(getNodeBounds(rectangle)).toEqual({ height: 20, width: 10, x: 5, y: 5 });
   });
 
-  it('should derive the bounding box from a line node drawn top-left to bottom-right', () => {
+  it("should return a line's own box: as long as the line, with no height", () => {
     // mock
     const line: TLineNode = {
       id: '1',
@@ -33,17 +34,14 @@ describe('getNodeBounds', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 20,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 20 }),
     };
 
     // result
-    expect(getNodeBounds(line)).toEqual({ height: 20, width: 10, x: 0, y: 0 });
+    expect(getNodeBounds(line)).toEqual({ height: 0, width: Math.hypot(10, 20), x: 5 - Math.hypot(10, 20) / 2, y: 10 });
   });
 
-  it('should derive the bounding box from a line node drawn in any direction', () => {
+  it('should give a line drawn backwards the same own box as one drawn forwards', () => {
     // mock
     const line: TLineNode = {
       id: '1',
@@ -51,14 +49,11 @@ describe('getNodeBounds', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 10,
-      x2: 0,
-      y1: 20,
-      y2: 0,
+      ...getLineBoxFromPoints({ x1: 10, x2: 0, y1: 20, y2: 0 }),
     };
 
     // result
-    expect(getNodeBounds(line)).toEqual({ height: 20, width: 10, x: 0, y: 0 });
+    expect(getNodeBounds(line)).toEqual({ height: 0, width: Math.hypot(10, 20), x: 5 - Math.hypot(10, 20) / 2, y: 10 });
   });
 
   it('should delegate to getVectorNodeBounds for a vector node', () => {

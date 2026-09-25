@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodesBoundingBox } from '../getNodesBoundingBox';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
@@ -38,7 +39,7 @@ describe('getNodesBoundingBox', () => {
     expect(bounds.x).toBeCloseTo(5 - (Math.SQRT2 * 10) / 2, 5);
   });
 
-  it('should use endpoint extents for a line node', () => {
+  it('should cover both endpoints of a line', () => {
     // mock
     const line: TLineNode = {
       id: 'l',
@@ -46,17 +47,16 @@ describe('getNodesBoundingBox', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 30,
-      x2: 10,
-      y1: 5,
-      y2: 25,
+      ...getLineBoxFromPoints({ x1: 30, x2: 10, y1: 5, y2: 25 }),
     };
 
-    // action
-    const bounds = getNodesBoundingBox([line]);
-
     // result
-    expect(bounds).toEqual({ height: 20, width: 20, x: 10, y: 5 });
+    expect(getNodesBoundingBox([line])).toEqual({
+      height: expect.closeTo(20),
+      width: expect.closeTo(20),
+      x: expect.closeTo(10),
+      y: expect.closeTo(5),
+    });
   });
 
   it('should use the vector network extents for a vector node', () => {

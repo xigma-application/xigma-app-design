@@ -380,9 +380,9 @@ test('a selected line inside a Union can be grabbed on its stroke and moves on i
     const { activePageId, pages } = store.getState().design;
     const { nodes, selectedIds } = pages[activePageId];
     const rectangle = Object.values(nodes).find((node) => node.type === 'rectangle') as { x: number; y: number };
-    const line = Object.values(nodes).find((node) => node.type === 'line') as { y1: number };
+    const line = Object.values(nodes).find((node) => node.type === 'line') as { y: number };
 
-    return { lineY: line.y1, rectangle: { x: rectangle.x, y: rectangle.y }, selectedType: nodes[selectedIds[0]].type };
+    return { lineY: line.y, rectangle: { x: rectangle.x, y: rectangle.y }, selectedType: nodes[selectedIds[0]].type };
   });
 
   expect(result.selectedType).toBe('line');

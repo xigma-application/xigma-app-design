@@ -23,15 +23,16 @@ describe('getStrokeColor', () => {
   it("should read the color of a line node's stroke paint", () => {
     // mock
     const node: TLineNode = {
+      height: 0,
       id: 'l',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokes: [{ color: '#abcdef', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 1,
-      y1: 0,
-      y2: 0,
+      width: 1,
+      x: 0,
+      y: 0,
     };
 
     // result

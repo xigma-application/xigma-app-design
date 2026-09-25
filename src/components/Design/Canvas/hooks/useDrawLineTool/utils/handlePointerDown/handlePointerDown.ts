@@ -19,6 +19,7 @@ import { TNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNod
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { handleEscape } from '../handleEscape/handleEscape';
 import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
@@ -53,10 +54,7 @@ const createLineNode = (
         strokeWidth: LINE_RENDER_STROKE_WIDTH,
         strokes: [makeSolidPaint(stroke)],
         type: NodeType.line,
-        x1: Math.round(point.x),
-        x2: Math.round(point.x),
-        y1: Math.round(point.y),
-        y2: Math.round(point.y),
+        ...getLineBoxFromPoints({ x1: Math.round(point.x), x2: Math.round(point.x), y1: Math.round(point.y), y2: Math.round(point.y) }),
       },
       dropTarget.targetIndex,
     ),

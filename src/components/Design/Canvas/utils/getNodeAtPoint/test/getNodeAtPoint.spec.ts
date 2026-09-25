@@ -3,6 +3,7 @@ import { NodeType, PathType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TSectionNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getFrameNameLabelRects } from '../../getFrameNameLabelRects';
 import { getNodeAtPoint } from '../getNodeAtPoint';
 import { getSectionNameLabelRects } from '../../getSectionNameLabelRects';
@@ -131,10 +132,7 @@ describe('getNodeAtPoint', () => {
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     // result — (0, 10) sits inside the diagonal's bounding box but far from the diagonal itself
@@ -446,15 +444,16 @@ describe('getNodeAtPoint', () => {
   it('should widen the line hit-test tolerance in world units as the viewport zooms out', () => {
     // mock
     const line: TSceneNode = {
+      height: 0,
       id: 'a',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 0,
+      width: 10,
+      x: 0,
+      y: 0,
     };
 
     // result — 6 world units off the segment misses at zoom 1 (4px tolerance) but hits at zoom
@@ -465,16 +464,17 @@ describe('getNodeAtPoint', () => {
   it('should widen a line’s hit-test tolerance to match its own strokeWidth when that exceeds the default', () => {
     // mock — 6 world units off the segment, well past the 4px default line tolerance
     const line: TSceneNode = {
+      height: 0,
       id: 'a',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokeWidth: 16,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 0,
+      width: 10,
+      x: 0,
+      y: 0,
     };
 
     // result

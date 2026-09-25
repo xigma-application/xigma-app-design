@@ -13,6 +13,7 @@ import {
 } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { drawHoverOutline } from '../drawHoverOutline';
 
 const createGlMock = (): WebGL2RenderingContext =>
@@ -289,10 +290,7 @@ describe('drawHoverOutline', () => {
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     // before

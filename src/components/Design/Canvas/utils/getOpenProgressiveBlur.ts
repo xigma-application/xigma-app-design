@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TBooleanNode, TEffect, TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TOpenPropertyPanel } from 'store/design/types';
 
@@ -18,7 +19,7 @@ export const getOpenProgressiveBlur = (
   const [node] = selectedNodes;
 
   if (openPropertyPanel && openPropertyPanel.property === 'effects' && selectedNodes.length === 1 && node.id === openPropertyPanel.nodeId) {
-    if ('effects' in node && node.effects) {
+    if ('effects' in node && node.effects && node.type !== NodeType.line) {
       const effect = node.effects[openPropertyPanel.index];
 
       if (isProgressiveBlur(effect) && effect.visible !== false) {

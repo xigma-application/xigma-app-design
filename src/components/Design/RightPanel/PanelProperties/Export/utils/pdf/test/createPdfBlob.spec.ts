@@ -12,6 +12,7 @@ import { NodeType, PathType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { createPdfBlob } from '../createPdfBlob';
 
 const JPEG_QUALITY = 0.92;
@@ -352,10 +353,7 @@ describe('createPdfBlob', () => {
             parentId: null,
             strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
             type: NodeType.line,
-            x1: 0,
-            x2: 40,
-            y1: 0,
-            y2: 30,
+            ...getLineBoxFromPoints({ x1: 0, x2: 40, y1: 0, y2: 30 }),
           },
         ],
         rootIds: ['pdf-line'],

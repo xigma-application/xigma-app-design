@@ -4,6 +4,7 @@ import { TDesignPage, TDesignState } from '../../../../types';
 import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { getActivePage } from '../../../getActivePage';
 import { getRotatedNodeBounds } from '../../../getRotatedNodeBounds';
 import { syncAutoLayoutChildren } from '../syncAutoLayoutChildren';
@@ -457,15 +458,16 @@ describe('syncAutoLayoutChildren', () => {
     // mock — a 20-long horizontal line at the origin, next to a 30-wide rectangle
     const a = rect({ height: 20, id: 'a', width: 30 });
     const line: TLineNode = {
+      height: 0,
       id: 'b',
       name: 'Line',
       parentId: 'frame-1',
+      rotation: 0,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 20,
-      y1: 0,
-      y2: 0,
+      width: 20,
+      x: 0,
+      y: 0,
     };
     const layoutFrame = frame({ childIds: ['a', 'b'], layoutMode: LayoutMode.horizontal, x: 0, y: 0 });
     const state = buildState({ nodes: { a, b: line, 'frame-1': layoutFrame } });
@@ -474,7 +476,7 @@ describe('syncAutoLayoutChildren', () => {
     syncAutoLayoutChildren(state, 'frame-1');
 
     // result — the line's box moves to x=30 (right after the rect, no gap), so both endpoints shift by +30
-    expect(getActivePage(state).nodes.b).toMatchObject({ x1: 30, x2: 50, y1: 0, y2: 0 });
+    expect(getLinePoints(getActivePage(state).nodes.b as TLineNode)).toMatchObject({ x1: 30, x2: 50, y1: 0, y2: 0 });
   });
 
   it('should position a rotated child by its rotated bounding box, not its raw un-rotated box', () => {

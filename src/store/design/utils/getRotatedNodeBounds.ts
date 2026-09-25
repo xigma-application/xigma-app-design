@@ -12,7 +12,7 @@ export const getRotatedNodeBounds = (node: TSceneNode): TDraftRect => {
   const bounds = getNodeAxisAlignedBounds(node);
   let rotatedBounds = bounds;
 
-  if (node.type !== NodeType.line && node.type !== NodeType.vector && node.rotation !== 0) {
+  if (node.type !== NodeType.vector && node.rotation !== 0) {
     const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const corners = getRectCorners(bounds).map((corner) => rotatePoint(corner, center, node.rotation));
     const xs = corners.map((corner) => corner.x);

@@ -4,6 +4,7 @@ import { SvgLayerType } from '../enums';
 import { TFrameNode, TLineNode, TRectangleNode, TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getSvgLayerAncestorGroups } from '../getSvgLayerAncestorGroups';
 
 const bounds = { height: 400, width: 400, x: 0, y: 0 };
@@ -79,10 +80,7 @@ describe('getSvgLayerAncestorGroups', () => {
       parentId: 'parent',
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     expect(getSvgLayerAncestorGroups({ node, type: SvgLayerType.vector }, nodesById, bounds)).toEqual([]);
@@ -123,10 +121,7 @@ describe('getSvgLayerAncestorGroups', () => {
       parentId: 'parent',
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     expect(getSvgLayerAncestorGroups({ node, type: SvgLayerType.vector }, blendedNodesById, bounds)).toEqual([

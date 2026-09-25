@@ -4,6 +4,7 @@ import { TFrameNode, TSceneNode } from 'types/design/types';
 import { TMaskRenderer } from '../types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { canSkipFrameClip } from '../canSkipFrameClip';
 
 const subtreeMock = vi.fn();
@@ -67,6 +68,8 @@ describe('canSkipFrameClip', () => {
 
   it('should measure children without a rotation', () => {
     // result
-    expect(canSkip([{ id: 'line', type: NodeType.line, x1: 30, x2: 40, y1: 30, y2: 40 } as TSceneNode])).toBe(true);
+    expect(canSkip([{ id: 'line', type: NodeType.line, ...getLineBoxFromPoints({ x1: 30, x2: 40, y1: 30, y2: 40 }) } as TSceneNode])).toBe(
+      true,
+    );
   });
 });

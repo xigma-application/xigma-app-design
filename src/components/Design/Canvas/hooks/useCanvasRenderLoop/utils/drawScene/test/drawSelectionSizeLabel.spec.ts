@@ -6,6 +6,7 @@ import { NodeType, SizingMode } from 'types/design/enums';
 import { TBoxSceneNode, TSceneNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawSelectionSizeLabel } from '../drawSelectionSizeLabel';
 
@@ -193,15 +194,16 @@ describe('drawSelectionSizeLabel', () => {
   it("should read a horizontal single line by its length, anchored at its own midpoint and offset a small gap below it — parallel to the line, not the rect-selection case's larger perpendicular offset", () => {
     // before
     const line = {
+      height: 0,
       id: 'line-1',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 10,
-      x2: 130,
-      y1: 20,
-      y2: 20,
+      width: 120,
+      x: 10,
+      y: 20,
     } as TSceneNode;
 
     drawSelectionSizeLabel(
@@ -235,10 +237,7 @@ describe('drawSelectionSizeLabel', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: Math.sqrt(3) * 50,
-      y1: 0,
-      y2: 50,
+      ...getLineBoxFromPoints({ x1: 0, x2: Math.sqrt(3) * 50, y1: 0, y2: 50 }),
     } as TSceneNode;
 
     drawSelectionSizeLabel(
@@ -265,10 +264,7 @@ describe('drawSelectionSizeLabel', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: -10,
-      y1: 0,
-      y2: 100,
+      ...getLineBoxFromPoints({ x1: 0, x2: -10, y1: 0, y2: 100 }),
     } as TSceneNode;
 
     drawSelectionSizeLabel(

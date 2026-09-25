@@ -104,20 +104,40 @@ describe('isPointOnSceneNode', () => {
   it('should hit-test a line by distance from its segment, widened to its own stroke width', () => {
     // mock
     const line: TSceneNode = {
+      height: 0,
       id: 'a',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokeWidth: 16,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 0,
+      width: 10,
+      x: 0,
+      y: 0,
     };
 
     // result — 6 world units off the segment, past the 4px default but within strokeWidth / 2
     expect(isPointOnSceneNode(buildContext(line, { x: 5, y: 6 }))).toBe(true);
+  });
+
+  it('should fall back to the default line tolerance for a line without a stroke width', () => {
+    // mock
+    const line: TSceneNode = {
+      height: 0,
+      id: 'a',
+      name: 'Line',
+      parentId: null,
+      rotation: 0,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // result
+    expect(isPointOnSceneNode(buildContext(line, { x: 5, y: 6 }))).toBe(false);
   });
 
   it('should route text-on-a-path through curved-glyph hit-testing', () => {

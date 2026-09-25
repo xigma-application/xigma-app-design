@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getResizeNodeOrigin } from '../getResizeNodeOrigin';
 
 describe('getResizeNodeOrigin', () => {
@@ -14,10 +15,7 @@ describe('getResizeNodeOrigin', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 5,
-      y2: 15,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 5, y2: 15 }),
     };
 
     // action & result

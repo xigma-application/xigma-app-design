@@ -9,6 +9,7 @@ import { BlendMode, NodeType, PathType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { createSvgBlob } from '../createSvgBlob';
 
 const JPEG_QUALITY = 0.92;
@@ -175,10 +176,7 @@ describe('createSvgBlob', () => {
             parentId: null,
             strokes: [{ color: '#0000ff', opacity: 100, type: 'solid' }],
             type: NodeType.line,
-            x1: 0,
-            x2: 40,
-            y1: 0,
-            y2: 30,
+            ...getLineBoxFromPoints({ x1: 0, x2: 40, y1: 0, y2: 30 }),
           },
         ],
         rootIds: ['svg-line'],

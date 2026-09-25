@@ -20,15 +20,16 @@ const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
 });
 
 const line = (overrides: Partial<TLineNode>): TLineNode => ({
+  height: 0,
   id: 'a',
   name: 'Line',
   parentId: 'frame-1',
+  rotation: 0,
   strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 30,
-  y1: 0,
-  y2: 0,
+  width: 30,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
@@ -188,7 +189,7 @@ describe('getAutoLayoutSyncChildren', () => {
     expect(result.sizes[0].gridChildHorizontalAlign).toBeUndefined();
   });
 
-  it('should leave the stroke fields undefined for a non-box child, like a line', () => {
+  it("should read a line's stroke width like any other box child", () => {
     // mock
     const a = line({ id: 'a', strokeWidth: 3 });
     const layoutFrame = frame({ childIds: ['a'] });
@@ -198,7 +199,7 @@ describe('getAutoLayoutSyncChildren', () => {
 
     // result
     expect(result.sizes[0].strokeAlign).toBeUndefined();
-    expect(result.sizes[0].strokeWidth).toBeUndefined();
+    expect(result.sizes[0].strokeWidth).toBe(3);
   });
 
   it('should leave the sizing-mode and min/max fields undefined for a non-box child, like a line', () => {

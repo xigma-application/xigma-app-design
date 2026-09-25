@@ -6,15 +6,16 @@ import { TLineNode } from 'types/design/types';
 import { getLineStrokeOutlineLoops } from '../getLineStrokeOutlineLoops';
 
 const buildLine = (overrides: Partial<TLineNode> = {}): TLineNode => ({
+  height: 0,
   id: 'line-1',
   name: 'Line',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 100,
-  y1: 0,
-  y2: 0,
+  width: 100,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
@@ -35,7 +36,7 @@ describe('getLineStrokeOutlineLoops', () => {
 
   it('should return null for a zero-length segment (no direction to offset along)', () => {
     // action
-    const loops = getLineStrokeOutlineLoops(buildLine({ x2: 0, y2: 0 }), 2);
+    const loops = getLineStrokeOutlineLoops(buildLine({ width: 0 }), 2);
 
     // result
     expect(loops).toBeNull();

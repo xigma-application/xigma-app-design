@@ -7,6 +7,7 @@ import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawTextHoverOutline } from './drawTextHoverOutline';
 import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
@@ -84,7 +85,7 @@ export const drawHoverOutline = (
           gl,
           program,
           buffer,
-          hoveredNode,
+          getLinePoints(hoveredNode),
           DRAFT_FRAME_STROKE,
           LINE_HOVER_STROKE_WIDTH / viewport.zoom,
           canvasWidth,

@@ -155,14 +155,15 @@ describe('getMatchedPairDragGuides', () => {
   it('should return null for a line origin', () => {
     store.dispatch(
       addNode({
+        height: 0,
         name: 'Line',
         parentId: null,
+        rotation: 0,
         strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
         type: NodeType.line,
-        x1: 0,
-        x2: 10,
-        y1: 0,
-        y2: 0,
+        width: 10,
+        x: 0,
+        y: 0,
       }),
     );
 

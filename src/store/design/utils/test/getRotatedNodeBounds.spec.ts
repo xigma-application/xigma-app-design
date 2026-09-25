@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
@@ -52,7 +53,7 @@ describe('getRotatedNodeBounds', () => {
     expect(bounds.y).toBeCloseTo(-5);
   });
 
-  it('should ignore rotation for line nodes, which have no rotation field', () => {
+  it('should cover both endpoints of a turned line', () => {
     // mock
     const line: TLineNode = {
       id: '1',
@@ -60,14 +61,16 @@ describe('getRotatedNodeBounds', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 20,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 20 }),
     };
 
     // result
-    expect(getRotatedNodeBounds(line)).toEqual({ height: 20, width: 10, x: 0, y: 0 });
+    expect(getRotatedNodeBounds(line)).toEqual({
+      height: expect.closeTo(20),
+      width: expect.closeTo(10),
+      x: expect.closeTo(0),
+      y: expect.closeTo(0),
+    });
   });
 
   it('should ignore rotation for vector nodes, whose network is already baked into absolute vertex coordinates', () => {

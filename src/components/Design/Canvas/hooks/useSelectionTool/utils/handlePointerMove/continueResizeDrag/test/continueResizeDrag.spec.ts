@@ -7,11 +7,13 @@ import { store } from 'store';
 
 // types
 import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
-import { TFrameNode, TVectorNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { continueResizeDrag } from '../continueResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -60,7 +62,13 @@ const addFrameNode = (x: number, y: number, width: number, height: number, paren
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(
-    addNode({ name: 'Line', parentId, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], type: NodeType.line, x1, x2, y1, y2 }),
+    addNode({
+      name: 'Line',
+      parentId,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
+    }),
   );
 
   return getLastAddedNodeId(store.getState());
@@ -399,7 +407,7 @@ describe('continueResizeDrag', () => {
       x: 0,
       y: 0,
     });
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as TLineNode)).toMatchObject({
       x1: 40,
       x2: 160,
       y1: 40,

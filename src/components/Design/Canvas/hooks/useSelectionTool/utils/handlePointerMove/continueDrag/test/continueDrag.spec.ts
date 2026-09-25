@@ -11,7 +11,12 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { continueDrag } from '../continueDrag';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
@@ -130,10 +135,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -486,7 +488,7 @@ describe('continueDrag', () => {
     // result
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
-    expect(node).toMatchObject({ x1: 205, x2: 255, y1: 205, y2: 205 });
+    expect(getLinePoints(node as TLineNode)).toMatchObject({ x1: 205, x2: 255, y1: 205, y2: 205 });
   });
 
   it('should translate a vector node vertices by the pointer delta', () => {

@@ -9,7 +9,12 @@ import { store } from 'store';
 import { NodeType } from 'types/design/enums';
 import { TEndpointDragState } from 'types/design/selectionTool/types';
 
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { continueEndpointDrag } from '../continueEndpointDrag';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -33,10 +38,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -73,7 +75,7 @@ describe('continueEndpointDrag', () => {
     // result
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
-    expect(node).toMatchObject({ x1: 50, x2: 200, y1: 60, y2: 100 });
+    expect(getLinePoints(node as TLineNode)).toMatchObject({ x1: 50, x2: 200, y1: 60, y2: 100 });
   });
 
   it('should move the "b" endpoint to the pointer position', () => {
@@ -88,6 +90,6 @@ describe('continueEndpointDrag', () => {
     // result
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
-    expect(node).toMatchObject({ x1: 100, x2: 250, y1: 100, y2: 260 });
+    expect(getLinePoints(node as TLineNode)).toMatchObject({ x1: 100, x2: 250, y1: 100, y2: 260 });
   });
 });

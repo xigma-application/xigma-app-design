@@ -150,15 +150,16 @@ describe('getBooleanVectorNode', () => {
   it('should join a line drawn without a stroke width as the 1px stroke shape the canvas draws', () => {
     // mock
     const line: TLineNode = {
+      height: 0,
       id: 'line',
       name: 'line',
       parentId: 'union',
+      rotation: 0,
       strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 50,
-      x2: 300,
-      y1: 50,
-      y2: 50,
+      width: 250,
+      x: 50,
+      y: 50,
     };
     const node = makeBoolean('union', ['a', 'line'], BooleanOperation.union);
 
@@ -175,15 +176,16 @@ describe('getBooleanVectorNode', () => {
     // mock
     const arrow: TLineNode = {
       endPoint: LineEndpoint.lineArrow,
+      height: 0,
       id: 'arrow',
       name: 'arrow',
       parentId: 'union',
+      rotation: 0,
       strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 50,
-      x2: 300,
-      y1: 50,
-      y2: 50,
+      width: 250,
+      x: 50,
+      y: 50,
     };
     const node = makeBoolean('union', ['a', 'arrow'], BooleanOperation.union);
 

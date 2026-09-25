@@ -3,6 +3,7 @@ import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TSectionNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getCollidedNodes } from '../getCollidedNodes';
 
 const buildNode = (
@@ -160,10 +161,7 @@ describe('getCollidedNodes', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 5,
-      x2: 15,
-      y1: 5,
-      y2: 15,
+      ...getLineBoxFromPoints({ x1: 5, x2: 15, y1: 5, y2: 15 }),
     };
     const area = { height: 10, width: 10, x: 0, y: 0 };
 

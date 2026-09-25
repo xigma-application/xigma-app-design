@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getUnrotatedNodeQueryPoint } from '../getUnrotatedNodeQueryPoint';
 
 const buildNode = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
@@ -43,23 +44,20 @@ describe('getUnrotatedNodeQueryPoint', () => {
     expect(result.y).toBeCloseTo(50);
   });
 
-  it('should return the exact same point reference for a line node regardless of rotation, since lines carry no rotation field', () => {
+  it('should turn the point back around the middle of a turned line', () => {
     // mock
-    const point = { x: 5, y: 5 };
+    const point = { x: 10, y: 10 };
     const line: TSceneNode = {
       id: 'a',
       name: 'Line',
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     // result
-    expect(getUnrotatedNodeQueryPoint(point, line)).toBe(point);
+    expect(getUnrotatedNodeQueryPoint(point, line)).toEqual({ x: expect.closeTo(5 + Math.hypot(5, 5)), y: expect.closeTo(5) });
   });
 
   it('should return the exact same point reference for a vector node, whose rotation is baked into its geometry instead', () => {

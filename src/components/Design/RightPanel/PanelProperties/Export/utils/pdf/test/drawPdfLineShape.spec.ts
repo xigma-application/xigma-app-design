@@ -16,15 +16,16 @@ const page = {} as never;
 const states = new Map<number, PDFName>();
 
 const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
+  height: 0,
   id: 'l',
   name: 'l',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 20,
-  y1: 0,
-  y2: 0,
+  width: 20,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
@@ -47,7 +48,7 @@ describe('drawPdfLineShape', () => {
 
   it('should draw nothing for a zero-length line', () => {
     // action
-    drawPdfLineShape(page, line({ x2: 0 }), {}, bounds, states);
+    drawPdfLineShape(page, line({ width: 0 }), {}, bounds, states);
 
     // result
     expect(drawPdfPolygonsMock).not.toHaveBeenCalled();

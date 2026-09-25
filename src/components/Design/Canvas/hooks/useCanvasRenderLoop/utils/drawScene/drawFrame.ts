@@ -1,10 +1,8 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from './types';
 
 // utils
-import { drawDraftLine } from './drawDraftLine';
 import { drawDraftShape } from './drawDraftShape';
 
 export const drawFrame = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
@@ -12,10 +10,6 @@ export const drawFrame = (context: TDrawSceneContext, refs: TCanvasRefs): void =
   const draftShape = refs.draftRef.current;
 
   if (draftShape) {
-    if (draftShape.type === NodeType.line) {
-      drawDraftLine(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);
-    } else {
-      drawDraftShape(gl, program, buffer, imageContext, draftShape, canvasWidth, canvasHeight, viewport);
-    }
+    drawDraftShape(gl, program, buffer, imageContext, draftShape, canvasWidth, canvasHeight, viewport);
   }
 };

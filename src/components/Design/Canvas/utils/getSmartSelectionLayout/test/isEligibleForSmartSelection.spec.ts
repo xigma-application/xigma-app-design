@@ -22,15 +22,16 @@ const rect = (overrides: Partial<Omit<TRectangleNode, 'type'>> = {}): TSceneNode
 
 const line = (): TSceneNode =>
   ({
+    height: 0,
     id: 'l',
     name: 'Line',
     parentId: null,
+    rotation: 0,
     strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
     type: NodeType.line,
-    x1: 0,
-    x2: 10,
-    y1: 0,
-    y2: 0,
+    width: 10,
+    x: 0,
+    y: 0,
   }) as TSceneNode;
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
@@ -62,8 +63,8 @@ describe('isEligibleForSmartSelection', () => {
     expect(isEligibleForSmartSelection([rect({ id: 'a' }), rect({ id: 'b', rotation: 45 })], {})).toBe(false);
   });
 
-  it('should reject a node that has no rotation field at all', () => {
-    expect(isEligibleForSmartSelection([rect({ id: 'a' }), line()], {})).toBe(false);
+  it('should accept an unturned line like any other box', () => {
+    expect(isEligibleForSmartSelection([rect({ id: 'a' }), line()], {})).toBe(true);
   });
 
   it('should reject a selection whose parent is a horizontal/vertical/grid managed-layout frame', () => {

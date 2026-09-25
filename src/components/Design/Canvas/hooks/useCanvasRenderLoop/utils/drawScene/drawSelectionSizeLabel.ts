@@ -5,6 +5,7 @@ import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { drawLineSizeLabel } from './drawLineSizeLabel';
 import { drawRectSizeLabel } from './drawRectSizeLabel';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
@@ -16,18 +17,9 @@ import { isSmartSelectionGapHandleActive } from '../../../../utils/isSmartSelect
 import { isSmartSelectionSwapDragActive } from '../../../../utils/isSmartSelectionSwapDragActive';
 import { TSelectionSizeLabelRect } from './getSelectionSizeLabelPlacement';
 
-const getSingleNodeRotation = (node: TSceneNode): number => {
-  /* v8 ignore if -- drawSelectionSizeLabel always intercepts a single-line selection via drawLineSizeLabel before this is ever reached, so node is never a line here */
-  if (node.type === NodeType.line) {
-    return 0;
-  }
-
-  return node.rotation;
-};
-
 const getSizeLabelRect = (nodes: TSceneNode[]): TSelectionSizeLabelRect => {
   if (nodes.length === 1) {
-    return { ...getNodeBounds(nodes[0]), paddings: getStrokePaddings(nodes[0]), rotation: getSingleNodeRotation(nodes[0]) };
+    return { ...getNodeBounds(nodes[0]), paddings: getStrokePaddings(nodes[0]), rotation: nodes[0].rotation };
   }
 
   return { ...getSelectionBounds(nodes), rotation: 0 };
@@ -37,8 +29,9 @@ const drawGroupSizeLabel = (context: TDrawSceneContext, nodes: TSceneNode[]): vo
   const [singleNode] = nodes;
 
   if (nodes.length === 1 && singleNode.type === NodeType.line) {
-    drawLineSizeLabel(context, singleNode.x1, singleNode.y1, singleNode.x2, singleNode.y2);
-  } else if (nodes.length > 0) {
+    const { x1, x2, y1, y2 } = getLinePoints(singleNode);
+    drawLineSizeLabel(context, x1, y1, x2, y2);
+  } else {
     const sizingModes = nodes.length === 1 ? getSizeLabelSizingModes(singleNode) : undefined;
 
     drawRectSizeLabel(context, getSizeLabelRect(nodes), sizingModes);

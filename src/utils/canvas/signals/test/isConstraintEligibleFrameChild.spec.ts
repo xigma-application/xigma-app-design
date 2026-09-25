@@ -3,6 +3,7 @@ import { LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TGroupNode, TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { isConstraintEligibleFrameChild } from '../isConstraintEligibleFrameChild';
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
@@ -95,19 +96,16 @@ describe('isConstraintEligibleFrameChild', () => {
     expect(isConstraintEligibleFrameChild(rect({ parentId: 'gone' }), {})).toBe(false);
   });
 
-  it('should return false for a non-box child (a line) of a freeform frame', () => {
+  it('should return true for a line child of a freeform frame', () => {
     const line: TLineNode = {
       id: 'l1',
       name: 'Line',
       parentId: 'frame-1',
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
-    expect(isConstraintEligibleFrameChild(line, { 'frame-1': frame() })).toBe(false);
+    expect(isConstraintEligibleFrameChild(line, { 'frame-1': frame() })).toBe(true);
   });
 });

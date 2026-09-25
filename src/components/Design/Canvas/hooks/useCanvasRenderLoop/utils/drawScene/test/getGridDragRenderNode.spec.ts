@@ -3,6 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { getGridDragRenderNode } from '../getGridDragRenderNode';
 
@@ -33,14 +35,11 @@ describe('getGridDragRenderNode', () => {
       parentId: null,
       strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 30,
-      x2: 10,
-      y1: 20,
-      y2: 0,
+      ...getLineBoxFromPoints({ x1: 30, x2: 10, y1: 20, y2: 0 }),
     };
     const refs = createCanvasRefs({ transform: { gridDragGhostRef: { current: { nodeIds: ['l'], offset: { x: 5, y: 5 } } } } });
 
     // result
-    expect(getGridDragRenderNode(refs, line, { l: line })).toMatchObject({ x1: 35, x2: 15, y1: 25, y2: 5 });
+    expect(getLinePoints(getGridDragRenderNode(refs, line, { l: line }) as TLineNode)).toMatchObject({ x1: 35, x2: 15, y1: 25, y2: 5 });
   });
 });

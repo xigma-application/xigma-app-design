@@ -383,9 +383,9 @@ node field and this geometry are new.
 Appearance section currently exposes it (Rectangle/Frame). `drawLeafNode.ts` computes one multiplier
 per node, once, before its `switch`: `getEffectiveOpacity(node, nodesById) * getAutoLayoutDragOpacity(...)`.
 `getEffectiveOpacity.ts` walks `node.parentId` up through `nodesById` to the root, multiplying in
-`(current.opacity ?? 1)` at every step it's a box scene node (`isBoxSceneNode` guard — `TLineNode`/
-`TVectorNode` don't have the field, contribute `1` and just pass the walk through to their own
-parent) — so a Frame at 50% dims every descendant, compounding with each one's own opacity, not just
+`(current.opacity ?? 1)` at every step it's a box scene node (`isBoxSceneNode` guard — `TVectorNode` doesn't have the
+field, contributes `1` and just passes the walk through to its own parent; lines are boxes and
+carry their own opacity) — so a Frame at 50% dims every descendant, compounding with each one's own opacity, not just
 itself. This replaces the old plain `dragOpacity` pass-through (still named that in
 `getAutoLayoutDragOpacity.ts` itself — the 0.5-while-dragged-over-an-auto-layout-drop-target value,
 unrelated to this) to `drawBoxLeafNode`/`drawEllipseLeafNode`/`drawPolygonLeafNode`/`drawStarLeafNode`/
@@ -1254,7 +1254,7 @@ drawn into — the screen, or an outer scope's `contentTarget` when nested. The 
 framebuffer at the end. Only pixel fills go through this — selection/hover/handle layers still draw
 in screen space afterwards, unchanged.
 
-**Blend mode (`TBaseNode.blendMode?: BlendMode`, every node type except `TLineNode`/`TVectorNode` —
+**Blend mode (`TBaseNode.blendMode?: BlendMode`, every node type except `TVectorNode` —
 same carve-out as opacity, `getNodeBlendMode.ts` narrows via `'blendMode' in node`) reuses this same
 tree-walker rather than adding a second one.** `TMaskRenderer` carries `refs: TCanvasRefs` (threaded
 in from `drawSceneNodes.ts`, which already had `refs` as its own param) purely so this mechanism can
@@ -1291,7 +1291,7 @@ passthrough despite its name) rather than a duplicate file, same "MSDF reuses im
 precedent from §3. Combines for free with masks/clip-content nesting, since it's just another
 wrapping layer around the same `renderNode`/`target` recursion, not a parallel mechanism.
 
-This node-level mechanism deliberately excludes `TLineNode`/`TVectorNode` (same carve-out as opacity).
+This node-level mechanism deliberately excludes `TVectorNode` (same carve-out as opacity).
 A vector's own *faces* got a narrower version of the same trick instead, one level down: per-face
 blend mode (`vector-network.md` §78) lives on each paint layer (`TPaintBase.blendMode`), not the node,
 so `drawVectorNode.ts` isolates per paint-group rather than per node — `drawVectorFillGroup.ts`

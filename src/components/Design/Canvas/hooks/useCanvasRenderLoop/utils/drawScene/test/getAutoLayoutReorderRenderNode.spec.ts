@@ -1,4 +1,6 @@
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { getAutoLayoutReorderRenderNode } from '../getAutoLayoutReorderRenderNode';
 
@@ -35,17 +37,19 @@ describe('getAutoLayoutReorderRenderNode', () => {
       parentId: null,
       strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 30,
-      x2: 10,
-      y1: 20,
-      y2: 0,
+      ...getLineBoxFromPoints({ x1: 30, x2: 10, y1: 20, y2: 0 }),
     };
     const refs = createCanvasRefs({
       transform: { autoLayoutReorderPreviewRef: { current: { activeIndex: 0, frameId: 'f1', positions: { l: { x: 20, y: 10 } } } } },
     });
 
     // result
-    expect(getAutoLayoutReorderRenderNode(refs, line, { l: line })).toMatchObject({ x1: 40, x2: 20, y1: 30, y2: 10 });
+    expect(getLinePoints(getAutoLayoutReorderRenderNode(refs, line, { l: line }) as TLineNode)).toMatchObject({
+      x1: 40,
+      x2: 20,
+      y1: 30,
+      y2: 10,
+    });
   });
 
   it('should translate every vertex of a vector node by the delta between its real and overridden position', () => {

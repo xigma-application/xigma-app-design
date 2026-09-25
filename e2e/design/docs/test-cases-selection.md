@@ -437,17 +437,17 @@ directly. A Section can only sit on the page or inside another section — never
 Dragging a shape onto a section on the canvas reparents it, exactly like dropping onto a frame. All
 of this lives in `e2e/design/selection/section-nested.spec.ts`.
 
-| #   | Scenario                                                                                                   | Unit |             E2E             |
-| --- | ---------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
-| 351 | A plain click on the empty body of a section with children selects nothing                                |  ✅  | ✅ `section-nested.spec.ts` |
-| 352 | A plain click directly on content inside a section selects the content (click-through like a frame)        |  ✅  | ✅ `section-nested.spec.ts` |
-| 353 | A plain click on a section's name label selects the section                                                |  ✅  | ✅ `section-nested.spec.ts` |
-| 354 | Hovering a section's content highlights that content                                                       |  ✅  | ✅ `section-nested.spec.ts` |
-| 355 | Holding Control while hovering that content highlights the same content                                    |  ✅  | ✅ `section-nested.spec.ts` |
-| 356 | A plain click on content inside a frame that is itself nested in a section reaches that content directly   |  ✅  | ✅ `section-nested.spec.ts` |
-| 357 | A section cannot be dropped into a frame via the Layers panel — nothing changes                            |  ✅  | ✅ `section-nested.spec.ts` |
-| 358 | A section dropped onto another section via the Layers panel nests inside it                                |  ✅  | ✅ `section-nested.spec.ts` |
-| 359 | Dragging a shape onto a section on the canvas reparents it into the section, same as a frame               |  ✅  | ✅ `section-nested.spec.ts` |
+| #   | Scenario                                                                                                 | Unit |             E2E             |
+| --- | -------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 351 | A plain click on the empty body of a section with children selects nothing                               |  ✅  | ✅ `section-nested.spec.ts` |
+| 352 | A plain click directly on content inside a section selects the content (click-through like a frame)      |  ✅  | ✅ `section-nested.spec.ts` |
+| 353 | A plain click on a section's name label selects the section                                              |  ✅  | ✅ `section-nested.spec.ts` |
+| 354 | Hovering a section's content highlights that content                                                     |  ✅  | ✅ `section-nested.spec.ts` |
+| 355 | Holding Control while hovering that content highlights the same content                                  |  ✅  | ✅ `section-nested.spec.ts` |
+| 356 | A plain click on content inside a frame that is itself nested in a section reaches that content directly |  ✅  | ✅ `section-nested.spec.ts` |
+| 357 | A section cannot be dropped into a frame via the Layers panel — nothing changes                          |  ✅  | ✅ `section-nested.spec.ts` |
+| 358 | A section dropped onto another section via the Layers panel nests inside it                              |  ✅  | ✅ `section-nested.spec.ts` |
+| 359 | Dragging a shape onto a section on the canvas reparents it into the section, same as a frame             |  ✅  | ✅ `section-nested.spec.ts` |
 
 Every scenario here earns e2e coverage for the same reason the frame-nesting block above does: the
 section click-through rule, the label selection, the Layers-panel drag rejection, and the canvas
@@ -523,21 +523,22 @@ frame.rotation`), then continues to the matching frame edge for an edge constrai
 that extent each side of the centre for a `center` constraint. The centre `×` marker rotates with
 the frame. Lives in `e2e/design/selection/frame-child-constraints.spec.ts`.
 
-| #   | Scenario                                                                                                      | Unit |                 E2E                  |
-| --- | ------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
-| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes                             |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize                       |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves                              |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step)                  |  ✅  |                  —                   |
-| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space                               |  ✅  |                  —                   |
-| 377 | An auto-layout parent ignores a plain flow child's alignment; a nested subtree translates whole               |  ✅  |                  —                   |
-| 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child               |  ✅  |                  —                   |
-| 379 | The canvas guide lines shift when the sole-selected child's constraint changes                                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 380 | No guide lines are drawn while more than one node is selected                                                 |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 381 | The guide lines re-anchor to a rotated child's current extent, still axis-aligned to the frame                |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 382 | The guide lines and centre `×` marker follow a rotated parent frame                                           |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 383 | Arrow-key nudge moves a freeform-frame / absolute child; a plain auto-layout flow child is left to the engine |  ✅  | ✅ `frame-child-constraints.spec.ts` |
-| 384 | Arrow-key nudge of a selected group / mask group moves every child with it, not just the group box            |  ✅  |       ✅ `group-nodes.spec.ts`       |
+| #   | Scenario                                                                                                                                                | Unit |                 E2E                  |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------------: |
+| 372 | A centre-anchored child keeps its centre on the frame centre as the frame resizes                                                                       |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 373 | A right-anchored child keeps its right edge flush with the frame's right edge on resize                                                                 |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 374 | A free (unaligned) child does not re-anchor when only the frame's far edge moves                                                                        |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 375 | Setting an alignment immediately snaps the child to the anchor (no separate reposition step)                                                            |  ✅  |                  —                   |
+| 376 | A rotated parent re-anchors the child in the parent's own unrotated local space                                                                         |  ✅  |                  —                   |
+| 377 | An auto-layout parent ignores a plain flow child's alignment; a nested subtree translates whole                                                         |  ✅  |                  —                   |
+| 378 | An `ignoreAutoLayout` (absolute) child of an auto-layout frame re-anchors like a freeform child                                                         |  ✅  |                  —                   |
+| 379 | The canvas guide lines shift when the sole-selected child's constraint changes                                                                          |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 380 | No guide lines are drawn while more than one node is selected                                                                                           |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 381 | The guide lines re-anchor to a rotated child's current extent, still axis-aligned to the frame                                                          |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 382 | The guide lines and centre `×` marker follow a rotated parent frame                                                                                     |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 383 | Arrow-key nudge moves a freeform-frame / absolute child; a plain auto-layout flow child is left to the engine                                           |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 384 | A right-anchored line keeps its gap to the frame's right edge when the frame gets wider (lines are zero-height boxes now, so constraints apply to them) |  ✅  | ✅ `frame-child-constraints.spec.ts` |
+| 384 | Arrow-key nudge of a selected group / mask group moves every child with it, not just the group box                                                      |  ✅  |       ✅ `group-nodes.spec.ts`       |
 
 ## Select matching layers
 

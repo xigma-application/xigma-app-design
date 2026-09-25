@@ -34,6 +34,7 @@ import {
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
 import { TPaint } from 'types/design/paint/types';
+import { TLinePoints } from 'utils/canvas/line/types';
 
 export type TEffect = {
   blendMode?: BlendMode;
@@ -405,32 +406,23 @@ export type TVectorNode = {
   widthProfile?: TVectorWidthProfile | null;
 };
 
-export type TLineNode = {
+export type TLineNode = TBaseNode & {
+  effects?: TEffect[];
   endPoint?: LineEndpoint;
-  hidden?: boolean;
-  id: string;
-  locked?: boolean;
-  name: string;
-  parentId: string | null;
   startPoint?: LineEndpoint;
   strokeWidth?: number;
   strokes: TPaint[];
   type: NodeType.line;
-  x1: number;
-  x2: number;
-  y1: number;
-  y2: number;
 };
 
-export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
-
-export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
+export type TDraftEntity = TDraftShape | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
 export type TBoxSceneNode =
   | TBooleanNode
   | TEllipseNode
   | TFrameNode
   | TGroupNode
+  | TLineNode
   | TMaskNode
   | TMediaNode
   | TPathNode
@@ -441,7 +433,7 @@ export type TBoxSceneNode =
   | TStarNode
   | TTextNode;
 
-export type TSceneNode = TBoxSceneNode | TLineNode | TVectorNode;
+export type TSceneNode = TBoxSceneNode | TVectorNode;
 
 export type TNewSceneNode =
   | Omit<TBooleanNode, 'id'>
@@ -474,7 +466,7 @@ export type TSceneNodeChanges =
   | Partial<TSliceNode>
   | Partial<TStarNode>
   | Partial<TTextNode>
-  | Partial<TLineNode>
+  | (Partial<TLineNode> & Partial<TLinePoints>)
   | Partial<TVectorNode>;
 
 export type TViewport = {

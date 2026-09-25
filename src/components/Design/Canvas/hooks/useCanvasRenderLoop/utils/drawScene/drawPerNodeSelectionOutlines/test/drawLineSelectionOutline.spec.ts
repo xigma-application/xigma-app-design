@@ -3,6 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { drawLineSelectionOutline } from '../drawLineSelectionOutline';
 
 const drawLineMock = vi.fn();
@@ -19,10 +21,7 @@ const node: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 20,
+  ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 20 }),
 };
 
 describe('drawLineSelectionOutline', () => {
@@ -36,7 +35,7 @@ describe('drawLineSelectionOutline', () => {
     drawLineSelectionOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, 200, 150, { x: 0, y: 0, zoom: 2 });
 
     // result — LINE_SELECTED_STROKE_WIDTH (0.1) / zoom (2) = 0.05
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, node, '#337ae1', 0.05, 200, 150, { x: 0, y: 0, zoom: 2 });
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, getLinePoints(node), '#337ae1', 0.05, 200, 150, { x: 0, y: 0, zoom: 2 });
     expect(drawLineEndpointHandlesMock).toHaveBeenCalledWith(
       {},
       {},

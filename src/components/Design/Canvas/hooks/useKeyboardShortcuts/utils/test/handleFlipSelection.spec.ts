@@ -6,10 +6,11 @@ import { undo } from 'store/history/actions';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TGroupNode, TLineNode, TRectangleNode, TSectionNode } from 'types/design/types';
 import { TImagePaint } from 'types/design/paint/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { handleFlipSelection } from '../handleFlipSelection';
 
 const addEllipseNode = (overrides: Partial<TEllipseNode> = {}): string => {
@@ -238,18 +239,19 @@ describe('handleFlipSelection', () => {
     expect((selectNodes(store.getState())[id] as TRectangleNode).rotation).toBe(0);
   });
 
-  it('should not touch rotation for a line node (it has none)', () => {
+  it('should mirror a line by swapping its endpoints', () => {
     // mock
     store.dispatch(
       addNode({
+        height: 0,
         name: 'Line',
         parentId: null,
+        rotation: 0,
         strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
         type: NodeType.line,
-        x1: 0,
-        x2: 20,
-        y1: 0,
-        y2: 0,
+        width: 20,
+        x: 0,
+        y: 0,
       }),
     );
     const { rootOrder } = selectActivePage(store.getState());
@@ -259,8 +261,8 @@ describe('handleFlipSelection', () => {
     // action
     handleFlipSelection(store.dispatch, 'horizontal');
 
-    // result — no throw, and the node still exists with no rotation field
-    expect(selectNodes(store.getState())[id]).not.toHaveProperty('rotation');
+    // result
+    expect(getLinePoints(selectNodes(store.getState())[id] as TLineNode)).toEqual({ x1: 20, x2: 0, y1: 0, y2: 0 });
   });
 
   it('should undo the whole flip (every touched node) in a single step', () => {

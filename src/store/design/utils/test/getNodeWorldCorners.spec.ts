@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodeWorldCorners } from '../getNodeWorldCorners';
 
 const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
@@ -39,7 +40,7 @@ describe('getNodeWorldCorners', () => {
     expect(corners[0].y).toBeCloseTo(0, 5);
   });
 
-  it('should return the line’s own endpoint box, ignoring rotation entirely', () => {
+  it("should return a line's turned box, whose corners fall on its endpoints", () => {
     // mock
     const line: TLineNode = {
       id: 'l',
@@ -47,18 +48,15 @@ describe('getNodeWorldCorners', () => {
       parentId: null,
       strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
-    // result — lines have no rotation field to speak of; corners come straight from their AABB
-    expect(getNodeWorldCorners(line)).toEqual([
-      { x: 0, y: 0 },
-      { x: 10, y: 0 },
-      { x: 10, y: 10 },
-      { x: 0, y: 10 },
-    ]);
+    // result
+    const corners = getNodeWorldCorners(line);
+
+    expect(corners[0]).toEqual({ x: expect.closeTo(0), y: expect.closeTo(0) });
+    expect(corners[1]).toEqual({ x: expect.closeTo(10), y: expect.closeTo(10) });
+    expect(corners[2]).toEqual({ x: expect.closeTo(10), y: expect.closeTo(10) });
+    expect(corners[3]).toEqual({ x: expect.closeTo(0), y: expect.closeTo(0) });
   });
 });

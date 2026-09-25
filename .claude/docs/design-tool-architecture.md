@@ -20,7 +20,14 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
     Every tool needs an entry here regardless of whether it introduces a new `NodeType`.
 - `src/types/design/types.ts` — one type per node shape (`TLineNode`, `TRectangleNode`, ...), built
   from `TBaseNode` (`id/name/x/y/width/height/rotation/parentId`) for box-shaped nodes, or a
-  standalone shape for anything else (`TLineNode` has `x1/y1/x2/y2` instead). Also holds the
+  standalone shape for anything else (`TVectorNode` keeps a point graph instead). `TLineNode` is a
+  `TBaseNode` like Figma's line: a zero-height box (`x`, `y`, `width` = length, `height` = 0,
+  `rotation` = angle, turned around the box centre like every other node). Endpoints are derived
+  with `utils/canvas/line/getLinePoints`; the reverse is `getLineBoxFromPoints`. Tools that think in
+  endpoints (endpoint drag, line resize/rotate origins, the Line tool) may still write
+  `x1/y1/x2/y2` through `updateNode` — `normalizeLineChanges` (store) turns those into the box and
+  keeps `height` at 0. Moves round the *delta*, not the result (`getGeometryDeltaChanges`,
+  constraints), because a diagonal line's box `x` is fractional. Also holds the
   `TDraft*` types (the shape used for the **in-progress**, not-yet-committed drag preview — usually
   `Omit<TXNode, 'id' | 'name' | 'parentId'>`) and the three big unions every node type must be added
   to: `TSceneNode`, `TNewSceneNode` (`Omit<T, 'id'>`, what `addNode` accepts), `TSceneNodeChanges`

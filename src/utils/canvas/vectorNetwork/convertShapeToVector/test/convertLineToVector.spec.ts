@@ -6,6 +6,7 @@ import { LineEndpoint, NodeType } from 'types/design/enums';
 import { TLineNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { convertLineToVector } from '../convertLineToVector';
 
 describe('convertLineToVector', () => {
@@ -17,10 +18,7 @@ describe('convertLineToVector', () => {
       parentId: null,
       strokes: [{ color: '#ff00ff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 50,
-      y1: 10,
-      y2: 40,
+      ...getLineBoxFromPoints({ x1: 0, x2: 50, y1: 10, y2: 40 }),
     };
 
     // action
@@ -56,10 +54,7 @@ describe('convertLineToVector', () => {
       startPoint: LineEndpoint.lineArrow,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     // action
@@ -74,16 +69,17 @@ describe('convertLineToVector', () => {
   it('should keep the line stroke width and leave no stroke color for a line without strokes', () => {
     // mock
     const node: TLineNode = {
+      height: 0,
       id: 'l',
       name: 'l',
       parentId: null,
+      rotation: 0,
       strokeWidth: 3,
       strokes: [],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 0,
+      width: 10,
+      x: 0,
+      y: 0,
     };
 
     // action

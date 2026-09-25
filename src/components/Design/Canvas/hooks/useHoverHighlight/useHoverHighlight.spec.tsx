@@ -29,6 +29,9 @@ import { LayoutMode, NodeType, ToolName } from 'types/design/enums';
 import { TDistanceGuides } from '../../utils/getDistanceGuides/types';
 import { TGridTrackAffordanceHover } from 'types/design/canvas/types';
 
+// utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
+
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
 
@@ -69,10 +72,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 

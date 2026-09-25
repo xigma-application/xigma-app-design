@@ -3,10 +3,11 @@ import { NodeType } from 'types/design/enums';
 import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodeAxisAlignedBounds } from '../getNodeAxisAlignedBounds';
 
 describe('getNodeAxisAlignedBounds', () => {
-  it('should return the min/max box of a line’s two endpoints, regardless of their order', () => {
+  it("should return a line's own unturned box, as long as the line", () => {
     // mock
     const line: TLineNode = {
       id: 'l',
@@ -14,14 +15,16 @@ describe('getNodeAxisAlignedBounds', () => {
       parentId: null,
       strokes: [{ color: '#fff', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 30,
-      x2: 10,
-      y1: 20,
-      y2: 0,
+      ...getLineBoxFromPoints({ x1: 30, x2: 10, y1: 20, y2: 0 }),
     };
 
     // result
-    expect(getNodeAxisAlignedBounds(line)).toEqual({ height: 20, width: 20, x: 10, y: 0 });
+    expect(getNodeAxisAlignedBounds(line)).toEqual({
+      height: expect.closeTo(0),
+      width: expect.closeTo(Math.hypot(20, 20)),
+      x: expect.closeTo(20 - Math.hypot(20, 20) / 2),
+      y: expect.closeTo(10),
+    });
   });
 
   it('should return the vector node’s own bounds for a vector', () => {

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNodeHitContext } from './types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { getStrokeExpandedNode } from './getStrokeExpandedNode';
 import { isPointInCurvedText } from '../isPointInCurvedText';
 import { isPointInEllipse } from '../isPointInEllipse';
@@ -24,7 +25,7 @@ export const isPointOnSceneNode = (context: TSceneNodeHitContext): boolean => {
     case NodeType.star:
       return isPointInStar(testPoint, node);
     case NodeType.line:
-      return isPointNearLine(testPoint, node, Math.max(lineTolerance, (node.strokeWidth ?? 0) / 2 / zoom));
+      return isPointNearLine(point, getLinePoints(node), Math.max(lineTolerance, (node.strokeWidth ?? 0) / 2 / zoom));
     case NodeType.text:
       return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance, nodesById[node.pathId]) : isPointInText(testPoint, node);
     case NodeType.path:

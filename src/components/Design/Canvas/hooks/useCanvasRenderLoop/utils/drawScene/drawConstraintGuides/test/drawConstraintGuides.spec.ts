@@ -6,6 +6,7 @@ import { AlignmentHorizontal, LayoutMode, NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { drawConstraintGuides } from '../drawConstraintGuides';
 
 const drawDashedLineMock = vi.fn();
@@ -124,22 +125,19 @@ describe('drawConstraintGuides', () => {
     expect(drawDashedLineMock).toHaveBeenCalledTimes(2);
   });
 
-  it('should draw nothing for a non-box selected node', () => {
+  it('should draw constraint guides for a line child like any other box', () => {
     const line: TLineNode = {
       id: 'l1',
       name: 'Line',
       parentId: 'frame-1',
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
+      ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
     };
 
     drawConstraintGuides(context, [line as TSceneNode], { 'frame-1': frame({ childIds: ['l1'] }), l1: line });
 
-    expect(drawDashedLineMock).not.toHaveBeenCalled();
+    expect(drawDashedLineMock).toHaveBeenCalled();
   });
 
   it('should draw nothing when the selected node has no parent', () => {

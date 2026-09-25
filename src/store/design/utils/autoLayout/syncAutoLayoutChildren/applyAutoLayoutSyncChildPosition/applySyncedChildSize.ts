@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TAutoLayoutChildPosition } from '../../getAutoLayoutChildPositions/getAutoLayoutChildPositions';
 import { TBoxSceneNode, TFrameNode, TSceneNode } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
@@ -34,12 +35,14 @@ export const applySyncedChildSize = (
   target: TAutoLayoutChildPosition,
 ): { appliedHeight: number; appliedWidth: number } => {
   if (isBoxSceneNode(child) && child.rotation === frame.rotation && (target.width !== bound.width || target.height !== bound.height)) {
+    const height = child.type === NodeType.line ? 0 : target.height;
+
     scaleChildFillsCrop(child, target);
 
     child.width = target.width;
-    child.height = target.height;
+    child.height = height;
 
-    return { appliedHeight: target.height, appliedWidth: target.width };
+    return { appliedHeight: height, appliedWidth: target.width };
   }
 
   return { appliedHeight: bound.height, appliedWidth: bound.width };

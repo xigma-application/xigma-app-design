@@ -22,15 +22,16 @@ const rect = (id: string, column: number, row: number): TRectangleNode => ({
 });
 
 const line = (id: string): TLineNode => ({
+  height: 0,
   id,
   name: id,
   parentId: 'grid-1',
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 0,
+  width: 10,
+  x: 0,
+  y: 0,
 });
 
 const frame: TFrameNode = {
@@ -91,7 +92,7 @@ describe('applyNewNodeGridPlacement', () => {
     expect(occupant.gridRowAnchorIndex).toBe(0);
   });
 
-  it('should leave a non-box new node (e.g. a line) without grid anchor fields', () => {
+  it('should give a new line grid anchor fields like any other box', () => {
     // mock
     const state = buildState();
     const page = state.pages[state.activePageId];
@@ -103,11 +104,11 @@ describe('applyNewNodeGridPlacement', () => {
     applyNewNodeGridPlacement(state, frameNode, 'new-node', 0);
 
     // result
-    expect(page.nodes['new-node']).not.toHaveProperty('gridColumnAnchorIndex');
+    expect(page.nodes['new-node']).toHaveProperty('gridColumnAnchorIndex');
     expect(frameNode.gridAutoPlacement).toBe(false);
   });
 
-  it('should leave a non-box shifted sibling (e.g. a line) without grid anchor fields', () => {
+  it('should shift a line sibling in the grid like any other box', () => {
     // mock
     const state = buildState();
     const page = state.pages[state.activePageId];
@@ -119,6 +120,6 @@ describe('applyNewNodeGridPlacement', () => {
     applyNewNodeGridPlacement(state, frameNode, 'new-node', 0);
 
     // result
-    expect(page.nodes.occupant).not.toHaveProperty('gridColumnAnchorIndex');
+    expect(page.nodes.occupant).toHaveProperty('gridColumnAnchorIndex');
   });
 });

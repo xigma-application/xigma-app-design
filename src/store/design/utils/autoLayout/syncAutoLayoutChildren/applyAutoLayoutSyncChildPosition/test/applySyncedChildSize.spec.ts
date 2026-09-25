@@ -88,26 +88,27 @@ describe('applySyncedChildSize', () => {
     expect(child).toMatchObject({ height: 20, width: 20 });
   });
 
-  it('should not resize a non-box scene node (e.g. a line)', () => {
+  it('should stretch a line only along its length, keeping it flat', () => {
     // mock
     const child: TLineNode = {
+      height: 0,
       id: 'a',
       name: 'Line',
       parentId: 'frame-1',
+      rotation: 0,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 20,
-      y1: 0,
-      y2: 0,
+      width: 20,
+      x: 0,
+      y: 0,
     };
 
     // before
     const applied = applySyncedChildSize(frame(), child, { height: 20, width: 20, x: 0, y: 0 }, target({ height: 40, width: 60 }));
 
     // result
-    expect(applied).toEqual({ appliedHeight: 20, appliedWidth: 20 });
-    expect(child).toMatchObject({ x1: 0, x2: 20 });
+    expect(applied).toEqual({ appliedHeight: 0, appliedWidth: 60 });
+    expect(child).toMatchObject({ height: 0, width: 60 });
   });
 
   it('should scale a stored image crop proportionally along with the resize', () => {
@@ -158,5 +159,16 @@ describe('applySyncedChildSize', () => {
 
     // result
     expect(child.fills[0]).toEqual(solidFill);
+  });
+
+  it('should keep the crop scale of a flat child that grows from no height', () => {
+    // mock
+    const child = rect({ height: 0, width: 20 });
+
+    // before
+    const applied = applySyncedChildSize(frame(), child, { height: 0, width: 20, x: 0, y: 0 }, target({ height: 10, width: 20 }));
+
+    // result
+    expect(applied).toEqual({ appliedHeight: 10, appliedWidth: 20 });
   });
 });

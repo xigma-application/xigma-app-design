@@ -6,7 +6,14 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 
+// types
+
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { resizeLineNode } from '../resizeLineNode';
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
@@ -16,10 +23,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -41,7 +45,7 @@ describe('resizeLineNode', () => {
     resizeLineNode(idLine, { x1: 20, x2: 80, y1: 20, y2: 80 }, store.dispatch, { x: 0, y: 0 }, 2, 2);
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as TLineNode)).toMatchObject({
       x1: 40,
       x2: 160,
       y1: 40,
@@ -57,7 +61,7 @@ describe('resizeLineNode', () => {
     resizeLineNode(idLine, { x1: 20, x2: 80, y1: 20, y2: 80 }, store.dispatch, { x: 0, y: null }, 2, 1);
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as TLineNode)).toMatchObject({
       x1: 40,
       x2: 160,
       y1: 20,

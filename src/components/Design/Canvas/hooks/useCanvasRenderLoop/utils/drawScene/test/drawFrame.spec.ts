@@ -3,11 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
 
 // utils
-import { drawDraftLine } from '../drawDraftLine';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawFrame } from '../drawFrame';
-
-vi.mock('../drawDraftLine', () => ({ drawDraftLine: vi.fn() }));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -78,30 +75,6 @@ describe('drawFrame', () => {
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
-  });
-
-  it('should delegate to drawDraftLine for a line draft', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const draft = {
-      strokes: [{ color: '#000000', opacity: 100, type: 'solid' as const }],
-      type: NodeType.line as const,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 10,
-    };
-
-    // before
-    drawFrame(
-      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
-      createCanvasRefs({ draftRef: { current: draft } }),
-    );
-
-    // result
-    expect(drawDraftLine).toHaveBeenCalledWith(gl, program, buffer, draft, 100, 100, IDENTITY_VIEWPORT);
   });
 
   it('should delegate to drawDraftShape for a non-line draft', () => {

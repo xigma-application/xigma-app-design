@@ -17,6 +17,6 @@ export const getGeometryDeltaChanges = (origin: TNodeOrigin, deltaX: number, del
     case 'vertices' in origin:
       return { vertices: translateVectorVertices(origin.vertices, deltaX, deltaY) };
     default:
-      return { x: Math.round(origin.x + deltaX), y: Math.round(origin.y + deltaY) };
+      return { x: origin.x + Math.round(deltaX), y: origin.y + Math.round(deltaY) };
   }
 };

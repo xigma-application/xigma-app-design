@@ -10,6 +10,7 @@ import { addGuide } from 'store/design/slice';
 import { store } from 'store';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { armPlainResizeDrag } from '../armPlainResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
@@ -46,10 +47,7 @@ const line: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 10,
+  ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
 };
 
 const vector: TVectorNode = {

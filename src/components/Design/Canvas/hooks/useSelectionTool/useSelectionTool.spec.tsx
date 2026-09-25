@@ -25,7 +25,11 @@ import { store } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDraftRect, TEditingTextBox } from 'types/canvas';
-import { TVectorNode } from 'types/design/types';
+import { TLineNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -71,10 +75,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -701,7 +702,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2260, 710));
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TLineNode)).toMatchObject({
       x1: 2210,
       x2: 2310,
       y1: 710,
@@ -725,7 +726,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2420, 760));
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TLineNode)).toMatchObject({
       x1: 2420,
       x2: 2500,
       y1: 760,
@@ -749,7 +750,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2720, 760));
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TLineNode)).toMatchObject({
       x1: 2600,
       x2: 2720,
       y1: 700,
@@ -780,7 +781,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2900, 900));
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TLineNode)).toMatchObject({
       x1: 2820,
       x2: 2900,
       y1: 760,

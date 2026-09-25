@@ -11,6 +11,7 @@ import { TEllipseNode, TFrameNode, TLineNode, TMediaNode, TVectorNode } from 'ty
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { armResizeDrag } from '../armResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
@@ -47,10 +48,7 @@ const line: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 10,
-  x2: 20,
-  y1: 30,
-  y2: 40,
+  ...getLineBoxFromPoints({ x1: 10, x2: 20, y1: 30, y2: 40 }),
 };
 
 const vector: TVectorNode = {

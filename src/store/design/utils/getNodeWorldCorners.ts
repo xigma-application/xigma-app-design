@@ -12,7 +12,7 @@ export const getNodeWorldCorners = (node: TSceneNode): TPoint[] => {
   const bounds = getNodeAxisAlignedBounds(node);
   const corners = getRectCorners(bounds);
 
-  if (node.type === NodeType.line || node.type === NodeType.vector || node.rotation === 0) {
+  if (node.type === NodeType.vector || node.rotation === 0) {
     return corners;
   }
 

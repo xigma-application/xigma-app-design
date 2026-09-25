@@ -6,7 +6,11 @@ import { store } from 'store';
 // types
 import { LineEndpoint, NodeType } from 'types/design/enums';
 
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
 
@@ -102,11 +106,8 @@ describe('handlePointerDown', () => {
       strokeWidth: 1,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 50,
-      x2: 50,
-      y1: 60,
-      y2: 60,
     });
+    expect(getLinePoints(page.nodes[nodeIdRef.current as string] as TLineNode)).toMatchObject({ x1: 50, x2: 50, y1: 60, y2: 60 });
     expect(page.selectedIds).toEqual([nodeIdRef.current]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(refs.drawing.cancelDrawRef.current).not.toBeNull();

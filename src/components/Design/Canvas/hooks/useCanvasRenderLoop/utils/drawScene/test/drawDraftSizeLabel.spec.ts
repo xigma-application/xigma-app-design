@@ -68,22 +68,4 @@ describe('drawDraftSizeLabel', () => {
 
     expect(text).toBe('120 x 80');
   });
-
-  it('should read an in-progress line draft by its own length, tilted along it, instead of its bounding box', () => {
-    // mock
-    const refs = createCanvasRefs({
-      draftRef: {
-        current: { strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], type: NodeType.line, x1: 0, x2: 100, y1: 0, y2: 100 },
-      },
-    });
-
-    // before
-    drawDraftSizeLabel(context, refs);
-
-    // result
-    const [, , , , text, , , , , , options] = drawValueLabelMock.mock.calls[0];
-
-    expect(text).toBe(`${Math.round(Math.hypot(100, 100))} x 0`);
-    expect(options.angleDeg).toBeCloseTo(45, 5);
-  });
 });

@@ -11,6 +11,7 @@ import { TGroupNode } from 'types/design/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { armDrag } from '../armDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
@@ -45,10 +46,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -105,7 +103,7 @@ describe('armDrag', () => {
     });
   });
 
-  it('should snapshot a line node origin as its endpoints', () => {
+  it('should snapshot a line node origin as its box position, like any other box', () => {
     // mock
     const idA = addLineNode(200, 200, 250, 200);
     const dragStateRef = createDragStateRef();
@@ -115,7 +113,7 @@ describe('armDrag', () => {
 
     // result
     expect(dragStateRef.current).toMatchObject({
-      nodeOrigins: { [idA]: { x1: 200, x2: 250, y1: 200, y2: 200 } },
+      nodeOrigins: { [idA]: { x: 200, y: 200 } },
       pendingClickAction: { id: idA, kind: 'collapse' },
     });
   });

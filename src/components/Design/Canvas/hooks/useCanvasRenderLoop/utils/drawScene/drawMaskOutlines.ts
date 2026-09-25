@@ -11,6 +11,7 @@ import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
@@ -88,7 +89,7 @@ export const drawMaskOutlines = (context: TDrawSceneContext, sceneNodes: TSceneN
             gl,
             program,
             buffer,
-            node,
+            getLinePoints(node),
             MASK_OUTLINE_STROKE,
             MASK_OUTLINE_WIDTH_PX / viewport.zoom,
             canvasWidth,

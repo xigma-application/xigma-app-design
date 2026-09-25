@@ -8,6 +8,7 @@ import { AlignmentHorizontal, AlignmentVertical, LayoutMode, NodeType } from 'ty
 import { TFrameNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodePositionInParent } from '../../../getNodePositionInParent';
 
 const addFrame = (x: number, y: number, width: number, height: number, layoutMode?: LayoutMode): string => {
@@ -73,10 +74,7 @@ describe('syncConstrainedFrameChildren (via updateNode)', () => {
         parentId: null,
         strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
         type: NodeType.line,
-        x1: 0,
-        x2: 10,
-        y1: 0,
-        y2: 10,
+        ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
       }),
     );
 

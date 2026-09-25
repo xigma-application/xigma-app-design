@@ -87,8 +87,8 @@ parent). Full writeup — the group reducers, the click/hover selection-bypass r
 own bounds-sync (including the rotated case) — lives in `group-nodes.md`, not here.
 
 **`locked?: boolean` / `hidden?: boolean`** (added for the Layers panel, `LeftPanel/File/Layers`) —
-optional on every `TSceneNode` variant (added to `TBaseNode`, plus separately to `TLineNode`/
-`TVectorNode` since those two don't extend it), same "retrofit as optional, `?? false`/falsy-check
+optional on every `TSceneNode` variant (added to `TBaseNode`, plus separately to
+`TVectorNode` since it doesn't extend it), same "retrofit as optional, `?? false`/falsy-check
 at read sites" pattern as `TRectangleNode.cornerRadius?: number`, chosen over `TMediaNode`-style
 required-per-type fields because locked/hidden apply to every node type, not a shape-specific
 feature — making them required would force every node-construction call site to set them. Toggled by

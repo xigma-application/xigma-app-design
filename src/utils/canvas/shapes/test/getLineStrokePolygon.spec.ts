@@ -1,17 +1,21 @@
 // types
 import { LineEndpoint, NodeType } from 'types/design/enums';
-import { TDraftLine } from 'types/design/types';
+import { TLineNode } from 'types/design/types';
 
 // utils
 import { getLineStrokePolygon } from '../getLineStrokePolygon';
 
-const line: TDraftLine = {
+const line: TLineNode = {
+  height: 0,
+  id: 'l',
+  name: 'Line',
+  parentId: null,
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 100,
-  y1: 0,
-  y2: 0,
+  width: 100,
+  x: 0,
+  y: 0,
 };
 
 describe('getLineStrokePolygon', () => {
@@ -36,7 +40,7 @@ describe('getLineStrokePolygon', () => {
 
   it('should reuse the polygon for the same line and return null for a zero-length one', () => {
     // mock
-    const zeroLength = { ...line, x2: 0 };
+    const zeroLength = { ...line, width: 0 };
 
     // result
     expect(getLineStrokePolygon(line)).toBe(getLineStrokePolygon(line));

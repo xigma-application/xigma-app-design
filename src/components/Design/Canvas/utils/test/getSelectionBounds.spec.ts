@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TSectionNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getSelectionBounds } from '../getSelectionBounds';
 
 const buildNode = (
@@ -76,10 +77,7 @@ describe('getSelectionBounds', () => {
       parentId: null,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 30,
-      x2: 40,
-      y1: 5,
-      y2: 20,
+      ...getLineBoxFromPoints({ x1: 30, x2: 40, y1: 5, y2: 20 }),
     };
 
     // result

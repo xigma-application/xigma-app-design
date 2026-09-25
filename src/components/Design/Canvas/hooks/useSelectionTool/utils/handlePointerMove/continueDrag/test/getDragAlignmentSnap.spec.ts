@@ -33,15 +33,16 @@ const rect = (id: string, x: number, y: number, width = 100, height = 100): TSce
 
 const line = (id: string): TSceneNode =>
   ({
+    height: 0,
     id,
     name: 'Line',
     parentId: null,
+    rotation: 0,
     strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
     type: NodeType.line,
-    x1: 0,
-    x2: 10,
-    y1: 0,
-    y2: 0,
+    width: 10,
+    x: 0,
+    y: 0,
   }) as TSceneNode;
 
 describe('getDragAlignmentSnap', () => {

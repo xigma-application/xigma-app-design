@@ -35,8 +35,8 @@ export const syncConstrainedFrameChild = (
     const oldLocal = getNodePositionInParent(child, previousBox);
     const targetLocal = getConstrainedTargetLocal(oldLocal, child, widthDelta, heightDelta);
     const targetAbsolute = getNodeAbsoluteFromParentPosition(targetLocal, frame);
-    const deltaX = Math.round(targetAbsolute.x) - child.x;
-    const deltaY = Math.round(targetAbsolute.y) - child.y;
+    const deltaX = Math.round(targetAbsolute.x - child.x);
+    const deltaY = Math.round(targetAbsolute.y - child.y);
 
     if (deltaX !== 0 || deltaY !== 0) {
       moveConstrainedChildSubtree(nodes, child, deltaX, deltaY);

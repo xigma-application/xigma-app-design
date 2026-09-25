@@ -5,6 +5,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { glassBackdropStates } from '../glassBackdropStates';
 import { markNodeDrawnOverGlassBackdrop } from '../markNodeDrawnOverGlassBackdrop';
 
@@ -62,7 +63,11 @@ describe('markNodeDrawnOverGlassBackdrop', () => {
 
     // before
     markNodeDrawnOverGlassBackdrop(renderer, rect({ effects: [{ type: EffectType.dropShadow, visible: false }] }));
-    markNodeDrawnOverGlassBackdrop(renderer, { id: 'l', type: NodeType.line, x1: 0, x2: 1, y1: 0, y2: 1 } as TSceneNode);
+    markNodeDrawnOverGlassBackdrop(renderer, {
+      id: 'l',
+      type: NodeType.line,
+      ...getLineBoxFromPoints({ x1: 0, x2: 1, y1: 0, y2: 1 }),
+    } as TSceneNode);
     markNodeDrawnOverGlassBackdrop(renderer, rect({ effects: undefined, strokeWidth: undefined }));
 
     // result

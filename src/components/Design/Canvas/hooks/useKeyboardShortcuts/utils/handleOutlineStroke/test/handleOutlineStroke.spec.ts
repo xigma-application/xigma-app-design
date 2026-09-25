@@ -133,15 +133,16 @@ describe('handleOutlineStroke', () => {
     // mock
     store.dispatch(
       addNode({
+        height: 0,
         name: 'Line',
         parentId: null,
+        rotation: 0,
         strokeWidth: 4,
         strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
         type: NodeType.line,
-        x1: 0,
-        x2: 100,
-        y1: 0,
-        y2: 0,
+        width: 100,
+        x: 0,
+        y: 0,
       }),
     );
     const [lineId] = selectActivePage(store.getState()).rootOrder.slice(-1);

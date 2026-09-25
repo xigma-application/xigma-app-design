@@ -1,3 +1,8 @@
+// types
+import { TLineNode } from 'types/design/types';
+
+// utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { act, renderHook } from '@testing-library/react';
@@ -92,11 +97,8 @@ describe('useDrawLineTool behaviors', () => {
       startPoint: CONFIG.startPoint,
       strokes: [{ color: CONFIG.stroke, opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 60,
-      x2: 10,
-      y1: 40,
-      y2: 10,
     });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x1: 60, x2: 10, y1: 40, y2: 10 });
   });
 
   it('should round fractional pointer positions to whole pixels', () => {
@@ -120,7 +122,7 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10.2, 10.8));
 
     // result
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 60, x2: 10, y1: 41, y2: 11 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x1: 60, x2: 10, y1: 41, y2: 11 });
   });
 
   it('should snap the line to the nearest 15° increment while Shift is held, reusing the same angle-snap the Pen tool uses when placing a point', () => {
@@ -145,7 +147,7 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(new PointerEvent('pointermove', { clientX: 100, clientY: 20, shiftKey: true }));
 
     // result — locked onto the 15deg line through the origin, not the raw (100,20) endpoint
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
   });
 
   it('should commit the Shift-snapped endpoint, not the raw pointer position, on pointer up', () => {
@@ -171,7 +173,7 @@ describe('useDrawLineTool behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
+    expect(getLinePoints(page.nodes[page.rootOrder[0]] as TLineNode)).toMatchObject({ x1: 0, x2: 98, y1: 0, y2: 26 });
   });
 
   it('should softly snap onto a near-cardinal angle even without Shift, matching the Pen tool’s own un-shifted magnet tolerance', () => {
@@ -195,7 +197,7 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 150, 5));
 
     // result — snapped flat, without Shift held at all
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x1: 0, x2: 150, y1: 0, y2: 0 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x1: 0, x2: 150, y1: 0, y2: 0 });
   });
 
   it('should re-evaluate the in-progress line immediately when Shift is pressed, without waiting for a further pointermove', () => {
@@ -221,7 +223,7 @@ describe('useDrawLineTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 100, 20));
     });
 
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 100, y2: 20 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 100, y2: 20 });
 
     // action — Shift held, no further pointer movement
     act(() => {
@@ -229,7 +231,7 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result — hard-constrained to the nearest 15deg increment right away
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 98, y2: 26 });
   });
 
   it('should re-evaluate again on keyup once Shift is released, dropping the hard constraint', () => {
@@ -257,7 +259,7 @@ describe('useDrawLineTool behaviors', () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
     });
 
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 98, y2: 26 });
 
     // action — Shift released, still no further pointer movement
     act(() => {
@@ -265,7 +267,7 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result — back to the raw, unsnapped position
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 100, y2: 20 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 100, y2: 20 });
   });
 
   it('should ignore non-Shift keys and do nothing before a drag has started', () => {
@@ -323,11 +325,8 @@ describe('useDrawLineTool behaviors', () => {
       startPoint: CONFIG.startPoint,
       strokes: [{ color: CONFIG.stroke, opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 10,
-      x2: 60,
-      y1: 10,
-      y2: 40,
     });
+    expect(getLinePoints(page.nodes[page.rootOrder[0]] as TLineNode)).toMatchObject({ x1: 10, x2: 60, y1: 10, y2: 40 });
     expect(design.activeTool).toBe(ToolName.default);
     expect(page.selectedIds).toEqual([page.rootOrder[0]]);
   });

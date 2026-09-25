@@ -18,15 +18,16 @@ vi.mock('../drawBoxLeafNode/drawBoxPaints', () => ({
 const context = { gl: {} } as TDrawSceneContext;
 
 const line = (overrides: Partial<TLineNode> = {}): TLineNode => ({
+  height: 0,
   id: 'l1',
   name: 'Line',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#222222', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 0,
+  width: 10,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
@@ -60,7 +61,7 @@ describe('drawLineLeafNode', () => {
 
   it('should draw nothing for a zero-length line', () => {
     // action
-    drawLineLeafNode(context, line({ x2: 0 }), 1, {}, new Map(), createCanvasRefs(), null, 0);
+    drawLineLeafNode(context, line({ width: 0 }), 1, {}, new Map(), createCanvasRefs(), null, 0);
 
     // result
     expect(drawBoxPaintsMock).not.toHaveBeenCalled();

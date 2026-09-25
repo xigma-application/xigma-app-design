@@ -9,15 +9,16 @@ import { TLineNode, TRectangleNode } from 'types/design/types';
 import { getStrokeOutlineWidth } from '../getStrokeOutlineWidth';
 
 const line: TLineNode = {
+  height: 0,
   id: 'line-1',
   name: 'Line',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 100,
-  y1: 0,
-  y2: 0,
+  width: 100,
+  x: 0,
+  y: 0,
 };
 const rectangle: TRectangleNode = {
   fills: [],

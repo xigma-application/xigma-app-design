@@ -6,7 +6,11 @@ import { store } from 'store';
 // types
 import { LineEndpoint, NodeType } from 'types/design/enums';
 
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { handleShiftKeyChange } from '../handleShiftKeyChange';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -25,15 +29,16 @@ const createLineNode = (): string => {
   const { payload } = store.dispatch(
     addNode({
       endPoint: LineEndpoint.none,
+      height: 0,
       name: 'Line',
       parentId: null,
+      rotation: 0,
       startPoint: LineEndpoint.none,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 0,
-      y1: 0,
-      y2: 0,
+      width: 0,
+      x: 0,
+      y: 0,
     }),
   );
 
@@ -60,7 +65,7 @@ describe('handleShiftKeyChange', () => {
     );
 
     // result
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 0, y2: 0 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 0, y2: 0 });
   });
 
   it('should do nothing when no drag has started yet', () => {
@@ -96,7 +101,7 @@ describe('handleShiftKeyChange', () => {
     ).not.toThrow();
 
     // result
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 0, y2: 0 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 0, y2: 0 });
   });
 
   it('should re-evaluate the in-progress line at the last known pointer position, hard-snapping to the nearest 15° increment', () => {
@@ -118,6 +123,6 @@ describe('handleShiftKeyChange', () => {
     );
 
     // result
-    expect(selectActivePage(store.getState()).nodes[nodeId]).toMatchObject({ x2: 98, y2: 26 });
+    expect(getLinePoints(selectActivePage(store.getState()).nodes[nodeId] as TLineNode)).toMatchObject({ x2: 98, y2: 26 });
   });
 });

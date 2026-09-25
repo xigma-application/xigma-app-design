@@ -15,6 +15,7 @@ import {
 } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getNodeOutlinePath } from '../getNodeOutlinePath';
 
 describe('getNodeOutlinePath', () => {
@@ -121,10 +122,7 @@ describe('getNodeOutlinePath', () => {
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 40,
-      y1: 0,
-      y2: 40,
+      ...getLineBoxFromPoints({ x1: 0, x2: 40, y1: 0, y2: 40 }),
     };
 
     // action

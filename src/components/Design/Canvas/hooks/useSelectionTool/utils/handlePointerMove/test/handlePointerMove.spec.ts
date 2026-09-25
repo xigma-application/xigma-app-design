@@ -18,7 +18,12 @@ import {
 } from 'types/design/canvas/types';
 import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from 'types/design/selectionTool/types';
 
+// types
+import { TLineNode } from 'types/design/types';
+
 // utils
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 import { handlePointerMove } from '../handlePointerMove';
@@ -91,10 +96,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
       parentId: null,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2,
-      y1,
-      y2,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
     }),
   );
 
@@ -229,7 +231,10 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x1: 650, y1: 660 });
+    expect(getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TLineNode)).toMatchObject({
+      x1: 650,
+      y1: 660,
+    });
   });
 
   it('should delegate to continueMarqueeDrag for a pending marquee', () => {

@@ -258,15 +258,16 @@ const imageRectangle: TRectangleNode = {
 };
 
 const line: TLineNode = {
+  height: 0,
   id: 'line-1',
   name: 'Line',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 500,
-  x2: 600,
-  y1: 500,
-  y2: 500,
+  width: 100,
+  x: 500,
+  y: 500,
 };
 
 const vectorNode: TVectorNode = {

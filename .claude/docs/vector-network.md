@@ -29,11 +29,11 @@ export type TVectorNode = {
 };
 ```
 
-Not a `TBaseNode` (no `x/y/width/height`) — like `TLineNode`, a point graph doesn't fit a box. Bounds
-are derived on demand (`utils/canvas/vectorNetwork/getVectorNodeBounds.ts`, min/max over `vertices`),
-exactly mirroring how `getNodeBounds.ts` already special-cases `TLineNode`.
+Not a `TBaseNode` (no `x/y/width/height`) — a point graph doesn't fit a box. Bounds are derived on
+demand (`utils/canvas/vectorNetwork/getVectorNodeBounds.ts`, min/max over `vertices`), the one
+special case left in `getNodeBounds.ts`.
 
-`rotation` **is** stored (unlike `TLineNode`), but `vertices`/`segments` always stay in that rotation's
+`rotation` **is** stored, but `vertices`/`segments` always stay in that rotation's
 *local/reference* frame — `rotation` is a live transform applied non-destructively wherever the shape is
 drawn or hit-tested (`bakeVectorNodeRotation.ts`, mirroring `TBaseNode.rotation`'s role for every other
 shape), never baked into the stored coordinates at rest. It only gets permanently folded into

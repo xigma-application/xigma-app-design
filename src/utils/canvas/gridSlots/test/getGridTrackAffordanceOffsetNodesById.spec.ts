@@ -113,19 +113,20 @@ describe('getGridTrackAffordanceOffsetNodesById', () => {
     expect(next.b).toMatchObject({ x: 15 });
   });
 
-  it('should skip a matched placement that is not a box scene node, such as a line', () => {
+  it('should offset a matched line like any other box', () => {
     // mock
     const frame = buildFrame();
     const lineChild: TLineNode = {
+      height: 0,
       id: 'a',
       name: 'Line',
       parentId: 'frame-1',
+      rotation: 0,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 30,
-      y1: 0,
-      y2: 0,
+      width: 30,
+      x: 0,
+      y: 0,
     };
     const nodesById = { a: lineChild, b: rect('b'), 'frame-1': frame };
 
@@ -133,6 +134,6 @@ describe('getGridTrackAffordanceOffsetNodesById', () => {
     const next = getGridTrackAffordanceOffsetNodesById(frame, nodesById, dragStateFor({ sourceIndices: [0] }), 15);
 
     // result
-    expect(next.a).toBe(nodesById.a);
+    expect(next.a).not.toBe(nodesById.a);
   });
 });

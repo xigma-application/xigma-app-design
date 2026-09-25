@@ -299,3 +299,40 @@ test.describe('keyboard nudge of a frame child', () => {
     expect(after.y).toBe(before.y + 1);
   });
 });
+
+test('a right-anchored line keeps its gap to the frame right edge when the frame gets wider', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-line-constraints');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(FRAME.x1, FRAME.y1, FRAME.x2, FRAME.y2);
+  await designPage.drawLine(700, 300, 800, 300);
+
+  const moveRightEdge = (): Promise<{ frameRight: number; lineEnd: number; parentIsFrame: boolean }> =>
+    page.evaluate(async () => {
+      const { store } = await import('/src/store/index.ts');
+      const { updateNode } = await import('/src/store/design/slice.ts');
+      const { getLinePoints } = await import('/src/utils/canvas/line/getLinePoints.ts');
+      const nodes = (): Record<string, { id: string; parentId: string | null; type: string; width: number; x: number }> =>
+        store.getState().design.pages[store.getState().design.activePageId].nodes as never;
+      const frame = Object.values(nodes()).find((node) => node.type === 'frame');
+      const line = Object.values(nodes()).find((node) => node.type === 'line');
+
+      store.dispatch(updateNode({ changes: { alignment: { horizontal: 'right' } } as never, id: line?.id ?? '' }));
+      store.dispatch(updateNode({ changes: { width: (frame?.width ?? 0) + 100 }, id: frame?.id ?? '' }));
+
+      const nextFrame = nodes()[frame?.id ?? ''];
+
+      return {
+        frameRight: nextFrame.x + nextFrame.width,
+        lineEnd: getLinePoints(nodes()[line?.id ?? ''] as never).x2,
+        parentIsFrame: line?.parentId === frame?.id,
+      };
+    });
+
+  const result = await moveRightEdge();
+
+  expect(result.parentIsFrame).toBe(true);
+  expect(result.frameRight - result.lineEnd).toBe(100);
+});

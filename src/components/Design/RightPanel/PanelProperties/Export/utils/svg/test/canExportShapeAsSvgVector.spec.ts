@@ -47,15 +47,16 @@ const ellipse: TEllipseNode = {
 };
 
 const line: TLineNode = {
+  height: 0,
   id: 'l',
   name: 'l',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 0,
+  width: 10,
+  x: 0,
+  y: 0,
 };
 
 const vector: TVectorNode = {

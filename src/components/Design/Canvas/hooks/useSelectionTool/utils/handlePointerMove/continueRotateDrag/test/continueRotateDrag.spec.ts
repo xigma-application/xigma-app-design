@@ -7,11 +7,13 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TRectangleNode } from 'types/design/types';
+import { TLineNode, TRectangleNode } from 'types/design/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
+import { getLinePoints } from 'utils/canvas/line/getLinePoints';
 import { getLastAddedNodeId } from 'test/getLastAddedNodeId';
 import { continueRotateDrag } from '../continueRotateDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -76,7 +78,13 @@ const addImageRectangleNode = (
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(
-    addNode({ name: 'Line', parentId, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }], type: NodeType.line, x1, x2, y1, y2 }),
+    addNode({
+      name: 'Line',
+      parentId,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      ...getLineBoxFromPoints({ x1, x2, y1, y2 }),
+    }),
   );
 
   return getLastAddedNodeId(store.getState());
@@ -255,12 +263,7 @@ describe('continueRotateDrag', () => {
     continueRotateDrag(canvas, pointerEvent(100, 150), store.dispatch, rotateDragRef, createCanvasRefs());
 
     // result
-    const line = store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as {
-      x1: number;
-      x2: number;
-      y1: number;
-      y2: number;
-    };
+    const line = getLinePoints(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as TLineNode);
 
     expect(line.x1).toBeCloseTo(150);
     expect(line.y1).toBeCloseTo(50);

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { convertNodeToVector, isConvertibleToVectorNode } from '../convertNodeToVector';
 
 const RECTANGLE: TRectangleNode = {
@@ -66,10 +67,7 @@ const LINE: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 10,
+  ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
 };
 const TEXT: TTextNode = {
   content: 'hi',

@@ -7,6 +7,7 @@ import { store } from 'store';
 import { LineEndpoint, NodeType, ToolName } from 'types/design/enums';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handlePointerUp } from '../handlePointerUp';
 
@@ -33,10 +34,7 @@ const createLineNode = (x1: number, y1: number): string => {
       startPoint: LineEndpoint.none,
       strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1,
-      x2: x1,
-      y1,
-      y2: y1,
+      ...getLineBoxFromPoints({ x1, x2: x1, y1, y2: y1 }),
     }),
   );
 
@@ -76,7 +74,7 @@ describe('handlePointerUp', () => {
     // result
     const page = selectActivePage(store.getState());
 
-    expect(page.nodes[nodeId]).toMatchObject({ type: NodeType.line, x1: 10, x2: 60, y1: 10, y2: 40 });
+    expect(page.nodes[nodeId]).toMatchObject({ type: NodeType.line, ...getLineBoxFromPoints({ x1: 10, x2: 60, y1: 10, y2: 40 }) });
     expect(startRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(store.getState().design.activeTool).toBe(ToolName.default);

@@ -445,15 +445,16 @@ describe('drawLeafNode', () => {
   it('should draw a line through its paints with the threaded opacity', () => {
     // mock
     const node: TSceneNode = {
+      height: 0,
       id: 'l1',
       name: 'Line',
       parentId: null,
+      rotation: 0,
       strokes: [{ color: '#222', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 10,
-      y1: 0,
-      y2: 0,
+      width: 10,
+      x: 0,
+      y: 0,
     };
     const refs = createCanvasRefs({
       transform: {

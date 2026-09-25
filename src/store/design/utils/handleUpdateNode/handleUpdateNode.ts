@@ -6,6 +6,7 @@ import { TSceneNodeChanges } from 'types/design/types';
 import { getActivePage } from '../getActivePage';
 import { invalidateVectorWidthProfile } from './invalidateVectorWidthProfile';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
+import { normalizeLineChanges } from './normalizeLineChanges';
 import { syncAutoLayoutChildren } from '../autoLayout/syncAutoLayoutChildren/syncAutoLayoutChildren';
 import { syncBoundNode } from './syncBoundNode';
 import { syncConstrainedFrameChildren } from './syncConstrainedFrameChildren/syncConstrainedFrameChildren';
@@ -19,7 +20,7 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
       ? { height: node.height, rotation: node.rotation, width: node.width, x: node.x, y: node.y }
       : undefined;
 
-    Object.assign(node, payload.changes);
+    Object.assign(node, normalizeLineChanges(node, payload.changes));
     syncBoundNode(state, node);
     invalidateVectorWidthProfile(node, payload.changes);
     syncGroupBounds(state, node.parentId);

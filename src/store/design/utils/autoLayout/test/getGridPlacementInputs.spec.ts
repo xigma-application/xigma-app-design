@@ -35,15 +35,16 @@ describe('getGridPlacementInputs', () => {
 
   it('should leave the grid fields undefined for a non-box child', () => {
     const line: TSceneNode = {
+      height: 0,
       id: 'l',
       name: 'Line',
       parentId: 'grid-1',
+      rotation: 0,
       strokes: [{ color: '#000', opacity: 100, type: 'solid' }],
       type: NodeType.line,
-      x1: 0,
-      x2: 1,
-      y1: 0,
-      y2: 0,
+      width: 1,
+      x: 0,
+      y: 0,
     };
 
     expect(getGridPlacementInputs(['l'], byId([line]))).toEqual([

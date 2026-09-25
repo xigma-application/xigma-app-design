@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { getRotateNodeOrigins } from '../getRotateNodeOrigins';
 
 const frame: TFrameNode = {
@@ -26,10 +27,7 @@ const line: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 10,
-  x2: 20,
-  y1: 30,
-  y2: 40,
+  ...getLineBoxFromPoints({ x1: 10, x2: 20, y1: 30, y2: 40 }),
 };
 
 const vector: TVectorNode = {

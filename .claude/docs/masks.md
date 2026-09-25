@@ -9,7 +9,7 @@ top of the panel makes it a no-op.
 ## 1. Data model
 
 `isMask?: boolean`, optional, on every node — same retrofit spots as `locked?`/`hidden?`
-(`TBaseNode` + `TLineNode` + `TVectorNode`, `types/design/types.ts`). No new `NodeType`;
+(`TBaseNode` + `TVectorNode`, `types/design/types.ts`). No new `NodeType`;
 "Mask group" is a plain `TGroupNode` named `DEFAULT_MASK_GROUP_NAME` (`'Mask group'`,
 `store/design/constants.ts`).
 

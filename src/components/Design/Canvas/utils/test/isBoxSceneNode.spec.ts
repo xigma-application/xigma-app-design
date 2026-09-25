@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getLineBoxFromPoints } from 'utils/canvas/line/getLineBoxFromPoints';
 import { isBoxSceneNode } from '../isBoxSceneNode';
 
 const frame: TFrameNode = {
@@ -26,10 +27,7 @@ const line: TLineNode = {
   parentId: null,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 10,
+  ...getLineBoxFromPoints({ x1: 0, x2: 10, y1: 0, y2: 10 }),
 };
 
 const vector: TVectorNode = {
@@ -52,8 +50,8 @@ describe('isBoxSceneNode', () => {
     expect(isBoxSceneNode(frame)).toBe(true);
   });
 
-  it('should be false for a line node, which has x1/y1/x2/y2 instead of x/y', () => {
-    expect(isBoxSceneNode(line)).toBe(false);
+  it('should be true for a line node, a box with no height', () => {
+    expect(isBoxSceneNode(line)).toBe(true);
   });
 
   it('should be false for a vector node, which has no single x/y anchor', () => {

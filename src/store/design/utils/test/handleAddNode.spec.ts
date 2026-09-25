@@ -52,15 +52,16 @@ const sectionNode: TSceneNode = {
 };
 
 const lineNode: TSceneNode = {
+  height: 0,
   id: 'line-1',
   name: 'Line (1)',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 10,
-  y1: 0,
-  y2: 0,
+  width: 10,
+  x: 0,
+  y: 0,
 };
 
 describe('handleAddNode', () => {

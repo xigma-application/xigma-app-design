@@ -8,10 +8,14 @@ type TDesignSnapshot = { nodes: Record<string, { x1?: number; x2?: number; y1?: 
 const readDesignState = (page: Page): Promise<TDesignSnapshot> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
+    const { getLinePoints } = await import('/src/utils/canvas/line/getLinePoints.ts');
     const { activePageId } = store.getState().design;
     const { nodes, rootOrder } = store.getState().design.pages[activePageId];
+    const points = Object.fromEntries(
+      Object.entries(nodes).map(([id, node]) => [id, getLinePoints(node as unknown as Parameters<typeof getLinePoints>[0])]),
+    );
 
-    return { nodes, rootOrder };
+    return { nodes: points, rootOrder };
   });
 
 test('holding Shift while drawing a line snaps it to the nearest 15° angle instead of the raw pointer position', async ({ page }) => {
@@ -90,6 +94,8 @@ test('an Arrow tool drag also snaps to the 15° angle while Shift is held, reusi
 
 test('pressing Shift mid-drag snaps the line immediately, with zero further pointer movement', async ({ page }) => {
   const designPage = new DesignPage(page);
+  const lineArea = { height: 80, width: 160, x: 880, y: 270 };
+  const shotLineArea = (): Promise<Buffer> => page.screenshot({ clip: lineArea });
 
   await designPage.goto('e2e-test-line-angle-snap-immediate');
   await expect(designPage.canvas).toBeVisible();
@@ -97,20 +103,15 @@ test('pressing Shift mid-drag snaps the line immediately, with zero further poin
   await designPage.selectToolFromDropdown('rectangle', 'Line');
   await designPage.pointerDown(900, 300);
   await designPage.pointerMove(1000, 320);
-  const beforeShift = await designPage.canvas.screenshot();
+  const beforeShift = await shotLineArea();
 
   // Shift held, the cursor never moves — the snap must apply on keydown itself
   await page.keyboard.down('Shift');
-  const afterShift = await designPage.canvas.screenshot();
-
-  expect(afterShift.equals(beforeShift)).toBe(false);
+  await expect.poll(async () => (await shotLineArea()).equals(beforeShift)).toBe(false);
 
   // releasing Shift, still without moving the mouse, re-evaluates back to the free-form endpoint
   await page.keyboard.up('Shift');
-  const afterRelease = await designPage.canvas.screenshot();
+  await expect.poll(async () => (await shotLineArea()).equals(beforeShift)).toBe(true);
 
   await designPage.pointerUp();
-
-  expect(afterRelease.equals(afterShift)).toBe(false);
-  expect(afterRelease.equals(beforeShift)).toBe(true);
 });

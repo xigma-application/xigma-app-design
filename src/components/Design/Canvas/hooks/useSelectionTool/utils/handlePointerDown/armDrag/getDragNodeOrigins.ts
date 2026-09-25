@@ -12,8 +12,6 @@ export const getDragNodeOrigins = (armIds: string[], nodes: Record<string, TScen
       const node = nodes[id];
 
       switch (node.type) {
-        case NodeType.line:
-          return [id, { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 }];
         case NodeType.vector:
           return [id, getVectorNodeOrigin(node)];
         default:

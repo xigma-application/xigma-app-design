@@ -48,15 +48,16 @@ const buildSectionNode = (): TSectionNode => ({
 });
 const buildGroupNode = (): TGroupNode => ({ ...BASE_NODE, childIds: [], type: NodeType.group });
 const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
+  height: 0,
   id: 'node-1',
   name: 'Line',
   parentId: null,
+  rotation: 0,
   strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
   type: NodeType.line,
-  x1: 0,
-  x2: 100,
-  y1: 0,
-  y2: 0,
+  width: 100,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
