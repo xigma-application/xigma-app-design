@@ -12,6 +12,7 @@ describe('getCommonPanelItems', () => {
     // action / result
     expect(getCommonPanelItems(PANEL_SECTIONS, [NodeType.frame, NodeType.rectangle])).toEqual([
       'position',
+      'rotation',
       'layout',
       'appearance',
       'cornerRadius',

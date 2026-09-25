@@ -222,3 +222,42 @@ test('a section inside a section shows its label inside its top-left corner, abo
 
   expect(selectedIds).toEqual([innerId]);
 });
+
+test('a section selected with a rectangle shows the mixed panel without rotation, and its Resize to fit fits the section', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-section-panel-mixed');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(600, 400, 650, 450);
+  await deselect(designPage);
+  await designPage.drawSection(550, 350, 750, 550);
+  await deselect(designPage);
+  await designPage.drawRectangle(900, 400, 960, 470);
+  await deselect(designPage);
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+  });
+
+  await expect(page.locator('[data-test-component-header="mixed"]').getByText('2 selected', { exact: true })).toBeVisible();
+  await expect(page.getByText('Rotation', { exact: true })).toHaveCount(0);
+
+  await page.getByLabel('Resize to fit', { exact: true }).click();
+
+  const section = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes } = pages[activePageId];
+
+    return Object.values(nodes).find((node) => node.type === 'section') as unknown as { height: number; width: number };
+  });
+
+  expect(section).toMatchObject({ height: 50, width: 50 });
+});

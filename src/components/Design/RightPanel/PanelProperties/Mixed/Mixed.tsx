@@ -11,6 +11,7 @@ import FillSection from '../Common/FillSection/FillSection';
 import LayoutGuideSection from '../Common/LayoutGuideSection/LayoutGuideSection';
 import MixedHeader from './MixedHeader/MixedHeader';
 import PositionSection from '../Common/PositionSection/PositionSection';
+import ResizeToFitButton from '../Common/ResizeToFitButton/ResizeToFitButton';
 import SelectionColorsSection from '../Common/SelectionColorsSection/SelectionColorsSection';
 import StrokeSection from '../Common/StrokeSection/StrokeSection';
 import { UITools } from 'shared';
@@ -23,14 +24,18 @@ import { translationNameSpace } from '../Common/constants';
 
 const Mixed: FC = () => {
   const { t } = useTranslation();
-  const { count, sections } = useMixedPanel();
+  const { count, hasSection, sections, withResizeToFit } = useMixedPanel();
 
   return (
     <Fragment>
-      <MixedHeader count={count} />
-      {sections.includes('position') && <PositionSection />}
+      <MixedHeader count={count} withComponentButton={!hasSection} />
+      {sections.includes('position') && <PositionSection withRotation={sections.includes('rotation')} />}
       {sections.includes('layout') && (
-        <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
+        <UITools.Section
+          component={withResizeToFit ? <ResizeToFitButton /> : undefined}
+          e2eValue="layout"
+          label={t(`${translationNameSpace}.layoutSection.label`)}
+        >
           <ColumnDimensions />
           <ColumnSpacing />
         </UITools.Section>

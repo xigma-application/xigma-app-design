@@ -1,7 +1,7 @@
 // types
 import { NodeType } from 'types/design/enums';
 
-export type TPanelNodeType = NodeType.boolean | NodeType.frame | NodeType.group | NodeType.rectangle;
+export type TPanelNodeType = NodeType.boolean | NodeType.frame | NodeType.group | NodeType.rectangle | NodeType.section;
 
 export type TPanelSection =
   | 'appearance'
@@ -12,5 +12,6 @@ export type TPanelSection =
   | 'layout'
   | 'layoutGuide'
   | 'position'
+  | 'rotation'
   | 'selectionColors'
   | 'stroke';

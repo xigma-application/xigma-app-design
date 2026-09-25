@@ -6,6 +6,7 @@ import { selectAppearanceNodes, selectSelectedNodes } from 'store/design/selecto
 import { useAppSelector } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TPanelSection } from '../types';
 
 // utils
@@ -13,7 +14,9 @@ import { getNodesPanelSections } from '../utils/getNodesPanelSections';
 
 export type TUseMixedPanelResult = {
   count: number;
+  hasSection: boolean;
   sections: TPanelSection[];
+  withResizeToFit: boolean;
 };
 
 export const useMixedPanel = (): TUseMixedPanelResult => {
@@ -22,8 +25,12 @@ export const useMixedPanel = (): TUseMixedPanelResult => {
 
   return {
     count: selectedNodes.length,
+    hasSection: selectedNodes.some((node) => node?.type === NodeType.section),
     sections: getNodesPanelSections(selectedNodes, PANEL_SECTIONS).filter(
       (section) => !CHILD_PANEL_SECTIONS.includes(section) || childSections.includes(section),
+    ),
+    withResizeToFit: selectedNodes.some(
+      (node) => node?.type === NodeType.section || (node?.type === NodeType.frame && node.childIds.length > 0),
     ),
   };
 };

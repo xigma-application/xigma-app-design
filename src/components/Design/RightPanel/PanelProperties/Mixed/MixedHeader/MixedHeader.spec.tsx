@@ -59,12 +59,12 @@ const union: TBooleanNode = {
   y: 0,
 };
 
-const renderMixedHeader = (): ReturnType<typeof render> =>
+const renderMixedHeader = (withComponentButton?: boolean): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <CanvasRefsProvider>
         <TooltipProvider>
-          <MixedHeader count={2} />
+          <MixedHeader count={2} withComponentButton={withComponentButton} />
         </TooltipProvider>
       </CanvasRefsProvider>
     </Provider>,
@@ -113,6 +113,18 @@ describe('MixedHeader behaviors', () => {
     expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
     expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Boolean operations')).not.toBeInTheDocument();
+  });
+
+  it('should hide the component split button when asked to', () => {
+    // mock
+    store.dispatch(setSelection(['mixedHeaderFrame', 'mixedHeaderRoot']));
+
+    // before
+    renderMixedHeader(false);
+
+    // result
+    expect(screen.queryByLabelText('Component options')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Wrap in new section')).toBeInTheDocument();
   });
 
   it('should hide wrap in section for a frame and a rectangle from different parents', () => {

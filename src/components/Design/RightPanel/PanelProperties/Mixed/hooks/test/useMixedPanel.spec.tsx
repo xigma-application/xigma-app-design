@@ -115,6 +115,6 @@ describe('useMixedPanel', () => {
     const { result } = renderHook(() => useMixedPanel(), { wrapper });
 
     // result
-    expect(result.current.sections).toEqual(['position', 'layout', 'selectionColors', 'export']);
+    expect(result.current.sections).toEqual(['position', 'rotation', 'layout', 'selectionColors', 'export']);
   });
 });

@@ -15,6 +15,7 @@ describe('getNodesPanelSections', () => {
     // action / result
     expect(getNodesPanelSections([makeNode(NodeType.rectangle), makeNode(NodeType.boolean)], PANEL_SECTIONS)).toEqual([
       'position',
+      'rotation',
       'layout',
       'appearance',
       'fill',

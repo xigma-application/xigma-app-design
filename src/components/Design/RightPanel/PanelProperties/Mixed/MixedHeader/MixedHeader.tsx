@@ -19,9 +19,10 @@ import { translationNameSpace } from '../constants';
 
 export type TMixedHeaderProps = {
   count: number;
+  withComponentButton?: boolean;
 };
 
-const MixedHeader: FC<TMixedHeaderProps> = ({ count }) => {
+const MixedHeader: FC<TMixedHeaderProps> = ({ count, withComponentButton = true }) => {
   const { t } = useTranslation();
   const isFromOneParent = useIsSelectionFromOneParent();
   const isBooleanOperandSelection = useIsBooleanOperandSelection();
@@ -38,7 +39,7 @@ const MixedHeader: FC<TMixedHeaderProps> = ({ count }) => {
         ) : (
           <Fragment>
             <PanelHeaderMatchingLayersButton />
-            <PanelHeaderComponentSplitButton />
+            {withComponentButton && <PanelHeaderComponentSplitButton />}
             {isFromOneParent && <PanelHeaderWrapInSectionButton />}
           </Fragment>
         )

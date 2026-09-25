@@ -8,9 +8,10 @@ import { TPanelNodeType, TPanelSection } from './types';
 export const translationNameSpace = `${parentNameSpace}.mixed`;
 
 export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
-  [NodeType.boolean]: ['position', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'export'],
+  [NodeType.boolean]: ['position', 'rotation', 'layout', 'appearance', 'fill', 'stroke', 'effects', 'export'],
   [NodeType.frame]: [
     'position',
+    'rotation',
     'layout',
     'appearance',
     'cornerRadius',
@@ -21,8 +22,20 @@ export const PANEL_SECTIONS: Record<TPanelNodeType, TPanelSection[]> = {
     'layoutGuide',
     'export',
   ],
-  [NodeType.group]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'selectionColors', 'export'],
-  [NodeType.rectangle]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'export'],
+  [NodeType.group]: [
+    'position',
+    'rotation',
+    'layout',
+    'appearance',
+    'cornerRadius',
+    'fill',
+    'stroke',
+    'effects',
+    'selectionColors',
+    'export',
+  ],
+  [NodeType.rectangle]: ['position', 'rotation', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'effects', 'export'],
+  [NodeType.section]: ['position', 'layout', 'appearance', 'cornerRadius', 'fill', 'stroke', 'selectionColors', 'export'],
 };
 
 export const CHILD_PANEL_SECTIONS: TPanelSection[] = ['appearance', 'cornerRadius', 'fill', 'stroke', 'effects'];
