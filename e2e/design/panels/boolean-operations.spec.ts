@@ -417,3 +417,54 @@ test('an arrow joined into a Union with a rectangle keeps its arrowhead', async 
 
   expect(wing.equals(blank)).toBe(false);
 });
+
+test('a Union with a gradient stroke draws that stroke around its shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-gradient-stroke');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+
+  const setUnionStrokes = (strokes: unknown[]): Promise<void> =>
+    page.evaluate(async (nextStrokes) => {
+      const { store } = await import('/src/store/index.ts');
+      const { setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const union = Object.values(pages[activePageId].nodes).find((node) => node.type === 'boolean');
+
+      store.dispatch(updateNode({ changes: { strokes: nextStrokes, strokeWidth: 6 } as never, id: union?.id ?? '' }));
+      store.dispatch(setSelection([]));
+    }, strokes);
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+
+  const edgeArea = { height: 40, width: 8, x: 694, y: 240 };
+
+  await setUnionStrokes([]);
+  const withoutStroke = await page.screenshot({ clip: edgeArea });
+
+  await setUnionStrokes([
+    {
+      end: { x: 1, y: 0.5 },
+      opacity: 100,
+      start: { x: 0, y: 0.5 },
+      stops: [
+        { color: '#ff0000', opacity: 100, position: 0 },
+        { color: '#0000ff', opacity: 100, position: 1 },
+      ],
+      type: 'gradient-linear',
+    },
+  ]);
+  const withStroke = await page.screenshot({ clip: edgeArea });
+
+  expect(withStroke.equals(withoutStroke)).toBe(false);
+});

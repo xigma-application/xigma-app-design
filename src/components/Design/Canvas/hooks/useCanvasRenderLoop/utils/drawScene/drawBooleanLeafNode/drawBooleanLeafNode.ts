@@ -7,9 +7,8 @@ import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
 // utils
 import { drawBooleanEffects } from './drawBooleanEffects';
+import { drawBooleanStrokePaints } from './drawBooleanStrokePaints';
 import { drawBoxPaints } from '../drawBoxLeafNode/drawBoxPaints';
-import { drawVectorNode } from '../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorNode';
-import { getBooleanOutline } from './getBooleanOutline';
 import { getBooleanShape } from './getBooleanShape';
 import { getBooleanVectorNode } from 'utils/canvas/booleanOperation/getBooleanVectorNode';
 import { getFaceBufferCache } from 'utils/canvas/faceBufferCache/getFaceBufferCache';
@@ -44,7 +43,7 @@ export const drawBooleanLeafNode = (
       getFaceBufferCache(context.gl),
     );
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.innerShadow);
-    drawVectorNode(context, getBooleanOutline(vector));
+    drawBooleanStrokePaints(context, node, shape, opacity, nodesById, pathOutlineStyles, refs, editingPathId, patternSourceDepth);
     drawBooleanEffects(context, node, shape, opacity, refs, EffectType.noise);
   }
 };

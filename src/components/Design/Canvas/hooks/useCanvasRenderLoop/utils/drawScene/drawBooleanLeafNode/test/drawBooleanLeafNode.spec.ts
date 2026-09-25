@@ -23,8 +23,8 @@ vi.mock('../drawBooleanEffects', () => ({
 vi.mock('../../drawBoxLeafNode/drawBoxPaints', () => ({
   drawBoxPaints: (...args: unknown[]): number => drawBoxPaintsMock(...args),
 }));
-vi.mock('../../drawVectorNodeOrTextPathGuide/drawSceneVectorNode/drawVectorNode', () => ({
-  drawVectorNode: (_context: unknown, outline: TVectorNode): number => calls.push(`stroke:${outline.filledFaceKeys.length}`),
+vi.mock('../drawBooleanStrokePaints', () => ({
+  drawBooleanStrokePaints: (): number => calls.push('stroke'),
 }));
 vi.mock('utils/canvas/faceBufferCache/getFaceBufferCache', () => ({ getFaceBufferCache: (): unknown => ({ tag: 'faces' }) }));
 
@@ -54,7 +54,7 @@ describe('drawBooleanLeafNode', () => {
     drawBooleanLeafNode({ gl: {} } as TDrawSceneContext, node, 1, {}, new Map(), createCanvasRefs(), null, 0);
 
     // result
-    expect(calls).toEqual([EffectType.dropShadow, 'fill:11', EffectType.innerShadow, 'stroke:0', EffectType.noise]);
+    expect(calls).toEqual([EffectType.dropShadow, 'fill:11', EffectType.innerShadow, 'stroke', EffectType.noise]);
   });
 
   it('should paint the fills over the shape polygons within its unrotated bounds with the node opacity', () => {
