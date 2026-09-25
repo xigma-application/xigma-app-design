@@ -69,7 +69,7 @@ test('"Use as mask" wraps two selected rectangles in a "Mask group", marking the
     const { activePageId, pages } = store.getState().design;
     const [idA] = pages[activePageId].rootOrder;
 
-    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: idA }));
+    store.dispatch(updateNode({ changes: { fills: [{ color: '#FF0000', opacity: 100, type: 'solid' }] }, id: idA }));
   });
 
   await designPage.drawRectangle(750, 350, 850, 450); // B — drawn second (on top), becomes the mask
@@ -266,7 +266,7 @@ test('filling a mask vector reveals its underlying content everywhere the fill n
     const { activePageId, pages } = store.getState().design;
     const [idA] = pages[activePageId].rootOrder;
 
-    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: idA }));
+    store.dispatch(updateNode({ changes: { fills: [{ color: '#FF0000', opacity: 100, type: 'solid' }] }, id: idA }));
   });
 
   // a right triangle entirely inside the rectangle's bounds: (750,350) -> (850,350) -> (750,450),
@@ -388,7 +388,7 @@ test('"Remove mask" restores full visibility while the group itself stays intact
     const { activePageId, pages } = store.getState().design;
     const [idA] = pages[activePageId].rootOrder;
 
-    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: idA }));
+    store.dispatch(updateNode({ changes: { fills: [{ color: '#FF0000', opacity: 100, type: 'solid' }] }, id: idA }));
   });
   await designPage.drawRectangle(750, 350, 850, 450);
   await designPage.click(720, 320, { shift: true });
@@ -443,7 +443,7 @@ test('a mask elsewhere in the scene must not blank out content nested inside a s
     const [sectionId, rectId] = pages[activePageId].rootOrder;
 
     store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: sectionId }));
-    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: rectId }));
+    store.dispatch(updateNode({ changes: { fills: [{ color: '#FF0000', opacity: 100, type: 'solid' }] }, id: rectId }));
   });
 
   await designPage.click(1500, 700); // deselect

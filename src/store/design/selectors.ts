@@ -31,6 +31,7 @@ import { TGuide, TGuideLine } from 'types/design/guides/types';
 import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
+import { canConvertToSection } from './utils/nodeHierarchy/canConvertToSection';
 import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchingLayers';
 import { canWrapInSection } from './utils/handleWrapInSection/canWrapInSection';
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
@@ -190,6 +191,8 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
 export const selectAppearanceNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
   expandGroupNodes(selectedNodes.filter(Boolean), nodes),
 );
+
+export const selectCanConvertToSection = createSelector([selectSelectedNodes, selectNodes], canConvertToSection);
 
 export const selectCanWrapInSection = createSelector([selectSelectedNodes, selectNodes], canWrapInSection);
 

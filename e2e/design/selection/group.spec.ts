@@ -718,7 +718,7 @@ test('Ctrl+clicking a group row chevron in the Layers panel expands or collapses
 
   const layersTree = page.locator('[class*="LayersTree"]').first();
   const rows = layersTree.locator('[class*="Tree__row_"]');
-  const chevronOf = (rowIndex: number): Locator => rows.nth(rowIndex).locator('[class*="TreeItem__toggleButton"]');
+  const chevronOf = (rowIndex: number): Locator => rows.nth(rowIndex).locator('[class*="TreeItem__toggle-button"]');
 
   // only the outermost group row shows, still collapsed
   await expect(rows).toHaveCount(1);

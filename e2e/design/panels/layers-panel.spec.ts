@@ -76,8 +76,8 @@ test('the collapse-all button and Alt+L both fold every expanded group in the La
   await expect(collapseAllButton).toHaveCount(0);
 
   // expand both nested groups
-  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click();
-  await rows.nth(1).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.nth(0).locator('[class*="TreeItem__toggle-button"]').click();
+  await rows.nth(1).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(4); // g2, g1, A, B
 
   // the collapse-all button appears; clicking it folds everything back
@@ -87,8 +87,8 @@ test('the collapse-all button and Alt+L both fold every expanded group in the La
   await expect(collapseAllButton).toHaveCount(0);
 
   // re-expand, then collapse everything again with Alt+L while hovering the panel
-  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click();
-  await rows.nth(1).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.nth(0).locator('[class*="TreeItem__toggle-button"]').click();
+  await rows.nth(1).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(4);
 
   await layersPanel.hover();
@@ -218,7 +218,7 @@ test('Ctrl+D on a nested layer keeps the duplicate nested under the same parent,
   const layersTree = page.locator('[class*="LayersTree"]').first();
   const rows = layersTree.locator('[class*="Tree__row_"]');
 
-  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click(); // expand the group
+  await rows.nth(0).locator('[class*="TreeItem__toggle-button"]').click(); // expand the group
   await expect(rows).toHaveCount(3); // group, child, child
 
   await rows.nth(1).click(); // select the first child
@@ -270,18 +270,20 @@ test('Ctrl+click selecting a nested child directly on canvas auto-expands its pa
 
   await designPage.drawFrame(700, 100, 900, 300);
   await designPage.click(1500, 700);
-  await designPage.drawRectangle(750, 150, 800, 200);
+  await designPage.drawRectangle(1050, 150, 1100, 200); // drawn outside the frame, then moved into it below
   await designPage.click(1500, 700);
 
   const [, rectangleId] = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { moveNodes } = await import('/src/store/design/slice.ts');
+    const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
     const { activePageId, pages } = store.getState().design;
     const { nodes, rootOrder } = pages[activePageId];
     const frameId = Object.keys(nodes).find((id) => nodes[id].type === 'frame')!;
     const rectangleId = rootOrder.find((id) => id !== frameId)!;
+    const { x } = nodes[rectangleId] as { x: number };
 
     store.dispatch(moveNodes({ nodeIds: [rectangleId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(updateNode({ changes: { x: x - 300 }, id: rectangleId }));
 
     return [frameId, rectangleId];
   });
@@ -319,9 +321,9 @@ test('Shift-clicking between two nested rows range-selects them, and from a nest
 
   await designPage.drawFrame(700, 100, 900, 300); // Frame (1)
   await designPage.click(1500, 700);
-  await designPage.drawRectangle(720, 120, 760, 160); // B — Rectangle (1)
+  await designPage.drawRectangle(1020, 120, 1060, 160); // B — Rectangle (1), drawn outside the frame
   await designPage.click(1500, 700);
-  await designPage.drawRectangle(780, 120, 820, 160); // C — Rectangle (2)
+  await designPage.drawRectangle(1080, 120, 1120, 160); // C — Rectangle (2), drawn outside the frame
   await designPage.click(1500, 700);
   await designPage.drawFrame(700, 350, 900, 550); // Frame (2) — a second, shallower (top-level) sibling
   await designPage.click(1500, 700);
@@ -350,7 +352,7 @@ test('Shift-clicking between two nested rows range-selects them, and from a nest
   // expand "Frame (1)" (drawn first) to reveal its nested children
   await rows
     .filter({ hasText: /^Frame \(1\)$/ })
-    .locator('[class*="TreeItem__toggleButton"]')
+    .locator('[class*="TreeItem__toggle-button"]')
     .click();
   await expect(rows).toHaveCount(4); // Frame (1), B, C, Frame (2)
 

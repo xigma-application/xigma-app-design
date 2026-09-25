@@ -53,7 +53,7 @@ test('dropping a layer onto the middle of a collapsed group nests it as the firs
   await expect(rows).toHaveCount(1);
 
   // expanding the group reveals C sitting above the original members
-  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.nth(0).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(4);
 });
 
@@ -79,7 +79,7 @@ test('dropping a layer onto the middle of an already-expanded group also nests i
   // rows become [C, group, B, A]
   const rectC = rows.nth(0);
 
-  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(4);
 
   await dragRowOnto(rectC, rows.filter({ hasText: 'Group' }));
@@ -87,7 +87,7 @@ test('dropping a layer onto the middle of an already-expanded group also nests i
   // the group still holds 4 rows (group + 3 children) and C is no longer a root row —
   // collapsing the group now folds C away too
   await expect(rows).toHaveCount(4);
-  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(1);
 });
 
@@ -122,7 +122,7 @@ test('holding a drag over a collapsed group auto-expands it after the spring-loa
   // releasing right there still drops the layer into the now-open group
   await page.mouse.up();
   await expect(rows).toHaveCount(4);
-  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggle-button"]').click();
   await expect(rows).toHaveCount(1);
 });
 
@@ -157,7 +157,7 @@ test('dragging a Layers row onto a sibling row reorders them, using the auto-lay
 
   // expand the frame row if the drag-in didn't already reveal its children
   if ((await rows.count()) === 1) {
-    await rows.filter({ hasText: 'Frame' }).locator('[class*="TreeItem__toggleButton"]').click();
+    await rows.filter({ hasText: 'Frame' }).locator('[class*="TreeItem__toggle-button"]').click();
   }
 
   await expect(rows).toHaveCount(3);

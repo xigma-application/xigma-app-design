@@ -12,6 +12,7 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 // utils
+import { canHoldSection } from 'store/design/utils/nodeHierarchy/canHoldSection';
 import { convertFrameToSection } from 'utils/canvas/convertFrameSection/convertFrameToSection';
 
 export const handleConvertSelectionToSection = (dispatch: AppDispatch): void => {
@@ -19,7 +20,7 @@ export const handleConvertSelectionToSection = (dispatch: AppDispatch): void => 
   const nodes = selectNodes(state);
   const frameNodes = selectSelectedIds(state)
     .map((id) => nodes[id])
-    .filter((node): node is TFrameNode => node?.type === NodeType.frame);
+    .filter((node): node is TFrameNode => node?.type === NodeType.frame && canHoldSection(node.parentId, nodes));
 
   if (frameNodes.length > 0) {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));

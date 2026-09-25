@@ -8,6 +8,7 @@ import { BooleanOperation, LayoutMode, NodeType } from 'types/design/enums';
 import { TGroupNode, TSceneNode } from 'types/design/types';
 
 // utils
+import { canHoldSection } from 'store/design/utils/nodeHierarchy/canHoldSection';
 import { commitFlowChange } from '../../Frame/LayoutSection/ColumnFlow/hooks/utils/commitFlowChange';
 import { commitOnGroups } from './utils/commitOnGroups';
 import { convertGroupToFrame } from 'utils/canvas/convertFrameSection/convertGroupToFrame';
@@ -59,6 +60,11 @@ export const useConvertGroup = (): TUseConvertGroupResult => {
         replaceGroup(convertGroupToFrame(group));
         dispatch(updateNode({ changes: { height, width }, id: group.id }));
       }),
-    onConvertToSection: (): void => commitOnGroups(dispatch, groups, (group) => replaceGroup(convertGroupToSection(group))),
+    onConvertToSection: (): void =>
+      commitOnGroups(
+        dispatch,
+        groups.filter((group) => canHoldSection(group.parentId, selectNodes(store.getState()))),
+        (group) => replaceGroup(convertGroupToSection(group)),
+      ),
   };
 };

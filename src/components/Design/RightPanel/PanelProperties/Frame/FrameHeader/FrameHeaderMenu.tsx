@@ -14,7 +14,7 @@ import { translationNameSpace } from './constants';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectCanConvertToSection, selectSelectedIds } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -27,6 +27,7 @@ const FrameHeaderMenu: FC = () => {
   const dispatch = useAppDispatch();
   const selectedIds = useAppSelector(selectSelectedIds);
   const onConvertToSection = useConvertSelectionToSection();
+  const canConvertToSection = useAppSelector(selectCanConvertToSection);
 
   const handleSelectPreset = (width: number, height: number) => (): void => {
     dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
@@ -36,7 +37,7 @@ const FrameHeaderMenu: FC = () => {
 
   return (
     <Fragment>
-      <PopoverItem label={t(`${translationNameSpace}.typeMenu.section`)} onClick={onConvertToSection} />
+      <PopoverItem disabled={!canConvertToSection} label={t(`${translationNameSpace}.typeMenu.section`)} onClick={onConvertToSection} />
       <PopoverItem label={t(`${translationNameSpace}.label`)} selected />
       <PopoverItem disabled label={t(`${translationNameSpace}.typeMenu.group`)} />
       {FRAME_PRESET_GROUPS.map((group) => (

@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { useConvertGroup } from '../useConvertGroup';
 
 // store
-import { addNodes, groupNodes, setSelection } from 'store/design/slice';
+import { addNodes, groupNodes, moveNodes, setSelection } from 'store/design/slice';
 import { selectNodes, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -179,5 +179,40 @@ describe('useConvertGroup', () => {
     // result
     const nodes = selectNodes(store.getState());
     expect(groupIds.map((id) => nodes[id].type)).toEqual([NodeType.frame, NodeType.frame]);
+  });
+
+  it('should keep a group inside a frame as a group when Section is picked', () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          {
+            childIds: [],
+            clipContent: true,
+            fills: [],
+            height: 400,
+            id: 'hostFrame',
+            name: 'Frame',
+            parentId: null,
+            rotation: 0,
+            type: NodeType.frame,
+            width: 400,
+            x: 0,
+            y: 0,
+          },
+        ],
+        rootIds: ['hostFrame'],
+      }),
+    );
+    const groupId = addGroup('nested');
+    store.dispatch(moveNodes({ nodeIds: [groupId], targetIndex: 0, targetParentId: 'hostFrame' }));
+    store.dispatch(setSelection([groupId]));
+    const { result } = renderHook(() => useConvertGroup(), { wrapper });
+
+    // action
+    act(() => result.current.onConvertToSection());
+
+    // result
+    expect(selectNodes(store.getState())[groupId].type).toBe(NodeType.group);
   });
 });

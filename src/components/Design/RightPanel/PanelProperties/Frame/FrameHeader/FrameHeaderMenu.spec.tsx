@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import FrameHeaderMenu from './FrameHeaderMenu';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
@@ -47,11 +47,17 @@ const addFrameNode = (): string => {
 
 describe('FrameHeaderMenu snapshots', () => {
   it('should render the type switcher and the size preset groups', () => {
+    // mock
+    store.dispatch(setSelection([addFrameNode()]));
+
     // before
     const { asFragment } = renderFrameHeaderMenu();
 
     // result
     expect(asFragment()).toMatchSnapshot();
+
+    // cleanup
+    store.dispatch(setSelection([]));
   });
 });
 
@@ -144,6 +150,26 @@ describe('FrameHeaderMenu behaviors', () => {
     // result
     const node = selectActivePage(store.getState()).nodes[frameId];
     expect(node.type).toBe(NodeType.section);
+
+    // cleanup
+    store.dispatch(setSelection([]));
+  });
+
+  it('should disable Section for a frame inside a frame and keep it a frame when clicked', () => {
+    // mock
+    const outerId = addFrameNode();
+    const innerId = addFrameNode();
+    store.dispatch(moveNodes({ nodeIds: [innerId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([innerId]));
+
+    // before
+    renderFrameHeaderMenu();
+
+    // action
+    fireEvent.click(screen.getByText('Section'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[innerId].type).toBe(NodeType.frame);
 
     // cleanup
     store.dispatch(setSelection([]));

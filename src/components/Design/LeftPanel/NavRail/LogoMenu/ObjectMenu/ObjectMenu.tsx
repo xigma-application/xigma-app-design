@@ -56,7 +56,7 @@ import {
 } from './constants';
 
 // store
-import { selectCanWrapInSection, selectNodes, selectSelectedIds } from 'store/design/selectors';
+import { selectCanConvertToSection, selectCanWrapInSection, selectNodes, selectSelectedIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -72,6 +72,7 @@ const ObjectMenu: FC = () => {
   const everySelectedIsFrame = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.frame);
   const everySelectedIsSection = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.section);
   const canWrapInSection = useAppSelector(selectCanWrapInSection);
+  const canConvertToSection = useAppSelector(selectCanConvertToSection);
   const onWrapInSection = useWrapSelectionInSection();
   const {
     onBringToFront,
@@ -113,7 +114,7 @@ const ObjectMenu: FC = () => {
         withCheck={false}
       />
       <MenuItem
-        disabled={!everySelectedIsFrame}
+        disabled={!everySelectedIsFrame || !canConvertToSection}
         label={t(OBJECT_MENU_CONVERT_TO_SECTION_KEY)}
         onClick={onConvertToSection}
         withCheck={false}

@@ -55,6 +55,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { canHoldSection } from 'store/design/utils/nodeHierarchy/canHoldSection';
 import { getIsMaskChild } from 'store/design/utils/getIsMaskChild';
 import { isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 
@@ -120,6 +121,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const isFrame = node.type === NodeType.frame;
   const isGroup = node.type === NodeType.group;
   const isSection = node.type === NodeType.section;
+  const canConvertToSection = canHoldSection(node.parentId, nodes);
   const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
   const canFlatten = isConvertibleToVectorNode(node) || node.type === NodeType.text;
   const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
@@ -168,7 +170,12 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       />
       <MenuSeparator />
       {(isFrame || isGroup) && (
-        <MenuItem disabled={!isFrame} label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} onClick={onConvertToSection} withCheck={false} />
+        <MenuItem
+          disabled={!isFrame || !canConvertToSection}
+          label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)}
+          onClick={onConvertToSection}
+          withCheck={false}
+        />
       )}
       {isSection && <MenuItem label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />}
       {!isSection && (

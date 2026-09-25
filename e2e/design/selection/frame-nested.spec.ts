@@ -48,6 +48,14 @@ const dragRowOnto = async (from: Locator, to: Locator): Promise<void> => {
   await page.mouse.up();
 };
 
+const expandRow = async (row: Locator): Promise<void> => {
+  const expandButton = row.getByRole('button', { name: 'Expand layer' });
+
+  if ((await expandButton.count()) > 0) {
+    await expandButton.click();
+  }
+};
+
 const buildNestedFrames = async (designPage: DesignPage, page: Page): Promise<void> => {
   await designPage.drawFrame(OUTER.x1, OUTER.y1, OUTER.x2, OUTER.y2);
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
@@ -59,17 +67,13 @@ const buildNestedFrames = async (designPage: DesignPage, page: Page): Promise<vo
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = page.locator('[class*="LayersTree"]').first().locator('[class*="Tree__row_"]');
-  const outerRow = rows.filter({ hasText: 'Frame (1)' });
-  const middleRow = rows.filter({ hasText: 'Frame (2)' });
-  const innerRow = rows.filter({ hasText: 'Frame (3)' });
-  const rectRow = rows.filter({ hasText: 'Rectangle' });
 
-  await dragRowOnto(middleRow, outerRow);
-  await outerRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal Frame 2's row
-  await dragRowOnto(innerRow, middleRow);
-  await middleRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal Frame 3's row
-  await dragRowOnto(rectRow, innerRow);
-  await innerRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal Rectangle's row
+  // each frame is drawn inside the previous one, so drawing already nests the whole chain — only the
+  // collapsed rows need expanding to reveal Frame 2, Frame 3 and the Rectangle
+  await expandRow(rows.filter({ hasText: 'Frame (1)' }));
+  await expandRow(rows.filter({ hasText: 'Frame (2)' }));
+  await expandRow(rows.filter({ hasText: 'Frame (3)' }));
+  await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(1);
 };
 
 test('a plain click reaches a frame nested any number of levels deep, but never its actual content', async ({ page }) => {

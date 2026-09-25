@@ -47,7 +47,7 @@ const buildSectionWithRect = async (designPage: DesignPage, page: Page): Promise
   const sectionRow = rows.filter({ hasText: 'Section (1)' });
 
   await dragRowOnto(rows.filter({ hasText: 'Rectangle' }), sectionRow);
-  await sectionRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal the nested rectangle's row
+  await sectionRow.locator('[class*="TreeItem__toggle-button"]').click(); // reveal the nested rectangle's row
 };
 
 test('a plain click always selects the section itself, even over its own content — a section is never click-through', async ({ page }) => {
@@ -128,7 +128,7 @@ test('a frame nested directly inside a section stays click-through, just like a 
   const rectRow = rows.filter({ hasText: 'Rectangle' });
 
   await dragRowOnto(rectRow, frameRow); // rectangle → frame
-  await frameRow.locator('[class*="TreeItem__toggleButton"]').click(); // reveal the frame's child again
+  await frameRow.locator('[class*="TreeItem__toggle-button"]').click(); // reveal the frame's child again
   await dragRowOnto(frameRow, sectionRow); // frame (now non-empty) → section
 
   // a plain click on the rectangle inside the frame reaches it directly, no Control needed — the
@@ -142,10 +142,10 @@ test('a frame nested directly inside a section stays click-through, just like a 
   // frame, which is itself now empty (its rectangle is gone) — so the frame row shows no expand toggle
   await expect(rows).toHaveCount(2);
   await expect(rows.filter({ hasText: 'Rectangle' })).toHaveCount(0);
-  await expect(frameRow.locator('[class*="TreeItem__toggleButton"]')).toHaveCount(0);
+  await expect(frameRow.locator('[class*="TreeItem__toggle-button"]')).toHaveCount(0);
 });
 
-test('a section can never be dropped into a frame or into another section via the Layers panel', async ({ page }) => {
+test('via the Layers panel a section is never dropped into a frame but does nest into another section', async ({ page }) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-section-nested-drop-rejected');
@@ -168,12 +168,12 @@ test('a section can never be dropped into a frame or into another section via th
   // attempting to nest a section into a frame changes nothing — no row collapses into the frame
   await dragRowOnto(firstSectionRow, frameRow);
   await expect(rows).toHaveCount(3);
-  await expect(frameRow.locator('[class*="TreeItem__toggleButton"]')).toHaveCount(0);
+  await expect(frameRow.locator('[class*="TreeItem__toggle-button"]')).toHaveCount(0);
 
-  // attempting to nest a section into another section also changes nothing
+  // a section dropped onto another section nests inside it
   await dragRowOnto(firstSectionRow, secondSectionRow);
-  await expect(rows).toHaveCount(3);
-  await expect(secondSectionRow.locator('[class*="TreeItem__toggleButton"]')).toHaveCount(0);
+  await expect(rows).toHaveCount(2);
+  await expect(secondSectionRow.locator('[class*="TreeItem__toggle-button"]')).toHaveCount(1);
 });
 
 test('dragging a shape on the canvas onto a section reparents it into the section, exactly like dropping onto a frame', async ({

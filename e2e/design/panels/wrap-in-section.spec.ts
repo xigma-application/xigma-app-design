@@ -195,3 +195,25 @@ test('Wrap in new section on layers inside a section nests the new section in it
 
   expect(wrapped).toEqual({ childIds: ['a', 'b'], height: 100, parentId: 'outer', type: 'section', width: 300, x: 575, y: 275 });
 });
+
+test('a frame inside a frame gets a disabled Section option in its header menu and stays a frame when it is clicked', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-in-frame-section-option');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(600, 150, 1100, 450);
+  await designPage.drawFrame(700, 200, 800, 300);
+
+  await page.getByLabel('Element type', { exact: true }).click();
+  await page.getByText('Section', { exact: true }).click();
+
+  const types = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return Object.values(pages[activePageId].nodes).map((node) => node.type);
+  });
+
+  expect(types).toEqual(['frame', 'frame']);
+});

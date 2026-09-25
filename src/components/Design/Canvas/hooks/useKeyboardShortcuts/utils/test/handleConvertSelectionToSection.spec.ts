@@ -117,6 +117,20 @@ describe('handleConvertSelectionToSection', () => {
     expect(page.rootOrder).not.toContain(childId);
   });
 
+  it('should leave a frame inside a frame as a frame, since a section cannot sit in a frame', () => {
+    // mock
+    const outerId = addFrameNode();
+    const innerId = addFrameNode();
+    store.dispatch(moveNodes({ nodeIds: [innerId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([innerId]));
+
+    // action
+    handleConvertSelectionToSection(store.dispatch);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[innerId].type).toBe(NodeType.frame);
+  });
+
   it('should be undoable as a single step even though it converts multiple frames', () => {
     // mock
     const frameA = addFrameNode();
