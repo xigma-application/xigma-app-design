@@ -101,3 +101,18 @@ its thin centre.
       live preview
 - [x] the shape made by Offset keeps the line's stroke, also after you draw more onto it
 - [x] a Union's own Dynamic and Brush stroke runs around every part of its shape
+
+## Stage 14 — Ellipse
+
+An ellipse has its own panel like a rectangle: Position, Layout, Appearance, Fill, Stroke, Effects
+and Export. Arc in Appearance sets Start, Sweep and Ratio in one joined field, just like the handles
+on the canvas. Fills, strokes and effects work the same as on a rectangle: several fills, gradients,
+images, shadows, blur and noise.
+
+- [x] Corner radius rounds the corners of a cut ellipse; it is off while the ellipse is not cut
+- [x] the stroke follows the real shape, including a cut arc, a ring and rounded corners, with no
+      gaps where the arc meets the cut
+- [x] Position puts the stroke inside, in the centre or outside; dashed, profile, Dynamic and Brush
+      strokes run around the shape
+- [x] ellipses show Fill and Stroke when selected together with other layers
+- [x] Flatten and Edit object keep the stroke of a rectangle or ellipse, including its Position
