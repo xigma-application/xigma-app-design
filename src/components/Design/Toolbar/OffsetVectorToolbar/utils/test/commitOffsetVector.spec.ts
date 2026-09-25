@@ -68,4 +68,34 @@ describe('commitOffsetVector', () => {
     // result
     expect(selectActivePage(store.getState()).nodes).toBe(before);
   });
+
+  it('should turn a polygon into its filled offset vector', () => {
+    // mock
+    const { payload } = store.dispatch(
+      addNode({
+        fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+        flipX: false,
+        flipY: false,
+        height: 50,
+        name: 'Polygon',
+        parentId: null,
+        rotation: 0,
+        sides: 3,
+        type: NodeType.polygon,
+        width: 50,
+        x: 0,
+        y: 0,
+      }),
+    );
+    store.dispatch(setOffsetVector({ distance: 5, join: StrokeJoin.round, nodeId: payload.id }));
+
+    // action
+    commitOffsetVector(store.dispatch);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[payload.id]).toMatchObject({
+      defaultFill: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+      type: NodeType.vector,
+    });
+  });
 });

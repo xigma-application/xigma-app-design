@@ -79,3 +79,48 @@ test('a selected polygon shows the Polygon panel whose Count and Corner radius r
   await designPage.click(1500, 900);
   await expect.poll(async () => (await page.screenshot({ clip: polygonArea })).equals(triangle)).toBe(false);
 });
+
+test('Offset vector previews the filled offset shape around a polygon and turns it into that vector on confirm', async ({ page }) => {
+  const designPage = new DesignPage(page);
+  const belowPolygon = { height: 4, width: 20, x: 890, y: 466 };
+
+  await designPage.goto('e2e-test-polygon-offset-vector');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawPolygon(800, 300, 1000, 500);
+
+  const blank = await page.screenshot({ clip: belowPolygon });
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+
+  const distance = page.getByRole('textbox', { name: 'Offset distance' });
+
+  await distance.fill('30');
+  await distance.press('Tab');
+
+  await expect(page.getByText('Offset', { exact: true })).toBeVisible();
+  await expect.poll(async () => (await page.screenshot({ clip: belowPolygon })).equals(blank)).toBe(false);
+
+  await page.getByLabel('Confirm').click();
+  await expect(page.getByText('Offset', { exact: true })).toHaveCount(0);
+
+  const vector = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return nodes[rootOrder[rootOrder.length - 1]] as unknown as {
+      defaultFill: unknown[];
+      type: string;
+      vertices: Record<string, { y: number }>;
+    };
+  });
+  const ys = Object.values(vector.vertices).map(({ y }) => y);
+
+  expect(vector.type).toBe('vector');
+  expect(vector.defaultFill).toHaveLength(1);
+  expect(Math.max(...ys)).toBeCloseTo(480, 0);
+
+  await designPage.click(1500, 900);
+  await expect.poll(async () => (await page.screenshot({ clip: belowPolygon })).equals(blank)).toBe(false);
+});

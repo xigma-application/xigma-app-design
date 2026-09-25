@@ -1,7 +1,7 @@
 // types
-import { TLineNode, TSceneNode } from 'types/design/types';
+import { NodeType } from 'types/design/enums';
+import { TOffsetVectorNode } from './types';
+import { TSceneNode } from 'types/design/types';
 
-// utils
-import { isLineNode } from '../line/isLineNode';
-
-export const isOffsetVectorNode = (node: TSceneNode | undefined): node is TLineNode => isLineNode(node);
+export const isOffsetVectorNode = (node: TSceneNode | undefined): node is TOffsetVectorNode =>
+  node?.type === NodeType.line || node?.type === NodeType.polygon;

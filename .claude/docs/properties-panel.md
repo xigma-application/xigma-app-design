@@ -1016,6 +1016,13 @@ each polygon through `usePolygonCount`) → `FillSection` → `FillSection prope
 ellipse, so the shared hooks accept it through `isStyledNode`, and it is a Mixed panel type with the same
 sections. `Common/types.ts` holds `TShapeNode` / `TShapeNodeType` (ellipse or polygon) used by the shape
 corner radius and stroke settings.
+Offset vector works for polygons too (`isOffsetVectorNode` = line or polygon): `utils/canvas/offsetVector/getOffsetVector`
+picks `getLineOffsetVector` or `getPolygonOffsetVector` (cached per node, distance and join) — the polygon's sharp
+world corners pushed out by the distance (`getOffsetPolygon`, mitred) and rounded by the distance for Round, or by
+corner radius + distance when the polygon is rounded; the vector keeps the polygon fills
+(`getClosedLoopPaintFillData`) and its stroke with Position. The preview draws that filled vector
+(`drawVectorNode`) under the magenta outline; ✓ / Enter replaces the polygon with it in one undo step. The toolbar
+distance and corner handlers live in `OffsetVectorToolbar/utils` (`changeOffsetVectorDistance`, `changeOffsetVectorJoin`).
 
 ## `ImageCrop/`
 

@@ -10,8 +10,10 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { StrokeJoin } from 'types/design/enums';
 
 // utils
+import { changeOffsetVectorDistance } from '../utils/changeOffsetVectorDistance';
+import { changeOffsetVectorJoin } from '../utils/changeOffsetVectorJoin';
 import { commitOffsetVector } from '../utils/commitOffsetVector';
-import { isLineNode } from 'utils/canvas/line/isLineNode';
+import { isOffsetVectorNode } from 'utils/canvas/offsetVector/isOffsetVectorNode';
 
 export type TUseOffsetVectorToolbarResult = {
   distance: number;
@@ -30,19 +32,11 @@ export const useOffsetVectorToolbar = (): TUseOffsetVectorToolbarResult => {
 
   return {
     distance: offsetVector?.distance ?? OFFSET_VECTOR_DEFAULT_DISTANCE,
-    isVisible: offsetVector !== null && isLineNode(nodes[offsetVector.nodeId]),
+    isVisible: offsetVector !== null && isOffsetVectorNode(nodes[offsetVector.nodeId]),
     join: offsetVector?.join ?? StrokeJoin.miter,
     onCancel: () => dispatch(setOffsetVector(null)),
     onConfirm: () => commitOffsetVector(dispatch),
-    onDistanceChange: (distance) => {
-      if (offsetVector) {
-        dispatch(setOffsetVector({ ...offsetVector, distance: Math.max(0, distance) }));
-      }
-    },
-    onJoinChange: (join) => {
-      if (offsetVector) {
-        dispatch(setOffsetVector({ ...offsetVector, join: join === StrokeJoin.round ? StrokeJoin.round : StrokeJoin.miter }));
-      }
-    },
+    onDistanceChange: (distance) => changeOffsetVectorDistance(dispatch, offsetVector, distance),
+    onJoinChange: (join) => changeOffsetVectorJoin(dispatch, offsetVector, join),
   };
 };

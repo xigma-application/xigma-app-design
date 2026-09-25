@@ -67,7 +67,9 @@ describe('PanelHeaderShapeMoreActionsButton behaviors', () => {
     // mock
     store.dispatch(
       addNodes({
-        nodes: [{ height: 0, id: 'menuLine', name: 'Line', parentId: null, rotation: 0, strokes: [], type: NodeType.line, width: 10, x: 0, y: 0 }],
+        nodes: [
+          { height: 0, id: 'menuLine', name: 'Line', parentId: null, rotation: 0, strokes: [], type: NodeType.line, width: 10, x: 0, y: 0 },
+        ],
         rootIds: ['menuLine'],
       }),
     );
