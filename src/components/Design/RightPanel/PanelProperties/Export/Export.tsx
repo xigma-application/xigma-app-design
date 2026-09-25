@@ -42,6 +42,10 @@ const Export: FC = () => {
   const isExporting = useAppSelector(selectIsExporting);
   const handleExportClick = useHandleExportClick(exportTargets, settings, zipName);
 
+  if (exportTargets.length === 0) {
+    return null;
+  }
+
   return (
     <UITools.Section
       addAriaLabel={t(`${translationNameSpace}.addAriaLabel`)}

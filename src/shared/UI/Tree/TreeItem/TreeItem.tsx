@@ -12,6 +12,7 @@ import { useRenameTreeItem } from './hooks/useRenameTreeItem';
 import { useSelectTreeItem } from './hooks/useSelectTreeItem/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
 import { useTreeItemContextMenu } from './hooks/useTreeItemContextMenu';
+import { useTreeItemHover } from './hooks/useTreeItemHover';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 import { useZoomToTreeItem } from './hooks/useZoomToTreeItem';
 
@@ -55,13 +56,21 @@ export const TreeItem: FC<TTreeItemProps> = ({
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const handleZoomToItem = useZoomToTreeItem(node.id);
+  const { onMouseEnter, onMouseLeave } = useTreeItemHover(node.id);
   const isExpandable = isContainerNode(node) && node.childIds.length > 0;
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
   const { isEditing, isRenameRequested, onEditingChange, onRenameRequested } = useTreeItemNameEditing();
   const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu(node.id);
 
   return (
-    <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect} onContextMenu={onContextMenu}>
+    <div
+      aria-selected={isSelected}
+      className={styles.TreeItem}
+      onClick={handleSelect}
+      onContextMenu={onContextMenu}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       <div
         className={cx(styles.TreeItem__content, isEditing && styles['TreeItem__content--editing'])}
         style={{ marginLeft: depth * TREE_ITEM_INDENT_PX }}

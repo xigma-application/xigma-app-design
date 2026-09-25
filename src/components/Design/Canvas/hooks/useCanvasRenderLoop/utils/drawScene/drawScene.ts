@@ -171,7 +171,7 @@ export const drawScene = (
   drawImageEditorCropOverflowPreview(ctx, nodesById, imageEditor);
   drawImageEditorTileOverflowPreview(ctx, nodesById, imageEditor);
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
-  drawSliceOutlines(ctx, sceneNodes, selectedIds);
+  drawSliceOutlines(ctx, sceneNodes, selectedIds, refs);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSectionCaptureOutlines(ctx, refs, vectorEditingNodeIds, nodesById);

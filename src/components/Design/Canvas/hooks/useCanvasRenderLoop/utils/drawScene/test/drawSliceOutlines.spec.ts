@@ -1,3 +1,6 @@
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
 // others
 import {
   SLICE_OUTLINE_DASH_GAP_PX,
@@ -48,7 +51,7 @@ describe('drawSliceOutlines', () => {
 
   it('should draw a dark dashed outline around every slice and skip other layers', () => {
     // before
-    drawSliceOutlines(context, [slice, rectangle], new Set());
+    drawSliceOutlines(context, [slice, rectangle], new Set(), createCanvasRefs());
 
     // result
     expect(drawDashedRectOutline).toHaveBeenCalledTimes(1);
@@ -72,7 +75,7 @@ describe('drawSliceOutlines', () => {
     const rotated = { ...slice, height: 10, rotation: 90, width: 30 } as TSceneNode;
 
     // before
-    drawSliceOutlines(context, [rotated], new Set(['slice']));
+    drawSliceOutlines(context, [rotated], new Set(['slice']), createCanvasRefs());
 
     // result
     const [, , , rect, color, , , , rotation] = vi.mocked(drawDashedRectOutline).mock.calls[0];
@@ -83,5 +86,18 @@ describe('drawSliceOutlines', () => {
     expect(rect.height).toBeCloseTo(30);
     expect(color).toBe(SLICE_OUTLINE_SELECTED_STROKE);
     expect(rotation).toBe(0);
+  });
+
+  it('should outline a slice in blue while its row is hovered in the layers tree', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.layersTreeHoverRef.current = 'slice';
+
+    // before
+    drawSliceOutlines(context, [slice], new Set(), refs);
+
+    // result
+    expect(vi.mocked(drawDashedRectOutline).mock.calls[0][4]).toBe(SLICE_OUTLINE_SELECTED_STROKE);
   });
 });

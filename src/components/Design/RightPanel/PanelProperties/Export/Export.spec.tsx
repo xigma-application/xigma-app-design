@@ -465,6 +465,41 @@ describe('Export behaviors', () => {
     expect(screen.queryByText('Preview')).toBeNull();
   });
 
+  it('should name the export button after the layer count when several layers are selected', () => {
+    // mock
+    const firstId = addAndSelectFrame('First');
+    const secondId = addAndSelectFrame('Second');
+
+    store.dispatch(setSelection([firstId, secondId]));
+
+    // before
+    renderExport();
+
+    // action
+    addRow();
+
+    // result
+    expect(screen.getByRole('button', { name: 'Export 2 layers' })).toBeInTheDocument();
+    expect(screen.queryByText('Preview')).toBeNull();
+  });
+
+  it('should not render the section when only a hidden slice is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({ height: 100, hidden: true, name: 'Slice 1', parentId: null, rotation: 0, type: NodeType.slice, width: 100, x: 0, y: 0 }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    const { container } = renderExport();
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('should show the export button with the selected node name once a row exists', () => {
     // before
     addAndSelectFrame('My Frame');

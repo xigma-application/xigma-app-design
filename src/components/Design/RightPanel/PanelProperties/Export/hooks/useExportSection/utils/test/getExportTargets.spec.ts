@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -22,5 +23,28 @@ describe('getExportTargets', () => {
   it('should target the whole page when nothing is selected', () => {
     // result
     expect(getExportTargets([], 'Page 1')).toEqual([{ id: null, name: 'Page 1' }]);
+  });
+
+  it('should leave hidden slices out while keeping visible slices and hidden layers of other types', () => {
+    // mock
+    const nodes = [
+      { hidden: true, id: 'hidden-slice', name: 'Hidden slice', type: NodeType.slice },
+      { id: 'slice', name: 'Slice', type: NodeType.slice },
+      { hidden: true, id: 'rectangle', name: 'Rectangle', type: NodeType.rectangle },
+    ] as TSceneNode[];
+
+    // result
+    expect(getExportTargets(nodes, 'Page 1')).toEqual([
+      { id: 'slice', name: 'Slice' },
+      { id: 'rectangle', name: 'Rectangle' },
+    ]);
+  });
+
+  it('should target nothing when only hidden slices are selected', () => {
+    // mock
+    const nodes = [{ hidden: true, id: 'slice', name: 'Slice', type: NodeType.slice }] as TSceneNode[];
+
+    // result
+    expect(getExportTargets(nodes, 'Page 1')).toEqual([]);
   });
 });

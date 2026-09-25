@@ -50,6 +50,6 @@ export const useExportSection = (): TUseExportSectionResult => {
     onStartDrag: (index, event): void => beginDrag(resolveFillDragIndices(selectedIndices, setSelectedIndices, index), index, event),
     registerRow,
     settings,
-    zipName: selectedNodes.length === 1 ? exportTarget.name : activePage.name,
+    zipName: exportTargets.length === 1 ? exportTarget.name : activePage.name,
   };
 };

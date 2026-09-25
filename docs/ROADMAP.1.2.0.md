@@ -82,3 +82,7 @@ everything visible in its area, including the page background.
 
 - [x] several slices export together, one file each
 - [x] a rotated slice exports the upright area around it
+- [x] hovering a slice in the layers panel highlights it on the canvas
+- [x] layers snap to a slice's edges while dragging, and a slice snaps to them
+- [x] a locked slice can still be picked in the layers panel but not dragged on the canvas
+- [x] a hidden slice disappears from the canvas and isn't exported

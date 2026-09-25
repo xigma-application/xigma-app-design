@@ -29,6 +29,7 @@ const CONTACT_GUIDE_NODE_TYPES: ReadonlySet<NodeType> = new Set([
   NodeType.polygon,
   NodeType.rectangle,
   NodeType.section,
+  NodeType.slice,
   NodeType.star,
   NodeType.text,
 ]);

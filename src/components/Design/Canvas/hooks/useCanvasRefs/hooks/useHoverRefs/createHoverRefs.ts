@@ -39,6 +39,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   isAutoLayoutGapAreaHoveredRef: { current: false },
   isAutoLayoutPaddingAreaHoveredRef: { current: false },
   isSmartSelectionBoxHoveredRef: { current: false },
+  layersTreeHoverRef: { current: null },
   rightPanelPaddingGuideRef: { current: null },
   ...overrides,
 });

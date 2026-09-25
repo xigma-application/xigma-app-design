@@ -254,6 +254,10 @@ describe('isContactGuideEligibleNode', () => {
     expect(isContactGuideEligibleNode(rect({ type: NodeType.section }))).toBe(true);
   });
 
+  it('should accept a slice so layers snap to it and it snaps to them', () => {
+    expect(isContactGuideEligibleNode(rect({ type: NodeType.slice }))).toBe(true);
+  });
+
   it('should reject a node without a rotation, such as a line', () => {
     expect(isContactGuideEligibleNode({ id: 'l', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 } as unknown as TSceneNode)).toBe(false);
   });

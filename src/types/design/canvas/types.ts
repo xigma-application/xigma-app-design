@@ -414,6 +414,7 @@ export type THoverRefs = {
   isAutoLayoutGapAreaHoveredRef: RefObject<boolean>;
   isAutoLayoutPaddingAreaHoveredRef: RefObject<boolean>;
   isSmartSelectionBoxHoveredRef: RefObject<boolean>;
+  layersTreeHoverRef: RefObject<string | null>;
   rightPanelPaddingGuideRef: RefObject<TRightPanelPaddingGuideState | null>;
 };
 

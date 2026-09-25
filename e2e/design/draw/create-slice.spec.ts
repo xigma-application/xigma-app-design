@@ -152,3 +152,94 @@ test('two slices picked with a marquee show the Slice panel ready to export both
   await expect(page.locator('[data-test-component-header="slice"]').getByText('Slice', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Export 2 layers' })).toBeVisible();
 });
+
+test('hovering a slice row in the layers tree highlights its outline until the pointer leaves', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-tree-hover');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 900, 500);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+
+  const idle = await designPage.canvas.screenshot();
+
+  await page.getByText('Slice (1)', { exact: true }).hover();
+
+  const hovered = await designPage.canvas.screenshot();
+
+  await page.mouse.move(5, 5);
+
+  const left = await designPage.canvas.screenshot();
+
+  expect(hovered.equals(idle)).toBe(false);
+  expect(left.equals(idle)).toBe(true);
+});
+
+test('a layer dragged next to a slice snaps to its edge', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 800, 400);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+  await designPage.drawRectangle(900, 300, 960, 360);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+
+  await designPage.pointerDown(930, 330);
+  await designPage.pointerMove(880, 330);
+  await designPage.pointerMove(833, 330);
+  await designPage.pointerUp();
+
+  const { nodes } = await readNodes(page);
+  const slice = nodes.find((node) => node.type === 'slice') as TNodeState & { width: number };
+  const rectangle = nodes.find((node) => node.type === 'rectangle');
+
+  expect(rectangle?.x).toBe(slice.x + slice.width);
+});
+
+test('a locked slice picked from the layers tree does not move when dragged on the canvas', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-locked');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 900, 500);
+  await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
+
+  const row = page.locator('[aria-selected]', { has: page.getByText('Slice (1)', { exact: true }) });
+
+  await row.hover();
+  await row.getByLabel('Lock layer').click();
+  await page.getByText('Slice (1)', { exact: true }).click();
+
+  const before = await findSlice(page);
+
+  await designPage.pointerDown(800, 400);
+  await designPage.pointerMove(850, 450);
+  await designPage.pointerUp();
+
+  const after = await findSlice(page);
+
+  expect(after?.x).toBe(before?.x);
+  expect(after?.y).toBe(before?.y);
+});
+
+test('a hidden slice has no export', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-slice-hidden-export');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSlice(700, 300, 900, 500);
+  await expect(page.getByRole('button', { name: 'Export Slice (1)' })).toBeVisible();
+
+  const row = page.locator('[aria-selected]', { has: page.getByText('Slice (1)', { exact: true }) });
+
+  await row.hover();
+  await row.getByLabel('Hide layer').click();
+
+  await expect(page.locator('[data-test-component-header="slice"]').getByText('Slice', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export Slice (1)' })).toHaveCount(0);
+});
