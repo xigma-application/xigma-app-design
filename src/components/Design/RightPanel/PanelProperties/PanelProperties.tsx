@@ -11,6 +11,7 @@ import ImageCrop from './ImageCrop/ImageCrop';
 import Line from './Line/Line';
 import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
+import Polygon from './Polygon/Polygon';
 import Rectangle from './Rectangle/Rectangle';
 import Section from './Section/Section';
 import Slice from './Slice/Slice';
@@ -44,6 +45,7 @@ const PanelProperties: FC = () => {
   const isEverySectionSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.section);
   const isEveryLineSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.line);
   const isEveryEllipseSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.ellipse);
+  const isEveryPolygonSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.polygon);
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -73,6 +75,8 @@ const PanelProperties: FC = () => {
       return <Line />;
     case isEveryEllipseSelected:
       return <Ellipse />;
+    case isEveryPolygonSelected:
+      return <Polygon />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

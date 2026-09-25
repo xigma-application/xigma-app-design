@@ -10,19 +10,16 @@ import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeade
 import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMoreActionsButton';
 import PanelHeaderShapeMoreActionsButton from '../../Common/PanelHeader/PanelHeaderShapeMoreActionsButton';
 
+// others
+import { translationNameSpace } from './constants';
+
 // store
-import { selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
+import { selectSelectedIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
-// utils
-import { isLineNode } from 'utils/canvas/line/isLineNode';
-import { getLineHeaderLabel } from './utils/getLineHeaderLabel';
-import { isArrowLine } from './utils/isArrowLine';
-
-const LineHeader: FC = () => {
+const PolygonHeader: FC = () => {
   const { t } = useTranslation();
   const isMultiple = useAppSelector(selectSelectedIds).length > 1;
-  const lines = useAppSelector(selectSelectedNodes).filter(isLineNode);
 
   return (
     <PanelHeader
@@ -35,10 +32,10 @@ const LineHeader: FC = () => {
           {isMultiple ? <PanelHeaderMoreActionsButton /> : <PanelHeaderShapeMoreActionsButton />}
         </Fragment>
       }
-      e2eValue="line"
-      label={getLineHeaderLabel(t, lines.length, lines.filter(isArrowLine).length)}
+      e2eValue="polygon"
+      label={t(`${translationNameSpace}.label`)}
     />
   );
 };
 
-export default LineHeader;
+export default PolygonHeader;

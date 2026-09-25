@@ -37,3 +37,45 @@ test('a polygon stroke is drawn inside its outline by default and outside when i
   await expect.poll(() => readPixelColor(page, 900, 460)).toEqual([255, 0, 0]);
   expect(await readPixelColor(page, 900, 440)).not.toEqual([255, 0, 0]);
 });
+
+test('a selected polygon shows the Polygon panel whose Count and Corner radius reshape it on the canvas', async ({ page }) => {
+  const designPage = new DesignPage(page);
+  const polygonArea = { height: 200, width: 200, x: 800, y: 300 };
+
+  await designPage.goto('e2e-test-polygon-panel');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawPolygon(800, 300, 1000, 500);
+
+  const count = page.getByRole('textbox', { name: 'Count' });
+  const cornerRadius = page.getByRole('textbox', { name: 'Corner radius' });
+
+  await expect(page.getByText('Polygon', { exact: true }).first()).toBeVisible();
+  await expect(count).toHaveValue('3');
+
+  await designPage.click(1500, 900);
+  const triangle = await page.screenshot({ clip: polygonArea });
+  await designPage.click(900, 420);
+
+  await count.fill('6');
+  await count.press('Tab');
+  await cornerRadius.fill('20');
+  await cornerRadius.press('Tab');
+
+  const polygon = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return nodes[rootOrder[rootOrder.length - 1]] as unknown as Record<string, unknown>;
+  });
+
+  expect(polygon).toMatchObject({ cornerRadius: 20, sides: 6 });
+
+  await page.getByLabel('More actions').click();
+  await expect(page.getByText('Edit object')).toBeVisible();
+  await expect(page.getByText('Offset vector')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await designPage.click(1500, 900);
+  await expect.poll(async () => (await page.screenshot({ clip: polygonArea })).equals(triangle)).toBe(false);
+});

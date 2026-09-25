@@ -400,6 +400,35 @@ describe('PanelProperties behaviors', () => {
     expect(screen.getByText('Arc')).toBeInTheDocument();
   });
 
+  it('should show the Polygon panel with the Count row while a polygon is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+        flipX: false,
+        flipY: false,
+        height: 20,
+        name: 'Polygon',
+        parentId: null,
+        rotation: 0,
+        sides: 3,
+        type: NodeType.polygon,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Polygon')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
+  });
+
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
     // mock
     store.dispatch(

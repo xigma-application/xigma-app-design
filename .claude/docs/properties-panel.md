@@ -952,12 +952,13 @@ component button, no dropdown) → `Common/PositionSection` → a bare `UITools.
 
 ## `Line/`
 
-`Line.tsx` = `LineHeader` (component, mask, boolean buttons + its own "…" `LineMoreActionsButton`:
-Edit object, a separator and Offset vector — enabled for one selected line, it sets `design.offsetVector`,
+`Line.tsx` = `LineHeader` (component, mask, boolean buttons + the shared shape "…" menu
+`Common/PanelHeader/PanelHeaderShapeMoreActionsButton`: Edit object, a separator and Offset vector — enabled
+for one selected layer that `isOffsetVectorNode` accepts (`useStartOffsetVector`), it sets `design.offsetVector`,
 which shows `Toolbar/OffsetVectorToolbar` above the bottom toolbar and a magenta preview on the canvas
 (`drawOffsetVectorPreview`); ✓ / Enter replaces the line with `getLineOffsetVector`, Cancel / Esc clears it —
 no component items) — titled "Arrow" for a single line with an arrowhead (`isArrowLine`) and "N selected" for any
-multiple selection of lines or arrows (`getLineHeaderLabel`), which also swaps the Line "…" menu for the shared
+multiple selection of lines or arrows (`getLineHeaderLabel`), which also swaps the shape "…" menu for the shared
 `PanelHeaderMoreActionsButton` (component items, Edit objects, Wrap in new section) → `PositionSection` → Layout (`ColumnDimensions isHeightDisabled`, since a
 line's height is always 0) → `AppearanceSection withCornerRadius={false}` → `FillSection
 property="strokes"` with `LineStrokeSettings` as its footer → `EffectsSection` → `Export`. No Fill.
@@ -980,10 +981,10 @@ per-side strokes stay on the `isAppearanceNode` shapes only.
 
 `Ellipse.tsx` (shown while every selected layer is an ellipse) = `EllipseHeader` (same buttons as
 `RectangleHeader`) → `PositionSection` → Layout (`ColumnDimensions`, `ColumnSpacing`,
-`ColumnGridChildSpan`) → `AppearanceSection withArc withBlendMode={false} withCornerRadius={false} withEllipseCornerRadius` (one Corner
-radius field next to Opacity through `useEllipseCornerRadius`, no individual corners; the row gets a bottom margin
-above Arc) →
-`FillSection` → `FillSection property="strokes"` with `EllipseStrokeSettings` as its footer (Position,
+`ColumnGridChildSpan`) → `AppearanceSection shapeCornerRadiusType={NodeType.ellipse} withArc withCornerRadius={false}` (one Corner
+radius field next to Opacity through `ShapeCornerRadiusInput` / `useShapeCornerRadius`, no individual corners,
+disabled while no selected ellipse is cut (`hasShapeCorners`); the row gets a bottom margin above Arc) →
+`FillSection` → `FillSection property="strokes"` with `Common/ShapeStrokeSettings` as its footer (Position,
 defaulting to Inside, Weight and the shared stroke settings panel, like the line footer; Join stays hidden
 because `hasJoin` only counts rectangles) → `EffectsSection` → `Export`.
 An ellipse stores paints like a rectangle (`fills`, `strokes`, `effects` and the stroke mode fields), so
@@ -1001,6 +1002,20 @@ and both arc ends of a pie, or the four ends of a ring segment. `getEllipseFillP
 `roundPolygonCorners` (each corner's cut limited to half of each neighbouring edge, joined by a circular
 fillet), and that one shape is drawn (stencil fill), outlined on hover, hit-tested, exported and turned
 into a vector.
+
+## `Polygon/`
+
+`Polygon.tsx` (shown while every selected layer is a polygon) = `PolygonHeader` (the Ellipse header buttons
+with the shared shape "…" menu `PanelHeaderShapeMoreActionsButton` instead of Edit object) → `PositionSection`
+→ Layout (`ColumnDimensions`, `ColumnSpacing`, `ColumnGridChildSpan`) → `AppearanceSection
+shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} withCount` (Opacity and one Corner radius
+field, always enabled for polygons, then `Common/AppearanceSection/Count/CountRow`: the `sides` count with the
+`Count` icon as its scrub handle, 3–60, rounded, Mixed for different counts, scrubbed by the same amount on
+each polygon through `usePolygonCount`) → `FillSection` → `FillSection property="strokes"` with
+`ShapeStrokeSettings type={NodeType.polygon}` → `EffectsSection` → `Export`. A polygon stores paints like an
+ellipse, so the shared hooks accept it through `isStyledNode`, and it is a Mixed panel type with the same
+sections. `Common/types.ts` holds `TShapeNode` / `TShapeNodeType` (ellipse or polygon) used by the shape
+corner radius and stroke settings.
 
 ## `ImageCrop/`
 

@@ -213,7 +213,7 @@ describe('AppearanceSection behaviors', () => {
       <Provider store={store}>
         <CanvasRefsProvider>
           <TooltipProvider>
-            <AppearanceSection withArc withCornerRadius={false} withEllipseCornerRadius />
+            <AppearanceSection shapeCornerRadiusType={NodeType.ellipse} withArc withCornerRadius={false} />
           </TooltipProvider>
         </CanvasRefsProvider>
       </Provider>,
@@ -239,5 +239,22 @@ describe('AppearanceSection behaviors', () => {
     // result
     expect(screen.getByText('Opacity')).toBeInTheDocument();
     expect(screen.queryByText('Corner radius')).not.toBeInTheDocument();
+  });
+
+  it('should show the polygon corner radius and Count rows when asked', () => {
+    // before
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <AppearanceSection shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} withCount />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Corner radius' })).toBeInTheDocument();
   });
 });

@@ -9,7 +9,8 @@ import CornerRadiusButtonIcons from './CornerRadius/CornerRadiusButtonIcons';
 import CornerRadiusFieldList from './CornerRadius/CornerRadiusFieldList';
 import CornerRadiusInput from './CornerRadius/CornerRadiusInput';
 import CornerSmoothingButton from './CornerRadius/CornerSmoothingButton/CornerSmoothingButton';
-import EllipseCornerRadiusInput from './CornerRadius/EllipseCornerRadiusInput';
+import CountRow from './Count/CountRow';
+import ShapeCornerRadiusInput from './CornerRadius/ShapeCornerRadiusInput';
 import OpacityField from './Opacity/OpacityField';
 import { UITools } from 'shared';
 
@@ -21,13 +22,22 @@ import { useOpacity } from './Opacity/hooks/useOpacity';
 import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common/constants';
 import { translationNameSpace } from './constants';
 
+// types
+import { TShapeNodeType } from '../types';
+
 export type TAppearanceSectionProps = {
+  shapeCornerRadiusType?: TShapeNodeType;
   withArc?: boolean;
   withCornerRadius?: boolean;
-  withEllipseCornerRadius?: boolean;
+  withCount?: boolean;
 };
 
-const AppearanceSection: FC<TAppearanceSectionProps> = ({ withArc = false, withCornerRadius = true, withEllipseCornerRadius = false }) => {
+const AppearanceSection: FC<TAppearanceSectionProps> = ({
+  shapeCornerRadiusType,
+  withArc = false,
+  withCornerRadius = true,
+  withCount = false,
+}) => {
   const { t } = useTranslation();
   const opacity = useOpacity();
   const cornerRadius = useCornerRadius();
@@ -38,11 +48,11 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({ withArc = false, withC
         buttonsIcon={withCornerRadius ? CornerRadiusButtonIcons(cornerRadius.isIndividual, cornerRadius.toggleIndividual, t) : undefined}
         gridColumnType={UITools.GridColumnType.twoInputs}
         labels={
-          withCornerRadius || withEllipseCornerRadius
+          withCornerRadius || shapeCornerRadiusType
             ? [t(`${translationNameSpace}.opacity.ariaLabel`), t(`${translationNameSpace}.cornerRadius.ariaLabel`)]
             : [t(`${translationNameSpace}.opacity.ariaLabel`)]
         }
-        withBottomMargin={(withCornerRadius && cornerRadius.isIndividual) || withArc}
+        withBottomMargin={(withCornerRadius && cornerRadius.isIndividual) || withArc || withCount}
       >
         <OpacityField displayValue={opacity.displayValue} onBlur={opacity.onBlur} onScrub={opacity.onScrub} value={opacity.value} />
         {withCornerRadius && (
@@ -57,7 +67,7 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({ withArc = false, withC
             value={cornerRadius.isMixed ? MIXED_LABEL : cornerRadius.mergedValue}
           />
         )}
-        {withEllipseCornerRadius && <EllipseCornerRadiusInput />}
+        {shapeCornerRadiusType && <ShapeCornerRadiusInput type={shapeCornerRadiusType} />}
       </UITools.SectionColumn>
       {withCornerRadius && cornerRadius.isIndividual && (
         <UITools.SectionColumn
@@ -69,6 +79,7 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({ withArc = false, withC
         </UITools.SectionColumn>
       )}
       {withArc && <ArcRow />}
+      {withCount && <CountRow />}
       <BlendModeRow />
     </UITools.Section>
   );
