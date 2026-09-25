@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
@@ -63,7 +63,7 @@ describe('LineHeader behaviors', () => {
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();
   });
 
-  it('should hide the component button for several lines', () => {
+  it('should count several lines as selected and move the component and section actions into the more actions menu', () => {
     // mock
     addLines(['headerLineA', 'headerLineB']);
     store.dispatch(setSelection(['headerLineA', 'headerLineB']));
@@ -71,14 +71,21 @@ describe('LineHeader behaviors', () => {
     // before
     renderHeader();
 
+    // action
+    fireEvent.click(screen.getByLabelText('More actions'));
+
     // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
     expect(screen.queryByLabelText('Create component')).not.toBeInTheDocument();
+    expect(screen.getByText('Create multiple components')).toBeInTheDocument();
+    expect(screen.getByText('Edit objects')).toBeInTheDocument();
+    expect(screen.queryByText('Offset vector')).not.toBeInTheDocument();
   });
 
-  it('should title an arrow, and every line being an arrow, as Arrow', () => {
+  it('should title a single arrow as Arrow', () => {
     // mock
-    addLines(['headerArrowA', 'headerArrowB'], LineEndpoint.lineArrow);
-    store.dispatch(setSelection(['headerArrowA', 'headerArrowB']));
+    addLines(['headerArrowA'], LineEndpoint.lineArrow);
+    store.dispatch(setSelection(['headerArrowA']));
 
     // before
     renderHeader();

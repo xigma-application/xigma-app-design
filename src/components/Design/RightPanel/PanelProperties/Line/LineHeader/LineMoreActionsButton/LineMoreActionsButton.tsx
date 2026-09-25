@@ -6,6 +6,7 @@ import { Icon, UITools } from 'shared';
 
 // hooks
 import { useEditObject } from '../../../Common/PanelHeader/hooks/useEditObject';
+import { useStartOffsetVector } from './hooks/useStartOffsetVector';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -16,6 +17,7 @@ const { PopoverItem, PopoverSeparator } = UITools.PopoverCompound;
 export const LineMoreActionsButton: FC = () => {
   const { t } = useTranslation();
   const handleEditObject = useEditObject();
+  const { canStart, onStart } = useStartOffsetVector();
 
   return (
     <UITools.ButtonMenu
@@ -26,7 +28,13 @@ export const LineMoreActionsButton: FC = () => {
     >
       <PopoverItem icon="EditObject" label={t(`${commonNameSpace}.editObjectTooltip`)} onClick={handleEditObject} withCheck={false} />
       <PopoverSeparator />
-      <PopoverItem disabled icon="OffsetVector" label={t(`${translationNameSpace}.offsetVector`)} withCheck={false} />
+      <PopoverItem
+        disabled={!canStart}
+        icon="OffsetVector"
+        label={t(`${translationNameSpace}.offsetVector`)}
+        onClick={onStart}
+        withCheck={false}
+      />
     </UITools.ButtonMenu>
   );
 };

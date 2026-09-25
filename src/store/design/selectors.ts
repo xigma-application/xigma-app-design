@@ -15,6 +15,7 @@ import {
   TGradientEditorState,
   TImageEditorState,
   TImageFillPickerFocus,
+  TOffsetVectorState,
   TOpenPropertyPanel,
   TPatternSourcePickTarget,
   TResolvedTheme,
@@ -75,6 +76,8 @@ export const selectCommentDraftPosition = (state: RootState): TPoint | null => s
 const selectCommentsRecord = createSelector([selectActivePage], (page): Record<string, TComment> => page.comments);
 
 export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
+
+export const selectOffsetVector = (state: RootState): TOffsetVectorState | null => state.design.offsetVector ?? null;
 
 export const selectDesignHintLabelKey = (state: RootState): string | null => state.design.designHintLabelKey;
 

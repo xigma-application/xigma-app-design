@@ -5,12 +5,12 @@ import { translationNameSpace } from '../constants';
 import { translationNameSpace as mixedNameSpace } from '../../../Mixed/constants';
 
 export const getLineHeaderLabel = (t: TFunction, count: number, arrowCount: number): string => {
-  switch (arrowCount) {
-    case 0:
-      return t(`${translationNameSpace}.label`);
-    case count:
+  switch (true) {
+    case count > 1:
+      return t(`${mixedNameSpace}.header.label`, { count });
+    case arrowCount > 0:
       return t(`${translationNameSpace}.arrowLabel`);
     default:
-      return t(`${mixedNameSpace}.header.label`, { count });
+      return t(`${translationNameSpace}.label`);
   }
 };

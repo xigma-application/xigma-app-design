@@ -55,6 +55,7 @@ import {
   selectLastTextTool,
   selectMaskConnectorRoleById,
   selectNodes,
+  selectOffsetVector,
   selectOpenPropertyPanel,
   selectOrderedNodes,
   selectPageGuides,
@@ -81,7 +82,7 @@ import {
 } from '../selectors';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { NodeType, StrokeJoin, ToolName } from 'types/design/enums';
 import { TGroupNode, TMaskNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const node: TSceneNode = {
@@ -151,6 +152,15 @@ const state = {
 } as any;
 
 describe('design selectors', () => {
+  it('should select the offset mode, or none when it was never started', () => {
+    // mock
+    const offsetVector = { distance: 20, join: StrokeJoin.round, nodeId: 'line' };
+
+    // result
+    expect(selectOffsetVector(state)).toBeNull();
+    expect(selectOffsetVector({ ...state, design: { ...state.design, offsetVector } })).toBe(offsetVector);
+  });
+
   it('should select the active page id', () => {
     // result
     expect(selectActivePageId(state)).toBe('page-1');

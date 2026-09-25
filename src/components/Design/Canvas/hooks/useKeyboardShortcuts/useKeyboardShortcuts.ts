@@ -23,7 +23,7 @@ import { handleCopySelection } from './utils/handleCopySelection';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
 import { handleEnterTextEdit } from './utils/handleEnterTextEdit';
-import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit/handleEnterVectorEdit';
+import { handleEnter } from './utils/handleEnter';
 import { handleFlattenSelection } from './utils/handleFlattenSelection';
 import { handleFlipSelection } from './utils/handleFlipSelection';
 import { handleGroupSelection } from './utils/handleGroupSelection';
@@ -76,7 +76,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.shapeBuilder), ...shortcuts[ToolName.shapeBuilder] },
       { action: (): any => dispatchTool(dispatch, ToolName.variableWidth), ...shortcuts[ToolName.variableWidth] },
       { action: (): any => handleLeave(dispatch, refs), ...shortcuts.escape },
-      { action: (): any => handleEnterVectorEdit(dispatch, refs), secondaryKey: KeyboardKeys.enter },
+      { action: (): any => handleEnter(dispatch, refs), secondaryKey: KeyboardKeys.enter },
       { action: (event): any => handleEnterTextEdit(event, dispatch), secondaryKey: KeyboardKeys.enter },
       { action: (): any => handleRedo(dispatch, refs), ...shortcuts.redo },
       { action: (): any => handleUndo(dispatch, refs), ...shortcuts.undo },

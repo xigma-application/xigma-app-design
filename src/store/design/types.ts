@@ -1,5 +1,5 @@
 // types
-import { ToolName } from 'types/design/enums';
+import { StrokeJoin, ToolName } from 'types/design/enums';
 import { TAutoLayoutPaddingEditState } from 'utils/canvas/autoLayoutPadding/types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -123,6 +123,7 @@ export type TDesignState = {
   lastPenTool: ToolName;
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
+  offsetVector?: TOffsetVectorState | null;
   openPropertyPanel?: TOpenPropertyPanel | null;
   pages: Record<string, TDesignPage>;
   panelGridTrackSelection?: TGridTrackSelection | null;
@@ -195,3 +196,5 @@ export type TDeleteGuidePayload = {
 export type TDeleteAllGuidesPayload = {
   axis: TGuideAxis;
 };
+
+export type TOffsetVectorState = { distance: number; join: StrokeJoin.miter | StrokeJoin.round; nodeId: string };

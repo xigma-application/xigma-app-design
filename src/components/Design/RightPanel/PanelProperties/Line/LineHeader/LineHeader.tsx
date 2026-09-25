@@ -8,6 +8,7 @@ import PanelHeaderBooleanButton from '../../Common/PanelHeader/PanelHeaderBoolea
 import PanelHeaderComponentButton from '../../Common/PanelHeader/PanelHeaderComponentButton';
 import PanelHeaderMaskButton from '../../Common/PanelHeader/PanelHeaderMaskButton';
 import PanelHeaderMatchingLayersButton from '../../Common/PanelHeader/PanelHeaderMatchingLayersButton';
+import PanelHeaderMoreActionsButton from '../../Common/PanelHeader/PanelHeaderMoreActionsButton';
 
 // store
 import { selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
@@ -31,7 +32,7 @@ const LineHeader: FC = () => {
           {!isMultiple && <PanelHeaderComponentButton />}
           <PanelHeaderMaskButton />
           <PanelHeaderBooleanButton />
-          <LineMoreActionsButton />
+          {isMultiple ? <PanelHeaderMoreActionsButton /> : <LineMoreActionsButton />}
         </Fragment>
       }
       e2eValue="line"

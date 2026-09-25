@@ -11,6 +11,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectOffsetVector,
   selectGradientEditor,
   selectOpenPropertyPanel,
   selectGridSectionHighlight,
@@ -60,6 +61,7 @@ import { drawGridSlots } from './drawGridSlots/drawGridSlots';
 import { drawGridTrackAffordance } from './drawGridTrackAffordance/drawGridTrackAffordance';
 import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
+import { drawOffsetVectorPreview } from './drawOffsetVectorPreview';
 import { drawImageEditorCropOverflowPreview } from './drawImageEditorCropOverflowPreview';
 import { drawImageEditorTileOverflowPreview } from './drawImageEditorTileOverflowPreview';
 import { drawLayoutGuides } from './drawLayoutGuides/drawLayoutGuides';
@@ -176,6 +178,7 @@ export const drawScene = (
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSectionCaptureOutlines(ctx, refs, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, imageEditor, pathId);
+  drawOffsetVectorPreview(ctx, selectOffsetVector(state), nodesById);
   drawConstraintGuides(ctx, selectedNodes, nodesById);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);
   drawSmartSelectionHandles(ctx, smartSelectionNodes, refs, nodesById);

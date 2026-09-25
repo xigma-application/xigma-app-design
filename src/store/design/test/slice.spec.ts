@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_NAME, DEFAULT_VECTOR_PAINT } from '../constants';
 
 // store
 import slice, {
+  setOffsetVector,
   closeOpenPropertyPanel,
   addComment,
   addGuide,
@@ -65,7 +66,7 @@ import slice, {
 } from '../slice';
 
 // types
-import { BlendMode, NodeType, ToolName } from 'types/design/enums';
+import { BlendMode, NodeType, StrokeJoin, ToolName } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const frameNodePayload: Omit<TFrameNode, 'id'> = {
@@ -153,6 +154,15 @@ describe('design slice', () => {
       revealedMinMax: { maxHeight: false, maxWidth: false, minHeight: false, minWidth: false },
       vectorEditingNodeIds: [],
     });
+  });
+
+  it('should start, change and leave the offset mode', () => {
+    // before
+    const started = slice(undefined, setOffsetVector({ distance: 20, join: StrokeJoin.miter, nodeId: 'line' }));
+
+    // result
+    expect(started.offsetVector).toEqual({ distance: 20, join: StrokeJoin.miter, nodeId: 'line' });
+    expect(slice(started, setOffsetVector(null)).offsetVector).toBeNull();
   });
 
   it('should set the active tool', () => {

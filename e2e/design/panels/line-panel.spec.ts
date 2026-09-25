@@ -118,6 +118,14 @@ test('two selected lines share the Line panel: different weights show Mixed and 
   await expect(page.getByText('Start point')).toBeVisible();
   await expect(page.getByLabel('Stroke weight')).toHaveValue('Mixed');
 
+  const header = page.locator('[data-test-component-header="line"]');
+
+  await expect(header.getByText('2 selected', { exact: true })).toBeVisible();
+  await header.getByRole('button', { name: 'More actions' }).click();
+  await expect(page.getByText('Create multiple components', { exact: true })).toBeVisible();
+  await expect(page.getByText('Edit objects', { exact: true })).toBeVisible();
+  await header.getByRole('button', { name: 'More actions' }).click();
+
   await page.getByRole('button', { name: 'None' }).nth(1).click();
   await page.getByText('Diamond arrow', { exact: true }).click();
 
@@ -250,4 +258,53 @@ test('clicking where an inside stroke is drawn, well off the line itself, select
   await designPage.click(900, 378);
 
   await expect(page.getByText('Start point')).toBeVisible();
+});
+
+test('Offset vector previews the offset outline around the line and replaces the line with that vector on confirm', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector');
+
+  const aboveLine = { height: 6, width: 100, x: 850, y: 377 };
+  const before = await page.screenshot({ clip: aboveLine });
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+
+  const onLine = { height: 4, width: 20, x: 890, y: 398 };
+  const blank = await page.screenshot({ clip: { height: 4, width: 20, x: 890, y: 330 } });
+
+  await expect(page.getByText('Offset', { exact: true })).toBeVisible();
+  await expect.poll(async () => (await page.screenshot({ clip: aboveLine })).equals(before)).toBe(false);
+  await expect.poll(async () => (await page.screenshot({ clip: onLine })).equals(blank)).toBe(false);
+
+  const distance = page.getByRole('textbox', { name: 'Offset distance' });
+
+  await distance.fill('30');
+  await distance.press('Tab');
+  await page.getByLabel('Round').click();
+  await page.getByLabel('Confirm').click();
+
+  await expect(page.getByText('Offset', { exact: true })).toHaveCount(0);
+  await new DesignPage(page).click(1500, 900);
+  await expect.poll(async () => (await page.screenshot({ clip: onLine })).equals(blank)).toBe(true);
+  expect((await readNodes(page)).map((node) => node.type)).toEqual(['vector']);
+
+  const vector = await readLine(page);
+  const xs = Object.values(vector.vertices as Record<string, { x: number }>).map((vertex) => vertex.x);
+
+  expect(vector.type).toBe('vector');
+  expect(Math.min(...xs)).toBeLessThan(800 - 25);
+  expect(Math.max(...xs)).toBeGreaterThan(1000 + 25);
+});
+
+test('Escape leaves Offset vector without adding anything', async ({ page }) => {
+  await drawSelectedLine(page, 'e2e-test-line-panel-offset-vector-escape');
+
+  await page.getByRole('button', { name: 'More actions' }).first().click();
+  await page.getByText('Offset vector', { exact: true }).click();
+  await expect(page.getByText('Offset', { exact: true })).toBeVisible();
+
+  await page.keyboard.press('Escape');
+
+  await expect(page.getByText('Offset', { exact: true })).toHaveCount(0);
+  expect((await readLine(page)).type).toBe('line');
 });

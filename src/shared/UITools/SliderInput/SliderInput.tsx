@@ -20,6 +20,8 @@ export type TSliderInputProps = {
   className?: string;
   displayValue?: string;
   e2eValue?: string;
+  inputMax?: number;
+  inputPosition?: 'end' | 'start';
   max: number;
   min: number;
   onChange: TFunc<[number]>;
@@ -35,6 +37,8 @@ export const SliderInput: FC<TSliderInputProps> = ({
   className = '',
   displayValue,
   e2eValue = '',
+  inputMax,
+  inputPosition = 'end',
   max,
   min,
   onChange,
@@ -44,10 +48,11 @@ export const SliderInput: FC<TSliderInputProps> = ({
   tooltip = '',
   value,
 }) => {
-  const onBlur = useSliderInputBlur(min, max, value, onChange, displayValue);
+  const fieldMax = inputMax ?? max;
+  const onBlur = useSliderInputBlur(min, fieldMax, value, onChange, displayValue);
 
   return (
-    <div className={cx(styles.SliderInput, className)}>
+    <div className={cx(styles.SliderInput, { [styles['SliderInput--inputStart']]: inputPosition === 'start' }, className)}>
       <div className={styles.SliderInput__slider}>
         <Slider
           ariaLabel={sliderAriaLabel}
@@ -68,9 +73,9 @@ export const SliderInput: FC<TSliderInputProps> = ({
           e2eValue={e2eValue}
           onBlur={onBlur}
           startAdornment={
-            <ScrubbableEdge max={max} min={min} onChange={onChange} onDragEnd={onDragEnd} onDragStart={onDragStart} value={value} />
+            <ScrubbableEdge max={fieldMax} min={min} onChange={onChange} onDragEnd={onDragEnd} onDragStart={onDragStart} value={value} />
           }
-          stepNumbers={{ max, min }}
+          stepNumbers={{ max: fieldMax, min }}
           type="text"
         />
       </Tooltip>

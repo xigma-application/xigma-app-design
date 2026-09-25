@@ -1,6 +1,19 @@
 // store
-import { cancelCommentDraft, setActiveTool, setImageEditor, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActiveTool, selectImageEditor, selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
+import {
+  cancelCommentDraft,
+  setActiveTool,
+  setImageEditor,
+  setOffsetVector,
+  setSelection,
+  setVectorEditingNodeIds,
+} from 'store/design/slice';
+import {
+  selectActiveTool,
+  selectImageEditor,
+  selectOffsetVector,
+  selectPenActiveVertexId,
+  selectVectorEditingNodeIds,
+} from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -32,6 +45,9 @@ export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
     case vectorEditingNodeIds.length > 0:
       dispatch(setActiveTool(ToolName.default));
       dispatch(setVectorEditingNodeIds([]));
+      break;
+    case selectOffsetVector(state) !== null:
+      dispatch(setOffsetVector(null));
       break;
     case imageEditor !== null:
       dispatch(setImageEditor(null));

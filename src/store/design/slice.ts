@@ -25,9 +25,10 @@ import {
   TGradientEditorState,
   TImageEditorState,
   TImageFillPickerFocus,
-  TOpenPropertyPanel,
   TMoveNodesPayload,
   TMoveNodesToPagePayload,
+  TOffsetVectorState,
+  TOpenPropertyPanel,
   TPatternSourcePickTarget,
   TReorderPayload,
   TResolvedTheme,
@@ -272,6 +273,9 @@ const designSlice = createSlice({
     setMinMaxRevealed: (state, action: PayloadAction<{ bound: keyof TRevealedMinMax; value: boolean }>) => {
       state.revealedMinMax[action.payload.bound] = action.payload.value;
     },
+    setOffsetVector: (state, action: PayloadAction<TOffsetVectorState | null>) => {
+      state.offsetVector = action.payload;
+    },
     setOpenPropertyPanel: (state, action: PayloadAction<TOpenPropertyPanel | null>) => {
       state.openPropertyPanel = action.payload;
     },
@@ -398,6 +402,7 @@ export const {
   setDesignHintLabelKey,
   setGradientEditor,
   setGridSectionHighlight,
+  setOffsetVector,
   setGridSettingsPanelOpen,
   setGridTrackModeMenuRequest,
   setGridTrackSelection,

@@ -10,6 +10,7 @@ import ImageCropToolbar from './ImageCropToolbar/ImageCropToolbar';
 import ImageEditToolbar from './ImageEditToolbar/ImageEditToolbar';
 import MediaToolHint from './MediaToolHint/MediaToolHint';
 import MouseModes from './MouseModes/MouseModes';
+import OffsetVectorToolbar from './OffsetVectorToolbar/OffsetVectorToolbar';
 import VectorEditToolbar from './VectorEditToolbar/VectorEditToolbar';
 
 // store
@@ -42,6 +43,7 @@ const Toolbar: FC = () => {
           <VectorEditToolbar />
           <ImageEditToolbar />
           <ImageCropToolbar />
+          <OffsetVectorToolbar />
           <MediaToolHint />
           <DesignHint />
           <ExportHint />

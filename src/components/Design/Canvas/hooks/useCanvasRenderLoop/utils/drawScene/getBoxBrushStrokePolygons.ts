@@ -13,7 +13,11 @@ import { getStrokeBrushCategory } from 'utils/design/stroke/getStrokeBrushCatego
 import { getStrokeBrushValues } from 'utils/design/stroke/getStrokeBrushValues';
 import { memoizeBrushPolygons } from './memoizeBrushPolygons';
 
-const getKey = (node: TBooleanNode | TFrameNode | TLineNode | TRectangleNode | TSectionNode, ring: TStrokeRing, isTraced: boolean): string =>
+const getKey = (
+  node: TBooleanNode | TFrameNode | TLineNode | TRectangleNode | TSectionNode,
+  ring: TStrokeRing,
+  isTraced: boolean,
+): string =>
   [
     isTraced,
     node.id,

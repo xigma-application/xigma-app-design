@@ -9,6 +9,8 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
+import { selectOffsetVector } from 'store/design/selectors';
+import { setOffsetVector, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 const handleEditObjectMock = vi.fn();
@@ -56,5 +58,31 @@ describe('LineMoreActionsButton behaviors', () => {
     // result
     expect(screen.getByText('Offset vector').closest('[class*="PopoverItem--disabled"]')).not.toBeNull();
     expect(screen.queryByText('Create component')).not.toBeInTheDocument();
+  });
+
+  it('should start offsetting the one selected line from Offset vector', () => {
+    // mock
+    store.dispatch(setSelection(['menuLine']));
+
+    // before
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <LineMoreActionsButton />
+          </TooltipProvider>
+        </CanvasRefsProvider>
+      </Provider>,
+    );
+
+    // action
+    fireEvent.click(screen.getByLabelText('More actions'));
+    fireEvent.click(screen.getByText('Offset vector'));
+
+    // result
+    expect(selectOffsetVector(store.getState())?.nodeId).toBe('menuLine');
+
+    store.dispatch(setOffsetVector(null));
+    store.dispatch(setSelection([]));
   });
 });

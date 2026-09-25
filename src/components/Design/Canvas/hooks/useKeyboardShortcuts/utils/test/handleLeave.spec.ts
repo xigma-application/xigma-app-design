@@ -5,17 +5,18 @@ import designReducer, {
   addNode,
   setActiveTool,
   setImageEditor,
+  setOffsetVector,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,
   startCommentDraft,
 } from 'store/design/slice';
-import { selectActivePage, selectImageEditor, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectImageEditor, selectOffsetVector, selectSelectedIds } from 'store/design/selectors';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { NodeType, StrokeJoin, ToolName } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -206,6 +207,19 @@ describe('handleLeave', () => {
       // result
       expect(selectImageEditor(realStore.getState())).toBeNull();
       expect(selectSelectedIds(realStore.getState())).toEqual(['node-1']);
+    });
+
+    it('should only leave the offset mode, keeping the line selected', () => {
+      // mock
+      realStore.dispatch(setSelection(['line-1']));
+      realStore.dispatch(setOffsetVector({ distance: 20, join: StrokeJoin.miter, nodeId: 'line-1' }));
+
+      // action
+      handleLeave(realStore.dispatch, createCanvasRefs());
+
+      // result
+      expect(selectOffsetVector(realStore.getState())).toBeNull();
+      expect(selectSelectedIds(realStore.getState())).toEqual(['line-1']);
     });
   });
 });
