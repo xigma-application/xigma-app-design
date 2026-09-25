@@ -1,15 +1,13 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect } from 'types/canvas';
 import { TEllipseNode, TSceneNode } from 'types/design/types';
+import { TPaint } from 'types/design/paint/types';
 
 // utils
 import { drawSvgPaintPolygons } from './drawSvgPaintPolygons';
-import { flipPoint } from 'utils/math/flipPoint';
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
-import { getEllipseStrokeRingPoints } from 'utils/canvas/shapes/getEllipseStrokeRingPoints';
+import { getEllipseStrokeShapes } from 'utils/canvas/shapes/getEllipseStrokeShapes';
 import { getEllipseWorldPoints } from 'utils/canvas/shapes/getEllipseWorldPoints';
-import { hasVectorStroke } from '../hasVectorStroke';
-import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const drawSvgEllipseShape = async (
   elements: string[],
@@ -19,10 +17,7 @@ export const drawSvgEllipseShape = async (
   bounds: TDraftRect,
 ): Promise<void> => {
   const opacity = getEffectiveOpacity(node, nodesById);
-  const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
   const boxGeometry = { rect: { height: node.height, width: node.width, x: node.x, y: node.y }, rotation: node.rotation };
-  const toDesign = (point: TPoint): TPoint =>
-    rotatePoint(flipPoint(point, center, node.flipX ?? false, node.flipY ?? false), center, node.rotation);
 
   await drawSvgPaintPolygons(
     elements,
@@ -35,14 +30,7 @@ export const drawSvgEllipseShape = async (
     boxGeometry,
   );
 
-  if (node.strokes && hasVectorStroke(node)) {
-    await drawSvgPaintPolygons(
-      elements,
-      defs,
-      node.strokes,
-      getEllipseStrokeRingPoints(node, node.strokeWidth as number).map((polygon) => polygon.map(toDesign)),
-      opacity,
-      bounds,
-    );
+  for (const { polygons } of (node.strokes?.length ? getEllipseStrokeShapes(node) : null) ?? []) {
+    await drawSvgPaintPolygons(elements, defs, node.strokes as TPaint[], polygons, opacity, bounds);
   }
 };

@@ -1,5 +1,6 @@
 // types
-import { StrokeDashCap, StrokeMode, StrokeProfile, StrokeStyle } from 'types/design/enums';
+import { NodeType, StrokeDashCap, StrokeMode, StrokeProfile, StrokeStyle } from 'types/design/enums';
+import { TEllipseNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -66,5 +67,25 @@ describe('getVectorModeStrokePolygons', () => {
   it('should leave a plain stroke to the regular drawing', () => {
     // result
     expect(getVectorModeStrokePolygons(makeSquareVector(), loop)).toBeNull();
+  });
+
+  it('should read an ellipse without a stroke width as no width', () => {
+    // mock
+    const ellipse = {
+      fills: [],
+      height: 100,
+      id: 'e',
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      strokeMode: StrokeMode.dynamic,
+      type: NodeType.ellipse,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TEllipseNode;
+
+    // result
+    expect(getVectorModeStrokePolygons(ellipse, loop)).toBeNull();
   });
 });

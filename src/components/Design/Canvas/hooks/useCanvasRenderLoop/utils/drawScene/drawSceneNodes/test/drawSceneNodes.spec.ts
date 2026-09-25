@@ -282,7 +282,7 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
   });
 
-  it('should also draw a thick stroke outline for an ellipse node with a stroke color and width', () => {
+  it('should also draw the stroke band of an ellipse node with stroke paints and a width', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -307,8 +307,8 @@ describe('drawSceneNodes', () => {
       {},
     );
 
-    // result — stencil fill pass, covering quad, then the thick outline
-    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    // result — the fill (stencil pass and covering quad), then the stroke band (both band edges and a covering quad)
+    expect(gl.drawArrays).toHaveBeenCalledTimes(5);
   });
 
   it('should draw a filled polygon for a polygon node', () => {

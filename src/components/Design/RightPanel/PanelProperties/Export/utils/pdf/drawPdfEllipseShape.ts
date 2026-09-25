@@ -1,17 +1,15 @@
 import { PDFName, PDFPage } from 'pdf-lib';
 
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect } from 'types/canvas';
 import { TEllipseNode, TSceneNode } from 'types/design/types';
+import { TPaint } from 'types/design/paint/types';
 
 // utils
 import { drawPdfPaintPolygons } from './drawPdfPaintPolygons';
-import { flipPoint } from 'utils/math/flipPoint';
 import { getEffectiveOpacity } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/getEffectiveOpacity';
-import { getEllipseStrokeRingPoints } from 'utils/canvas/shapes/getEllipseStrokeRingPoints';
+import { getEllipseStrokeShapes } from 'utils/canvas/shapes/getEllipseStrokeShapes';
 import { getEllipseWorldPoints } from 'utils/canvas/shapes/getEllipseWorldPoints';
-import { hasVectorStroke } from '../hasVectorStroke';
-import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const drawPdfEllipseShape = (
   page: PDFPage,
@@ -21,9 +19,6 @@ export const drawPdfEllipseShape = (
   graphicsStates: Map<number, PDFName>,
 ): void => {
   const opacity = getEffectiveOpacity(node, nodesById);
-  const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-  const toDesign = (point: TPoint): TPoint =>
-    rotatePoint(flipPoint(point, center, node.flipX ?? false, node.flipY ?? false), center, node.rotation);
 
   drawPdfPaintPolygons(
     page,
@@ -34,14 +29,7 @@ export const drawPdfEllipseShape = (
     graphicsStates,
   );
 
-  if (node.strokes && hasVectorStroke(node)) {
-    drawPdfPaintPolygons(
-      page,
-      node.strokes,
-      getEllipseStrokeRingPoints(node, node.strokeWidth as number).map((polygon) => polygon.map(toDesign)),
-      opacity,
-      bounds,
-      graphicsStates,
-    );
-  }
+  ((node.strokes?.length ? getEllipseStrokeShapes(node) : null) ?? []).forEach(({ polygons }) => {
+    drawPdfPaintPolygons(page, node.strokes as TPaint[], polygons, opacity, bounds, graphicsStates);
+  });
 };

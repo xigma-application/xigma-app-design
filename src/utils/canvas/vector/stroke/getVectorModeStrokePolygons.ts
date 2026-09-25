@@ -1,7 +1,7 @@
 // types
 import { StrokeDashCap, StrokeProfile } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
-import { TVectorNode } from 'types/design/types';
+import { TEllipseNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { buildStrokeRing } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/buildStrokeRing';
@@ -14,16 +14,17 @@ import { getStrokeDynamicValues } from 'utils/design/stroke/getStrokeDynamicValu
 import { getStrokeOutlinePolygons } from 'utils/canvas/vectorNetwork/getStrokeOutlinePolygons/getStrokeOutlinePolygons';
 import { getVectorProfileRingPolygons } from './getVectorProfileRingPolygons';
 
-export const getVectorModeStrokePolygons = (node: TVectorNode, loop: TPoint[]): TPoint[][] | null => {
+export const getVectorModeStrokePolygons = (node: TEllipseNode | TVectorNode, loop: TPoint[]): TPoint[][] | null => {
   const dashPattern = getStrokeDashPattern(node);
-  const halfWidth = node.strokeWidth / 2;
+  const strokeWidth = node.strokeWidth ?? 0;
+  const halfWidth = strokeWidth / 2;
   const { inner, outer } = getStrokeOutlinePolygons(loop, halfWidth, true);
 
   switch (getLineStrokeMode(node, dashPattern)) {
     case 'brush':
       return getBoxBrushStrokePolygons(node, buildStrokeRing(outer, inner));
     case 'dynamic':
-      return getBoxDynamicStrokePolygons(outer, inner, { ...getStrokeDynamicValues(node), seed: node.id, strokeWidth: node.strokeWidth });
+      return getBoxDynamicStrokePolygons(outer, inner, { ...getStrokeDynamicValues(node), seed: node.id, strokeWidth });
     case 'dashed':
       return getBoxDashedStrokePolygons(outer, inner, dashPattern as number[], node.strokeDashCap ?? StrokeDashCap.none);
     case 'profile':

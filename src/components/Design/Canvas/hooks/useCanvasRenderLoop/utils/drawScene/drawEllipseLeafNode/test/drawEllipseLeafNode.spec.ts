@@ -9,14 +9,10 @@ import { drawEllipseLeafNode } from '../drawEllipseLeafNode';
 
 const drawBoxPaintsMock = vi.fn();
 const drawBooleanEffectsMock = vi.fn();
-const drawThickEllipseOutlineMock = vi.fn();
 
 vi.mock('../../drawBoxLeafNode/drawBoxPaints', () => ({ drawBoxPaints: (...args: unknown[]): void => drawBoxPaintsMock(...args) }));
 vi.mock('../../drawBooleanLeafNode/drawBooleanEffects', () => ({
   drawBooleanEffects: (...args: unknown[]): void => drawBooleanEffectsMock(...args),
-}));
-vi.mock('utils/canvas/shapes/drawThickEllipseOutline', () => ({
-  drawThickEllipseOutline: (...args: unknown[]): void => drawThickEllipseOutlineMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -63,7 +59,7 @@ describe('drawEllipseLeafNode', () => {
       EffectType.innerShadow,
       EffectType.noise,
     ]);
-    expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
+    expect(drawBoxPaintsMock).toHaveBeenCalledTimes(1);
   });
 
   it('should reuse the same shape for the same node', () => {
@@ -78,34 +74,38 @@ describe('drawEllipseLeafNode', () => {
     expect(drawBoxPaintsMock.mock.calls[0][3]).toBe(drawBoxPaintsMock.mock.calls[1][3]);
   });
 
-  it('should draw the outline in the first visible stroke color when the ellipse has a stroke width', () => {
+  it('should draw the stroke paints over the stroke shape after the inner shadow and before the noise', () => {
     // mock
-    const node = ellipse({ strokeAlign: StrokeAlign.inside, strokeWidth: 3, strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] });
+    const strokes = [{ color: '#00ff00', opacity: 100, type: 'solid' as const }];
+    const node = ellipse({ strokeAlign: StrokeAlign.inside, strokeWidth: 3, strokes });
 
     // action
     draw(node);
 
     // result
-    expect(drawThickEllipseOutlineMock).toHaveBeenCalledWith(
-      gl,
-      program,
-      buffer,
+    expect(drawBoxPaintsMock).toHaveBeenCalledTimes(2);
+    expect(drawBoxPaintsMock.mock.calls[1]).toEqual([
+      context,
       node,
-      '#00ff00',
-      3,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
+      strokes,
+      expect.any(Array),
+      0.5,
+      {},
+      pathOutlineStyles,
+      refs,
+      null,
       0,
-      StrokeAlign.inside,
-    );
+      null,
+      'evenOdd',
+    ]);
   });
 
-  it('should skip the outline without a stroke width', () => {
+  it('should skip the stroke without a stroke width or without stroke paints', () => {
     // action
     draw(ellipse({ strokes: [{ color: '#00ff00', opacity: 100, type: 'solid' }] }));
+    draw(ellipse({ strokeWidth: 3 }));
 
     // result
-    expect(drawThickEllipseOutlineMock).not.toHaveBeenCalled();
+    expect(drawBoxPaintsMock).toHaveBeenCalledTimes(2);
   });
 });

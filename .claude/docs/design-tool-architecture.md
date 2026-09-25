@@ -458,6 +458,12 @@ Two independent render passes, both need updating for a visual change to show up
   full ellipse, arc, ring or rounded corners — flipped and rotated) as a `TBooleanShape`, and
   `drawEllipseLeafNode` runs `drawBoxPaints` over it between the boolean shadow / inner shadow / noise
   drawers. The batched path only takes a full ellipse with solid, unblended fills and no stroke or effects.
+  Its stroke (`getEllipseStrokeShapes`) runs along the same shape, one loop per outline (`getEllipseStrokeLoops`:
+  the shape, or the outer edge and the hole of an uncut ring): Inside / Center / Outside build the band from
+  clean offsets of the loop (`getOffsetPolygon` drops edges that would fold back and bevels overlong miters,
+  so short arc segments at a cut corner leave no holes), and dashed, profile, dynamic and brush strokes run
+  around the offset midline through the closed-loop vector functions. The same shapes feed SVG/PDF export and
+  Outline stroke / booleans (built already turned, so their outline rotation is 0).
   A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
   functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
   Vectors carry the same optional stroke mode fields (Offset vector copies them from the line via

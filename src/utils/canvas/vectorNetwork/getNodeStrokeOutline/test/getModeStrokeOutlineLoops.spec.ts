@@ -70,4 +70,24 @@ describe('getModeStrokeOutlineLoops', () => {
     // result
     expect(loops.length).toBeGreaterThan(4);
   });
+
+  it('should outline an ellipse by its drawn stroke band', () => {
+    // mock
+    const ellipse = {
+      fills: [],
+      height: 100,
+      id: 'e',
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      strokeWidth: 10,
+      type: NodeType.ellipse,
+      width: 100,
+      x: 0,
+      y: 0,
+    } as TEllipseNode;
+
+    // result
+    expect(getModeStrokeOutlineLoops(ellipse)).toHaveLength(2);
+  });
 });

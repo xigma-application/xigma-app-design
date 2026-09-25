@@ -42,7 +42,7 @@ describe('Ellipse behaviors', () => {
     expect(screen.getByText('Layout')).toBeInTheDocument();
   });
 
-  it('should show the corner radius and Arc rows in Appearance, then Fill and Effects', () => {
+  it('should show the corner radius and Arc rows in Appearance, then Fill, Stroke and Effects', () => {
     // before
     renderEllipse();
 
@@ -52,6 +52,7 @@ describe('Ellipse behaviors', () => {
     expect(screen.getByText('Corner radius')).toBeInTheDocument();
     expect(screen.getByLabelText('Apply blend mode')).toBeInTheDocument();
     expect(screen.getByText('Fill')).toBeInTheDocument();
+    expect(screen.getByText('Stroke')).toBeInTheDocument();
     expect(screen.getByText('Effects')).toBeInTheDocument();
   });
 });

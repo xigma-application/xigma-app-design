@@ -2,4 +2,12 @@
 import { NodeType } from 'types/design/enums';
 import { TStrokeableNode } from './types';
 
-export const getStrokeOutlineRotation = (node: TStrokeableNode): number => (node.type === NodeType.line ? 0 : node.rotation);
+export const getStrokeOutlineRotation = (node: TStrokeableNode): number => {
+  switch (node.type) {
+    case NodeType.ellipse:
+    case NodeType.line:
+      return 0;
+    default:
+      return node.rotation;
+  }
+};

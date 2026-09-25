@@ -5,6 +5,13 @@ import { DesignPage } from '../model/DesignPage';
 
 const ellipseArea = { height: 200, width: 200, x: 800, y: 300 };
 
+const readPixelColor = async (page: Page, x: number, y: number): Promise<[number, number, number]> => {
+  const { PNG } = await import('pngjs');
+  const png = PNG.sync.read(await page.screenshot({ clip: { height: 1, width: 1, x, y } }));
+
+  return [png.data[0], png.data[1], png.data[2]];
+};
+
 const readEllipse = (page: Page): Promise<Record<string, unknown>> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
@@ -97,4 +104,48 @@ test('an ellipse takes a second fill and a drop shadow from its panel and draws 
 
   await designPage.click(1500, 900);
   await expect.poll(async () => (await page.screenshot({ clip: shadowArea })).equals(plain)).toBe(false);
+});
+
+test('a stroke added to a cut ellipse follows its shape, fills its corners and moves with its position', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-ellipse-panel-stroke');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawEllipse(800, 300, 1000, 500);
+
+  const sweep = page.getByRole('textbox', { name: 'Sweep' });
+
+  await sweep.fill('75');
+  await sweep.press('Tab');
+  await page.getByLabel('Add stroke').click();
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
+
+    store.dispatch(
+      updateNode({
+        changes: { strokeWidth: 20, strokes: [{ color: '#000000', opacity: 100, type: 'solid' }] },
+        id: rootOrder[rootOrder.length - 1],
+      }),
+    );
+  });
+
+  await expect(page.getByRole('textbox', { name: 'Stroke weight' })).toHaveValue('20');
+
+  await designPage.click(1500, 900);
+
+  const cornerInBand = await readPixelColor(page, 992, 396);
+  const inside = await page.screenshot({ clip: { height: 240, width: 240, x: 780, y: 280 } });
+
+  expect(cornerInBand.every((channel) => channel < 60)).toBe(true);
+
+  await designPage.click(900, 330);
+  await page.getByText('Inside', { exact: true }).click();
+  await page.locator('[class*="DropdownOption__label"]', { hasText: 'Outside' }).click();
+  expect(await readEllipse(page)).toMatchObject({ strokeAlign: 'outside' });
+
+  await designPage.click(1500, 900);
+  await expect.poll(async () => (await page.screenshot({ clip: { height: 240, width: 240, x: 780, y: 280 } })).equals(inside)).toBe(false);
 });
