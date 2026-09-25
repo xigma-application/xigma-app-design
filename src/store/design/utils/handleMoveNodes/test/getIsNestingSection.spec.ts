@@ -55,7 +55,7 @@ describe('getIsNestingSection', () => {
     expect(getIsNestingSection(null, ['a'], {})).toBe(false);
   });
 
-  it('should be true when moving a section into a container node', () => {
+  it('should be true when moving a section into a frame', () => {
     // mock
     const frame = buildFrame({ id: 'frame-1' });
     const section = buildSection({ id: 'a' });
@@ -80,5 +80,14 @@ describe('getIsNestingSection', () => {
     const nodesById: Record<string, TSceneNode> = { a: section, target: targetRect };
 
     expect(getIsNestingSection('target', ['a'], nodesById)).toBe(false);
+  });
+
+  it('should be false when moving a section into another section', () => {
+    // mock
+    const outer = buildSection({ id: 'outer' });
+    const inner = buildSection({ id: 'a' });
+    const nodesById: Record<string, TSceneNode> = { a: inner, outer };
+
+    expect(getIsNestingSection('outer', ['a'], nodesById)).toBe(false);
   });
 });

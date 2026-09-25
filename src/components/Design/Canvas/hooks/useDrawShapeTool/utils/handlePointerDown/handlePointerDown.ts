@@ -20,11 +20,11 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { buildShapeNode } from './buildShapeNode';
-import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
 import { getCandidateShapes, type TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { handleEscape } from '../handleEscape/handleEscape';
 import { resolveNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/resolveNewNodeDropTarget';
+import { resolveSectionNewNodeTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/resolveSectionNewNodeTarget';
 import { screenToWorld } from 'utils/transform/screenToWorld';
 
 const createShapeNode = (
@@ -60,8 +60,7 @@ const resolveShapeDropTarget = (
   const state = appStore.getState();
 
   if (type === NodeType.section) {
-    clearNewNodeDropTarget(canvasRefs);
-    return null;
+    return resolveSectionNewNodeTarget(canvasRefs, point, selectRenderOrderedNodes(state));
   }
 
   return resolveNewNodeDropTarget(canvasRefs, point, selectRenderOrderedNodes(state), selectNodes(state), selectRootOrder(state));

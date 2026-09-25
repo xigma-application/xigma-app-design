@@ -226,7 +226,7 @@ describe('updateDragDropTarget', () => {
     expect((page.nodes[sectionId] as { childIds: string[] }).childIds).toContain(rectId);
   });
 
-  it('should clear the ref and do nothing when the selection contains a section', () => {
+  it('should not reparent a dragged section into the frame under the pointer', () => {
     addFrame(0, 0, 300);
     const sectionId = addSection(500, 500);
     const refs = canvasRefs();
@@ -238,6 +238,57 @@ describe('updateDragDropTarget', () => {
       store.getState(),
       [byId[sectionId]],
       { x: 150, y: 150 },
+      rendered,
+      byId,
+      refs,
+      null,
+      false,
+      dragState(),
+    );
+
+    expect(refs.transform.dropTargetFrameIdRef.current).toBeNull();
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should reparent a dragged section into the section under the pointer', () => {
+    const outerId = addSection(0, 0);
+    const innerId = addSection(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    updateDragDropTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[innerId]],
+      { x: 10, y: 10 },
+      rendered,
+      byId,
+      refs,
+      null,
+      false,
+      dragState(),
+    );
+
+    const page = selectActivePage(store.getState());
+    expect(refs.transform.dropTargetFrameIdRef.current).toBe(outerId);
+    expect(page.nodes[innerId].parentId).toBe(outerId);
+  });
+
+  it('should do nothing when a section is dragged together with a layer that is not a section', () => {
+    addSection(0, 0);
+    const sectionId = addSection(500, 500);
+    const rectId = addRect(600, 600);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    updateDragDropTarget(
+      store.dispatch,
+      store.getState(),
+      [byId[sectionId], byId[rectId]],
+      { x: 10, y: 10 },
       rendered,
       byId,
       refs,

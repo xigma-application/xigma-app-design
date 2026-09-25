@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSceneNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { canWrapInSection } from '../canWrapInSection';
@@ -18,39 +18,52 @@ const makeRectangle = (id: string, parentId: string | null): TRectangleNode => (
   y: 0,
 });
 
+const box = { height: 10, rotation: 0, width: 10, x: 0, y: 0 };
 const section: TSectionNode = {
+  ...box,
   childIds: [],
   fill: '#ffffff',
-  height: 10,
   id: 'section',
   name: 'Section',
   parentId: null,
-  rotation: 0,
   type: NodeType.section,
-  width: 10,
-  x: 0,
-  y: 0,
 };
+const frame: TFrameNode = {
+  ...box,
+  childIds: [],
+  clipContent: true,
+  fills: [],
+  id: 'frame',
+  name: 'Frame',
+  parentId: null,
+  type: NodeType.frame,
+};
+const nodes: Record<string, TSceneNode> = { frame, section };
 
 describe('canWrapInSection', () => {
-  it('should allow layers at the top level of the page', () => {
+  it('should allow layers and sections at the top level of the page', () => {
     // action / result
-    expect(canWrapInSection([makeRectangle('a', null), makeRectangle('b', null)])).toBe(true);
+    expect(canWrapInSection([makeRectangle('a', null), section], nodes)).toBe(true);
   });
 
-  it('should not allow a layer inside a frame, group or section', () => {
+  it('should allow layers that sit directly in the same section', () => {
     // action / result
-    expect(canWrapInSection([makeRectangle('a', null), makeRectangle('b', 'parent')])).toBe(false);
+    expect(canWrapInSection([makeRectangle('a', 'section'), makeRectangle('b', 'section')], nodes)).toBe(true);
   });
 
-  it('should not allow a selected section', () => {
+  it('should not allow layers inside a frame', () => {
     // action / result
-    expect(canWrapInSection([makeRectangle('a', null), section])).toBe(false);
+    expect(canWrapInSection([makeRectangle('a', 'frame')], nodes)).toBe(false);
+  });
+
+  it('should not allow layers from different parents', () => {
+    // action / result
+    expect(canWrapInSection([makeRectangle('a', null), makeRectangle('b', 'section')], nodes)).toBe(false);
   });
 
   it('should not allow an empty selection or a missing node', () => {
     // action / result
-    expect(canWrapInSection([])).toBe(false);
-    expect(canWrapInSection([undefined as unknown as TSceneNode])).toBe(false);
+    expect(canWrapInSection([], nodes)).toBe(false);
+    expect(canWrapInSection([undefined], nodes)).toBe(false);
   });
 });

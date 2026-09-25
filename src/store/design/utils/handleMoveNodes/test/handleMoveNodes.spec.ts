@@ -296,7 +296,7 @@ describe('handleMoveNodes', () => {
     expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual([]);
   });
 
-  it('should not move a section into another section', () => {
+  it('should move a section into another section', () => {
     // mock
     const outer = buildSection({ id: 'outer' });
     const inner = buildSection({ id: 'inner' });
@@ -305,11 +305,24 @@ describe('handleMoveNodes', () => {
     // action
     handleMoveNodes(state, { nodeIds: ['inner'], targetIndex: 0, targetParentId: 'outer' });
 
-    // result — nothing moved
+    // result
     const page = getActivePage(state);
-    expect(page.rootOrder).toEqual(['outer', 'inner']);
-    expect(page.nodes.inner.parentId).toBeNull();
-    expect((page.nodes.outer as TSectionNode).childIds).toEqual([]);
+    expect(page.rootOrder).toEqual(['outer']);
+    expect(page.nodes.inner.parentId).toBe('outer');
+    expect((page.nodes.outer as TSectionNode).childIds).toEqual(['inner']);
+  });
+
+  it('should not move a section into a frame', () => {
+    // mock
+    const frame = buildFrame({ id: 'frame-1' });
+    const section = buildSection({ id: 'section-1' });
+    const state = buildState({ nodes: { 'frame-1': frame, 'section-1': section }, rootOrder: ['frame-1', 'section-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['section-1'], targetIndex: 0, targetParentId: 'frame-1' });
+
+    // result — nothing moved
+    expect(getActivePage(state).nodes['section-1'].parentId).toBeNull();
   });
 
   it('should not move a section into a group', () => {

@@ -8,33 +8,39 @@ import { TDesignState } from '../../types';
 
 // utils
 import { canWrapInSection } from './canWrapInSection';
+import { finalizeGroupPlacement } from '../handleGroupNodes/finalizeGroupPlacement';
 import { getActivePage } from '../getActivePage';
 import { getNextSectionName } from '../getNextSectionName';
-import { handleGroupNodes } from '../handleGroupNodes/handleGroupNodes';
+import { getNodesBoundingBox } from '../getNodesBoundingBox';
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 
 export const handleWrapInSection = (state: TDesignState, sectionId: string): void => {
   const page = getActivePage(state);
+  const selectedNodes = page.selectedIds.map((id) => page.nodes[id]);
 
-  if (canWrapInSection(page.selectedIds.map((id) => page.nodes[id]))) {
-    const name = getNextSectionName(page.nodes);
-    handleGroupNodes(state, sectionId);
-    const group = page.nodes[sectionId];
+  if (canWrapInSection(selectedNodes, page.nodes)) {
+    const { parentId } = selectedNodes[0];
+    const parent = parentId ? page.nodes[parentId] : null;
+    const containerOrder = parent && isContainerNode(parent) ? parent.childIds : page.rootOrder;
+    const memberIds = containerOrder.filter((id) => page.selectedIds.includes(id));
+    const bounds = getNodesBoundingBox(memberIds.map((id) => page.nodes[id]));
 
-    if (group?.type === NodeType.group) {
-      page.nodes[sectionId] = {
-        childIds: group.childIds,
-        fill: SECTION_FILL,
-        height: group.height + WRAP_IN_SECTION_PADDING * 2,
-        id: sectionId,
-        name,
-        parentId: group.parentId,
-        rotation: 0,
-        type: NodeType.section,
-        width: group.width + WRAP_IN_SECTION_PADDING * 2,
-        x: group.x - WRAP_IN_SECTION_PADDING,
-        y: group.y - WRAP_IN_SECTION_PADDING,
-      };
-      page.selectedIds = [sectionId];
-    }
+    page.nodes[sectionId] = {
+      childIds: memberIds,
+      fill: SECTION_FILL,
+      height: bounds.height + WRAP_IN_SECTION_PADDING * 2,
+      id: sectionId,
+      name: getNextSectionName(page.nodes),
+      parentId,
+      rotation: 0,
+      type: NodeType.section,
+      width: bounds.width + WRAP_IN_SECTION_PADDING * 2,
+      x: bounds.x - WRAP_IN_SECTION_PADDING,
+      y: bounds.y - WRAP_IN_SECTION_PADDING,
+    };
+    memberIds.forEach((id) => {
+      page.nodes[id].parentId = sectionId;
+    });
+    finalizeGroupPlacement(page, parentId, sectionId, memberIds);
   }
 };

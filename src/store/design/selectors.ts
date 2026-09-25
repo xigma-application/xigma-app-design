@@ -191,7 +191,7 @@ export const selectAppearanceNodes = createSelector([selectSelectedNodes, select
   expandGroupNodes(selectedNodes.filter(Boolean), nodes),
 );
 
-export const selectCanWrapInSection = createSelector([selectSelectedNodes], canWrapInSection);
+export const selectCanWrapInSection = createSelector([selectSelectedNodes, selectNodes], canWrapInSection);
 
 export const selectCanSelectMatchingLayers = createSelector([selectSelectedIds, selectNodes], canSelectMatchingLayers);
 

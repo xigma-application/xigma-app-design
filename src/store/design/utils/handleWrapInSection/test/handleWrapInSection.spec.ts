@@ -8,7 +8,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 const makeRectangle = (id: string, x: number, y: number): TRectangleNode => ({
   fills: [],
@@ -83,5 +83,43 @@ describe('handleWrapInSection', () => {
     // result
     expect(selectNodes(store.getState()).inFrame.parentId).toBe('frame');
     expect(selectSelectedIds(store.getState())).toEqual(['inFrame']);
+  });
+
+  it('should wrap layers inside a section in a new section nested in that section', () => {
+    // mock
+    const outerSectionId = selectNodes(store.getState()).a.parentId as string;
+    store.dispatch(setSelection(['a', 'b']));
+
+    // action
+    store.dispatch(wrapInSection());
+
+    // result
+    const [innerSectionId] = selectSelectedIds(store.getState());
+    const nodes = selectNodes(store.getState());
+    expect(nodes[innerSectionId]).toMatchObject({ childIds: ['a', 'b'], parentId: outerSectionId, type: NodeType.section, x: 75, y: 75 });
+    expect((nodes[outerSectionId] as TSectionNode).childIds).toEqual([innerSectionId]);
+  });
+
+  it('should wrap a selected top-level section in a new section around it', () => {
+    // mock
+    const outerSectionId = selectActivePage(store.getState()).rootOrder.find(
+      (id) => selectNodes(store.getState())[id].type === NodeType.section,
+    );
+    store.dispatch(setSelection([outerSectionId as string]));
+
+    // action
+    store.dispatch(wrapInSection());
+
+    // result
+    const [wrapperId] = selectSelectedIds(store.getState());
+    expect(selectNodes(store.getState())[wrapperId]).toMatchObject({
+      childIds: [outerSectionId],
+      height: 190,
+      parentId: null,
+      type: NodeType.section,
+      width: 240,
+      x: 50,
+      y: 50,
+    });
   });
 });

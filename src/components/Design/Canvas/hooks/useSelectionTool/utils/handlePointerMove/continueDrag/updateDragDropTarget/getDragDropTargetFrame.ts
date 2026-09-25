@@ -3,7 +3,7 @@ import { getIsDescendantOfMovedNodes } from 'store/design/utils/handleMoveNodes/
 import { isDropTargetContainer } from 'store/design/utils/nodeHierarchy/isDropTargetContainer';
 
 // types
-import { TSceneNode } from 'types/design/types';
+import { TFrameNode, TSceneNode, TSectionNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -15,11 +15,12 @@ export const getDragDropTargetFrame = (
   point: TPoint,
   renderOrderedNodes: TSceneNode[],
   nodesById: Record<string, TSceneNode>,
+  isTarget: (node: TSceneNode) => node is TFrameNode | TSectionNode = isDropTargetContainer,
 ): string | null => {
   for (let index = renderOrderedNodes.length - 1; index >= 0; index -= 1) {
     const node = renderOrderedNodes[index];
 
-    if (isDropTargetContainer(node) && !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)) {
+    if (isTarget(node) && !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)) {
       const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
 
       if (isPointInRect(getUnrotatedQueryPoint(point, bounds, node.rotation), bounds)) {

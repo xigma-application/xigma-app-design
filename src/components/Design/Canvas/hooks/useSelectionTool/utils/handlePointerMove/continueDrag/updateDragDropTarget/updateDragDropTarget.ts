@@ -2,14 +2,15 @@
 import { AppDispatch, RootState } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { isSectionNode } from 'utils/canvas/signals/isSectionNode';
 import { resolveDragReparentTarget } from './resolveDragReparentTarget';
+import { resolveSectionDragReparentTarget } from './resolveSectionDragReparentTarget';
 
 export const updateDragDropTarget = (
   dispatch: AppDispatch,
@@ -27,22 +28,28 @@ export const updateDragDropTarget = (
   canvasRefs.transform.autoLayoutDropTargetRef.current = null;
   canvasRefs.transform.gridDropTargetRef.current = null;
 
-  const canReparent = selectedNodes.length > 0 && !selectedNodes.some((node) => node.type === NodeType.section);
+  const isEverySection = selectedNodes.length > 0 && selectedNodes.every(isSectionNode);
+  const canReparent = selectedNodes.length > 0 && !selectedNodes.some(isSectionNode);
 
-  if (canReparent) {
-    resolveDragReparentTarget(
-      dispatch,
-      state,
-      selectedNodes,
-      point,
-      renderOrderedNodes,
-      nodesById,
-      canvasRefs,
-      grabbedNodeId,
-      isModifierHeld,
-      dragState,
-    );
-  } else {
-    canvasRefs.transform.autoLayoutReorderPreviewRef.current = null;
+  switch (true) {
+    case canReparent:
+      resolveDragReparentTarget(
+        dispatch,
+        state,
+        selectedNodes,
+        point,
+        renderOrderedNodes,
+        nodesById,
+        canvasRefs,
+        grabbedNodeId,
+        isModifierHeld,
+        dragState,
+      );
+      break;
+    case isEverySection:
+      resolveSectionDragReparentTarget(dispatch, state, selectedNodes, point, renderOrderedNodes, nodesById, canvasRefs);
+      break;
+    default:
+      canvasRefs.transform.autoLayoutReorderPreviewRef.current = null;
   }
 };

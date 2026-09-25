@@ -4,6 +4,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getDragDropTargetFrame } from '../getDragDropTargetFrame';
+import { isSectionNode } from 'utils/canvas/signals/isSectionNode';
 
 const rect = (id: string, x: number, y: number, width = 50, height = 50, parentId: string | null = null): TSceneNode =>
   ({
@@ -153,5 +154,16 @@ describe('getDragDropTargetFrame', () => {
     const result = getDragDropTargetFrame(['a'], { x: 180, y: 90 }, [draggedNode, group], nodesById);
 
     expect(result).toBeNull();
+  });
+
+  it('should skip a frame above a section when only sections are valid targets', () => {
+    const draggedNode = rect('a', 0, 0);
+    const targetSection = section('s1', 100, 0, 200, 200);
+    const coveringFrame = frame('f1', 100, 0, 200, 200);
+    const nodesById = { a: draggedNode, f1: coveringFrame, s1: targetSection };
+
+    const result = getDragDropTargetFrame(['a'], { x: 180, y: 90 }, [draggedNode, targetSection, coveringFrame], nodesById, isSectionNode);
+
+    expect(result).toBe('s1');
   });
 });
