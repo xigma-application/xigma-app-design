@@ -1,6 +1,6 @@
 ---
 name: xigma-unit-coverage
-description: xigma enforces 100% unit test coverage (branches/functions/lines/statements) via vite.config.ts's coverage.thresholds. Load before saying a change is "done" — run `npm run test:coverage` and add a targeted test for any line the report flags, rather than only running the plain `vitest run` suite. Finish every change with `npm run prettier:write`, not just coverage-driven ones.
+description: xigma enforces 100% unit test coverage (branches/functions/lines/statements) via vite.config.ts's coverage.thresholds. Load before saying a change is "done" — run `npm run test:coverage` and add a targeted test for any line the report flags, rather than only running the plain `vitest run` suite. Finish every change with `npm run format:write`, not just coverage-driven ones.
 ---
 
 # xigma Unit Coverage — 100% Enforced
@@ -46,7 +46,7 @@ everything else, including every hook/util/component you touch, is held to the s
    100%, not that *this specific file's own test(s)* are what's carrying it. If a file's tests live
    in more than one spec (a dedicated spec plus an integration/hook-level spec that also exercises
    it), include all of them in that file's scoped run rather than just the dedicated one.
-6. Always finish by running `npm run prettier:write` — every change, regardless of whether coverage
+6. Always finish by running `npm run format:write` — every change, regardless of whether coverage
    was actually the thing that needed fixing. This is the last step, after tests/tsc are already
    green, not a substitute for them.
 
@@ -55,7 +55,7 @@ everything else, including every hook/util/component you touch, is held to the s
 Once `npm run test:coverage` passes clean (100% across all four metrics) after the actual
 unit-test-relevant changes are in, a **later** step in the same task that doesn't touch any `src/**`
 `.ts`/`.tsx` file (implementation or `.spec.ts(x)`) does not need a second full run. This includes:
-running `npm run prettier:write` (formatting-only diffs can't change coverage), adding/editing an
+running `npm run format:write` (formatting-only diffs can't change coverage), adding/editing an
 `e2e/**` Playwright spec, updating `TEST_CASES.md`, or writing/updating `.claude/docs/**` notes. Run
 `tsc -p tsconfig.app.json --noEmit` (cheap) and/or `npx playwright test` for e2e-only follow-up work
 instead of paying for the full ~90s+ coverage run again. Only re-trigger `test:coverage` if a `src/**`

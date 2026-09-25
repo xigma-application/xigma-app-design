@@ -142,7 +142,7 @@ to its branch first, then re-pulled here — there is no local symlink/workspace
 | `npm run test:e2e:ui`                       | Run e2e tests with Playwright's UI runner               |
 | `npm run lint` / `lint:fix`                 | ESLint check / autofix                                  |
 | `npm run stylelint:check` / `stylelint:fix` | Stylelint check / autofix for `.scss`                   |
-| `npm run prettier:check` / `prettier:write` | Prettier check / autofix                                |
+| `npm run format:check` / `format:write`     | Oxfmt check / autofix                                   |
 | `npm run generate:font-atlas`               | Regenerate the MSDF font atlas from the source TTF      |
 | `npm run xigma:pull`                        | Re-pull the `@xigma/*` packages from `xigma-app-shared` |
 
@@ -178,7 +178,7 @@ Two independent layers:
 
 ## Code quality gates
 
-ESLint, Stylelint (SCSS, BEM ordering), Prettier, and `tsc -b` are all expected to be clean before
+ESLint, Stylelint (SCSS, BEM ordering), Oxfmt, and `tsc -b` are all expected to be clean before
 a change is considered done — see the scripts above for the check/fix commands for each.
 
 ## Roadmap

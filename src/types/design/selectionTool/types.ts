@@ -176,7 +176,8 @@ export type TVectorMultiSelectRotateDragState = {
 export type TVectorCutHit = { nodeId: string; segmentId: string; t: number };
 
 export type TVectorCutDragState =
-  { hit: TVectorCutHit | null; lineStart: TPoint; status: 'pending' } | { lineStart: TPoint; status: 'dividing' };
+  | { hit: TVectorCutHit | null; lineStart: TPoint; status: 'pending' }
+  | { lineStart: TPoint; status: 'dividing' };
 
 export type TVectorEraseDragState = { axisLock: TAxisLock | null; lastPoint: TPoint; shiftAnchor: TPoint | null };
 

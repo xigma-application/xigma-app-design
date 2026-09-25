@@ -4,7 +4,14 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 export type TPaintType =
-  'gradient-angular' | 'gradient-diamond' | 'gradient-linear' | 'gradient-radial' | 'image' | 'pattern' | 'solid' | 'video';
+  | 'gradient-angular'
+  | 'gradient-diamond'
+  | 'gradient-linear'
+  | 'gradient-radial'
+  | 'image'
+  | 'pattern'
+  | 'solid'
+  | 'video';
 
 export type TImageScaleMode = 'fill' | 'fit' | 'stretch' | 'tile';
 

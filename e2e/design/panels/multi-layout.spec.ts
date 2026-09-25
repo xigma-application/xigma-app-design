@@ -177,7 +177,9 @@ test('with two rectangles selected, typing a horizontal Spacing moves the second
   expect(xs[1] - xs[0]).toBe(120);
 });
 
-test('with a grid of rectangles selected, Spacing shows the gap between columns and rows and a typed value moves whole columns', async ({ page }) => {
+test('with a grid of rectangles selected, Spacing shows the gap between columns and rows and a typed value moves whole columns', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-multi-layout-spacing-grid');
