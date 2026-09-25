@@ -143,3 +143,42 @@ test('a line selected with a rectangle shows the Mixed panel without Fill, and a
 
   await expect.poll(async () => (await readNodes(page)).map((node) => node.strokeWidth)).toEqual([7, 7]);
 });
+
+test('an arrow drawn with the Arrow tool shows the Line panel titled Arrow, and turns back into Line once its arrowhead is removed', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-line-panel-arrow-title');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectToolFromDropdown('rectangle', 'Arrow');
+  await designPage.pointerDown(800, 400);
+  await designPage.pointerMove(1000, 400);
+  await designPage.pointerUp();
+
+  const header = page.locator('[data-test-component-header="line"]');
+
+  await expect(header.getByText('Arrow', { exact: true })).toBeVisible();
+  await expect(page.getByText('Line arrow', { exact: true })).toBeVisible();
+
+  await page.getByText('Line arrow', { exact: true }).click();
+  await page.getByText('None', { exact: true }).last().click();
+
+  await expect(header.getByText('Line', { exact: true })).toBeVisible();
+});
+
+test('an arrow selected with a plain line keeps the Line panel but is titled by its count', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-line-panel-arrow-and-line');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawLine(800, 400, 1000, 400);
+  await designPage.drawLine(800, 500, 1000, 500);
+  await selectAll(page, [{ endPoint: 'lineArrow' }]);
+
+  const header = page.locator('[data-test-component-header="line"]');
+
+  await expect(header.getByText('2 selected', { exact: true })).toBeVisible();
+  await expect(page.getByText('Start point')).toBeVisible();
+});

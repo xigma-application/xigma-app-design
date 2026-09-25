@@ -1482,3 +1482,5 @@ There is no Fill section.
 | 634 | Several lines with different weights show Mixed, and an end point picked applies to all                                                                       |  ✅  | ✅ `line-panel.spec.ts` |
 | 635 | Edit object in the Line panel "…" menu (Edit object, then a disabled Offset vector, no component items) turns the line into a vector and enters point editing |  ✅  | ✅ `line-panel.spec.ts` |
 | 638 | A line selected with a rectangle shows the Mixed panel without Fill, and a typed stroke weight applies to both                                                |  ✅  | ✅ `line-panel.spec.ts` |
+| 639 | An arrow shows the Line panel titled Arrow (every selected line has an arrowhead at an end), and turns back into Line once the arrowhead is removed           |  ✅  | ✅ `line-panel.spec.ts` |
+| 640 | An arrow selected with a plain line keeps the Line panel, titled by the layer count ("2 selected")                                                            |  ✅  | ✅ `line-panel.spec.ts` |

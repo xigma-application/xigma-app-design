@@ -925,6 +925,7 @@
   "design.rightPanel.panelProperties.section.sectionHeader.typeMenu.frame": "Frame",
   "design.rightPanel.panelProperties.section.sectionHeader.typeMenu.group": "Group",
   "design.rightPanel.panelProperties.line.header.offsetVector": "Offset vector",
+  "design.rightPanel.panelProperties.line.header.arrowLabel": "Arrow",
   "design.rightPanel.panelProperties.line.header.label": "Line",
   "design.rightPanel.panelProperties.line.strokeSettings.startPoint.label": "Start point",
   "design.rightPanel.panelProperties.line.strokeSettings.endPoint.label": "End point",

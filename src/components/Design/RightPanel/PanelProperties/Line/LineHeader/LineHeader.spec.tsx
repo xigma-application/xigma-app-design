@@ -13,7 +13,7 @@ import { addNodes, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { LineEndpoint, NodeType } from 'types/design/enums';
 
 const renderHeader = (): void => {
   render(
@@ -27,10 +27,11 @@ const renderHeader = (): void => {
   );
 };
 
-const addLines = (ids: string[]): void => {
+const addLines = (ids: string[], endPoint = LineEndpoint.none): void => {
   store.dispatch(
     addNodes({
       nodes: ids.map((id) => ({
+        endPoint,
         height: 0,
         id,
         name: id,
@@ -72,5 +73,41 @@ describe('LineHeader behaviors', () => {
 
     // result
     expect(screen.queryByLabelText('Create component')).not.toBeInTheDocument();
+  });
+
+  it('should title an arrow, and every line being an arrow, as Arrow', () => {
+    // mock
+    addLines(['headerArrowA', 'headerArrowB'], LineEndpoint.lineArrow);
+    store.dispatch(setSelection(['headerArrowA', 'headerArrowB']));
+
+    // before
+    renderHeader();
+
+    // result
+    expect(screen.getByText('Arrow')).toBeInTheDocument();
+  });
+
+  it('should count the layers as selected when arrows and plain lines are mixed', () => {
+    // mock
+    addLines(['headerMixArrow'], LineEndpoint.triangleArrow);
+    addLines(['headerMixLine']);
+    store.dispatch(setSelection(['headerMixArrow', 'headerMixLine']));
+
+    // before
+    renderHeader();
+
+    // result
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+  });
+
+  it('should title the header Line with nothing selected', () => {
+    // mock
+    store.dispatch(setSelection([]));
+
+    // before
+    renderHeader();
+
+    // result
+    expect(screen.getByText('Line')).toBeInTheDocument();
   });
 });

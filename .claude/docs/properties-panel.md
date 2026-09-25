@@ -953,7 +953,8 @@ component button, no dropdown) → `Common/PositionSection` → a bare `UITools.
 ## `Line/`
 
 `Line.tsx` = `LineHeader` (component, mask, boolean buttons + its own "…" `LineMoreActionsButton`:
-Edit object, a separator and a disabled Offset vector placeholder, no component items) → `PositionSection` → Layout (`ColumnDimensions isHeightDisabled`, since a
+Edit object, a separator and a disabled Offset vector placeholder, no component items) — titled "Arrow" instead of "Line"
+when every selected line has an arrowhead (`isArrowLine`, any of the `ARROW_ENDPOINTS`) at either end, and "N selected" (the Mixed label) when arrows and plain lines are selected together (`getLineHeaderLabel`) → `PositionSection` → Layout (`ColumnDimensions isHeightDisabled`, since a
 line's height is always 0) → `AppearanceSection withCornerRadius={false}` → `FillSection
 property="strokes"` with `LineStrokeSettings` as its footer → `EffectsSection` → `Export`. No Fill.
 `LineStrokeSettings` shows a disabled Position dropdown fixed at Center, the Weight field and the
