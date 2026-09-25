@@ -15,6 +15,7 @@ import Polygon from './Polygon/Polygon';
 import Rectangle from './Rectangle/Rectangle';
 import Section from './Section/Section';
 import Slice from './Slice/Slice';
+import Star from './Star/Star';
 
 // hooks
 import { useCloseGridSettingsPanelOnReselect } from './hooks/useCloseGridSettingsPanelOnReselect';
@@ -46,6 +47,7 @@ const PanelProperties: FC = () => {
   const isEveryLineSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.line);
   const isEveryEllipseSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.ellipse);
   const isEveryPolygonSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.polygon);
+  const isEveryStarSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.star);
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -77,6 +79,8 @@ const PanelProperties: FC = () => {
       return <Ellipse />;
     case isEveryPolygonSelected:
       return <Polygon />;
+    case isEveryStarSelected:
+      return <Star />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

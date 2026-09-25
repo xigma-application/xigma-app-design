@@ -8,7 +8,7 @@ import { NodeType } from 'types/design/enums';
 import { TPolygonNode } from 'types/design/types';
 
 // utils
-import { handlePolygonCountBlur } from '../handlePolygonCountBlur';
+import { handleShapeCountBlur } from '../handleShapeCountBlur';
 
 const polygon: TPolygonNode = {
   fills: [],
@@ -28,13 +28,13 @@ const polygon: TPolygonNode = {
 
 const blurEvent = (value: string): FocusEvent<HTMLInputElement> => ({ target: { value } }) as unknown as FocusEvent<HTMLInputElement>;
 
-describe('handlePolygonCountBlur', () => {
+describe('handleShapeCountBlur', () => {
   it('should commit a typed count', () => {
     // mock
     const dispatch = vi.fn() as unknown as AppDispatch;
 
     // before
-    handlePolygonCountBlur(blurEvent('8'), dispatch, [polygon], '5');
+    handleShapeCountBlur(blurEvent('8'), dispatch, [polygon], '5');
 
     // result
     expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ payload: { changes: { sides: 8 }, id: 'polygon' } }));
@@ -46,7 +46,7 @@ describe('handlePolygonCountBlur', () => {
     const event = blurEvent('abc');
 
     // before
-    handlePolygonCountBlur(event, dispatch, [polygon], '5');
+    handleShapeCountBlur(event, dispatch, [polygon], '5');
 
     // result
     expect(dispatch).not.toHaveBeenCalled();

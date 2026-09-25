@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
-import PolygonHeader from './PolygonHeader';
+import ShapeHeader from './ShapeHeader';
 import { TooltipProvider } from 'shared';
 
 // core
@@ -16,12 +16,12 @@ import { store } from 'store';
 import { NodeType } from 'types/design/enums';
 import { TPolygonNode } from 'types/design/types';
 
-const renderPolygonHeader = (): ReturnType<typeof render> =>
+const renderShapeHeader = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <CanvasRefsProvider>
         <TooltipProvider>
-          <PolygonHeader />
+          <ShapeHeader e2eValue="polygon" label="Polygon" />
         </TooltipProvider>
       </CanvasRefsProvider>
     </Provider>,
@@ -60,20 +60,20 @@ beforeEach(() => {
   store.dispatch(setSelection([]));
 });
 
-describe('PolygonHeader snapshots', () => {
-  it('should render the Polygon label with the create component button', () => {
+describe('ShapeHeader snapshots', () => {
+  it('should render the given label with the create component button', () => {
     // before
-    const { asFragment } = renderPolygonHeader();
+    const { asFragment } = renderShapeHeader();
 
     // result
     expect(asFragment()).toMatchSnapshot();
   });
 });
 
-describe('PolygonHeader behaviors', () => {
-  it('should render the Polygon label', () => {
+describe('ShapeHeader behaviors', () => {
+  it('should render the given label', () => {
     // before
-    renderPolygonHeader();
+    renderShapeHeader();
 
     // result
     expect(screen.getByText('Polygon')).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('PolygonHeader behaviors', () => {
 
   it('should render the create component button and no element type menu', () => {
     // before
-    renderPolygonHeader();
+    renderShapeHeader();
 
     // result
     expect(screen.getByLabelText('Create component')).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe('PolygonHeader behaviors', () => {
     store.dispatch(setSelection(['polygonHeaderA']));
 
     // before
-    const { unmount } = renderPolygonHeader();
+    const { unmount } = renderShapeHeader();
 
     // result
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('PolygonHeader behaviors', () => {
     // action
     unmount();
     store.dispatch(setSelection(['polygonHeaderA', 'polygonHeaderB']));
-    renderPolygonHeader();
+    renderShapeHeader();
 
     // result
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('PolygonHeader behaviors', () => {
     store.dispatch(setSelection(['polygonHeaderA', 'polygonHeaderNested']));
 
     // before
-    renderPolygonHeader();
+    renderShapeHeader();
 
     // result
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();

@@ -16,30 +16,30 @@ import { UITools } from 'shared';
 
 // others
 import { translationNameSpace } from '../Common/constants';
-import { translationNameSpace as polygonNameSpace } from './constants';
+import { translationNameSpace as starNameSpace } from './constants';
 
 // types
 import { NodeType } from 'types/design/enums';
 
-const Polygon: FC = () => {
+const Star: FC = () => {
   const { t } = useTranslation();
 
   return (
     <Fragment>
-      <ShapeHeader e2eValue="polygon" label={t(`${polygonNameSpace}.header.label`)} />
+      <ShapeHeader e2eValue="star" label={t(`${starNameSpace}.header.label`)} />
       <PositionSection />
       <UITools.Section e2eValue="layout" label={t(`${translationNameSpace}.layoutSection.label`)}>
         <ColumnDimensions />
         <ColumnSpacing />
         <ColumnGridChildSpan />
       </UITools.Section>
-      <AppearanceSection countType={NodeType.polygon} shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} />
+      <AppearanceSection countType={NodeType.star} shapeCornerRadiusType={NodeType.star} withCornerRadius={false} />
       <FillSection />
-      <FillSection footer={<ShapeStrokeSettings type={NodeType.polygon} />} property="strokes" />
+      <FillSection footer={<ShapeStrokeSettings type={NodeType.star} />} property="strokes" />
       <EffectsSection />
       <Export />
     </Fragment>
   );
 };
 
-export default Polygon;
+export default Star;

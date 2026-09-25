@@ -23,21 +23,17 @@ import { MIXED_LABEL } from 'components/Design/RightPanel/PanelProperties/Common
 import { translationNameSpace } from './constants';
 
 // types
+import { TCountNodeType } from './Count/types';
 import { TShapeNodeType } from '../types';
 
 export type TAppearanceSectionProps = {
+  countType?: TCountNodeType;
   shapeCornerRadiusType?: TShapeNodeType;
   withArc?: boolean;
   withCornerRadius?: boolean;
-  withCount?: boolean;
 };
 
-const AppearanceSection: FC<TAppearanceSectionProps> = ({
-  shapeCornerRadiusType,
-  withArc = false,
-  withCornerRadius = true,
-  withCount = false,
-}) => {
+const AppearanceSection: FC<TAppearanceSectionProps> = ({ countType, shapeCornerRadiusType, withArc = false, withCornerRadius = true }) => {
   const { t } = useTranslation();
   const opacity = useOpacity();
   const cornerRadius = useCornerRadius();
@@ -52,7 +48,7 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({
             ? [t(`${translationNameSpace}.opacity.ariaLabel`), t(`${translationNameSpace}.cornerRadius.ariaLabel`)]
             : [t(`${translationNameSpace}.opacity.ariaLabel`)]
         }
-        withBottomMargin={(withCornerRadius && cornerRadius.isIndividual) || withArc || withCount}
+        withBottomMargin={(withCornerRadius && cornerRadius.isIndividual) || withArc || countType !== undefined}
       >
         <OpacityField displayValue={opacity.displayValue} onBlur={opacity.onBlur} onScrub={opacity.onScrub} value={opacity.value} />
         {withCornerRadius && (
@@ -79,7 +75,7 @@ const AppearanceSection: FC<TAppearanceSectionProps> = ({
         </UITools.SectionColumn>
       )}
       {withArc && <ArcRow />}
-      {withCount && <CountRow />}
+      {countType && <CountRow type={countType} />}
       <BlendModeRow />
     </UITools.Section>
   );

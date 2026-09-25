@@ -3,7 +3,7 @@ import { FocusEvent, ReactNode } from 'react';
 import { Provider } from 'react-redux';
 
 // hooks
-import { usePolygonCount } from '../usePolygonCount';
+import { useShapeCount } from '../useShapeCount';
 
 // store
 import { addNodes, setSelection } from 'store/design/slice';
@@ -12,7 +12,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPolygonNode } from 'types/design/types';
+import { TPolygonNode, TStarNode } from 'types/design/types';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -39,13 +39,13 @@ const selectPolygons = (polygons: TPolygonNode[]): void => {
 
 const getSides = (id: string): number => (selectActivePage(store.getState()).nodes[id] as TPolygonNode).sides;
 
-describe('usePolygonCount', () => {
+describe('useShapeCount', () => {
   it('should show the count and commit a typed one', () => {
     // mock
     selectPolygons([makePolygon('countA', 3)]);
 
     // before
-    const { result } = renderHook(() => usePolygonCount(), { wrapper });
+    const { result } = renderHook(() => useShapeCount(NodeType.polygon), { wrapper });
 
     // action
     act(() => result.current.onBlur({ target: { value: '6' } } as unknown as FocusEvent<HTMLInputElement>));
@@ -60,7 +60,7 @@ describe('usePolygonCount', () => {
     selectPolygons([makePolygon('countB', 3), makePolygon('countC', 5)]);
 
     // before
-    const { result } = renderHook(() => usePolygonCount(), { wrapper });
+    const { result } = renderHook(() => useShapeCount(NodeType.polygon), { wrapper });
 
     // action
     act(() => result.current.onScrub(4));
@@ -76,9 +76,27 @@ describe('usePolygonCount', () => {
     store.dispatch(setSelection([]));
 
     // before
-    const { result } = renderHook(() => usePolygonCount(), { wrapper });
+    const { result } = renderHook(() => useShapeCount(NodeType.polygon), { wrapper });
 
     // result
     expect(result.current.value).toBe(0);
+  });
+
+  it('should read and set the points of the selected stars', () => {
+    // mock
+    const star: TStarNode = { ...makePolygon('countStar', 3), points: 5, ratio: 0.5, type: NodeType.star };
+
+    store.dispatch(addNodes({ nodes: [star], rootIds: [star.id] }));
+    store.dispatch(setSelection([star.id]));
+
+    // before
+    const { result } = renderHook(() => useShapeCount(NodeType.star), { wrapper });
+
+    // action
+    act(() => result.current.onScrub(7));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[star.id] as TStarNode).points).toBe(7);
+    expect(result.current.displayValue).toBe('7');
   });
 });

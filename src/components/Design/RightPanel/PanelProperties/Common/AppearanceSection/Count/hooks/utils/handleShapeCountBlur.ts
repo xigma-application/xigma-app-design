@@ -4,22 +4,22 @@ import { FocusEvent } from 'react';
 import { AppDispatch } from 'store';
 
 // types
-import { TPolygonNode } from 'types/design/types';
+import { TCountNode } from '../../types';
 
 // utils
-import { commitPolygonCount } from './commitPolygonCount';
+import { commitShapeCount } from './commitShapeCount';
 import { parseArcValue } from '../../../Arc/hooks/utils/parseArcValue';
 
-export const handlePolygonCountBlur = (
+export const handleShapeCountBlur = (
   event: FocusEvent<HTMLInputElement>,
   dispatch: AppDispatch,
-  nodes: TPolygonNode[],
+  nodes: TCountNode[],
   displayValue: string,
 ): void => {
   const parsed = parseArcValue(event.target.value);
 
   if (parsed !== null) {
-    commitPolygonCount(dispatch, nodes, () => parsed);
+    commitShapeCount(dispatch, nodes, () => parsed);
   } else {
     event.target.value = displayValue;
   }

@@ -1005,16 +1005,17 @@ into a vector.
 
 ## `Polygon/`
 
-`Polygon.tsx` (shown while every selected layer is a polygon) = `PolygonHeader` (the Ellipse header buttons
-with the shared shape "…" menu `PanelHeaderShapeMoreActionsButton` instead of Edit object) → `PositionSection`
+`Polygon.tsx` (shown while every selected layer is a polygon) = `Common/ShapeHeader` (the Ellipse header buttons
+with the shared shape "…" menu `PanelHeaderShapeMoreActionsButton` instead of Edit object; label and e2e value
+come as props) → `PositionSection`
 → Layout (`ColumnDimensions`, `ColumnSpacing`, `ColumnGridChildSpan`) → `AppearanceSection
-shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} withCount` (Opacity and one Corner radius
+countType={NodeType.polygon} shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false}` (Opacity and one Corner radius
 field, always enabled for polygons, then `Common/AppearanceSection/Count/CountRow`: the `sides` count with the
 `Count` icon as its scrub handle, 3–60, rounded, Mixed for different counts, scrubbed by the same amount on
-each polygon through `usePolygonCount`) → `FillSection` → `FillSection property="strokes"` with
+each polygon through `useShapeCount(type)`) → `FillSection` → `FillSection property="strokes"` with
 `ShapeStrokeSettings type={NodeType.polygon}` → `EffectsSection` → `Export`. A polygon stores paints like an
 ellipse, so the shared hooks accept it through `isStyledNode`, and it is a Mixed panel type with the same
-sections. `Common/types.ts` holds `TShapeNode` / `TShapeNodeType` (ellipse or polygon) used by the shape
+sections. `Common/types.ts` holds `TShapeNode` / `TShapeNodeType` (ellipse, polygon or star) used by the shape
 corner radius and stroke settings.
 Offset vector works for polygons too (`isOffsetVectorNode` = line or polygon): `utils/canvas/offsetVector/getOffsetVector`
 picks `getLineOffsetVector` or `getPolygonOffsetVector` (cached per node, distance and join) — the polygon's sharp
@@ -1023,6 +1024,16 @@ corner radius + distance when the polygon is rounded; the vector keeps the polyg
 (`getClosedLoopPaintFillData`) and its stroke with Position. The preview draws that filled vector
 (`drawVectorNode`) under the magenta outline; ✓ / Enter replaces the polygon with it in one undo step. The toolbar
 distance and corner handlers live in `OffsetVectorToolbar/utils` (`changeOffsetVectorDistance`, `changeOffsetVectorJoin`).
+
+## `Star/`
+
+`Star.tsx` (shown while every selected layer is a star) is the Polygon panel with `NodeType.star`: the same
+`ShapeHeader`, Position, Layout, `AppearanceSection countType={NodeType.star}` (Opacity, Corner radius, then a
+`CountRow` whose Count sets `points` with the `CountStar` icon and whose second field is
+`Common/AppearanceSection/Ratio/RatioField`: the inner ratio as a percentage with one decimal, 0.1–100%, Mixed
+for different ratios, scrubbed by the same amount through `useStarRatio`; stored as `ratio` 0.001–1), Fill,
+Stroke with `ShapeStrokeSettings type={NodeType.star}`, Effects and Export. `CountRow` takes the shape type;
+`getShapeCount` / `commitShapeCount` read and write `sides` or `points`.
 
 ## `ImageCrop/`
 

@@ -430,6 +430,37 @@ describe('PanelProperties behaviors', () => {
     expect(screen.getByText('Count')).toBeInTheDocument();
   });
 
+  it('should show the Star panel with the Count and Ratio row while a star is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fills: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
+        flipX: false,
+        flipY: false,
+        height: 20,
+        name: 'Star',
+        parentId: null,
+        points: 5,
+        ratio: 0.382,
+        rotation: 0,
+        type: NodeType.star,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Star')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Ratio' })).toHaveValue('38.2%');
+  });
+
   it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
     // mock
     store.dispatch(

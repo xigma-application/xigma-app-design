@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PolygonHeader snapshots > should render the Polygon label with the create component button 1`] = `
+exports[`ShapeHeader snapshots > should render the given label with the create component button 1`] = `
 <DocumentFragment>
   <div
     class="_ComponentHeader_163cd5"

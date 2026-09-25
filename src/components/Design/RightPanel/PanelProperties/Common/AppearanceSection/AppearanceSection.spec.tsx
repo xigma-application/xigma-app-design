@@ -247,7 +247,7 @@ describe('AppearanceSection behaviors', () => {
       <Provider store={store}>
         <CanvasRefsProvider>
           <TooltipProvider>
-            <AppearanceSection shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} withCount />
+            <AppearanceSection countType={NodeType.polygon} shapeCornerRadiusType={NodeType.polygon} withCornerRadius={false} />
           </TooltipProvider>
         </CanvasRefsProvider>
       </Provider>,
