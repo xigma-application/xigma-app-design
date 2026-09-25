@@ -141,6 +141,32 @@ describe('getNodeStrokeOutline', () => {
     expect(result?.filledFaceKeys).toHaveLength(1);
   });
 
+  it('should leave the outline of a turned line unrotated, since the line points are already turned', () => {
+    // mock
+    const node: TLineNode = {
+      height: 0,
+      id: 'line-1',
+      name: 'Line',
+      parentId: null,
+      rotation: 90,
+      strokeWidth: 2,
+      strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+      type: NodeType.line,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+
+    // action
+    const result = getNodeStrokeOutline(node);
+
+    // result
+    const xs = Object.values(result?.vertices ?? {}).map((vertex) => vertex.x);
+
+    expect(result?.rotation).toBe(0);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(2, 5);
+  });
+
   it('should outline a line with no strokeWidth at the 1px width the canvas draws it with', () => {
     // mock
     const node: TLineNode = {

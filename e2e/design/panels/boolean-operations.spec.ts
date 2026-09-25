@@ -333,6 +333,29 @@ test('a line joined into a Union with a rectangle stays visible as its stroke sh
   expect(lineArea.equals(blank)).toBe(false);
 });
 
+test('a diagonal line joined into a Union is drawn along its own direction, not turned a second time', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-diagonal-line');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawLine(780, 260, 1000, 420);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+  await designPage.click(1500, 900);
+
+  const blank = await page.screenshot({ clip: { height: 20, width: 20, x: 1100, y: 370 } });
+
+  await expect.poll(async () => (await page.screenshot({ clip: { height: 20, width: 20, x: 935, y: 370 } })).equals(blank)).toBe(false);
+});
+
 test('dragging a Union that contains a line moves the line part live instead of leaving it behind until release', async ({ page }) => {
   const designPage = new DesignPage(page);
 

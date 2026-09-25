@@ -9,6 +9,7 @@ import { buildVectorNodeFromLoops } from 'utils/canvas/vectorNetwork/buildVector
 import { getStrokeAlignInset } from 'utils/canvas/getStrokeAlignInset/getStrokeAlignInset';
 import { getStrokeColor } from './getStrokeColor';
 import { getStrokeOutlineLoops } from './getStrokeOutlineLoops';
+import { getStrokeOutlineRotation } from './getStrokeOutlineRotation';
 import { getStrokeOutlineWidth } from './getStrokeOutlineWidth';
 
 export const getNodeStrokeOutline = (node: TStrokeableNode): TVectorNode | null => {
@@ -25,7 +26,7 @@ export const getNodeStrokeOutline = (node: TStrokeableNode): TVectorNode | null 
 
       return buildVectorNodeFromLoops(
         pointLoops,
-        { id: nanoid(), name: `${node.name} outline`, parentId: null, rotation: 'rotation' in node ? node.rotation : 0 },
+        { id: nanoid(), name: `${node.name} outline`, parentId: null, rotation: getStrokeOutlineRotation(node) },
         strokeColor,
       );
     }
