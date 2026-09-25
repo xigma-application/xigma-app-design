@@ -7,6 +7,7 @@ import { TPathOutlineStyle } from '../getPathOutlineStyles';
 
 // utils
 import { drawBoxPaints } from '../drawBoxLeafNode/drawBoxPaints';
+import { getBooleanStrokeModePolygons } from './getBooleanStrokeModePolygons';
 import { getBooleanStrokeRings } from './getBooleanStrokeRings';
 
 export const drawBooleanStrokePaints = (
@@ -24,21 +25,38 @@ export const drawBooleanStrokePaints = (
   const strokeWidth = node.strokeWidth ?? 1;
 
   if (strokes.length > 0 && strokeWidth > 0) {
-    getBooleanStrokeRings(shape, strokeWidth).forEach((ring) => {
+    const modePolygons = getBooleanStrokeModePolygons(node, shape, strokeWidth);
+
+    if (modePolygons) {
       drawBoxPaints(
         context,
         { ...shape.bounds, rotation: 0 },
         strokes,
-        ring,
+        modePolygons,
         opacity,
         nodesById,
         pathOutlineStyles,
         refs,
         editingPathId,
         patternSourceDepth,
-        null,
-        'nonZero',
       );
-    });
+    } else {
+      getBooleanStrokeRings(shape, strokeWidth).forEach((ring) => {
+        drawBoxPaints(
+          context,
+          { ...shape.bounds, rotation: 0 },
+          strokes,
+          ring,
+          opacity,
+          nodesById,
+          pathOutlineStyles,
+          refs,
+          editingPathId,
+          patternSourceDepth,
+          null,
+          'nonZero',
+        );
+      });
+    }
   }
 };

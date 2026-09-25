@@ -1,5 +1,5 @@
 // types
-import { BooleanOperation, NodeType } from 'types/design/enums';
+import { BooleanOperation, NodeType, StrokeMode } from 'types/design/enums';
 import { TBooleanNode } from 'types/design/types';
 import { TDrawSceneContext } from '../../types';
 
@@ -7,6 +7,7 @@ import { TDrawSceneContext } from '../../types';
 import { booleanShape } from './fixtures';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { drawBooleanStrokePaints } from '../drawBooleanStrokePaints';
+import { getBooleanStrokeModePolygons } from '../getBooleanStrokeModePolygons';
 import { getBooleanStrokeRings } from '../getBooleanStrokeRings';
 
 const drawBoxPaintsMock = vi.fn();
@@ -88,5 +89,18 @@ describe('drawBooleanStrokePaints', () => {
 
     // result
     expect(drawBoxPaintsMock).not.toHaveBeenCalled();
+  });
+
+  it('should paint a dynamic stroke once over its wiggled rings', () => {
+    // mock
+    const dynamic = { ...node, strokeMode: StrokeMode.dynamic };
+
+    // action
+    drawBooleanStrokePaints(context, dynamic, booleanShape, 1, {}, new Map(), createCanvasRefs(), null, 0);
+
+    // result
+    expect(drawBoxPaintsMock).toHaveBeenCalledTimes(1);
+    expect(drawBoxPaintsMock.mock.calls[0][3]).toBe(getBooleanStrokeModePolygons(dynamic, booleanShape, 4));
+    expect(drawBoxPaintsMock.mock.calls[0]).toHaveLength(10);
   });
 });

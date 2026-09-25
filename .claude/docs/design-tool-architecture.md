@@ -454,6 +454,8 @@ Two independent render passes, both need updating for a visual change to show up
   through `getNodeStrokeOutline` → `getModeStrokeOutlineLoops`: a line's stroke shape, or a rectangle's
   non-uniform drawn ring (turned back into its unrotated frame), wound by nesting depth
   (`getNestingOrientedLoops`) because the loop assembler fills by nonzero winding.
+  A boolean's own Dynamic or Brush stroke (`getBooleanStrokeModePolygons`) runs the box dynamic / brush
+  functions over the centred edges of every loop of its shape; a Basic stroke stays the nonzero ring.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

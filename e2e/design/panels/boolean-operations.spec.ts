@@ -598,3 +598,47 @@ test('a dashed line joined into a Union keeps the gaps between its dashes', asyn
   await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 868, y: 258 } })).equals(blank)).toBe(false);
   await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 848, y: 258 } })).equals(blank)).toBe(true);
 });
+
+test('a dynamic or brush stroke on a Union is drawn as that stroke, not as a plain ring', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-stroke-modes');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawRectangle(760, 260, 880, 380);
+
+  const setUnionStroke = (changes: Record<string, unknown>): Promise<void> =>
+    page.evaluate(async (strokeChanges) => {
+      const { store } = await import('/src/store/index.ts');
+      const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+      const { activePageId, pages } = store.getState().design;
+      const existing = Object.values(pages[activePageId].nodes).find((node) => node.type === 'boolean');
+
+      if (!existing) {
+        store.dispatch(setSelection(pages[activePageId].rootOrder));
+        store.dispatch(booleanNodes('union'));
+      }
+
+      const union = Object.values(store.getState().design.pages[activePageId].nodes).find((node) => node.type === 'boolean');
+
+      store.dispatch(
+        updateNode({
+          changes: { strokeWidth: 12, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }], ...strokeChanges } as never,
+          id: union?.id ?? '',
+        }),
+      );
+      store.dispatch(setSelection([]));
+    }, changes);
+
+  const edgeArea = { height: 120, width: 30, x: 685, y: 200 };
+
+  await setUnionStroke({ strokeMode: 'basic' });
+  await designPage.click(1500, 900);
+  const plain = await page.screenshot({ clip: edgeArea });
+
+  for (const strokeMode of ['dynamic', 'brush']) {
+    await setUnionStroke({ strokeMode });
+    await expect.poll(async () => (await page.screenshot({ clip: edgeArea })).equals(plain)).toBe(false);
+  }
+});

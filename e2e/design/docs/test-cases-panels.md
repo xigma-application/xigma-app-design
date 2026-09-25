@@ -1489,3 +1489,4 @@ There is no Fill section.
 | 643 | The line stroke settings open without Join and Miter angle, and the Brush tab hides Start point and End point                                                         |  ✅  |     ✅ `line-panel.spec.ts`     |
 | 644 | Clicking where a line's inside/outside, dashed, dynamic or brush stroke is drawn selects the line, and its stroked bounds (marquee, snapping) follow the drawn stroke |  ✅  |     ✅ `line-panel.spec.ts`     |
 | 645 | A dashed line joined into a Union keeps the gaps between its dashes (was: the Union took the plain solid stroke)                                                      |  ✅  | ✅ `boolean-operations.spec.ts` |
+| 647 | A dynamic or brush stroke on a Union is drawn as that stroke around every loop of its shape (was: always a plain ring)                                                |  ✅  | ✅ `boolean-operations.spec.ts` |
