@@ -89,7 +89,7 @@ describe('renderPatternSourceThumbnail', () => {
     const context = { gl: createGlMock(), imageContext: {} } as unknown as TDrawSceneContext;
 
     // before
-    const result = renderPatternSourceThumbnail(context, 'missing', {}, refs, 256);
+    const result = renderPatternSourceThumbnail(context, 'missing', {}, refs, 256, []);
 
     // result
     expect(result).toBeNull();
@@ -102,7 +102,7 @@ describe('renderPatternSourceThumbnail', () => {
     const nodesById = { r1: rect('r1', { hidden: true }) };
 
     // before
-    const result = renderPatternSourceThumbnail(context, 'r1', nodesById, refs, 256);
+    const result = renderPatternSourceThumbnail(context, 'r1', nodesById, refs, 256, []);
 
     // result
     expect(result).toBeNull();
@@ -114,7 +114,7 @@ describe('renderPatternSourceThumbnail', () => {
     const nodesById = { r1: rect('r1', { height: 0 }) };
 
     // before
-    const result = renderPatternSourceThumbnail(context, 'r1', nodesById, refs, 256);
+    const result = renderPatternSourceThumbnail(context, 'r1', nodesById, refs, 256, []);
 
     // result
     expect(result).toBeNull();
@@ -135,7 +135,7 @@ describe('renderPatternSourceThumbnail', () => {
     const nodesById = { c1: child, f1: parent };
 
     // before
-    const result = renderPatternSourceThumbnail(context, 'f1', nodesById, refs, 256);
+    const result = renderPatternSourceThumbnail(context, 'f1', nodesById, refs, 256, []);
 
     // result — 100x50 scaled by 2.56 (256/100) fits exactly, since the height axis (50*2.56=128) stays under 256
     expect(createTargetMock).toHaveBeenCalledWith(gl, 256, 128);

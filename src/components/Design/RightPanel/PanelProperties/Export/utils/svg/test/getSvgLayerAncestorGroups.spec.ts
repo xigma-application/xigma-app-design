@@ -111,7 +111,9 @@ describe('getSvgLayerAncestorGroups', () => {
   });
 
   it('should return no groups for a raster layer, regardless of ancestor rotation or blend mode', () => {
-    expect(getSvgLayerAncestorGroups({ nodeIds: new Set(['x']), type: SvgLayerType.raster }, blendedNodesById, bounds)).toEqual([]);
+    expect(
+      getSvgLayerAncestorGroups({ contextIds: [], nodeIds: new Set(['x']), type: SvgLayerType.raster }, blendedNodesById, bounds),
+    ).toEqual([]);
   });
 
   it('should compute a blend-mode group for a baked-geometry vector layer (line), unlike rotation', () => {

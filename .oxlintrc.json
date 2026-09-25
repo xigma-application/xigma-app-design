@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "options": {
+    "typeAware": true
+  },
   "plugins": [],
   "categories": {
     "correctness": "off"
@@ -114,6 +117,7 @@
         "default-case": "warn",
         "default-case-last": "warn",
         "default-param-last": "off",
+        "typescript/dot-notation": "warn",
         "eqeqeq": "warn",
         "max-classes-per-file": ["error", 1],
         "no-console": "warn",
