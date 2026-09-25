@@ -15,7 +15,9 @@ import { isSelectionInsideGroup } from '../../../../../utils/isSelectionInsideGr
 const toHoverResult = (nodeId: string | null): THoverResult => ({ className: null, cursor: '', nodeId });
 
 const findFrameLabelHit = ({ nodesById, point, viewport }: THoverResolverContext): TSceneNode | undefined =>
-  getNodeValues(nodesById).find((node) => isClickThroughFrame(node, nodesById) && isPointOnNodeNameLabel(point, node, viewport.zoom));
+  getNodeValues(nodesById).find(
+    (node) => isClickThroughFrame(node, nodesById) && isPointOnNodeNameLabel(point, node, viewport.zoom, nodesById),
+  );
 
 const getPlainNodeId = (hit: TSceneNode, { isControlPressed, nodesById, selectedNodes }: THoverResolverContext): string => {
   const ancestor = getTopLevelAncestor(hit, nodesById);

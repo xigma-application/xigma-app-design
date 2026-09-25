@@ -45,6 +45,8 @@ const buildFrame = (): TSceneNode =>
     y: 0,
   }) as TSceneNode;
 
+const NODES_BY_ID: Record<string, TSceneNode> = {};
+
 describe('getSectionNameLabelRects', () => {
   beforeEach(() => {
     getSectionNameLabelBadgeRectMock.mockReset().mockReturnValue({ height: 20, text: 'Section 1', width: 60, x: 10, y: -30 });
@@ -52,22 +54,22 @@ describe('getSectionNameLabelRects', () => {
 
   it('should return no rects when there are no nodes', () => {
     // result
-    expect(getSectionNameLabelRects([], 1)).toEqual([]);
+    expect(getSectionNameLabelRects([], 1, NODES_BY_ID)).toEqual([]);
   });
 
   it('should skip non-section nodes', () => {
     // result
-    expect(getSectionNameLabelRects([buildFrame()], 1)).toEqual([]);
+    expect(getSectionNameLabelRects([buildFrame()], 1, NODES_BY_ID)).toEqual([]);
   });
 
   it('should skip a section with an empty name', () => {
     // result
-    expect(getSectionNameLabelRects([buildSection({ name: '' })], 1)).toEqual([]);
+    expect(getSectionNameLabelRects([buildSection({ name: '' })], 1, NODES_BY_ID)).toEqual([]);
   });
 
   it('should pad the badge rect on every side, at zoom 1', () => {
     // before
-    const [rect] = getSectionNameLabelRects([buildSection()], 1);
+    const [rect] = getSectionNameLabelRects([buildSection()], 1, NODES_BY_ID);
 
     // result
     expect(rect.nodeId).toBe('section-1');
@@ -77,12 +79,24 @@ describe('getSectionNameLabelRects', () => {
     expect(rect.height).toBe(20 + FRAME_NAME_LABEL_HIT_PADDING_PX * 2);
   });
 
+  it('should ask for the inside badge of a section nested in a section', () => {
+    // mock
+    const parent = buildSection({ id: 'parent' });
+    const nested = buildSection({ id: 'nested', parentId: 'parent' });
+
+    // before
+    getSectionNameLabelRects([nested], 1, { nested, parent });
+
+    // result
+    expect(getSectionNameLabelBadgeRectMock).toHaveBeenCalledWith(nested, 1, true);
+  });
+
   it('should skip a section whose badge rect can’t be computed', () => {
     // mock
     getSectionNameLabelBadgeRectMock.mockReturnValue(null);
 
     // result
-    expect(getSectionNameLabelRects([buildSection()], 1)).toEqual([]);
+    expect(getSectionNameLabelRects([buildSection()], 1, NODES_BY_ID)).toEqual([]);
   });
 });
 
@@ -114,10 +128,10 @@ describe('getSectionNameLabelRects caching', () => {
     const nodes = [buildSection()];
 
     // before
-    const first = getSectionNameLabelRects(nodes, 1);
+    const first = getSectionNameLabelRects(nodes, 1, NODES_BY_ID);
 
     // result
-    expect(getSectionNameLabelRects(nodes, 1)).toBe(first);
+    expect(getSectionNameLabelRects(nodes, 1, NODES_BY_ID)).toBe(first);
   });
 
   it('should rebuild the list when the zoom changes', () => {
@@ -125,9 +139,20 @@ describe('getSectionNameLabelRects caching', () => {
     const nodes = [buildSection()];
 
     // before
-    const first = getSectionNameLabelRects(nodes, 1);
+    const first = getSectionNameLabelRects(nodes, 1, NODES_BY_ID);
 
     // result
-    expect(getSectionNameLabelRects(nodes, 2)).not.toBe(first);
+    expect(getSectionNameLabelRects(nodes, 2, NODES_BY_ID)).not.toBe(first);
+  });
+
+  it('should rebuild the list when the nodes record changes', () => {
+    // mock
+    const nodes = [buildSection()];
+
+    // before
+    const first = getSectionNameLabelRects(nodes, 1, NODES_BY_ID);
+
+    // result
+    expect(getSectionNameLabelRects(nodes, 1, {})).not.toBe(first);
   });
 });

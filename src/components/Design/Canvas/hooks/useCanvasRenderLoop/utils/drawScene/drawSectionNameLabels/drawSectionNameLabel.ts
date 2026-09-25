@@ -96,9 +96,10 @@ export const drawSectionNameLabel = (
   canvasHeight: number,
   viewport: TViewport,
   backgroundColor: string,
+  isNested = false,
 ): void => {
   if (node.name.length !== 0) {
-    const badge = getSectionNameLabelBadgeRect(node, viewport.zoom);
+    const badge = getSectionNameLabelBadgeRect(node, viewport.zoom, isNested);
     const style = getSectionNameLabelStyle(node, backgroundColor);
 
     drawSectionNameLabelBadge(gl, program, buffer, imageContext, badge, style, canvasWidth, canvasHeight, viewport);

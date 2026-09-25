@@ -7,4 +7,4 @@ import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThr
 import { isPointOnNodeNameLabel } from '../../../../../utils/isPointOnNodeNameLabel';
 
 export const isClickThroughFrameBody = (node: TSceneNode, nodesById: Record<string, TSceneNode>, point: TPoint, zoom: number): boolean =>
-  isClickThroughFrame(node, nodesById) && !isPointOnNodeNameLabel(point, node, zoom);
+  isClickThroughFrame(node, nodesById) && !isPointOnNodeNameLabel(point, node, zoom, nodesById);

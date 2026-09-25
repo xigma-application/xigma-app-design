@@ -24,7 +24,7 @@ describe('isClickThroughFrameBody', () => {
 
     // result
     expect(isClickThroughFrameBody(node, {}, { x: 1, y: 2 }, 2)).toBe(true);
-    expect(onLabelMock).toHaveBeenCalledWith({ x: 1, y: 2 }, node, 2);
+    expect(onLabelMock).toHaveBeenCalledWith({ x: 1, y: 2 }, node, 2, {});
   });
 
   it('should be false on its label or for a container that is not click-through', () => {

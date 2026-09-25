@@ -65,6 +65,7 @@ describe('drawSectionNameLabels', () => {
       [buildFrame()],
       refsWith(null),
       '#535353',
+      {},
     );
 
     // result
@@ -80,6 +81,7 @@ describe('drawSectionNameLabels', () => {
       [section],
       refsWith(null),
       '#535353',
+      {},
     );
 
     // result
@@ -93,6 +95,35 @@ describe('drawSectionNameLabels', () => {
       150,
       IDENTITY_VIEWPORT,
       '#535353',
+      false,
+    );
+  });
+
+  it('should draw a section nested in a section with its inside label', () => {
+    // before
+    const parent = buildSection({ id: 'parent' });
+    const nested = buildSection({ id: 'nested', parentId: 'parent' });
+
+    drawSectionNameLabels(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [nested],
+      refsWith(null),
+      '#535353',
+      { nested, parent },
+    );
+
+    // result
+    expect(drawSectionNameLabelMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      imageContext,
+      nested,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      '#535353',
+      true,
     );
   });
 
@@ -105,6 +136,7 @@ describe('drawSectionNameLabels', () => {
       [section],
       refsWith(section.id),
       '#535353',
+      {},
     );
 
     // result

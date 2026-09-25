@@ -100,7 +100,7 @@ describe('getSectionNameLabelEditTarget', () => {
     getSectionNameLabelEditTarget({ x: 30, y: -20 }, store.getState());
 
     // result — the hidden section never even reaches the rect builder
-    expect(getSectionNameLabelRectsMock).toHaveBeenCalledWith([], expect.any(Number));
+    expect(getSectionNameLabelRectsMock).toHaveBeenCalledWith([], expect.any(Number), expect.any(Object));
   });
 
   it('should return null when no label rect is hit', () => {

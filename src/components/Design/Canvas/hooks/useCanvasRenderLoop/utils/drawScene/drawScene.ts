@@ -186,7 +186,7 @@ export const drawScene = (
   drawGridSectionHighlight(ctx, gridSectionHighlight, gridTrackSelection, refs, nodesById);
   drawGridTrackAffordance(ctx, selectedNodes, refs, nodesById, gridTrackSelection);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs, nodesById);
-  drawSectionNameLabels(ctx, filteredNodes, refs, backgroundColor);
+  drawSectionNameLabels(ctx, filteredNodes, refs, backgroundColor, nodesById);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVertexCountHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
   drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, refs);

@@ -2,6 +2,7 @@
 import {
   FRAME_NAME_LABEL_FONT_SIZE_PX,
   FRAME_NAME_LABEL_GAP_PX,
+  SECTION_NAME_LABEL_NESTED_INSET_PX,
   SECTION_NAME_LABEL_PADDING_X_PX,
   SECTION_NAME_LABEL_PADDING_Y_PX,
 } from 'constant/canvas';
@@ -40,6 +41,28 @@ describe('getSectionNameLabelBadgeRect', () => {
     // result
     expect(rect?.x).toBe(10);
     expect((rect?.y ?? 0) + (rect?.height ?? 0)).toBe(20 - FRAME_NAME_LABEL_GAP_PX);
+  });
+
+  it('should place the badge of a nested section inside it, inset from its top-left corner', () => {
+    // before
+    const rect = getSectionNameLabelBadgeRect(buildSection(), 2, true);
+
+    // result
+    expect(rect?.x).toBe(10 + SECTION_NAME_LABEL_NESTED_INSET_PX / 2);
+    expect(rect?.y).toBe(20 + SECTION_NAME_LABEL_NESTED_INSET_PX / 2);
+  });
+
+  it('should rebuild a cached badge when the section becomes nested', () => {
+    // mock
+    const section = buildSection();
+
+    // before
+    const outside = getSectionNameLabelBadgeRect(section, 1);
+    const inside = getSectionNameLabelBadgeRect(section, 1, true);
+
+    // result
+    expect(inside).not.toBe(outside);
+    expect(inside?.y).toBe(20 + SECTION_NAME_LABEL_NESTED_INSET_PX);
   });
 
   it('should size the badge to the text plus padding on every side', () => {

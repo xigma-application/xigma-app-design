@@ -373,12 +373,49 @@ describe('getNodeAtPoint', () => {
       x: 0,
       y: 100,
     };
-    const [labelRect] = getSectionNameLabelRects([section], IDENTITY_VIEWPORT.zoom);
+    const [labelRect] = getSectionNameLabelRects([section], IDENTITY_VIEWPORT.zoom, {});
     const labelCenter = { x: labelRect.x + labelRect.width / 2, y: labelRect.y + labelRect.height / 2 };
 
     // result
     expect(labelRect.y + labelRect.height).toBeLessThan(100);
     expect(getNodeAtPoint(labelCenter, [section], IDENTITY_VIEWPORT)).toEqual(section);
+  });
+
+  it('should hit a nested section through its inside name label even when a layer above covers the label', () => {
+    // mock
+    const parent: TSectionNode = {
+      childIds: ['section-inner'],
+      fills: [{ color: '#444444', opacity: 100, type: 'solid' }],
+      height: 400,
+      id: 'section-outer',
+      name: 'Section 1',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: 400,
+      x: 0,
+      y: 0,
+    };
+    const nested: TSectionNode = {
+      ...parent,
+      childIds: [],
+      height: 200,
+      id: 'section-inner',
+      name: 'Section 2',
+      parentId: 'section-outer',
+      width: 200,
+      x: 50,
+      y: 50,
+    };
+    const cover = buildNode({ height: 100, id: 'cover', parentId: 'section-inner', width: 100, x: 50, y: 50 });
+    const nodesById = { cover, [nested.id]: nested, [parent.id]: parent };
+    const [labelRect] = getSectionNameLabelRects([nested], IDENTITY_VIEWPORT.zoom, nodesById);
+    const labelCenter = { x: labelRect.x + labelRect.width / 2, y: labelRect.y + labelRect.height / 2 };
+
+    // result
+    expect(labelRect.y).toBeGreaterThan(50);
+    expect(getNodeAtPoint(labelCenter, [nested, cover], IDENTITY_VIEWPORT, { clipNodesById: nodesById })).toEqual(nested);
+    expect(getNodeAtPoint({ x: 140, y: 140 }, [nested, cover], IDENTITY_VIEWPORT, { clipNodesById: nodesById })).toEqual(cover);
   });
 
   it('should never hit a hidden node', () => {

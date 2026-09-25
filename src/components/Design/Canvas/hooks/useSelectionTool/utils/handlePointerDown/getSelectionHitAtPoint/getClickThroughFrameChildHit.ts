@@ -9,6 +9,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getClickThroughLeafNodes } from '../../../../../utils/getClickThroughLeafNodes';
+import { getNestedSectionLabelHit } from './getNestedSectionLabelHit';
 import { getNodeAtPoint } from '../../../../../utils/getNodeAtPoint/getNodeAtPoint';
 
 export const getClickThroughFrameChildHit = (
@@ -18,8 +19,11 @@ export const getClickThroughFrameChildHit = (
   nodesById: Record<string, TSceneNode>,
 ): TSceneNode | null => {
   const state = store.getState();
-  const candidates = getClickThroughLeafNodes(selectRenderOrderedNodes(state), nodesById);
-  const hit = getNodeAtPoint(point, candidates, viewport, { clipNodesById: nodesById });
+  const renderOrderedNodes = selectRenderOrderedNodes(state);
+  const candidates = getClickThroughLeafNodes(renderOrderedNodes, nodesById);
+  const hit =
+    getNestedSectionLabelHit(frame, point, viewport.zoom, renderOrderedNodes, nodesById) ??
+    getNodeAtPoint(point, candidates, viewport, { clipNodesById: nodesById });
 
   return hit && isAncestorNode(frame.id, hit, nodesById) && !selectVectorEditingNodeIds(state).includes(hit.id) ? hit : null;
 };

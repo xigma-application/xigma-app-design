@@ -554,7 +554,11 @@ describe('getSelectionHitAtPoint', () => {
 
     it('should select the section from a plain click on its name label', () => {
       const { sectionId } = buildSectionWithChild();
-      const [labelRect] = getSectionNameLabelRects([selectNodes(store.getState())[sectionId]], IDENTITY_VIEWPORT.zoom);
+      const [labelRect] = getSectionNameLabelRects(
+        [selectNodes(store.getState())[sectionId]],
+        IDENTITY_VIEWPORT.zoom,
+        selectNodes(store.getState()),
+      );
 
       const hit = getSelectionHitAtPoint(
         { x: labelRect.x + labelRect.width / 2, y: labelRect.y + labelRect.height / 2 },

@@ -9,8 +9,12 @@ import { TSceneNode } from 'types/design/types';
 import { getClickThroughFrameChildHit } from '../getClickThroughFrameChildHit';
 
 const nodeAtPointMock = vi.fn();
+const nestedLabelHitMock = vi.fn();
 
 vi.mock('../../../../../../utils/getClickThroughLeafNodes', () => ({ getClickThroughLeafNodes: (): string[] => ['candidates'] }));
+vi.mock('../getNestedSectionLabelHit', () => ({
+  getNestedSectionLabelHit: (...args: unknown[]): unknown => nestedLabelHitMock(...args),
+}));
 vi.mock('../../../../../../utils/getNodeAtPoint/getNodeAtPoint', () => ({
   getNodeAtPoint: (...args: unknown[]): unknown => nodeAtPointMock(...args),
 }));
@@ -23,8 +27,22 @@ const nodesById = {
 const viewport = { x: 0, y: 0, zoom: 1 };
 
 describe('getClickThroughFrameChildHit', () => {
+  beforeEach(() => {
+    nestedLabelHitMock.mockReset().mockReturnValue(null);
+  });
+
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it('should return a nested section whose name label is under the pointer before any leaf', () => {
+    // mock
+    nestedLabelHitMock.mockReturnValue(nodesById.child);
+    nodeAtPointMock.mockClear();
+
+    // result
+    expect(getClickThroughFrameChildHit(nodesById.frame, { x: 1, y: 2 }, viewport, nodesById)).toBe(nodesById.child);
+    expect(nodeAtPointMock).not.toHaveBeenCalled();
   });
 
   it('should return the leaf under the pointer when it lies inside the frame', () => {

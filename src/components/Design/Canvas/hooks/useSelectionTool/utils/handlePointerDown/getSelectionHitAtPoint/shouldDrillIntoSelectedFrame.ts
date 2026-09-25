@@ -14,7 +14,7 @@ export const shouldDrillIntoSelectedFrame = (
   zoom: number,
 ): boolean => {
   if ((node.type === NodeType.frame || node.type === NodeType.section) && node.childIds.length > 0) {
-    return isClickThroughFrame(node, nodesById) ? !isPointOnNodeNameLabel(point, node, zoom) : true;
+    return isClickThroughFrame(node, nodesById) ? !isPointOnNodeNameLabel(point, node, zoom, nodesById) : true;
   }
 
   return false;

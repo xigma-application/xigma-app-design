@@ -184,3 +184,41 @@ test('several selected sections show Wrap in new section and Resize to fit fits 
     { height: 70, width: 60 },
   ]);
 });
+
+test('a section inside a section shows its label inside its top-left corner, above its children, and a click there selects it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-section-panel-nested-label');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(605, 355, 800, 500);
+  await deselect(designPage);
+  await designPage.drawSection(600, 350, 1000, 700);
+  await deselect(designPage);
+  await designPage.drawSection(500, 250, 1300, 850);
+  await deselect(designPage);
+
+  const innerId = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes } = pages[activePageId];
+    const inner = Object.values(nodes).find((node) => node.type === 'section' && node.parentId !== null);
+
+    return inner && 'childIds' in inner && inner.childIds.length === 1 ? inner.id : null;
+  });
+
+  expect(innerId).not.toBeNull();
+
+  await designPage.click(625, 370);
+
+  const selectedIds = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].selectedIds;
+  });
+
+  expect(selectedIds).toEqual([innerId]);
+});
