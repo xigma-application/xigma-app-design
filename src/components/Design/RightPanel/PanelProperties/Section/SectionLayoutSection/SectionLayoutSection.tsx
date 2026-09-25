@@ -14,9 +14,14 @@ import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace as commonNameSpace } from '../../Common/constants';
 import { translationNameSpace } from './constants';
 
+// store
+import { selectCanResizeToFit } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 const SectionLayoutSection: FC = () => {
   const { t } = useTranslation();
   const onResizeToFit = useResizeToFitSelection();
+  const canResizeToFit = useAppSelector(selectCanResizeToFit);
 
   return (
     <UITools.Section
@@ -30,7 +35,12 @@ const SectionLayoutSection: FC = () => {
             </Fragment>
           }
         >
-          <UITools.ButtonIcon ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)} name="FitLayout" onClick={onResizeToFit} />
+          <UITools.ButtonIcon
+            ariaLabel={t(`${translationNameSpace}.resizeToFitAriaLabel`)}
+            disabled={!canResizeToFit}
+            name="FitLayout"
+            onClick={onResizeToFit}
+          />
         </Tooltip>
       }
       e2eValue="layout"

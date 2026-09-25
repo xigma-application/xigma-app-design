@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
 
 // store
-import { addNode, moveNodes } from 'store/design/slice';
+import { addNode, addNodes, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -562,6 +562,8 @@ describe('NodeContextMenu', () => {
     // mock
     const user = userEvent.setup();
     const onConvertToFrame = vi.fn();
+    store.dispatch(addNodes({ nodes: [buildSectionNode()], rootIds: ['node-1'] }));
+    store.dispatch(setSelection(['node-1']));
 
     // before
     renderNodeContextMenu({ node: buildSectionNode(), onConvertToFrame });
@@ -574,6 +576,20 @@ describe('NodeContextMenu', () => {
 
     // result
     expect(onConvertToFrame).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable Convert to frame for a section that holds another section', () => {
+    // mock
+    const inner = { ...buildSectionNode(), id: 'context-inner', parentId: 'context-outer' };
+    const outer = { ...buildSectionNode(), childIds: ['context-inner'], id: 'context-outer' };
+    store.dispatch(addNodes({ nodes: [outer, inner], rootIds: ['context-outer'] }));
+    store.dispatch(setSelection(['context-outer']));
+
+    // before
+    renderNodeContextMenu({ node: outer });
+
+    // result
+    expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should call onUngroupSelection on Ungroup click for a group node', async () => {

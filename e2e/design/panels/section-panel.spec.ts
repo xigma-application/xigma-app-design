@@ -140,3 +140,47 @@ test('Align left on a section with children moves every child to the section’s
 
   expect(children).toEqual([section, section]);
 });
+
+test('several selected sections show Wrap in new section and Resize to fit fits each one to its own children', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-section-panel-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(600, 400, 650, 450);
+  await deselect(designPage);
+  await designPage.drawSection(550, 350, 700, 500);
+  await deselect(designPage);
+  await designPage.drawRectangle(900, 400, 960, 470);
+  await deselect(designPage);
+  await designPage.drawSection(850, 350, 1050, 550);
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setSelection } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+  });
+
+  await expect(page.getByLabel('Wrap in new section', { exact: true })).toBeVisible();
+
+  await page.getByLabel('Resize to fit', { exact: true }).click();
+
+  const sizes = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return rootOrder.map((id) => {
+      const node = nodes[id] as unknown as { height: number; width: number };
+
+      return { height: node.height, width: node.width };
+    });
+  });
+
+  expect(sizes).toEqual([
+    { height: 50, width: 50 },
+    { height: 70, width: 60 },
+  ]);
+});

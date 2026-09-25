@@ -43,7 +43,7 @@ import {
 } from '../constants';
 
 // store
-import { selectNodes } from 'store/design/selectors';
+import { selectCanConvertToFrame, selectNodes } from 'store/design/selectors';
 import { TDesignPage } from 'store/design/types';
 import { useAppSelector } from 'store';
 
@@ -116,6 +116,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
   const nodes = useAppSelector(selectNodes);
+  const canConvertToFrame = useAppSelector(selectCanConvertToFrame);
   const isMask = getIsMaskChild(node, nodes);
   const isMaskContainer = node.type === NodeType.mask;
   const isFrame = node.type === NodeType.frame;
@@ -177,7 +178,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {isSection && <MenuItem label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />}
+      {isSection && (
+        <MenuItem disabled={!canConvertToFrame} label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />
+      )}
       {!isSection && (
         <MenuItem
           label={t(NODE_MENU_GROUP_SELECTION_KEY)}

@@ -10,16 +10,21 @@ import { useConvertSelectionToFrame } from 'components/Design/Menu/hooks/useConv
 // others
 import { translationNameSpace } from './constants';
 
+// store
+import { selectCanConvertToFrame } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 const { PopoverItem } = UITools.PopoverCompound;
 
 const SectionHeaderMenu: FC = () => {
   const { t } = useTranslation();
   const onConvertToFrame = useConvertSelectionToFrame();
+  const canConvertToFrame = useAppSelector(selectCanConvertToFrame);
 
   return (
     <Fragment>
       <PopoverItem label={t(`${translationNameSpace}.label`)} selected />
-      <PopoverItem label={t(`${translationNameSpace}.typeMenu.frame`)} onClick={onConvertToFrame} />
+      <PopoverItem disabled={!canConvertToFrame} label={t(`${translationNameSpace}.typeMenu.frame`)} onClick={onConvertToFrame} />
       <PopoverItem disabled label={t(`${translationNameSpace}.typeMenu.group`)} />
     </Fragment>
   );

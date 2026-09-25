@@ -1,20 +1,29 @@
 // others
-import { PAGE_BACKGROUND_PAINT } from '../constants';
+import { EMPTY_SELECTED_INDICES, PAGE_BACKGROUND_PAINT } from '../constants';
 
 // selectors
 import {
   selectActivePage,
   selectActivePageId,
+  selectActivePageName,
   selectActiveTool,
   selectAllGuideLines,
+  selectAppearanceNodes,
   selectAreAdditionalLabelsVisible,
   selectAreFrameOutlinesVisible,
+  selectAreLayoutGuidesVisible,
   selectAreMaskOutlinesVisible,
   selectAreRulersVisible,
   selectBackgroundPaint,
+  selectCanConvertToFrame,
+  selectCanConvertToSection,
+  selectCanResizeToFit,
+  selectCanSelectMatchingLayers,
+  selectCanWrapInSection,
   selectCommentDraftPosition,
   selectComments,
   selectDescendantIdsOfSelected,
+  selectDesignHintLabelKey,
   selectEditingAutoLayoutPadding,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
@@ -23,10 +32,19 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectFrameGuides,
+  selectGradientEditor,
   selectGridSectionHighlight,
+  selectGridTrackModeMenuRequest,
+  selectGridTrackSelection,
+  selectGridTrackValueEditRequest,
+  selectHoveredDimensionField,
   selectImageEditor,
+  selectImageFillPickerFocus,
   selectIsActionsPanelOpen,
+  selectIsExporting,
   selectIsGridSettingsPanelOpen,
+  selectIsMediaToolArmed,
+  selectIsPatternSourcePicking,
   selectIsUiHidden,
   selectIsUiMinimized,
   selectLastFrameTool,
@@ -37,20 +55,29 @@ import {
   selectLastTextTool,
   selectMaskConnectorRoleById,
   selectNodes,
+  selectOpenPropertyPanel,
   selectOrderedNodes,
   selectPageGuides,
   selectPages,
   selectPaint,
+  selectPanelGridTrackSelection,
+  selectPatternSourcePickTarget,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
   selectResolvedTheme,
+  selectRevealedMinMax,
+  selectSelectedFillIndices,
   selectSelectedIds,
   selectSelectedLeafNodes,
   selectSelectedNodes,
   selectSelectedParentIds,
+  selectSelectedParentNode,
+  selectSelectedStrokeIndices,
+  selectSmartSelectionNodes,
   selectTopLevelFrameNodes,
   selectVectorEditingNodeIds,
   selectViewport,
+  selectZoom,
 } from '../selectors';
 
 // types
@@ -682,5 +709,89 @@ describe('design selectors — groups', () => {
   it('should leave no roles for a group with no mask child', () => {
     // result
     expect(selectMaskConnectorRoleById(groupState).size).toBe(0);
+  });
+});
+
+describe('design selectors — panel and editor state', () => {
+  const gridTrackSelection = { axis: 'column', frameId: 'node-1', indices: [0] };
+  const filledState = {
+    design: {
+      ...state.design,
+      designHintLabelKey: 'hint',
+      gradientEditor: { nodeId: 'node-1' },
+      gridTrackModeMenuRequest: { frameId: 'node-1' },
+      gridTrackSelection,
+      gridTrackValueEditRequest: { frameId: 'node-1' },
+      hoveredDimensionField: 'width',
+      imageFillPickerFocus: { index: 0 },
+      isExporting: true,
+      isMediaToolArmed: true,
+      isPatternSourcePicking: true,
+      openPropertyPanel: { index: 0, type: 'fill' },
+      pages: {
+        'page-1': { ...state.design.pages['page-1'], selectedFillIndices: [1], selectedStrokeIndices: [2] },
+      },
+      panelGridTrackSelection: gridTrackSelection,
+      patternSourcePickTarget: { index: 0 },
+      preferences: { ...state.design.preferences, areLayoutGuidesVisible: true },
+      revealedMinMax: { maxHeight: true },
+    },
+  } as any;
+
+  it('should select the active page name', () => {
+    // result
+    expect(selectActivePageName(state)).toBe('Page 1');
+  });
+
+  it('should select the values stored in the design state', () => {
+    // result
+    expect(selectAreLayoutGuidesVisible(filledState)).toBe(true);
+    expect(selectDesignHintLabelKey(filledState)).toBe('hint');
+    expect(selectGradientEditor(filledState)).toEqual({ nodeId: 'node-1' });
+    expect(selectGridTrackModeMenuRequest(filledState)).toEqual({ frameId: 'node-1' });
+    expect(selectGridTrackSelection(filledState)).toBe(gridTrackSelection);
+    expect(selectGridTrackValueEditRequest(filledState)).toEqual({ frameId: 'node-1' });
+    expect(selectHoveredDimensionField(filledState)).toBe('width');
+    expect(selectImageFillPickerFocus(filledState)).toEqual({ index: 0 });
+    expect(selectIsExporting(filledState)).toBe(true);
+    expect(selectIsMediaToolArmed(filledState)).toBe(true);
+    expect(selectIsPatternSourcePicking(filledState)).toBe(true);
+    expect(selectOpenPropertyPanel(filledState)).toEqual({ index: 0, type: 'fill' });
+    expect(selectPanelGridTrackSelection(filledState)).toBe(gridTrackSelection);
+    expect(selectPatternSourcePickTarget(filledState)).toEqual({ index: 0 });
+    expect(selectRevealedMinMax(filledState)).toEqual({ maxHeight: true });
+    expect(selectSelectedFillIndices(filledState)).toEqual([1]);
+    expect(selectSelectedStrokeIndices(filledState)).toEqual([2]);
+  });
+
+  it('should fall back to null, false or the empty indices when the state has no value', () => {
+    // result
+    expect(selectGridTrackModeMenuRequest(state)).toBeNull();
+    expect(selectGridTrackSelection(state)).toBeNull();
+    expect(selectGridTrackValueEditRequest(state)).toBeNull();
+    expect(selectHoveredDimensionField(state)).toBeNull();
+    expect(selectImageFillPickerFocus(state)).toBeNull();
+    expect(selectIsExporting(state)).toBe(false);
+    expect(selectOpenPropertyPanel(state)).toBeNull();
+    expect(selectPanelGridTrackSelection(state)).toBeNull();
+    expect(selectSelectedFillIndices(state)).toBe(EMPTY_SELECTED_INDICES);
+    expect(selectSelectedStrokeIndices(state)).toBe(EMPTY_SELECTED_INDICES);
+  });
+
+  it('should select the zoom of the active page viewport', () => {
+    // result
+    expect(selectZoom(state)).toBe(2);
+  });
+
+  it('should derive the selection based helpers from the selected frame', () => {
+    // result
+    expect(selectAppearanceNodes(state)).toEqual([node]);
+    expect(selectSmartSelectionNodes(state)).toEqual([node]);
+    expect(selectSelectedParentNode(state)).toBeUndefined();
+    expect(selectCanConvertToFrame(state)).toBe(false);
+    expect(selectCanConvertToSection(state)).toBe(true);
+    expect(selectCanResizeToFit(state)).toBe(false);
+    expect(selectCanWrapInSection(state)).toBe(true);
+    expect(selectCanSelectMatchingLayers(state)).toBe(false);
   });
 });

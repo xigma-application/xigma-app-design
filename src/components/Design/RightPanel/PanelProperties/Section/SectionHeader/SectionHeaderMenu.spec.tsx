@@ -17,13 +17,13 @@ import { TSectionNode } from 'types/design/types';
 // utils
 import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
 
-const makeSection = (id: string): TSectionNode => ({
+const makeSection = (id: string, childIds: string[] = [], parentId: string | null = null): TSectionNode => ({
   ...getDefaultSectionStyle(),
-  childIds: [],
+  childIds,
   height: 100,
   id,
   name: 'Section 1',
-  parentId: null,
+  parentId,
   rotation: 0,
   type: NodeType.section,
   width: 100,
@@ -73,5 +73,26 @@ describe('SectionHeaderMenu behaviors', () => {
 
     // result
     expect(selectNodes(store.getState()).menuToFrame.type).toBe(NodeType.frame);
+  });
+
+  it('should disable Frame when a selected section holds another section', () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [makeSection('menuOuter', ['menuInner']), makeSection('menuInner', [], 'menuOuter'), makeSection('menuPlain')],
+        rootIds: ['menuOuter', 'menuPlain'],
+      }),
+    );
+    store.dispatch(setSelection(['menuOuter', 'menuPlain']));
+
+    // before
+    renderComponent();
+
+    // action
+    fireEvent.click(screen.getByText('Frame'));
+
+    // result
+    expect(selectNodes(store.getState()).menuOuter.type).toBe(NodeType.section);
+    expect(selectNodes(store.getState()).menuPlain.type).toBe(NodeType.section);
   });
 });

@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
@@ -68,12 +68,11 @@ describe('handleConvertSelectionToFrame', () => {
     expect(page.rootOrder).toEqual(rootOrderBefore);
   });
 
-  it('should convert every selected section while ignoring any other selected node type', () => {
+  it('should convert every selected section', () => {
     // mock
     const sectionA = addSectionNode();
     const sectionB = addSectionNode();
-    const rectangleId = addRectangleNode();
-    store.dispatch(setSelection([sectionA, sectionB, rectangleId]));
+    store.dispatch(setSelection([sectionA, sectionB]));
 
     // action
     handleConvertSelectionToFrame(store.dispatch);
@@ -83,7 +82,37 @@ describe('handleConvertSelectionToFrame', () => {
 
     expect(page.nodes[sectionA].type).toBe(NodeType.frame);
     expect(page.nodes[sectionB].type).toBe(NodeType.frame);
-    expect(page.nodes[rectangleId].type).toBe(NodeType.rectangle);
+  });
+
+  it('should convert nothing when the selection also holds a node that is not a section', () => {
+    // mock
+    const sectionId = addSectionNode();
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([sectionId, rectangleId]));
+
+    // action
+    handleConvertSelectionToFrame(store.dispatch);
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[sectionId].type).toBe(NodeType.section);
+  });
+
+  it('should convert nothing when a selected section holds another section', () => {
+    // mock
+    const innerId = addSectionNode();
+    const outerId = addSectionNode();
+    const plainId = addSectionNode();
+    store.dispatch(moveNodes({ nodeIds: [innerId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([outerId, plainId]));
+
+    // action
+    handleConvertSelectionToFrame(store.dispatch);
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(nodes[outerId].type).toBe(NodeType.section);
+    expect(nodes[plainId].type).toBe(NodeType.section);
   });
 
   it('should do nothing when nothing selected is a section', () => {

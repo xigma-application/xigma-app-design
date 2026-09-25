@@ -96,4 +96,44 @@ describe('SectionLayoutSection behaviors', () => {
     // result
     expect(selectNodes(store.getState()).layoutFit).toMatchObject({ height: 40, width: 140, x: 30, y: 50 });
   });
+
+  it('should disable Resize to fit when no selected section has children', () => {
+    // mock
+    store.dispatch(
+      addNodes({ nodes: [makeSection('layoutEmptyA', []), makeSection('layoutEmptyB', [])], rootIds: ['layoutEmptyA', 'layoutEmptyB'] }),
+    );
+    store.dispatch(setSelection(['layoutEmptyA', 'layoutEmptyB']));
+
+    // before
+    renderComponent();
+
+    // result
+    expect(screen.getByLabelText('Resize to fit')).toBeDisabled();
+  });
+
+  it('should resize every selected section to fit its own children', () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          makeSection('layoutMultiA', ['layoutMultiChildA']),
+          makeSection('layoutMultiB', ['layoutMultiChildB']),
+          makeRectangle('layoutMultiChildA', 'layoutMultiA', 30),
+          makeRectangle('layoutMultiChildB', 'layoutMultiB', 200),
+        ],
+        rootIds: ['layoutMultiA', 'layoutMultiB'],
+      }),
+    );
+    store.dispatch(setSelection(['layoutMultiA', 'layoutMultiB']));
+
+    // before
+    renderComponent();
+
+    // action
+    fireEvent.click(screen.getByLabelText('Resize to fit'));
+
+    // result
+    expect(selectNodes(store.getState()).layoutMultiA).toMatchObject({ height: 40, width: 40, x: 30, y: 50 });
+    expect(selectNodes(store.getState()).layoutMultiB).toMatchObject({ height: 40, width: 40, x: 200, y: 50 });
+  });
 });

@@ -32,7 +32,9 @@ import { TGuide, TGuideLine } from 'types/design/guides/types';
 import { TPaint, TSolidPaint } from 'types/design/paint/types';
 
 // utils
+import { canConvertToFrame } from './utils/nodeHierarchy/canConvertToFrame';
 import { canConvertToSection } from './utils/nodeHierarchy/canConvertToSection';
+import { canResizeToFit } from './utils/nodeHierarchy/canResizeToFit';
 import { canSelectMatchingLayers } from './utils/matchingLayers/canSelectMatchingLayers';
 import { canWrapInSection } from './utils/handleWrapInSection/canWrapInSection';
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
@@ -198,7 +200,11 @@ export const selectAppearanceNodes = createSelector([selectSelectedNodes, select
   expandGroupNodes(selectedNodes.filter(Boolean), nodes),
 );
 
+export const selectCanConvertToFrame = createSelector([selectSelectedNodes, selectNodes], canConvertToFrame);
+
 export const selectCanConvertToSection = createSelector([selectSelectedNodes, selectNodes], canConvertToSection);
+
+export const selectCanResizeToFit = createSelector([selectSelectedNodes, selectNodes], canResizeToFit);
 
 export const selectCanWrapInSection = createSelector([selectSelectedNodes, selectNodes], canWrapInSection);
 

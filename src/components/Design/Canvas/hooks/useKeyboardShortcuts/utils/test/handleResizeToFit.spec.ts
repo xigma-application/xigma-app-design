@@ -1,6 +1,7 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { selectActivePage, selectNodes } from 'store/design/selectors';
+import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
@@ -82,20 +83,6 @@ describe('handleResizeToFit', () => {
 
     // result
     expect(selectNodes(store.getState())[id]).toEqual(before);
-  });
-
-  it('should do nothing when more than one node is selected', () => {
-    // mock
-    const idA = addFrameNode({ childIds: [] });
-    const idB = addFrameNode({ childIds: [] });
-    store.dispatch(setSelection([idA, idB]));
-    const before = selectNodes(store.getState())[idA];
-
-    // action
-    handleResizeToFit(store.dispatch);
-
-    // result
-    expect(selectNodes(store.getState())[idA]).toEqual(before);
   });
 
   it('should do nothing when the selected frame has no children', () => {
@@ -205,5 +192,58 @@ describe('handleResizeToFit', () => {
 
     // result
     expect(selectNodes(store.getState())[sectionId]).toMatchObject({ height: 100, width: 80, x: 10, y: 10 });
+  });
+
+  it('should fit every selected container to its own children and leave an empty one as it is', () => {
+    // mock
+    const childA = addRectangleNode({ height: 20, width: 20, x: 10, y: 10 });
+    const childB = addRectangleNode({ height: 30, width: 40, x: 500, y: 500 });
+    const frameA = addFrameNode({ childIds: [childA], height: 200, width: 200, x: 0, y: 0 });
+    const frameB = addFrameNode({ childIds: [childB], height: 300, width: 300, x: 400, y: 400 });
+    const emptyFrame = addFrameNode({ childIds: [], height: 50, width: 50, x: 900, y: 900 });
+    store.dispatch(setSelection([frameA, frameB, emptyFrame]));
+    const emptyBefore = selectNodes(store.getState())[emptyFrame];
+
+    // action
+    handleResizeToFit(store.dispatch);
+
+    // result
+    const nodes = selectNodes(store.getState());
+    expect(nodes[frameA]).toMatchObject({ height: 20, width: 20, x: 10, y: 10 });
+    expect(nodes[frameB]).toMatchObject({ height: 30, width: 40, x: 500, y: 500 });
+    expect(nodes[emptyFrame]).toEqual(emptyBefore);
+  });
+
+  it('should fit the selected frame and leave a selected layer that is not a container as it is', () => {
+    // mock
+    const childId = addRectangleNode({ height: 20, width: 20, x: 10, y: 10 });
+    const frameId = addFrameNode({ childIds: [childId], height: 200, width: 200, x: 0, y: 0 });
+    const rectangleId = addRectangleNode({ height: 30, width: 30, x: 700, y: 700 });
+    store.dispatch(setSelection([frameId, rectangleId]));
+    const rectangleBefore = selectNodes(store.getState())[rectangleId];
+
+    // action
+    handleResizeToFit(store.dispatch);
+
+    // result
+    expect(selectNodes(store.getState())[frameId]).toMatchObject({ height: 20, width: 20, x: 10, y: 10 });
+    expect(selectNodes(store.getState())[rectangleId]).toEqual(rectangleBefore);
+  });
+
+  it('should undo the fit of every selected container in one step', () => {
+    // mock
+    const childA = addRectangleNode({ height: 20, width: 20, x: 10, y: 10 });
+    const childB = addRectangleNode({ height: 30, width: 40, x: 500, y: 500 });
+    const frameA = addFrameNode({ childIds: [childA], height: 200, width: 200, x: 0, y: 0 });
+    const frameB = addFrameNode({ childIds: [childB], height: 300, width: 300, x: 400, y: 400 });
+    store.dispatch(setSelection([frameA, frameB]));
+    const before = selectNodes(store.getState());
+
+    // action
+    handleResizeToFit(store.dispatch);
+    store.dispatch(undo());
+
+    // result
+    expect(selectNodes(store.getState())).toEqual(before);
   });
 });

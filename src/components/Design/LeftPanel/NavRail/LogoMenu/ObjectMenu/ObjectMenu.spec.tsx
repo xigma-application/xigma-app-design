@@ -49,7 +49,7 @@ vi.mock('components/Design/Menu/hooks/useNodeMenuActions', () => ({
 import ObjectMenu from './ObjectMenu';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -363,6 +363,20 @@ describe('ObjectMenu', () => {
 
     // result
     expect(onConvertToFrame).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep Convert to frame disabled when a selected section holds another section', () => {
+    // mock
+    const innerId = addSectionNode();
+    const outerId = addSectionNode();
+    store.dispatch(moveNodes({ nodeIds: [innerId], targetIndex: 0, targetParentId: outerId }));
+    store.dispatch(setSelection([outerId]));
+
+    // before
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should keep Convert to section and Convert to frame disabled for a mixed-type selection', () => {
