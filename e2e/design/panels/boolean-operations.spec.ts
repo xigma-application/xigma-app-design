@@ -389,3 +389,31 @@ test('a selected line inside a Union can be grabbed on its stroke and moves on i
   expect(result.rectangle).toEqual({ x: 700, y: 200 });
   expect(result.lineY).toBe(360);
 });
+
+test('an arrow joined into a Union with a rectangle keeps its arrowhead', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-arrow-head');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 200, 820, 320);
+  await designPage.drawLine(780, 260, 1000, 260);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+    const line = Object.values(nodes).find((node) => node.type === 'line');
+
+    store.dispatch(updateNode({ changes: { endPoint: 'arrow' }, id: line?.id ?? '' }));
+    store.dispatch(setSelection(rootOrder));
+    store.dispatch(booleanNodes('union'));
+  });
+  await designPage.click(1500, 900);
+
+  const wingArea = { height: 3, width: 4, x: 994, y: 255 };
+  const blank = await page.screenshot({ clip: { ...wingArea, x: 1300, y: 700 } });
+  const wing = await page.screenshot({ clip: wingArea });
+
+  expect(wing.equals(blank)).toBe(false);
+});

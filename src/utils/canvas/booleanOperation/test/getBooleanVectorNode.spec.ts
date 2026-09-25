@@ -171,6 +171,33 @@ describe('getBooleanVectorNode', () => {
     expect(Math.max(...xs)).toBe(300);
   });
 
+  it('should keep the arrowhead of an arrow joined with a rectangle', () => {
+    // mock
+    const arrow: TLineNode = {
+      endPoint: 'arrow',
+      id: 'arrow',
+      name: 'arrow',
+      parentId: 'union',
+      stroke: '#ffffff',
+      type: NodeType.line,
+      x1: 50,
+      x2: 300,
+      y1: 50,
+      y2: 50,
+    };
+    const node = makeBoolean('union', ['a', 'arrow'], BooleanOperation.union);
+
+    // action
+    const result = getBooleanVectorNode(node, { a: makeRectangle('a', 'union', 0), arrow, union: node });
+
+    // result
+    const nearTip = Object.values(result?.vertices ?? {}).filter((vertex) => vertex.x > 290);
+
+    expect(result?.filledFaceKeys).toHaveLength(1);
+    expect(Math.max(...nearTip.map((vertex) => vertex.y))).toBeGreaterThan(53);
+    expect(Math.min(...nearTip.map((vertex) => vertex.y))).toBeLessThan(47);
+  });
+
   it('should keep the geometry but restyle a copy of the boolean with other fills', () => {
     // mock
     const node = makeBoolean('restyled', ['ra', 'rb'], BooleanOperation.union);

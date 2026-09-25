@@ -136,6 +136,7 @@ arrowhead's visual overflow.
 | 112 | The drawn arrow renders visibly differently from an identical plain line (the arrowhead itself)                                                                                                                                                                                |  —   |  ✅ `create-arrow.spec.ts`   |
 | 113 | Pressing "Shift+L" activates the Arrow tool, then dragging draws an arrow                                                                                                                                                                                                      |  —   |  ✅ `create-arrow.spec.ts`   |
 | 114 | Pressing a plain "L" (no Shift) still activates Line, not Arrow                                                                                                                                                                                                                |  —   |  ✅ `create-arrow.spec.ts`   |
+| 115 | Outline stroke (⌥⌘O) on an arrow keeps the arrowhead in the outlined vector (was: only the line body was outlined)                                                                                                                                                             |  ✅  |  ✅ `create-arrow.spec.ts`   |
 
 ## Select newly created shape nodes on creation
 

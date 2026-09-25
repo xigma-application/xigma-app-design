@@ -105,3 +105,35 @@ test('pressing a plain "L" (no shift) still activates Line, not Arrow', async ({
   const lineTool = designPage.toolRadio('line');
   await expect(lineTool).toHaveAttribute('aria-checked', 'true');
 });
+
+test('Outline stroke on an arrow keeps its arrowhead in the outlined shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-arrow-outline-stroke');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawLine(780, 260, 1000, 260);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(updateNode({ changes: { endPoint: 'arrow', stroke: '#000000' }, id: pages[activePageId].rootOrder[0] }));
+  });
+  await page.keyboard.press('Alt+Control+O');
+  await designPage.click(1500, 900);
+
+  const wingArea = { height: 3, width: 4, x: 994, y: 255 };
+  const blank = await page.screenshot({ clip: { ...wingArea, x: 1300, y: 700 } });
+  const wing = await page.screenshot({ clip: wingArea });
+  const type = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
+
+    return nodes[rootOrder[0]].type;
+  });
+
+  expect(type).toBe('vector');
+  expect(wing.equals(blank)).toBe(false);
+});

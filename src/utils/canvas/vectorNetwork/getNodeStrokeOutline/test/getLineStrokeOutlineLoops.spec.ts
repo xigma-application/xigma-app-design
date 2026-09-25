@@ -40,4 +40,19 @@ describe('getLineStrokeOutlineLoops', () => {
     // result
     expect(loops).toBeNull();
   });
+
+  it('should grow the outline around an arrowhead at the end and at the start', () => {
+    // before
+    const loops = getLineStrokeOutlineLoops(buildLine({ endPoint: 'arrow', startPoint: 'arrow' }), 0.5);
+
+    // result
+    const xs = loops?.outer.map((point) => point.x) ?? [];
+    const ys = loops?.outer.map((point) => point.y) ?? [];
+
+    expect(loops?.outer).toHaveLength(14);
+    expect(Math.max(...xs)).toBeGreaterThan(100);
+    expect(Math.min(...xs)).toBeLessThan(0);
+    expect(Math.max(...ys)).toBeGreaterThan(3);
+    expect(Math.min(...ys)).toBeLessThan(-3);
+  });
 });
