@@ -67,6 +67,8 @@ describe('drawBooleanStrokePaints', () => {
       expect.anything(),
       null,
       1,
+      null,
+      'nonZero',
     );
   });
 

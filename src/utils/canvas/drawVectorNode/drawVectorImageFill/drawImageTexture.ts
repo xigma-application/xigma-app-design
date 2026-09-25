@@ -1,5 +1,5 @@
 // types
-import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TTextureSize } from '../../getOrLoadTexture';
 import { TViewport } from 'types/design/types';
@@ -8,6 +8,7 @@ import { TViewport } from 'types/design/types';
 import { DEFAULT_IMAGE_ADJUSTMENTS, IMAGE_FILL_DEFAULT_TILE_SCALE } from 'constant/canvas';
 
 // utils
+import { setStencilFillOp } from '../setStencilFillOp';
 import { drawImageStencilMask } from './drawImageStencilMask';
 import { getFlippedImageFillUv } from '../getFlippedImageFillUv';
 import { getImageFillContainRect } from '../getImageFillContainRect';
@@ -76,6 +77,7 @@ export const drawImageTexture = (
   boxRotation?: TBoxFillRotation,
   scale = IMAGE_FILL_DEFAULT_TILE_SCALE,
   adjustments: TImageAdjustments = DEFAULT_IMAGE_ADJUSTMENTS,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   const isSideways = rotation === 90 || rotation === 270;
   const effectiveImageWidth = (isSideways ? imageSize?.height : imageSize?.width) ?? 0;
@@ -131,7 +133,7 @@ export const drawImageTexture = (
   gl.enable(gl.STENCIL_TEST);
   gl.colorMask(false, false, false, false);
   gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-  gl.stencilOp(gl.KEEP, gl.KEEP, gl.INVERT);
+  setStencilFillOp(gl, fillRule);
 
   drawImageStencilMask(gl, positionLocation, faceBufferCache, buffer, faces);
 

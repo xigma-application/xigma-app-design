@@ -1,8 +1,9 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { setStencilFillOp } from '../setStencilFillOp';
 import { drawImageStencilMask } from './drawImageStencilMask';
 import { getImageFillPlaceholderVertices } from '../getImageFillPlaceholderVertices';
 import { hexToRgbaFloat } from '../../hexToRgbaFloat';
@@ -21,6 +22,7 @@ export const drawImagePlaceholder = (
   canvasHeight: number,
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -39,7 +41,7 @@ export const drawImagePlaceholder = (
   gl.enable(gl.STENCIL_TEST);
   gl.colorMask(false, false, false, false);
   gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-  gl.stencilOp(gl.KEEP, gl.KEEP, gl.INVERT);
+  setStencilFillOp(gl, fillRule);
 
   drawImageStencilMask(gl, positionLocation, faceBufferCache, buffer, faces);
 

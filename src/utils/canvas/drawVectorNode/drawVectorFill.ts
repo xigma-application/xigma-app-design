@@ -1,8 +1,9 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { setStencilFillOp } from './setStencilFillOp';
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
 import { getVectorFillCoveringQuad } from './getVectorFillCoveringQuad';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
@@ -20,6 +21,7 @@ export const drawVectorFill = (
   viewport: TViewport,
   isAlphaWriteEnabled: boolean,
   alpha = 1,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   if (faces.length !== 0) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -38,7 +40,7 @@ export const drawVectorFill = (
     gl.enable(gl.STENCIL_TEST);
     gl.colorMask(false, false, false, false);
     gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-    gl.stencilOp(gl.KEEP, gl.KEEP, gl.INVERT);
+    setStencilFillOp(gl, fillRule);
 
     faces.forEach((face: TPoint[]) => {
       getOrCreateFaceBuffer(gl, faceBufferCache, buffer, face);

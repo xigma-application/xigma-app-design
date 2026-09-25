@@ -66,6 +66,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
   });
 
@@ -96,6 +97,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
   });
 

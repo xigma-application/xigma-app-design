@@ -52,6 +52,7 @@ describe('drawBoxPaints', () => {
       [{ color: '#f00', opacity: 100, type: 'solid' }],
       [null],
       { center: { x: 30, y: 30 }, degrees: 30, localBounds: { height: 20, width: 40, x: 10, y: 20 } },
+      'evenOdd',
     );
   });
 

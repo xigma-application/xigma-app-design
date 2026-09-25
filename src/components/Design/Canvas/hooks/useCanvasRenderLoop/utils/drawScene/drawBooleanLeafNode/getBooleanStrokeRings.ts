@@ -16,7 +16,7 @@ export const getBooleanStrokeRings = (shape: TBooleanShape, strokeWidth: number)
   if (!cached) {
     const rings = shape.polygons.map((loop) => {
       const { inner, outer } = getStrokeOutlinePolygons(loop, strokeWidth / 2, true);
-      return [outer, inner];
+      return [outer, [...inner].reverse()];
     });
 
     byWidth.set(strokeWidth, rings);

@@ -92,6 +92,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
       2,
@@ -107,6 +108,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
   });
 
@@ -143,6 +145,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
   });
 
@@ -239,6 +242,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
   });
 });

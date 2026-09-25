@@ -1,5 +1,5 @@
 // types
-import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -31,6 +31,7 @@ export const drawVectorFillPaints = (
   isAlphaWriteEnabled: boolean,
   imageFilterQuality: TImageFilterQuality | undefined,
   boxRotation?: TBoxFillRotation,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   paints.forEach((paint, index) => {
     if (paint.visible !== false) {
@@ -50,6 +51,7 @@ export const drawVectorFillPaints = (
           viewport,
           isAlphaWriteEnabled,
           alpha,
+          fillRule,
         );
       } else if (paint.type === 'pattern') {
         drawVectorPatternFill(
@@ -68,6 +70,7 @@ export const drawVectorFillPaints = (
           isAlphaWriteEnabled,
           alpha,
           boxRotation,
+          fillRule,
         );
       } else if (paint.type === 'image' || paint.type === 'video') {
         drawVectorImageFill(
@@ -95,6 +98,7 @@ export const drawVectorFillPaints = (
           boxRotation,
           paint.scale,
           paint.type === 'image' ? paint.adjustments : undefined,
+          fillRule,
         );
       } else {
         drawVectorGradientFill(
@@ -110,6 +114,7 @@ export const drawVectorFillPaints = (
           viewport,
           isAlphaWriteEnabled,
           alpha,
+          fillRule,
         );
       }
     }

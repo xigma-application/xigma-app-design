@@ -2,11 +2,12 @@
 import { PATTERN_PLACEHOLDER_DOT_COLOR } from 'constant/canvas';
 
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TPoint } from 'types/canvas';
 import { TPatternPaint } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { setStencilFillOp } from './setStencilFillOp';
 import { drawVectorPatternSourceTile, TBoxFillRotation, TPatternSourceTile } from './drawVectorPatternSourceTile';
 import { getOrCreateFaceBuffer } from './getOrCreateFaceBuffer';
 import { getPatternPlaceholderDotVertices } from './getPatternPlaceholderDotVertices';
@@ -60,6 +61,7 @@ export const drawVectorPatternFill = (
   isAlphaWriteEnabled: boolean,
   alpha = 1,
   boxRotation?: TBoxFillRotation,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   if (faces.length !== 0) {
     if (sourceTile) {
@@ -96,7 +98,7 @@ export const drawVectorPatternFill = (
       gl.enable(gl.STENCIL_TEST);
       gl.colorMask(false, false, false, false);
       gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-      gl.stencilOp(gl.KEEP, gl.KEEP, gl.INVERT);
+      setStencilFillOp(gl, fillRule);
 
       drawPatternStencilMask(gl, positionLocation, faceBufferCache, buffer, faces);
 

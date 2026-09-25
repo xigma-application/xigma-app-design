@@ -83,6 +83,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
   });
@@ -127,6 +128,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       0.4,
+      'evenOdd',
     );
   });
 
@@ -246,6 +248,7 @@ describe('drawVectorFillPaints', () => {
       undefined,
       undefined,
       undefined,
+      'evenOdd',
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
@@ -297,6 +300,7 @@ describe('drawVectorFillPaints', () => {
       IDENTITY_VIEWPORT,
       false,
       1,
+      'evenOdd',
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
   });
@@ -354,6 +358,7 @@ describe('drawVectorFillPaints', () => {
       undefined,
       undefined,
       undefined,
+      'evenOdd',
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
@@ -446,6 +451,7 @@ describe('drawVectorFillPaints', () => {
       boxRotation,
       undefined,
       undefined,
+      'evenOdd',
     );
   });
 
@@ -685,6 +691,7 @@ describe('drawVectorFillPaints', () => {
       false,
       1,
       undefined,
+      'evenOdd',
     );
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorGradientFillMock).not.toHaveBeenCalled();
@@ -746,6 +753,7 @@ describe('drawVectorFillPaints', () => {
       false,
       1,
       boxRotation,
+      'evenOdd',
     );
   });
 });

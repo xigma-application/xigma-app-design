@@ -99,6 +99,7 @@ describe('drawBoxLeafNode', () => {
       [{ color: '#fff', opacity: 25, type: 'solid' }],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(drawRectMock).not.toHaveBeenCalled();
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
@@ -129,6 +130,7 @@ describe('drawBoxLeafNode', () => {
       [{ color: '#222222', opacity: 100, type: 'solid' }],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       2,
@@ -139,6 +141,7 @@ describe('drawBoxLeafNode', () => {
       [{ color: '#111111', opacity: 100, type: 'solid' }],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 
@@ -175,6 +178,7 @@ describe('drawBoxLeafNode', () => {
       [bottomFill],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(drawVectorFillGroupMock).toHaveBeenNthCalledWith(
       2,
@@ -185,6 +189,7 @@ describe('drawBoxLeafNode', () => {
       [topFill],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 
@@ -222,6 +227,7 @@ describe('drawBoxLeafNode', () => {
       [pattern],
       [resolvedTile.tile],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(resolvedTile.release).toHaveBeenCalled();
   });
@@ -269,6 +275,7 @@ describe('drawBoxLeafNode', () => {
       [pattern],
       [resolvedTile.tile],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(resolvedTile.release).toHaveBeenCalled();
   });
@@ -329,6 +336,7 @@ describe('drawBoxLeafNode', () => {
       [pattern],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 
@@ -349,6 +357,7 @@ describe('drawBoxLeafNode', () => {
       [{ color: '#fff', opacity: 100, type: 'solid' }],
       [null],
       { center: { x: 60, y: 40 }, degrees: 30, localBounds: { height: 40, width: 100, x: 10, y: 20 } },
+      'evenOdd',
     );
   });
 
@@ -422,6 +431,7 @@ describe('drawBoxLeafNode', () => {
       [{ color: '#f00', opacity: 100, type: 'solid' }],
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 

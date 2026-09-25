@@ -119,6 +119,7 @@ describe('drawVectorFillGroup', () => {
       false,
       undefined,
       undefined,
+      'evenOdd',
     );
     expect(pool.acquire).not.toHaveBeenCalled();
     expect(compositeBlend).not.toHaveBeenCalled();
@@ -157,6 +158,7 @@ describe('drawVectorFillGroup', () => {
       false,
       undefined,
       boxRotation,
+      'evenOdd',
     );
   });
 
@@ -208,6 +210,7 @@ describe('drawVectorFillGroup', () => {
       true,
       undefined,
       undefined,
+      'evenOdd',
     );
 
     // result — the previous framebuffer/viewport/blend func/alpha-write state is restored before compositing
@@ -265,6 +268,7 @@ describe('drawVectorFillGroup', () => {
       true,
       undefined,
       boxRotation,
+      'evenOdd',
     );
   });
 

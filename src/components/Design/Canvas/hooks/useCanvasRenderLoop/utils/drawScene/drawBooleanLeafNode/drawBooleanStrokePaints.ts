@@ -36,6 +36,8 @@ export const drawBooleanStrokePaints = (
         refs,
         editingPathId,
         patternSourceDepth,
+        null,
+        'nonZero',
       );
     });
   }

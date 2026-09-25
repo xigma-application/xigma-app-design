@@ -52,3 +52,5 @@ export type TCornerRadiusHandle = 'ne' | 'nw' | 'se' | 'sw';
 export type TImageFilterQuality = 'basic' | 'detailed';
 
 export type TColorProfile = 'displayP3' | 'srgb';
+
+export type TFillRule = 'evenOdd' | 'nonZero';

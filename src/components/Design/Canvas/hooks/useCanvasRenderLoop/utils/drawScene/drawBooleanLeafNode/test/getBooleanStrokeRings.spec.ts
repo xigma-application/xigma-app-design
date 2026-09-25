@@ -16,6 +16,22 @@ describe('getBooleanStrokeRings', () => {
     ]);
   });
 
+  it('should wind the inner loop against the outer one, so a nonzero fill cuts it out and keeps any part folded over a thin shape', () => {
+    // mock
+    const getSignedArea = (loop: { x: number; y: number }[]): number =>
+      loop.reduce((sum, point, index) => {
+        const next = loop[(index + 1) % loop.length];
+
+        return sum + point.x * next.y - next.x * point.y;
+      }, 0);
+
+    // before
+    const [[outer, inner]] = getBooleanStrokeRings(booleanShape, 6);
+
+    // result
+    expect(Math.sign(getSignedArea(outer))).toBe(-Math.sign(getSignedArea(inner)));
+  });
+
   it('should reuse the rings for the same shape and stroke width', () => {
     // result
     expect(getBooleanStrokeRings(booleanShape, 2)).toBe(getBooleanStrokeRings(booleanShape, 2));

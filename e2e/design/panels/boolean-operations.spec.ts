@@ -538,3 +538,36 @@ test('flattening a Union with a gradient stroke keeps a stroke in the gradient f
 
   expect(flattened).toEqual({ strokeColor: '#ff0000', strokeWidth: 4, type: 'vector' });
 });
+
+test('a thick stroke on a Union of thin lines is drawn as a solid band, not a hollow outline with a line through it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-boolean-thick-stroke-thin-shape');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawLine(700, 300, 1000, 300);
+  await designPage.drawLine(850, 200, 850, 450);
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { booleanNodes, setSelection, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    store.dispatch(setSelection(pages[activePageId].rootOrder));
+    store.dispatch(booleanNodes('union'));
+
+    const union = Object.values(store.getState().design.pages[activePageId].nodes).find((node) => node.type === 'boolean');
+
+    store.dispatch(
+      updateNode({
+        changes: { strokeWidth: 30, strokes: [{ color: '#ff0000', opacity: 100, type: 'solid' }] } as never,
+        id: union?.id ?? '',
+      }),
+    );
+    store.dispatch(setSelection([]));
+  });
+  await designPage.click(1500, 900);
+
+  const blank = await page.screenshot({ clip: { height: 4, width: 4, x: 760, y: 360 } });
+
+  await expect.poll(async () => (await page.screenshot({ clip: { height: 4, width: 4, x: 760, y: 305 } })).equals(blank)).toBe(false);
+});

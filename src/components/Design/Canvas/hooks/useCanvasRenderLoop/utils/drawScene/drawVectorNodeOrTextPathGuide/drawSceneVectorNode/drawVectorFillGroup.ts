@@ -1,6 +1,6 @@
 // types
 import { BlendMode } from 'types/design/enums';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TPoint } from 'types/canvas';
 import { TDrawSceneContext } from '../../types';
 import { TPaint } from 'types/design/paint/types';
 
@@ -22,6 +22,7 @@ const drawIsolatedFillGroup = (
   patternSourceTiles: (TPatternSourceTile | null)[],
   blendMode: BlendMode,
   boxRotation?: TBoxFillRotation,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
   const pool = imageContext.renderTargetPool;
@@ -69,6 +70,7 @@ const drawIsolatedFillGroup = (
     true,
     imageFilterQuality,
     boxRotation,
+    fillRule,
   );
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer);
@@ -90,11 +92,12 @@ export const drawVectorFillGroup = (
   paint: TPaint[],
   patternSourceTiles: (TPatternSourceTile | null)[] = [],
   boxRotation?: TBoxFillRotation,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   const blendMode = getFaceGroupBlendMode(paint);
 
   if (blendMode) {
-    drawIsolatedFillGroup(context, faceBufferCache, nodeBounds, polygons, paint, patternSourceTiles, blendMode, boxRotation);
+    drawIsolatedFillGroup(context, faceBufferCache, nodeBounds, polygons, paint, patternSourceTiles, blendMode, boxRotation, fillRule);
   } else {
     const { buffer, canvasHeight, canvasWidth, gl, imageContext, imageFilterQuality, program, viewport } = context;
 
@@ -118,6 +121,7 @@ export const drawVectorFillGroup = (
       imageContext.isAlphaWriteEnabled,
       imageFilterQuality,
       boxRotation,
+      fillRule,
     );
   }
 };

@@ -108,6 +108,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(drawThickOutlineMock).not.toHaveBeenCalled();
   });
@@ -136,6 +137,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints((node as TRectangleNode).fills, 0.5),
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
     expect(drawThickOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, '#000', 2, 200, 150, IDENTITY_VIEWPORT, 0, undefined, 0.5);
   });
@@ -161,6 +163,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints(previewNode.fills, 1),
       [null],
       { center: { x: 50, y: 70 }, degrees: 0, localBounds: { height: 20, width: 20, x: 40, y: 60 } },
+      'evenOdd',
     );
   });
 
@@ -181,6 +184,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 
@@ -208,6 +212,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints((node as TRectangleNode).fills, 1),
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 
@@ -243,6 +248,7 @@ describe('drawLeafNode', () => {
       getScaledFillPaints((node as TRectangleNode).fills, 0.25),
       [null],
       DEFAULT_BOX_ROTATION,
+      'evenOdd',
     );
   });
 

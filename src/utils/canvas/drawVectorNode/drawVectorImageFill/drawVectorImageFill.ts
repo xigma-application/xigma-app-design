@@ -2,7 +2,7 @@
 import { IMAGE_PLACEHOLDER_TEXTURE_SIZE_PX } from 'constant/canvas';
 
 // types
-import { TDraftRect, TImageFilterQuality, TPoint } from 'types/canvas';
+import { TDraftRect, TFillRule, TImageFilterQuality, TPoint } from 'types/canvas';
 import { TImageAdjustments, TImageCrop, TImageScaleMode } from 'types/design/paint/types';
 import { TViewport } from 'types/design/types';
 
@@ -44,6 +44,7 @@ export const drawVectorImageFill = (
   boxRotation?: TBoxFillRotation,
   scale?: number,
   adjustments?: TImageAdjustments,
+  fillRule: TFillRule = 'evenOdd',
 ): void => {
   if (faces.length !== 0) {
     const bounds = getVectorFillBounds(faces, nodeBounds);
@@ -79,9 +80,22 @@ export const drawVectorImageFill = (
         boxRotation,
         scale,
         adjustments,
+        fillRule,
       );
     } else {
-      drawImagePlaceholder(gl, program, buffer, faceBufferCache, faces, bounds, canvasWidth, canvasHeight, viewport, isAlphaWriteEnabled);
+      drawImagePlaceholder(
+        gl,
+        program,
+        buffer,
+        faceBufferCache,
+        faces,
+        bounds,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        isAlphaWriteEnabled,
+        fillRule,
+      );
     }
   }
 };
