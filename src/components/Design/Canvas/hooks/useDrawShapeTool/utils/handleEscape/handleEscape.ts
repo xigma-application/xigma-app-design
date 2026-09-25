@@ -30,6 +30,7 @@ export const handleEscape = (
   dropTargetRef.current = null;
   canvasRefs.transform.alignmentGuideRef.current = null;
   canvasRefs.transform.aspectRatioLockGuideRef.current = null;
+  canvasRefs.transform.sectionCaptureIdsRef.current = [];
   canvasRefs.drawing.cancelDrawRef.current = null;
   dispatch(setActiveTool(ToolName.default));
 };

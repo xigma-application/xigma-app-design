@@ -112,9 +112,9 @@ test('a frame nested directly inside a section stays click-through, just like a 
   await designPage.goto('e2e-test-section-nested-frame-click-through');
   await expect(designPage.canvas).toBeVisible();
 
-  // a frame with its own rectangle, then a section around them — frame drawing must finish before
-  // drawSection, since the frame/section/slice toolbar dropdown swaps its visible radio to whatever
-  // was last used, which would break a later selectTool('frame')
+  // a frame, a rectangle drawn inside it (so it nests into the frame) and a section drawn around
+  // both (so it collects the frame) — frame drawing must finish before drawSection, since the
+  // frame/section/slice toolbar dropdown swaps its visible radio to whatever was last used
   await designPage.drawFrame(950, 200, 1250, 550);
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
   await designPage.drawRectangle(1000, 300, 1100, 400);
@@ -123,13 +123,7 @@ test('a frame nested directly inside a section stays click-through, just like a 
   await designPage.click(EMPTY_POINT.x, EMPTY_POINT.y);
 
   const rows = rowsOf(page);
-  const sectionRow = rows.filter({ hasText: 'Section (1)' });
   const frameRow = rows.filter({ hasText: 'Frame (1)' });
-  const rectRow = rows.filter({ hasText: 'Rectangle' });
-
-  await dragRowOnto(rectRow, frameRow); // rectangle → frame
-  await frameRow.locator('[class*="TreeItem__toggle-button"]').click(); // reveal the frame's child again
-  await dragRowOnto(frameRow, sectionRow); // frame (now non-empty) → section
 
   // a plain click on the rectangle inside the frame reaches it directly, no Control needed — the
   // frame's own click-through status is unaffected by having a section (rather than the page root)

@@ -30,6 +30,7 @@ describe('useTransformRefs behaviors', () => {
       resizedNodeIdsRef: { current: null },
       rotateDragRef: { current: null },
       rotatedNodeIdsRef: { current: null },
+      sectionCaptureIdsRef: { current: [] },
     });
   });
 

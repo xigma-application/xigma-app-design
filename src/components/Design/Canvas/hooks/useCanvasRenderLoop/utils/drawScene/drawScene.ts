@@ -71,6 +71,7 @@ import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes/drawSceneNodes';
 import { drawSectionNameLabels } from './drawSectionNameLabels/drawSectionNameLabels';
+import { drawSectionCaptureOutlines } from './drawSectionCaptureOutlines';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
 import { drawShapeContactGuides } from './drawShapeContactGuides';
@@ -171,6 +172,7 @@ export const drawScene = (
   drawFrameOutlines(ctx, sceneNodes, refs, nodesById);
   drawMaskOutlines(ctx, sceneNodes, nodesById);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
+  drawSectionCaptureOutlines(ctx, refs, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, imageEditor, pathId);
   drawConstraintGuides(ctx, selectedNodes, nodesById);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);

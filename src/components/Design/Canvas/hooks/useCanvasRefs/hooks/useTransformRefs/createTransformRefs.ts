@@ -22,5 +22,6 @@ export const createTransformRefs = (overrides: Partial<TTransformRefs> = {}): TT
   resizedNodeIdsRef: { current: null },
   rotateDragRef: { current: null },
   rotatedNodeIdsRef: { current: null },
+  sectionCaptureIdsRef: { current: [] },
   ...overrides,
 });

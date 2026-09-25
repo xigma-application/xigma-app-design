@@ -18,6 +18,7 @@ import { getPointAlignmentSnap } from '../../../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { getShapeDraftRect } from '../../../../utils/getShapeDraftRect';
 import { screenToWorld } from 'utils/transform/screenToWorld';
+import { updateSectionCaptureIds } from '../../../../utils/sectionCapture/updateSectionCaptureIds';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -35,6 +36,7 @@ export const handlePointerMove = (
     const rect = getShapeDraftRect(startRef.current, snap.point, event.shiftKey);
 
     dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
+    updateSectionCaptureIds(canvasRefs, nodeIdRef.current);
     canvasRefs.transform.alignmentGuideRef.current = snap.guide;
     canvasRefs.transform.aspectRatioLockGuideRef.current = event.shiftKey ? { ...rect, rotation: 0 } : null;
   }

@@ -125,12 +125,13 @@ both the committed-node path and the live-draft path) — hit-testing/bounds (`i
 `getNodeBounds.ts`) deliberately stay keyed to the raw segment only, with no allowance for the
 arrowhead's visual overflow.
 
-| #   | Scenario                                                                                            | Unit |            E2E            |
-| --- | --------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 111 | Picking "Arrow" from the Rectangle dropdown draws a line with an arrowhead and reverts to `default` |  —   | ✅ `create-arrow.spec.ts` |
-| 112 | The drawn arrow renders visibly differently from an identical plain line (the arrowhead itself)     |  —   | ✅ `create-arrow.spec.ts` |
-| 113 | Pressing "Shift+L" activates the Arrow tool, then dragging draws an arrow                           |  —   | ✅ `create-arrow.spec.ts` |
-| 114 | Pressing a plain "L" (no Shift) still activates Line, not Arrow                                     |  —   | ✅ `create-arrow.spec.ts` |
+| #   | Scenario                                                                                                                                                                                                                                                                       | Unit |             E2E              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :--------------------------: |
+| 111 | Picking "Arrow" from the Rectangle dropdown draws a line with an arrowhead and reverts to `default`                                                                                                                                                                            |  —   |  ✅ `create-arrow.spec.ts`   |
+| 112 | Drawing or resizing a section outlines the sibling layers it fully covers while dragging and moves them into it only on release; a section drawn in a section looks only at that section's children; shrinking a section drops the children that no longer fit into its parent |  ✅  | ✅ `section-capture.spec.ts` |
+| 112 | The drawn arrow renders visibly differently from an identical plain line (the arrowhead itself)                                                                                                                                                                                |  —   |  ✅ `create-arrow.spec.ts`   |
+| 113 | Pressing "Shift+L" activates the Arrow tool, then dragging draws an arrow                                                                                                                                                                                                      |  —   |  ✅ `create-arrow.spec.ts`   |
+| 114 | Pressing a plain "L" (no Shift) still activates Line, not Arrow                                                                                                                                                                                                                |  —   |  ✅ `create-arrow.spec.ts`   |
 
 ## Select newly created shape nodes on creation
 

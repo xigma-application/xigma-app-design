@@ -526,6 +526,7 @@ export type TTransformRefs = {
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
   rotatedNodeIdsRef: RefObject<Set<string> | null>;
+  sectionCaptureIdsRef: RefObject<string[]>;
 };
 
 export type TPenRefs = {

@@ -19,6 +19,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { clearNewNodeDropTarget } from 'components/Design/Canvas/utils/resolveNewNodeDropTarget/clearNewNodeDropTarget';
+import { commitSectionCapture } from '../../../../utils/sectionCapture/commitSectionCapture';
 import { getPointAlignmentSnap } from '../../../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from 'utils/math/pointer/getPointerPosition';
 import { screenToWorld } from 'utils/transform/screenToWorld';
@@ -55,6 +56,7 @@ export const handlePointerUp = (
     const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
     dispatch(updateNode({ changes: rect, id: nodeIdRef.current }));
+    commitSectionCapture(dispatch, canvasRefs, nodeIdRef.current, null);
     resetDrawRefs(canvasRefs, startRef, nodeIdRef, dropTargetRef);
     clearNewNodeDropTarget(canvasRefs);
     canvas.releasePointerCapture(event.pointerId);

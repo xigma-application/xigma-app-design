@@ -11,6 +11,7 @@ import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { clearResizeOriginalFills } from '../handlePointerMove/continueResizeDrag/resizeNode/resizeOriginalFillsCache';
+import { commitResizedSectionCapture } from './commitResizedSectionCapture';
 import { commitResizedVectorNodeSnapshots } from './commitResizedVectorNodeSnapshots';
 
 const commitImageEditorCropModeTransition = (dispatch: AppDispatch, resizeDragState: TResizeDragState): void => {
@@ -33,6 +34,7 @@ export const disarmResizeDrag = (
   if (resizeDragState) {
     commitResizedVectorNodeSnapshots(dispatch, resizeDragState, canvasRefs);
     commitImageEditorCropModeTransition(dispatch, resizeDragState);
+    commitResizedSectionCapture(dispatch, resizeDragState, canvasRefs);
     Object.keys(resizeDragState.nodeOrigins).forEach(clearResizeOriginalFills);
     canvasRefs.transform.resizedNodeIdsRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;

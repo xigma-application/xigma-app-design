@@ -40,6 +40,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const matchedPairGuidesRef = useRef<TMatchedPairGuides | null>(null);
   const resizedNodeIdsRef = useRef<Set<string> | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
+  const sectionCaptureIdsRef = useRef<string[]>([]);
   const rotatedNodeIdsRef = useRef<Set<string> | null>(null);
   const transformRefsRef = useRef<TTransformRefs | null>(null);
 
@@ -65,6 +66,7 @@ export const useTransformRefs = (): TTransformRefs => {
       resizedNodeIdsRef,
       rotateDragRef,
       rotatedNodeIdsRef,
+      sectionCaptureIdsRef,
     };
   }
 
