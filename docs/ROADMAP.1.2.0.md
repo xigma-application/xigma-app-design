@@ -73,6 +73,8 @@ Right-clicking a layer that is part of the selection builds the menu from the wh
 item shows only if it makes sense for every selected layer. Show/Hide and Lock/Unlock apply to all
 selected layers at once.
 
+- [x] Remove mask removes the mask from every selected mask layer at once
+
 ## Stage 12 — Slice
 
 A slice marks an area of the page to export. It shows as a dashed outline and never hides what is

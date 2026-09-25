@@ -56,6 +56,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getNodeMenuFlags } from './utils/getNodeMenuFlags';
+import { handleRemoveNodesMask } from '../utils/handleRemoveNodesMask';
 import { handleToggleNodesFlag } from '../utils/handleToggleNodesFlag';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
@@ -123,7 +124,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const isMultiple = menuNodes.length > 1;
   const handleToggleHidden = isMultiple ? (): void => handleToggleNodesFlag(dispatch, menuNodeIds, 'hidden') : onToggleHidden;
   const handleToggleLocked = isMultiple ? (): void => handleToggleNodesFlag(dispatch, menuNodeIds, 'locked') : onToggleLocked;
-  const handleRemoveMask = useHandleRemoveMask(node, onRemoveMask);
+  const handleRemoveNodeMask = useHandleRemoveMask(node, onRemoveMask);
+  const handleRemoveMask = isMultiple ? (): void => handleRemoveNodesMask(dispatch, menuNodes) : handleRemoveNodeMask;
 
   return (
     <Menu

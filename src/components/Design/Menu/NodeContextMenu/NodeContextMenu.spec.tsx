@@ -633,6 +633,30 @@ describe('NodeContextMenu', () => {
     store.dispatch(setSelection([]));
   });
 
+  it('should remove the mask from every selected mask layer, not only the right-clicked one', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onRemoveMask = vi.fn();
+    const first = buildMaskScene();
+    const second = buildMaskScene();
+    const node = selectActivePage(store.getState()).nodes[first.nodeId];
+    store.dispatch(setSelection([first.nodeId, second.nodeId]));
+
+    // before
+    renderNodeContextMenu({ node, onRemoveMask });
+
+    // action
+    await user.click(screen.getByText('Remove mask'));
+
+    // result
+    const { nodes } = selectActivePage(store.getState());
+
+    expect(onRemoveMask).not.toHaveBeenCalled();
+    expect(nodes[first.maskId].type).toBe(NodeType.group);
+    expect(nodes[second.maskId].type).toBe(NodeType.group);
+    store.dispatch(setSelection([]));
+  });
+
   it('should show the slice menu without the group, frame, send to make, flatten and mask items, and no empty section', () => {
     // mock
     const slice = { ...BASE_NODE, id: 'context-slice', type: NodeType.slice } as TSceneNode;

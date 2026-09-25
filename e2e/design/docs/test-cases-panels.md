@@ -137,7 +137,7 @@ multi-selections only.
 | 619 | Wrap in new section (header button, More actions, Object menu, ⌘S) wraps layers or sections at the top level or directly in a section in a new selected section 25px larger than them on every side (nested in that section); it is not offered for layers inside a frame or group, nor for layers from different parents            |  ✅  |                                                        ✅ `wrap-in-section.spec.ts`                                                        |
 | 620 | A section can sit inside a section: a section drawn over a section and a section dragged onto a section land inside it, while a section still never goes into a frame or group                                                                                                                                                       |  ✅  |                                                        ✅ `wrap-in-section.spec.ts`                                                        |
 | 621 | A page without its own background follows the theme (#535353 dark, #F5F5F5 light); a new page takes the background set on the page it was created from, or keeps following the theme                                                                                                                                                 |  ✅  |                                                        ✅ `page-background.spec.ts`                                                        |
-| 622 | A selected section shows the Section panel (no rotation, no effects); alignment moves its children like a frame's; fill and stroke are stored on the node; Resize to fit shrinks it to its children and Frame in the header menu turns it into a frame                                                                                                         |  ✅  |                                                         ✅ `section-panel.spec.ts`                                                         |
+| 622 | A selected section shows the Section panel (no rotation, no effects); alignment moves its children like a frame's; fill and stroke are stored on the node; Resize to fit shrinks it to its children and Frame in the header menu turns it into a frame                                                                               |  ✅  |                                                         ✅ `section-panel.spec.ts`                                                         |
 | 623 | A section's name label follows its solid fill (black text on a light fill); with no solid fill it follows the page background (#444444 with a white 10% edge on a dark page, #FFFFFF with a #D7D7D7 edge on a light one)                                                                                                             |  ✅  |                                                         ✅ `section-panel.spec.ts`                                                         |
 
 ## Layers panel — lock/visibility
@@ -1450,3 +1450,14 @@ gotcha the same change hit.
 auto-correct and ancestor/background resolution are pure functions covered by unit tests; the e2e test
 covers the real browser flow (toggle, ratio, overlay, reacting to a page background change). Parent-frame
 resolution is unit-tested only (`getContrastBackgroundColor.spec.ts`).
+
+## Right-click menu for several layers
+
+When the right-clicked layer is part of the selection, the menu is built from the whole selection
+(`useNodeMenuNodes` + `getNodeMenuFlags`): an item shows only if it fits every selected layer, and
+Show/Hide, Lock/Unlock and Remove mask act on every selected layer in one undo step.
+
+| #   | Scenario                                                                                                              | Unit |              E2E               |
+| --- | --------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------: |
+| 624 | Right-clicking one layer of a section + rectangle selection hides the items a section lacks, and Show/Hide hides both |  ✅  | ✅ `node-context-menu.spec.ts` |
+| 625 | Remove mask on two selected mask layers removes both masks, and one undo brings both back                             |  ✅  | ✅ `node-context-menu.spec.ts` |
