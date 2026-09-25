@@ -88,3 +88,16 @@ everything visible in its area, including the page background.
 - [x] layers snap to a slice's edges while dragging, and a slice snaps to them
 - [x] a locked slice can still be picked in the layers panel but not dragged on the canvas
 - [x] a hidden slice disappears from the canvas and isn't exported
+
+## Stage 13 — Line and Arrow
+
+A line has the full stroke settings: Position (Inside and Outside shift the stroke to one side),
+dashed and custom strokes with dash caps, width profiles, and Dynamic and Brush strokes drawn along
+the line. Arrowheads stay solid. A line is picked and measured by the stroke you see, not only by
+its thin centre.
+
+- [x] a line with an arrowhead is titled Arrow; several lines or arrows are titled "N selected"
+- [x] Offset vector turns a line into a closed shape around it, with sharp or round corners and a
+      live preview
+- [x] the shape made by Offset keeps the line's stroke, also after you draw more onto it
+- [x] a Union's own Dynamic and Brush stroke runs around every part of its shape
