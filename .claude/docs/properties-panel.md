@@ -950,6 +950,19 @@ component button, no dropdown) → `Common/PositionSection` → a bare `UITools.
 "Layout" holding `Common/ColumnDimensions` + `Common/ColumnGridChildSpan` → `Common/AppearanceSection`
 → `Common/FillSection`. No auto-layout rows.
 
+## `Line/`
+
+`Line.tsx` = `LineHeader` (component, mask, boolean buttons + the "…" `PanelHeaderMoreActionsButton`
+holding Edit object) → `PositionSection` → Layout (`ColumnDimensions isHeightDisabled`, since a
+line's height is always 0) → `AppearanceSection withCornerRadius={false}` → `FillSection
+property="strokes"` with `LineStrokeSettings` as its footer → `EffectsSection` → `Export`. No Fill.
+`LineStrokeSettings` shows a disabled Position dropdown fixed at Center, the Weight field and the
+Start point / End point dropdowns (`getLineEndpointOptions`; the End point icons are rotated 180°).
+The shared hooks (opacity, blend mode, effects, stroke paints) accept lines through `isStyledNode`
+(`TAppearanceNode | TLineNode`); `useFillSection` uses `isPaintPropertyNode`, so lines take part in
+strokes but never in fills. Hooks for fields a line lacks (corner radius, stroke sides, advanced
+stroke settings) keep gating on `isAppearanceNode`.
+
 ## `ImageCrop/`
 
 **Routed ahead of every node-type panel, not by node type at all.** `PanelProperties.tsx`'s switch

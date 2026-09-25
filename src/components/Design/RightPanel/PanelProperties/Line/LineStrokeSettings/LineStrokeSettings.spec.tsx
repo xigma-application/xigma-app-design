@@ -1,0 +1,94 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+
+// components
+import LineStrokeSettings from './LineStrokeSettings';
+
+// store
+import { addNodes, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { LineEndpoint, NodeType } from 'types/design/enums';
+import { TLineNode } from 'types/design/types';
+
+const line: TLineNode = {
+  endPoint: LineEndpoint.lineArrow,
+  height: 0,
+  id: 'settingsLine',
+  name: 'Line',
+  parentId: null,
+  rotation: 0,
+  strokeWidth: 3,
+  strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  type: NodeType.line,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
+describe('LineStrokeSettings behaviors', () => {
+  it('should show a fixed center position, the weight and both endpoints', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [line], rootIds: [line.id] }));
+    store.dispatch(setSelection([line.id]));
+
+    // before
+    render(
+      <Provider store={store}>
+        <LineStrokeSettings />
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByText('Center').closest('button')).toBeDisabled();
+    expect(screen.getByLabelText('Stroke weight')).toHaveValue('3');
+    expect(screen.getByText('None')).toBeInTheDocument();
+    expect(screen.getByText('Line arrow')).toBeInTheDocument();
+  });
+
+  it('should show Mixed for lines of different weights', () => {
+    // mock
+    store.dispatch(
+      addNodes({
+        nodes: [
+          { ...line, id: 'settingsLineMixedA' },
+          { ...line, id: 'settingsLineMixedB', strokeWidth: 6 },
+        ],
+        rootIds: ['settingsLineMixedA', 'settingsLineMixedB'],
+      }),
+    );
+    store.dispatch(setSelection(['settingsLineMixedA', 'settingsLineMixedB']));
+
+    // before
+    render(
+      <Provider store={store}>
+        <LineStrokeSettings />
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByLabelText('Stroke weight')).toHaveValue('Mixed');
+  });
+
+  it('should set the start point picked from its dropdown', () => {
+    // mock
+    store.dispatch(addNodes({ nodes: [{ ...line, id: 'settingsLinePick' }], rootIds: ['settingsLinePick'] }));
+    store.dispatch(setSelection(['settingsLinePick']));
+
+    // before
+    render(
+      <Provider store={store}>
+        <LineStrokeSettings />
+      </Provider>,
+    );
+
+    // action
+    fireEvent.click(screen.getByText('None'));
+    fireEvent.click(screen.getByText('Round'));
+
+    // result
+    expect((selectActivePage(store.getState()).nodes.settingsLinePick as TLineNode).startPoint).toBe(LineEndpoint.round);
+  });
+});

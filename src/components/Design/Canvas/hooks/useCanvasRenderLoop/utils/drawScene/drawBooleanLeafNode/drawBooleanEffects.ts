@@ -11,7 +11,7 @@ import { getEffectBlendModePreview } from 'utils/canvas/blendMode/getEffectBlend
 
 export const drawBooleanEffects = (
   context: TDrawSceneContext,
-  node: TBooleanNode,
+  node: Pick<TBooleanNode, 'effects' | 'id'>,
   shape: TBooleanShape,
   opacity: number,
   refs: TCanvasRefs,

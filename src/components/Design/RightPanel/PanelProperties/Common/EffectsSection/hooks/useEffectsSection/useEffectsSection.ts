@@ -16,11 +16,11 @@ import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { isAppearanceNode } from '../../../AppearanceSection/types';
 import { TEffect } from 'types/design/types';
 import { TUseEffectsSectionResult } from './types';
 
 // utils
+import { isStyledNode } from '../../../AppearanceSection/utils/isStyledNode';
 import { getItemsWithPatch } from '../../../utils/getItemsWithPatch';
 import { getReorderedItems } from '../../../utils/getReorderedItems';
 import { handleItemRemove } from '../../../utils/handleItemRemove';
@@ -37,7 +37,7 @@ import { handleEffectOpenChange } from './utils/handleEffectOpenChange';
 
 export const useEffectsSection = (): TUseEffectsSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
   const [node] = nodes;
   const isMixed = !hasMatchingItemTypes(nodes.map((selected) => selected.effects ?? NO_EFFECTS));
   const effects = isMixed ? NO_EFFECTS : (node?.effects ?? NO_EFFECTS);

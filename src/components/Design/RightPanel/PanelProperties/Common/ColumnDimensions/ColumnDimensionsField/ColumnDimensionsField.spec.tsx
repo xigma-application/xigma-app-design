@@ -59,6 +59,14 @@ describe('ColumnDimensionsField behaviors', () => {
     expect(screen.getByText('W')).toBeInTheDocument();
   });
 
+  it('should disable the input when the field is disabled', () => {
+    // before
+    renderColumnDimensionsField({ disabled: true });
+
+    // result
+    expect(screen.getByLabelText('Width')).toBeDisabled();
+  });
+
   it('should render the current value in the input', () => {
     // before
     renderColumnDimensionsField({ value: 187 });

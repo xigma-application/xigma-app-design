@@ -14,7 +14,7 @@ import { selectActivePage, selectIsGridSettingsPanelOpen } from 'store/design/se
 import { store } from 'store';
 
 // types
-import { BooleanOperation, LayoutMode, NodeType, ToolName } from 'types/design/enums';
+import { BooleanOperation, LayoutMode, LineEndpoint, NodeType, ToolName } from 'types/design/enums';
 
 // utils
 import { getDefaultSectionStyle } from 'utils/design/section/getDefaultSectionStyle';
@@ -357,6 +357,35 @@ describe('PanelProperties behaviors', () => {
 
     // result
     expect(screen.getByText('Slice')).toBeInTheDocument();
+    expect(screen.queryByText('Fill')).not.toBeInTheDocument();
+  });
+
+  it('should show the Line panel with a stroke and no fill section while a line is selected', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        endPoint: LineEndpoint.none,
+        height: 0,
+        name: 'Line',
+        parentId: null,
+        rotation: 0,
+        startPoint: LineEndpoint.none,
+        strokes: [{ color: '#000000', opacity: 100, type: 'solid' }],
+        type: NodeType.line,
+        width: 40,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
+
+    // before
+    renderPanelProperties();
+
+    // result
+    expect(screen.getByText('Line')).toBeInTheDocument();
+    expect(screen.getByText('Start point')).toBeInTheDocument();
     expect(screen.queryByText('Fill')).not.toBeInTheDocument();
   });
 

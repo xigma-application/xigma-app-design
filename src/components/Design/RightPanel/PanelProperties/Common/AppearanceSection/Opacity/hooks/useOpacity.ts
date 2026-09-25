@@ -6,10 +6,10 @@ import { selectAppearanceNodes } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
-import { isAppearanceNode } from '../../types';
 import { TUseOpacityResult } from './types';
 
 // utils
+import { isStyledNode } from '../../utils/isStyledNode';
 import { clampOpacity } from './utils/clampOpacity';
 import { commitOnNodes } from '../../utils/commitOnNodes';
 import { commitOpacityChange } from './utils/commitOpacityChange';
@@ -17,7 +17,7 @@ import { getOpacityPercentage } from './utils/getOpacityPercentage';
 
 export const useOpacity = (): TUseOpacityResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
   const [firstNode] = nodes;
   const value = getOpacityPercentage(firstNode);
   const isMixed = nodes.some((node) => getOpacityPercentage(node) !== value);

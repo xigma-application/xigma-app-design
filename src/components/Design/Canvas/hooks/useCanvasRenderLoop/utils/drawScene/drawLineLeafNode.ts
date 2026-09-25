@@ -1,11 +1,14 @@
 // types
+import { EffectType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from './types';
 import { TLineNode, TSceneNode } from 'types/design/types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 
 // utils
+import { drawBooleanEffects } from './drawBooleanLeafNode/drawBooleanEffects';
 import { drawBoxPaints } from './drawBoxLeafNode/drawBoxPaints';
+import { getLineShape } from './getLineShape';
 import { getLineStrokeBox } from 'utils/canvas/shapes/getLineStrokeBox';
 import { getLineStrokePolygon } from 'utils/canvas/shapes/getLineStrokePolygon';
 
@@ -22,6 +25,9 @@ export const drawLineLeafNode = (
   const polygon = getLineStrokePolygon(node);
 
   if (polygon) {
+    const shape = getLineShape(polygon);
+
+    drawBooleanEffects(context, node, shape, opacity, refs, EffectType.dropShadow);
     drawBoxPaints(
       context,
       getLineStrokeBox(node),
@@ -34,5 +40,7 @@ export const drawLineLeafNode = (
       editingPathId,
       patternSourceDepth,
     );
+    drawBooleanEffects(context, node, shape, opacity, refs, EffectType.innerShadow);
+    drawBooleanEffects(context, node, shape, opacity, refs, EffectType.noise);
   }
 };

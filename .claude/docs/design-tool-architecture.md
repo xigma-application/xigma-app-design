@@ -443,6 +443,8 @@ Two independent render passes, both need updating for a visual change to show up
   `drawPolygon`, ...). Check here first before writing new vertex/buffer boilerplate — a new shape
   can usually be one polygon filled by an existing primitive (lines and their endpoints are a single
   outline polygon filled through `drawBoxPaints`).
+  Line effects reuse the boolean effect drawers: `getLineShape` wraps that polygon as a
+  `TBooleanShape` (keys shared with booleans via `getNextBooleanShapeKey`) for `drawBooleanEffects`.
 - `src/constant/canvas.ts` — every magic number (stroke widths, hit-test tolerances, handle sizes,
   dash lengths) lives here, not inline. Roughly alphabetical but not strictly enforced.
 

@@ -1,7 +1,7 @@
 // types
-import { TAppearanceNode } from '../../../types';
+import { TStyledNode } from '../../../types';
 
 // utils
 import { clampOpacity } from './clampOpacity';
 
-export const getOpacityPercentage = (node: TAppearanceNode | undefined): number => clampOpacity((node?.opacity ?? 1) * 100);
+export const getOpacityPercentage = (node: TStyledNode | undefined): number => clampOpacity((node?.opacity ?? 1) * 100);

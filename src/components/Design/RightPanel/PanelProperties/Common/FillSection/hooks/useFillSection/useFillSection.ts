@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from 'store';
 import { MULTI_SELECTION_DISABLED_FILL_MODES } from '../../constants';
 
 // types
-import { isAppearanceNode } from '../../../AppearanceSection/types';
 import { TPaint, TPaintProperty } from 'types/design/paint/types';
 import { TUseFillSectionResult } from './types';
 
@@ -18,6 +17,7 @@ import { TUseFillSectionResult } from './types';
 import { commitFills } from './utils/commitFills';
 import { getFillTargets } from './utils/getFillTargets';
 import { hasMixedPaints } from './utils/hasMixedPaints';
+import { isPaintPropertyNode } from './utils/isPaintPropertyNode';
 import { getDefaultPaintColor } from './utils/getDefaultPaintColor';
 import { getInitialOpenPickerIndex } from './utils/getInitialOpenPickerIndex';
 import { getNodePaints } from 'utils/design/paint/getNodePaints';
@@ -34,7 +34,7 @@ import { useOpenPickerIndex } from './hooks/useOpenPickerIndex/useOpenPickerInde
 
 export const useFillSection = (property: TPaintProperty = 'fills'): TUseFillSectionResult => {
   const dispatch = useAppDispatch();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter((selected) => isPaintPropertyNode(selected, property));
   const [node] = nodes;
   const isMultiSelection = nodes.length > 1;
   const isMixed = hasMixedPaints(nodes, property);

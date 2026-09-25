@@ -1,0 +1,9 @@
+.LineEndpointLabel {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+
+  &__icon--flipped {
+    transform: rotate(180deg);
+  }
+}

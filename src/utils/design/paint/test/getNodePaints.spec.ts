@@ -19,4 +19,8 @@ describe('getNodePaints', () => {
   it('should return an empty list when the node has no strokes yet', () => {
     expect(getNodePaints({ fills: [fill] }, 'strokes')).toEqual([]);
   });
+
+  it('should return an empty list for a node without fills, like a line', () => {
+    expect(getNodePaints({ strokes: [stroke] })).toEqual([]);
+  });
 });

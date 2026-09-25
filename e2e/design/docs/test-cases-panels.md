@@ -1466,3 +1466,15 @@ Show/Hide, Lock/Unlock and Remove mask act on every selected layer in one undo s
 | --- | --------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------: |
 | 624 | Right-clicking one layer of a section + rectangle selection hides the items a section lacks, and Show/Hide hides both |  ✅  | ✅ `node-context-menu.spec.ts` |
 | 625 | Remove mask on two selected mask layers removes both masks, and one undo brings both back                             |  ✅  | ✅ `node-context-menu.spec.ts` |
+
+## Line panel
+
+A selected line gets its own panel: Position, Layout (height locked at 0), Appearance without corner
+radius, Stroke with Position (fixed Center), Weight, Start point and End point, Effects and Export.
+There is no Fill section.
+
+| #   | Scenario                                                                            | Unit |           E2E           |
+| --- | ----------------------------------------------------------------------------------- | :--: | :---------------------: |
+| 632 | A selected line shows the Line panel, and picking an end point draws it on the line |  ✅  | ✅ `line-panel.spec.ts` |
+| 633 | A drop shadow on a line is drawn under it                                           |  ✅  | ✅ `line-panel.spec.ts` |
+| 634 | Several lines with different weights show Mixed, and a typed weight applies to all  |  ✅  | — covered by unit tests |

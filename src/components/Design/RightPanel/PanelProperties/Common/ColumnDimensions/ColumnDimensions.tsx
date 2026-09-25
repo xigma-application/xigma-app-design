@@ -13,7 +13,11 @@ import { useDimensionFieldHover } from './hooks/useDimensionFieldHover';
 // others
 import { translationNameSpace } from './constants';
 
-const ColumnDimensions: FC = () => {
+export type TColumnDimensionsProps = {
+  isHeightDisabled?: boolean;
+};
+
+const ColumnDimensions: FC<TColumnDimensionsProps> = ({ isHeightDisabled = false }) => {
   const { t } = useTranslation();
   const {
     canFillHeight,
@@ -101,6 +105,7 @@ const ColumnDimensions: FC = () => {
         canFill={canFillHeight}
         displayValue={displayHeight}
         canHug={canHug}
+        disabled={isHeightDisabled}
         e2eValue="height"
         hasMax={hasMaxHeightValue}
         hasMin={hasMinHeightValue}

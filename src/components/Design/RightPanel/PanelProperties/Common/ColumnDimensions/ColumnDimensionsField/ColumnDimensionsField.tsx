@@ -23,6 +23,7 @@ export type TColumnDimensionsFieldProps = {
   axis: 'height' | 'width';
   canFill?: boolean;
   canHug?: boolean;
+  disabled?: boolean;
   displayValue?: number | string;
   e2eValue: TE2EValue;
   hasMax?: boolean;
@@ -51,6 +52,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
   axis,
   canFill = false,
   canHug = false,
+  disabled = false,
   displayValue,
   e2eValue,
   hasMax = false,
@@ -80,6 +82,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
     <UITools.TextField
       aria-label={ariaLabel}
       defaultValue={displayValue ?? value}
+      disabled={disabled}
       e2eValue={e2eValue}
       endAdornment={
         <ColumnDimensionsFieldEndAdornment
@@ -106,6 +109,7 @@ export const ColumnDimensionsField: FC<TColumnDimensionsFieldProps> = ({
       onMouseLeave={onMouseLeave}
       startAdornment={
         <ScrubbableInput
+          disabled={disabled}
           max={DIMENSIONS_MAX}
           min={DIMENSIONS_MIN}
           onChange={onScrub}

@@ -12,9 +12,9 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { BlendMode } from 'types/design/enums';
-import { isAppearanceNode } from '../../../types';
 
 // utils
+import { isStyledNode } from '../../../utils/isStyledNode';
 import { commitBlendModeToNodes } from './utils/commitBlendModeToNodes';
 import { getSharedBlendMode } from './utils/getSharedBlendMode';
 
@@ -32,7 +32,7 @@ export const useBlendModeButton = (): TUseBlendModeButtonResult => {
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { blendMode: blendModeRefs } = useCanvasRefsContext();
-  const nodes = useAppSelector(selectAppearanceNodes).filter(isAppearanceNode);
+  const nodes = useAppSelector(selectAppearanceNodes).filter(isStyledNode);
   const value = getSharedBlendMode(nodes);
   const isDefault = value === BlendMode.passThrough;
 

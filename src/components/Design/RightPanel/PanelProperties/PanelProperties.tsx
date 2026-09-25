@@ -7,6 +7,7 @@ import FrameTool from './FrameTool/FrameTool';
 import GridSettings from './GridSettings/GridSettings';
 import Group from './Group/Group';
 import ImageCrop from './ImageCrop/ImageCrop';
+import Line from './Line/Line';
 import Mixed from './Mixed/Mixed';
 import NoSelection from './NoSelection/NoSelection';
 import Rectangle from './Rectangle/Rectangle';
@@ -40,6 +41,7 @@ const PanelProperties: FC = () => {
   const isEveryRectangleSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.rectangle);
   const isEveryGroupSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.group);
   const isEverySectionSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.section);
+  const isEveryLineSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.line);
   const isEverySliceSelected = selectedNodes.length > 0 && selectedNodes.every((node) => node?.type === NodeType.slice);
 
   useCloseGridSettingsPanelOnReselect(selectedNodes.length > 0, isGridSettingsPanelOpen);
@@ -65,6 +67,8 @@ const PanelProperties: FC = () => {
       return <Section />;
     case isEverySliceSelected:
       return <Slice />;
+    case isEveryLineSelected:
+      return <Line />;
     case isPanelTypeSelection(selectedNodes):
       return <Mixed />;
     default:

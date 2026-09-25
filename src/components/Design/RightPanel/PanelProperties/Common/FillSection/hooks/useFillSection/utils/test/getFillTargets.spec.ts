@@ -1,5 +1,5 @@
 // types
-import { StrokeAlign } from 'types/design/enums';
+import { NodeType, StrokeAlign } from 'types/design/enums';
 import { TAppearanceNode } from '../../../../../AppearanceSection/types';
 
 // utils
@@ -12,5 +12,13 @@ describe('getFillTargets', () => {
 
     // result
     expect(getFillTargets(nodes)).toEqual([{ id: 'a', strokeAlign: StrokeAlign.outside, strokeWidth: 2 }]);
+  });
+
+  it('should mark a line stroke as centered', () => {
+    // mock
+    const nodes = [{ id: 'l', strokeWidth: 3, strokes: [], type: NodeType.line }] as unknown as TAppearanceNode[];
+
+    // result
+    expect(getFillTargets(nodes)).toEqual([{ id: 'l', strokeAlign: StrokeAlign.center, strokeWidth: 3 }]);
   });
 });
